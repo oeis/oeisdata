@@ -1,0 +1,56 @@
+%I A090858
+%S A090858 0,0,1,0,2,2,2,4,6,7,8,13,15,21,25,30,39,50,58,74,89,105,129,156,185,
+%T A090858 221,264,309,366,433,505,593,696,805,941,1090,1258,1458,1684,1933,
+%U A090858 2225,2555,2922,3346,3823,4349,4961,5644,6402,7267,8234,9309,10525,11886,13393
+%N A090858 Number of partitions of n such that there is exactly one part which occurs twice, while all other parts occur only once.
+%C A090858 Number of solutions (p(1),p(2),...,p(n)), p(i)>=0,i=1..n, to p(1)+2*p(2)+...+n*p(n)=n such that |{i: p(i)<>0}| = p(1)+p(2)+...+p(n)-1.
+%C A090858 Also number of partitions of n such that if k is the largest part, then, with exactly one exception, all the integers 1,2,...,k occur as parts. Example: a(7)=4 because we have [4,2,1], [3,3,1], [3,2,2] and [3,1,1,1,1]. - _Emeric Deutsch_, Apr 18 2006
+%H A090858 Alois P. Heinz, <a href="/A090858/b090858.txt">Table of n, a(n) for n = 0..10000</a>
+%F A090858 G.f.: Sum_{k>0} x^(2*k)/(1+x^k) * Product_{k>0} (1+x^k). Convolution of 1-A048272(n) and A000009(n). a(n) = A036469(n) - A015723(n).
+%F A090858 G.f.: sum(x^(k(k+1)/2)[(1-x^k)/x^(k-1)/(1-x)-k]/product(1-x^i,i=1..k), k=1..infinity). - _Emeric Deutsch_, Apr 18 2006
+%F A090858 a(n) ~ c * exp(Pi*sqrt(n/3)) / n^(1/4), where c = 3^(1/4) * (1 - log(2)) / (2*Pi) = 0.064273294789... - _Vaclav Kotesovec_, May 24 2018
+%e A090858 a(7) = 4 because we have 4 such partitions of 7: [1,1,2,3], [1,1,5], [2,2,3], [1,3,3].
+%e A090858 From _Gus Wiseman_, Apr 19 2019: (Start)
+%e A090858 The a(2) = 1 through a(11) = 13 partitions described in the name are the following (empty columns not shown). The Heinz numbers of these partitions are given by A060687.
+%e A090858   (11)  (22)   (221)  (33)   (322)   (44)    (441)   (55)    (443)
+%e A090858         (211)  (311)  (411)  (331)   (332)   (522)   (433)   (533)
+%e A090858                              (511)   (422)   (711)   (442)   (551)
+%e A090858                              (3211)  (611)   (3321)  (622)   (722)
+%e A090858                                      (3221)  (4221)  (811)   (911)
+%e A090858                                      (4211)  (4311)  (5221)  (4322)
+%e A090858                                              (5211)  (5311)  (4331)
+%e A090858                                                      (6211)  (4421)
+%e A090858                                                              (5411)
+%e A090858                                                              (6221)
+%e A090858                                                              (6311)
+%e A090858                                                              (7211)
+%e A090858                                                              (43211)
+%e A090858 The a(2) = 1 through a(10) = 8 partitions described in Emeric Deutsch's comment are the following (empty columns not shown). The Heinz numbers of these partitions are given by A325284.
+%e A090858   (2)  (22)  (32)   (222)   (322)    (332)     (432)      (3322)
+%e A090858        (31)  (311)  (3111)  (331)    (431)     (3222)     (3331)
+%e A090858                             (421)    (2222)    (4221)     (22222)
+%e A090858                             (31111)  (3311)    (4311)     (42211)
+%e A090858                                      (4211)    (33111)    (43111)
+%e A090858                                      (311111)  (42111)    (331111)
+%e A090858                                                (3111111)  (421111)
+%e A090858                                                           (31111111)
+%e A090858 (End)
+%p A090858 g:=sum(x^(k*(k+1)/2)*((1-x^k)/x^(k-1)/(1-x)-k)/product(1-x^i,i=1..k),k=1..15): gser:=series(g,x=0,64): seq(coeff(gser,x,n),n=1..54); # _Emeric Deutsch_, Apr 18 2006
+%p A090858 # second Maple program:
+%p A090858 b:= proc(n, i, t) option remember; `if`(n>i*(i+3-2*t)/2, 0,
+%p A090858      `if`(n=0, t, b(n, i-1, t)+`if`(i>n, 0, b(n-i, i-1, t)+
+%p A090858      `if`(t=1 or 2*i>n, 0, b(n-2*i, i-1, 1)))))
+%p A090858     end:
+%p A090858 a:= n-> b(n$2, 0):
+%p A090858 seq(a(n), n=0..100);  # _Alois P. Heinz_, Dec 28 2015
+%t A090858 b[n_, i_, t_] := b[n, i, t] = If[n > i*(i + 3 - 2*t)/2, 0, If[n == 0, t, b[n, i - 1, t] + If[i > n, 0,  b[n - i, i - 1, t] + If[t == 1 || 2*i > n, 0, b[n - 2*i, i - 1, 1]]]]]; a[n_] := b[n, n, 0]; Table[a[n], {n, 0, 100} ] (* _Jean-François Alcover_, Jan 20 2016, after _Alois P. Heinz_ *)
+%t A090858 Table[Length[Select[IntegerPartitions[n],Length[#]-Length[Union[#]]==1&]],{n,0,30}] (* _Gus Wiseman_, Apr 19 2019 *)
+%o A090858 (PARI) alist(n)=concat([0,0],Vec(sum(k=1,n\2,(x^(2*k)+x*O(x^n))/(1+x^k)*prod(j=1,n-2*k,1+x^j+x*O(x^n))))) \\ _Franklin T. Adams-Watters_, Nov 02 2015
+%Y A090858 Cf. A047967, A265251.
+%Y A090858 Column k=2 of A266477.
+%Y A090858 Cf. A008284, A046660, A060687, A116608, A117571, A127002, A325241, A325244.
+%K A090858 easy,nonn
+%O A090858 0,5
+%A A090858 _Vladeta Jovovic_, Feb 12 2004
+%E A090858 More terms from Pab Ter (pabrlos(AT)yahoo.com), May 26 2004
+%E A090858 a(0) added by _Franklin T. Adams-Watters_, Nov 02 2015

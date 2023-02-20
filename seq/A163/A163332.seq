@@ -1,0 +1,31 @@
+%I A163332
+%S A163332 0,1,2,5,4,3,6,7,8,15,16,17,14,13,12,9,10,11,18,19,20,23,22,21,24,25,
+%T A163332 26,47,46,45,48,49,50,53,52,51,44,43,42,39,40,41,38,37,36,29,28,27,30,
+%U A163332 31,32,35,34,33,54,55,56,59,58,57,60,61,62,69,70,71,68,67,66,63,64,65
+%N A163332 Self-inverse permutation of the integers for constructing the Peano curve in an N X N grid.
+%C A163332 The integers [0,(3^k)-1] are confined to range [0,(3^k)-1].
+%C A163332 From _Kevin Ryde_, Sep 04 2020: (Start)
+%C A163332 To calculate a(n), write n in ternary digits n[k],..,n[0], where n[0] is the least significant digit.  Then the ternary digits of a(n) are a[j] = k^{n[j+1]+n[j+3]+...}(n[j]) where Peano's complement operator k^{s}(d) = d if s even or 2-d if s odd.
+%C A163332 A single complement is k(d) = 2-d and the "exponent" is repeats k(k(k(...))).  Sum s = n[j+1] + n[j+3] + ... is every second digit above j, so digit j flips 0 <-> 2 when an odd number of odd digits (1's) among these.  The complement does not change digit parity so a second transformation re-complements back to the original digits and so self-inverse a(a(n)) = n.
+%C A163332 Peano's curve is formed by digits of a(n) put alternately to x and y coordinates, so a(n) maps between the Peano curve the ternary Z-order curve per the formulas in A163528, A163529.
+%C A163332 (End)
+%H A163332 Antti Karttunen, <a href="/A163332/b163332.txt">Table of n, a(n) for n = 0..59048</a>
+%H A163332 Giuseppe Peano, <a href="https://doi.org/10.1007/BF01199438">Sur une courbe, qui remplit toute une aire plane</a>, Mathematische Annalen, volume 36, number 1, 1890, pages 157-160.  Also <a href="https://eudml.org/doc/157489">EUDML</a> (link to GDZ).
+%H A163332 <a href="/index/Per#IntegerPermutation">Index entries for sequences that are permutations of the natural numbers</a>
+%F A163332 a(n) = A163327(A163333(A163327(n))).
+%t A163332 a[n_] := FromDigits[With[{d = Reverse@IntegerDigits[n, 3]}, Reverse@Table[
+%t A163332   If[EvenQ@Total@d[[j+1 ;; ;; 2]], d[[j]], 2-d[[j]]], {j, Length@d}]], 3];
+%t A163332 Array[a, 100] (* _Andrey Zabolotskiy_, Apr 08 2021, after _Kevin Ryde_ *)
+%o A163332 (MIT Scheme:)
+%o A163332 (define (A163332 n) (let loop ((z 0) (n n) (i 0)) (let ((x (modulo n 3)) (y (modulo (floor->exact (/ n 3)) 3))) (cond ((zero? n) z) ((and (= 1 x) (= 1 y)) (loop (+ (* 4 (expt 3 i)) (complement-i-lsts z i)) (floor->exact (/ n 9)) (+ i 2))) ((= 1 x) (loop (+ (* (+ (* y 3) 1) (expt 3 i)) (complement-i-oddpos-lsts z (/ i 2))) (floor->exact (/ n 9)) (+ i 2))) ((= 1 y) (loop (+ (* (+ 3 (- 2 x)) (expt 3 i)) (complement-i-evenpos-lsts z (/ i 2))) (floor->exact (/ n 9)) (+ i 2))) (else (loop (+ (* (+ (* y 3) x) (expt 3 i)) z) (floor->exact (/ n 9)) (+ i 2)))))))
+%o A163332 (define (complement-i-lsts n i) (if (zero? i) n (+ (- 2 (modulo n 3)) (* 3 (complement-i-lsts (floor->exact (/ n 3)) (-1+ i))))))
+%o A163332 (define (complement-i-evenpos-lsts n i) (if (zero? i) n (+ (- 2 (modulo n 3)) (* 3 (complement-i-oddpos-lsts (floor->exact (/ n 3)) (-1+ i))))))
+%o A163332 (define (complement-i-oddpos-lsts n i) (+ (* 3 (complement-i-evenpos-lsts (floor->exact (/ n 3)) i)) (modulo n 3)))
+%o A163332 (PARI) a(n) = my(v=digits(n,3)); for(start=2,3, my(s=0); forstep(i=start,#v,2, s+=v[i-1]; if(s%2,v[i]=2-v[i]))); fromdigits(v,3); \\ _Kevin Ryde_, Sep 04 2020
+%Y A163332 Coordinates using this transform: A163528, A163529.
+%Y A163332 A163334 & A163336 give two variants of the Peano curve in an N X N grid.
+%Y A163332 Cf. A163355 (Hilbert curve).
+%K A163332 nonn
+%O A163332 0,3
+%A A163332 _Antti Karttunen_, Jul 29 2009
+%E A163332 Name corrected by _Kevin Ryde_, Aug 27 2020

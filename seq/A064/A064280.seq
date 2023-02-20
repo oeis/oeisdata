@@ -1,0 +1,34 @@
+%I A064280
+%S A064280 1,0,0,1,4,12,86,696,6150,61760,673256,8137200,105074420,1479237312,
+%T A064280 22077680616,354753059584,6007578698408,108500041654272,
+%U A064280 2055204828592832,41215470268919040,863378484993573840,19036646809582054400,436944006380312366240
+%N A064280 Number of nonequivalent solutions to the order n checkerboard problem up to reflection and rotation: place n pieces on an n X n board so there is exactly one piece in each row, column and main diagonal.
+%C A064280 For even n>=4: A007016(n) = 8*A064280(n).
+%C A064280 For even n, the diagonals do not intersect and there can be no symmetrical solutions. For odd n, a symmetrical solution will have a rook on the central square and the remaining n-1 rooks must be placed so as to avoid the main diagonals. See A292080 for information on counting non-attacking rook configurations with no rook on either main diagonal. - _Andrew Howroyd_, Sep 12 2017
+%H A064280 Andrew Howroyd, <a href="/A064280/b064280.txt">Table of n, a(n) for n = 1..100</a>
+%H A064280 Geoffrey Chase, <a href="https://archive.org/stream/creativecomputing-1980-01/Creative_Computing_v06_n01_1980_Jan#page/n125/mode/2up">Checkerboard Problem Solved</a>, Creative Computing 6(1), Jan 1980, 122.
+%H A064280 Bahairiv Joshi, <a href="https://archive.org/stream/creativecomputing-1980-10/Creative_Computing_v06_n10_1980_October#page/n125/mode/2up">Unique Solutions to the Checkerboard Problem</a>, Creative Computing 6(10), Oct 1980, 124-125.
+%H A064280 Abijah Reed, <a href="https://archive.org/stream/creativecomputing-1980-05/Creative_Computing_v06_n05_1980_May#page/n99/mode/2up">Comments on Checkerboard Problem Solved</a>, Creative Computing 6(5), May 1980, 94.
+%F A064280 a(2n) = A007016(2n) / 8, a(2n+1) = (A007016(2n+1) + 2^n * A000166(n) + 2*A037224(2*n) + 2*A053871(n)) / 8 for n > 0. - _Andrew Howroyd_, Sep 12 2017
+%e A064280 The 4 X 4 solution is unique, up to equivalence, with pieces at (1,1), (2,3), (3,4) and (4,2).
+%t A064280 sf = Subfactorial;
+%t A064280 x[n_] := x[n] = Integrate[If[EvenQ[n], (x^2 - 4*x + 2)^(n/2), (x - 1)*(x^2 - 4*x + 2)^((n - 1)/2)]/E^x, {x, 0, Infinity}];
+%t A064280 F[n_ /; EvenQ[n]] := With[{m = n/2}, m*(x[2*m] - (2*m - 3)*x[2*m - 1])];
+%t A064280 F[n_ /; OddQ[n]] := With[{m = (n - 1)/2}, (2*m + 1)*x[2*m] + 3*m*x[2*m - 1] - 2*m*(m - 1)*x[2*m - 2]];
+%t A064280 d[n_] := (-1)^n HypergeometricPFQ[{1/2, -n}, {}, 2];
+%t A064280 R[n_] := If[OddQ[n], 0, If[n == 0, 1, (n - 1)!*2/(n/2 - 1)!]];
+%t A064280 a[1] = 1; a[n_] := With[{m = Quotient[n, 2]}, (F[n] + If[EvenQ[n], 0, 2^m * sf[m] + 2*R[m] + 2*d[m] + 2*Boole[m == 0]])/8];
+%t A064280 Array[a, 30] (* _Jean-François Alcover_, Sep 15 2019 *)
+%o A064280 (PARI) \\ here sf is A000166, F is A007016, D is A053871, R(n) is A037224(2n).
+%o A064280 sf(n) = {n! * polcoeff( exp(-x + x * O(x^n)) / (1 - x), n)}
+%o A064280 F(n) = {my(v = vector(n)); for(n=4, length(v), v[n] = (n-1)*v[n-1] + 2*if(n%2==1, (n-1)*v[n-2], (n-2)*if(n==4,1,v[n-4]))); if(n<4, [1,0,0][n], if(n%2==0, n*(v[n] - (n-3)*v[n-1]), 2*n*v[n-1] + 3*(n-1)*v[n-2] - (n-1)*(n-3)*v[n-3])/2)}
+%o A064280 D(n) = {sum(k=0, n, (-1)^(n-k) * binomial(n,k) * (2*k)!/(2^k*k!))}
+%o A064280 R(n) = {if(n%2==1, 0, if(n==0, 1, (n-1)!*2/(n/2-1)!))}
+%o A064280 a(n) = {(F(n) + if(n%2==0, 0, my(m=n\2); 2^m * sf(m) + 2*R(m) + 2*D(m) + 2*(m==0)))/8} \\ _Andrew Howroyd_, Sep 12 2017
+%Y A064280 A007016 gives the number of solutions including symmetrical ones.
+%Y A064280 Cf. A000166, A007016, A037224, A053871, A292080.
+%K A064280 nonn
+%O A064280 1,5
+%A A064280 _Jud McCranie_, Sep 24 2001
+%E A064280 a(11)-a(12) from _Lars Blomberg_, Jan 13 2013
+%E A064280 Name clarified and terms a(13) and beyond from _Andrew Howroyd_, Sep 12 2017

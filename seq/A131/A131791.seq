@@ -1,0 +1,52 @@
+%I A131791
+%S A131791 1,1,1,1,2,2,1,1,3,5,6,6,5,3,1,1,4,9,15,21,26,29,30,30,29,26,21,15,9,
+%T A131791 4,1,1,5,14,29,50,76,105,135,165,194,220,241,256,265,269,270,270,269,
+%U A131791 265,256,241,220,194,165,135,105,76,50,29,14,5,1,1,6,20,49,99,175,280,415
+%N A131791 Triangle read by rows of 2^n terms for n>=0: let S(n) denote the initial 2^n terms of the partial sums of row n; starting with a single '1' in row 0, generate row n+1 by concatenating S(n) with the terms of S(n) when read in reverse order.
+%C A131791 Row sums (and central terms) form A028361: Product_{i=0..n-1} (2^i + 1).
+%C A131791 I'm interested in the graph of S(n). It appears to tend to a limit curve if scaled appropriately, e.g., scaled to fit a [0,1] box by f_n(x) = T(n,[x*2^n])/A028361(n-1). In this setup I think that the limit curve f(x) satisfies f(0)=0, f(1-x)=f(x), f(1/2)=1, f'(x)=2f(2x) for x<=1/2. Is this equation solvable? - _Martin Fuller_, Aug 31 2007
+%C A131791 From _N. J. A. Sloane_, Nov 13 2018: (Start)
+%C A131791 Kenyon (1992) defines p_n(x) (n >= 0) to be the polynomial
+%C A131791 p_n(x) = (1+x)*(1+x+x^2)*(1+x+x^2+x^3+x^4)*...*(1+x+...+x^(2^n)).
+%C A131791 He shows among many other things that the coefficient of x^(floor(c*2^(n+1))) in p_n(x), for c in [0,1], is given by
+%C A131791 (f(c)+o(1))*p_n(1)/2^(n+1),
+%C A131791 where f : R -> R is a nonzero C^1 function satisfying
+%C A131791 (i) support(f) is a subset of [0,1],
+%C A131791 (ii) f(x) = f(1-x), and
+%C A131791 (iii) f'(x) = 4*f(2*x) for 0 <= x <= 1/2.
+%C A131791 These three properties define f uniquely up to multiplication by a scalar. Also f is C^oo, is nowhere analytic on [0,1], and is a "bump function", since its graph looks like a "bump".
+%C A131791 This provides a fairly complete answer to _Martin Fuller_'s question above. (End)
+%D A131791 Richard Kenyon, Infinite scaled convolutions, Preprint, 1992 (apparently unpublished)
+%H A131791 Paul D. Hanna, <a href="/A131791/b131791.txt">Rows 0 to 11 of the triangle, flattened.</a>
+%H A131791 Julien Clément, Antoine Genitrini, <a href="https://arxiv.org/abs/1907.06743">Binary Decision Diagrams: from Tree Compaction to Sampling</a>, arXiv:1907.06743 [cs.DS], 2019.
+%F A131791 T(n, 2^(n-1)) = A028361(n-1) for n>=1.
+%F A131791 T(n, 2^(n-2)) = A028362(n-1) for n>=2.
+%F A131791 Sum_{k=0..2^n-1} (k+1)*T(n,k) = A028362(n+1) for n>=0.
+%F A131791 G.f. of row n: Product_{j=0..n-1} (1 - x^(2^j+1))/(1-x). - _Paul D. Hanna_, Aug 09 2009
+%e A131791 Triangle begins:
+%e A131791 1;
+%e A131791 1, 1;
+%e A131791 1, 2, 2, 1;
+%e A131791 1, 3, 5, 6, 6, 5, 3, 1;
+%e A131791 1, 4, 9, 15, 21, 26, 29, 30, 30, 29, 26, 21, 15, 9, 4, 1;
+%e A131791 1, 5, 14, 29, 50, 76, 105, 135, 165, 194, 220, 241, 256, 265, 269, 270, 270, 269, 265, 256, 241, 220, 194, 165, 135, 105, 76, 50, 29, 14, 5, 1; ...
+%e A131791 ILLUSTRATION OF GENERATING METHOD.
+%e A131791 From row 2: [1,2,2,1], take the partial sums: [1,3,5,6] and concatenate to this the terms in reverse order: [6,5,3,1] to obtain row 3: [1,3,5,6, 6,5,3,1].
+%p A131791 p[-1]:=1:
+%p A131791 lprint(seriestolist(series(p[-1],x,0)));
+%p A131791 p[0]:=(1-x^2)/(1-x):
+%p A131791 lprint(seriestolist(series(p[0],x,2)));
+%p A131791 for n from 1 to 4 do
+%p A131791 p[n]:=p[n-1]*(1-x^(2^n+1))/(1-x);
+%p A131791 lprint(seriestolist(series(p[n],x,2^(n+1))));
+%p A131791 od: # _N. J. A. Sloane_, Nov 13 2018
+%t A131791 T[n_, k_] := SeriesCoefficient[Product[(1-x^(2^j+1))/(1-x), {j, 0, n-1}], {x, 0, k}];
+%t A131791 Table[T[n, k], {n, 0, 6}, {k, 0, 2^n-1}] // Flatten (* _Jean-François Alcover_, Oct 01 2019 *)
+%o A131791 (PARI) T(n,k)=local(A=[1],B=[1]);if(n==0,1,for(i=0,n-1, B=Vec(Ser(A)/(1-x));A=concat(B,Vec(Pol(B)+O(x^#B))));A[k+1])
+%o A131791 for(n=0,6,for(k=0,2^n-1,print1(T(n,k),", "));print())
+%o A131791 (PARI) T(n,k)=polcoeff(prod(j=0,n-1,(1-x^(2^j+1))/(1-x)),k)
+%o A131791 for(n=0,6,for(k=0,2^n-1,print1(T(n,k),", "));print()) \\ _Paul D. Hanna_, Aug 09 2009
+%Y A131791 Cf. A131792 (main diagonal); A028361, A028362.
+%K A131791 nonn,tabf,look
+%O A131791 0,5
+%A A131791 _Paul D. Hanna_, Jul 15 2007

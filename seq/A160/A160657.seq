@@ -1,0 +1,43 @@
+%I A160657
+%S A160657 2,6,14,14,62,126,30,30,1022,126,4094,2046,1022,32766,62,62,8190,
+%T A160657 174762,8190,2046,254,8190,16777214,4194302,510,134217726,2097150,
+%U A160657 1022,1073741822,2147483646,126,126,17179869182,8388606,68719476734,1022,2097150,2147483646
+%N A160657 a(n) is the period of a 2 X 4n rectangular oscillator in the 2 X 2 (B36/S125) Life-like cellular automaton.
+%C A160657 These oscillators work and have the same period in any rule from B3/S5 to B3678/S012567.
+%C A160657 The Nathaniel Johnston rectangular oscillator link points to Sierpinski's gasket (Pascal's triangle mod 2) as a source for the chaotic terms of A003558. This is consistent with the comment of [Sep 21 2011, A003558] showing an alternative trigonometric connection to A054142, since the latter row terms are found as alternate ascending diagonals in Pascal's triangle. - _Gary W. Adamson_, Sep 21 2011
+%C A160657 From _Charlie Neder_, Jan 11 2019: (Start)
+%C A160657 a(n) = A268754(2n).
+%C A160657 Proof: Decompose the phases of the oscillators into rectangles, as in the linked paper. Each of these rectangles has a corner on the exterior of the bounding diamond of the oscillator which determines the rectangle. As shown in the paper, these corners behave as Rule 90 on a width-n strip, which is exactly what A268754 emulates. Since the initial 2 X 4n block used in this sequence corresponds to the one-cell "seed" used in A268754, the resulting patterns must have the same period. (End)
+%H A160657 Adam P. Goucher, <a href="/A160657/b160657.txt">Table of n, a(n) for n = 1..160</a>
+%H A160657 Nathaniel Johnston, <a href="http://www.nathanieljohnston.com/index.php/2009/05/rectangular-oscillators-in-the-2x2-b36s125-cellular-automaton/">Rectangular Oscillators in the 2*2 (B36/S125) Cellular Automaton</a>, 2009.
+%H A160657 Nathaniel Johnston, <a href="https://arxiv.org/abs/1203.1644">The B36/S125 "2×2" Life-Like Cellular Automaton</a>, arXiv:1203.1644 [nlin.CG], 2012; also in Game of Life Cellular Automata, A. Adamatzky (ed.), Springer-UK, 2010, pages 99-114.
+%H A160657 LifeWiki, <a href="http://www.conwaylife.com/wiki/index.php?title=2x2">2x2</a>
+%F A160657 a(n) divides 2^(A003558(n) + 1) - 2 for n >= 1. [Corrected by _Charlie Neder_, Jan 11 2019]
+%e A160657 a(2) = 6 because a 2 X 8 box has period 6 in this rule.
+%t A160657 g = Function[{sq, p}, Module[{l = Length[sq]},
+%t A160657 Do[If[sq[[i]] == sq[[j]], Return[p^(j - 1) - p^(i - 1)]],
+%t A160657 {j, 2, l}, {i, 1, j - 1}]]];
+%t A160657 MPM = Algebra`MatrixPowerMod;
+%t A160657 EventualPeriod = Function[{m, v, p},
+%t A160657 Module[{n = Length[m], w, sq, k, primes},
+%t A160657 sq = NestList[(MPM[#, p, p]) &, m, n];
+%t A160657 w = Mod[Last[sq].v, p];
+%t A160657 sq = Map[(Mod[#.w, p]) &, sq];
+%t A160657 k = g[sq, p];
+%t A160657 If[k == Null, k = p^n Apply[LCM, Table[p^r - 1, {r, 1, n}]]];
+%t A160657 primes = Map[First, FactorInteger[k]];
+%t A160657 primes = Select[primes, (# > 1) &];
+%t A160657 While[Length[primes] > 0,
+%t A160657 primes = Select[primes, (Mod[k, #] == 0) &];
+%t A160657 primes = Select[primes, (Mod[MPM[m, k/#, p].w, p] == w) &];
+%t A160657 k = k/Fold[Times, 1, primes];
+%t A160657 ]; k ]];
+%t A160657 mat = Function[{n}, Table[Boole[Abs[i - j] == 1], {i, 1, n}, {j, 1, n}]];
+%t A160657 vec = Function[{n}, Table[Boole[i == 1], {i, 1, n}]];
+%t A160657 Table[EventualPeriod[mat[2 n], vec[2 n], 2], {n, 1, 100}]
+%t A160657 (* _Adam P. Goucher_, Jan 13 2019 *)
+%Y A160657 Cf. A003558, A054142, A268754, A298819.
+%K A160657 nonn
+%O A160657 1,1
+%A A160657 _Nathaniel Johnston_, May 22 2009
+%E A160657 a(18) corrected by _Charlie Neder_, Jan 11 2019

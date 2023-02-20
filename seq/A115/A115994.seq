@@ -1,0 +1,46 @@
+%I A115994
+%S A115994 1,2,3,4,1,5,2,6,5,7,8,8,14,9,20,1,10,30,2,11,40,5,12,55,10,13,70,18,
+%T A115994 14,91,30,15,112,49,16,140,74,1,17,168,110,2,18,204,158,5,19,240,221,
+%U A115994 10,20,285,302,20,21,330,407,34,22,385,536,59,23,440,698,94,24,506,896,149,25
+%N A115994 Triangle read by rows: T(n,k) is number of partitions of n with Durfee square of size k (n>=1; 1<=k<=floor(sqrt(n))).
+%C A115994 Row n has floor(sqrt(n)) terms. Row sums yield A000041. Column 2 yields A006918. sum(k*T(n,k),k=1..floor(sqrt(n)))=A115995.
+%C A115994 T(n,k) is number of partitions of n-k^2 into parts of 2 kinds with at most k of each kind.
+%C A115994 The limit of the diagonals is A000712 (partitions into parts of two kinds). In particular, if 0<=m<=n, T(n(n+1)/2 + m, n) = A000712(m). These partitions in this range can be viewed as an equilateral right triangle of side n, with one partition appended on the top (at the left) and another appended on the right. - _Franklin T. Adams-Watters_, Jan 11 2006
+%C A115994 Successive columns approach closer and closer to A000712. - _N. J. A. Sloane_, Mar 10 2007
+%D A115994 G. E. Andrews, The Theory of Partitions, Addison-Wesley, 1976 (pp. 27-28).
+%D A115994 G. E. Andrews and K. Eriksson, Integer Partitions, Cambridge Univ. Press, 2004 (pp. 75-78).
+%H A115994 Alois P. Heinz, <a href="/A115994/b115994.txt">Rows n = 1..1000, flattened</a>
+%H A115994 E. R. Canfield, <a href="http://dx.doi.org/10.1016/j.aam.2004.08.008">From recursions to asymptotics: Durfee and dilogarithmic deductions</a>, Advances in Applied Mathematics, Volume 34, Issue 4, May 2005, Pages 768-797
+%H A115994 E. R. Canfield, S. Corteel, C. D. Savage, <a href="http://www.combinatorics.org/ojs/index.php/eljc/article/view/v5i1r32">Durfee Polynomials</a>, Electronic Journal of Combinatorics 5 (1998), #R32.
+%H A115994 S. B. Ekhad, D. Zeilberger, <a href="http://arxiv.org/abs/1411.0002">A Quick Empirical Reproof of the Asymptotic Normality of the Hirsch Citation Index (First proved by Canfield, Corteel, and Savage)</a>, arXiv preprint arXiv:1411.0002, 2014.
+%H A115994 P. Flajolet and R. Sedgewick, <a href="http://algo.inria.fr/flajolet/Publications/AnaCombi/anacombi.html">Analytic Combinatorics</a>, 2009, page 45
+%H A115994 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/DurfeeSquare.html">Durfee Square.</a>
+%F A115994 G.f.: sum(k>=1, t^k*q^(k^2)/product(j=1..k, (1-q^j)^2 ) ).
+%F A115994 T(n,k) = Sum_{i=0}^{n-k^2} P*(i,k)*P*(n-k^2-i), where P*(n,k) = P(n+k,k) is the number of partitions of n objects into at most k parts.
+%e A115994 T(5,2) = 2 because the only partitions of 5 having Durfee square of size 2 are [3,2] and [2,2,1]; the other five partitions ([5], [4,1], [3,1,1], [2,1,1,1] and [1,1,1,1,1]) have Durfee square of size 1.
+%e A115994 Triangle starts:
+%e A115994   1;
+%e A115994   2;
+%e A115994   3;
+%e A115994   4,  1;
+%e A115994   5,  2;
+%e A115994   6,  5;
+%e A115994   7,  8;
+%e A115994   8, 14;
+%e A115994   9, 20,  1;
+%e A115994   ...
+%p A115994 g:=sum(t^k*q^(k^2)/product((1-q^j)^2,j=1..k),k=1..40): gser:=series(g,q=0,32): for n from 1 to 27 do P[n]:=coeff(gser,q^n) od: for n from 1 to 27 do seq(coeff(P[n],t^j),j=1..floor(sqrt(n))) od; # yields sequence in triangular form
+%p A115994 # second Maple program:
+%p A115994 b:= proc(n, i) option remember;
+%p A115994       `if`(n=0, 1, `if`(i<1, 0, b(n, i-1)+`if`(i>n, 0, b(n-i, i))))
+%p A115994     end:
+%p A115994 T:= (n, k)-> add(b(m, k)*b(n-k^2-m, k), m=0..n-k^2):
+%p A115994 seq(seq(T(n, k), k=1..floor(sqrt(n))), n=1..30); # _Alois P. Heinz_, Apr 09 2012
+%t A115994 Map[Select[#,#>0&]&,Drop[Transpose[Table[CoefficientList[ Series[x^(n^2)/Product[1-x^i,{i,1,n}]^2,{x,0,nn}],x],{n,1,10}]],1]] //Grid (* _Geoffrey Critzer_, Sep 27 2013 *)
+%t A115994 b[n_, i_] := b[n, i] = If[n==0, 1, If[i<1, 0, b[n, i-1] + If[i>n, 0, b[n-i, i]]]]; T[n_, k_] := Sum[b[m, k]*b[n-k^2-m, k], {m, 0, n-k^2}]; Table[T[n, k], {n, 1, 30}, {k, 1, Sqrt[n]}] // Flatten (* _Jean-François Alcover_, Dec 25 2015, after _Alois P. Heinz_ *)
+%Y A115994 For another version see A115720. Row lengths A000196.
+%Y A115994 Cf. A115995, A115721, A115722, A008284, A006918.
+%K A115994 nonn,look,tabf
+%O A115994 1,2
+%A A115994 _Emeric Deutsch_, Feb 11 2006
+%E A115994 Edited and verified by _Franklin T. Adams-Watters_, Mar 11 2006

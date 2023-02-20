@@ -1,0 +1,53 @@
+%I A002494 M1762 N0699
+%S A002494 1,0,1,2,7,23,122,888,11302,262322,11730500,1006992696,164072174728,
+%T A002494 50336940195360,29003653625867536,31397431814147073280,
+%U A002494 63969589218557753586160,245871863137828405125824848,1787331789281458167615194471072,24636021675399858912682459613241920
+%N A002494 Number of n-node graphs without isolated nodes.
+%C A002494 Number of unlabeled simple graphs covering n vertices. - _Gus Wiseman_, Aug 02 2018
+%D A002494 F. Harary, Graph Theory. Addison-Wesley, Reading, MA, 1969, p. 214.
+%D A002494 W. L. Kocay, Some new methods in reconstruction theory, Combinatorial Mathematics IX, 952 (1982) 89--114. [From _Benoit Jubin_, Sep 06 2008]
+%D A002494 W. L. Kocay, On reconstructing spanning subgraphs, Ars Combinatoria, 11 (1981) 301--313. [From _Benoit Jubin_, Sep 06 2008]
+%D A002494 J. H. Redfield, The theory of group-reduced distributions, Amer. J. Math., 49 (1927), 433-435; reprinted in P. A. MacMahon, Coll. Papers I, pp. 805-827.
+%D A002494 N. J. A. Sloane, A Handbook of Integer Sequences, Academic Press, 1973 (includes this sequence).
+%D A002494 N. J. A. Sloane and Simon Plouffe, The Encyclopedia of Integer Sequences, Academic Press, 1995 (includes this sequence).
+%H A002494 T. D. Noe, <a href="/A002494/b002494.txt">Table of n, a(n) for n=0..75</a> (using A000088)
+%H A002494 P. C. Fishburn and W. V. Gehrlein, <a href="https://doi.org/10.1002/jgt.3190160204">Niche numbers</a>, J. Graph Theory, 16 (1992), 131-139.
+%H A002494 J. H. Redfield, <a href="/A002494/a002494.pdf">The theory of group-reduced distributions</a> [Annotated scan of pages 452 and 453 only]
+%H A002494 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/IsolatedPoint.html">Isolated Point.</a>
+%H A002494 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/GraphicalPartition.html">Graphical Partition</a>
+%H A002494 Gus Wiseman, <a href="/A048143/a048143_4.txt">Sequences enumerating clutters, antichains, hypertrees, and hyperforests, organized by labeling, spanning, and allowance of singletons</a>.
+%F A002494 O.g.f.: (1-x)*G(x) where G(x) is o.g.f. for A000088. - _Geoffrey Critzer_, Apr 14 2012
+%e A002494 From _Gus Wiseman_, Aug 02 2018: (Start)
+%e A002494 Non-isomorphic representatives of the a(4) = 7 graphs:
+%e A002494   (12)(34)
+%e A002494   (12)(13)(14)
+%e A002494   (12)(13)(24)
+%e A002494   (12)(13)(14)(23)
+%e A002494   (12)(13)(24)(34)
+%e A002494   (12)(13)(14)(23)(24)
+%e A002494   (12)(13)(14)(23)(24)(34)
+%e A002494 (End)
+%p A002494 b:= proc(n, i, l) `if`(n=0 or i=1, 1/n!*2^((p-> add(ceil((p[j]-1)/2)
+%p A002494       +add(igcd(p[k], p[j]), k=1..j-1), j=1..nops(p)))([l[], 1$n])),
+%p A002494        add(b(n-i*j, i-1, [l[], i$j])/j!/i^j, j=0..n/i))
+%p A002494     end:
+%p A002494 a:= n-> b(n$2, [])-`if`(n>0, b(n-1$2, []), 0):
+%p A002494 seq(a(n), n=0..20);  # _Alois P. Heinz_, Aug 14 2019
+%t A002494 << MathWorld`Graphs`
+%t A002494 Length /@ (gp = Select[ #, GraphicalPartitionQ] & /@
+%t A002494 Graphs /@ Range[9])
+%t A002494 nn = 20; g = Sum[NumberOfGraphs[n] x^n, {n, 0, nn}]; CoefficientList[Series[ g (1 - x), {x, 0, nn}], x]  (*Geoffrey Critzer, Apr 14 2012*)
+%t A002494 sysnorm[m_]:=If[Union@@m!=Range[Max@@Flatten[m]],sysnorm[m/.Rule@@@Table[{(Union@@m)[[i]],i},{i,Length[Union@@m]}]],First[Sort[sysnorm[m,1]]]];
+%t A002494 sysnorm[m_,aft_]:=If[Length[Union@@m]<=aft,{m},With[{mx=Table[Count[m,i,{2}],{i,Select[Union@@m,#>=aft&]}]},Union@@(sysnorm[#,aft+1]&/@Union[Table[Map[Sort,m/.{par+aft-1->aft,aft->par+aft-1},{0,1}],{par,First/@Position[mx,Max[mx]]}]])]];
+%t A002494 Table[Length[Union[sysnorm/@Select[Subsets[Select[Subsets[Range[n]],Length[#]==2&]],Union@@#==Range[n]&]]],{n,6}] (* _Gus Wiseman_, Aug 02 2018 *)
+%t A002494 b[n_, i_, l_] := If[n==0 || i==1, 1/n!*2^(Function[p, Sum[Ceiling[(p[[j]]-1)/2] + Sum[GCD[p[[k]], p[[j]]], {k, 1, j-1}], {j, 1, Length[p]}]][Join[l, Table[1, {n}]]]), Sum[b[n-i*j, i-1, Join[l, Table[i, {j}]]]/j!/i^j, {j, 0, n/i}]];
+%t A002494 a[n_] := b[n, n, {}] - If[n > 0, b[n-1, n-1, {}], 0];
+%t A002494 a /@ Range[0, 20] (* _Jean-François Alcover_, Dec 03 2019, after _Alois P. Heinz_ *)
+%Y A002494 Equals first differences of A000088. Cf. A006129.
+%Y A002494 Cf. also A006647, A006648, A006649, A006650, A006651.
+%Y A002494 Cf. A000612, A001187, A055621, A304998.
+%K A002494 nonn,nice
+%O A002494 0,4
+%A A002494 _N. J. A. Sloane_
+%E A002494 More terms from _Vladeta Jovovic_, Apr 10 2000
+%E A002494 a(0) added from _David W. Wilson_, Aug 24 2008

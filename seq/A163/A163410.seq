@@ -1,0 +1,33 @@
+%I A163410
+%S A163410 1,3,5,7,9,15,17,21,27,31,45,51,63,73,85,93,107,119,127,153,189,219,
+%T A163410 255,257,313,365,381,443,511,765,771,1193,1241,1285,1453,1533,1571,
+%U A163410 1619,1787,1799,1831,1879,2313,3579,3855,4369,4889,5113,5189,5397,5557,5869
+%N A163410 A positive integer is included if it is a palindrome when written in binary, and it is not divisible by any primes that are not binary palindromes.
+%H A163410 Robert Israel, <a href="/A163410/b163410.txt">Table of n, a(n) for n = 1..10000</a>
+%e A163410 51 in binary is 110011, which is a palindrome. 51 is divisible by the primes 3 and 17. 3 in binary is 11, a palindrome. And 17 in binary is 10001, also a palindrome. Since all the primes dividing the binary palindrome 51 are themselves binary palindromes, then 51 is included in this sequence.
+%p A163410 dmax:= 15: # to get all terms with at most dmax binary digits
+%p A163410 revdigs:= proc(n)
+%p A163410   local L, Ln, i;
+%p A163410   L:= convert(n, base, 2);
+%p A163410   Ln:= nops(L);
+%p A163410   add(L[i]*2^(Ln-i), i=1..Ln);
+%p A163410 end proc:
+%p A163410 isbpali:= proc(n) option remember; local L; L:= convert(n,base,2); L=ListTools:-Reverse(L) end proc:
+%p A163410 Bp:= {0, 1}:
+%p A163410 for d from 2 to dmax do
+%p A163410   if d::even then
+%p A163410     Bp:= Bp union {seq(2^(d/2)*x + revdigs(x), x=2^(d/2-1)..2^(d/2)-1)}
+%p A163410   else
+%p A163410     m:= (d-1)/2;
+%p A163410     B:={seq(2^(m+1)*x + revdigs(x), x=2^(m-1)..2^m-1)};
+%p A163410     Bp:= Bp union B union map(`+`, B, 2^m)
+%p A163410   fi
+%p A163410 od:
+%p A163410 R:= select(t -> andmap(isbpali, numtheory:-factorset(t)), Bp minus {0}):
+%p A163410 sort(convert(R,list)); # _Robert Israel_, Dec 19 2016
+%t A163410 binPalQ[n_] := PalindromeQ @ IntegerDigits[n, 2]; Select[Range[6000], binPalQ[#] && AllTrue[FactorInteger[#][[;; , 1]], binPalQ] &] (* _Amiram Eldar_, Mar 30 2021 *)
+%Y A163410 Cf. A006995, A163411, A207039.
+%K A163410 base,nonn
+%O A163410 1,2
+%A A163410 _Leroy Quet_, Jul 27 2009
+%E A163410 More terms from _Sean A. Irvine_, Nov 10 2009

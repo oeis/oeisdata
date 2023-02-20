@@ -1,0 +1,60 @@
+%I A144528
+%S A144528 1,0,1,0,0,1,0,0,1,2,0,0,1,2,3,0,0,1,4,5,6,0,0,1,6,9,10,11,0,0,1,11,
+%T A144528 18,21,22,23,0,0,1,18,35,42,45,46,47,0,0,1,37,75,94,101,104,105,106,0,
+%U A144528 0,1,66,159,204,223,230,233,234,235,0,0,1,135,355,473,520,539,546,549,550,551
+%N A144528 Triangle read by rows: T(n,k) is the number of trees on n unlabeled nodes with all nodes of degree <= k (n>=1, 0 <= k <= n-1).
+%H A144528 Andrew Howroyd, <a href="/A144528/b144528.txt">Table of n, a(n) for n = 1..1275</a>
+%H A144528 Rebecca Neville, <a href="https://web.archive.org/web/20191029092609/http://gtn.kazlow.info:80/GTN54.pdf">Graphs whose vertices are forests with bounded degree</a>, Graph Theory Notes of New York, LIV (2008), 12-21. [Wayback Machine link]
+%e A144528 Triangle begins:
+%e A144528   1
+%e A144528   0 1
+%e A144528   0 0 1
+%e A144528   0 0 1  2
+%e A144528   0 0 1  2  3
+%e A144528   0 0 1  4  5  6
+%e A144528   0 0 1  6  9 10  11
+%e A144528   0 0 1 11 18 21  22  23
+%e A144528   0 0 1 18 35 42  45  46  47
+%e A144528   0 0 1 37 75 94 101 104 105 106
+%e A144528   ...
+%e A144528 From _Andrew Howroyd_, Dec 17 2020: (Start)
+%e A144528 Formatted as an array to show the full columns:
+%e A144528 ================================================
+%e A144528 n\k  | 0 1 2   3   4   5   6   7   8   9  10
+%e A144528 -----+------------------------------------------
+%e A144528    1 | 1 1 1   1   1   1   1   1   1   1   1 ...
+%e A144528    2 | 0 1 1   1   1   1   1   1   1   1   1 ...
+%e A144528    3 | 0 0 1   1   1   1   1   1   1   1   1 ...
+%e A144528    4 | 0 0 1   2   2   2   2   2   2   2   2 ...
+%e A144528    5 | 0 0 1   2   3   3   3   3   3   3   3 ...
+%e A144528    6 | 0 0 1   4   5   6   6   6   6   6   6 ...
+%e A144528    7 | 0 0 1   6   9  10  11  11  11  11  11 ...
+%e A144528    8 | 0 0 1  11  18  21  22  23  23  23  23 ...
+%e A144528    9 | 0 0 1  18  35  42  45  46  47  47  47 ...
+%e A144528   10 | 0 0 1  37  75  94 101 104 105 106 106 ...
+%e A144528   11 | 0 0 1  66 159 204 223 230 233 234 235 ...
+%e A144528   12 | 0 0 1 135 355 473 520 539 546 549 550 ...
+%e A144528   ...
+%e A144528 (End)
+%t A144528 b[n_, i_, t_, k_] := b[n, i, t, k] = If[i<1, 0, Sum[Binomial[b[i-1, i-1,
+%t A144528   k, k] + j-1, j]*b[n-i*j, i-1, t-j, k], {j, 0, Min[t, n/i]}]];
+%t A144528 b[0, i_, t_, k_] = 1; a = {}; nmax = 20;
+%t A144528 For[ni=2, ni < nmax-1, ni++, (* columns 3 to max-1 *)
+%t A144528   gf[x_] = 1 + Sum[b[j-1, j-1, ni, ni] x^j, {j, 1, nmax}];
+%t A144528   ci[x_] = SymmetricGroupIndex[ni+1, x] /. x[i_] -> gf[x^i];
+%t A144528   a = Append[a, CoefficientList[Normal[Series[
+%t A144528     gf[x] - (gf[x]^2 - gf[x^2])/2 + x ci[x], {x, 0, nmax}]], x]];]
+%t A144528 Join[{1, 0, 1, 0, 0, 1}, Table[Join[{0, 0, 1}, Table[a[[k-3]][[n+1]],
+%t A144528 {k, 4, n}]], {n, 4, nmax}]] // Flatten - _Robert A. Russell_, Feb 05 2023
+%o A144528 (PARI) \\ here V(n,k) gives column k as a vector.
+%o A144528 MSet(p,k)={my(n=serprec(p,x)-1); if(min(k,n)<1, 1 + O(x*x^n), polcoef(exp( sum(i=1, min(k,n), (y^i + O(y*y^k))*subst(p + O(x*x^(n\i)), x, x^i)/i ))/(1-y + O(y*y^k)), k, y))}
+%o A144528 V(n,k)={my(g=1+O(x)); for(n=2, n, g=x*MSet(g, k-1)); Vec(1 + x*MSet(g, k) + (subst(g, x, x^2) - g^2)/2)}
+%o A144528 M(n, m=n)={Mat(vector(m, k, V(n,k-1)[2..1+n]~))}
+%o A144528 { my(T=M(12)); for(n=1, #T~, print(T[n, 1..n])) } \\ _Andrew Howroyd_, Dec 18 2020
+%Y A144528 Columns k=2..7 are A000012, A000672, A000602, A036650, A036653, A359392.
+%Y A144528 The last three diagonals give A144527, A144520, A000055.
+%Y A144528 Cf. A144215, A238414, A299038.
+%K A144528 nonn,tabl,changed
+%O A144528 1,10
+%A A144528 _N. J. A. Sloane_, Dec 20 2008
+%E A144528 a(53) corrected and terms a(56) and beyond from _Andrew Howroyd_, Dec 17 2020

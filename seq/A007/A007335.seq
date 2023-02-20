@@ -1,0 +1,57 @@
+%I A007335 M0794
+%S A007335 2,3,6,12,18,24,48,54,96,162,192,216,384,486,768,864,1458,1536,1944,
+%T A007335 3072,3456,4374,6144,7776,12288,13122,13824,17496,24576,31104,39366,
+%U A007335 49152,55296,69984,98304,118098,124416,157464,196608,221184,279936
+%N A007335 MU-numbers: next term is uniquely the product of 2 earlier terms.
+%C A007335 All terms are 3-smooth. - _Reinhard Zumkeller_, Aug 13 2015
+%C A007335 Empirically, this sequence corresponds to numbers of the form 2^v * 3^w with v = 1 or w = 1 or v and w both odd (see illustration in Links section). - _Rémy Sigrist_, Feb 16 2023
+%D A007335 Clifford A. Pickover, Mazes for the Mind, St. Martin's Press, NY, 1992, p. 359.
+%D A007335 N. J. A. Sloane and Simon Plouffe, The Encyclopedia of Integer Sequences, Academic Press, 1995 (includes this sequence).
+%H A007335 Reinhard Zumkeller, <a href="/A007335/b007335.txt">Table of n, a(n) for n = 1..1000</a>
+%H A007335 Rémy Sigrist, <a href="/A007335/a007335.png">Scatterplot of the 2-adic valuation of a(n) vs the 3-adic valuation of a(n) for n = 1..50000</a>
+%H A007335 Robert G. Wilson v, <a href="/A007335/a007335.pdf">Note, n.d.</a>
+%F A007335 a(n) = A003586(A261255(n)). - _Reinhard Zumkeller_, Aug 13 2015
+%F A007335 Conjecture: Sum_{n>=1} 1/a(n) = 181/144. - _Amiram Eldar_, Jul 31 2022
+%t A007335 s={2,3}; Do[n=Select[ Table[s[[j]] s[[k]], {j, Length@s}, {k, j+1, Length@s}] // Flatten // Sort // Split, #[[1]] > s[[-1]] && Length[#] == 1 &][[1,1]]; AppendTo[s, n], {39}]; s  (* _Jean-François Alcover_, Apr 22 2011 *)
+%t A007335 Nest[Append[#, SelectFirst[Union@ Select[Tally@ Map[Times @@ # &, Select[Permutations[#, {2}], #1 < #2 & @@ # &]], Last@ # == 1 &][[All, 1]], Function[k, FreeQ[#, k]]]] &, {2, 3}, 39] (* _Michael De Vlieger_, Nov 16 2017 *)
+%o A007335 (Haskell)
+%o A007335 a007335 n = a007335_list !! (n-1)
+%o A007335 a007335_list = 2 : 3 : f [3, 2] (singleton 6 1) where
+%o A007335    f xs m | v == 1    = y : f (y : xs) (g (map (y *) xs) m')
+%o A007335           | otherwise = f xs m'
+%o A007335           where g [] m = m
+%o A007335                 g (z:zs) m = g zs $ insertWith (+) z 1 m
+%o A007335                 ((y,v),m') = deleteFindMin m
+%o A007335 -- _Reinhard Zumkeller_, Aug 13 2015
+%o A007335 (Julia)
+%o A007335 function isMU(u, n, h, i, r)
+%o A007335     ur = u[r]; ui = u[i]
+%o A007335     ur <= ui && return h
+%o A007335     if ur * ui > n
+%o A007335         r -= 1
+%o A007335     elseif ur * ui < n
+%o A007335         i += 1
+%o A007335     else
+%o A007335         h && return false
+%o A007335         h = true; i += 1; r -= 1
+%o A007335     end
+%o A007335     isMU(u, n, h, i, r)
+%o A007335 end
+%o A007335 function MUList(len)
+%o A007335     u = Array{Int, 1}(undef, len)
+%o A007335     u[1] = 2; u[2] = 3; i = 2; n = 2
+%o A007335     while i < len
+%o A007335         n += 1
+%o A007335         if isMU(u, n, false, 1, i)
+%o A007335             i += 1
+%o A007335             u[i] = n
+%o A007335         end
+%o A007335     end
+%o A007335     return u
+%o A007335 end
+%o A007335 MUList(41) |> println # _Peter Luschny_, Apr 07 2019
+%Y A007335 Subsequence of A000423.
+%Y A007335 Cf. A054540, A003586, A261255.
+%K A007335 nonn,easy,nice,changed
+%O A007335 1,1
+%A A007335 _N. J. A. Sloane_

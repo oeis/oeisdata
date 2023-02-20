@@ -1,0 +1,32 @@
+%I A077672
+%S A077672 1,6,45,-1,15,36,21,120,-1,210,66,36,78,210,45,-1,1326,378,190,120,
+%T A077672 210,66,1035,4560,-1,78,1485,1540,435,300,465,902496,1485,3570,105,-1,
+%U A077672 17205,4560,2145,120,861,630,903,157080,4095,276,9870,41328,-1,300,153,780,5565,1185030
+%N A077672 a(1) = 1; for n > 1, a(n) = smallest triangular number which is n times another triangular number > 1, or -1 if no such number exists.
+%C A077672 a(b^2) = -1 for b > 1 because (2*b*m + b - 1)^2 < 1 + 4*b^2*m^2 + 4*b^2*m < (2*b*m + b)^2. - _Sascha Kurz_, Jan 27 2003
+%H A077672 Robert Israel, <a href="/A077672/b077672.txt">Table of n, a(n) for n = 1..10000</a>
+%e A077672 a(5) = 15 = 5*3, a(6) = 630 = 105*6.
+%p A077672 f:= proc(n) local eq, X,Y,S,i,Si,XY,y;
+%p A077672   if issqr(n) then return -1 fi;
+%p A077672   eq:= n*(X^2-1)=Y^2-1;
+%p A077672   S:= map(t -> subs(t, [X,Y]), [isolve(eq)]);
+%p A077672   for i from 0 do
+%p A077672      Si:= select(t -> t[1] > 3 and t[1]::odd and t[2]>0, expand(subs(_Z1=i, S)));
+%p A077672      if Si <> [] then
+%p A077672        XY:= Si[min[index](map(t -> t[1],Si))];
+%p A077672        y:= (XY[2]-1)/2;
+%p A077672        return y*(y+1)/2;
+%p A077672      fi
+%p A077672   od
+%p A077672 end proc:
+%p A077672 f(1):= 1:
+%p A077672 map(f, [$1..100]); # _Robert Israel_, Aug 15 2017
+%t A077672 With[{s = Map[# (# + 1)/2 &, Range[10^4]]}, Table[2 Boole[n == 1] + If[IntegerQ[Sqrt@ n], -1, SelectFirst[n Rest@ s, MemberQ[s, #] &]], {n, 54}]] (* _Michael De Vlieger_, Aug 15 2017 *)
+%o A077672 (PARI) isok(k, n) = {my(t = k*(k+1)/2); !(t % n) && (t/n != 1) && ispolygonal(t/n, 3);}
+%o A077672 a(n) = {if (n == 1, return (1)); if (issquare(n), return (-1)); my(k = 1); while (!isok(k, n), k++); k*(k+1)/2;} \\ _Michel Marcus_, Aug 15 2017
+%Y A077672 Cf. A000217 (triangular numbers), A000290 (squares).
+%K A077672 sign
+%O A077672 1,2
+%A A077672 _Amarnath Murthy_, Nov 16 2002
+%E A077672 More terms from _Sascha Kurz_, Jan 27 2003
+%E A077672 More terms from _Michel Marcus_, Aug 15 2017

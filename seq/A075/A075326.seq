@@ -1,0 +1,80 @@
+%I A075326
+%S A075326 0,3,9,13,18,23,29,33,39,43,49,53,58,63,69,73,78,83,89,93,98,103,109,
+%T A075326 113,119,123,129,133,138,143,149,153,159,163,169,173,178,183,189,193,
+%U A075326 199,203,209,213,218,223,229,233,238,243,249,253,258,263,269,273,279,283
+%N A075326 Anti-Fibonacci numbers: start with a(0) = 0, and extend by the rule that the next term is the sum of the two smallest numbers that are not in the sequence nor were used to form an earlier sum.
+%C A075326 In more detail, the sequence is constructed as follows: Start with a(0) = 0. The missing numbers are 1 2 3 4 5 6 ... Add the first two, and we get 3, which is therefore a(1). Cross 1, 2, and 1+2=3 off the missing list. The first two missing numbers are now 4 and 5, so a(2) = 4+5 = 9. Cross off 4,5,9 from the missing list. Repeat.
+%C A075326 In other words, this is the sum of consecutive pairs in the sequence 1, 2, 4, 5, 6, 7, 8, 10, 11, 12, 14, 15, ..., (A249031) the complement to the present one in the natural numbers. For example, a(1)=1+2=3, a(2)=4+5=9, a(3)=6+7=13, ... - Philippe Lallouet (philip.lallouet(AT)orange.fr), May 08 2008
+%C A075326 The new definition is due to Philippe Lalloue (philip.lallouet(AT)orange.fr), May 08 2008, while the name "anti-Fibonacci numbers" is due to D. R. Hofstadter, Oct 23 2014.
+%C A075326 Original definition: second members of pairs in A075325.
+%C A075326 If instead we take the sum of the last used non-term and the most recent (i.e., 1+2, 2+4, 4+5, 5+7, etc.), we get A008585. - _Jon Perry_, Nov 01 2014
+%C A075326 The sequences a = A075325, b = A047215, and c = A075326 are the solutions of the system of complementary equations defined recursively as follows:
+%C A075326   a(n) = least new,
+%C A075326   b(n) = least new,
+%C A075326   c(n) = a(n) + b(n),
+%C A075326 where "least new k" means the least positive integer not yet placed. For anti-tribonacci numbers, see A265389; for anti-tetranacci, see A299405. - _Clark Kimberling_, May 01 2018
+%C A075326 We see the Fibonacci numbers 3, 13, 89 and 233 occur in this sequence of anti-Fibonacci numbers. Are there infinitely many Fibonacci numbers occurring in (a(n))? The answer is yes: at least 13% of the Fibonacci numbers occur in (a(n)). This follows from Thomas Zaslavsky's formula, which implies that the sequence A017305 = (10n+3) is a subsequence of (a(n)). The Fibonacci sequence A000045 modulo 10 equals A003893, and has period 60. In this period, the number 3 occurs 8 times. - _Michel Dekking_, Feb 14 2019
+%H A075326 Reinhard Zumkeller, <a href="/A075326/b075326.txt">Table of n, a(n) for n = 0..10000</a>
+%H A075326 D. R. Hofstadter, <a href="/A075326/a075326_1.pdf">Anti-Fibonacci numbers</a>, Oct 23 2014.
+%H A075326 Thomas Zaslavsky, <a href="/A075326/a075326_2.pdf">Anti-Fibonacci Numbers: A Formula</a>, Sep 26 2016
+%F A075326 See Zaslavsky (2016) link.
+%p A075326 # Maple code for M+1 terms of sequence, from _N. J. A. Sloane_, Oct 26 2014
+%p A075326 c:=0; a:=[c]; t:=0; M:=100;
+%p A075326 for n from 1 to M do
+%p A075326 s:=t+1; if s in a then s:=s+1; fi;
+%p A075326 t:=s+1; if t in a then t:=t+1; fi;
+%p A075326 c:=s+t;
+%p A075326 a:=[op(a),c];
+%p A075326 od:
+%p A075326 [seq(a[n],n=1..nops(a))];
+%t A075326 (* Three sequences a,b,c as in Comments *)
+%t A075326 z = 200;
+%t A075326 mex[list_, start_] := (NestWhile[# + 1 &, start, MemberQ[list, #] &]);
+%t A075326 a = {}; b = {}; c = {};
+%t A075326 Do[AppendTo[a,
+%t A075326    mex[Flatten[{a, b, c}], If[Length[a] == 0, 1, Last[a]]]];
+%t A075326   AppendTo[b, mex[Flatten[{a, b, c}], Last[a]]];
+%t A075326   AppendTo[c, Last[a] + Last[b]], {z}];
+%t A075326 Take[a, 100] (* A075425 *)
+%t A075326 Take[b, 100] (* A047215 *)
+%t A075326 Take[c, 100] (* A075326 *)
+%t A075326 Grid[{Join[{"n"}, Range[0, 20]], Join[{"a(n)"}, Take[a, 21]],
+%t A075326   Join[{"b(n)"}, Take[b, 21]], Join[{"c(n)"}, Take[c, 21]]},
+%t A075326 Alignment -> ".",
+%t A075326 Dividers -> {{2 -> Red, -1 -> Blue}, {2 -> Red, -1 -> Blue}}]
+%t A075326 (* _Peter J. C. Moses_, Apr 26 2018 *)
+%t A075326 ********
+%t A075326 (* Sequence "a" via A035263 substitutions *)
+%t A075326 Accumulate[Prepend[Flatten[Nest[Flatten[# /. {0 -> {1, 1}, 1 -> {1, 0}}] &, {0}, 7] /. Thread[{0, 1} -> {{5, 5}, {6, 4}}]], 3]]
+%t A075326 (* _Peter J. C. Moses_, May 01 2018 *)
+%t A075326 ********
+%t A075326 (* Sequence "a" via Hofstadter substitutions; see his 2014 link *)
+%t A075326 morph = Rest[Nest[Flatten[#/.{1->{3},3->{1,1,3}}]&,{1},6]]
+%t A075326 hoff = Accumulate[Prepend[Flatten[morph/.Thread[{1,3}->{{6,4,5,5},{6,4,6,4,6,4,5,5}}]],3]]
+%t A075326 (* _Peter J. C. Moses_, May 01 2018 *)
+%o A075326 (Haskell)
+%o A075326 import Data.List ((\\))
+%o A075326 a075326 n = a075326_list !! n
+%o A075326 a075326_list = 0 : f [1..] where
+%o A075326    f ws@(u:v:_) = y : f (ws \\ [u, v, y]) where y = u + v
+%o A075326 -- _Reinhard Zumkeller_, Oct 26 2014
+%o A075326 (Python)
+%o A075326 def aupton(nn):
+%o A075326     alst, disallowed, mink = [0], {0}, 1
+%o A075326     for n in range(1, nn+1):
+%o A075326         nextk = mink + 1
+%o A075326         while nextk in disallowed: nextk += 1
+%o A075326         an = mink + nextk
+%o A075326         alst.append(an)
+%o A075326         disallowed.update([mink, nextk, an])
+%o A075326         mink = nextk + 1
+%o A075326         while mink in disallowed: mink += 1
+%o A075326     return alst
+%o A075326 print(aupton(57)) # _Michael S. Branicky_, Jan 31 2022
+%Y A075326 Cf. A008585, A075325, A075327, A249031, A249032 (first differences), A000045.
+%Y A075326 Cf. also A079523, A131323, A249031, A249032, A249406.
+%K A075326 nonn
+%O A075326 0,2
+%A A075326 _Amarnath Murthy_, Sep 16 2002
+%E A075326 More terms from _David Wasserman_, Jan 16 2005
+%E A075326 Entry revised (including the addition of an initial 0) by _N. J. A. Sloane_, Oct 26 2014 and Sep 26 2016 (following a suggestion from _Thomas Zaslavsky_)

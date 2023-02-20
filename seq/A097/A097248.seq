@@ -1,0 +1,69 @@
+%I A097248
+%S A097248 1,2,3,3,5,6,7,6,5,10,11,5,13,14,15,5,17,10,19,15,21,22,23,10,7,26,15,
+%T A097248 21,29,30,31,10,33,34,35,15,37,38,39,30,41,42,43,33,7,46,47,15,11,14,
+%U A097248 51,39,53,30,55,42,57,58,59,7,61,62,35,15,65,66,67,51,69,70,71,30,73,74,21
+%N A097248 a(n) is the eventual stable point reached when iterating k -> A097246(k), starting from k = n.
+%C A097248 a(n) = r(n,m) with m such that r(n,m)=r(n,m+1), where r(n,k) = A097246(r(n,k-1)), r(n,0)=n. (The original definition.)
+%C A097248 A097248(n) = r(n,a(n)).
+%C A097248 From _Antti Karttunen_, Nov 15 2016: (Start)
+%C A097248 The above remark could be interpreted to mean that A097249(n) <= a(n).
+%C A097248 All terms are squarefree, and the squarefree numbers are the fixed points.
+%C A097248 These are also fixed points eventually reached when iterating A277886.
+%C A097248 (End)
+%H A097248 Antti Karttunen, <a href="/A097248/b097248.txt">Table of n, a(n) for n = 1..10000</a>
+%F A097248 a(A005117(n)) = A005117(n).
+%F A097248 From _Antti Karttunen_, Nov 15 2016: (Start)
+%F A097248 If A008683(n) <> 0 [when n is squarefree], a(n) = n, otherwise a(n) = a(A097246(n)).
+%F A097248 If A277885(n) = 0, a(n) = n, otherwise a(n) = a(A277886(n)).
+%F A097248 A007913(a(n)) = a(n).
+%F A097248 a(A007913(n)) = A007913(n).
+%F A097248 A048675(a(n)) = A048675(n).
+%F A097248 a(A260443(n)) = A019565(n).
+%F A097248 (End)
+%F A097248 From _Peter Munn_, Feb 06 2020: (Start)
+%F A097248 a(1) = 1; a(p) = p, for prime p; a(m*k) = A331590(a(m), a(k)).
+%F A097248 a(A331590(m,k)) = A331590(a(m), a(k)).
+%F A097248 a(n^2) = a(A003961(n)) = A003961(a(n)).
+%F A097248 a(A225546(n)) = a(n).
+%F A097248 a(n) = A225546(2^A048675(n)) = A019565(A048675(n)).
+%F A097248 a(A329050(n,k)) = prime(n+k-1) = A000040(n+k-1).
+%F A097248 a(A329332(n,k)) = A019565(n * k).
+%F A097248 Equivalently, a(A019565(n)^k) = A019565(n * k).
+%F A097248 (End)
+%F A097248 From _Antti Karttunen_, Feb 22-25 & Mar 01 2020: (Start)
+%F A097248 a(A019565(x)*A019565(y)) = A019565(x+y).
+%F A097248 a(A332461(n)) = A332462(n).
+%F A097248 a(A332824(n)) = A019565(n).
+%F A097248 a(A277905(n,k)) = A277905(n,1) = A019565(n), for all n >= 1, and 1 <= k <= A018819(n).
+%F A097248 (End)
+%t A097248 Table[FixedPoint[Times @@ Map[#1^#2 & @@ # &, Partition[#, 2, 2] &@ Flatten[FactorInteger[#] /. {p_, e_} /; e >= 2 :> {If[OddQ@ e, {p, 1}, {1, 1}], {NextPrime@ p, Floor[e/2]}}]] &, n], {n, 75}] (* _Michael De Vlieger_, Mar 18 2017 *)
+%o A097248 (PARI)
+%o A097248 A097246(n) = { my(f=factor(n)); prod(i=1, #f~, (nextprime(f[i,1]+1)^(f[i,2]\2))*((f[i,1])^(f[i,2]%2))); };
+%o A097248 A097248(n) = { my(k=A097246(n)); while(k<>n, n = k; k = A097246(k)); k; };
+%o A097248 \\ _Antti Karttunen_, Mar 18 2017
+%o A097248 (Scheme) ;; with memoization-macro definec
+%o A097248 ;; Two implementations:
+%o A097248 (definec (A097248 n) (if (not (zero? (A008683 n))) n (A097248 (A097246 n))))
+%o A097248 (definec (A097248 n) (if (zero? (A277885 n)) n (A097248 (A277886 n))))
+%o A097248 ;; _Antti Karttunen_, Nov 15 2016
+%o A097248 (Python)
+%o A097248 from sympy import factorint, nextprime
+%o A097248 from operator import mul
+%o A097248 def a097246(n):
+%o A097248     f=factorint(n)
+%o A097248     return 1 if n==1 else reduce(mul, [(nextprime(i)**int(f[i]/2))*(i**(f[i]%2)) for i in f])
+%o A097248 def a(n):
+%o A097248     k=a097246(n)
+%o A097248     while k!=n:
+%o A097248         n=k
+%o A097248         k=a097246(k)
+%o A097248     return k # _Indranil Ghosh_, May 15 2017
+%Y A097248 Range of values is A005117.
+%Y A097248 Cf. A008683, A019565, A048675, A097246, A097247, A097249, A277905, A332824.
+%Y A097248 A003961, A225546, A277885, A277886, A331590 are used to express relationship between terms of this sequence.
+%Y A097248 The formula section also details how the sequence maps the terms of A007913, A260443, A329050, A329332.
+%Y A097248 See comments/formulas in A283475, A283478, A331751 giving their relationship to this sequence.
+%K A097248 nonn
+%O A097248 1,2
+%A A097248 _Reinhard Zumkeller_, Aug 03 2004
+%E A097248 Name changed and the original definition moved to the Comments section by _Antti Karttunen_, Nov 15 2016

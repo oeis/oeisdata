@@ -1,0 +1,48 @@
+%I A022818
+%S A022818 1,1,1,1,2,1,1,3,3,1,1,4,6,5,1,1,5,10,13,7,1,1,6,15,26,23,11,1,1,7,21,
+%T A022818 45,55,44,15,1,1,8,28,71,110,121,74,22,1,1,9,36,105,196,271,237,129,
+%U A022818 30,1,1,10,45,148,322,532,599,468,210,42,1,1,11,55,201,498,952,1301,1309,867,345,56,1
+%N A022818 Square array read by antidiagonals: A(n,k) = number of terms in the n-th derivative of a function composed with itself k times (n, k >= 1).
+%D A022818 Winston C. Yang (yang(AT)math.wisc.edu), Derivatives of self-compositions of functions, preprint, 1997.
+%H A022818 Alois P. Heinz, <a href="/A022818/b022818.txt">Antidiagonals n = 1..141</a>
+%H A022818 Warren P. Johnson, <a href="https://www.maa.org/sites/default/files/pdf/upload_library/22/Ford/Johnson217-234.pdf">The curious history of Faà di Bruno's formula</a>, American Mathematical Monthly, 109 (2002), 217-234.
+%H A022818 Warren P. Johnson, <a href="https://www.jstor.org/stable/2695352?seq=1">The curious history of Faà di Bruno's formula</a>, American Mathematical Monthly, 109 (2002), 217-234.
+%H A022818 Winston C. Yang, <a href="http://dx.doi.org/10.1016/S0012-365X(99)00412-4">Derivatives are essentially integer partitions</a>, Discrete Mathematics, 222(1-3), July 2000, 235-245. [Take the transpose of Table 2 on p. 241 and omit row 0 and column 0; A(n,k) = M(k,n). - _Petros Hadjicostas_, May 30 2020]
+%F A022818 From _Petros Hadjicostas_, May 30 2020: (Start)
+%F A022818 A(n,k) = Sum_{s=1..n} A008284(n,s)*A(s,k-1) for n >= 1 and k >= 2 with A(n,1) = 1 for n >= 1.
+%F A022818 A(n,k) = Sum_{s=1..n} binomial(k,s-1)*A081719(n-1,s-1) for n, k >= 1. (End)
+%e A022818 Square array A(n,k) (with rows n >= 1 and columns k >= 1) begins:
+%e A022818   1,  1,   1,   1,    1,    1,    1,     1, ...
+%e A022818   1,  2,   3,   4,    5,    6,    7,     8, ...
+%e A022818   1,  3,   6,  10,   15,   21,   28,    36, ...
+%e A022818   1,  5,  13,  26,   45,   71,  105,   148, ...
+%e A022818   1,  7,  23,  55,  110,  196,  322,   498, ...
+%e A022818   1, 11,  44, 121,  271,  532,  952,  1590, ...
+%e A022818   1, 15,  74, 237,  599, 1301, 2541,  4586, ...
+%e A022818   1, 22, 129, 468, 1309, 3101, 6539, 12644, ...
+%e A022818   ...
+%p A022818 A:= proc(n, k) option remember;
+%p A022818       `if`(k=1, 1, add(b(n, n, i)*A(i, k-1), i=0..n))
+%p A022818     end:
+%p A022818 b:= proc(n, i, k) option remember; `if`(n<k, 0, `if`(n=0, 1,
+%p A022818       `if`(i<1, 0, add(b(n-i*j, i-1, k-j), j=0..min(n/i, k)))))
+%p A022818     end:
+%p A022818 seq(seq(A(n, 1+d-n), n=1..d), d=1..12); # _Alois P. Heinz_, Aug 18 2012
+%p A022818 # second Maple program:
+%p A022818 b:= proc(n, i, l, k) option remember; `if`(k=0,
+%p A022818       `if`(n<2, 1, 0), `if`(n=0 or i=1, b(l+n$2, 0, k-1),
+%p A022818          b(n, i-1, l, k) +b(n-i, min(n-i, i), l+1, k)))
+%p A022818     end:
+%p A022818 A:= (n, k)->  b(n$2, 0, k):
+%p A022818 seq(seq(A(n, 1+d-n), n=1..d), d=1..12);  # _Alois P. Heinz_, Jul 19 2018
+%t A022818 a[n_, k_] := a[n, k] = If[k == 1, 1, Sum[b[n, n, i]*a[i, k-1], {i, 0, n}]]; b[n_, i_, k_] := b[n, i, k] = If[n < k, 0, If[n == 0, 1, If[i < 1, 0, Sum[b[n-i*j, i-1, k-j], {j, 0, Min[n/i, k]}]]]]; Table[Table[a[n, 1+d-n], {n, 1, d}], {d, 1, 12}] // Flatten (* _Jean-François Alcover_, Jan 14 2014, translated from _Alois P. Heinz_'s Maple code *)
+%o A022818 (PARI) P(n, k) = #partitions(n-k, k); /* A008284 */
+%o A022818 tabl(nn) = {M = matrix(nn, nn, n, k, 0); for(n=1, nn, M[n, 1] = 1; ); for(n=1, nn, for(k=2, nn, M[n, k] = sum(s=1, n, P(n, s)*M[s, k-1]))); for (n=1, nn, for (k=1, nn, print1(M[n, k], ", "); ); print(); ); } \\ _Petros Hadjicostas_, May 30 2020
+%Y A022818 Rows n=1-10 give: A000012, A000027, A000217, A008778, A022815, A022816, A022817, A215626, A215627, A215628.
+%Y A022818 Columns k=1-10 give: A000012, A000041, A022811, A022812, A022813, A022814, A024207, A024208, A024209, A024210.
+%Y A022818 Main diagonal gives: A192435.
+%Y A022818 Cf. A008284, A081719.
+%K A022818 nonn,tabl
+%O A022818 1,5
+%A A022818 _N. J. A. Sloane_.
+%E A022818 Edited by _Alois P. Heinz_, Aug 18 2012

@@ -1,0 +1,54 @@
+%I A093934
+%S A093934 1,2,4,12,48,296,3040,54256,1716608,97213472,9937755904,1849103423168,
+%T A093934 631027551238656,397616229914793600,465313769910614218240,
+%U A093934 1016485858155549165160192,4163516302794478683289989120,32101177200132015985353543496192,467507173926886632279989196725442560
+%N A093934 Number of equivalence classes of unlabeled tournaments with n signed nodes.
+%C A093934 Similar to unlabeled tournaments (A000568), with the additional feature that each node carries either a plus sign or a minus sign.
+%C A093934 Equivalence is defined with respect to the action of S_n on the nodes (and the induced action on the edges).
+%H A093934 Andrew Howroyd, <a href="/A093934/b093934.txt">Table of n, a(n) for n = 0..50</a> (terms n = 0..30 from N. J. A. Sloane)
+%F A093934 a(n) = Sum_{j} (1/(Product (r^(j_r) (j_r)!))) * 2^{t_j},
+%F A093934 where j runs through all partitions of n into odd parts, say with j_1 parts of size 1, j_3 parts of size 3, etc.,
+%F A093934 and t_j = (1/2)*[ Sum_{r=1..n, s=1..n} j_r j_s gcd(r,s) + Sum_{r} j_r ].
+%p A093934 with(combinat); with(numtheory);
+%p A093934 for n from 1 to 30 do
+%p A093934 p:=partition(n); s:=0:
+%p A093934 for k from 1 to nops(p) do
+%p A093934 # get next partition of n
+%p A093934 ex:=1:
+%p A093934 # discard if there is an even part
+%p A093934 for i from 1 to nops(p[k]) do if p[k][i] mod 2=0 then ex:=0:break:fi: od:
+%p A093934 # analyze an odd partition
+%p A093934 if ex=1 then
+%p A093934 # convert partition to list of sizes of parts
+%p A093934 q:=convert(p[k],multiset);
+%p A093934 for i from 1 to n do a(i):=0: od:
+%p A093934 for i from 1 to nops(q) do a(q[i][1]):=q[i][2]: od:
+%p A093934 # get number of parts
+%p A093934 nump := add(a(i),i=1..n);
+%p A093934 # get multiplicity
+%p A093934 c:=1: for i from 1 to n do c:=c*a(i)!*i^a(i): od:
+%p A093934 # get exponent t(j)
+%p A093934 tj:=0;
+%p A093934 for i from 1 to n do for j from 1 to n do
+%p A093934 if a(i)>0 and a(j)>0 then tj:=tj+a(i)*a(j)*gcd(i,j); fi;
+%p A093934 od: od:
+%p A093934 s:=s + (1/c)*2^((tj+nump)/2);
+%p A093934 fi:
+%p A093934 od;
+%p A093934 A[n]:=s;
+%p A093934 od:
+%p A093934 [seq(A[n],n=1..30)];
+%t A093934 permcount[v_] := Module[{m = 1, s = 0, k = 0, t}, For[i = 1, i <= Length[v], i++, t = v[[i]]; k = If[i > 1 && t == v[[i - 1]], k + 1, 1]; m *= t*k; s += t]; s!/m];
+%t A093934 edges[v_] := Sum[Sum[GCD[v[[i]], v[[j]]], {j, 1, i - 1}], {i, 2, Length[v]}] + Sum[Quotient[v[[i]], 2], {i, 1, Length[v]}];
+%t A093934 oddp[v_] := Module[{i}, For[i = 1, i <= Length[v], i++, If[BitAnd[v[[i]], 1] == 0, Return[0]]]; 1];
+%t A093934 a[n_] := Module[{s = 0}, Do[If[oddp[p] == 1, s += permcount[p]*2^edges[p]* 2^Length[p]], {p, IntegerPartitions[n]}]; s/n!];
+%t A093934 a /@ Range[0, 18] (* _Jean-François Alcover_, Jan 07 2021, after _Andrew Howroyd_ *)
+%o A093934 (PARI)
+%o A093934 permcount(v) = {my(m=1, s=0, k=0, t); for(i=1, #v, t=v[i]; k=if(i>1&&t==v[i-1], k+1, 1); m*=t*k; s+=t); s!/m}
+%o A093934 edges(v) = {sum(i=2, #v, sum(j=1, i-1, gcd(v[i], v[j]))) + sum(i=1, #v, v[i]\2)}
+%o A093934 oddp(v) = {for(i=1, #v, if(bitand(v[i], 1)==0, return(0))); 1}
+%o A093934 a(n) = {my(s=0); forpart(p=n, if(oddp(p), s+=permcount(p)*2^(#p+edges(p)))); s/n!} \\ _Andrew Howroyd_, Feb 29 2020
+%Y A093934 Cf. A000568.
+%K A093934 nonn
+%O A093934 0,2
+%A A093934 _Nadia Heninger_ and _N. J. A. Sloane_, Jul 21 2009

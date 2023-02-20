@@ -1,0 +1,82 @@
+%I A024614
+%S A024614 3,7,12,13,19,21,27,28,31,37,39,43,48,49,52,57,61,63,67,73,75,76,79,
+%T A024614 84,91,93,97,103,108,109,111,112,117,124,127,129,133,139,147,148,151,
+%U A024614 156,157,163,169,171,172,175,181,183,189,192,193,196,199,201,208,211,217,219,223,228
+%N A024614 Numbers of the form x^2 + xy + y^2, where x and y are positive integers.
+%C A024614 Equivalently, sequence A024612 with duplicates removed; i.e., numbers of the form i^2 - i*j + j^2, where 1 <= i < j.
+%C A024614 A subsequence of A135412, which consists of multiples (by squarefree factors) of the numbers listed here. It appears that this lists numbers > 1 which have in their factorization: (a) no even power of 3 unless there is a factor == 1 (mod 6); (b) no odd power of 2 or of a prime == 5 (mod 6) and no even power unless there is a factor 3 or == 1 (mod 6). - _M. F. Hasler_, Aug 17 2016
+%C A024614 If we regroup the entries in a triangle with row lengths A004526
+%C A024614    3,
+%C A024614    7,
+%C A024614   12, 13,
+%C A024614   19, 21,
+%C A024614   27, 28, 31,
+%C A024614   37, 39, 43,
+%C A024614 ... it seems that the j-th row of the triangle contains the numbers i^2+j^2-i*j in row j>=2 and column i = floor((j+1)/2) .. j-1. - _R. J. Mathar_, Aug 21 2016
+%C A024614 Proof of the above characterization: the sequence is the union of 3*(the squares A000290) and A024606 (numbers x^2+xy+y^2 with x > y > 0). For the latter it is known that these are the numbers with a factor p==1 (mod 6) and any prime factor == 2 (mod 3) occurring to an even power. The former (3*n^2) are the same as (odd power of 3)*(even power of any other prime factor). The union of the two cases yields the earlier characterization. - _M. F. Hasler_, Mar 04 2018
+%C A024614 Least term that can be written in exactly n ways is A300419(n). - _Altug Alkan_, Mar 04 2018
+%C A024614 For the general theory see the Fouvry et al. reference and A296095. Bounds used in the Julia program are based on the theorems in this paper. - _Peter Luschny_, Mar 10 2018
+%H A024614 Alois P. Heinz, <a href="/A024614/b024614.txt">Table of n, a(n) for n = 1..10000</a> (first 1000 terms from Peter Luschny)
+%H A024614 Etienne Fouvry, Claude Levesque, Michel Waldschmidt, <a href="https://arxiv.org/abs/1712.09019">Representation of integers by cyclotomic binary forms</a>, arXiv:1712.09019 [math.NT], 2017.
+%e A024614 3 = 1^2 + 1^2 + 1*1, 7 = 2^2 + 1^2 + 2*1, ...
+%p A024614 isA024614 := proc(n)
+%p A024614     local i,j,disc;
+%p A024614     # n=i^2+j^2-i*j = (j-i)^2+i*j, 1<=i<j
+%p A024614     # so (j-i)>=1 and i*j>=j and i^2+j^2-i*j >= 1+j max search radius
+%p A024614     for j from 2 to n-1 do
+%p A024614         # i=(j +- sqrt(4n-3j^2))/2
+%p A024614         disc := 4*n-3*j^2 ;
+%p A024614         if disc >= 0 then
+%p A024614             if issqr(disc) then
+%p A024614                 i := (j+sqrt(disc))/2 ;
+%p A024614                 if type(i,'integer') and i >= 1 and i<j then
+%p A024614                     return true;
+%p A024614                 end if;
+%p A024614                 i := (j-sqrt(disc))/2 ;
+%p A024614                 if type(i,'integer') and i >= 1 and i<j then
+%p A024614                      return true;
+%p A024614                 end if;
+%p A024614             end if;
+%p A024614         end if;
+%p A024614     end do:
+%p A024614     return false;
+%p A024614 end proc:
+%p A024614 n := 1 :
+%p A024614 for t from 1 to 228 do
+%p A024614     if  isA024614(t) then
+%p A024614         printf("%d %d\n",n,t) ;
+%p A024614         n := n+1 ;
+%p A024614     end if;
+%p A024614 end do: # _R. J. Mathar_, Aug 21 2016
+%p A024614 # second Maple program:
+%p A024614 a:= proc(n) option remember; local k, x;
+%p A024614       for k from a(n-1)+1 do for x while x^2<k do
+%p A024614         if (y-> x^2+(x+y)*y=k)((isqrt(4*k-3*x^2)-x)/2) then return k fi
+%p A024614       od od
+%p A024614     end: a(0):=0:
+%p A024614 seq(a(n), n=1..200);  # _Alois P. Heinz_, Mar 02 2018
+%t A024614 max = 228; T0 = {}; xm = Ceiling[Sqrt[max]]; While[T = T0; T0 = Table[x^2 + x y + y^2, {x, 1, xm}, {y, x, xm}] // Flatten // Union // Select[#, # <= max&]&; T != T0, xm = 2 xm]; T (* _Jean-François Alcover_, Mar 23 2018 *)
+%o A024614 (Julia)
+%o A024614 function isA024614(n)
+%o A024614     n % 3 >= 2 && return false
+%o A024614     n == 3 && return true
+%o A024614     M = Int(round(2*sqrt(n/3)))
+%o A024614     for y in 2:M, x in 1:y
+%o A024614         n == x^2 + y^2 + x*y && return true
+%o A024614     end
+%o A024614     return false
+%o A024614 end
+%o A024614 A024614list(upto) = [n for n in 1:upto if isA024614(n)]
+%o A024614 println(A024614list(228)) # _Peter Luschny_, Mar 02 2018 updated Mar 17 2018
+%o A024614 (PARI) is(n)={n>2&&!for(i=1, #n=Set(Col(factor(n)%6))/*consider prime factors mod 6*/, n[i][1]>1||next/*skip factors = 1 mod 6*/; /* odd power: ok only if p=3 */n[i][2]%2&&(n[i][1]!=3 || next) && return; /*even power: ok if there's a p==1, listed first*/ n[1][1]==1 || /*also ok if it's not a 3 and if there's a 3 elsewhere */ (n[i][1]==2 && i<#n && n[i+1][1]==3) || (n[i][1]>3 && for(j=1,i-1,n[j][1]==3 && next(2))||return))} \\ _M. F. Hasler_, Aug 17 2016, documented & bug fixed (following an observation by _Altug Alkan_) Mar 04 2018
+%o A024614 (PARI) is(n)={(n=factor(n))||return/*n=1*/; /*exponents % 2, primes % 3*/ n[,2]%=2; n[,1]%=3; (n=Set(Col(n))) /*odd power of a prime == 2? will be last*/ [#n][2] && n[#n][1]==2 && return; /*factor == 1? will be 1st or after 3*/ n[1+(!n[1][1] && #n>1)][1]==1 || /*thrice a square?*/ (!n[1][1]&&n[1][2]&&!for(i=2,#n,n[i][2]&&return))} \\ Alternate code, 5% slower, maybe a bit less obscure. - _M. F. Hasler_, Mar 04 2018
+%o A024614 (PARI) N=228; v=vector(N);
+%o A024614 for(x=1,N, x2=x*x; if(x2>N,break); for(y=x,N, t=x2+y*(x+y); if(t>N,break); v[t]=1;));
+%o A024614 for(n=1,N,if(v[n],print1(n,", "))); \\ _Joerg Arndt_, Mar 10 2018
+%o A024614 (PARI) list(lim)=my(v=List(), x2); lim\=1; for(x=1, sqrtint(4*lim\3), x2=x^2; for(y=1, min((sqrt(4*lim-3*x2)-x)/2, x), listput(v, y*(x+y)+x2))); Set(v) \\ Charles R Greathouse IV, Mar 23 2018
+%Y A024614 Cf. A003136, A007645 (prime terms), A024612, A135412, A296095, A300419.
+%K A024614 nonn,easy
+%O A024614 1,1
+%A A024614 _Clark Kimberling_
+%E A024614 Edited by _M. F. Hasler_, Aug 17 2016
+%E A024614 b-file for values a(1)..a(10^4) double-checked with PARI code by _M. F. Hasler_, Mar 04 2018

@@ -1,0 +1,71 @@
+%I A117195
+%S A117195 1,0,1,1,0,1,0,1,0,1,0,1,1,0,1,1,0,1,1,0,1,0,1,1,1,1,0,1,0,1,1,1,1,1,
+%T A117195 0,1,0,1,1,2,1,1,1,0,1,1,0,2,1,2,1,1,1,0,1,0,1,1,2,2,2,1,1,1,0,1,0,1,
+%U A117195 2,2,2,2,2,1,1,1,0,1,0,1,1,3,2,3,2,2,1,1,1,0,1,0,1,2,2,4,2,3,2,2,1,1,1,0,1
+%N A117195 Triangle read by rows: T(n,k) = number of partitions into distinct parts having rank k, 0<=k<n.
+%C A117195 T(n,0) = A010054(n), T(n,1) = 1-A010054(n) for n>1;
+%C A117195 A000009(n) = Sum(T(n,k): 0<=k<n);
+%C A117195 A117192(n) = Sum(T(n,k)*(1 - k mod 2): 0<=k<n);
+%C A117195 A117193(n) = Sum(T(n,k)*(k mod 2): 0<=k<n);
+%C A117195 A117194(n) = Sum(T(n,k)*(1 - k mod 2): 0<k<n);
+%H A117195 Alois P. Heinz, <a href="/A117195/b117195.txt">Rows n = 1..141, flattened</a>
+%H A117195 Maria Monks, <a href="https://doi.org/10.1090/S0002-9939-09-10076-X">Number theoretic properties of generating functions related to Dyson's rank for partitions into distinct parts</a>, Proceedings of The American Mathematical Society, vol.138, no.02, pp.481-494, 2009.
+%F A117195 G.f.: sum(n>=1, q^(n*(n+1)/2) / prod(k=1..n, 1-z*q^k) ), see Monks reference. [_Joerg Arndt_, Oct 07 2012]
+%e A117195 Triangle starts:
+%e A117195 [ 1]   1,
+%e A117195 [ 2]   0, 1,
+%e A117195 [ 3]   1, 0, 1,
+%e A117195 [ 4]   0, 1, 0, 1,
+%e A117195 [ 5]   0, 1, 1, 0, 1,
+%e A117195 [ 6]   1, 0, 1, 1, 0, 1,
+%e A117195 [ 7]   0, 1, 1, 1, 1, 0, 1,
+%e A117195 [ 8]   0, 1, 1, 1, 1, 1, 0, 1,
+%e A117195 [ 9]   0, 1, 1, 2, 1, 1, 1, 0, 1,
+%e A117195 [10]   1, 0, 2, 1, 2, 1, 1, 1, 0, 1,
+%e A117195 [11]   0, 1, 1, 2, 2, 2, 1, 1, 1, 0, 1,
+%e A117195 [12]   0, 1, 2, 2, 2, 2, 2, 1, 1, 1, 0, 1,
+%e A117195 [13]   0, 1, 1, 3, 2, 3, 2, 2, 1, 1, 1, 0, 1,
+%e A117195 [14]   0, 1, 2, 2, 4, 2, 3, 2, 2, 1, 1, 1, 0, 1, ...
+%e A117195 T(12,0) = #{} = 0,
+%e A117195 T(12,1) = #{5+4+2+1} = 1,
+%e A117195 T(12,2) = #{6+3+2+1, 5+4+3} = 2,
+%e A117195 T(12,3) = #{6+5+1, 6+4+2} = 2,
+%e A117195 T(12,4) = #{7+4+1, 7+3+2} = 2,
+%e A117195 T(12,5) = #{8+3+1, 7+5} = 2,
+%e A117195 T(12,6) = #{9+2+1, 8+4} = 2,
+%e A117195 T(12,7) = #{9+3} = 1,
+%e A117195 T(12,8) = #{10+2} = 1,
+%e A117195 T(12,9) = #{11+1} = 1,
+%e A117195 T(12,10) = #{} = 0,
+%e A117195 T(12,11) = #{12} = 1.
+%p A117195 b:= proc(n, i, k) option remember;
+%p A117195       if n<0 or k<0 then []
+%p A117195     elif n=0 then [0$k, 1]
+%p A117195     elif i<1 then []
+%p A117195     else zip ((x, y)-> x+y, b(n, i-1, k), b(n-i, i-1, k-1), 0)
+%p A117195       fi
+%p A117195     end:
+%p A117195 T:= proc(n) local j, r; r:= [];
+%p A117195       for j from 0 to n do
+%p A117195         r:= zip ((x, y)-> x+y, r, b(n-j, j-1, j-1), 0)
+%p A117195       od; r[]
+%p A117195     end:
+%p A117195 seq (T(n), n=1..20);  # _Alois P. Heinz_, Aug 29 2011
+%t A117195 b[n_, i_, k_] := b[n, i, k] = Which[n<0 || k<0, {}, n == 0, Append[Array[0&, k], 1], i<1, {}, True, Plus @@ PadRight[{b[n, i-1, k], b[n-i, i-1, k-1]}]]; T[n_] := Module[{j, r}, r = {}; For[j = 0, j <= n, j++, r = Plus @@ PadRight[{r, b[n-j, j-1, j-1]}]]; r]; Table[T[n], {n, 1, 20}] // Flatten (* _Jean-François Alcover_, Jan 30 2014, after _Alois P. Heinz_ *)
+%o A117195 (PARI)
+%o A117195 N=33;  L=1+2*ceil(sqrtint(N));
+%o A117195 q='q+O(q^N);
+%o A117195 gf=sum(n=1,L, q^(n*(n+1)/2) / prod(k=1,n,1-z*q^k) );
+%o A117195 v=Vec(gf);
+%o A117195 { for (n=1,#v,  /* print triangle: */
+%o A117195     p = Pol(v[n], 'z) + 'c0;
+%o A117195     p = polrecip(p);
+%o A117195     rw = Vec(p);  rw[1] -= 'c0;
+%o A117195     print1("[", n, "]   " );
+%o A117195     print( rw );
+%o A117195 ); }
+%o A117195 /* _Joerg Arndt_, Oct 07 2012 */
+%Y A117195 Cf. A063995, A105806.
+%K A117195 nonn,tabl
+%O A117195 1,40
+%A A117195 _Reinhard Zumkeller_, Mar 03 2006

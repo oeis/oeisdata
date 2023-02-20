@@ -1,0 +1,27 @@
+%I A096936
+%S A096936 1,0,1,3,0,0,2,0,1,0,0,3,2,0,0,3,0,0,2,0,2,0,0,0,1,0,1,6,0,0,2,0,0,0,
+%T A096936 0,3,2,0,2,0,0,0,2,0,0,0,0,3,3,0,0,6,0,0,0,0,2,0,0,0,2,0,2,3,0,0,2,0,
+%U A096936 0,0,0,0,2,0,1,6,0,0,2,0,1,0,0,6,0,0,0,0,0,0,4,0,2,0,0,0,2,0,0,3,0,0,2,0,0
+%N A096936 Half of number of integer solutions to the equation x^2 + 3y^2 = n.
+%D A096936 N. J. Fine, Basic Hypergeometric Series and Applications, Amer. Math. Soc., 1988; p. 78, Eq. (32.25).
+%H A096936 Antti Karttunen, <a href="/A096936/b096936.txt">Table of n, a(n) for n = 1..65537</a>
+%H A096936 M. D. Hirschhorn, <a href="http://dx.doi.org/10.1016/j.disc.2004.08.045">The number of representations of a number by various forms</a>, Discrete Mathematics 298 (2005), 205-211.
+%H A096936 José Manuel Rodríguez Caballero, <a href="https://arxiv.org/abs/1709.09621">Divisors on overlapped intervals and multiplicative functions</a>, arXiv:1709.09621 [math.NT], 2017.
+%F A096936 a(n) = A033716(n) / 2.
+%F A096936 Multiplicative with a(2^e) = 3*(1+(-1)^e)/2, a(3^e) = 1, a(p^e) = (1+(-1)^e)/2 if p==2 (mod 3) and a(p^e) = 1+e if p==1 (mod 3). - Corrected by _Antti Karttunen_, Nov 20 2017
+%F A096936 G.f.: ((Sum_{k in Z} x^(k^2)) * (Sum_{k in Z} x^(3*k^2)) - 1)/2.
+%F A096936 Asymptotic mean: Limit_{m->oo} (1/m) * Sum_{k=1..m} a(k) = Pi/(2*sqrt(3)) = 0.906899... (A093766). - _Amiram Eldar_, Oct 15 2022
+%e A096936 G.f. = x + x^3 + 3*x^4 + 2*x^7 + x^9 + 3*x^12 + 2*x^13 + 3*x^16 + 2*x^19 + ...
+%p A096936 sigmamr := proc(n,m,r) local a,d ; a := 0 ; for d in numtheory[divisors](n) do if modp(d,m) = r then  a := a+1 ; end if; end do: a; end proc:
+%p A096936 A002324 := proc(n) sigmamr(n,3,1)-sigmamr(n,3,2) ; end proc:
+%p A096936 A096936 := proc(n) A002324(n) +2*(sigmamr(n,12,4)-sigmamr(n,12,8) ); end proc:
+%p A096936 seq(A096936(n),n=1..90) ; # _R. J. Mathar_, Mar 23 2011
+%t A096936 a[ n_] := If[ n < 1, 0, Times @@ (Which[ # == 1 || # == 3, 1, # == 2, 3 (1 + (-1)^#2)/2, Mod[#, 3] == 1, #2 + 1, True, (1 + (-1)^#2)/2] & @@@ FactorInteger[n])]; (* _Michael Somos_, Nov 20 2017 *)
+%o A096936 (PARI) {a(n) = if( n<1, 0, 1/2 * polcoeff( sum(k=1, sqrtint(n), 2*x^k^2, 1 + x*O(x^n)) * sum(k=1, sqrtint(n\3), 2*x^(3*k^2), 1 + x*O(x^n)), n))};
+%o A096936 (PARI) {a(n) = if( n<1, 0, qfrep([1, 0; 0, 3], n)[n])}; /* _Michael Somos_, Jun 05 2005 */
+%o A096936 (PARI) {a(n) = my(A, p, e); if( n<1, 0, A = factor(n); prod( k=1, matsize(A)[1], [p, e] = A[k, ]; if( p==3, 1, p==2, 3 * (1 + (-1)^e) / 2, p%3==2, (1 + (-1)^e) / 2, e+1)))}; /* _Michael Somos_, Nov 20 2017 */
+%o A096936 (Scheme) (definec (A096936 n) (if (= 1 n) n (let ((p (A020639 n)) (e (A067029 n)) (rest (A096936 (A028234 n)))) (cond ((= 2 p) (* (if (odd? e) 0 3) rest)) ((= 3 p) rest) ((= 1 (modulo p 3)) (* (+ 1 e) rest)) (else (* (if (odd? e) 0 1) rest)))))) ;; With the memoization-macro definec, after the given multiplicative formula. - _Antti Karttunen_, Nov 20 2017
+%Y A096936 Cf. A033716, A093766, A115979.
+%K A096936 nonn,mult
+%O A096936 1,4
+%A A096936 _Michael Somos_, Jul 15 2004

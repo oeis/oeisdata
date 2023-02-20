@@ -1,0 +1,49 @@
+%I A058865
+%S A058865 1,0,3,1,0,0,4,12,6,1,0,0,0,5,30,75,30,30,10,1,0,0,0,0,6,60,270,360,
+%T A058865 435,270,255,80,60,15,1,0,0,0,0,0,7,105,735,1925,2940,3591,4165,2310,
+%U A058865 2520,1925,882,630,175,105,21,1,0,0,0,0,0,0,8,168,1680,7280,16800
+%N A058865 Irregular table a(n,k) = number of connected labeled chordal graphs on n nodes with k edges, containing no induced path P_4, for n >= 1, 1 <= k <= n*(n-1)/2, read by rows; also the number of labeled trees with each vertex replaced by a clique.
+%C A058865 A subclass of chordal-comparability graphs.
+%H A058865 G. C. Greubel, <a href="/A058865/b058865.txt">Rows n = 2..30 of the irregular triangle, flattened</a>
+%H A058865 R. Castelo and N. C. Wormald, <a href="http://www.cs.uu.nl/research/techreps/repo/CS-2001/2001-12.pdf">Enumeration of P4-free chordal graphs</a>.
+%H A058865 R. Castelo and N. C. Wormald, <a href="http://dx.doi.org/10.1007/s00373-002-0513-9">Enumeration of P4-Free chordal graphs</a>, Graphs and Combinatorics, 19:467-474, 2003.
+%H A058865 M. C. Golumbic, <a href="http://dx.doi.org/10.1016/0012-365X(78)90178-4">Trivially perfect graphs</a>, Discr. Math. 24(1) (1978), 105-107.
+%H A058865 T. H. Ma and J. P. Spinrad, <a href="http://dx.doi.org/10.1007/BF00385814">Cycle-free partial orders and chordal comparability graphs</a>, Order, 1991, 8:49-61.
+%H A058865 E. S. Wolk, <a href="http://dx.doi.org/10.1090/S0002-9939-1965-0172274-5">A note on the comparability graph of a tree</a>, Proc. Am. Math. Soc., 1965, 16:17-20.
+%F A058865 Let A(n,k) be the total number of labeled P_4 - free chordal graphs on n vertices and q edges (= A356916), then:
+%F A058865 a(n,q) = Sum_{k=1..n-2} binomial(n,k)*(A(n-k, q - k(k-1)/2 - k(n-k)) - a(n-k, q - k(k-1)/2 - k(n-k))) for q < n(n-1)/2 =: T(n), a(n, T(n)) = 1. [Corrected by _M. F. Hasler_, Sep 03 2022]
+%F A058865 A(n,q) = a(n,q) + Sum_{k = 1..n-1} binomial(n-1, k-1)*Sum_{l = k-1..min(k(k-1)/2, q)} a(k,l)*A(n-k,q-l). [Simplified by _M. F. Hasler_, Sep 03 2022]
+%F A058865 Particular values: a(n,k) = 0 for q < n-1; a(n, T(n)) = 1; a(n,n-1) = n; a(n, T(n)-1) = n(n-1)/2 for n > 2, a(n, n) = a(n, T(n)-2) = n(n-1)(n-2)/2 for n > 3. - _M. F. Hasler_, Sep 03 2022
+%F A058865 From _G. C. Greubel_, Sep 03 2022: (Start)
+%F A058865 a(n, binomial(n,2) - 1) = A000217(n+1) - [n=2], n >= 2.
+%F A058865 a(n, n) = 3*A000292(n) - 2*[n=3], n >= 3.
+%F A058865 Sum_{k=1..binomial(n,2)} a(n, k) = A058863(n). (End)
+%e A058865 The table starts:
+%e A058865    n | a(n, 1 <= k <= n(n-1)/2)
+%e A058865   ---+---------------------------
+%e A058865    1 | ()    (row length = 0: empty row)
+%e A058865    2 | 1
+%e A058865    3 | 0, 3, 1
+%e A058865    4 | 0, 0, 4, 12, 6, 1
+%e A058865    5 | 0, 0, 0, 5, 30, 75, 30, 30, 10, 1
+%e A058865   ...
+%t A058865 T[n_, k_]:= T[n, k]= If[k==Binomial[n, 2], 1, Sum[Binomial[n, j]*(A[n-j, k-j*(2*n -1-j)/2] - T[n-j, k-j*(2*n-1-j)/2]), {j, n-2}]]; (* T = A058865 *)
+%t A058865 A[n_, k_]:= A[n, k]= T[n, k] + Sum[Sum[Binomial[n-1, j-1]*T[j, m]*A[n-j, k-m], {j, n-1}], {m, 0, k}]; (* A = A356916 *)
+%t A058865 Table[T[n, k], {n,2,12}, {k,Binomial[n, 2]}]//Flatten (* _G. C. Greubel_, Sep 03 2022 *)
+%o A058865 (PARI) A58865=Map(); A058865(n,q) = if( q < n-1 || q >= n*(n-1)\2, q==n*(n-1)\2, mapisdefined(A58865, [n,q], &q), q, mapput(A58865, [n,q], q = sum(k=1,n-2, binomial(n,k)*(A356916(n-k, q - k*(k-1)/2 - k*(n-k)) - A058865(n-k, q - k*(k-1)\2 - (n-k)*k)))); q) \\ A356916 "outsourced" by _M. F. Hasler_, Sep 26 2022
+%o A058865 [[A058865(n,k)| k<-[1..n*(n-1)/2]] | n<-[1..7]] \\ _M. F. Hasler_, Sep 03 2022
+%o A058865 (SageMath)
+%o A058865 @CachedFunction
+%o A058865 def T(n,k): # T = A058865
+%o A058865     if (k==binomial(n,2)): return 1
+%o A058865     else: return sum( binomial(n,j)*( A(n-j, k-j*(2*n-1-j)/2) - T(n-j, k-j*(2*n-1-j)/2) ) for j in (1..n-2) )
+%o A058865 @CachedFunction
+%o A058865 def A(n,k): # A = A356916
+%o A058865     return T(n,k) + sum(sum( binomial(n-1,j-1)*T(j,m)*A(n-j,k-m) for j in (1..n-1) ) for m in (0..k) )
+%o A058865 flatten([[T(n,k) for k in (1..binomial(n,2))] for n in (2..12)]) # _G. C. Greubel_, Sep 03 2022
+%Y A058865 Cf. A000217 (row lengths, up to offset), A000292, A007134, A058863, A058864.
+%Y A058865 Cf. A356916.
+%K A058865 nonn,tabf
+%O A058865 1,3
+%A A058865 Robert Castelo (rcastelo(AT)imim.es), Jan 06 2001
+%E A058865 Typo in a(6,11) corrected by _G. C. Greubel_, Sep 03 2022

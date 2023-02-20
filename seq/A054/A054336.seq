@@ -1,0 +1,68 @@
+%I A054336
+%S A054336 1,1,1,2,2,1,3,5,3,1,6,10,9,4,1,10,22,22,14,5,1,20,44,54,40,20,6,1,35,
+%T A054336 93,123,109,65,27,7,1,70,186,281,276,195,98,35,8,1,126,386,618,682,
+%U A054336 541,321,140,44,9,1,252,772,1362,1624,1440,966,497,192,54,10,1
+%N A054336 A convolution triangle of numbers based on A001405 (central binomial coefficients).
+%C A054336 T(n,k) is the number of 2-Motzkin paths (i.e., Motzkin paths with blue and red level steps) with no level steps at positive height and having k blue level steps. Example: T(4,2)=9 because, denoting U=(1,1), D=(1,-1), B=blue (1,0), R=red (1,0), we have BBRR, BRBR, BRRB, RBBR, RBRB, RRBB, BBUD, BUDB, and UDBB. - _Emeric Deutsch_, Jun 07 2011
+%C A054336 In the language of the Shapiro et al. reference (given in A053121) such a lower triangular (ordinary) convolution array, considered as a matrix, belongs to the Bell-subgroup of the Riordan-group.
+%C A054336 The g.f. for the row polynomials p(n,x) (increasing powers of x) is 1/(1-(1+x)*z-z^2*c(z^2)), with c(x) the g.f. for Catalan numbers A000108.
+%C A054336 Column sequences: A001405, A045621.
+%C A054336 Riordan array (f(x), x*f(x)), f(x) the g.f. of A001405. - _Philippe Deléham_, Dec 08 2009
+%C A054336 From _Paul Barry_, Oct 21 2010: (Start)
+%C A054336 Riordan array ((sqrt(1+2x) - sqrt(1-2x))/(2x*sqrt(1-2x)), (sqrt(1+2x)-sqrt(1-2x))/(2*sqrt(1-2x))),
+%C A054336 inverse of Riordan array ((1+x)/(1+2x+2x^2), x(1+x)/(1+2x+2x^2)) (A181472). (End)
+%H A054336 G. C. Greubel, <a href="/A054336/b054336.txt">Rows n = 0..100 of triangle, flattened</a>
+%F A054336 G.f. for column m: cbi(x)*(x*cbi(x))^m, with cbi(x) := (1+x*c(x^2))/sqrt(1-4*x^2) = 1/(1-x-x^2*c(x^2)), where c(x) is the g.f. for Catalan numbers A000108.
+%F A054336 T(n,k) = Sum_{j>=0} A053121(n,j)*binomial(j,k). - _Philippe Deléham_, Mar 30 2007
+%F A054336 T(n,k) = T(n-1,k-1) + T(n-1,l) + Sum_{j>=0} T(n-1,k+1+j)*(-1)^j. - _Philippe Deléham_, Feb 23 2012
+%e A054336 Fourth row polynomial (n=3): p(3,x)= 3 + 5*x + 3*x^2 + x^3.
+%e A054336 From _Paul Barry_, Oct 21 2010: (Start)
+%e A054336 Triangle begins
+%e A054336    1;
+%e A054336    1,  1;
+%e A054336    2,  2,   1;
+%e A054336    3,  5,   3,   1;
+%e A054336    6, 10,   9,   4,  1;
+%e A054336   10, 22,  22,  14,  5,  1;
+%e A054336   20, 44,  54,  40, 20,  6, 1;
+%e A054336   35, 93, 123, 109, 65, 27, 7, 1;
+%e A054336 Production matrix is
+%e A054336    1,  1;
+%e A054336    1,  1,  1;
+%e A054336   -1,  1,  1,  1;
+%e A054336    1, -1,  1,  1,  1;
+%e A054336   -1,  1, -1,  1,  1,  1;
+%e A054336    1, -1,  1, -1,  1,  1,  1;
+%e A054336   -1,  1, -1,  1, -1,  1,  1, 1;
+%e A054336    1, -1,  1, -1,  1, -1,  1, 1, 1;
+%e A054336   -1,  1, -1,  1, -1,  1, -1, 1, 1, 1; (End)
+%t A054336 c[n_, j_] /; n < j || OddQ[n - j] = 0; c[n_, j_] = (j + 1) Binomial[n + 1, (n - j)/2]/(n + 1); t[n_, k_] := Sum[c[n, j]*Binomial[j, k], {j, 0, n}]; Flatten[Table[t[n, k], {n, 0, 10}, {k, 0, n}]][[;; 66]] (* _Jean-François Alcover_, Jul 13 2011, after _Philippe Deléham_ *)
+%o A054336 (PARI)
+%o A054336 A053121(n,k) = if((n-k+1)%2==0, 0, (k+1)*binomial(n+1, (n-k)\2)/(n+1) );
+%o A054336 T(n,k) = sum(j=k,n, A053121(n,j)*binomial(j,k));
+%o A054336 for(n=0,10, for(k=0,n, print1(T(n,k), ", "))) \\ _G. C. Greubel_, Jul 21 2019
+%o A054336 (Magma)
+%o A054336 A053121:= func< n,k | ((n-k+1) mod 2) eq 0 select 0 else (k+1)*Binomial(n+1, Floor((n-k)/2))/(n+1) >;
+%o A054336 T:= func< n,k | (&+[Binomial(j,k)*A053121(n,j): j in [k..n]]) >;
+%o A054336 [T(n,k): k in [0..n], n in [0..10]]; // _G. C. Greubel_, Jul 21 2019
+%o A054336 (Sage)
+%o A054336 def A053121(n, k):
+%o A054336     if (n-k+1) % 2==0: return 0
+%o A054336     else: return (k+1)*binomial(n+1, ((n-k)//2))/(n+1)
+%o A054336 def T(n,k): return sum(binomial(j,k)*A053121(n,j) for j in (k..n))
+%o A054336 [[T(n,k) for k in (0..n)] for n in (0..10)] # _G. C. Greubel_, Jul 21 2019
+%o A054336 (GAP)
+%o A054336 A053121:= function(n,k)
+%o A054336     if ((n-k+1) mod 2)=0 then return 0;
+%o A054336     else return (k+1)*Binomial(n+1, Int((n-k)/2))/(n+1);
+%o A054336     fi;
+%o A054336   end;
+%o A054336 T:= function(n,k)
+%o A054336     return Sum([k..n], j-> Binomial(j,k)*A053121(n,j));
+%o A054336   end;
+%o A054336 Flat(List([0..10], n-> List([0..n], k-> T(n,k) ))); # _G. C. Greubel_, Jul 21 2019
+%Y A054336 Cf. A001405, A035324, A054335.
+%Y A054336 Row sums: A054341.
+%K A054336 easy,nice,nonn,tabl
+%O A054336 0,4
+%A A054336 _Wolfdieter Lang_, Mar 13 2000

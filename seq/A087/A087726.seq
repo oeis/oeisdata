@@ -1,0 +1,63 @@
+%I A087726
+%S A087726 1,4,9,28,25,36,49,112,153,100,121,252,169,196,225,640,289,612,361,
+%T A087726 700,441,484,529,1008,1225,676,1377,1372,841,900,961,2560,1089,1156,
+%U A087726 1225,4284,1369,1444,1521,2800,1681,1764,1849,3388,3825,2116,2209,5760,4753,4900,2601,4732
+%N A087726 Number of elements X in the matrix ring M_2(Z_n) such that X^2 == 0 mod n.
+%C A087726 Conjecture: a(n)=n^2 if and only if n is squarefree. [_Ben Branman_, Mar 22 2013]
+%C A087726 Preceding conjecture is true in the case where n is squarefree. - _Eric M. Schmidt_, Mar 23 2013
+%C A087726 It appears that a(p^k) = (1+3*p^2 + 2*k*(p^2-1) + (-1)^k*(p^2-1))*p^(2*k-2)/4 for primes p.  Since the sequence is multiplicative, this would imply the conjecture. - _Robert Israel_, Jun 10 2015
+%C A087726 A proof of the formula for k=1 can be done easily (see pdf). - _Manfred Scheucher_, Jun 10 2015
+%H A087726 Manfred Scheucher, <a href="/A087726/b087726.txt">Table of n, a(n) for n = 1..1000</a>
+%H A087726 Manfred Scheucher, <a href="/A087726/a087726_4.pdf">A proof of the formula for k=1</a>
+%p A087726 f:= proc(n)
+%p A087726   local tot, S, a, mult, sa, d, ad, g, cands;
+%p A087726   tot:= 0;
+%p A087726   S:= ListTools:-Classify(t -> t^2 mod n, [$0..n-1]);
+%p A087726   for a in numtheory:-divisors(n) do
+%p A087726     mult:= numtheory:-phi(n/a);
+%p A087726     sa:= a^2 mod n;
+%p A087726     for d in S[sa] do
+%p A087726        g:= igcd(a+d,n);
+%p A087726        cands:= [seq(i*n/g, i=0..g-1)];
+%p A087726        tot:= tot + mult * numboccur(sa,[seq(seq(s*t,s=cands),t=cands)] mod n);
+%p A087726     od
+%p A087726   od;
+%p A087726   tot
+%p A087726 end proc:
+%p A087726 map(f, [$1..100]); # _Robert Israel_, Jun 09 2015
+%t A087726 a[m_] := Count[Table[Mod[MatrixPower[Partition[IntegerDigits[n, m, 4], 2], 2], m] == {{0, 0}, {0, 0}}, {n, 0, m^4 - 1}], True]; Table[a[n], {n,2,30}] (* _Ben Branman_, Mar 22 2013 *)
+%o A087726 (C)
+%o A087726 #include<stdio.h>
+%o A087726 #include<stdlib.h>
+%o A087726 int main(int argc,char** argv)
+%o A087726 {
+%o A087726   long ct = 0;
+%o A087726   int n = atoi(argv[1]);
+%o A087726   int a,b,c,d;
+%o A087726   for(a=0;a<n;a++)
+%o A087726   {
+%o A087726     for(b=0;b<n;b++)
+%o A087726     {
+%o A087726       for(c=0;c<n;c++)
+%o A087726       {
+%o A087726 if((a*a+b*c)%n != 0) continue;
+%o A087726 for(d=0;d<n;d++)
+%o A087726 {
+%o A087726 if((b*c+d*d)%n != 0) continue;
+%o A087726 if((a*b+b*d)%n != 0) continue;
+%o A087726 if((c*a+d*c)%n != 0) continue;
+%o A087726 ct++;
+%o A087726 }
+%o A087726       }
+%o A087726     }
+%o A087726   }
+%o A087726   printf("%d %ld\n",n,ct);
+%o A087726   return 0;
+%o A087726 }
+%o A087726 /* _Manfred Scheucher_, Jun 09 2015 */
+%Y A087726 Cf. A066907, A000188.
+%K A087726 mult,nonn
+%O A087726 1,2
+%A A087726 Yuval Dekel (dekelyuval(AT)hotmail.com), Sep 28 2003
+%E A087726 More terms from _Ben Branman_, Mar 22 2013
+%E A087726 More terms from _Manfred Scheucher_, Jun 09 2015

@@ -1,0 +1,31 @@
+%I A106737
+%S A106737 1,2,2,3,2,4,3,4,2,4,4,6,3,6,4,5,2,4,4,6,4,8,6,8,3,6,6,9,4,8,5,6,2,4,
+%T A106737 4,6,4,8,6,8,4,8,8,12,6,12,8,10,3,6,6,9,6,12,9,12,4,8,8,12,5,10,6,7,2,
+%U A106737 4,4,6,4,8,6,8,4,8,8,12,6,12,8,10,4,8,8,12,8,16,12,16,6,12,12,18,8,16,10,12
+%N A106737 a(n) = Sum_{k=0..n} ({binomial(n+k,n-k)*binomial(n,k)} mod 2).
+%C A106737 The formula (the recurrence, if confirmed to be equal to sum binomial formula) implies that this is the run length transform of the sequence 1,2,3,4,5,... - _N. J. A. Sloane_, Feb 05 2015. Note: That sequence should be considered as a successor function a(n) = n+1, starting from offset 0. See also A020725. - _Antti Karttunen_, Oct 15 2016
+%C A106737 The recurrence formula is correct. See paper in links. - _Chai Wah Wu_, Oct 16 2016
+%H A106737 Chai Wah Wu, <a href="/A106737/b106737.txt">Table of n, a(n) for n = 0..10000</a>
+%H A106737 Chai Wah Wu, <a href="https://arxiv.org/abs/1610.06166">Sums of products of binomial coefficients mod 2 and run length transforms of sequences</a>, arXiv:1610.06166 [math.CO], 2016.
+%F A106737 a(0)=1, a(2n) = a(n), a(4n+1) = 2*a(2n), a(4n+3) = 2*a(2n+1) - a(n).
+%F A106737 From _Antti Karttunen_, Oct 15 2016: (Start)
+%F A106737 a(n) = A000005(A005940(1+n)). [Follows from the Run Length Transform-interpretation.]
+%F A106737 For n > 1, a(n^2) is always even. [Based on RLT-interpretation. n^2 = 1 modulo 4 for all odd n and ((2^k)*n)^2 = 2^(2k) * (n^2), thus the last 1-bit is always alone and contributes 2 to the product, making it even.]
+%F A106737 (End)
+%t A106737 Table[Sum[Mod[#, 2] &[Binomial[n + k, n - k] Binomial[n, k]], {k, 0, n}], {n, 0, 95}] (* _Michael De Vlieger_, Oct 17 2016 *)
+%o A106737 (PARI) a(n) = sum(k=0, n, (binomial(n+k,n-k)*binomial(n,k)) % 2); \\ _Michel Marcus_, Dec 08 2013
+%o A106737 (Python)
+%o A106737 def A106737(n):
+%o A106737     return sum(int(not (~(n+k) & (n-k)) | (~n & k)) for k in range(n+1)) # _Chai Wah Wu_, Feb 09 2016
+%o A106737 (Scheme, two mathematically equal implementations, based on RLT-interpretation)
+%o A106737 ;; The first one implements the given recurrence and uses memoization-macro definec:
+%o A106737 (definec (A106737 n) (cond ((zero? n) 1) ((even? n) (A106737 (/ n 2))) ((= 1 (modulo n 4)) (* 2 (A106737 (/ (- n 1) 2)))) (else (- (* 2 (A106737 (/ (- n 1) 2))) (A106737 (/ (- n 3) 4))))))
+%o A106737 ;; This one applies the Run Length Transform explicitly to r -> r+1 function:
+%o A106737 (define (A106737 n) (fold-left (lambda (a r) (* a (+ 1 r))) 1 (bisect (reverse (binexp->runcount1list n)) (- 1 (modulo n 2))))) ;; See A227349 for the required other functions.
+%o A106737 ;; _Antti Karttunen_, Oct 15 2016
+%Y A106737 Row sums of triangle in A253084.
+%Y A106737 Cf. A000005, A005940, A020725, A227349, A277335 (positions of odd terms).
+%Y A106737 Cf. also A153013.
+%K A106737 nonn
+%O A106737 0,2
+%A A106737 _Benoit Cloitre_, May 15 2005

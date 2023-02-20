@@ -1,0 +1,47 @@
+%I A072704
+%S A072704 1,1,1,1,2,1,1,3,3,1,1,4,5,4,1,1,5,8,7,5,1,1,6,12,12,9,6,1,1,7,16,20,
+%T A072704 16,11,7,1,1,8,21,30,28,20,13,8,1,1,9,27,42,45,36,24,15,9,1,1,10,33,
+%U A072704 58,68,60,44,28,17,10,1,1,11,40,77,98,95,75,52,32,19,11,1
+%N A072704 Triangle of number of weakly unimodal partitions/compositions of n into exactly k terms.
+%D A072704 Rigoberto Flórez, Leandro Junes, José L. Ramírez, Enumerating several aspects of non-decreasing Dyck paths, Discrete Mathematics (2019) Vol. 342, Issue 11, 3079-3097. See page 3094, Table 4.
+%H A072704 Alois P. Heinz, <a href="/A072704/b072704.txt">Rows n = 1..141, flattened</a>
+%H A072704 H. Bottomley, <a href="/A001523/a001523.gif">Illustration of initial terms</a>
+%H A072704 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/UnimodalSequence.html">Unimodal Sequence</a>
+%F A072704 G.f. with initial column 1, 0, 0, ...: 1 + Sum_{n>=1} (t*x^n / ( ( Product_{k=1..n-1} (1 - t*x^k)^2 ) * (1 - t*x^n) ) ). - _Joerg Arndt_, Oct 01 2017
+%e A072704 Rows start:
+%e A072704 01:  [1]
+%e A072704 02:  [1, 1]
+%e A072704 03:  [1, 2, 1]
+%e A072704 04:  [1, 3, 3, 1]
+%e A072704 05:  [1, 4, 5, 4, 1]
+%e A072704 06:  [1, 5, 8, 7, 5, 1]
+%e A072704 07:  [1, 6, 12, 12, 9, 6, 1]
+%e A072704 08:  [1, 7, 16, 20, 16, 11, 7, 1]
+%e A072704 09:  [1, 8, 21, 30, 28, 20, 13, 8, 1]
+%e A072704 10:  [1, 9, 27, 42, 45, 36, 24, 15, 9, 1]
+%e A072704 ...
+%e A072704 T(6,3)=8 since 6 can be written as 1+1+4, 1+2+3, 1+3+2, 1+4+1, 2+2+2, 2+3+1, 3+2+1, or 4+1+1 but not 2+1+3 or 3+1+2.
+%p A072704 b:= proc(n, i) option remember; local q; `if`(i>n, 0,
+%p A072704       `if`(irem(n, i, 'q')=0, x^q, 0) +expand(
+%p A072704       add(b(n-i*j, i+1)*(j+1)*x^j, j=0..n/i)))
+%p A072704     end:
+%p A072704 T:= n-> (p-> seq(coeff(p, x, i), i=1..n))(b(n, 1)):
+%p A072704 seq(T(n), n=1..12);  # _Alois P. Heinz_, Mar 26 2014
+%t A072704 b[n_, i_] := b[n, i] = If[i>n, 0, If[Mod[n, i ] == 0, x^Quotient[n, i], 0] + Expand[ Sum[b[n-i*j, i+1]*(j+1)*x^j, {j, 0, n/i}]]]; T[n_] := Function[{p}, Table[Coefficient[p, x, i], {i, 1, n}]][b[n, 1]]; Table[T[n], {n, 1, 12}] // Flatten (* _Jean-François Alcover_, Feb 26 2015, after _Alois P. Heinz_ *)
+%t A072704 unimodQ[q_]:=Or[Length[q]<=1,If[q[[1]]<=q[[2]],unimodQ[Rest[q]],OrderedQ[Reverse[q]]]];
+%t A072704 Table[Length[Select[Join@@Permutations/@IntegerPartitions[n,{k}],unimodQ]],{n,0,10},{k,0,n}] (* _Gus Wiseman_, Mar 06 2020 *)
+%o A072704 (PARI) \\ starting for n=0, with initial column 1, 0, 0, ...:
+%o A072704 N=25;  x='x+O('x^N);
+%o A072704 T=Vec(1 + sum(n=1, N, t*x^n / ( prod(k=1,n-1, (1 - t*x^k)^2 ) * (1 - t*x^n) ) ) )
+%o A072704 for(r=1,#T, print(Vecrev(T[r])) ); \\ _Joerg Arndt_, Oct 01 2017
+%Y A072704 Cf. A059623, A072705. Row sums are A001523. First column is A057427, second is A000027 offset, third appears to be A000212 offset, right hand columns include A000012, A000027, A005408 and A008574.
+%Y A072704 The case of partitions is A072233.
+%Y A072704 Dominates A332670 (the version for negated compositions).
+%Y A072704 The strict case is A072705.
+%Y A072704 The case of constant compositions is A113704.
+%Y A072704 Unimodal sequences covering an initial interval are A007052.
+%Y A072704 Partitions whose run-lengths are unimodal are A332280.
+%Y A072704 Cf. A107429, A115981, A227038, A328509, A332282, A332283, A332578, A332638, A332669, A332728.
+%K A072704 nonn,tabl
+%O A072704 1,5
+%A A072704 _Henry Bottomley_, Jul 04 2002

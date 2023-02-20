@@ -1,0 +1,54 @@
+%I A063895
+%S A063895 1,1,1,1,2,3,6,11,22,43,88,179,372,774,1631,3448,7347,15713,33791,
+%T A063895 72923,158021,343495,749102,1638103,3591724,7893802,17387931,38379200,
+%U A063895 84875596,188036830,417284181,927469845,2064465341,4601670625,10270463565,22950838755
+%N A063895 Start with x, xy; then concatenate each word in turn with all preceding words, getting x xy xxy xxxy xyxxy xxxxy xyxxxy xxyxxxy ...; sequence gives number of words of length n. Also binary trees by degree: x (x,y) (x,(x,y)) (x,(x,(x,y))) ((x,y),(x,(x,y)))...
+%C A063895 Also binary rooted identity trees (those with no symmetries, cf. A004111).
+%C A063895 From _Gus Wiseman_, May 04 2021: (Start)
+%C A063895 Also the number of unlabeled binary rooted semi-identity trees with 2*n - 1 nodes. In a semi-identity tree, only the non-leaf branches directly under any given vertex are required to be distinct. Alternatively, an unlabeled rooted tree is a semi-identity tree iff the non-leaf branches of the root are all distinct and are themselves semi-identity trees. For example, the a(3) = 1 through a(6) = 6 trees are:
+%C A063895   (o(oo))  (o(o(oo)))  ((oo)(o(oo)))  ((oo)(o(o(oo))))  ((o(oo))(o(o(oo))))
+%C A063895                        (o(o(o(oo))))  (o((oo)(o(oo))))  ((oo)((oo)(o(oo))))
+%C A063895                                       (o(o(o(o(oo)))))  ((oo)(o(o(o(oo)))))
+%C A063895                                                         (o((oo)(o(o(oo)))))
+%C A063895                                                         (o(o((oo)(o(oo)))))
+%C A063895                                                         (o(o(o(o(o(oo))))))
+%C A063895 The a(8) = 11 trees with 15 nodes:
+%C A063895   ((o(oo))((oo)(o(oo))))
+%C A063895   ((o(oo))(o(o(o(oo)))))
+%C A063895   ((oo)((oo)(o(o(oo)))))
+%C A063895   ((oo)(o((oo)(o(oo)))))
+%C A063895   ((oo)(o(o(o(o(oo))))))
+%C A063895   (o((o(oo))(o(o(oo)))))
+%C A063895   (o((oo)((oo)(o(oo)))))
+%C A063895   (o((oo)(o(o(o(oo))))))
+%C A063895   (o(o((oo)(o(o(oo))))))
+%C A063895   (o(o(o((oo)(o(oo))))))
+%C A063895   (o(o(o(o(o(o(oo)))))))
+%C A063895 (End)
+%H A063895 Alois P. Heinz, <a href="/A063895/b063895.txt">Table of n, a(n) for n = 1..1000</a>
+%H A063895 <a href="/index/Ro#rooted">Index entries for sequences related to rooted trees</a>
+%F A063895 a(n) = (sum a(i)*a(j), i+j=n, i<j)+(if n=2k, (a(k)-1)*a(k)/2), n>2. a(1)=a(2)=1.
+%F A063895 G.f. A(x) = 1-sqrt(1-2x-2x^2+A(x^2)) satisfies x+x^2-A(x)+(A(x)^2-A(x^2))/2=0, A(0)=0. - _Michael Somos_, Sep 06 2003
+%F A063895 a(n) ~ c * d^n / n^(3/2), where d = 2.33141659246516873904600076533362924695..., c = 0.2873051160895040470174351963... . - _Vaclav Kotesovec_, Sep 11 2014
+%p A063895 a:= proc(n) option remember; `if`(n<3, n*(3-n)/2, add(a(i)*a(n-i),
+%p A063895       i=1..(n-1)/2)+`if`(irem(n, 2, 'r')=0, (p->(p-1)*p/2)(a(r)), 0))
+%p A063895     end:
+%p A063895 seq(a(n), n=1..50);  # _Alois P. Heinz_, Aug 02 2013
+%t A063895 a[n_] := a[n] = If[n<3, n*(3-n)/2, Sum[a[i]*a[n-i], {i, 1, (n-1)/2}]+If[{q, r} = QuotientRemainder[n, 2]; r == 0, (a[q]-1)*a[q]/2, 0]]; Table[a[n], {n, 1, 36}] (* _Jean-François Alcover_, Feb 25 2014, after _Alois P. Heinz_ *)
+%t A063895 ursiq[n_]:=Join@@Table[Select[Union[Sort/@Tuples[ursiq/@ptn]],#=={}||#=={{},{}}||Length[#]==2&&(UnsameQ@@DeleteCases[#,{}])&],{ptn,IntegerPartitions[n-1]}];Table[Length[ursiq[n]],{n,1,15,2}] (* _Gus Wiseman_, May 04 2021 *)
+%o A063895 (PARI) {a(n)=local(A, m); if(n<1, 0, m=1; A=O(x); while( m<=n, m*=2; A=1-sqrt(1-2*x-2*x^2+subst(A, x, x^2))); polcoeff(A, n))}
+%Y A063895 Cf. A063894, A036774.
+%Y A063895 The non-semi-identity version is 2*A001190(n)-1, ranked by A111299.
+%Y A063895 Semi-binary trees are also counted by A001190, but ranked by A292050.
+%Y A063895 The not necessarily binary version is A306200, ranked A306202.
+%Y A063895 The Matula-Goebel numbers of these trees are A339193.
+%Y A063895 The plane tree version is A343663.
+%Y A063895 A000081 counts unlabeled rooted trees with n nodes.
+%Y A063895 A004111 counts identity trees, ranked by A276625.
+%Y A063895 A306201 counts balanced semi-identity trees, ranked by A306203.
+%Y A063895 A331966 counts lone-child avoiding semi-identity trees, ranked by A331965.
+%Y A063895 Cf. A001678, A331934, A331963, A331964.
+%K A063895 easy,nonn,nice,eigen
+%O A063895 1,5
+%A A063895 Claude Lenormand (claude.lenormand(AT)free.fr), Aug 29 2001
+%E A063895 Additional comments and g.f. from _Christian G. Bower_, Nov 29 2001

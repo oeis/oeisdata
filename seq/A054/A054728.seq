@@ -1,0 +1,49 @@
+%I A054728
+%S A054728 1,11,22,30,38,42,58,60,74,66,86,78,106,105,118,102,134,114,223,132,
+%T A054728 166,138,188,156,202,168,214,174,236,186,359,204,262,230,278,222,298,
+%U A054728 240,314,246,326,210,346,270,358,282,557,306,394,312,412,318
+%N A054728 a(n) is the smallest level N such that genus of modular curve X_0(N) is n (or -1 if no such curve exists).
+%C A054728 a(150) = -1, a(n) > 0 for 0<=n<=149.
+%C A054728 a(9999988) = 119999861 is the largest value in the first 1+10^7 terms of the sequence. - _Gheorghe Coserea_, May 24 2016
+%D A054728 J. A. Csirik, The genus of X_0(N) is not 150, preprint, 2000.
+%H A054728 Gheorghe Coserea, <a href="/A054728/b054728.txt">Table of n, a(n) for n = 0..200010</a>
+%H A054728 János A. Csirik, Joseph L. Wetherell, Michael E. Zieve, <a href="https://arxiv.org/abs/math/0006096">On the genera of X_0(N)</a>, arXiv:math/0006096 [math.NT], 2000.
+%F A054728 A001617(a(A001617(n))) = A001617(n) and a(A054729(n)) = -1 for all n>=1. - _Gheorghe Coserea_, May 22 2016
+%t A054728 a1617[n_] := If[n<1, 0, 1+Sum[MoebiusMu[d]^2 n/d/12 - EulerPhi[GCD[d, n/d]]/2, {d, Divisors[n]}] - Count[(#^2 - # + 1)/n& /@ Range[n], _?IntegerQ]/3 - Count[(#^2+1)/n& /@ Range[n], _?IntegerQ]/4];
+%t A054728 seq[n_] := Module[{inv, bnd}, inv = Table[-1, {n+1}]; bnd = 12n + 18 Floor[Sqrt[n]] + 100; For[k = 1, k <= bnd, k++, g = a1617[k]; If[g <= n && inv[[g+1]] == -1, inv[[g+1]] = k]]; inv];
+%t A054728 seq[51] (* _Jean-François Alcover_, Nov 20 2018, after _Gheorghe Coserea_ and _Michael Somos_ in A001617 *)
+%o A054728 (PARI)
+%o A054728 A000089(n) = {
+%o A054728   if (n%4 == 0 || n%4 == 3, return(0));
+%o A054728   if (n%2 == 0, n \= 2);
+%o A054728   my(f = factor(n), fsz = matsize(f)[1]);
+%o A054728   prod(k = 1, fsz, if (f[k,1] % 4 == 3, 0, 2));
+%o A054728 };
+%o A054728 A000086(n) = {
+%o A054728   if (n%9 == 0 || n%3 == 2, return(0));
+%o A054728   if (n%3 == 0, n \= 3);
+%o A054728   my(f = factor(n), fsz = matsize(f)[1]);
+%o A054728   prod(k = 1, fsz, if (f[k,1] % 3 == 2, 0, 2));
+%o A054728 };
+%o A054728 A001615(n) = {
+%o A054728   my(f = factor(n), fsz = matsize(f)[1],
+%o A054728      g = prod(k=1, fsz, (f[k,1]+1)),
+%o A054728      h = prod(k=1, fsz, f[k,1]));
+%o A054728   return((n*g)\h);
+%o A054728 };
+%o A054728 A001616(n) = {
+%o A054728   my(f = factor(n), fsz = matsize(f)[1]);
+%o A054728   prod(k = 1, fsz, f[k,1]^(f[k,2]\2) + f[k,1]^((f[k,2]-1)\2));
+%o A054728 };
+%o A054728 A001617(n) = 1 + A001615(n)/12 - A000089(n)/4 - A000086(n)/3 - A001616(n)/2;
+%o A054728 seq(n) = {
+%o A054728   my(inv = vector(n+1,g,-1), bnd = 12*n + 18*sqrtint(n) + 100, g);
+%o A054728   for (k = 1, bnd, g = A001617(k);
+%o A054728        if (g <= n && inv[g+1] == -1, inv[g+1] = k));
+%o A054728   return(inv);
+%o A054728 };
+%o A054728 seq(51)  \\ _Gheorghe Coserea_, May 21 2016
+%Y A054728 Cf. A001617, A054727, A054729.
+%K A054728 sign
+%O A054728 0,2
+%A A054728 Janos A. Csirik, Apr 21 2000

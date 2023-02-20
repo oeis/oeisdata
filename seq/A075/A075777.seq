@@ -1,0 +1,52 @@
+%I A075777
+%S A075777 6,10,14,16,22,22,30,24,30,34,46,32,54,46,46,40,70,42,78,48,62,70,94,
+%T A075777 52,70,82,54,64,118,62,126,64,94,106,94,66,150,118,110,76,166,82,174,
+%U A075777 96,78,142,190,80,126,90,142,112,214,90,142,100,158,178,238,94,246,190
+%N A075777 Minimal surface area of a rectangular solid with volume n and integer sides.
+%C A075777 To find minimum surface area (incorrect, see below!), let s1_0 = [n^(1/3)]. Find largest integer s1 such that s1 <= s1_0 and s1 | n. Then let s2_0 = [sqrt(n / s1)]. Find largest integer s2 such that s2 <= s2_0 and s2 | (n / s1). Then s3 = n / (s1 * s2). And minimum surface area a(n) = 2 * (s1 * s2 + s1 * s3 + s2 * s3).
+%C A075777 The above algorithm is not correct. Consider n=68: algorithm returns (s1,s2,s3) = (4,1,17) for minimal surface area 178. However, (2,2,17) has a surface area of 144. Consider n=246: algorithm gives (6,1,41) but (3,2,41) has a lower surface area. It appears that the algorithm, by picking s1 to be the highest divisor of n, does not get the chance to choose a pair (s1,s2) that is equal or nearly equal. I wrote a Python script for a new algorithm (posted below). However, it is much slower since it loops through every divisor s1 of n and divisor s2 of a given n/s1 while finding and keeping a minimum surface area. (Ceiling is used to avoid a floating point error on the roots.) - _Scott B. Farrar_, Sep 29 2015
+%H A075777 Robert Israel, <a href="/A075777/b075777.txt">Table of n, a(n) for n = 1..10000</a>
+%H A075777 Dan Meyer, <a href="http://blog.mrmeyer.com/2015/the-math-problem-that-1000-math-teachers-couldnt-solve/">The Math Problem that 1000 Math Teachers Couldn't Solve</a>
+%e A075777 a(12) = 32 because side lengths of 2, 2 and 3 will give volume 12 and surface area 32, which is the minimum surface area.
+%p A075777 N:= 1000: # to get a(1) .. a(N)
+%p A075777 A:= Vector(N,1)*6*N;
+%p A075777 for p1 from 1 to N do
+%p A075777   for p2 from p1 to floor(N/p1) do
+%p A075777      for p3 from p2 to floor(N/p1/p2) do
+%p A075777         n:= p1*p2*p3;
+%p A075777         a:= 2*(p1*p2 + p2*p3 + p1*p3);
+%p A075777         if a < A[n] then A[n]:= a fi
+%p A075777 od od od:
+%p A075777 seq(A[i],i=1..N); # _Robert Israel_, Sep 30 2015
+%o A075777 (PARI) a(n) = {s1_0 = floor(n^(1/3)); s1 = s1_0; while (n % s1 != 0, s1--); s2_0 = floor(sqrt(n/s1)); nds1 = n/s1; s2 = s2_0; while (nds1 % s2 != 0, s2--); s3 = n/(s1*s2); return (2 * (s1 * s2 + s1 * s3 + s2 * s3));} \\ _Michel Marcus_, Apr 14 2013; script based on 1st algorithm now known to give ok terms up to n=67 only
+%o A075777 (PARI) a(n) = {mins = -1; fordiv(n, x, q = n/x; fordiv(q, y, z = q/y; s = 2*(x*y + y*z +x*z); if (mins ==-1, mins =s, mins = min(mins, s)););); mins;} \\ _Michel Marcus_, Sep 30 2015
+%o A075777 (Python)
+%o A075777 import math
+%o A075777 def cubestepdown(n):
+%o A075777     s1_0 = int(math.ceil(n ** (1 / 3.0)))
+%o A075777     minSA = -1
+%o A075777     s1 = s1_0
+%o A075777     while s1>=1:
+%o A075777         while n % s1 > 0:
+%o A075777             s1 = s1 - 1
+%o A075777         s1quot = int(n/s1)
+%o A075777         s2_0 = int(math.ceil(math.sqrt(n/s1)))
+%o A075777         s2 = s2_0
+%o A075777         while s2>=1:
+%o A075777             while s1quot % s2 > 0:
+%o A075777                 s2 = s2 - 1
+%o A075777             s3 = int(n / (s1 * s2))
+%o A075777             SA = 2*(s1*s2 + s1*s3 + s2*s3)
+%o A075777             if minSA==-1:
+%o A075777                 minSA = SA
+%o A075777             else:
+%o A075777                 if SA<minSA:
+%o A075777                     minSA = SA
+%o A075777             s2 = s2 - 1
+%o A075777         s1 = s1 - 1
+%o A075777     return minSA
+%o A075777 # _Scott B. Farrar_, Sep 29 2015
+%Y A075777 Cf. A135711.
+%K A075777 easy,nonn
+%O A075777 1,1
+%A A075777 Robert A. Stump (bee_ess107(AT)msn.com), Oct 09 2002

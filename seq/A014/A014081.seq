@@ -1,0 +1,61 @@
+%I A014081
+%S A014081 0,0,0,1,0,0,1,2,0,0,0,1,1,1,2,3,0,0,0,1,0,0,1,2,1,1,1,2,2,2,3,4,0,0,
+%T A014081 0,1,0,0,1,2,0,0,0,1,1,1,2,3,1,1,1,2,1,1,2,3,2,2,2,3,3,3,4,5,0,0,0,1,
+%U A014081 0,0,1,2,0,0,0,1,1,1,2,3,0,0,0,1,0,0,1,2,1,1,1,2,2,2,3,4,1,1,1,2,1,1,2,3,1
+%N A014081 a(n) is the number of occurrences of '11' in binary expansion of n.
+%C A014081 a(n) takes the value k for the first time at n = 2^(k+1)-1. Cf. A000225. - _Robert G. Wilson v_, Apr 02 2009
+%C A014081 a(n) = A213629(n,3) for n > 2. - _Reinhard Zumkeller_, Jun 17 2012
+%H A014081 Reinhard Zumkeller, <a href="/A014081/b014081.txt">Table of n, a(n) for n = 0..10000</a>
+%H A014081 J.-P. Allouche, <a href="http://math.colgate.edu/~integers/graham2/graham2.Abstract.html">On an Inequality in a 1970 Paper of R. L. Graham</a>, INTEGERS 21A (2021), #A2.
+%H A014081 Jean-Paul Allouche and Jeffrey Shallit, <a href="https://doi.org/10.1007/BFb0097122">Sums of digits and the Hurwitz zeta function</a>, in: K. Nagasaka and E. Fouvry (eds.), Analytic Number Theory, Lecture Notes in Mathematics, Vol. 1434, Springer, Berlin, Heidelberg, 1990, pp. 19-30.
+%H A014081 Helmut Prodinger, <a href="http://dx.doi.org/10.1137/0603004">Generalizing the sum of digits function</a>, SIAM J. Algebraic Discrete Methods, Vol. 3, No. 1 (1982), pp. 35-42. MR0644955 (83f:10009). [See B_2(11,n) on p. 35. - _N. J. A. Sloane_, Apr 06 2014]
+%H A014081 Michel Rigo and Manon Stipulanti, <a href="https://arxiv.org/abs/2103.16966">Revisiting regular sequences in light of rational base numeration systems</a>, arXiv:2103.16966 [cs.FL], 2021. Mentions this sequence.
+%H A014081 Ralf Stephan, <a href="/somedcgf.html">Some divide-and-conquer sequences with (relatively) simple ordinary generating functions</a>, 2004.
+%H A014081 Ralf Stephan, <a href="/A079944/a079944.ps">Table of generating functions</a>.
+%H A014081 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/DigitBlock.html">Digit Block</a>.
+%H A014081 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/Rudin-ShapiroSequence.html">Rudin-Shapiro Sequence</a>.
+%H A014081 <a href="/index/Bi#binary">Index entries for sequences related to binary expansion of n</a>
+%F A014081 a(4n) = a(4n+1) = a(n), a(4n+2) = a(2n+1), a(4n+3) = a(2n+1) + 1. - _Ralf Stephan_, Aug 21 2003
+%F A014081 G.f.: 1/(1-x) * Sum_{k>=0} t^3/((1+t)*(1+t^2)), where t = x^(2^k). - _Ralf Stephan_, Sep 10 2003
+%F A014081 a(n) = A000120(n) - A069010(n). - _Ralf Stephan_, Sep 10 2003
+%F A014081 Sum_{n>=1} A014081(n)/(n*(n+1)) = A100046 (Allouche and Shallit, 1990). - _Amiram Eldar_, Jun 01 2021
+%e A014081 The binary expansion of 15 is 1111, which contains three occurrences of 11, so a(15)=3.
+%p A014081 # To count occurrences of 11..1 (k times) in binary expansion of v:
+%p A014081 cn := proc(v, k) local n, s, nn, i, j, som, kk;
+%p A014081 som := 0;
+%p A014081 kk := convert(cat(seq(1, j = 1 .. k)),string);
+%p A014081 n := convert(v, binary);
+%p A014081 s := convert(n, string);
+%p A014081 nn := length(s);
+%p A014081 for i to nn - k + 1 do
+%p A014081 if substring(s, i .. i + k - 1) = kk then som := som + 1 fi od;
+%p A014081 som; end; # This program no longer worked. Corrected by _N. J. A. Sloane_, Apr 06 2014.
+%p A014081 [seq(cn(n,2),n=0..300)];
+%p A014081 # Alternative:
+%p A014081 A014081 := proc(n) option remember;
+%p A014081   if n mod 4 <= 1 then procname(floor(n/4))
+%p A014081 elif n mod 4 = 2 then procname(n/2)
+%p A014081 else 1 + procname((n-1)/2)
+%p A014081 fi
+%p A014081 end proc:
+%p A014081 A014081(0):= 0:
+%p A014081 map(A014081, [$0..1000]); # _Robert Israel_, Sep 04 2015
+%t A014081 f[n_] := Count[ Partition[ IntegerDigits[n, 2], 2, 1], {1, 1}]; Table[ f@n, {n, 0, 104}] (* _Robert G. Wilson v_, Apr 02 2009 *)
+%t A014081 Table[SequenceCount[IntegerDigits[n,2],{1,1},Overlaps->True],{n,0,120}] (* _Harvey P. Dale_, Jun 06 2022 *)
+%o A014081 (Haskell)
+%o A014081 import Data.Bits ((.&.))
+%o A014081 a014081 n = a000120 (n .&. div n 2)  -- _Reinhard Zumkeller_, Jan 23 2012
+%o A014081 (PARI) A014081(n)=sum(i=0,#binary(n)-2,bitand(n>>i,3)==3)  \\ _M. F. Hasler_, Jun 06 2012
+%o A014081 (PARI) a(n) = hammingweight(bitand(n, n>>1)) ;
+%o A014081 vector(105, i, a(i-1))  \\ _Gheorghe Coserea_, Aug 30 2015
+%o A014081 (Python)
+%o A014081 def a(n): return sum([((n>>i)&3==3) for i in range(len(bin(n)[2:]) - 1)]) # _Indranil Ghosh_, Jun 03 2017
+%o A014081 (Python)
+%o A014081 from re import split
+%o A014081 def A014081(n): return sum(len(d)-1 for d in split('0+', bin(n)[2:]) if d != '') # _Chai Wah Wu_, Feb 04 2022
+%Y A014081 Cf. A014082, A033264, A037800, A056973, A000225, A213629, A000120, A069010, A100046.
+%Y A014081 First differences give A245194.
+%Y A014081 A245195 gives 2^a(n).
+%K A014081 nonn,base,easy
+%O A014081 0,8
+%A A014081 _Simon Plouffe_

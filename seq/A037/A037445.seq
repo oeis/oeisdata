@@ -1,0 +1,52 @@
+%I A037445
+%S A037445 1,2,2,2,2,4,2,4,2,4,2,4,2,4,4,2,2,4,2,4,4,4,2,8,2,4,4,4,2,8,2,4,4,4,
+%T A037445 4,4,2,4,4,8,2,8,2,4,4,4,2,4,2,4,4,4,2,8,4,8,4,4,2,8,2,4,4,4,4,8,2,4,
+%U A037445 4,8,2,8,2,4,4,4,4,8,2,4,2,4,2,8,4,4,4,8,2,8,4,4,4,4,4,8,2,4,4,4,2,8,2,8,8
+%N A037445 Number of infinitary divisors (or i-divisors) of n.
+%C A037445 A divisor of n is called infinitary if it is a product of divisors of the form p^{y_a 2^a}, where p^y is a prime power dividing n and sum_a y_a 2^a is the binary representation of y.
+%H A037445 Reinhard Zumkeller, <a href="/A037445/b037445.txt">Table of n, a(n) for n = 1..10000</a>
+%H A037445 Steven R. Finch, <a href="/A007947/a007947.pdf">Unitarism and Infinitarism</a>, February 25, 2004. [Cached copy, with permission of the author]
+%H A037445 J. O. M. Pedersen, <a href="http://amicable.homepage.dk/tables.htm">Tables of Aliquot Cycles</a> [Broken link]
+%H A037445 J. O. M. Pedersen, <a href="http://web.archive.org/web/20140502102524/http://amicable.homepage.dk/tables.htm">Tables of Aliquot Cycles</a> [Via Internet Archive Wayback-Machine]
+%H A037445 J. O. M. Pedersen, <a href="/A063990/a063990.pdf">Tables of Aliquot Cycles</a> [Cached copy, pdf file only]
+%H A037445 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/InfinitaryDivisor.html">Infinitary Divisor</a>
+%H A037445 <a href="/index/Eu#epf">Index entries for sequences computed from exponents in factorization of n</a>
+%F A037445 Multiplicative with a(p^e) = 2^A000120(e). - _David W. Wilson_, Sep 01 2001
+%F A037445 Let n = q_1*...*q_k, where q_1,...,q_k are different terms of A050376. Then a(n) = 2^k (the number of subsets of a set with k elements is 2^k). - _Vladimir Shevelev_, Feb 19 2011.
+%F A037445 a(n) = Product_{k=1..A001221(n)} A000079(A000120(A124010(n,k))). - _Reinhard Zumkeller_, Mar 19 2013
+%F A037445 From _Antti Karttunen_, May 28 2017: (Start)
+%F A037445 a(n) = A286575(A156552(n)). [Because multiplicative with a(p^e) = A001316(e).]
+%F A037445 a(n) = 2^A064547(n). (End)
+%e A037445 For n = 8, n = 2^3 = 2^"11" (writing 3 in binary) so the infinitary divisors are 2^"00" = 1, 2^"01" = 2, 2^"10" = 4 and 2^"11" = 8, so a(8) = 4.
+%e A037445 For n = 90, n = 2*5*9 where 2,5,9 are in A050376, so a(90) = 2^3 = 8.
+%p A037445 A037445 := proc(n)
+%p A037445     local a,p;
+%p A037445     a := 1 ;
+%p A037445     for p in ifactors(n)[2] do
+%p A037445         a := a*2^wt(p[2]) ;
+%p A037445     end do:
+%p A037445     a ;
+%p A037445 end proc: # _R. J. Mathar_, May 16 2016
+%t A037445 Table[Length@((Times @@ (First[it]^(#1 /. z -> List)) & ) /@
+%t A037445 Flatten[Outer[z, Sequence @@ bitty /@
+%t A037445 Last[it = Transpose[FactorInteger[k]]], 1]]), {k, 2, 240}]
+%t A037445 bitty[k_] := Union[Flatten[Outer[Plus, Sequence @@ ({0, #1} & ) /@ Union[2^Range[0, Floor[Log[2, k]]]*Reverse[IntegerDigits[k, 2]]]]]]
+%t A037445 y[n_] := Select[Range[0, n], BitOr[n, # ] == n & ] divisors[Infinity][1] := {1}
+%t A037445 divisors[Infinity][n_] := Sort[Flatten[Outer[Times, Sequence @@ (FactorInteger[n] /. {p_, m_Integer} :> p^y[m])]]] Length /@ divisors[Infinity] /@ Range[105] (* Paul Abbott (paul(AT)physics.uwa.edu.au), Apr 29 2005 *)
+%t A037445 a[1] = 1; a[n_] := Times @@ Flatten[ 2^DigitCount[#, 2, 1]&  /@ FactorInteger[n][[All, 2]] ]; Table[a[n], {n, 1, 105}] (* _Jean-François Alcover_, Aug 19 2013, after _Reinhard Zumkeller_ *)
+%o A037445 (PARI) A037445(n) = factorback(apply(a -> 2^hammingweight(a), factorint(n)[,2])) \\ _Andrew Lelechenko_, May 10 2014
+%o A037445 (Haskell)
+%o A037445 a037445 = product . map (a000079 . a000120) . a124010_row
+%o A037445 -- _Reinhard Zumkeller_, Mar 19 2013
+%o A037445 (Scheme) (define (A037445 n) (if (= 1 n) n (* (A001316 (A067029 n)) (A037445 (A028234 n))))) ;; _Antti Karttunen_, May 28 2017
+%o A037445 (Python)
+%o A037445 from sympy import factorint
+%o A037445 def wt(n): return bin(n).count("1")
+%o A037445 def a(n):
+%o A037445     f=factorint(n)
+%o A037445     return 2**sum([wt(f[i]) for i in f]) # _Indranil Ghosh_, May 30 2017
+%Y A037445 Cf. A000120, A001316, A004607, A007358, A007357, A038148, A049417, A064547, A074848, A124010, A156552, A286575.
+%K A037445 nonn,nice,easy,mult
+%O A037445 1,2
+%A A037445 _Yasutoshi Kohmoto_
+%E A037445 Corrected and extended by _Naohiro Nomoto_, Jun 21 2001

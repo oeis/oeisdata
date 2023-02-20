@@ -1,0 +1,30 @@
+%I A024938
+%S A024938 0,1,1,0,3,0,3,2,2,5,1,5,3,5,5,7,5,10,6,10,12,10,15,12,16,17,17,19,22,
+%T A024938 17,27,21,30,30,31,35,36,40,45,45,49,53,50,62,60,69,69,73,78,85,88,98,
+%U A024938 100,105,116,116,134,135,141,149,154,168,176,188,195,206,211,232,242,255,267,276
+%N A024938 Total number of parts in all partitions of n into distinct prime parts.
+%H A024938 Alois P. Heinz, <a href="/A024938/b024938.txt">Table of n, a(n) for n = 1..1000</a>
+%F A024938 G.f.: sum(x^p(j)/(1+x^p(j)),j>=1)*product(1+x^p(j), j>=1), where p(j) is the j-th prime. - _Vladeta Jovovic_, Jul 17 2003
+%e A024938 a(16) = 7 because the partitions of 16 into distinct prime parts are [13,3], [11,5] and [11,3,2].
+%p A024938 g:=sum(x^ithprime(j)/(1+x^ithprime(j)),j=1..30)*product(1+x^ithprime(j),j=1..30): gser:=series(g,x=0,80): seq(coeff(gser,x,n),n=1..75); # _Emeric Deutsch_, Apr 01 2006
+%p A024938 # second Maple program:
+%p A024938 with(numtheory):
+%p A024938 b:= proc(n, i) option remember; local g;
+%p A024938       if n=0 then [1, 0]
+%p A024938     elif i<1 then [0, 0]
+%p A024938     else g:= `if`(ithprime(i)>n, [0$2], b(n-ithprime(i), i-1));
+%p A024938          b(n, i-1) +g +[0, g[1]]
+%p A024938       fi
+%p A024938     end:
+%p A024938 a:= n-> b(n, pi(n))[2]:
+%p A024938 seq(a(n), n=1..80);  # _Alois P. Heinz_, Oct 30 2012
+%t A024938 Rest@ CoefficientList[ Series[ Sum[x^Prime@j/(1 + x^Prime@j), {j, 20}]* Product[1 + x^Prime@j, {j, 20}], {x, 0, 70}], x] (* _Robert G. Wilson v_ *)
+%t A024938 b[n_, i_] := b[n, i] = Module[{g}, If[n==0, {1, 0}, If[i < 1, {0, 0}, g = If[ Prime[i] > n, {0, 0}, b[n - Prime[i], i-1]]; b[n, i-1] + g + {0, g[[1]]}]]]; a[n_] := b[n, PrimePi[n]][[2]]; Table[a[n], {n, 1, 80}] (* _Jean-François Alcover_, Dec 27 2015, after _Alois P. Heinz_ *)
+%o A024938 (PARI)
+%o A024938 sumparts(n, pred)={sum(k=1, n, 1 - 1/(1+pred(k)*x^k) + O(x*x^n))*prod(k=1, n, 1+pred(k)*x^k + O(x*x^n))}
+%o A024938 {my(n=60); Vec(sumparts(n, isprime), -n)} \\ _Andrew Howroyd_, Dec 28 2017
+%Y A024938 Cf. A084993.
+%K A024938 easy,nonn
+%O A024938 1,5
+%A A024938 _Clark Kimberling_
+%E A024938 More terms from _Vladeta Jovovic_, Jul 17 2003

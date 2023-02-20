@@ -1,0 +1,54 @@
+%I A125173
+%S A125173 0,1,1,2,2,2,2,3,2,3,3,3,3,3,3,4,3,3,3,4,3,4,4,4,4,4,3,4,4,4,4,4,4,4,
+%T A125173 4,4,4,4,4,5,4,4,4,5,4,5,4,5,4,5,4,5,5,4,4,5,4,5,5,5,5,5,4,5,5,5,5,5,
+%U A125173 5,5,5,5,5,5,5,5,5,5,5,5,4,5,5,5,5,5,5,6,5,5,5,5,5,5,5,5,5,5,5,6,5,5,5,6
+%N A125173 Minimum number of "k-splits" required to transform {n} to {1}.
+%C A125173 A "k-split" is a transformation T(k) of a set of positive integers obtained by replacing the maximum element m of the set by k and m-2k, where 1<=k<=m/2, unless m = 2k in which case m is simply replaced by k.
+%C A125173 Examples: T(4)({1,2,12}) = {1,2,4}, T(5)({1,2,12}) = {1,2,5}, T(6)({1,2,12}) = {1,2,6}.
+%C A125173 Is this the same as the sequence of the minimum number of "d-swaps" required to reverse a word of length n, which was introduced by D. E. Knuth in Problem 11264 in the American Mathematical Monthly?
+%C A125173 Almost, see A241216! - _Joerg Arndt_, Apr 17 2014
+%H A125173 Joerg Arndt and Alois P. Heinz, <a href="/A125173/b125173.txt">Table of n, a(n) for n = 1..200</a> (first 162 terms from Joerg Arndt)
+%H A125173 Donald E. Knuth, <a href="https://www.jstor.org/stable/27642122">Problem 11264</a>, Amer. Math. Monthly, vol.114, no.1, p.77, (2007).
+%H A125173 Richard Stong, <a href="https://www.jstor.org/stable/40391081">Reversal by Swaps (Solution to Problem 11264)</a>, Amer. Math. Monthly, vol.116, no.3, p.277-278, (March 2009).
+%e A125173 a(9) = 2, as shown by the sequence of 2 k-splits:
+%e A125173   T(3)({9}) = {3}, followed by T(1)({3}) = {1}.
+%e A125173 a(44) <= 5, as shown by the 5 k-splits:
+%e A125173   T(15)({44}) = {14,15}, T(7)({14,15}) = {1,7,14}, T(7)({1,7,14}) = {1,7}, T(3)({1,7}) = {1,3} and finally T(1)({1,3}) = {1}.
+%e A125173 Exhaustive calculation shows that no sequence of fewer k-splits will suffice for {44}, so a(44) = 5.
+%p A125173 b:= proc(s) option remember; local m; m:= max(s[]);
+%p A125173       `if`(m=1, 0, 1 +min(seq(b((s union {k, m-2*k})
+%p A125173        minus {m, 0}), k=1..m/2)))
+%p A125173     end:
+%p A125173 a:= n-> b({n}):
+%p A125173 seq(a(n), n=1..50);  # _Alois P. Heinz_, Apr 12 2014
+%t A125173 b[s_List] := b[s] = Module[{m = Max[s]}, If[m == 1, 0, 1 + Min[Table[b[s ~Union~ {k, m-2k} ~Complement~ {m, 0}], {k, 1, m/2}]]]];
+%t A125173 a[n_] := b[{n}];
+%t A125173 Array[a, 50] (* _Jean-François Alcover_, Nov 05 2020, after _Alois P. Heinz_ *)
+%o A125173 (Sage)
+%o A125173 def split(k, S):
+%o A125173     m = max( S )
+%o A125173     S = S.difference( [m] )
+%o A125173     p = m - 2 * k;
+%o A125173 #    if p < 0:  return("invalid split")
+%o A125173     S = S.union(Set([k]))
+%o A125173     if p!=0:  S = S.union(Set([p]))
+%o A125173     return S
+%o A125173 @CachedFunction
+%o A125173 def min_split(S):
+%o A125173     m = max( S )
+%o A125173     if m <= 2:  return  int(m > 1)
+%o A125173     ct = 0
+%o A125173     mct = 999
+%o A125173     k = 1
+%o A125173     while k <= m/2:
+%o A125173         ct = 1 + min_split( split(k,S) )
+%o A125173         if ct < mct:  mct = ct
+%o A125173         k += 1
+%o A125173     return mct
+%o A125173 def a(n):  return min_split( Set( [n] ) )
+%o A125173 for n in [1..1100]: print(a(n))
+%o A125173 # _Joerg Arndt_, Apr 12 2014
+%K A125173 nonn
+%O A125173 1,4
+%A A125173 _John W. Layman_, Jan 12 2007
+%E A125173 Terms recomputed and terms a(58) and beyond added by _Joerg Arndt_, Apr 12 2014

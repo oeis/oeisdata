@@ -1,0 +1,42 @@
+%I A116861
+%S A116861 1,1,1,1,0,2,1,1,1,2,1,0,2,1,3,1,1,3,1,1,4,1,0,3,2,2,2,5,1,1,3,3,2,4,
+%T A116861 2,6,1,0,5,2,3,4,4,3,8,1,1,4,3,4,7,4,5,3,10,1,0,5,3,4,7,7,6,6,5,12,1,
+%U A116861 1,6,4,3,12,6,8,7,9,5,15,1,0,6,4,5,10,10,9,10,11,10,7,18,1,1,6,4,5,15,11,13,9,16,11,13,8,22
+%N A116861 Triangle read by rows: T(n,k) is the number of partitions of n such that the sum of the parts, counted without multiplicities, is equal to k (n>=1, k>=1).
+%C A116861 Conjecture: Reverse the rows of the table to get an infinite lower-triangular matrix b with 1's on the main diagonal. The third diagonal of the inverse of b is minus A137719. - _George Beck_, Oct 26 2019
+%C A116861 Proof: The reversed rows yield the matrix I+N where N is strictly lower triangular, N[i,j] = 0 for j >= i, having its 2nd diagonal equal to the 2nd column (1, 0, 1, 0, 1, ...): N[i+1,i] = A000035(i), i >= 1, and 3rd diagonal equal to the 3rd column of this triangle, (2, 1, 2, 3, 3, 3, ...): N[i+2,i] = A137719(i), i >= 1. It is known that (I+N)^-1 = 1 - N + N^2 - N^3 +- .... Here N^2 has not only the second but also the 3rd diagonal zero, because N^2[i+2,i] = N[i+2,i+1]*N[i+1,i] = A000035(i+1)*A000035(i) = 0. Therefore the 3rd diagonal of (I+N)^-1 is equal to -A137719 without leading 0. - _M. F. Hasler_, Oct 27 2019
+%H A116861 Alois P. Heinz, <a href="/A116861/b116861.txt">Rows n = 1..141, flattened</a>
+%H A116861 P. J. Rossky, M. Karplus, <a href="https://doi.org/10.1063/1.432387">The enumeration of Goldstone diagrams in many-body perturbation theory</a>, J. Chem. Phys. 64 (1976) 1569, equation (16)(1).
+%F A116861 G.f.: -1 + Product_{j>=1} (1 + t^j*x^j/(1-x^j)).
+%F A116861 Sum_{k=1..n} T(n,k) = A000041(n).
+%F A116861 T(n,n) = A000009(n).
+%F A116861 Sum_{k=1..n} k*T(n,k) = A014153(n-1).
+%F A116861 T(n,1) = 1. T(n,2) = A000035(n+1). T(n,3) = A137719(n-2). - _R. J. Mathar_, Oct 27 2019
+%F A116861 T(n,4) = A002264(n-1) + A121262(n). - _R. J. Mathar_, Oct 28 2019
+%e A116861 T(10,7) = 4 because we have [6,1,1,1,1], [4,3,3], [4,2,2,1,1] and [4,2,1,1,1,1] (6+1=4+3=4+2+1=7).
+%e A116861 Triangle starts:
+%e A116861   1;
+%e A116861   1, 1;
+%e A116861   1, 0, 2;
+%e A116861   1, 1, 1, 2;
+%e A116861   1, 0, 2, 1, 3;
+%e A116861   1, 1, 3, 1, 1, 4;
+%p A116861 g:= -1+product(1+t^j*x^j/(1-x^j), j=1..40): gser:= simplify(series(g,x=0,18)): for n from 1 to 14 do P[n]:=sort(coeff(gser,x^n)) od: for n from 1 to 14 do seq(coeff(P[n],t^j),j=1..n) od; # yields sequence in triangular form
+%p A116861 # second Maple program:
+%p A116861 b:= proc(n, i) option remember; local f, g, j;
+%p A116861       if n=0 then [1] elif i<1 then [ ] else f:= b(n, i-1);
+%p A116861          for j to n/i do
+%p A116861            f:= zip((x, y)->x+y, f, [0$i, b(n-i*j, i-1)[]], 0)
+%p A116861          od; f
+%p A116861       fi
+%p A116861     end:
+%p A116861 T:= n-> subsop(1=NULL, b(n, n))[]:
+%p A116861 seq(T(n), n=1..20);  # _Alois P. Heinz_, Feb 27 2013
+%t A116861 max = 14; s = Series[-1+Product[1+t^j*x^j/(1-x^j), {j, 1, max}], {x, 0, max}, {t, 0, max}] // Normal; t[n_, k_] := SeriesCoefficient[s, {x, 0, n}, {t, 0, k}]; Table[t[n, k], {n, 1, max}, {k, 1, n}] // Flatten (* _Jean-François Alcover_, Jan 17 2014 *)
+%o A116861 (PARI) A116861(n,k,s=0)={forpart(X=n,vecsum(Set(X))==k&&s++,k);s} \\ _M. F. Hasler_, Oct 27 2019
+%Y A116861 Cf. A000041 (row sums), A000009 (diagonal), A014153.
+%Y A116861 Cf. A114638 (count partitions with #parts = sum(distinct parts)).
+%Y A116861 Column 1: A000012, column 2: A000035(1..), column 3: A137719(1..).
+%K A116861 nonn,tabl
+%O A116861 1,6
+%A A116861 _Emeric Deutsch_, Feb 27 2006

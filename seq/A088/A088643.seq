@@ -1,0 +1,68 @@
+%I A088643
+%S A088643 1,2,1,3,2,1,4,3,2,1,5,2,3,4,1,6,5,2,3,4,1,7,6,5,2,3,4,1,8,5,6,7,4,3,
+%T A088643 2,1,9,8,5,6,7,4,3,2,1,10,9,8,5,6,7,4,3,2,1,11,8,9,10,7,6,5,2,3,4,1,
+%U A088643 12,11,8,9,10,7,6,5,2,3,4,1,13,10,9,8,11,12,7,6,5,2,3,4,1,14,9,10,13,6,11,12,7,4,3,8,5,2,1
+%N A088643 Triangle read by rows: row n >= 1 is obtained as follows. Start with n, next term is always largest number m with 1 <= m < n which has not yet appeared in that row and such that m + previous term in the row is a prime. Stop when no further m can be found.
+%C A088643 It is conjectured that row n is always a permutation of {1..n}. This has been verified for n <= 400000.
+%C A088643 Presumably many of the rows, when read from right to left, match the infinite sequence A055265. [But see a more precise comment that follows. - _N. J. A. Sloane_, Aug 14 2021]
+%C A088643 I conjecture that almost all rows have exactly 7 (but not more) trailing terms in common with the initial terms of A055265 = (1, 2, 3, 4, 7, 6, 5, 8, ...): After row 10 whose reversal matches the first 10 terms of A055265, and rows n = 14, 15 and 16 having the last 2 (but not 3) terms equal to A055265(1..2), all rows up to n = 500 have either (about 25%) exactly 1 or (about 73%) exactly 7 trailing terms equal to the first terms of A055265. Between n = 501 and n = 10000 and beyond, all rows end in (..., 9, 14, 5, 6, 7, 4, 3, 2, 1), so they all have exactly m = 7 but not m = 8 trailing terms equal to A055265(1..m). - _M. F. Hasler_, Aug 03 2021
+%C A088643 In fact, the reversed rows converge to the different sequence A132075, essentially defined by this property. - _M. F. Hasler_, Aug 04 2021
+%C A088643 It seems we do not know of a proof (1) that the sequence of reversed rows of this sequence converges or (2) that A132075 is infinite; or that either statement implies the other. The reversed rows converge to A132075 if both statements are true, as suggested empirically by the early rows of this sequence. - _Peter Munn_, Nov 19 2021
+%H A088643 Reinhard Zumkeller, <a href="/A088643/b088643.txt">Rows n = 1..150 of triangle, flattened</a>
+%H A088643 Peter Munn, <a href="/A255312/a255312_1.txt">Illustration of the relationship between this sequence, A132075 and A255312</a>.
+%H A088643 J. W. Roche, <a href="http://www.jstor.org/stable/27970468">Letter regarding "M. J. Kenney and S. J. Bezuszka, Calendar problem 12, 1997"</a>, Mathematics Teacher, 91 (1998), 155.
+%F A088643 A255313(n,k) = T(n,k-1) + T(n,k), n > 0 and 1 <= k <= n. - _Reinhard Zumkeller_, Feb 22 2015
+%e A088643 For example, the 20th row is 20, 17, 14, 15, 16, 13, 18, 19, 12, 11, 8, 9, 10, 7, 6, 5, 2, 3, 4, 1.
+%e A088643 Triangle begins:
+%e A088643   1;
+%e A088643   2, 1;
+%e A088643   3, 2, 1;
+%e A088643   4, 3, 2, 1;
+%e A088643   5, 2, 3, 4, 1;
+%e A088643   6, 5, 2, 3, 4, 1;
+%e A088643   (...)
+%p A088643 A088643 := proc(n,k)
+%p A088643     option remember ;
+%p A088643     local m,c;
+%p A088643     if n = 1 then
+%p A088643         1;
+%p A088643     else
+%p A088643         if k = 1 then
+%p A088643             return n;
+%p A088643         else
+%p A088643             for m from n-1 to 1 by -1 do
+%p A088643                 if not member(m,[seq(procname(n,c),c=1..k-1)]) then
+%p A088643                     if isprime(m+procname(n,k-1)) then
+%p A088643                         return m;
+%p A088643                     end if ;
+%p A088643                 end if;
+%p A088643             end do:
+%p A088643         end if;
+%p A088643     end if;
+%p A088643 end proc:
+%p A088643 for n from 1 to 10 do
+%p A088643 for k from 1 to n do
+%p A088643     printf("%d ",A088643(n,k)) ;
+%p A088643 end do:
+%p A088643 printf("\n") ;
+%p A088643 end do: # _R. J. Mathar_, Aug 18 2021
+%t A088643 t[n_, 1] := n; t[n_, k_] := t[n, k] = For[m = n-1, m >= 1, m--, If[ PrimeQ[m + t[n, k-1] ] && FreeQ[ Table[ t[n, j], {j, 1, k-1} ], m], Return[m] ] ]; Table[ t[n, k], {n, 1, 14}, {k, 1, n} ] // Flatten (* _Jean-François Alcover_, Apr 03 2013 *)
+%o A088643 (Haskell)
+%o A088643 import Data.List (delete)
+%o A088643 a088643_tabl = map a088643_row [1..]
+%o A088643 a088643 n k = a088643_row n !! (k-1)
+%o A088643 a088643_row n = n : f n [n-1, n-2 .. 1] where
+%o A088643    f u vs = g vs where
+%o A088643      g []                            = []
+%o A088643      g (x:xs) | a010051 (x + u) == 1 = x : f x (delete x vs)
+%o A088643               | otherwise            = g xs
+%o A088643 -- _Reinhard Zumkeller_, Jan 05 2013
+%o A088643 (PARI) apply( {A088643_row(n, t=List(-[1-n..-1]))=vector(n,i, i>1 && for(j=1,#t, isprime(n+t[j]) && [n=t[j], listpop(t,j), break]);n)}, [1..20]) \\ _M. F. Hasler_, Aug 02 2021; improved Aug 03 2021 after PARI below
+%o A088643 (PARI) row(n) = { my(res = vector(n), todo = List([1..n-1])); res[1] = n; for(i = 1, n - 1, forstep(j = #todo, 1, -1, if(isprime(res[i] + todo[j]), res[i+1] = todo[j]; listpop(todo, j); next(2) ) ) ); res } \\ _David A. Corneth_, Aug 02 2021
+%Y A088643 A088631 and A088861 give second and third columns.
+%Y A088643 Cf. A049476, A049477, A049478, A346778.
+%Y A088643 Cf. A055265, A132075, A255312, A255313, A255316.
+%K A088643 nonn,tabl,nice,easy
+%O A088643 1,2
+%A A088643 _N. J. A. Sloane_, Nov 24 2003
+%E A088643 More terms from _David Wasserman_, Aug 16 2005

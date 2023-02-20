@@ -1,0 +1,33 @@
+%I A098777
+%S A098777 1,-1,-2,2,16,-40,-320,1040,12160,-52480,-742400,3872000,66457600,
+%T A098777 -411136000,-8202444800,58479872000,1335009280000,-10791497728000,
+%U A098777 -277035646976000,2502527565824000,71391934873600000,-712816377856000000,-22367684235100160000,244597236078018560000
+%N A098777 Pseudo-factorials: a(0)=1, a(n+1) = (-1)^(n+1) * Sum_{k=0..n} binomial(n,k) * a(k)*a(n-k), n>=0.
+%C A098777 A variation on the usual factorials (which satisfy the recursion (n+1)!=sum('binomial(n,k)*k!*(n-k)!','k'=0..n) for n>=0).
+%C A098777 This sequence seems to satisfy an analog of Wilson's Theorem (which states that (p-1)! equals -1 modulo p for p a prime): For p<10000 a prime congruent to 2 modulo 3, we have a(p-1) congruent to 1 mod p and a(n) congruent to 0 mod p for n>p. For p<10000 a prime congruent to 1 mod 3 we have a(p-1)+a(p) congruent to -1 modulo p.
+%C A098777 On the analytic side, the sequence is closely related (via its exponential generating series) to the elliptic curve of j-invariant O (corresponding to the regular hexagonal lattice).
+%C A098777 This sequence has a generating function expressible in terms of the Dixon elliptic function sm(x,0) whose coefficients are A104133. The ordinary generating function has a continued fraction expansion of Jacobi type: the numerators are -j^2*(2-(-1)^j) and the denominators are (-1)^(j-1)(j+1/2+(-1)^j/2). - _Philippe Flajolet_ and _Roland Bacher_, Jan 18 2009
+%H A098777 Alois P. Heinz, <a href="/A098777/b098777.txt">Table of n, a(n) for n = 0..464</a> (first 101 terms from T. D. Noe)
+%H A098777 R. Bacher and P. Flajolet, <a href="http://arxiv.org/abs/0901.1379">Pseudo-factorials, Elliptic Functions and Continued Fractions</a>, arXiv:0901.1379 [math.CA], 2009.
+%H A098777 P. Flajolet, <a href="http://algo.inria.fr/flajolet/Publications/publist.html">Research Papers</a>
+%H A098777 Maxim V. Polyakov, Kirill M. Semenov-Tian-Shansky, Alexander O. Smirnov, Alexey A. Vladimirov, <a href="https://arxiv.org/abs/1811.08449">Quasi-Renormalizable Quantum Field Theories</a>, arXiv:1811.08449 [hep-th], 2018.
+%F A098777 The exponential generating function f(z) = Sum_{n>=0} a(n) * z^n/n! satisfies f'(z)=-f(-z)^2 and is an elliptic function with respect to a regular hexagonal lattice (moreover, -f(z)f(-z) is (up to translation) a Weierstrass function.
+%F A098777 a(n) = -n!/R^(n+1)*sum(b^(8*p+4*q)/((p-1/2)*b+(q-1/2)/b)^(n+1), p = -infinity..infinity, q = -infinity..infinity), where b = exp(I*Pi/6) and R = 2^(-4/3)/Pi*GAMMA(1/3)^3. - _Philippe Flajolet_ and _Roland Bacher_, Jan 18 2009
+%F A098777 G.f.: 1/Q(0), where Q(k) = 1 + (2*k+1)*x  +  3*x^2*(2*k+1)^2/(1 - (2*k+1)*x  +  x^2*(2*k+2)^2/Q(k+1) ); (continued fraction after P. Flajolet). - _Sergei N. Gladkovskii_, Dec 05 2013
+%F A098777 E.g.f.: (1 - 3*Series_Reversion( Integral 1/(1 - 9*x^2)^(2/3) dx ))^(1/3). - _Paul D. Hanna_, Apr 10 2014
+%e A098777 G.f. = 1 - x - 2*x^2 + 2*x^3 + 16*x^4 - 40*x^5 - 320*x^6 + 1040*x^7 + ...
+%p A098777 a:= proc(n) option remember; `if`(n=0, 1, (-1)^n*add(
+%p A098777        binomial(n-1, k) *a(k) *a(n-1-k), k=0..n-1))
+%p A098777     end:
+%p A098777 seq(a(n), n=0..25);  # _Alois P. Heinz_, May 22 2018
+%t A098777 max = 23; f[z_] = Sum[a[n]*(z^n/n!), {n, 0, max}]; a[0] = 1; a[1] = -1; eq = Rest[ Thread[ CoefficientList[f'[z] + f[-z]^2, z] == 0]]; sol = Solve[ Drop[eq, -max-1]][[1]]; Table[a[n], {n, 0, max}] /. sol (* _Jean-François Alcover_, Oct 05 2011 *)
+%t A098777 a[0] = 1; a[n_] := a[n] = (-1)^n*Sum[Binomial[n-1, k]*a[k]*a[n-k-1], {k, 0, n-1}]; Table[a[n], {n, 0, 23}] (* _Jean-François Alcover_, Apr 15 2015 *)
+%t A098777 a[ n_] := If[ n < 0, 0, n! SeriesCoefficient[ (1 - 3 InverseSeries[ Integrate[ Series[ (1 - 9 x^2)^(-2/3), {x, 0, n}], x]])^(1/3), {x, 0, n}]]; (* _Michael Somos_, May 22 2018 *)
+%t A098777 Table[SeriesCoefficient[With[{wp = WeierstrassP[z, {0, 4/27}], pd = WeierstrassPPrime[z, {0, 4/27}]}, (2 (2 - 9 pd + 9 wp (2 + 3 pd + 3 wp^2)))/((9 pd + 2 (1 - 3 wp)^2) (2 + 3 wp))], {z, 0, n}] n!, {n, 0, 23}] (* _Jan Mangaldan_, Jul 07 2020 *)
+%t A098777 nmax = 25; CoefficientList[(1 - 3*InverseSeries[Series[x*Hypergeometric2F1[1/2, 2/3, 3/2, 9*x^2], {x, 0, nmax}]])^(1/3), x] * Range[0, nmax]! (* _Vaclav Kotesovec_, Jul 07 2020 *)
+%o A098777 (PARI) a(n)=local(A=1); A=(1-3*serreverse(intformal(1/(1-9*x^2 +x*O(x^n))^(2/3))))^(1/3); n!*polcoeff(A, n)
+%o A098777 for(n=0, 20, print1(a(n), ", ")) \\ _Paul D. Hanna_, Apr 10 2014
+%Y A098777 Cf. A144689, A144750, A235166.
+%K A098777 sign
+%O A098777 0,3
+%A A098777 _Roland Bacher_, Oct 04 2004

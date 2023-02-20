@@ -1,0 +1,53 @@
+%I A147679
+%S A147679 1,1,1,0,3,3,4,8,4,8,20,25,25,25,25,144,108,108,144,108,108,630,735,
+%T A147679 735,735,735,735,735,5696,4608,5248,4608,5696,4608,5248,4608,39366,
+%U A147679 40824,40824,39285,40824,40824,39285,40824,40824,366400,362000,362000,362000,362000,366400,362000,362000,362000,362000
+%N A147679 Triangle read by rows: T(n,k) (n >= 1, 0 <= k <= n-1) is the number of permutations of [0..(n-1)] of spread k.
+%C A147679 The reference gives more terms, formulas, connection with A003112, etc.
+%C A147679 s(pi):= Sum_{j=0..n-1} j*pi(j) (mod j) is defined to be the spread of a permutation pi of [0..(n-1)].
+%H A147679 R. L. Graham and D. H. Lehmer, <a href="https://doi.org/10.1017/S1446788700019339">On the Permanent of Schur's Matrix</a>, J. Australian Math. Soc., 21A (1976), 487-497.
+%e A147679 Triangle begins:
+%e A147679     1
+%e A147679     1   1
+%e A147679     0   3   3
+%e A147679     4   8   4   8
+%e A147679    20  25  25  25  25
+%e A147679   144 108 108 144 108 108
+%e A147679   ...
+%p A147679 b:= proc(n) option remember;
+%p A147679      local l, p, r;
+%p A147679      l:= array([i$i=0..n-1]);
+%p A147679      r:= array([0$i=1..n]);
+%p A147679      p:= proc(t,s)
+%p A147679       local d, h, j;
+%p A147679       if t=n then d:= ((s+(n-1)*l[n]) mod n) +1;
+%p A147679                   r[d]:= r[d]+1
+%p A147679       else for j from t to n do
+%p A147679             l[t],l[j]:= l[j],l[t];
+%p A147679             p(t+1, (s+(t-1)*l[t]) )
+%p A147679            od;
+%p A147679            h:= l[t];
+%p A147679            for j from t to n-1 do l[j]:= l[j+1] od;
+%p A147679            l[n]:= h
+%p A147679       fi
+%p A147679      end;
+%p A147679      p(1,0);
+%p A147679      eval(r)
+%p A147679     end:
+%p A147679 T:= (n,k)-> b(n)[k+1]:
+%p A147679 seq (seq (T(n,k), k=0..n-1), n=1..10);
+%t A147679 b[n_] := b[n] = Module[{l, p, r}, l = Range[0, n-1]; r = Array[0&, n]; p [t_, s_] := Module[{d, h, j}, If[t == n, d = Mod[s+(n-1)*l[[n]], n]+1; r[[d]] = r[[d]]+1, For[j = t, j <= n, j++, {l[[t]], l[[j]]} = {l[[j]], l[[t]]}; p[t+1, s+(t-1)*l[[t]]]]; h = l[[t]]; For[j = t, j <= n-1, j++, l[[j]] = l[[j+1]]]; l[[n]] = h]]; p[1, 0]; r]; t[n_, k_] := b[n][[k+1]]; Table [Print[t[n, k]]; t[n, k], {n, 1, 10}, {k, 0, n-1}] // Flatten (* _Jean-François Alcover_, Apr 17 2014, after _Alois P. Heinz_ *)
+%o A147679 (Sage)
+%o A147679 @CachedFunction
+%o A147679 def A147679_row(n):
+%o A147679     row = [0]*n
+%o A147679     for p in Permutations(range(n)):
+%o A147679         spread = sum(i*px for i,px in enumerate(p)) % n
+%o A147679         row[spread] += 1
+%o A147679     return row
+%o A147679 A147679 = lambda n,k: A147679_row(n)[k] # _D. S. McNeil_, Dec 23 2010
+%Y A147679 Cf. A003112. Row sums give: A000142. Columns k=0-3 give: A004204, A004205, A004206, A004246. Diagonal gives: A004205.
+%K A147679 nonn,tabl
+%O A147679 1,5
+%A A147679 _N. J. A. Sloane_, May 01 2009
+%E A147679 Edited by _Alois P. Heinz_, Dec 22 2010

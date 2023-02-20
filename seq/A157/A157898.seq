@@ -1,0 +1,66 @@
+%I A157898
+%S A157898 1,0,1,1,1,2,0,2,2,4,1,2,6,4,8,0,3,6,16,8,16,1,3,12,16,40,16,32,0,4,
+%T A157898 12,40,40,96,32,64,1,4,20,40,120,96,224,64,128,0,5,20,80,120,336,224,
+%U A157898 512,128,256
+%N A157898 Triangle read by rows: inverse binomial transform of A059576
+%C A157898 The inverse binomial transform of the triangle A059576 is given by multiplying the triangle with A130595 from the left.
+%H A157898 G. C. Greubel, <a href="/A157898/b157898.txt">Rows n = 0..50 of the triangle, flattened</a>
+%F A157898 Sum_{k=0..n} T(n, k) = A097076(n+1).
+%F A157898 From _G. C. Greubel_, Sep 03 2022: (Start)
+%F A157898 T(n, k) = Sum_{j=k..n} (-1)^(n-j)*binomial(n,j)*A059576(j,k).
+%F A157898 T(n, 0) = A059841(n).
+%F A157898 T(n, 1) = A004526(n-1).
+%F A157898 T(n, 2) = 2*A008805(n-2).
+%F A157898 T(n, 3) = 4*A058187(n-3).
+%F A157898 T(n, 4) = 8*A189976(n+4).
+%F A157898 T(n, n) = A011782(n).
+%F A157898 T(n, n-1) = A011782(n) - [n==0]. (End)
+%e A157898 First few rows of the triangle =
+%e A157898   1;
+%e A157898   0, 1;
+%e A157898   1, 1,  2;
+%e A157898   0, 2,  2,  4;
+%e A157898   1, 2,  6,  4,   8;
+%e A157898   0, 3,  6, 16,   8,  16;
+%e A157898   1, 3, 12, 16,  40,  16,  32;
+%e A157898   0, 4, 12, 40,  40,  96,  32,  64;
+%e A157898   1, 4, 20, 40, 120,  96, 224,  64, 128;
+%e A157898   0, 5, 20, 80, 120, 336, 224, 512, 128, 256;
+%e A157898   ...
+%p A157898 A059576 := proc (n, k)
+%p A157898     if n = 0 then
+%p A157898         return 1;
+%p A157898     end if;
+%p A157898     if k <= n and k >= 0 then
+%p A157898         add((-1)^j*2^(n-j-1)*binomial(k, j)*binomial(n-j, k), j = 0 .. min(k, n-k))
+%p A157898     else
+%p A157898         0 ;
+%p A157898     end if
+%p A157898 end proc:
+%p A157898 A157898 := proc(n,k)
+%p A157898     add ( A130595(n,j)*A059576(j,k),j=k..n) ;
+%p A157898 end proc: # _R. J. Mathar_, Feb 13 2013
+%t A157898 t[n_, k_]:= t[n, k]= If[k==0 || k==n, 2^(n-1) +Boole[n==0]/2, 2*t[n-1, k-1] + 2*t[n-1, k] -(2 -Boole[n==2])*t[n-2, k-1]]; (* t= A059576 *)
+%t A157898 A157898[n_, k_]:= A157898[n, k]= Sum[(-1)^(n-j)*Binomial[n,j]*t[j,k], {j,k,n}];
+%t A157898 Table[A157898[n, k], {n,0,12}, {k,0,n}]//Flatten (* _G. C. Greubel_, Sep 03 2022 *)
+%o A157898 (Magma)
+%o A157898 A011782:= func< n | n eq 0 select 1 else 2^(n-1) >;
+%o A157898 function t(n, k) // t = A059576
+%o A157898   if k eq 0 or k eq n then return A011782(n);
+%o A157898   else return 2*t(n-1, k-1) + 2*t(n-1, k) - (2 - 0^(n-2))*t(n-2, k-1);
+%o A157898   end if; return t;
+%o A157898 end function;
+%o A157898 A157898:= func< n,k | (&+[(-1)^(n-j)*Binomial(n,j)*t(j,k): j in [k..n]]) >;
+%o A157898 [A157898(n, k): k in [0..n], n in [0..12]]; // _G. C. Greubel_, Sep 03 2022
+%o A157898 (SageMath)
+%o A157898 @CachedFunction
+%o A157898 def t(n, k): # t = A059576
+%o A157898     if (k==0 or k==n): return bool(n==0)/2 + 2^(n-1) # A011782
+%o A157898     else: return 2*t(n-1, k-1) + 2*t(n-1, k) - (2 - 0^(n-2))*t(n-2, k-1)
+%o A157898 def A157898(n,k): return sum((-1)^(n-j)*binomial(n,j)*t(j,k) for j in (k..n))
+%o A157898 flatten([[A157898(n, k) for k in (0..n)] for n in (0..12)]) # _G. C. Greubel_, Sep 03 2022
+%Y A157898 Cf. A059576, A097076 (row sums), A130595.
+%Y A157898 Cf. A004526, A008805, A011782, A058187, A059841, A189976.
+%K A157898 nonn,tabl,easy
+%O A157898 0,6
+%A A157898 _Gary W. Adamson_ and _Roger L. Bagula_, Mar 08 2009

@@ -1,0 +1,60 @@
+%I A008314
+%S A008314 1,1,1,1,1,3,1,4,3,1,5,10,1,6,15,10,1,7,21,35,1,8,28,56,35,1,9,36,84,
+%T A008314 126,1,10,45,120,210,126,1,11,55,165,330,462,1,12,66,220,495,792,462,
+%U A008314 1,13,78,286,715,1287,1716,1,14,91,364,1001,2002,3003,1716,1,15,105,455,1365,3003,5005
+%N A008314 Irregular triangle read by rows: one half of the coefficients of the expansion of (2*x)^n in terms of Chebyshev T-polynomials.
+%C A008314 The entry a(0,0) should actually be 1/2.
+%C A008314 The row lengths of this array are [1,1,2,2,3,3,...] = A004526.
+%C A008314 Row k also counts the binary strings of length k that have 0, 2 up to 2*floor(k/2) 'unmatched symbols'. See contributions by Marc van Leeuwen at the Mathematics Stack Exchange link. - _Wouter Meeussen_, Apr 17 2013
+%C A008314 For n >= 1, T(n,k) is the coefficient of cos((n-2k)x) in the expression for 2^(n-1)*cos(x)^n as a sum of cosines of multiples of x.  It is binomial(n,k) if k < n/2, while T(n,n/2) = binomial(n,n/2)/2 if n is even. - _Robert Israel_, Jul 25 2016
+%D A008314 M. Abramowitz and I. A. Stegun, eds., Handbook of Mathematical Functions, National Bureau of Standards Applied Math. Series 55, 1964 (and various reprintings), p. 795.
+%D A008314 T. J. Rivlin, Chebyshev polynomials: from approximation theory to algebra and number theory, 2nd ed., Wiley, New York, 1990, pp. 54-55, Ex. 1.5.31.
+%H A008314 Robert Israel, <a href="/A008314/b008314.txt">Table of n, a(n) for n = 0..10099</a> (rows 0 to 199, flattened)
+%H A008314 M. Abramowitz and I. A. Stegun, eds., <a href="http://www.convertit.com/Go/ConvertIt/Reference/AMS55.ASP">Handbook of Mathematical Functions</a>, National Bureau of Standards, Applied Math. Series 55, Tenth Printing, 1972 [alternative scanned copy].
+%H A008314 Suyoung Choi and Hanchul Park, <a href="http://arxiv.org/abs/1210.3776">A new graph invariant arises in toric topology</a>, arXiv preprint arXiv:1210.3776 [math.AT], 2012.
+%H A008314 Mathematics Stack Exchange, <a href="http://math.stackexchange.com/questions/345529">Bijection between number of partitions of 2n satisfying certain conditions with number of partitions of n</a>, April-March 2013.
+%H A008314 <a href="/index/Ch#Cheby">Index entries for sequences related to Chebyshev polynomials.</a>
+%F A008314 a(n,k) are the M_3 multinomial numbers A036040 for the partitions with m = 1 and 2 parts (in Abramowitz-Stegun order). - _Wolfdieter Lang_, Aug 01 2014
+%e A008314 [1/2], [1], [1,2/2=1], [1,3], [1,4,6/2=3], [1,5,10], [1,6,15,20/2=10],...
+%e A008314 From _Wolfdieter Lang_, Aug 01 2014: (Start)
+%e A008314 This irregular triangle begins (even n has falling even T-polynomial indices, odd n has falling odd T-indices):
+%e A008314 n\k  1  2   3   4     5     6     7     8 ...
+%e A008314 0: 1/2 (but a(0,1) = 1)
+%e A008314 1:   1
+%e A008314 2:   1  1
+%e A008314 3:   1  3
+%e A008314 4:   1  4   3
+%e A008314 5:   1  5  10
+%e A008314 6:   1  6  15  10
+%e A008314 7:   1  7  21  35
+%e A008314 8:   1  8  28  56    35
+%e A008314 9:   1  9  36  84   126
+%e A008314 10:  1 10  45 120   210   126
+%e A008314 11:  1 11  55 165   330   462
+%e A008314 12:  1 12  66 220   495   792   462
+%e A008314 13:  1 13  78 286   715  1287  1716
+%e A008314 14:  1 14  91 364  1001  2002  3003  1716
+%e A008314 15:  1 15 105 455  1365  3003  5005  6435
+%e A008314 ...
+%e A008314 (2*x)^5 = 2*(1*T_5(x) + 5*T_3(x) + 10*T_1(x)),
+%e A008314 (2*x)^6 = 2*(1*T_6(x) + 6*T_4(x) + 15*T_3(x) + 10*T_0(x)).
+%e A008314 (End)
+%p A008314 F:= proc(n) local q;
+%p A008314   q:= combine(2^(n-1)*cos(t)^n,trig);
+%p A008314   if n::even then
+%p A008314      seq(coeff(q,cos((n-2*j)*t)),j=0..n/2-1),eval(q,cos=0)
+%p A008314   else
+%p A008314      seq(coeff(q,cos((n-2*j)*t)),j=0..(n-1)/2)
+%p A008314   fi
+%p A008314 end proc:
+%p A008314 1, seq(F(n),n=1..15); # _Robert Israel_, Jul 25 2016
+%t A008314 Table[(c/@ Range[n,0,-2]) /. Flatten[Solve[Thread[CoefficientList[Expand[1/2*(2*x)^n -Sum[c[k] ChebyshevT[k,x],{k,0,n}]],x]==0]]],{n,16}];
+%t A008314 (* or with combinatorics *)
+%t A008314 match[li:{(1|-1)..}]:= Block[{it=li,rot=0}, While[Length[Union[Join[it,{"(",")"}]]]>3, rot++; it=RotateRight[it //.{a___,1,b___String,-1,c___} ->{a,"(",b,")",c}]]; RotateLeft[it,rot] /. {(1|-1)->0, "("->1,")"->-1}];
+%t A008314 Table[Last/@ Sort@ Tally[Table[Tr[Abs@ match[-1+2*IntegerDigits[n,2]]], {n,2^(k-1), 2^k-1}]], {k,1,16}]; (* _Wouter Meeussen_, Apr 17 2013 *)
+%Y A008314 Cf. A007318, A008311.
+%Y A008314 Bisection triangles: A122366 (odd numbered rows), A127673 (even numbered rows).
+%K A008314 nonn,tabf
+%O A008314 0,6
+%A A008314 _N. J. A. Sloane_
+%E A008314 Name reformulated by _Wolfdieter Lang_, Aug 01 2014

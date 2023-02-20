@@ -1,0 +1,58 @@
+%I A072347
+%S A072347 1,1,1,2,1,2,1,3,1,2,1,3,2,3,2,5,1,2,1,3,2,3,2,5,1,3,1,4,3,5,3,8,1,2,
+%T A072347 1,3,2,3,2,5,1,3,1,4,3,5,3,8,2,3,2,5,3,4,3,7,2,5,2,7,5,8,5,13,1,2,1,3,
+%U A072347 2,3,2,5,1,3,1,4,3,5,3,8,2,3,2,5,3,4,3,7,2,5,2,7,5,8,5,13,1,3,1,4,3,5,3
+%N A072347 If n = pqr...st in binary, a(n) = value of continuant [p,q,r,...,s,t].
+%C A072347 []=1, [p]=p, [p,q]=pq+1, [p,q,r]=pqr+p+r; in general [x_1,...,x_n] = [x_1,...,x_{n-1}]*x_n + [x_1,...,x_{n-2}].
+%C A072347 The successive record values in this sequence occur at n=0 and n=2^k-1 for k>1 and are equal to the Fibonacci numbers A000045 (cf. Chrystal, p. 503, Exercise 11).
+%C A072347 Every positive integer eventually appears, as the value of the sequence at (4^n-1)/3 is n. - _Jeffrey Shallit_, May 02 2016
+%C A072347 First occurrence of n in this sequence is given by A272530(n). - _Jeffrey Shallit_, Oct 13 2017
+%D A072347 G. Chrystal, Algebra, Vol. II, pp. 494 ff. (for definition of continuant).
+%D A072347 R. L. Graham, D. E. Knuth and O. Patashnik, Concrete Mathematics. Addison-Wesley, Reading, MA, 1990, Sect. 6.7 (for definition of continuant).
+%D A072347 T. Muir, The Theory of Determinants in the Historical Order of Development. 4 vols., Macmillan, NY, 1906-1923, Vol. 2, p. 413 (for definition of continuant).
+%H A072347 T. D. Noe, <a href="/A072347/b072347.txt">Table of n, a(n) for n=0..4095</a>
+%H A072347 J.-P. Allouche and J. Shallit, <a href="https://doi.org/10.1016/0304-3975(92)90001-V">The ring of k-regular sequences</a>, Theoret. Comput. Sci. 98 (1992), 163-197.
+%H A072347 T. Muir, <a href="http://www.hti.umich.edu/cgi/t/text/text-idx?sid=b88432273f115fb346725f1a42422e19;c=umhistmath;idno=ACM9350.0002.001">The Theory of Determinants in the Historical Order of Development</a>, 4 vols., Macmillan, NY, 1906-1923, Vol. 2.
+%H A072347 Wikipedia, <a href="https://en.wikipedia.org/wiki/Continuant_(mathematics)">Continuant</a>
+%F A072347 From _Robert Israel_, May 04 2016: (Start)
+%F A072347 a(2n) = a(floor(n/2)).
+%F A072347 a(4n+1) = a(2n+1).
+%F A072347 a(4n+3) = a(2n+1) + a(n).
+%F A072347 G.f. G(x) satisfies G(x) = (1+x^2+x^3)*G(x^4) + (1+x^2)*(G(x^2)-G(-x^2))/(2*x). (End)
+%F A072347 Hence this sequence is 2-regular in the sense of Allouche and Shallit (1992). - _Jeffrey Shallit_, Oct 13 2017
+%e A072347 From _Alois P. Heinz_, Aug 14 2013: (Start)
+%e A072347 a(0) =      []                          = 1.
+%e A072347 a(1) =     [1]                          = 1.
+%e A072347 a(2) =   [1,0] = [0,1]    =   1*0 + 1   = 1.
+%e A072347 a(3) =   [1,1]            =   1*1 + 1   = 2.
+%e A072347 a(4) = [1,0,0] = [0,0,1]  = 1*0*0 + 1+0 = 1.
+%e A072347 a(5) = [1,0,1]            = 1*0*1 + 1+1 = 2.
+%e A072347 a(6) = [1,1,0] = [0,1,1]  = 1*1*0 + 1+0 = 1.
+%e A072347 a(7) = [1,1,1]            = 1*1*1 + 1+1 = 3.
+%e A072347 (End)
+%p A072347 c:= proc() option remember;
+%p A072347       if nargs=0 then 1
+%p A072347     elif nargs=1 then args[1]
+%p A072347     else args[-1]*c(seq(args[i], i=1..nargs-1))
+%p A072347                  +c(seq(args[i], i=1..nargs-2))
+%p A072347       fi
+%p A072347     end:
+%p A072347 a:= n-> `if`(n=0, 1, c(convert(n, base, 2)[])):
+%p A072347 seq(a(n), n=0..120);  # _Alois P. Heinz_, Aug 06 2013
+%p A072347 # second Maple program:
+%p A072347 a:= proc(n) option remember;
+%p A072347   if n::even then procname(floor(n/4))
+%p A072347 elif n mod 4 = 1 then procname((n+1)/2)
+%p A072347 else procname((n-1)/2) + procname((n-3)/4)
+%p A072347 fi
+%p A072347 end proc:
+%p A072347 a(0):= 1: a(1):= 1:
+%p A072347 map(a, [$0..1000]); # _Robert Israel_, May 04 2016
+%t A072347 c[args_List] := With[{nargs = Length[args]}, Which[nargs == 0, 1, nargs == 1, First[args], True, Last[args]*c[Most[args]] + c[args // Most // Most]]]; a[n_] := c[IntegerDigits[n, 2]]; a[0] = 1; Table[a[n], {n, 0, 102}] (* _Jean-François Alcover_, Feb 11 2014, after _Alois P. Heinz_ *)
+%o A072347 (ARIBAS) function continuant(n: integer): integer; var len,v,v1,v2,j: integer; begin len := bit_length(n); if len < 2 then v := 1; else v1 := bit_test(n,len-1); v := 1 + bit_test(n,len-1)*bit_test(n,len-2); for j := len-3 to 0 by -1 do v2 := v1; v1 := v; v := v1*bit_test(n,j) + v2; end; end; return v; end; for n := 0 to 102 do write(continuant(n),","); end;
+%Y A072347 Cf. A272530.
+%K A072347 nonn,nice,easy
+%O A072347 0,4
+%A A072347 _N. J. A. Sloane_, Jul 18 2002
+%E A072347 More terms from _Klaus Brockhaus_, Jul 19 2002
+%E A072347 Maple program corrected by _Robert Israel_, May 04 2016

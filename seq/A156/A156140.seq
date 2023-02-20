@@ -1,0 +1,72 @@
+%I A156140
+%S A156140 -1,0,1,3,2,7,5,8,3,13,10,17,7,18,11,15,4,21,17,30,13,35,22,31,9,32,
+%T A156140 23,37,14,33,19,24,5,31,26,47,21,58,37,53,16,59,43,70,27,65,38,49,11,
+%U A156140 50,39,67,28,73,45,62,17,57,40,63,23,52,29,35,6,43,37,68,31,87,56,81,25,94,69
+%N A156140 Accumulation of Stern's diatomic series: a(0)=-1, a(1)=0, and a(n+1) = (2e(n)+1)*a(n) - a(n-1) for n > 1, where e(n) is the highest power of 2 dividing n.
+%H A156140 Charles R Greathouse IV, <a href="/A156140/b156140.txt">Table of n, a(n) for n = 0..10000</a>
+%F A156140 Let b(n) = A002487(n), Stern's diatomic series.
+%F A156140 a(n+1)*b(n) - a(n)*b(n+1) = 1 for n >= 0.
+%F A156140 a(2n+1) = a(n) + a(n+1) + b(n) + b(n+1) for n >= 0.
+%F A156140 a(2n) = a(n) + b(n) for n >= 0.
+%F A156140 a(2^n + k) = -n*a(k) + (n^2 + n + 1)*b(k) for 0 <= k <= 2^n.
+%F A156140 b(2^n + k) = -a(k) + (n + 1)*b(k) for 0 <= k <= 2^n.
+%F A156140 a(2^m + k) = b(2^m+k)*m + b(k), m >= 0, 0 <= k < 2^m. - _Yosu Yurramendi_, Mar 09 2018
+%F A156140 a(2^(m+1)+2^m+1) = 2*m+1, m >= 0. - _Yosu Yurramendi_, Mar 09 2018
+%F A156140 From _Yosu Yurramendi_, May 08 2018: (Start)
+%F A156140 a(2^m) = m, m >= 0.
+%F A156140 a(2^r*(2*k+1)) = a(2^r*(2*k)) + a(2^r*(2*k+2)), r = m - floor(log_2(k)) - 1, m > 0, 1 <= k < 2^m.
+%F A156140 (End)
+%p A156140 A156140 := proc(n)
+%p A156140     option remember ;
+%p A156140     if n <= 1 then
+%p A156140         n-1 ;
+%p A156140     else
+%p A156140         (2*A007814(n-1)+1)*procname(n-1)-procname(n-2) ;
+%p A156140     end if;
+%p A156140 end proc:
+%p A156140 seq(A156140(n),n=0..80) ; # _R. J. Mathar_, Mar 14 2009
+%t A156140 Fold[Append[#1, (2 IntegerExponent[#2, 2] + 1) #1[[-1]] - #1[[-2]] ] &, {-1, 0}, Range[73]] (* _Michael De Vlieger_, Mar 09 2018 *)
+%o A156140 (PARI) first(n)=my(v=vector(n+1)); v[1]=-1; v[2]=0; for(k=1,n-1,v[k+2]=(2*valuation(k,2)+1)*v[k+1] - v[k]); v \\ _Charles R Greathouse IV_, Apr 05 2016
+%o A156140 (PARI) fusc(n)=my(a=1, b=0); while(n>0, if(bitand(n, 1), b+=a, a+=b); n>>=1); b
+%o A156140 a(n)=my(m=1,s,t); if(n==0, return(-1)); while(n%2==0, s+=fusc(n>>=1)); while(n>1, t=logint(n,2); n-=2^t; s+=m*fusc(n)*(t^2+t+1); m*=-t); m*(n-1) + s \\ _Charles R Greathouse IV_, Dec 13 2016
+%o A156140 (R)
+%o A156140 a <- c(0,1)
+%o A156140 maxlevel <- 6 # by choice
+%o A156140 for(m in 1:maxlevel) {
+%o A156140   a[2^(m+1)] <- m + 1
+%o A156140   for(k in 1:(2^m-1)) {
+%o A156140     r <- m - floor(log2(k)) - 1
+%o A156140     a[2^r*(2*k+1)] <- a[2^r*(2*k)] + a[2^r*(2*k+2)]
+%o A156140 }}
+%o A156140 a
+%o A156140 # _Yosu Yurramendi_, May 08 2018
+%Y A156140 Cf. A002487, A007814.
+%Y A156140 From _Yosu Yurramendi_, Mar 09 2018: (Start)
+%Y A156140 a(2^m +  0) = A000027(m),   m >= 0.
+%Y A156140 a(2^m +  1) = A002061(m+2), m >= 1.
+%Y A156140 a(2^m +  2) = A002522(m),   m >= 2.
+%Y A156140 a(2^m +  3) = A033816(m-1), m >= 2.
+%Y A156140 a(2^m +  4) = A002061(m),   m >= 2.
+%Y A156140 a(2^m +  5) = A141631(m),   m >= 3.
+%Y A156140 a(2^m +  6) = A084849(m-1), m >= 3.
+%Y A156140 a(2^m +  7) = A056108(m-1), m >= 3.
+%Y A156140 a(2^m +  8) = A000290(m-1), m >= 3.
+%Y A156140 a(2^m +  9) = A185950(m-1), m >= 4.
+%Y A156140 a(2^m + 10) = A144390(m-1), m >= 4.
+%Y A156140 a(2^m + 12) = A014106(m-2), m >= 4.
+%Y A156140 a(2^m + 16) = A028387(m-3), m >= 4.
+%Y A156140 a(2^m + 18) = A250657(m-4), m >= 5.
+%Y A156140 a(2^m + 20) = A140677(m-3), m >= 5.
+%Y A156140 a(2^m + 32) = A028872(m-2), m >= 5.
+%Y A156140 a(2^m -  1) = A005563(m-1), m >= 0.
+%Y A156140 a(2^m -  2) = A028387(m-2), m >= 2.
+%Y A156140 a(2^m -  3) = A033537(m-2), m >= 2.
+%Y A156140 a(2^m -  4) = A008865(m-1), m >= 3.
+%Y A156140 a(2^m -  7) = A140678(m-3), m >= 3.
+%Y A156140 a(2^m -  8) = A014209(m-3), m >= 4.
+%Y A156140 a(2^m - 16) = A028875(m-2), m >= 5.
+%Y A156140 a(2^m - 32) = A108195(m-5), m >= 6.
+%Y A156140 (End)
+%K A156140 sign,look,easy
+%O A156140 0,4
+%A A156140 Arie Werksma (Werksma(AT)Tiscali.nl), Feb 04 2009

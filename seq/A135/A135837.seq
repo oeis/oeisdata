@@ -1,0 +1,73 @@
+%I A135837
+%S A135837 1,1,2,1,4,2,1,6,6,4,1,8,12,16,4,1,10,20,40,20,8,1,12,30,80,60,48,8,1,
+%T A135837 14,42,140,140,168,56,16,1,16,56,224,280,448,224,128,16,1,18,72,336,
+%U A135837 504,1008,672,576,144,32
+%N A135837 A007318 * a triangle with (1, 2, 2, 4, 4, 8, 8, ...) in the main diagonal and the rest zeros.
+%C A135837 This sequence is jointly generated with A117919 as a triangular array of coefficients of polynomials v(n,x): initially, u(1,x) = v(1,x) = 1; for n > 1, u(n,x) = u(n-1,x) + x*v(n-1)x and v(n,x) = 2*x*u(n-1,x) + v(n-1,x).  See the Mathematica section. - _Clark Kimberling_, Feb 26 2012
+%C A135837 Subtriangle of the triangle (1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, ...) DELTA (0, 2, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, ...) where DELTA is the operator defined in A084938. - _Philippe Deléham_, Mar 19 2012
+%H A135837 Reinhard Zumkeller, <a href="/A135837/b135837.txt">Rows n = 1..150 of triangle, flattened</a>
+%F A135837 Binomial transform of a triangle with (1, 2, 2, 4, 4, 8, 8, ...) in the main diagonal and the rest zeros.
+%F A135837 Sum_{k=1..n} T(n, k) = A001333(n).
+%F A135837 From _Philippe Deléham_, Mar 19 2012: (Start)
+%F A135837 As DELTA-triangle with 0 <= k <= n:
+%F A135837 G.f.: (1-x+2*y*x^2-2*y^2*x^2)/(1-2*x+2*y*x^2-2*y^2*x^2).
+%F A135837 T(n,k) = 2*T(n-1,k) - T(n-2,k) + 2*T(n-2,k-2), T(0,0) = T(1,0) = T(2,0) = 1, T(1,1) = T(2,2) = 0, T(2,1) = 2, T(n,k) = 0 if k < 0 or if k > n. (End)
+%F A135837 G.f.: x*y*(1-x+2*x*y)/(1-2*x-2*x^2*y^2+x^2). - _R. J. Mathar_, Aug 11 2015
+%F A135837 From _G. C. Greubel_, Feb 07 2022: (Start)
+%F A135837 T(n, n) = A016116(n).
+%F A135837 T(n, 2) = 2*(n-1).
+%F A135837 T(n, 3) = 2*A000217(n-2). (End)
+%e A135837 First few rows of the triangle:
+%e A135837   1;
+%e A135837   1,  2;
+%e A135837   1,  4,  2;
+%e A135837   1,  6,  6,  4;
+%e A135837   1,  8, 12, 16,  4;
+%e A135837   1, 10, 20, 40, 20,  8;
+%e A135837   1, 12, 30, 80, 60, 48,  8;
+%e A135837   ...
+%e A135837 From _Philippe Deléham_, Mar 19 2012: (Start)
+%e A135837 (1, 0, 0, 1, 0, 0, ...) DELTA (0, 2, -1, -1, 0, 0, ...) begins:
+%e A135837   1;
+%e A135837   1,  0;
+%e A135837   1,  2,  0;
+%e A135837   1,  4,  2,  0;
+%e A135837   1,  6,  6,  4,  0;
+%e A135837   1,  8, 12, 16,  4,  0;
+%e A135837   1, 10, 20, 40, 20,  8,  0;
+%e A135837   1, 12, 30, 80, 60, 48, 8,  0; (End)
+%t A135837 (* First program *)
+%t A135837 u[1, x_]:= 1; v[1, x_]:= 1; z = 13;
+%t A135837 u[n_, x_]:= u[n-1, x] + x*v[n-1, x];
+%t A135837 v[n_, x_]:= 2 x*u[n-1, x] + v[n-1, x];
+%t A135837 Table[Expand[u[n, x]], {n, 1, z/2}]
+%t A135837 Table[Expand[v[n, x]], {n, 1, z/2}]
+%t A135837 cu = Table[CoefficientList[u[n, x], x], {n, 1, z}];
+%t A135837 TableForm[cu]
+%t A135837 Flatten[%]    (* A117919 *)
+%t A135837 Table[Expand[v[n, x]], {n, 1, z}]
+%t A135837 cv = Table[CoefficientList[v[n, x], x], {n, 1, z}];
+%t A135837 TableForm[cv]
+%t A135837 Flatten[%]    (* A135837 *) (* _Clark Kimberling_, Feb 26 2012 *)
+%t A135837 (* Second program *)
+%t A135837 T[n_, k_]:= T[n, k]= If[k<1 || k>n, 0, If[k==1, 1, If[k==n, 2^Floor[n/2], 2*T[n-1, k] - T[n-2, k] + 2*T[n-2, k-2]]]];
+%t A135837 Table[T[n, k], {n,12}, {k,n}]//Flatten (* _G. C. Greubel_, Feb 07 2022 *)
+%o A135837 (Haskell)
+%o A135837 a135837 n k = a135837_tabl !! (n-1) !! (k-1)
+%o A135837 a135837_row n = a135837_tabl !! (n-1)
+%o A135837 a135837_tabl = [1] : [1, 2] : f [1] [1, 2] where
+%o A135837    f xs ys = ys' : f ys ys' where
+%o A135837      ys' = zipWith3 (\u v w -> 2 * u - v + 2 * w)
+%o A135837                     (ys ++ [0]) (xs ++ [0, 0]) ([0, 0] ++ xs)
+%o A135837 -- _Reinhard Zumkeller_, Aug 08 2012
+%o A135837 (Sage)
+%o A135837 def T(n,k): # A135837
+%o A135837     if (k<1 or k>n): return 0
+%o A135837     elif (k==1): return 1
+%o A135837     elif (k==n): return 2^(n//2)
+%o A135837     else: return 2*T(n-1, k) - T(n-2, k) + 2*T(n-2, k-2)
+%o A135837 flatten([[T(n,k) for k in (1..n)] for n in (1..12)]) # _G. C. Greubel_, Feb 07 2022
+%Y A135837 Cf. A000217, A001333 (row sums), A007318, A016116, A117919, A135838.
+%K A135837 nice,nonn,tabl
+%O A135837 1,3
+%A A135837 _Gary W. Adamson_, Dec 01 2007

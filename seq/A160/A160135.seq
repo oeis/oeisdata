@@ -1,0 +1,24 @@
+%I A160135
+%S A160135 1,1,1,1,1,6,1,5,1,8,1,10,1,10,9,9,1,15,1,12,11,14,1,30,1,16,10,14,1,
+%T A160135 42,1,29,15,20,13,19,1,22,17,40,1,54,1,18,18,26,1,58,1,33,21,20,1,60,
+%U A160135 17,50,23,32,1,78,1,34,20,49,19,78,1,24,27,74,1,75,1,40,34,26,19,90,1,76,28
+%N A160135 Sum of non-exponential divisors of n.
+%C A160135 The non-exponential divisors d|n of a number n = p(i)^e(i) are divisors d not of the form p(i)^s(i), s(i)|e(i) for all i.
+%H A160135 Antti Karttunen, <a href="/A160135/b160135.txt">Table of n, a(n) for n = 1..65537</a>
+%F A160135 a(n) = A000203(n) - A051377(n) for n >= 2.
+%F A160135 a(1) = 1, a(p) = 1, a(p*q) = 1 + p + q, a(p*q*...*z) = (p + 1)*(q + 1)*...*(z + 1) - p*q*...*z, for p, q,..,z = primes (A000040), p*q = product of two distinct primes (A006881), p*q*...*z = product of k (k > 0) distinct primes (A120944).
+%F A160135 a(p^k) = (p^(k+1)-1)/(p-1)- Sum_{d|k} p^d for p = primes (A000040), p^k = prime powers A000961(n>1), k = natural numbers (A000027)>
+%F A160135 a(p^q) = 1+(p^1-p^1)+p^2+p^3+...+p^(q-1), for p, q = primes (A000040), p^q = prime powers of primes (A053810).
+%e A160135 a(8) = A000203(8) - A051377(8) = 15 - 10 = 5. a(8) = a(2^3) = (2^4-1)/(2-1) - (2^1+2^3) = 5.
+%p A160135 lpowp := proc(n,p) local e; for e from 0 do if n mod p^(e+1) <> 0 then RETURN(e) ; fi; od: end:
+%p A160135 expdvs := proc(n) local a,d,nfcts,b,f,iseDiv ; a := {} ; nfcts := ifactors(n)[2] ; for d in ( numtheory[divisors](n) minus {1} ) do iseDiv := true; for f in nfcts do b := lpowp(d,op(1,f) ) ; if b = 0 or op(2,f) mod b <> 0 then iseDiv := false; fi; od: if iseDiv then a := a union {d} ; fi; od: a ; end proc:
+%p A160135 A051377 := proc(n) local k ; add( k, k = expdvs(n)) ; end: A160135 := proc(n) if n = 1 then 1; else numtheory[sigma][1](n)-A051377(n) ; fi; end: seq(A160135(n),n=1..120) ; # _R. J. Mathar_, May 08 2009
+%t A160135 esigma[n_] := Times @@ (Sum[First[#]^d, {d, Divisors[Last[#]]}] &) /@ FactorInteger[n]; a[1] = 1; a[n_] := DivisorSigma[1, n] - esigma[n]; Array[a, 100] (* _Amiram Eldar_, Oct 26 2021 after _Jean-François Alcover_ at A051377 *)
+%o A160135 (PARI)
+%o A160135 A051377(n) = { my(f=factor(n)); prod(i=1, #f[, 1], sumdiv(f[i, 2], d, f[i, 1]^d)); }; \\ From A051377
+%o A160135 A160135(n) = if(1==n,n, sigma(n) - A051377(n)); \\ _Antti Karttunen_, Mar 04 2018
+%Y A160135 Cf. A000203, A051377, A000040, A006881, A120944, A000961, A053810.
+%K A160135 nonn
+%O A160135 1,6
+%A A160135 _Jaroslav Krizek_, May 02 2009
+%E A160135 Edited by _R. J. Mathar_, May 08 2009

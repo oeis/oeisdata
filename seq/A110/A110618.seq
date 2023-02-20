@@ -1,0 +1,65 @@
+%I A110618
+%S A110618 1,0,1,1,3,3,7,8,15,18,30,37,58,71,105,131,186,230,318,393,530,653,
+%T A110618 863,1060,1380,1686,2164,2637,3345,4057,5096,6158,7665,9228,11395,
+%U A110618 13671,16765,20040,24418,29098,35251,41869,50460,59755,71669,84626,101050
+%N A110618 Number of partitions of n with no part larger than n/2. Also partitions of n into n/2 or fewer parts.
+%C A110618 Also the number of integer partitions of n that are the vertex-degrees of some set multipartition (multiset of nonempty sets) with no singletons. - _Gus Wiseman_, Oct 30 2018
+%F A110618 a(n) = A000041(n) - Sum_{i=0..floor((n-1)/2)} A000041(i) = A000041(n) - A000070(floor((n-1)/2)) = A110619(n, 2).
+%F A110618 a(2*n) = A209816(n). - _Gus Wiseman_, Oct 30 2018
+%e A110618 a(5) = 3 since 5 can be partitioned as 1+1+1+1+1, 2+1+1+1, or 2+2+1; not counted are 5, 4+1, or 3+2.
+%e A110618 a(6) = 7 since 6 can be partitioned as 1+1+1+1+1+1, 1+1+1+1+2, 1+1+2+2, 2+2+2, 1+1+1+3, 1+2+3, 3+3; not counted are 1+1+4, 2+4, 1+5, 6.
+%e A110618 From _Gus Wiseman_, Oct 30 2018: (Start)
+%e A110618 The a(2) = 1 through a(8) = 15 partitions with no part larger than n/2:
+%e A110618   (11)  (111)  (22)    (221)    (33)      (322)      (44)
+%e A110618                (211)   (2111)   (222)     (331)      (332)
+%e A110618                (1111)  (11111)  (321)     (2221)     (422)
+%e A110618                                 (2211)    (3211)     (431)
+%e A110618                                 (3111)    (22111)    (2222)
+%e A110618                                 (21111)   (31111)    (3221)
+%e A110618                                 (111111)  (211111)   (3311)
+%e A110618                                           (1111111)  (4211)
+%e A110618                                                      (22211)
+%e A110618                                                      (32111)
+%e A110618                                                      (41111)
+%e A110618                                                      (221111)
+%e A110618                                                      (311111)
+%e A110618                                                      (2111111)
+%e A110618                                                      (11111111)
+%e A110618 The a(2) = 1 through a(8) = 15 partitions into n/2 or fewer parts:
+%e A110618   (2)  (3)  (4)   (5)   (6)    (7)    (8)
+%e A110618             (22)  (32)  (33)   (43)   (44)
+%e A110618             (31)  (41)  (42)   (52)   (53)
+%e A110618                         (51)   (61)   (62)
+%e A110618                         (222)  (322)  (71)
+%e A110618                         (321)  (331)  (332)
+%e A110618                         (411)  (421)  (422)
+%e A110618                                (511)  (431)
+%e A110618                                       (521)
+%e A110618                                       (611)
+%e A110618                                       (2222)
+%e A110618                                       (3221)
+%e A110618                                       (3311)
+%e A110618                                       (4211)
+%e A110618                                       (5111)
+%e A110618 The a(6) = 7 integer partitions of 6 with no part larger than n/2 together with a realizing set multipartition of each (the parts of the partition count the appearances of each vertex in the set multipartition):
+%e A110618       (33): {{1,2},{1,2},{1,2}}
+%e A110618      (321): {{1,2},{1,2},{1,3}}
+%e A110618     (3111): {{1,2},{1,3},{1,4}}
+%e A110618      (222): {{1,2,3},{1,2,3}}
+%e A110618     (2211): {{1,2},{1,2,3,4}}
+%e A110618    (21111): {{1,2},{1,3,4,5}}
+%e A110618   (111111): {{1,2,3,4,5,6}}
+%e A110618 (End)
+%p A110618 A000070 := proc(n) add( combinat[numbpart](i),i=0..n) ; end proc:
+%p A110618 A110618 := proc(n) combinat[numbpart](n) - A000070(floor((n-1)/2)) ; end proc: # _R. J. Mathar_, Jan 24 2011
+%t A110618 f[n_, 1] := 1; f[1, k_] := 1; f[n_, k_] := f[n, k] = If[k > n, f[n, k - 1], f[n, k - 1] + f[n - k, k]]; g[n_] := f[n, Floor[n/2]]; g[0] = 1; g[1] = 0; Array[g, 47, 0] (* _Robert G. Wilson v_, Jan 23 2011 *)
+%t A110618 sps[{}]:={{}};sps[set:{i_,___}]:=Join@@Function[s,Prepend[#,s]&/@sps[Complement[set,s]]]/@Cases[Subsets[set],{i,___}];
+%t A110618 mps[set_]:=Union[Sort[Sort/@(#/.x_Integer:>set[[x]])]&/@sps[Range[Length[set]]]];
+%t A110618 multhyp[m_]:=Select[mps[m],And[And@@UnsameQ@@@#,Min@@Length/@#>1]&];
+%t A110618 strnorm[n_]:=Flatten[MapIndexed[Table[#2,{#1}]&,#]]&/@IntegerPartitions[n];
+%t A110618 Table[Length[Select[strnorm[n],multhyp[#]!={}&]],{n,8}] (* _Gus Wiseman_, Oct 30 2018 *)
+%o A110618 (PARI) a(n) = numbpart(n) - sum(i=0, if (n%2, n\2, n/2-1), numbpart(i)); \\ _Michel Marcus_, Oct 31 2018
+%Y A110618 Cf. A000070, A000569, A025065, A049311, A096373, A116540, A147878, A209816, A283877, A306005, A320921.
+%K A110618 nonn
+%O A110618 0,5
+%A A110618 _Henry Bottomley_, Aug 01 2005

@@ -1,0 +1,41 @@
+%I A031362
+%S A031362 1,4,0,4,4,0,4,4,0,0,4,0,8,4,0,4,0,0,4,4,0,4,0,0,4,4,0,4,4,0,0,4,0,4,
+%T A031362 16,0,0,0,0,0,4,0,4,4,0,16,4,0,0,4,0,0,4,0,4,0,0,4,0,0,4,0,0,4,4,0,4,
+%U A031362 16,0,4,4,0,0,0,0,4,4,0,16,0,0,4,4,0,0,0,0,0,4,0,0,4,0,0,4,0,8,4,0,4
+%N A031362 Number of coincidence site modules of index 10n+1 with 10-fold symmetry in plane.
+%C A031362 The Dirichlet g.f. is Sum_{n>=0} a(n+1)/(1+10n)^s. - _R. J. Mathar_, Jul 16 2010
+%D A031362 M. Baake, "Solution of coincidence problem...", in R. V. Moody, ed., Math. of Long-Range Aperiodic Order, Kluwer 1997, pp. 9-44.
+%D A031362 Baake, M. and P. A. B. Pleasants. "The coincidence problem for crystals and quasicrystals." Aperiodic, vol. 94, pp. 25-29. 1995.
+%F A031362 Dirichlet series: Product ((1+p^(-s))/(1-p^(-s)))^2 (p=1 mod 5).
+%p A031362 read("transforms") : maxOrd := 1000 :
+%p A031362 ZetaNum := proc(p,nmax,f) local n ; L := [1,seq(0,n=2..p-1),f,seq(0,n=p+1..nmax)] ; end proc:
+%p A031362 Zeta := proc(p,nmax,f) local L,e; L := [1,seq(0,n=2..nmax)] ; for e from 1 do if p^e > nmax then break; else L := subsop(p^e=f^e,L) ; end if; end do: L ; end proc:
+%p A031362 Zetap := [1,seq(0,n=2..maxOrd)] : for e from 1 to maxOrd by 5 do if isprime(e) then ZetaNum(e,maxOrd,1) ; Zetap := DIRICHLET(Zetap,%) ; Zeta(e,maxOrd,1) ; Zetap := DIRICHLET(Zetap,%) ; end if; end do:
+%p A031362 Zetap := DIRICHLET(Zetap,Zetap) ; seq( Zetap[1+10*e],e=0..(nops(Zetap)-1)/10) ;
+%p A031362 # _R. J. Mathar_, Jul 16 2010
+%t A031362 did[m_, n_] := If[Mod[m, n] == 0, 1, 0];
+%t A031362 DIRICHLET[a_List, b_List] := Module[{c = {}, i, s, d}, For[i = 1, i <= Min[Length[a], Length[b]], i++, s = 0; For[d = 1, d <= i, d++, If[did[i, d] == 1, s = s + a[[d]] b[[i/d]]]]; c = Append[c, s]]; c];
+%t A031362 maxOrd = 1000;
+%t A031362 zetaNum [p_, nmax_, f_] := Module[{n}, L = Join[{1}, Table[0, {n, 2, p - 1}], {f}, Table[0, {n, p + 1, nmax}]]];
+%t A031362 zeta[p_, nmax_, f_] := Module[{L, e}, L = Join[{1}, Table[0, {n, 2, nmax}]]; For[e = 1, True, e++, If [p^e > nmax, Break[], L = ReplacePart[L, p^e -> f^e]]]; L];
+%t A031362 zetap = Join[{1}, Table[0, {n, 2, maxOrd}]]; For[e = 1, e <= maxOrd, e += 5, If[PrimeQ[e], ze = zetaNum[e, maxOrd, 1];
+%t A031362 zetap = DIRICHLET[zetap, ze]; ze = zeta[e, maxOrd, 1];
+%t A031362 zetap = DIRICHLET[zetap, ze]]];
+%t A031362 zetap = DIRICHLET[zetap, zetap];
+%t A031362 Table[zetap[[1 + 10 e]], {e, 0, (Length[zetap] - 1)/10}] (* _Jean-François Alcover_, Apr 05 2020, after _R. J. Mathar_ *)
+%o A031362 (PARI)
+%o A031362 M=1200
+%o A031362 t4=direuler(p=2,M,(1+(p%5<2)*X)) \\ p == 0 or 1 mod 5
+%o A031362 t5=direuler(p=2,M,1/(1+(p%5<1)*X)) \\ p == 0  mod 5
+%o A031362 t6=dirmul(t4,t5) \\ p == 1 mod 5
+%o A031362 t7=direuler(p=2,M,1/(1-(p%5<2)*X))
+%o A031362 t8=direuler(p=2,M,(1-(p%5<1)*X))
+%o A031362 t9=dirmul(t7,t8)
+%o A031362 t10=dirmul(t6,t9)
+%o A031362 t10b=dirmul(t10,t10)
+%o A031362 t11=vector(40,n,t10b[10*n+1]) \\ (and then prepend 1)
+%o A031362 \\ _N. J. A. Sloane_, Nov 15 2019
+%K A031362 nonn,easy
+%O A031362 1,2
+%A A031362 _N. J. A. Sloane_
+%E A031362 More terms from _R. J. Mathar_, Jul 16 2010

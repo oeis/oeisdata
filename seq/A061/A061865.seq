@@ -1,0 +1,36 @@
+%I A061865
+%S A061865 1,2,0,3,1,1,4,2,2,0,5,4,4,1,1,6,6,8,4,2,0,7,9,13,9,5,1,1,8,12,20,18,
+%T A061865 12,4,2,0,9,16,30,32,26,14,6,1,1,10,20,42,54,52,34,18,6,2,0,11,25,57,
+%U A061865 84,94,76,48,21,7,1,1,12,30,76,126,160,152,114,64,26,6,2,0,13,36,98,181,259,284,246,163,81,28,8,1,1
+%N A061865 Triangle in which the k-th item in the n-th row (both starting from 1) is the number of ways in which we can add k distinct integers from 1 to n, in such a way that the sum is divisible by k.
+%C A061865 T(n,k) is the number of k-element subsets of {1,...,n} whose mean is an integer.  Row sums and alternating row sums: A051293 and A000027. - _Clark Kimberling_, May 05 2012 [first link corrected to A051293 by _Antti Karttunen_, Feb 18 2013]
+%H A061865 Alois P. Heinz, <a href="/A061865/b061865.txt">Rows n = 1..150, flattened</a>
+%H A061865 <a href="/index/Su#subsetsums">Index entries for sequences related to subset sums modulo m</a>
+%F A061865 T(n,k) = C(n,k) - Sum[a_1=1..(n-k+1)] Sum[a_2=a_1+1..(n-k+2)] ... Sum[a_k=a_(k-1)+1..n] (ceiling(f(a_1,...a_k)) - floor(f(a_1,...a_k))), where f(a_1,...a_k) = (a_1+...+a_k)/k is the arithmetic mean. - _Ctibor O. Zizka_, Jun 03 2015
+%e A061865 The third term of the sixth row is 8 because we have solutions {1+2+3, 1+2+6, 1+3+5, 1+5+6, 2+3+4, 2+4+6, 3+4+5, 4+5+6} which all are divisible by 3.
+%e A061865 From _Clark Kimberling_, May 05 2012: (Start)
+%e A061865 First six rows:
+%e A061865   1;
+%e A061865   2, 0;
+%e A061865   3, 1, 1;
+%e A061865   4, 2, 2, 0;
+%e A061865   5, 4, 4, 1, 1;
+%e A061865   6, 6, 8, 4, 2, 0;
+%e A061865 (End)
+%p A061865 [seq(DivSumChooseTriangle(j),j=1..120)]; DivSumChooseTriangle := (n) -> nops(DivSumChoose(trinv(n-1),(n-((trinv(n-1)*(trinv(n-1)-1))/2))));
+%p A061865 DIVSum_SOLUTIONS_GLOBAL := []; DivSumChoose := proc(n,k) global DIVSum_SOLUTIONS_GLOBAL; DIVSum_SOLUTIONS_GLOBAL := []; DivSumChooseSearch([],n,k); RETURN(DIVSum_SOLUTIONS_GLOBAL); end;
+%p A061865 DivSumChooseSearch := proc(s,n,k) global DIVSum_SOLUTIONS_GLOBAL; local i,p; p := nops(s); if(p = k) then if(0 = (convert(s,`+`) mod k)) then DIVSum_SOLUTIONS_GLOBAL := [op(DIVSum_SOLUTIONS_GLOBAL),s]; fi; else for i from lmax(s)+1 to n-(k-p)+1 do DivSumChooseSearch([op(s),i],n,k); od; fi; end;
+%p A061865 lmax := proc(a) local e,z; z := 0; for e in a do if whattype(e) = list then e := last_term(e); fi; if e > z then z := e; fi; od; RETURN(z); end;
+%p A061865 # second Maple program:
+%p A061865 b:= proc(n, s, m, t) option remember; `if`(n=0, `if`(s=0 and t=0, 1, 0),
+%p A061865       `if`(t=0, 0, b(n-1, irem(s+n, m), m, t-1))+b(n-1, s, m, t))
+%p A061865     end:
+%p A061865 T:= (n, k)-> b(n, 0, k$2):
+%p A061865 seq(seq(T(n, k), k=1..n), n=1..14);  # _Alois P. Heinz_, Aug 28 2018
+%t A061865 t[n_, k_] := Length[ Select[ Subsets[ Range[n], {k}], Mod[Total[#], k] == 0 & ]]; Flatten[ Table[ t[n, k], {n, 1, 13}, {k, 1, n}]] (* _Jean-François Alcover_, Dec 02 2011 *)
+%Y A061865 The second diagonal is given by C(((n+(n mod 2))/2), 2)+C(((n-(n mod 2))/2), 2) = A002620, the third diagonal by A061866. Cf. A061857.
+%Y A061865 T(2n,n) gives A169888.
+%K A061865 nonn,tabl
+%O A061865 1,2
+%A A061865 _Antti Karttunen_, May 11 2001
+%E A061865 Starting offset corrected from 0 to 1 by _Antti Karttunen_, Feb 18 2013.

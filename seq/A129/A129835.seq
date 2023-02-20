@@ -1,0 +1,41 @@
+%I A129835
+%S A129835 0,1,2,3,4,5,6,0,8,9,0,1,12,13,0,1,16,17,18,0,1,21,2,23,24,0,1,27,2,
+%T A129835 29,30,31,0,1,34,2,36,2,38,39,0,1,42,2,44,3,3,47,48,0,1
+%N A129835 A computation-universal sequence of natural numbers (with zero).
+%C A129835 Let i be the index of an element (number) and f(i) be the number at that index. Applying f(f(...f(i)...)) until a fixed point is reached is computation - universal, i.e., can simulate the execution of any computer (Universal Turing Machine) program given proper choice of the initial i. The resulting fixed point encodes the program output, if any. The halting problem applies, so the procedure may not ever reach a fixed point.
+%C A129835 The sequence results from using a modified version of the classical pairing function for nonnegative integers to numerically encode what is known as Combinatory Logic and is computation-universal, i.e. equivalent to the Turing Machine. Computationalist philosophers basically argue that each of us is inside that sequence, which the author personally doesn't believe. At least, lim f(x) on infinity is noncomputable.
+%D A129835 H.P. Barendregt, The Lambda Calculus, its Syntax and Semantics, revised edition, North-Holland, Amsterdam, 1984.
+%D A129835 D. J. Cooke and H. E. Bez, Computer Mathematics. Cambridge University Press.
+%H A129835 John Tromp, <a href="https://tromp.github.io/cl/cl.html">John's Lambda Calculus and Combinatory Logic Playground</a>.
+%F A129835 Let d(x) = (1/2)x(x+1). Then the pairing function <x,y> = d(x+y)+x+2 maps pairs <x,y> onto numbers {2, 3, 4, ...}. To unpair a number q into x & y, follow these steps: if q >= 2 do p = q-2; n = FLOOR((sqrt(8p+1)-1)/2); x = p-d(n); y = d(n)+n-p; & now we know the x & the y in the paired representation of q = <x,y>.
+%F A129835 This way we can represent any number in the form like, e. g., <<<1,0>,1>,<0,1>> = 323. To get that from 323, unpair 323 repeatedly until you have just 0's & 1's inside pairwise-balanced brackets. Next, define f(q) as follows: f(...<<<1,x>,y>,z>...)=...<<x,z>,<y,z>>..., else f(...<<0,x>,y>...)=...x..., else f(q)=q (fixed point).
+%F A129835 Here we're doing pattern matching on the bracketed representations of numbers and changing one number into another in this representation according to the 3 rules above. Leading & trailing "..."'s are to be left the same. x, y, z match any subconstruction in q that then takes another place in the f(q) transformation.
+%F A129835 The three rewriting rules are listed in descending priority, correspond to a single f(q) and should be applied to the first occurrence of the pattern in the bracketed construction. We operate on bracketed constructions with 0's & 1's that are in 1-to-1 correspondence with numbers and should be viewed as such.
+%F A129835 Basically, f(q) is a relation on the infinite set of natural numbers (with zero) and can be viewed as an infinite directed graph with numbers as nodes connected by the relation j=f(q) that partitions the whole set into tree-like equivalence classes.
+%e A129835 E.g. 323 corresponds to <<<1,0>,1>,<0,1>>: <<<1,0>,1>,<0,1>> <->
+%e A129835 <<4,1>,<0,1>> <-> <21, 3> <-> 323 by the pairing transform. It reduces to
+%e A129835 <0,1> by applying f(.): <<<1,0>,1>,<0,1>> -> <<0,<0,1>>,<1,<0,1>>> ->
+%e A129835 <0,1>. The two "->"'s correspond to first applying the first rule, then
+%e A129835 the second rule and then we get a fixed point <0,1> = 3 (by simply
+%e A129835 pairing 0 & 1). At each step, we apply the first rule that applies, out of
+%e A129835 the three. Taken together, this example shows that f(f(323)) = f(241) =
+%e A129835 3. According to the 3rd rule, f(3)=3, so 3 is a fixed point - the
+%e A129835 computation terminates at 3. The intermediate step
+%e A129835 <<0,<0,1>>,<1,<0,1>>> = <<0,3>,<1,3>> = <8,13> = 241 by the pairing transform.
+%o A129835 { Turbo Pascal code for the SK - combinator - based Natural State Machine K == 0 S == 1 } program SKNSM; uses Crt, WinDos; (* Numerical pairing / unpairing routines *)
+%o A129835 {2 naturals into 1} procedure Pair(X, Y : Comp; Shift : Byte; var P : Comp); var S : Comp; begin S := X + Y; P := S * (S + 1) / 2 + X + Shift; end;
+%o A129835 {1 natural into 2} function UnPair(P : Comp; Shift : Byte; var X, Y : Comp) : Boolean; var N, T : Comp; begin if P >= Shift then begin UnPair := True; P := P - Shift; N := Int(((Sqrt(8 * P + 1)) - 1) / 2); T := N * (N + 1) / 2; X := P - T; Y := T + N - P; end else UnPair := False; end;
+%o A129835 (* Combinatory routines *)
+%o A129835 {parsing, get left} function CLGetLeftPart(C : string) : string; var I, Sum : Byte; begin if C[2] <> '(' then CLGetLeftPart := C[2] else begin I := 2; Sum := 1; repeat Inc(I); if C[I] = '(' then Inc(Sum) else if C[I] = ')' then Dec(Sum); until Sum = 0; CLGetLeftPart := Copy(C, 2, I - 1); end; end;
+%o A129835 {parsing, get right} function CLGetRightPart(C : string) : string; var L, I, Sum : Byte; begin I := Length(C) - 1; if C[I] <> ')' then CLGetRightPart := C[I] else begin Sum := 1; repeat Dec(I); if C[I] = '(' then Dec(Sum) else if C[I] = ')' then Inc(Sum); until Sum = 0; CLGetRightPart := Copy(C, I, Length(C) - I); end; end;
+%o A129835 {string to number} procedure CLEncode(C : string; var P : Comp); var X, Y : Comp; begin case C[1] of 'K' : P := 0; 'S' : P := 1; else CLEncode(CLGetLeftPart(C), X); CLEncode(CLGetRightPart(C), Y); Pair(X, Y, 2, P); end; end;
+%o A129835 {number to string} procedure CLDecode(P : Comp; var C : string); var X, Y : Comp; begin if P = 0 then C := C + 'K' else if P = 1 then C := C + 'S' else begin UnPair(P, 2, X, Y); C := C + '('; CLDecode(X, C); CLDecode(Y, C); C := C + ')'; end; end;
+%o A129835 {combinatory reduction / rewriting routine L - the cutoff number of reduction steps} function CLReduce(L : Comp; var P : Comp) : Boolean; var X, Y, XX, XY, XXX, XXY : Comp; begin if L = 0 then CLReduce := False else begin if UnPair(P, 2, X, Y) then begin if UnPair(X, 2, XX, XY) then begin if XX = 0 then begin P := XY; CLReduce := CLReduce(L - 1, P); end else if UnPair(XX, 2, XXX, XXY) then begin if XXX = 1 then begin Pair(XXY, Y, 2, X); Pair(XY, Y, 2, Y); Pair(X, Y, 2, P); CLReduce := CLReduce(L - 1, P); end else begin CLReduce := CLReduce(L, X); Pair(X, Y, 2, P); CLReduce := CLReduce(L - 1, P); end; end; end; end; end; end;
+%o A129835 {reduce / rewrite ONCE} procedure CLRedStep(N : Comp; var R : Comp); begin CLReduce(1, N); R := N; end;
+%o A129835 {reduction function - wrapper} function F(X : Longint) : Longint; var Y : Comp; begin CLRedStep(X, Y); F := Trunc(Y); end; (* Main routine *) const N = 299;
+%o A129835 {first 300 pointers - a FSM prefix of NSM} var X, Y : Longint; TF: Text; begin Assign(TF, 'NSM.txt');
+%o A129835 {file to write transitions to} Rewrite(TF); for X := 0 to N do begin Y := F(X); Write(TF, X, ' -> ', Y); if X = Y then Write(TF, ' FP');
+%o A129835 {fixed point} WriteLn(TF); end; Close(TF); end.
+%K A129835 nonn,more,uned
+%O A129835 0,3
+%A A129835 Artem S. Shafraniuk (ashafraniuk(AT)gmail.com), May 21 2007

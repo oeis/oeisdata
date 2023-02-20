@@ -1,0 +1,81 @@
+%I A102032
+%S A102032 1,3,7,15,11,21,89,255,167,307,349,1365,1259,6729,6417,65535,28431,
+%T A102032 29127,54757,209715,274627,750685,706649,5592405,2663383,9679163,
+%U A102032 14913005,186946121,37025579,353440017,1175487521,4294967295
+%N A102032 a(n) is the smallest positive integer k such that, if kn is written in base 2, it requires exactly n ones.
+%C A102032 This sequence can be considered for any base b. If one calculates the arithmetic mean of the sequence d(n):=a(n)/2^n, i.e. (d(1)+d(2)+...+d(n))/n, one obtains a sequence converging to zero.
+%C A102032 From _Robert Israel_, Aug 26 2015: (Start)
+%C A102032 a(2*n) <= (2^A070939(a(n)) + 1)*a(n).
+%C A102032 if n is odd, a(n) <= (2^(n*r)-1)/(n*(2^r-1)) where r = A002326((n-1)/2). (End)
+%D A102032 I. Vardi, Niven numbers, Computational Recreations in Mathematics, Addison-Wesley, 1991, pp. 19 and 28--31.
+%H A102032 Eugen J. Ionascu and Ray Chandler, <a href="/A102032/b102032.txt">Table of n, a(n) for n = 1..2024</a>
+%H A102032 J. M. De Koninck, N. Doyon and I. Katai, <a href="http://dx.doi.org/10.4064/aa106-3-5">On the counting function for the Niven numbers</a>, Acta Arith. 106 (2003), 265--275.
+%H A102032 E. J. Ionascu, H. Fredricksen, F. Luca and P. Stanica, <a href="http://dx.doi.org/10.4064/aa132-2-3">Minimal Niven numbers</a>, Acta Arith. 132 (2008), 135--159.
+%H A102032 E. J. Ionascu, F. Luca, P. Stanica and H. Fredricksen, <a href="http://faculty.nps.edu/pstanica/research/SeqMinNiven.pdf">Remarks on a sequence of minimal Niven numbers</a>, Proceedings of the International Workshop, SSC 2007 (Sequences, Subsequences and Consequences) Springer, 162--168.
+%F A102032 a(n) = 2^n-1 if n=2^k or a(n) = (2^(n+k-1)+2^n-2^(n-k)-1)/n if n=2^k-1 is a prime number; unknown for other values of n.
+%e A102032 Example: If n=7 then 7(89)=623 which written in base 2 is 1001101111 using exactly 7 ones and 89 is the smallest positive integer with this property. Hence a(7)=89. The number 1001101111 is usually known as Niven number in base 2. We called 623 a minimal Niven number.
+%p A102032 with(numtheory):
+%p A102032 fjv6:=proc(n,m)
+%p A102032 local i,j,k,l,x,x1,y,y1,z,z1,w,stopp,s,t,u,v,A,F,G,out;
+%p A102032 i:=n;stopp:=0;
+%p A102032 x1:=2^(m*i+6)-1; x:=x1 mod i;j:=0;
+%p A102032 while stopp=0 and j<=m*i+5 do
+%p A102032 l:=j;
+%p A102032 while stopp=0 and l<=m*i+4 do
+%p A102032 k:=l;
+%p A102032 while stopp=0 and k<=m*i+3 do
+%p A102032 s:=k;
+%p A102032 while stopp=0 and s<=m*i+2 do
+%p A102032 t:=s;
+%p A102032 while stopp=0 and t<=m*i+1 do
+%p A102032 v:=t;
+%p A102032 while stopp=0 and v<=m*i do y1:=2^(m*i+5-j)+2^(m*i+4-l)+2^(m*i+3-k)+2^(m*i+2-s)+2^(m*i+1-t)+2^(m*i-v); y:=y1 mod i;
+%p A102032 if y=x then z:=(x1-y1)/i;out:=[m*i, z];
+%p A102032 stopp:=1;
+%p A102032 fi;
+%p A102032 v:=v+1;od;t:=t+1;od;s:=s+1;od; k:=k+1; od;l:=l+1;od;j:=j+1;od;
+%p A102032 if stopp=0 then out:=[m*i,0];fi;
+%p A102032 out;
+%p A102032 end:
+%p A102032 formula:=proc(n)
+%p A102032 local x,y,B,expon,outputis, theOddFactor;
+%p A102032 x:=n+1;B:=ifactors(x);expon:=B[2][1][2];theOddFactor:=(n+1)/2^expon;
+%p A102032 y:=isprime(n);
+%p A102032 if theOddFactor=1 and y=true then outputis:=[n,(2^(n+expon-1)+2^n-2^(n-expon)-1)/n];fi;
+%p A102032 if theOddFactor>1 or y=false then outputis:=fjv6(n,1);fi;
+%p A102032 lprint(outputis[1],outputis[2]);
+%p A102032 end:
+%p A102032 fjfromis6:=proc(n,m)
+%p A102032 local k,B,expon, theoddfac,par,stopp,av,sub;
+%p A102032 av:=0;for k from n to m do
+%p A102032 par:=k mod 2;
+%p A102032 if par=0 then B:=ifactors(k);expon:=B[2][1][2];theoddfac:=k/2^expon;
+%p A102032 sub:=fjv6(theoddfac,2^expon);
+%p A102032 lprint(sub[1], sub[2]); fi;
+%p A102032 stopp:=0;
+%p A102032 if par=1 then formula(k); fi;
+%p A102032 od;
+%p A102032 end:
+%p A102032 fjfromis6(1,185);
+%p A102032 # Alternative:
+%p A102032 F:= proc(k,x,n,dmax)
+%p A102032    option remember;
+%p A102032    local d,z,v;
+%p A102032    if k = 0 then
+%p A102032       if x = 0 then return 0 else return infinity fi
+%p A102032    end;
+%p A102032    for d from k-1 to dmax do
+%p A102032       v:= procname(k-1,(x - 2^d) mod n,n, d-1) ;
+%p A102032       if v < 2^d then return v + 2^d fi
+%p A102032    od;
+%p A102032    infinity;
+%p A102032 end proc:
+%p A102032 seq(F(n,0,n,infinity)/n, n=1..100); # _Robert Israel_, Aug 26 2015
+%t A102032 F[k_, x_, n_, dMax_] := F[k, x, n, dMax] = Module[{d, z, v}, If[k == 0, If[x == 0, Return[0], Return[Infinity]]]; For[d = k - 1, d <= dMax, d++, v = F[k - 1, Mod[x - 2^d, n], n, d - 1]; If[v < 2^d, Return[v + 2^d]]]; Infinity];
+%t A102032 Table[F[n, 0, n, Infinity]/n, {n, 1, 32}] (* _Jean-François Alcover_, Jun 22 2020, after _Robert Israel_ *)
+%o A102032 (PARI) a(n)=my(K=n);while(hammingweight(K)!=n,K+=n);K/n \\ _Charles R Greathouse IV_, Feb 04 2013
+%Y A102032 Cf. A005349, A143115.
+%K A102032 nonn
+%O A102032 1,2
+%A A102032 _Eugen J. Ionascu_, Aug 03 2007
+%E A102032 Edited by _Ray Chandler_, Nov 16 2008

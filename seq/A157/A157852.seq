@@ -1,0 +1,54 @@
+%I A157852
+%S A157852 6,8,7,6,5,2,3,6,8,9,2,7,6,9,4,3,6,9,8,0,9,3,1,2,4,0,9,3,6,5,4,4,0,1,
+%T A157852 6,4,9,3,9,6,3,7,3,8,4,9,0,3,6,2,2,5,4,1,7,9,5,0,7,1,0,1,0,1,0,7,4,3,
+%U A157852 3,6,6,2,5,3,4,7,8,4,9,3,7,0,6,8,6,2,7,2,9,8,2,4,0,4,9,8,4,6,8,1,8,8,7,3,1,9,2,9,3,3,4,3,3,5,4,6,6,1,2,3,2,8,6
+%N A157852 Decimal expansion of the absolute value of lim_{N -> infinity} Integral_{x=1..2*N} e^(i*Pi*x)*x^(1/x).
+%C A157852 This constant is the integral analog of the constant described in A037077 since e^(i*Pi*x) =(-1)^x. While A037077 was named the MRB constant by _Simon Plouffe_, Marvin Ray Burns named this constant MKB after his wife at the time.
+%C A157852 This constant is hard to integrate and very slow to converge, so it takes a combination of modern methods to calculate many digits!
+%C A157852 This constant could be written as a special value, for omega=Pi, of the function f(omega) = lim_{N->infinity} Integral_{x = Pi/omega .. 2N8(Pi/omega)} (exp(i*omega*x)*x^(1/x)), a kind of discretely sampled Fourier transform of x^(1/x). This stresses the fact that it is a complex entity. People who desire to underline the similarity of this integral to the MRB alternating series (A037077) often write the factor exp(i*Pi*x) as (-1)^x, which can be a bit confusing because it hides the imaginary unit. - _Stanislav Sykora_, Apr 08 2016
+%H A157852 Marvin Ray Burns, <a href="/A157852/b157852.txt">Table of n, a(n) for n = 0..19999</a>
+%H A157852 Marvin Ray Burns, <a href="http://www.mapleprimes.com/blog/marvinrayburns/mrbconstantc"> Author's public inquiry 1</a>
+%H A157852 Marvin Ray Burns, <a href="http://math2.org/mmb/thread/41959">Author's public inquiry 2</a>
+%H A157852 Marvin Ray Burns, <a href="https://community.wolfram.com/groups/-/m/t/1323951?p_p_auth=uRW87GNs">How I calculated the digits of the MKB constant</a>
+%H A157852 Marvin Ray Burns, <a href="/A157852/a157852_3.nb">Paper on 20000 digits in a Mathematica notebook (Digits checked by different formula, computing more digits)</a>
+%H A157852 Marvin Ray Burns, <a href="/A157852/a157852_9.nb">How 40,000 digits of A157852 was successfully computed and checked to 35,000 digits</a>
+%H A157852 Marvin Ray Burns, <a href="/A157852/a157852_13.nb">Mathematica Notebook of 54,386 digits of A157852 computed with increasing MaxRecursion, with proof at bottom</a>.
+%H A157852 Marvin Ray Burns, <a href="https://www.wolframcloud.com/obj/bmmmburns/Published/How_I_found_A157852_sum.nb">How_I_found_A157852_sum</a>.
+%H A157852 Marvin Ray Burns, <a href="/A157852/a157852_12.pdf">A157852 sum PDFK</a>
+%H A157852 R. J. Mathar, <a href="http://arxiv.org/abs/0912.3844">Numerical evaluation of the oscillatory integral over exp(i*pi*x)x^(1/x) between 1 and infinity</a>, arxiv:0912.3844 [math.CA], 2009-2010.
+%F A157852 Equals sqrt(A255727^2 + A255728^2). - _Joerg Arndt_, Apr 05 2016
+%e A157852 After integrating from 1 to 15 million the absolute value of the integral is approximately 0.687652_7, after integrating from 1 to 20 million approximately 0.687652_6.
+%p A157852 # After _Marvin Ray Burns_'s "Program 3".
+%p A157852 f := (n, x) -> seq(x, 0..n):
+%p A157852 m := n -> (Pi/I)^n * MeijerG([[], [f(n, 1)]], [[1-n, f(n, 0)], []], -I*Pi):
+%p A157852 s := n -> abs(add(m(k), k = 1..n) - 2)/Pi:
+%p A157852 # s(n) approximates the constant for n -> oo and suitable chosen precision.
+%p A157852 seq(evalf(s(n), 22), n = 1..3); # _Peter Luschny_, Nov 16 2021
+%t A157852 a = NIntegrate[ x^(1/x)*Cos[Pi*x], {x, 1, 10^20}, WorkingPrecision -> 30, MaxRecursion -> 70]; b = NIntegrate[ x^(1/x)*Sin[Pi*x], {x, 1, 10^20}, WorkingPrecision -> 30, MaxRecursion -> 70]; RealDigits[ Sqrt[a^2 + b^2], 10, 18] // First (* _Jean-François Alcover_, Feb 14 2013 *)
+%t A157852 (* Program 2: to compute and verify 1000s of digits through a different formula. *)
+%t A157852 g[x_] = x^(1/x); t = (Timing[
+%t A157852     MKB = -(I NIntegrate[(g[(1 + t I)]) ( Exp[-Pi t]), {t, 0,
+%t A157852            Infinity}, WorkingPrecision -> 2410,
+%t A157852           Method -> "Trapezoidal", MaxRecursion -> 10] + I/Pi)])[[
+%t A157852   1]]; Print["Timing for calculation=", t]; t = (Timing[
+%t A157852     MKB1 = (1/Pi  NIntegrate[
+%t A157852          g'[1 + I t] Exp[-Pi t], {t, 0, Infinity},
+%t A157852          WorkingPrecision -> 2410, Method -> "Trapezoidal",
+%t A157852          MaxRecursion -> 10] - 2 I/Pi)])[[
+%t A157852   1]]; Print["Timing for verification=", t]; err =
+%t A157852 test - test2; Print["Error=", N[err, 20]];Abs[MKB] (* MaxRecursion -> 13 works for 10,000 digits. _Marvin Ray Burns_, Apr 18 2021 *)
+%t A157852 (* Program 3: An infinite sum involving the Meijer G function. Compare the discussion near the end of "How I calculated the digits of the MKB constant" and all of Cloud Notebook "How_I_found_A157852_sum" in the link section. *)
+%t A157852 f[n_] := MeijerG[{{},Table[1, {n+1}]}, {Prepend[Table[0, n+1], -n + 1], {}}, -I Pi];
+%t A157852 Abs[Sum[(I/Pi)^(1 - n) N[f[n], 22], {n, 1, 15}] - 2 I/Pi] (* _Marvin Ray Burns_, Nov 15 2021 *)
+%Y A157852 Integrating A037077 instead of summing.
+%Y A157852 Cf. A037077, A255727 (real part), A255728 (imaginary part).
+%K A157852 nonn,cons
+%O A157852 0,1
+%A A157852 _Marvin Ray Burns_, Mar 07 2009
+%E A157852 Edited by _N. J. A. Sloane_, Mar 13 2009
+%E A157852 Corrected and edited by _Marvin Ray Burns_, Apr 03 2009
+%E A157852 8 more digits from _R. J. Mathar_, Nov 30 2009, 3 more Jan 03 2011, 3 more on Feb 25 2013
+%E A157852 15 more digits added by _Marvin Ray Burns_, Feb 26 2013
+%E A157852 Many more digits added by _Marvin Ray Burns_, May 11 2015
+%E A157852 Edited by _Marvin Ray Burns_, Aug 06 2015
+%E A157852 Edited by _Marvin Ray Burns_, Jun 18 2017

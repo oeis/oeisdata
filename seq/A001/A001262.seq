@@ -1,0 +1,59 @@
+%I A001262
+%S A001262 2047,3277,4033,4681,8321,15841,29341,42799,49141,52633,65281,74665,
+%T A001262 80581,85489,88357,90751,104653,130561,196093,220729,233017,252601,
+%U A001262 253241,256999,271951,280601,314821,357761,390937,458989,476971,486737
+%N A001262 Strong pseudoprimes to base 2.
+%C A001262 The number 2^k-1 is in the sequence iff k is in A054723 or in A001567. - _Thomas Ordowski_, Sep 02 2016
+%C A001262 The number (2^k+1)/3 is in the sequence iff k is in A127956. - _Davide Rotondo_, Aug 13 2021
+%D A001262 R. K. Guy, Unsolved Problems Theory Numbers, A12.
+%D A001262 P. Ribenboim, The Book of Prime Number Records. Springer-Verlag, NY, 2nd ed., 1989, p. 95.
+%H A001262 T. D. Noe, <a href="/A001262/b001262.txt">Table of n, a(n) for n = 1..10000</a> (using data from A001567)
+%H A001262 Joerg Arndt, <a href="http://www.jjj.de/fxt/#fxtbook">Matters Computational (The Fxtbook)</a>, section 39.10, pp.786-792
+%H A001262 Chris Caldwell, <a href="http://primes.utm.edu/glossary/xpage/StrongPRP.html">Strong probable prime</a>
+%H A001262 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/StrongPseudoprime.html">Strong Pseudoprime</a>
+%H A001262 OEIS Wiki, <a href="http://oeis.org/wiki/Strong_pseudoprimes">Strong Pseudoprime</a>
+%H A001262 Wikipedia, <a href="http://en.wikipedia.org/wiki/Strong_pseudoprime">Strong pseudoprime</a>
+%H A001262 <a href="/index/Ps#pseudoprimes">Index entries for sequences related to pseudoprimes</a>
+%e A001262 For k = 577, k-1 = 576 = 9*2^6. Since 2^(9*2^3) = 2^72 == -1 (mod 577), 577 passes the primality test, but since it is actually prime, it is not in the sequence.
+%e A001262 For k = 3277, k-1 = 3276 = 819*2^2, and 2^(819*2) == -1 (mod 3277), so k passes the primality test, and k = 3277 = 29*113 is composite, so 3277 is in the sequence. - _Michael B. Porter_, Sep 04 2016
+%p A001262 A007814 := proc(n) padic[ordp](n,2) ; end proc:
+%p A001262 isStrongPsp := proc(n,b) local d,s,r; if type(n,'even') or n<=1 then return false; elif isprime(n) then return false; else s := A007814(n-1) ; d := (n-1)/2^s ; if modp(b &^ d,n) = 1 then return true; else for r from 0 to s-1 do if modp(b &^ d,n) = n-1 then return true; end if; d := 2*d ; end do: return false; end if; end if; end proc:
+%p A001262 isA001262 := proc(n) isStrongPsp(n,2) ; end proc:
+%p A001262 for n from 1 by 2 do if isA001262(n) then print(n); end if; end do:
+%p A001262 # _R. J. Mathar_, Apr 05 2011
+%t A001262 sppQ[n_?EvenQ, _] := False; sppQ[n_?PrimeQ, _] := False; sppQ[n_, b_] := (s = IntegerExponent[n-1, 2]; d = (n-1)/2^s; If[PowerMod[b, d, n] == 1, Return[True], Do[If[PowerMod[b, d, n] == n-1, Return[True]]; d = 2*d, {s}]]); lst = {}; k = 3; While[k < 500000, If[sppQ[k, 2], Print[k]; AppendTo[lst, k]]; k += 2]; lst (* _Jean-François Alcover_, Oct 20 2011, after _R. J. Mathar_ *)
+%o A001262 (PARI)
+%o A001262 isStrongPsp(n,b)={
+%o A001262         my(s,d,r,bm) ;
+%o A001262         if( (n% 2) ==0 || n <=1, return(0) ;) ;
+%o A001262         if(isprime(n), return(0) ;) ;
+%o A001262         s = valuation(n-1,2) ;
+%o A001262         d = (n-1)/2^s ;
+%o A001262         bm = Mod(b,n)^d ;
+%o A001262         if ( bm == Mod(1,n), return(1) ;) ;
+%o A001262         for(r=0,s-1,
+%o A001262                 bm = Mod(b,n)^d ;
+%o A001262                 if ( bm == Mod(-1,n),
+%o A001262                         return(1) ;
+%o A001262                 ) ;
+%o A001262                 d *= 2;
+%o A001262         ) ;
+%o A001262         return(0);
+%o A001262 }
+%o A001262 isA001262(n)={
+%o A001262         isStrongPsp(n,2)
+%o A001262 }
+%o A001262 {
+%o A001262 for(n=1,10000000000,
+%o A001262     if(isA001262(n),
+%o A001262         print(n)
+%o A001262     ) ;
+%o A001262 ) ;
+%o A001262 } \\ _R. J. Mathar_, Mar 07 2012
+%o A001262 (PARI) is_A001262(n,a=2)={ (bittest(n,0) && !isprime(n) && n>8) || return; my(s=valuation(n-1,2)); if(1==a=Mod(a,n)^(n>>s),return(1)); while(a!=-1 && s--, a=a^2); a==-1} \\ _M. F. Hasler_, Aug 16 2012
+%Y A001262 Cf. A001567 (pseudoprimes to base 2), A020229 (strong pseudoprimes to base 3), A020231 (base 5), A020233 (base 7).
+%Y A001262 Cf. A072276 (SPP to base 2 and 3), A215568 (SPP to base 2 and 5), A056915 (SPP to base 2,3 and 5), A074773 (SPP to base 2,3,5 and 7).
+%K A001262 nonn,nice
+%O A001262 1,1
+%A A001262 _N. J. A. Sloane_
+%E A001262 More terms from _David W. Wilson_, Aug 15 1996

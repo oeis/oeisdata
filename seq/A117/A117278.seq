@@ -1,0 +1,38 @@
+%I A117278
+%S A117278 1,1,0,1,1,1,0,1,1,1,1,1,0,1,1,1,0,1,2,1,0,2,1,1,1,1,0,2,2,1,0,1,2,2,
+%T A117278 1,1,1,1,2,2,2,1,0,2,1,3,2,1,1,0,1,3,2,3,2,1,0,2,2,3,3,2,1,1,1,0,4,3,
+%U A117278 3,3,2,1,0,2,2,4,3,4,2,1,1,1,1,3,4,5,3,3,2,1,0,2,2,6,4,4,4,2,1,1,0,1,5,3,6
+%N A117278 Triangle read by rows: T(n,k) is the number of partitions of n into k prime parts (n>=2, 1<=k<=floor(n/2)).
+%C A117278 Row n has floor(n/2) terms. Row sums yield A000607. T(n,1) = A010051(n) (the characteristic function of the primes). T(n,2) = A061358(n). Sum(k*T(n,k), k>=1) = A084993(n).
+%H A117278 Alois P. Heinz, <a href="/A117278/b117278.txt">Rows n = 2..200, flattened</a>
+%F A117278 G.f.: G(t,x) = -1+1/product(1-tx^(p(j)), j=1..infinity), where p(j) is the j-th prime.
+%e A117278 T(12,3) = 2 because we have [7,3,2] and [5,5,2].
+%e A117278 Triangle starts:
+%e A117278   1;
+%e A117278   1;
+%e A117278   0, 1;
+%e A117278   1, 1;
+%e A117278   0, 1, 1;
+%e A117278   1, 1, 1;
+%e A117278   0, 1, 1, 1;
+%e A117278   0, 1, 2, 1;
+%e A117278   ...
+%p A117278 g:=1/product(1-t*x^(ithprime(j)),j=1..30): gser:=simplify(series(g,x=0,30)): for n from 2 to 22 do P[n]:=sort(coeff(gser,x^n)) od: for n from 2 to 22 do seq(coeff(P[n],t^j),j=1..floor(n/2)) od; # yields sequence in triangular form
+%p A117278 # second Maple program:
+%p A117278 b:= proc(n, i) option remember;
+%p A117278       `if`(n=0, [1], `if`(i<1, [], zip((x, y)->x+y, b(n, i-1),
+%p A117278        [0, `if`(ithprime(i)>n, [], b(n-ithprime(i), i))[]], 0)))
+%p A117278     end:
+%p A117278 T:= n-> subsop(1=NULL, b(n, numtheory[pi](n)))[]:
+%p A117278 seq(T(n), n=2..25);  # _Alois P. Heinz_, Nov 16 2012
+%t A117278 (* As triangle: *) nn=20;a=Product[1/(1-y x^i),{i,Table[Prime[n],{n,1,nn}]}];Drop[CoefficientList[Series[a,{x,0,nn}],{x,y}],2,1]//Grid (* _Geoffrey Critzer_, Oct 30 2012 *)
+%o A117278 (PARI)
+%o A117278 parts(n, pred)={prod(k=1, n, if(pred(k), 1/(1-y*x^k) + O(x*x^n), 1))}
+%o A117278 {my(n=15); apply(p->Vecrev(p/y), Vec(parts(n, isprime)-1))} \\ _Andrew Howroyd_, Dec 28 2017
+%Y A117278 Columns k=1-10 give: A010051, A061358, A068307, A259194, A259195, A259196, A259197, A259198, A259200, A259201.
+%Y A117278 Row sums give A000607.
+%Y A117278 T(A000040(n),n) gives A259254(n).
+%Y A117278 Cf. A084993, A219180.
+%K A117278 nonn,tabf
+%O A117278 2,19
+%A A117278 _Emeric Deutsch_, Mar 07 2006

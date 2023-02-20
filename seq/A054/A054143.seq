@@ -1,0 +1,53 @@
+%I A054143
+%S A054143 1,1,3,1,4,7,1,5,11,15,1,6,16,26,31,1,7,22,42,57,63,1,8,29,64,99,120,
+%T A054143 127,1,9,37,93,163,219,247,255,1,10,46,130,256,382,466,502,511,1,11,
+%U A054143 56,176,386,638,848,968,1013,1023,1,12,67,232,562,1024,1486,1816,1981,2036,2047
+%N A054143 Triangular array T given by T(n,k) = Sum_{0 <= j <= i-n+k, n-k <= i <= n} C(i,j) for n >= 0 and 0 <= k <= n.
+%C A054143 Row sums given by A001787.
+%C A054143 T(n, n) = -1 + 2^(n+1).
+%C A054143 T(2*n, n) = 4^n.
+%C A054143 T(2*n+1, n) = A000346(n).
+%C A054143 T(2*n-1, n) = A032443(n).
+%C A054143 A054143 is the fission of the polynomial sequence ((x+1^n) by the polynomial sequence (q(n,x)) given by q(n,x) = x^n + x^(n-1) + ... + x + 1. See A193842 for the definition of fission. - _Clark Kimberling_, Aug 07 2011
+%H A054143 G. C. Greubel, <a href="/A054143/b054143.txt">Rows n = 0..100 of triangle, flattened</a>
+%F A054143 T(n,k) = Sum_{0 <= j <= i-n+k, n-k <= i <= n} binomial(i,j).
+%F A054143 T(n,k) = T(n-1,k) + 3*T(n-1,k-1) - 2*T(n-2,k-1) - 2*T(n-2,k-2), T(0,0) = 1, T(n,k) = 0 if k < 0 or if k > n. - _Philippe Deléham_, Nov 30 2013
+%F A054143 From _Petros Hadjicostas_, Jun 05 2020: (Start)
+%F A054143 Bivariate o.g.f.: Sum_{n,k >= 0} T(n,k)*x^n*y^k = 1/(1 - x - 3*x*y + 2*x^2*y + 2*x^2*y^2) = 1/((1 - 2*x*y)*(1 - x*(y+1))).
+%F A054143 n-th row o.g.f.: ((1 + y)^(n+1) - (2*y)^(n+1))/(1 - y). (End)
+%e A054143 Triangle T(n,k) (with rows n >= 0 and columns k = 0..n) begins:
+%e A054143   1;
+%e A054143   1,  3;
+%e A054143   1,  4,  7;
+%e A054143   1,  5, 11, 15;
+%e A054143   1,  6, 16, 26, 31;
+%e A054143   1,  7, 22, 42, 57, 63;
+%p A054143 A054143_row := proc(n) add(add(binomial(n,n-i)*x^(k+1),i=0..k),k=0..n-1); coeffs(sort(%)) end; seq(print(A054143_row(n)),n=1..6); # _Peter Luschny_, Sep 29 2011
+%t A054143 (* First program *)
+%t A054143 z=10;
+%t A054143 p[n_,x_]:=(x+1)^n;
+%t A054143 q[0,x_]:=1;q[n_,x_]:=x*q[n-1,x]+1;
+%t A054143 p1[n_,k_]:=Coefficient[p[n,x],x^k];p1[n_,0]:=p[n,x]/.x->0;
+%t A054143 d[n_,x_]:=Sum[p1[n,k]*q[n-1-k,x],{k,0,n-1}]
+%t A054143 h[n_]:=CoefficientList[d[n,x],{x}]
+%t A054143 TableForm[Table[Reverse[h[n]],{n,0,z}]]
+%t A054143 Flatten[Table[Reverse[h[n]],{n,-1,z}]] (* A054143 *)
+%t A054143 TableForm[Table[h[n],{n,0,z}]]
+%t A054143 Flatten[Table[h[n],{n,-1,z}]] (* A104709 *)
+%t A054143 (* Second program *)
+%t A054143 Table[Sum[Binomial[i, j], {i, n-k, n}, {j,0,i-n+k}], {n,0,12}, {k,0,n}]// Flatten (* _G. C. Greubel_, Aug 01 2019 *)
+%o A054143 (PARI) T(n,k) = sum(i=n-k,n, sum(j=0,i-n+k, binomial(i,j)));
+%o A054143 for(n=0,12, for(k=0,n, print1(T(n,k), ", "))) \\ _G. C. Greubel_, Aug 01 2019
+%o A054143 (Magma)
+%o A054143 T:= func< n,k | (&+[ (&+[ Binomial(i,j): j in [0..i-n+k]]): i in [n-k..n]]) >;
+%o A054143 [T(n,k): k in [0..n], n in [0..12]]; // _G. C. Greubel_, Aug 01 2019
+%o A054143 (Sage)
+%o A054143 def T(n, k): return sum(sum( binomial(i,j) for j in (0..i-n+k)) for i in (n-k..n))
+%o A054143 [[T(n, k) for k in (0..n)] for n in (0..12)] # _G. C. Greubel_, Aug 01 2019
+%o A054143 (GAP) Flat(List([0..12], n-> List([0..n], k-> Sum([n-k..n], i-> Sum([0..i-n+k], j-> Binomial(i,j) ))))); # _G. C. Greubel_, Aug 01 2019
+%Y A054143 Cf. A000346, A001787, A032443.
+%Y A054143 Diagonal sums give A005672. - _Paul Barry_, Feb 07 2003
+%K A054143 nonn,tabl
+%O A054143 0,3
+%A A054143 _Clark Kimberling_, Mar 18 2000
+%E A054143 Name edited by _Petros Hadjicostas_, Jun 04 2020

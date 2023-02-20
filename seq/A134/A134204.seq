@@ -1,0 +1,45 @@
+%I A134204
+%S A134204 2,3,5,7,13,17,19,23,41,31,29,37,11,67,59,61,83,53,73,79,101,109,89,
+%T A134204 233,103,47,239,139,113,293,97,151,137,127,43,167,157,509,251,373,107,
+%U A134204 467,163,181,347,193,313,439,281,307,443,271,197,227,367,733,331,353,401,71,229
+%N A134204 a(0)=2; for n > 0, a(n) = smallest prime not occurring earlier in the sequence such that a(n-1) + a(n) is a multiple of n. If no such prime exists, the sequence terminates.
+%C A134204 Is this sequence infinite and, if so, is it a permutation of the primes?
+%C A134204 This sequence is infinite if and only if a(n-1) never divides n for any n.
+%C A134204 This sequence exists for at least 800*10^6 terms (see A133242, A133243, A232992). - _David Applegate_, Nov 01 2007, Nov 15 2007
+%C A134204 The plot of primes less than 10^6 shows an interesting crosshatch pattern. Why? [_T. D. Noe_, Jul 12 2009] See also the graph of A133244. - _N. J. A. Sloane_, Apr 06 2013
+%C A134204 Entries A224221, A224222 are similar sequences which terminate after 20 or so steps, while A224223 and A224229 are similar sequences whose status is also unknown. - _N. J. A. Sloane_, Apr 05 2013
+%C A134204 Empirically, the direction of hatchings is related to the parity of n, and each hatch corresponds to terms with the same value of Sum_{k=1..n} ((-1)^k * (a(k-1)+a(k))/k) (see colorized scatterplots in Links section). - _Rémy Sigrist_, Nov 07 2017
+%H A134204 Robert Israel and Reinhard Zumkeller, <a href="/A134204/b134204.txt">Table of n, a(n) for n = 0..100000</a> initial 1000 terms from Robert Israel
+%H A134204 David Applegate, <a href="/A134204/a134204.cc.txt">C++ Program</a> [For output see A133242, A133243, A232992]
+%H A134204 T. D. Noe, <a href="http://www.sspectra.com/math/A134204.png">Graph of initial terms (out to 10^6)</a>
+%H A134204 N. J. A. Sloane, <a href="http://neilsloane.com/doc/g4g8.pdf">Eight Hateful Sequences</a>, a short paper for the 8th Gathering for Gardner, May 2008.
+%H A134204 Rémy Sigrist, <a href="/A134204/a134204.png">Colored scatterplot of the sequence (where the color is a function of the parity of n)</a>
+%H A134204 Rémy Sigrist, <a href="/A134204/a134204_1.png">Colored scatterplot of the sequence (where the color is a function of floor(a(n)/n))</a>
+%H A134204 Rémy Sigrist, <a href="/A134204/a134204_2.png">Colored scatterplot of the sequence (where the color is a function of floor(2*a(n)/n))</a>
+%H A134204 Rémy Sigrist, <a href="/A134204/a134204_3.png">Colored scatterplot of the sequence (where the color is a function of Sum_{k=1..n} ((-1)^k * (a(k-1)+a(k))/k))</a>
+%e A134204 The primes that don't occur among terms a(0) through a(6) form the sequence 11,23,29,31,... Of these, 23 is the smallest that when added to a(6)=19 gets a multiple of 7 -- 19+23 = 42 = 6*7. (19+11 = 30, which is not a multiple of 7.) So a(7) = 23.
+%t A134204 aa = {a[0]=2, a[1]=3}; a[n_] := a[n] = (an = First[ Complement[ Prime[ Range[1 + PrimePi[ Max[aa]]]], aa]]; While[ Not[ FreeQ[aa, an] && Divisible[ a[n-1] + an, n]], an = NextPrime[an]]; AppendTo[aa, an]; an); Table[a[n], {n, 0, 60}] (* _Jean-François Alcover_, Oct 17 2012 *)
+%t A134204 _T. D. Noe_, Apr 05 2013, provided the following information about how his plot (see link) was obtained: I computed 500000 points and then plotted up to y = 10^6. Here's the Mma code (which takes a while to run):
+%t A134204 t = {2}; Do[k = Ceiling[t[[-1]]/n];
+%t A134204   While[p = k*n - t[[-1]]; ! PrimeQ[p] || MemberQ[t, p], k++];
+%t A134204   If[2 p < n, Print[{n, p, N[n/p]}]];
+%t A134204   AppendTo[t, p], {n, 500000}]
+%t A134204 ListPlot[t, PlotRange -> {1, 1000000}, Frame -> True,
+%t A134204 PlotStyle -> {PointSize[0.005]}, ImageSize -> 500,
+%t A134204 PlotLabel -> "\nA134204(n)\n", GridLines -> Automatic]
+%t A134204 With[{nn = 10^3}, Fold[Append[#1, SelectFirst[Prime@ Range[2, Ceiling@ Log2[nn] nn], Function[p, And[FreeQ[#1, p], Divisible[Last@ #1 + p, #2]]]]] &, {2}, Range@ nn]] (* _Michael De Vlieger_, Oct 16 2017 *)
+%o A134204 (Haskell)
+%o A134204 import Data.List (delete)
+%o A134204 a134204 n = a134204_list !! n
+%o A134204 a134204_list = 2 : f 1 2 (tail a000040_list) where
+%o A134204    f x q ps = p' : f (x + 1) p' (delete p' ps) where
+%o A134204      p' = head [p | p <- ps, mod (p + q) x == 0]
+%o A134204 -- _Reinhard Zumkeller_, Jun 04 2012
+%o A134204 (PARI) A134204(n,show_all=1,a=2,used=[])={for(n=1,n, show_all & print1(a","); used=setunion(used,Set(a)); forstep(p=(-a)%n,9e19,n,isprime(p)||next; setsearch(used,p)&next; a=p;break));a} \\ _M. F. Hasler_, Mar 01 2013
+%Y A134204 Cf. A134205, A134206, A134207, A133242, A133243, A131261, A224221, A224222, A224223, A224229, A232992.
+%Y A134204 For records see A133244, A133245.
+%Y A134204 Cf. A162846 (where prime(n) occurs).
+%K A134204 nonn,nice,look
+%O A134204 0,1
+%A A134204 _Leroy Quet_, Oct 14 2007
+%E A134204 More terms from _Robert Israel_, Oct 14 2007

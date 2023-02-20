@@ -1,0 +1,48 @@
+%I A006252 M1275
+%S A006252 1,1,1,2,4,14,38,216,600,6240,9552,319296,-519312,28108560,-176474352,
+%T A006252 3998454144,-43985078784,837126163584,-12437000028288,237195036797184,
+%U A006252 -4235955315745536,85886259443020800,-1746536474655406080,38320721602434017280,-864056965711935974400
+%N A006252 Expansion of e.g.f. 1/(1 - log(1+x)).
+%C A006252 From _Michael Somos_, Mar 04 2004: (Start)
+%C A006252 Stirling transform of a(n+1)=[1,2,4,14,38,...] is A000255(n)=[1,3,11,53,309,...].
+%C A006252 Stirling transform of 2*a(n)=[2,2,4,8,28,...] is A052849(n)=[2,4,12,48,240,...].
+%C A006252 Stirling transform of a(n)=[1,1,2,4,14,38,216,...] is A000142(n)=[1,2,6,24,120,...].
+%C A006252 Stirling transform of a(n-1)=[1,1,1,2,4,14,38,...] is A000522(n-1)=[1,2,5,16,65,...].
+%C A006252 Stirling transform of a(n-1)=[0,1,1,2,4,14,38,...] is A007526(n-1)=[0,1,4,15,64,...].
+%C A006252 (End)
+%C A006252 For n > 0: a(n) = sum of n-th row in triangle A048594. - _Reinhard Zumkeller_, Mar 02 2014
+%C A006252 Coefficients in a factorial series representation of the exponential integral: exp(z)*E_1(z) = Sum_{n >= 0} (-1)^n*a(n)/(z)_n, where (z)_n denotes the rising factorial z*(z + 1)*...*(z + n) and E_1(z) = Integrate_{t = z..inf} exp(-t)/t dt. See Weninger, equation 6.4. - _Peter Bala_, Feb 12 2019
+%D A006252 G. Pólya, Induction and Analogy in Mathematics. Princeton Univ. Press, 1954, p. 9.
+%D A006252 N. J. A. Sloane and Simon Plouffe, The Encyclopedia of Integer Sequences, Academic Press, 1995 (includes this sequence).
+%H A006252 Reinhard Zumkeller, <a href="/A006252/b006252.txt">Table of n, a(n) for n = 0..400</a>
+%H A006252 Beáta Bényi and Daniel Yaqubi, <a href="https://arxiv.org/abs/1903.07450">Mixed coloured permutations</a>, arXiv:1903.07450 [math.CO], 2019.
+%H A006252 Takao Komatsu and Amalia Pizarro-Madariaga, <a href="https://doi.org/10.3906/mat-1809-52">Harmonic numbers associated with inversion numbers in terms of determinants</a>, Turkish Journal of Mathematics (2019) Vol. 43, 340-354.
+%H A006252 E. J. Weniger, <a href="https://arxiv.org/abs/1005.0466">Summation of divergent power series by means of factorial series</a> arXiv:1005.0466v1 [math.NA], 2010.
+%F A006252 a(n) = Sum_{k=0..n} k!*stirling1(n, k). - _Vladeta Jovovic_, Sep 08 2002
+%F A006252 a(n) = D^n(1/(1-x)) evaluated at x = 0, where D is the operator exp(-x)*d/dx. Row sums of A048594. Cf. A007840. - _Peter Bala_, Nov 25 2011
+%F A006252 E.g.f.: 1/(1-log(1+x)) = 1 + x/(1-x + x/(2-x + 4*x/(3-2*x + 9*x/(4-3*x + 16*x/(5-4*x + 25*x/(6-5*x +...)))))), a continued fraction. - _Paul D. Hanna_, Dec 31 2011
+%F A006252 a(n)/n! ~ -(-1)^n / (n * (log(n))^2) * (1 - 2*(1 + gamma)/log(n)), where gamma is the Euler-Mascheroni constant A001620. - _Vaclav Kotesovec_, Jul 01 2018
+%F A006252 a(0) = 1; a(n) = Sum_{k=1..n} (-1)^(k-1) * (k-1)! * binomial(n,k) * a(n-k). - _Seiichi Manyama_, May 22 2022
+%t A006252 With[{nn=30},CoefficientList[Series[1/(1-Log[1+x]),{x,0,nn}],x] Range[0,nn]!] (* _Harvey P. Dale_, Aug 12 2016 *)
+%o A006252 (PARI) a(n)=if(n<0,0,n!*polcoeff(1/(1-log(1+x+x*O(x^n))),n))
+%o A006252 (PARI) {a(n)=local(CF=1+x*O(x^n)); for(k=0, n-1, CF=1/((n-k+1)-(n-k)*x+(n-k+1)^2*x*CF)); n!*polcoeff(1+x/(1-x+x*CF), n, x)} /* _Paul D. Hanna_, Dec 31 2011 */
+%o A006252 (PARI) a_vector(n) = my(v=vector(n+1)); v[1]=1; for(i=1, n, v[i+1]=sum(j=1, i, (-1)^(j-1)*(j-1)!*binomial(i, j)*v[i-j+1])); v; \\ _Seiichi Manyama_, May 22 2022
+%o A006252 (Haskell)
+%o A006252 a006252 0 = 1
+%o A006252 a006252 n = sum $ a048594_row n  -- _Reinhard Zumkeller_, Mar 02 2014
+%o A006252 (Sage)
+%o A006252 def A006252_list(len):
+%o A006252     f, R, C = 1, [1], [1]+[0]*len
+%o A006252     for n in (1..len):
+%o A006252         f *= n
+%o A006252         for k in range(n, 0, -1):
+%o A006252             C[k] = -C[k-1]*((k-1)/(k) if k>1 else 1)
+%o A006252         C[0] = -sum(C[k] for k in (1..n))
+%o A006252         R.append(C[0]*f)
+%o A006252     return R
+%o A006252 print(A006252_list(24)) # _Peter Luschny_, Feb 21 2016
+%Y A006252 Column k=1 of A320080.
+%Y A006252 Cf. A007840.
+%K A006252 sign
+%O A006252 0,4
+%A A006252 _N. J. A. Sloane_

@@ -1,0 +1,36 @@
+%I A098407
+%S A098407 1,1,2,6,13,33,78,186,436,1028,2394,5566,12877,29689,68198,156194,
+%T A098407 356599,811959,1843956,4177436,9442166,21295934,47932572,107677140,
+%U A098407 241443980,540441068,1207689636,2694452060,6002389882,13351958546,29659179804,65794744420,145768641091
+%N A098407 Number of different hierarchical orderings that can be formed from n unlabeled elements with no repetition of subhierarchies.
+%C A098407 a(n) is the number of finite sets of compositions with total sum n. The case of constant sums is A358904, cf. A074854. The case of distinct sums is A304961, ordered A336127. The ordered version (sequences of distinct compositions) is A358907. - _Gus Wiseman_, Dec 12 2022
+%H A098407 Alois P. Heinz, <a href="/A098407/b098407.txt">Table of n, a(n) for n = 0..3217</a>
+%H A098407 N. J. A. Sloane and Thomas Wieder, <a href="https://arxiv.org/abs/math/0307064">The Number of Hierarchical Orderings</a>, arXiv:math/0307064 [math.CO], 2003; Order 21 (2004), 83-89.
+%F A098407 a(n) = Sum_{ partitions n = s_1 + ... + s_n } Product_{ Set{s_i} } C(2^(s_i - 1), m(s_i)), where the sum runs over all partitions of n, the product runs over the set of parts of a given partition, s_i is the i-th part in the set of parts, C(k, l) denotes the binomial coefficient and m(s_i) is the multiplicity of part s_i in the given partition.
+%F A098407 G.f.: Product_{k>=1} (1+x^k)^(2^(k-1)). - _Vladeta Jovovic_, Feb 19 2008
+%F A098407 a(n) ~ 2^n * exp(sqrt(2*n) - 1/4 + c) / (sqrt(2*Pi) * 2^(3/4) * n^(3/4)), where c = Sum_{k>=2} -(-1)^k / (k*(2^k-2)) = -0.207530918644117743551169251314627032059... - _Vaclav Kotesovec_, Jun 08 2018
+%F A098407 Weigh transform of A011782. - _Alois P. Heinz_, Jun 25 2018
+%e A098407 Let a pair of parentheses () indicate a subhierarchy and let square brackets [] denote a set of subhierarchies, that is, a hierarchy (also called a society). Let the ranks be ordered from left to right and separated by a colon; e.g., (2:3) is a subhierarchy with three elements ("individuals") on top and two elements on the bottom rank.
+%e A098407 Then the hierarchical ordering for n = 4 is composed of the following sets: [(1:1),(2)]; [(1),(3)]; [(1),(1:1:1)]; [(1),(2:1)]; [(1),(1:2)]; [(4)]; [(2:2)]; [(1:3)]; [(3:1)]; [(1:1:2)]; [(1:2:1)]; [(2:1:1)]; [(1:1:1:1)]; thus a(4) = 13.
+%e A098407 For example, the following hierarchy is not allowed: [(1),(1),(1),(1)] because of the repetition of (1).
+%p A098407 main := proc(n::integer) local a, ListOfPartitions, NumberOfPartitions, APartition, APart, ASet, MultipliticityOfAPart, ndxprttn, ndxprt, Term, Produkt; with(combinat): with(ListTools): a := 0; ListOfPartitions := partition(n); NumberOfPartitions := nops(ListOfPartitions); for ndxprttn from 1 to NumberOfPartitions do APartition := ListOfPartitions[ndxprttn]; ASet := convert(APartition,set); Produkt := 1; for ndxprt from 1 to nops(ASet) do APart := op(ndxprt,ASet); MultipliticityOfAPart := Occurrences(APart, APartition); Term := 2^(APart-1); Term := binomial(Term,MultipliticityOfAPart); Produkt := Produkt * Term; # End of do-loop *** ndxprt ***. end do; a := a + Produkt; # End of do-loop *** ndxprttn ***. end do; print("n, a(n):",n,a); end proc;
+%p A098407 PartitionList := proc (n, k) # Authors: # Herbert S. Wilf and Joanna Nordlicht, # Source: # Lecture Notes "East Side West Side,..." # University of Pennsylvania, USA, 2002. # Available from http://www.cis.upenn.edu/~wilf/lecnotes.html # Berechnet die Partitionen von n mit k Summanden. local East, West; if n < 1 or k < 1 or n < k then RETURN([]) elif n = 1 then RETURN([[1]]) else if n < 2 or k < 2 or n < k then West := [] else West := map(proc (x) options operator, arrow; [op(x), 1] end proc, PartitionList(n-1, k-1)) end if; if k <= n-k then East := map(proc(y) options operator, arrow; map(proc (x) options operator, arrow; x+1 end proc, y) end proc, PartitionList(n-k, k)) else East := [] end if; RETURN([op(West), op(East)]) end if end proc;
+%p A098407 # second Maple program:
+%p A098407 series(exp(add((-1)^(j-1)/j*z^j/(1-2*z^j), j=1..40)), z, 40); # Cf. A102866; _Vladeta Jovovic_, Feb 19 2008
+%p A098407 # alternative Maple program:
+%p A098407 b:= proc(n, i) option remember; `if`(n=0 or i=1, `if`(n>1, 0, 1),
+%p A098407       add(b(n-i*j, i-1)*binomial(2^(i-1), j), j=0..n/i))
+%p A098407     end:
+%p A098407 a:= n-> b(n$2):
+%p A098407 seq(a(n), n=0..32);  # _Alois P. Heinz_, May 22 2018
+%t A098407 terms = 32; CoefficientList[Product[(1 + x^k)^(2^(k-1)), {k, 1, terms+1}] + O[x]^(terms+1), x] // Rest (* _Jean-François Alcover_, Nov 10 2017, after _Vladeta Jovovic_ *)
+%t A098407 nmax = 40; CoefficientList[Series[Exp[Sum[-(-1)^k*x^k/(k*(1 - 2 x^k)), {k, 1, nmax}]], {x, 0, nmax}], x] (* _Vaclav Kotesovec_, Jun 08 2018 *)
+%Y A098407 Cf. A011782, A075729.
+%Y A098407 A034691 counts multisets of compositions, ordered A133494.
+%Y A098407 A261049 counts sets of partitions, ordered A358906.
+%Y A098407 Cf. A000009, A000219, A001970, A055887, A075900, A218482, A296122, A304961.
+%K A098407 nonn
+%O A098407 0,3
+%A A098407 _Thomas Wieder_, Sep 07 2004; corrected Sep 09 2004
+%E A098407 More terms from _Alois P. Heinz_, Apr 21 2012
+%E A098407 a(0)=1 prepended by _Alois P. Heinz_, May 22 2018

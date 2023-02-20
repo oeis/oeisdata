@@ -1,0 +1,57 @@
+%I A106535
+%S A106535 11,19,31,59,71,79,131,179,191,239,251,271,311,359,379,419,431,439,
+%T A106535 479,491,499,571,599,631,659,719,739,751,839,971,1019,1039,1051,1091,
+%U A106535 1171,1259,1319,1399,1439,1451,1459,1499,1531,1559,1571,1619,1759,1811,1831
+%N A106535 Numbers k such that the smallest x > 1 for which Fibonacci(x) == 0 mod k is x = k - 1.
+%C A106535 This is a sister sequence to A000057, because this sequence, since {k : A001177(k) = k-1}, might be called a subdiagonal sequence of A001177, and {k : A001177(k) = k+1}, which might be called a superdiagonal sequence of A001177. Sequences A000057 and A106535 are disjoint. Is this sequence the set of all divisors of some family of sequences, like A000057 is? - _Art DuPre_, Jul 11 2012
+%C A106535 Subset of A219612. - _Paolo P. Lava_, Dec 22 2014
+%C A106535 Are all members of this sequence prime? Using A069106, any composite members must exceed 89151931. - _Robert Israel_, Oct 13 2015
+%C A106535 From _Jianing Song_, Jul 02 2019: (Start)
+%C A106535 Yes, all terms are primes. See a brief proof below.
+%C A106535 Also, if p == 1 (mod 4) then b(p) divides (p-Legendre(p,5))/2. So terms in this sequence are congruent to 11 or 19 modulo 20.
+%C A106535 Primes p such that ord(-(3+sqrt(5))/2,p) = p-1, where ord(z,p) is the smallest integer k > 0 such that (z^k-1)/p is an algebraic integer. (End)
+%C A106535 Comments from _Amiram Eldar_, Jan 30 2022 (Start)
+%C A106535 Sequence A003147, "Primes p with a Fibonacci primitive root", is defined in the paper: Daniel Shanks, Fibonacci primitive roots, Fibonacci Quarterly, Vol.  10, No. 2 (1972), pp. 163-168, and 181.
+%C A106535 A second paper on this subject Daniel Shanks and Larry Taylor, An Observation of Fibonacci Primitive Roots, Fibonacci Quarterly, Vol. 11, No. 2 (1973), pp. 159-160,
+%C A106535 deals with terms p == 3 (mod 4) of A003147, i.e., the intersection of A003147 and A002145 (or A004767).
+%C A106535 It states that if g is a Fibonacci primitive root of a prime p such that p == 3 (mod 4) then g-1 and g-2 are also primitive roots of p.
+%C A106535 The first 2000 terms of (A003147 intersect A002145) agree with the present sequence, although the definitions are quite different. Are these two sequences the same? (End)
+%H A106535 Robert Israel, <a href="/A106535/b106535.txt">Table of n, a(n) for n = 1..2000</a>
+%H A106535 Alfred Brousseau, <a href="http://www.fq.math.ca/Scanned/2-1/alfred2.pdf">Primes which are factors of all Fibonacci sequences</a>, Fib. Quart., 2 (1964), 33-38.
+%H A106535 Alfred Brousseau, <a href="http://www.fq.math.ca/fibonacci-tables.html">Fibonacci and Related Number Theoretic Tables</a>, Fibonacci Association, San Jose, CA, 1972.
+%H A106535 Jianing Song, <a href="/A106535/a106535.txt">Proof that all terms are prime</a>
+%F A106535 {n: A001177(n) = n-1}. - _R. J. Mathar_, Jul 09 2012
+%p A106535 A106535 := proc(n)
+%p A106535         option remember;
+%p A106535         if n = 1 then
+%p A106535                 11;
+%p A106535         else
+%p A106535                 for a from procname(n-1)+1 do
+%p A106535                         if A001177(a) = a-1 then
+%p A106535                                 return a;
+%p A106535                         end if;
+%p A106535                 end do:
+%p A106535         end if;
+%p A106535 end proc: # _R. J. Mathar_, Jul 09 2012
+%p A106535 # Alternative:
+%p A106535 fmod:= proc(a,b) local A;
+%p A106535   uses LinearAlgebra[Modular];
+%p A106535   A:= Mod(b, <<1,1>|<1,0>>,integer[8]);
+%p A106535   MatrixPower(b,A,a)[1,2];
+%p A106535 end proc:
+%p A106535 filter:= proc(n)
+%p A106535   local cands;
+%p A106535   if fmod(n-1,n) <> 0 then return false fi;
+%p A106535   cands:= map(t -> (n-1)/t, numtheory:-factorset(n-1));
+%p A106535   andmap(c -> (fmod(c,n) > 0), cands);
+%p A106535 end proc:
+%p A106535 select(filter, [$2..10^4]); # _Robert Israel_, Oct 13 2015
+%t A106535 f[n_] := Block[{x = 2}, While[Mod[Fibonacci@ x, n] != 0, x++]; x];Select[Range@ 1860, f@ # == # - 1 &] (* _Michael De Vlieger_, Oct 13 2015 *)
+%o A106535 (GAP) Filtered([2..2000], n -> Fibonacci(n-1) mod n = 0 and Filtered( [2..n-2], x -> Fibonacci(x) mod n = 0 ) = [] );
+%o A106535 (PARI) isok(n) = {x = 2; while(fibonacci(x) % n, x++); x == n-1;} \\ _Michel Marcus_, Oct 20 2015
+%Y A106535 Cf. A000057, A001175, A069106.
+%Y A106535 Similar sequences that give primes p such that A001177(p) = (p-1)/s: this sequence (s=1), A308795 (s=2), A308796 (s=3), A308797 (s=4), A308798 (s=5), A308799 (s=6), A308800 (s=7),A308801 (s=8), A308802 (s=9).
+%K A106535 nonn
+%O A106535 1,1
+%A A106535 Peter K. Pearson (ppearson+att(AT)spamcop.net), May 06 2005
+%E A106535 Corrected by _T. D. Noe_, Oct 25 2006

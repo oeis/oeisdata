@@ -1,0 +1,44 @@
+%I A061844
+%S A061844 1,36,3136,24336,5973136,71526293136,318723477136,264779654424693136,
+%T A061844 24987377153764853136,31872399155963477136,58396845218255516736,
+%U A061844 517177921565478376336,252815272791521979771662766736
+%N A061844 Squares that remain squares if you decrease every digit by 1.
+%C A061844 The terms may be calculated efficiently by solving x^2 - y^2 = 111...1; this is done by factoring 111..1 = (x + y)(x - y).
+%C A061844 Note that some solutions will produce a square containing a zero digit so the solution is impermissible; for example, 460^2 - 317^2 = 111111 but 460^2 = 211600. - _Wendy Appleby_, Sep 20 2015
+%C A061844 Except for a(1) = 1, we don't allow decreasing the digits to create a leading 0. Thus 126736 = 356^2 is not included, even though 126736 - 111111 = 15625 = 125^2. - _Robert Israel_, Dec 30 2015
+%C A061844 a(79) > 10^209. - _JungHwan Min_, Jan 02 2016
+%C A061844 From _Robert Israel_, Jan 04 2016: (Start)
+%C A061844 The sequence may well be finite.
+%C A061844 It is known that A000005(n) = O(n^epsilon) for all epsilon>0.
+%C A061844 Therefore if 1 < c < 10/9, for d sufficiently large (10^d-1)/9 has fewer than c^d divisors, and thus fewer than c^d possible candidates for x^2 having d digits.
+%C A061844 Heuristically, x^2 has probability ~ (9/10)^d of having no digits 0.
+%C A061844 Thus we expect fewer than (9c/10)^d terms having d digits.
+%C A061844 Since Sum_d (9c/10)^d converges, we expect only finitely many terms.
+%C A061844 Of course, this is only a heuristic argument, but it seems to fit well with the data.  (End)
+%H A061844 JungHwan Min, <a href="/A061844/b061844.txt">Table of n, a(n) for n = 1..78</a>
+%e A061844 13225 = 115^2 and 24336 = 156^2.
+%p A061844 A:= {1}:
+%p A061844 for d from 1 to 96 do
+%p A061844   r:= (10^d-1)/9;
+%p A061844   f:= subs(X=10,factors((X^d-1)/(X-1))[2]);
+%p A061844   q:= map(t -> op(map(s -> [s[1],t[2]*s[2]], ifactors(t[1])[2])),f);
+%p A061844   divs:= {1};
+%p A061844 for t in q do
+%p A061844     divs:= map(x -> seq(x*t[1]^j,j=0..t[2]),divs)
+%p A061844   od;
+%p A061844   for t in select(s -> s^2 > r, divs) do
+%p A061844     x:= (t + r/t)/2;
+%p A061844     if ilog10(x^2) = d-1 and x^2 > 2*10^(d-1) and not has(convert(x^2,base,10),0) then
+%p A061844       A:= A union {x^2};
+%p A061844     fi
+%p A061844   od
+%p A061844 od:
+%p A061844 sort(convert(A,list)); # _Robert Israel_, Dec 30 2015
+%t A061844 For[digits = 1, digits <= 30, digits++, n = (10^digits - 1)/9; divList = Select[Divisors[n], (#1 >= Sqrt[n])&]; For[j = 1, j <= Length[divList], j++, x = (divList[[j]] + n/divList[[j]])/2; y = (divList[[j]] - n/divList[[j]])/2; dx = IntegerDigits[x^2]; dy = IntegerDigits[y^2]; If[(Length[dx] == digits) && (Length[dy] == digits) && (Select[dx, (#1 == 0)&] == {}), Print[x^2]]]]
+%t A061844 Flatten@Prepend[Table[Select[#[[Ceiling[(Length[#] + 1)/2] ;;]] &@(# + Reverse@#)/2 &@Divisors[(10^n - 1)/9], IntegerLength[#^2] == n && (#[[1]] != 1 && FreeQ[#, 0]&[IntegerDigits[#^2]])&]^2, {n, 30}], 1] (* _JungHwan Min_, Dec 29 2015 *)
+%t A061844 Join[{1},Select[Select[Flatten[Table[#^2&/@(x/.Solve[{x^2-y^2 == FromDigits[ PadRight[{},n,1]],x>0,y>0},{x,y},Integers]),{n,2,30}]], DigitCount[ #,10,0]==0&&IntegerDigits[#][[1]]>1&]// Union,IntegerQ[ Sqrt[ FromDigits[IntegerDigits[#]-1]]]&]] (* _Harvey P. Dale_, Apr 16 2016 *)
+%Y A061844 Cf. A052382.
+%K A061844 base,nonn,nice
+%O A061844 1,2
+%A A061844 _Erich Friedman_, Jun 23 2001
+%E A061844 More terms and program from Jonathan Cross (jcross(AT)wcox.com), Oct 08 2001

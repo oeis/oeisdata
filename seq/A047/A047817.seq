@@ -1,0 +1,36 @@
+%I A047817
+%S A047817 10,10,130,170,10,130,290,170,4810,410,10,2210,530,290,7930,170,10,
+%T A047817 351130,10,6970,3770,890,10,214370,1010,530,524290,557090,10,325130,
+%U A047817 10,170,130,1370,290,5969210,1490,10,1081730,6970,10,3770
+%N A047817 Denominators of Hurwitz numbers H_n (coefficients in expansion of Weierstrass P-function).
+%C A047817 Hurwitz showed (see Katz, eqn. 9) that a(n) = product of the prime p = 2 and the primes p of the form 4*k + 1 such that p - 1 divides 4*n. It follows that a(n) is a divisibility sequence, that is, if n | m then a(n) | a(m). - _Peter Bala_, Jan 08 2014
+%D A047817 F. Lemmermeyer, Reciprocity Laws, Springer-Verlag, 2000; see p. 276.
+%H A047817 T. D. Noe, <a href="/A047817/b047817.txt">Table of n, a(n) for n = 1..1000</a>
+%H A047817 L. Carlitz, <a href="http://dx.doi.org/10.1090/S0025-5718-1962-0152678-2">The coefficients of the lemniscate function</a>, Math. Comp., 16 (1962), 475-478.
+%H A047817 A. Hurwitz, <a href="http://gdz.sub.uni-goettingen.de/dms/load/img/?PPN=PPN252457811_1897&amp;DMDID=DMDLOG_0041&amp;LOGID=LOG_0041&amp;PHYSID=PHYS_0289">Über die Entwicklungskoeffizienten der lemniskatischen Funktionen</a>, Math. Ann., 51 (1899), 196-226; Mathematische Werke. Vols. 1 and 2, Birkhäuser, Basel, 1962-1963, see Vol. 2, No. LXVII.
+%H A047817 A. Hurwitz, <a href="/A002306/a002306.pdf">Über die Entwicklungskoeffizienten der lemniskatischen Funktionen</a>, Math. Ann., 51 (1899), 196-226; Mathematische Werke. Vols. 1 and 2, Birkhäuser, Basel, 1962-1963, see Vol. 2, No. LXVII. [Annotated scanned copy]
+%H A047817 N. M. Katz, <a href="https://web.math.princeton.edu/~nmk/old/congKlvS.pdf">The Congruences of Clausen - von Staudt and Kummer for Bernoulli-Hurwitz Numbers</a>, Mathematische Annalen 216, 1-4 (1975)
+%H A047817 Alexei Pantchichkine, <a href="https://hal.archives-ouvertes.fr/hal-01875160">Constructions of p-adic L-functions and admissible measures for Hermitian modular forms</a>, Number Theory [math.NT], 2018.
+%H A047817 <a href="/index/Di#divseq">Index to divisibility sequences</a>
+%F A047817 Let P be the Weierstrass P-function satisfying P'^2 = 4*P^3 - 4*P. Then P(z) = 1/z^2 + Sum_{n>=1} 2^(4n)*H_n*z^(4n-2)/(4n*(4n-2)!).
+%F A047817 Sum_{ (r, s) != (0, 0) } 1/(r+si)^(4n) = (2w)^(4n)*H_n/(4n)! where w = 2 * Integral_{0..1} dx/(sqrt(1-x^4)).
+%F A047817 See PARI line for recurrence.
+%e A047817 Hurwitz numbers H_1, H_2, ... = 1/10, 3/10, 567/130, 43659/170, 392931/10, ...
+%p A047817 H := proc(n) local k; option remember; if n = 1 then 1/10 else 3*add((4*k - 1)*(4*n - 4*k - 1)*binomial(4*n, 4*k)*H(k)*H(n - k), k = 1 .. n - 1)/( (2*n - 3)*(16*n^2 - 1)) fi; end;
+%p A047817 a := n -> denom(H(n));
+%p A047817 # Implementation based on Hurwitz's extension of Clausen's theorem:
+%p A047817 GenClausen := proc(n) local k,S; map(k->k+1, numtheory[divisors](n));
+%p A047817     S := select(p-> isprime(p) and p mod 4 = 1, %);
+%p A047817     if S <> {} then 2*mul(k,k=S) else NULL fi end:
+%p A047817 A047817_list := proc(n) local i; seq(GenClausen(i),i=1..4*n) end;
+%p A047817 A047817_list(42); # _Peter Luschny_, Oct 03 2011
+%p A047817 # Implementation based on Weierstrass's P-function:
+%p A047817 c := n -> (n*(4*n-2)!/(2^(4*n-2)))*coeff(series(WeierstrassP(z,4,0),z, 4*n+2),z,4*n-2); a := n -> denom(c(n)); seq(a(n), n=1..42); # _Peter Luschny_, Aug 18 2014
+%t A047817 a[1] = 1/10; a[n_] := a[n] = (3/(2*n - 3)/(16*n^2 - 1))* Sum[(4*k - 1)*(4*n - 4*k - 1)*Binomial[4*n, 4*k]*a[k]* a[n - k], {k, 1, n - 1}]; Denominator[ Table[a[n], {n, 1, 42}]] (* _Jean-François Alcover_, Oct 18 2011, after PARI *)
+%t A047817 a[ n_] := If[ n < 1, 0, Denominator[ 2^(-4 n) (4 n)! SeriesCoefficient[ 1 - x WeierstrassZeta[ x, {4, 0}], {x, 0, 4 n}]]]; (* _Michael Somos_, Mar 05 2015 *)
+%o A047817 (PARI) do(lim)=v=vector(lim); v[1]=1/10; for(n=2,lim,v[n]=3/(2*n-3)/(16*n^2-1)*sum(k=1,n-1,(4*k-1)*(4*n-4*k-1)*binomial(4*n,4*k)*v[k]*v[n-k])) \\ Henri Cohen, Mar 18 2002
+%Y A047817 For numerators see A002306.
+%Y A047817 Cf. A160014.
+%K A047817 nonn,easy,nice,frac
+%O A047817 1,1
+%A A047817 _N. J. A. Sloane_

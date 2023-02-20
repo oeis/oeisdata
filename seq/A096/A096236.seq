@@ -1,0 +1,43 @@
+%I A096236
+%S A096236 1,2,4,7,13,24,38,72,122,226,400,684,1246,2381,4384,8330,15839,30617,
+%T A096236 58764,113987,221994,434498,852036,1673320,3296641,6509179
+%N A096236 Number of n-digit base-3 deletable primes.
+%C A096236 A prime p is a base-b deletable prime if when written in base b it has the property that removing some digit leaves either the empty string or another deletable prime. "Digit" means digit in base b.
+%C A096236 Deleting a digit cannot leave any leading zeros in the new string. For example, deleting the 2 in 2003 to obtain 003 is not allowed.
+%t A096236 b = 3; a = {1}; d = {2};
+%t A096236 For[n = 2, n <= 10, n++,
+%t A096236   p = Select[Range[b^(n - 1), b^n - 1], PrimeQ[#] &];
+%t A096236   ct = 0;
+%t A096236   For[i = 1, i <= Length[p], i++,
+%t A096236    c = IntegerDigits[p[[i]], b];
+%t A096236    For[j = 1, j <= n, j++,
+%t A096236     t = Delete[c, j];
+%t A096236     If[t[[1]] == 0, Continue[]];
+%t A096236     If[MemberQ[d, FromDigits[t, b]], AppendTo[d, p[[i]]]; ct++;
+%t A096236      Break[]]]];
+%t A096236   AppendTo[a, ct]];
+%t A096236 a (* _Robert Price_, Nov 12 2018 *)
+%o A096236 (Python)
+%o A096236 from sympy import isprime
+%o A096236 from sympy.ntheory.digits import digits
+%o A096236 def ok(n, prevset, base=3):
+%o A096236     if not isprime(n): return False
+%o A096236     s = "".join(str(d) for d in digits(n, base)[1:])
+%o A096236     si = (s[:i]+s[i+1:] for i in range(len(s)))
+%o A096236     return any(t[0] != '0' and int(t, base) in prevset for t in si)
+%o A096236 def afind(terms):
+%o A096236     s, snxt, base = {2}, set(), 3
+%o A096236     print(len(s), end=", ")
+%o A096236     for n in range(2, terms+1):
+%o A096236         for i in range(base**(n-1), base**n):
+%o A096236             if ok(i, s):
+%o A096236                 snxt.add(i)
+%o A096236         s, snxt = snxt, set()
+%o A096236         print(len(s), end=", ")
+%o A096236 afind(13) # _Michael S. Branicky_, Jan 14 2022
+%Y A096236 Cf. A080608, A080603, A096235-A096246.
+%K A096236 nonn,more,base
+%O A096236 1,2
+%A A096236 _Michael Kleber_, Feb 28 2003
+%E A096236 More terms from _John W. Layman_, Dec 14 2004
+%E A096236 11 more terms from _Ryan Propper_, Jul 19 2005

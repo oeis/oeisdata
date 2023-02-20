@@ -1,0 +1,46 @@
+%I A045853
+%S A045853 1,12,66,220,507,924,1584,2772,4521,6436,8712,12552,18041,23364,28776,
+%T A045853 37896,50997,62832,72996,89892,115776,139348,156816,185064,231759,
+%U A045853 274044,300828,343564,418638,487080,528528,592284,707421,814836,874170,959508,1128338
+%N A045853 Number of nonnegative solutions of x1^2 + x2^2 + ... + x12^2 = n.
+%H A045853 Seiichi Manyama, <a href="/A045853/b045853.txt">Table of n, a(n) for n = 0..10000</a> (terms 0..2000 from T. D. Noe)
+%F A045853 Coefficient of q^n in (1 + q + q^4 + q^9 + q^16 + q^25 + q^36 + q^49 + q^64 + ...)^12.
+%F A045853 G.f.: ((1 + theta_3(x)) / 2)^12. - _Ilya Gutkovskiy_, Feb 10 2021
+%p A045853 b:= proc(n, k) option remember; `if`(n=0, 1, `if`(n<0 or k<1, 0,
+%p A045853       b(n, k-1)+add(b(n-j^2, k-1), j=1..isqrt(n))))
+%p A045853     end:
+%p A045853 a:= b(n, 12):
+%p A045853 seq(a(n), n=0..40);  # _Alois P. Heinz_, Feb 10 2021
+%t A045853 CoefficientList[((1 + EllipticTheta[3, 0, q])/2)^12 + O[q]^40, q] (* _Jean-François Alcover_, Mar 01 2021 *)
+%o A045853 (Ruby)
+%o A045853 def mul(f_ary, b_ary, m)
+%o A045853   s1, s2 = f_ary.size, b_ary.size
+%o A045853   ary = Array.new(s1 + s2 - 1, 0)
+%o A045853   (0..s1 - 1).each{|i|
+%o A045853     (0..s2 - 1).each{|j|
+%o A045853       ary[i + j] += f_ary[i] * b_ary[j]
+%o A045853     }
+%o A045853   }
+%o A045853   ary[0..m]
+%o A045853 end
+%o A045853 def power(ary, n, m)
+%o A045853   if n == 0
+%o A045853     a = Array.new(m + 1, 0)
+%o A045853     a[0] = 1
+%o A045853     return a
+%o A045853   end
+%o A045853   k = power(ary, n >> 1, m)
+%o A045853   k = mul(k, k, m)
+%o A045853   return k if n & 1 == 0
+%o A045853   return mul(k, ary, m)
+%o A045853 end
+%o A045853 def A(k, n)
+%o A045853   ary = Array.new(n + 1, 0)
+%o A045853   (0..Math.sqrt(n).to_i).each{|i| ary[i * i] = 1}
+%o A045853   power(ary, k, n)
+%o A045853 end
+%o A045853 p A(12, 100) # _Seiichi Manyama_, May 28 2017
+%Y A045853 Cf. A010052, A045847.
+%K A045853 nonn
+%O A045853 0,2
+%A A045853 _N. J. A. Sloane_

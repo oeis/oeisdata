@@ -1,0 +1,51 @@
+%I A152176
+%S A152176 1,1,1,1,1,1,1,3,2,1,1,3,5,2,1,1,7,14,11,3,1,1,8,31,33,16,3,1,1,17,82,
+%T A152176 137,85,27,4,1,1,22,202,478,434,171,37,4,1,1,43,538,1851,2271,1249,
+%U A152176 338,54,5,1,1,62,1401,6845,11530,8389,3056,590,70,5,1,1,121,3838,26148
+%N A152176 Triangle read by rows: T(n,k) is the number of k-block partitions of an n-set up to rotations and reflections.
+%C A152176 Number of bracelet structures of length n using exactly k different colored beads. Turning over will not create a new bracelet. Permuting the colors of the beads will not change the structure. - _Andrew Howroyd_, Apr 06 2017
+%C A152176 The number of achiral structures (A) is given in A140735 (odd n) and A293181 (even n).  The number of achiral structures plus twice the number of chiral pairs (A+2C) is given in A152175.  These can be used to determine A+C by taking half their average, as is done in the Mathematica program. - _Robert A. Russell_, Feb 24 2018
+%C A152176 T(n,k)=pi_k(C_n) which is the number of non-equivalent partitions of the cycle on n vertices, with exactly k parts. Two partitions P1 and P2 of a graph G are said to be equivalent if there is a nontrivial automorphism of G which maps P1 onto P2. - _Mohammad Hadi Shekarriz_, Aug 21 2019
+%D A152176 M. R. Nester (1999). Mathematical investigations of some plant interaction designs. PhD Thesis. University of Queensland, Brisbane, Australia. [See A056391 for pdf file of Chap. 2]
+%H A152176 Andrew Howroyd, <a href="/A152176/b152176.txt">Table of n, a(n) for n = 1..1275</a>
+%H A152176 B. Ahmadi, F. Alinaghipour and M. H. Shekarriz, <a href="https://arxiv.org/abs/1910.12102">Number of Distinguishing Colorings and Partitions</a>, arXiv:1910.12102 [math.CO], 2019.
+%H A152176 E. N. Gilbert and J. Riordan, <a href="http://projecteuclid.org/euclid.ijm/1255631587">Symmetry types of periodic sequences</a>, Illinois J. Math., 5 (1961), 657-665.
+%H A152176 Tilman Piesk, <a href="http://en.wikiversity.org/wiki/Partition_related_number_triangles#rotref">Partition related number triangles</a>
+%H A152176 Marko Riedel, <a href="https://math.stackexchange.com/questions/4191361/">Bracelets with swappable colors classified by the distribution of colors, Power Group Enumeration algorithm</a>
+%H A152176 Marko Riedel, <a href="/A152176/a152176_1.maple.txt">Maple code for the number of bracelets with some number of swappable colors by Power Group Enumeration</a>
+%H A152176 Mohammad Hadi Shekarriz, <a href="/A152176/a152176.txt">GAP Program</a>
+%e A152176 Triangle begins:
+%e A152176   1;
+%e A152176   1,  1;
+%e A152176   1,  1,   1;
+%e A152176   1,  3,   2,    1;
+%e A152176   1,  3,   5,    2,    1;
+%e A152176   1,  7,  14,   11,    3,    1;
+%e A152176   1,  8,  31,   33,   16,    3,   1;
+%e A152176   1, 17,  82,  137,   85,   27,   4,  1;
+%e A152176   1, 22, 202,  478,  434,  171,  37,  4, 1;
+%e A152176   1, 43, 538, 1851, 2271, 1249, 338, 54, 5, 1;
+%e A152176   ...
+%t A152176 Adn[d_, n_] := Adn[d, n] = Which[0==n, 1, 1==n, DivisorSum[d, x^# &],
+%t A152176   1==d, Sum[StirlingS2[n, k] x^k, {k, 0, n}],
+%t A152176   True, Expand[Adn[d, 1] Adn[d, n-1] + D[Adn[d, n - 1], x] x]];
+%t A152176 Ach[n_, k_] := Ach[n, k] = Switch[k, 0, If[0==n, 1, 0], 1, If[n>0, 1, 0],
+%t A152176   (* else *) _, If[OddQ[n], Sum[Binomial[(n-1)/2, i] Ach[n-1-2i, k-1],
+%t A152176   {i, 0, (n-1)/2}], Sum[Binomial[n/2-1, i] (Ach[n-2-2i, k-1]
+%t A152176   + 2^i Ach[n-2-2i, k-2]), {i, 0, n/2-1}]]] (* achiral loops of length n, k colors *)
+%t A152176 Table[(CoefficientList[DivisorSum[n, EulerPhi[#] Adn[#, n/#] &]/(x n), x]
+%t A152176 + Table[Ach[n, k],{k,1,n}])/2, {n, 1, 20}] // Flatten (* _Robert A. Russell_, Feb 24 2018 *)
+%o A152176 (PARI) \\ see A056391 for Polya enumeration functions
+%o A152176 T(n,k) = NonequivalentStructsExactly(DihedralPerms(n), k); \\ _Andrew Howroyd_, Oct 14 2017
+%o A152176 (PARI) \\ Ach is A304972 and R is A152175 as square matrices.
+%o A152176 Ach(n)={my(M=matrix(n, n, i, k, i>=k)); for(i=3, n, for(k=2, n, M[i, k]=k*M[i-2, k] + M[i-2, k-1] + if(k>2, M[i-2, k-2]))); M}
+%o A152176 R(n)={Mat(Col([Vecrev(p/y, n) | p<-Vec(intformal(sum(m=1, n, eulerphi(m) * subst(serlaplace(-1 + exp(sumdiv(m, d, y^d*(exp(d*x + O(x*x^(n\m)))-1)/d))), x, x^m))/x))]))}
+%o A152176 T(n)={(R(n) + Ach(n))/2}
+%o A152176 { my(A=T(12)); for(n=1, #A, print(A[n, 1..n])) } \\ _Andrew Howroyd_, Sep 20 2019
+%Y A152176 Columns 2-6 are A056357, A056358, A056359, A056360, A056361.
+%Y A152176 Row sums are A084708.
+%Y A152176 Partial row sums include A000011, A056353, A056354, A056355, A056356.
+%Y A152176 Cf. A081720, A273891, A008277 (set partitions), A284949 (up to reflection), A152175 (up to rotation).
+%K A152176 nonn,tabl
+%O A152176 1,8
+%A A152176 _Vladeta Jovovic_, Nov 27 2008

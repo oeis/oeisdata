@@ -1,0 +1,52 @@
+%I A008550
+%S A008550 1,1,1,1,1,1,1,2,1,1,1,5,3,1,1,1,14,11,4,1,1,1,42,45,19,5,1,1,1,132,
+%T A008550 197,100,29,6,1,1,1,429,903,562,185,41,7,1,1,1,1430,4279,3304,1257,
+%U A008550 306,55,8,1,1,1,4862,20793,20071,8925,2426,469,71,9,1,1
+%N A008550 Table T(n,k), n>=0 and k>=0, read by antidiagonals: the k-th column given by the k-th Narayana polynomial.
+%C A008550 Mirror image of A243631. - _Philippe Deléham_, Sep 26 2014
+%H A008550 Michael De Vlieger, <a href="/A008550/b008550.txt">Table of n, a(n) for n = 0..11475</a>
+%H A008550 H. Prodinger, <a href="http://arxiv.org/abs/math/0103149">On a functional difference equation of Runyon, Morrison, Carlitz, and Riordan</a>, arXiv:math/0103149 [math.CO], 2001.
+%H A008550 H. Prodinger, <a href="https://www.emis.de/journals/SLC/wpapers/s46proding.html">On a functional difference equation of Runyon, Morrison, Carlitz, and Riordan</a>, Séminaire Lotharingien de Combinatoire 46 (2001), Article B46a.
+%H A008550 L. Yang, S.-L. Yang, <a href="https://doi.org/10.1007/s00373-020-02185-6">A relation between Schroder paths and Motzkin paths</a>, Graphs Combinat. 36 (2020) 1489-1502, eq. (6).
+%F A008550 T(n, k) = Sum_{j>0} A001263(k, j)*n^(j-1); T(n, 0)=1.
+%F A008550 T(n, k) = Sum_{j, 0<=j<=k} A088617(k, j)*n^j*(1-n)^(k-j).
+%F A008550 The o.g.f. of row n is gf(n) = 2/(sqrt((n-1)^2*x^2-2*(n+1)*x+1)+(n-1)*x+1). - _Peter Luschny_, Nov 17 2014
+%F A008550 G.f. of row n: 1/(1 - x/(1 - n*x/(1 - x/(1 - n*x/(1 - x/(1 - ...)))))), a continued fraction. - _Ilya Gutkovskiy_, Aug 10 2017
+%F A008550 T(n, k) = Hypergeometric2F1([k-n, k-n+1], [2], k), as a number triangle. - _G. C. Greubel_, Feb 15 2021
+%e A008550 Row n=0:  1, 1,  1,   1,    1,     1,      1, ... see A000012.
+%e A008550 Row n=1:  1, 1,  2,   5,   14,    42,    132, ... see A000108.
+%e A008550 Row n=2:  1, 1,  3,  11,   45,   197,    903, ... see A001003.
+%e A008550 Row n=3:  1, 1,  4,  19,  100,   562,   3304, ... see A007564.
+%e A008550 Row n=4:  1, 1,  5,  29,  185,  1257,   8925, ... see A059231.
+%e A008550 Row n=5:  1, 1,  6,  41,  306,  2426,  20076, ... see A078009.
+%e A008550 Row n=6:  1, 1,  7,  55,  469,  4237,  39907, ... see A078018.
+%e A008550 Row n=7:  1, 1,  8,  71,  680,  6882,  72528, ... see A081178.
+%e A008550 Row n=8:  1, 1,  9,  89,  945, 10577, 123129, ... see A082147.
+%e A008550 Row n=9:  1, 1, 10, 109, 1270, 15562, 198100, ... see A082181.
+%e A008550 Row n=10: 1, 1, 11, 131,  161,  1661,  22101, ... see A082148.
+%e A008550 Row n=11: 1, 1, 12, 155, 2124, 30482, 453432, ... see A082173.
+%e A008550 ... - _Philippe Deléham_, Apr 03 2013
+%e A008550 The first few rows of the antidiagonal triangle are:
+%e A008550   1;
+%e A008550   1,  1;
+%e A008550   1,  1,  1;
+%e A008550   1,  2,  1,  1;
+%e A008550   1,  5,  3,  1, 1;
+%e A008550   1, 14, 11,  4, 1, 1;
+%e A008550   1, 42, 45, 19, 5, 1, 1; - _G. C. Greubel_, Feb 15 2021
+%p A008550 gf := n -> 2/(sqrt((n-1)^2*x^2-2*(n+1)*x+1)+(n-1)*x+1):
+%p A008550 for n from 0 to 11 do PolynomialTools:-CoefficientList(convert( series(gf(n),x,12),polynom),x) od; # _Peter Luschny_, Nov 17 2014
+%t A008550 (* First program *)
+%t A008550 Unprotect[Power]; Power[0 | 0, 0 | 0] = 1; Protect[Power]; Table[Function[n, Sum[Apply[Binomial[#1 + #2, #1] Binomial[#1, #2]/(#2 + 1) &, {k, j}]*n^j*(1 - n)^(k - j), {j, 0, k}]][m - k + 1] /. k_ /; k <= 0 -> 1, {m, -1, 9}, {k, m + 1, 0, -1}] // Flatten (* _Michael De Vlieger_, Aug 10 2017 Note: this code renders 0^0 = 1. To restore normal Power functionality: Unprotect[Power]; ClearAll[Power]; Protect[Power] *)
+%t A008550 (* Second program *)
+%t A008550 Table[Hypergeometric2F1[1-n+k, k-n, 2, k], {n, 0, 12}, {k, 0, n}]//Flatten (* _G. C. Greubel_, Feb 15 2021 *)
+%o A008550 (Sage) flatten([[hypergeometric([k-n, k-n+1], [2], k).simplify_hypergeometric() for k in (0..n)] for n in (0..12)]) # _G. C. Greubel_, Feb 15 2021
+%o A008550 (Magma) [Truncate(HypergeometricSeries(k-n, k-n+1, 2, k)): k in [0..n], n in [0..12]]; // _G. C. Greubel_, Feb 15 2021
+%Y A008550 Columns: A000012, A000012, A000027, A028387, A090197, A090198, A090199, A090200.
+%Y A008550 Main diagonal is A242369.
+%Y A008550 A diagonal is in A099169.
+%Y A008550 Cf. A204057 (another version), A088617, A243631.
+%Y A008550 Cf. A132745.
+%K A008550 easy,nonn,tabl
+%O A008550 0,8
+%A A008550 _Philippe Deléham_, Jan 23 2004

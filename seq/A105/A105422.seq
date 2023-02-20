@@ -1,0 +1,46 @@
+%I A105422
+%S A105422 1,0,1,1,0,1,1,2,0,1,2,2,3,0,1,3,5,3,4,0,1,5,8,9,4,5,0,1,8,15,15,14,5,
+%T A105422 6,0,1,13,26,31,24,20,6,7,0,1,21,46,57,54,35,27,7,8,0,1,34,80,108,104,
+%U A105422 85,48,35,8,9,0,1,55,139,199,209,170,125,63,44,9,10,0,1,89,240,366,404,360
+%N A105422 Triangle read by rows: T(n,k) is the number of compositions of n having exactly k parts equal to 1.
+%C A105422 T(n,k) is also the number of length n bit strings beginning with 0 having k singletons. Example: T(4,2)=3 because we have 0010, 0100 and 0110. - _Emeric Deutsch_, Sep 21 2008
+%C A105422 The cyclic version of this array is A320341(n,k), which counts the (unmarked) cyclic compositions of n with exactly k parts equal to 1, with a minor exception for k=0. The sequence (A320341(n, k=0) - 1: n >= 1) counts the (unmarked) cyclic compositions of n with no parts equal to 1. - _Petros Hadjicostas_, Jan 08 2019
+%C A105422 Also the convolution triangle of Fibonacci(n-2). # _Peter Luschny_, Oct 07 2022
+%H A105422 Alois P. Heinz, <a href="/A105422/b105422.txt">Rows n = 0..140, flattened</a>
+%H A105422 D. Baccherini, D. Merlini and R. Sprugnoli, <a href="http://pefmath.etf.rs/vol2num1/AADM-Vol2-No1-69-91.pdf">Level generating trees and proper Riordan arrays</a>, Applicable Analysis and Discrete Mathematics, 2, 2008, 69-91 (see p. 83). [_Emeric Deutsch_, Sep 21 2008]
+%H A105422 Milan Janjić, <a href="https://cs.uwaterloo.ca/journals/JIS/VOL21/Janjic/janjic93.html">Words and Linear Recurrences</a>, J. Int. Seq. 21 (2018), #18.1.4.
+%F A105422 G.f.: (1-z)/(1 - z - z^2 - tz + tz^2).
+%F A105422 T(n,k) = T(n-1,k) + T(n-2,k) + T(n-1,k-1) - T(n-2,k-1), T(0,0)=1, T(1,0)=0. - _Philippe Deléham_, Nov 18 2009
+%F A105422 If the triangle's columns are transposed into rows, then T(n,k) can be interpreted as the number of compositions of n+k having exactly k 1's. Then g.f.: ((1-x)/(1-x-x^2))^(k-1) and T(n,k) = T(n-2,k) + T(n-1,k) - T(n-1, k-1) + T(n, k-1). Also, Sum_{j=1..n} T(n-j, j) = 2^(n-1), the number of compositions of n. - _Gregory L. Simay_, Jun 28 2019
+%e A105422 T(6,2) = 9 because we have (1,1,4), (1,4,1), (4,1,1), (1,1,2,2), (1,2,1,2), (1,2,2,1), (2,1,1,2), (2,1,2,1) and (2,2,1,1).
+%e A105422 Triangle begins:
+%e A105422 00:    1;
+%e A105422 01:    0,   1;
+%e A105422 02:    1,   0,   1;
+%e A105422 03:    1,   2,   0,   1;
+%e A105422 04:    2,   2,   3,   0,   1;
+%e A105422 05:    3,   5,   3,   4,   0,   1;
+%e A105422 06:    5,   8,   9,   4,   5,   0,   1;
+%e A105422 07:    8,  15,  15,  14,   5,   6,   0,   1;
+%e A105422 08:   13,  26,  31,  24,  20,   6,   7,   0,  1;
+%e A105422 09:   21,  46,  57,  54,  35,  27,   7,   8,  0,  1;
+%e A105422 10:   34,  80, 108, 104,  85,  48,  35,   8,  9,  0,  1;
+%e A105422 11:   55, 139, 199, 209, 170, 125,  63,  44,  9, 10,  0,  1;
+%e A105422 12:   89, 240, 366, 404, 360, 258, 175,  80, 54, 10, 11,  0, 1;
+%e A105422 13:  144, 413, 666, 780, 725, 573, 371, 236, 99, 65, 11, 12, 0, 1;
+%e A105422 ...
+%p A105422 G:=(1-z)/(1-z-z^2-t*z+t*z^2): Gser:=simplify(series(G,z=0,15)): P[0]:=1: for n from 1 to 14 do P[n]:=coeff(Gser,z^n) od: for n from 0 to 13 do seq(coeff(t*P[n],t^k),k=1..n+1) od; # yields sequence in triangular form
+%p A105422 # second Maple program:
+%p A105422 T:= proc(n) option remember; local j; if n=0 then 1
+%p A105422       else []; for j to n do zip((x, y)-> x+y, %,
+%p A105422       [`if`(j=1, 0, [][]), T(n-j)], 0) od; %[] fi
+%p A105422     end:
+%p A105422 seq(T(n), n=0..20);  # _Alois P. Heinz_, Nov 05 2012
+%p A105422 # Uses function PMatrix from A357368. Adds a row above and a column to the left.
+%p A105422 PMatrix(10, n -> combinat:-fibonacci(n-2)); # _Peter Luschny_, Oct 07 2022
+%t A105422 nn = 10; a = x/(1 - x) - x + y x;
+%t A105422 CoefficientList[CoefficientList[Series[1/(1 - a), {x, 0, nn}], x], y] // Flatten (* _Geoffrey Critzer_, Dec 23 2011 *)
+%Y A105422 Column 0 yields A000045 (the Fibonacci numbers). Column 1 yields A006367. Column 2 yields A105423. Row sums yield A011782. Cyclic version is A320341.
+%K A105422 nonn,tabl
+%O A105422 0,8
+%A A105422 _Emeric Deutsch_, Apr 07 2005

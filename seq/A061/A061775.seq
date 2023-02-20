@@ -1,0 +1,57 @@
+%I A061775
+%S A061775 1,2,3,3,4,4,4,4,5,5,5,5,5,5,6,5,5,6,5,6,6,6,6,6,7,6,7,6,6,7,6,6,7,6,
+%T A061775 7,7,6,6,7,7,6,7,6,7,8,7,7,7,7,8,7,7,6,8,8,7,7,7,6,8,7,7,8,7,8,8,6,7,
+%U A061775 8,8,7,8,7,7,9,7,8,8,7,8,9,7,7,8,8,7,8,8,7,9,8,8,8,8,8,8,8,8,9,9,7,8,8,8,9,7,7,9
+%N A061775 Number of nodes in rooted tree with Matula-Goebel number n.
+%C A061775 Let p(1)=2, ... denote the primes. The label f(T) for a rooted tree T is 1 if T has 1 node, otherwise f(T) = Product p(f(T_i)) where the T_i are the subtrees obtained by deleting the root and the edges adjacent to it. (Cf. A061773 for illustration).
+%C A061775 Each n occurs A000081(n) times.
+%H A061775 Alois P. Heinz, <a href="/A061775/b061775.txt">Table of n, a(n) for n = 1..10000</a>
+%H A061775 Keith Briggs, <a href="http://keithbriggs.info/matula.html">Matula numbers and rooted trees</a>
+%H A061775 Emeric Deutsch, <a href="http://arxiv.org/abs/1111.4288">Tree statistics from Matula numbers</a>, arXiv preprint arXiv:1111.4288 [math.CO], 2011.
+%H A061775 F. Goebel, <a href="http://dx.doi.org/10.1016/0095-8956(80)90049-0">On a 1-1-correspondence between rooted trees and natural numbers</a>, J. Combin. Theory, B 29 (1980), 141-143.
+%H A061775 I. Gutman and A. Ivic, <a href="http://dx.doi.org/10.1016/0012-365X(95)00182-V">On Matula numbers</a>, Discrete Math., 150, 1996, 131-142.
+%H A061775 I. Gutman and Yeong-Nan Yeh, <a href="http://www.emis.de/journals/PIMB/067/3.html">Deducing properties of trees from their Matula numbers</a>, Publ. Inst. Math., 53 (67), 1993, 17-22.
+%H A061775 D. Matula, <a href="http://www.jstor.org/stable/2027327?seq=30">A natural rooted tree enumeration by prime factorization</a>, SIAM Rev. 10 (1968) 273.
+%H A061775 <a href="/index/Mat#matula">Index entries for sequences related to Matula-Goebel numbers</a>
+%F A061775 a(1) = 1; if n = p_t (= the t-th prime), then a(n) = 1+a(t); if n = uv (u,v>=2), then a(n) = a(u)+a(v)-1.
+%F A061775 a(n) = A091238(A091204(n)). - _Antti Karttunen_, January 2004
+%F A061775 a(n) = A196050(n)+1. - _Antti Karttunen_, Aug 16 2014
+%e A061775 a(4) = 3 because the rooted tree corresponding to the Matula-Goebel number 4 is "V", which has one root-node and two leaf-nodes, three in total.
+%e A061775 See also the illustrations in A061773.
+%p A061775 with(numtheory): a := proc (n) local u, v: u := n-> op(1, factorset(n)): v := n-> n/u(n): if n = 1 then 1 elif isprime(n) then 1+a(pi(n)) else a(u(n))+a(v(n))-1 end if end proc: seq(a(n), n = 1..108); # _Emeric Deutsch_, Sep 19 2011
+%t A061775 a[n_] := Module[{u, v}, u = FactorInteger[#][[1, 1]]&; v = #/u[#]&; If[n == 1, 1, If[PrimeQ[n], 1+a[PrimePi[n]], a[u[n]]+a[v[n]]-1]]]; Table[a[n], {n, 108}] (* _Jean-François Alcover_, Jan 16 2014, after _Emeric Deutsch_ *)
+%o A061775 (Haskell)
+%o A061775 import Data.List (genericIndex)
+%o A061775 a061775 n = genericIndex a061775_list (n - 1)
+%o A061775 a061775_list = 1 : g 2 where
+%o A061775    g x = y : g (x + 1) where
+%o A061775       y = if t > 0 then a061775 t + 1 else a061775 u + a061775 v - 1
+%o A061775           where t = a049084 x; u = a020639 x; v = x `div` u
+%o A061775 -- _Reinhard Zumkeller_, Sep 03 2013
+%o A061775 (PARI)
+%o A061775 A061775(n) = if(1==n, 1, if(isprime(n), 1+A061775(primepi(n)), {my(pfs,t,i); pfs=factor(n); pfs[,1]=apply(t->A061775(t),pfs[,1]); (1-bigomega(n)) + sum(i=1, omega(n), pfs[i,1]*pfs[i,2])}));
+%o A061775 for(n=1, 10000, write("b061775.txt", n, " ", A061775(n)));
+%o A061775 \\ _Antti Karttunen_, Aug 16 2014
+%o A061775 (Python)
+%o A061775 from functools import lru_cache
+%o A061775 from sympy import isprime, factorint, primepi
+%o A061775 @lru_cache(maxsize=None)
+%o A061775 def A061775(n):
+%o A061775     if n == 1: return 1
+%o A061775     if isprime(n): return 1+A061775(primepi(n))
+%o A061775     return 1+sum(e*(A061775(p)-1) for p, e in factorint(n).items()) # _Chai Wah Wu_, Mar 19 2022
+%Y A061775 One more than A196050.
+%Y A061775 Sum of entries in row n of irregular table A214573.
+%Y A061775 Number of entries in row n of irregular tables A182907, A206491, A206495 and A212620.
+%Y A061775 One less than the number of entries in row n of irregular tables A184187, A193401 and A193403.
+%Y A061775 Cf. A005517 (the position of the first occurrence of n).
+%Y A061775 Cf. A005518 (the position of the last occurrence of n).
+%Y A061775 Cf. A091233 (their difference plus one).
+%Y A061775 Cf. A214572 (Numbers k such that a(k) = 8).
+%Y A061775 Cf. also A000081, A061773, A049084, A020639, A049076, A078442, A091238, A091204, A091205, A109082, A127301, A109129, A193402, A193405, A193406, A196047, A196068, A198333, A206487, A206494, A206496, A214569, A214571, A213670, A214568, A228599, A245817, A245818.
+%Y A061775 Cf. also A075166, A075167, A216648, A216649.
+%K A061775 nonn
+%O A061775 1,2
+%A A061775 _N. J. A. Sloane_, Jun 22 2001
+%E A061775 More terms from _David W. Wilson_, Jun 25 2001
+%E A061775 Extended by _Emeric Deutsch_, Sep 19 2011

@@ -1,0 +1,38 @@
+%I A077618
+%S A077618 1,1,1,0,1,2,1,0,0,2,1,0,1,1,1,0,1,0,1,0,1,1,1,0,0,2,0,0,1,7,1,0,1,1,
+%T A077618 1,0,1,1,1,0,1,1,1,0,0,1,1,0,0,0,2,0,1,0,1,0,1,1,1,0,1,1,0,0,1,6,1,0,
+%U A077618 1,2,1,0,1,1,0,0,1,3,1,0,0,1,1,0,1,1,1,0,1,0,1,0,1,1,1,0,1,0,0,0,1,4,1,0,1
+%N A077618 Number of occurrences of n in A076734.
+%C A077618 n is squarefree iff a(n)>0, see A077619, A077622.
+%C A077618 If n is prime, a(n)=1. - _Robert Israel_, Oct 20 2017
+%H A077618 Antti Karttunen, <a href="/A077618/b077618.txt">Table of n, a(n) for n = 1..30030</a>
+%F A077618 a(A002110(n)) = A077622(n). - _Antti Karttunen_, Oct 20 2017, after _Reinhard Zumkeller_'s comment in the latter sequence.
+%e A077618 For n=10, we have exactly two numbers k <= 10 such that A001222(k) = A001222(10) = 2, for which 10 is the least squarefree number >= k, namely 9 (= 3*3) and 10 (= 2*5), thus a(10) = 2. - _Antti Karttunen_, Oct 20 2017
+%p A077618 N:= 200: # to get a(1)..a(N)
+%p A077618 M:= map(numtheory:-bigomega, [$1..N]):
+%p A077618 S:= map(numtheory:-issqrfree, [$1..N]):
+%p A077618 f:= proc(n) local m,k,t;
+%p A077618   if not S[n] then return 0 fi;
+%p A077618   m:= M[n];
+%p A077618   t:= 1;
+%p A077618   for k from n-1 to 1 by -1 do
+%p A077618     if M[k] = m then
+%p A077618       if S[k] then return t
+%p A077618       else t:= t+1
+%p A077618       fi;
+%p A077618     fi
+%p A077618   od;
+%p A077618   t
+%p A077618 end proc:
+%p A077618 map(f, [$1..N]); # _Robert Israel_, Oct 20 2017
+%t A077618 Block[{nn = 120, s, t}, s = KeySelect[KeySort@ PositionIndex@ Array[Which[SquareFreeQ@ #1, #1, #3 < #1, #3, True, Block[{k = #1}, While[Nand[SquareFreeQ[k], PrimeOmega[k] == #2], k++]; k]] & @@ {#, PrimeOmega@ #, Times @@ Prime@ Range@ #} &, 2 nn], # < nn &]; t = ConstantArray[0, nn]; ReplacePart[t, Map[# -> Length@ Lookup[s, #] &, Keys@ s]]] (* _Michael De Vlieger_, Oct 20 2017 *)
+%o A077618 (PARI) A077618(n) = { my(b = bigomega(n),s=1); if(1==n,n,if(!issquarefree(n),0,k=n-1; while(k > 1,if(bigomega(k)==b,if(issquarefree(k),return(s),s++)); k--; ); (s))); }; \\ _Antti Karttunen_, Oct 20 2017
+%o A077618 (PARI) first(n) = {my(test = vector(n, i, [bigomega(i), i, issquarefree(i), 1]),
+%o A077618 biglist = vector(logint(n, 2) + 1)); forstep(i = n, 1, -1, if(test[i][3] == 0,
+%o A077618 test[i][4] = 0; if(biglist[test[i][1] + 1]!=0, test[biglist[test[i][1] + 1]][4]++)
+%o A077618 , biglist[test[i][1] + 1] = test[i][2])); vector(n, i, test[i][4])} \\ _David A. Corneth_, Oct 20 2017
+%Y A077618 Cf. A005117, A076734, A077622.
+%K A077618 nonn
+%O A077618 1,6
+%A A077618 _Reinhard Zumkeller_, Nov 12 2002
+%E A077618 Term a(10) corrected by _Antti Karttunen_, Oct 20 2017

@@ -1,0 +1,50 @@
+%I A050320
+%S A050320 1,1,1,1,1,2,1,1,1,2,1,2,1,2,2,1,1,2,1,2,2,2,1,2,1,2,1,2,1,5,1,1,2,2,
+%T A050320 2,3,1,2,2,2,1,5,1,2,2,2,1,2,1,2,2,2,1,2,2,2,2,2,1,6,1,2,2,1,2,5,1,2,
+%U A050320 2,5,1,3,1,2,2,2,2,5,1,2,1,2,1,6,2,2,2,2,1,6,2,2,2,2,2,2,1,2,2,3,1,5,1
+%N A050320 Number of ways n is a product of squarefree numbers > 1.
+%C A050320 a(n) depends only on prime signature of n (cf. A025487). So a(24) = a(375) since 24 = 2^3*3 and 375 = 3*5^3 both have prime signature (3,1).
+%C A050320 Broughan shows (Theorem 8) that the average value of a(n) is k exp(2*sqrt(log n)/sqrt(zeta(2)))/log(n)^(3/4) where k is about 0.18504.  - _Charles R Greathouse IV_, May 21 2013
+%C A050320 From _Gus Wiseman_, Aug 20 2020: (Start)
+%C A050320 Also the number of set multipartitions (multisets of sets) of the multiset of prime indices of n. For example, the a(n) set multipartitions for n = 2, 6, 36, 60, 360 are:
+%C A050320   {1}  {12}    {12}{12}      {1}{123}      {1}{12}{123}
+%C A050320        {1}{2}  {1}{2}{12}    {12}{13}      {12}{12}{13}
+%C A050320                {1}{1}{2}{2}  {1}{1}{23}    {1}{1}{12}{23}
+%C A050320                              {1}{2}{13}    {1}{1}{2}{123}
+%C A050320                              {1}{3}{12}    {1}{2}{12}{13}
+%C A050320                              {1}{1}{2}{3}  {1}{3}{12}{12}
+%C A050320                                            {1}{1}{1}{2}{23}
+%C A050320                                            {1}{1}{2}{2}{13}
+%C A050320                                            {1}{1}{2}{3}{12}
+%C A050320                                            {1}{1}{1}{2}{2}{3}
+%C A050320 (End)
+%H A050320 Giovanni Resta, <a href="/A050320/b050320.txt">Table of n, a(n) for n = 1..10000</a>
+%H A050320 Kevin Broughan, <a href="http://www.math.waikato.ac.nz/~kab/papers/quadrafree2.pdf">Quadrafree factorisatio numerorum</a>, Rocky Mountain J. Math. 44 (3) (2014) 791-807.
+%H A050320 <a href="/index/Eu#epf">Index entries for sequences computed from exponents in factorization of n</a>
+%F A050320 Dirichlet g.f.: Product_{n is squarefree and > 1} (1/(1-1/n^s)).
+%F A050320 a(n) = A050325(A101296(n)). - _R. J. Mathar_, May 26 2017
+%F A050320 a(n!) = A103774(n); a(A006939(n)) = A337072(n). - _Gus Wiseman_, Aug 20 2020
+%e A050320 For n = 36 we have three choices as 36 = 2*2*3*3 = 6*6 = 2*3*6 (but no factorizations with factors 4, 9, 12, 18 or 36 are allowed), thus a(36) = 3. - _Antti Karttunen_, Oct 21 2017
+%t A050320 sub[w_, e_] := Block[{v = w}, v[[e]]--; v]; ric[w_, k_] := If[Max[w] == 0, 1, Block[{e, s, p = Flatten@Position[Sign@w, 1]}, s = Select[Prepend[#, First@p] & /@ Subsets[Rest@p], Total[1/2^#] <= k &]; Sum[ric[sub[w, e], Total[1/2^e]], {e, s}]]]; sig[w_] := sig[w] = ric[w, 1];  a[n_] := sig@ Sort[Last /@ FactorInteger[n]]; Array[a, 103] (* _Giovanni Resta_, May 21 2013 *)
+%t A050320 sqfacs[n_]:=If[n<=1,{{}},Join@@Table[(Prepend[#,d]&)/@Select[sqfacs[n/d],Min@@#>=d&],{d,Select[Rest[Divisors[n]],SquareFreeQ]}]]
+%t A050320 Table[Length[sqfacs[n]],{n,100}] (* _Gus Wiseman_, Aug 20 2020 *)
+%o A050320 (Haskell)
+%o A050320 a050320 n = h n $ tail $ a206778_row n where
+%o A050320    h 1 _          = 1
+%o A050320    h _ []         = 0
+%o A050320    h m fs'@(f:fs) =
+%o A050320      if f > m then 0 else if r > 0 then h m fs else h m' fs' + h m fs
+%o A050320      where (m', r) = divMod m f
+%o A050320 -- _Reinhard Zumkeller_, Dec 16 2013
+%Y A050320 Cf. A001055, A005117, A050325. a(p^k)=1. a(A002110)=A000110.
+%Y A050320 a(n!)=A103774(n).
+%Y A050320 Cf. A206778.
+%Y A050320 Differs from A259936 for the first time at n=36.
+%Y A050320 A050326 is the strict case.
+%Y A050320 A045778 counts strict factorizations.
+%Y A050320 A089259 counts set multipartitions of integer partitions.
+%Y A050320 A116540 counts normal set multipartitions.
+%Y A050320 Cf. A008480, A124010, A317829, A318360.
+%K A050320 nonn,easy,nice
+%O A050320 1,6
+%A A050320 _Christian G. Bower_, Sep 15 1999

@@ -1,0 +1,67 @@
+%I A103294
+%S A103294 1,0,1,0,0,1,0,0,2,1,0,0,0,3,1,0,0,0,4,4,1,0,0,0,2,9,5,1,0,0,0,0,12,
+%T A103294 14,6,1,0,0,0,0,8,27,20,7,1,0,0,0,0,4,40,48,27,8,1,0,0,0,0,0,38,90,75,
+%U A103294 35,9,1,0,0,0,0,0,30,134,166,110,44,10,1,0,0,0,0,0,14,166,311,277,154,54,11,1
+%N A103294 Triangle T, read by rows: T(n,k) = number of complete rulers with length n and k segments (n >= 0, k >= 0).
+%C A103294 If n=k then T(n,k)=1.
+%C A103294 A sparse ruler, or simply a ruler, is a strict increasing finite sequence of nonnegative integers starting from 0 called marks.
+%C A103294 A segment of a ruler is the space between two adjacent marks. The number of segments is the number of marks - 1.
+%C A103294 A ruler is complete if the set of all distances it can measure is {1,2,3,...,k} for some integer k>=1.
+%C A103294 A ruler is perfect if it is complete and no complete ruler with the same length possesses less marks.
+%C A103294 A ruler is optimal if it is perfect and no perfect ruler with the same number of segments has a greater length.
+%C A103294 The 'empty ruler' with length n=0 is considered perfect and optimal.
+%D A103294 G. S. Bloom and S. W. Golomb, Numbered complete graphs, unusual rulers, and assorted applications. Theory and Applications of Graphs, Lecture Notes in Math. 642, (1978), 53-65.
+%D A103294 R. K. Guy, Modular difference sets and error correcting codes. in: Unsolved Problems in Number Theory, 3rd ed. New York: Springer-Verlag, chapter C10, pp. 181-183, 2004.
+%D A103294 J. C. P. Miller, Difference bases: Three problems in additive number theory, pp. 299-322 of A. O. L. Atkin and B. J. Birch, editors, Computers in Number Theory. Academic Press, NY, 1971.
+%H A103294 Fausto A. C. Cariboni, <a href="/A103294/b103294.txt">Rows n = 0..49, flattened</a> (rows n = 0..39 from Hugo Pfoertner)
+%H A103294 G. S. Bloom and S. W. Golomb, <a href="https://doi.org/10.1109/PROC.1977.10517">Applications of numbered undirected graphs</a>, Proc. IEEE 65 (1977), 562-570.
+%H A103294 Peter Luschny, <a href="http://www.luschny.de/math/rulers/prulers.html">Perfect and Optimal Rulers</a>
+%H A103294 Peter Luschny, <a href="http://www.luschny.de/math/rulers/rulercnt.html">Table of Counts</a>
+%H A103294 Peter Luschny, <a href="http://oeis.org/wiki/User:Peter_Luschny/PerfectRulers">Perfect rulers</a>
+%H A103294 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/PerfectRuler.html">Perfect Rulers</a>
+%H A103294 B. Wichmann, <a href="https://doi.org/10.1112/jlms/s1-38.1.465">A note on restricted difference bases</a>, J. Lond. Math. Soc. 38 (1963), 465-466.
+%H A103294 <a href="/index/Per#perul">Index entries for sequences related to perfect rulers</a>
+%e A103294 Rows begin:
+%e A103294 [1],
+%e A103294 [0,1],
+%e A103294 [0,0,1],
+%e A103294 [0,0,2,1],
+%e A103294 [0,0,0,3,1],
+%e A103294 [0,0,0,4,4,1],
+%e A103294 [0,0,0,2,9,5,1],
+%e A103294 [0,0,0,0,12,14,6,1],
+%e A103294 [0,0,0,0,8,27,20,7,1],
+%e A103294 ...
+%e A103294 a(19)=T(5,4)=4 counts the complete rulers with length 5 and 4 segments: {[0,2,3,4,5],[0,1,3,4,5],[0,1,2,4,5],[0,1,2,3,5]}
+%t A103294 marks[n_, k_] := Module[{i}, i[0] = 0; iter = Sequence @@ Table[{i[j], i[j - 1] + 1, n - k + j - 1}, {j, 1, k}]; Table[Join[{0}, Array[i, k], {n}],
+%t A103294      iter // Evaluate] // Flatten[#, k - 1]&];
+%t A103294 completeQ[ruler_List] := Range[ruler[[-1]]] == Sort[ Union[ Flatten[ Table[ ruler[[i]] - ruler[[j]], {i, 1, Length[ruler]}, {j, 1, i - 1}]]]];
+%t A103294 rulers[n_, k_] := Select[marks[n, k - 1], completeQ];
+%t A103294 T[n_, n_] = 1; T[_, 0] = 0; T[n_, k_] := Length[rulers[n, k]];
+%t A103294 Table[T[n, k], {n, 0, 12}, {k, 0, n}] // Quiet (* _Jean-François Alcover_, Jul 05 2019 *)
+%o A103294 (Sage)
+%o A103294 def isComplete(R) :
+%o A103294     S = Set([])
+%o A103294     L = len(R)-1
+%o A103294     for i in range(L,0,-1) :
+%o A103294         for j in (1..i) :
+%o A103294             S = S.union(Set([R[i]-R[i-j]]))
+%o A103294     return len(S) == R[L]
+%o A103294 def Partsum(T) :
+%o A103294     return [add([T[j] for j in range(i)]) for i in (0..len(T))]
+%o A103294 def Ruler(L, S) :
+%o A103294     return map(Partsum, Compositions(L, length=S))
+%o A103294 def CompleteRuler(L, S) :
+%o A103294     return tuple(filter(isComplete, Ruler(L, S)))
+%o A103294 for n in (0..8):
+%o A103294     print([len(CompleteRuler(n,k)) for k in (0..n)]) # _Peter Luschny_, Jul 05 2019
+%Y A103294 Row sums give A103295.
+%Y A103294 Column sums give A103296.
+%Y A103294 The first nonzero entries in the rows give A103300.
+%Y A103294 The last nonzero entries in the columns give A103299.
+%Y A103294 The row numbers of the last nonzero entries in the columns give A004137.
+%Y A103294 Cf. A103295 through A103301, A004137, A212661.
+%K A103294 nonn,tabl
+%O A103294 0,9
+%A A103294 _Peter Luschny_, Feb 28 2005
+%E A103294 Typo in data corrected by _Jean-François Alcover_, Jul 05 2019

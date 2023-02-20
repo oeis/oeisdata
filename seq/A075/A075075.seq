@@ -1,0 +1,58 @@
+%I A075075
+%S A075075 1,2,4,6,3,5,10,8,12,9,15,20,16,24,18,21,7,11,22,14,28,26,13,17,34,30,
+%T A075075 45,27,33,44,32,40,25,35,42,36,48,52,39,51,68,56,70,50,55,66,54,63,49,
+%U A075075 77,88,64,72,81,90,60,38,19,23,46,58,29,31,62,74,37,41,82,76,114,57,43
+%N A075075 a(1) = 1, a(2) = 2 and then the smallest number not occurring earlier such that every term divides the product of its neighbors: a(n-1)*a(n+1)/a(n) is an integer.
+%C A075075 This is a permutation of natural numbers. [_Leroy Quet_ asks (May 06 2009) if this is a theorem or just a conjecture.]
+%C A075075 Every time a(n) divides a(n-1), a(n+1) is the next number that is not already in the sequence. I don't have a proof that a(n) divides a(n-1) infinitely often. - _Franklin T. Adams-Watters_, Jun 12 2014
+%C A075075 It appears that a(n): 1,2,...,3,5,...,7,11,...,prime(2k),prime(2k+1),... - _Thomas Ordowski_, Jul 10 2015
+%C A075075 The primes do appear to occur in increasing order, but prime(2k) is not always followed directly by prime(2k+1).  For example, a(72) = 43 = prime(14), but a(125) = 47 = prime(15). - _Robert Israel_, Jul 10 2015
+%C A075075 If a(n) and a(n+1) are primes then a(n) divides a(n-1). - _Thomas Ordowski_, Jul 10 2015 [Cf. second comment]
+%C A075075 a(n) is the least multiple of a(n-1)/gcd(a(n-2),a(n-1)) that has not previously occurred. - _Robert Israel_, Jul 10 2015
+%C A075075 Conjecture: if a(n) divides a(n-1) then a(n+1) is prime. - _Thomas Ordowski_, Jul 11 2015
+%C A075075 It seems that a(n) and a(n+1) are consecutive primes if and only if a(n) divides a(n-1) and a(n) < a(n+1). - _Thomas Ordowski_, Jul 13 2015
+%H A075075 Alois P. Heinz, <a href="/A075075/b075075.txt">Table of n, a(n) for n = 1..10000</a>
+%p A075075 b:= proc(n) option remember; false end: a:= proc(n) option remember; local k, m; if n<3 then b(n):= true; n else m:= denom(a(n-2) /a(n-1)); for k from m by m while b(k) do od; b(k):= true; k fi end: seq(a(n), n=1..100); # _Alois P. Heinz_, May 16 2009
+%t A075075 f[s_List] := Block[{m = Numerator[ s[[ -1]]/s[[ -2]] ]}, k = m; While[ MemberQ[s, k], k += m]; Append[s, k]]; Nest[f, {1, 2}, 70] (* _Robert G. Wilson v_, May 20 2009 *)
+%o A075075 (Haskell)
+%o A075075 import Data.List (delete)
+%o A075075 a075075 n = a075075_list !! (n-1)
+%o A075075 a075075_list = 1 : 2 : f 1 2 [3..] where
+%o A075075   f z z' xs = g xs where g (u:us) =
+%o A075075     if (z * u) `mod` z' > 0 then g us else u : f z' u (delete u xs)
+%o A075075 -- _Reinhard Zumkeller_, Dec 19 2012
+%o A075075 (Python)
+%o A075075 from __future__ import division
+%o A075075 from fractions import gcd
+%o A075075 A075075_list, l1, l2, m, b = [1,2], 2, 1, 2, {1,2}
+%o A075075 for _ in range(10**3):
+%o A075075 ....i = m
+%o A075075 ....while True:
+%o A075075 ........if not i in b:
+%o A075075 ............A075075_list.append(i)
+%o A075075 ............l1, l2, m = i, l1, i//gcd(l1,i)
+%o A075075 ............b.add(i)
+%o A075075 ............break
+%o A075075 ........i += m # _Chai Wah Wu_, Dec 09 2014
+%o A075075 (MATLAB)
+%o A075075 N = 10^6;
+%o A075075 Avail = ones(1,N);
+%o A075075 A = zeros(1,N);
+%o A075075 A(1) = 1; A(2) = 2;
+%o A075075 Avail([1,2]) = 0;
+%o A075075 for n=3:N
+%o A075075   q = round(A(n-1)/gcd(A(n-1),A(n-2)));
+%o A075075   b = find(Avail(q*[1:floor(N/q)]),1,'first');
+%o A075075   if numel(b) == 0
+%o A075075      break
+%o A075075   end
+%o A075075   A(n) = q*b;
+%o A075075   Avail(A(n)) = 0;
+%o A075075 end
+%o A075075 A = A(1:n-1); % _Robert Israel_, Jul 10 2015
+%Y A075075 Cf. A075076 (ratios), A160256, A064413 (EKG sequence).
+%Y A075075 Cf. A160516 (inverse), A185635 (fixed points).
+%K A075075 nice,nonn,look
+%O A075075 1,2
+%A A075075 _Amarnath Murthy_, Sep 09 2002
+%E A075075 More terms from _Sascha Kurz_, Feb 03 2003

@@ -1,0 +1,49 @@
+%I A024785
+%S A024785 2,3,5,7,13,17,23,37,43,47,53,67,73,83,97,113,137,167,173,197,223,283,
+%T A024785 313,317,337,347,353,367,373,383,397,443,467,523,547,613,617,643,647,
+%U A024785 653,673,683,743,773,797,823,853,883,937,947,953,967,983,997,1223
+%N A024785 Left-truncatable primes: every suffix is prime and no digits are zero.
+%C A024785 Last term is a(4260) = 357686312646216567629137 (Angell and Godwin). - _Eric W. Weisstein_, Dec 11 1999
+%C A024785 Can be seen as table whose rows list n-digit terms, 1 <= n <= 25. Row lengths are A050987. - _M. F. Hasler_, Nov 07 2018
+%H A024785 N. J. A. Sloane, <a href="/A024785/b024785.txt">Table of n, a(n) for n = 1..4260</a> (The full list, based on the De Geest web site)
+%H A024785 I. O. Angell and H. J. Godwin, <a href="http://dx.doi.org/10.1090/S0025-5718-1977-0427213-2">On Truncatable Primes</a>, Math. Comput. 31, 265-267, 1977.
+%H A024785 Patrick De Geest, <a href="http://www.worldofnumbers.com/truncat.htm">The list of 4260 left-truncatable primes</a>
+%H A024785 James Grime and Brady Haran, <a href="https://www.youtube.com/watch?v=azL5ehbw_24">357686312646216567629137</a>, Numberphile video (2018).
+%H A024785 Ernest G. Hibbs, <a href="https://www.proquest.com/openview/4012f0286b785cd732c78eb0fc6fce80">Component Interactions of the Prime Numbers</a>, Ph. D. Thesis, Capitol Technology Univ. (2022), see p. 33.
+%H A024785 Rosetta Code, <a href="http://rosettacode.org/wiki/Truncatable_primes">Programs for finding truncatable primes</a>
+%H A024785 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/TruncatablePrime.html">Truncatable Prime</a>
+%H A024785 Chai Wah Wu, <a href="http://arxiv.org/abs/1503.08883">On a conjecture regarding primality of numbers constructed from prepending and appending identical digits</a>, arXiv:1503.08883 [math.NT], 2015.
+%H A024785 <a href="/index/Tri#tprime">Index entries for sequences related to truncatable primes</a>
+%p A024785 a:=[[2],[3],[5],[7]]: l1:=1: l2:=4: for n from 1 to 3 do for k from 1 to 9 do for j from l1 to l2 do d:=[op(a[j]),k]: if(isprime(op(convert(d,base,10,10^nops(d)))))then a:=[op(a), d]: fi: od: od: l1:=l2+1: l2:=nops(a): if(l1>l2)then break: fi: od: seq(op(convert(a[j],base,10,10^nops(a[j]))),j=1..nops(a)); # _Nathaniel Johnston_, Jun 21 2011
+%p A024785 # second Maple program:
+%p A024785 T:= proc(n) option remember; `if`(n=0, "", sort(select(isprime,
+%p A024785       map(x-> seq(parse(cat(j, x)), j=1..9), [T(n-1)])))[])
+%p A024785     end:
+%p A024785 seq(T(n), n=1..4);  # _Alois P. Heinz_, Sep 01 2021
+%t A024785 max = 2000; truncate[p_] := If[id = IntegerDigits[p]; FreeQ[id, 0] && (Last[id] == 3 || Last[id] == 7) && PrimeQ[q = FromDigits[ Rest[id]]], q, p]; ok[n_] := FixedPoint[ truncate, n] < 10;p = 5; A024785 = {2, 3, 5}; While[(p = NextPrime[p]) < max, If[ok[p], AppendTo[A024785, p]]]; A024785 (* _Jean-François Alcover_, Nov 09 2011 *)
+%t A024785 d[n_]:=IntegerDigits[n]; ltrQ[n_]:=And@@PrimeQ[NestList[FromDigits[Drop[d[#],1]]&,n,Length[d[n]]-1]]; Select[Range[1225],ltrQ[#]&] (* _Jayanta Basu_, May 29 2013 *)
+%t A024785 FullList=Sort[Flatten[Table[FixedPointList[Select[Flatten[Table[Range[9]*10^Length@IntegerDigits[#[[1]]] + #[[i]], {i, Length[#]}]], PrimeQ] &, {i}], {i, {2, 3, 5, 7}}]]] (* _Fabrice Laussy_, Nov 10 2019 *)
+%o A024785 (PARI) v=vector(4260);v[1]=2;v[2]=3;v[3]=5;v[4]=7;i=0;j=4; until(i>=j,i++;p=v[i];P10=10^(1+log(p)\log(10)); for(k=1,9,z=k*P10+p;if(isprime(z),j++;v[j]=z;))); s=vector(4260);s=vecsort(v);for(i=1,j,write("b024785.txt",i," ",s[i]);); \\
+%o A024785 (PARI) is_A024785(n,t=1)={until(t>10*p,isprime(p=n%t*=10)||return);n==p} \\ _M. F. Hasler_, Apr 17 2014
+%o A024785 (PARI) A024785=vector(25,n,p=vecsort(concat(apply(p->select(isprime, vector(9,i, i*10^(n-1)+p)),if(n>1,p))))); \\ Yields the list of rows (n-digit terms, n = 1..25). Use concat(%) to flatten. There are faster variants using matrices (vectorv(9,i,1)*p+[1..9]~*10^(n-1)*vector(#p,i,1)) and/or predefined vectors, but they are less concise and this takes less than 0.1 sec. - _M. F. Hasler_, Nov 07 2018
+%o A024785 (Haskell)
+%o A024785 import Data.List (tails)
+%o A024785 a024785 n = a024785_list !! (n-1)
+%o A024785 a024785_list = filter (\x ->
+%o A024785    all (== 1) $ map (a010051 . read) $ init $ tails $ show x) a038618_list
+%o A024785 -- _Reinhard Zumkeller_, Nov 01 2011
+%o A024785 (Python)
+%o A024785 from sympy import isprime
+%o A024785 def alst():
+%o A024785   primes, alst = [2, 3, 5, 7], []
+%o A024785   while len(primes) > 0:
+%o A024785     alst += sorted(primes)
+%o A024785     candidates = set(int(d+str(p)) for p in primes for d in "123456789")
+%o A024785     primes = [c for c in candidates if isprime(c)]
+%o A024785   return alst
+%o A024785 print(alst()) # _Michael S. Branicky_, Apr 11 2021
+%Y A024785 Supersequence of A240768.
+%Y A024785 Cf. A033664, A032437, A020994, A024770 (right-truncatable primes), A052023, A052024, A052025, A050986, A050987, A077390 (left-and-right truncatable primes), A137812 (left-or-right truncatable primes), A254753.
+%K A024785 nonn,base,easy,fini,full,tabf
+%O A024785 1,1
+%A A024785 _David W. Wilson_

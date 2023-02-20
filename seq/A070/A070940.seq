@@ -1,0 +1,73 @@
+%I A070940
+%S A070940 1,1,2,1,3,2,3,1,4,3,4,2,4,3,4,1,5,4,5,3,5,4,5,2,5,4,5,3,5,4,5,1,6,5,
+%T A070940 6,4,6,5,6,3,6,5,6,4,6,5,6,2,6,5,6,4,6,5,6,3,6,5,6,4,6,5,6,1,7,6,7,5,
+%U A070940 7,6,7,4,7,6,7,5,7,6,7,3,7,6,7,5,7,6,7,4,7,6,7,5,7
+%N A070940 Number of digits that must be counted from left to right to reach the last 1 in the binary representation of n.
+%C A070940 Length of longest carry sequence when adding numbers <= n to n in binary representation: a(n)=T(n, A080079(n)) and T(n,k) <= a(n) for 1 <= k <= n, with T defined as in A080080. - _Reinhard Zumkeller_, Jan 26 2003
+%C A070940 a(n+1) is the number of distinct values of gcd(2^n, binomial(n,j)) (or, equivalently, A007814(binomial(n,j))) arising for j=0,...,n-1. Proof using Kummer's Theorem given by Marc Schwartz. - _Labos Elemer_, Apr 23 2003
+%C A070940 E.g., n=10: 10th row of Pascal's triangle = {1,10,45,120,210,252,210,120,45,10,1}, largest powers of 2 dividing binomial coefficients is: {1,2,1,8,2,4,2,8,1,2,1}; including distinct powers of 2, thus a(10)=4. If m=-1+2^k, i.e., m=0,1,3,7,15,31,.. then a(m)=1. This corresponds to "odd rows" of Pascal triangle. - _Labos Elemer_
+%C A070940 Smallest x > 0 for which a(x)=n equals 2^n. - _Labos Elemer_
+%C A070940 a(n) <= A070939(n), a(n) = A070939(n) iff n is odd, where A070939(n) = floor(log_2(n)) + 1. - _Reinhard Zumkeller_, Jan 26 2003
+%C A070940 Can be regarded as a table with row n having 2^(n-1) columns, with odd columns repeating the previous row, and even columns containing the row number. - _Franklin T. Adams-Watters_, Nov 08 2011
+%C A070940 It appears that a(n) is the greatest number in a periodicity equivalence class defined at A269570; e.g., the 5 classes for n = 35 are (1, 1, 2, 2, 6), (1, 1, 1, 1, 4, 2, 2), (3), (1, 3), (1, 2); in these the greatest number is 6, so that a(35) = 6. - _Clark Kimberling_, Mar 01 2016
+%C A070940 Number of binary digits of the largest odd factor of n. - _Andres Cicuttin_, May 18 2017
+%H A070940 Reinhard Zumkeller, <a href="/A070940/b070940.txt">Table of n, a(n) for n = 1..10000</a>
+%H A070940 <a href="/index/Bi#binary">Index entries for sequences related to binary expansion of n</a>
+%F A070940 a(n) = floor(log_2(n)) - A007814(n) = A070939(n) - A007814(n).
+%F A070940 a(n) = f(n, 1), f(n, k) = if n=1 then k else f(floor(n/2), k+(if k>1 then 1 else n mod 2)). - _Reinhard Zumkeller_, Feb 01 2003
+%F A070940 G.f.: sum(k>=0, t/(1-t^2) * [1 + sum(l>=1, t^2^l)], t=x^2^k). - _Ralf Stephan_, Mar 15 2004
+%F A070940 a(n) = A070939(A000265(n)). - _Andres Cicuttin_, May 19 2017
+%F A070940 a(1) = 1 and for m >= 0, 0 <= k < 2^m, a(2^(m+1)+2*k) =  a(2^m+k), a(2^(m+1)+2*k+1) = m+2. - _Yosu Yurramendi_, Aug 08 2019
+%e A070940 a(10)=3 is the number of digits that must be counted from left to right to reach the last 1 in 1010, the binary representation of 10.
+%e A070940 The table starts:
+%e A070940 1
+%e A070940 1 2
+%e A070940 1 3 2 3
+%e A070940 1 4 3 4 2 4 3 4
+%p A070940 A070940 := n -> if n mod 2 = 0 then A070939(n)-A001511(n/2) else A070939(n); fi;
+%t A070940 Table[Length[Union[Table[GCD[2^n, Binomial[n, j]], {j, 0, n}]]], {n, 0, 256}]
+%t A070940 f[n_] := Position[ IntegerDigits[n, 2], 1][[ -1, 1]]; Table[ f[n], {n, 105}] (* _Robert G. Wilson v_, Dec 01 2004 *)
+%t A070940 (* By exploiting the "positional" regularity of the sequence *)
+%t A070940 b = {}; a = {1, 1};
+%t A070940 Do[a = Riffle[a, j];
+%t A070940   b = AppendTo[b, a[[1 ;; Floor[Length[a]/2]]]] // Flatten, {j, 1, 10}];
+%t A070940 Print[b[[1 ;; 100]]] (* _Andres Cicuttin_, May 18 2017 *)
+%t A070940 (* By following the alternative definition "Number of binary digits of the largest integer odd factor of n" *)
+%t A070940 c = Table[IntegerDigits[n/(2^IntegerExponent[n, 2]), 2] // Length , {n,
+%t A070940     2^10 - 1}];
+%t A070940 Print[c[[1 ;; 100]]] (* _Andres Cicuttin_, May 18 2017 *)
+%t A070940 lidn[n_]:=Module[{idn=IntegerDigits[n,2]},idn=If[Last[idn]==0,Flatten[ Most[ Split[ idn]]],idn];Length[idn]]; Array[lidn,100] (* _Harvey P. Dale_, Oct 18 2020 *)
+%o A070940 (Haskell)
+%o A070940 a070940 = maximum . a080080_row  -- _Reinhard Zumkeller_, Apr 22 2013
+%o A070940 (R)
+%o A070940 blocklevel <- 7  # by choice
+%o A070940 a <- 1
+%o A070940 for(m in 0:blocklevel)
+%o A070940   for(k in 0:(2^m-1)){
+%o A070940     a[2^(m+1)+2*k  ] <-  a[2^m+k]
+%o A070940     a[2^(m+1)+2*k+1] <-  m + 2
+%o A070940 }
+%o A070940 a
+%o A070940 # _Yosu Yurramendi_, Aug 08 2019
+%o A070940 (Python)
+%o A070940 def A070940(n):
+%o A070940     while n%2 == 0:
+%o A070940         n = n//2
+%o A070940     a = 0
+%o A070940     while n != 0:
+%o A070940         n, a = n//2, a+1
+%o A070940     return a
+%o A070940 n = 0
+%o A070940 while n < 100:
+%o A070940     n = n+1
+%o A070940     print(n,A070940(n)) # _A.H.M. Smeets_, Aug 19 2019
+%o A070940 (Python)
+%o A070940 def A070940(n): return n.bit_length()-(~n&n-1).bit_length() # _Chai Wah Wu_, Jul 13 2022
+%Y A070940 Cf. A070939, A001511. Differs from A002487 around 11th term.
+%Y A070940 Cf. A000005, A007318, A000079, A082907, A082908.
+%Y A070940 Bisections give A070941 and this sequence (again).
+%Y A070940 Cf. A002064 (row sums), A199570.
+%K A070940 nonn,nice,easy,tabf
+%O A070940 1,3
+%A A070940 _N. J. A. Sloane_, May 18 2002
+%E A070940 Entry revised by _Ralf Stephan_, Nov 29 2004

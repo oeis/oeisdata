@@ -1,0 +1,64 @@
+%I A001196
+%S A001196 0,3,12,15,48,51,60,63,192,195,204,207,240,243,252,255,768,771,780,
+%T A001196 783,816,819,828,831,960,963,972,975,1008,1011,1020,1023,3072,3075,
+%U A001196 3084,3087,3120,3123,3132,3135,3264,3267,3276,3279,3312,3315,3324,3327,3840,3843
+%N A001196 Double-bitters: only even length runs in binary expansion.
+%C A001196 Numbers whose set of base 4 digits is {0,3}. - _Ray Chandler_, Aug 03 2004
+%C A001196 n such that there exists a permutation p_1, ..., p_n of 1, ..., n such that i + p_i is a power of 4 for every i. - _Ray Chandler_, Aug 03 2004
+%C A001196 The first 2^n terms of the sequence could be obtained using the Cantor-like process for the segment [0, 4^n-1]. E.g., for n=1 we have [0, {1, 2}, 3] such that numbers outside of braces are the first 2 terms of the sequence; for n=2 we have [0, {1, 2}, 3, {4, 5, 6, 7, 8, 9, 10, 11}, 12, {13, 14}, 15] such that the numbers outside of braces are the first 4 terms of the sequence, etc. - _Vladimir Shevelev_, Dec 17 2012
+%C A001196 From _Emeric Deutsch_, Jan 26 2018: (Start)
+%C A001196 Also, the indices of the compositions having only even parts. For the definition of the index of a composition, see A298644. For example, 195 is in the sequence since its binary form is 11000011 and the composition [2,4,2] has only even parts. 132 is not in the sequence since its binary form is 10000100 and the composition [1,4,1,2] also has odd parts.
+%C A001196 The command c(n) from the Maple program yields the composition having index n. (End)
+%C A001196 After the k-th step of generating the Koch snowflake curve, label the edges of the curve consecutively 0..3*4^k-1 starting from a vertex of the originating triangle. a(0), a(1), ... a(2^k-1) are the labels of the edges contained in one edge of the originating triangle. Add 4^k to each label to get the labels for the next edge of the triangle. Compare with A191108 in respect of the Sierpinski arrowhead curve. - _Peter Munn_, Aug 18 2019
+%H A001196 Sean A. Irvine, <a href="/A001196/b001196.txt">Table of n, a(n) for n = 0..10000</a>
+%H A001196 Robert Baillie and Thomas Schmelzer, <a href="https://library.wolfram.com/infocenter/MathSource/7166/">Summing Kempner's Curious (Slowly-Convergent) Series</a>, Mathematica Notebook kempnerSums.nb, Wolfram Library Archive, 2008.
+%H A001196 Ralf Stephan, <a href="/somedcgf.html">Some divide-and-conquer sequences with (relatively) simple ordinary generating functions</a>, 2004.
+%H A001196 Ralf Stephan, <a href="/A079944/a079944.ps">Table of generating functions</a>. [ps file]
+%H A001196 Ralf Stefan, <a href="/A001196/a001196.pdf">Table of generating functions</a>. [pdf file]
+%H A001196 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/KochSnowflake.html">Koch Snowflake</a>.
+%H A001196 Wikipedia, <a href="https://en.wikipedia.org/wiki/Koch_snowflake">Koch snowflake</a>.
+%H A001196 <a href="/index/Bi#binary">Index entries for sequences related to binary expansion of n</a>
+%F A001196 a(2n) = 4*a(n), a(2n+1) = 4*a(n) + 3.
+%F A001196 a(n) = 3 * A000695(n).
+%F A001196 Sum_{n>=1} 1/a(n) = 0.628725478158702414849086504025451177643560169366348272891020450593453403709... (calculated using Baillie and Schmelzer's kempnerSums.nb, see Links). - _Amiram Eldar_, Feb 12 2022
+%p A001196 Runs := proc (L) local j, r, i, k: j := 1: r[j] := L[1]: for i from 2 to nops(L) do if L[i] = L[i-1] then r[j] := r[j], L[i] else j := j+1: r[j] := L[i] end if end do: [seq([r[k]], k = 1 .. j)] end proc: RunLengths := proc (L) map(nops, Runs(L)) end proc: c := proc (n) ListTools:-Reverse(convert(n, base, 2)): RunLengths(%) end proc: A := {}: for n to 3350 do if type(product(1+c(n)[j], j = 1 .. nops(c(n))), odd) = true then A := `union`(A, {n}) else  end if end do: A; # most of the Maple  program is due to _W. Edwin Clark_. - _Emeric Deutsch_, Jan 26 2018
+%p A001196 # second Maple program:
+%p A001196 a:= proc(n) option remember;
+%p A001196      `if`(n<2, 3*n, 4*a(iquo(n, 2, 'r'))+3*r)
+%p A001196     end:
+%p A001196 seq(a(n), n=0..100);  # _Alois P. Heinz_, Jan 24 2022
+%t A001196 fQ[n_] := Union@ Mod[Length@# & /@ Split@ IntegerDigits[n, 2], 2] == {0}; Select[ Range@ 10000, fQ] (* Or *)
+%t A001196 fQ[n_] := Union@ Join[IntegerDigits[n, 4], {0, 3}] == {0, 3}; Select[ Range@ 10000, fQ] (* _Robert G. Wilson v_, Dec 24 2012 *)
+%o A001196 (Haskell)
+%o A001196 a001196 n = if n == 0 then 0 else 4 * a001196 n' + 3 * b
+%o A001196             where (n',b) = divMod n 2
+%o A001196 -- _Reinhard Zumkeller_, Feb 21 2014
+%o A001196 (Python)
+%o A001196 def inA001196(n):
+%o A001196     while n != 0:
+%o A001196         if n%4 == 1 or n%4 == 2:
+%o A001196             return 0
+%o A001196         n = n//4
+%o A001196     return 1
+%o A001196 n, a = 0, 0
+%o A001196 while n < 20:
+%o A001196     if inA001196(a):
+%o A001196         print(n,a)
+%o A001196         n = n+1
+%o A001196     a = a+1 # _A.H.M. Smeets_, Aug 19 2019
+%o A001196 (Python)
+%o A001196 from itertools import groupby
+%o A001196 def ok2lb(n):
+%o A001196   if n == 0: return True  # by convention
+%o A001196   return all(len(list(g))%2 == 0 for k, g in groupby(bin(n)[2:]))
+%o A001196 print([i for i in range(3313) if ok2lb(i)]) # _Michael S. Branicky_, Jan 04 2021
+%o A001196 (PARI) a(n) = 3*fromdigits(binary(n),4); \\ _Kevin Ryde_, Nov 07 2020
+%o A001196 (C) int a_next(int a_n) { int t = a_n << 1; return a_n ^ t ^ (t + 3); } /* _Falk Hüffner_, Jan 24 2022 */
+%Y A001196 3 times the Moser-de Bruijn sequence A000695.
+%Y A001196 Two digits in other bases: A005823, A097252-A097262.
+%Y A001196 Digit duplication in other bases: A338086, A338754.
+%Y A001196 Main diagonal of A054238.
+%Y A001196 Cf. A191108.
+%K A001196 nonn,base,easy
+%O A001196 0,2
+%A A001196 _N. J. A. Sloane_, based on an email from Bart la Bastide (bart(AT)xs4all.nl)

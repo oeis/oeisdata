@@ -1,0 +1,61 @@
+%I A090192
+%S A090192 1,1,0,-1,0,2,0,-5,0,14,0,-42,0,132,0,-429,0,1430,0,-4862,0,16796,0,
+%T A090192 -58786,0,208012,0,-742900,0,2674440,0,-9694845,0,35357670,0,
+%U A090192 -129644790,0,477638700,0,-1767263190,0,6564120420,0,-24466267020,0,91482563640,0,-343059613650,0
+%N A090192 Carlitz-Riordan q-Catalan numbers (recurrence version) for q = -1.
+%C A090192 Hankel transform is (-1)^C(n+1,2). - _Paul Barry_, Feb 15 2008
+%H A090192 Fung Lam and Seiichi Manyama, <a href="/A090192/b090192.txt">Table of n, a(n) for n = 0..3338</a> (first 1002 terms from Fung Lam)
+%F A090192 a(n+1) = Sum_{i=0..n} q^i*a(i)*a(n-i) with q=-1 and a(0)=1.
+%F A090192 G.f.: 1+x*c(-x^2), where c(x) is the g.f. of A000108; a(n) = 0^n+C((n-1)/2)(-1)^((n-1)/2)(1-(-1)^n)/2, where C(n) = A000108(n). - _Paul Barry_, Feb 15 2008
+%F A090192 G.f.: 1/(1-x/(1+x/(1-x/(1+x/(1-x/(1+x/(1-.... (continued fraction). - _Paul Barry_, Jan 15 2009
+%F A090192 a(n) = 2 * a(n-1) - Sum_{k=1..n} a(k-1) * a(n-k) if n>0. - _Michael Somos_, Jul 23 2011
+%F A090192 G.f.: (2*x-1+sqrt(1+4*x^2))/(2*x). - _Philippe Deléham_, Nov 07 2011
+%F A090192 E.g.f.: x*hypergeom([1/2],[2,3/2],-x^2)=A(x)=x*(1-(x^2)/(Q(0)+(x^2)); Q(k)=2*(k^3)+9*(k^2)+(13-2*(x^2))*k-(x^2)+6+(x^2)*(k+1)*(k+2)*((2*k+3)^2)/Q(k+1); (continued fraction). - _Sergei N. Gladkovskii_, Nov 22 2011
+%F A090192 G.f.: 2 + (G(0)-1)/(2*x) where G(k)=1 - 4*x/(1 + 1/G(k+1) ); (recursively defined continued fraction). - _Sergei N. Gladkovskii_, Dec 08 2012
+%F A090192 G.f.: 2 + (G(0) -1)/x, where G(k)= 1 - x/(1 + x/G(k+1) ); (continued fraction). - _Sergei N. Gladkovskii_, Jul 17 2013
+%F A090192 G.f.: 1 - 1/(2*x) + G(0)/(4*x), where G(k)= 1 + 1/(1 - 2*x^2*(2*k-1)/(2*x^2*(2*k-1) - (k+1)/G(k+1) )); (continued fraction). - _Sergei N. Gladkovskii_, Jul 17 2013
+%F A090192 G.f.: 1- x/(Q(0) + 2*x^2), where Q(k)= (4*x^2 - 1)*k - 2*x^2 - 1 +  2*x^2*(k+1)*(2*k+1)/Q(k+1); (continued fraction). - _Sergei N. Gladkovskii_, Jul 17 2013
+%F A090192 G.f.: 1+ x/Q(0), where Q(k) = 2*k+1 - x^2*(1-4*(k+1)^2)/Q(k+1); (continued fraction). - _Sergei N. Gladkovskii_, Jan 09 2014
+%F A090192 D-finite with recurrence: (n+3)*a(n+2) = -4*n*a(n), a(0)=a(1)=1. For nonzero terms, a(n) ~ (-1)^((n+3)/2)/sqrt(2*Pi)*2^(n+1)/(n+1)^(3/2). - _Fung Lam_, Mar 17 2014
+%F A090192 a(n) = hypergeom([-n+1,-n], [2], -1). - _Peter Luschny_, Sep 22 2014
+%F A090192 G.f. A(x) satisfies A(x) = 1 / (1 - x * A(-x)). - _Michael Somos_, Dec 26 2016
+%e A090192 G.f. = 1 + x - x^3 + 2*x^5 - 5*x^7 + 14*x^9 - 42*x^11 + 132*x^13 - 429*x^15 + ...
+%p A090192 A090192_list := proc(n) local j, a, w; a := array(0..n); a[0] := 1;
+%p A090192 for w from 1 to n do a[w] := a[w-1]-add(a[j]*a[w-j-1], j=1..w-1) od;
+%p A090192 convert(a, list) end: A090192_list(48); # _Peter Luschny_, May 19 2011
+%p A090192 a := n -> hypergeom([-n+1,-n],[2],-1); seq(round(evalf(a(n), 69)), n=0..48); # _Peter Luschny_, Sep 22 2014
+%p A090192 a:= proc(n) if n::even then 0 else (-1)^((n-1)/2)*binomial(n+1,(n+1)/2)/(2*n) fi end proc: a(0):= 1:
+%p A090192 seq(a(n), n=0..100); # _Robert Israel_, Sep 22 2014
+%t A090192 CoefficientList[Series[(2 x - 1 + Sqrt[1 + 4*x^2])/(2 x), {x, 0, 50}],
+%t A090192   x] (* _G. C. Greubel_, Dec 24 2016 *)
+%t A090192 Table[Hypergeometric2F1[1 - n, -n, 2, -1], {n, 0, 48}] (* _Michael De Vlieger_, Dec 26 2016 *)
+%o A090192 (PARI) {a(n) = my(A); if( n<0, 0, n++; A = vector(n); A[1] = 1; for( k=2, n, A[k] = 2 * A[k-1] - sum( j=1, k-1, A[j] * A[k-j])); A[n])}; /* _Michael Somos_, Jul 23 2011 */
+%o A090192 (Sage)
+%o A090192 def A090192_list(n) :
+%o A090192     D = [0]*(n+2); D[1] = 1
+%o A090192     b = True; h = 1; R = []
+%o A090192     for i in range(2*n-1) :
+%o A090192         if b :
+%o A090192             for k in range(h,0,-1) : D[k] -= D[k-1]
+%o A090192             h += 1; R.append(D[1])
+%o A090192         else :
+%o A090192             for k in range(1,h, 1) : D[k] += D[k+1]
+%o A090192         b = not b
+%o A090192     return R
+%o A090192 A090192_list(49) # _Peter Luschny_, Jun 03 2012
+%o A090192 (Ruby)
+%o A090192 def A(q, n)
+%o A090192   ary = [1]
+%o A090192   (1..n).each{|i| ary << (0..i - 1).inject(0){|s, j| s + q ** j * ary[j] * ary[i - 1 - j]}}
+%o A090192   ary
+%o A090192 end
+%o A090192 def A090192(n)
+%o A090192   A(-1, n)
+%o A090192 end # _Seiichi Manyama_, Dec 24 2016
+%o A090192 (PARI) Vec((2*x - 1 + sqrt(1+4*x^2))/(2*x) + O(x^50)) \\ _G. C. Greubel_, Dec 24 2016
+%Y A090192 Cf. A227543.
+%Y A090192 Cf. A015108 (q=-11), A015107 (q=-10), A015106 (q=-9), A015105 (q=-8), A015103 (q=-7), A015102 (q=-6), A015100 (q=-5), A015099 (q=-4), A015098 (q=-3), A015097 (q=-2), this sequence (q=-1), A000108 (q=1), A015083 (q=2), A015084 (q=3), A015085 (q=4), A015086 (q=5), A015089 (q=6), A015091 (q=7), A015092 (q=8), A015093 (q=9), A015095 (q=10), A015096 (q=11).
+%Y A090192 Column k=1 of A290789.
+%K A090192 sign
+%O A090192 0,6
+%A A090192 _Philippe Deléham_, Jan 22 2004

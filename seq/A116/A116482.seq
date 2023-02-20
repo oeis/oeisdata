@@ -1,0 +1,56 @@
+%I A116482
+%S A116482 1,1,1,1,2,1,2,2,1,3,3,1,4,4,2,1,5,6,3,1,6,8,5,2,1,8,11,7,3,1,10,14,
+%T A116482 10,5,2,1,12,19,14,7,3,1,15,24,19,11,5,2,1,18,31,26,15,7,3,1,22,39,34,
+%U A116482 21,11,5,2,1,27,49,45,29,15,7,3,1,32,61,58,39,22,11,5,2,1,38,76,75,52,30
+%N A116482 Triangle read by rows: T(n,k) is the number of partitions of n having k even parts (n>=0, 0<=k<=floor(n/2)).
+%C A116482 Row n has 1 + floor(n/2) terms. Row sums are the partition numbers (A000041).
+%C A116482 Column 0 yields A000009. Column 1 yields A038348. Column 2 yields A096778.
+%C A116482 Sum_{k=0..floor(n/2)}k*T(n,k) = A066898(n).
+%C A116482 From _Gregory L. Simay_, Nov 02 2015: (Start)
+%C A116482 If n<=2k+1, T(n+2k,k) = A000041(n), the number of partitions of n.
+%C A116482 T(n+2k,k) = the convolution of A000009(n-2j),which are the strict partitions of (n-2j), and p(j+k,k), which are the number of partitions of j+k having exactly k parts.
+%C A116482 T(n+2k,k) = e(n,k) where e(n,0)= A000009(n) and e(n,k) = e(n,k-1) + e(n-2k,k-1) + e(n-4k,k-1) + ... .(End)
+%H A116482 Alois P. Heinz, <a href="/A116482/b116482.txt">Rows n = 0..200, flattened</a>
+%F A116482 G.f.: G(t,x) = 1/Product_{j>=1}((1-x^(2j-1))(1-tx^(2j))).
+%F A116482 From _Gregory L. Simay_, Nov 03 2015: (Start)
+%F A116482 G.f.: T(n+2k,k) = g.f.: e(n,k) = Product_{j>=1}(1-x^2*(k+j))*p(x), where p(x) is the g.f. of the partitions of x. If n<=2k+1, then the g.f. reduces to p(x).
+%F A116482 T(n+2k,k) = T(n+2k-2,k-1) + T(n,k).
+%F A116482 (End)
+%e A116482 T(7,2) = 3 because we have [4,2,1], [3,2,2] and [2,2,1,1,1].
+%e A116482 Triangle starts:
+%e A116482    1;
+%e A116482    1;
+%e A116482    1,  1;
+%e A116482    2,  1;
+%e A116482    2,  2,  1;
+%e A116482    3,  3,  1;
+%e A116482    4,  4,  2,  1;
+%e A116482    5,  6,  3,  1;
+%e A116482    6,  8,  5,  2,  1;
+%e A116482    8, 11,  7,  3,  1;
+%e A116482   10, 14, 10,  5,  2, 1;
+%e A116482   12, 19, 14,  7,  3, 1;
+%e A116482   15, 24, 19, 11,  5, 2, 1;
+%e A116482   18, 31, 26, 15,  7, 3, 1;
+%e A116482   22, 39, 34, 21, 11, 5, 2, 1;
+%e A116482   27, 49, 45, 29, 15, 7, 3, 1;
+%e A116482 Added entries for n=8 through n=15. - _Gregory L. Simay_, Nov 03 2015
+%e A116482 From _Gregory L. Simay_, Nov 03 2015: (Start)
+%e A116482 T(15,4) = T(7+2*4,4) = p(7) = 15, since 7 < 2*4 + 1.
+%e A116482 T(15,3) = T(13,2) + T(9,3) = 26 + 3 = 29.
+%e A116482 T(10,1) = T(8+2*1,1) = T(8,0) + T(6,0) + T(4,0) + T(2,0) + T(0,0) = 6 + 4 + 2 + 1 + 1 = 14.
+%e A116482 T(15,3) = T(9+2*3) = e(9,3) = e(9,2) + e(3,2) = (e(9,1) + e(5,1) + e(1,1)) + e(3,1) = q(9) + q(7) + q(5) + q(3) + q(1) + q(5) + q(3) + q(1) + q(1) + q(3) + q(1) = q(9) + q(7) + 2*q(5) + 3*q(3) + 4*q(1) = 8 + 5 + 2*3 + 3*2 + 4*1 = 29 = the convolution sum of q(9-2j) with p(3+j,3).
+%e A116482 (End)
+%p A116482 g:=1/product((1-x^(2*j-1))*(1-t*x^(2*j)),j=1..20): gser:=simplify(series(g,x=0,22)): P[0]:=1: for n from 1 to 18 do P[n]:=coeff(gser,x^n) od: for n from 0 to 18 do seq(coeff(P[n],t,j),j=0..floor(n/2)) od; # yields sequence in triangular form
+%p A116482 # second Maple program:
+%p A116482 b:= proc(n, i) option remember; local j; if n=0 then 1 elif i<1
+%p A116482       then 0 else []; for j from 0 to n/i do zip((x, y)->x+y, %,
+%p A116482       [`if`(irem(i, 2)=0, 0$j, [][]), b(n-i*j, i-1)], 0) od; %[] fi
+%p A116482     end:
+%p A116482 T:= n-> b(n, n):
+%p A116482 seq (T(n), n=0..30);  # _Alois P. Heinz_, Jan 07 2013
+%t A116482 nn=8;CoefficientList[Series[Product[1/(1-x^(2i-1))/(1-y x^(2i)),{i,1,nn}],{x,0,nn}],{x,y}]//Grid  (* _Geoffrey Critzer_, Jan 07 2013 *)
+%Y A116482 Cf. A000041, A038348, A066898, A103919.
+%K A116482 nonn,tabf
+%O A116482 0,5
+%A A116482 _Emeric Deutsch_, Feb 17 2006

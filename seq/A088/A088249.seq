@@ -1,0 +1,39 @@
+%I A088249
+%S A088249 2,3,5,7,11,131,17471,191,0,0,313,373,0,0,0,0,0,0,0,71317,73037,797,0,
+%T A088249 0,97379,101,10301,1074701,1092901,11311,12721,131,1371731,13931,
+%U A088249 1490941,151,1572751,16361,1670761,1730371,17971,181,191,19391,1970791,19991
+%N A088249 Smallest palindromic prime beginning with the n-th prime, or 0 if no such prime exists.
+%C A088249 Conjecture: Except for n=1 and 3, a(n) = 0 iff prime(n) has Most Significant digit one among (2,4,5,6,8).
+%H A088249 Robert Israel, <a href="/A088249/b088249.txt">Table of n, a(n) for n = 1..10000</a>
+%e A088249 a(7) = 17471, prime(7) = 17. a(9) = 0, prime(9) = 23 and no such prime exists.
+%p A088249 revdigs:= proc(n) local L, i;
+%p A088249   L:= convert(n,base,10);
+%p A088249   add(L[-i]*10^(i-1),i=1..nops(L))
+%p A088249 end proc:
+%p A088249 pali:= proc(n) local d;
+%p A088249     d:= ilog10(n);
+%p A088249     n*10^d + revdigs(floor(n/10));
+%p A088249 end proc:
+%p A088249 f:= proc(n) local L, Lp, x,cand,d;
+%p A088249   L:= convert(n,base,10);
+%p A088249   if not member(L[-1],[1,3,7,9]) then return 0 fi;
+%p A088249   for d from nops(L) to 0 by -1 do
+%p A088249     if L[1..d] = ListTools:-Reverse(L[1..d]) then
+%p A088249       Lp:= [op(ListTools:-Reverse(L[d+1..-1])),op(L)];
+%p A088249       cand:= add(Lp[i]*10^(i-1),i=1..nops(Lp));
+%p A088249       if isprime(cand) then return cand fi
+%p A088249     fi
+%p A088249   od;
+%p A088249   for d from 1 do
+%p A088249     for x from 0 to 10^d-1 do
+%p A088249       cand:= pali(10^d*n+x);
+%p A088249       if isprime(cand) then return cand fi;
+%p A088249     od;
+%p A088249   od
+%p A088249 end proc:
+%p A088249 f(2):= 2: f(5):= 5:
+%p A088249 map(f @ ithprime, [$1..100]); # _Robert Israel_, Aug 06 2020
+%K A088249 base,easy,nonn,look
+%O A088249 1,1
+%A A088249 _Amarnath Murthy_, Sep 26 2003
+%E A088249 More terms from _Giovanni Resta_, Feb 07 2006

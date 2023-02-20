@@ -1,0 +1,67 @@
+%I A079025
+%S A079025 1,1,1,2,3,2,3,6,6,3,5,12,16,12,5,7,20,32,32,20,7,11,35,65,79,65,35,
+%T A079025 11,15,54,113,160,160,113,54,15,22,86,199,318,371,318,199,86,22,30,
+%U A079025 128,323,573,756,756,573,323,128,30,42,192,523,1013,1485,1683,1485,1013,523,192,42
+%N A079025 Triangular array read by rows: column sums of frequency distributions associated with number of divisors of least prime signatures.
+%C A079025 Row sums of the triangular table is sequence A074141. The left column and the main diagonal are the partition numbers A000041.
+%C A079025 T(n,k) is the total number of divisors d of m (counted with multiplicity), such that the prime signature of d is a partition of k and m runs through the set of least numbers whose prime signature is a partition of n. - _Alois P. Heinz_, Aug 23 2019
+%H A079025 Alois P. Heinz, <a href="/A079025/b079025.txt">Rows n = 0..200, flattened</a>
+%e A079025 The seven least integers associated with prime signatures 5, 41, 32, 311, 221, 2111, 11111 (partitions of 5) are 32, 48, 72, 120, 180, 420 and 2310 (see A036035).  The corresponding numbers of divisors 6, 10, 12, 16, 18, 24 and 32 (see A074139) can be refined with the following frequency distributions D(p,s), which counts how many divisors of the entry of A036035 have a sum of prime exponents s, 0<=s<=n:
+%e A079025   1  1  1  1  1 1
+%e A079025   1  2  2  2  2 1
+%e A079025   1  2  3  3  2 1
+%e A079025   1  3  4  4  3 1
+%e A079025   1  3  5  5  3 1
+%e A079025   1  4  7  7  4 1
+%e A079025   1  5 10 10  5 1 , therefore the column sums are:
+%e A079025   7 20 32 32 20 7 , which is row 5 of the triangle.
+%e A079025 Triangle T(n,k) begins:
+%e A079025     1
+%e A079025     1   1
+%e A079025     2   3    2
+%e A079025     3   6    6    3
+%e A079025     5  12   16   12    5
+%e A079025     7  20   32   32   20     7
+%e A079025    11  35   65   79   65    35    11
+%e A079025    15  54  113  160  160   113    54    15
+%e A079025    22  86  199  318  371   318   199    86    22
+%e A079025    30 128  323  573  756   756   573   323   128   30
+%e A079025    42 192  523 1013 1485  1683  1485  1013   523  192   42
+%e A079025    56 275  803 1683 2701  3405  3405  2701  1683  803  275   56
+%e A079025    77 399 1237 2776 4822  6662  7413  6662  4822 2776 1237  399  77
+%e A079025   101 556 1826 4366 8144 12205 14901 14901 12205 8144 4366 1826 556 101
+%e A079025   ...
+%p A079025 A079025 := proc(n,k)
+%p A079025     local psig ,d,a;
+%p A079025     a := 0 ;
+%p A079025     for psig in A036035_row(n) do
+%p A079025         for d in numtheory[divisors](psig) do
+%p A079025             if numtheory[bigomega](d) = k then
+%p A079025                 a := a+1 ;
+%p A079025             end if:
+%p A079025         end do:
+%p A079025     end do:
+%p A079025     a ;
+%p A079025 end proc:
+%p A079025 for n from 0 to 13 do
+%p A079025     for k from 0 to n do
+%p A079025         printf("%d ",A079025(n,k)) ;
+%p A079025     end do:
+%p A079025     printf("\n") ;
+%p A079025 end do: # _R. J. Mathar_, Aug 28 2018
+%p A079025 # second Maple program:
+%p A079025 b:= proc(n, i) option remember; expand(`if`(n=0 or i=1, (x+1)^n,
+%p A079025       b(n, i-1) +factor((x^(i+1)-1)/(x-1))*b(n-i, min(n-i, i))))
+%p A079025     end:
+%p A079025 T:= n-> (p-> seq(coeff(p, x, i), i=0..n))(b(n$2)):
+%p A079025 seq(T(n), n=0..12);  # _Alois P. Heinz_, Aug 22 2019
+%t A079025 b[n_, i_] := b[n, i] = Expand[If[n == 0 || i == 1, (x + 1)^n, b[n, i - 1] + Factor[(x^(i + 1) - 1)/(x - 1)]*b[n - i, Min[n - i, i]]]];
+%t A079025 T[n_] := Function[p, Table[Coefficient[p, x, i], {i, 0, n}]][b[n, n]];
+%t A079025 Table[T[n], {n, 0, 12}] // Flatten (* _Jean-François Alcover_, Dec 06 2019, after _Alois P. Heinz_ *)
+%Y A079025 Columns k=0-10 give: A000041, A006128, A309691, A309693, A309919, A309920, A309921, A309922, A309923, A309924, A309925.
+%Y A079025 Row sums give A074141.
+%Y A079025 T(2n,n) gives A309915.
+%Y A079025 Cf. A036035, A074139, A079474, A087443.
+%K A079025 easy,nonn,tabl
+%O A079025 0,4
+%A A079025 _Alford Arnold_, Feb 01 2003

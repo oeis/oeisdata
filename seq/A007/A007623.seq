@@ -1,0 +1,48 @@
+%I A007623 M4678
+%S A007623 0,1,10,11,20,21,100,101,110,111,120,121,200,201,210,211,220,221,300,
+%T A007623 301,310,311,320,321,1000,1001,1010,1011,1020,1021,1100,1101,1110,
+%U A007623 1111,1120,1121,1200,1201,1210,1211,1220,1221,1300,1301,1310,1311,1320,1321,2000,2001,2010
+%N A007623 Integers written in factorial base.
+%C A007623 Places reading from right have values (1, 2, 6, 24, 120, ...) = factorials.
+%C A007623 Also the reversed inversion vectors for the list of all finite permutations in reversed lexicographic order: A055089.
+%C A007623 This concatenated representation is unsatisfactory for large n (above 36287999), when coefficients of 10 or greater start to appear. For these large numbers the representation given in A108731 is better. - _N. J. A. Sloane_, Jun 04 2012
+%C A007623 For n < 10*10!-1, a(n) = concatenation of n-th row of triangle in A108731. - _Reinhard Zumkeller_, Jun 04 2012
+%C A007623 a(n) = A049345(n) for n=0..23. - _Reinhard Zumkeller_, Jan 05 2014
+%C A007623 For n = 36288000 = 10 * 10!, the digits in factorial base are {10, 0, 0, 0, 0, 0, 0, 0, 0, 0}. - _Michael De Vlieger_, Oct 11 2015, corrected and edited by _M. F. Hasler_, Nov 27 2018
+%D A007623 D. E. Knuth, The Art of Computer Programming. Addison-Wesley, Reading, MA, Vol. 2, p. 192.
+%D A007623 F. Smarandache, Definitions solved and unsolved problems, conjectures and theorems in number theory and geometry, edited by M. Perez, Xiquan Publishing House, 2000.
+%D A007623 N. J. A. Sloane and Simon Plouffe, The Encyclopedia of Integer Sequences, Academic Press, 1995 (includes this sequence).
+%H A007623 M. F. Hasler (terms 0 .. 1000) & Antti Karttunen, <a href="/A007623/b007623.txt">Table of n, a(n) for n = 0..40320</a>
+%H A007623 Italo J. Dejter, <a href="http://arxiv.org/abs/1012.0995">A numeral system for the middle levels</a>, arXiv:1012.0995 [math.CO], 2010-2015.
+%H A007623 Italo J. Dejter, <a href="http://home.coqui.net/dejterij/acson.pdf">Dihedral-symmetry middle-levels problem via a Catalan system of numeration</a>, preprint, 2015.
+%H A007623 Italo J. Dejter, <a href="/A007623/a007623.pdf">Ordering the Levels Lk and Lk+1 of B2k+1</a>, preprint, 2015-2017.
+%H A007623 P. Hecht, <a href="https://dx.doi.org/10.22161/ijaers.4.6.10">Post-Quantum Cryptography: S_381 Cyclic Subgroup of High Order</a>, International Journal of Advanced Engineering Research and Science (IJAERS, 2017) Vol. 4, Issue 6, 78-86.
+%H A007623 C. A. Laisant, <a href="http://www.numdam.org/item?id=BSMF_1888__16__176_0">Sur la numération factorielle, application aux permutations</a>, Bulletin de la Société Mathématique de France, 16 (1888), p. 176-183.
+%H A007623 Wikipedia, <a href="http://en.wikipedia.org/wiki/Factoradic">Factorial base</a>
+%H A007623 <a href="/index/Fa#facbase">Index entries for sequences related to factorial base representation</a>
+%e A007623 a(47) = 1321 because 47 = 1*4! + 3*3! + 2*2! + 1*1!
+%p A007623 a := n -> if nargs<2 then a(n,2) elif n<args[2] then n else a(iquo(n,args[2]),args[2]+1)*10+irem(n,args[2]) fi: 'a(i)'$i=0..200;
+%t A007623 factBaseIntDs[n_] := Module[{m, i, len, dList, currDigit}, i = 1; While[n > i!, i++ ]; m = n; len = i; dList = Table[0, {len}]; Do[ currDigit = 0; While[m >= j!, m = m - j!; currDigit++ ]; dList[[len - j + 1]] = currDigit, {j, i, 1, -1}]; If[dList[[1]] == 0, dList = Drop[dList, 1]]; dList]; Table[FromDigits[factBaseIntDs[n]], {n, 0, 50}] (* _Alonso del Arte_, May 03 2006 *)
+%t A007623 lim = 50; m = 1; While[Factorial@ m < lim, m++]; m; IntegerDigits[#, MixedRadix[Reverse@ Range[2, m]]] & /@ Range@ lim (* _Michael De Vlieger_, Oct 11 2015, Version 10.2 *)
+%o A007623 (PARI) apply( a(n,p=2)=if(n<p, n, a(n\p, p+1)*10 + n%p), [0..199]) \\ _M. F. Hasler_, Mar 27 2007; minor edit Nov 26 2018
+%o A007623 (Haskell)
+%o A007623 a007623 n | n <= 36287999 = read $ concatMap show (a108731_row n) :: Int
+%o A007623           | otherwise     = error "representation would be ambiguous"
+%o A007623 -- _Reinhard Zumkeller_, Jun 04 2012
+%o A007623 (Scheme, R6RS standard)
+%o A007623 (define (A007623 n) (let loop ((n n) (s 0) (p 1) (i 2)) (if (zero? n) s (let ((d (mod n i))) (loop (/ (- n d) i) (+ (* p d) s) (* 10 p) (+ 1 i))))))
+%o A007623 ;; In older Schemes use modulo instead of mod. - _Antti Karttunen_, Feb 13 2016
+%o A007623 (Python)
+%o A007623 def a(n, p=2): return n if n<p else a(n//p, p+1)*10 + n%p
+%o A007623 print([a(n - 1) for n in range(1, 201)]) # _Indranil Ghosh_, Jun 19 2017, after PARI program
+%Y A007623 Cf. A000142.
+%Y A007623 Cf. A034968 (sum of digits).
+%Y A007623 Cf. A060130 (number of nonzero digits).
+%Y A007623 Cf. A099563 (the most significant digit).
+%Y A007623 Cf. also A055089, A055881, A060112, A060495. Permutation of A064039.
+%Y A007623 See index entry "factorial base representation" for many more related sequences.
+%Y A007623 Compare also to primorial base A049345.
+%K A007623 base,nonn,nice,easy
+%O A007623 0,3
+%A A007623 _N. J. A. Sloane_, _Robert G. Wilson v_, _Mira Bernstein_
+%E A007623 More terms from _R. K. Guy_

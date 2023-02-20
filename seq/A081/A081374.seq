@@ -1,0 +1,44 @@
+%I A081374
+%S A081374 1,2,2,5,10,22,43,86,170,341,682,1366,2731,5462,10922,21845,43690,
+%T A081374 87382,174763,349526,699050,1398101,2796202,5592406,11184811,22369622,
+%U A081374 44739242,89478485,178956970,357913942,715827883,1431655766,2863311530,5726623061
+%N A081374 Size of "uniform" Hamming covers of distance 1, that is, Hamming covers in which all vectors of equal weight are treated the same, included or excluded from the cover together.
+%C A081374 Motivation: consideration of the "hats" problem (which boils down to normal hamming covering codes) in the case when the people are indistinguishable or unlabeled.
+%C A081374 From _Paul Curtz_, May 26 2011: (Start)
+%C A081374 If we add a(0)=1 in front and build the table of a(n) and iterated differences in further rows we get:
+%C A081374 1,    1,  2,  2,  5, 10,
+%C A081374 0,    1,  0,  3,  5, 12,
+%C A081374 1,   -1,  3,  2,  7,  9,
+%C A081374 -2,   4, -1,  5,  2, 13,
+%C A081374 6,   -5,  6, -3, 11,  6
+%C A081374 -11, 11, -9, 14, -5, 21.
+%C A081374 The first column is the inverse binomial transform, which is 1,0 followed by (-1)^n*A083322(n-1), n>=2.
+%C A081374 The main diagonal in the table above is A001045, the adjacent upper diagonals are A078008, A048573 and A062092. (End)
+%H A081374 Vincenzo Librandi, <a href="/A081374/b081374.txt">Table of n, a(n) for n = 1..1000</a>
+%H A081374 <a href="/index/Rec#order_04">Index entries for linear recurrences with constant coefficients</a>, signature (2,0,-1,2).
+%F A081374 If (n mod 6 = 5) then sum(binomial(n, 3*i+1), i=0..n/3); elif (n mod 6 = 2) then sum(binomial(n, 3*i), i=0..n/3)+1; else sum(binomial(n, 3*i), i=0..n/3); fi;
+%F A081374 G.f.: x*(2*x^3-2*x^2+1)/( (1-2*x)*(1+x)*(1-x+x^2) ).
+%F A081374 a(n)=2*a(n-1)-a(n-3)+2*a(n-4).
+%F A081374 From _Paul Curtz_, May 26 2011: (Start)
+%F A081374 a(n+1) - 2*a(n) has period length 6: repeat 0, -2, 1, 0, 2, -1 (see A080425).
+%F A081374 a(n) - A083322(n-1) = A010892(n-1) has period length 6.
+%F A081374 a(n) + a(n+3) = 3*2^n = A007283(n).
+%F A081374 a(n+6)-a(n) = 21*2^n = A175805(n).
+%F A081374 a(n) - A131708(n) = -A131531(n).  (End)
+%p A081374 hatwork := proc(n,i,covered) local val, val2; options remember;
+%p A081374 # computes the minimum cover of the i-bit through n-bit words.
+%p A081374 # if covered is true the i-bit words are already covered (by the (i-1)-bit words)
+%p A081374 if (i>n or (i = n and covered)) then 0; elif (i = n and not covered) then 1; else
+%p A081374 # one choice is to include the i-bit words in the cover
+%p A081374 val := hatwork(n, i+1, true) + binomial(n,i);
+%p A081374 # the other choice is not to include the i-bit words in the cover
+%p A081374 if (covered) then val2 := hatwork (n, i+1, false); if (val2 < val) then val := val2; fi; else
+%p A081374 # if the i-bit words were not covered by (i-1), they must be covered by the (i+1)-bit words
+%p A081374 if (i <= n) then val2 := hatwork (n, i+2, true) + binomial(n,i+1); if (val2 < val) then val := val2; fi; fi; fi; val; fi; end proc;
+%p A081374 A081374 := proc (n) hatwork(n, 0, false); end proc;
+%t A081374 LinearRecurrence[{2,0,-1,2},{1,2,2,5},40] (* _Harvey P. Dale_, Feb 11 2015 *)
+%o A081374 (Magma) I:=[1,2,2,5]; [n le 4 select I[n] else 2*Self(n-1)-Self(n-3)+2*Self(n-4): n in [1..40]]; // _Vincenzo Librandi_, Jul 08 2016
+%Y A081374 Cf. A083322.
+%K A081374 nonn
+%O A081374 1,2
+%A A081374 _David Applegate_, Aug 22 2003

@@ -1,0 +1,41 @@
+%I A067180
+%S A067180 0,2,3,13,5,0,7,17,0,19,29,0,67,59,0,79,89,0,199,389,0,499,599,0,997,
+%T A067180 1889,0,1999,2999,0,4999,6899,0,17989,8999,0,29989,39989,0,49999,
+%U A067180 59999,0,79999,98999,0,199999,389999,0,598999,599999,0,799999,989999,0,2998999,2999999,0,4999999
+%N A067180 Smallest prime with digit sum n, or 0 if no such prime exists.
+%H A067180 Robert Israel, <a href="/A067180/b067180.txt">Table of n, a(n) for n = 1..1000</a> (first 175 terms from Robert G. Wilson v)
+%F A067180 a(3k) = 0 for k > 1.
+%F A067180 a(3k-2) =  A067523(2k-1), a(3k-1) = A067523(2k), for all k > 1. - _M. F. Hasler_, Nov 04 2018
+%e A067180 a(68) = 59999999 because 59999999 is the smallest prime with digit sum = 68;
+%e A067180 a(100) = 298999999999 because 298999999999 is the smallest prime with digit sum = 100.
+%p A067180 g:= proc(s,d) # integers of <=d digits with sum s
+%p A067180   if s > 9*d then return [] fi;
+%p A067180   if d = 1 then return [s] fi;
+%p A067180   [seq(op(map(t -> j*10^(d-1)+ t, g(s-j,d-1))),j=0..9)];
+%p A067180 end proc:
+%p A067180 f:= proc(n) local d, j,x,y;
+%p A067180   if n mod 3 = 0 then return 0 fi;
+%p A067180   for d from ceil(n/9) do
+%p A067180     if d = 1 then
+%p A067180       if isprime(n) and n < 10 then return n
+%p A067180       else next
+%p A067180       fi
+%p A067180     fi;
+%p A067180     for j from 1 to 9 do
+%p A067180       for y in g(n-j,d-1) do
+%p A067180         x:= 10^(d-1)*j + y;
+%p A067180         if isprime(x) then return x fi;
+%p A067180   od od od;
+%p A067180 end proc:
+%p A067180 f(1):= 0: f(3):= 3:
+%p A067180 map(f, [$1..100]); # _Robert Israel_, Dec 13 2020
+%t A067180 a = Table[0, {100}]; Do[b = Apply[ Plus, IntegerDigits[ Prime[n]]]; If[b < 101 && a[[b]] == 0, a[[b]] = Prime[n]], {n, 1, 10^7} ]; a
+%t A067180 f[n_] :=  If[n > 5 && Mod[n, 3] == 0, 0, Block[{k = 1, lmt, lst = {}, ip = IntegerPartitions[n, Round[1 + n/9], {0, 1, 2, 3, 4, 5, 6, 7, 8, 9}]}, lmt = 1 + Length@ ip; While[k < lmt, AppendTo[lst, Select[ FromDigits@# & /@ Permutations@ ip[[k]], PrimeQ[#] &]]; k++]; Min@ Flatten@ lst]]; f[1] = 0; f[4] = 13; Array[f, 70] (* _Robert G. Wilson v_, Sep 28 2014 *)
+%o A067180 (PARI) A067180(n)={if(n<2, 0, n<4, n, n%3, my(d=divrem(n,9)); forprime(p=d[2]*10^d[1]-1,,sumdigits(p)==n&&return(p)))} \\ _M. F. Hasler_, Nov 04 2018
+%Y A067180 Cf. A054750.
+%Y A067180 Removal of the 0 terms from this sequence leaves A067523.
+%K A067180 easy,nonn,base
+%O A067180 1,2
+%A A067180 _Amarnath Murthy_, Jan 09 2002
+%E A067180 Edited and extended by _Robert G. Wilson v_, Mar 01 2002
+%E A067180 Edited by _Ray Chandler_, Apr 24 2007

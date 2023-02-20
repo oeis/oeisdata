@@ -1,0 +1,80 @@
+%I A032020
+%S A032020 1,1,1,3,3,5,11,13,19,27,57,65,101,133,193,351,435,617,851,1177,1555,
+%T A032020 2751,3297,4757,6293,8761,11305,15603,24315,30461,41867,55741,74875,
+%U A032020 98043,130809,168425,257405,315973,431065,558327,751491,958265,1277867,1621273
+%N A032020 Number of compositions (ordered partitions) of n into distinct parts.
+%C A032020 a(n) = the number of different ways to run up a staircase with n steps, taking steps of distinct sizes where the order matters and there is no other restriction on the number or the size of each step taken. - _Mohammad K. Azarian_, May 21 2008
+%C A032020 Compositions into distinct parts are equivalent to (1,1)-avoiding compositions. - _Gus Wiseman_, Jun 25 2020
+%C A032020 All terms are odd. - _Alois P. Heinz_, Apr 09 2021
+%D A032020 Mohammad K. Azarian, A Generalization of the Climbing Stairs Problem II, Missouri Journal of Mathematical Sciences, Vol. 16, No. 1, Winter 2004, pp. 12-17.
+%H A032020 T. D. Noe and Alois P. Heinz, <a href="/A032020/b032020.txt">Table of n, a(n) for n = 0..10000</a> (first 1001 terms from T. D. Noe)
+%H A032020 C. G. Bower, <a href="/transforms2.html">Transforms (2)</a>
+%H A032020 Martin Klazar, <a href="http://arxiv.org/abs/1808.08449">What is an answer? — remarks, results and problems on PIO formulas in combinatorial enumeration, part I</a>, arXiv:1808.08449 [math.CO], 2018.
+%H A032020 B. Richmond and A. Knopfmacher, <a href="http://dx.doi.org/10.1007/BF01827930">Compositions with distinct parts</a>, Aequationes Mathematicae 49 (1995), pp. 86-97.
+%H A032020 B. Richmond and A. Knopfmacher, <a href="http://gdz.sub.uni-goettingen.de/dms/resolveppn/?PPN=GDZPPN002550873">Compositions with distinct parts</a>, Aequationes Mathematicae 49 (1995), pp. 86-97. (free access)
+%H A032020 Gus Wiseman, <a href="/A102726/a102726.txt">Sequences counting and ranking compositions by the patterns they match or avoid.</a>
+%F A032020 "AGK" (ordered, elements, unlabeled) transform of 1, 1, 1, 1, ...
+%F A032020 G.f.: Sum_{k>=0} k! * x^((k^2+k)/2) / Product_{j=1..k} (1-x^j). - _David W. Wilson_ May 04 2000
+%F A032020 a(n) = Sum_{m=1..n} A008289(n,m)*m!. - _Geoffrey Critzer_, Sep 07 2012
+%e A032020 a(6) = 11 because 6 = 5+1 = 4+2 = 3+2+1 = 3+1+2 = 2+4 = 2+3+1 = 2+1+3 = 1+5 = 1+3+2 = 1+2+3.
+%e A032020 From _Gus Wiseman_, Jun 25 2020: (Start)
+%e A032020 The a(0) = 1 through a(7) = 13 strict compositions:
+%e A032020   ()  (1)  (2)  (3)    (4)    (5)    (6)      (7)
+%e A032020                 (1,2)  (1,3)  (1,4)  (1,5)    (1,6)
+%e A032020                 (2,1)  (3,1)  (2,3)  (2,4)    (2,5)
+%e A032020                               (3,2)  (4,2)    (3,4)
+%e A032020                               (4,1)  (5,1)    (4,3)
+%e A032020                                      (1,2,3)  (5,2)
+%e A032020                                      (1,3,2)  (6,1)
+%e A032020                                      (2,1,3)  (1,2,4)
+%e A032020                                      (2,3,1)  (1,4,2)
+%e A032020                                      (3,1,2)  (2,1,4)
+%e A032020                                      (3,2,1)  (2,4,1)
+%e A032020                                               (4,1,2)
+%e A032020                                               (4,2,1)
+%e A032020 (End)
+%p A032020 b:= proc(n, i) b(n, i):= `if`(n=0, [1], `if`(i<1, [], zip((x, y)
+%p A032020       -> x+y, b(n, i-1), `if`(i>n, [], [0, b(n-i, i-1)[]]), 0))) end:
+%p A032020 a:= proc(n) local l; l:=b(n, n): add((i-1)! *l[i], i=1..nops(l)) end:
+%p A032020 seq(a(n), n=0..50);  # _Alois P. Heinz_, Dec 12 2012
+%p A032020 # second Maple program:
+%p A032020 T:= proc(n, k) option remember; `if`(k<0 or n<0, 0,
+%p A032020       `if`(k=0, `if`(n=0, 1, 0), T(n-k, k) +k*T(n-k, k-1)))
+%p A032020     end:
+%p A032020 a:= n-> add(T(n, k), k=0..floor((sqrt(8*n+1)-1)/2)):
+%p A032020 seq(a(n), n=0..60);  # _Alois P. Heinz_, Sep 04 2015
+%t A032020 f[list_]:=Length[list]!; Table[Total[Map[f, Select[IntegerPartitions[n], Sort[#] == Union[#] &]]], {n, 0,30}]
+%t A032020 T[n_, k_] := T[n, k] = If[k<0 || n<0, 0, If[k==0, If[n==0, 1, 0], T[n-k, k] + k*T[n-k, k-1]]]; a[n_] := Sum[T[n, k], {k, 0, Floor[(Sqrt[8*n + 1] - 1) / 2]}]; Table[a[n], {n, 0, 60}] (* _Jean-François Alcover_, Sep 22 2015, after _Alois P. Heinz_ *)
+%o A032020 (PARI)
+%o A032020 N=66;  q='q+O('q^N);
+%o A032020 gf=sum(n=0,N, n!*q^(n*(n+1)/2) / prod(k=1,n, 1-q^k ) );
+%o A032020 Vec(gf)
+%o A032020 /* _Joerg Arndt_, Oct 20 2012 */
+%o A032020 (PARI)
+%o A032020 Q(N) = { \\ A008289
+%o A032020   my(q = vector(N)); q[1] = [1, 0, 0, 0];
+%o A032020   for (n = 2, N,
+%o A032020     my(m = (sqrtint(8*n+1) - 1)\2);
+%o A032020     q[n] = vector((1 + (m>>2)) << 2); q[n][1] = 1;
+%o A032020     for (k = 2, m, q[n][k] = q[n-k][k] + q[n-k][k-1]));
+%o A032020   return(q);
+%o A032020 };
+%o A032020 seq(N) = concat(1, apply(q -> sum(k = 1, #q, q[k] * k!), Q(N)));
+%o A032020 seq(43) \\ _Gheorghe Coserea_, Sep 09 2018
+%Y A032020 Cf. A008289, A032011.
+%Y A032020 Row sums of A241719.
+%Y A032020 Column k=1 of A243081, A242447, A261835, A261836, A327244, A327245.
+%Y A032020 Main diagonal of A261960.
+%Y A032020 Dominated by A003242 (anti-run compositions).
+%Y A032020 These compositions are ranked by A233564.
+%Y A032020 (1,1)-avoiding patterns are counted by A000142.
+%Y A032020 Numbers with strict prime signature are A130091.
+%Y A032020 (1,1,1)-avoiding compositions are counted by A232432.
+%Y A032020 (1,1)-matching compositions are counted by A261982.
+%Y A032020 Inseparable partitions are counted by A325535.
+%Y A032020 Patterns matched by compositions are counted by A335456.
+%Y A032020 Strict permutations of prime indices are counted by A335489.
+%Y A032020 Cf. A000009, A011782, A102726, A181796, A261962, A333489, A335457.
+%K A032020 nonn,easy,nice
+%O A032020 0,4
+%A A032020 _Christian G. Bower_, Apr 01 1998

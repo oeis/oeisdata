@@ -1,0 +1,44 @@
+%I A093515
+%S A093515 2,3,4,5,6,7,8,11,12,13,14,17,18,19,20,23,24,29,30,31,32,37,38,41,42,
+%T A093515 43,44,47,48,53,54,59,60,61,62,67,68,71,72,73,74,79,80,83,84,89,90,97,
+%U A093515 98,101,102,103,104,107,108,109,110,113,114,127,128,131,132,137,138,139
+%N A093515 Numbers k such that either k or k-1 is a prime.
+%C A093515 Original name: Transform of the prime sequence by the Rule 110 cellular automaton.
+%C A093515 As described in A051006, a monotonic sequence can be mapped into a fractional real. Then the binary digits of that real can be treated (transformed) by an elementary cellular automaton. Taking the resulting sequence of binary digits as a fractional real, it can be mapped back into a sequence, as in A092855.
+%C A093515 From _M. F. Hasler_, Mar 01 2008: (Start)
+%C A093515 The "Rule110" transform as used here involves a right-shift of the sequence before applying the transform as described on the MathWorld page.
+%C A093515 _Robert G. Wilson v_ observed that this sequence contains exactly the indices for which A121561 equals 1. (End)
+%C A093515 From _M. F. Hasler_, Jan 07 2019: (Start)
+%C A093515 The correspondence of monotonic sequences with fractional reals mentioned in the first comment is not really relevant here: RuleX most naturally maps directly one characteristic sequence to another and thus one set (or increasing sequence) to another one. Interpreting the characteristic sequences as binary digits of a fractional real then yields a map from [0,1] into [0,1] rather as a consequence.
+%C A093515 _Antti Karttunen_ observed that this seems to be the complement of A005381 (k and k-1 are composite). This is indeed the case: The characteristic sequence of primes has no three subsequent 1's. In all other cases of the 8 possible inputs for Rule110, the output is 0 if and only if the cell itself and its neighbor to the right are zero, which here means "k and k+1 are composite", and with the right shift mentioned above, the complement of A005381, i.e., numbers such that k or k-1 is prime (or: primes U primes + 1). We have actually proved the more general
+%C A093515 Theorem: Rule110 transforms any set S having no three consecutive integers into the set S' = {k | k or k-1 is in S} = S U (1 + S). (End)
+%H A093515 M. F. Hasler, <a href="/A093515/b093515.txt">Table of n, a(n) for n = 1..19998</a> (using prime(1..10^4)).
+%H A093515 Ferenc Adorjan, <a href="http://web.axelero.hu/fadorjan/aronsf.pdf">Binary mapping of monotonic sequences - the Aronson and the CA functions</a>
+%H A093515 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/ElementaryCellularAutomaton.html">Elementary Cellular Automaton</a>
+%H A093515 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/Rule110.html">Rule110 Elementary Cellular Automaton</a>
+%F A093515 {a(n)} = A000040 U (A000040 + 1), where A000040 are the primes. - _M. F. Hasler_, Jan 07 2019
+%F A093515 a(1) = 2, a(n) = a(n-1) + 1 if a(n-1) is prime, a(n) is the next prime after a(n-1) otherwise. - _Luca Armstrong_, Aug 10 2021
+%t A093515 Select[Range[2, 150], !(!PrimeQ[# - 1] && !PrimeQ[#]) &] (* _Vincenzo Librandi_, Jan 08 2019 *)
+%o A093515 (PARI) {ca_tr(ca,v)= /* Calculates the Cellular Automaton transform of the vector v by the rule ca */
+%o A093515 local(cav=vector(8),a,r=[],i,j,k,l,po,p=vector(3));
+%o A093515 a=binary(min(255,ca));k=matsize(a)[2];forstep(i=k,1,- 1,cav[k-i+1]=a[i]);
+%o A093515 j=0;l=matsize(v)[2];k=v[l];po=1;
+%o A093515 for(i=1,k+2,j*=2;po=isin(i,v,l,po);j=(j+max(0,sign(po)))% 8;if(cav[j+1],r=concat(r,i)));
+%o A093515 return(r) /* See the function "isin" at A092875 */}
+%o A093515 (PARI) /* transform a sequence v by the rule r - Note: v could be replaced by a function, e.g. v[c] => prime(c) here */
+%o A093515 seqruletrans(v,r)={my(c=1,L=List(),t=0); r=Vecrev(binary(r),8); for(i=1,v[#v], v[c]<i && c++; r[1+t=t%4*2+(v[c]==i)] && listput(L,i)); Set(L)}
+%o A093515 A093515=seqruletrans(primes(10^4),110) \\ _M. F. Hasler_, Mar 01 2008, updated Jan 07 2019
+%o A093515 (PARI) A121561_is_1(N,n=0)=vector(N,i, while(!isprime(n+=1)&&!isprime(n-1),);n) \\ _M. F. Hasler_, Mar 01 2008
+%o A093515 (PARI) is(n)=isprime(n)||isprime(n-1) \\ _M. F. Hasler_, Jan 07 2019
+%o A093515 (Magma) [n: n in [2..180] | not(not IsPrime(n) and not IsPrime(n-1))]; // _Vincenzo Librandi_, Jan 08 2019
+%o A093515 (Python)
+%o A093515 from sympy import isprime
+%o A093515 def ok(n): return isprime(n) or isprime(n-1)
+%o A093515 print(list(filter(ok, range(140)))) # _Michael S. Branicky_, Aug 10 2021
+%Y A093515 Cf. A092855, A051006, A093510, A093511, A093512, A093513, A093514, A093516, A093517, A161903.
+%Y A093515 Cf. A005381 (complement, apart from 1 which is in neither sequence), A323162.
+%Y A093515 Cf. A121561.
+%K A093515 easy,nonn
+%O A093515 1,1
+%A A093515 Ferenc Adorjan (fadorjan(AT)freemail.hu)
+%E A093515 Name changed by _Antti Karttunen_, Jan 07 2019

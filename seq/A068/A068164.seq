@@ -1,0 +1,65 @@
+%I A068164
+%S A068164 11,2,3,41,5,61,7,83,19,101,11,127,13,149,151,163,17,181,19,1201,211,
+%T A068164 223,23,241,251,263,127,281,29,307,31,1321,233,347,353,367,37,383,139,
+%U A068164 401,41,421,43,443,457,461,47,487,149,503,151,521,53,541,557,563,157
+%N A068164 Smallest prime obtained from n by inserting zero or more decimal digits.
+%C A068164 The digits may be added before, in the middle of, or after the digits of n.
+%C A068164 a(n) = n for prime n, by definition. - _Zak Seidov_, Nov 13 2014
+%C A068164 a(n) always exists. Proof. Suppose n is L digits long, and let n' = 10*n+1. The arithmetic progression k*10^(2L)+n' (k >= 0) contains infinitely many primes, by Dirichlet's theorem, and they all contain the digits of n. QED. - _Robert Israel_, Nov 13 2014. For another proof, see A018800.
+%C A068164 Similar to but different from A062584. E.g. a(133) = 1033, but A062584(133) = 4133.
+%H A068164 Michael S. Branicky, <a href="/A068164/b068164.txt">Table of n, a(n) for n = 1..10000</a> (terms 1..1000 from Allan C. Wechsler)
+%H A068164 <a href="/index/Pri#piden">Index entries for primes involving decimal expansion of n</a>
+%e A068164 Smallest prime formed from 20 is 1201, by placing 1 on both sides. Smallest prime formed from 33 is 233, by placing a 2 in front.
+%p A068164 A068164 := proc(n)
+%p A068164     local p,pdigs,plen,dmas,dmasdigs,i,j;
+%p A068164     # test all primes ascending
+%p A068164     p := 2;
+%p A068164     while true do
+%p A068164         pdigs := convert(p,base,10) ;
+%p A068164         plen := nops(pdigs) ;
+%p A068164         # binary digit mask over p
+%p A068164         for dmas from 2^plen-1 to 0 by -1 do
+%p A068164             dmasdigs := convert(dmas,base,2) ;
+%p A068164             pdel := [] ;
+%p A068164             for i from 1 to nops(dmasdigs) do
+%p A068164                 if op(i,dmasdigs) = 1 then
+%p A068164                     pdel := [op(pdel),op(i,pdigs)] ;
+%p A068164                 end if;
+%p A068164             end do:
+%p A068164             if n = add(op(j,pdel)*10^(j-1),j=1..nops(pdel)) then
+%p A068164                 return p;
+%p A068164             end if;
+%p A068164         end do:
+%p A068164         p := nextprime(p) ;
+%p A068164     end do:
+%p A068164 end proc:
+%p A068164 seq(A068164(n),n=1..120) ; # _R. J. Mathar_, Nov 13 2014
+%o A068164 (Haskell)
+%o A068164 a068164 n = head (filter isPrime (digitExtensions n))
+%o A068164 digitExtensions n = filter (includes n) [0..]
+%o A068164 includes n k = listIncludes (show n) (show k)
+%o A068164 listIncludes [] _ = True
+%o A068164 listIncludes (h:_) [] = False
+%o A068164 listIncludes l1@(h1:t1) (h2:t2) = if (h1 == h2) then (listIncludes t1 t2) else (listIncludes l1 t2)
+%o A068164 isPrime 1 = False
+%o A068164 isPrime n = not (hasDivisorAtLeast 2 n)
+%o A068164 hasDivisorAtLeast k n = (k*k <= n) && (((n `rem` k) == 0) || (hasDivisorAtLeast (k+1) n))
+%o A068164 (Python)
+%o A068164 from sympy import sieve
+%o A068164 def dmo(n, t):
+%o A068164     if t < n: return False
+%o A068164     while n and t:
+%o A068164         if n%10 == t%10:
+%o A068164             n //= 10
+%o A068164         t //= 10
+%o A068164     return n == 0
+%o A068164 def a(n):
+%o A068164     return next(p for p in sieve if dmo(n, p))
+%o A068164 print([a(n) for n in range(1, 77)]) # _Michael S. Branicky_, Jan 21 2023
+%Y A068164 Cf. A018800 (an upper bound), A060386, A062584 (also an upper bound).
+%Y A068164 Cf. also A068165.
+%K A068164 base,easy,nonn
+%O A068164 1,1
+%A A068164 _Amarnath Murthy_, Feb 25 2002
+%E A068164 Corrected by _Ray Chandler_, Oct 11 2003
+%E A068164 Haskell code and b-file added by _Allan C. Wechsler_, Nov 13 2014

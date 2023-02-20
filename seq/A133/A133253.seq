@@ -1,0 +1,54 @@
+%I A133253
+%S A133253 1,23,159,649,2424,9574,39913,166639,678898
+%N A133253 Number of possible 3 X n arrangements of black and white squares that can form three consecutive rows in an n X n crossword puzzle.
+%C A133253 In a standard American crossword puzzle, such as those in the New York Times, in any row there must be at least one run of white squares and all runs of white squares must be of length at least three.
+%t A133253 <<DiscreteMath`Combinatorica`
+%t A133253 (*This program counts, lists and displays the possible 3 - row patterns in an n x n crossword puzzle*)
+%t A133253 plotnice = ArrayPlot [ #, Frame -> False, Mesh -> True, MeshStyle -> \
+%t A133253 GrayLevel [ 0 ] ] &;
+%t A133253 For [ n = 3, n <= 7, n++,
+%t A133253 usablemods = {0, 1, 3, 7};
+%t A133253 usablenumbers = Function [ MemberQ [ usablemods, Mod [ #, 8 ] ] ];
+%t A133253 goodnumbers = Union [ Table [ k, {k, 0, 2^(n - 3) - 1} ], Table [ k, {k,
+%t A133253 2^(n - 1), 2^n - 2} ] ];
+%t A133253 numbers = Select [ goodnumbers, usablenumbers ];
+%t A133253 rows = Table [ PadLeft [ IntegerDigits [ numbers [ [ j ] ],
+%t A133253 2 ], n ], {j, 1, Length [ numbers ]} ];
+%t A133253 no101s = Function [ FreeQ [ Partition [ #1, 3, 1 ], {1, 0, 1} ] ];
+%t A133253 no1001s = Function [ FreeQ [ Partition [ #1, 4, 1 ], {1, 0, 0, 1} ] ];
+%t A133253 legalrows = Select [ Select [ rows, no1001s ], no101s ];
+%t A133253 threerows = Tuples [ legalrows, 3 ];
+%t A133253 transposedthreerows = Transpose /@ threerows;
+%t A133253 freeof101s = Function [ FreeQ [ #, {1, 0, 1} ] ];
+%t A133253 transposedno101s = Select [ transposedthreerows, freeof101s ];
+%t A133253 legalthreerows = Transpose /@ transposedno101s;
+%t A133253 insertzerorows = Function [ Append [ Prepend [ #, Table [ 0, {n} ] ], Table [ 0, {n} ] ] ];
+%t A133253 legalthreerowswithzeros = insertzerorows /@ legalthreerows;
+%t A133253 finalthreerows = {};
+%t A133253 legalthreerowscount = 0;
+%t A133253 For [ v = 1, v <= Length [ legalthreerowswithzeros ], v++,
+%t A133253 puzzlegraph = Table [ legalthreerowswithzeros [ [ v, r, s ] ], {r,
+%t A133253 1, 5}, {s, 1, n} ];
+%t A133253 verts = {};
+%t A133253 For [ i2 =
+%t A133253 1, i2 <= 5, i2++, For [ j2 = 1, j2
+%t A133253 <= n, j2++, If [ puzzlegraph [ [ i2, j2 ] ] == 1, verts = Append [
+%t A133253 verts, j2 + 5n - n*i2 ] ] ] ];
+%t A133253 thegraph = DeleteVertices [ GridGraph [ n, 5 ], verts ];
+%t A133253 If [ ConnectedQ [ thegraph ] == True, connectedcount = connectedcount + 1 ];
+%t A133253 (*graph = ShowGraph [ thegraph, DisplayFunction -> Identity ];
+%t A133253 thepuzzle = ArrayPlot [ legalthreerowswithzeros [ [ v ] ], Frame -> False,
+%t A133253 Mesh -> True, MeshStyle -> GrayLevel [
+%t A133253 0 ], DisplayFunction -> Identity ];*)
+%t A133253 (*Show [ GraphicsArray [ {thepuzzle, graph} ] ];*)
+%t A133253 (*Print [ ConnectedQ [ thegraph ] ];*)
+%t A133253 If [ ConnectedQ [ thegraph ] == True, legalthreerowscount = \
+%t A133253 legalthreerowscount +
+%t A133253 1; finalthreerows = Append [ finalthreerows, legalthreerows [ [ v ] ] ] ];
+%t A133253 ]
+%t A133253 plotnice /@ finalthreerows;
+%t A133253 Print [ "the number of threerow arrangements in a ", n, " x ", n, " puzzle is ", legalthreerowscount ] ]
+%Y A133253 Cf. A130578.
+%K A133253 nonn
+%O A133253 3,2
+%A A133253 Marc A. Brodie (mbrodie(AT)wju.edu), Jan 03 2008

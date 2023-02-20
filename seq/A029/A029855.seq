@@ -1,0 +1,37 @@
+%I A029855
+%S A029855 1,1,3,7,19,46,124,320,858,2282,6161,16647,45352,123861,340000,936098,
+%T A029855 2586518,7166394,19911638,55456892,154814055,433081632,1213901668,
+%U A029855 3408659401,9587879987,27011564035,76212078500
+%N A029855 Number of rooted trees where root has degree 4.
+%C A029855 Fourth column of A033185. - _Michael Somos_, Aug 20 2018
+%D A029855 F. Harary and E. M. Palmer, Graphical Enumeration, Academic Press, NY, 1973, p. 53.
+%H A029855 Washington Bomfim, <a href="/A029855/b029855.txt">Table of n, a(n) for n = 5..200</a>
+%H A029855 Frank Ruskey, <a href="https://page.math.tu-berlin.de/~felsner/SemWS17-18/Ruskey-Comb-Gen.pdf">Combinatorial Generation Algorithm 4.26, p. 96</a>
+%H A029855 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/FrequencyRepresentation.html">Frequency Representation</a>
+%H A029855 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/RootedTree.html">Rooted Tree</a>
+%H A029855 <a href="/index/Ro#rooted">Index entries for sequences related to rooted trees</a>
+%F A029855 a(n)= Sum_(P){ Prod_(1^a1 2^a2 3^a3 ...){ binomial(f(i)+a_i -1, a_i) } }, where P is the set of the partitions of n with four parts, and f = A000081. - _Washington Bomfim_, Jul 10 2012
+%F A029855 a(n) ~ c * A051491^n / n^(3/2), where c = 0.036592912312268101787903577... - _Vaclav Kotesovec_, Dec 26 2020
+%t A029855 Needs["Combinatorica`"];
+%t A029855 nn=30;s[n_,k_]:=s[n,k]=a[n+1-k]+If[n<2k,0,s[n-k,k]];a[1]=1;a[n_]:=a[n]=Sum[a[i]s[n-1,i]i,{i,1,n-1}]/(n-1);rt=Table[a[i],{i,1,nn}];Drop[Take[CoefficientList[CycleIndex[SymmetricGroup[4],s]/.Table[s[j]->Table[Sum[rt[[i]]x^(k*i),{i,1,nn}],{k,1,nn}][[j]],{j,1,nn}],x],nn],4]  (* _Geoffrey Critzer_, Oct 14 2012, after code by _Robert A. Russell_ in A000081 *)
+%o A029855 (PARI)
+%o A029855 max_n = 200; f=vector(max_n);            \\ f[n] = A000081[n], n=1..max_n
+%o A029855 sum2(k) = {local(s); s=0; fordiv(k, d, s += d*f[d]); return(s)};
+%o A029855 Init_f()={f[1]=1;
+%o A029855 for(n =1, max_n -2, s=0; for(k=1, n, s+=sum2(k)*f[n-k+1]); f[n+1]=s/n)};
+%o A029855 S=0; P=[0,1,1,1,1,0];
+%o A029855 visit4() = {i = 3; k = 2; p = P[2]; Pr = 1;
+%o A029855 while(1, while(P[i]==p, i++);c=i-k;Pr*=binomial(f[P[k]]+c-1, c);
+%o A029855 if(P[i] == 0, S += Pr; return); p = P[i]; k = i; i++)};
+%o A029855                                          \\ F. Ruskey partition generator
+%o A029855 Part(n, k, s, t) = { P[t] = s;
+%o A029855 if((k == 1) || (n == k), visit4(), L = max(1, ceil((n - s)/(k - 1)));
+%o A029855 for(j = L, min(s, n-s-k+2), Part(n-s, k-1, j, t+1))); P[t] = 1;};
+%o A029855 \\
+%o A029855 a(n) = {S=0; n--; Part(2*n,4+1,n,1); return(S)}
+%o A029855 Init_f(); for(n=5, max_n, print(n, " ", a(n)))           \\ b-file format
+%o A029855 \\ # _Washington Bomfim_, Jul 10 2012
+%Y A029855 Cf. A000226 (root degree 3), A000081, A033185.
+%K A029855 nonn
+%O A029855 5,3
+%A A029855 _Christian G. Bower_

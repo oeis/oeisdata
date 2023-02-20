@@ -1,0 +1,88 @@
+%I A050782
+%S A050782 0,1,1,1,1,1,1,1,1,1,0,1,21,38,18,35,17,16,14,9,0,12,1,7,29,21,19,37,
+%T A050782 9,8,0,14,66,1,8,15,7,3,13,15,0,16,6,23,1,13,9,3,44,7,0,19,13,4,518,1,
+%U A050782 11,3,4,13,0,442,7,4,33,9,1,11,4,6,0,845,88,4,3,7,287,1,11,6,0,12345679,8
+%N A050782 Smallest positive multiplier m such that m*n is palindromic (or zero if no such m exists).
+%C A050782 Multiples of 81 require the largest multipliers.
+%C A050782 From _Jon E. Schoenfield_, Jan 15 2015: (Start)
+%C A050782 In general, a(n) is large when n is a multiple of 81. E.g., for n in [1..10000], of the 9000 terms where a(n)>0, 111 are at indices n that are multiples of 81; of the remaining 8889 terms,
+%C A050782      755 are in [1..9],
+%C A050782     1760 are in [10..99],
+%C A050782     3439 are in [100..999],
+%C A050782     2180 are in [1000..9999],
+%C A050782      708 are in [10000..99999],
+%C A050782       36 are in [100000..999999],
+%C A050782        6 are in [1000000..9999999],
+%C A050782        2 are in [10000000..99999999],
+%C A050782        2 are in [100000000..999999999],
+%C A050782 and 1 (the largest) is a(8891) = 8546948927,
+%C A050782 but the smallest of the 111 terms whose indices are multiples of 81 is a(2997)=333667. (End)
+%C A050782 a(n) = 0 iff 10 | n. a(n) = 1 iff n is a palindrome. If k | a(n) then a(k*n) = a(n)/k. - _Robert Israel_, Jan 15 2015
+%H A050782 Giovanni Resta, <a href="/A050782/b050782.txt">Table of n, a(n) for n = 0..10000</a> (first 8181 terms from Chai Wah Wu)
+%H A050782 Patrick De Geest, <a href="http://www.worldofnumbers.com/index.html">World!Of Numbers</a>
+%e A050782 E.g., a(81) -> 81 * 12345679 = 999999999 and a palindrome.
+%p A050782 digrev:= proc(n) local L,d,i;
+%p A050782   L:= convert(n,base,10);
+%p A050782   d:= nops(L);
+%p A050782   add(L[i]*10^(d-i),i=1..d);
+%p A050782 end proc:
+%p A050782 f:= proc(n)
+%p A050782 local d,d2,x,t,y;
+%p A050782 if n mod 10 = 0 then return 0 fi;
+%p A050782 if n < 10 then return 1 fi;
+%p A050782 for d from 2 do
+%p A050782   if d::even then
+%p A050782     d2:= d/2;
+%p A050782     for x from 10^(d2-1) to 10^d2-1 do
+%p A050782        t:= x*10^d2 + digrev(x);
+%p A050782        if t mod n = 0 then return(t/n) fi;
+%p A050782     od
+%p A050782   else
+%p A050782     d2:= (d-1)/2;
+%p A050782     for x from 10^(d2-1) to 10^d2-1 do
+%p A050782       for y from 0 to 9 do
+%p A050782         t:= x*10^(d2+1)+y*10^d2+digrev(x);
+%p A050782         if t mod n = 0 then return(t/n) fi;
+%p A050782       od
+%p A050782     od
+%p A050782   fi
+%p A050782 od;
+%p A050782 end proc:
+%p A050782 seq(f(n),n=0 .. 100); # _Robert Israel_, Jan 15 2015
+%t A050782 t={0}; Do[i=1; If[IntegerQ[n/10],y=0,While[Reverse[x=IntegerDigits[i*n]]!=x,i++]; y=i]; AppendTo[t,y],{n,80}]; t (* _Jayanta Basu_, Jun 01 2013 *)
+%o A050782 (Python)
+%o A050782 from __future__ import division
+%o A050782 def palgen(l,b=10): # generator of palindromes in base b of length <= 2*l
+%o A050782     if l > 0:
+%o A050782         yield 0
+%o A050782         for x in range(1,l+1):
+%o A050782             n = b**(x-1)
+%o A050782             n2 = n*b
+%o A050782             for y in range(n,n2):
+%o A050782                 k, m = y//b, 0
+%o A050782                 while k >= b:
+%o A050782                     k, r = divmod(k,b)
+%o A050782                     m = b*m + r
+%o A050782                 yield y*n + b*m + k
+%o A050782             for y in range(n,n2):
+%o A050782                 k, m = y, 0
+%o A050782                 while k >= b:
+%o A050782                     k, r = divmod(k,b)
+%o A050782                     m = b*m + r
+%o A050782                 yield y*n2 + b*m + k
+%o A050782 def A050782(n, l=10):
+%o A050782     if n % 10:
+%o A050782         x = palgen(l)
+%o A050782         next(x)  # replace with x.next() in Python 2.x
+%o A050782         for i in x:
+%o A050782             q, r = divmod(i, n)
+%o A050782             if not r:
+%o A050782                 return q
+%o A050782         else:
+%o A050782             return 'search limit reached.'
+%o A050782     else:
+%o A050782         return 0 # _Chai Wah Wu_, Dec 30 2014
+%Y A050782 Cf. A002113, A020485, A050810.
+%K A050782 nonn,base,nice
+%O A050782 0,13
+%A A050782 _Patrick De Geest_, Oct 15 1999

@@ -1,0 +1,52 @@
+%I A069525
+%S A069525 6,6,6,24,15,6,42,24,0,60,33,24,312,42,15,240,51,0,114,60,42,132,1104,
+%T A069525 24,150,312,0,420,1131,60,1023,2112,33,204,105,0,222,114,312,240,123,
+%U A069525 42,1032,132,0,1104,141,240,12201,150,51,312,1113,0,330,4200,114,4002,2301
+%N A069525 Smallest multiple of n with digit sum = 6, or 0 if no such number exists, e.g. a(9k)= 0.
+%C A069525 In addition to those divisible by 9, all numbers n divisible by 239, 271 or 803 have a(n)=0. - _Robert Israel_, Sep 04 2019
+%H A069525 Robert Israel, <a href="/A069525/b069525.txt">Table of n, a(n) for n = 1..2500</a>
+%F A069525 a(n) = n*A088395(n). - _R. J. Mathar_, Aug 06 2019
+%p A069525 N:= 1000: # to get a(1)..a(N)
+%p A069525 nextL:= proc(L)
+%p A069525 local m,q,Lp;
+%p A069525 for m from 1 do
+%p A069525    if L[m] > 0 then
+%p A069525     if m = LinearAlgebra:-Dimension(L) then return <5,0$(m-1),1>
+%p A069525     else Lp:= L;
+%p A069525        Lp[1]:= L[m]-1;
+%p A069525        Lp[2..m]:= 0;
+%p A069525        Lp[m+1]:= L[m+1]+1;
+%p A069525        return Lp;
+%p A069525     fi
+%p A069525    fi
+%p A069525 od;
+%p A069525 end proc:
+%p A069525 nogo:= proc(n) local m,a2,a5,S,S2,S3,i,j;
+%p A069525   a2:= padic:-ordp(n,2);
+%p A069525   a5:= padic:-ordp(n,5);
+%p A069525   m:= numtheory:-order(10,n/(2^a2*5^a5))+max(a2,a5);
+%p A069525   S:= {seq(10^i mod n, i=0..m-1)};
+%p A069525   S2:= {seq(seq(S[i]+S[j] mod n,j=1..i),i=1..nops(S))};
+%p A069525   S3:= {seq(seq(S[i]+ S2[j] mod n, j=1..nops(S2)),i=1..nops(S))};
+%p A069525   evalb(S3 intersect map(t -> -t mod n, S3) = {});
+%p A069525 end proc:
+%p A069525 Agenda:= remove(t -> (t mod 9=0 or t mod 239=0 or t mod 271=0 or t mod 803=0, {$1..N}):
+%p A069525 L:= <6>: x:= 6:
+%p A069525 A:= Vector(N):
+%p A069525 while Agenda <> {} and x < 10^20 do
+%p A069525   x:= add(L[i]*10^(i-1),i=1..LinearAlgebra:-Dimension(L));
+%p A069525   found,Agenda:= selectremove(t -> x mod t = 0, Agenda);
+%p A069525   if found <> {} then
+%p A069525     A[convert(found,list)]:= x;
+%p A069525   fi;
+%p A069525   L:= nextL(L);
+%p A069525 od:
+%p A069525 Agenda:= remove(nogo,Agenda);
+%p A069525 if Agenda <> {} then printf("Values not found for %a\n",Agenda) fi;
+%p A069525 convert(A,list); # _Robert Israel_, Sep 04 2019
+%t A069525 Array[If[AnyTrue[Mod[#, {9, 239, 271, 803}], # == 0 &], 0, Block[{k = 1}, While[Total@ IntegerDigits[k #] != 6, k++]; k #]] &, 59] (* _Michael De Vlieger_, Sep 04 2019 *)
+%Y A069525 Cf. A062220, A069521, A069522, A069523, A069524.
+%K A069525 base,nonn
+%O A069525 1,1
+%A A069525 _Amarnath Murthy_, Apr 01 2002
+%E A069525 More terms from _Ray Chandler_, Jul 30 2003

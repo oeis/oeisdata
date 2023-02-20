@@ -1,0 +1,26 @@
+%I A005200 M1247
+%S A005200 1,2,4,11,28,78,213,598,1670,4723,13356,37986,108193,309169,884923,
+%T A005200 2538369,7292170,20982220,60451567,174385063,503600439,1455827279,
+%U A005200 4212464112,12199373350,35357580112,102552754000,297651592188,864460682777,2512115979800,7304240074858
+%N A005200 Total number of fixed points in rooted trees with n nodes.
+%D A005200 N. J. A. Sloane and Simon Plouffe, The Encyclopedia of Integer Sequences, Academic Press, 1995 (includes this sequence).
+%H A005200 T. D. Noe and Alois P. Heinz, <a href="/A005200/b005200.txt">Table of n, a(n) for n = 1..1000</a> (first 200 terms from T. D. Noe)
+%H A005200 F. Harary and E. M. Palmer, <a href="http://dx.doi.org/10.1017/S0305004100055857">Probability that a point of a tree is fixed</a>, Math. Proc. Camb. Phil. Soc. 85 (1979) 407-415.
+%H A005200 <a href="/index/Ro#rooted">Index entries for sequences related to rooted trees</a>
+%H A005200 <a href="/index/Tra#trees">Index entries for sequences related to trees</a>
+%F A005200 G.f. satisfies A(x)=T(x)[ 1+A(x)-A(x^2) ], where T(x)=x+x^2+2*x^3+... is g.f. for A000081.
+%p A005200 # First construct T(x), the g.f. for A000081. Then we form A005200 = s and its g.f. A as follows:
+%p A005200 s := [ 1,2 ]; A := series(add(s[ i ]*x^i,i=1..2),x,3); G := series(subs(x=x^2,A),x,3);
+%p A005200 for n from 3 to 30 do t1 := coeff(T,x,n)+add( coeff(T,x,i)*s[ n-i ],i=1..n-1)-add(coeff(T,x,i)*coeff(G,x,n-i),i=1..n-1); s := [ op(s),t1 ]; A := series(A+t1*x^n,x,n+1); G := series(subs(x=x^2,A),x,n+1); od: s; A;
+%p A005200 # second Maple program:
+%p A005200 with(numtheory): b:= proc(n) option remember; local d, j; if n<1 then 0 elif n=1 then 1 else add(add(d*b(d), d=divisors(j)) *b(n-j), j=1..n-1)/ (n-1) fi end: a:= proc(n) option remember; b(n) +add((b(n-i) -b(n-2*i)) *a(i), i=0..n-1) end: seq(a(n), n=1..100); # _Alois P. Heinz_, Sep 16 2008
+%t A005200 terms = 30; (* T = g.f. of A000081 *)
+%t A005200 T[x_] = 0; Do[T[x_] = x*Exp[Sum[ T[x^k]/k, {k, 1, terms}]] + O[x]^(terms+1) // Normal, terms+1];
+%t A005200 A[_] = 0; Do[A[x_] = T[x]*(1 + A[x] - A[x^2]) + O[x]^(terms+1) // Normal,
+%t A005200 terms+1];
+%t A005200 Drop[CoefficientList[A[x], x] , 1] (* _Jean-François Alcover_, Sep 30 2011, updated Jan 11 2018 *)
+%t A005200 b[n_] := b[n] = Module[{d, j}, If[n<1, 0, If[n == 1, 1, Sum[Sum[d*b[d], {d, Divisors[j]}]*b[n-j], {j, 1, n-1}]/(n-1)]]]; a[n_] := a[n] = b[n] + Sum[ (b[n-i] - b[n-2*i])*a[i], {i, 0, n-1}]; Table[a[n], {n, 1, 100}] (* _Jean-François Alcover_, Nov 11 2015, after _Alois P. Heinz_ *)
+%Y A005200 Cf. A000081, A005201, A000055.
+%K A005200 nonn,easy,nice
+%O A005200 1,2
+%A A005200 _N. J. A. Sloane_

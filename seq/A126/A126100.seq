@@ -1,0 +1,29 @@
+%I A126100
+%S A126100 0,1,1,3,11,58,407,4306,72489,2111013,111172234,10798144310,
+%T A126100 1944301471861,650202565436890,404697467417019634,
+%U A126100 470133531223369393920,1022561022228933341815171,4177761667636803276899047351,32163582481439081597751699343141,468019937132164016636736323752098741
+%N A126100 Number of rooted connected unlabeled graphs on n nodes.
+%C A126100 Let G run through all connected unlabeled graphs on n nodes. Add up the numbers of inequivalent nodes (under Aut(G)) for each G.
+%C A126100 "Pointed" connected graphs. This has the same relation to A001349 as A000081 does to A000055.
+%C A126100 a(0) = 0 because the empty graph cannot be rooted.
+%H A126100 Andrew Howroyd, <a href="/A126100/b126100.txt">Table of n, a(n) for n = 0..50</a> (terms 0..23 from David Applegate and N. J. A. Sloane)
+%F A126100 The g.f. A(x) = x+x^2+3*x^3+11*x^4+... satisfies f(x) = 1 + A(x)*g(x), where f(x) = 1+x+2*x^2+6*x^3+20*x^4+... is the g.f. for A000666 and g(x) = 1+x+2*x^2+4*x^3+11*x^4+... is the g.f. for A000088. - _Brendan McKay_
+%e A126100 For 3 nodes G is either a path (2 kinds of nodes) or a triangle (one kind of node), for a total of a(3) = 3.
+%e A126100 For the 5-vertex graphs we have 2 x 1 orbit, 6 x 2 orbits, 8 x 3 orbits, 5 x 4 orbits for a total of 2 + 12 + 24 + 20 = 58.
+%t A126100 permcount[v_] := Module[{m = 1, s = 0, k = 0, t}, For[i = 1, i <= Length[v], i++, t = v[[i]]; k = If[i > 1 && t == v[[i - 1]], k + 1, 1]; m *= t*k; s += t]; s!/m];
+%t A126100 edges[v_] := Sum[GCD[v[[i]], v[[j]]], {i, 2, Length[v]}, {j, 1, i - 1}] + Total[Quotient[v, 2]];
+%t A126100 g[n_, r_] := (s = 0; Do[s += permcount[p]*(2^(r*Length[p] + edges[p])), {p, IntegerPartitions[n]}]; s/n!);
+%t A126100 seq[m_] := Sum[g[n-1, 1] x^(n-1), {n, 0, m}]/Sum[g[n-1, 0] x^(n-1), {n, 0, m}] + O[x]^m // CoefficientList[#, x]& // Prepend[#, 0]&;
+%t A126100 seq[20] (* _Jean-François Alcover_, Jul 09 2018, after _Andrew Howroyd_ *)
+%o A126100 (PARI)
+%o A126100 permcount(v) = {my(m=1,s=0,k=0,t); for(i=1,#v,t=v[i]; k=if(i>1&&t==v[i-1],k+1,1); m*=t*k;s+=t); s!/m}
+%o A126100 edges(v) = {sum(i=2, #v, sum(j=1, i-1, gcd(v[i],v[j]))) + sum(i=1, #v, v[i]\2)}
+%o A126100 g(n,r) = {my(s=0); forpart(p=n, s+=permcount(p)*(2^(r*#p+edges(p)))); s/n!}
+%o A126100 seq(n)={concat([0], Vec(Ser(vector(n, n, g(n-1,1)))/Ser(vector(n, n, g(n-1,0)))))} \\ _Andrew Howroyd_, May 03 2018
+%Y A126100 Cf. A001349, A126101, A000666, A000088, A126201, A303831 (birooted), A304311.
+%K A126100 nonn,nice
+%O A126100 0,4
+%A A126100 _David Applegate_ and _N. J. A. Sloane_, Mar 05 2007
+%E A126100 a(5)-a(9) computed by _Gordon F. Royle_, Mar 05 2007
+%E A126100 a(10) and a(11) computed by _Brendan McKay_, Mar 05 2007
+%E A126100 a(12) onwards computed from the generating function, A000088 and A000666 by _David Applegate_ and _N. J. A. Sloane_, Mar 06 2007

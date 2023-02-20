@@ -1,0 +1,61 @@
+%I A057150
+%S A057150 1,0,1,0,1,1,0,1,2,1,0,0,5,2,1,0,0,4,11,2,1,0,0,3,21,14,2,1,0,0,1,34,
+%T A057150 49,15,2,1,0,0,1,33,131,69,15,2,1,0,0,0,33,248,288,79,15,2,1,0,0,0,19,
+%U A057150 410,840,420,82,15,2,1,0,0,0,14,531,2144,1744,497,83,15,2,1
+%N A057150 Triangle read by rows: T(n,k) = number of k X k binary matrices with n ones, with no zero rows or columns, up to row and column permutation.
+%C A057150 Also the number of non-isomorphic set multipartitions (multisets of sets) of weight n with k parts and k vertices. - _Gus Wiseman_, Nov 14 2018
+%e A057150 [1], [0,1], [0,1,1], [0,1,2,1], [0,0,5,2,1], [0,0,4,11,2,1], ...;
+%e A057150 There are 8 square binary matrices with 5 ones, with no zero rows or columns, up to row and column permutation: 5 of size 3 X 3:
+%e A057150 [0 0 1] [0 0 1] [0 0 1] [0 0 1] [0 0 1]
+%e A057150 [0 0 1] [0 1 0] [0 1 1] [0 1 1] [1 1 0]
+%e A057150 [1 1 1] [1 1 1] [1 0 1] [1 1 0] [1 1 0]
+%e A057150 2 of size 4 X 4:
+%e A057150 [0 0 0 1] [0 0 0 1]
+%e A057150 [0 0 0 1] [0 0 1 0]
+%e A057150 [0 0 1 0] [0 1 0 0]
+%e A057150 [1 1 0 0] [1 0 0 1]
+%e A057150 and 1 of size 5 X 5:
+%e A057150 [0 0 0 0 1]
+%e A057150 [0 0 0 1 0]
+%e A057150 [0 0 1 0 0]
+%e A057150 [0 1 0 0 0]
+%e A057150 [1 0 0 0 0].
+%e A057150 From _Gus Wiseman_, Nov 14 2018: (Start)
+%e A057150 Triangle begins:
+%e A057150    1
+%e A057150    0   1
+%e A057150    0   1   1
+%e A057150    0   1   2   1
+%e A057150    0   0   5   2   1
+%e A057150    0   0   4  11   2   1
+%e A057150    0   0   3  21  14   2   1
+%e A057150    0   0   1  34  49  15   2   1
+%e A057150    0   0   1  33 131  69  15   2   1
+%e A057150    0   0   0  33 248 288  79  15   2   1
+%e A057150 Non-isomorphic representatives of the multiset partitions counted in row 6 {0,0,4,11,2,1} are:
+%e A057150   {{12}{13}{23}}  {{1}{1}{1}{234}}  {{1}{2}{3}{3}{45}}  {{1}{2}{3}{4}{5}{6}}
+%e A057150   {{1}{23}{123}}  {{1}{1}{24}{34}}  {{1}{2}{3}{5}{45}}
+%e A057150   {{13}{23}{23}}  {{1}{1}{4}{234}}
+%e A057150   {{3}{23}{123}}  {{1}{2}{34}{34}}
+%e A057150                   {{1}{3}{24}{34}}
+%e A057150                   {{1}{3}{4}{234}}
+%e A057150                   {{1}{4}{24}{34}}
+%e A057150                   {{1}{4}{4}{234}}
+%e A057150                   {{2}{4}{12}{34}}
+%e A057150                   {{3}{4}{12}{34}}
+%e A057150                   {{4}{4}{12}{34}}
+%e A057150 (End)
+%t A057150 permcount[v_List] := Module[{m = 1, s = 0, k = 0, t}, For[i = 1, i <= Length[v], i++, t = v[[i]]; k = If[i > 1 && t == v[[i - 1]], k + 1, 1]; m *= t*k; s += t]; s!/m];
+%t A057150 c[p_List, q_List, k_] := SeriesCoefficient[Product[Product[(1 + O[x]^(k + 1) + x^LCM[p[[i]], q[[j]]])^GCD[p[[i]], q[[j]]], {j, 1, Length[q]}], {i, 1, Length[p]}], {x, 0, k}];
+%t A057150 M[m_, n_, k_] := M[m, n, k] = Module[{s = 0}, Do[Do[s += permcount[p]* permcount[q]*c[p, q, k], {q, IntegerPartitions[n]}], {p, IntegerPartitions[m]}]; s/(m!*n!)];
+%t A057150 T[n_, k_] := M[k, k, n] - 2*M[k, k - 1, n] + M[k - 1, k - 1, n];
+%t A057150 Table[T[n, k], {n, 1, 12}, {k, 1, n}] // Flatten (* _Jean-François Alcover_, Sep 10 2019, after _Andrew Howroyd_ *)
+%o A057150 (PARI) \\ See A321609 for M.
+%o A057150 T(n,k) = M(k,k,n) - 2*M(k,k-1,n) + M(k-1,k-1,n); \\ _Andrew Howroyd_, Nov 14 2018
+%Y A057150 Row sums give A057151.
+%Y A057150 Cf. A049311, A056037, A056079, A056080, A057149, A057151, A057152.
+%Y A057150 Cf. A007716, A048291, A054976, A101370, A104601, A104602, A120732, A120733, A135588, A319616, A321609, A321615.
+%K A057150 nonn,tabl
+%O A057150 1,9
+%A A057150 _Vladeta Jovovic_, Aug 14 2000
+%E A057150 Duplicate seventh row removed by _Gus Wiseman_, Nov 14 2018

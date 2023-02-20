@@ -1,0 +1,66 @@
+%I A136301
+%S A136301 1,1,1,1,5,2,1,1,13,6,13,2,6,2,1,1,29,14,73,6,42,18,29,2,18,8,14,2,6,
+%T A136301 2,1,1,61,30,301,14,186,86,301,6,102,48,186,18,102,42,61,2,42,20,86,8,
+%U A136301 48,20,30,2,18,8,14,2,6,2,1,1,125,62,1081,30,690,330,2069,14,414,200,1394
+%N A136301 Frequency of occurrence for each possible "probability of derangement" for a Secret Santa drawing in which each person draws a name in sequence and the only person who does not draw someone else's name is the one who draws the final name.
+%C A136301 The sequence is best represented as a series of columns 1..n, where each column j has 2^(j-1) rows (see Example). For more details, see A136300.
+%C A136301 The first column represents the case for 3 people (offset 3).
+%H A136301 Brian Parsonnet, <a href="/A136301/b136301.txt">Table of n, a(n) for n = 3..257</a>
+%H A136301 Brian Parsonnet, <a href="/A136301/a136301.pdf">Probability of Derangements</a>
+%F A136301 H(r,c) = Sum_{j=0..c-L(r)-1} H(T(r), L(r)+j) * M(c-T(r)-1, j) where M(y,z) = binomial distribution (y,z) when y - 1 > z and (y,z)-1 when y-1 <= z and T(r) = A053645 and L(r) = A000523.
+%e A136301 Represented as a series of columns, where column j has 2^(j-1) rows, the sequence begins:
+%e A136301   row |j = 1   2   3   4   5 ...
+%e A136301   ----+-------------------------
+%e A136301     1 |    1   1   1   1   1 ...
+%e A136301     2 |        1   5  13  29 ...
+%e A136301     3 |        2   6  14  30 ...
+%e A136301     4 |        1  13  73 301 ...
+%e A136301     5 |            2   6  14 ...
+%e A136301     6 |            6  42 186 ...
+%e A136301     7 |            2  18  86 ...
+%e A136301     8 |            1  29 301 ...
+%e A136301     9 |                2   6 ...
+%e A136301    10 |               18 102 ...
+%e A136301    11 |                8  48 ...
+%e A136301    12 |               14 186 ...
+%e A136301    13 |                2  18 ...
+%e A136301    14 |                6 102 ...
+%e A136301    15 |                2  42 ...
+%e A136301    16 |                1  61 ...
+%e A136301    17 |                    2 ...
+%e A136301   ... |                  ... ...
+%e A136301 .
+%e A136301 If there are 5 people, numbered 1-5 according to the order in which they draw a name, and person #5 draws name #5, the first four people must draw 1-4 as a proper derangement, and there are 9 ways of doing so: 21435 / 23415 / 24135 / 31425 / 34125 / 34215 / 41235 / 43125 / 43215.
+%e A136301 But the probability of each derangement depends on how many choices exist at each successive draw. The first person can draw from 4 possibilities (2,3,4,5). The second person nominally has 3 to choose from, unless the first person drew number 2, in which case person 2 may draw 4 possibilities (1,3,4,5), and so on. The probabilities of 21435 and 24135 are both then
+%e A136301         1/4 * 1/4 * 1/2 * 1/2 = 1/64.
+%e A136301 More generally, if there are n people, at the i-th turn (i = 1..n), person i has either (n-i) or (n-i+1) choices, depending on whether the name of the person who is drawing has been chosen yet. A way to represent the two cases above is 01010, where a 0 indicates that the person's number is not yet drawn, and a 1 indicates it is.
+%e A136301 For the n-th person to be forced to choose his or her own name, the last digit of this pattern must be 0, by definition. Similarly, the 1st digit must be a 0, and the second to last digit must be a 1. So all the problem patterns start with 0 and end with 10. For 5 people, that leaves 4 target patterns which cover all 9 derangements. By enumeration, that distribution can be shown to be (for the 3rd column = 5 person case):
+%e A136301         0-00-10 1 occurrences
+%e A136301         0-01-10 5 occurrences
+%e A136301         0-10-10 2 occurrences
+%e A136301         0-11-11 1 occurrences
+%e A136301 1;
+%e A136301 1, 1;
+%e A136301 1, 5, 2, 1;
+%e A136301 1, 13, 6, 13, 2, 6, 2, 1;
+%e A136301 1, 29, 14, 73, 6, 42, 18, 29, 2, 18, 8, 14, 2, 6, 2, 1;
+%t A136301 maxP = 22;
+%t A136301 rows = Range[1, 2^(nP = maxP - 3)];
+%t A136301 pasc = Table[
+%t A136301    Binomial[p + 1, i] - If[i >= p, 1, 0], {p, nP}, {i, 0, p}];
+%t A136301 sFreq = Table[0, {maxP - 1}, {2^nP}]; sFreq[[2 ;; maxP - 1, 1]] = 1;
+%t A136301 For[p = 1, p <= nP, p++,
+%t A136301   For[s = 1, s <= p, s++, rS = Range[2^(s - 1) + 1, 2^s];
+%t A136301         sFreq[[p + 2, rS]] = pasc[[p + 1 - s, 1 ;; p + 2 - s]] .
+%t A136301             sFreq[[s ;; p + 1, 1 ;; 2^(s - 1)]]]];
+%t A136301 TableForm[ Transpose[ sFreq ] ]
+%Y A136301 The application of this table towards final determination of the probabilities of derangements leads to sequence A136300, which is the sequence of numerators. The denominators are in A001044.
+%Y A136301 A048144 represents the peak value of all odd-numbers columns.
+%Y A136301 A000255 equals the sum of the bottom half of each column.
+%Y A136301 A000166 equals the sum of each column.
+%Y A136301 A047920 represents the frequency of replacements by person drawing at position n.
+%Y A136301 A008277, Triangle of Stirling numbers of 2nd kind, can be derived from A136301 through a series of transformations (see "Probability of Derangements.pdf").
+%K A136301 uned,nonn,tabf
+%O A136301 3,5
+%A A136301 _Brian Parsonnet_, Mar 22 2008
+%E A136301 Edited by _Brian Parsonnet_, Mar 01 2011

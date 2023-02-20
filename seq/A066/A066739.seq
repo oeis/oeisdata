@@ -1,0 +1,38 @@
+%I A066739
+%S A066739 1,1,2,3,6,8,14,19,32,44,67,91,139,186,269,362,518,687,960,1267,1747,
+%T A066739 2294,3106,4052,5449,7063,9365,12092,15914,20422,26639,34029,44091,
+%U A066739 56076,72110,91306,116808,147272,187224,235201,297594,372390,468844,584644,732942
+%N A066739 Number of representations of n as a sum of products of positive integers. 1 is not allowed as a factor, unless it is the only factor. Representations which differ only in the order of terms or factors are considered equivalent.
+%H A066739 Alois P. Heinz, <a href="/A066739/b066739.txt">Table of n, a(n) for n = 0..10000</a>
+%H A066739 N. J. A. Sloane, <a href="/transforms.txt">Transforms</a>
+%F A066739 a(n) = Sum_{pi} Product_{m=1..n} binomial(k(m)+A001055(m)-1, k(m)), where pi runs through all partitions k(1) + 2 * k( 2) + ... + n * k(n) = n. a(n)=1/n*Sum_{m=1..n} a(n-m)*b(m), n > 0, a(0)=1, b(m)=Sum_{d|m} d*A001055(d). Euler transform of A001055(n): Product_{m=1..infinity} (1-x^m)^(-A001055(m)). - _Vladeta Jovovic_, Jan 21 2002
+%e A066739 For n=5, 5 = 4+1 = 2*2+1 = 3+2 = 3+1+1 = 2+2+1 = 2+1+1+1 = 1+1+1+1+1, so a(5) = 8.
+%e A066739 For n=8, 8 = 4*2 = 2*2*2 = ... = 4+4 = 2*2+4 = 2*2+2*2 = ...; note that there are 3 ways to factor the terms of 4+4. In general, if a partition contains a number k exactly r times, then the number of ways to factor the k's is the binomial coefficient C(A001055(k)+r-1,r).
+%p A066739 with(numtheory):
+%p A066739 b:= proc(n, k) option remember;
+%p A066739       `if`(n>k, 0, 1) +`if`(isprime(n), 0,
+%p A066739       add(`if`(d>k, 0, b(n/d, d)), d=divisors(n) minus {1, n}))
+%p A066739     end:
+%p A066739 a:= proc(n) option remember;
+%p A066739       `if`(n=0, 1, add(add(d*b(d, d), d=divisors(j)) *a(n-j), j=1..n)/n)
+%p A066739     end:
+%p A066739 seq(a(n), n=0..60); # _Alois P. Heinz_, Apr 22 2012
+%t A066739 p[ n_, 1 ] := If[ n==1, 1, 0 ]; p[ 1, k_ ] := 1; p[ n_, k_ ] := p[ n, k ]=p[ n, k-1 ]+If[ Mod[ n, k ]==0, p[ n/k, k ], 0 ]; A001055[ n_ ] := p[ n, n ]; a[ n_, 1 ] := 1; a[ 0, k_ ] := 1; a[ n_, k_ ] := If[ k>n, a[ n, n ], a[ n, k ]=a[ n, k-1 ]+Sum[ Binomial[ A001055[ k ]+r-1, r ]a[ n-k*r, k-1 ], {r, 1, Floor[ n/k ]} ] ]; a[ n_ ] := a[ n, n ]; (* p[ n, k ]=number of factorizations of n with factors <= k. a[ n, k ]=number of representations of n as a sum of products of positive integers, with summands <= k *)
+%t A066739 b[n_, k_] := b[n, k] = If[n>k, 0, 1] + If[PrimeQ[n], 0, Sum[If[d>k, 0, b[n/d, d]], {d, Divisors[n] ~Complement~ {1, n}}]]; a[0] = 1; a[n_] := a[n] = If[n == 0, 1, Sum[DivisorSum[j, #*b[#, #]&]*a[n-j], {j, 1, n}]/n]; Table[a[n], {n, 0, 60}] (* _Jean-François Alcover_, Nov 10 2015, after _Alois P. Heinz_ *)
+%t A066739 facs[n_]:=If[n<=1,{{}},Join@@Table[(Prepend[#1,d]&)/@Select[facs[n/d],Min@@#1>=d&],{d,Rest[Divisors[n]]}]];
+%t A066739 Table[Length[Union[Sort/@Join@@Table[Tuples[facs/@ptn],{ptn,IntegerPartitions[n]}]]],{n,50}] (* _Gus Wiseman_, Sep 05 2018 *)
+%o A066739 (Python)
+%o A066739 from sympy.core.cache import cacheit
+%o A066739 from sympy import divisors, isprime
+%o A066739 @cacheit
+%o A066739 def b(n, k): return (0 if n>k else 1) + (0 if isprime(n) else sum([0 if d>k else b(n//d, d) for d in divisors(n)[1:-1]]))
+%o A066739 @cacheit
+%o A066739 def a(n): return 1 if n==0 else sum(sum(d*b(d, d) for d in divisors(j))*a(n - j)  for j in range(1, n + 1))//n
+%o A066739 print([a(n) for n in range(61)]) # _Indranil Ghosh_, Aug 19 2017, after Maple code
+%Y A066739 Cf. A000041, A001055.
+%Y A066739 Cf. A066815, A066816, A066806.
+%Y A066739 Cf. A001970, A050336, A063834, A065026, A066739, A281113, A284639, A318948, A318949.
+%K A066739 easy,nonn
+%O A066739 0,3
+%A A066739 _Naohiro Nomoto_, Jan 16 2002
+%E A066739 Edited by _Dean Hickerson_, Jan 19 2002

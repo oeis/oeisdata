@@ -1,0 +1,32 @@
+%I A084993
+%S A084993 0,1,1,2,3,5,6,9,12,16,20,27,33,42,53,64,80,96,117,141,169,201,239,
+%T A084993 282,333,390,456,532,617,715,826,951,1094,1253,1435,1636,1864,2119,
+%U A084993 2404,2723,3078,3473,3915,4403,4947,5549,6215,6952,7767,8665,9656,10748
+%N A084993 Total number of parts in all partitions of n into prime parts.
+%H A084993 Alois P. Heinz, <a href="/A084993/b084993.txt">Table of n, a(n) for n = 1..10000</a>
+%F A084993 G.f.: sum(x^p(j)/(1-x^p(j)),j=1..infinity)/product(1-x^p(j), j=1..infinity), where p(j) is the j-th prime. - _Emeric Deutsch_, Mar 07 2006
+%e A084993 Partitions of 9 into primes are 2+2+2+3=3+3+3=2+2+5=2+7; thus a(9)=4+3+3+2=12.
+%p A084993 g:=sum(x^ithprime(j)/(1-x^ithprime(j)),j=1..20)/product(1-x^ithprime(j),j=1..20): gser:=series(g,x=0,60): seq(coeff(gser,x^n),n=1..57); # _Emeric Deutsch_, Mar 07 2006
+%p A084993 # second Maple program:
+%p A084993 with(numtheory):
+%p A084993 b:= proc(n, i) option remember; local g;
+%p A084993       if n=0 then [1, 0]
+%p A084993     elif i<1 then [0, 0]
+%p A084993     elif i=1 then `if`(irem(n, 2)=0, [1, n/2], [0, 0])
+%p A084993     else g:= `if`(ithprime(i)>n, [0$2], b(n-ithprime(i), i));
+%p A084993          b(n, i-1) +g +[0, g[1]]
+%p A084993       fi
+%p A084993     end:
+%p A084993 a:= n-> b(n, pi(n))[2]:
+%p A084993 seq(a(n), n=1..60);  # _Alois P. Heinz_, Oct 30 2012
+%t A084993 nn=40;a=Product[1/(1-y x^i),{i,Table[Prime[n],{n,1,nn}]}];Drop[CoefficientList[Series[D[a,y]/.y->1,{x,0,nn}],x],1]  (* _Geoffrey Critzer_, Oct 30 2012 *)
+%t A084993 b[n_, i_] := b[n, i] = Module[{g}, Which[n == 0, {1, 0}, i < 1, {0, 0}, i == 1, If[EvenQ[n], {1, n/2}, {0, 0}], True, g = If[Prime[i] > n, {0, 0}, b[n - Prime[i], i]]; b[n, i - 1] + g + {0, g[[1]]}]];
+%t A084993 a[n_] := b[n, PrimePi[n]][[2]];
+%t A084993 Array[a, 52] (* _Jean-François Alcover_, Dec 30 2017, after _Alois P. Heinz_ *)
+%o A084993 (PARI)
+%o A084993 sumparts(n, pred)={sum(k=1, n, 1/(1-pred(k)*x^k) - 1 + O(x*x^n))/prod(k=1, n, 1-pred(k)*x^k + O(x*x^n))}
+%o A084993 {my(n=60); Vec(sumparts(n, isprime), -n)} \\ _Andrew Howroyd_, Dec 28 2017
+%Y A084993 Cf. A000607, A024938.
+%K A084993 nonn
+%O A084993 1,4
+%A A084993 _Vladeta Jovovic_, Jul 17 2003

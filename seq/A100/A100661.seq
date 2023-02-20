@@ -1,0 +1,108 @@
+%I A100661
+%S A100661 1,2,1,2,3,2,1,2,3,2,3,4,3,2,1,2,3,2,3,4,3,2,3,4,3,4,5,4,3,2,1,2,3,2,
+%T A100661 3,4,3,2,3,4,3,4,5,4,3,2,3,4,3,4,5,4,3,4,5,4,5,6,5,4,3,2,1,2,3,2,3,4,
+%U A100661 3,2,3,4,3,4,5,4,3,2,3,4,3,4,5,4,3,4,5,4,5,6,5,4,3,2,3,4,3,4,5,4,3,4,5,4,5
+%N A100661 Quet transform of A006519 (see A101387 for definition). Also, least k such that n+k has at most k ones in its binary representation.
+%C A100661 If n+a(n) has exactly a(n) 1's in binary, then a(n+1) = a(n)+1, but if n+a(n) has less than a(n) 1's, then a(n+1) = a(n)-1. a(n) is the number of terms needed to represent n as a sum of numbers of the form 2^k-1. [_Jeffrey Shallit_]
+%C A100661 Is a(n) = A080468(n+1)+1?
+%C A100661 Compute a(n) by repeatedly subtracting the largest number 2^k-1<=n until zero is reached. The number of times a term was subtracted gives a(n). Examples: 5 = 3 + 1 + 1 ==> a(5) = 3 6 = 3 + 3 ==> a(6) = 2. Replace all zeros in A079559 by -1, then the a(n) are obtained as cumulative sums (equivalent to the generating function given); see fxtbook link. [_Joerg Arndt_, Jun 12 2006]
+%H A100661 Alois P. Heinz, <a href="/A100661/b100661.txt">Table of n, a(n) for n = 1..10000</a>
+%H A100661 Joerg Arndt, <a href="http://www.jjj.de/fxt/#fxtbook">Matters Computational (The Fxtbook)</a>, section 1.26.3, p. 72.
+%H A100661 David Wasserman, <a href="/A100661/a100661.txt">Quet transform + PARI code</a> [Cached copy]
+%F A100661 a(2^k-1) = 1. For 2^k <= n <= 2^(k+1)-2, a(n) = a(n-2^k+1)+1.
+%F A100661 G.f.: x*(2*(1-x)*prod(n>=1, (1+x^(2^n-1))) - 1)/((1-x)^2) = x*(1 + 2*x + 1*x^2 + 2*x^3 + 3*x^4 + 2*x^5 + 1*x^6 + 2*x^7 + 3*x^8 + 2*x^9 + ...) [_Joerg Arndt_, Jun 12 2006]
+%e A100661 a(4) = 2 because 4+2 (110) has two 1's, but 4+1 (101) has more than one 1.
+%e A100661 Conjecture (Joerg Arndt):
+%e A100661 a(n) is the number of bits in the binary words of sequence A108918
+%e A100661 ......A108918.A108918..n..=..n.=.(sum.of.term.2^k-1)
+%e A100661 ........00001.1.....00001.=..1.=..1
+%e A100661 ........00011.2.....00010.=..2.=..1.+.1
+%e A100661 ........00010.1.....00011.=..3.=..3
+%e A100661 ........00101.2.....00100.=..4.=..3.+.1
+%e A100661 ........00111.3.....00101.=..5.=..3.+.1.+.1
+%e A100661 ........00110.2.....00110.=..6.=..3.+.3
+%e A100661 ........00100.1.....00111.=..7.=..7
+%e A100661 ........01001.2.....01000.=..8.=..7.+.1
+%e A100661 ........01011.3.....01001.=..9.=..7.+.1.+.1
+%e A100661 ........01010.2.....01010.=.10.=..7.+.3
+%e A100661 ........01101.3.....01011.=.11.=..7.+.3.+.1
+%e A100661 ........01111.4.....01100.=.12.=..7.+.3.+.1.+.1
+%e A100661 ........01110.3.....01101.=.13.=..7.+.3.+.3
+%e A100661 ........01100.2.....01110.=.14.=..7.+.7
+%e A100661 ........01000.1.....01111.=.15.=.15
+%p A100661 hb:= n-> `if`(n=1, 0, 1+hb(iquo (n, 2))):
+%p A100661 a:= proc(n) local m, t;
+%p A100661       m:= n;
+%p A100661       for t from 0 while m>0 do
+%p A100661         m:= m - (2^(hb(m+1))-1)
+%p A100661       od; t
+%p A100661     end:
+%p A100661 seq(a(n), n=1..100);  # _Alois P. Heinz_, Jan 22 2011
+%t A100661 hb[n_] := If[n==1, 0, 1+hb[Quotient[n, 2]]];
+%t A100661 a[n_] := Module[{m=n, t}, For[t=0, m>0, t++, m = m - (2^(hb[m+1])-1)]; t];
+%t A100661 Array[a, 100] (* _Jean-François Alcover_, Oct 31 2020, after _Alois P. Heinz_ *)
+%o A100661 (Sage) A100661 = lambda n: next(k for k in PositiveIntegers() if (n+k).digits(base=2).count(1) <= k) # _D. S. McNeil_, Jan 23 2011
+%o A100661 (PARI)
+%o A100661 A100661(n)=
+%o A100661 { /* method: repeatedly subtract Mersenne numbers */
+%o A100661     local(m, ct);
+%o A100661     if ( n<=1, return(n) );
+%o A100661     m = 1;
+%o A100661     while ( n>m, m<<=1 );
+%o A100661     m -= 1;
+%o A100661     while ( m>n, m>>=1 );
+%o A100661     /* here m=2^k-1 and m<=n */
+%o A100661     ct = 0;
+%o A100661     while ( n, while (m<=n, n-=m; ct+=1);  m>>=1 );
+%o A100661     return( ct );
+%o A100661 }
+%o A100661 vector(100,n,A100661(n)) /* show terms */
+%o A100661 /* _Joerg Arndt_, Jan 22 2011 */
+%o A100661 (PARI)
+%o A100661 TInverse(v)=
+%o A100661 {
+%o A100661     local(l, w, used, start, x);
+%o A100661     l = length(v); w = vector(l); used = vector(l); start = 1;
+%o A100661     for (i = 1, l,
+%o A100661         while (start <= l && used[start], start++);
+%o A100661         x = start;
+%o A100661         for (j = 2, v[i], x++; while (x <= l && used[x], x++));
+%o A100661         if (x > l,
+%o A100661             return (vector(i - 1, k, w[k]))
+%o A100661             , /* else */
+%o A100661             w[i] = x; used[x] = 1
+%o A100661         )
+%o A100661     );
+%o A100661     return(w);
+%o A100661 }
+%o A100661 PInverse(v)=
+%o A100661 {
+%o A100661     local(l, w);
+%o A100661     l = length(v); w = vector(l);
+%o A100661     for (i = 1, l, if (v[i] <= l, w[v[i]] = i));
+%o A100661     return(w);
+%o A100661 }
+%o A100661 T(v)=
+%o A100661 {
+%o A100661     local(l, w, c);
+%o A100661     l = length(v); w = vector(l);
+%o A100661     for (n = 1, l,
+%o A100661         if (v[n],
+%o A100661             c = 0;
+%o A100661             for (m = 1, n - 1, if (v[m] < v[n], c++));
+%o A100661             w[n] = v[n] - c
+%o A100661             , /* else */
+%o A100661             return (vector(n - 1, i, w[i]))
+%o A100661         )
+%o A100661     );
+%o A100661     return(w);
+%o A100661 }
+%o A100661 Q(v)=T(PInverse(TInverse(v)));
+%o A100661 /* compute terms: */
+%o A100661 v = vector(150);
+%o A100661 for (n = 1, 150, m = n; x = 1; while (!(m%2), m\=2; x *= 2); v[n] = x); Q(v)
+%Y A100661 Cf. A006519, A080468, A101387, A100808.
+%Y A100661 Records at indices in (essentially) A000325.
+%K A100661 easy,nonn
+%O A100661 1,2
+%A A100661 _David Wasserman_, Jan 14 2005

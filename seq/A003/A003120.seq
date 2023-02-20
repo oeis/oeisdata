@@ -1,0 +1,62 @@
+%I A003120 M0836
+%S A003120 1,1,2,3,7,13,31,66,159,365,900,2162,5417,13436,34165,86603,223028,
+%T A003120 574493,1495524,3900055,10246172,26982966,71447432,189664782,
+%U A003120 505605729,1351179886,3623051567,9737403960,26243202664,70878565004
+%N A003120 Number of rooted trees with n nodes and omega-valency 1.
+%C A003120 Draw the tree with the root at the bottom. The omega-valency of a leaf is 1; the omega-valency of any other vertex v is max(1,sum(omega-valence(s))-1) where the sum is over the vertices directly above v. Then the omega-valency of the tree itself is the omega-valency of the root. [_F. Chapoton_, Jul 25 2011; _N. J. A. Sloane_, Jul 27 2011]
+%C A003120 Other names: Number of arborescences of type (n,1), or tapeworms.
+%C A003120 Let phi_n denote the number of rooted trees on n nodes whose comparability graph is Hamiltonian. Then phi_1=1, phi_n = a(n-1) for n >= 2. [Arditti]
+%D A003120 N. J. A. Sloane and Simon Plouffe, The Encyclopedia of Integer Sequences, Academic Press, 1995 (includes this sequence).
+%H A003120 J.-C. Arditti, <a href="http://dx.doi.org/10.1016/0012-365X(73)90135-0">Dénombrement des arborescences dont le graphe de comparabilité est Hamiltonien</a>, Discrete Math., 5 (1973), 189-200.
+%H A003120 F. Harary and R. W. Robinson, <a href="/A001333/a001333_2.pdf">Tapeworms</a>, Unpublished manuscript, circa 1973. (Annotated scanned copy)
+%H A003120 Simon Plouffe, <a href="https://arxiv.org/abs/0911.4975">Approximations de séries génératrices et quelques conjectures</a>, Dissertation, Université du Québec à Montréal, 1992; arXiv:0911.4975 [math.NT], 2009.
+%H A003120 Simon Plouffe, <a href="/A000051/a000051_2.pdf">1031 Generating Functions</a>, Appendix to Thesis, Montreal, 1992
+%H A003120 <a href="/index/Ro#rooted">Index entries for sequences related to rooted trees</a>
+%F A003120 The generating function is probably not rational. - _F. Chapoton_, Jul 26 2011
+%F A003120 The g.f. -(z-1)*(3*z**2+z-1)/(-1+3*z+z**2-7*z**3+3*z**4) conjectured by _Simon Plouffe_ in his 1992 dissertation is wrong (starting from index 11).
+%e A003120 For n=4, the 3 rooted trees are
+%e A003120 O     O       O
+%e A003120 |    / \      |
+%e A003120 |    |       / \
+%e A003120 |
+%p A003120 (Maple program from _N. J. A. Sloane_, Jul 27 2011, based on Eq. (2) of the Arditti paper. This proceeds in very small steps because I was trying to isolate the error in that formula. The error turns out to be in the display following (2): this is not phi(x). Otherwise Eq. (2) is correct.)
+%p A003120 S:=x*y + x^2*y + 2*x^3*y + x^4*(3*y+y^2) + x^5*(7*y+y^2+y^3);
+%p A003120 M:=30;
+%p A003120 for n from 6 to M do
+%p A003120 t5:=series(series(S,y,n),x,n+1);
+%p A003120 t6:=add( subs(x=x^k,subs(y=y^k,t5))/k, k=1..n+1);
+%p A003120 t7:=series(series(t6,y,n),x,n+1);
+%p A003120 t8:=(x/y)*(exp(t7)-1);
+%p A003120 t9:=series(series(t8,y,n),x,n+1);
+%p A003120 xf1:=subs(y=0,series(t5/y,y,n));
+%p A003120 t10:=series(series(xf1,y,n),x,n+1);
+%p A003120 t11:=series(series(t9-x*t10,y,n),x,n+1);
+%p A003120 t12:=series(series(t11+x*y*t10+x*y,y,n),x,n+1);
+%p A003120 t13:=coeff(t12,x,n);
+%p A003120 S:=S+x^n*t13;
+%p A003120 od:
+%p A003120 xf1:=subs(y=0,series(S/y,y,M+1));
+%p A003120 series(%,x,M+1);
+%p A003120 seriestolist(%);
+%o A003120 (Sage)
+%o A003120 def A003120_list(n):
+%o A003120     a = polygen(QQ, 'a')
+%o A003120     an = FractionField(a.parent())
+%o A003120     ri = PowerSeriesRing(an, 'x')
+%o A003120     x = ri.gen()
+%o A003120     t = ri.zero().O(1)
+%o A003120     v = ri.zero().O(1)
+%o A003120     for l in range(n):
+%o A003120         truc = ri.zero()
+%o A003120         for k in range(1, l + 1):
+%o A003120             truc += ri([u(a=a**k) for u in t(x**k).truncate(l+1)]) / k
+%o A003120         t = a*x+x*v+x*(t-v)/a-x/a*(t+1)+x*(exp(truc))/a
+%o A003120         v = a*ri([u(a=0) for u in t/a])
+%o A003120     return (v / a).coefficients()
+%o A003120 A003120_list(33) # _F. Chapoton_, Jul 26 2011
+%Y A003120 Cf. A193487, A193488, A193489, A193490, A193491.
+%K A003120 nonn,nice,easy
+%O A003120 1,3
+%A A003120 _N. J. A. Sloane_
+%E A003120 Corrected by _F. Chapoton_, Jul 26 2011
+%E A003120 Confirmed and extended to n = 30 by _N. J. A. Sloane_, Jul 27 2011

@@ -1,0 +1,78 @@
+%I A072574
+%S A072574 1,1,0,1,2,0,1,2,0,0,1,4,0,0,0,1,4,6,0,0,0,1,6,6,0,0,0,0,1,6,12,0,0,0,
+%T A072574 0,0,1,8,18,0,0,0,0,0,0,1,8,24,24,0,0,0,0,0,0,1,10,30,24,0,0,0,0,0,0,
+%U A072574 0,1,10,42,48,0,0,0,0,0,0,0,0,1,12,48,72,0,0,0,0,0,0,0,0,0,1,12,60,120,0
+%N A072574 Triangle T(n,k) of number of compositions (ordered partitions) of n into exactly k distinct parts, 1<=k<=n.
+%C A072574 If terms in the compositions did not need to be distinct then the triangle would have values C(n-1,k-1), essentially A007318 offset.
+%H A072574 Joerg Arndt, <a href="/A072574/b072574.txt">Table of n, a(n) for n = 1..5050</a> (rows 1..100, flattened).
+%H A072574 B. Richmond and A. Knopfmacher, <a href="http://dx.doi.org/10.1007/BF01827930">Compositions with distinct parts</a>, Aequationes Mathematicae 49 (1995), pp. 86-97.
+%H A072574 <a href="/index/Com#comp">Index entries for sequences related to compositions</a>
+%F A072574 T(n, k) = T(n-k, k)+k*T(n-k, k-1) [with T(n, 0)=1 if n=0 and 0 otherwise] = A000142(k)*A060016(n, k).
+%F A072574 G.f.: sum(n>=0, n! * z^n * q^((n^2+n)/2) / prod(k=1..n, 1-q^k ) ), rows by powers of q, columns by powers of z; includes row 0 (drop term for n=0 for this triangle, see PARI code); setting z=1 gives g.f. for A032020. [_Joerg Arndt_, Oct 20 2012]
+%e A072574 T(6,2)=4 since 6 can be written as 1+5=2+4=4+2=5+1.
+%e A072574 Triangle starts (trailing zeros omitted for n>=10):
+%e A072574 [ 1]  1;
+%e A072574 [ 2]  1, 0;
+%e A072574 [ 3]  1, 2, 0;
+%e A072574 [ 4]  1, 2, 0, 0;
+%e A072574 [ 5]  1, 4, 0, 0, 0;
+%e A072574 [ 6]  1, 4, 6, 0, 0, 0;
+%e A072574 [ 7]  1, 6, 6, 0, 0, 0, 0;
+%e A072574 [ 8]  1, 6, 12, 0, 0, 0, 0, 0;
+%e A072574 [ 9]  1, 8, 18, 0, 0, 0, 0, 0, 0;
+%e A072574 [10]  1, 8, 24, 24, 0, 0, ...;
+%e A072574 [11]  1, 10, 30, 24, 0, 0, ...;
+%e A072574 [12]  1, 10, 42, 48, 0, 0, ...;
+%e A072574 [13]  1, 12, 48, 72, 0, 0, ...;
+%e A072574 [14]  1, 12, 60, 120, 0, 0, ...;
+%e A072574 [15]  1, 14, 72, 144, 120, 0, 0, ...;
+%e A072574 [16]  1, 14, 84, 216, 120, 0, 0, ...;
+%e A072574 [17]  1, 16, 96, 264, 240, 0, 0, ...;
+%e A072574 [18]  1, 16, 114, 360, 360, 0, 0, ...;
+%e A072574 [19]  1, 18, 126, 432, 600, 0, 0, ...;
+%e A072574 [20]  1, 18, 144, 552, 840, 0, 0, ...;
+%e A072574 These rows (without the zeros) are shown in the Richmond/Knopfmacher reference.
+%e A072574 From _Gus Wiseman_, Oct 17 2022: (Start)
+%e A072574 Column n = 8 counts the following compositions.
+%e A072574   (8)  (1,7)  (1,2,5)
+%e A072574        (2,6)  (1,3,4)
+%e A072574        (3,5)  (1,4,3)
+%e A072574        (5,3)  (1,5,2)
+%e A072574        (6,2)  (2,1,5)
+%e A072574        (7,1)  (2,5,1)
+%e A072574               (3,1,4)
+%e A072574               (3,4,1)
+%e A072574               (4,1,3)
+%e A072574               (4,3,1)
+%e A072574               (5,1,2)
+%e A072574               (5,2,1)
+%e A072574 (End)
+%t A072574 Table[Length[Select[Join@@Permutations/@Select[IntegerPartitions[n],UnsameQ@@#&],Length[#]==k&]],{n,0,15},{k,1,n}] (* _Gus Wiseman_, Oct 17 2022 *)
+%o A072574 (PARI)
+%o A072574 N=21;  q='q+O('q^N);
+%o A072574 gf=sum(n=0,N, n! * z^n * q^((n^2+n)/2) / prod(k=1,n, 1-q^k ) );
+%o A072574 /* print triangle: */
+%o A072574 gf -= 1; /* remove row zero */
+%o A072574 P=Pol(gf,'q);
+%o A072574 { for (n=1,N-1,
+%o A072574     p = Pol(polcoeff(P, n),'z);
+%o A072574     p += 'z^(n+1);  /* preserve trailing zeros */
+%o A072574     v = Vec(polrecip(p));
+%o A072574     v = vector(n,k,v[k]); /* trim to size n */
+%o A072574     print(v);
+%o A072574 ); }
+%o A072574 /* _Joerg Arndt_, Oct 20 2012 */
+%Y A072574 Columns (offset) include A057427 and A052928.
+%Y A072574 Row sums are A032020.
+%Y A072574 Cf. A060016, A072576.
+%Y A072574 A008289 is the version for partitions (zeros removed).
+%Y A072574 A072575 counts strict compositions by maximum.
+%Y A072574 A097805 is the non-strict version, or A007318 (zeros removed).
+%Y A072574 A113704 is the constant instead of strict version.
+%Y A072574 A216652 is a condensed version (zeros removed).
+%Y A072574 A336131 counts splittings of partitions with distinct sums.
+%Y A072574 A336139 counts strict compositions of each part of a strict composition.
+%Y A072574 Cf. A075900, A097910, A307068, A336127, A336128, A336130, A336132, A336141, A336142, A336342, A336343.
+%K A072574 nonn,tabl
+%O A072574 1,5
+%A A072574 _Henry Bottomley_, Jun 21 2002

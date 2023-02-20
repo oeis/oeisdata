@@ -1,0 +1,62 @@
+%I A011957
+%S A011957 0,1,1,1,1,2,3,6,10,18,31,59,105,198,365,688,1285,2438,4599,8755,
+%T A011957 16647,31806,60787,116570,223696,430290,828514,1598025,3085465,
+%U A011957 5965612,11545611,22370304,43383539,84216330,163617801,318148208,619094385,1205609454,2349383925,4581307186,8939118925,17452582356
+%N A011957 Number of ZnS polytypes that repeat after n layers.
+%C A011957 Also the number of orbits of the symmetric group S3 action on irreducible polynomials of degree n>1 over GF(2). [_Jean Francis Michon_, Philippe Ravache (philippe.ravache(AT)univ-rouen.fr), Oct 04 2009]
+%H A011957 Dennis S. Bernstein, Omran Kouba, <a href="https://arxiv.org/abs/1901.10703">Counting Colorful Necklaces and Bracelets in Three Colors</a>, arXiv:1901.10703 [math.CO], 2019.
+%H A011957 Dennis S. Bernstein, Omran Kouba, <a href="https://doi.org/10.1007/s00010-019-00645-w">Counting colorful necklaces and bracelets in three colors</a>, Aequat. Math. (2019) 93: 1183.
+%H A011957 T. J. McLarnan, <a href="http://dx.doi.org/10.1524/zkri.1981.155.3-4.269">The numbers of polytypes in close-packings and related structures</a>, Zeitschrift für Kristallographie. Volume 155, Issue 3-4, Pages 269-291, ISSN (Online) 0044-2968, ISSN (Print) 1433-7266, DOI: 10.1524/zkri.1981.155.3-4.269, August 2010.
+%H A011957 J.-F. Michon, P. Ravache, <a href="https://dx.doi.org/10.1016/j.ffa.2010.01.004">On different families of invariant irreducible polynomials over F_2</a>, Finite fields & Applications 16 (2010) 163-174.
+%F A011957 (see PARI code)
+%t A011957 L[n_, k_] := DivisorSum[GCD[n, k], MoebiusMu[#]*Binomial[n/#, k/#] &];
+%t A011957 A165920[n_] := Sum[If[(n + k) ~Mod~ 3 == 1, L[n, k], 0], {k, 0, n}]/n;
+%t A011957 A001037[n_] := If[n == 0, 1, DivisorSum[n, MoebiusMu[#]*2^(n/#) &]/n];
+%t A011957 A000048[n_] := DivisorSum[n, (# ~Mod~ 2)*(MoebiusMu[#]*2^(n/#)) &]/(2*n);
+%t A011957 A011957[n_] := Module[{an}, If[n <= 2, Return[n - 1]]; an =A001037[n]/6;
+%t A011957   If[n ~Mod~ 2 == 0, an += 1/2*A000048[n/2]];
+%t A011957   If[n ~Mod~ 3 == 0, an += 2/3*A165920[n/3]];
+%t A011957   Return[an]
+%t A011957 ];
+%t A011957 Table[A011957[n], {n, 1, 50}] (* _Jean-François Alcover_, Dec 02 2015, adapted from _Joerg Arndt_'s PARI script *)
+%o A011957 (PARI)
+%o A011957 L(n, k)=sumdiv(gcd(n, k), d, moebius(d) * binomial(n/d, k/d) );
+%o A011957 A165920(n)=sum(k=0, n, if( (n+k)%3==1, L(n, k), 0 ) ) / n;
+%o A011957 A001037(n)=if(n<1, n==0, sumdiv(n, d, moebius(d)*2^(n/d))/n);
+%o A011957 A000048(n)=sumdiv(n, d, (d%2)*(moebius(d)*2^(n/d)))/(2*n);
+%o A011957 A165921(n)=
+%o A011957 {
+%o A011957     my(an);
+%o A011957     if ( n<=2, return(0) );
+%o A011957     an = A001037(n);
+%o A011957     if (n%2==0, an -= 3*A000048(n/2) );
+%o A011957     if (n%3==0, an -= 2*A165920(n/3) );
+%o A011957     an /= 6;
+%o A011957     return( an );
+%o A011957 }
+%o A011957 A011957(n)=
+%o A011957 {
+%o A011957     my(an);
+%o A011957     an = A165921(n);
+%o A011957     if (n%2==0, an += A000048(n/2) );
+%o A011957     if (n%3==0, an += A165920(n/3) );
+%o A011957     return( an );
+%o A011957 }
+%o A011957 /* simplified version (merging the routines for A011957 and A165921 above): */
+%o A011957 A011957(n)=
+%o A011957 {
+%o A011957     my(an);
+%o A011957     if ( n<=2, return(n-1) );
+%o A011957     an = A001037(n) / 6;
+%o A011957     if (n%2==0, an += 1/2 * A000048(n/2) );
+%o A011957     if (n%3==0, an += 2/3 * A165920(n/3) );
+%o A011957     return( an );
+%o A011957 }
+%o A011957 /* _Joerg Arndt_, Jul 12 2012 */
+%Y A011957 Cf. A000048 (number of 3-elements orbits).
+%Y A011957 Cf. A165920 (number of 2-elements orbits).
+%Y A011957 Cf. A165921 (number of 6-elements orbits).
+%K A011957 nonn,easy
+%O A011957 1,6
+%A A011957 _N. J. A. Sloane_
+%E A011957 Incorrect formula removed and terms verified by _Joerg Arndt_, Jul 12 2012

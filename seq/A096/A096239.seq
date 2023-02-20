@@ -1,0 +1,44 @@
+%I A096239
+%S A096239 3,7,32,135,597,2787,13374,66071,335895,1743974,9216391,49420750,
+%T A096239 268312356
+%N A096239 Number of n-digit base-6 deletable primes.
+%C A096239 A prime p is a base-b deletable prime if when written in base b it has the property that removing some digit leaves either the empty string or another deletable prime. "Digit" means digit in base b.
+%C A096239 Deleting a digit cannot leave any leading zeros in the new string. For example, deleting the 2 in 2003 to obtain 003 is not allowed.
+%t A096239 b = 6; a = {3}; d = {2, 3, 5};
+%t A096239 For[n = 2, n <= 5, n++,
+%t A096239   p = Select[Range[b^(n - 1), b^n - 1], PrimeQ[#] &];
+%t A096239   ct = 0;
+%t A096239   For[i = 1, i <= Length[p], i++,
+%t A096239    c = IntegerDigits[p[[i]], b];
+%t A096239    For[j = 1, j <= n, j++,
+%t A096239     t = Delete[c, j];
+%t A096239     If[t[[1]] == 0, Continue[]];
+%t A096239     If[MemberQ[d, FromDigits[t, b]], AppendTo[d, p[[i]]]; ct++;
+%t A096239      Break[]]]];
+%t A096239   AppendTo[a, ct]];
+%t A096239 a (* _Robert Price_, Nov 12 2018 *)
+%o A096239 (Python)
+%o A096239 from sympy import isprime
+%o A096239 from sympy.ntheory.digits import digits
+%o A096239 def ok(n, prevset, base=6):
+%o A096239     if not isprime(n): return False
+%o A096239     s = "".join(str(d) for d in digits(n, base)[1:])
+%o A096239     si = (s[:i]+s[i+1:] for i in range(len(s)))
+%o A096239     return any(t[0] != '0' and int(t, base) in prevset for t in si)
+%o A096239 def afind(terms):
+%o A096239     alst = [3]
+%o A096239     s, snxt, base = {2, 3, 5}, set(), 6
+%o A096239     print(len(s), end=", ")
+%o A096239     for n in range(2, terms+1):
+%o A096239         for i in range(base**(n-1), base**n):
+%o A096239             if ok(i, s):
+%o A096239                 snxt.add(i)
+%o A096239         s, snxt = snxt, set()
+%o A096239         print(len(s), end=", ")
+%o A096239 afind(8) # _Michael S. Branicky_, Jan 17 2022
+%Y A096239 Cf. A080608, A080603, A096235-A096246.
+%K A096239 nonn,base,more
+%O A096239 1,1
+%A A096239 _Michael Kleber_, Feb 28 2003
+%E A096239 a(6)-a(11) from _Ryan Propper_, Jul 19 2005
+%E A096239 a(12)-a(13) from _Michael S. Branicky_, Jan 17 2022

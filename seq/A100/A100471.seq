@@ -1,0 +1,48 @@
+%I A100471
+%S A100471 1,1,2,2,4,4,7,8,11,13,18,20,27,32,40,44,60,67,82,93,114,129,161,175,
+%T A100471 209,239,285,315,372,416,484,545,631,698,811,890,1027,1146,1304,1437,
+%U A100471 1631,1805,2042,2252,2539,2785,3143,3439,3846,4226,4722,5159
+%N A100471 Number of integer partitions of n whose sequence of frequencies is strictly increasing.
+%H A100471 Vaclav Kotesovec, <a href="/A100471/b100471.txt">Table of n, a(n) for n = 0..8000</a> (terms 0..1000 from Alois P. Heinz)
+%e A100471 a(4) = 4 because of the 5 unrestricted partitions of 4, only one, 3+1 uses each of its summands just once and 1,1 is not an increasing sequence.
+%e A100471 From _Gus Wiseman_, Jan 23 2019: (Start)
+%e A100471 The a(1) = 1 through a(8) = 11 integer partitions:
+%e A100471   (1)  (2)   (3)    (4)     (5)      (6)       (7)        (8)
+%e A100471        (11)  (111)  (22)    (311)    (33)      (322)      (44)
+%e A100471                     (211)   (2111)   (222)     (511)      (422)
+%e A100471                     (1111)  (11111)  (411)     (4111)     (611)
+%e A100471                                      (3111)    (22111)    (2222)
+%e A100471                                      (21111)   (31111)    (5111)
+%e A100471                                      (111111)  (211111)   (41111)
+%e A100471                                                (1111111)  (221111)
+%e A100471                                                           (311111)
+%e A100471                                                           (2111111)
+%e A100471                                                           (11111111)
+%e A100471 (End)
+%p A100471 b:= proc(n,i,t) option remember;
+%p A100471       if n<0 then 0
+%p A100471     elif n=0 then 1
+%p A100471     elif i=1 then `if`(n>t, 1, 0)
+%p A100471     elif i=0 then 0
+%p A100471     else      b(n, i-1, t)
+%p A100471          +add(b(n-i*j, i-1, j), j=t+1..floor(n/i))
+%p A100471       fi
+%p A100471     end:
+%p A100471 a:= n-> b(n, n, 0):
+%p A100471 seq(a(n), n=0..60);  # _Alois P. Heinz_, Feb 21 2011
+%t A100471 b[n_, i_, t_] := b[n, i, t] = Which[n<0, 0, n==0, 1, i==1, If[n>t, 1, 0], i == 0, 0 , True, b[n, i-1, t] + Sum[b[n-i*j, i-1, j], {j, t+1, Floor[n/i]}]]; a[n_] := b[n, n, 0]; Table[a[n], {n, 0, 60}] (* _Jean-François Alcover_, Mar 16 2015, after _Alois P. Heinz_ *)
+%t A100471 Table[Length[Select[IntegerPartitions[n],OrderedQ@*Split]],{n,20}] (* _Gus Wiseman_, Jan 23 2019 *)
+%o A100471 (Haskell)
+%o A100471 a100471 n = p 0 (n + 1) 1 n where
+%o A100471    p m m' k x | x == 0    = if m < m' || m == 0 then 1 else 0
+%o A100471               | x < k     = 0
+%o A100471               | m == 0    = p 1 m' k (x - k) + p 0 m' (k + 1) x
+%o A100471               | otherwise = p (m + 1) m' k (x - k) +
+%o A100471                             if m < m' then p 0 m (k + 1) x else 0
+%o A100471 -- _Reinhard Zumkeller_, Dec 27 2012
+%Y A100471 Cf. A000219, A000837 (frequencies are relatively prime), A047966 (frequencies are equal), A098859 (frequencies are distinct), A100881, A100882, A100883, A304686 (Heinz numbers of these partitions).
+%K A100471 nonn
+%O A100471 0,3
+%A A100471 _David S. Newman_, Nov 21 2004
+%E A100471 Corrected and extended by _Vladeta Jovovic_, Nov 24 2004
+%E A100471 Name edited by _Gus Wiseman_, Jan 23 2019

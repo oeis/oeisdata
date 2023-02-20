@@ -1,0 +1,54 @@
+%I A101211
+%S A101211 1,1,1,2,1,2,1,1,1,2,1,3,1,3,1,2,1,1,1,1,1,1,1,2,2,2,2,1,1,3,1,4,1,4,
+%T A101211 1,3,1,1,2,1,1,1,2,2,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,3,2,3,2,2,1,2,1,1,
+%U A101211 1,2,1,2,3,2,3,1,1,4,1,5,1,5,1,4,1,1,3,1,1,1,3,2,1,2,1,2,1,2,1,1,1,1,2,2,1
+%N A101211 Triangle read by rows: n-th row is length of run of leftmost 1's, followed by length of run of 0's, followed by length of run of 1's, etc., in the binary representation of n.
+%C A101211 Row n has A005811(n) elements. In rows 2^(k-1)..2^k-1 we have all the compositions (ordered partitions) of k. Other orderings of compositions: A066099, A108244, and A124734. - _Jason Kimberley_, Feb 09 2013
+%C A101211 A043276(n) = largest term in n-th row. - _Reinhard Zumkeller_, Dec 16 2013
+%C A101211 From the first comment it follows that we have a bijection between the positive integers and the set of all compositions. - _Emeric Deutsch_, Jul 11 2017
+%C A101211 From _Robert Israel_, Jan 23 2018: (Start)
+%C A101211 If n is even, row 2*n is row n with its last element incremented by 1, and row 2*n+1 is row n with 1 appended.
+%C A101211 If n is odd, row 2*n+1 is row n with its last element incremented by 1, and row 2*n is row n with 1 appended. (End)
+%H A101211 Antti Karttunen, <a href="/A101211/b101211.txt">The rows 1..1023 of the table, flattened</a>
+%F A101211 a(n) = A227736(A227741(n)) = A227186(A056539(A227737(n)),A227740(n)) - _Antti Karttunen_, Jul 27 2013
+%e A101211 Since 9 is 1001 in binary, the 9th row is 1,2,1.
+%e A101211 Since 11 is 1011 in binary, the 11th row is 1,1,2.
+%e A101211 Triangle begins:
+%e A101211 1;
+%e A101211 1,1;
+%e A101211 2;
+%e A101211 1,2;
+%e A101211 1,1,1;
+%e A101211 2,1;
+%e A101211 3;
+%e A101211 1,3;
+%p A101211 # Maple program due to W. Edwin Clark:
+%p A101211 Runs := proc (L) local j, r, i, k; j := 1: r[j] := L[1]: for i from 2 to nops(L) do if L[i] = L[i-1] then r[j] := r[j], L[i] else j := j+1: r[j] := L[i] end if end do: [seq([r[k]], k = 1 .. j)] end proc: RunLengths := proc (L) map(nops, Runs(L)) end proc: c := proc (n) ListTools:-Reverse(convert(n, base, 2)): RunLengths(%) end proc: # Row n is obtained with the command c(n). - _Emeric Deutsch_, Jul 03 2017
+%p A101211 # Maple program due to W. Edwin Clark, yielding the integer ind corresponding to a given composition (the index of the composition):
+%p A101211 ind := proc (x) local X, j, i: X := NULL: for j to nops(x) do if type(j, odd) then X := X, seq(1, i = 1 .. x[j]) end if: if type(j, even) then X := X, seq(0, i = 1 .. x[j]) end if end do: X := [X]: add(X[i]*2^(nops(X)-i), i = 1 .. nops(X)) end proc; # Clearly, ind(c(n))= n. - _Emeric Deutsch_, Jan 23 2018
+%t A101211 Table[Length /@ Split@ IntegerDigits[n, 2], {n, 38}] // Flatten (* _Michael De Vlieger_, Jul 11 2017 *)
+%o A101211 (Scheme, two variants)
+%o A101211 (define (A101211 n) (A227736 (A227741 n)))
+%o A101211 (define (A101211v2 n) (A227186bi (A056539 (A227737 n)) (A227740 n)))
+%o A101211 ;; Scheme-implementation for A227186bi can be found under A227186. - _Antti Karttunen_, Jul 27 2013
+%o A101211 (Haskell)
+%o A101211 import Data.List (group)
+%o A101211 a101211 n k = a101211_tabf !! (n-1) !! (k-1)
+%o A101211 a101211_row n = a101211_tabf !! (n-1)
+%o A101211 a101211_tabf = map (reverse . map length . group) $ tail a030308_tabf
+%o A101211 -- _Reinhard Zumkeller_, Dec 16 2013
+%o A101211 (Python)
+%o A101211 from itertools import groupby
+%o A101211 def arow(n): return [len(list(g)) for k, g in groupby(bin(n)[2:])]
+%o A101211 def auptorow(rows):
+%o A101211     alst = []
+%o A101211     for i in range(1, rows+1): alst.extend(arow(i))
+%o A101211     return alst
+%o A101211 print(auptorow(38)) # _Michael S. Branicky_, Oct 02 2021
+%Y A101211 A070939(n) gives the sum of terms in row n, while A167489(n) gives the product of its terms. A090996 gives the first column. A227736 lists the terms of each row in reverse order.
+%Y A101211 Cf. also A227186.
+%Y A101211 Cf. A030308, A175911.
+%K A101211 nonn,base,tabf
+%O A101211 1,4
+%A A101211 _Leroy Quet_, Dec 13 2004
+%E A101211 More terms from _Emeric Deutsch_, Apr 12 2005

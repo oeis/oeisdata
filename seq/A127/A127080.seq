@@ -1,0 +1,53 @@
+%I A127080
+%S A127080 1,1,1,1,1,-2,1,1,-1,-5,1,1,0,-4,12,1,1,1,-3,3,43,1,1,2,-2,-4,28,-120,
+%T A127080 1,1,3,-1,-9,15,-15,-531,1,1,4,0,-12,4,48,-288,1680,1,1,5,1,-13,-5,75,
+%U A127080 -105,105,8601,1,1,6,2,-12,-12,72,24,-624,3984,-30240,1,1,7,3,-9,-17,45,105,-735,945,-945,-172965
+%N A127080 Infinite square array read by antidiagonals: Q(m, 0) = 1, Q(m, 1) = 1; Q(m, 2k) = (m - 2k + 1)*Q(m+1, 2k-1) - (2k-1)*Q(m+2,2k-2), m*Q(m, 2k+1) = (m - 2k)*Q(m+1, 2k) - 2k(m+1)*Q(m+2, 2k-1).
+%C A127080 Comment from _N. J. A. Sloane_, Jan 29 2020: (Start)
+%C A127080 It looks like there was a missing 2 in the definition, which I have now corrected.  The old definition was:
+%C A127080 (Wrong!) Infinite square array read by antidiagonals: Q(m, 0) = 1, Q(m, 1) = 1; Q(m, 2k) = (m - 2k + 1)*Q(m+1, 2k-1) - (2k-1)*Q(m+2, k-2), m*Q(m, 2k+1) = (m - 2k)*Q(m+1, 2k) - 2k(m+1)*Q(m+2, 2k-1). (Wrong!) (End)
+%D A127080 V. van der Noort and N. J. A. Sloane, Paper in preparation, 2007.
+%H A127080 G. C. Greubel, <a href="/A127080/b127080.txt">Antidiagonals n = 0..100, flattened</a>
+%F A127080 E.g.f.: Sum_{k >= 0} Q(m,2k) x^k/k! = (1+4x)^((m-1)/2)/(1+2x)^(m/2), Sum_{k >= 0} Q(m,2k+1) x^k/k! = (1+4x)^((m-2)/2)/(1+2x)^((m+1)/2).
+%e A127080 Array begins:
+%e A127080      1,    1,    1,    1,    1,   1,   1,    1,    1,    1, ... (A000012)
+%e A127080      1,    1,    1,    1,    1,   1,   1,    1,    1,    1, ... (A000012)
+%e A127080     -2,   -1,    0,    1,    2,   3,   4,    5,    6,    7, ... (A023444)
+%e A127080     -5,   -4,   -3,   -2,   -1,   0,   1,    2,    3,    4, ... (A023447)
+%e A127080     12,    3,   -4,   -9,  -12, -13, -12,   -9,   -4,    3, ... (A127146)
+%e A127080     43,   28,   15,    4,   -5, -12, -17,  -20,  -21,  -20, ... (A127147)
+%e A127080   -120,  -15,   48,   75,   72,  45,   0,  -57, -120, -183, ... (A127148)
+%e A127080   -531, -288, -105,   24,  105, 144, 147,  120,   69,    0, ...
+%e A127080   1680,  105, -624, -735, -432, 105, 720, 1281, 1680, 1833, ...
+%p A127080 f:= proc(k) option remember;
+%p A127080       if `mod`(k,2)=0 then k!/(k/2)!
+%p A127080     else 2^(k-1)*((k-1)/2)!*add(binomial(2*j, j)/8^j, j=0..((k-1)/2))
+%p A127080       fi; end;
+%p A127080 Q:= proc(n, k) option remember;
+%p A127080       if n=0 then (-1)^binomial(k, 2)*f(k)
+%p A127080     elif k<2 then 1
+%p A127080     elif `mod`(k,2)=0 then (n-k+1)*Q(n+1,k-1) - (k-1)*Q(n+2,k-2)
+%p A127080     else ( (n-k+1)*Q(n+1,k-1) - (k-1)*(n+1)*Q(n+2,k-2) )/n
+%p A127080       fi; end;
+%p A127080 seq(seq(Q(n-k, k), k=0..n), n=0..12); # _G. C. Greubel_, Jan 30 2020
+%t A127080 Q[0, k_]:= Q[0,k]= (-1)^Binomial[k, 2]*If[EvenQ[k], k!/(k/2)!, 2^(k-1)*((k-1)/2)!* Sum[Binomial[2*j, j]/8^j, {j, 0, (k-1)/2}] ];
+%t A127080 Q[n_, k_]:= Q[n,k]= If[k<2, 1, If[EvenQ[k], (n-k+1)*Q[n+1, k-1] - (k-1)*Q[n+2, k-2], ((n -k+1)*Q[n+1, k-1] - (k-1)*(n+1)*Q[n+2, k-2])/n]];
+%t A127080 Table[Q[n-k,k], {n,0,12}, {k,0,n}]//Flatten (* _G. C. Greubel_, Jan 30 2020 *)
+%o A127080 (Sage)
+%o A127080 @CachedFunction
+%o A127080 def f(k):
+%o A127080     if (mod(k, 2)==0): return factorial(k)/factorial(k/2)
+%o A127080     else: return 2^(k-1)*factorial((k-1)/2)*sum(binomial(2*j, j)/8^j for j in (0..(k-1)/2))
+%o A127080 def Q(n,k):
+%o A127080     if (n==0): return (-1)^binomial(k, 2)*f(k)
+%o A127080     elif (k<2): return 1
+%o A127080     elif (mod(k,2)==0): return (n-k+1)*Q(n+1,k-1) - (k-1)*Q(n+2,k-2)
+%o A127080     else: return ( (n-k+1)*Q(n+1,k-1) - (k-1)*(n+1)*Q(n+2,k-2) )/n
+%o A127080 [[Q(n-k,k) for k in (0..n)] for n in (0..12)] # _G. C. Greubel_, Jan 30 2020
+%Y A127080 See A105937 for another version.
+%Y A127080 Columns give A127137, A127138, A127144, A127145;
+%Y A127080 Rows give A127146, A127147, A127148.
+%K A127080 sign,tabl
+%O A127080 0,6
+%A A127080 _N. J. A. Sloane_, Mar 24 2007
+%E A127080 More terms added by _G. C. Greubel_, Jan 30 2020

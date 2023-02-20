@@ -1,0 +1,43 @@
+%I A136674
+%S A136674 1,2,-1,1,-4,1,0,-8,6,-1,-1,-12,19,-8,1,-2,-15,44,-34,10,-1,-3,-16,84,
+%T A136674 -104,53,-12,1,-4,-14,140,-258,200,-76,14,-1,-5,-8,210,-552,605,-340,
+%U A136674 103,-16,1,-6,3,288,-1056,1562,-1209,532,-134,18,-1,-7,20,363,-1848,3575,-3640,2170,-784,169,-20,1
+%N A136674 Triangle T(n,k) read by rows: coefficient [x^k] of the polynomial p(n,x) with p(0,x) = 1, p(1,x) = 2 - x, p(2,x) = 1 - 4*x + x^2 and p(n,x) = (2-x)*p(n-1,x) - p(n-2,x) if n>2.
+%C A136674 Row sums: A117373(n-1).
+%H A136674 G. C. Greubel, <a href="/A136674/b136674.txt">Rows n = 0..100 of triangle, flattened</a>
+%F A136674 T(n,k) = 2*T(n-1,k) - T(n-2,k) - T(n-1,k-1). - _R. J. Mathar_, Jan 12 2011
+%e A136674 Triangle begins as:
+%e A136674    1;
+%e A136674    2,  -1;
+%e A136674    1,  -4,   1;
+%e A136674    0,  -8,   6,    -1;
+%e A136674   -1, -12,  19,    -8,    1;
+%e A136674   -2, -15,  44,   -34,   10,    -1;
+%e A136674   -3, -16,  84,  -104,   53,   -12,    1;
+%e A136674   -4, -14, 140,  -258,  200,   -76,   14,   -1;
+%e A136674   -5,  -8, 210,  -552,  605,  -340,  103,  -16,   1;
+%e A136674   -6,   3, 288, -1056, 1562, -1209,  532, -134,  18,  -1;
+%e A136674   -7,  20, 363, -1848, 3575, -3640, 2170, -784, 169, -20, 1;
+%p A136674 A136674aux := proc(n) option remember; if n = 0 then 1; elif n= 1 then 2-x ; elif n= 2 then 1-4*x+x^2 ; else (2-x)*procname(n-1)-procname(n-2) ; end if; end proc:
+%p A136674 A136674 := proc(n,k) coeftayl(A136674aux(n),x=0,k) ; end proc: # _R. J. Mathar_, Jan 12 2011
+%t A136674 (* tridiagonal matrix code*)
+%t A136674 T[n_, m_, d_]:= If[n==m, 2, If[n==d && m==d-1, -3, If[(n==m-1 || n==m+1), -1, 0]]];
+%t A136674 M[d_]:= Table[T[n, m, d], {n,d}, {m,d}];
+%t A136674 Join[{{1}}, Table[CoefficientList[Det[M[d] - x*IdentityMatrix[d]], x], {d, 1, 10}]]//Flatten
+%t A136674 (* polynomial recursion: three initial terms necessary*)
+%t A136674 p[x, 0]:= 1; p[x, 1]:= (2-x); p[x, 2]:= 1 -4*x +x^2;
+%t A136674 p[x_, n_]:= p[x, n]= (2-x)*p[x, n-1] - p[x, n-2];
+%t A136674 Table[ExpandAll[p[x, n]], {n, 0, Length[g] -1}]
+%t A136674 (* Third program *)
+%t A136674 T[n_, k_]:= T[n, k]= If[k<0 || k>n, 0, If[k==n, (-1)^n, If[k==0, 3-n, 2*T[n-1, k] -T[n-2, k] -T[n-1, k-1] ]]]; Table[T[n, k], {n, 0, 10}, {k, 0, n}]//Flatten (* _G. C. Greubel_, Mar 12 2020 *)
+%o A136674 (Sage)
+%o A136674 @CachedFunction
+%o A136674 def T(n, k):
+%o A136674     if (k<0 or k>n): return 0
+%o A136674     elif (k==n): return (-1)^n
+%o A136674     elif (k==0): return 3-n
+%o A136674     else: return 2*T(n-1,k) - T(n-2,k) - T(n-1,k-1)
+%o A136674 [[T(n, k) for k in (0..n)] for n in (0..10)] # _G. C. Greubel_, Mar 12 2020
+%K A136674 easy,tabl,sign
+%O A136674 0,2
+%A A136674 _Roger L. Bagula_, Apr 05 2008

@@ -1,0 +1,77 @@
+%I A161492
+%S A161492 1,1,1,1,2,1,1,4,3,1,1,6,8,4,1,1,9,17,13,5,1,1,12,32,34,19,6,1,1,16,
+%T A161492 55,78,58,26,7,1,1,20,89,160,154,90,34,8,1,1,25,136,305,365,269,131,
+%U A161492 43,9,1,1,30,200,544,794,716,433,182,53,10,1,1,36,284,923,1609,1741,1271,657,244,64,11,1
+%N A161492 Triangle T(n,m) read by rows: the number of skew Ferrers diagrams with area n and m columns.
+%C A161492 Row sums give A006958, sums along falling diagonals give A227309. [_Joerg Arndt_, Mar 23 2014]
+%C A161492 A coin fountain is an arrangement of coins in numbered rows such that the bottom row (row 0) contains contiguous coins and such that each coin in a higher row touches exactly two coins in the next lower row. See A005169. T(n,m) equals the number of coin fountains with exactly n coins in the even-numbered rows and n - m coins in the odd-numbered rows of the fountain. See the illustration in the Links section. - _Peter Bala_, Jul 21 2019
+%H A161492 Peter Bala, <a href="/A161492/a161492.pdf">Illustration for the terms of row 4</a>
+%H A161492 Peter Bala, <a href="/A161492/a161492_1.pdf">Fountains of coins and skew Ferrers diagrams</a>
+%H A161492 M. P. Delest, J. M. Fedou, <a href="http://dx.doi.org/10.1016/0012-365X(93)90224-H">Enumeration of skew Ferrers diagrams</a>, Discrete Mathematics. vol.112, no.1-3, pp.65-79, (1993)
+%F A161492 From _Peter Bala_, Jul 21 2019: (Start)
+%F A161492 The following formulas all include an initial term T(0,0) = 1.
+%F A161492 O.g.f. as a ratio of q-series: A(q,t) = N(q,t)/D(q,t) = 1 + q*t + q^2*(t + t^2) + q^3*(t + 2*t^2 + t^3) + ..., where N(q,t) = Sum_{n >= 0} (-1)^n*q^((n^2 + 3*n)/2)*t^n/Product_{k = 1..n} (1 - q^k)^2 and D(q,t) = Sum_{n >= 0} (-1)^n*q^((n^2 + n)/2)*t^n/Product_{k = 1..n} (1 - q^k)^2.
+%F A161492 Continued fraction representations:
+%F A161492 A(q,t) = 1/(1 - q*t/(1 - q/(1 - q^2*t/(1 - q^2/(1 - q^3*t/(1 - q^3/(1 - (...) ))))))).
+%F A161492 A(q,t) = 1/(1 - q*t/(1 + q*(t - 1) - q*t/(1 + q*(t - q) - q*t/( 1 + q*(t - q^2) - q*t/( (...) ))))).
+%F A161492 A(q,t) = 1/(1 - q*t - q^2*t/(1 - q*(1 + q*t) - q^4*t/(1 - q^2*(1 + q*t) - q^6*t/(1 - q^3*(1 + q*t) - q^8*t/( (...) ))))).
+%F A161492 A(q,t) =  1/(1 - q*t - q^2*t/(1 - q^2*t - q/(1 - q^3*t - q^5*t/(1 - q^4*t - q^2/(1 - q^5*t - q^8*t/ (1 - q^6*t - q^3/(1 - q^7*t - q^11*t/(1 - q^8*t - (...) )))))))). (End)
+%e A161492 T(4,2)=4 counts the following 4 diagrams with area equal to 4 and 2 columns:
+%e A161492    .X..XX...X..XX
+%e A161492    XX..XX...X..X.
+%e A161492    X.......XX..X.
+%e A161492 From _Joerg Arndt_, Mar 23 2014: (Start)
+%e A161492 Triangle begins:
+%e A161492 01:  1
+%e A161492 02:  1   1
+%e A161492 03:  1   2    1
+%e A161492 04:  1   4    3    1
+%e A161492 05:  1   6    8    4     1
+%e A161492 06:  1   9   17   13     5     1
+%e A161492 07:  1  12   32   34    19     6     1
+%e A161492 08:  1  16   55   78    58    26     7    1
+%e A161492 09:  1  20   89  160   154    90    34    8   1
+%e A161492 10:  1  25  136  305   365   269   131   43   9   1
+%e A161492 11:  1  30  200  544   794   716   433  182  53  10  1
+%e A161492 12:  1  36  284  923  1609  1741  1271  657 ...
+%e A161492 (End)
+%p A161492 qpoch := proc(a,q,n)
+%p A161492     mul( 1-a*q^k,k=0..n-1) ;
+%p A161492 end proc:
+%p A161492 A161492 := proc(n,m)
+%p A161492     local N,N2,ns ;
+%p A161492     N := 0 ;
+%p A161492     for ns from 0 to n+2 do
+%p A161492         N := N+ (-1)^ns *q^binomial(ns+1,2) / qpoch(q,q,ns) / qpoch(q,q,ns+1) *q^(ns+1) *t^(ns+1) ;
+%p A161492         N := taylor(N,q=0,n+1) ;
+%p A161492     end do:
+%p A161492     N2 := 0 ;
+%p A161492     for ns from 0 to n+2 do
+%p A161492         N2 := N2+ (-1)^ns*q^binomial(ns,2)/(qpoch(q,q,ns))^2*q^ns*t^ns ;
+%p A161492         N2 := taylor(N2,q=0,n+1) ;
+%p A161492     end do:
+%p A161492     coeftayl(N/N2,q=0,n) ;
+%p A161492     coeftayl(%,t=0,m) ;
+%p A161492 end proc:
+%p A161492 for a from 1 to 20 do
+%p A161492     for c from 1 to a do
+%p A161492         printf("%d ", A161492(a,c)) ;
+%p A161492     od:
+%p A161492 od:
+%t A161492 nmax = 13;
+%t A161492 qn[n_] := Product[1 - q^k, {k, 1, n}];
+%t A161492 nm = Sum[(-1)^n q^(n(n+1)/2)/(qn[n] qn[n+1])(t q)^(n+1) + O[q]^nmax, {n, 0, nmax}];
+%t A161492 dn = Sum[(-1)^n q^(n(n-1)/2)/(qn[n]^2)(t q)^n + O[q]^nmax, {n, 0, nmax}];
+%t A161492 Rest[CoefficientList[#, t]]& /@ Rest[CoefficientList[nm/dn, q]] // Flatten (* _Jean-François Alcover_, Dec 19 2019, after _Joerg Arndt_ *)
+%o A161492 (PARI) /* formula from the Delest/Fedou reference: */
+%o A161492 N=20;  q='q+O('q^N);  t='t;
+%o A161492 qn(n) = prod(k=1, n, 1-q^k );
+%o A161492 nm = sum(n=0, N, (-1)^n* q^(n*(n+1)/2) / ( qn(n) * qn(n+1) ) * (t*q)^(n+1) );
+%o A161492 dn = sum(n=0, N, (-1)^n* q^(n*(n-1)/2) / ( qn(n)^2 ) * (t*q)^n );
+%o A161492 v=Vec(nm/dn);
+%o A161492 for(n=1,N-1,print(Vec(polrecip(Pol(v[n])))));  \\ print triangle
+%o A161492 \\ _Joerg Arndt_, Mar 23 2014
+%Y A161492 Row sums A006958. Cf. A005169, A227309.
+%K A161492 nonn,tabl
+%O A161492 1,5
+%A A161492 _R. J. Mathar_, Jun 11 2009

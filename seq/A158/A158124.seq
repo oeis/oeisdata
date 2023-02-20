@@ -1,0 +1,42 @@
+%I A158124
+%S A158124 294001,505447,584141,604171,929573,971767,1062599,1282529,1524181,
+%T A158124 2017963,2474431,2690201,3070663,3085553,3326489,4393139,5152507,
+%U A158124 5285767,5564453,5575259,5974249,6173731,6191371,6236179,6463267,6712591,7204777,7469789,7469797,7810223
+%N A158124 Weakly prime numbers (or isolated primes): changing any one decimal digit always produces a composite number, with restriction that first digit may not be changed to a 0.
+%C A158124 The definition could be restated as "primes p with d digits such that there is no prime q with at most d digits at Hamming distance 1 from p (in base 10)". - _N. J. A. Sloane_, May 06 2019
+%C A158124 For the following values of k, 5, 6, 7, 8, 9, 10, the number of terms < 10^k in this sequence is 0, 6, 43, 406, 3756, 37300. - _Jean-Marc Rebert_, Nov 10 2015
+%H A158124 Jean-Marc Rebert, <a href="/A158124/b158124.txt">Table of n, a(n) for n = 1..3756</a>
+%H A158124 C. Rivera, <a href="http://www.primepuzzles.net/puzzles/puzz_017.htm">Weakly Primes</a>
+%H A158124 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/WeaklyPrime.html">Weakly Prime</a>
+%p A158124 filter:= proc(n)
+%p A158124   local L,i,d,ds;
+%p A158124   if not isprime(n) then return false fi;
+%p A158124   L:= convert(n,base,10);
+%p A158124   for i from 1 to nops(L) do
+%p A158124     if i = nops(L) then ds:= {$1..9} minus {L[i]}
+%p A158124     elif i = 1 then ds:= {1,3,7,9} minus {L[i]}
+%p A158124     else ds:= {$0..9} minus {L[i]}
+%p A158124     fi;
+%p A158124     for d in ds do
+%p A158124       if isprime(n + (d - L[i])*10^(i-1)) then return false fi;
+%p A158124     od
+%p A158124   od;
+%p A158124   true
+%p A158124 end proc:
+%p A158124 select(filter, [seq(i,i=11..10^6,2)]); # _Robert Israel_, Dec 15 2015
+%t A158124 Select[Prime@ Range[10^5], Function[n, Function[w, Total@ Map[Boole@ PrimeQ@ # &, DeleteCases[#, n]] &@ Union@ Flatten@ Map[Function[d, FromDigits@ ReplacePart[w, d -> #] & /@ If[d == 1, #, Prepend[#, 0]] &@ Range@ 9], Range@ Length@ w] == 0]@ IntegerDigits@ n]] (* _Michael De Vlieger_, Dec 13 2016 *)
+%o A158124 (PARI) isokp(n) = {v = digits(n); for (k=1, #v, w = v; if (k==1, idep = 1, idep=0); for (j=idep, 9, if (j != v[k], w[k] = j; ntest = subst(Pol(w), x, 10); if (isprime(ntest), return(0));););); return (1);}
+%o A158124 lista(nn) = {forprime(p=2, nn, if (isokp(p), print1(p, ", ")););} \\ _Michel Marcus_, Dec 15 2015
+%o A158124 (Python)
+%o A158124 from sympy import isprime
+%o A158124 def h1(n): # hamming distance 1 neighbors of n, not starting with 0
+%o A158124     s = str(n); d = "0123456789"; L = len(s)
+%o A158124     yield from (int(s[:i]+c+s[i+1:]) for c in d for i in range(L) if c!=s[i] and not (i==0 and c=="0"))
+%o A158124 def ok(n): return isprime(n) and all(not isprime(k) for k in h1(n))
+%o A158124 print([k for k in range(10**6) if ok(k)]) # _Michael S. Branicky_, Jul 31 2022
+%Y A158124 Cf. A050249, A158125 (weakly primes), A186995, A192545.
+%K A158124 nonn,base
+%O A158124 1,1
+%A A158124 _Eric W. Weisstein_, Mar 13 2009
+%E A158124 Edited by _Charles R Greathouse IV_, Aug 02 2010
+%E A158124 Missing a(3385) inserted into b-file by _Andrew Howroyd_, Feb 23 2018

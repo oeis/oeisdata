@@ -1,0 +1,50 @@
+%I A032153
+%S A032153 1,1,1,2,2,3,5,6,8,11,19,22,32,41,57,92,114,155,209,280,364,587,707,
+%T A032153 984,1280,1737,2213,2990,4390,5491,7361,9650,12708,16451,21567,27506,
+%U A032153 40100,49201,65701,84128,111278,140595,184661,232356,300680
+%N A032153 Number of ways to partition n elements into pie slices of different sizes.
+%C A032153 Number of strict necklace compositions of n. A strict necklace composition of n is a finite sequence of distinct positive integers summing to n that is lexicographically minimal among all of its cyclic rotations. In other words, it is a strict composition of n starting with its least part. - _Gus Wiseman_, May 31 2019
+%H A032153 Alois P. Heinz, <a href="/A032153/b032153.txt">Table of n, a(n) for n = 0..5000</a> (first 2001 terms from Robert Israel)
+%H A032153 C. G. Bower, <a href="/transforms2.html">Transforms (2)</a>
+%H A032153 <a href="/index/Lu#Lyndon">Index entries for sequences related to Lyndon words</a>
+%F A032153 "CGK" (necklace, element, unlabeled) transform of 1, 1, 1, 1, ...
+%F A032153 G.f.: Sum_{k >= 1} (k-1)! * x^((k^2+k)/2) / (Product_{j=1..k} 1-x^j). - _Vladeta Jovovic_, Sep 21 2004
+%F A032153 a(n) = Sum_{k=1..floor((sqrt(8*n+1)-1)/2)} (k-1)! * A008289(n,k) for n > 0. - _Alois P. Heinz_, Aug 07 2020
+%e A032153 From _Gus Wiseman_, May 31 2019: (Start)
+%e A032153 Inequivalent representatives of the a(1) = 1 through a(9) = 11 ways to slice a pie:
+%e A032153   (1)  (2)  (3)   (4)   (5)   (6)    (7)    (8)    (9)
+%e A032153             (12)  (13)  (14)  (15)   (16)   (17)   (18)
+%e A032153                         (23)  (24)   (25)   (26)   (27)
+%e A032153                               (123)  (34)   (35)   (36)
+%e A032153                               (132)  (124)  (125)  (45)
+%e A032153                                      (142)  (134)  (126)
+%e A032153                                             (143)  (135)
+%e A032153                                             (152)  (153)
+%e A032153                                                    (162)
+%e A032153                                                    (234)
+%e A032153                                                    (243)
+%e A032153 (End)
+%p A032153 N:= 100: # to get a(0)..a(N)
+%p A032153 K:= floor(isqrt(1+8*N)/2):
+%p A032153 S:= series(1+add((k-1)!*x^((k^2+k)/2)/mul(1-x^j,j=1..k),k=1..K),x,N+1):
+%p A032153 seq(coeff(S,x,j),j=0..N); # _Robert Israel_, Jul 15 2016
+%p A032153 # second Maple program:
+%p A032153 b:= proc(n, i, p) option remember; `if`(i*(i+1)/2<n, 0,
+%p A032153      `if`(n=0, p!, b(n, i-1, p)+b(n-i, min(n-i, i-1), p+1)))
+%p A032153     end:
+%p A032153 a:= n-> `if`(n=0, 1, b(n$2, -1)):
+%p A032153 seq(a(n), n=1..50);  # _Alois P. Heinz_, Aug 12 2020
+%t A032153 max=50; s=Sum[(x^(k(k+1)/2-1)*(k-1)!)/QPochhammer[x, x, k], {k, 1, max}] + O[x]^max; CoefficientList[s, x] (* _Jean-François Alcover_, Jan 19 2016 *)
+%t A032153 neckQ[q_]:=Array[OrderedQ[{q,RotateRight[q,#]}]&,Length[q]-1,1,And];
+%t A032153 Table[Length[Select[Join@@Permutations/@Select[IntegerPartitions[n],UnsameQ@@#&],neckQ]],{n,30}] (* _Gus Wiseman_, May 31 2019 *)
+%o A032153 (PARI)
+%o A032153 N=66;  q='q+O('q^N);
+%o A032153 gf=sum(n=1,N, (n-1)!*q^(n*(n+1)/2) / prod(k=1,n, 1-q^k ) );
+%o A032153 Vec(gf)
+%o A032153 /* _Joerg Arndt_, Oct 20 2012 */
+%o A032153 (PARI) seq(n)=[subst(serlaplace(p/y),y,1) | p <- Vec(y-1+prod(k=1, n, 1 + x^k*y + O(x*x^n)))] \\ _Andrew Howroyd_, Sep 13 2018
+%Y A032153 Cf. A000079, A008289, A008965, A032020, A275972, A325676, A325788.
+%K A032153 nonn,nice
+%O A032153 0,4
+%A A032153 _Christian G. Bower_
+%E A032153 a(0)=1 prepended by _Andrew Howroyd_, Sep 13 2018

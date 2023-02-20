@@ -1,0 +1,226 @@
+%I A008288
+%S A008288 1,1,1,1,3,1,1,5,5,1,1,7,13,7,1,1,9,25,25,9,1,1,11,41,63,41,11,1,1,13,
+%T A008288 61,129,129,61,13,1,1,15,85,231,321,231,85,15,1,1,17,113,377,681,681,
+%U A008288 377,113,17,1,1,19,145,575,1289,1683,1289,575,145,19,1,1,21,181,833,2241,3653,3653
+%N A008288 Square array of Delannoy numbers D(i,j) (i >= 0, j >= 0) read by antidiagonals.
+%C A008288 In the Formula section, some contributors use T(n,k) = D(n-k, k) (for 0 <= k <= n), which is the triangular version of the square array (D(n,k): n,k >= 0). Conversely, D(n,k) = T(n+k,k) for n,k >= 0. - _Petros Hadjicostas_, Aug 05 2020
+%C A008288 Also called the tribonacci triangle [Alladi and Hoggatt (1977)]. - _N. J. A. Sloane_, Mar 23 2014
+%C A008288 D(n,k) is the number of lattice paths from (0,0) to (n,k) using steps (1,0), (0,1), (1,1). - _Joerg Arndt_, Jul 01 2011 [Corrected by _N. J. A. Sloane_, May 30 2020]
+%C A008288 Or, triangle read by rows of coefficients of polynomials P[n](x) defined by P[0] = 1, P[1] = x+1; for n >= 2, P[n] = (x+1)*P[n-1] + x*P[n-2].
+%C A008288 D(n, k) is the number of k-matchings of a comb-like graph with n+k teeth. Example: D(1, 3) = 7 because the graph consisting of a horizontal path ABCD and the teeth Aa, Bb, Cc, Dd has seven 3-matchings: four triples of three teeth and the three triples {Aa, Bb, CD}, {Aa, Dd, BC}, {Cc, Dd, AB}. Also D(3, 1)=7, the 1-matchings of the same graph being the seven edges: {AB}, {BC}, {CD}, {Aa}, {Bb}, {Cc}, {Dd}. - _Emeric Deutsch_, Jul 01 2002
+%C A008288 Sum of n-th antidiagonal of the array D is A000129(n+1). - _Reinhard Zumkeller_, Dec 03 2004 [Edited by _Petros Hadjicostas_, Aug 05 2020 so that the counting of antidiagonals of D starts at n = 0. That is, the sum of the terms in the n-th row of the triangles T is  A000129(n+1).]
+%C A008288 The A-sequence for this Riordan type triangle (see one of _Paul Barry_'s comments under Formula) is A112478 and the Z-sequence the trivial: {1, 0, 0, 0, ...}. See the W. Lang link under A006232 for Sheffer a- and z-sequences where also Riordan A- and Z-sequences are explained. This leads to the recurrence for the triangle given below. - _Wolfdieter Lang_, Jan 21 2008
+%C A008288 The triangle or chess sums, see A180662 for their definitions, link the Delannoy numbers with twelve different sequences, see the crossrefs. All sums come in pairs due to the symmetrical nature of this triangle. The knight sums Kn14 and Kn15 have been added. It is remarkable that all knight sums are related to the tribonacci numbers, that is, A000073 and A001590, but none of the others. - _Johannes W. Meijer_, Sep 22 2010
+%C A008288 This sequence, A008288, is jointly generated with A035607 as an array of coefficients of polynomials u(n,x): initially, u(1,x) = v(1,x) = 1; for n > 1, u(n,x) = x*u(n-1,x) + v(n-1) and v(n,x) = 2*x*u(n-1,x) + v(n-1,x). See the Mathematica section. - _Clark Kimberling_, Mar 09 2012
+%C A008288 Row n, for n > 0, of _Roger L. Bagula_'s triangle in the Example section shows the coefficients of the polynomial u(n) = c(0) + c(1)*x + ... + c(n)*x^n which is the numerator of the n-th convergent of the continued fraction [k, k, k, ...], where k = sqrt(x) + 1/sqrt(x); see A230000. - _Clark Kimberling_, Nov 13 2013
+%C A008288 In an n-dimensional hypercube lattice, D(n,k) gives the number of nodes situated at a Minkowski (Manhattan) distance of k from a given node. In cellular automata theory, the cells at Manhattan distance k are called the von Neumann neighborhood of radius k. For k=1, see A005843. - _Dmitry Zaitsev_, Dec 10 2015
+%C A008288 These numbers appear as the coefficients of series relating spherical and bispherical harmonics, in the solutions of Laplace's equation in 3D. [Majic 2019, Eq. 22] - _Matt Majic_, Nov 24 2019
+%C A008288 From _Peter Bala_, Feb 19 2020: (Start)
+%C A008288 The following remarks assume an offset of 1 in the row and column indices of the triangle.
+%C A008288 The sequence of row polynomials T(n,x), beginning with T(1,x) = x, T(2,x) = x + x^2, T(3,x) = x + 3*x^2 + x^3, ..., is a strong divisibility sequence of polynomials in the ring Z[x]; that is, for all positive integers n and m, poly_gcd(T(n,x), T(m,x)) = T(gcd(n, m), x) - apply Norfleet (2005), Theorem 3. Consequently, the sequence (T(n,x): n >= 1) is a divisibility sequence in the polynomial ring Z[x]; that is, if n divides m then T(n,x) divides T(m,x) in Z[x].
+%C A008288 Let S(x) = 1 + 2*x + 6*x^2 + 22*x^3 + ... denote the o.g.f. for the large Schröder numbers A006318. The power series (x*S(x))^n, n = 2, 3, 4, ..., can be expressed as a linear combination with polynomial coefficients of S(x) and 1: (x*S(x))^n = T(n-1,-x) - T(n,-x)*S(x). The result can be extended to negative integer n if we define T(0,x) = 0 and T(-n,x) = (-1)^(n+1) * T(n,x)/x^n. Cf. A115139.
+%C A008288 [In the previous two paragraphs, D(n,x) was replaced with T(n,x) because the contributor is referring to the rows of the triangle T(n,k), not the rows of the array D(n,k). - _Petros Hadjicostas_, Aug 05 2020] (End)
+%C A008288 Named after the French amateur mathematician Henri-Auguste Delannoy (1833-1915). - _Amiram Eldar_, Apr 15 2021
+%C A008288 D(i,j) = D(j,i). With this and _Dmitry Zaitsev_'s Dec 10 2015 comment, D(i,j) can be considered the number of points at L1 distance <= i in Z^j or the number of points at L1 distance <= j in Z^i from any given point. The rows and columns of D(i,j) are the crystal ball sequences on cubic lattices. See the first example below. The n-th term in the k-th crystal ball sequence can be considered the number of points at distance <= n from any point in a k-dimensional cubic lattice, or the number of points at distance <= k from any point in an n-dimensional cubic lattice. - _Shel Kaphan_, Jan 01 2023 and Jan 07 2023
+%D A008288 Miklos Bona, editor, Handbook of Enumerative Combinatorics, CRC Press, 2015, page 593.
+%D A008288 L. Comtet, Advanced Combinatorics, Reidel, 1974, p. 81.
+%D A008288 Steven Edwards and W. Griffiths, Generalizations of Delannoy and cross polytope numbers, Fib. Q., 55 (2017), 356-366.
+%D A008288 L. Moser and W. Zayachkowski, Lattice paths with diagonal steps, Scripta Mathematica, 26 (1963), 223-229.
+%D A008288 G. Picou, Note #2235, L'Intermédiaire des Mathématiciens, 8 (1901), page 281. - _N. J. A. Sloane_, Mar 02 2022
+%D A008288 D. B. West, Combinatorial Mathematics, Cambridge, 2021, p. 28.
+%H A008288 T. D. Noe, <a href="/A008288/b008288.txt">Table of n, a(n) for n = 0..5150</a>
+%H A008288 K. Alladi and V. E. Hoggatt Jr., <a href="http://www.fq.math.ca/Scanned/15-1/alladi.pdf">On tribonacci numbers and related functions</a>, Fibonacci Quart. 15 (1977), 42-45.
+%H A008288 Said Amrouche and Hacène Belbachir, <a href="https://arxiv.org/abs/2001.11665">Asymmetric extension of Pascal-Dellanoy triangles</a>, arXiv:2001.11665 [math.CO], 2020.
+%H A008288 J.-M. Autebert et al., <a href="http://smf4.emath.fr/Publications/Gazette/2003/95/smf_gazette_95_51-62.pdf">H.-A. Delannoy et les oeuvres posthumes d'Édouard Lucas</a>, Gazette des Mathématiciens - no 95, Jan 2003 (in French).
+%H A008288 Bela Bajnok, <a href="https://arxiv.org/abs/1705.07444">Additive Combinatorics: A Menu of Research Problems</a>, arXiv:1705.07444 [math.NT], 2017. See Sect. 2.3.
+%H A008288 C. Banderier and S. Schwer, <a href="https://arxiv.org/abs/math/0411128">Why Delannoy numbers?</a>, arXiv:math/0411128 [math.CO], 2004.
+%H A008288 Paul Barry, <a href="https://cs.uwaterloo.ca/journals/JIS/VOL9/Barry/barry91.html">On Integer-Sequence-Based Constructions of Generalized Pascal Triangles</a>, Journal of Integer Sequences, 9 (2006), #06.2.4.
+%H A008288 Paul Barry, <a href="https://cs.uwaterloo.ca/journals/JIS/VOL15/Barry4/bern2.html">Riordan-Bernstein Polynomials, Hankel Transforms and Somos Sequences</a>, Journal of Integer Sequences, 15 (2012), #12.8.2.
+%H A008288 Paul Barry, <a href="https://cs.uwaterloo.ca/journals/JIS/VOL16/Barry3/barry252.html">On the Inverses of a Family of Pascal-Like Matrices Defined by Riordan Arrays</a>, Journal of Integer Sequences, 16 (2013), #13.5.6.
+%H A008288 Paul Barry, <a href="https://arxiv.org/abs/1804.05027">The Gamma-Vectors of Pascal-like Triangles Defined by Riordan Arrays</a>, arXiv:1804.05027 [math.CO], 2018.
+%H A008288 Paul Barry, <a href="https://www.emis.de/journals/JIS/VOL22/Barry1/barry411.html">The Central Coefficients of a Family of Pascal-like Triangles and Colored Lattice Paths</a>, J. Int. Seq., 22 (2019), #19.1.3.
+%H A008288 Paul Barry, <a href="https://www.emis.de/journals/JIS/VOL22/Barry3/barry422.html">Generalized Catalan Numbers Associated with a Family of Pascal-like Triangles</a>, J. Int. Seq., 22 (2019), #19.5.8.
+%H A008288 Frédéric Bihan, Francisco Santos, and Pierre-Jean Spaenlehauer, <a href="https://arxiv.org/abs/1804.5683">A Polyhedral Method for Sparse Systems with many Positive Solutions</a>, arXiv:1804.05683 [math.CO], 2018.
+%H A008288 B. A. Bondarenko, <a href="http://www.fq.math.ca/pascal.html">Generalized Pascal Triangles and Pyramids</a> (in Russian), FAN, Tashkent, 1990, ISBN 5-648-00738-8. English translation published by Fibonacci Association, Santa Clara Univ., Santa Clara, CA, 1993; see p. 37.
+%H A008288 D. Bump, K. Choi, P. Kurlberg and J. Vaaler, <a href="http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.23.7311">A local Riemann hypothesis, I</a>, Math. Zeit. 233 (2000), 1-19.
+%H A008288 C. Carré, N. Debroux, M. Deneufchatel, J.-P. Dubernard et al., <a href="http://hal.archives-ouvertes.fr/docs/00/90/58/89/PDF/polycubes.pdf">Dirichlet convolution and enumeration of pyramid polycubes</a>, hal-00905889, 2013.
+%H A008288 C. Carre, N. Debroux, M. Deneufchatel, J.-Ph. Dubernard, C. Hillariet, J.-G. Luque, and O. Mallet, <a href="https://cs.uwaterloo.ca/journals/JIS/VOL18/Dubernard/dub4.html">Enumeration of Polycubes and Dirichlet Convolutions</a>, J. Int. Seq. 18 (2015), #15.11.4.
+%H A008288 J. S. Caughman et al., <a href="http://dx.doi.org/10.1016/j.disc.2007.05.017">A note on lattice chains and Delannoy numbers</a>, Discrete Math., 308 (2008), 2623-2628.
+%H A008288 Swee Hong Chan, Igor Pak, and Greta Panova, <a href="https://arxiv.org/abs/2106.10640">Log-concavity in planar random walks</a>, arXiv:2106.10640 [math.CO], 2021.
+%H A008288 H. Delannoy, <a href="http://gallica.bnf.fr/ark:/12148/bpt6k201183v/f73.image">Emploi de l'échiquier pour la résolution de certains problèmes de probabilités</a>, Association Française pour l'Avancement des Sciences, 24th session, 1895, pp. 70-90 (see the table given on p. 76).
+%H A008288 J. R. Dias, <a href="http://www.stkpula.hr/ccacaa/CCA-PDF/cca2004/v77-n1_n2/CCA_77_2004_325-330_dias.pdf">Properties and relationships of conjugated polyenes having a reciprocal eigenvalue spectrum - dendralene and radialene hydrocarbons</a>, Croatica Chem. Acta, 77 (2004), 325-330.
+%H A008288 M. Dziemianczuk, <a href="https://www.emis.de/journals/INTEGERS/papers/n54/n54.Abstract.html">Generalizing Delannoy numbers via counting weighted lattice paths</a>, INTEGERS, 13 (2013), #A54.
+%H A008288 James East and Nicholas Ham, <a href="https://arxiv.org/abs/1811.05735">Lattice paths and submonoids of Z^2</a>, arXiv:1811.05735 [math.CO], 2018.
+%H A008288 Steven Edwards and William Griffiths, <a href="https://cs.uwaterloo.ca/journals/JIS/VOL23/Griffiths/griffiths51.html">On Generalized Delannoy Numbers</a>, J. Int. Seq., 23 (2020), #20.3.6.
+%H A008288 R. Feria-Puron, H. Perez-Roses, and J. Ryan, <a href="http://arxiv.org/abs/1503.07357">Searching for Large Circulant Graphs</a>, arXiv:1503.07357 [math.CO], 2015.
+%H A008288 R. Feria-Purón, J. Ryan, and H. Pérez-Rosés, <a href="http://dx.doi.org/10.1016/j.endm.2014.08.031">Searching for Large Multi-Loop Networks</a>, Electronic Notes in Discrete Mathematics, 46 (2014), 233-240.
+%H A008288 Rebecca Hartman-Baker, <a href="https://www.ideals.illinois.edu/handle/2142/11055">The Diffusion Equation Method for Global Optimization and Its Application to Magnetotelluric Geoprospecting</a>, University of Illinois, Urbana-Champaign, 2005.
+%H A008288 G. Hetyei, <a href="http://arxiv.org/abs/0909.5512">Shifted Jacobi polynomials and Delannoy numbers</a>, arXiv:0909.5512 [math.CO], 2009.
+%H A008288 G. Hetyei, <a href="http://www.math.cornell.edu/event/conf/billera65/notes/hetyei.pdf">Links we almost missed between Delannoy numbers and Legendre polynomials</a>.
+%H A008288 V. E. Hoggatt, Jr., <a href="/A001628/a001628.pdf">Letters to N. J. A. Sloane, 1974-1975</a>.
+%H A008288 Milan Janjić, <a href="https://arxiv.org/abs/1905.04465">On Restricted Ternary Words and Insets</a>, arXiv:1905.04465 [math.CO], 2019.
+%H A008288 M. Janjic and B. Petkovic, <a href="http://arxiv.org/abs/1301.4550">A Counting Function</a>, arXiv:1301.4550 [math.CO], 2013. - _N. J. A. Sloane_, Feb 13 2013
+%H A008288 M. Janjic and B. Petkovic, <a href="https://cs.uwaterloo.ca/journals/JIS/VOL17/Janjic/janjic45.html">A Counting Function Generalizing Binomial Coefficients and Some Other Classes of Integers</a>, J. Int. Seq. 17 (2014), #14.3.5.
+%H A008288 Svante Janson, <a href="https://arxiv.org/abs/1804.06071">Patterns in random permutations avoiding some sets of multiple patterns</a>, arXiv:1804.06071 [math.PR], 2018.
+%H A008288 Shel Kaphan, <a href="/A008288/a008288_1.txt">Illustration of a recurrence relation on the Delannoy numbers and their connection with geometry.</a>
+%H A008288 G. Kreweras, <a href="http://www.numdam.org/item?id=BURO_1973__20__3_0">Sur les hiérarchies de segments</a>, Cahiers Bureau Universitaire Recherche Opérationnelle, # 20, Inst. Statistiques, Univ. Paris, 1973, pp. 4-10.
+%H A008288 G. Kreweras, <a href="/A001844/a001844.pdf">Sur les hiérarchies de segments</a>, Cahiers du Bureau Universitaire de Recherche Opérationnelle, Institut de Statistique, Université de Paris, #20 (1973). (Annotated scanned copy)
+%H A008288 G. Kreweras, <a href="/A006318/a006318_2.pdf">Aires des chemins surdiagonaux et application à un problème économique</a>, Cahiers du Bureau universitaire de recherche opérationnelle Série Recherche 24 (1976), 1-8. [Annotated scanned copy]
+%H A008288 M. LLadser, <a href="https://arxiv.org/abs/math/0604152">Uniform formulas for coefficients of meromorphic functions</a>, arXiv:math/0604152 [math.CO], 2006.
+%H A008288 E. Lucas, <a href="http://denise.vella.chemla.free.fr/lucas.pdf">Théorie des Nombres</a>. Gauthier-Villars, Paris, 1891, Vol. 1, p. 174.
+%H A008288 Matt Majic, <a href="https://www.researchgate.net/publication/337484536">Relationships between spherical and bispherical harmonics, and an electrostatic T-matrix for dimers</a>, preprint, 2019, DOI:10.13140/RG.2.2.21203.12320.
+%H A008288 J. W. Meijer, <a href="https://www.ucbcba.edu.bo/Publicaciones/revistas/actanova/documentos/v4n4/Ensayos_Meijer2010_PI_.3r.pdf">Famous numbers on a chessboard</a>, Acta Nova, 4(4) (2010), 589-598.
+%H A008288 Mirka Miller, Hebert Perez-Roses, and Joe Ryan, <a href="http://arxiv.org/abs/1203.4069">The Maximum Degree-and-Diameter-Bounded Subgraph in the Mesh</a>, arXiv:1203.4069 [math.CO], 2012.
+%H A008288 Alejandro H. Morales, Igor Pak, and Greta Panova, <a href="https://arxiv.org/abs/2108.10140">Hook formulas for skew shapes IV. Increasing tableaux and factorial Grothendieck polynomials</a>, arXiv:2108.10140 [math.CO], 2021.
+%H A008288 Lili Mu and Sai-nan Zheng, <a href="https://cs.uwaterloo.ca/journals/JIS/VOL20/Zheng/zheng8.html"> On the Total Positivity of Delannoy-Like Triangles</a>, Journal of Integer Sequences, 20 (2017), #17.1.6.
+%H A008288 M. Norfleet, <a href="http://www.fq.mat.ca/43-2.html">Characterization of second-order strong divisibility sequences of polynomials</a>, The Fibonacci Quarterly, 43(2) (2005), 166-169.
+%H A008288 Richard L. Ollerton and Anthony G. Shannon, <a href="http://www.fq.math.ca/Scanned/36-2/ollerton.pdf">Some properties of generalized Pascal squares and triangles</a>, Fib. Q., 36 (1998), 98-109. See Table 9.
+%H A008288 L. Pachter and B. Sturmfels, <a href="http://arXiv.org/abs/math.ST/0409132">The mathematics of phylogenomics</a>, arXiv:math/0409132 [math.ST], 2004-2005.
+%H A008288 R. Pemantle and M. C. Wilson, <a href="https://arxiv.org/abs/math/0003192">Asymptotics of multivariate sequences, I: smooth points of the singular variety</a>, arXiv:math/0003192 [math.CO], 2000.
+%H A008288 J. L. Ramirez and V. F. Sirvent, <a href="https://cs.uwaterloo.ca/journals/JIS/VOL17/Ramirez/ramirez4.html">Incomplete Tribonacci Numbers and Polynomials</a>, Journal of Integer Sequences, 17 (2014), #14.4.2. See Table 1. - _N. J. A. Sloane_, Mar 23 2014
+%H A008288 Marko Razpet, <a href="http://dx.doi.org/10.1016/S0012-365X(01)00098-X">A self-similarity structure generated by king's walk</a>, Algebraic and topological methods in graph theory (Lake Bled, 1999). Discrete Math. 244(1-3) (2002), 423--433. MR1844050 (2002k:05022).
+%H A008288 Shiva Samieinia, <a href="https://www2.math.su.se/reports/2007/6/">Digital straight line segments and curves</a>, Licentiate Thesis. Stockholm University, Department of Mathematics, Report 2007:6.
+%H A008288 Shiva Samieinia, <a href="http://dx.doi.org/10.4171/PM/1858">The number of continuous curves in digital geometry</a>, Port. Math. 67(1) (2010), 75-89.
+%H A008288 Seunghyun Seo, <a href="https://cs.uwaterloo.ca/journals/JIS/VOL20/Seo/seo2.html">The Catalan Threshold Arrangement</a>, Journal of Integer Sequences, 20 (2017), #17.1.1.
+%H A008288 M. Shattuck, <a href="http://arxiv.org/abs/1406.2755">Combinatorial identities for incomplete tribonacci polynomials</a>, arXiv:1406.2755 [math.CO], 2014.
+%H A008288 R. G. Stanton and D. D. Cowan, <a href="http://dx.doi.org/10.1137/1012049">Note on a "square" functional equation</a>, SIAM Rev., 12 (1970), 277-279.
+%H A008288 Luis Verde-Star <a href="https://cs.uwaterloo.ca/journals/JIS/VOL24/Verde/verde4.html">A Matrix Approach to Generalized Delannoy and Schröder Arrays</a>, J. Int. Seq., Vol. 24 (2021), Article 21.4.1.
+%H A008288 Yi Wang, Zheng Sai-Nan, and Chen Xi, <a href="https://doi.org/10.1016/j.disc.2019.04.003">Analytic aspects of Delannoy numbers</a>, Discrete Mathematics 342(8) (2019), 2270-2277.
+%H A008288 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/DelannoyNumber.html">Delannoy Number</a>.
+%H A008288 Dmitry Zaitsev, <a href="https://arxiv.org/abs/1605.08870">k-neighborhood for Cellular Automata</a>, arXiv:1605.08870 [cs.DM], 2016.
+%H A008288 Liang Zhao and Fengyao Yan, <a href="https://cs.uwaterloo.ca/journals/JIS/VOL19/Zhao/zhao17.html">Note on Total Positivity for a Class of Recursive Matrices</a>, Journal of Integer Sequences, 19 (2016), #16.6.5.
+%F A008288 D(n, 0) = 1 = D(0, n) for n >= 0; D(n, k) = D(n, k-1) + D(n-1, k-1) + D(n-1, k).
+%F A008288 Bivariate o.g.f.: Sum_{n >= 0, k >= 0} D(n, k)*x^n*y^k = 1/(1 - x - y - x*y).
+%F A008288 D(n, k) = Sum_{d = 0..min(n,k)} binomial(k, d)*binomial(n+k-d, k) = Sum_{d=0..min(n,k)} 2^d*binomial(n, d)*binomial(k, d). [Edited by _Petros Hadjicostas_, Aug 05 2020]
+%F A008288 Seen as a triangle read by rows: T(n, 0) = T(n, n) = 1 for n >= 0 and T(n, k) = T(n-1, k-1) + T(n-2, k-1) + T(n-1, k), 0 < k < n and n > 1. - _Reinhard Zumkeller_, Dec 03 2004
+%F A008288 Read as a number triangle, this is the Riordan array (1/(1-x), x(1+x)/(1-x)) with T(n, k) = Sum_{j=0..n-k} C(n-k, j) * C(k, j) * 2^j. - _Paul Barry_, Jul 18 2005
+%F A008288 T(n,k) = Sum_{j=0..n-k} C(k,j)*C(n-j,k). - _Paul Barry_, May 21 2006
+%F A008288 Let y^k(n) be the number of Khalimsky-continuous functions f from [0,n-1] to Z such that f(0) = 0 and f(n-1) = k. Then y^k(n) = D(i,j) for i = (1/2)*(n-1-k) and j = (1/2)*(n-1+k) where n-1+k belongs to 2Z. - Shiva Samieinia (shiva(AT)math.su.se), Oct 08 2007
+%F A008288 Recurrence for triangle from A-sequence (see the _Wolfdieter Lang_ comment above): T(n,k) = Sum_{j=0..n-k} A112478(j) * T(n-1, k-1+j), n >= 1, k >= 1. [For k > n, the sum is empty, in which case T(n,k) = 0.]
+%F A008288 From _Peter Bala_, Jul 17 2008: (Start)
+%F A008288 The n-th row of the square array is the crystal ball sequence for the product lattice A_1 x ... x A_1 (n copies). A035607 is the table of the associated coordination sequences for these lattices.
+%F A008288 The polynomial p_n(x) := Sum {k = 0..n} 2^k * C(n,k) * C(x,k) = Sum_{k = 0..n} C(n,k) * C(x+k,n), whose values [p_n(0), p_n(1), p_n(2), ... ] give the n-th row of the square array, is the Ehrhart polynomial of the n-dimensional cross polytope (the hyperoctahedron) [Bump et al. (2000), Theorem 6].
+%F A008288 The first few values are p_0(x) = 1, p_1(x) = 2*x + 1, p_2(x) = 2*x^2 + 2*x + 1 and p_3(x) = (4*x^3 + 6*x^2 + 8*x + 3)/3.
+%F A008288 The reciprocity law p_n(m) = p_m(n) reflects the symmetry of the table.
+%F A008288 The polynomial p_n(x) is the unique polynomial solution of the difference equation (x+1)*f(x+1) - x*f(x-1) = (2*n+1)*f(x), normalized so that f(0) = 1.
+%F A008288 These polynomials have their zeros on the vertical line Re x = -1/2 in the complex plane; that is, the polynomials p_n(x-1), n = 1,2,3,..., satisfy a Riemann hypothesis [Bump et al. (2000), Theorem 4]. The o.g.f. for the p_n(x) is (1 + t)^x/(1 - t)^(x + 1) = 1 + (2*x + 1)*t + (2*x^2 + 2*x + 1)*t^2 + ... .
+%F A008288 The square array of Delannoy numbers has a close connection with the constant log(2). The entries in the n-th row of the array occur in the series acceleration formula log(2) = (1 - 1/2 + 1/3 - ... + (-1)^(n+1)/n) + (-1)^n * Sum_{k>=1} (-1)^(k+1)/(k*D(n,k-1)*D(n,k)). [T(n,k) was replaced with D(n,k) in the formula to agree with the beginning of the paragraph. - _Petros Hadjicostas_, Aug 05 2020]
+%F A008288 For example, the fourth row of the table (n = 3) gives the series log(2) = 1 - 1/2 + 1/3 - 1/(1*1*7) + 1/(2*7*25) - 1/(3*25*63) + 1/(4*63*129) - ... . See A142979 for further details.
+%F A008288 Also the main diagonal entries (the central Delannoy numbers) give the series acceleration formula Sum_{n>=1} 1/(n*D(n-1,n-1)*D(n,n)) = (1/2)*log(2), a result due to Burnside. [T(n,n) was replaced here with D(n,n) to agree with the previous paragraphs. - _Petros Hadjicostas_, Aug 05 2020]
+%F A008288 Similar relations hold between log(2) and the crystal ball sequences of the C_n lattices A142992. For corresponding results for the constants zeta(2) and zeta(3), involving the crystal ball sequences for root lattices of type A_n and A_n x A_n, see A108625 and A143007 respectively. (End)
+%F A008288 From _Peter Bala_, Oct 28 2008: (Start)
+%F A008288 Hilbert transform of Pascal's triangle A007318 (see A145905 for the definition of this term).
+%F A008288 D(n+a,n) = P_n(a,0;3) for all integer a such that a >= -n, where P_n(a,0;x) is the Jacobi polynomial with parameters (a,0) [Hetyei]. The related formula A(n,k) = P_k(0,n-k;3) defines the table of asymmetric Delannoy numbers, essentially A049600. (End)
+%F A008288 Seen as a triangle read by rows: T(n,k) = (-1)^(n-k) * Hyper2F1([-n+k, k+1], [1], 2) for 0 <= k <= n. - _Peter Luschny_, Aug 02 2014
+%F A008288 From _Peter Bala_, Jun 25 2015: (Start)
+%F A008288 O.g.f. for triangle T(n,k): A(z,t) = 1/(1 - (1 + t)*z - t*z^2) = 1 + (1 + t)*z + (1 + 3*t + t^2)*z^2 + (1 + 5*t + 5*t^2 + t^3)*z^3 + ....
+%F A008288 1 + z*d/dz(A(z,t))/A(z,t) is the o.g.f. for A102413. (End)
+%F A008288 E.g.f. for the n-th subdiagonal of T(n,k), n >= 0, equals exp(x)*P(n,x), where P(n,x) is the polynomial Sum_{k = 0..n} binomial(n,k)*(2*x)^k/k!. For example, the e.g.f. for the second subdiagonal is exp(x)*(1 + 4*x + 4*x^2/2) = 1 + 5*x + 13*x^2/2! + 25*x^3/3! + 41*x^4/4! + 61*x^5/5! + .... - _Peter Bala_, Mar 05 2017 [The n-th subdiagonal of triangle T(n,k) is the n-th row of array D(n,k).]
+%F A008288 Let a_i(n) be multiplicative with a_i(p^e) = D(i, e), p prime and e >= 0, then Sum_{n > 0} a_i(n)/n^s = (zeta(s))^(2*i+1)/(zeta(2*s))^i for i >= 0. - _Werner Schulte_, Feb 14 2018
+%F A008288 Seen as a triangle read by rows: T(n,k) = Sum_{i=0..k} binomial(n-i, i) * binomial(n-2*i, k-i) for 0 <= k <= n. - _Werner Schulte_, Jan 09 2019
+%F A008288 Univariate generating function: Sum_{k >= 0} D(n,k)*z^k = (1 + z)^n/(1 - z)^(n+1). [Dziemianczuk (2013), Eq. 5.3] - _Matt Majic_, Nov 24 2019
+%F A008288 (n+1)*D(n+1,k) = (2*k+1)*D(n,k) + n*D(n-1,k). [Majic (2019), Eq. 22] - _Matt Majic_, Nov 24 2019
+%F A008288 For i, j >= 1, D(i,j) = D(i,j-1) + 2*Sum_{k=0..i-1} D(k,j-1), or, because D(i,j) = D(j,i), D(i,j) = D(i-1,j) + 2*Sum_{k=0..j-1} D(i-1,k). - _Shel Kaphan_, Jan 01 2023
+%e A008288 The square array D(i,j) (i >= 0, j >= 0) begins:
+%e A008288   1, 1,  1,   1,   1,   1,    1,    1,    1,    1, ... = A000012
+%e A008288   1, 3,  5,   7,   9,  11,   13,   15,   17,   19, ... = A005408
+%e A008288   1, 5, 13,  25,  41,  61,   85,  113,  145,  181, ... = A001844
+%e A008288   1, 7, 25,  63, 129, 231,  377,  575,  833, 1159, ... = A001845
+%e A008288   1, 9, 41, 129, 321, 681, 1289, 2241, 3649, 5641, ... = A001846
+%e A008288   ...
+%e A008288 For D(2,5) = 61, which is seen above in the row labeled A001844, we calculate the sum (9 + 11 + 41) of the 3 nearest terms above and/or to the left. - _Peter Munn_, Jan 01 2023
+%e A008288 D(2,5) = 61 can also be obtained from the row labeled A005408 using a recurrence mentioned in the formula section:  D(2,5) = D(1,5) + 2*Sum_{k=0..4} D(1,k), so D(2,5) = 11 + 2*(1+3+5+7+9) = 11 + 2*25. - _Shel Kaphan_, Jan 01 2023
+%e A008288 As a triangular array (on its side) this begins:
+%e A008288    0,   0,   0,   0,   1,   0,  11,   0, ...
+%e A008288    0,   0,   0,   1,   0,   9,   0,  61, ...
+%e A008288    0,   0,   1,   0,   7,   0,  41,   0, ...
+%e A008288    0,   1,   0,   5,   0,  25,   0, 129, ...
+%e A008288    1,   0,   3,   0,  13,   0,  63,   0, ...
+%e A008288    0,   1,   0,   5,   0,  25,   0, 129, ...
+%e A008288    0,   0,   1,   0,   7,   0,  41,   0, ...
+%e A008288    0,   0,   0,   1,   0,   9,   0,  61, ...
+%e A008288    0,   0,   0,   0,   1,   0,  11,   0, ...
+%e A008288    [Edited by _Shel Kaphan_, Jan 01 2023]
+%e A008288 From _Roger L. Bagula_, Dec 09 2008: (Start)
+%e A008288 As a triangle T(n,k) (with rows n >= 0 and columns k = 0..n), this begins:
+%e A008288    1;
+%e A008288    1,  1;
+%e A008288    1,  3,   1;
+%e A008288    1,  5,   5,   1;
+%e A008288    1,  7,  13,   7,    1;
+%e A008288    1,  9,  25,  25,    9,    1;
+%e A008288    1, 11,  41,  63,   41,   11,    1;
+%e A008288    1, 13,  61, 129,  129,   61,   13,   1;
+%e A008288    1, 15,  85, 231,  321,  231,   85,  15,   1;
+%e A008288    1, 17, 113, 377,  681,  681,  377, 113,  17,  1;
+%e A008288    1, 19, 145, 575, 1289, 1683, 1289, 575, 145, 19, 1;
+%e A008288    ... (End)
+%e A008288 Triangle T(n,k) recurrence: 63 = T(6,3) = 25 + 13 + 25 = T(5,2) + T(4,2) + T(5,3).
+%e A008288 Triangle T(n,k) recurrence with A-sequence A112478: 63 = T(6,3) = 1*25 + 2*25 - 2*9 + 6*1 (T entries from row n = 5 only). [Here the formula T(n,k) = Sum_{j=0..n-k} A112478(j) * T(n-1, k-1+j) is used with n = 6 and k = 3; i.e., T(6,3) = Sum_{j=0..3} A111478(j) * T(5, 2+j). - _Petros Hadjicostas_, Aug 05 2020]
+%e A008288 From _Philippe Deléham_, Mar 29 2012: (Start)
+%e A008288 Subtriangle of the triangle given by (1, 0, 1, -1, 0, 0, 0, ...) DELTA (0, 1, 0, 0, 0, ...) where DELTA is the operator defined in A084938:
+%e A008288    1;
+%e A008288    1,  0;
+%e A008288    1,  1,  0;
+%e A008288    1,  3,  1,  0;
+%e A008288    1,  5,  5,  1,  0;
+%e A008288    1,  7, 13,  7,  1,  0;
+%e A008288    1,  9, 25, 25,  9,  1, 0;
+%e A008288    1, 11, 41, 63, 41, 11, 1, 0;
+%e A008288    ...
+%e A008288 Subtriangle of the triangle given by (0, 1, 0, 0, 0, ...) DELTA (1, 0, 1, -1, 0, 0, 0, ...) where DELTA is the operator defined in A084938:
+%e A008288    1;
+%e A008288    0, 1;
+%e A008288    0, 1,  1;
+%e A008288    0, 1,  3,  1;
+%e A008288    0, 1,  5,  5,  1;
+%e A008288    0, 1,  7, 13,  7,  1;
+%e A008288    0, 1,  9, 25, 25,  9,  1;
+%e A008288    0, 1, 11, 41, 63, 41, 11, 1;
+%e A008288    ... (End)
+%p A008288 A008288 := proc(n, k) option remember; if k = 0 then 1 elif n=k then 1 else A008288(n-1, k-1) + A008288(n-2, k-1) + A008288(n-1, k) fi; end: seq(seq(A008288(n,k),k=0..n), n=0..10);
+%p A008288 P[0]:=1; P[1]:=x+1; for n from 2 to 12 do P[n]:=expand((x+1)*P[n-1]+x*P[n-2]); lprint(P[n]); lprint(seriestolist(series(P[n],x,200))); od:
+%t A008288 (* Next, A008388 jointly generated with A035607 *)
+%t A008288 u[1, x_] := 1; v[1, x_] := 1; z = 16;
+%t A008288 u[n_, x_] := x*u[n - 1, x] + v[n - 1, x];
+%t A008288 v[n_, x_] := 2 x*u[n - 1, x] + v[n - 1, x];
+%t A008288 Table[Expand[u[n, x]], {n, 1, z/2}]
+%t A008288 Table[Expand[v[n, x]], {n, 1, z/2}]
+%t A008288 cu = Table[CoefficientList[u[n, x], x], {n, 1, z}];
+%t A008288 TableForm[cu]
+%t A008288 Flatten[%]    (* A008288 *)
+%t A008288 Table[Expand[v[n, x]], {n, 1, z}]
+%t A008288 cv = Table[CoefficientList[v[n, x], x], {n, 1, z}];
+%t A008288 TableForm[cv]
+%t A008288 Flatten[%]    (* A035607 *)
+%t A008288 (* _Clark Kimberling_, Mar 09 2012 *)
+%t A008288 d[n_, k_] := Binomial[n+k, k]*Hypergeometric2F1[-k, -n, -n-k, -1]; A008288 = Flatten[Table[d[n-k, k], {n, 0, 12}, {k, 0, n}]] (* _Jean-François Alcover_, Apr 05 2012, after 3rd formula *)
+%o A008288 (Haskell)
+%o A008288 a008288 n k = a008288_tabl !! n !! k
+%o A008288 a008288_row n = a008288_tabl !! n
+%o A008288 a008288_tabl = map fst $ iterate
+%o A008288     (\(us, vs) -> (vs, zipWith (+) ([0] ++ us ++ [0]) $
+%o A008288                        zipWith (+) ([0] ++ vs) (vs ++ [0]))) ([1], [1, 1])
+%o A008288 -- _Reinhard Zumkeller_, Jul 21 2013
+%o A008288 (Sage)
+%o A008288 for k in range(8):
+%o A008288     a = lambda n: hypergeometric([-n, -k], [1], 2)
+%o A008288     print([simplify(a(n)) for n in range(11)]) # _Peter Luschny_, Nov 19 2014
+%Y A008288 Sums of antidiagonals: A000129 (Pell numbers).
+%Y A008288 Main diagonal: A001850 (central Delannoy numbers), which has further information and references.
+%Y A008288 A002002, A026002, and A190666 are +-k-diagonals for k=1, 2, 3 resp. - _Shel Kaphan_, Jan 01 2023
+%Y A008288 Rows 0..10: A000012, A005408, A001844, A001845, A001846, A001847, A001848, A001849, A008417, A008419, A008421.
+%Y A008288 See also A027618.
+%Y A008288 Cf. A059446.
+%Y A008288 Has same main diagonal as A064861. Different from A100936.
+%Y A008288 Cf. A101164, A101167, A128966, A131887, A131935.
+%Y A008288 Cf. A035607, A108625, A142979, A142992, A143007.
+%Y A008288 Read mod small primes: A211312, A211313, A211314, A211315.
+%Y A008288 Triangle sums (see the comments): A000129 (Row1); A056594 (Row2); A000073 (Kn11 & Kn21); A089068 (Kn12 & Kn22); A180668 (Kn13 & Kn23); A180669 (Kn14 & Kn24); A180670 (Kn15 & Kn25); A099463 (Kn3 & Kn4); A116404 (Fi1 & Fi2); A006498 (Ca1 & Ca2); A006498(3*n) (Ca3 & Ca4); A079972 (Gi1 & Gi2); A079972(4*n) (Gi3 & Gi4); A079973(3*n) (Ze1 & Ze2); A079973(2*n) (Ze3 & Ze4).
+%Y A008288 Cf. A102413, A128966. (D(n,1)) = A005843. Cf. A115139.
+%K A008288 nonn,tabl,nice,easy
+%O A008288 0,5
+%A A008288 _N. J. A. Sloane_
+%E A008288 Expanded description from _Clark Kimberling_, Jun 15 1997
+%E A008288 Additional references from Sylviane R. Schwer (schwer(AT)lipn.univ-paris13.fr), Nov 28 2001
+%E A008288 Changed the notation to make the formulas more precise. - _N. J. A. Sloane_, Jul 01 2002

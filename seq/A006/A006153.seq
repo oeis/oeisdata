@@ -1,0 +1,49 @@
+%I A006153 M3578
+%S A006153 1,1,4,21,148,1305,13806,170401,2403640,38143377,672552730,
+%T A006153 13044463641,276003553860,6326524990825,156171026562838,
+%U A006153 4130464801497105,116526877671782896,3492868475952497313,110856698175372359346,3713836169709782989993,130966414749485504586940
+%N A006153 E.g.f.: 1/(1-x*exp(x)).
+%C A006153 a(n) is the sum of the row entries of triangle A199673, that is, a(n) is the number of ways to assign n people into labeled groups and then to assign a leader for each group from its members; see example below. - _Dennis P. Walsh_, Nov 15 2011
+%C A006153 a(n) is the number of functions f:{1,2,...,n}->{1,2,...,n} (endofunctions) such that for some j>1, f^j=f where f^j denotes iterated functional composition. Equivalently, the number of endofunctions such that every element is mapped to a recurrent element. Equivalently, every vertex of the functional digraph is at a distance at most 1 from a cycle. - _Geoffrey Critzer_, Jan 21 2012
+%C A006153 Numerators in rational approximations of Lambert W(1). See Ramanujan, Notebooks, volume 2, page 22: "2. If e^{-x} = x, shew that the convergents to x are 1/2, 4/7, 21/37, 148/261, &c." - _Michael Somos_, Jan 21 2019
+%D A006153 S. Ramanujan, Notebooks, Tata Institute of Fundamental Research, Bombay 1957 Vol. 2, see page 22.
+%D A006153 Getu, S.; Shapiro, L. W.; Combinatorial view of the composition of functions. Ars Combin. 10 (1980), 131-145.
+%D A006153 N. J. A. Sloane and Simon Plouffe, The Encyclopedia of Integer Sequences, Academic Press, 1995 (includes this sequence).
+%D A006153 R. P. Stanley, Enumerative Combinatorics, Cambridge, Vol. 2, 1999; see Problem 5.32(d).
+%H A006153 Alois P. Heinz, <a href="/A006153/b006153.txt">Table of n, a(n) for n = 0..200</a>
+%H A006153 INRIA Algorithms Project, <a href="http://ecs.inria.fr/services/structure?nbr=110">Encyclopedia of Combinatorial Structures 110</a>
+%H A006153 Dennis Walsh, <a href="http://frank.mtsu.edu/~dwalsh/GROUPCNT.pdf"> Assigning people into labeled groups with leaders</a>
+%F A006153 a(n) = n! * Sum_{k=0..n}(n-k)^k/k!.
+%F A006153 a(n) = Sum_{k=0..n} k!*k^(n-k)*binomial(n,k).
+%F A006153 For n>=1, a(n-1) = b(n) where b(1)=1 and b(n) = Sum_{i=1..n-1} i*binomial(n-1, i)*b(i). - _Benoit Cloitre_, Nov 13 2004
+%F A006153 a(n) = Sum_{k=1..n}A199673(n,k) = Sum_{k=1..n}n! k^(n-k)/(n-k)!. - _Dennis P. Walsh_, Nov 15 2011
+%F A006153 E.g.f. for a(n), n>=1: x*e^x/(1-x*e^x). - _Dennis P. Walsh_, Nov 15 2011
+%F A006153 a(n) ~ n! / ((1+LambertW(1))*LambertW(1)^n). - _Vaclav Kotesovec_, Jun 21 2013\
+%F A006153 O.g.f.: Sum_{n>=0} n! * x^n / (1 - n*x)^(n+1). - _Paul D. Hanna_, May 22 2018
+%F A006153 a(0) = 1; a(n) = n * Sum_{k=0..n-1} binomial(n-1,k) * a(k). - _Ilya Gutkovskiy_, Jul 12 2020
+%e A006153 a(3) = 21 since there are 21 ways to assign 3 people into labeled groups with designated leaders. If there is one group, there are 3 ways to select a leader from the 3 people in the group. If there are two groups (group 1 and group 2), there are 6 ways to assign leaders and then 2 ways to select a group for the remaining person, and thus there are 12 assignments. If there are three groups (group1, group 2, and group3), each person is a leader of their singleton group, and there are 6 ways to assign the 3 people to the 3 groups. Hence a(3) = 3 + 12 + 6 = 21.
+%e A006153 a(4) = 148 = 4 + 48 + 72 + 24.
+%p A006153 a := proc(n) local k; add(k^(n-k)*n!/(n-k)!,k=1..n); end; # for n >= 1
+%t A006153 With[{nn=20},CoefficientList[Series[1/(1-x Exp[x]),{x,0,nn}],x] Range[0,nn]!] (* _Harvey P. Dale_, Aug 29 2012 *)
+%t A006153 a[ n_] := If[n < 0, 0, n! + n! Sum[(n - k)^k / k!, {k, n}]]; (* _Michael Somos_, Jan 21 2019 *)
+%o A006153 (PARI) x='x+O('x^66);
+%o A006153 egf=1/(1-x*exp(x)); /* = 1 + x + 2*x^2 + 7/2*x^3 + 37/6*x^4 + 87/8*x^5 +... */
+%o A006153 Vec(serlaplace(egf)) /* _Joerg Arndt_, Apr 30 2011 */
+%o A006153 (PARI) {a(n) = if(n<0, 0, n! * sum(k=0, n, (n-k)^k / k!))}; /* _Michael Somos_, Jan 21 2019 */
+%o A006153 (Sage)
+%o A006153 def A006153_list(len):
+%o A006153     f, R, C = 1, [1], [1]+[0]*(len-1)
+%o A006153     for n in (1..len-1):
+%o A006153         f *= n
+%o A006153         for k in range(n, 0, -1):
+%o A006153             C[k] = -C[k-1]*(1/(k-1) if k>1 else 1)
+%o A006153         C[0] = sum((-1)^k*C[k] for k in (1..n))
+%o A006153         R.append(C[0]*f)
+%o A006153     return R
+%o A006153 print(A006153_list(20)) # _Peter Luschny_, Feb 21 2016
+%Y A006153 Row sums of triangle A199673.
+%Y A006153 Cf. A003566, A072597, A089148.
+%K A006153 nonn,easy,nice
+%O A006153 0,3
+%A A006153 _Simon Plouffe_ and _N. J. A. Sloane_
+%E A006153 Definition corrected by _Joerg Arndt_, Apr 30 2011

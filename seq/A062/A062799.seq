@@ -1,0 +1,46 @@
+%I A062799
+%S A062799 0,1,1,2,1,4,1,3,2,4,1,7,1,4,4,4,1,7,1,7,4,4,1,10,2,4,3,7,1,12,1,5,4,
+%T A062799 4,4,12,1,4,4,10,1,12,1,7,7,4,1,13,2,7,4,7,1,10,4,10,4,4,1,20,1,4,7,6,
+%U A062799 4,12,1,7,4,12,1,17,1,4,7,7,4,12,1,13,4,4
+%N A062799 Inverse Möbius transform of the numbers of distinct prime factors (A001221).
+%C A062799 Let us say that two divisors d_1 and d_2 of n are adjacent divisors if d_1/d_2 or d_2/d_1 is a prime. Then a(n) is the number of all pairs of adjacent divisors of n. - _Vladimir Shevelev_, Aug 16 2010
+%C A062799 Equivalent to the preceding comment: a(n) is the number of edges in the directed multigraph on tau(n) vertices, vertices labeled by the divisors d_i of n, where edges connect vertex(d_i) and vertex(d_j) if the ratio of the labels is a prime. - _R. J. Mathar_, Sep 23 2011
+%C A062799 a(A001248(n)) = 2. - _Reinhard Zumkeller_, Dec 02 2014
+%C A062799 Depends on the prime signature of n as follows: a(A025487(n)) = 0, 1, 2, 4, 3, 7, 4, 10, 12, 5, 12, 13, 20, 6, 17, 16, 28, 7, 22, 33, 19 ,32, 24, 36, 8, 27, 46, ... (n>=1). - _R. J. Mathar_, May 28 2017
+%H A062799 T. D. Noe, <a href="/A062799/b062799.txt">Table of n, a(n) for n = 1..10000</a>
+%H A062799 S.-H. Cha, E. G. DuCasse, and L. V. Quintas, <a href="http://arxiv.org/abs/1405.5283">Graph Invariants Based on the Divides Relation and Ordered by Prime Signatures</a>, arXiv:1405.5283 [math.NT], 2014.
+%H A062799 E. Pérez Herrero, Psychedelic Geometry Blogspot, <a href="http://psychedelic-geometry.blogspot.com/2009/09/curious-series-002.html">CURIOUS SERIES-002</a>
+%F A062799 a(n) = Sum_{d|n} A001221(d), that is, where d runs over divisors of n.
+%F A062799 For squarefree s (i.e., s in A005117), a(s) = omega(s)*2^(omega(s)-1), where omega(n) = A001221(n). Also, for n>1, a(n) <= omega(n)*A000005(n) - 1. - _Enrique Pérez Herrero_, Sep 08 2009
+%F A062799 Let n=Product_{i=1..omega(n)} p(i)^e(i). a(n) = d[Product_{i=1..omega(n)} (1 + e(i)*x)]/dx|x=1. In other words, a(n) = Sum_{m>=1} A146289(n,m)*m. - _Geoffrey Critzer_, Feb 10 2015
+%F A062799 a(A000040(n)) = 1; a(A001248(n)) = 2; a(A030078(n)) = 3; a(A030514(n)) = 4; a(A050997(n)) = 5. - _Altug Alkan_, Oct 17 2015
+%F A062799 a(n) = Sum_{prime p|n} A000005(n/p). - _Max Alekseyev_, Aug 11 2016
+%F A062799 G.f.: Sum_{k>=1} omega(k)*x^k/(1 - x^k), where omega(k) is the number of distinct primes dividing k (A001221). - _Ilya Gutkovskiy_, Jan 16 2017
+%F A062799 Dirichlet g.f.: zeta(s)^2*primezeta(s) where primezeta(s) = Sum_{prime p} p^(-s). - _Benedict W. J. Irwin_, Jul 16 2018
+%e A062799 n = 255: divisors = {1, 3, 5, 15, 17, 51, 85, 255}, a(255) = 0+1+1+2+1+2+2+3 = 12.
+%p A062799 read("transforms") ;
+%p A062799 A001221 := proc(n)
+%p A062799         nops(numtheory[factorset](n)) ;
+%p A062799 end proc:
+%p A062799 omega := [seq(A001221(n),n=1..80)] ;
+%p A062799 ones := [seq(1,n=1..80)] ;
+%p A062799 DIRICHLET(ones,omega) ; # _R. J. Mathar_, Sep 23 2011
+%p A062799 N:= 1000: # to get a(1) to a(N)
+%p A062799 B:= Vector(N,t-> nops(numtheory:-factorset(t))):
+%p A062799 A:= Vector(N):
+%p A062799 for d from 1 to N do
+%p A062799   md:= d*[$1..floor(N/d)];
+%p A062799   A[md]:= map(`+`,A[md],B[d])
+%p A062799 od:
+%p A062799 convert(A,list); # _Robert Israel_, Oct 21 2015
+%t A062799 f[n_] := Block[{d = Divisors[n], c = l = 0, k = 2}, l = Length[d]; While[k < l + 1, c = c + Length[ FactorInteger[ d[[k]] ]]; k++ ]; Return[c]]; Table[f[n], {n, 1, 100} ]
+%t A062799 omega[n_] := Length[FactorInteger[n]]; SetAttributes[omega, Listable]; omega[1] := 0; A062799[n_] := Plus @@ omega[Divisors[n]] (* _Enrique Pérez Herrero_, Sep 08 2009 *)
+%o A062799 (Haskell)
+%o A062799 a062799 = sum . map a001221 . a027750_row
+%o A062799 -- _Reinhard Zumkeller_, Dec 02 2014
+%o A062799 (PARI) a(n)=my(f=factor(n)[,2],s);forvec(v=vector(#f,i,[0,f[i]]),s+=sum(i=1,#f,v[i]>0));s \\ _Charles R Greathouse IV_, Oct 15 2015
+%o A062799 (PARI) vector(100, n, sumdiv(n, k, omega(k))) \\ _Altug Alkan_, Oct 15 2015
+%Y A062799 Cf. A001221, A001248, A027750.
+%K A062799 nonn
+%O A062799 1,4
+%A A062799 _Labos Elemer_, Jul 19 2001

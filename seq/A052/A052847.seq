@@ -1,0 +1,49 @@
+%I A052847
+%S A052847 1,0,1,2,4,6,12,18,33,52,88,138,229,354,568,880,1378,2110,3260,4942,
+%T A052847 7527,11320,17031,25394,37842,55956,82630,121300,177677,258980,376626,
+%U A052847 545352,787784,1133764,1627657,2329020,3324559,4731396,6717774,9512060
+%N A052847 G.f.: 1 / Product_{k>=1} (1-x^k)^(k-1).
+%C A052847 Euler transform of sequence [0,1,2,3,...]. - _Michael Somos_, Jul 02 2004
+%C A052847 Number of partitions of n objects of 2 colors, where each part must contain at least one of each color. - _Franklin T. Adams-Watters_, Jan 23 2006
+%C A052847 Number of partitions of n without 1s, one kind of 2s, two kinds of 3s, etc. - _Joerg Arndt_, Jul 31 2011
+%C A052847 From _Vaclav Kotesovec_, Oct 17 2015: (Start)
+%C A052847 In general, if v>=0 and g.f. = Product_{k>=1} 1/(1-x^(k+v))^k, then a(n) ~ d1(v) * n^(v^2/6 - 25/36) * exp(-Pi^4 * v^2 / (432*Zeta(3)) + 3*Zeta(3)^(1/3) * n^(2/3)/2^(2/3) - v * Pi^2 * n^(1/3) / (3 * 2^(4/3) * Zeta(3)^(1/3))) / (sqrt(3*Pi) * 2^(v^2/6 + 11/36) * Zeta(3)^(v^2/6 - 7/36)), where Zeta(3) = A002117.
+%C A052847 d1(v) = exp(Integral_{x=0..infinity} (1/(x*exp((v-1)*x) * (exp(x)-1)^2) - (6*v^2-1) / (12*x*exp(x)) + v/x^2 - 1/x^3) dx).
+%C A052847 d1(v) = (exp(Zeta'(-1) - v*Zeta'(0))) / Product_{j=0..v-1} j!, where Zeta'(0) = -A075700, Zeta'(-1) = A084448 and Product_{j=0..v-1} j! = A000178(v-1).
+%C A052847 d1(v) = exp(1/12) * (2*Pi)^(v/2) / (A * G(v+1)), where A = A074962 is the Glaisher-Kinkelin constant and G is the Barnes G-function.
+%C A052847 (End)
+%H A052847 Vaclav Kotesovec, <a href="/A052847/b052847.txt">Table of n, a(n) for n = 0..1000</a>
+%H A052847 INRIA Algorithms Project, <a href="http://ecs.inria.fr/services/structure?nbr=815">Encyclopedia of Combinatorial Structures 815</a>
+%H A052847 Vaclav Kotesovec, <a href="/A052847/a052847.jpg">Graph - The asymptotic ratio</a>
+%F A052847 a(n) = 1/n*Sum_{k=1..n} (sigma[2](k)-sigma[1](k))*a(n-k).
+%F A052847 G.f.: exp( Sum_{k>0} ( x^k / (1 - x^k) )^2 / k ).
+%F A052847 G.f.: exp( sum(n>=0, (sigma[2](n)-sigma[1](n)) *x^n/n ) ). - _Joerg Arndt_, Jul 31 2011
+%F A052847 a(n) ~ 2^(1/36) * Zeta(3)^(1/36) * exp(1/12 - Pi^4/(432*Zeta(3)) - Pi^2 * n^(1/3) / (3 * 2^(4/3) * Zeta(3)^(1/3)) + 3 * Zeta(3)^(1/3) * n^(2/3) / 2^(2/3)) / (A * 3^(1/2) * n^(19/36)), where A = A074962 = 1.2824271291... is the Glaisher-Kinkelin constant. - _Vaclav Kotesovec_, Mar 07 2015
+%e A052847 1 + x^2 + 2*x^3 + 4*x^4 + 6*x^5 + 12*x^6 + 18*x^7 + 33*x^8 + 52*x^9 + ...
+%e A052847 From _Gus Wiseman_, Jan 22 2019: (Start)
+%e A052847 The partitions described in Franklin T. Adams-Watters's comment are (n = 2 through 6):
+%e A052847   {{12}}  {{112}}  {{1112}}    {{11112}}    {{111112}}
+%e A052847           {{122}}  {{1122}}    {{11122}}    {{111122}}
+%e A052847                    {{1222}}    {{11222}}    {{111222}}
+%e A052847                    {{12}{12}}  {{12222}}    {{112222}}
+%e A052847                                {{12}{112}}  {{122222}}
+%e A052847                                {{12}{122}}  {{112}{112}}
+%e A052847                                             {{112}{122}}
+%e A052847                                             {{12}{1112}}
+%e A052847                                             {{12}{1122}}
+%e A052847                                             {{12}{1222}}
+%e A052847                                             {{122}{122}}
+%e A052847                                             {{12}{12}{12}}
+%e A052847 (End)
+%p A052847 spec := [S,{B=Sequence(Z,1 <= card),C=Prod(B,B),S= Set(C)},unlabeled]: seq(combstruct[count](spec, size=n), n=0..20);
+%p A052847 with(numtheory): etr:= proc(p) local b; b:=proc(n) option remember; local d, j; if n=0 then 1 else add(add(d*p(d), d=divisors(j)) *b(n-j), j=1..n)/n fi end end: a:=etr(n-> n-1): seq(a(n), n=0..50); # _Vaclav Kotesovec_, Mar 04 2015 after _Alois P. Heinz_
+%t A052847 Clear[a]; a[n_]:= a[n] = 1/n*Sum[(DivisorSigma[2,k]-DivisorSigma[1,k])*a[n-k],{k,1,n}]; a[0]=1; Table[a[n],{n,0,100}] (* _Vaclav Kotesovec_, Mar 04 2015 *)
+%t A052847 nmax = 40; CoefficientList[Series[Product[1/(1-x^(k+1))^k, {k, 1, nmax}], {x, 0, nmax}], x] (* _Vaclav Kotesovec_, Oct 16 2015 *)
+%o A052847 (PARI) {a(n) = if( n<0, 0, polcoeff( 1 / prod(k=1, n, (1 - x^k + x*O(x^n))^(k-1)), n))}
+%Y A052847 Cf. A005380, A000203, A001157, A052812.
+%Y A052847 Cf. A000219 (v=0), A052847 (v=1), A263358 (v=2), A263359 (v=3), A263360 (v=4), A263361 (v=5), A263362 (v=6), A263363 (v=7), A263364 (v=8).
+%Y A052847 Cf. A054974, A321407, A321760, A323654, A323655, A323656.
+%K A052847 easy,nonn
+%O A052847 0,4
+%A A052847 encyclopedia(AT)pommard.inria.fr, Jan 25 2000
+%E A052847 Edited by _Vladeta Jovovic_, Sep 10 2002

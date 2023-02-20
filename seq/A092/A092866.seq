@@ -1,0 +1,47 @@
+%I A092866
+%S A092866 0,4,49,166,543,1237,2511,4762,7777,12262,18933,28504,39078,56065,
+%T A092866 73879,95962,124653,164761,203259,258646,311233,377932,458793,560755,
+%U A092866 648936,775258,908893,1056520,1215087,1428193,1607871,1866007,2111488,2399545,2694010,3040201,3356433,3811387,4253074,4720102,5180466,5806687,6324906,7035949,7690900,8392036,9180330,10136287,10894551,11930833
+%N A092866 Number of intersections inside an equilateral triangular figure formed by the straight line segments mutually connecting all vertices and all points that divide the sides into n equal parts. If three or more lines meet at an interior point this intersection is counted only once.
+%C A092866 A detailed example for n=5 is given at the Pfoertner link.
+%H A092866 Jessica Gonzalez, <a href="/A092866/a092866.png">Illustration of a(4)=166</a>
+%H A092866 Hugo Pfoertner, <a href="/A092866/a092866.pdf">Intersections of diagonals in polygons of triangular shape.</a>
+%H A092866 Bjorn Poonen and Michael Rubinstein, <a href="http://math.mit.edu/~poonen/papers/ngon.pdf">The number of intersection points made by the diagonals of a regular polygon.</a>
+%H A092866 Cynthia Miaina Rasamimanananivo and Max Alekseyev, <a href="/A092866/a092866.py.txt">Sage program for this sequence</a>
+%H A092866 <a href="/index/Pol#Poonen">Sequences formed by drawing all diagonals in regular polygon</a>
+%F A092866 a(n) = A274585(n) - 3n.
+%e A092866 a(2)=4 because there are 3 intersection points between the triangle medians and the line segments connecting the midpoints of the sides plus the intersection of the 3 medians at the centroid.
+%p A092866 Inter:= proc(p1x,p1y,p2x,p2y,q1x,q1y,q2x,q2y)
+%p A092866   local det,x,y;
+%p A092866   det:= p1x*q1y-p1x*q2y-p1y*q1x+p1y*q2x-p2x*q1y+p2x*q2y+p2y*q1x-p2y*q2x;
+%p A092866   if det = 0 then return NULL fi;
+%p A092866   x:= (p1x*p2y*q1x-p1x*p2y*q2x-p1x*q1x*q2y+p1x*q1y*q2x-p1y*p2x*q1x+p1y*p2x*q2x+p2x*q1x*q2y-p2x*q1y*q2x)/det;
+%p A092866   y:= (p1x*p2y*q1y-p1x*p2y*q2y-p1y*p2x*q1y+p1y*p2x*q2y-p1y*q1x*q2y+p1y*q1y*q2x+p2y*q1x*q2y-p2y*q1y*q2x)/det;
+%p A092866   if x >0 and y > 0 and x + y < 1 then [x,y]
+%p A092866   else NULL
+%p A092866   fi
+%p A092866 end proc:
+%p A092866 F:= proc(n) local A,B,C,Pairs,Pts;
+%p A092866      A:= [seq([j/n,0],j=0..n)];
+%p A092866      B:= [seq([0,j/n],j=0..n)];
+%p A092866      C:= [seq([j/n,1-j/n],j=0..n)];
+%p A092866      Pairs:= [seq(seq([A[i],B[j]],i=2..n+1),j=2..n+1),
+%p A092866               seq(seq([A[i],C[j]],i=1..n),j=1..n),
+%p A092866               seq(seq([B[i],C[j]],i=1..n),j=2..n+1)];
+%p A092866      Pts:= {seq(seq(Inter(op(Pairs[i][1]),op(Pairs[i][2]),op(Pairs[j][1]),op(Pairs[j][2])),j=1..i-1),i=2..nops(Pairs))};
+%p A092866      nops(Pts);
+%p A092866 end proc:
+%p A092866 map(F, [$1..20]); # _Robert Israel_, Jun 30 2016
+%t A092866 Inter[{p1x_, p1y_}, {p2x_, p2y_}, {q1x_, q1y_}, {q2x_, q2y_}] := Module[ {det, x, y}, det = p1x q1y - p1x q2y - p1y q1x + p1y q2x - p2x q1y + p2x q2y + p2y q1x - p2y q2x; If[det == 0, Return[Nothing]]; x = (p1x p2y q1x - p1x p2y q2x - p1x q1x q2y + p1x q1y q2x - p1y p2x q1x + p1y p2x q2x + p2x q1x q2y - p2x q1y q2x)/det; y = (p1x p2y q1y - p1x p2y q2y - p1y p2x q1y + p1y p2x q2y - p1y q1x q2y + p1y q1y q2x + p2y q1x q2y - p2y q1y q2x)/det; If[x > 0 && y > 0 && x + y < 1, {x, y}, Nothing]];
+%t A092866 F[n_] := F[n] = Module[{A, B, K, Pairs, Pts}, A = Table[{j/n, 0}, {j, 0, n}]; B = Table[{0, j/n}, {j, 0, n}]; K = Table[{j/n, 1 - j/n}, {j, 0, n}]; Pairs = {Table[Table[{A[[i]], B[[j]]}, {i, 2, n+1}], {j, 2, n+1}], Table[Table[{A[[i]], K[[j]]}, {i, 1, n}], {j, 1, n}], Table[Table[ {B[[i]], K[[j]]}, {i, 1, n}], {j, 2, n+1}]} // Flatten[#, 2]&; Pts = Table[Table[Inter[Pairs[[i, 1]], Pairs[[i, 2]], Pairs[[j, 1]], Pairs[[j, 2]]], {j, 1, i-1}], {i, 2, Length[Pairs]}]; Flatten[Pts, 1] // Union // Length];
+%t A092866 Table[Print[n, " ", F[n]]; F[n], {n, 1, 20}] (* _Jean-François Alcover_, Apr 11 2019, after _Robert Israel_ *)
+%Y A092866 Cf. A092867 (regions formed by the diagonals), A274585 (points both inside and on the triangle sides), A274586 (edges).
+%Y A092866 Cf. A006561 (number of intersections of diagonals of regular n-gon), A091908 (intersections between line segments connecting vertices with subdivision points on opposite side).
+%K A092866 nonn
+%O A092866 1,2
+%A A092866 _Hugo Pfoertner_, Mar 10 2004
+%E A092866 a(1) = 0 prepended by _Max Alekseyev_, Jun 29 2016
+%E A092866 a(4) corrected and a(6)-a(20) added by _Cynthia Miaina Rasamimanananivo_, Jun 28 2016
+%E A092866 a(20) corrected by _Robert Israel_, Jun 30 2016
+%E A092866 a(21)-a(50) from _Cynthia Miaina Rasamimanananivo_, Jun 30 - Aug 23, 2016
+%E A092866 "Equilateral" added to definition by _N. J. A. Sloane_, May 13 2020

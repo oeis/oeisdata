@@ -1,0 +1,91 @@
+%I A007063 M2387
+%S A007063 1,3,5,4,10,7,15,8,20,9,18,24,31,14,28,22,42,35,33,46,53,6,36,23,2,55,
+%T A007063 62,59,76,65,54,11,34,48,70,79,99,95,44,97,58,84,25,13,122,83,26,115,
+%U A007063 82,91,52,138,67,90,71,119,64,37,81,39,169,88,108,141,38,16,146,41,21
+%N A007063 Main diagonal of Kimberling's expulsion array (A035486).
+%C A007063 From _Clark Kimberling_ Aug 05 2022, Oct 24 2022: (Start)
+%C A007063 Eight such arrays (including A035486 and A356026) have been coded by _Peter J. C. Moses_ using
+%C A007063 R for "right side of expelled (number)",
+%C A007063 L for "left side",
+%C A007063 I for "inner", i.e., next to expelled, and
+%C A007063 O for "outer", i.e., farthest from expelled. For example, the array A035486 (and diagonal A007063) are coded as RILI. For the eight codes see Example and Mathematica. It is conjectured that six of the eight diagonal sequences are permutations of the positive integers. (End)
+%D A007063 D. Gale, Tracking the Automatic Ant: And Other Mathematical Explorations, ch. 5, p. 27. Springer, 1998.
+%D A007063 R. K. Guy, Unsolved Problems in Number Theory, 3rd ed., Springer, 2004; Section E35, p. 359.
+%D A007063 N. J. A. Sloane and Simon Plouffe, The Encyclopedia of Integer Sequences, Academic Press, 1995 (includes this sequence).
+%H A007063 Enrique Pérez Herrero, <a href="/A007063/b007063.txt">Table of n, a(n) for n = 1..100000</a>
+%H A007063 Enrique Pérez Herrero, <a href="http://oeis.org/wiki/User:Enrique_P%C3%A9rez_Herrero/Kimberling">Kimberling's Expulsion Array</a>
+%H A007063 Clark Kimberling, <a href="https://cms.math.ca/crux/backfile/Crux_v17n02_Feb.pdf">Problem 1615</a>, Crux Mathematicorum, Vol. 17 (2) 44 1991; <a href="https://cms.math.ca/crux/backfile/Crux_v18n03_Mar.pdf">Solution to Problem 1615</a>, Crux Mathematicorum, Vol. 18, March 1992, pp. 82-83.
+%H A007063 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/KimberlingSequence.html">Kimberling Sequence</a>
+%F A007063 a(theta(k)) = 3*theta(k)-(k+1), where theta(k) = Sum_{i=0..k-1} 2^floor(i/3). - _Enrique Pérez Herrero_, Feb 23 2010
+%e A007063 The eight diagonals described in Comments:
+%e A007063 A007053 = RILI = (1, 3, 5, 4, 10,  7, 15,  8, 20,  9, 18, 24, 31, 14, ... )
+%e A007063 A282348 = ROLO = (1, 3, 5, 2,  8,  9,  4, 10,  7, 20, 12, 24, 14, 23, ... )
+%e A007063 A356376 = LORO = (1, 3, 5, 6,  4, 11, 12,  9, 13, 15, 23,  7, 27, 16, ... )
+%e A007063 A356026 = LIRI = (1, 3, 5, 7,  4, 12, 10, 17,  6, 22, 15, 19, 24, 33, ... )
+%e A007063 A356777 = ROLI = (1, 3, 5, 4,  8,  6, 10, 15,  2,  9, 13, 26, 11, 12, ... )
+%e A007063 A356778 = RILO = (1, 3, 5, 6,  2, 10,  9, 15,  8, 20, 19,  7, 21, 31, ... )
+%e A007063 A356779 = LORI = (1, 3, 5, 7,  4, 12, 11, 17, 10, 22, 21,  9, 23, 33, ... )
+%e A007063 A356780 = LIRO = (1, 3, 5, 6,  4, 11, 13,  2,  7, 14, 24,  9, 10, 31, ... )
+%t A007063 K[i_, j_] := i + j - 1 /; (j >= 2 i - 3);
+%t A007063 K[i_, j_] := K[i - 1, i - j/2 - 1] /; (EvenQ[j] && (j < 2 i - 3));
+%t A007063 K[i_, j_] := K[i - 1, i + (j - 1)/2] /; (OddQ[j] && (j < 2 i - 3));
+%t A007063 A007063[i_] := A007063[i] = K[i, i]; SetAttributes[A007063, Listable] (* _Enrique Pérez Herrero_, Feb 09 2010 *)
+%t A007063 (* Next program generates the 8 arrays with highlighted diagonal sequences. *)
+%t A007063 len = 1000;
+%t A007063 roli = Join[{{1}},
+%t A007063    NestList[
+%t A007063     Join[#[[Riffle[Range[Length[#], (Length[#] + 3)/2, -1],
+%t A007063          Range[(Length[#] - 1)/2, 1, -1]]]],
+%t A007063       Range[#, # + 2] &[(3 Length[#] + 1)/2]] &, {2, 3, 4}, len]];
+%t A007063 rili = Join[{{1}},
+%t A007063   NestList[Join[#[[Riffle[Range[(Length[#] + 3)/2, Length[#]],
+%t A007063         Range[(Length[#] - 1)/2, 1, -1]]]],
+%t A007063      Range[#, # + 2] &[(3 Length[#] + 1)/2]] &, {2, 3, 4},
+%t A007063    len]];(*A007063*)
+%t A007063 rolo = Join[{{1}},
+%t A007063   NestList[Join[#[[Riffle[Range[Length[#], (Length[#] + 3)/2, -1],
+%t A007063         Range[1, (Length[#] - 1)/2]]]],
+%t A007063      Range[#, # + 2] &[(3 Length[#] + 1)/2]] &, {2, 3, 4},
+%t A007063    len]];(*A282348*)
+%t A007063 rilo = Join[{{1}},
+%t A007063   NestList[Join[#[[Riffle[Range[(Length[#] + 3)/2, Length[#]],
+%t A007063         Range[1, (Length[#] - 1)/2, 1]]]],
+%t A007063      Range[#, # + 2] &[(3 Length[#] + 1)/2]] &, {2, 3, 4}, len]];
+%t A007063 lori = Join[{{1}},
+%t A007063    NestList[
+%t A007063     Join[#[[Riffle[Range[1, (Length[#] - 1)/2],
+%t A007063          Range[(Length[#] + 3)/2, Length[#]]]]],
+%t A007063       Range[#, # + 2] &[(3 Length[#] + 1)/2]] &, {2, 3, 4}, len]];
+%t A007063 liri = Join[{{1}},
+%t A007063   NestList[Join[#[[Riffle[Range[(Length[#] - 1)/2, 1, -1],
+%t A007063         Range[(Length[#] + 3)/2, Length[#]]]]],
+%t A007063      Range[#, # + 2] &[(3 Length[#] + 1)/2]] &, {2, 3, 4},
+%t A007063    len]];(*A356026*)
+%t A007063 loro = Join[{{1}},
+%t A007063   NestList[Join[#[[Riffle[Range[1, (Length[#] - 1)/2],
+%t A007063         Range[Length[#], (Length[#] + 3)/2, -1]]]],
+%t A007063      Range[#, # + 2] &[(3 Length[#] + 1)/2]] &, {2, 3, 4}, len]];
+%t A007063 liro = Join[{{1}},
+%t A007063    NestList[
+%t A007063     Join[#[[Riffle[Range[(Length[#] - 1)/2, 1, -1],
+%t A007063          Range[Length[#], (Length[#] + 3)/2, -1]]]],
+%t A007063       Range[#, # + 2] &[(3 Length[#] + 1)/2]] &, {2, 3, 4}, len]];
+%t A007063 (Map[{#, Take[Flatten[Map[Take[#, {(Length[#] + 1)/2}] &, #]], 200] &[
+%t A007063       ToExpression[#]]} &, {"rolo", "rilo", "roli", "rili", "loro",
+%t A007063     "liro", "lori", "liri"}]) // ColumnForm
+%t A007063 rows = 10; Map[{#,
+%t A007063    Grid[Map[Map[StringPadLeft[ToString[#], 2] &, #] &,
+%t A007063      Take[ToExpression[#], rows]],
+%t A007063     Frame -> {None, None, Map[{#, #} -> True &, Range[rows]]},
+%t A007063     FrameStyle -> Directive[Red]]} &, {"rolo", "rilo", "roli", "rili",
+%t A007063    "loro", "liro", "lori", "liri"}]
+%t A007063 (* _Peter J. C. Moses_, 24 October 2022; _Clark Kimberling_, Oct 24 2022 *)
+%o A007063 (PARI) K(i,j) = { my(i1,j1);i1=i; j1=j;
+%o A007063 while(j1<(2*i1-3),if(j1%2,j1=i1+((j1-1)/2),j1=i1-((j1+2)/2));i1--;);
+%o A007063 return(i1+j1-1);}
+%o A007063 A007063(i)=K(i,i); \\ _Enrique Pérez Herrero_, Feb 21 2010
+%Y A007063 Cf. A175312, A006852, A035486, A038807, A282348,  A356376,  A356026, A356377, A356378, A356379, A356380.
+%K A007063 nonn,nice,easy
+%O A007063 1,2
+%A A007063 _N. J. A. Sloane_, _Mira Bernstein_
+%E A007063 More terms from _James A. Sellers_, Dec 23 1999

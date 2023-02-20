@@ -1,0 +1,60 @@
+%I A125053
+%S A125053 1,1,3,1,5,15,21,15,5,61,183,285,327,285,183,61,1385,4155,6681,8475,
+%T A125053 9129,8475,6681,4155,1385,50521,151563,247065,325947,378105,396363,
+%U A125053 378105,325947,247065,151563,50521,2702765,8108295,13311741,17908935
+%N A125053 Variant of triangle A008301, read by rows of 2*n+1 terms, such that the first column is the secant numbers (A000364).
+%C A125053 Foata and Han refer to this as the triangle of Poupard numbers h_n(k). - _N. J. A. Sloane_, Feb 17 2014
+%C A125053 Central terms (A125054) equal the binomial transform of the tangent numbers (A000182).
+%H A125053 Reinhard Zumkeller, <a href="/A125053/b125053.txt">Rows n = 0..100 of triangle, flattened</a>
+%H A125053 Dominique Foata and Guo-Niu Han, <a href="http://www-irma.u-strasbg.fr/~foata/paper/pub123Seidel.pdf">Seidel Triangle Sequences and Bi-Entringer Numbers</a>, Nov 20 2013;
+%H A125053 Foata, Dominique; Han, Guo-Niu; Strehl, Volker <a href="https://doi.org/10.1016/j.laa.2016.09.016">The Entringer-Poupard matrix sequence</a>.  Linear Algebra Appl. 512, 71-96 (2017).
+%F A125053 Sum_{k=0..2n} C(2n,k)*T(n,k) = 4^n * A000182(n), where A000182 are the tangent numbers.
+%F A125053 Sum_{k=0..2n} (-1)^n*C(2n,k)*T(n,k) = (-4)^n.
+%e A125053 If we write the triangle like this:
+%e A125053 ......................... ...1;
+%e A125053 ................... ...1, ...3, ...1;
+%e A125053 ............. ...5, ..15, ..21, ..15, ...5;
+%e A125053 ....... ..61, .183, .285, .327, .285, .183, ..61;
+%e A125053 . 1385, 4155, 6681, 8475, 9129, 8475, 6681, 4155, 1385;
+%e A125053 then the first nonzero term is the sum of the previous row:
+%e A125053 1385 = 61 + 183 + 285 + 327 + 285 + 183 + 61,
+%e A125053 the next term is 3 times the first:
+%e A125053 4155 = 3*1385,
+%e A125053 and the remaining terms in each row are obtained by the rule illustrated by:
+%e A125053 6681 = 2*4155 - 1385 - 4*61;
+%e A125053 8475 = 2*6681 - 4155 - 4*183;
+%e A125053 9129 = 2*8475 - 6681 - 4*285;
+%e A125053 8475 = 2*9129 - 8475 - 4*327;
+%e A125053 6681 = 2*8475 - 9129 - 4*285;
+%e A125053 4155 = 2*6681 - 8475 - 4*183;
+%e A125053 1385 = 2*4155 - 6681 - 4*61.
+%e A125053 An alternate recurrence is illustrated by:
+%e A125053 4155 = 1385 + 2*(61 + 183 + 285 + 327 + 285 + 183 + 61);
+%e A125053 6681 = 4155 + 2*(183 + 285 + 327 + 285 + 183);
+%e A125053 8475 = 6681 + 2*(285 + 327 + 285);
+%e A125053 9129 = 8475 + 2*(327);
+%e A125053 and then for k>n, T(n,k) = T(n,2*n-k).
+%p A125053 T := proc(n, k) option remember; local j;
+%p A125053   if n = 1 then 1
+%p A125053 elif k = 1 then add(T(n-1, j), j=1..2*n-3)
+%p A125053 elif k = 2 then 3*T(n, 1)
+%p A125053 elif k > n then T(n, 2*n-k)
+%p A125053 else 2*T(n, k-1) - T(n, k-2) - 4*T(n-1, k-2)
+%p A125053   fi end:
+%p A125053 seq(print(seq(T(n,k), k=1..2*n-1)), n=1..5); # _Peter Luschny_, May 11 2014
+%t A125053 t[n_, k_] := t[n, k] = If[2*n < k || k < 0, 0, If[n == 0 && k == 0, 1, If[k == 0, Sum[t[n-1, j], {j, 0, 2*n-2}], If[k <= n, t[n, k-1] + 2*Sum[t[n-1, j], {j, k-1, 2*n-1-k}], t[n, 2*n-k]]]]]; Table[t[n, k], {n, 0, 6}, {k, 0, 2*n}] // Flatten (* _Jean-François Alcover_, Dec 06 2012, translated from Pari *)
+%o A125053 (PARI) T(n,k)=if(2*n<k || k<0,0,if(n==0 && k==0,1,if(k==0,sum(j=0,2*n-2,T(n-1,j)), if(k<=n,T(n,k-1)+2*sum(j=k-1,2*n-1-k,T(n-1,j)),T(n,2*n-k)))))
+%o A125053 (Haskell)
+%o A125053 a125053 n k = a125053_tabf !! n !! k
+%o A125053 a125053_row n = a125053_tabf !! n
+%o A125053 a125053_tabf = iterate f [1] where
+%o A125053 f zs = zs' ++ reverse (init zs') where
+%o A125053 zs' = (sum zs) : g (map (* 2) zs) (sum zs)
+%o A125053 g [x] y = [x + y]
+%o A125053 g xs y = y' : g (tail $ init xs) y' where y' = sum xs + y
+%o A125053 -- _Reinhard Zumkeller_, Mar 17 2012
+%Y A125053 Cf. A008301, A000364 (secant numbers, which are the row sums), A125054 (central terms), A125055, A000182, A008282.
+%Y A125053 Cf. A210111 (left half).
+%K A125053 nonn,tabf,nice
+%O A125053 0,3
+%A A125053 _Paul D. Hanna_, Nov 21 2006, Dec 20 2006

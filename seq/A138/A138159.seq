@@ -1,0 +1,43 @@
+%I A138159
+%S A138159 1,1,2,5,1,14,6,3,0,1,42,27,24,7,9,6,0,4,0,0,1,132,110,133,70,74,54,
+%T A138159 37,32,24,12,16,6,6,8,0,0,5,0,0,0,1,429,429,635,461,507,395,387,320,
+%U A138159 260,232,191,162,104,130,100,24,74,62,18,32,10,30,13,8,0,10,10,0,0,0,6,0,0,0,0,1
+%N A138159 Triangle read by rows: T(n,k) is the number of permutations of [n] having k occurrences of the pattern 321 (n>=1, 0<=k<=n(n-1)(n-2)/6).
+%C A138159 Row n has 1 + n(n-1)(n-2)/6 terms.
+%C A138159 Sum of row n is n! (A000142).
+%C A138159 T(n,0) = A000108(n) (the Catalan numbers).
+%C A138159 T(n,1) = A003517(n-1).
+%C A138159 T(n,2) = A001089(n).
+%C A138159 Sum_{k>=0} k * T(n,k) = A001810(n).
+%H A138159 Alois P. Heinz, <a href="/A138159/b138159.txt">Rows n = 0..15, flattened</a>
+%H A138159 D. Callan, <a href="http://arxiv.org/abs/math.CO/0211380">A recursive bijective approach to counting permutations containing 3-letter patterns</a>, arXiv:math/0211380 [math.CO], 2002.
+%H A138159 FindStat - Combinatorial Statistic Finder, <a href="http://www.findstat.org/StatisticsDatabase/St000002/">The number of occurrences of the pattern [1,2,3] inside a permutation of length at least 3</a>
+%H A138159 M. Fulmek, <a href="http://dx.doi.org/10.1016/S0196-8858(02)00501-8">Enumeration of permutations containing a prescribed number of occurrences of a pattern of length three</a>, Adv. Appl. Math., 30, 2003, 607-632. also Arxiv CO/0112092.
+%H A138159 Toufik Mansour, Sherry H. F. Yan and Laura L. M. Yang, <a href="http://dx.doi.org/10.1016/j.disc.2006.01.011">Counting occurrences of 231 in an involution</a>, Discrete Mathematics 306 (2006), pages 564-572.
+%H A138159 J. Noonan, <a href="http://dx.doi.org/10.1016/0012-365X(95)00247-T">The number of permutations containing exactly one increasing subsequence of length three</a>, Discrete Math. 152 (1996), no. 1-3, 307-313.
+%H A138159 J. Noonan and D. Zeilberger, <a href="http://arXiv.org/abs/math.CO/9808080">The Enumeration of Permutations With a Prescribed Number of "Forbidden" Patterns</a>, arXiv:math/9808080 [math.CO], 1998.
+%H A138159 J. Noonan and D. Zeilberger, <a href="http://dx.doi.org/10.1006/aama.1996.0016">The enumeration of permutations with a prescribed number of "forbidden" patterns</a>, Adv. Appl. Math., 17, 1996, 381-407.
+%F A138159 The number of 321-patterns of a given permutation p of [n] is given by Sum(L[i]R[i],i=1..n), where L (R) is the left (right) inversion vector of p. L and R are related by R[i]+i=p[i]+L[i] (the given Maple program makes use of this approach). References contain formulas and generating functions for the first few columns (some are only conjectured).
+%e A138159 T(4,2) = 3 because we have 4312, 4231 and 3421.
+%e A138159 Triangle starts:
+%e A138159     1;
+%e A138159     1;
+%e A138159     2;
+%e A138159     5,   1;
+%e A138159    14,   6,   3,  0,  1;
+%e A138159    42,  27,  24,  7,  9,  6,  0,  4,  0,  0,  1;
+%e A138159   132, 110, 133, 70, 74, 54, 37, 32, 24, 12, 16, 6, 6, 8, 0, 0, 5, 0, 0, 0, 1;
+%e A138159   ...
+%p A138159 # The following Maple program yields row 9 of the triangle; change the value of n to obtain other rows.
+%p A138159 n:=9: with(combinat): P:=permute(n): f:=proc(k) local L: L:=proc(j) local ct, i: ct:=0: for i to j-1 do if P[k][j] < P[k][i] then ct:=ct+1 else end if end do: ct end proc: add(L(j)*(L(j)+P[k][j]-j),j=1..n) end proc: a:=sort([seq(f(k),k=1..factorial(n))]): for h from 0 to (1/6)*n*(n-1)*(n-2) do c[h]:=0: for m to factorial(n) do if a[m]=h then c[h]:=c[h]+1 else end if end do end do: seq(c[h],h=0..(1/6)*n*(n-1)*(n-2));
+%p A138159 # second Maple program:
+%p A138159 b:= proc(s, c) option remember; (n-> `if`(n=0, x^c, add(b(s minus {j},
+%p A138159       (t-> (j-n+t)*t+c)(nops(select(x-> x>j, s)))), j=s)))(nops(s))
+%p A138159     end:
+%p A138159 T:= n-> (p-> seq(coeff(p, x, i), i=0..degree(p)))(b({$1..n}, 0)):
+%p A138159 seq(T(n), n=0..9);  # _Alois P. Heinz_, Dec 01 2021
+%t A138159 ro[n_] := With[{}, P = Permutations[Range[n]]; f[k_] := With[{}, L[j_] := With[{}, ct = 0; Do[If[P[[k, j]] < P[[k, i]], ct = ct + 1], {i, 1, j - 1}]; ct]; Sum[L[j]*(L[j] + P[[k, j]] - j), {j, 1, n}]]; a = Sort[Table[f[k], {k, 1, n!}]]; Do[c[h] = 0; Do[If[a[[m]] == h, c[h] = c[h] + 1], {m, 1, n!}], {h, 0, (1/6)*n*(n - 1)*(n - 2)}]; Table[c[h], {h, 0, (1/6)*n*(n - 1)*(n - 2)}]]; Flatten[Table[ro[n], {n, 1, 7}]] (* _Jean-François Alcover_, Sep 01 2011, after Maple *)
+%Y A138159 Cf. A000108, A000142, A000292, A003517, A001089, A001810, A056986, A263771.
+%K A138159 nonn,look,tabf
+%O A138159 0,3
+%A A138159 _Emeric Deutsch_, Mar 27 2008

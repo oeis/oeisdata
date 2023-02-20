@@ -1,0 +1,41 @@
+%I A091613
+%S A091613 1,1,1,3,0,1,4,3,0,1,7,6,2,0,1,14,10,5,2,0,1,23,23,11,4,2,0,1,39,50,
+%T A091613 22,10,4,2,0,1,71,99,48,22,9,4,2,0,1,124,200,105,46,21,9,4,2,0,1,214,
+%U A091613 404,223,101,46,20,9,4,2,0,1,378,805,468,218,98,45,20,9,4,2,0,1,661,1599,979,466,213,98,44,20,9,4,2,0,1
+%N A091613 Triangle: T(n,k) = number of compositions (ordered partitions) of n such that some part is repeated consecutively k times and no part is repeated consecutively more than k times.
+%C A091613 Cf. A232294 - A128695 = column 3. - _Geoffrey Critzer_, Mar 24 2014
+%H A091613 Alois P. Heinz, <a href="/A091613/b091613.txt">Rows n = 1..100, flattened</a>
+%F A091613 G.f. for column k: 1/(1 - Sum_{i>=1} (x^i + x^(2*i) + ... + x^(k*i))/( 1 + x^i + x^(2*i) + ... + x^(k*i)) ) - 1/(1 - Sum_{i>=1} (x^i + x^(2*i) + ... + x^((k-1)*i))/( 1 + x^i + x^(2*i) + ... + x^((k-1)*i))). - _Geoffrey Critzer_, Mar 24 2014
+%e A091613 Triangle starts:
+%e A091613     1;
+%e A091613     1,   1;
+%e A091613     3,   0,   1;
+%e A091613     4,   3,   0,  1;
+%e A091613     7,   6,   2,  0,  1;
+%e A091613    14,  10,   5,  2,  0, 1;
+%e A091613    23,  23,  11,  4,  2, 0, 1;
+%e A091613    39,  50,  22, 10,  4, 2, 0, 1;
+%e A091613    71,  99,  48, 22,  9, 4, 2, 0, 1;
+%e A091613   124, 200, 105, 46, 21, 9, 4, 2, 0, 1;
+%e A091613   ...
+%e A091613 In the partition 3+3+2+2+2+1+3+3+1, 2 is repeated consecutively 3 times, no part is repeated consecutively more than 3 times. (3 appears 4 times nonconsecutively.)
+%p A091613 b:= proc(n, l, k) option remember; `if`(n=0, 1, add(`if`(
+%p A091613       i=l, 0, add(b(n-i*j, i, k), j=1..min(k, n/i))), i=1..n))
+%p A091613     end:
+%p A091613 T:= (n, k)-> b(n, 0, k)-b(n, 0, k-1):
+%p A091613 seq(seq(T(n, k), k=1..n), n=1..14);  # _Alois P. Heinz_, Feb 08 2017
+%t A091613 nn=15;Table[Take[Drop[Transpose[Map[PadRight[#,nn+1]&,Table[ CoefficientList[Series[1/(1-Sum[Sum[x^(j i),{i,1,k}]/Sum[x^(j i),{i,0,k}],{j,1,nn}])-1/(1-Sum[Sum[x^(j i),{i,1,k-1}]/Sum[x^(j i),{i,0,k-1}],{j,1,nn}]),{x,0,nn}],x],{k,1,nn}]]],1][[n]],n],{n,1,nn}]//Grid
+%t A091613 (* or *)
+%t A091613 Needs["Combinatorica`"];Table[Distribution[Map[Max,Map[Length,Map[Split, Level[Map[Permutations,IntegerPartitions[n,n]],{2}]],{2}]],Range[1,n]],{n,1,15}]//Grid (* _Geoffrey Critzer_, Mar 24 2014 *)
+%t A091613 b[n_, l_, k_] := b[n, l, k] = If[n == 0, 1, Sum[If[i == l, 0,
+%t A091613      Sum[b[n - i*j, i, k], {j, 1, Min[k, n/i]}]], {i, 1, n}]];
+%t A091613 T[n_, k_] := b[n, 0, k] - b[n, 0, k - 1];
+%t A091613 Table[T[n, k], {n, 1, 14}, {k, 1, n}] // Flatten (* _Jean-François Alcover_, Jun 04 2021, after _Alois P. Heinz_ *)
+%Y A091613 Row sums: A000079(n-1) (2^(n-1)).
+%Y A091613 Inverse: A091614.
+%Y A091613 Square: A091615.
+%Y A091613 Columns 1-6: A003242, A091616, A091617, A091618, A091619, A091620.
+%Y A091613 Convergent of columns: A034007.
+%K A091613 nonn,tabl
+%O A091613 1,4
+%A A091613 _Christian G. Bower_, Jan 23 2004

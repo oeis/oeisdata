@@ -1,0 +1,40 @@
+%I A056240
+%S A056240 2,3,4,5,8,7,15,14,21,11,35,13,33,26,39,17,65,19,51,38,57,23,95,46,69,
+%T A056240 92,115,29,161,31,87,62,93,124,155,37,217,74,111,41,185,43,123,86,129,
+%U A056240 47,215,94,141,188,235,53,329,106,159,212,265,59,371,61,177,122
+%N A056240 Smallest number whose prime divisors (taken with multiplicity) add to n.
+%C A056240 a(n) is the index of first occurrence of n in A001414.
+%C A056240 From _David James Sycamore_ and _Michel Marcus_, Jun 16 2017, Jun 28 2017: (Start)
+%C A056240 Recursive calculation of a(n):
+%C A056240 For prime p, a(p) = p.
+%C A056240 For even composite n, let P_n denote the largest prime < n-1 such that n-P_n is prime (except if n = 6).
+%C A056240 For odd composite n, let P_n denote the largest prime < n-1 such that n-3-P_n is prime.
+%C A056240 Conjecture: a(n) = min { q*a(n-q); q prime, P_n <= q < n-1 }.
+%C A056240 Examples:
+%C A056240 For n = 9998, P_9998 = 9967 and a(9998) = min { 9973*a(25), 9967*a(31) } = 9967*31 = 308977.
+%C A056240 For n = 875, P_875 = 859 and a(875) = min { 863*a(12), 859*a(16) } = 863*35 = 30205.
+%C A056240 Note: A000040 and A288313 are both subsequences of this sequence. (End)
+%H A056240 Reinhard Zumkeller, <a href="/A056240/b056240.txt">Table of n, a(n) for n = 2..10000</a>
+%H A056240 Hans Havermann, <a href="http://chesswanks.com/seq/sopfr/">Tables of sum-of-prime-factors sequences (overview with links to the first 50000 sums).</a>
+%F A056240 Trivial but essential: a(n) >= n. - _David A. Corneth_, Mar 23 2018
+%F A056240 a(n) >= n with equality iff n = 4 or n is prime. - _M. F. Hasler_, Jan 19 2019
+%e A056240 a(8) = 15 = 3*5 because 15 is the smallest number whose prime divisors sum to 8.
+%e A056240 a(10000) = 586519: Let pp(n) be the largest prime < n and the candidate being the current value that might be a(10000). Then we see that pp(10000 - 1) = 9973, giving a candidate 9973 * a(10000 - 9973) = 9973 * 92. pp(9973) = 9967, giving a candidate 9967 * a(10000 - 9967) = 9967 * 62. pp(9967) = 9949, giving the candidate 9949 * a(10000 - 9949) = 9962 * 188. This is larger than our candidate so we keep 9967 * 62 as our candidate. pp(9949) = 9941, giving a candidate 9941 * pp(10000 - 9941) = 9941 * 59. We see that (n - p) * a(p) >= (n - p) * p > candidate = 9941 * 59 for p > 59 so we stop iterating to conclude a(10000) = 9941 * 59 = 586519. - _David A. Corneth_, Mar 23 2018, edited by _M. F. Hasler_, Jan 19 2019
+%t A056240 a = Table[0, {75}]; Do[b = Plus @@ Flatten[ Table[ #1, {#2}] & @@@ FactorInteger[n]]; If[b < 76 && a[[b]] == 0, a[[b]] = n], {n, 2, 1000}]; a (* _Robert G. Wilson v_, May 04 2002 *)
+%t A056240 b[n_] := b[n] = Total[Times @@@ FactorInteger[n]];
+%t A056240 a[n_] := For[k = 2, True, k++, If[b[k] == n, Return[k]]];
+%t A056240 Table[a[n], {n, 2, 63}] (* _Jean-François Alcover_, Jul 03 2017 *)
+%o A056240 (Haskell)
+%o A056240 a056240 = (+ 1) . fromJust . (`elemIndex` a001414_list)
+%o A056240 -- _Reinhard Zumkeller_, Jun 14 2012
+%o A056240 (PARI) isok(k, n) = my(f=factor(k)); sum(j=1, #f~, f[j,1]*f[j,2]) == n;
+%o A056240 a(n) = my(k=2); while(!isok(k, n), k++); k; \\ _Michel Marcus_, Jun 21 2017
+%o A056240 (PARI) a(n) = {if(n < 7, return(n + 2*(n==6))); my(p = precprime(n), res); if(p == n, return(p), p = precprime(n - 2); res = p * a(n - p); while(res > (n - p) * p && p > 2, p = precprime(p - 1); res = min(res, a(n - p) * p)); res)} \\ _David A. Corneth_, Mar 23 2018
+%o A056240 (PARI) A056240(n, p=n-1, m=oo)=if(n<6 || isprime(n), n, n==6, 8, until(p<3 || (n-p=precprime(p-1))*p >= m=min(m,A056240(n-p)*p),); m) \\ _M. F. Hasler_, Jan 19 2019
+%Y A056240 Cf. A000040, A001414, A064502, A288313.
+%Y A056240 First column of array A064364, n>=2.
+%Y A056240 See A000792 for the maximal numbers whose prime factors sums up to n.
+%K A056240 nonn,easy
+%O A056240 2,1
+%A A056240 _Adam Kertesz_, Aug 19 2000
+%E A056240 More terms from _James A. Sellers_, Aug 25 2000

@@ -1,0 +1,76 @@
+%I A068873
+%S A068873 2,5,19,17,43,41,79,83,127,131,199,197,283,281,379,389,499,509,643,
+%T A068873 641,809,809,983,971,1171,1163,1381,1373,1609,1607,1861,1861,2137,
+%U A068873 2137,2437,2441,2749,2767,3109,3109,3457,3457,3833,3847,4243,4241,4663,4679,5119
+%N A068873 Smallest prime which is a sum of n distinct primes.
+%C A068873 Conjectured terms a(50)-a(76): 5147, 5623, 5591, 6079, 6101, 6599, 6607, 7151, 7151, 7699, 7699, 8273, 8293, 8893, 8893, 9521, 9547, 10211, 10223, 10889, 10891, 11597, 11617, 12343, 12373, 13099, 13127. - _Jean-François Alcover_, Apr 22 2020
+%D A068873 Shantanu Dey & Moloy De, Two conjectures on prime numbers, Journal of Recreational Mathematics, Vol. 36 (3), pp 205-206. Baywood Publ. Co, Amityville NY 2011.
+%H A068873 Jean-François Alcover, <a href="/A068873/a068873.txt">Conjectured terms up to a(200).</a>
+%F A068873 Min(a(n), A073619(n)) = A007504(n) for n > 1. - _Jonathan Sondow_, Jul 10 2012
+%e A068873 a(3) = 19 as 19 is the smallest prime which can be expressed as the sum of three primes as 19 = 3 + 5 + 11. a(4) = 17= 2+3+5+7. a(2)=A038609(1). a(3)=A124867(7). Further examples in A102330.
+%p A068873 # Number of ways to write n as a sum of k distinct primes, the smallest
+%p A068873 # being smalp
+%p A068873 sumkprims := proc(n,k,smalp)
+%p A068873     option remember;
+%p A068873     local a,res,pn;
+%p A068873     res := n-smalp ;
+%p A068873     if res < 0 then
+%p A068873         return 0;
+%p A068873     elif res > 0 and k <=0 then
+%p A068873         return 0;
+%p A068873     elif res = 0 and k = 1 then
+%p A068873         return 1;
+%p A068873     else
+%p A068873         pn := nextprime(smalp) ;
+%p A068873         a := 0 ;
+%p A068873         while pn <= res do
+%p A068873             a := a+procname(res,k-1,pn) ;
+%p A068873             pn := nextprime(pn) ;
+%p A068873         end do:
+%p A068873         a ;
+%p A068873     end if;
+%p A068873 end proc:
+%p A068873 # Number of ways of writing n as a sum of k distinct primes
+%p A068873 A000586k := proc(n,k)
+%p A068873     local a,i,smalp ;
+%p A068873     a := 0 ;
+%p A068873     for i from 1 do
+%p A068873         smalp := ithprime(i) ;
+%p A068873         if k*smalp > n then
+%p A068873             return a;
+%p A068873         end if;
+%p A068873         a := a+sumkprims(n,k,smalp) ;
+%p A068873     end do:
+%p A068873 end proc:
+%p A068873 # Smallest prime which is a sum of n distinct primes
+%p A068873 A068873 := proc(n)
+%p A068873     local a,i;
+%p A068873     a := A007504(n) ;
+%p A068873     a := nextprime(a-1) ;
+%p A068873     for i from 1 do
+%p A068873         if A000586k(a,n) > 0 then
+%p A068873             return a;
+%p A068873         end if;
+%p A068873         a := nextprime(a) ;
+%p A068873     end do:
+%p A068873 end proc: # _R. J. Mathar_, May 04 2014
+%o A068873 (PARI) a(n)=
+%o A068873 {
+%o A068873     my(P=primes(n),k=n,t);
+%o A068873     while(1,
+%o A068873         forvec(v=vector(n-1,i,[1,k-1]),
+%o A068873             t=sum(i=1,n-1,P[v[i]])+P[k];
+%o A068873             if(isprime(t),return(t))
+%o A068873         ,
+%o A068873             2 \\ flag: only strictly increasing vectors v
+%o A068873         );
+%o A068873         P=concat(P,nextprime(P[k]+1));
+%o A068873         k++
+%o A068873     );
+%o A068873 } \\ _Charles R Greathouse IV_, Sep 19 2015
+%Y A068873 Cf. A102330, A013918, A007504.
+%K A068873 nonn
+%O A068873 1,1
+%A A068873 _Amarnath Murthy_, Mar 19 2002
+%E A068873 More terms from _Sascha Kurz_, Feb 03 2003
+%E A068873 Corrected by _Ray Chandler_, Feb 02 2005

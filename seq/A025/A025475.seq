@@ -1,0 +1,93 @@
+%I A025475
+%S A025475 1,4,8,9,16,25,27,32,49,64,81,121,125,128,169,243,256,289,343,361,512,
+%T A025475 529,625,729,841,961,1024,1331,1369,1681,1849,2048,2187,2197,2209,
+%U A025475 2401,2809,3125,3481,3721,4096,4489,4913,5041,5329,6241,6561,6859,6889,7921,8192
+%N A025475 1 and the prime powers p^m where m >= 2, thus excluding the primes.
+%C A025475 Also nonprime n such that sigma(n)*phi(n) > (n-1)^2. - _Benoit Cloitre_, Apr 12 2002
+%C A025475 If p is a term of the sequence, then the index n for which a(n) = p is given by n := b(p) := 1 + Sum_{k>=2} PrimePi(p^(1/k)). Here, the sum has floor(log_2(p)) positive terms. For any m > 0, the greatest number n such that a(n) <= m is also given by b(m), thus, b(m) is the number of such prime powers <= m. - _Hieronymus Fischer_, May 31 2013
+%C A025475 That 8 and 9 are the only two consecutive integers in this sequence is known as Catalan's Conjecture and was proved in 2002 by Preda Mihăilescu. - _Geoffrey Critzer_, Nov 15 2015
+%H A025475 T. D. Noe, <a href="/A025475/b025475.txt">Table of n, a(n) for n = 1..10000</a>
+%H A025475 Romeo Meštrović, <a href="http://arxiv.org/abs/1305.1867">Generalizations of Carmichael numbers I,</a> arXiv:1305.1867v1 [math.NT], May 4, 2013.
+%H A025475 Preda Mihăilescu, <a href="https://web.archive.org/web/20070221085421/https://www.dpmms.cam.ac.uk/seminars/Kuwait/abstracts/L30.pdf">On Catalan's Conjecture</a>, Kuwait Foundation Lecture 30 - April 28, 2003.
+%H A025475 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/PrimePower.html">Prime Power</a>.
+%F A025475 The number of terms <= N is O(sqrt(N)*log N). [See Weisstein link] - _N. J. A. Sloane_, May 27 2022
+%F A025475 A005171(a(n))*A010055(a(n)) = 1. - _Reinhard Zumkeller_, Nov 01 2009
+%F A025475 A192280(a(n)) = 0 for n > 1. - _Reinhard Zumkeller_, Aug 26 2011
+%F A025475 A014963(a(n)) - A089026(a(n)) = A014963(a(n)) - 1. - _Eric Desbiaux_, May 18 2013
+%F A025475 From _Hieronymus Fischer_, May 31 2013: (Start)
+%F A025475 The greatest number n such that a(n) <= m is given by 1 + Sum_{k>=2} A000720(floor(m^(1/k))).
+%F A025475 Example 1:  m = 10^10 ==> n = 10085;
+%F A025475 Example 2:  m = 10^11 ==> n = 28157;
+%F A025475 Example 3:  m = 10^12 ==> n = 80071;
+%F A025475 Example 4:  m = 10^15 ==> n = 1962690. (End)
+%F A025475 Sum_{n>=2} 1/a(n) = Sum_{p prime} 1/(p*(p-1)) = A136141. - _Amiram Eldar_, Oct 11 2020
+%F A025475 From _Amiram Eldar_, Jan 28 2021: (Start)
+%F A025475 Product_{n>=2} (1 + 1/a(n)) = Product_{k>=2} zeta(k)/zeta(2*k) = 2.0729553047...
+%F A025475 Product_{n>=2} (1 - 1/a(n)) = A068982. (End)
+%p A025475 with(numtheory); A025475:=proc(q) local n; print(1);
+%p A025475 for n from 2 to q do if not isprime(n) then
+%p A025475   if type(phi(n)/(n-phi(n)),integer) then print(n);
+%p A025475 fi; fi; od; end: A025475(10^6); # _Paolo P. Lava_, May 23 2013
+%p A025475 # alternative implementation
+%p A025475 isA025475 := proc(n)
+%p A025475     if n < 1 then
+%p A025475         false;
+%p A025475     elif n = 1 then
+%p A025475         true;
+%p A025475     elif isprime(n) then
+%p A025475         false;
+%p A025475     elif nops(numtheory[factorset](n)) = 1 then
+%p A025475         true;
+%p A025475     else
+%p A025475         false;
+%p A025475     end if;
+%p A025475 end proc:
+%p A025475 A025475 := proc(n)
+%p A025475     option remember;
+%p A025475     local a;
+%p A025475     if n = 1 then
+%p A025475         1;
+%p A025475     else
+%p A025475         for a from procname(n-1)+1 do
+%p A025475             if isA025475(a) then
+%p A025475                 return a;
+%p A025475             end if;
+%p A025475         end do:
+%p A025475     end if;
+%p A025475 end proc:
+%p A025475 # _R. J. Mathar_, Jun 06 2013
+%p A025475 # another alternative
+%p A025475 N:= 10^5: # to get all terms <= N
+%p A025475 Primes:= select(isprime, [2,(2*i+1 $ i = 1 .. floor((sqrt(N)-1)/2))]):
+%p A025475 sort([1,seq(seq(p^i, i=2..floor(log[p](N))),p=Primes)]); # _Robert Israel_, Jul 27 2015
+%t A025475 A025475 = Select[ Range[ 2, 10000 ], ! PrimeQ[ # ] && Mod[ #, # - EulerPhi[ # ] ] == 0 & ]
+%t A025475 A025475 = Sort[ Flatten[ Table[ Prime[n]^i, {n, 1, PrimePi[ Sqrt[10^4]]}, {i, 2, Log[ Prime[n], 10^4]}]]]
+%t A025475 {1}~Join~Select[Range[10^4], And[! PrimeQ@ #, PrimePowerQ@ #] &] (* _Michael De Vlieger_, Jul 04 2016 *)
+%t A025475 NextPrime[#]-#&/@Select[Range[100000],PrimePowerQ[#]&&!PrimeQ[#]&] (* _Harvey P. Dale_, Oct 19 2022 *)
+%o A025475 (PARI) for(n=1,10000,if(sigma(n)*eulerphi(n)*(1-isprime(n))>(n-1)^2,print1(n,",")))
+%o A025475 (PARI) is_A025475(n)={ ispower(n,,&p) && isprime(p) || n==1 }  \\ _M. F. Hasler_, Sep 25 2011
+%o A025475 (PARI) list(lim)=my(v=List([1]),L=log(lim+.5));forprime(p=2,(lim+.5)^(1/3),for(e=3,L\log(p),listput(v,p^e))); vecsort(concat(Vec(v), apply(n->n^2,primes(primepi(sqrtint(lim\1)))))) \\ _Charles R Greathouse IV_, Nov 12 2012
+%o A025475 (PARI) list(lim)=my(v=List([1])); for(m=2,logint(lim\=1,2), forprime(p=2,sqrtnint(lim,m), listput(v, p^m))); Set(v) \\ _Charles R Greathouse IV_, Aug 26 2015
+%o A025475 (Haskell)
+%o A025475 a025475 n = a025475_list !! (n-1)
+%o A025475 a025475_list = filter ((== 0) . a010051) a000961_list
+%o A025475 -- _Reinhard Zumkeller_, Jun 22 2011
+%o A025475 (Python)
+%o A025475 from sympy import primerange
+%o A025475 A025475_list, m = [1], 10*2
+%o A025475 m2 = m**2
+%o A025475 for p in primerange(1,m):
+%o A025475     a = p**2
+%o A025475     while a < m2:
+%o A025475         A025475_list.append(a)
+%o A025475         a *= p
+%o A025475 A025475_list = sorted(A025475_list) # _Chai Wah Wu_, Sep 08 2014
+%Y A025475 Subsequence of A000961. - _Reinhard Zumkeller_, Jun 22 2011
+%Y A025475 Cf. A001597, A000720, A068982, A136141, A193166.
+%Y A025475 Differences give A053707.
+%Y A025475 Cf. A076048 (number of terms < 10^n).
+%Y A025475 There are four different sequences which may legitimately be called "prime powers": A000961 (p^k, k >= 0), A246655 (p^k, k >= 1), A246547 (p^k, k >= 2), A025475 (p^k, k=0 and k >= 2). When you refer to "prime powers", be sure to specify which of these you mean. Also A001597 is the sequence of nontrivial powers n^k, n >= 1, k >= 2. - _N. J. A. Sloane_, Mar 24 2018
+%K A025475 nonn,easy,nice
+%O A025475 1,2
+%A A025475 _David W. Wilson_
+%E A025475 Edited by _Daniel Forgues_, Aug 18 2009

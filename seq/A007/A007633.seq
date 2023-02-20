@@ -1,0 +1,48 @@
+%I A007633 M1164
+%S A007633 0,1,2,4,8,121,151,212,242,484,656,757,29092,48884,74647,75457,76267,
+%T A007633 92929,93739,848848,1521251,2985892,4022204,4219124,4251524,4287824,
+%U A007633 5737375,7875787,7949497,27711772,83155138,112969211,123464321
+%N A007633 Palindromic in bases 3 and 10.
+%D A007633 J. Meeus, Multibasic palindromes, J. Rec. Math., 18 (No. 3, 1985-1986), 168-173.
+%D A007633 N. J. A. Sloane and Simon Plouffe, The Encyclopedia of Integer Sequences, Academic Press, 1995 (includes this sequence).
+%H A007633 Patrick De Geest, <a href="/A007633/b007633.txt">Table of n, a(n) for n = 1..65</a> (first 41 terms from Robert Israel, terms 42..63 from Robert G. Wilson v)
+%H A007633 M. R. Calandra, <a href="/A007632/a007632.pdf">Integers which are palindromic in both decimal and binary notation</a>, J. Rec. Math., 18 (No. 1, 1985-1986), 47. (Annotated scanned copy) [With scan of J. Rec. Math. 18.3 (1985), pp. 168-173]
+%H A007633 Patrick De Geest, <a href="http://www.worldofnumbers.com/nobase10.htm#base2to9">Palindromic numbers in other bases</a>
+%p A007633 ND:= 12;  # to get all terms with <= ND decimal digits
+%p A007633 rev10:= proc(n) option remember;
+%p A007633   rev10(floor(n/10)) + (n mod 10)*10^ilog10(n)
+%p A007633 end;
+%p A007633 for i from 0 to 9 do rev10(i):= i od:
+%p A007633 rev3:= proc(n) option remember;
+%p A007633   rev3(floor(n/3)) + (n mod 3)*3^ilog[3](n)
+%p A007633 end;
+%p A007633 for i from 0 to 2 do rev3(i):= i od:
+%p A007633 pali3:= n -> rev3(n) = n;
+%p A007633 count:= 1:
+%p A007633 A[1]:= 0:
+%p A007633 for d from 1 to ND do
+%p A007633   d1:= ceil(d/2);
+%p A007633   for x from 10^(d1-1) to 10^d1 - 1 do
+%p A007633     if d::even then y:= x*10^d1+rev10(x)
+%p A007633     else y:= x*10^(d1-1)+rev10(floor(x/10));
+%p A007633     fi;
+%p A007633     if pali3(y) then
+%p A007633        count:= count+1;
+%p A007633        A[count]:= y;
+%p A007633     fi
+%p A007633   od:
+%p A007633 od:
+%p A007633 seq(A[i],i=1..count); # _Robert Israel_, Apr 20 2014
+%t A007633 Do[ a = IntegerDigits[n]; b = IntegerDigits[n, 3]; If[a == Reverse[a] && b == Reverse[b], Print[n] ], {n, 0, 10^9} ]
+%t A007633 NextPalindrome[n_] := Block[{l = Floor[ Log[10, n] + 1], idn = IntegerDigits[n]}, If[ Union[idn] == {9}, Return[n + 2], If[l < 2, Return[n + 1], If[ FromDigits[ Reverse[ Take[idn, Ceiling[l/2]] ]] FromDigits[ Take[idn, -Ceiling[l/2]]], FromDigits[ Join[ Take[idn, Ceiling[l/2]], Reverse[ Take[idn, Floor[l/2]] ]]], idfhn = FromDigits[ Take[idn, Ceiling[l/2]]] + 1; idp = FromDigits[ Join[ IntegerDigits[idfhn], Drop[ Reverse[ IntegerDigits[idfhn]], Mod[l, 2]] ]]] ]]]; palQ[n_Integer, base_Integer] := Block[{idn = IntegerDigits[n, base]}, idn == Reverse[idn]]; l = {0}; a = 0; Do[a = NextPalindrome[a]; If[ palQ[a, 4], AppendTo[l, a]], {n, 100000}]; l (* _Robert G. Wilson v_, Sep 30 2004 *)
+%t A007633 pal3Q[n_]:=Module[{idn3=IntegerDigits[n,3]},idn3==Reverse[idn3]]; Select[ Range[ 0,1235*10^5],PalindromeQ[#]&&pal3Q[#]&] (* Requires Mathematica version 10 or later *) (* _Harvey P. Dale_, Jan 04 2019 *)
+%t A007633 Select[Range[0, 10^5],
+%t A007633 PalindromeQ[#] && # == IntegerReverse[#, 3] &] (* _Robert Price_, Nov 09 2019 *)
+%o A007633 (Python)
+%o A007633 from itertools import chain
+%o A007633 from gmpy2 import digits
+%o A007633 A007633_list = sorted([n for n in chain((int(str(x)+str(x)[::-1]) for x in range(1,10**6)),(int(str(x)+str(x)[-2::-1]) for x in range(10**6))) if digits(n,3) == digits(n,3)[::-1]]) # _Chai Wah Wu_, Nov 23 2014
+%Y A007633 Cf. A007632, A029961, A029962, A029963, A029964, A029804, A029965, A029966, A029967, A029968, A029969, A029970, A029731, A097855, A099165.
+%K A007633 nonn,base
+%O A007633 1,3
+%A A007633 _N. J. A. Sloane_, _Mira Bernstein_, _Robert G. Wilson v_

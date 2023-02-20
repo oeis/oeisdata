@@ -1,0 +1,41 @@
+%I A034876
+%S A034876 0,0,0,1,0,1,0,1,1,2,0,1,0,0,0,2,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,1,0,0,
+%T A034876 0,1,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,
+%U A034876 0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0
+%N A034876 Number of ways to write n! as a product of smaller factorials each greater than 1.
+%C A034876 By definition, a(n) > 0 if and only if n is a member of A034878. If n > 2, then a(n!) > max(a(n), a(n!-1)), as (n!)! = n!*(n!-1)!. Similarly, a(A001013(n)) > 0 for n > 2. Clearly a(n)=0 if n is a prime A000040. So a(n+1)=1 if n=2^p-1 is a Mersenne prime A000668, as (n+1)!=(2!)^p*n! and n is prime. - _Jonathan Sondow_, Dec 15 2004
+%C A034876 From _Antti Karttunen_, Dec 25 2018: (Start)
+%C A034876 If n! = a! * x! * y! * ... * z!, with a > x >= y >= z, then A006530(n!) = A006530(a!) > A006530(x!). This follows because all rows in A115627 end with 1, that is, because all factorials >= 2 are in A102750.
+%C A034876 If all the two-term solutions are of the form n! = a! * x! = b! * y! = ... = c! * z! (that is, all are products of two factorials larger than one), with a > x, b > y, ..., c > z, then a(n) = (a(x)+1 + a(y)+1 + ... + a(z)+1).
+%C A034876 Values 0..5 occur for the first time at n = 1, 4, 10, 576, 13824, 69120.
+%C A034876 In range 1..69120 differs from A322583 only at positions n = 1, 2, 9, 10 and 16.
+%C A034876 (End)
+%D A034876 R. K. Guy, Unsolved Problems in Number Theory, B23.
+%H A034876 Antti Karttunen, <a href="/A034876/b034876.txt">Table of n, a(n) for n = 1..69120</a>
+%H A034876 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/FactorialProducts.html">Factorial Products</a>
+%H A034876 <a href="/index/Fa#factorial">Index entries for sequences related to factorial numbers</a>
+%F A034876 a(1) = 0; for n > 1, a(n) = Sum_{x=A007917(n)..n-1} A322583(n!/x!) when n is a composite, and a(n) = 0 when n is a prime. - _Antti Karttunen_, Dec 25 2018
+%e A034876 a(10) = 2 because 10! = 3! * 5! * 7! = 6! * 7! are the only two ways to write 10! as a product of smaller factorials > 1.
+%e A034876 From _Antti Karttunen_, Dec 25 2018: (Start)
+%e A034876 a(8) = 1 because 8! = 7! * (2!)^3.
+%e A034876 a(9) = 1 because 9! = 7! * 3! * 3! * 2!.
+%e A034876 a(16) = 2 because 16! = 15! * (2!)^4 = 14! * 5! * 2!.
+%e A034876 a(144) = 2 because 144! = 143! * 4! * 3! = 143! * 3! * 3! * 2! * 2!.
+%e A034876 a(576) = 3 because 576! = 575! * 4! * 4! = 575! * 4! * 3! * 2! * 2! = 575! * 3! * 3! * 2! * 2! * 2! * 2!.
+%e A034876 a(720) = 2 because 720! = 719! * 6! = 719! * 5! * 3!.
+%e A034876 a(3456) = 3 because 3456! = 3455! * 4! * 4! * 3! = 3455! * 4! * 3! * 3! * 2! * 2! = 3455! * 3! * 3! * 3! * 2! * 2! * 2! * 2!.
+%e A034876 (End)
+%o A034876 (PARI)
+%o A034876 A034876aux(n, m, p) = if(1==n, 1, my(s=0); forstep(i=m, p, -1, my(f=i!); if(!(n%f), s += A034876aux(n/f, i, 2))); (s));
+%o A034876 A034876(n) = if(1==n,0,A034876aux(n!, n-1, precprime(n))); \\ (Slow) - _Antti Karttunen_, Dec 24 2018
+%o A034876 (PARI)
+%o A034876 A322583aux(n, m) = if(1==n, 1, my(s=0); for(i=2, oo, my(f=i!); if(f>m, return(s)); if(!(n%f), s += A322583aux(n/f, f))));
+%o A034876 memoA322583 = Map();
+%o A034876 A322583(n) = { my(c); if(mapisdefined(memoA322583,n,&c), c, c = A322583aux(n,n); mapput(memoA322583,n,c); (c)); };
+%o A034876 A034876aux(n, m, p) = if(1==n, 1, my(s=0); forstep(i=m, p, -1, my(f=i!); s += A322583(n/f)); (s));
+%o A034876 A034876(n) = if(1==n, 0, A034876aux(n!, n-1, precprime(n))); \\ _Antti Karttunen_, Dec 25 2018
+%Y A034876 Cf. A034878, A001013, A075082, A085604, A115627, A322583.
+%K A034876 easy,nonn,nice
+%O A034876 1,10
+%A A034876 _Erich Friedman_
+%E A034876 Corrected by _Jonathan Sondow_, Dec 18 2004

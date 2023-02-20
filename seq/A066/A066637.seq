@@ -1,0 +1,105 @@
+%I A066637
+%S A066637 0,1,1,3,1,3,1,6,3,3,1,8,1,3,3,12,1,8,1,8,3,3,1,17,3,3,6,8,1,10,1,20,
+%T A066637 3,3,3,22,1,3,3,17,1,10,1,8,8,3,1,34,3,8,3,8,1,17,3,17,3,3,1,27,1,3,8,
+%U A066637 35,3,10,1,8,3,10,1,46,1,3,8,8,3,10,1,34,12,3,1,27,3,3,3,17,1,27,3,8,3,3,3
+%N A066637 Total number of elements in all factorizations of n with all factors > 1.
+%C A066637 From _Gus Wiseman_, Apr 18 2021: (Start)
+%C A066637 Number of ways to choose a factor index or position in a factorization of n. The version selecting a factor value is A339564. For example, the factorizations of n = 2, 4, 8, 12, 16, 24, 30 with a selected position (in parentheses) are:
+%C A066637   ((2))  ((4))    ((8))      ((12))     ((16))       ((24))       ((30))
+%C A066637          ((2)*2)  ((2)*4)    ((2)*6)    ((2)*8)      ((3)*8)      ((5)*6)
+%C A066637          (2*(2))  (2*(4))    (2*(6))    (2*(8))      (3*(8))      (5*(6))
+%C A066637                   ((2)*2*2)  ((3)*4)    ((4)*4)      ((4)*6)      ((2)*15)
+%C A066637                   (2*(2)*2)  (3*(4))    (4*(4))      (4*(6))      (2*(15))
+%C A066637                   (2*2*(2))  ((2)*2*3)  ((2)*2*4)    ((2)*12)     ((3)*10)
+%C A066637                              (2*(2)*3)  (2*(2)*4)    (2*(12))     (3*(10))
+%C A066637                              (2*2*(3))  (2*2*(4))    ((2)*2*6)    ((2)*3*5)
+%C A066637                                         ((2)*2*2*2)  (2*(2)*6)    (2*(3)*5)
+%C A066637                                         (2*(2)*2*2)  (2*2*(6))    (2*3*(5))
+%C A066637                                         (2*2*(2)*2)  ((2)*3*4)
+%C A066637                                         (2*2*2*(2))  (2*(3)*4)
+%C A066637                                                      (2*3*(4))
+%C A066637                                                      ((2)*2*2*3)
+%C A066637                                                      (2*(2)*2*3)
+%C A066637                                                      (2*2*(2)*3)
+%C A066637                                                      (2*2*2*(3))
+%C A066637 (End)
+%D A066637 Amarnath Murthy, Generalization of Partition function, Introducing Smarandache Factor partitions, Smarandache Notions Journal, Vol. 11, 1-2-3, Spring 2000.
+%D A066637 Amarnath Murthy, Length and extent of Smarandache Factor partitions, Smarandache Notions Journal, Vol. 11, 1-2-3, Spring 2000.
+%H A066637 Alois P. Heinz, <a href="/A066637/b066637.txt">Table of n, a(n) for n = 1..20000</a> (first 1000 terms from T. D. Noe)
+%e A066637 a(12) = 8: there are 4 factorizations of 12: (12), (6*2), (4*3), (3*2*2) having 1, 2, 2, 3 elements respectively, a total of 8.
+%p A066637 # Return a list of lists which are factorizations (product representations)
+%p A066637 # of n. Within each sublist, the factors are sorted. A minimum factor in
+%p A066637 # each element of sublists returned can be specified with 'mincomp'.
+%p A066637 # If mincomp=2, the number of sublists contained in the list returned is A001055(n).
+%p A066637 # Example:
+%p A066637 # n=8 and mincomp=2 return [[2,2,2],[4,8],[8]]
+%p A066637 listProdRep := proc(n,mincomp)
+%p A066637     local dvs,resul,f,i,j,rli,tmp ;
+%p A066637     resul := [] ;
+%p A066637     # list returned is empty if n < mincomp
+%p A066637     if n >= mincomp then
+%p A066637         if n = 1 then
+%p A066637             RETURN([1]) ;
+%p A066637         else
+%p A066637             # compute the divisors, and take each divisor
+%p A066637             # as a head element (minimum element) of one of the
+%p A066637             # sublists. Example: for n=8 use {1,2,4,8}, and consider
+%p A066637             # (for mincomp=2) sublists [2,...], [4,...] and [8].
+%p A066637             dvs := numtheory[divisors](n) ;
+%p A066637             for i from 1 to nops(dvs) do
+%p A066637                 # select the head element 'f' from the divisors
+%p A066637                 f := op(i,dvs) ;
+%p A066637                 # if this is already the maximum divisor n
+%p A066637                 # itself, this head element is the last in
+%p A066637                 # the sublist
+%p A066637                 if f =n and f >= mincomp then
+%p A066637                     resul := [op(resul),[f]] ;
+%p A066637                 elif f >= mincomp then
+%p A066637                     # if this is not the maximum element
+%p A066637                     # n itself, produce all factorizations
+%p A066637                     # of the remaining factor recursively.
+%p A066637                     rli := procname(n/f,f) ;
+%p A066637                     # Prepend all the results produced
+%p A066637                     # from the recursion with the head
+%p A066637                     # element for the result.
+%p A066637                     for j from 1 to nops(rli) do
+%p A066637                         tmp := [f,op(op(j,rli))] ;
+%p A066637                         resul := [op(resul),tmp] ;
+%p A066637                     od ;
+%p A066637                 fi ;
+%p A066637             od ;
+%p A066637         fi ;
+%p A066637     fi ;
+%p A066637     resul ;
+%p A066637 end:
+%p A066637 A066637 := proc(n)
+%p A066637     local f,d;
+%p A066637     a := 0 ;
+%p A066637     for d in listProdRep(n,2) do
+%p A066637         a := a+nops(d) ;
+%p A066637     end do:
+%p A066637     a ;
+%p A066637 end proc: # _R. J. Mathar_, Jul 11 2013
+%p A066637 # second Maple program:
+%p A066637 with(numtheory):
+%p A066637 b:= proc(n, k) option remember; `if`(n>k, 0, [1$2])+
+%p A066637       `if`(isprime(n), 0, (p-> p+[0, p[1]])(add(
+%p A066637       `if`(d>k, 0, b(n/d, d)), d=divisors(n) minus {1, n})))
+%p A066637     end:
+%p A066637 a:= n-> `if`(n<2, 0, b(n$2)[2]):
+%p A066637 seq(a(n), n=1..120); # _Alois P. Heinz_, Feb 12 2019
+%t A066637 g[1, r_] := g[1, r]={1, 0}; g[n_, r_] := g[n, r]=Module[{ds, i, val}, ds=Select[Divisors[n], 1<#<=r&]; val={0, 0}+Sum[g[n/ds[[i]], ds[[i]]], {i, 1, Length[ds]}]; val+{0, val[[1]]}]; a[n_] := g[n, n][[2]]; a/@Range[95] (* g[n, r] = {c, f}, where c is the number of factorizations of n with factors <= r and f is the total number of factors in them. - _Dean Hickerson_, Oct 28 2002 *)
+%t A066637 facs[n_]:=If[n<=1,{{}},Join@@Table[Map[Prepend[#,d]&,Select[facs[n/d],Min@@#>=d&]],{d,Rest[Divisors[n]]}]];Table[Sum[Length[fac],{fac,facs[n]}],{n,50}] (* _Gus Wiseman_, Apr 18 2021 *)
+%Y A066637 The version for normal multisets is A001787.
+%Y A066637 The version for compositions is A001792.
+%Y A066637 The version for partitions is A006128 (strict: A015723).
+%Y A066637 Choosing a value instead of position gives A339564.
+%Y A066637 A000070 counts partitions with a selected part.
+%Y A066637 A001055 counts factorizations.
+%Y A066637 A002033 and A074206 count ordered factorizations.
+%Y A066637 A067824 counts strict chains of divisors starting with n.
+%Y A066637 A336875 counts compositions with a selected part.
+%Y A066637 Cf. A000005, A000041, A045778, A050336, A066186, A162247, A264401, A281116, A292504, A292886, A322794.
+%K A066637 nonn
+%O A066637 1,4
+%A A066637 _Amarnath Murthy_, Dec 28 2001

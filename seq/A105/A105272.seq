@@ -1,0 +1,103 @@
+%I A105272
+%S A105272 1,1,2,1,2,2,1,4,2,2,1,4,4,2,2,1,3,6,4,2,2,1,3,6,7,4,2,2,1,6,4,3,7,4,
+%T A105272 2,2,1,6,4,3,15,14,4,2,2,1,10,4,8,5,6,14,4,2,2,1,10,21,10,5,10,6,14,4,
+%U A105272 2,2,1,12,3,6,12,12,12,6,14,4,2,2
+%N A105272 Array T(n,k) (k >= 1, n >= k) read by antidiagonals (see definition in Comments lines).
+%C A105272 T(n,k) is the order of the permutation p of [1,...,n] defined as follows:
+%C A105272 Write F={1,2,3,....,n}.
+%C A105272 Place F into a "window" of width k, where k <= n. That is, write out the elements from left to right, up to down, with k elements per line.
+%C A105272 Produce a new set F' by traversing the set according to the following algorithm, adding elements to F' as they are traversed in F.
+%C A105272 Traversal algorithm:
+%C A105272 1) Start at the upper right hand element.
+%C A105272 2) If there is an element below the current one
+%C A105272 then
+%C A105272 A) go to it
+%C A105272 B) go back to step 2
+%C A105272 3) Otherwise, if there is a column to the left of the current one, then
+%C A105272 A) go to it
+%C A105272 B) go back to step 2
+%C A105272 4) End
+%C A105272 Then p is the permutation that sends F to F'.
+%H A105272 Robert Price, <a href="/A105272/b105272.txt">Table of n, a(n) for n = 1..1275</a>
+%H A105272 Samuel Minter, <a href="http://www.abulsme.com/function.html">Abulsme function information and definition</a>
+%e A105272 To find T(12,5):
+%e A105272 Start with F = { A B C D E F G H I J K L } with a window of widhth 5:
+%e A105272 A B C D E
+%e A105272 F G H I J
+%e A105272 K L
+%e A105272 Now let's traverse that and construct our new set
+%e A105272 Upper right is E so add it to our new set:
+%e A105272 { E ....
+%e A105272 We can go down so we do so and get J
+%e A105272 { E J .....
+%e A105272 Now we can't go down so go to the top of the column to the left and get D
+%e A105272 { E J D .....
+%e A105272 Eventually we will get:
+%e A105272 F' = { E J D I C H B G L A F K }
+%e A105272 The permutation p that sends F to F' is a single cycle of length 12, so T(12,5) = 12.
+%e A105272 Array begins:
+%e A105272 k = 1: 1,1,1,1,1,1,1,1,1,1,... (A000012)
+%e A105272 k = 2: 2,2,4,4,3,3,6,6,10,10,... (A024222)
+%e A105272 k = 3: 2,2,4,6,6,4,4,4,21,3,... (A118960)
+%e A105272 k = 4: 2,2,4,7,3,3,8,10,6,6,... (A120280)
+%e A105272 k = 5: 2,2,4,7,15,5,5,12,40,45,... (A120363)
+%e A105272 k = 6: 2,2,4,14,6,10,12,12,7,15,... (A120654)
+%e A105272 k = 7: 2,2,4,14,6,12,30,4,4,20,... (A121514)
+%e A105272 k = 8: 2,2,4,14,6,13,13,24,8,8,...
+%e A105272 k = 9: 2,2,4,14,6,13,15,15,63,9,...
+%e A105272 k = 10: 2,2,4,14,6,13,16,10,18,12,...
+%e A105272 ... (Rows converge to A121526)
+%t A105272 T[1] = ConstantArray[1, 75];
+%t A105272 For[k = 2, k <= 20, k++,
+%t A105272   T[k] = Table[f = Range[n]; fp = {};
+%t A105272     For[col = k, col > 0, col--,
+%t A105272      For[row = 0, col + row*k <= n, row++,
+%t A105272       AppendTo[fp, f[[col + row*k]]]]];
+%t A105272     LCM @@ Length /@ First[FindPermutation[f, fp]], {n, k, 75}]];
+%t A105272 A105272 = {};
+%t A105272 For[i = 1, i <= 20, i++,
+%t A105272   For[j = i, j >= 1, j--,
+%t A105272    AppendTo[A105272, T[i - j + 1][[j]]]]];
+%t A105272 A105272 (* _Robert Price_, Aug 26 2019 *)
+%o A105272 (C program) int abulsme(int l, int s) {
+%o A105272 long int t[30000], m[30000], c[30000], b[30000];
+%o A105272 long int k,i,n,j,z,u,q,g;
+%o A105272 for (t[1]=s, k=2; k<=l; k++) {
+%o A105272 m[k]=(t[k-1]+s-l+abs(t[k-1]+s-l))/(2*abs(t[k-1]+s-l-1)+2);
+%o A105272 t[k]=((t[k-1]-m[k])%(s*m[k]+2*l*abs(m[k]-1)))+s*abs(m[k]-1);
+%o A105272 }
+%o A105272 for (i=1; i<=l; b[i]=0,i++);
+%o A105272 for (n=0, i=1; i<=l; i++) {
+%o A105272 if (!b[i]) {
+%o A105272 j=i;
+%o A105272 k=0;
+%o A105272 do {
+%o A105272 j=t[j];
+%o A105272 b[j]=1;
+%o A105272 k++;
+%o A105272 } while (j!=i);
+%o A105272 u=1;
+%o A105272 z=1;
+%o A105272 if (i>1) {
+%o A105272 do {
+%o A105272 if (c[z]==k) {
+%o A105272 u=0;
+%o A105272 }
+%o A105272 z++;
+%o A105272 } while (!((z>n)||(!u)));
+%o A105272 }
+%o A105272 if (u) {
+%o A105272 n++;
+%o A105272 c[n]=k;
+%o A105272 }
+%o A105272 }
+%o A105272 for (q=c[1], g=q, z=1; z<n; z++, g=q) {
+%o A105272 for (0; q%c[z+1]; q+=g);
+%o A105272 }
+%o A105272 }
+%o A105272 return g;
+%o A105272 }
+%K A105272 nonn,tabl
+%O A105272 1,3
+%A A105272 _N. J. A. Sloane_, Aug 10 2008, based on email from Samuel Minter (abulsme(AT)abulsme.com0, May 08 2008
+%E A105272 a(46)-a(78) from _Robert Price_, Aug 26 2019

@@ -1,0 +1,32 @@
+%I A048679
+%S A048679 0,1,2,4,3,8,5,6,16,9,10,12,7,32,17,18,20,11,24,13,14,64,33,34,36,19,
+%T A048679 40,21,22,48,25,26,28,15,128,65,66,68,35,72,37,38,80,41,42,44,23,96,
+%U A048679 49,50,52,27,56,29,30,256,129,130,132,67,136,69,70,144,73,74,76,39,160,81
+%N A048679 Compressed fibbinary numbers (A003714), with rewrite 0->0, 01->1 applied to their binary expansion.
+%C A048679 Permutation of the nonnegative integers (A001477); inverse permutation of A048680 i.e. A048679[ A048680[ n ] ] = n for all n.
+%H A048679 Antti Karttunen, <a href="/A048679/b048679.txt">Table of n, a(n) for n = 0..10945</a> (terms 0..10000 from Alois P. Heinz)
+%H A048679 <a href="/index/Per#IntegerPermutation">Index entries for sequences that are permutations of the natural numbers</a>
+%F A048679 a(n) = A106151(2*A003714(n)) for n > 0. - _Reinhard Zumkeller_, May 09 2005
+%F A048679 a(n+1) = min{([a(n)/2]+1)*2^k} such that it is not yet in the sequence. - _Gerard Orriols_, Jun 07 2014
+%F A048679 a(n) = A072650(A003714(n)) = A003188(A227351(n)). - _Antti Karttunen_, May 13 2018
+%p A048679 a(n) = rewrite_0to0_x1to1(fibbinary(j)) (where fibbinary(j) = A003714[ n ])
+%p A048679 rewrite_0to0_x1to1 := proc(n) option remember; if(0 = n) then RETURN(n); else RETURN((2 * rewrite_0to0_x1to1(floor(n/(2^(1+(n mod 2)))))) + (n mod 2)); fi; end;
+%p A048679 fastfib := n -> round((((sqrt(5)+1)/2)^n)/sqrt(5)); fibinv_appr := n -> floor(log[ (sqrt(5)+1)/2 ](sqrt(5)*n)); fibinv := n -> (fibinv_appr(n) + floor(n/fastfib(1+fibinv_appr(n)))); fibbinary := proc(n) option remember; if(n <= 2) then RETURN(n); else RETURN((2^(fibinv(n)-2))+fibbinary_seq(n-fastfib(fibinv(n)))); fi; end;
+%p A048679 # second Maple program:
+%p A048679 b:= proc(n) is(n=0) end:
+%p A048679 a:= proc(n) option remember; local h; h:= iquo(a(n-1), 2)+1;
+%p A048679       while b(h) do h:= h*2 od; b(h):=true; h
+%p A048679     end: a(0):=0:
+%p A048679 seq(a(n), n=0..100);  # _Alois P. Heinz_, Sep 22 2014
+%t A048679 b[n_] := n==0; a[n_] := a[n] = Module[{h}, h = Quotient[a[n-1], 2] + 1; While[b[h], h = h*2]; b[h] = True; h]; a[0]=0; Table[a[n], {n, 0, 100}] (* _Jean-François Alcover_, Feb 27 2016, after _Alois P. Heinz_ *)
+%o A048679 (PARI)
+%o A048679 A072649(n) = { my(m); if(n<1, 0, m=0; until(fibonacci(m)>n, m++); m-2); }; \\ From A072649
+%o A048679 A003714(n) = { my(s=0,w); while(n>2, w = A072649(n); s += 2^(w-1); n -= fibonacci(w+1)); (s+n); }
+%o A048679 A007814(n) = valuation(n,2);
+%o A048679 A000265(n) = (n/2^valuation(n, 2));
+%o A048679 A106151(n) = if(n<=1,n,if(n%2,1+(2*A106151((n-1)/2)),(2^(A007814(n)-1))*A106151(A000265(n))));
+%o A048679 A048679(n) = if(!n,n,A106151(2*A003714(n))); \\ _Antti Karttunen_, May 13 2018, after _Reinhard Zumkeller_'s May 09 2005 formula.
+%Y A048679 Cf. A000045, A003714, A005203, A048678, A048680, A072650, A087808, A106151, A200714, A227351, A232559, A277006, A304100, A304101.
+%K A048679 nonn,base
+%O A048679 0,3
+%A A048679 _Antti Karttunen_

@@ -1,0 +1,29 @@
+%I A036653
+%S A036653 1,1,1,1,2,3,6,11,22,45,101,223,520,1223,2954,7208,17905,44863,113738,
+%T A036653 290605,748711,1941592,5067433,13297590,35074788,92939166,247317085,
+%U A036653 660681399,1771321949,4764829720,12857155911,34793296227,94410222996,256826514689,700311754812,1913868186951
+%N A036653 Number of 6-valent trees with n nodes.
+%H A036653 Andrew Howroyd, <a href="/A036653/b036653.txt">Table of n, a(n) for n = 0..500</a>
+%H A036653 R. Otter, <a href="http://www.jstor.org/stable/1969046">The number of trees</a>, Ann. of Math. (2) 49 (1948), 583-599 discusses asymptotics.
+%H A036653 E. M. Rains and N. J. A. Sloane, <a href="https://cs.uwaterloo.ca/journals/JIS/cayley.html">On Cayley's Enumeration of Alkanes (or 4-Valent Trees).</a>, J. Integer Sequences, Vol. 2 (1999), Article 99.1.1.
+%H A036653 <a href="/index/Tra#trees">Index entries for sequences related to trees</a>
+%F A036653 a(n) = A036651(n) + A036652(n) for n > 0.
+%F A036653 G.f.: B(x) - cycle_index(S2,-B(x)) + x * cycle_index(S6,B(x)) = B(x) - (B(x)^2 - B(x^2)) / 2 + x * (B(x)^6 + 15*B(x)^4*B(x^2) + 45*B(x)^2*B(x^2)^2 + 15*B(x^2)^3 + 40*B(x)^3*B(x^3) + 120*B(x)*B(x^2)*B(x^3) + 40*B(x^3)^2 + 90*B(x)^2*B(x^4) + 90*B(x^2)*B(x^4) + 144*B(x)*B(x^5) + 120*B(x^6)) / 720, where B(x) = 1 + x * cycle_index(S5,B(x)) = 1 + x * (B(x)^5 + 10*B(x)^3*B(x^2) + 15*B(x)*B(x^2)^2 + 20*B(x)^2*B(x^3) + 20*B(x^2)*B(x^3) + 30*B(x)*B(x^4) + 24*B(x^5)) / 120 is the generating function for A036721. - _Robert A. Russell_, Jan 19 2023
+%t A036653 n = 20; (* algorithm from Rains and Sloane *)
+%t A036653 S5[f_,h_,x_] := f[h,x]^5/120 + f[h,x]^3 f[h,x^2]/12 + f[h,x]^2 f[h,x^3]/6 + f[h,x] f[h,x^2]^2/8 + f[h,x] f[h,x^4]/4 + f[h,x^2] f[h,x^3]/6 + f[h,x^5]/5;
+%t A036653 S6[f_,h_,x_] := f[h,x]^6/720 + f[h,x]^4 f[h,x^2]/48 + f[h,x]^3 f[h,x^3]/18 + f[h,x]^2 f[h,x^2]^2/16 + f[h,x]^2 f[h,x^4]/8 + f[h,x] f[h,x^2] f[h,x^3]/6 + f[h,x] f[h,x^5]/5 + f[h,x^2]^3/48 + f[h,x^2] f[h,x^4]/8 + f[h,x^3]^2/18 + f[h,x^6]/6;
+%t A036653 T[-1,z_] := 1;  T[h_,z_] := T[h,z] = Table[z^k, {k,0,n}].Take[CoefficientList[z^(n+1) + 1 + S5[T,h-1,z]z, z], n+1];
+%t A036653 Sum[Take[CoefficientList[z^(n+1) + S6[T,h-1,z]z - S6[T,h-2,z]z - (T[h-1,z] - T[h-2,z]) (T[h-1,z]-1),z], n+1], {h,1,n/2}] + PadRight[{0,1}, n+1] + Sum[Take[CoefficientList[z^(n+1) + (T[h,z] - T[h-1,z])^2/2 + (T[h,z^2] - T[h-1,z^2])/2, z],n+1], {h,0,n/2}] (* _Robert A. Russell_, Sep 15 2018 *)
+%t A036653 b[n_, i_, t_, k_] := b[n,i,t,k] = If[i<1, 0, Sum[Binomial[b[i-1,i-1,
+%t A036653   k,k] + j-1, j]* b[n-i*j, i-1, t-j, k], {j, 0, Min[t, n/i]}]];
+%t A036653 b[0, i_, t_, k_] = 1; m = 5; (* m = maximum children *) n = 40;
+%t A036653 gf[x_] = 1 + Sum[b[j-1,j-1,m,m]x^j,{j,1,n}]; (* G.f. for A036721 *)
+%t A036653 ci[x_] = SymmetricGroupIndex[m+1, x] /. x[i_] -> gf[x^i];
+%t A036653 CoefficientList[Normal[Series[gf[x] - (gf[x]^2 - gf[x^2])/2 + x ci[x],
+%t A036653 {x, 0, n}]],x] (* _Robert A. Russell_, Jan 19 2023 *)
+%Y A036653 Column k=6 of A144528; A036721 (rooted trees).
+%Y A036653 Cf. A036651, A036652.
+%K A036653 nonn,changed
+%O A036653 0,5
+%A A036653 _N. J. A. Sloane_
+%E A036653 a(0) changed to 1 and terms a(32) and beyond from _Andrew Howroyd_, Dec 18 2020

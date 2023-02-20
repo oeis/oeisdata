@@ -1,0 +1,48 @@
+%I A015631
+%S A015631 1,3,8,15,29,42,69,95,134,172,237,287,377,452,552,652,804,915,1104,
+%T A015631 1252,1450,1635,1910,2106,2416,2674,3007,3301,3735,4027,4522,4914,
+%U A015631 5404,5844,6432,6870,7572,8121,8805,9389,10249,10831,11776,12506
+%N A015631 Number of ordered triples of integers from [ 1..n ] with no global factor.
+%C A015631 Number of integer-sided triangles with at least two sides <= n and sides relatively prime. - _Henry Bottomley_, Sep 29 2006
+%H A015631 R. J. Mathar, <a href="/A015631/b015631.txt">Table of n, a(n) for n = 1..10000</a>
+%F A015631 a(n) = (A071778(n)+3*A018805(n)+2)/6. - _Vladeta Jovovic_, Dec 01 2004
+%F A015631 Partial sums of the Moebius transform of the triangular numbers (A007438). - _Steve Butler_, Apr 18 2006
+%F A015631 a(n) = 2*A123324(n) - A046657(n) for n>1. - _Henry Bottomley_, Sep 29 2006
+%F A015631 Row sums of triangle A134543. - _Gary W. Adamson_, Oct 31 2007
+%F A015631 a(n) ~ n^3 / (6*Zeta(3)). - _Vaclav Kotesovec_, Jan 31 2019
+%F A015631 G.f.: (1/(1 - x)) * Sum_{k>=1} mu(k) * x^k / (1 - x^k)^3. - _Ilya Gutkovskiy_, Feb 14 2020
+%F A015631 a(n) = n*(n+1)*(n+2)/6 - Sum_{j=2..n} a(floor(n/j)) = A000292(n) - Sum_{j=2..n} a(floor(n/j)). - _Chai Wah Wu_, Mar 30 2021
+%e A015631 a(4) = 15 because the 15 triples in question are in lexicographic order: [1,1,1], [1,1,2], [1,1,3], [1,1,4], [1,2,2], [1,2,3], [1,2,4], [1,3,3], [1,3,4], [1,4,4], [2,2,3], [2,3,3], [2,3,4], [3,3,4] and [3,4,4]. - _Wolfdieter Lang_, Apr 04 2013
+%e A015631 The a(4) = 15 triangles with at least two sides <= 4 and sides relatively prime (see _Henry Bottomley_'s comment above) are: [1,1,1], [1,2,2], [2,2,3], [1,3,3], [2,3,3], [2,3,4], [3,3,4], [3,3,5], [1,4,4], [2,4,5], [3,4,4], [3,4,5], [3,4,6], [4,4,5], [4,4,7]. - _Alois P. Heinz_, Feb 14 2020
+%p A015631 with(numtheory):
+%p A015631 b:= proc(n) option remember;
+%p A015631        add(mobius(n/d)*d*(d+1)/2, d=divisors(n))
+%p A015631     end:
+%p A015631 a:= proc(n) option remember;
+%p A015631       b(n) + `if`(n=1, 0, a(n-1))
+%p A015631     end:
+%p A015631 seq(a(n), n=1..60);  # _Alois P. Heinz_, Feb 09 2011
+%t A015631 a[1] = 1; a[n_] := a[n] = Sum[MoebiusMu[n/d]*d*(d+1)/2, {d, Divisors[n]}] + a[n-1]; Table[a[n], {n, 1, 60}] (* _Jean-François Alcover_, Jan 20 2014, after Maple *)
+%t A015631 Accumulate[Table[Sum[MoebiusMu[n/d]*d*(d + 1)/2, {d, Divisors[n]}], {n, 1, 50}]] (* _Vaclav Kotesovec_, Jan 31 2019 *)
+%o A015631 (Magma) [n eq 1 select 1 else Self(n-1)+ &+[MoebiusMu(n div d) *d*(d+1)/2:d in Divisors(n)]:n in [1..50]]; // _Marius A. Burtea_, Feb 14 2020
+%o A015631 (Python)
+%o A015631 from functools import lru_cache
+%o A015631 @lru_cache(maxsize=None)
+%o A015631 def A015631(n):
+%o A015631     if n == 0:
+%o A015631         return 0
+%o A015631     c, j = 1, 2
+%o A015631     k1 = n//j
+%o A015631     while k1 > 1:
+%o A015631         j2 = n//k1 + 1
+%o A015631         c += (j2-j)*A015631(k1)
+%o A015631         j, k1 = j2, n//j2
+%o A015631     return n*(n-1)*(n+4)//6-c+j # _Chai Wah Wu_, Mar 30 2021
+%o A015631 (PARI) a(n) = sum(k=1, n, sumdiv(k, d, moebius(k/d)*binomial(d+1, 2))); \\ _Seiichi Manyama_, Jun 12 2021
+%o A015631 (PARI) a(n) = binomial(n+2, 3)-sum(k=2, n, a(n\k)); \\ _Seiichi Manyama_, Jun 12 2021
+%o A015631 (PARI) my(N=66, x='x+O('x^N)); Vec(sum(k=1, N, moebius(k)*x^k/(1-x^k)^3)/(1-x)) \\ _Seiichi Manyama_, Jun 12 2021
+%Y A015631 Column k=3 of A177976.
+%Y A015631 Cf. A000292, A002088, A015616, A015634, A015650, A134543.
+%K A015631 nonn
+%O A015631 1,2
+%A A015631 _Olivier Gérard_

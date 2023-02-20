@@ -1,0 +1,28 @@
+%I A046787
+%S A046787 0,0,1,5,17,46,113,254,546,1122,2242,4354,8286,15441,28303,51025,
+%T A046787 90699,159003,275355,471216,797761,1336686,2218393,3648177,5948503,
+%U A046787 9620406,15439833,24597942,38916192,61159549,95508014,148241050,228753319,351022425,535760584
+%N A046787 Number of partitions of 5n with equal nonzero number of parts congruent to each of 1, 2, 3 and 4 modulo 5.
+%C A046787 Number of partitions of m with equal numbers of parts congruent to each of 1, 2, 3 and 4 (mod 5) is 0 unless m == 0 mod 5.
+%H A046787 Andrew Howroyd, <a href="/A046787/b046787.txt">Table of n, a(n) for n = 0..1000</a> (terms n=0..100 from Alois P. Heinz)
+%H A046787 <a href="/wiki/Partitions_of_5n">Index and properties of sequences related to partitions of 5n</a>
+%F A046787 a(n) = A046776(n) + A202086(n) + A202088(n) - A000041(n) = A202192(n) - A000041(n). - _Max Alekseyev_
+%F A046787 G.f.: (Sum_{k>0} x^(2*k)/(Product_{j=1..k} 1 - x^j)^4)/(Product_{j>0} 1 - x^j). - _Andrew Howroyd_, Sep 16 2019
+%p A046787 mkl:= proc(i,l) local ll, mn, x; ll:= `if`(irem(i, 5)=0, l, applyop(x->x+1, irem(i,5), l)); mn:= min(l[])-1; `if`(mn<=0, ll, map(x->x-mn, ll)) end:
+%p A046787 g:= proc(n,i,t) local m, mx; if n<0 then 0 elif n=0 then `if`(t[1]>0 and t[1]=t[2] and t[2]=t[3] and t[3]=t[4], 1, 0) elif i=0 then 0 elif i<5 then mx:= max(t[]); m:= n-10*mx +t[1] +t[2]*2 +t[3]*3 +t[4]*4; `if`(m>=0 and irem(m, 10)=0, 1, 0) else g(n,i,t):= g(n, i-1, t) + g(n-i, i, mkl(i, t)) fi end:
+%p A046787 a:= n-> g(5*n, 5*n, [0,0,0,0]):
+%p A046787 seq(a(n), n=0..20);  # _Alois P. Heinz_, Jul 04 2009
+%t A046787 mkl[i_, l_] := Module[{ll, mn, x}, ll = If[Mod[i, 5] == 0, l, MapAt[#+1&, l, Mod[i, 5]]]; mn = Min[l]-1; If[mn <= 0, ll, Map[#-mn&, ll]]];
+%t A046787 g[n_, i_, t_] := g[n, i, t] = Module[{m, mx}, If[n<0, 0, If[n==0, If[ t[[1]]>0 && Equal @@ t[[1;;4]], 1, 0], If[i==0, 0, If[i<5, mx = Max[t]; m = n - 10 mx + t[[1]] + 2 t[[2]] + 3 t[[3]] + 4 t[[4]]; If[m >= 0 && Mod[m, 10]==0, 1, 0], g[n, i-1, t] + g[n-i, i, mkl[i, t]]]]]]];
+%t A046787 a[n_] := g[5n, 5n, {0, 0, 0, 0}];
+%t A046787 Table[a[n], {n, 0, 34}] (* _Jean-François Alcover_, May 25 2019, after _Alois P. Heinz_ *)
+%o A046787 (PARI) seq(n)={Vec(sum(k=1, n\2, x^(2*k)/prod(j=1, k, 1 - x^j + O(x*x^(n-2*k)))^4)/prod(j=1, n, 1 - x^j + O(x*x^n)), -(n+1))} \\ _Andrew Howroyd_, Sep 16 2019
+%Y A046787 Other similar sequences include:
+%Y A046787   Mod 4: A046778, A046779, A046780, A046781, A046782.
+%Y A046787   Mod 5: A046783, A046784, A046785, A046786.
+%Y A046787 Cf. A046765, A046776, A202192.
+%K A046787 nonn
+%O A046787 0,4
+%A A046787 _David W. Wilson_
+%E A046787 a(17)-a(32) from _Alois P. Heinz_, Jul 04 2009
+%E A046787 a(33)-a(34) from _Alois P. Heinz_, Aug 13 2013

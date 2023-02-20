@@ -1,0 +1,34 @@
+%I A145895
+%S A145895 1,1,1,0,1,1,2,1,0,1,2,4,2,4,1,0,1,4,8,10,8,4,6,1,0,1,8,20,26,24,25,
+%T A145895 12,7,8,1,0,1,17,48,70,84,70,54,47,16,11,10,1,0,1,37,116,197,244,241,
+%U A145895 224,141,104,76,20,16,12,1,0,1,82,286,535,728,816,734,609,472,246,180,112,24,22
+%N A145895 Triangle read by rows: T(n,k) is the number of Dyck paths of semilength n and having k UDU and DUD's (here U=(1,1), D=(1,-1); 0 <= k <= 2n-2).
+%C A145895 Row n contains 2n-1 entries (n>=1).
+%C A145895 Row sums are the Catalan numbers (A000108).
+%C A145895 T(n,0) = A004148(n-1) (the secondary structure numbers).
+%C A145895 Sum_{k=0..2n-2} k*T(n,k) = 2*binomial(2n-2, n-2) = 2*A001791(n-1).
+%H A145895 Alois P. Heinz, <a href="/A145895/b145895.txt">Rows n = 0..100, flattened</a>
+%H A145895 Andrei Asinowski, Cyril Banderier, <a href="https://doi.org/10.4230/LIPIcs.AofA.2020.1">On Lattice Paths with Marked Patterns: Generating Functions and Multivariate Gaussian Distribution</a>, 31st International Conference on Probabilistic, Combinatorial and Asymptotic Methods for the Analysis of Algorithms (AofA 2020) Leibniz International Proceedings in Informatics (LIPIcs) Vol. 159, 1:1-1:16.
+%F A145895 G.f.: c(z/(1+(1-t^2)z+(1-t)^2*z^2)), where c(z) = (1-sqrt(1-4z))*(2z) is the g.f. of the Catalan numbers (A000108).
+%F A145895 The trivariate g.f., with z marking semilength, t marking number of UDU's and s marking number of DUD's is c(z/(1+(1-ts)*z + (1-t)(1-s)z^2)), where c(z) = (1-sqrt(1-4z))*(2z) is the g.f. of the Catalan numbers (A000108).
+%e A145895 T(4,3) = 4 because we have UDUDUUDD, UUDDUDUD, UDUUDUDD and UUDUDDUD.
+%e A145895 Triangle starts:
+%e A145895   1;
+%e A145895   1;
+%e A145895   1,  0,  1;
+%e A145895   1,  2,  1,  0,  1;
+%e A145895   2,  4,  2,  4,  1,  0,  1;
+%e A145895   4,  8, 10,  8,  4,  6,  1,  0,  1;
+%p A145895 c := proc (z) options operator, arrow: (1/2-(1/2)*sqrt(1-4*z))/z end proc: G := c(z/(1+(1-t^2)*z+(1-t)^2*z^2)): Gser := simplify(series(G, z = 0, 12)): for n from 0 to 9 do P[n] := sort(coeff(Gser, z, n)) end do: 1; for n to 9 do seq(coeff(P[n], t, k), k = 0 .. 2*n-2) end do; # yields sequence in triangular form
+%p A145895 # second Maple program:
+%p A145895 b:= proc(x, y, t) option remember; `if`(y<0 or y>x, 0,
+%p A145895      `if`(x=0, 1, expand(b(x-1, y+1, [2, 2, 4, 2, 4][t])*
+%p A145895      `if`(t=3, z, 1)+b(x-1, y-1, [5, 3, 5, 3, 5][t])*`if`(t=4, z, 1))))
+%p A145895     end:
+%p A145895 T:= n-> (p-> seq(coeff(p, z, i), i=0..degree(p)))(b(2*n, 0, 1)):
+%p A145895 seq(T(n), n=1..12);  # _Alois P. Heinz_, Jun 04 2014
+%t A145895 b[x_, y_, t_] := b[x, y, t] = If[y<0 || y>x, 0, If[x == 0, 1, Expand[b[x-1, y+1, {2, 2, 4, 2, 4}[[t]]]*If[t == 3, z, 1] + b[x-1, y-1, {5, 3, 5, 3, 5}[[t]]]*If[t == 4, z, 1]]]]; T[n_] := Function[{p}, Table[Coefficient[p, z, i], {i, 0, Exponent[p, z]}]][b[2*n, 0, 1]]; Table[T[n], {n, 0, 12}] // Flatten (* _Jean-François Alcover_, May 27 2015, after _Alois P. Heinz_ *)
+%Y A145895 Cf. A000108, A004148, A001791.
+%K A145895 nonn,tabf
+%O A145895 0,7
+%A A145895 _Emeric Deutsch_, Dec 10 2008

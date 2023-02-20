@@ -1,0 +1,41 @@
+%I A091958
+%S A091958 1,1,2,4,1,9,5,21,21,51,78,3,127,274,28,323,927,180,835,3061,954,12,
+%T A091958 2188,9933,4510,165,5798,31824,19734,1430,15511,100972,81684,9790,55,
+%U A091958 41835,317942,324246,57876,1001,113634,995088,1245762,309036,10920
+%N A091958 Triangle read by rows: T(n,k)=number of ordered trees with n edges and k branch nodes at odd height.
+%C A091958 T(3n,n) = binomial(3n,n)/(2n+1) = A001764(n); T(n,0) = A001006(n) (the Motzkin numbers); T(n,1) = A055219(n-3) (n>=3; most probably); Row sums are the Catalan numbers (A000108).
+%C A091958 T(n,k) = number of ordered trees on n edges with k vertices of outdegree at least 3; T(n,k) = number of ordered trees on n edges with k vertices V such that V's rightmost descendant leaf is at distance exactly 3 from V. - _David Callan_, Oct 24 2004
+%C A091958 T(n,k) is the number of Dyck n-paths containing k UUUDs. For example, T(6,2) = 3 because UUUDUUUDDDDD, UUUDDUUUDDDD, UUUDDDUUUDDD each contains 2 UUUDs. - _David Callan_, Nov 04 2004
+%H A091958 Alois P. Heinz, <a href="/A091958/b091958.txt">Rows n = 0..250, flattened</a>
+%H A091958 E. Deutsch, <a href="http://dx.doi.org/10.1006/jcta.1999.3027">A bijection on ordered trees and its consequences</a>, J. Comb. Theory, A, 90, 210-215, 2000.
+%H A091958 A. Kuznetsov, I. Pak, A. Postnikov, <a href="http://dx.doi.org/10.1006/jcta.1996.0094">Trees associated with the Motzkin numbers</a>, J. Comb. Theory, A, 76, 145-147, 1996.
+%H A091958 A. Sapounakis, I. Tasoulas and P. Tsikouras, <a href="http://dx.doi.org/10.1016/j.disc.2007.03.005">Counting strings in Dyck paths</a>, Discrete Math., 307 (2007), 2909-2924.
+%F A091958 T(n,k) = binomial((n+1), k)*sum((-1)^j*binomial(n+1-k,j)*binomial(2n-3k-3j, n), j=0..floor(n/3)-k)/(n+1). G.f.: G=G(t,z) satisfies (t-1)z^3 G^3 + zG^2 - G + 1 = 0.
+%e A091958 T(3,1) = 1 because the only tree having 3 edges and 1 branch node at an odd level is the tree having the shape of the letter Y.
+%e A091958 Triangle begins:
+%e A091958 1;
+%e A091958 1;
+%e A091958 2;
+%e A091958 4,       1;
+%e A091958 9,       5;
+%e A091958 21,     21;
+%e A091958 51,     78,    3;
+%e A091958 127,   274,   28;
+%e A091958 323,   927,  180;
+%e A091958 835,  3061,  954,  12;
+%e A091958 2188, 9933, 4510, 165;
+%p A091958 T := (n,k)->binomial((n+1),k)*sum((-1)^j*binomial(n+1-k,j)*binomial(2*n-3*k-3*j,n),j=0..floor(n/3)-k)/(n+1): seq(seq(T(n,k),k=0..floor(n/3)),n=0..18);
+%p A091958 # second Maple program:
+%p A091958 b:= proc(x, y, t) option remember; `if`(y<0 or y>x, 0,
+%p A091958      `if`(x=0, 1, expand(b(x-1, y+1, [2, 3, 4, 4][t])
+%p A091958       +b(x-1, y-1, [1, 1, 1, 1][t])*`if`(t=4, z, 1))))
+%p A091958     end:
+%p A091958 T:= n-> (p-> seq(coeff(p, z, i), i=0..degree(p)))(b(2*n, 0, 1)):
+%p A091958 seq(T(n), n=0..15);  # _Alois P. Heinz_, Jun 10 2014
+%t A091958 Clear[a]; a[n_, k_]/;k>n/3 || k<0 := 0; a[n_, 0]/;0<=n<=1 := 1; a[n_, 0]/;n>=2 := a[n, 0] = ((2*n + 1)*a[n-1, 0] + 3*(n - 1)*a[n-2, 0])/(n + 2); a[n_, k_]/;1<=k<=n/3 && n>=2 := a[n, k] = ( (12 - 9*k + 3*n)*a[n-2, k-2] - (12 - 18*k + 3*n)*a[ n-2, k-1] - 9*k*a[ n-2, k] + (4 - 6*k + 4*n)*a[n-1, k-1] + 6*k*a[n-1, k] - (2 - k + n)*a[n, k-1] )/k; Table[a[n, k], {n, 0, 16}, {k, 0, n/3}] (Callan)
+%t A091958 T[n_, k_] := (2*n-3*k)!*HypergeometricPFQ[{k-n-1, k-n/3, 1/3+k-n/3, 2/3+k-n/3}, {k-2*n/3, 1/3+k-2*n/3, 2/3+k-2*n/3}, 1]/(k!*(n-k+1)!*(n-3*k)!); Table[T[n, k], {n, 0, 15}, {k, 0, n/3}] // Flatten (* _Jean-François Alcover_, Mar 31 2015 *)
+%Y A091958 Cf. A001764, A001006, A055219, A243752.
+%Y A091958 Topmost entries in each column form A001764=( binomial(3n, n)/(2n+1) )_(n>=0), next to topmost entries form A025174=( binomial(3n+2, n) )_(n>=0), next lower entries are given by ( (n+2)binomial(3n+4, n) )_(n>=0).
+%K A091958 nonn,tabf
+%O A091958 0,3
+%A A091958 _Emeric Deutsch_, Mar 13 2004

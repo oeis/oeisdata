@@ -1,0 +1,43 @@
+%I A027413
+%S A027413 0,0,1,0,2,3,2,0,0,5,4,6,4,7,6,0,8,9,6,10,8,11,10,12,0,13,0,14,12,21,
+%T A027413 8,0,12,17,10,18,12,19,14,20,16,29,12,22,18,23,22,24,0,25,18,26,24,27,
+%U A027413 14,28,20,29,28,42,16,31,24,0,16,45,20,34,24,45,24,36,24,37,30,38,16
+%N A027413 If n is an odd prime, a(n) = the number of primitive roots mod n, otherwise a(n) =  the number of k < n divisible by at least one but not all of the prime factors of n.
+%C A027413 Old name was: "Number of primitive solutions of system "for all 2<=i<=n, k^i > 1 mod n"."
+%C A027413 The meaning of "primitive" is twofold: (i) Because k^i == (k+n)^i (mod n), we admit only solutions k where k is the representative 2<=k<n. (ii) For prime n, the residue k^i==1 (mod n) is unavoidable if we let i run through the numbers counted by phi(n). So we also admit solutions k where the set of {k^i mod n} is the full {1,2,...,n-1}. - _R. J. Mathar_, _Robert Israel_, Jun 09 2016
+%C A027413 If n is an odd prime, a(n) = A000010(n-1).  If n is composite, a(n) = n-n(1+A173557(n))/A007947(n). - _Robert Israel_, Jun 09 2016
+%H A027413 Robert Israel, <a href="/A027413/b027413.txt">Table of n, a(n) for n = 1..10000</a>
+%p A027413 A027413 := proc(n)
+%p A027413     local a,k,i,kimods ;
+%p A027413     a := 0 ;
+%p A027413     for k from 2 to n-1 do
+%p A027413         kimods := {} ;
+%p A027413         for i from 2 to n do
+%p A027413             kimods := kimods union {modp(k^i,n)};
+%p A027413         end do:
+%p A027413         if min(op(kimods)) > 1 or nops(kimods) = n-1 then
+%p A027413             a := a+1 ;
+%p A027413         end if;
+%p A027413     end do:
+%p A027413     a ;
+%p A027413 end proc: # _R. J. Mathar_, Jun 09 2016
+%p A027413 f:= proc(n)
+%p A027413 local F,q,r;
+%p A027413    if isprime(n) then numtheory:-phi(n-1)
+%p A027413    else
+%p A027413      F:= numtheory:-factorset(n);
+%p A027413      q:= convert(F,`*`);
+%p A027413      r:= convert(map(`-`,F,1),`*`);
+%p A027413      n*(q-r-1)/q;
+%p A027413     fi;
+%p A027413 end proc:
+%p A027413 f(2):= 0: f(1):= 0:
+%p A027413 map(f, [$1..1000]); # _Robert Israel_, Jun 09 2016
+%t A027413 f[n_] := Module[{F, q, r}, If[PrimeQ[n], EulerPhi[n-1], F = FactorInteger[ n][[All, 1]]; q = Times @@ F; r = Times @@ (F-1); n(q-r-1)/q]];
+%t A027413 f[2] = 0; f[1] = 0;
+%t A027413 f /@ Range[100] (* _Jean-François Alcover_, Aug 15 2020, after _Robert Israel_ *)
+%Y A027413 Cf. A000010, A007947, A173557.
+%K A027413 nonn
+%O A027413 1,5
+%A A027413 Sandor Adrian (sandor(AT)skylab.math.unibuc.ro), _Olivier Gérard_
+%E A027413 Better definition from _Robert Israel_, Jun 09 2016

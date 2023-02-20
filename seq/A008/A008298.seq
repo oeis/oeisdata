@@ -1,0 +1,44 @@
+%I A008298
+%S A008298 1,3,1,8,9,1,42,59,18,1,144,450,215,30,1,1440,3394,2475,565,45,1,5760,
+%T A008298 30912,28294,9345,1225,63,1,75600,293292,340116,147889,27720,2338,84,
+%U A008298 1,524160,3032208,4335596,2341332,579369,69552,4074,108,1,6531840,36290736,57773700,38049920,11744775,1857513,154350,6630,135,1
+%N A008298 Triangle of D'Arcais numbers.
+%C A008298 Also the Bell transform of A038048(n+1) and the inverse Bell transform of A180563(n+1) (adding 1,0,0,.. as column 0). For the definition of the Bell transform see A264428. - _Peter Luschny_, Jan 19 2016
+%C A008298 Named after the Italian mathematician Francesco Flores D'Arcais (1849-1927). - _Amiram Eldar_, Jun 13 2021
+%D A008298 Louis Comtet, Advanced Combinatorics, Reidel, 1974, p. 159.
+%D A008298 F. D'Arcais, Développement en série, Intermédiaire Math., Vol. 20 (1913), pp. 233-234.
+%H A008298 Seiichi Manyama, <a href="/A008298/b008298.txt">Rows n = 1..100, flattened</a> (rows n = 1..20 from Vincenzo Librandi)
+%H A008298 Peter Luschny, <a href="https://oeis.org/wiki/User:Peter_Luschny/BellTransform">The Bell transform</a>.
+%F A008298 G.f.: Sum_{1<=k<=n} T(n, k)*u^k*t^n/n! = ((1-t)*(1-t^2)*(1-t^3)...)^(-u).
+%F A008298 Recurrence for degree n D'Arcais polynomials T(n; u) = Sum_{k=1..n} T(n, k)*u^k is given by T(n; u) = Sum_{k=1..n} (n-1)!/(n-k)!*sigma(k)*u*T(n-k; u), T(0; u) = 1. - _Vladeta Jovovic_, Oct 11 2002
+%F A008298 T(n; u) = n!*Sum_{pi} Product_{i=1..n} binomial(u+k(i)-1, k(i)) where pi runs through all nonnegative solutions of k(1)+2*k(2)+..+n*k(n)=n. - _Vladeta Jovovic_, Oct 11 2002
+%F A008298 E.g.f.: exp(Sum_{n>0} sigma(n)*u*x^n/n), where sigma(n)=A000203(n). - _Vladeta Jovovic_, Jan 10 2003
+%F A008298 T(n, k) = coeff(n!*P(n), x^k), n >= 1 and 1 <= k <= n, with P(n) = (1/n)*Sum_{k=0..n-1} sigma(n-k)*P(k)*x for n >= 1 and P(n=0) = 1. See A036039. - _Johannes W. Meijer_, Jul 08 2016
+%F A008298 T(n, k) = (n!/k!) * Sum_{i_1,i_2,...,i_k > 0 and i_1+i_2+...+i_k=n} Product_{j=1..k} sigma(i_j)/i_j. - _Seiichi Manyama_, Nov 09 2020.
+%e A008298 exp(Sum_{n>0} sigma(n)*u*x^n/n) = 1+u*x/1!+(3*u+u^2)*x^2/2!+(8*u+9*u^2+u^3)*x^3/3!+(42*u+59*u^2+18*u^3+u^4)*x^4/4!+...
+%e A008298 Triangle starts:
+%e A008298       1:
+%e A008298       3,      1;
+%e A008298       8,      9,      1;
+%e A008298      42,     59,     18,      1;
+%e A008298     144,    450,    215,     30,     1;
+%e A008298    1440,   3394,   2475,    565,    45,    1;
+%e A008298    5760,  30912,  28294,   9345,  1225,   63,  1;
+%e A008298   75600, 293292, 340116, 147889, 27720, 2338, 84, 1;
+%e A008298   ...
+%e A008298 T(4; u) = 4!*(binomial(u+3,4) + binomial(u+1,2)*binomial(u,1) + binomial(u+1,2) + binomial(u,1)^2 + binomial(u,1)) = 42*u+59*u^2+18*u^3+u^4.
+%p A008298 P := proc(n): if n=0 then 1 else P(n):= (1/n)*(add(x(n-k) * P(k), k=0..n-1)) fi; end: with(numtheory): x := proc(n): sigma(n) * x end: Q := proc(n): n!*P(n) end: T := proc(n, k): coeff(Q(n), x, k) end: seq(seq(T(n, k), k=1..n), n=1..10); # _Johannes W. Meijer_, Jul 08 2016
+%t A008298 t[0][u_] = 1; t[n_][u_] := t[n][u] = Sum[(n-1)!/(n-k)!*DivisorSigma[1, k]*u*t[n-k][u], {k, 1, n}]; row[n_] := CoefficientList[ t[n][u], u] // Rest; Table[row[n], {n, 1, 10}] // Flatten (* _Jean-François Alcover_, Oct 03 2012, after _Vladeta Jovovic_ *)
+%o A008298 (Sage) # uses[bell_matrix from A264428]
+%o A008298 # Adds a column 1,0,0,0, ... at the left side of the triangle.
+%o A008298 print(bell_matrix(lambda n: A038048(n+1), 9)) # _Peter Luschny_, Jan 19 2016
+%o A008298 (PARI) row(n)={local(P(n)=if(n,sum(k=0,n-1,sigma(n-k)*x*P(k))/n,1)); Vecrev(P(n)*n!/x)} \\ T(n,k)=row(n)[k]. - _M. F. Hasler_, Jul 13 2016
+%o A008298 (PARI) a(n) = if(n<1, 0, (n-1)!*sigma(n));
+%o A008298 T(n, k) = if(k==0, 0^n, sum(j=0, n-k+1, binomial(n-1, j-1)*a(j)*T(n-j, k-1))) \\ _Seiichi Manyama_, Nov 08 2020 after _Peter Luschny_
+%Y A008298 Column k=1..3 give A038048, A059356, A059357.
+%Y A008298 Row sums give A053529.
+%Y A008298 Cf. A075525, A180563, A210590.
+%K A008298 nonn,tabl,nice,easy
+%O A008298 1,2
+%A A008298 _N. J. A. Sloane_
+%E A008298 More terms from _Vladeta Jovovic_, Dec 28 2001

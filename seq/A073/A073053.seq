@@ -1,0 +1,68 @@
+%I A073053
+%S A073053 101,11,101,11,101,11,101,11,101,11,112,22,112,22,112,22,112,22,112,
+%T A073053 22,202,112,202,112,202,112,202,112,202,112,112,22,112,22,112,22,112,
+%U A073053 22,112,22,202,112,202,112,202,112,202,112,202,112,112,22,112,22
+%N A073053 Apply DENEAT operator (or the Sisyphus function) to n.
+%C A073053 DENEAT(n): concatenate number of even digits in n, number of odd digits and total number of digits. E.g., 25 -> 1.1.2 = 112 (Digits: Even, Not Even, And Total). Leading zeros are then omitted.
+%C A073053 This is also known as the Sisyphus function. - _N. J. A. Sloane_, Jun 25 2018
+%C A073053 Repeated application of the DENEAT operator reduces all numbers to 123. This is easy to prove. Compare A073054, A100961. - _N. J. A. Sloane_ Jun 18 2005
+%D A073053 M. E. Coppenbarger, Iterations of a modified Sisyphus function, Fib. Q., 56 (No. 2, 2018), 130-141.
+%D A073053 M. Ecker, Caution: Black Holes at Work, New Scientist (Dec. 1992)
+%D A073053 M. J. Halm, Blackholing, Mpossibilities 69, (Jan 01 1999), p. 2.
+%D A073053 J. Schram, The Sisyphus string, J. Rec. Math., 19:1 (1987), 43-44.
+%D A073053 M. Zeger, Fatal attraction, Mathematics and Computer Education, 27:2 (1993), 118-123.
+%H A073053 N. J. A. Sloane, <a href="/A073053/b073053.txt">Table of n, a(n) for n = 0..20000</a>
+%e A073053 a(1) = 0.1.1 -> 11.
+%e A073053 a(10000000000) = 10111 because 10000000000 has 10 even digits, 1 odd digit and 11 total digits
+%e A073053 DENEAT(1356) -> "1" even (6), "3" odd (1,3,5), "4" total digits -> 134.
+%e A073053 DENEAT(1490) -> "2" even (0 is considered even,4), "2" odd (1,9), "4" total digits -> 224. - _Paolo P. Lava_, Mar 05 2010
+%p A073053 read("transforms") :
+%p A073053 A073053 := proc(n)
+%p A073053     local e,o,L ;
+%p A073053     if n = 0 then
+%p A073053         0 ;
+%p A073053     else
+%p A073053         e := A196563(n) ;
+%p A073053         o := A196564(n) ;
+%p A073053         L := [e,o,e+o] ;
+%p A073053         digcatL(L) ;
+%p A073053     end if;
+%p A073053 end proc: # _R. J. Mathar_, Jul 13 2012
+%p A073053 # Maple code based on R. J. Mathar's code for A171797, added by _N. J. A. Sloane_, May 12 2019 (Start)
+%p A073053 nevenDgs := proc(n) local a, d; a := 0 ; for d in convert(n, base, 10) do if type(d, 'even') then a :=a +1 ; end if; end do; a ; end proc:
+%p A073053 cat2 := proc(a, b) local ndigsb; ndigsb := max(ilog10(b)+1, 1) ; a*10^ndigsb+b ; end:
+%p A073053 catL := proc(L) local a, i; a := op(1, L) ; for i from 2 to nops(L) do a := cat2(a, op(i, L)) ; end do; a; end proc:
+%p A073053 A055642 := proc(n) max(1, ilog10(n)+1) ; end proc:
+%p A073053 A171797 := proc(n) local n1, n2 ; n1 := A055642(n) ; n2 := nevenDgs(n) ; catL([n1, n2, n1-n2]) ; end proc:
+%p A073053 A073053 := proc(n) local n1, n2 ; n1 := A055642(n) ; n2 := nevenDgs(n) ; catL([n2, n1-n2, n1]) ; end proc:
+%p A073053 seq(A073053(n), n=1..80) ; (End)
+%p A073053 L:=proc(n) if n=0 then 1 else floor(evalf(log(n)/log(10)))+1; fi; end;
+%p A073053 S:=proc(n) local Le,Ld,Lt,t1,e,d,t; global L;
+%p A073053 t1:=convert(n,base,10); e:=0; d:=0; t:=nops(t1);
+%p A073053 for i from 1 to t do if (t1[i] mod 2) = 0 then e:=e+1; else d:=d+1; fi; od:
+%p A073053 Le:=L(e); Ld:=L(d); Lt:=L(t);
+%p A073053 if e=0 then 10^Lt*d+t
+%p A073053 elif d=0 then 10^(Ld+Lt)*e+10^Lt*d+t
+%p A073053 else 10^(Ld+Lt)*e+10^Lt*d+t; fi;
+%p A073053 end;
+%p A073053 [seq(S(n),n=1..200)]; # _N. J. A. Sloane_, Jun 25 2018
+%p A073053 # alternative Maple program:
+%p A073053 a:= n-> (l-> (e-> parse(cat(e, (h-> [h-e, h][])(nops(l))))
+%p A073053     )(nops(select(x-> x::even, l))))(convert(n, base, 10)):
+%p A073053 seq(a(n), n=0..200);  # _Alois P. Heinz_, Jan 21 2022
+%t A073053 f[n_] := Block[{id = IntegerDigits[n]}, FromDigits[ Join[ IntegerDigits[ Length[ Select[id, EvenQ[ # ] &]]], IntegerDigits[ Length[ Select[id, OddQ[ # ] &]]], IntegerDigits[ Length[ id]] ]]]; Table[ f[n], {n, 0, 55}] (* _Robert G. Wilson v_, Jun 09 2005 *)
+%t A073053 s={};Do[id=IntegerDigits[n];ev=Select[id, EvenQ];ne=Select[id, OddQ];fd=FromDigits[{Length[ev], Length[ne], Length[id]}]; s=Append[s, fd], {n, 81}];SameQ[newA073053-s] (* _Zak Seidov_ *)
+%t A073053 deneat[n_]:=Module[{idn=IntegerDigits[n]},FromDigits[Flatten[ IntegerDigits/@ {Count[ idn,_?EvenQ],Count[ idn,_?OddQ],Length[ idn]}]]] Array[ deneat,60,0]// Flatten (* _Harvey P. Dale_, Aug 13 2021 *)
+%o A073053 (Python)
+%o A073053 def a(n):
+%o A073053     s = str(n)
+%o A073053     e = sum(1 for c in s if c in "02468")
+%o A073053     return int(str(e) + str(len(s)-e) + str(len(s)))
+%o A073053 print([a(n) for n in range(54)]) # _Michael S. Branicky_, Jan 21 2022
+%Y A073053 Cf. A008577, A072420, A073054, A100961, A171797.
+%Y A073053 For records see A305395, A004643, A308004.
+%K A073053 easy,nonn,base
+%O A073053 0,1
+%A A073053 _Michael Joseph Halm_, Aug 16 2002
+%E A073053 Edited and corrected by _Jason Earls_ and _Robert G. Wilson v_, Jun 03 2005
+%E A073053 a(0) added by _N. J. A. Sloane_, May 12 2019

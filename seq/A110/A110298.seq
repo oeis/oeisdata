@@ -1,0 +1,46 @@
+%I A110298
+%S A110298 1,1,0,1,0,1,2,0,1,1,4,0,1,1,2,8,0,2,1,2,4,17,0,4,2,2,4,8,37,0,8,4,4,
+%T A110298 4,8,17,82,0,17,8,8,8,8,17,37,185,0,37,17,16,16,16,17,37,82,423,0,82,
+%U A110298 37,34,32,32,34,37,82,185,978,0,185,82,74,68,64,68,74,82,185,423
+%N A110298 Triangle read by rows: T(n,k) (1 <= k <= n) is the number of secondary structures of size n (i.e., with n nodes) for which node k is the last node in the block that contains node 1.
+%H A110298 G. C. Greubel, <a href="/A110298/b110298.txt">Rows n = 1..50 of the triangle, flattened</a>
+%H A110298 W. R. Schmitt and M. S. Waterman, <a href="http://dx.doi.org/10.1016/0166-218X(92)00038-N">Linear trees and RNA secondary structure</a>, Discrete Appl. Math., 51, 317-323, 1994.
+%H A110298 P. R. Stein and M. S. Waterman, <a href="http://dx.doi.org/10.1016/0012-365X(79)90033-5">On some new sequences generalizing the Catalan and Motzkin numbers</a>, Discrete Math., 26 (1978), 261-272.
+%H A110298 M. Vauchassade de Chaumont and G. Viennot, <a href="http://www.emis.de/journals/SLC/opapers/s08viennot.html">Polynômes orthogonaux et problèmes d'énumeration en biologie moléculaire</a>, Publ. I.R.M.A. Strasbourg, 1984, 229/S-08, Actes 8e Sem. Lotharingien, pp. 79-86.
+%F A110298 T(n, 1) = A004148(n-1);
+%F A110298 T(n, n) = A004148(n-2).
+%F A110298 T(n, 1) = b(n-1); T(n, 2) = 0; T(n, k) = b(k-2)*b(n-k) if k >= 3, where b(n) = A004148(n) is the number of secondary structures of size n (b(0)=1 and b(n) = Sum_{k=ceiling((n+1)/2)..n} binomial(k, n-k)*binomial(k, n-k+1)/k for n >= 1).
+%F A110298 Sum_{k=1..n} T(n, k) = A004148(n).
+%F A110298 G.f.: 1 + t*z*g(z) + t^2*z^2*g(z)*(g(t*z) - 1), where g = 1 + z*g + z^2*g*(g-1) = (1 - z + z^2 - sqrt(1 - 2*z - z^2 - 2*z^3 + z^4))/(2*z^2) is the g.f. of the RNA secondary structure numbers (A004148).
+%e A110298 T(6,3)=2 because we have 13/2/4/5/6 and 13/2/46/5.
+%e A110298 T(15,5)=846 because on the nodes 2,3,4 we can have A004148(3)=2 secondary structures and on the nodes 6,7,...,15 we can have A004148(10)=423 secondary structures.
+%e A110298 Triangle begins:
+%e A110298    1;
+%e A110298    1, 0;
+%e A110298    1, 0,  1;
+%e A110298    2, 0,  1, 1;
+%e A110298    4, 0,  1, 1, 2;
+%e A110298    8, 0,  2, 1, 2, 4;
+%e A110298   17, 0,  4, 2, 2, 4, 8;
+%e A110298   37, 0,  8, 4, 4, 4, 8, 17;
+%e A110298   82, 0, 17, 8, 8, 8, 8, 17, 37;
+%p A110298 b:=proc(n) if n=0 then 1 else sum(binomial(j,n-j)*binomial(j,n-j+1)/j,j=ceil((n+1)/2)..n) fi end: T:=proc(n,k) if k=1 then b(n-1) elif k=2 then 0 elif k<=n then b(k-2)*b(n-k) else 0 fi end: for n from 1 to 13 do seq(T(n,k),k=1..n) od; # yields sequence in triangular form
+%p A110298 g:=1/2/z^2*(1-z+z^2-sqrt(1-2*z-z^2-2*z^3+z^4)): h:=subs(z=t*z,g): G:=simplify(1+t*z*g+t^2*z^2*(h-1)*g): Gser:=simplify(series(G,z=0,17)): P[0]:=1: for n from 1 to 13 do P[n]:=coeff(Gser,z^n) od: for n from 1 to 13 do seq(coeff(P[n],t^k),k=1..n) od; # yields the sequence in triangular form
+%t A110298 b[n_]:= b[n]= If[n==0, 1, b[n-1] +Sum[b[j]*b[n-j-2], {j, n-2}]];
+%t A110298 T[n_, k_]:= If[k<3, b[n-1]*(1-(-1)^k)/2, b[k-2]*b[n-k]];
+%t A110298 Table[T[n, k], {n,13}, {k,n}]//Flatten (* _G. C. Greubel_, Jan 04 2023 *)
+%o A110298 (Magma)
+%o A110298 A004148:= func< n | n eq 0 select 1 else (&+[Binomial(j, n-j)*Binomial(j, n-j+1)/j: j in [Ceiling((n+1)/2)..n]]) >;
+%o A110298 A110298:= func< n,k | k le 2 select A004148(n-1)*(k mod 2) else A004148(k-2)*A004148(n-k) >;
+%o A110298 [A110298(n,k): k in [1..n], n in [1..13]]; // _G. C. Greubel_, Jan 04 2023
+%o A110298 (SageMath)
+%o A110298 @CachedFunction
+%o A110298 def b(n): return 1 if (n==0) else b(n-1) +sum(b(j)*b(n-j-2) for j in range(1,n-1))
+%o A110298 def A110298(n, k):
+%o A110298     if (k<3): return b(n-1)*(k%2)
+%o A110298     else: return b(k-2)*b(n-k)
+%o A110298 flatten([[A110298(n,k) for k in range(1,n+1)] for n in range(1,11)]) # _G. C. Greubel_, Jan 04 2023
+%Y A110298 Cf. A004148.
+%K A110298 nonn,tabl
+%O A110298 1,7
+%A A110298 _Emeric Deutsch_, Jul 18 2005

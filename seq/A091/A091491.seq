@@ -1,0 +1,65 @@
+%I A091491
+%S A091491 1,1,1,1,2,1,1,4,3,1,1,9,8,4,1,1,23,22,13,5,1,1,65,64,41,19,6,1,1,197,
+%T A091491 196,131,67,26,7,1,1,626,625,428,232,101,34,8,1,1,2056,2055,1429,804,
+%U A091491 376,144,43,9,1,1,6918,6917,4861,2806,1377,573,197,53,10,1
+%N A091491 Triangle, read by rows, where the n-th diagonal is generated from the n-th row by the sum of the products of the n-th row terms with binomial coefficients.
+%C A091491 Row sums are A014137 (partial sums of Catalan numbers A000108). Columns equal the partial sums of the columns of the Catalan convolution triangle A033184. Columns include A014137, A014138, A001453.
+%C A091491 Apart from the first column, any term is the partial sum of terms of the row above, when summing from the right. - _Ralf Stephan_, Apr 27 2004
+%C A091491 Matrix inverse equals triangle A104402.
+%C A091491 Riordan array (1/(1-x), x*c(x)) where c(x) is the g.f. of A000108. - _Philippe Deléham_, Nov 04 2009
+%H A091491 Reinhard Zumkeller, <a href="/A091491/b091491.txt">Rows n=0..150 of triangle, flattened</a>
+%F A091491 T(n, k) = Sum_{j=0..n-k} T(n-k, j)*C(k+j-1, k-1).
+%F A091491 G.f.: 2/(2-y*(1-sqrt(1-4*x)))/(1-x).
+%F A091491 T(n, k) = T(n-1, k-1) + T(n, k+1) for n>0, with T(n, 0)=1.
+%F A091491 Recurrence: for k>0, T(n, k) = Sum_{j=k..n} T(n-1, j). - _Ralf Stephan_, Apr 27 2004
+%F A091491 T(n+2,2)= |A099324(n+2)|. - _Philippe Deléham_, Nov 25 2009
+%F A091491 T(n,k) = k * Sum_{i=0..n-k} binomial(2*(n-i)-k-1, n-i-1)/(n-i) for k>0; T(n,0)=1. - _Vladimir Kruchinin_, Feb 07 2011
+%F A091491 From _Gary W. Adamson_, Jul 26 2011: (Start)
+%F A091491 The n-th row of the triangle is the top row of M^n, where M is the following infinite square production matrix in which a column of (1,0,0,0,...) is prepended to an infinite lower triangular matrix of all 1's and the rest zeros:
+%F A091491   1, 1, 0, 0, 0, 0, ...
+%F A091491   0, 1, 1, 0, 0, 0, ...
+%F A091491   0, 1, 1, 1, 0, 0, ...
+%F A091491   0, 1, 1, 1, 1, 0, ...
+%F A091491   0, 1, 1, 1, 1, 1, ...
+%F A091491 (End)
+%F A091491 Sum_{k=0..n} T(n,k) = Sum_{j=0..n} A000108(j) = A014137(n). - _G. C. Greubel_, Apr 30 2021
+%e A091491 T(7,3) = T(4,0)*C(2,2) + T(4,1)*C(3,2) + T(4,2)*C(5,2) + T(4,3)*C(6,2) = (1)*1 + (4)*3 + (3)*6 + (1)*10 = 41.
+%e A091491 Rows begin:
+%e A091491   1;
+%e A091491   1,     1;
+%e A091491   1,     2,     1;
+%e A091491   1,     4,     3,     1;
+%e A091491   1,     9,     8,     4,     1;
+%e A091491   1,    23,    22,    13,     5,     1;
+%e A091491   1,    65,    64,    41,    19,     6,    1;
+%e A091491   1,   197,   196,   131,    67,    26,    7,    1;
+%e A091491   1,   626,   625,   428,   232,   101,   34,    8,    1;
+%e A091491   1,  2056,  2055,  1429,   804,   376,  144,   43,    9,   1;
+%e A091491   1,  6918,  6917,  4861,  2806,  1377,  573,  197,   53,  10,  1;
+%e A091491   1, 23714, 23713, 16795,  9878,  5017, 2211,  834,  261,  64, 11,  1;
+%e A091491   1, 82500, 82499, 58785, 35072, 18277, 8399, 3382, 1171, 337, 76, 12, 1;
+%e A091491   ...
+%e A091491 As to the production matrix M, top row of M^3 = [1, 4, 3, 1, 0, 0, 0, ...].
+%t A091491 nmax = 11; t[n_, k_] := k*(2n-k-1)!*HypergeometricPFQ[{1, k-n, -n}, {k/2-n+1/2, k/2-n+1}, 1/4]/(n!*(n-k)!); t[_, 0] = 1; Flatten[ Table[ t[n, k], {n, 0, nmax}, {k, 0, n}]] (* _Jean-François Alcover_, Nov 14 2011, after _Vladimir Kruchinin_ *)
+%o A091491 (PARI) T(n,k)=if(k>n || n<0 || k<0,0,if(k==0 || k==n,1, sum(j=0,n-k,T(n-k,j)*binomial(k+j-1,k-1)););)
+%o A091491 for(n=0,10,for(k=0,n,print1(T(n,k),", "));print(""))
+%o A091491 (PARI) T(n,k)=local(X=x+x*O(x^n),Y=y+y*O(y^k)); polcoeff(polcoeff(2/(2-Y*(1-sqrt(1-4*X)))/(1-X),n,x),k,y)
+%o A091491 for(n=0,10,for(k=0,n,print1(T(n,k),", "));print(""))
+%o A091491 (PARI) T(n,k)=if(n<k || k<0,0,if(n==k || k==0,1,T(n-1,k-1)+T(n,k+1)))
+%o A091491 for(n=0,10,for(k=0,n,print1(T(n,k),", "));print(""))
+%o A091491 (Haskell)
+%o A091491 a091491 n k = a091491_tabl !! n !! k
+%o A091491 a091491_row n = a091491_tabl !! n
+%o A091491 a091491_tabl = iterate (\row -> 1 : scanr1 (+) row) [1]
+%o A091491 -- _Reinhard Zumkeller_, Jul 12 2012
+%o A091491 (Magma)
+%o A091491 A091491:= func< n,k | k eq 0 select 1 else k*(&+[Binomial(2*(n-j)-k-1, n-j-1)/(n-j): j in [0..n-k]]) >;
+%o A091491 [A091491(n,k): k in [0..n], n in [0..12]]; // _G. C. Greubel_, Apr 30 2021
+%o A091491 (Sage)
+%o A091491 def A091491(n,k): return 1 if (k==0) else k*sum(binomial(2*(n-j)-k-1, n-j-1)/(n-j) for j in (0..n-k))
+%o A091491 flatten([[A091491(n,k) for k in (0..n)] for n in (0..12)]) # _G. C. Greubel_, Apr 30 2021
+%Y A091491 Cf. A000108, A001453, A014137, A014138, A033184, A104402.
+%Y A091491 Cf. A096465 (reversed).
+%K A091491 nonn,tabl
+%O A091491 0,5
+%A A091491 _Paul D. Hanna_, Jan 14 2004

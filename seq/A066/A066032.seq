@@ -1,0 +1,48 @@
+%I A066032
+%S A066032 1,0,1,0,0,1,0,1,1,2,0,0,0,0,1,0,0,1,1,1,2,0,0,0,0,0,0,1,0,1,1,2,2,2,
+%T A066032 2,3,0,0,1,1,1,1,1,1,2,0,0,0,0,1,1,1,1,1,2,0,0,0,0,0,0,0,0,0,0,1,0,0,
+%U A066032 1,2,2,3,3,3,3,3,3,4,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,1,1,1,1,1,1,1,2
+%N A066032 Number of ways to write n as a product with no factor larger than m (1 <= m <=n, written row by row).
+%H A066032 Reinhard Zumkeller, <a href="/A066032/b066032.txt">Rows n = 1..150 of triangle, flattened</a>
+%F A066032 T(1, 1) = 1. For every prime p T(p, m) = 1 if p <= m and 0 else. For composite n: T(n, m) = sum[T(n/d, d)] + I(n<=m) where the sum is over all divisors d of n except 1 and n with d <= m and I(n<=m) is 1 if n<=m and 0 else.
+%F A066032 From _Reinhard Zumkeller_, Oct 01 2012: (Start)
+%F A066032 T(n,floor(n/2)) = A028422(n) for n > 1; T(n,floor(n/3)) = A216599(n) for n > 2;
+%F A066032 T(n,floor(n/4)) = A216600(n) for n > 3; T(n,floor(n/5)) = A216601(n) for n > 4;
+%F A066032 T(n,floor(n/6)) = A216602(n) for n > 5. (End)
+%e A066032 T(12, 5) = a(71) = 2, since there are 2 possibilities to write 12 as a product with no factor larger than 5 (4*3 and 3*2*2)
+%e A066032 1;
+%e A066032 0,1;
+%e A066032 0,0,1;
+%e A066032 0,1,1,2;
+%e A066032 0,0,0,0,1;
+%e A066032 0,0,1,1,1,2;
+%e A066032 0,0,0,0,0,0,1;
+%e A066032 0,1,1,2,2,2,2,3;
+%e A066032 0,0,1,1,1,1,1,1,2;
+%e A066032 0,0,0,0,1,1,1,1,1,2;
+%e A066032 0,0,0,0,0,0,0,0,0,0,1;
+%e A066032 0,0,1,2,2,3,3,3,3,3,3,4;
+%p A066032 with(numtheory): T := proc(n::integer, m::integer) local i, A, summe, d: if isprime(n) then: if n <= m then RETURN(1) fi: RETURN(0): fi:
+%p A066032 A := divisors(n) minus {n,1}: for d in A do: if d > m then A := A minus {d}: fi: od: summe := 0: for d in A do: summe := summe + T(n/d,d): od: if n <=m then summe := summe + 1: fi: RETURN(summe): end: A066032 := [seq(seq(T(n, m),m=1..n), n=1..16)];
+%t A066032 T[1, 1] = 1; T[p_?PrimeQ, m_] := Boole[p <= m]; T[n_, m_] := Sum[T[n/d, d]* Boole[d <= m], {d, Divisors[n][[2 ;; -2]]}] + Boole[n <= m];
+%t A066032 Table[T[n, m], {n, 1, 14}, {m, 1, n}] // Flatten (* _Jean-François Alcover_, Mar 01 2019 *)
+%o A066032 (Haskell)
+%o A066032 a066032 1 1 = 1
+%o A066032 a066032 n k = fromEnum (n <= k) +
+%o A066032    (sum $ map (\d -> a066032 (n `div` d) d) $
+%o A066032               takeWhile (<= k) $ tail $ a027751_row n)
+%o A066032 a066032_row n = map (a066032 n) [1..n]
+%o A066032 a066032_tabl = map a066032_row [1..]
+%o A066032 -- _Reinhard Zumkeller_, Oct 01 2012
+%o A066032 (Python)
+%o A066032 from sympy import divisors, isprime
+%o A066032 def T(n, m):
+%o A066032     if isprime(n): return 1 if n<=m else 0
+%o A066032     A=(d for d in divisors(n)[1:-1] if d <= m)
+%o A066032     s=sum(T(n//d, d) for d in A)
+%o A066032     return s + 1 if n<=m else s
+%o A066032 for n in range(1, 21): print([T(n, m) for m in range(1, n + 1)]) # _Indranil Ghosh_, Aug 19 2017
+%Y A066032 A001055(n) = T(n, n) is the right diagonal.
+%K A066032 nonn,look,tabl
+%O A066032 1,10
+%A A066032 Ulrich Schimke (ulrschimke(AT)aol.com), Feb 11 2002

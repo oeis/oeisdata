@@ -1,0 +1,54 @@
+%I A094912
+%S A094912 0,0,0,0,0,1,0,0,0,0,1,0,0,1,0,0,0,0,0,0,1,0,0,1,0,0,1,0,0,1,0,0,0,0,
+%T A094912 0,0,0,0,0,0,1,1,0,1,0,0,1,0,0,0,0,0,1,0,0,1,0,0,1,0,0,1,0,0,0,0,0,0,
+%U A094912 0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,1,1,0,0,0,0,0,1,0,0,1,0,0,0,0,0,0,0,0,1
+%N A094912 Output from a certain finite automaton when fed binary representation of n read from right to left.
+%C A094912 There are 3 states. Start in state A.
+%C A094912 If in A and 0 arrives go to A
+%C A094912 If in A and 1 arrives go to B
+%C A094912 If in B and 0 arrives go to C
+%C A094912 If in B and 1 arrives go to A
+%C A094912 If in C and 0 arrives go to A
+%C A094912 If in C and 1 arrives go to C
+%C A094912 If end in A, B, C then output 0, 0, 1 respectively.
+%H A094912 Reinhard Zumkeller, <a href="/A094912/b094912.txt">Table of n, a(n) for n = 0..10000</a>
+%H A094912 J.-P. Allouche and M. Mendes France, <a href="https://webusers.imj-prg.fr/~jean-paul.allouche/allmendeshouches.pdf">Automata and Automatic Sequences</a>, in: Axel F. and Gratias D. (eds), Beyond Quasicrystals. Centre de Physique des Houches, vol 3. Springer, Berlin, Heidelberg, pp. 293-367, 1995; DOI https://doi.org/10.1007/978-3-662-03130-8_11.
+%H A094912 J.-P. Allouche and M. Mendes France, <a href="/A003842/a003842.pdf">Automata and Automatic Sequences</a>, in: Axel F. and Gratias D. (eds), Beyond Quasicrystals. Centre de Physique des Houches, vol 3. Springer, Berlin, Heidelberg, pp. 293-367, 1995; DOI https://doi.org/10.1007/978-3-662-03130-8_11. [Local copy]
+%e A094912 a(10) = 1: 10 = 1010, read from right: A->A->B->C, so output a 1.
+%p A094912 T:= <<1,3,1>|<2,1,3>>:
+%p A094912 a:= proc(n)
+%p A094912   local L, state,i;
+%p A094912   L:= convert(n,base,2);
+%p A094912   state:= 1;
+%p A094912   for i from 1 to nops(L) do
+%p A094912     state:= T[state, L[i]+1];
+%p A094912   od:
+%p A094912   [0,0,1][state];
+%p A094912 end proc:
+%p A094912 seq(a(n),n=0..100); # _Robert Israel_, Aug 18 2014
+%o A094912 (PARI) {m=104;for(n=0,m,tape=binary(n);d=length(tape);state="A";for(j=0,d-1, in=tape[d-j];
+%o A094912 state=if(state=="A",if(in==0,"A","B"),if(state=="B",if(in==0,"C","A"),if(in==0,"A","C"))));
+%o A094912 print1(if(state=="A"||state=="B",0,1),","))} \\ _Klaus Brockhaus_, Jun 23 2004
+%o A094912 (Haskell)
+%o A094912 a094912 n = a 2 n where
+%o A094912    a s 0 = 0 ^ s
+%o A094912    a s x = a (t s b) x' where (x',b) = divMod x 2
+%o A094912    t 2 0 = 2; t 2 1 = 1; t 1 0 = 0; t 1 1 = 2; t 0 0 = 2; t 0 1 = 0
+%o A094912    -- state encoding: A = 2, B = 1, C = 0.
+%o A094912 -- _Reinhard Zumkeller_, Nov 11 2013
+%o A094912 (Python)
+%o A094912 def delta(q, a):
+%o A094912     if q == "A": return {"0": "A", "1": "B"}[a]
+%o A094912     if q == "B": return {"0": "C", "1": "A"}[a]
+%o A094912     return {"0": "A", "1": "C"}[a]
+%o A094912 def a(n):
+%o A094912     q = "A"
+%o A094912     for a in bin(n)[2:][::-1]: q = delta(q, a)
+%o A094912     return int(q == "C")
+%o A094912 print([a(n) for n in range(105)]) # _Michael S. Branicky_, Jul 31 2022
+%Y A094912 Cf. A231600.
+%K A094912 nonn,easy,base
+%O A094912 0,1
+%A A094912 _N. J. A. Sloane_, Jun 21 2004
+%E A094912 A very interesting paper. I only looked though it as far as page 12. Perhaps some reader would read to the end and add appropriate references to it from other entries in the OEIS, as well as adding any new sequences that are found. A similar remark could be made about many papers on _Jean-Paul Allouche_'s web site. - _N. J. A. Sloane_.
+%E A094912 More terms from _Klaus Brockhaus_, Jun 23 2004

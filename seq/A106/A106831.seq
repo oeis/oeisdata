@@ -1,0 +1,65 @@
+%I A106831
+%S A106831 2,6,4,24,12,12,8,120,48,36,24,48,24,24,16,720,240,144,96,144,72,72,
+%T A106831 48,240,96,72,48,96,48,48,32,5040,1440,720,480,576,288,288,192,720,
+%U A106831 288,216,144,288,144,144,96,1440,480,288,192,288,144,144,96,480,192,144,96,192
+%N A106831 Define a triangle in which the entries are of the form +-1/(b!c!d!e!...), where the order of the factorials is important; read the triangle by rows and record and expand the denominators.
+%C A106831 Row n has 2^n terms. Row 0 is +1/2!. An entry +-1/b!c!d!... has two children, a left child -+1/(a+1)!b!c!... and a right child +-1/2!b!c!d!...
+%C A106831 Let S_n = sum of entries in row n of the triangle. Then for n > 0, n!S_{n-1} is the Bernoulli number B_n.
+%H A106831 Reinhard Zumkeller, <a href="/A106831/b106831.txt">Rows n = 0..13 of table, flattened</a>
+%H A106831 Wikipedia, <a href="https://en.wikipedia.org/wiki/Bernoulli_number#A_binary_tree_representation">Bernoulli number: A binary tree representation</a>
+%H A106831 S. C. Woon, <a href="http://www.jstor.org/stable/2691054">A tree for generating Bernoulli numbers</a>, Math. Mag., 70 (1997), 51-56.
+%H A106831 <a href="/index/Be#Bernoulli">Index entries for sequences related to Bernoulli numbers.</a>
+%F A106831 From _Antti Karttunen_, Jan 16 2019: (Start)
+%F A106831 If sequence is shifted one term to the right, then the following recurrence works:
+%F A106831 a(0) = 1; and for n > 0, a(2n) = (1+A001511(2n))*a(n), a(2n+1) = 2*a(n).
+%F A106831 (End)
+%e A106831 Woon's "Bernoulli Tree" begins like this (see also the given Wikipedia-link). This sequence gives the values of the denominators:
+%e A106831                                      +1
+%e A106831                                     ────
+%e A106831                                      2!
+%e A106831                  -1                 /  \                  +1
+%e A106831                 ──── ............../    \.............. ─────
+%e A106831                  3!                                      2!2!
+%e A106831         +1        .         -1                 -1         .         +1
+%e A106831        ────      / \       ────               ────       / \      ──────
+%e A106831         4! ...../   \..... 2!3!               3!2! ...../   \.... 2!2!2!
+%e A106831        / \                 / \                 / \                 / \
+%e A106831       /   \               /   \               /   \               /   \
+%e A106831      /     \             /     \             /     \             /     \
+%e A106831     -1      +1         +1       -1         +1      -1          -1       +1
+%e A106831    ────    ────       ────     ──────     ────   ──────      ──────  ────────
+%e A106831     5!     2!4!       3!3!     2!2!3!     4!2!   2!3!2!      3!2!2!  2!2!2!2!
+%e A106831 etc.
+%p A106831 Contribution from _Peter Luschny_, Jun 12 2009: (Start)
+%p A106831 The routine computes the triangle row by row and gives the numbers with their sign.
+%p A106831 Thus A(1)=[2]; A(2)=[ -6,4]; A(3)=[24,-12,-12,8]; etc.
+%p A106831 A := proc(n) local k, i, j, m, W, T; k := 2;
+%p A106831 W := array(0..2^n); W[1] := [1,`if`(n=0,1,2)];
+%p A106831 for i from 1 to n-1 do for m from k by 2 to 2*k-1 do
+%p A106831 T := W[iquo(m,2)]; W[m] := [ -T[1],T[2]+1,seq(T[j],j=3..nops(T))];
+%p A106831 W[m+1] := [T[1],2,seq(T[j],j=2..nops(T))]; od; k := 2*k; od;
+%p A106831 seq(W[i][1]*mul(W[i][j]!,j=2..nops(W[i])),i=iquo(k,2)..k-1) end:
+%p A106831 seq(print(A(i)),i=1..5); (End)
+%t A106831 a [n_] := Module[{k, i, j, m, w, t}, k = 2; w = Array[0&, 2^n]; w[[1]] := {1, If[n == 0, 1, 2]}; For[i = 1, i <= n-1, i++, For[m = k, m <= 2*k-1 , m = m+2, t = w[[Quotient[m, 2]]]; w[[m]] = {-t[[1]], t[[2]]+1, Sequence @@ Table[t[[j]], {j, 3, Length[t]}]}; w[[m+1]] = {t[[1]], 2, Sequence @@ Table[t[[j]], {j, 2, Length[t]}]}]; k = 2*k]; Table[w[[i, 1]]*Product[w[[i, j]]!, {j, 2, Length[w[[i]]]}], {i, Quotient[k, 2], k-1}]]; Table[a[i] , {i, 1, 6}] // Flatten // Abs (* _Jean-François Alcover_, Dec 20 2013, translated from Maple *)
+%o A106831 (Haskell)
+%o A106831 a106831 n k = a106831_tabf !! n !! n
+%o A106831 a106831_row n = a106831_tabf !! n
+%o A106831 a106831_tabf = map (map (\(_, _, left, right) -> left * right)) $
+%o A106831    iterate (concatMap (\(x, f, left, right) -> let f' = f * x in
+%o A106831    [(x + 1, f', f', right), (3, 2, 2, left * right)])) [(3, 2, 2, 1)]
+%o A106831 -- _Reinhard Zumkeller_, May 05 2014
+%o A106831 (PARI)
+%o A106831 A106831off1(n) = if(!n,1, my(rl=1, m=1); while(n,if(!(n%2), rl++, m *= ((1+rl)!); rl=1); n >>= 1); (m));
+%o A106831 A106831(n) = A106831off1(1+n); \\ _Antti Karttunen_, Jan 16 2019
+%o A106831 (PARI)
+%o A106831 A001511(n) = (1+valuation(n,2));
+%o A106831 A106831r1(n) = if(!n,1,if(n%2, 2*A106831r1((n-1)/2), (1+A001511(n))*A106831r1(n/2))); \\ Implements the given recurrence.
+%o A106831 A106831(n) = A106831r1(1+n); \\ _Antti Karttunen_, Jan 16 2019
+%Y A106831 Cf. A242179 (numerators), A050925, A050932, A000142.
+%Y A106831 Cf. A001013, A060054, A075180, A164555, A027642, A246660.
+%Y A106831 Cf. A323505 (mirror image), and also A005940, A283477, A322827 for other similar trees.
+%K A106831 nonn,tabf,frac,easy,nice
+%O A106831 0,1
+%A A106831 _N. J. A. Sloane_, May 22 2005
+%E A106831 More terms from _Franklin T. Adams-Watters_, Apr 28 2006
+%E A106831 Example section reillustrated by _Antti Karttunen_, Jan 16 2019

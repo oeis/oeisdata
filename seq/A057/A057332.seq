@@ -1,0 +1,61 @@
+%I A057332
+%S A057332 4,15,52,210,1007,5156,25571,133293,727082,3874464,21072166,117829671,
+%T A057332 654556778
+%N A057332 a(n) is the number of (2n+1)-digit palindromic primes that undulate.
+%C A057332 'Undulate' means that the alternate digits are consistently greater than or less than the digits adjacent to them (e.g., 906343609). Smoothly undulating palindromic primes (e.g., 323232323) are a subset and included in the count.
+%D A057332 C. A. Pickover, "Wonders of Numbers", Oxford New York 2001, Chapter 52, pp. 123-124, 316-317.
+%H A057332 C. K. Caldwell, <a href="http://primes.utm.edu/curios/page.php?short=906343609">Prime Curios! 906343609</a> and <a href="http://primes.utm.edu/curios/page.php?short=1007">Prime Curios! 1007</a>.
+%H A057332 C. A. Pickover, "Wonders of Numbers, Adventures in Mathematics, Mind and Meaning," <a href="http://www.zentralblatt-math.org/zmath/en/search/?q=an:0983.00008&amp;format=complete">Zentralblatt review</a>
+%H A057332 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/UndulatingNumber.html">Undulating Number.</a>
+%o A057332 (Python)
+%o A057332 from sympy import isprime
+%o A057332 from itertools import product
+%o A057332 def sign(n): return (n > 0) - (n < 0)
+%o A057332 def unds(n):
+%o A057332   s = str(n)
+%o A057332   if len(s) == 1: return True
+%o A057332   signs = set(sign(int(s[i-1]) - int(s[i])) for i in range(1, len(s), 2))
+%o A057332   if len(signs) > 1: return False
+%o A057332   if len(s) % 2 == 0: return signs == {1} or signs == {-1}
+%o A057332   return sign(int(s[-1]) - int(s[-2])) in signs - {0}
+%o A057332 def candidate_pals(n): # of length 2n + 1
+%o A057332   if n == 0: yield from [2, 3, 5, 7]; return # one-digit primes
+%o A057332   for rightbutend in product("0123456789", repeat=n-1):
+%o A057332     rightbutend = "".join(rightbutend)
+%o A057332     for end in "1379": # multi-digit primes must end in 1, 3, 7, or 9
+%o A057332       left = end + rightbutend[::-1]
+%o A057332       for mid in "0123456789": yield int(left + mid + rightbutend + end)
+%o A057332 def a(n): return sum(1 for p in candidate_pals(n) if unds(p) and isprime(p))
+%o A057332 print([a(n) for n in range(6)]) # _Michael S. Branicky_, Apr 15 2021
+%o A057332 (Python)
+%o A057332 from sympy import isprime
+%o A057332 def f(w,dir):
+%o A057332     if dir == 1:
+%o A057332         for s in w:
+%o A057332             for t in range(int(s[-1])+1,10):
+%o A057332                 yield s+str(t)
+%o A057332     else:
+%o A057332         for s in w:
+%o A057332             for t in range(0,int(s[-1])):
+%o A057332                 yield s+str(t)
+%o A057332 def A057332(n):
+%o A057332     c = 0
+%o A057332     for d in '123456789':
+%o A057332         x = d
+%o A057332         for i in range(1,n+1):
+%o A057332             x = f(x,(-1)**i)
+%o A057332         c += sum(1 for p in x if isprime(int(p+p[-2::-1])))
+%o A057332         if n > 0:
+%o A057332             y = d
+%o A057332             for i in range(1,n+1):
+%o A057332                 y = f(y,(-1)**(i+1))
+%o A057332             c += sum(1 for p in y if isprime(int(p+p[-2::-1])))
+%o A057332     return c # _Chai Wah Wu_, Apr 25 2021
+%Y A057332 Cf. A046075, A033619, A032758, A039944, A016073, A046076, A046077, A057333.
+%K A057332 nonn,base,more
+%O A057332 0,1
+%A A057332 _Patrick De Geest_, Sep 15 2000
+%E A057332 a(5) from _Donovan Johnson_, Aug 08 2010
+%E A057332 a(6)-a(10) from _Lars Blomberg_, Nov 19 2013
+%E A057332 a(11) from _Chai Wah Wu_, Apr 25 2021
+%E A057332 a(12) from _Chai Wah Wu_, May 02 2021

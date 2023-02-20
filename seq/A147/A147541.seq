@@ -1,0 +1,78 @@
+%I A147541
+%S A147541 1,2,1,3,2,-4,2,5,4,-6,4,4,10,-36,18,45,34,-72,64,-24,124,-358,258,
+%T A147541 170,458,-1260,916,148,1888,-4296,3690,887,7272,-17616,14718,-5096,
+%U A147541 29610,-67164,58722,-26036,119602,-244496,242256,-104754,487352,-1029384
+%N A147541 Result of using the primes as coefficients in an infinite polynomial series in x and then expressing this series as (1+x)(1+a(1)*x)(1+a(2)*x^2) ... .
+%C A147541 This is the PPE (power product expansion) of A036467. - _R. J. Mathar_, Feb 01 2010
+%H A147541 H. Gingold, <a href="http://www.ams.org/mathscinet-getitem?mr=1068511">A note on reduction of operations via power product approximations</a>, Utilitas Math. 37 (1990), 79-89. [From _R. J. Mathar_, Nov 10 2008]
+%H A147541 H. Gingold and A. Knopfmacher, <a href="http://www.ams.org/mathscinet-getitem?mr=1370515">Analytic properties of power product expansions</a>, Canad. J. Math. 47 (1995), 1219-1239. [From _R. J. Mathar_, Nov 10 2008]
+%H A147541 H. Gingold, A. Knopfmacher and D. Lubinsky, <a href="http://www.ams.org/mathscinet-getitem?mr=1245748">The zero distribution of the partial products of power product expansions</a>, Analysis 13 (1993), 133-157. [From _R. J. Mathar_, Nov 10 2008]
+%e A147541 From the primes, construct the series 1+2x+3x^2+5x^3+7x^4+... Divide this by (1+x) to get the quotient (1+a(1)x+...), which here gives a(1)=1. Then divide this quotient by (1+a(1)x), i.e. here (1+x), to get (1+a(2)x^2+...), giving a(2)=2.
+%p A147541 From _R. J. Mathar_, Feb 01 2010: (Start)
+%p A147541 # Partition n into a set of distinct positive integers, the maximum one
+%p A147541 # being m.
+%p A147541 # Example: partitionsQ(7,5) returns [[2,5],[3,4],[1,2,4]] ;
+%p A147541 # Richard J. Mathar, 2008-11-10
+%p A147541 partitionsQ := proc(n,m)
+%p A147541 local p,t,rec,q;
+%p A147541 p := [] ;
+%p A147541 # take 't' of the n and recursively determine the partitions of
+%p A147541 # what has been left over.
+%p A147541 for t from min(m,n) to 1 by -1 do
+%p A147541 # Since we are only considering partitions into distinct parts,
+%p A147541 # the triangular numbers set a lower bound on the t.
+%p A147541 if t*(t+1)/2 >= n then
+%p A147541 rec := partitionsQ(n-t,t-1) ;
+%p A147541 if nops(rec) = 0 then
+%p A147541 p := [op(p),[t]] ;
+%p A147541 else
+%p A147541 for q in rec do
+%p A147541 p := [op(p),[op(q),t]] ;
+%p A147541 end do:
+%p A147541 end if;
+%p A147541 end if;
+%p A147541 end do:
+%p A147541 RETURN(p) ;
+%p A147541 end proc:
+%p A147541 # Power product expansion of L.
+%p A147541 # L is a list starting with 1, which is considered L[0].
+%p A147541 # Returns the list [a(1),a(2),..] such that
+%p A147541 # product_(i=1,2,..) (1+a(i)x^i) = sum_(j=0,1,2,...) L[j]x^j.
+%p A147541 # Richard J. Mathar, 2008-11-10
+%p A147541 ppe := proc(L)
+%p A147541 local pro,i,par,swithi,snoti,m,p,k ;
+%p A147541 pro := [] ;
+%p A147541 for i from 1 to nops(L)-1 do
+%p A147541 par := partitionsQ(i,i) ;
+%p A147541 swithi := 0 ;
+%p A147541 snoti := 0 ;
+%p A147541 for p in par do
+%p A147541 if i in p then
+%p A147541 m := 1 ;
+%p A147541 for k from 1 to nops(p)-1 do
+%p A147541 m := m*op(op(k,p),pro) ;
+%p A147541 end do;
+%p A147541 swithi := swithi+m ;
+%p A147541 else
+%p A147541 snoti := snoti+mul( op(k,pro),k=p) ;
+%p A147541 end if;
+%p A147541 end do:
+%p A147541 pro := [op(pro), (op(i+1,L)-snoti)/swithi] ;
+%p A147541 end do:
+%p A147541 RETURN(pro) ;
+%p A147541 end proc:
+%p A147541 read("transforms") ;
+%p A147541 A147541 := proc(nmax)
+%p A147541 local L,L1,L2 ;
+%p A147541 L := [1,seq(ithprime(n),n=1..nmax)] ;
+%p A147541 L1 := [seq((-1)^n,n=0..nmax+10)] ;
+%p A147541 A036467 := CONV(L,L1) ;
+%p A147541 ppe(A036467) ;
+%p A147541 end:
+%p A147541 A147541(47) ;
+%p A147541 (End)
+%Y A147541 Cf. A000040, A147542.
+%K A147541 sign
+%O A147541 1,2
+%A A147541 _Neil Fernandez_, Nov 06 2008
+%E A147541 Extended by _R. J. Mathar_, Feb 01 2010

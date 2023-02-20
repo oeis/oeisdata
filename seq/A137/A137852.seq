@@ -1,0 +1,29 @@
+%I A137852
+%S A137852 1,1,-2,9,-24,130,-720,8505,-35840,412776,-3628800,42030450,
+%T A137852 -479001600,7019298000,-82614884352,1886805545625,-20922789888000,
+%U A137852 374426276224000,-6402373705728000,134987215801622184,-2379913632645120000,55685679780013920000
+%N A137852 G.f.: Product_{n>=1} (1 + a(n)*x^n/n!) = exp(x).
+%C A137852 Equals signed A006973 (except for initial term), where A006973 lists the dimensions of representations by Witt vectors.
+%H A137852 Alois P. Heinz, <a href="/A137852/b137852.txt">Table of n, a(n) for n = 1..170</a>
+%H A137852 Gottfried Helms, <a href="http://go.helms-net.de/math/musings/dreamofasequence.pdf">A dream of a (number-) sequence</a>, 2007-2009.
+%F A137852 a(n) = (n-1)!*[(-1)^n + Sum_{d divides n, 1<d<n} d*( -a(d)/d! )^(n/d) ] for n>1 with a(1)=1.
+%F A137852 Another recurrence. With FP(n,m) the set of partitions of n with m distinct parts (which could be called fermionic partitions (fp)) and the multinomial numbers M1(fp(n,m)) (given as array in A036038) for any fp(n,m) from FP(n,m): a(n)= 1 - sum( sum(M1(fp)*product(a(k[j]),j=1..m),fp from FP(n,m)),m=2..maxm(n)), with maxm(n):=A003056(n) and the distinct parts k[j], j=1,...,m, of the partition fp(n,m). Inputs a(1)=1, a(2)=1. See also array A008289(n,m) for the cardinality of the set FP(n,m). - _Wolfdieter Lang_, Feb 20 2009
+%e A137852 exp(x) = (1+x)*(1+x^2/2!)*(1-2*x^3/3!)*(1+9*x^4/4!)*(1-24*x^5/5!)* (1+130*x^6/6!)*(1-720*x^7/7!)*(1+8505*x^8/8!)*(1-35840*x^9/9!)*(1+412776*x^10/10!)*(1-3628800*x^11/11!)*...*(1+a(n)*x^n/n!)*...
+%e A137852 Another recurrence: n=6; m=1,2,3=maxm(6)=A003056(6); fp(6,2) from {(1,5),(2,4)}, fp(6,3)=(1,2,3); a(6)= 1 - ( 6*a(1)*a(5) + 15*a(2)*a(4) + 60*a(1)*a(2)*a(3)). Check: 1 - (6*1*(-24) + 15*1*9 +60*1*1*(-2)) = 130 = a(6). - _Wolfdieter Lang_, Feb 20 2009
+%p A137852 with(numtheory):
+%p A137852 a:= proc(n) option remember; `if`(n=1, 1, (n-1)!*((-1)^n+
+%p A137852        add(d*(-a(d)/d!)^(n/d), d=divisors(n) minus {1, n})))
+%p A137852     end:
+%p A137852 seq(a(n), n=1..30);  # _Alois P. Heinz_, Aug 14 2012
+%t A137852 max = 22; f[x_] := Product[1 + a[n] x^n/n!, {n, 1, max}]; coes = CoefficientList[ Series[f[x] - Exp[x], {x, 0, max}], x]; sol = Solve[ Thread[coes == 0]][[1]]; Table[a[n] /. sol, {n, 1, max}] (* _Jean-François Alcover_, Nov 28 2011 *)
+%t A137852 a[1] = 1; a[n_] := a[n] = (n-1)!*((-1)^n + Sum[d*(-a[d]/d!)^(n/d), {d, Divisors[n] ~Complement~ {1, n}}]);
+%t A137852 Array[a, 30] (* _Jean-François Alcover_, Jan 11 2018 *)
+%o A137852 (PARI) {a(n)=if(n<1,0,if(n==1,1,(n-1)!*((-1)^n + sumdiv(n,d, if(d<n&d>1, d*(-a(d)/d!)^(n/d))))))}
+%o A137852 for(n=1,30,print1(a(n),", "))
+%o A137852 (PARI) /* As coefficients in product g.f.: */
+%o A137852 {a(n)=if(n<1,0,n!*polcoeff(exp(x +x*O(x^n))/prod(k=0,n-1,1+a(k)*x^k/k! +x*O(x^n)),n))}
+%o A137852 for(n=1,30,print1(a(n),", "))
+%Y A137852 Cf. A006973.
+%K A137852 nice,sign
+%O A137852 1,3
+%A A137852 _Paul D. Hanna_, Feb 14 2008

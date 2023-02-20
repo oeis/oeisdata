@@ -1,0 +1,37 @@
+%I A073901
+%S A073901 0,2,1,3,7,0,29,27,0,90,234,0,753,1025,0,3876,9242,0,32549,50112,0,
+%T A073901 180092,420318,0,1525141,2467286,0,9248093,20668960,0,76318859,
+%U A073901 130130794,0
+%N A073901 Number of primes with nonzero digits and digit sum n.
+%C A073901 a(3k) = 0 for all k>1.
+%C A073901 The number of candidates to consider for a(n) (i.e. the number of integers with nonzero digits and digit sum n) is A104144(n+8). - _Robert Israel_, Jun 05 2015
+%H A073901 Manfred Scheucher, <a href="/A073901/a073901.sage.txt">Sage Script</a>
+%H A073901 Rémy Sigrist, <a href="/A073901/a073901.gp.txt">PARI program</a>
+%e A073901 a(2) = 2: the two primes are 2 and 11. a(5) = 7: the primes are 5, 41, 23, 113, 131, 311 and 2111.
+%p A073901 S[1,1]:= [1]:
+%p A073901 for x from 2 to 9 do S[1,x]:= [] od:
+%p A073901 a[1]:= 0: a[2]:= 2:
+%p A073901 for n from 2 to 22 do
+%p A073901   for x from 2 to 9 do S[n,x]:= map(`+`,S[n-1,x-1],1) od:
+%p A073901   S[n,1]:= [seq(op(map(t -> 10*t+1, S[n-1,x])),x=1..9)];
+%p A073901   if n > 3 and n mod 3 = 0 then a[n]:= 0
+%p A073901   else
+%p A073901     if n > 5 then X:= [1,3,7,9] else X:= [$1..9] fi;
+%p A073901     a[n]:= add(numboccur(map(isprime,S[n,x]),true),x=X);
+%p A073901   fi
+%p A073901 od:
+%p A073901 seq(a[n],n=1..22); # _Robert Israel_, Jun 05 2015
+%t A073901 f[n_] := If[ Mod[n, 3] == 0 && n > 3, 0, Block[{ip = IntegerPartitions@ n, lng = 1 + PartitionsP@ n, cnt = 0, k = 1}, While[k < lng, If[ Max@ ip[[k]] < 10, cnt += Length@ Select[ FromDigits@# & /@ Permutations@ ip[[k]], PrimeQ]]; k++]; cnt]]; Array[f, 30] (* _Robert G. Wilson v_, Jun 05 2015 *)
+%t A073901 DigitSum[n_, b_:10] := Total[IntegerDigits[n, b]];nextodd[c_] := If[ Length[c]==2, Join[ Table[1, {c[[1]]-2}], {c[[2]]+2}], Join[ Table[1, {c[[1]]-1}], {c[[2]]+1}, Drop[c, 2]]]; a[2]=2; a[n_] := If[Mod[n, 3]==0 && n>3, 0, Module[{c, ct}, For[ c = Table[1, {n}]; ct = 0, True, c = nextodd[c], If[ PrimeQ[ FromDigits[c]] && DigitSum[FromDigits[c]]==n, ct++ ]; If[ c[[ -1]] >= n-1, Return[ct]] ] ]]; Table[ a[n], {n, 20}]
+%o A073901 (PARI) See Links section.
+%Y A073901 Not the same as A116381.
+%Y A073901 Cf. A104144.
+%K A073901 base,more,nonn
+%O A073901 1,2
+%A A073901 _Amarnath Murthy_, Aug 18 2002
+%E A073901 Edited and extended by _Robert G. Wilson v_, Sep 19 2002
+%E A073901 a(20) to a(24) and alternate Mathematica coding from _Dean Hickerson_, Sep 21 2002
+%E A073901 a(25) from _Robert G. Wilson v_, Sep 26 2002
+%E A073901 a(26)-a(31) from _Robert G. Wilson v_, Nov 14 2005
+%E A073901 Corrected and edited by _Manfred Scheucher_, Jun 01 2015
+%E A073901 a(32)-a(33) from _Rémy Sigrist_, Nov 17 2022

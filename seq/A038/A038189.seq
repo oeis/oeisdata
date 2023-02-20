@@ -1,0 +1,62 @@
+%I A038189
+%S A038189 0,0,0,1,0,0,1,1,0,0,0,1,1,0,1,1,0,0,0,1,0,0,1,1,1,0,0,1,1,0,1,1,0,0,
+%T A038189 0,1,0,0,1,1,0,0,0,1,1,0,1,1,1,0,0,1,0,0,1,1,1,0,0,1,1,0,1,1,0,0,0,1,
+%U A038189 0,0,1,1,0,0,0,1,1,0,1,1,0,0,0,1,0,0,1,1,1,0,0,1,1,0,1,1,1,0,0,1,0,0,1,1,0,0,0,1
+%N A038189 Bit to left of least significant 1-bit in binary expansion of n.
+%C A038189 Characteristic function of A091067.
+%C A038189 Image, under the coding i -> floor(i/2), of the fixed point, starting with 0, of the morphism 0 -> 01, 1 -> 02, 2 -> 32, 3 -> 31. - _Jeffrey Shallit_, May 15 2016
+%C A038189 Restricted to the positive integers, completely additive modulo 2. - _Peter Munn_, Jun 20 2022
+%D A038189 Jean-Paul Allouche and Jeffrey O. Shallit, Automatic sequences, Cambridge, 2003, sect. 5.1.6
+%H A038189 Ivan Panchenko, <a href="/A038189/b038189.txt">Table of n, a(n) for n = 0..10000</a>
+%H A038189 Michael Gilleland, <a href="/selfsimilar.html">Some Self-Similar Integer Sequences</a>
+%H A038189 <a href="/index/Ch#char_fns">Index entries for characteristic functions</a>
+%H A038189 <a href="/index/Bi#binary">Index entries for sequences related to binary expansion of n</a>
+%H A038189 <a href="/index/Fo#fold">Index entries for sequences obtained by enumerating foldings</a>
+%F A038189 a(0) = 0, a(2*n) = a(n) for n>0, a(4*n+1) = 0, a(4*n+3) = 1.
+%F A038189 G.f.: Sum_{k>=0} t^3/(1-t^4), where t=x^2^k. Parity of A025480. For n >= 1, a(n) = 1/2 * (1 - (-1)^A025480(n-1)). - _Ralf Stephan_, Jan 04 2004 [index adjusted by _Peter Munn_, Jun 22 2022]
+%F A038189 a(n) = 1 if Kronecker(-n,m)=Kronecker(m,n) for all m, otherwise a(n)=0. - _Michael Somos_, Sep 22 2005
+%F A038189 a(n) = 1 iff A164677(n) < 0. - _M. F. Hasler_, Aug 06 2015
+%F A038189 For n >= 1, a(n) = A065339(n) mod 2. - _Peter Munn_, Jun 20 2022
+%e A038189 a(6) = 1 since 6 = 110 and bit before rightmost 1 is a 1.
+%p A038189 A038189 := proc(n)
+%p A038189     option remember;
+%p A038189     if n = 0 then
+%p A038189         0 ;
+%p A038189     elif type(n,'even') then
+%p A038189         procname(n/2) ;
+%p A038189     elif modp(n,4) = 1 then
+%p A038189         0 ;
+%p A038189     else
+%p A038189         1 ;
+%p A038189     end if;
+%p A038189 end proc:
+%p A038189 seq(A038189(n),n=0..100) ; # _R. J. Mathar_, Mar 30 2018
+%t A038189 f[n_] := Block[{id2 = Join[{0}, IntegerDigits[n, 2]]}, While[ id2[[-1]] == 0, id2 = Most@ id2]; id2[[-2]]]; f[0] = 0; Array[f, 105, 0] (* _Robert G. Wilson v_, Apr 14 2009 and fixed Feb 27 2014 *)
+%t A038189 f[n_] := f[n] = Switch[Mod[n, 4], 0, f[n/2], 1, 0, 2, f[n/2], 3, 1]; f[0] = 0; Array[f, 105, 0] (* _Robert G. Wilson v_, Apr 14 2009, fixed Feb 27 2014 *)
+%o A038189 (C) int a(int n) { return (n & ((n&-n)<<1)) ? 1 : 0; } /* from _Russ Cox_ */
+%o A038189 (PARI) a(n) = if(n<1, 0, ((n/2^valuation(n,2)-1)/2)%2) /* _Michael Somos_, Sep 22 2005 */
+%o A038189 (PARI) a(n) = if(n<3, 0, prod(m=1,n, kronecker(-n,m)==kronecker(m,n))) /* _Michael Somos_, Sep 22 2005 */
+%o A038189 (PARI) A038189(n)=bittest(n,valuation(n,2)+1) \\ _M. F. Hasler_, Aug 06 2015
+%o A038189 (PARI) a(n)=my(h=bitand(n,-n));n=bitand(n,h<<1);n!=0; \\ _Joerg Arndt_, Apr 09 2021
+%o A038189 (Magma)
+%o A038189 function a (n)
+%o A038189   if n eq 0 then return 0; // alternatively,  return 1;
+%o A038189   else while IsEven(n) do n := n div 2; end while; end if;
+%o A038189   return n div 2 mod 2; end function;
+%o A038189   nlo := 0; nhi := 32;
+%o A038189   [a(n) : n in [nlo..nhi] ]; //  _Fred Lunnon_, Mar 27 2018
+%o A038189 (Python)
+%o A038189 def A038189(n):
+%o A038189     s = bin(n)[2:]
+%o A038189     m = len(s)
+%o A038189     i = s[::-1].find('1')
+%o A038189     return int(s[m-i-2]) if m-i-2 >= 0 else 0 # _Chai Wah Wu_, Apr 08 2021
+%Y A038189 Cf. A038190, A065339.
+%Y A038189 A014707(n)=a(n+1). A014577(n)=1-a(n+1).
+%Y A038189 The following are all essentially the same sequence: A014577, A014707, A014709, A014710, A034947, A038189, A082410. - _N. J. A. Sloane_, Jul 27 2012
+%Y A038189 Related sequences A301848, A301849, A301850. - _Fred Lunnon_, Mar 27 2018
+%K A038189 nonn,easy,base
+%O A038189 0,1
+%A A038189 _Fred Lunnon_, Dec 11 1999
+%E A038189 More terms from _David W. Wilson_
+%E A038189 Definition corrected by _Russ Cox_ and _Ralf Stephan_, Nov 08 2004

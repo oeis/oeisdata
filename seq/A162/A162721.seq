@@ -1,0 +1,39 @@
+%I A162721
+%S A162721 2,3,4,5,7,8,11,13,16,17,19,23,27,29,31,32,37,41,43,47,53,54,59,61,63,
+%T A162721 64,67,71,73,79,83,89,97,101,103,107,108,109,113,125,126,127,128,131,
+%U A162721 137,139,149,151,157,163,167,173,175,179,181,191,193,197,199,211,216,223,227,229,233,239,241,243,245,251,252,256
+%N A162721 A positive integer k is included if, when k is represented in binary, it contains the binary representation of every distinct prime dividing k as substrings, without overlapping of the substrings.
+%C A162721 Includes all primes and powers of 2, but no even semiprimes except 4. Contains p^2 for primes p in A018826. - _Robert Israel_, Jan 10 2023
+%C A162721 Contains no squarefree numbers except primes. - _Robert Israel_, Jan 12 2023
+%H A162721 Robert Israel, <a href="/A162721/b162721.txt">Table of n, a(n) for n = 1..10000</a>
+%e A162721 20 in binary is 10100. The distinct primes dividing 20 are 2 and 5, which are 10 and 101 in binary. Both 10 and 101 occur in 10100, but with overlapping. So 20 is not in this sequence. However, 54 in binary is 110110. 54 is divisible by 2 and 3, which are 10 and 11 in binary. Both 10 and 11 occur in 110110 without overlapping. (1{10}{11}0.) So 54 is in this sequence.
+%p A162721 # Requires Maple 2018 or later
+%p A162721 satfilter:= proc(n) local n2, P, nP, X, P2, J, Cons, Clause, i,j,k, Ck;
+%p A162721   n2:= convert(n,base,2);
+%p A162721   P:= numtheory:-factorset(n);
+%p A162721   nP:= nops(P);
+%p A162721   P2:= map(convert,P,base,2);
+%p A162721   J:= map(t -> map(s -> [$s..s+nops(t)-1],select(i -> n2[i..i+nops(t)-1] = t, [$1..nops(n2)+1-nops(t)])), P2);
+%p A162721   if member([],J) then return false fi;
+%p A162721   Cons:= true;
+%p A162721   for i from 1 to nops(J) do
+%p A162721     Clause:= X[i,J[i][1]];
+%p A162721     for j from 2 to nops(J[i]) do
+%p A162721       Clause:= Clause &or X[i,J[i][j]]
+%p A162721     od;
+%p A162721     Cons:= Cons &and Clause;
+%p A162721   od;
+%p A162721   for k from 1 to nops(n2) do
+%p A162721     Ck:= {};
+%p A162721     for i from 1 to nP do
+%p A162721       for j from 1 to nops(J[i]) do if member(k,J[i,j]) then Ck:= Ck union {X[i,J[i,j]]} fi od od;
+%p A162721     if nops(Ck) >= 2 then for i from 2 to nops(Ck) do for j from 1 to i-1 do Cons:= Cons &and (&not(Ck[i]) &or &not(Ck[j])) od od fi;
+%p A162721   od:
+%p A162721   Logic:-Satisfiable(Cons);
+%p A162721 end proc:
+%p A162721 select(satfilter, [$2..1000]); # _Robert Israel_, Jan 10 2023
+%Y A162721 Cf. A018826, A162722.
+%K A162721 base,nonn
+%O A162721 1,1
+%A A162721 _Leroy Quet_, Jul 11 2009
+%E A162721 More terms from _Sean A. Irvine_, Dec 09 2010

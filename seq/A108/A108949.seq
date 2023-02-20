@@ -1,0 +1,53 @@
+%I A108949
+%S A108949 0,0,1,0,2,1,3,3,6,7,10,14,19,26,33,45,58,77,97,127,161,205,259,326,
+%T A108949 411,510,639,786,980,1197,1482,1800,2216,2677,3275,3942,4793,5749,
+%U A108949 6951,8309,9995,11912,14259,16944,20194,23926,28402,33559,39687,46767,55120,64780,76110,89222
+%N A108949 Number of partitions of n with more even parts than odd parts.
+%H A108949 Alois P. Heinz, <a href="/A108949/b108949.txt">Table of n, a(n) for n = 0..1000</a>
+%H A108949 B. Kim, E. Kim, and J. Lovejoy, <a href="https://doi.org/10.1016/j.ejc.2020.103159">Parity bias in partitions</a>, European J. Combin., 89 (2020), 103159, 19 pp.
+%F A108949 a(n) = A171966(n) - A045931(n) = A171967(n) - A108950(n). - _Reinhard Zumkeller_, Jan 21 2010
+%F A108949 a(n) = Sum_{k=-floor(n/2)+(n mod 2)..-1} A240009(n,k). - _Alois P. Heinz_, Mar 30 2014
+%F A108949 G.f.: (Product_{k>=1} 1/(1-x^(2*k-1)))*Sum_{n>=1} q^(2*n^2)*(1-q^(n))/Product_{k=1..n} (1-q^(2*k))^2. - _Jeremy Lovejoy_, Jan 12 2021
+%e A108949 a(6) = 3: {[6], [4,2], [2,2,2]}; a(7) = 3: {[4,2,1], [3,2,2], [2,2,2,1]}.
+%p A108949 with(combinat,partition):
+%p A108949 evnbigrodd:=proc(n::nonnegint)
+%p A108949    local evencount,oddcount,bigcount,parts,i,j;
+%p A108949    bigcount:=0;
+%p A108949    partitions:=partition(n);
+%p A108949    for i from 1 to nops(partitions) do
+%p A108949       evencount:=0;
+%p A108949       oddcount:=0;
+%p A108949       for j from 1 to nops(partitions[i]) do
+%p A108949          if (op(j,partitions[i]) mod 2 <>0) then
+%p A108949             oddcount:=oddcount+1
+%p A108949          fi;
+%p A108949          if (op(j,partitions[i]) mod 2 =0) then
+%p A108949             evencount:=evencount+1
+%p A108949          fi
+%p A108949       od;
+%p A108949       if (evencount>oddcount) then
+%p A108949          bigcount:=bigcount+1
+%p A108949       fi
+%p A108949    od;
+%p A108949    return(bigcount)
+%p A108949 end proc;
+%p A108949 seq(evnbigrodd(i),i=1..42);
+%p A108949 # second Maple program:
+%p A108949 b:= proc(n, i, t) option remember; `if`(n=0,
+%p A108949       `if`(t<0, 1, 0), `if`(i<1, 0, b(n, i-1, t)+
+%p A108949       `if`(i>n, 0, b(n-i, i, t+(2*irem(i, 2)-1)))))
+%p A108949     end:
+%p A108949 a:= n-> b(n$2, 0):
+%p A108949 seq(a(n), n=0..80);  # _Alois P. Heinz_, Mar 30 2014
+%t A108949 p[n_] := p[n] = Select[IntegerPartitions[n], Count[#, _?OddQ] == Count[#, _?EvenQ] &]; t = Table[p[n], {n, 0, 10}] (* partitions of n with # odd parts = # even parts *)
+%t A108949 TableForm[t] (* partitions, vertical format *)
+%t A108949 Table[Length[p[n]], {n, 0, 30}] (* A045931 *)
+%t A108949 (* _Peter J. C. Moses_, Mar 10 2014 *)
+%t A108949 b[n_, i_, t_] := b[n, i, t] = If[n==0, If[t<0, 1, 0], If[i<1, 0, b[n, i-1, t] + If[i>n, 0, b[n-i, i, t+(2*Mod[i, 2]-1)]]]]; a[n_] := b[n, n, 0]; Table[a[n], {n, 0, 80}] (* _Jean-François Alcover_, Nov 02 2015, after _Alois P. Heinz_ *)
+%o A108949 (PARI) a(n) = {nb = 0; forpart(p=n, nb += (2*#(select(x->x%2, Vec(p))) < #p);); nb;} \\ _Michel Marcus_, Nov 02 2015
+%Y A108949 Cf. A045931 for #even parts = #odd parts, A108950 for #even parts < #odd parts.
+%Y A108949 Cf. A171966, A130780. - _Reinhard Zumkeller_, Jan 21 2010
+%K A108949 nonn
+%O A108949 0,5
+%A A108949 _Len Smiley_, Jul 21 2005
+%E A108949 More terms from _Joerg Arndt_, Oct 04 2012

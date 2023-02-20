@@ -1,0 +1,59 @@
+%I A113552
+%S A113552 1,2,6,3,12,4,20,5,10,30,15,60,420,7,14,42,21,84,28,140,35,70,210,105,
+%T A113552 630,9,18,90,45,180,36,252,63,126,1260,315,1890,27,54,270,135,540,108,
+%U A113552 756,189,378,3780,945,5670,81,162,810,405,1620,324,2268,567,1134,11340,2835
+%N A113552 Beginning with 1, least divisor of the previous term not included earlier, otherwise the least multiple of the previous term having at least one prime divisor coprime to it and not included earlier.
+%C A113552 From _Michael De Vlieger_, May 18 2018: (Start)
+%C A113552 In the table below, we note a cycle that exists for n >= 24 and at least through n = 2^14. Let e = floor(n/12). We write multiple k if the condition is false, or the parity of divisor d if d does not occur in a. We can express a(n) as the product of the smallest four primes as shown below.
+%C A113552 n (mod 12)   k or d     2     3     5     7
+%C A113552 -------------------------------------------
+%C A113552    0           ODD         3^(e-1)  5     7
+%C A113552    1           6        2    3^e    5     7
+%C A113552    2           ODD           3^e
+%C A113552    3           2        2    3^e
+%C A113552    4           5        2    3^e    5
+%C A113552    5           ODD           3^e    5
+%C A113552    6           4        2^2  3^e    5
+%C A113552    7           EVEN     2^2  3^e
+%C A113552    8           7        2^2  3^e          7
+%C A113552    9           ODD           3^e          7
+%C A113552   10           2        2    3^e          7
+%C A113552   11           10       2^2  3^e    5     7
+%C A113552 Conjectures:
+%C A113552 1. All terms are divisible only by some combination of the smallest 4 primes; A113553 is finite at four terms.
+%C A113552 2. For n > 24 such that n (mod 12) = 2, a(n) = 3^((n - 2)/12). (End)
+%H A113552 Antti Karttunen & Michael De Vlieger, <a href="/A113552/b113552.txt">Table of n, a(n) for n = 1..16384</a>
+%H A113552 Michael De Vlieger, <a href="/A113552/a113552.txt">Notes on A113552</a>
+%e A113552 After 4 the next term is 20 and not 8 as 8 and 4 have the same prime divisors.
+%e A113552 After a(27) = 18 = 2 * 3^2, the next term a(28) is neither 2*18 = 2^2 * 3^2, nor 3*18 = 2 * 3^3 nor 4*18 = 2^3 * 3^2 as none of them have any prime factors that would not occur already in 18. But 5*18 = 90 has such a factor, and 90 has not occurred before, thus a(28) = 90. - _Antti Karttunen_, May 18 2018
+%p A113552 S:= {1}: A[1]:= 1:
+%p A113552 for n from 2 to 60 do
+%p A113552   d:= min(numtheory:-divisors(A[n-1]) minus S);
+%p A113552   if d < infinity then A[n]:= d
+%p A113552   else
+%p A113552     Q:= numtheory:-factorset(A[n-1]);
+%p A113552     for k from 2 do
+%p A113552       if not member(k*A[n-1], S) and not (numtheory:-factorset(k) subset Q) then
+%p A113552         A[n]:= k*A[n-1];
+%p A113552         break
+%p A113552       fi
+%p A113552     od
+%p A113552   fi;
+%p A113552   S:= S union {A[n]}
+%p A113552 od: # _Robert Israel_, May 22 2018
+%t A113552 Nest[Append[#, Block[{d = Complement[Divisors@ #[[-1]], #], k = 2}, If[d != {}, d[[1]], While[Nand[PowerMod[#[[-1]], k, k] != 0, FreeQ[#, k #[[-1]] ] ], k++]; k #[[-1]] ] ] ] &, {1}, 116] (* _Robert G. Wilson v_, Aug 20 2006, corrected by _Michael De Vlieger_, May 18 2018 *)
+%o A113552 (PARI)
+%o A113552 up_to = (2^14)+1;
+%o A113552 A007947(n) = factorback(factorint(n)[, 1]);
+%o A113552 v113552 = vector(up_to);
+%o A113552 m_occurrences = Map();
+%o A113552 k=0; prev=1;
+%o A113552 for(n=1,up_to,fordiv(prev,d,if(!mapisdefined(m_occurrences,d),v113552[n] = d;mapput(m_occurrences,d,n);break)); if(!v113552[n], m = 1; try = prev; while(!(prev%A007947(m)) || mapisdefined(m_occurrences,try), m++; try = prev*m); mapput(m_occurrences,v113552[n] = try,n)); prev = v113552[n]);
+%o A113552 A113552(n) = v113552[n]; \\ _Antti Karttunen_, May 18 2018
+%Y A113552 Differs from A282291 for the first time at n=25, where a(25) = 630, while A282291(25) = 840.
+%Y A113552 Differs from A304752 for the first time at n=28, where a(28) = 90, while A113552(28) = 72.
+%K A113552 easy,nonn
+%O A113552 1,2
+%A A113552 _Amarnath Murthy_, Nov 03 2005
+%E A113552 More terms from _Robert G. Wilson v_, Aug 20 2006
+%E A113552 Sequence's terms changed back to the original author's intended meaning, differing from those computed by Wilson and Johnston from n = 28 onward, with a(28) = 90 instead of a(28) = 72. The latter version was recreated with the new A-number A304752, to which also the old Maple and Mathematica programs were transferred. - _Antti Karttunen_, May 18 2018

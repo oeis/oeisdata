@@ -1,0 +1,90 @@
+%I A121207
+%S A121207 1,1,1,1,1,2,1,1,3,5,1,1,4,9,15,1,1,5,14,31,52,1,1,6,20,54,121,203,1,
+%T A121207 1,7,27,85,233,523,877,1,1,8,35,125,400,1101,2469,4140,1,1,9,44,175,
+%U A121207 635,2046,5625,12611,21147,1,1,10,54,236,952,3488,11226,30846,69161,115975
+%N A121207 Triangle read by rows. The definition is by diagonals. The r-th diagonal from the right, for r >= 0, is given by b(0) = b(1) = 1; b(n+1) = Sum_{k=0..n} binomial(n+2,k+r)*a(k).
+%C A121207 From _Paul D. Hanna_, Dec 12 2006: (Start)
+%C A121207 Consider the row reversal, which is A124496 with an additional left column (A000110 = Bell numbers). The matrix inverse of this triangle is very simple:
+%C A121207    1;
+%C A121207   -1,   1;
+%C A121207   -1,  -1,   1;
+%C A121207   -1,  -2,  -1,   1;
+%C A121207   -1,  -3,  -3,  -1,   1;
+%C A121207   -1,  -4,  -6,  -4,  -1,   1;
+%C A121207   -1,  -5, -10, -10,  -5,  -1,   1;
+%C A121207   -1,  -6, -15, -20, -15,  -6,  -1,   1;
+%C A121207   -1,  -7, -21, -35, -35, -21,  -7,  -1,   1;
+%C A121207   -1,  -8, -28, -56, -70, -56, -28,  -8,  -1,   1; ...
+%C A121207 This gives the recurrence and explains why the Bell numbers appear. (End)
+%C A121207 Triangle A160185 = reversal then deletes right border of 1's. - _Gary W. Adamson_, May 03 2009
+%H A121207 Alois P. Heinz, <a href="/A121207/b121207.txt">Rows n = 0..140, flattened</a>
+%H A121207 Robert Dougherty-Bliss, <a href="https://arxiv.org/abs/2210.13520">Gosper's algorithm and Bell numbers</a>, arXiv:2210.13520 [cs.SC], 2022.
+%H A121207 H. W. Gould and Jocelyn Quaintance, <a href="http://www.doiserbia.nb.rs/img/doi/1452-8630/2007/1452-86300702371G.pdf">A linear binomial recurrence and the Bell numbers and polynomials</a>, Applicable Analysis and Discrete Mathematics, 1 (2007), 371-385.
+%e A121207 Triangle begins (compare also table 9.2 in the Gould-Quaintance reference):
+%e A121207   1;
+%e A121207   1, 1;
+%e A121207   1, 1,  2;
+%e A121207   1, 1,  3,  5;
+%e A121207   1, 1,  4,  9,  15;
+%e A121207   1, 1,  5, 14,  31, 52;
+%e A121207   1, 1,  6, 20,  54, 121, 203;
+%e A121207   1, 1,  7, 27,  85, 233, 523,  877;
+%e A121207   1, 1,  8, 35, 125, 400,1101, 2469,  4140;
+%e A121207   1, 1,  9, 44, 175, 635,2046, 5625, 12611, 21147;
+%e A121207   1, 1, 10, 54, 236, 952,3488,11226, 30846, 69161, 115975;
+%e A121207   1, 1, 11, 65, 309,1366,5579,20425, 65676,180474, 404663, 678570;
+%e A121207   1, 1, 12, 77, 395,1893,8494,34685,126817,407787,1120666,2512769,4213597;
+%p A121207 # This is the Jovovic formula with general index 'd'
+%p A121207 # where A040027, A045499, etc. use one explicit integer
+%p A121207 # Index n+1 is shifted to n from the original formula.
+%p A121207 Gould := proc(n, d) local k;
+%p A121207     if n <= 1 then return 1 else
+%p A121207     return add(binomial(n-1+d, k+d)*Gould(k, d), k=0..n-1);
+%p A121207     fi
+%p A121207 end:
+%p A121207 # row and col refer to the extrapolated super-table:
+%p A121207 # working up to row, not row-1, shows also the Bell numbers
+%p A121207 # at the end of each row.
+%p A121207 for row from 0 to 13 do
+%p A121207     for col from 0 to row do
+%p A121207        # 'diag' is constant for one of A040027, A045499 etc.
+%p A121207        diag := row - col;
+%p A121207        printf("%4d, ", Gould(col, diag));
+%p A121207     od;
+%p A121207     print();
+%p A121207 od; # _R. J. Mathar_
+%p A121207 # second Maple program:
+%p A121207 T:= proc(n, k) option remember; `if`(k=0, 1,
+%p A121207       add(T(n-j, k-j)*binomial(n-1, j-1), j=1..k))
+%p A121207     end:
+%p A121207 seq(seq(T(n, k), k=0..n), n=0..12);  # _Alois P. Heinz_, Jan 08 2018
+%t A121207 g[n_ /; n <= 1, _] := 1; g[n_, d_] := g[n, d] = Sum[ Binomial[n-1+d, k+d]*g[k, d], {k, 0, n-1}]; Flatten[ Table[ diag = row-col; g[col, diag], {row, 0, 13}, {col, 0, row}]] (* _Jean-François Alcover_, Nov 25 2011, after _R. J. Mathar_ *)
+%t A121207 T[n_, k_] := T[n, k] = If[k == 0, 1, Sum[T[n-j, k-j] Binomial[n-1, j-1], {j, 1, k}]]; Table[T[n, k], {n, 0, 12}, {k, 0, n}] // Flatten (* _Jean-François Alcover_, Jul 26 2018, after _Alois P. Heinz_ *)
+%o A121207 (Python)
+%o A121207 # Computes the n-th diagonal of the triangle reading from the right.
+%o A121207 from itertools import accumulate
+%o A121207 def Gould_diag(diag, size):
+%o A121207     if size < 1: return []
+%o A121207     if size == 1: return [1]
+%o A121207     L, accu = [1,1], [1]*diag
+%o A121207     for _ in range(size-2):
+%o A121207         accu = list(accumulate([accu[-1]] + accu))
+%o A121207         L.append(accu[-1])
+%o A121207     return L # _Peter Luschny_, Apr 24 2016
+%o A121207 (Julia)
+%o A121207 function Gould_diag(diag, size)
+%o A121207     size < 1 && return []
+%o A121207     size == 1 && return [1]
+%o A121207     L = [1, 1]
+%o A121207     accu = ones(BigInt, diag)
+%o A121207     for _ in 1:size-2
+%o A121207         accu = cumsum(vcat(accu[end], accu))
+%o A121207         L = vcat(L, accu[end])
+%o A121207     end
+%o A121207 L end # _Peter Luschny_, Mar 30 2022
+%Y A121207 Diagonals, reading from the right, are A000110, A040027, A045501, A045499, A045500.
+%Y A121207 A124496 is a very similar triangle, obtained by reversing the rows and appending a rightmost diagonal which is A000110, the Bell numbers. See also A046936, A298804, A186020, A160185.
+%Y A121207 T(2n,n) gives A297924.
+%K A121207 nonn,tabl
+%O A121207 0,6
+%A A121207 _N. J. A. Sloane_, based on email from _R. J. Mathar_, Dec 11 2006

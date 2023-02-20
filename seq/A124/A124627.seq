@@ -1,0 +1,65 @@
+%I A124627
+%S A124627 2,3,5,11,33,127,715,5345,52692,648344,9737826,174442666,3657513487,
+%T A124627 88362834417,2428095525614,75063691591379,2586559741900744,
+%U A124627 98552043877145945,4123221751454999891,188272405177875090033,9332039515886416792536,499720579610294249596689,28785866289101759323472435,1776891233143817540293248652
+%N A124627 Riemann-Gram approximation to A007097(n+1) using A007097(n).
+%C A124627 The largest presently [as of Dec 2006] known value of prime(10^n) is
+%C A124627 prime(10^18) = 44211790234832169331 this compares to
+%C A124627 primex(10^18) = 44211790234127235727 accurate to 11 places
+%C A124627 Here the sign of prime(x)-primex(x) is positive. However, the sign changes as x varies. The following is a table with the relative error and sign change:
+%C A124627    n          prime(10^n)         primex(10^n)  rel. error
+%C A124627   -- -------------------- -------------------- ------------
+%C A124627    6             15485863             15484040  1.1772 E-4
+%C A124627    7            179424673            179431239 -3.6594 E-4
+%C A124627    8           2038074743           2038076587 -9.0478 E-5
+%C A124627    9          22801763489          22801797576 -1.4949 E-5
+%C A124627   10         252097800623         252097715777  3.3655 E-6
+%C A124627   11        2760727302517        2760727752353 -1.6294 E-6
+%C A124627   12       29996224275833       29996225393465 -3.7259 E-7
+%C A124627   13      323780508946331      323780512411510 -1.0702 E-7
+%C A124627   14     3475385758524527     3475385760290723 -5.0820 E-8
+%C A124627   15    37124508045065437    37124508056355511 -3.0411 E-9
+%C A124627   16   394906913903735329   394906913798224969  2.6718 E-9
+%C A124627   17  4185296581467695669  4185296581676470048 -4.9883 E-11
+%C A124627   18 44211790234832169331 44211790234127235727  1.5944 E-11
+%F A124627 Primex(n) ~ prime(n). Prime(n) is the n-th prime number. Primex(n) is the Riemann-Gram approximation of Prime(n) accurate to log_10(n)/2 + 1 digits for large n. The sequence is primex(A007097(n)) for n = 1 to 18.
+%e A124627 A007097(17) = 75063692618249;
+%e A124627 Primex(75063692618249) = 2586559741900744;
+%e A124627 A007097(18) = 2586559730396077;
+%e A124627 Primex(2586559730396077) = 98552043877145945;
+%e A124627 A007097(19) ~ 98552043800000000.
+%t A124627 RiemannGram[x_] := Module[{n = 1, L, s = 1, r}, L = r = Log[x];
+%t A124627    While[s < 10^30 r, s = s + r/(Zeta[n + 1] n); n++; r = r L/n]; s];
+%t A124627 Primex[n_] :=  Module[{r1, r2, r, est},   If[n == 1, r = 2, r1 = n Log[n]; r2 = 2 r1;    For[i = 1, i < 50, i++, r = (r1 + r2)/2; est = RiemannGram[r]; If[est < n, r1 = r, r2 = r]]]; Round@r];
+%t A124627 Primex /@ NestList[Prime, 1, 15] (* _Birkas Gyorgy_, Apr 04 2011 *)
+%o A124627 (PARI) xeqprimex(n) = {
+%o A124627 my(a,x); a = [1, 2, 3, 5, 11, 31, 127, 709, 5381, 52711, 648391, 9737333, 174440041, 3657500101, 88362852307, 2428095424619, 75063692618249, 2586559730396077];
+%o A124627 for(x=1,n, print1(round(primex(a[x]))",") ) }
+%o A124627 \\ Approximates the n-th prime number to an accuracy of log10(n)/2 places.
+%o A124627 primex(n) = {
+%o A124627 my(x,px,r1,r2,r,p10,b,e,est);
+%o A124627 if(n==1,return(2)); \\ force to 2
+%o A124627 b=10; \\ Select base
+%o A124627 p10=log(n)/log(10); \\ Determine p10 = power of 10 of n to adjust b^p10
+%o A124627 if(Rg(b^p10*log(b^(p10+1)))< b^p10,m=p10+1,m=p10);
+%o A124627 r1 = 0; r2 = 7.718281828; \\ Real kicker. if r2=1, it fails at 1e117
+%o A124627 for(x=1, 100,
+%o A124627    r=(r1+r2)/2;
+%o A124627    est = (b^p10*log(b^(m+r)));
+%o A124627    px = Rg(est);
+%o A124627    if(px <= b^p10,r1=r,r2=r); r=(r1+r2)/2; );
+%o A124627   est;
+%o A124627 }
+%o A124627 Rg(x) = \\ Gram's Riemann Approx of Pi(x)
+%o A124627 { my(n=1,L,s=1,r);
+%o A124627 L=r=log(x);
+%o A124627 while(s<10^40*r, s=s+r/zeta(n+1)/n; n=n+1; r=r*L/n);
+%o A124627 (s)
+%o A124627 }
+%Y A124627 Cf. A007097.
+%K A124627 nonn,uned
+%O A124627 1,1
+%A A124627 _Cino Hilliard_, Dec 21 2006
+%E A124627 a(19) and a(20) found by _David Baugh_ using a program by Xavier Gourdon and _Andrey V. Kulsha_, Oct 25 2007
+%E A124627 a(21), a(22) and a(23) calculated by _David Baugh_, Feb 10 2015
+%E A124627 a(24) calculated by _David Baugh_, May 16 2016

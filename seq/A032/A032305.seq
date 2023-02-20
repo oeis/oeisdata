@@ -1,0 +1,33 @@
+%I A032305
+%S A032305 1,1,1,2,3,6,12,25,51,111,240,533,1181,2671,6014,13795,31480,72905,
+%T A032305 168361,393077,914784,2150810,5040953,11914240,28089793,66702160,
+%U A032305 158013093,376777192,896262811,2144279852,5120176632,12286984432,29428496034,70815501209
+%N A032305 Number of rooted trees where any 2 subtrees extending from the same node have a different number of nodes.
+%H A032305 Alois P. Heinz, <a href="/A032305/b032305.txt">Table of n, a(n) for n = 1..1000</a>
+%H A032305 Gus Wiseman, <a href="/A032305/a032305.png">Illustration of the first 8 terms of A032305.</a>
+%H A032305 <a href="/index/Ro#rooted">Index entries for sequences related to rooted trees</a>
+%F A032305 Shifts left under "EFK" (unordered, size, unlabeled) transform.
+%F A032305 G.f.: A(x) = x*Product_{n>=1} (1+a(n)*x^n) = Sum_{n>=1} a(n)*x^n. - _Paul D. Hanna_, Apr 07 2004
+%F A032305 Lim_{n->infinity} a(n)^(1/n) = 2.5119824... - _Vaclav Kotesovec_, Nov 20 2019
+%F A032305 G.f.: x * exp(Sum_{n>=1} Sum_{k>=1} (-1)^(k+1) * a(n)^k * x^(n*k) / k). - _Ilya Gutkovskiy_, Jun 30 2021
+%e A032305 The a(6) = 6 fully unbalanced trees: (((((o))))), (((o(o)))), ((o((o)))), (o(((o)))), (o(o(o))), ((o)((o))). - _Gus Wiseman_, Jan 10 2018
+%p A032305 A:= proc(n) if n<=1 then x else convert(series(x* (product(1+ coeff(A(n-1), x,i)*x^i, i=1..n-1)), x=0, n+1), polynom) fi end: a:= n-> coeff(A(n), x,n): seq(a(n), n=1..31);  # _Alois P. Heinz_, Aug 22 2008
+%p A032305 # second Maple program:
+%p A032305 g:= proc(n, i) option remember; `if`(n=0, 1, `if`(i<1, 0,
+%p A032305       add(`if`(j=0, 1, g((i-1)$2))*g(n-i*j, i-1), j=0..min(1, n/i))))
+%p A032305     end:
+%p A032305 a:= n-> g((n-1)$2):
+%p A032305 seq(a(n), n=1..35);  # _Alois P. Heinz_, Mar 04 2013
+%t A032305 nn=30;f[x_]:=Sum[a[n]x^n,{n,0,nn}];sol=SolveAlways[0 == Series[f[x]-x Product[1+a[i]x^i,{i,1,nn}],{x,0,nn}],x];Table[a[n],{n,1,nn}]/.sol  (* _Geoffrey Critzer_, Nov 17 2012 *)
+%t A032305 allnim[n_]:=If[n===1,{{}},Join@@Function[c,Select[Union[Sort/@Tuples[allnim/@c]],UnsameQ@@(Count[#,_List,{0,Infinity}]&/@#)&]]/@IntegerPartitions[n-1]];
+%t A032305 Table[Length[allnim[n]],{n,15}] (* _Gus Wiseman_, Jan 10 2018 *)
+%t A032305 g[n_, i_] := g[n, i] = If[n == 0, 1, If[i < 1, 0,
+%t A032305      Sum[If[j == 0, 1, g[i-1, i-1]]*g[n-i*j, i-1], {j, 0, Min[1, n/i]}]]];
+%t A032305 a[n_] := g[n-1, n-1];
+%t A032305 Array[a, 35] (* _Jean-François Alcover_, May 21 2021, after _Alois P. Heinz_ *)
+%o A032305 (PARI) a(n)=polcoeff(x*prod(i=1,n-1,1+a(i)*x^i)+x*O(x^n),n)
+%Y A032305 Cf. A000081, A001678, A003238, A004111, A213920, A273873, A290689, A291443, A297571.
+%Y A032305 Column k=1 of A318753.
+%K A032305 nonn
+%O A032305 1,4
+%A A032305 _Christian G. Bower_

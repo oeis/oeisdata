@@ -1,0 +1,48 @@
+%I A103255
+%S A103255 1,2,11,23,37,56,57,65,112,122,193,217,242,305,312,433,592,781,851,
+%T A103255 877,889,913,1001,1064,1177,1201,1346,1376,1617,1633,1706,1729,1801,
+%U A103255 1953,1960,1969,2137,2162,2184,2257,2345,2480,2543,2920,3071,3081,3482,3641,3889,4019
+%N A103255 Integers x > 0 such that x^3 + y^3 = z^2 for some y > 0, z > 0, and gcd(x,y) = 1.
+%H A103255 F. Beukers, <a href="http://dx.doi.org/10.1215/S0012-7094-98-09105-0">The Diophantine equation Ax^p+By^q=Cz^r</a>, Duke Math. J. 91 (1998), 61-88.
+%H A103255 H. Darmon and A. Granville, <a href="http://www.dms.umontreal.ca/~andrew/PDF/superelliptic.pdf">On the equations z^m=F(x,y) and Ax^p+By^q=Cz^r</a>, Bull. Lond. Math. Soc., 27 (6) (1995) 513, Sect 7.2.
+%e A103255 x=11, y=37, 11^3 + 37^3 = 228^2. 11 is the third entry in the list.
+%e A103255 The pairs [x,y] = [a(n),a(?)] for the first few terms are [1, 2], [2, 1], [11, 37], [23, 1177], [37, 11], [56, 65], [57, 112], [65, 56], [112, 57], [122, 1201], [193, 3482], [217, 312], [242, 433]. [_Joerg Arndt_, Sep 30 2012]
+%t A103255 (* This program uses z-values from A099426 b-file. To get 50 terms, the first 200 z-values suffice, the result being the same with the whole b-file of 300 z-values. *)
+%t A103255 terms = 50;
+%t A103255 zz = Import["https://oeis.org/A099426/b099426.txt", "Table"][[1 ;; 4 terms, 2]];
+%t A103255 r[z_] := {x, y, z} /. ToRules[Reduce[GCD[x, y] == 1 && 0<x<y && x^3 + y^3 == z^2, {x, y}, Integers]];
+%t A103255 xyz = r /@ zz;
+%t A103255 Union[Flatten[xyz[[All, 1 ;; 2]]]][[1 ;; terms]] (* _Jean-François Alcover_, Jun 13 2019 *)
+%o A103255 (Magma) [ k : k in [1..100] | exists{P : P in IntegralPoints(EllipticCurve([0,k^3])) | P[1] gt 0 and P[2] ne 0 and GCD(Integers()!P[1],k) eq 1} ]; // Geoff Bailey
+%o A103255 (Sage) # apparently inefficient as of version 5.2
+%o A103255 def is_A103255(n):
+%o A103255     E = EllipticCurve([0, n^3])
+%o A103255     E.gens(descent_second_limit=16);
+%o A103255     for p in E.integral_points():
+%o A103255         if p[0] > 0 and p[1] > 0 and gcd(p[1], n) == 1:
+%o A103255             return true
+%o A103255     return false
+%o A103255 [n for n in (1..60) if is_A103255(n)]
+%o A103255 # _Peter Luschny_, Sep 29 2012
+%o A103255 (PARI)
+%o A103255 is_A103255(x, lim)=
+%o A103255 { /* Warning: just how big lim has to be is unclear */
+%o A103255     my(x3=x^3);
+%o A103255     for (y=1, lim,
+%o A103255         if ( gcd(x,y) != 1, next() );
+%o A103255         if ( issquare(x3+y^3), return(1) );
+%o A103255     );
+%o A103255     return(0);
+%o A103255 }
+%o A103255 /* Using lim=10^6 reproduces all terms <= 1000: */
+%o A103255 for (n=1,1000, if( is_A103255(n, 10^6), print1(n,", ")) );
+%o A103255 /* _Joerg Arndt_, Sep 30 2012 */
+%Y A103255 Cf. A099426 (values of z).
+%K A103255 nonn,more
+%O A103255 1,2
+%A A103255 _Cino Hilliard_, Mar 20 2005
+%E A103255 Recomputed and extended by Geoff Bailey (geoff(AT)maths.usyd.edu.au) using MAGMA, Jan 28 2007
+%E A103255 a(9)-a(10) from _Jonathan Vos Post_, May 27 2007
+%E A103255 a(11)-a(16) from _Vincenzo Librandi_, Dec 21 2010
+%E A103255 a(17)-a(22) from _Joerg Arndt_, Sep 30 2012
+%E A103255 a(23)-a(50) from _Jean-François Alcover_, Jun 12 2019

@@ -1,0 +1,23 @@
+%I A006023 M2046
+%S A006023 1,1,2,12,183,8884,1495984,872987584,1787227218134,13013640978954744,
+%T A006023 341143259362180445672,32519497484526664873838560,
+%U A006023 11366387701006542223325518765872,14668949294272099348849331250968826816
+%N A006023 Number of unlabeled mating digraphs with n nodes.
+%D A006023 R. C. Read, The Enumeration of Mating-Type Graphs. Report CORR 89-38, Dept. Combinatorics and Optimization, Univ. Waterloo, Oct 1989.
+%D A006023 N. J. A. Sloane and Simon Plouffe, The Encyclopedia of Integer Sequences, Academic Press, 1995 (includes this sequence).
+%H A006023 Andrew Howroyd, <a href="/A006023/b006023.txt">Table of n, a(n) for n = 0..50</a>
+%H A006023 R. C. Read, <a href="/A006023/a006023.pdf">The Enumeration of Mating-Type Graphs</a>, Dept. Combinatorics and Optimization, Univ. Waterloo, Oct 1989. (Annotated scanned copy)
+%F A006023 G.f. Sum_{n>=1} x^n * (Sum_{(j)} h((j)) * 2^Y((j)) * Product_{i=1..n} (1-x^i)^{j_i}) where the inner sum runs over all partitions (j) = j_1j_2...j_m of n = 1 * j_1 + 2 * j_2 + ... _ m * j_m, h((j)) = 1 / Product_{i=1..m} (j_i! * i^{j_i}), and  Y((j)) = Sum_{i=1..m} (i-1) * j_i + Sum_{i=1..m} i * j_i * (j_i - 1) + 2 * Sum_{1 <= i < k <= m} j_i * j_k * gcd(i, k). - _Sean A. Irvine_, Mar 06 2018
+%t A006023 permcount[v_] := Module[{m = 1, s = 0, t, i, k = 0}, For[i = 1, i <= Length[v], i++, t = v[[i]]; k = If[i > 1 && t == v[[i - 1]], k + 1, 1]; m *= t*k; s += t]; s!/m];
+%t A006023 edges[v_] := Sum[2*GCD[v[[i]], v[[j]]], {i, 2, Length[v]}, {j, 1, i - 1}] + Sum[v[[i]] - 1, {i, 1, Length[v]}];
+%t A006023 a[n_] := Module[{s = 0}, If[n == 0, Return[1]]; Sum[Do[ s += permcount[p]* 2^edges[p] * Coefficient[Product[1 - x^p[[i]], {i, 1, Length[p]}], x, n - k]/k!, {p, IntegerPartitions[k]}], {k, 1, n}]; s];
+%t A006023 a /@ Range[0, 20] (* _Jean-François Alcover_, Sep 22 2019, after _Andrew Howroyd_ *)
+%o A006023 (PARI) \\ compare A000273.
+%o A006023 permcount(v) = {my(m=1, s=0, k=0, t); for(i=1, #v, t=v[i]; k=if(i>1&&t==v[i-1], k+1, 1); m*=t*k; s+=t); s!/m}
+%o A006023 edges(v) = {sum(i=2, #v, sum(j=1, i-1, 2*gcd(v[i], v[j]))) + sum(i=1, #v, v[i]-1)}
+%o A006023 a(n) = {if(n<1, n==0, my(s=0); sum(k=1, n, forpart(p=k, s+=permcount(p) * 2^edges(p) * polcoef(prod(i=1, #p, 1-x^p[i]), n-k)/k!)); s)} \\ _Andrew Howroyd_, Sep 09 2018
+%Y A006023 Cf. A000273, A004110, A006025.
+%K A006023 nonn
+%O A006023 0,3
+%A A006023 _Simon Plouffe_
+%E A006023 a(0)=1 prepended by _Andrew Howroyd_, Sep 09 2018

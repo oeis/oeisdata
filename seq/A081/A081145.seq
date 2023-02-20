@@ -1,0 +1,55 @@
+%I A081145
+%S A081145 1,2,4,7,3,8,14,5,12,20,6,16,27,9,21,34,10,25,41,11,28,47,13,33,54,15,
+%T A081145 37,60,17,42,68,18,45,73,19,48,79,22,55,23,58,94,24,61,99,26,66,107,
+%U A081145 29,71,115,30,75,121,31,78,126,32,81,132,35,87,140,36,91,147,38,96,155,39
+%N A081145 a(1)=1; thereafter, a(n) is the least positive integer which has not already occurred and is such that |a(n)-a(n-1)| is different from any |a(k)-a(k-1)| which has already occurred.
+%C A081145 The sequence is a permutation of the positive integers. The inverse is A081146.
+%C A081145 Similar to A100707, except that when we subtract we use the largest possible k.
+%C A081145 The 1977 paper of Slater and Velez proves that this sequence is a permutation of positive integers and conjectures that its absolute difference sequence (see A308007) is also a permutation. If we call this the "Slater-Velez permutation of the first kind", then they also constructed another permutation (the 2nd kind), for which they are able to prove that both the sequence (A129198) and its absolute difference (A129199) are true permutations. - Ferenc Adorjan, Apr 03 2007
+%C A081145 The points appear to lie on three straight lines of slopes roughly 0.56, 1.40, 2.24 (click "graph", or see the Wilks link). I checked this for the first 10^6 terms using _Allan Wilks_'s C program. See A308009-A308015 for further information about the three lines. - _N. J. A. Sloane_, May 14 2019
+%D A081145 P. J. Slater and W. Y. Velez, Permutations of the Positive Integers with Restrictions on the Sequence of Differences, II, Pacific Journal of Mathematics, Vol. 82, No. 2, 1979, 527-531.
+%H A081145 Ferenc Adorjan, <a href="/A081145/b081145.txt">Table of n,a(n) for n = 1..5000</a>
+%H A081145 Shalosh B. Ekhad and Doron Zeilberger, <a href="http://sites.math.rutgers.edu/~zeilberg/mamarim/mamarimPDF/sv.pdf">Guessing the Elusive Patterns in the Slater-Valez sequence (aka OEIS A081145)</a>, June 2019; <a href="/A081145/a081145.pdf">Local copy</a>
+%H A081145 P. J. Slater and W. Y. Velez, <a href="http://projecteuclid.org/euclid.pjm/1102811644">Permutations of the Positive Integers with Restrictions on the Sequence of Differences</a>, Pacific Journal of Mathematics, Vol. 71, No. 1, 1977, 193-196.
+%H A081145 William Y. Velez, <a href="https://doi.org/10.1016/0012-365X(92)90724-T">Research problems 159-160</a>, Discrete Math., 110 (1992), pp. 301-302.
+%H A081145 Allan Wilks, <a href="/A081145/a081145_2.txt">Table showing n, a(n), slope, line_number, for n=1..100000</a> [The three lines are labeled 0 (lower), 1 (middle), 2 (upper).]
+%H A081145 Allan Wilks, <a href="/A081145/a081145.c.txt">C program for A081145</a>
+%H A081145 <a href="/index/Per#IntegerPermutation">Index entries for sequences that are permutations of the natural numbers</a>
+%e A081145 a(4)=7 because the previous term is 4 and the differences |3-4|, |5-4| and |6-4| have already occurred.
+%e A081145 After 7 we get 3 as the difference 4 has not occurred earlier. 5 follows 14 as the difference 9 has not occurred earlier.
+%t A081145 f[s_] := Block[{d = Abs[Rest@s - Most@s], k = 1}, While[ MemberQ[d, Abs[k - Last@s]] || MemberQ[s, k], k++ ]; Append[s, k]]; NestList[s, {1}, 70] (* _Robert G. Wilson v_, Jun 09 2006 *)
+%t A081145 f[s_] := Block[{k = 1, d = Abs[Most@s - Rest@s], l = Last@s}, While[MemberQ[s, k] || MemberQ[d, Abs[l - k]], k++ ]; Append[s, k]]; Nest[f, {1}, 70] (* _Robert G. Wilson v_, Jun 13 2006 *)
+%o A081145 (PARI){SV_p1(n)=local(x,v=6,d=2,j,k); /* Slater-Velez permutation - the first kind (by F. Adorjan)*/ x=vector(n);x[1]=1;x[2]=2; for(i=3,n,j=3;k=1;while(k,if(k=bittest(v,j)||bittest(d,abs(j-x[i-1])),j++,v+=2^j;d+=2^abs(j-x[i-1]);x[i]=j))); return(x)} \\ Ferenc Adorjan, Apr 03 2007
+%o A081145 (Python)
+%o A081145 A081145_list, l, s, b1, b2 = [1,2], 2, 3, set(), set([1])
+%o A081145 for n in range(3, 10**2):
+%o A081145     i = s
+%o A081145     while True:
+%o A081145         m = abs(i-l)
+%o A081145         if not (i in b1 or m in b2):
+%o A081145             A081145_list.append(i)
+%o A081145             b1.add(i)
+%o A081145             b2.add(m)
+%o A081145             l = i
+%o A081145             while s in b1:
+%o A081145                 b1.remove(s)
+%o A081145                 s += 1
+%o A081145             break
+%o A081145         i += 1 # _Chai Wah Wu_, Dec 15 2014
+%o A081145 (Haskell)
+%o A081145 import Data.List (delete)
+%o A081145 a081145 n = a081145_list !! (n-1)
+%o A081145 a081145_list = 1 : f 1 [2..] [] where
+%o A081145    f x vs ws = g vs where
+%o A081145      g (y:ys) = if z `elem` ws then g ys else y : f y (delete y vs) (z:ws)
+%o A081145                 where z = abs (x - y)
+%o A081145 -- _Reinhard Zumkeller_, Jul 02 2015
+%Y A081145 The sequence of differences is A099004 (see also A308007).
+%Y A081145 Similar to Murthy's sequence A093903, Cald's sequence (A006509) and Recamán's sequence A005132. See also A100707 (another version).
+%Y A081145 A308021 is an offspring of this sequence. - _N. J. A. Sloane_, May 13 2019
+%Y A081145 Cf. A063733, A072007, A078783, A081146, A084331, A084335, A117622.
+%Y A081145 See A308009-A308015 for the lines that the points lie on.
+%Y A081145 A308172 gives smallest missing numbers.
+%K A081145 nonn
+%O A081145 1,2
+%A A081145 _Don Reble_, Mar 08 2003

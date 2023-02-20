@@ -1,0 +1,37 @@
+%I A059459
+%S A059459 2,3,7,5,13,29,31,23,19,17,8209,8273,10321,2129,2131,83,67,71,79,1103,
+%T A059459 1039,1031,1063,1061,1069,263213,263209,263201,265249,265313,264289,
+%U A059459 280673,280681,280697,280699,280703,280639,280607,280603,280859,280843,281867,265483,265547,265579,265571,266083,266081,266089,266093,266029
+%N A059459 a(1) = 2; a(n+1) is obtained by writing a(n) in binary and trying to complement just one bit, starting with the least significant bit, until a new prime is reached.
+%C A059459 This is the lexicographically least (in positions of the flipped bits) such sequence.
+%C A059459 It is not known if the sequence is infinite.
+%C A059459 "The prime maze - consider the prime numbers in base 2, starting with the smallest prime (10)2. One can move to another prime number by either changing only one digit of the number, or adding a 1 to the front of the number. Can we reach 11 = (1011)2.? 3331? The Mersennes?" (See 'Prime Links + +'.) If we start at 11 and exclude terms 2 and 3 we get terms 11, 43, 41, and so on. This is the opposite parity sequence.
+%C A059459 a(130), if it exists, is greater than 2^130000. - _Charles R Greathouse IV_, Jan 02 2014
+%C A059459 a(130) is equal to a(129) + 2^400092. - _Giovanni Resta_, Jul 19 2017
+%H A059459 T. D. Noe and Charles R Greathouse IV, <a href="/A059459/b059459.txt">Table of n, a(n) for n = 1..129</a> (first 104 terms from Noe)
+%H A059459 Chris K. Caldwell, <a href="http://primes.utm.edu/links/curiosities/problems_and_puzzles/">Prime Links + +</a>
+%H A059459 W. Paulsen, <a href="https://web.archive.org/web/20090116121117/http://www.csm.astate.edu/~wpaulsen/primemaze/pmaze.html">The Prime Number Maze</a>, Web Pages.
+%H A059459 W. Paulsen, <a href="http://www.fq.math.ca/Scanned/40-3/paulsen.pdf">The Prime Number Maze</a>, Fib. Quart., 40 (2002), 272-279.
+%H A059459 Carlos Rivera, <a href="http://www.primepuzzles.net/problems/prob_025.htm">Problem 25.- William Paulsen's Prime Numbers Maze</a>, The Prime Puzzles and Problems Connection.
+%p A059459 A059459search := proc(a,upto_bit,upto_length) local i,n,t; if(nops(a) >= upto_length) then RETURN(a); fi; t := a[nops(a)]; for i from 0 to upto_bit do n := XORnos(t,(2^i)); if(isprime(n) and (not member(n,a))) then print([op(a), n]); RETURN(A059459search([op(a), n],upto_bit,upto_length)); fi; od; RETURN([op(a),`and no more`]); end;
+%p A059459 E.g., call as: A059459search([2],128,200);
+%t A059459 maxBits = 2^11; ClearAll[a]; a[1] = 2; a[n_] := a[n] = If[ PrimeQ[ a[n-1] ], bits = PadLeft[ IntegerDigits[ a[n-1], 2], maxBits]; For[i = 1, i <= maxBits, i++, bits2 = bits; bits2[[-i]] = 1 - bits[[-i]]; If[ i == maxBits, Print[ "maxBits reached" ]; Break[], If[ PrimeQ[an = FromDigits[ bits2, 2]] && FreeQ[ Table[ a[k], {k, 1, n-1}], an], Return[an] ] ] ], 0]; Table[ a[n], {n, 129}] (* _Jean-François Alcover_, Jan 17 2012 *)
+%t A059459 f[lst_List] := Block[{db2 = IntegerDigits[lst[[-1]], 2]}, exp = Length@ db2; While[pp = db2; pp[[exp]] = If[OddQ@db2[[exp]], 0, 1]; pp = FromDigits[pp, 2]; !PrimeQ[pp] || MemberQ[lst, pp], exp--; If[exp == 0, exp++; PrependTo[db2, 0]]]; Append[lst, pp]]; Nest[f, {2}, 128] (* _Robert G. Wilson v_, Jul 17 2017 *)
+%o A059459 (PARI) step(n)=my(k,t); while(vecsearch(v, t=bitxor(n,1<<k)) || !ispseudoprime(t=bitxor(n, 1<<k)), k++); v=Set(concat(v,t)); t
+%o A059459 u=v=[2]; u=concat(u,step(2)); for(i=3,129,u=concat(u,step(u[#u]));print(#u" "u[#u])) \\ _Charles R Greathouse IV_, Jan 02 2014
+%o A059459 (Python)
+%o A059459 from sympy import isprime
+%o A059459 from itertools import islice
+%o A059459 def agen():
+%o A059459     seen, cand = set(), 2
+%o A059459     while True:
+%o A059459         an = cand; bit = 1; seen.add(an); yield an
+%o A059459         while cand in seen or not isprime(cand):
+%o A059459             cand = an-bit if an&bit else an+bit
+%o A059459             bit <<= 1
+%o A059459 print(list(islice(agen(), 51))) # _Michael S. Branicky_, Oct 01 2022
+%Y A059459 Cf. A059458 (for this sequence written in binary), A059471. A strictly ascending analog: A059661, positions of the flipped bits: A059663.
+%K A059459 nonn,base,nice
+%O A059459 1,1
+%A A059459 _Gregory Allen_, Feb 02 2001
+%E A059459 More terms and Maple program from _Antti Karttunen_, Feb 03 2001, who remarks that he was able to extend the sequence to the 104th term 151115727453207491916143 using the bit-flip-limit 128.

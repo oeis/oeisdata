@@ -1,0 +1,42 @@
+%I A110924
+%S A110924 1,2,4,5,7,11,13,17,19,23,25,29,31,37,3,9,35,15,21,41,27,33,43,39,45,
+%T A110924 47,49,53,55,59,61,67,51,57,65,63,69,71,73,77,79,83,85,89,91,97,75,81,
+%U A110924 95,87,93,101,99,103,105,107,109,113,115,119,121,127,111,117,125,123,129
+%N A110924 a(1) = 1, a(2) = 2; a(n) is smallest positive integer not among earlier terms of the sequence such that gcd(a(n), a(n-1) + a(n-2)) = 1.
+%C A110924 2 and 4 are the only even terms in the sequence. Is every odd positive integer in the sequence?
+%H A110924 Robert Israel, <a href="/A110924/b110924.txt">Table of n, a(n) for n = 1..10000</a>
+%e A110924 Of the positive integers not among the first 4 terms of the sequence, 7 is the smallest which is coprime to a(3) + a(4) = 4 + 5 = 9.
+%p A110924 N:= 1000: # to get the first N terms
+%p A110924 LCp:= proc(c,R,q)
+%p A110924 local T,TM,m;
+%p A110924 T:= select(t -> igcd(t,q) = 1, {$1 .. q-1});
+%p A110924 m:= floor(c/q);
+%p A110924 T:= map(`+`,T,m*q);
+%p A110924 TM:= T minus R minus {$m*q .. c};
+%p A110924 while TM = {} do
+%p A110924   T:= map(`+`,T,q);
+%p A110924   TM := T minus R;
+%p A110924 od:
+%p A110924 min(TM);
+%p A110924 end proc;
+%p A110924 A110924[1]:= 1: A110924[2]:= 2: A110924[3]:= 4: A110924[4]:= 5:
+%p A110924 c:= 1: R:= {2,4,5}:
+%p A110924 for n from 5 to N do
+%p A110924   A110924[n]:= LCp(c, R, A110924[n-1] + A110924[n-2]);
+%p A110924   if A110924[n] = c+2 then
+%p A110924     c:= c+2;
+%p A110924     while member(c+2,R) do c:= c+2 od:
+%p A110924     R:= select(`>`,R,c);
+%p A110924   else
+%p A110924     R:= R union {A110924[n]}
+%p A110924   fi;
+%p A110924 od:
+%p A110924 seq(A110924[n],n=1..N); # _Robert Israel_, May 09 2014
+%t A110924 a[1] = 1; a[2] = 2; a[3] = 4;
+%t A110924 a[n_] := a[n] = Module[{aa = Array[a, n-1], b = a[n-1] + a[n-2]}, For[k = 3, True, k += 2, If[FreeQ[aa, k], If[CoprimeQ[k, b], Return[k]]]]];
+%t A110924 Array[a, 100] (* _Jean-François Alcover_, Aug 26 2020 *)
+%o A110924 (PARI) { u=[2,1]; c=3; s=u[1]+u[2]; m=Set(); m=setunion(m,[1]); m=setunion(m,[2]); print1(1,",",2); for(k=1,100, i=2;while(gcd(i,s)>1 || setsearch(m,i)!=0,i++); u[(c%2)+1] = i; c++; s=u[1]+u[2]; m=setunion(m,[i]); print1(i,",")) } \\ Lambert Klasen (lambert.klasen(AT)gmx.net), Oct 25 2005
+%K A110924 nonn
+%O A110924 1,2
+%A A110924 _Leroy Quet_, Sep 23 2005
+%E A110924 More terms from Lambert Klasen (lambert.klasen(AT)gmx.net), Oct 25 2005

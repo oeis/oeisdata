@@ -1,0 +1,48 @@
+%I A076615
+%S A076615 1,1,2,2,16,40,80,80,11360,55040,253440,1056000,3801600,10982400,
+%T A076615 21964800,21964800,857213660160,7907423180800,72155129446400,
+%U A076615 645950912921600,5622693241651200,47110389109555200,375570435981312000,2811021970538496000,19445103757787136000
+%N A076615 Number of permutations of {1,2,...,n} that result in a binary search tree with the minimum possible height.
+%C A076615 Empty external nodes are counted in determining the height of a search tree.
+%H A076615 Alois P. Heinz, <a href="/A076615/b076615.txt">Table of n, a(n) for n = 0..511</a> (first 50 terms from Michal Forisek)
+%H A076615 Wikipedia, <a href="https://en.wikipedia.org/wiki/Binary_search_tree">Binary search tree</a>
+%H A076615 <a href="/index/Ro#rooted">Index entries for sequences related to rooted trees</a>
+%H A076615 <a href="/index/Tra#trees">Index entries for sequences related to trees</a>
+%F A076615 Let b(n,k) be the number of permutations of {1,2,...,n} that produce a binary search tree of depth at most k. We have:
+%F A076615 b(0,k) = 1 for k>=0,
+%F A076615 b(1,0) = 0,
+%F A076615 b(1,k) = 1 for k>0,
+%F A076615 b(n,k) = Sum_{r=1..n} C(n-1,r-1) * b(r-1,k-1) * b(n-r,k-1) for n>=2, k>=0.
+%F A076615 Then a(n) = b(n,floor(log_2(n))+1).
+%e A076615 a(3) = 2 because only the permutations (2,1,3) and (2,3,1) result in a binary search tree of minimal height. In both cases you will get the following binary search tree:
+%e A076615         2
+%e A076615       /   \
+%e A076615      1     3
+%e A076615     / \   / \
+%e A076615    o   o o   o
+%p A076615 b:= proc(n,k) option remember;
+%p A076615       if n=0 then 1
+%p A076615     elif n=1 then `if`(k>0, 1, 0)
+%p A076615     else add(binomial(n-1, r-1) *b(r-1, k-1) *b(n-r, k-1), r=1..n)
+%p A076615       fi
+%p A076615     end:
+%p A076615 a:= n-> b(n, ilog2(n)+1):
+%p A076615 seq(a(n), n=0..30);  # _Alois P. Heinz_, Sep 20 2011
+%t A076615 b[n_, k_] := b[n, k] = Which[n==0, 1, n==1, If[k>0, 1, 0], True, Sum[ Binomial[n-1, r-1]*b[r-1, k-1]*b[n-r, k-1], {r, 1, n}]]; a[n_] := b[n, Floor @ Log[2, n]+1]; Table[a[n], {n, 1, 30}] (* _Jean-François Alcover_, Feb 19 2017, after _Alois P. Heinz_ *)
+%o A076615 (Python)
+%o A076615 from math import factorial as f, log, floor
+%o A076615 B= {}
+%o A076615 def b(n,x):
+%o A076615     if (n,x) in B: return B[(n,x)]
+%o A076615     if n<=1: B[(n,x)] = int(x>=0)
+%o A076615     else: B[(n,x)]=sum([b(i,x-1)*b(n-1-i,x-1)*f(n-1)//f(i)//f(n-1-i) for i in range(n)])
+%o A076615     return B[(n,x)]
+%o A076615 for n in range(1,51): print(b(n,floor(log(n,2))))
+%o A076615 # _Michal Forisek_, Sep 19 2011
+%Y A076615 Leftmost nonzero elements in rows of A195581.
+%Y A076615 Cf. A076616, A328349.
+%K A076615 nonn
+%O A076615 0,3
+%A A076615 _Jeffrey Shallit_, Oct 22 2002
+%E A076615 Extended beyond a(8) and efficient formula by _Michal Forisek_, Sep 19 2011
+%E A076615 a(0)=1 prepended by _Alois P. Heinz_, Jul 18 2018

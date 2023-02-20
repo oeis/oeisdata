@@ -1,0 +1,31 @@
+%I A005198 M2491
+%S A005198 0,1,1,3,5,13,27,68,160,404,1010,2604,6726,17661,46628,124287,333162,
+%T A005198 898921,2437254,6640537,18166568,49890419,137478389,380031868,
+%U A005198 1053517588,2928246650,8158727139,22782938271,63752461474,178740014515,502026565792,1412409894224
+%N A005198 a(n) is the number of forests with n (unlabeled) nodes in which each component tree is planted, that is, is a rooted tree in which the root has degree 1.
+%D A005198 N. J. A. Sloane and Simon Plouffe, The Encyclopedia of Integer Sequences, Academic Press, 1995 (includes this sequence).
+%H A005198 Alois P. Heinz, <a href="/A005198/b005198.txt">Table of n, a(n) for n = 1..2136</a> (first 118 terms from Washington Bomfim)
+%H A005198 E. M. Palmer and A. J. Schwenk, <a href="http://dx.doi.org/10.1016/0095-8956(79)90073-X">On the number of trees in a random forest</a>, J. Combin. Theory, B 27 (1979), 109-121.
+%F A005198 a(1) = 0, if n >= 2 a(n) = Sum_{P_1(n)}( Product_{k=2..n} binomial(A000081(k-1) + c_k - 1, c_k) ), where P_1(n) are the partitions of n without parts equal to 1: 2*c_2 + ... + n*c_n = n; c_2, ..., c_n >= 0. - _Washington Bomfim_, Jul 05 2020
+%p A005198 g:= proc(n) option remember; `if`(n<=1, n, (add(add(d*g(d),
+%p A005198        d=numtheory[divisors](j))*g(n-j), j=1..n-1))/(n-1))
+%p A005198     end:
+%p A005198 b:= proc(n, i) option remember; `if`(n=0, 1, `if`(i<2, 0, add(
+%p A005198        binomial(g(i-1)+j-1, j)*b(n-i*j, i-1), j=0..n/i)))
+%p A005198     end:
+%p A005198 a:= n-> b(n$2):
+%p A005198 seq(a(n), n=1..40);  # _Alois P. Heinz_, Jul 07 2020
+%t A005198 g[n_] := g[n] = If[n <= 1, n, Sum[Sum[d g[d], {d, Divisors[j]}] g[n - j], {j, 1, n - 1}]/(n - 1)];
+%t A005198 b[n_, i_] := b[n, i] = If[n == 0, 1, If[i < 2, 0, Sum[Binomial[g[i - 1] + j - 1, j] b[n - i j, i - 1], {j, 0, n/i}]]];
+%t A005198 a[n_] := b[n, n];
+%t A005198 Array[a, 40] (* _Jean-François Alcover_, Nov 08 2020, after _Alois P. Heinz_ *)
+%o A005198 (PARI) g(m) = {my(f); if(m==0, return(1)); f = vector(m+1); f[1]=1;
+%o A005198 for(j=1, m, f[j+1]=1/j * sum(k=1, j, sumdiv(k,d, d * f[d]) * f[j-k+1])); f[m+1] };
+%o A005198 global(max_n = 130); A000081 = vector(max_n, n, g(n-1));
+%o A005198 seq(n)={my(s=0, D, c, P_1); if(n==1,return(0)); forpart(P_1 = n, D = Set(P_1); c = vector(#D); for(k=1, #D, c[k] = #select(x->x == D[k], Vec(P_1)));
+%o A005198 s += prod(k=1, #D, binomial( A000081[D[k]-1] + c[k] - 1, c[k]) ),[2,n],[1,n]); s}; \\ _Washington Bomfim_, Jul 05 2020
+%Y A005198 Cf. A000081.
+%K A005198 nonn
+%O A005198 1,4
+%A A005198 _N. J. A. Sloane_.
+%E A005198 Definition clarified and more terms added from Palmer-Schwenk by _N. J. A. Sloane_, May 29 2012

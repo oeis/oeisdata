@@ -1,0 +1,42 @@
+%I A156602
+%S A156602 1,1,1,1,-7,1,1,48,48,1,1,-329,2256,-329,1,1,2255,105985,105985,2255,
+%T A156602 1,1,-15456,4979040,-34127170,4979040,-15456,1,1,105937,233908896,
+%U A156602 10988845010,10988845010,233908896,105937,1,1,-726103,10988739073,-3538373981506,24252380937070,-3538373981506,10988739073,-726103,1
+%N A156602 Triangle T(n, k, m) = t(n, m)/(t(k, m)*t(n-k, m)), where t(n, k) = Product_{j=1..n} p(j, k+1), p(n, x) = Sum_{j=0..n} (-1)^j*A053122(n, j)*x^j, and m = 8, read by rows.
+%H A156602 G. C. Greubel, <a href="/A156602/b156602.txt">Rows n = 0..50 of the triangle, flattened</a>
+%F A156602 T(n, k, m) = t(n, m)/(t(k, m)*t(n-k, m)), where t(n, k) = Product_{j=1..n} p(j, k+1), p(n, x) = Sum_{j=0..n} (-1)^j*A053122(n, j)*x^j, and m = 8.
+%e A156602 Triangle begins as:
+%e A156602   1;
+%e A156602   1,      1;
+%e A156602   1,     -7,         1;
+%e A156602   1,     48,        48,           1;
+%e A156602   1,   -329,      2256,        -329,           1;
+%e A156602   1,   2255,    105985,      105985,        2255,         1;
+%e A156602   1, -15456,   4979040,   -34127170,     4979040,    -15456,      1;
+%e A156602   1, 105937, 233908896, 10988845010, 10988845010, 233908896, 105937, 1;
+%t A156602 (* First program *)
+%t A156602 b[n_, k_]:= If[k==n, 2, If[k==n-1 || k==n+1, -1, 0]];
+%t A156602 M[d_]:= Table[b[n, k], {n,d}, {k,d}];
+%t A156602 p[x_, n_]:= If[n==0, 1, CharacteristicPolynomial[M[n], x]];
+%t A156602 f= Table[p[x, n], {n,0,20}];
+%t A156602 t[n_, k_]:= If[k==0, n!, Product[f[[j]], {j, n}]/.x->(k+1)];
+%t A156602 T[n_, k_, m_]:= If[n==0, 1, t[n, m]/(t[k, m]*t[n-k, m])];
+%t A156602 Table[T[n, k, 8], {n,0,12}, {k,0,n}]//TableForm (* modified by _G. C. Greubel_, Jun 25 2021 *)
+%t A156602 (* Second program *)
+%t A156602 t[n_, k_]:= t[n, k]= If[n==0, 1, If[k==0, (n-1)!, Product[(-1)^j*Simplify[ChebyshevU[j, x/2 - 1]], {j,0,n-1}]/.x->(k+1)]];
+%t A156602 T[n_, k_, m_]:= T[n, k, m]= t[n, m]/(t[k, m]*t[n-k, m]);
+%t A156602 Table[T[n, k, 8], {n,0,12}, {k,0,n}]//Flatten (* _G. C. Greubel_, Jun 25 2021 *)
+%o A156602 (Sage)
+%o A156602 @CachedFunction
+%o A156602 def t(n, k):
+%o A156602     if (n==0): return 1
+%o A156602     elif (k==0): return factorial(n-1)
+%o A156602     else: return product( (-1)^j*chebyshev_U(j, (k-1)/2) for j in (0..n-1) )
+%o A156602 def T(n,k,m): return t(n,m)/(t(k,m)*t(n-k,m))
+%o A156602 flatten([[T(n, k, 8) for k in (0..n)] for n in (0..12)]) # _G. C. Greubel_, Jun 25 2021
+%Y A156602 Cf. A007318 (m=0), A034801 (m=4), A156599 (m=5), A156600 (m=6), A156601 (m=7), this sequence (m=8), A156603.
+%Y A156602 Cf. A053122.
+%K A156602 sign,tabl
+%O A156602 0,5
+%A A156602 _Roger L. Bagula_, Feb 11 2009
+%E A156602 Edited by _G. C. Greubel_, Jun 25 2021

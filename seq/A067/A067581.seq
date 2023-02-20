@@ -1,0 +1,39 @@
+%I A067581
+%S A067581 0,1,2,3,4,5,6,7,8,9,10,22,11,20,13,24,15,23,14,25,16,27,18,26,17,28,
+%T A067581 19,30,12,33,21,34,29,31,40,32,41,35,42,36,44,37,45,38,46,39,47,50,43,
+%U A067581 51,48,52,49,53,60,54,61,55,62,57,63,58,64,59,66,70,56,71,65,72,68,73,69
+%N A067581 a(n) = smallest integer not yet in the sequence with no digits in common with a(n-1), a(0)=0.
+%C A067581 David W. Wilson has shown that the sequence contains every positive integer except those containing all the digits 1 through 9 (which obviously have no possible predecessor). Jun 04 2002
+%C A067581 a(A137857(n)) = A137857(n). - _Reinhard Zumkeller_, Feb 15 2008
+%H A067581 Reinhard Zumkeller and Zak Seidov, <a href="/A067581/b067581.txt">Table of n, a(n) for n = 0..10000</a>
+%e A067581 a(14) = 13, since a(13) = 20 and all integers smaller than 13 have a digit in common with 20 or have already appeared in the sequence.
+%t A067581 f[s_List] := Block[{k = 1, id = IntegerDigits@ s[[ -1]]}, While[ MemberQ[s, k] || Intersection[id, IntegerDigits@k] != {}, k++ ]; Append[s, k]]; Nest[f, {1}, 71] (* _Robert G. Wilson v_, Apr 03 2009 *)
+%o A067581 (Haskell)
+%o A067581 import Data.List (delete, intersect); import Data.Function (on)
+%o A067581 a067581 n = a067581_list !! (n-1)
+%o A067581 a067581_list = 1 : f 1 [2..] where
+%o A067581    f u vs = v : f v (delete v vs)
+%o A067581      where v : _ = filter (null . (intersect `on` show) u) vs
+%o A067581 -- _Reinhard Zumkeller_, Jul 01 2013
+%o A067581 (PARI)  {u=0; a=0; for(n=0, 99, print1(a", "); u+=1<<a; D=Set(if(a,digits(a))); for(k=0, 9e9, bittest(u, k)&&next; #setintersect(D, Set(digits(k)))&&next; a=k; break))} \\ _M. F. Hasler_, Nov 01 2014
+%o A067581 (Python)
+%o A067581 from itertools import count, islice, product as P
+%o A067581 def only(s, D=1): # numbers with >= D digits only from s
+%o A067581     yield from (int("".join(p)) for d in count(D) for p in P(s, repeat=d))
+%o A067581 def agen(): # generator of terms
+%o A067581     aset, an, minan = {0}, 0, 1
+%o A067581     while True:
+%o A067581         yield an
+%o A067581         an, s = minan, set(str(an))
+%o A067581         use = "".join(c for c in "0123456789" if c not in s)
+%o A067581         for an in only(use, D=len(str(minan))):
+%o A067581             if an not in aset: break
+%o A067581         aset.add(an)
+%o A067581         while minan in aset: minan += 1
+%o A067581 print(list(islice(agen(), 73))) # _Michael S. Branicky_, Jun 30 2022
+%Y A067581 Cf. A136332, A184992, A239664, A249585, A249591.
+%Y A067581 See also A276512, A276633, A276766.
+%K A067581 easy,nonn,base,nice,look
+%O A067581 0,3
+%A A067581 Ulrich Schimke (ulrschimke(AT)aol.com)
+%E A067581 Extended to a(0)=0 by _M. F. Hasler_, Nov 02 2014

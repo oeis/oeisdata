@@ -1,0 +1,71 @@
+%I A005202 M3282
+%S A005202 0,1,0,1,1,4,6,14,28,60,125,263,558,1181,2513,5339,11392,24290,51926,
+%T A005202 111017,237757,509404,1092713,2345256,5038015,10828720,23291759,
+%U A005202 50126055,107939753,232550011,501270200,1080996244,2332221316,5033764628,10868950676,23476998980,50728408182,109649040738,237081174662,512767906801,1109354495908
+%N A005202 Total number of fixed points in planted trees with n nodes.
+%C A005202 From _R. J. Mathar_, Apr 13 2019: (Start)
+%C A005202 The associated triangle H_{p,j}, p >= 1, 1 <= j <= p, a(n) = Sum_{j=1..p} j*H_{p,j}, row sums in A001678, starts:
+%C A005202    1;
+%C A005202    0,  0;
+%C A005202    1,  0,  0;
+%C A005202    1,  0,  0,  0;
+%C A005202    1,  0,  1,  0,  0;
+%C A005202    1,  1,  1,  0,  0,  0;
+%C A005202    2,  2,  1,  0,  1,  0,  0;
+%C A005202    1,  4,  2,  2,  1,  0,  0,  0;
+%C A005202    3,  4,  4,  5,  2,  0,  1,  0,  0;
+%C A005202    3,  7,  7,  9,  4,  4,  1,  0,  0,  0;
+%C A005202    5,  9, 15, 14, 11,  9,  3,  0,  1,  0,  0;
+%C A005202    4, 14, 23, 28, 25, 19,  7,  6,  1,  0,  0,  0;
+%C A005202   11, 15, 39, 46, 55, 38, 24, 14,  5,  0,  1,  0,  0;
+%C A005202    6, 32, 54, 86, 97, 86, 64, 36, 11,  9,  1,  0,  0,  0;
+%C A005202 (End)
+%D A005202 N. J. A. Sloane and Simon Plouffe, The Encyclopedia of Integer Sequences, Academic Press, 1995 (includes this sequence).
+%H A005202 F. Harary and E. M. Palmer, <a href="https://doi.org/10.1017/S0305004100055857">Probability that a point of a tree is fixed</a>, Math. Proc. Camb. Phil. Soc. 85 (1979) 407-415.
+%H A005202 <a href="/index/Ro#rooted">Index entries for sequences related to rooted trees</a>
+%H A005202 <a href="/index/Tra#trees">Index entries for sequences related to trees</a>
+%p A005202 Hpj := proc(Hofxy,p,j)
+%p A005202     coeftayl(Hofxy,x=0,p) ;
+%p A005202     coeftayl(%,y=0,j) ;
+%p A005202     simplify(%) ;
+%p A005202 end proc:
+%p A005202 Hxy := proc(x,y,pmax,hxyinit)
+%p A005202     if pmax = 0 then
+%p A005202         x*y ;
+%p A005202     else
+%p A005202         pp := 1;
+%p A005202         for p from 1 to pmax do
+%p A005202             t :=1 ;
+%p A005202             for j from 1 to p do
+%p A005202                 t := t*(1+x^p*y^j+add(x^(k*p),k=2..pmax+1))^Hpj(hxyinit,p,j) ;
+%p A005202             end do:
+%p A005202             pp := pp*t ;
+%p A005202         end do:
+%p A005202         x*y*%/(1+x*y) ;
+%p A005202     end if;
+%p A005202 end proc:
+%p A005202 hxy := Hxy(x,y,0,0) ;
+%p A005202 for pmax from 2 to 20 do
+%p A005202     Hxy(x,y,pmax,hxy) ;
+%p A005202     taylor(%,x=0,pmax+2) ;
+%p A005202     convert(%,polynom) ;
+%p A005202     taylor(%,y=0,pmax+2) ;
+%p A005202     hxy := convert(%,polynom) ;
+%p A005202     for p from 0 to pmax do
+%p A005202         Ap := 0 ;
+%p A005202         for j from 1 to p do
+%p A005202             Ap := Ap+j*Hpj(hxy,p,j) ;
+%p A005202         end do:
+%p A005202         printf("%d,",Ap) ;
+%p A005202     end do:
+%p A005202     print() ;
+%p A005202 end do: # _R. J. Mathar_, Apr 13 2019
+%t A005202 Hpj[Hofxy_, p_, j_] := SeriesCoefficient[SeriesCoefficient[Hofxy, {x, 0, p}] , {y, 0, j}];
+%t A005202 Hxy [x_, y_, pMax_, hxyinit_] := If [pMax == 0, x y, pp = 1; For[p = 1, p <= pMax, p++, t = 1; For[j = 1, j <= p, j++, t = t(1 + x^p y^j + Sum[x^(k*p), {k, 2, pMax + 1}])^Hpj[hxyinit, p, j]]; pp = pp t]; x*y* pp/(1 + x y)];
+%t A005202 hxy = Hxy[x, y, 0, 0];
+%t A005202 Reap[For[pMax = 2, pMax <= terms - 1, pMax++, Print["pMax = ", pMax]; sx = Series[Hxy[x, y, pMax, hxy], {x, 0, pMax + 2}] // Normal; sy = Series[sx, {y, 0, pMax + 2}]; hxy = sy // Normal; For[p = 0, p <= pMax, p++, Ap = 0; For[j = 1, j <= p, j++, Ap = Ap + j Hpj[hxy, p, j]]; If[pMax == terms - 1, Print[Ap]; Sow[Ap]]]]][[2, 1]] (* _Jean-François Alcover_, Mar 22 2020, after _R. J. Mathar_ *)
+%Y A005202 Cf. A005200.
+%K A005202 nonn,easy
+%O A005202 1,6
+%A A005202 _N. J. A. Sloane_
+%E A005202 More terms from _R. J. Mathar_, Apr 13 2019

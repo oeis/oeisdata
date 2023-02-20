@@ -1,0 +1,37 @@
+%I A050219
+%S A050219 728,2964,3864,4959,5935,6187,9386,9633,11695,13764,16536,16591,20784,
+%T A050219 25428,28808,29623,32696,33632,35805,39585,43736,44733,49027,55344,
+%U A050219 56336,57663,58305,62634,65912,65974,66650,67067,67728,69279,69835,73615,73616,74168
+%N A050219 Smaller of Smith brothers.
+%H A050219 Amiram Eldar, <a href="/A050219/b050219.txt">Table of n, a(n) for n = 1..10000</a> (terms 1..1000 from Robert Israel)
+%H A050219 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/SmithBrothers.html">Smith Brothers.</a>
+%p A050219 issmith:= proc(n)
+%p A050219   if isprime(n) then return false fi;
+%p A050219   convert(convert(n,base,10),`+`) = add(t[2]*convert(convert(t[1],base,10),`+`),t=ifactors(n)[2])
+%p A050219 end proc:
+%p A050219 S:= select(issmith, {$4..10^5}):
+%p A050219 sort(convert(S intersect map(`-`,S,1), list)); # _Robert Israel_, Jan 15 2018
+%t A050219 smithQ[n_] := !PrimeQ[n] && Total[Flatten[IntegerDigits[Table[#[[1]], {#[[2]]}]& /@ FactorInteger[n]]]] == Total[IntegerDigits[n]];
+%t A050219 Select[Range[10^5], smithQ[#] && smithQ[#+1]&] (* _Jean-François Alcover_, Jun 07 2020 *)
+%o A050219 (PARI) isone(n) = {if (!isprime(n), f = factor(n); sumdigits(n) == sum(k=1, #f~, f[k,2]*sumdigits(f[k,1])););}
+%o A050219 isok(n) =  isone(n) && isone(n+1); \\ _Michel Marcus_, Jul 17 2015
+%o A050219 (Python)
+%o A050219 from sympy import factorint
+%o A050219 from itertools import count, islice
+%o A050219 def sd(n): return sum(map(int, str(n)))
+%o A050219 def smith():
+%o A050219     for k in count(1):
+%o A050219         f = factorint(k)
+%o A050219         if sum(f[p] for p in f) > 1 and sd(k) == sum(sd(p)*f[p] for p in f):
+%o A050219             yield k
+%o A050219 def agen():
+%o A050219     prev = -1
+%o A050219     for s in smith():
+%o A050219         if s == prev + 1: yield prev
+%o A050219         prev = s
+%o A050219 print(list(islice(agen(), 38))) # _Michael S. Branicky_, Dec 23 2022
+%Y A050219 Cf. A006753, A050220.
+%K A050219 nonn,base
+%O A050219 1,1
+%A A050219 _Eric W. Weisstein_
+%E A050219 Offset corrected by _Arkadiusz Wesolowski_, May 08 2012

@@ -1,0 +1,47 @@
+%I A106239
+%S A106239 0,0,0,1,0,0,15,0,0,0,222,0,0,0,0,3660,10,0,0,0,0,68295,525,0,0,0,0,0,
+%T A106239 1436568,20307,0,0,0,0,0,0,33779340,727020,280,0,0,0,0,0,0,880107840,
+%U A106239 25934184,31500,0,0,0,0,0,0,0,25201854045,950478210,2325015,0,0,0,0,0,0,0,0
+%N A106239 Triangle read by rows: T(n,m) = number of graphs on n labeled nodes, with m components of size = order. Also number of graphs on n labeled nodes with m unicyclic components.
+%C A106239 Also the Bell transform of A057500(n+1). For the definition of the Bell transform see A264428. - _Peter Luschny_, Jan 27 2016
+%D A106239 D. E. Knuth, The Art of Computer Programming, Volume 4, Fascicle 3: Generating All Combinations and Partitions, Addison-Wesley, 2005, pp. 39, 47.
+%H A106239 Alois P. Heinz, <a href="/A106239/b106239.txt">Rows n = 1..141, flattened</a>
+%F A106239 E.g.f.: exp((-y/2)*log(1+LambertW(-x)) + (y/2)*LambertW(-x) - (y/4)*LambertW(-x)^2). - _Vladeta Jovovic_, May 04 2005
+%F A106239 T(n,m) = n! * Sum_{P(n,m)} Product_{p=1..n} f(p)^c_p / (c_p! * p!^c_p), where f(n) = A057500(n) =(n^(n-2)*(1-3*n)+exp(n)*Gamma(n+1,n)/n)/2, and P(n,m) are the partitions of n with m parts p, all p>=3: c_1 + 2*c_2 + ... + n*c_n = n; c_1,c_2, ..., c_n>= 0. - _Washington Bomfim_, May 03 2005, updated Apr 08 2020
+%F A106239 T(n,1) = A057500(n), T(n,m) = Sum_{j=2..n-1} C(n-1,j) * A057500(j+1) * T(n-1-j,m-1) if m>1. - _Alois P. Heinz_, Sep 15 2008
+%e A106239 a(30) = T[8,2] = 20307. The partitions of 8 with two parts p, p>=3 are [5*1 + 3*1], and [4*2].
+%e A106239 Partition [5*1 + 3*1] corresponds to f(5)^1 * f(3)^1 / ( (1! * 5!^1) * (1! * 3!^1) ) = 222 /(5! * 3!) = 37/120; Partition [4*2] corresponds to f(4)^2 / ( 2! * 4!^2) = 225 / (2*4!^2) = 25/128. Finally 8! * (37/120 + 25/128) = 20307. (See formula).
+%e A106239 Triangle T(n,m) begins:
+%e A106239           0;
+%e A106239           0,        0;
+%e A106239           1,        0,     0;
+%e A106239          15,        0,     0, 0;
+%e A106239         222,        0,     0, 0, 0;
+%e A106239        3660,       10,     0, 0, 0, 0;
+%e A106239       68295,      525,     0, 0, 0, 0, 0;
+%e A106239     1436568,    20307,     0, 0, 0, 0, 0, 0;
+%e A106239    33779340,   727020,   280, 0, 0, 0, 0, 0, 0;
+%e A106239   880107840, 25934184, 31500, 0, 0, 0, 0, 0, 0, 0;
+%p A106239 cy:= proc(n) option remember; local t; binomial(n-1, 2) *add ((n-3)! /(n-2-t)! *n^(n-2-t), t=1..n-2) end: T:= proc(n,m) if m=1 then cy(n) else add (binomial(n-1, j) *cy(j+1) * T(n-1-j, m-1), j=2..n-1) fi end: seq (seq (T(n,m), m=1..n), n=1..11); # _Alois P. Heinz_, Sep 15 2008
+%p A106239 # The function BellMatrix is defined in A264428.
+%p A106239 # Adds (1,0,0,0, ..) as column 0.
+%p A106239 a := n -> n!*n^(n-1)/2*add(1/(n^k*(n-k)!), k=3..n);
+%p A106239 BellMatrix(n -> a(n+1), 9); # _Peter Luschny_, Jan 27 2016
+%t A106239 nn=12;t=Sum[n^(n-1)x^n/n!,{n,1,nn}];Range[0,nn]!CoefficientList[ Series[Exp[y(Log[1/(1-t)]/2-t/2-t^2/4)],{x,0,nn}],{x,y}] //Grid  (* _Geoffrey Critzer_, Nov 04 2012 *)
+%t A106239 BellMatrix[f_Function, len_] := With[{t = Array[f, len, 0]}, Table[BellY[n, k, t], {n, 0, len - 1}, {k, 0, len - 1}]];
+%t A106239 rows = 12;
+%t A106239 M = BellMatrix[(#+1)! (#+1)^#/2 Sum[1/((#+1)^k (#-k+1)!), {k, 3, #+1}]&, rows];
+%t A106239 Table[M[[n, k]], {n, 2, rows}, {k, 2, n}] // Flatten (* _Jean-François Alcover_, Jun 24 2018, after _Peter Luschny_ *)
+%o A106239 (PARI) Row(n)={my(w=lambertw(-x+O(x*x^n))); Vecrev(n!*if(n>=3, polcoef(exp(-y*log(1+w)/2 + y*w/2 - y*w^2/4), n)/y), n)}
+%o A106239 {for(n=1, 10, print(Row(n)))} \\ _Andrew Howroyd_, Apr 06 2020
+%o A106239 (PARI) x = 90; D = Set(x); A = t = vector(x);
+%o A106239 \p 500        \\ See Peter Luschny formula in A057500.
+%o A106239 f = vector(x, n, round( (n^(n-2)*(1-3*n) + exp(n) * incgam(n+1,n) /n)/2) );
+%o A106239 T(n,m)={my(p,c,S=0,Pr,cD,j);if(m>floor(n/3),return(0));if(n>x,return(-1));
+%o A106239 forpart(a = n, A = Vec(a); Pr = 1; D = Set(a); cD = #D;
+%o A106239 for(j=1,cD, p= D[j]; t= select(x-> x==p, A); c=#t; Pr *= f[p]^c / (c!*p!^c));
+%o A106239 S += Pr, [3,n],[m,m]); n! * S };\\ - _Washington Bomfim_, Apr 07 2020
+%Y A106239 Cf. A057500, A106238 (similar formulas that can be used in the unlabeled case).
+%K A106239 nonn,tabl
+%O A106239 1,7
+%A A106239 _Washington Bomfim_, May 03 2005

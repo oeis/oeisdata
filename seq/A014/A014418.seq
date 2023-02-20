@@ -1,0 +1,59 @@
+%I A014418
+%S A014418 0,1,10,11,20,100,101,110,111,120,200,201,210,211,1000,1001,1010,1011,
+%T A014418 1020,1100,1101,1110,1111,1120,1200,1201,1210,1211,2000,2001,2010,
+%U A014418 2011,2020,2100,2101,2110,2111,2120,2200,2201,2210,2211,10000
+%N A014418 Representation of n in base of Catalan numbers (a classic greedy version).
+%C A014418 From _Antti Karttunen_, Jun 22 2014: (Start)
+%C A014418 Also called "Greedy Catalan Base" for short.
+%C A014418 Note: unlike A239903, this is a true base system, thus A244158(a(n)) = n holds for all n. See also A244159 for another, "less greedy" Catalan Base number system.
+%C A014418 No digits larger than 3 will ever appear, because C(n+1)/C(n) approaches 4 from below, but never reaches it. [Where C(n) is the n-th Catalan number, A000108(n)].
+%C A014418 3-digits cannot appear earlier than at the fifth digit-position from the right, the first example being a(126) = 30000.
+%C A014418 The last digit is always either 0 or 1. (Cf. the sequences A244222 and A244223 which give the corresponding k for "even" and "odd" representations). No term ends as ...21.
+%C A014418 No two "odd" terms (ending with 1) may occur consecutively.
+%C A014418 A244217 gives the k for which a(k) starts with the digit 1, while A244216 gives the k for which a(k) starts with the digit 2 or 3.
+%C A014418 A000108(n+1) gives the position of numeral where 1 is followed by n zeros.
+%C A014418 A014138 gives the positions of repunits.
+%C A014418 A197433 gives such k that a(k) = A239903(k). [Actually, such k, that the underlying strings of digits/numbers are same].
+%C A014418 For the explanations, see the attached notes.
+%C A014418 (End)
+%H A014418 Olivier Gérard (first 1001 terms) & Antti Karttunen, <a href="/A014418/b014418.txt">Table of n, a(n) for n = 0..16796</a>
+%H A014418 Georg Cantor, <a href="http://gdz.sub.uni-goettingen.de/dms/load/img/?PPN=PPN599415665_0014&amp;DMDID=DMDLOG_0008&amp;IDDOC=599174">Über die einfachen Zahlensysteme</a>, Zeitschrift fur Mathematik und Physik, 14 (1869), 121-128.
+%H A014418 Aviezri S. Fraenkel, <a href="http://www.jstor.org/stable/2322638">Systems of numeration</a>, The American Mathematical Monthly, Vol. 92, No. 2 (Feb., 1985), pp. 105-114.
+%H A014418 Antti Karttunen, <a href="/A014418/a014418.txt">A few notes on A014418</a>
+%F A014418 From _Antti Karttunen_, Jun 23 2014: (Start)
+%F A014418 a(0) = 0, a(n) = 10^(A244160(n)-1) + a(n-A000108(A244160(n))). [Here A244160 gives the index of the largest Catalan number that still fits into the sum].
+%F A014418 a(n) = A007090(A244161(n)).
+%F A014418 For all n, A000035(a(n)) = A000035(A244161(n)) = A244221(n).
+%F A014418 (End)
+%e A014418 A simple weighted sum of Sum_{k} digit(k)*C(k) [where C(k) = A000108(k), and digit(1) is the rightmost digit] recovers the natural number n (which the given numeral a(n) represents) as follows:
+%e A014418 a(11) = 201, and indeed 2*C(3) + 0*C(2) + 1*C(1) = 2*5 + 0*2 + 1*1 = 11.
+%e A014418 a(126) = 30000, and indeed, 3*C(5) = 3*42 = 126.
+%t A014418 CatalanBaseIntDs[n_] := Module[{m, i, len, dList, currDigit}, i = 1; While[n > CatalanNumber[i], i++]; m = n; len = i; dList = Table[0, {len}]; Do[currDigit = 0; While[m >= CatalanNumber[j], m = m - CatalanNumber[j]; currDigit++]; dList[[len - j + 1]] = currDigit, {j, i, 1, -1}]; If[dList[[1]] == 0, dList = Drop[dList, 1]]; FromDigits@ dList]; Array [CatalanBaseIntDs, 50, 0] (* _Robert G. Wilson v_, Jul 02 2014 *)
+%o A014418 (MIT/GNU Scheme, with memoizing definec-macro from Antti Karttunen's IntSeq-library)
+%o A014418 ;; Version based on direct recurrence:
+%o A014418 (definec (A014418 n) (if (zero? n) n (+ (expt 10 (- (A244160 n) 1)) (A014418 (- n (A000108 (A244160 n)))))))
+%o A014418 ;; The following implementation first constructs a vector/list, to which further sequences may refer to:
+%o A014418 (define (A014418 n) (baselist-as-decimal (A014418raw n)))
+%o A014418 (define (A014418raw n) (vector->list (A014418raw_vector n)))
+%o A014418 (define (A014418raw_vector n) (if (zero? n) (make-vector 0) (let ((catbasevec (make-vector (A244160 n) 0))) (let loop ((n n)) (cond ((zero? n) (vector-reverse catbasevec)) (else (let ((k (A244160 n))) (vector-set! catbasevec (- k 1) (+ 1 (vector-ref catbasevec (- k 1)))) (loop (- n (A000108 k))))))))))
+%o A014418 ;; _Antti Karttunen_, Jun 22-23 2014
+%o A014418 (Python)
+%o A014418 from sympy import catalan
+%o A014418 def a244160(n):
+%o A014418     if n==0: return 0
+%o A014418     i=1
+%o A014418     while True:
+%o A014418         if catalan(i)>n: break
+%o A014418         else: i+=1
+%o A014418     return i - 1
+%o A014418 def a(n):
+%o A014418     if n==0: return 0
+%o A014418     x=a244160(n)
+%o A014418     return 10**(x - 1) + a(n - catalan(x))
+%o A014418 print([a(n) for n in range(51)]) # _Indranil Ghosh_, Jun 08 2017
+%Y A014418 Cf. A014420 (gives the sum of digits), A244221 (same sequence reduced modulo 2, or equally, the last digit of a(n)), A244216, A244217, A244222, A244223, A000108, A007623, A197433, A239903, A244155, A244158, A244320, A244318, A244159 (a variant), A244161 (in base-4), A014417 (analogous sequence for Fibonacci numbers).
+%Y A014418 Cf. also A033552, A176137, A161227, A161228.
+%K A014418 nonn,base,easy
+%O A014418 0,3
+%A A014418 _Olivier Gérard_
+%E A014418 Description clarified by _Antti Karttunen_, Jun 22 2014

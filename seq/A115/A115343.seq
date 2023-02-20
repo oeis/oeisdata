@@ -1,0 +1,77 @@
+%I A115343
+%S A115343 223092870,281291010,300690390,340510170,358888530,363993630,
+%T A115343 380570190,397687290,406816410,417086670,434444010,455885430,
+%U A115343 458948490,481410930,485555070,497668710,504894390,512942430,514083570,531990690,538047510,547777230,551861310
+%N A115343 Products of 9 distinct primes.
+%H A115343 David A. Corneth, <a href="/A115343/b115343.txt">Table of n, a(n) for n = 1..10000</a> (first 1045 terms from Vincenzo Librandi and Chai Wah Wu)
+%e A115343 514083570 is in the sequence as it is equal to 2*3*5*7*11*13*17*19*53.
+%p A115343 N:= 10^9: # to get all terms < N
+%p A115343 n0:= mul(ithprime(i),i=1..8):
+%p A115343 Primes:= select(isprime,[$1..floor(N/n0)]):
+%p A115343 nPrimes:= nops(Primes):
+%p A115343 for i from 1 to 9 do
+%p A115343   for j from 1 to nPrimes do
+%p A115343     M[i,j]:= convert(Primes[1..min(j,i)],`*`);
+%p A115343 od od:
+%p A115343 A:= {}:
+%p A115343 for i9 from 9 to nPrimes do
+%p A115343   m9:= Primes[i9];
+%p A115343 for i8 in select(t -> M[7,t-1]*Primes[t]*m9 <= N, [$8..i9-1]) do
+%p A115343   m8:= m9*Primes[i8];
+%p A115343 for i7 in select(t -> M[6,t-1]*Primes[t]*m8 <= N, [$7..i8-1]) do
+%p A115343   m7:= m8*Primes[i7];
+%p A115343 for i6 in select(t -> M[5,t-1]*Primes[t]*m7 <= N, [$6..i7-1]) do
+%p A115343   m6:= m7*Primes[i6];
+%p A115343 for i5 in select(t -> M[4,t-1]*Primes[t]*m6 <= N, [$5..i6-1]) do
+%p A115343   m5:= m6*Primes[i5];
+%p A115343 for i4 in select(t -> M[3,t-1]*Primes[t]*m5 <= N, [$4..i5-1]) do
+%p A115343   m4:= m5*Primes[i4];
+%p A115343 for i3 in select(t -> M[2,t-1]*Primes[t]*m4 <= N, [$3..i4-1]) do
+%p A115343   m3:= m4*Primes[i3];
+%p A115343 for i2 in select(t -> M[1,t-1]*Primes[t]*m3 <= N, [$2..i3-1]) do
+%p A115343   m2:= m3*Primes[i2];
+%p A115343 for i1 in select(t -> Primes[t]*m2 <= N, [$1..i2-1]) do
+%p A115343   A:= A union {m2*Primes[i1]};
+%p A115343 od od od od od od od od od:
+%p A115343 A; # _Robert Israel_, Sep 02 2014
+%t A115343 Module[{n=6*10^8,k},k=PrimePi[n/Times@@Prime[Range[8]]];Select[ Union[ Times@@@ Subsets[Prime[Range[k]],{9}]],#<=n&]](* _Harvey P. Dale_ with suggestions from _Jean-François Alcover_, Sep 03 2014 *)
+%t A115343 n = 10^9; n0 = Times @@ Prime[Range[8]]; primes = Select[Range[Floor[n/n0]], PrimeQ]; nPrimes = Length[primes]; Do[M[i, j] = Times @@ primes[[1 ;; Min[j, i]]], {i, 1, 9}, {j, 1, nPrimes}]; A = {};
+%t A115343 Do[m9 = primes[[i9]];
+%t A115343 Do[m8 = m9*primes[[i8]];
+%t A115343 Do[m7 = m8*primes[[i7]];
+%t A115343 Do[m6 = m7*primes[[i6]];
+%t A115343 Do[m5 = m6*primes[[i5]];
+%t A115343 Do[m4 = m5*primes[[i4]];
+%t A115343 Do[m3 = m4*primes[[i3]];
+%t A115343 Do[m2 = m3*primes[[i2]];
+%t A115343 Do[A = A ~Union~ {m2*primes[[i1]]},
+%t A115343 {i1, Select[Range[1, i2-1], primes[[#]]*m2 <= n &]}],
+%t A115343 {i2, Select[Range[2, i3-1], M[1, #-1]*primes[[#]]*m3 <= n &]}],
+%t A115343 {i3, Select[Range[3, i4-1], M[2, #-1]*primes[[#]]*m4 <= n &]}],
+%t A115343 {i4, Select[Range[4, i5-1], M[3, #-1]*primes[[#]]*m5 <= n &]}],
+%t A115343 {i5, Select[Range[5, i6-1], M[4, #-1]*primes[[#]]*m6 <= n &]}],
+%t A115343 {i6, Select[Range[6, i7-1], M[5, #-1]*primes[[#]]*m7 <= n &]}],
+%t A115343 {i7, Select[Range[7, i8-1], M[6, #-1]*primes[[#]]*m8 <= n &]}],
+%t A115343 {i8, Select[Range[8, i9-1], M[7, #-1]*primes[[#]]*m9 <= n &]}],
+%t A115343 {i9, 9, nPrimes}];
+%t A115343 A (* _Jean-François Alcover_, Sep 03 2014, translated and adapted from Robert Israel's Maple program *)
+%o A115343 (Python)
+%o A115343 from operator import mul
+%o A115343 from functools import reduce
+%o A115343 from sympy import nextprime, sieve
+%o A115343 from itertools import combinations
+%o A115343 n = 190
+%o A115343 m = 9699690*nextprime(n-1)
+%o A115343 A115343 = []
+%o A115343 for x in combinations(sieve.primerange(1,n),9):
+%o A115343 ....y = reduce(mul,(d for d in x))
+%o A115343 ....if y < m:
+%o A115343 ........A115343.append(y)
+%o A115343 A115343 = sorted(A115343) # _Chai Wah Wu_, Sep 02 2014
+%o A115343 (PARI) is(n)=omega(n)==9 && bigomega(n)==9 \\ _Hugo Pfoertner_, Dec 18 2018
+%Y A115343 Cf. A000040, A006881, A007304, A046386, A046387, A067885, A123321, A123322, A115343, A281222.
+%K A115343 nonn,easy
+%O A115343 1,1
+%A A115343 _Jonathan Vos Post_, Mar 06 2006
+%E A115343 Corrected and extended by _Don Reble_, Mar 09 2006
+%E A115343 More terms and corrected b-file from _Chai Wah Wu_, Sep 02 2014

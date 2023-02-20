@@ -1,0 +1,47 @@
+%I A054729
+%S A054729 150,180,210,286,304,312,336,338,348,350,480,536,570,598,606,620,666,
+%T A054729 678,706,730,756,780,798,850,876,896,906,916,970,1014,1026,1046,1106,
+%U A054729 1144,1170,1176,1186,1188,1224,1244,1260,1320,1350,1356,1366
+%N A054729 Numbers n such that genus of modular curve X_0(N) is never equal to n.
+%C A054729 "Looking further in the list of integers not of the form g0(N), we do eventually find some odd values, the first one occurring at the 3885th position.  There are four such up to 10^5 (out of 9035 total missed values), namely 49267, 74135, 94091, 96463." (see Csirik link) - _Gheorghe Coserea_, May 21 2016.
+%C A054729 a(1534734) = 9999996. - _Gheorghe Coserea_, May 23 2016
+%H A054729 Gheorghe Coserea, <a href="/A054729/b054729.txt">Table of n, a(n) for n = 1..20155</a>
+%H A054729 J. A. Csirik, M. Zieve, and J. Wetherell, <a href="http://arXiv.org/abs/math/0006096">On the genera of X0(N)</a>, arXiv:math/0006096 [math.NT], 2000.
+%t A054729 a1617[n_] := a1617[n] = If[n < 1, 0, 1 + Sum[MoebiusMu[d]^2 n/d/12 - EulerPhi[GCD[d, n/d]]/2, {d, Divisors[n]}] - Count[(#^2 - # + 1)/n & /@ Range[n], _?IntegerQ]/3 - Count[(#^2+1)/n & /@ Range[n], _?IntegerQ]/4];
+%t A054729 seq[n_] := Module[{inv, bnd}, inv[_] = -1; bnd = 12 n + 18 Floor[Sqrt[n]] + 100; For[k = 1, k <= bnd, k++, g = a1617[k]; If[g <= n && inv[g+1] == -1, inv[g+1] = k]]; (Position[Array[inv, n+1], -1] // Flatten)-1];
+%t A054729 seq[1000] (* _Jean-François Alcover_, Nov 20 2018, after _Gheorghe Coserea_ and _Michael Somos_ in A001617 *)
+%o A054729 (PARI)
+%o A054729 A000089(n) = {
+%o A054729   if (n%4 == 0 || n%4 == 3, return(0));
+%o A054729   if (n%2 == 0, n \= 2);
+%o A054729   my(f = factor(n), fsz = matsize(f)[1]);
+%o A054729   prod(k = 1, fsz, if (f[k,1] % 4 == 3, 0, 2));
+%o A054729 };
+%o A054729 A000086(n) = {
+%o A054729   if (n%9 == 0 || n%3 == 2, return(0));
+%o A054729   if (n%3 == 0, n \= 3);
+%o A054729   my(f = factor(n), fsz = matsize(f)[1]);
+%o A054729   prod(k = 1, fsz, if (f[k,1] % 3 == 2, 0, 2));
+%o A054729 };
+%o A054729 A001615(n) = {
+%o A054729   my(f = factor(n), fsz = matsize(f)[1],
+%o A054729      g = prod(k=1, fsz, (f[k,1]+1)),
+%o A054729      h = prod(k=1, fsz, f[k,1]));
+%o A054729   return((n*g)\h);
+%o A054729 };
+%o A054729 A001616(n) = {
+%o A054729   my(f = factor(n), fsz = matsize(f)[1]);
+%o A054729   prod(k = 1, fsz, f[k,1]^(f[k,2]\2) + f[k,1]^((f[k,2]-1)\2));
+%o A054729 };
+%o A054729 A001617(n) = 1 + A001615(n)/12 - A000089(n)/4 - A000086(n)/3 - A001616(n)/2;
+%o A054729 scan(n) = {
+%o A054729   my(inv = vector(n+1,g,-1), bnd = 12*n + 18*sqrtint(n) + 100, g);
+%o A054729   for (k = 1, bnd, g = A001617(k);
+%o A054729        if (g <= n && inv[g+1] == -1, inv[g+1] = k));
+%o A054729   apply(x->(x-1), Vec(select(x->x==-1, inv, 1)))
+%o A054729 };
+%o A054729 scan(1367)  \\ _Gheorghe Coserea_, May 21 2016
+%Y A054729 Cf. A054726, A054728, A054730.
+%K A054729 nonn
+%O A054729 1,1
+%A A054729 Janos A. Csirik, Apr 21 2000

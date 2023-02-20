@@ -1,0 +1,49 @@
+%I A073101
+%S A073101 0,0,1,1,2,5,5,6,4,9,7,15,4,14,33,22,4,21,9,30,25,22,19,45,10,17,25,
+%T A073101 36,7,72,17,62,27,22,59,69,9,29,67,84,7,77,12,56,87,39,32,142,16,48,
+%U A073101 46,53,13,82,92,124,37,30,25,178,11,34,147,118,49,94,15,67,51,176,38,191,7
+%N A073101 Number of integer solutions (x,y,z) to 4/n = 1/x + 1/y + 1/z satisfying 0 < x < y < z.
+%C A073101 In 1948 Erdős and Straus conjectured that for any positive integer n >= 2 the equation 4/n = 1/x + 1/y + 1/z has a solution with positive integers x, y and z (without the additional requirement 0 < x < y < z). All of the solutions can be printed by removing the comment symbols from the Mathematica program. For the solution (x,y,z) having the largest z value, see (A075245, A075246, A075247). See A075248 for Sierpiński's conjecture for 5/n.
+%C A073101 See (A257839, A257840, A257841) for the lexicographically smallest solutions, and A257843 for the differences between these and those with largest z-value. - _M. F. Hasler_, May 16 2015
+%H A073101 T. D. Noe, <a href="/A073101/b073101.txt">Table of n, a(n) for n = 1..1000</a>, (corrected by _Peter Luschny_, Jan 19 2019)
+%H A073101 Christian Elsholtz, <a href="http://dx.doi.org/10.1090/S0002-9947-01-02782-9">Sums Of k Unit Fractions</a>, Trans. Amer. Math. Soc. 353 (2001), 3209-3227.
+%H A073101 David Eppstein, <a href="http://www.ics.uci.edu/~eppstein/numth/egypt/intro.html">Algorithms for Egyptian Fractions</a>
+%H A073101 Paul Erdős, <a href="https://www.renyi.hu/~p_erdos/1950-02.pdf">Az 1/z_1 + 1/z_2 + ... + 1/z_n = a/b egyenlet egész számú megoldásairól</a>, (On a Diophantine equation), Mat. Lapok, 1:192-210, 1050. Math. Rev. 13:208b.
+%H A073101 Ron Knott, <a href="http://www.maths.surrey.ac.uk/hosted-sites/R.Knott/Fractions/egyptian.html">Egyptian Fractions</a>
+%H A073101 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/EgyptianFraction.html">Egyptian Fraction</a>
+%e A073101 a(5)=2 because there are two solutions: 4/5 = 1/2 + 1/4 + 1/20 and 4/5 = 1/2 + 1/5 + 1/10.
+%p A073101 A:= proc(n)
+%p A073101    local x,t, p,q,ds,zs,ys,js, tot,j;
+%p A073101 tot:= 0;
+%p A073101 for x from 1+floor(n/4) to ceil(3*n/4)-1 do
+%p A073101     t:= 4/n - 1/x;
+%p A073101     p:= numer(t);
+%p A073101     q:= denom(t);
+%p A073101     ds:= convert(select(d -> (d < q) and d + q mod p = 0,
+%p A073101           numtheory:-divisors(q^2)),list);
+%p A073101     ys:= map(d -> (d+q)/p, ds);
+%p A073101     zs:= map(d -> (q^2/d+q)/p, ds);
+%p A073101     js:= select(j -> ys[j] > x,[$1..nops(ds)]);
+%p A073101     tot:= tot + nops(js);
+%p A073101 od;
+%p A073101 tot;
+%p A073101 end proc:
+%p A073101 seq(A(n),n=2..100); # _Robert Israel_, Aug 22 2014
+%t A073101 (* download Egypt.m from D. Eppstein's site and put it into MyOwn directory underneath Mathematica\AddOns\StandardPackages *) Needs["MyOwn`Egypt`"]; Table[ Length[ EgyptianFraction[4/n, Method -> Lexicographic, MaxTerms -> 3, MinTerms -> 3, Duplicates -> Disallow, OutputFormat -> Plain]], {n, 5, 80}]
+%t A073101 m = 4; For[lst = {}; n = 2, n <= 100, n++, cnt = 0; xr = n/m; If[IntegerQ[xr], xMin = xr + 1, xMin = Ceiling[xr]]; If[IntegerQ[3xr], xMax = 3xr - 1, xMax = Floor[3xr]]; For[x = xMin, x <= xMax, x++, yr = 1/(m/n - 1/x); If[IntegerQ[yr], yMin = yr + 1, yMin = Ceiling[yr]]; If[IntegerQ[2yr], yMax = 2yr + 1, yMax = Ceiling[2yr]]; For[y = yMin, y <= yMax, y++, zr = 1/(m/n - 1/x - 1/y); If[y > x && zr > y && IntegerQ[zr], z = zr; cnt++; (*Print[n, " ", x, " ", y, " ", z]*)]]]; AppendTo[lst, cnt]]; lst
+%t A073101 f[n_] := Length@ Solve[4/n == 1/x + 1/y + 1/z && 0 < x < y < z, {x, y, z}, Integers]; Array[f, 72, 2] (* _Robert G. Wilson v_, Jul 17 2013 *)
+%o A073101 (Haskell)
+%o A073101 import Data.Ratio ((%), numerator, denominator)
+%o A073101 a073101 n = length [(x,y) |
+%o A073101    x <- [n `div` 4 + 1 .. 3 * n `div` 4],   let y' = recip $ 4%n - 1%x,
+%o A073101    y <- [floor y' + 1 .. floor (2*y') + 1], let z' = recip $ 4%n - 1%x - 1%y,
+%o A073101    denominator z' == 1 && numerator z' > y && y > x]
+%o A073101 -- _Reinhard Zumkeller_, Jan 03 2011
+%o A073101 (PARI) A073101(n)=sum(c=n\4+1,n*3\4,sum(b=c+1,ceil(2/(t=4/n-1/c))-1,numerator(t-1/b)==1)) \\ _M. F. Hasler_, May 15 2015
+%Y A073101 Cf. A075245, A075246, A075247, A075248.
+%Y A073101 Cf. A192787 (# distinct solutions with x <= y <= z).
+%K A073101 nonn
+%O A073101 1,5
+%A A073101 _Robert G. Wilson v_, Aug 18 2002
+%E A073101 Edited by _T. D. Noe_, Sep 10 2002
+%E A073101 Extended to offset 1 with a(1) = 0 by _M. F. Hasler_, May 16 2015

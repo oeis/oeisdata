@@ -1,0 +1,31 @@
+%I A103440
+%S A103440 1,-3,1,13,-24,-3,50,-51,1,72,-120,13,170,-150,-24,205,-288,-3,362,
+%T A103440 -312,50,360,-528,-51,601,-510,1,650,-840,72,962,-819,-120,864,-1200,
+%U A103440 13,1370,-1086,170,1224,-1680,-150,1850,-1560,-24,1584,-2208,205,2451,-1803,-288,2210,-2808,-3,2880,-2550
+%N A103440 a(n) = Sum[d|n, d==1 (mod 3), d^2] - Sum[d|n, d==2 (mod 3), d^2].
+%H A103440 Robert Israel, <a href="/A103440/b103440.txt">Table of n, a(n) for n = 1..10000</a>
+%H A103440 G. E. Andrews and B. C. Berndt, <a href="http://www.ams.org/notices/200801/tx080100018p.pdf">Your Hit Parade: The Top Ten Most Fascinating Formulas in Ramanujan's Lost Notebook</a>, Notices Amer. Math. Soc., 55 (No. 1, 2008), 18-30. See p. 23, Equation (27).
+%H A103440 J. Stienstra, <a href="http://arxiv.org/abs/math/0502197">Mahler measure, Eisenstein series and dimers</a>, arXiv:math/0502197 [math.NT], 2005.
+%F A103440 G.f.: F(q) = Sum_{n>=1} A049347(n-1) * n^2 * q^n / (1 - q^n).
+%F A103440 G.f.: F(q) = -q * G'(q) / (9*G(q)), with G(q) = Product_{n>=1} (1 - q^n)^(9*n * A049347(n-1)).
+%F A103440 a(n) is multiplicative with a(3^e) = 1, a(p^e) = a(p) * a(p^(e-1)) - z * a(p^(e-2)) where z = Kronecker(-3, p) * p^2 and a(p) = z + 1.
+%F A103440 a(3*n) = a(n).
+%F A103440 G.f.: Sum_{k>0} x^k * (1 - x^k - 6*x^(2*k) - x^(3*k) + x^(4*k)) / (1 + x^k + x^(2*k))^3. - _Michael Somos_, Oct 21 2007
+%F A103440 G.f. A(x) satisfies 0 = f(A(x), A(x^2), A(x^4)) where f(u, v, w) = u^2 - v + w + 3*v^2 - 8*w^2 + 6*v*w - 8*u*w + 6*u*v - 9*v^3 - 54*u*v*w + 72*u*w^2 - 9*u^2*w. - _Michael Somos_, Dec 23 2007
+%e A103440 G.f. = q - 3*q^2 + q^3 + 13*q^4 - 24*q^5 - 3*q^6 + 50*q^7 - 51*q^8 + q^9 + ...
+%p A103440 f:= proc(n) local D,d;
+%p A103440   D:= numtheory:-divisors(n/3^padic:-ordp(n,3));
+%p A103440   -add((-1)^(d mod 3)*d^2, d = D)
+%p A103440 end proc:
+%p A103440 map(f, [$1..100]); # _Robert Israel_, Aug 16 2018
+%t A103440 a[n_] := Sum[m=Mod[d, 3]; (Boole[m==1]-Boole[m==2]) d^2, {d, Divisors[n]}];
+%t A103440 Array[a, 56] (* _Jean-François Alcover_, Aug 16 2018 *)
+%t A103440 a[ n_] := SeriesCoefficient[ (1 - QPochhammer[ x]^9 / QPochhammer[ x^3]^3) / 9, {x, 0, n}]; (* _Michael Somos_, Sep 07 2018 *)
+%o A103440 (PARI) {a(n) = if( n<1, 0, sumdiv( n, d, d^2 * kronecker( -3, d)))}; /* _Michael Somos_, Oct 21 20007 */
+%o A103440 (PARI) {a(n) = my(A, p, e, a0, a1, x, y, z); if( n<1, 0, A = factor(n); prod( k=1, matsize(A)[1], [p, e] = A[k, ]; if( p==3, 1, z = kronecker( -3, p) * p^2; a0 = 1; a1 = y = z + 1; for(i=2, e, x = y * a1 - z * a0; a0 = a1; a1 = x); a1)))}; /* _Michael Somos_, Oct 21 20007 */
+%o A103440 (PARI) {a(n) = my(A); if( n<0, 0, A = x * O(x^n); polcoeff( (1 - eta(x + A)^9 / eta(x^3 + A)^3) / 9, n))}; /* _Michael Somos_, Oct 21 20007 */
+%Y A103440 Equals A103637(n) - A103638(n). Cf. A002173.
+%Y A103440 A109041(n) = -9 * a(n) unless n=0. A014985(n) = a(2^n). -24 * A134340(n) = a(6*n+5).
+%K A103440 sign,mult
+%O A103440 1,2
+%A A103440 _Ralf Stephan_, Feb 11 2005

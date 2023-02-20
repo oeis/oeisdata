@@ -1,0 +1,60 @@
+%I A082553
+%S A082553 1,1,1,3,1,1,1,3,7,1,1,7,1,1,1,9,1,29,1,3,1,1,1,31,15,1,87,3,1,1,1,
+%T A082553 115,1,1,1,257,1,1,1,17,1,1,1,3,21,1,1,519,23,141,1,3,1,847,1,19,1,1,
+%U A082553 1,215,1,1,27,1557,1,1,1,3,1,1,1,2617,1,1,3125,3,1,1
+%N A082553 Number of sets of distinct positive integers whose geometric mean is an integer, the largest integer of a set is n.
+%C A082553 a(n) = 1 if and only if n is squarefree (i.e., if and only if n is in A005117). - _Nathaniel Johnston_, Apr 28 2011
+%C A082553 If n has a prime divisor p > sqrt(n), then a(n) = a(n/p). - _Max Alekseyev_, Aug 27 2013
+%H A082553 Jinyuan Wang, <a href="/A082553/b082553.txt">Table of n, a(n) for n = 1..134</a>
+%H A082553 Wikipedia, <a href="https://en.wikipedia.org/wiki/Geometric_mean">Geometric mean</a>
+%e A082553 a(4) = 3: the three sets are {4}, {1, 4}, {1, 2, 4}.
+%t A082553 Table[Length[Select[Subsets[Range[n]],MemberQ[#,n]&&IntegerQ[GeometricMean[#]]&]],{n,15}] (* _Gus Wiseman_, Jul 19 2019 *)
+%o A082553 (PARI) { A082553(n) = my(m,c=0); if(issquarefree(n),return(1)); m = Set(vector(n-1,i,i)); forprime(p=sqrtint(n)+1,n, m = setminus(m,vector(n\p,i,p*i)); if(Mod(n,p)==0, return(A082553(n\p)) ); ); forvec(v=vector(#m,i,[0,1]), c += ispower(n*factorback(m,v),1+vecsum(v)) ); c; } \\ _Max Alekseyev_, Aug 31 2013
+%o A082553 (Python)
+%o A082553 from sympy import factorint, factorial
+%o A082553 def make_product(p, n, k):
+%o A082553     '''
+%o A082553     Find all k-element subsets of {1, ..., n} whose product is p.
+%o A082553     Returns: list of lists
+%o A082553     '''
+%o A082553     if n**k < p:
+%o A082553         return []
+%o A082553     if k == 1:
+%o A082553         return [[p]]
+%o A082553     if p%n == 0:
+%o A082553         l = [s + [n] for s in make_product(p//n, n - 1, k - 1)]
+%o A082553     else:
+%o A082553         l = []
+%o A082553     return l + make_product(p, n - 1, k)
+%o A082553 def integral_geometric_mean(n):
+%o A082553     '''
+%o A082553     Find all subsets of {1, ..., n} that contain n and whose
+%o A082553     geometric mean is an integer.
+%o A082553     '''
+%o A082553     f = factorial(n)
+%o A082553     l = [[n]]
+%o A082553     #Find product of distinct prime factors of n
+%o A082553     c = 1
+%o A082553     for p in factorint(n):
+%o A082553         c *= p
+%o A082553     #geometric mean must be a multiple of c
+%o A082553     for gm in range(c, n, c):
+%o A082553         k = 2
+%o A082553         while not (gm**k%n == 0):
+%o A082553             k += 1
+%o A082553         while gm**k <= f:
+%o A082553             l += [s + [n] for s in make_product(gm**k//n, n - 1, k - 1)]
+%o A082553             k += 1
+%o A082553     return l
+%o A082553 def A082553(n):
+%o A082553     return len(integral_geometric_mean(n)) # _David Wasserman_, Aug 02 2019
+%Y A082553 Subsets whose mean is an integer are A051293.
+%Y A082553 Partitions whose geometric mean is an integer are A067539.
+%Y A082553 Partial sums are A326027.
+%Y A082553 Strict partitions whose geometric mean is an integer are A326625.
+%Y A082553 Cf. A005117, A102627, A316413, A326623.
+%K A082553 nonn
+%O A082553 1,4
+%A A082553 _Naohiro Nomoto_, May 03 2003
+%E A082553 a(24)-a(62) from _Max Alekseyev_, Aug 31 2013
+%E A082553 a(63)-a(99) from _David Wasserman_, Aug 02 2019

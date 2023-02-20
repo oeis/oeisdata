@@ -1,0 +1,44 @@
+%I A007553 M4329
+%S A007553 1,1,1,1,7,5,85,335,1135,15245,13475,717575,4256825,29782325,
+%T A007553 525045275,243258625,56809006625,415670267875,5068080417875,
+%U A007553 104229929847625,60861649495625,20784245979986875,169274937975443125,3318579283890780625,75028912866554839375
+%N A007553 Logarithmic transform of Fibonacci numbers.
+%C A007553 The coefficients of the e.g.f. log(Sum_{n>=0} Fibonacci(n+1)*x^n/n!) produce the sequence [1,1,-1,-1,7,-5,-85,...], offset 0. - _Peter Bala_, Jan 19 2011
+%C A007553 The series reversion of Sum_{n>=1} Fibonacci(n)*x^n/n is an e.g.f. whose coefficient sequence [1,-1,-1,7,-5,-85,335,1135,...] (offset 1) appears to be a signed version of this sequence. - _Peter Bala_, Jan 19 2011
+%C A007553 E.g.f. A(x), A(x)=x*B(x) satisfies the differential equation B'(x) = 1 + B(x) - B(x)*B(x). - _Vladimir Kruchinin_, Nov 03 2011
+%D A007553 N. J. A. Sloane and Simon Plouffe, The Encyclopedia of Integer Sequences, Academic Press, 1995 (includes this sequence).
+%H A007553 Vaclav Kotesovec, <a href="/A007553/b007553.txt">Table of n, a(n) for n = 1..340</a>
+%H A007553 M. Bernstein and N. J. A. Sloane, <a href="http://arXiv.org/abs/math.CO/0205301">Some canonical sequences of integers</a>, Linear Alg. Applications, 226-228 (1995), 57-72; erratum 320 (2000), 210. [Link to arXiv version]
+%H A007553 M. Bernstein and N. J. A. Sloane, <a href="/A003633/a003633_1.pdf">Some canonical sequences of integers</a>, Linear Alg. Applications, 226-228 (1995), 57-72; erratum 320 (2000), 210. [Link to Lin. Alg. Applic. version together with omitted figures]
+%H A007553 N. J. A. Sloane, <a href="/transforms.txt">Transforms</a>
+%H A007553 <a href="/index/Lo#logarithmic">Index entries for sequences related to logarithmic numbers</a>
+%F A007553 b(n) = b(n-1) - Sum_{i=1..n-2} b(i)*b(n-1-i)*binomial(n-1,i), b(0)=1. a(n+1) = abs(b(n)). - _Vladimir Kruchinin_, Nov 03 2011
+%F A007553 Let e.g.f. E(x) = log(1 + Sum_{n>=1} Fibonacci(n+1)*x^n/n!), then g.f. A(x)=x*(1+1/Q(0)), where Q(k) = 1/(x*(k+1)) + 1 + 1/Q(k+1); (continued fraction). - _Sergei N. Gladkovskii_, May 07 2013
+%F A007553 Let F(x) = log(Sum_{n>=0} Fibonacci(n+1)*x^n/n!) be the e.g.f., produce the sequence [1,1,-1,-1,7,-5,-85,...], then g.f. A(x)= 1 + x/Q(0), where Q(k) = 1 + x*(2*k+1) + x^2*(2*k+1)*(2*k+2)/(1 + x*(2*k+2) + x^2*(2*k+2)*(2*k+3)/Q(k+1) ) ; (continued fraction). - _Sergei N. Gladkovskii_, Sep 23 2013
+%F A007553 a(n) ~ 2*(n-1)! * abs(cos(n*arctan(Pi/log(2/(3+sqrt(5)))))) * (5/(Pi^2+log(2/(3+sqrt(5)))^2))^(n/2). - _Vaclav Kotesovec_, Jun 24 2014
+%p A007553 b:= proc(n) option remember; (t-> `if`(n=0, 0, t(n) -add(j*t(n-j)*
+%p A007553       binomial(n, j)*b(j), j=1..n-1)/n))(i->(<<0|1>, <1|1>>^i)[2, 2])
+%p A007553     end:
+%p A007553 a:= n-> abs(b(n)):
+%p A007553 seq(a(n), n=1..30);  # _Alois P. Heinz_, Mar 06 2018
+%t A007553 FullSimplify[Abs[Rest[CoefficientList[Series[-2*x/(1+Sqrt[5]) - Log[5+Sqrt[5]] + Log[2+(3+Sqrt[5])*E^(Sqrt[5]*x)], {x, 0, 15}], x] * Range[0, 15]!]]] (* _Vaclav Kotesovec_, Jun 24 2014 *)
+%o A007553 (Maxima)
+%o A007553 b(n):=if n=0 then 1 else b(n-1)-sum(b(i)*b(n-1-i)*binomial(n-1,i),i,1,n-2);
+%o A007553 a(n):=if n=0 then 0 else abs(b(n-1)); # _Vladimir Kruchinin_, Nov 03 2011
+%o A007553 (Maxima)
+%o A007553 b(n):=if n=1 then 1 else sum((n+k-1)!*sum(((-1)^(j)/(k-j)!*sum(((sqrt(5)+1)^(n+j-i-1)*5^((i-j)/2)*stirling1(i,j)*2^(-n-j+i+1)*binomial(n+j-2,i-1))/i!,i,j,n+j-1)),j,1,k),k,1,n-1);
+%o A007553 a(n):=if n=1 then 1 else abs(b(n-1));
+%o A007553 makelist(ratsimp(a(n)),n,1,10); # _Vladimir Kruchinin_, Nov 17 2012
+%o A007553 (Sage)
+%o A007553 @CachedFunction
+%o A007553 def c(n,k) :
+%o A007553     if n==k: return 1
+%o A007553     if k<1 or k>n: return 0
+%o A007553     return ((n-k)//2+1)*c(n-1,k-1)-2*k*c(n-1,k+1)
+%o A007553 @CachedFunction
+%o A007553 def A007553(n):
+%o A007553     return abs(add(c(n,k) for k in (0..n)))
+%o A007553 [A007553(n) for n in (0..25)] # _Peter Luschny_, Jun 10 2014
+%K A007553 nonn
+%O A007553 1,5
+%A A007553 _N. J. A. Sloane_

@@ -1,0 +1,95 @@
+%I A036991
+%S A036991 0,1,3,5,7,11,13,15,19,21,23,27,29,31,39,43,45,47,51,53,55,59,61,63,
+%T A036991 71,75,77,79,83,85,87,91,93,95,103,107,109,111,115,117,119,123,125,
+%U A036991 127,143,151,155,157,159,167,171,173,175,179,181,183,187,189,191,199,203
+%N A036991 Numbers k with the property that in the binary expansion of k, reading from right to left, the number of 0's never exceeds the number of 1's.
+%C A036991 List of binary words that correspond to a valid pairing of parentheses. - _Joerg Arndt_, Nov 27 2004
+%C A036991 This sequence includes A000225, A002450, A007583. - _Gennady Eremin_, Nov 27 2021
+%C A036991 Partial differences are powers of 2. - _Gennady Eremin_, Dec 23 2021
+%H A036991 Alois P. Heinz, <a href="/A036991/b036991.txt">Table of n, a(n) for n = 1..13496</a> (all terms < 2^16; first 1000 terms from Reinhard Zumkeller)
+%H A036991 Joerg Arndt, <a href="http://www.jjj.de/fxt/#fxtbook">Matters Computational (The Fxtbook)</a>, section 1.28, pp. 78-80.
+%H A036991 Gennady Eremin, <a href="https://arxiv.org/abs/2302.02765">Dyck Numbers, III. Enumeration and bijection with symmetric Dyck paths</a>, arXiv:2302.02765 [math.CO], 2023.
+%H A036991 <a href="/index/Bi#binary">Index entries for sequences related to binary expansion of n</a>
+%e A036991 From _Joerg Arndt_, Dec 05 2021: (Start)
+%e A036991 List of binary words with parentheses for those in the sequence. The binary words are scanned starting from the least significant bit and the parenthesis words are written left to right:
+%e A036991      Binary   Parentheses (if the value is in the sequence)
+%e A036991 00:  ..... P  [empty string]
+%e A036991 01:  ....1 P   ()
+%e A036991 02:  ...1.
+%e A036991 03:  ...11 P   (())
+%e A036991 04:  ..1..
+%e A036991 05:  ..1.1 P   ()()
+%e A036991 06:  ..11.
+%e A036991 07:  ..111 P   ((()))
+%e A036991 08:  .1...
+%e A036991 09:  .1..1
+%e A036991 10:  .1.1.
+%e A036991 11:  .1.11 P   (()())
+%e A036991 12:  .11..
+%e A036991 13:  .11.1 P   ()(())
+%e A036991 14:  .111.
+%e A036991 15:  .1111 P   (((())))
+%e A036991 16:  1....
+%e A036991 17:  1...1
+%e A036991 18:  1..1.
+%e A036991 19:  1..11 P   (())()
+%e A036991 (End)
+%p A036991 q:= proc(n) local l, t, i; l:= Bits[Split](n); t:=0;
+%p A036991       for i to nops(l) do t:= t-1+2*l[i];
+%p A036991         if t<0 then return false fi
+%p A036991       od: true
+%p A036991     end:
+%p A036991 select(q, [$0..300])[];  # _Alois P. Heinz_, Oct 09 2019
+%t A036991 moreOnesRLQ[n_Integer] := Module[{digits, len, flag = True, iter = 1, ones = 0, zeros = 0}, digits = Reverse[IntegerDigits[n, 2]]; len = Length[digits]; While[flag && iter < len, If[digits[[iter]] == 1, ones++, zeros++]; flag = ones >= zeros; iter++]; flag]; Select[Range[0, 203], moreOnesRLQ] (* _Alonso del Arte_, Sep 21 2011 *)
+%t A036991 Join[{0},Select[Range[210],Min[Accumulate[Reverse[IntegerDigits[#,2]]/.{0->-1}]]>-1&]] (* _Harvey P. Dale_, Apr 18 2014 *)
+%o A036991 (C++) /* returns true if the input is in the sequence: */
+%o A036991 bool is_parenword(ulong x)
+%o A036991 {
+%o A036991     int s = 0;
+%o A036991     for (ulong j=0; x!=0; ++j)
+%o A036991     {
+%o A036991         s += ( x&1 ? +1 : -1 );
+%o A036991         if ( s<0 ) break; /* invalid word */
+%o A036991         x >>= 1;
+%o A036991     }
+%o A036991     return (s>=0);
+%o A036991 }  /* _Joerg Arndt_, Nov 27 2004 */
+%o A036991 (Haskell)
+%o A036991 a036991 n = a036991_list !! (n-1)
+%o A036991 a036991_list = filter ((p 1) . a030308_row) [0..] where
+%o A036991    p _    [_]    = True
+%o A036991    p ones (0:bs) = ones > 1 && p (ones - 1) bs
+%o A036991    p ones (1:bs) = p (ones + 1) bs
+%o A036991 -- _Reinhard Zumkeller_, Jul 31 2013
+%o A036991 (Python)
+%o A036991 def ok(n):
+%o A036991     if n == 0: return True # by definition
+%o A036991     count = {"0": 0, "1": 0}
+%o A036991     for bit in bin(n)[:1:-1]:
+%o A036991         count[bit] += 1
+%o A036991         if count["0"] > count["1"]: return False
+%o A036991     return True
+%o A036991 print([k for k in range(204) if ok(k)]) # _Michael S. Branicky_, Nov 25 2021
+%o A036991 (Python)
+%o A036991 from itertools import count, islice
+%o A036991 def A036991_gen(): # generator of terms
+%o A036991     yield 0
+%o A036991     for n in count(1):
+%o A036991         s = bin(n)[2:]
+%o A036991         c, l = 0, len(s)
+%o A036991         for i in range(l):
+%o A036991             c += int(s[l-i-1])
+%o A036991             if 2*c <= i:
+%o A036991                 break
+%o A036991         else:
+%o A036991             yield n
+%o A036991 A036991_list = list(islice(A036991_gen(),20)) # _Chai Wah Wu_, Dec 30 2021
+%o A036991 (PARI) select( {is_A036991(n,c=1)=!n||!until(!n>>=1,(c-=(-1)^bittest(n,0))||return)}, [0..99]) \\ _M. F. Hasler_, Nov 26 2021
+%Y A036991 Cf. A036988, A036990, A036992. A036994 is a subset (requires the count of zeros to be strictly less than).
+%Y A036991 Cf. A030308, A000225, A002450, A007583, A350346.
+%K A036991 nonn,easy,base,changed
+%O A036991 1,3
+%A A036991 _N. J. A. Sloane_
+%E A036991 More terms from _Erich Friedman_
+%E A036991 Edited by _N. J. A. Sloane_, Sep 14 2008 at the suggestion of _R. J. Mathar_
+%E A036991 Offset corrected and example adjusted accordingly by _Reinhard Zumkeller_, Jul 31 2013

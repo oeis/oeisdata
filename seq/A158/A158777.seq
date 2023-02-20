@@ -1,0 +1,48 @@
+%I A158777
+%S A158777 1,1,0,1,2,0,2,0,1,6,0,6,0,3,0,1,24,0,24,0,12,0,4,0,25,120,0,120,0,60,
+%T A158777 0,20,0,245,0,121,720,0,720,0,360,0,120,0,2190,0,1446,0,361,5040,0,
+%U A158777 5040,0,2520,0,840,0,20370,0,15162,0,5047,0,841,40320,0,40320,0,20160,0,6720,0
+%N A158777 Irregular array T(n,k), read by rows: row n is the polynomial expansion in t of p(x,t) = exp(t*x)/(1 - x/t - t^4 * x^4) with weighting factors t^n*n!.
+%C A158777 Row sums are A334157: {1, 2, 5, 16, 89, 686, 5917, 54860, 588401, 7370074, ...}.
+%C A158777 Outer diagonal is A330045: {1, 1, 1, 1, 25, 121, 361, 841, 42001, 365905, ...}.
+%C A158777 From _Petros Hadjicostas_, Apr 15 2020: (Start)
+%C A158777 To prove the general formula below for T(n,2*m), let v = x/t in the equation Sum_{n,k >= 0} (T(n,k)/n!) * (x/t)^n * t^k = p(x,t). We get Sum_{n,k >= 0} (T(n,k)/n!) * v^n * t^k = exp(t^2*v)/(1 - v - t^8*v^4).
+%C A158777 Using the Taylor expansions of exp(t^2*v) and 1/(1 - v - t^8*v^4) around v = 0 (from array A180184), we get that Sum_{n,k >= 0} (T(n,k)/n!) * v^n * t^k = (Sum_{n >= 0} (t^2*v)^n/n!) * (Sum_{n >= 0} Sum_{h=0..floor(n/4)} binomial(n - 3*h, h)*t^(8*h)*v^n).
+%C A158777 Using the Cauchy product of the above two series, for each n >= 0, we get Sum_{k >= 0} (T(n,k)/n!)*t^k = Sum_{l=0..n} Sum_{h=0..floor(l/4)} (binomial(l - 3*h, h)/(n-l)!)*t^(8*h+2*n-2*l). This implies that T(n,k) = 0 for odd k >= 1.
+%C A158777 Letting k = 2*m = 8*h + 2*n - 2*l and s = n - l, we get Sum_{m >= 0} (T(n, 2*m)/n!)*t^(2*m) = Sum_{m >= 0} Sum_{s=0..m with 4|(m-s)} (binomial(n - s - 3*(m - s)/4, (m - s)/4)/s!)*t^(2*m) (and also that T(n,2*j) = 0 for j > m). Equating coefficients, we get the formula for T(n,2*m) shown below. (End)
+%F A158777 T(n,k) = [t^k] (t^n * n! * ([x^n] p(x,t))), where p(x,t) = exp(t*x)/(1 - x/t - t^4*x^4).
+%F A158777 From _Petros Hadjicostas_, Apr 15 2020: (Start)
+%F A158777 Sum_{n,k >= 0} (T(n,k)/n!) * (x/t)^n * t^k = p(x,t).
+%F A158777 T(n,0) = n! = A000142(n) for n >= 0; T(n,2) = n! for n >= 1; T(n,4) = n!/2 = A001710(n) for n >= 2; T(n,6) = n!/6 = A001715(n) for n >= 3.
+%F A158777 T(n,2*m) = n! * Sum_{s = 0..m with 4|(m-s)} binomial(n - s - 3*(m-s)/4, (m-s)/4)/s! for n >= 0 and 0 <= m <= n.
+%F A158777 T(n,2*n) = A330045(n) for n >= 0. (End)
+%e A158777 Array T(n,k) (with n >= 0 and 0 <= k <= 2*n) begins as follows:
+%e A158777      1;
+%e A158777      1, 0,    1;
+%e A158777      2, 0,    2, 0,    1;
+%e A158777      6, 0,    6, 0,    3, 0,   1;
+%e A158777     24, 0,   24, 0,   12, 0,   4, 0,    25;
+%e A158777    120, 0,  120, 0,   60, 0,  20, 0,   245, 0,   121;
+%e A158777    720, 0,  720, 0,  360, 0, 120, 0,  2190, 0,  1446, 0,  361;
+%e A158777   5040, 0, 5040, 0, 2520, 0, 840, 0, 20370, 0, 15162, 0, 5047, 0, 841;
+%e A158777   ...
+%p A158777 # Triangle T(n, k) without the zeros (even k):
+%p A158777 W := proc(n, m) local v, s, h; v := 0;
+%p A158777 for s from 0 to m do
+%p A158777 if 0 = (m - s) mod 4 then
+%p A158777 h := (m - s)/4;
+%p A158777 v := v + binomial(n - s - 3*h, h)/s!;
+%p A158777 end if; end do; n!*v; end proc;
+%p A158777 for n1 from 0 to 20 do
+%p A158777 seq(W(n1,m1), m1=0..n1); end do; # _Petros Hadjicostas_, Apr 15 2020
+%t A158777 (* Generates the sequence in the data section *)
+%t A158777 Table[Expand[t^n*n!*SeriesCoefficient[Series[Exp[t*x]/(1 - x/t - t^4*x^4), {x, 0, 20}], n]], {n, 0, 10}];
+%t A158777 a = Table[CoefficientList[Expand[t^n*n!*SeriesCoefficient[Series[Exp[t*x]/(1 - x/t - t^4*x^4), {x, 0, 20}], n]], t], {n, 0, 10}];
+%t A158777 Flatten[%]
+%t A158777 (* Generates row sums *)
+%t A158777 Table[Apply[Plus, CoefficientList[Expand[t^n*n!*SeriesCoefficient[Series[Exp[t*x]/( 1 - x/t - t^4*x^4), {x, 0, 20}], n]], t]], {n, 0, 10}];
+%Y A158777 Cf. A000142, A001710, A001715, A180184, A330045, A334157.
+%K A158777 nonn,tabf
+%O A158777 0,5
+%A A158777 _Roger L. Bagula_, Mar 26 2009
+%E A158777 Various sections edited by _Petros Hadjicostas_, Apr 13 2020

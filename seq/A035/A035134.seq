@@ -1,0 +1,45 @@
+%I A035134
+%S A035134 6,22,33,55,66,77,111,141,161,202,222,262,282,303,323,393,434,454,474,
+%T A035134 494,505,515,535,545,555,565,595,606,626,646,707,717,737,767,777,818,
+%U A035134 838,858,878,898,939,949,959,969,979,989,1001,1111,1221,1441,1551,1661
+%N A035134 Squarefree composite palindromes.
+%C A035134 Palindromes with at least two and all distinct prime factors.
+%H A035134 Robert Israel, <a href="/A035134/b035134.txt">Table of n, a(n) for n = 1..10000</a>
+%H A035134 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/Squarefree.html">Squarefree</a>
+%p A035134 N:= 4: # to get all terms with <= N digits
+%p A035134 revdigs:= proc(n) local L, j, nL;
+%p A035134   L:= convert(n, base, 10); nL:= nops(L);
+%p A035134   add(L[j]*10^(nL-j), j=1..nL);
+%p A035134 end proc:
+%p A035134 palis:= $0..9:
+%p A035134 for d from 2 to N do
+%p A035134   if d::even then
+%p A035134     palis:= palis, seq(x*10^(d/2)+revdigs(x), x=10^(d/2-1)..10^(d/2)-1)
+%p A035134   else
+%p A035134     palis:= palis, seq(seq(x*10^((d+1)/2)+y*10^((d-1)/2)+revdigs(x), y=0..9), x=10^((d-3)/2)..10^((d-1)/2)-1);
+%p A035134   fi
+%p A035134 od:
+%p A035134 select(t -> not(isprime(t)) and numtheory:-issqrfree(t), [palis][3..-1]): # _Robert Israel_, Sep 18 2016
+%t A035134 sqfQ[n_]:=Max[Transpose[FactorInteger[n]][[2]]]<=1; palQ[n_]:=FromDigits[Reverse[IntegerDigits[n]]]==n; Select[Range[2,1662],!PrimeQ[#] && sqfQ[#] && palQ[#] &] (* _Jayanta Basu_, May 12 2013 *)
+%t A035134 Select[Range[2000],PalindromeQ[#]&&SquareFreeQ[#]&&CompositeQ[#]&] (* _Harvey P. Dale_, Apr 10 2022 *)
+%o A035134 (PARI) isA002113(n)=n=digits(n);for(i=1, #n\2, if(n[i]!=n[#n+1-i], return(0))); 1;
+%o A035134 is(n) = n>1 && isA002113(n) && issquarefree(n) && !isprime(n) \\ _Altug Alkan_, Sep 19 2016
+%o A035134 \\ in and output digits as a vector.
+%o A035134 (PARI) nxtA002113(n)={my(d=n); i=(#d+1)\2; while(i&&d[i]==9, d[i]=0; d[#d+1-i]=0; i--); if(i, d[i]++; d[#d+1-i]=d[i], d=vector(#d+1); d[1]=d[#d]=1); d}\\sum(i=1, #d, 10^(#d-i)*d[i])}
+%o A035134 \\ all terms up to n digits
+%o A035134 lista(n) = {my(p = [6],l=List(), sp, i); while(#p <= n, sp = sum(i=1,#p,p[i]*10^(#p-i)); if(issquarefree(sp)&&!isprime(sp), listput(l,sp)); p=nxtA002113(p));l} \\ _David A. Corneth_, Sep 19 2016
+%o A035134 (Python)
+%o A035134 from itertools import product
+%o A035134 from sympy import factorint, isprime
+%o A035134 def pals(d, base=10): # all d-digit palindromes
+%o A035134     digits = "".join(str(i) for i in range(base))
+%o A035134     for p in product(digits, repeat=d//2):
+%o A035134         if d > 1 and p[0] == "0": continue
+%o A035134         left = "".join(p); right = left[::-1]
+%o A035134         for mid in [[""], digits][d%2]: yield int(left + mid + right)
+%o A035134 def ok(pal): f = factorint(pal); return len(f)>1 and all(f[p]<2 for p in f)
+%o A035134 print(list(filter(ok, (p for d in range(1, 5) for p in pals(d) if ok(p))))) # _Michael S. Branicky_, Jun 22 2021
+%Y A035134 Cf. A002113, A005117, A035132, A035135.
+%K A035134 nonn,base
+%O A035134 1,1
+%A A035134 _Patrick De Geest_, Nov 15 1998

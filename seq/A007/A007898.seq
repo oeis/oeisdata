@@ -1,0 +1,18 @@
+%I A007898
+%S A007898 1,1,2,3,3,4,4,7,7,6,6,12,7,8,12,16,9,15,10,18,16,12,12,32,17,14,22,
+%T A007898 24,15,30,16,34,24,18,24,48,19,20,28,48,21,40,22,36,45,24,24,78,32,37,
+%U A007898 36,42,27,54,36,64,40,30,30,96,31,32,60,78,42,60,34,54
+%N A007898 a(n) = psi_c(n), where Product_{k>1} 1/(1-1/k^s)^A007897(k) = Sum_{k>0} psi_c(k)/k^s.
+%D A007898 F. V. Weinstein, The Fibonacci Partitions, preprint, 1995.
+%H A007898 F. V. Weinstein, <a href="https://arxiv.org/abs/math/0307150">Notes on Fibonacci partitions</a>, arXiv:math/0307150 [math.NT], 2003-2018.
+%e A007898 G.f. = x + x^2 + 2*x^3 + 3*x^4 + 3*x^5 + 4*x^6 + 4*x^7 + 7*x^8 + 7*x^9 + ...
+%t A007898 dircon[v_, w_] := Module[{lv = Length[v], lw = Length[w], fv, fw}, fv[n_] := If[n <= lv, v[[n]], 0]; fw[n_] := If[n <= lw, w[[n]], 0]; Table[ DirichletConvolve[fv[n], fw[n], n, m], {m, Min[lv, lw]}]];
+%t A007898 a[n_] := Module[{A, v, w, m}, If[n<1, 0, v = Table[Boole[k == 1], {k, n}]; For[k = 2, k <= n, k++, m = Length[IntegerDigits[n, k]] - 1; A = Product[ {p, e} = pe; If[p == 2, If[e<3, e, 2^(e-2) + 2], 1 + p^(e-1) (p-1)/2], {pe, FactorInteger[k]}]; A = (1-x)^-A + x O[x]^m // Normal; w = Table[0, {n}]; For[i = 0, i <= m, i++, w[[k^i]] = Coefficient[A, x, i]]; v = dircon[v, w]]; v[[n]]]];
+%t A007898 Array[a, 68] (* _Jean-François Alcover_, Nov 12 2018, from PARI *)
+%o A007898 (PARI) {a(n) = my(A, v, w, m, p, e); if( n<1, 0, v = vector(n, k, k==1); for(k=2, n, m = #digits(n, k) - 1; A = factor(k); A = prod( j=1, matsize(A)[1], if( p = A[j,1], e = A[j,2]; if( p==2, if( e<3, e, 2^(e-2) + 2), 1 + p^(e-1) * (p-1) / 2))); A = (1 - x)^ -A + x * O(x^m); w = vector(n); for(i=0, m, w[k^i] = polcoeff(A, i)); v = dirmul(v, w)); v[n])}; /* _Michael Somos_, May 26 2014 */
+%Y A007898 Cf. A007896, A007897.
+%K A007898 nonn
+%O A007898 1,3
+%A A007898 Felix Weinstein (wain(AT)ana.unibe.ch)
+%E A007898 New definition by _Michel Marcus_, May 12 2014
+%E A007898 Definition edited by _N. J. A. Sloane_, May 26 2014

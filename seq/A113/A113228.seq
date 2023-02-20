@@ -1,0 +1,30 @@
+%I A113228
+%S A113228 1,1,2,6,23,110,632,4229,32337,278204,2659223,27959880,320706444,
+%T A113228 3985116699,53328433923,764610089967,11693644958690,190015358010114,
+%U A113228 3269272324528547,59373764638615449,1135048629795612125,22783668363316052016,479111084084119883217
+%N A113228 a(n) is the number of permutations of [1..n] that avoid the consecutive pattern 1324 (equally, the permutations that avoid 4231).
+%H A113228 Alois P. Heinz, <a href="/A113228/b113228.txt">Table of n, a(n) for n = 0..200</a> (terms n = 0..60 from Ray Chandler)
+%H A113228 Andrew Baxter, Brian Nakamura, and Doron Zeilberger, <a href="http://www.math.rutgers.edu/~zeilberg/mamarim/mamarimhtml/auto.html">Automatic generation of theorems and proofs on enumerating consecutive Wilf-classes</a>
+%H A113228 Colin Defant, Noah Kravitz, and Nathan Williams, <a href="https://arxiv.org/abs/2302.06552">The Ungar Games</a>, arXiv:2302.06552 [math.CO], 2023.
+%H A113228 Sergi Elizalde, <a href="https://arxiv.org/abs/math/0505254">Asymptotic enumeration of permutations avoiding generalized patterns</a>, arXiv:math/0505254 [math.CO], 2005.
+%H A113228 Sergi Elizalde, <a href="https://doi.org/10.1016/j.aam.2005.05.006">Asymptotic enumeration of permutations avoiding generalized patterns</a>, Adv. in Appl. Math. 36 (2006), no. 2, 138-155.
+%H A113228 Sergi Elizalde and Marc Noy, <a href="http://dx.doi.org/10.1016/S0196-8858(02)00527-4">Consecutive patterns in permutations</a>, Adv. Appl. Math. 30 (2003), 110-125.
+%H A113228 Steven Finch, <a href="http://www.people.fas.harvard.edu/~sfinch/csolve/av.pdf">Pattern-Avoiding Permutations</a> [Broken link?]
+%H A113228 Steven Finch, <a href="/A240885/a240885.pdf">Pattern-Avoiding Permutations</a> [Cached copy, with permission]
+%F A113228 In the recurrence coded in Mathematica below, w[n, a] = #1324-avoiding permutations on [n] with first entry a; u[n, a, b] is the number that start with an ascent a<b and v[n, a] is the number that start with a descent from a (n>=2). The main sum for u[n, a, b] counts by length k of the longest initial increasing subsequence. The cases k=2, k=3, k>=4 are considered separately.
+%F A113228 a(n) ~ c * d^n * n!, where d = 0.9558503134742499886507376383060906722796..., c = 1.15104449887019137479444895134035262624... . - _Vaclav Kotesovec_, Aug 23 2014
+%e A113228 In 24135, the entries 2435 are in relative order 1324 but they do not occur consecutively and 24135 avoids the consecutive 1324 pattern.
+%p A113228 b:= proc(u, o, t) option remember; `if`(u+o=0, 1,
+%p A113228        add(b(u-j, o+j-1, `if`(t>0 and j<t, -j, 0)), j=1..u)+
+%p A113228        add(b(u+j-1, o-j, j), j=1..`if`(t<0, min(-t-1, o), o)))
+%p A113228     end:
+%p A113228 a:= n-> b(n, 0, 0):
+%p A113228 seq(a(n), n=0..25);  # _Alois P. Heinz_, Nov 07 2013
+%t A113228 Clear[u, v, w]; w[0]=1; w[1]=1;w[2]=2; w[n_]/;n>=3 := w[n] = Sum[w[n, a], {a, n}]; w[1, 1] = w[2, 1] = w[2, 2] = 1; w[n_, a_]/;n>=3 && 1<=a<=n := Sum[u[n, a, b], {b, a+1, n}] + v[n, a]; v[1, 1]=1; v[n_, a_]/;n>=2 && a==1 := 0; v[n_, a_]/;n>=2 && 2<=a<=n := wCumulative[n-1, a-1]; wCumulative[n_, k_]/;Not[1<=k<=n] := 0; wCumulative[n_, k_]/;1<=k<=n := wCumulative[n, k] = Sum[w[n, a], {a, k}]; u[n_, a_, b_]/;Not[1<=a<b<=n] := 0; u[2, 1, 2]=u[3, 1, 2]=u[3, 1, 3]=u[3, 2, 3]=1; u[n_, a_, b_]/;n>=4 && 1<=a<b<=n := u[n, a, b] = wCumulative[n-2, a-1] + Sum[ Sum[u[n-2, c, d], {d, c+1, b-2}] + v[n-2, c], {c, a, b-2}] + (n-b)wCumulative[n-3, b-2] + Sum[ Sum[ (Sum[u[n-3, d, e], {e, d+1, c-3}] + v[n-3, d]), {d, b-1, c-3}], {c, b+1, n}] + Sum[(n-c)bi[c-b-1, i]wCumulative[n-4-i, c-i-3], {i, 0, n-2-b}, {c, b+i+1, n-1}] + Sum[ bi[c-b-1, i]*Sum[(Sum[u[n-4-i, e, f], {f, e+1, d-i-4}] + v[n-4-i, e]), {d, c+1, n}, {e, c-i-2, d-i-4}], {i, 0, n-3-b}, {c, b+i+1, n-1}] + If[{a, b}=={1, 2}, 1, 0]; Table[w[n], {n, 0, 12}]
+%t A113228 (* Second program: *)
+%t A113228 b[u_, o_, t_] := b[u, o, t] = If[u+o == 0, 1, Sum[b[u-j, o+j-1, If[t>0 && j < t, -j, 0]], {j, 1, u}] + Sum[b[u+j-1, o-j, j], {j, 1, If[t<0, Min[-t-1, o], o]}]]; a[n_] := b[n, 0, 0]; Table[a[n], {n, 0, 25}] (* _Jean-François Alcover_, Jan 19 2017, after _Alois P. Heinz_ *)
+%Y A113228 Cf. A113229, A117156, A117158, A117226, A201692, A201693, A231166.
+%Y A113228 Column k=0 of A264173.
+%K A113228 nonn,changed
+%O A113228 0,3
+%A A113228 _David Callan_, Oct 19 2005

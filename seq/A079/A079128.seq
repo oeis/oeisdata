@@ -1,0 +1,31 @@
+%I A079128
+%S A079128 1,1,4,15,96,455,4320,29295,300160,2663199,36288000,348523175,
+%T A079128 5748019200,68027248575,1116542242816,16813959537375,334764638208000,
+%U A079128 4954072089341375,115242726703104000,1966765155600364119,45415699475660800000,930312555383281809375
+%N A079128 Number of degree-n permutations with (mutually) relatively prime cycle lengths.
+%C A079128 a(p) = p!-(p-1)! for prime p. Conjecture: a(n) is divisible by n^2-1 for n>3.
+%C A079128 Conjecture: gcd(a(n),n)=1. - _Vladeta Jovovic_, Jan 25 2003
+%H A079128 Alois P. Heinz, <a href="/A079128/b079128.txt">Table of n, a(n) for n = 1..450</a>
+%p A079128 with(combinat):
+%p A079128 b:= proc(n, i, g) option remember; `if`(n=0, `if`(g>=2, 1, 0),
+%p A079128       `if`(i<2, 0, b(n, i-1, g) +`if`(igcd(g, i)<2, 0,
+%p A079128        add((i-1)!^j/j! *multinomial(n, i$j, n-i*j)*
+%p A079128          b(n-i*j, i-1, igcd(i, g)), j=1..n/i))))
+%p A079128     end:
+%p A079128 a:= n-> n!-b(n, n, 0):
+%p A079128 seq(a(n), n=1..25);  # _Alois P. Heinz_, Jun 06 2013
+%p A079128 # second Maple program:
+%p A079128 b:= proc(n, g) option remember; `if`(n=0, `if`(g=1, 1, 0), add(
+%p A079128       (j-1)!*b(n-j, igcd(g, j))*binomial(n-1, j-1), j=1..n))
+%p A079128     end:
+%p A079128 a:= n-> b(n, 0):
+%p A079128 seq(a(n), n=1..25);  # _Alois P. Heinz_, Jul 03 2021
+%t A079128 f[list_] :=
+%t A079128 Total[list]!/Apply[Times, Table[list[[i]], {i, 1, Length[list]}]]/
+%t A079128   Apply[Times, Select[Table[Count[list, i], {i, 1, Total[list]}], # > 0 &]!];
+%t A079128 Table[Total[Map[f, Select[IntegerPartitions[n], Apply[GCD, #] == 1 &]]], {n, 1, 25}] (* _Geoffrey Critzer_, Jun 06 2013 *)
+%t A079128 multinomial[n_, k_List] := n!/Times @@ (k!); b[n_, i_, g_] := b[n, i, g] = If[n==0, If[g >= 2, 1, 0], If[i<2, 0, b[n, i-1, g] + If[GCD[g, i]<2, 0, Sum[(i-1)!^j/j!*multinomial[n, Append[Array[i&, j], n-i*j]]*b[n-i*j, i-1, GCD[i, g]], {j, 1, n/i}]]]]; a[n_] := n! - b[n, n, 0]; Table[a[n], {n, 1, 25}] (* _Jean-François Alcover_, Jan 08 2016, after _Alois P. Heinz_ *)
+%Y A079128 Cf. A079129, A000837, A079129, A226388.
+%K A079128 nonn
+%O A079128 1,3
+%A A079128 _Vladeta Jovovic_, _Vladimir Baltic_, Dec 27 2002

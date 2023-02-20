@@ -1,0 +1,37 @@
+%I A107424
+%S A107424 1,0,1,0,1,1,0,2,2,1,0,3,5,2,1,0,5,17,13,3,1,0,9,43,50,20,3,1,0,16,
+%T A107424 124,220,136,36,4,1,0,28,338,866,773,296,52,4,1,0,51,941,3435,4280,
+%U A107424 2303,596,78,5,1,0,93,2591,13250,22430,16317,5817,1080,105,5,1,0,170,7234,51061
+%N A107424 Triangle read by rows: T(n, k) is the number of primitive (period n) n-bead necklace structures with k different colors. Only includes structures that contain all k colors.
+%C A107424 This classification is concerned with which beads are the same color, not with the colors themselves, so bbabcd is the same structure as aabacd. Cyclic permutations are also the same structure, e.g. abacda is also the same structure. However, order matters: the reverse of aabacd is equivalent to aabcad, which is also on the list.
+%H A107424 Andrew Howroyd, <a href="/A107424/b107424.txt">Table of n, a(n) for n = 1..1275</a> (first 50 rows)
+%F A107424 T(n, k) = Sum_{d|n} mu(n/d) * A152175(d, k). - _Andrew Howroyd_, Apr 09 2017
+%e A107424 T(6, 4) = 13: {aaabcd, aabacd, aabcad, abacad, aabbcd, aabcbd, aabcdb, aacbbd, aacbdb, ababcd, abacbd, acabdb, abcabd}.
+%e A107424 From _Andrew Howroyd_, Apr 09 2017 (Start)
+%e A107424 Triangle starts:
+%e A107424 1
+%e A107424 0  1
+%e A107424 0  1   1
+%e A107424 0  2   2    1
+%e A107424 0  3   5    2    1
+%e A107424 0  5  17   13    3    1
+%e A107424 0  9  43   50   20    3   1
+%e A107424 0 16 124  220  136   36   4  1
+%e A107424 0 28 338  866  773  296  52  4 1
+%e A107424 0 51 941 3435 4280 2303 596 78 5 1
+%e A107424 (End)
+%t A107424 A[d_, n_] := A[d, n] = Which[n == 0, 1, n == 1, DivisorSum[d, x^# &], d == 1, Sum[StirlingS2[n, k] x^k, {k, 0, n}], True, Expand[A[d, 1] A[d, n-1] + D[A[d, n-1], x] x]];
+%t A107424 B[n_, k_] := Coefficient[DivisorSum[n, EulerPhi[#] A[#, n/#]&]/n/x, x, k];
+%t A107424 T[n_, k_] := DivisorSum[n, MoebiusMu[n/#] B[#, k]&];
+%t A107424 Table[T[n, k], {n, 1, 12}, {k, 0, n-1}] // Flatten (* _Jean-François Alcover_, Jun 06 2018, after _Andrew Howroyd_ and _Robert A. Russell_ *)
+%o A107424 (PARI) \\ here R(n) is A152175 as square matrix.
+%o A107424 R(n) = {Mat(Col([Vecrev(p/y, n) | p<-Vec(intformal(sum(m=1, n, eulerphi(m) * subst(serlaplace(-1 + exp(sumdiv(m, d, y^d*(exp(d*x + O(x*x^(n\m)))-1)/d))), x, x^m))/x))]))}
+%o A107424 T(n) = {my(M=R(n)); matrix(n, n, i, k, sumdiv(i, d, moebius(i/d)*M[d,k]))}
+%o A107424 { my(A=T(10)); for(n=1, #A, print(A[n, 1..n])) } \\ _Andrew Howroyd_, Jan 09 2020
+%Y A107424 Columns 2-6 are A056303, A056304, A056305, A056306, A056307.
+%Y A107424 Partial row sums include A000048, A002075, A056300, A056301, A056302.
+%Y A107424 Row sums are A276547.
+%Y A107424 Cf. A074650, A152175, A276543, A137651, A276544.
+%K A107424 nonn,tabl
+%O A107424 1,8
+%A A107424 _David Wasserman_, May 26 2005

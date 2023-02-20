@@ -1,0 +1,45 @@
+%I A143951
+%S A143951 1,1,1,1,2,3,4,6,9,14,21,31,47,71,107,161,243,367,553,834,1258,1898,
+%T A143951 2863,4318,6514,9827,14824,22361,33732,50886,76762,115796,174680,
+%U A143951 263509,397508,599647,904579,1364576,2058489,3105269,4684359,7066449,10659877,16080632,24257950,36593598,55202165,83273553,125619799,189499952
+%N A143951 Number of Dyck paths such that the area between the x-axis and the path is n.
+%C A143951 Column sums of A129182.
+%H A143951 Alois P. Heinz, <a href="/A143951/b143951.txt">Table of n, a(n) for n = 0..2000</a> (first 1001 terms from Vincenzo Librandi)
+%H A143951 P. Barry, <a href="http://arxiv.org/abs/1205.2565">On sequences with {-1, 0, 1} Hankel transforms</a>, arXiv preprint arXiv:1205.2565 [math.CO], 2012. - From _N. J. A. Sloane_, Oct 18 2012
+%F A143951 G.f.: 1/(1 - x/(1 - x^3/(1 - x^5/(1 - x^7/(1 - x^9/(1 - ...
+%F A143951 Derivation: the g.f. G(x,z) of Dyck paths, where x marks area and z marks semilength, satisfies G(x,z)=1+x*z*G(x,z)*G(x,x^2*z). Set z=1.
+%F A143951 From _Peter Bala_, Dec 26 2012: (Start)
+%F A143951 Let F(x) denote the o.g.f. of this sequence. For positive integer n >= 3, the real number F(1/n) has the simple continued fraction expansion 1 + 1/(n-2 + 1/(1 + 1/(n^2-2 + 1/(1 + 1/(n^3-2 + 1/(1 + ...)))))).
+%F A143951 For n >= 1, F(-1/n) has the simple continued fraction expansion
+%F A143951 1/(1 + 1/(n + 1/(n^2 + 1/(n^3 + ...)))). Examples are given below. Cf. A005169 and A111317.
+%F A143951 (End)
+%F A143951 G.f.: A(x) = 1/(1 - x/(1-x + x/(1+x^2 + x^4/(1-x^3 - x^2/(1+x^4 - x^7/(1-x^5 + x^3/(1+x^6 + x^10/(1-x^7 - x^4/(1+x^8 - x^13/(1-x^9 + x^5/(1+x^10 + x^16/(1 + ...)))))))))))), a continued fraction. - _Paul D. Hanna_, Aug 08 2016
+%F A143951 a(n) ~ c / r^n, where r = 0.66290148514884371255690407749133031115536799774051... and c = 0.337761150388539773466092171229604432776662930886727976914... . - _Vaclav Kotesovec_, Feb 17 2017, corrected Nov 04 2021
+%F A143951 From _Peter Bala_, Jul 04 2019: (Start)
+%F A143951 O.g.f. as a ratio of q-series: N(q)/D(q), where N(q) = Sum_{n >= 0} (-1)^n*q^(2*n^2+n)/( (1-q^2)*(1-q^4)*...*(1-q^(2*n)) ) and D(q) = Sum_{n >= 0} (-1)^n*q^(2*n^2-n)/( (1-q^2)*(1-q^4)*...*(1-q^(2*n)) ). Cf. A224704.
+%F A143951 D(q) has its least  positive (and simple) real zero at x = 0.66290 14851 48843 71255 69040 ....
+%F A143951 a(n) ~ c*d^n, where  d = 1/x = 1.5085197761707628638804960 ...  and c = - N(x)/(x*D'(x)) = 0.3377611503885397734660921 ... (the prime indicates differentiation w.r.t. q). (End)
+%e A143951 a(5)=3 because we have UDUUDD, UUDDUD and UDUDUDUDUD, where U=(1,1) and D=(1,-1).
+%e A143951 From _Peter Bala_, Dec 26 2012: (Start)
+%e A143951 F(1/10) = sum {n >= 0} a(n)/10^n has the simple continued fraction expansion 1 + 1/(8 + 1/(1 + 1/(98 + 1/(1 + 1/(998 + 1/(1 + ...)))))).
+%e A143951 F(-1/10) = sum {n >= 0} (-1)^n*a(n)/10^n has the simple continued fraction expansion 1/(1 + 1/(10 + 1/(100 + 1/(1000 + ...)))).
+%e A143951 (End)
+%p A143951 g:=1/(1-x/(1-x^3/(1-x^5/(1-x^7/(1-x^9/(1-x^11/(1-x^13/(1-x^15)))))))): gser:= series(g,x=0,45): seq(coeff(gser,x,n),n=0..44);
+%p A143951 # second Maple program:
+%p A143951 b:= proc(x, y, k) option remember;
+%p A143951       `if`(y<0 or y>x or k<0 or k>x^2/2-(y-x)^2/4, 0,
+%p A143951       `if`(x=0, 1, b(x-1, y-1, k-y+1/2) +b(x-1, y+1, k-y-1/2)))
+%p A143951     end:
+%p A143951 a:= n-> add(b(2*n-4*t, 0, n), t=0..n/2):
+%p A143951 seq(a(n), n=0..50);  # _Alois P. Heinz_, Aug 24 2018
+%t A143951 terms = 50; CoefficientList[1/(1+ContinuedFractionK[-x^(2i-1), 1, {i, 1, Sqrt[terms]//Ceiling}]) + O[x]^terms, x] (* _Jean-François Alcover_, Jul 11 2018 *)
+%o A143951 (PARI) N=66; q = 'q +O('q^N);
+%o A143951 G(k) = if(k>N, 1, 1 - q^(k+1) / G(k+2) );
+%o A143951 gf = 1 / G(0);
+%o A143951 Vec(gf) \\ _Joerg Arndt_, Jul 06 2013
+%Y A143951 Cf. A129182, A291874 (convolution inverse).
+%Y A143951 Cf. A005169, A111317, A224704.
+%K A143951 nonn
+%O A143951 0,5
+%A A143951 _Emeric Deutsch_, Oct 09 2008
+%E A143951 b-file corrected and extended by _Alois P. Heinz_, Aug 24 2018

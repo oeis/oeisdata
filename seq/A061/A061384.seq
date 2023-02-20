@@ -1,0 +1,46 @@
+%I A061384
+%S A061384 1,11,20,102,111,120,201,210,300,1003,1012,1021,1030,1102,1111,1120,
+%T A061384 1201,1210,1300,2002,2011,2020,2101,2110,2200,3001,3010,3100,4000,
+%U A061384 10004,10013,10022,10031,10040,10103,10112,10121,10130,10202,10211
+%N A061384 Numbers n such that sum of digits = number of digits.
+%C A061384 Number of d-digit entries is A071976(d). - _Robert Israel_, Apr 06 2016
+%C A061384 Equivalently, numbers n > 0 for which the arithmetic mean of the digits equals 1. - _M. F. Hasler_, Dec 07 2018
+%H A061384 Robert Israel, <a href="/A061384/b061384.txt">Table of n, a(n) for n = 1..10000</a>
+%F A061384 {n > 0 | A007953(n) = A055642(n)}. - _M. F. Hasler_, Dec 07 2018
+%e A061384 120 is a term as the arithmetic mean of the digits is (1+2+0)/3 = 1.
+%p A061384 Q:= proc(n,s) option remember;
+%p A061384 # n-digit integers with digit sum s
+%p A061384 if s = 0 then []
+%p A061384 elif s = 1 then [10^(n-1)]
+%p A061384 elif n = 1 then
+%p A061384    if s <= 9 then [s]
+%p A061384    else []
+%p A061384    fi
+%p A061384 else
+%p A061384   map(op,[seq(map(t -> 10*t+i, procname(n-1,s-i)), i=0..min(9,s-1))])
+%p A061384 fi
+%p A061384 end proc:
+%p A061384 map(op, [seq(sort(Q(n,n)),n=1..5)]); # _Robert Israel_, Apr 06 2016
+%t A061384 Select[Range[15000], Total[IntegerDigits[#]] == IntegerLength[#]&] (* _Harvey P. Dale_, Jan 08 2011 *)
+%o A061384 (Magma) [ n: n in [1..10215] | &+Intseq(n) eq #Intseq(n) ]; // _Bruno Berselli_, Jun 30 2011
+%o A061384 (PARI) isok(n) = (sumdigits(n)/#Str(n) == 1); \\ _Michel Marcus_, Mar 28 2016
+%o A061384 (PARI) is_A061384(n)={sumdigits(n)==logint(n+!n,10)+1} \\ _M. F. Hasler_, Dec 07 2018
+%o A061384 (PARI) A061384_row(n)={my(L=List(), u=vector(n, i, i==1), d); forvec(v=vector(n+1, i, [if(i>n,n, 1), if(i>1, n, 1)]), vecmax(d=v[^1]-v[^-1]+u)<10 && listput(L,fromdigits(d)),1);Vec(L)} \\ Return the list of all n-digit terms. - _M. F. Hasler_, Dec 07 2018
+%o A061384 (Python)
+%o A061384 from itertools import count, islice
+%o A061384 def Q(n, s): # length-n strings of 0..9 with sum s, after _Robert Israel_
+%o A061384     if s == 0: yield "0"*n
+%o A061384     elif n == 1: yield (str(s) if s <= 9 else "")
+%o A061384     else:
+%o A061384         m = min(9, s) + 1
+%o A061384         yield from (str(i)+t for i in range(m) for t in Q(n-1, s-i))
+%o A061384 def agen():
+%o A061384     yield from (int(t) for n in count(1) for t in Q(n, n) if t[0] != "0")
+%o A061384 print(list(islice(agen(), 43))) # _Michael S. Branicky_, May 26 2022
+%Y A061384 Totally balanced subset: A071154. Cf. also A061383-A061388, A061423-A061425.
+%Y A061384 Cf. A071976.
+%Y A061384 Cf. A007953 (sum of digits), A055642 (number of digits).
+%K A061384 nonn,base,easy
+%O A061384 1,2
+%A A061384 _Amarnath Murthy_, May 03 2001
+%E A061384 More terms from _Erich Friedman_, May 08 2001

@@ -1,0 +1,50 @@
+%I A103314
+%S A103314 1,1,2,2,4,2,10,2,16,8,34,2,100,2,130,38,256,2,1000,2,1156,134,2050,2,
+%T A103314 10000,32,8194,512,16900,2,146854,2,65536,2054,131074,158,1000000,2,
+%U A103314 524290,8198,1336336,2,11680390,2,4202500,54872,8388610,2,100000000,128
+%N A103314 Total number of subsets of the n-th roots of 1 that add to zero.
+%C A103314 The term a(0) = 1 counts the single zero-sum subset of the (by convention) empty set of zeroth roots of 1.
+%C A103314 I am inclined to believe that if S is a zero-sum subset of the n-th roots of 1, that n can be built up from (zero-sum) cyclically balanced subsets via the following operations: 1. A U B, where A and B are disjoint. 2. A - B, where B is a subset of A. - _David W. Wilson_, May 19 2005
+%C A103314 Lam and Leung's paper, though interesting, does not apply directly to this sequence because it allows repetitions of the roots in the sums.
+%C A103314 Observe that 2^n=a(n) (mod n). Sequence A107847 is the quotient (2^n-a(n))/n. - _T. D. Noe_, May 25 2005
+%C A103314 From _Max Alekseyev_, Jan 31 2008: (Start)
+%C A103314 Every subset of the set U(n) = { 1=r^0, r^1, ..., r^(n-1) } of the n-th power roots of 1 (where r is a fixed primitive root) defines a binary word w of the length n where the j-th bit is 1 iff the root r^j is included in the subset.
+%C A103314 If d is the period of w with respect to cyclic rotations (thus d|n) then the periodic part of w uniquely defines some binary Lyndon word of the length d (see A001037). In turn, each binary Lyndon word of the length d, where d<n and d|n, corresponds to d distinct zero-sum subsets of U(n).
+%C A103314 The binary Lyndon words of the length n are different in this respect: only some of them correspond to n distinct zero-sum subsets of U(n) while the others do not correspond to such subsets at all. A110981(n) gives the number of binary Lyndon words of the length n that correspond to zero-sum subsets of U(n). (End)
+%H A103314 Max Alekseyev and M. F. Hasler, <a href="/A103314/b103314.txt">Table of n, a(n) for n = 0..164</a>
+%H A103314 T. Y. Lam and K. H. Leung, <a href="http://arXiv.org/abs/math.NT/9511209">On vanishing sums for roots of unity</a>, arXiv:math/9511209 [math.NT], 1995.
+%H A103314 T. D. Noe, <a href="http://www.sspectra.com/math/RootSums.html">Sums of Roots of Unity Plots</a>
+%H A103314 T. D. Noe, <a href="http://www.sspectra.com/math/A103314-Proof.pdf">Proof a(n)=a(s(n))^(n/ s(n))</a>
+%H A103314 Sasha Rybak, <a href="http://dxdy.ru/post78783.html#p78783">Zero sums of roots of unity</a> (in Russian), forum dxdy.ru.
+%H A103314 Gary Sivek, <a href="http://www.emis.de/journals/INTEGERS/papers/k31/k31.Abstract.html">On vanishing sums of distinct roots of unity</a>, #A31, Integers 10 (2010), 365-368.
+%F A103314 a(n) = A070894(n)+1.
+%F A103314 a(2^n) = 2^(2^(n-1)). - Dan Asimov and Gareth McCaughan, Mar 11 2005
+%F A103314 a(2n) = a(n)^2 if n is even. If p, q are primes, a(pq) = 2^p+2^q-2. In particular, if p is prime, a(2p) = 2^p + 2. - Gareth McCaughan, Mar 12 2005
+%F A103314 a(n) == 2^n (mod n), a(p) = 2 (p prime). - _David W. Wilson_, May 08 2005
+%F A103314 It appears that a(n) = a(s(n))^(n/s(n)) where s(n) = A007947(n) is the squarefree kernel of n. This is true if all zero-sum subsets of the n-th roots of 1 are formed by set operations on cyclic subsets. If true, A103314 is determined by its values on squarefree numbers (A005117). Some consequences would be a(p^n) = 2^p^(n-1), a(p^m q^n) = (2^p+2^q+2)^(p^(m-1) q^(n-1)) and a(p^2 n) = a(pn)^p for primes p and q. - _David W. Wilson_, May 08 2005
+%F A103314 a(pn) = a(n)^p when p is prime and p|n; a(2p) = 2^p+2 when p is an odd prime. More generally a(pq) = 2^p+2^q-2 when p, q are distinct primes. - Gareth McCaughan (gareth.mccaughan(AT)pobox.com), Mar 12 2005
+%F A103314 For distinct odd primes p and q, a(2pq) = (2^p+2)^q + (2^q+2)^p - 2(2^p+1)^q - 2(2^q+1)^p + 2^(pq) + SUM[j=0..p] binomial(p,j)(2^j+2^(p-j))^q. - Sasha Rybak, Sep 21 2007.
+%F A103314 a(n) = n*A110981(n) + 2^n - n*A001037(n). - _Max Alekseyev_, Jan 14 2008
+%t A103314 Needs["DiscreteMath`Combinatorica`"]; Table[Plus@@Table[Count[ (KSubsets[ Range[n], k]), q_List/;Chop[ Abs[Plus@@(E^(2.*Pi*I*q/n))]]==0], {k, 0, n}], {n, 15}] (* _T. D. Noe_ *)
+%o A103314 (PARI)
+%o A103314 /* This program implements all known results; it works for all n except for 165, 195, 210, 231, 255, 273, 285, 330, 345, ... */
+%o A103314 A103314(n) = { local(f=factor(n)); n<2 & return(1); n==f[1,1] & return(2);
+%o A103314 vecmax(f[,2])>1 & return(A103314(f=prod(i=1,#f~,f[i,1]))^(n/f));
+%o A103314 if( 2==#f=f[,1], return(2^f[1]+2^f[2]-2));
+%o A103314 #f==3 & f[1]==2 & return(sum(j=0,f[2],binomial(f[2],j)*(2^j+2^(f[2]-j))^f[3])
+%o A103314 +(2^f[2]+2)^f[3]+(2^f[3]+2)^f[2]-2*((2^f[2]+1)^f[3]+(2^f[3]+1)^f[2])+2^(f[2]*f[3]));
+%o A103314 n==105 & return(166093023482); error("A103314(n) is unknown for n=",n) }
+%o A103314 /* _Max Alekseyev_ and _M. F. Hasler_, Jan 31 2008 */
+%Y A103314 Equals A070894 + 1. A107847(n) = (2^n - A103314(n))/n, A110981 = A001037 - A107847.
+%Y A103314 Row sums of A103306. See also A006533, A006561, A006600, A007569, A007678.
+%Y A103314 Cf. A070925, A107753 (number of primitive subsets of the n-th roots of unity summing to zero), A107754 (number of subsets of the n-th roots of unity summing to one), A107861 (number of distinct values in the sums of all subsets of the n-th roots of unity).
+%Y A103314 Cf. A322366.
+%K A103314 nonn,nice,hard
+%O A103314 0,3
+%A A103314 _Wouter Meeussen_, Mar 11 2005
+%E A103314 More terms from _David W. Wilson_, Mar 12 2005
+%E A103314 Scott Huddleston (scotth(AT)ichips.intel.com) finds that a(30) >= 146854 and conjectures that is the true value of a(30). - Mar 24 2005. Confirmed by Meeussen and Wilson.
+%E A103314 More terms from _T. D. Noe_, May 25 2005
+%E A103314 Further terms from _Max Alekseyev_ and _M. F. Hasler_, Jan 07 2008
+%E A103314 Edited by _M. F. Hasler_, Feb 06 2008
+%E A103314 Duplicate Mathematica program deleted by _Harvey P. Dale_, Jun 28 2021

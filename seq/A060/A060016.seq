@@ -1,0 +1,60 @@
+%I A060016
+%S A060016 1,1,0,1,1,0,1,1,0,0,1,2,0,0,0,1,2,1,0,0,0,1,3,1,0,0,0,0,1,3,2,0,0,0,
+%T A060016 0,0,1,4,3,0,0,0,0,0,0,1,4,4,1,0,0,0,0,0,0,1,5,5,1,0,0,0,0,0,0,0,1,5,
+%U A060016 7,2,0,0,0,0,0,0,0,0,1,6,8,3,0,0,0,0,0,0,0,0,0,1,6,10,5,0,0,0,0,0,0,0,0,0
+%N A060016 Triangle T(n,k) = number of partitions of n into k distinct parts, 1 <= k <= n.
+%C A060016 Also number of partitions of n-k(k+1)/2 into at most k parts (not necessarily distinct).
+%C A060016 A025147(n) = Sum_{k=2..floor((n+2)/2)} a(n-k+1, k-1). - _Reinhard Zumkeller_, Nov 04 2007
+%D A060016 M. Abramowitz and I. A. Stegun, eds., Handbook of Mathematical Functions, National Bureau of Standards Applied Math. Series 55, 1964 (and various reprintings), p. 831.
+%D A060016 L. Comtet, Advanced Combinatorics, Reidel, 1974, pp. 94, 96 and 307.
+%D A060016 F. N. David, M. G. Kendall and D. E. Barton, Symmetric Function and Allied Tables, Cambridge, 1966, p. 219.
+%D A060016 D. S. Mitrinovic et al., Handbook of Number Theory, Kluwer, Section XIV.2, p. 493.
+%H A060016 Alois P. Heinz, <a href="/A060016/b060016.txt">Rows n = 1..141, flattened</a>
+%H A060016 M. Abramowitz and I. A. Stegun, eds., <a href="http://www.convertit.com/Go/ConvertIt/Reference/AMS55.ASP">Handbook of Mathematical Functions</a>, National Bureau of Standards, Applied Math. Series 55, Tenth Printing, 1972 [alternative scanned copy].
+%F A060016 T(n, k) = T(n-k, k) + T(n-k, k-1) [with T(n, 0)=1 if n=0 and 0 otherwise].
+%F A060016 G.f.: Sum_{n>=0} z^n * q^((n^2+n)/2) / Product_{k=1..n} (1-q^k), rows by powers of q, columns by powers of z; includes row 0 (drop term for n=0 for this triangle, see PARI code); setting z=1 gives g.f. for A000009; cf. to g.f. for A072574. - _Joerg Arndt_, Oct 20 2012
+%e A060016 Triangle starts
+%e A060016 [ 1]  1,
+%e A060016 [ 2]  1, 0,
+%e A060016 [ 3]  1, 1, 0,
+%e A060016 [ 4]  1, 1, 0, 0,
+%e A060016 [ 5]  1, 2, 0, 0, 0,
+%e A060016 [ 6]  1, 2, 1, 0, 0, 0,
+%e A060016 [ 7]  1, 3, 1, 0, 0, 0, 0,
+%e A060016 [ 8]  1, 3, 2, 0, 0, 0, 0, 0,
+%e A060016 [ 9]  1, 4, 3, 0, 0, 0, 0, 0, 0,
+%e A060016 [10]  1, 4, 4, 1, 0, 0, 0, 0, 0, 0,
+%e A060016 [11]  1, 5, 5, 1, 0, 0, 0, 0, 0, 0, 0,
+%e A060016 [12]  1, 5, 7, 2, 0, 0, 0, 0, 0, 0, 0, 0,
+%e A060016 [13]  1, 6, 8, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+%e A060016 [14]  1, 6, 10, 5, 0, 0, 0, 0, 0, 0, 0, 0, ...
+%e A060016 T(8,3)=2 since 8 can be written in 2 ways as the sum of 3 distinct positive integers: 5+2+1 and 4+3+1.
+%p A060016 b:= proc(n, i) b(n, i):= `if`(n=0, [1], `if`(i<1, [], zip((x, y)
+%p A060016       -> x+y, b(n, i-1), `if`(i>n, [], [0, b(n-i, i-1)[]]), 0)))
+%p A060016     end:
+%p A060016 T:= proc(n) local l; l:= subsop(1=NULL, b(n, n));
+%p A060016       l[], 0$(n-nops(l))
+%p A060016     end:
+%p A060016 seq(T(n), n=1..20);  # _Alois P. Heinz_, Dec 12 2012
+%t A060016 Flatten[Table[Length[Select[IntegerPartitions[n,{k}],Max[Transpose[ Tally[#]][[2]]]==1&]],{n,20},{k,n}]] (* _Harvey P. Dale_, Feb 27 2012 *)
+%t A060016 T[_, 1] = 1; T[n_, k_] /; 1<k<n := T[n, k] = T[n-k, k]+T[n-k, k-1]; T[_, _] = 0; Table[T[n, k], {n, 1, 20}, {k, 1, n}] // Flatten (* _Jean-François Alcover_, Oct 26 2015 *)
+%o A060016 (PARI)
+%o A060016 N=16;  q='q+O('q^N);
+%o A060016 gf=sum(n=0,N, z^n * q^((n^2+n)/2) / prod(k=1,n, 1-q^k ) );
+%o A060016 /* print triangle: */
+%o A060016 gf -= 1; /* remove row zero */
+%o A060016 P=Pol(gf,'q);
+%o A060016 { for (n=1,N-1,
+%o A060016     p = Pol(polcoeff(P, n),'z);
+%o A060016     p += 'z^(n+1);  /* preserve trailing zeros */
+%o A060016     v = Vec(polrecip(p));
+%o A060016     v = vector(n,k,v[k]); /* trim to size n */
+%o A060016     print(v);
+%o A060016 ); }
+%o A060016 /* _Joerg Arndt_, Oct 20 2012 */
+%Y A060016 Columns (offset) include A057427, A004526, A001399, A001400, A001401, etc. Cf. A000009 (row sums), A008289 (without zeros), A030699 (row maximum), A008284 (partition triangle including duplications).
+%Y A060016 See A008289 for another version.
+%K A060016 nonn,tabl,nice,easy
+%O A060016 1,12
+%A A060016 _N. J. A. Sloane_
+%E A060016 More terms, recurrence, etc. from _Henry Bottomley_, Mar 26 2001

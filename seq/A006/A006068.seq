@@ -1,0 +1,81 @@
+%I A006068 M2253
+%S A006068 0,1,3,2,7,6,4,5,15,14,12,13,8,9,11,10,31,30,28,29,24,25,27,26,16,17,
+%T A006068 19,18,23,22,20,21,63,62,60,61,56,57,59,58,48,49,51,50,55,54,52,53,32,
+%U A006068 33,35,34,39,38,36,37,47,46,44,45,40,41,43,42,127,126,124,125,120,121
+%N A006068 a(n) is Gray-coded into n.
+%C A006068 Equivalently, if binary expansion of n has m bits (say), compute derivative of n (A038554), getting sequence n' of length m-1; sort on n'.
+%C A006068 Inverse of sequence A003188 considered as a permutation of the nonnegative integers, i.e., a(A003188(n)) = n = A003188(a(n)). - _Howard A. Landman_, Sep 25 2001
+%C A006068 The sequence exhibits glide reflections that grow fractally. These show up well on the scatterplot, also audibly using the "listen" link. - _Peter Munn_, Aug 18 2019
+%D A006068 M. Gardner, Mathematical Games, Sci. Amer. Vol. 227 (No. 2, Feb. 1972), p. 107.
+%D A006068 M. Gardner, Knotted Doughnuts and Other Mathematical Entertainments. Freeman, NY, 1986, p. 15.
+%D A006068 N. J. A. Sloane and Simon Plouffe, The Encyclopedia of Integer Sequences, Academic Press, 1995 (includes this sequence).
+%H A006068 T. D. Noe, <a href="/A006068/b006068.txt">Table of n, a(n) for n = 0..1023</a>
+%H A006068 Joerg Arndt, <a href="http://www.jjj.de/fxt/#fxtbook">Matters Computational (The Fxtbook)</a>, section 1.16 Gray code, C code inverse_gray_code() with "version 3" giving the PARI code here.
+%H A006068 Dana G. Korssjoen, Biyao Li, Stefan Steinerberger, Raghavendra Tripathi, and Ruimin Zhang, <a href="https://arxiv.org/abs/2012.04625">Finding structure in sequences of real numbers via graph theory: a problem list</a>, arXiv:2012.04625, Dec 08, 2020
+%H A006068 Eric Rowland and Reem Yassawi, <a href="https://arxiv.org/abs/1403.7659">Profinite automata</a>, arXiv:1403.7659 [math.DS], 2014. See p. 22.
+%H A006068 Paul Tarau, <a href="http://www.cse.unt.edu/~tarau/research/2009/fISO.pdf">Isomorphic Data Encodings and their Generalization to Hylomorphisms on Hereditarily Finite Data Types</a>; see also <a href="http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.212.3832">alternate link</a>.
+%H A006068 <a href="/index/Per#IntegerPermutation">Index entries for sequences that are permutations of the natural numbers</a>
+%F A006068 a(n) = 2*a(ceiling((n+1)/2)) + A010060(n-1). If 3*2^(k-1) < n <= 2^(k+1), a(n) = 2^(k+1) - 1 - a(n-2^k); if 2^(k+1) < n <= 3*2^k, a(n) = a(n-2^k) + 2^k. - _Henry Bottomley_, Jan 10 2001
+%F A006068 a(n) = n XOR [n/2] XOR [n/4] XOR [n/8] ... XOR [n/2^m] where m = [log(n)/log(2)] (for n>0) and [x] is integer floor of x. - _Paul D. Hanna_, Jun 04 2002
+%F A006068 a(n) XOR [a(n)/2] = n. - _Paul D. Hanna_, Jan 18 2012
+%F A006068 A066194(n) = a(n-1) + 1, n>=1. - _Philippe Deléham_, Apr 29 2005
+%F A006068 a(n) = if n<2 then n else 2*m + (n mod 2 + m mod 2) mod 2, with m=a(floor(n/2)). - _Reinhard Zumkeller_, Aug 10 2010
+%F A006068 a(n XOR m) = a(n) XOR a(m), where XOR is the bitwise exclusive-or operator, A003987. - _Peter Munn_, Dec 14 2019
+%F A006068 a(0) = 0. For all n >= 0 if a(n) is even a(2*n) = 2*a(n), a(2*n+1) = 2*a(n)+1, else a(2*n) = 2*a(n)+1, a(2*n+1) = 2*a(n). - _Yosu Yurramendi_, Oct 12 2021
+%e A006068 The first few values of n' are -,-,1,0,10,11,01,00,100,101,111,110,010,011,001,000,... (for n=0..15) and to put these in lexicographic order we must take n in the order 0,1,3,2,7,6,4,5,15,14,12,13,8,9,11,10,...
+%p A006068 a:= proc(n) option remember; `if`(n<2, n,
+%p A006068       Bits[Xor](n, a(iquo(n, 2))))
+%p A006068     end:
+%p A006068 seq(a(n), n=0..100);  # _Alois P. Heinz_, Apr 17 2018
+%t A006068 a[n_] := BitXor @@ Table[Floor[n/2^m], {m, 0, Floor[Log[2, n]]}]; a[0]=0; Table[a[n], {n, 0, 69}] (* _Jean-François Alcover_, Jul 19 2012, after _Paul D. Hanna_ *)
+%t A006068 Table[Fold[BitXor, n, Quotient[n, 2^Range[BitLength[n] - 1]]], {n, 0, 70}] (* _Jan Mangaldan_, Mar 20 2013 *)
+%o A006068 (PARI) {a(n)=local(B=n);for(k=1,floor(log(n+1)/log(2)),B=bitxor(B,n\2^k));B} /* _Paul D. Hanna_, Jan 18 2012 */
+%o A006068 (PARI) /* the following routine needs only O(log_2(n)) operations */
+%o A006068 a(n)= {
+%o A006068     my( s=1, ns );
+%o A006068     while ( 1,
+%o A006068         ns = n >> s;
+%o A006068         if ( 0==ns, break() );
+%o A006068         n = bitxor(n, ns);
+%o A006068         s <<= 1;
+%o A006068     );
+%o A006068     return ( n );
+%o A006068 } /* _Joerg Arndt_, Jul 19 2012 */
+%o A006068 (Haskell)
+%o A006068 a006068 n = foldl xor 0 $
+%o A006068                   map (div n) $ takeWhile (<= n) a000079_list :: Integer
+%o A006068 -- _Reinhard Zumkeller_, Apr 28 2012
+%o A006068 (Python)
+%o A006068 def a(n):
+%o A006068     s=1
+%o A006068     while True:
+%o A006068         ns=n>>s
+%o A006068         if ns==0: break
+%o A006068         n=n^ns
+%o A006068         s<<=1
+%o A006068     return n
+%o A006068 print([a(n) for n in range(101)]) # _Indranil Ghosh_, Jun 07 2017, after PARI code by _Joerg Arndt_
+%o A006068 (R) nmax <- 63 # by choice
+%o A006068 a <- vector()
+%o A006068 for(n in 1:nmax){
+%o A006068   ones <- which(as.integer(intToBits(n)) == 1)
+%o A006068   nbit <- as.integer(intToBits(n))[1:tail(ones, n = 1)]
+%o A006068   level <- 0; anbit <- nbit; anbit.s <- nbit
+%o A006068   while(sum(anbit.s) > 0){
+%o A006068     s <- 2^level; if(s > length(anbit.s)) break
+%o A006068     anbit.s <- c(anbit[-(1:s)], rep(0,s))
+%o A006068     anbit <- bitwXor(anbit, anbit.s)
+%o A006068     level <- level + 1
+%o A006068   }
+%o A006068   a <- c(a, sum(anbit*2^(0:(length(anbit) - 1))))
+%o A006068 }
+%o A006068 (a <- c(0,a))
+%o A006068 # _Yosu Yurramendi_, Oct 12 2021, after PARI code by Joerg Arndt
+%Y A006068 Cf. A038554, A005811, A003188, A014550, A003100.
+%Y A006068 Cf. A054429, A180200. - _Reinhard Zumkeller_, Aug 15 2010
+%Y A006068 Cf. A000079, A055975 (first differences), A209281 (binary weight).
+%Y A006068 A003987, A010060 are used to express relationship between terms of this sequence.
+%K A006068 nonn,easy,nice,look,hear
+%O A006068 0,3
+%A A006068 _N. J. A. Sloane_
+%E A006068 More terms from _Henry Bottomley_, Jan 10 2001

@@ -1,0 +1,32 @@
+%I A014968
+%S A014968 0,1,2,4,7,12,20,32,50,77,116,172,252,364,520,736,1031,1432,1974,2700,
+%T A014968 3668,4952,6644,8864,11764,15533,20412,26704,34784,45124,58312,75072,
+%U A014968 96306,123128,156904,199320,252443,318796,401468,504224,631636,789264,983848,1223532,1518164,1879620,2322184,2863040
+%N A014968 Expansion of (1/theta_4 - 1)/2.
+%C A014968 Let p(n) = the number of partitions of n, p(i,n) = the number of parts of the i-th partition of n, d(i,n) = the number of different parts in the i-th partition of n. Then a(n) = Sum_{i=1..p(n)} Sum_{j=1..d(i,n)} binomial(d(i,n)-1, j-1). - _Thomas Wieder_, May 08 2005
+%C A014968 a(n) is the sum of the number of partitions of n-1 with two kinds of part 1 + the number of partitions of n-6 with two kinds of parts 1 through 3 + the number of partitions of n-15 with two kinds of parts 1 through 5 + ... . - _Gregory L. Simay_, Aug 03 2019
+%H A014968 Alois P. Heinz, <a href="/A014968/b014968.txt">Table of n, a(n) for n = 0..10000</a> (first 1001 terms from Seiichi Manyama)
+%H A014968 J. H. Conway and N. J. A. Sloane, <a href="http://dx.doi.org/10.1007/978-1-4757-2016-7">Sphere Packings, Lattices and Groups</a>, Springer-Verlag, p. 103.
+%H A014968 A. Fink, R. K. Guy and M. Krusemeyer, <a href="https://doi.org/10.11575/cdm.v3i2.61940">Partitions with parts occurring at most thrice</a>, Contrib. Discr. Math. 3 (2) (2008), 76-114
+%F A014968 G.f.: Sum_{k>0} (x^k / (1 + x^k)) * Product_{j=1..k} (1 + x^j) / (1 - x^j). - _Michael Somos_, Nov 03 2013
+%F A014968 2 * a(n) = A015128(n) unless n=0.
+%F A014968 a(n) ~ exp(Pi*sqrt(n)) / (4*n) * (1 - 1/(Pi*sqrt(n))). - _Vaclav Kotesovec_, Nov 10 2016
+%F A014968 G.f.: (Product_{k>=1} 1/(1-x^k))*(Sum_{k>=0} x^((2k+1)(k+1))/((1-x)...(1-x^(2k+1))). - _Gregory L. Simay_, Aug 03 2019
+%e A014968 G.f.: x + 2*x^2 + 4*x^3 + 7*x^4 + 12*x^5 + 20*x^6 + 32*x^7 + 50*x^8 + ...
+%p A014968 A014968 := proc(n::integer) local a,i,j,prttn,prttnlst,ZahlTeile,ZahlVerschiedenerTeile; with(combinat); a := 0; prttnlst:=partition(n); for i from 1 to nops(prttnlst) do prttn := prttnlst[i]; ZahlTeile := nops(prttn); ZahlVerschiedenerTeile:=nops(convert(prttn,multiset)); for j from 1 to ZahlVerschiedenerTeile do a := a + binomial(ZahlVerschiedenerTeile-1,j-1); od; od; print("n, a(n): ",n, a); end proc;  for n from 0 to 20 do A014968(n) end do # _Thomas Wieder_, May 08 2005; fixed by _Vaclav Kotesovec_, Dec 16 2015
+%p A014968 # second Maple program:
+%p A014968 b:= proc(n, i) option remember; `if`(n=0, 1, `if`(i=1, 0,
+%p A014968       b(n, i-1))+add(2*b(n-i*j, i-1), j=`if`(i=1, n, 1)..n/i))
+%p A014968     end:
+%p A014968 a:= n-> `if`(n=0, 0, b(n$2)/2):
+%p A014968 seq(a(n), n=0..49);  # _Alois P. Heinz_, Feb 10 2021
+%t A014968 a[ n_] := SeriesCoefficient[ (1 / EllipticTheta[ 4, 0, q] - 1) / 2, {q, 0, n}]; (* _Michael Somos_, Nov 03 2013 *)
+%t A014968 (QPochhammer[x^2]/QPochhammer[x]^2-1)/2 + O[x]^40 // CoefficientList[#, x]& (* _Jean-François Alcover_, Nov 07 2016 *)
+%o A014968 (PARI) {a(n) = my(A); if( n<0, 0, A = x * O(x^n); polcoeff( (eta(x^2 + A) / eta(x + A)^2 - 1 ) / 2, n))}; /* _Michael Somos_, Nov 03 2013 */
+%o A014968 (PARI) {a(n) = if( n<0, 0, polcoeff( sum(k=1, n, x^k / (1 + x^k) * prod(j=1, k, (1 + x^j) / (1 - x^j), 1 + x * O(x^(n-k)))), n))}; /* _Michael Somos_, Nov 03 2013 */
+%o A014968 (PARI) x='x+O('x^66); concat([0],Vec(eta(x^2)/eta(x)^2-1)/2) \\ _Joerg Arndt_, Nov 27 2016
+%Y A014968 Cf. A015128, A265835.
+%Y A014968 Cf. Expansion of ((Product_{n>=1} (1 - x^(k*n))/(1 - x^n)^k) - 1)/k in powers of x: this sequence (k=2), A277968 (k=3), A277974 (k=5), A160549 (k=7), A277912 (k=11).
+%K A014968 nonn
+%O A014968 0,3
+%A A014968 _N. J. A. Sloane_

@@ -1,0 +1,56 @@
+%I A024996
+%S A024996 1,1,0,1,1,0,2,0,1,1,1,3,2,3,1,1,1,2,5,6,8,6,5,2,1,1,3,8,13,19,20,19,
+%T A024996 13,8,3,1,1,4,12,24,40,52,58,52,40,24,12,4,1,1,5,17,40,76,116,150,162,
+%U A024996 150,116,76,40,17,5,1,1,6,23,62,133,232,342,428,462,428,342,232,133,62,23,6
+%N A024996 Triangular array, read by rows: second differences in n,n direction of trinomial array A027907.
+%C A024996 For n > 2, T(n,k) is the number of integer strings s(0), ..., s(n) such that s(n) = n - k, s(0) = 0, |s(i) - s(i-1)| = 1 for i = 1,2 and <= 1 for i >= 3.
+%H A024996 G. C. Greubel, <a href="/A024996/b024996.txt">Table of n, a(n) for n = 0..1874</a> [a(676) ff. corrected by _Georg Fischer_, Jun 24 2020]
+%F A024996 T(n, k) = T(n-1, k-2) + T(n-1, k-1) + T(n-1, k), starting with [1], [1, 0, 1], [1, 0, 2, 0, 1].
+%F A024996 G.f.: y*z + (1-y*z)^2 / (1-z*(1+y+y^2)). - _Ralf Stephan_, Jan 09 2005 [corrected by _Peter Luschny_, Jun 25 2020]
+%e A024996                   1
+%e A024996                1  0  1
+%e A024996             1  0  2  0  1
+%e A024996          1  1  3  2  3  1  1
+%e A024996       1  2  5  6  8  6  5  2  1
+%e A024996    1  3  8 13 19 20 19 13  8  3  1
+%p A024996 A024996 := proc(n,k)
+%p A024996     option remember;
+%p A024996     if n < 0 or k < 0 or k > 2*n then
+%p A024996         0 ;
+%p A024996     elif n <= 2 then
+%p A024996         if k = 2*n or k = 0 then
+%p A024996             1;
+%p A024996         elif k = 2*n-1 or k = 1 then
+%p A024996             0;
+%p A024996         elif k =2 then
+%p A024996             2;
+%p A024996         end if;
+%p A024996     else
+%p A024996         procname(n-1,k-1)+procname(n-1,k-2)+procname(n-1,k) ;
+%p A024996     end if;
+%p A024996 end proc: # _R. J. Mathar_, Jun 23 2013
+%p A024996 seq(seq(A024996(n,k), k=0..2*n), n=0..11); # added by _Georg Fischer_, Jun 24 2020
+%t A024996 nmax = 10; CoefficientList[CoefficientList[Series[y*x + (1 - y*x)^2/(1 - x*(1 + y + y^2)), {x, 0, nmax}, {y, 0, 2*nmax}], x], y] // Flatten (* _G. C. Greubel_, May 22 2017; amended by _Georg Fischer_, Jun 24 2020 *)
+%o A024996 (PARI) T(n,k)=if(n<0||k<0||k>2*n,0,if(n==0,1,if(n==1,[1,0,1][k+1],if(n==2,[1,0,2,0,1][k+1],T(n-1,k-2)+T(n-1,k-1)+T(n-1,k))))) \\ _Ralf Stephan_, Jan 09 2004
+%o A024996 nmax=8; for(n=0, nmax, for(k=0, 2*n, print1(T(n,k),","))) \\ added by __Georg Fischer_, Jun 24 2020
+%o A024996 (Julia)
+%o A024996 using Nemo
+%o A024996 function A024996Expansion(prec)
+%o A024996     R, t = PolynomialRing(ZZ, "t")
+%o A024996     S, x = PowerSeriesRing(R, prec+1, "x")
+%o A024996     ser = divexact(x^2*t^3 + x^2*t + x*t - 1, x*t^2 + x*t + x - 1)
+%o A024996     L = zeros(ZZ, prec^2)
+%o A024996     for k ∈ 0:prec-1, n ∈ 0:2*k
+%o A024996         L[k^2+n+1] = coeff(coeff(ser, k), n)
+%o A024996     end
+%o A024996     L
+%o A024996 end
+%o A024996 A024996Expansion(8) |> println # _Peter Luschny_, Jun 25 2020
+%Y A024996 First differences in n, n direction of array A025177.
+%Y A024996 Central column is essentially A024997, other columns are A024998, A026069, A026070, A026071. Row sums are in A025579.
+%Y A024996 Cf. A027907, A026552, A024072.
+%K A024996 nonn,tabf,easy
+%O A024996 0,7
+%A A024996 _Clark Kimberling_
+%E A024996 Edited by _Ralf Stephan_, Jan 09 2004
+%E A024996 Offset corrected by _R. J. Mathar_, Jun 23 2013

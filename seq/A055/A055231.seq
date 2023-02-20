@@ -1,0 +1,63 @@
+%I A055231
+%S A055231 1,2,3,1,5,6,7,1,1,10,11,3,13,14,15,1,17,2,19,5,21,22,23,3,1,26,1,7,
+%T A055231 29,30,31,1,33,34,35,1,37,38,39,5,41,42,43,11,5,46,47,3,1,2,51,13,53,
+%U A055231 2,55,7,57,58,59,15,61,62,7,1,65,66,67,17,69,70,71,1,73,74,3,19,77,78,79,5
+%N A055231 Powerfree part of n: product of primes that divide n only once.
+%C A055231 The previous name was: Write n = K^2*F where F is squarefree and F = g*f where g = gcd(K,F) and f = F/g; then a(n) = f(n) = F(n)/g(n). Thus gcd(K^2,f) = 1.
+%C A055231 Differs from A007913; they coincide if and only if g(n) = 1.
+%C A055231 a(n) is the powerfree part of n; i.e., if n=Product(pi^ei) over all i [prime factorization) then a(n)=Product(pi^ei) over those i with ei=1; if n=b*c^2*d^3 then a(n) is minimum possible value of b. - _Henry Bottomley_, Sep 01 2000
+%C A055231 Also denominator of n/rad(n)^2, where rad is the squarefree kernel of n (A007947), numerator: A062378. - _Reinhard Zumkeller_, Dec 10 2002
+%C A055231 Largest unitary squarefree number dividing n (the unitary squarefree kernel of n). - _Steven Finch_, Mar 01 2004
+%C A055231 From _Bernard Schott_, Dec 19 2022: (Start)
+%C A055231 a(n) = 1 iff n is a squareful number (A001694).
+%C A055231 1 < a(n) < n iff n is a nonsquarefree number that is not squareful (A332785).
+%C A055231 a(n) = n iff n is a squarefree number (A005117). (End)
+%H A055231 Antti Karttunen, <a href="/A055231/b055231.txt">Table of n, a(n) for n = 1..20000</a> (first 1000 terms from T. D. Noe)
+%H A055231 Steven R. Finch, <a href="/A007947/a007947.pdf">Unitarism and Infinitarism</a>, February 25, 2004. [Cached copy, with permission of the author]
+%H A055231 Vaclav Kotesovec, <a href="/A055231/a055231.jpg">Plot of Sum_{k=1..n} a(k) / n^2 for n = 1..1000000</a>
+%F A055231 a(n) = A007913(n)/gcd(A008833(n), A007913(n)).
+%F A055231 a(n) = n/A057521(n).
+%F A055231 Multiplicative with a(p) = p and a(p^e) = 1 for e > 1. - _Vladeta Jovovic_, Nov 01 2001
+%F A055231 Dirichlet g.f.: zeta(s)*Product_{primes p} (1 + p^(1-s) - p^(-s) - p^(1-2s) + p^(-2s)). - _R. J. Mathar_, Dec 21 2011
+%F A055231 a(n) = A007947(n)/A071773(n). - observed by _Velin Yanev_, Aug 27 2017, confirmed by _Antti Karttunen_, Nov 28 2017
+%F A055231 a(1) = 1; for n > 1, a(n) = A020639(n)^A063524(A067029(n)) * a(A028234(n)). - _Antti Karttunen_, Nov 28 2017
+%F A055231 a(n*m) = a(n)*a(m)/(gcd(n,a(m))*gcd(m,a(n))) for all n and m > 0 (conjectured). - _Velin Yanev_, Feb 06 2019. [This follows easily from the comment of _Vladeta Jovovic_. - _N. J. A. Sloane_, Mar 14 2019]
+%F A055231 From _Vaclav Kotesovec_, Dec 19 2019: (Start)
+%F A055231 Dirichlet g.f.: zeta(s-1) * zeta(s) * Product_{primes p} (1 - p^(1-3*s) + p^(2-3*s) - p^(2-2*s) + p^(-2*s) - p^(-s)).
+%F A055231 Sum_{k=1..n} a(k) ~ c * Pi^2 * n^2 / 12, where c = Product_{primes p} (1 - 2/p^2 + 2/p^4 - 1/p^5) = 0.394913518073109872954607634745304266741971541072... (End)
+%p A055231 A055231 := proc(n)
+%p A055231     a := 1 ;
+%p A055231     if n > 1 then
+%p A055231         for f in ifactors(n)[2] do
+%p A055231             if op(2, f) = 1 then
+%p A055231                 a := a*op(1, f) ;
+%p A055231             end if;
+%p A055231         end do:
+%p A055231     end if;
+%p A055231     a ;
+%p A055231 end proc: # _R. J. Mathar_, Dec 23 2011
+%t A055231 rad[n_] := Times @@ First /@ FactorInteger[n]; a[n_] := Denominator[n/rad[n]^2]; Table[a[n], {n, 1, 80}] (* _Jean-François Alcover_, Jun 20 2013, after _Reinhard Zumkeller_ *)
+%t A055231 f[p_, e_] := If[e==1, p, 1]; a[n_] := Times @@ (f @@@ FactorInteger[n]); Array[a, 100] (* _Amiram Eldar_, Sep 07 2020 *)
+%o A055231 (PARI) A055231(n)={
+%o A055231    local(a=1);
+%o A055231    f=factor(n) ;
+%o A055231    for(i=1,matsize(f)[1],
+%o A055231          if( f[i,2] ==1, a *=  f[i,1]
+%o A055231          )
+%o A055231    ) ;
+%o A055231    a ;
+%o A055231 } /* _R. J. Mathar_, Mar 12 2012 */
+%o A055231 (PARI) a(n) = {my(f=factor(n)); for (k=1, #f~, if (f[k,2] > 1, f[k,2] = 0);); factorback(f);} \\ _Michel Marcus_, Aug 27 2017
+%o A055231 (Scheme, with memoization-macro definec) (definec (A055231 n) (if (= 1 n) 1 (* (if (= 1 (A067029 n)) (A020639 n) 1) (A055231 (A028234 n))))) ;; _Antti Karttunen_, Nov 28 2017
+%o A055231 (Python)
+%o A055231 from math import prod
+%o A055231 from sympy import factorint
+%o A055231 def A055231(n): return prod(p for p, e in factorint(n).items() if e == 1) # _Chai Wah Wu_, Nov 14 2022
+%Y A055231 Positions of 1's: A001694.
+%Y A055231 Cf. A008833, A007913, A007947, A000188, A057521, A055773 (computed for n!), A056169 (number of prime divisors), A056671 (number of divisors), A092261 (sum of divisors of the n-th term), A332785.
+%Y A055231 Cf. A005117 (subsequence).
+%K A055231 nonn,mult
+%O A055231 1,2
+%A A055231 _Labos Elemer_, Jun 21 2000
+%E A055231 Name replaced with a simpler description (based on _Henry Bottomley_'s comment) by _Antti Karttunen_, Nov 28 2017
+%E A055231 Incorrect comments and example deleted by _Peter Munn_, Nov 30 2022

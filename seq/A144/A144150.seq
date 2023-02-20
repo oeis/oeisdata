@@ -1,0 +1,56 @@
+%I A144150
+%S A144150 1,1,1,1,1,1,1,1,2,1,1,1,3,5,1,1,1,4,12,15,1,1,1,5,22,60,52,1,1,1,6,
+%T A144150 35,154,358,203,1,1,1,7,51,315,1304,2471,877,1,1,1,8,70,561,3455,
+%U A144150 12915,19302,4140,1,1,1,9,92,910,7556,44590,146115,167894,21147,1,1,1,10,117
+%N A144150 Square array A(n,k), n >= 0, k >= 0, read by antidiagonals, where the e.g.f. of column k is 1+g^(k+1)(x) with g = x-> exp(x)-1.
+%C A144150 A(n,k) is also the number of (k+1)-level labeled rooted trees with n leaves.
+%C A144150 Number of ways to start with set {1,2,...,n} and then repeat k times: partition each set into subsets. - _Alois P. Heinz_, Aug 14 2015
+%C A144150 Equivalently, A(n,k) is the number of length k+1 multichains from bottom to top in the set partition lattice of an n-set. - _Geoffrey Critzer_, Dec 05 2020
+%H A144150 Alois P. Heinz, <a href="/A144150/b144150.txt">Antidiagonals n = 0..140, flattened</a>
+%H A144150 E. T. Bell, <a href="http://doi.org/10.2307/1968633">The Iterated Exponential Integers</a>, Annals of Mathematics, 39(3) (1938), 539-557.
+%H A144150 Pierpaolo Natalini and Paolo Emilio Ricci, <a href="https://doi.org/10.2298/AADM1702327N">Higher order Bell polynomials and the relevant integer sequences</a>, in Appl. Anal. Discrete Math. 11 (2017), 327-339.
+%H A144150 Pierpaolo Natalini and Paolo E. Ricci, <a href="https://cs.uwaterloo.ca/journals/JIS/VOL20/Ricci/ricci3.html">Integer Sequences Connected with Extensions of the Bell Polynomials</a>, Journal of Integer Sequences, 2017, Vol. 20, #17.10.2.
+%H A144150 Ivar Henning Skau and Kai Forsberg Kristensen, <a href="https://arxiv.org/abs/1903.07979">An asymptotic Formula for the iterated exponential Bell Numbers</a>, arXiv:1903.07979 [math.CO], 2019.
+%H A144150 Ivar Henning Skau and Kai Forsberg Kristensen, <a href="https://arxiv.org/abs/1903.08379">Sets of iterated Partitions and the Bell iterated Exponential Integers</a>, arXiv:1903.08379 [math.CO], 2019.
+%H A144150 <a href="/index/Ro#rooted">Index entries for sequences related to rooted trees</a>
+%F A144150 E.g.f. of column k: 1 + g^(k+1)(x) with g = x-> exp(x)-1.
+%F A144150 Column k+1 is Stirling transform of column k.
+%e A144150 Square array begins:
+%e A144150   1,  1,   1,    1,    1,    1,  ...
+%e A144150   1,  1,   1,    1,    1,    1,  ...
+%e A144150   1,  2,   3,    4,    5,    6,  ...
+%e A144150   1,  5,  12,   22,   35,   51,  ...
+%e A144150   1, 15,  60,  154,  315,  561,  ...
+%e A144150   1, 52, 358, 1304, 3455, 7556,  ...
+%p A144150 g:= proc(p) local b; b:= proc(n) option remember; if n=0 then 1
+%p A144150       else (n-1)! *add(p(k)*b(n-k)/(k-1)!/(n-k)!, k=1..n) fi
+%p A144150     end end:
+%p A144150 A:= (n,k)-> (g@@k)(1)(n):
+%p A144150 seq(seq(A(n, d-n), n=0..d), d=0..12);
+%p A144150 # second Maple program:
+%p A144150 A:= proc(n, k) option remember; `if`(n=0 or k=0, 1,
+%p A144150       add(binomial(n-1, j-1)*A(j, k-1)*A(n-j, k), j=1..n))
+%p A144150     end:
+%p A144150 seq(seq(A(n, d-n), n=0..d), d=0..12);  # _Alois P. Heinz_, Aug 14 2015
+%p A144150 # third Maple program:
+%p A144150 b:= proc(n, t, m) option remember; `if`(t=0, 1, `if`(n=0,
+%p A144150       b(m, t-1, 0), m*b(n-1, t, m)+b(n-1, t, m+1)))
+%p A144150     end:
+%p A144150 A:= (n, k)-> b(n, k, 0):
+%p A144150 seq(seq(A(n, d-n), n=0..d), d=0..12);  # _Alois P. Heinz_, Aug 04 2021
+%t A144150 g[k_] := g[k] = Nest[Function[x, E^x - 1], x, k]; a[n_, k_] := SeriesCoefficient[1 + g[k + 1], {x, 0, n}]*n!; Table[a[n - k, k], {n, 0, 12}, {k, n, 0, -1}] // Flatten (* _Jean-François Alcover_, Dec 06 2013 *)
+%o A144150 (Python)
+%o A144150 from sympy.core.cache import cacheit
+%o A144150 from sympy import binomial
+%o A144150 @cacheit
+%o A144150 def A(n, k): return 1 if n==0 or k==0 else sum([binomial(n - 1, j - 1)*A(j, k - 1)*A(n - j, k) for j in range(1, n + 1)])
+%o A144150 for n in range(51): print([A(k, n - k) for k in range(n + 1)]) # _Indranil Ghosh_, Aug 07 2017
+%Y A144150 Columns k=0-10 give: A000012, A000110, A000258, A000307, A000357, A000405, A001669, A081624, A081629, A081697, A081740.
+%Y A144150 Rows n=0+1, 2-5 give: A000012, A000027, A000326, A005945, A005946.
+%Y A144150 First lower diagonal gives A139383.
+%Y A144150 First upper diagonal gives A346802.
+%Y A144150 Main diagonal gives A261280.
+%Y A144150 Cf. A000142, A111672, A290353.
+%K A144150 nonn,tabl
+%O A144150 0,9
+%A A144150 _Alois P. Heinz_, Sep 11 2008

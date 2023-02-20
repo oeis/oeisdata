@@ -1,0 +1,42 @@
+%I A034691
+%S A034691 1,1,3,7,18,42,104,244,585,1373,3233,7533,17547,40591,93711,215379,
+%T A034691 493735,1127979,2570519,5841443,13243599,29953851,67604035,152258271,
+%U A034691 342253980,767895424,1719854346,3845443858
+%N A034691 Euler transform of powers of 2 [1,2,4,8,16,...].
+%C A034691 This is the number of different hierarchical orderings that can be formed from n unlabeled elements: these are divided into groups and the elements in each group are then arranged in an "unlabeled preferential arrangement" or "composition" as in A000079. - _Thomas Wieder_ and _N. J. A. Sloane_, Jun 10 2003
+%C A034691 From _Gus Wiseman_, Mar 03 2016: (Start)
+%C A034691 The original Sloane-Wieder definition, "To obtain a hierarchical ordering we partition the elements into unlabeled nonempty subsets and form a composition of each subset," [arXiv:math/0307064] has two possible meanings. The first possible meaning is that we should (1) choose a set partition pi of {1...n} and (2) for each block of pi choose a composition of the number of elements. In this case the correct number of such structures would evidently be counted by A004211 which differs from a(n) for n > 2.
+%C A034691 The other possible meaning is that after we have done (1) and (2) above we (3) "forget" the choice of pi. We will have produced a collection M of multisets of compositions. The span of M (its set of distinct elements) is correctly counted by A034691 and it seems that non-isomorphic hierarchical orderings of unlabeled sets are nothing more than multisets of compositions. This discovery is due to Wieder. (End)
+%C A034691 The asymptotic formula in the article by N. J. A. Sloane and Thomas Wieder, "The Number of Hierarchical Orderings" (Theorem 3) is incorrect (a multiplicative factor of 1.397... is missing, see my formula below). - _Vaclav Kotesovec_, Sep 08 2014
+%C A034691 Number of partitions of n into 1 sort of 1, 2 sorts of 2's, 4 sorts of 3's, ..., 2^(k-1) sorts of k's, ... . - _Joerg Arndt_, Sep 09 2014
+%C A034691 Also number of normal multiset partitions of weight n, where a multiset is normal if it spans an initial interval of positive integers. - _Gus Wiseman_, Mar 03 2016
+%H A034691 T. D. Noe and Vaclav Kotesovec, <a href="/A034691/b034691.txt">Table of n, a(n) for n = 0..3190</a> (first 300 terms from T. D. Noe)
+%H A034691 Vaclav Kotesovec, <a href="/A034691/a034691_1.pdf">Asymptotics of sequence A034691</a>
+%H A034691 Vaclav Kotesovec, <a href="http://arxiv.org/abs/1508.01796">Asymptotics of the Euler transform of Fibonacci numbers</a>, arXiv:1508.01796 [math.CO], Aug 07 2015
+%H A034691 N. J. A. Sloane and Thomas Wieder, <a href="https://arxiv.org/abs/math/0307064">The Number of Hierarchical Orderings</a>, arXiv:math/0307064 [math.CO], 2003; Order 21 (2004), 83-89.
+%H A034691 Thomas Wieder, <a href="/A034691/a034691_1.txt">An explicit formula for the n-th term</a>
+%H A034691 Thomas Wieder, <a href="http://www.m-hikari.com/ams/ams-password-2009/ams-password53-56-2009/wiederAMS53-56-2009.pdf">The number of certain rankings and hierarchies formed from labeled or unlabeled elements and sets</a>, Applied Mathematical Sciences, vol. 3, 2009, no. 55, 2707 - 2724. [From _Thomas Wieder_, Nov 14 2009]
+%F A034691 G.f.: 1 / Product_{n>=1} (1-x^n)^(2^(n-1)).
+%F A034691 Recurrence: a(n) = (1/n) * Sum_{m=1..n} a(n-m)*c(m) where c(m) = A083413(m).
+%F A034691 a(n) ~ c * 2^n * exp(sqrt(2*n)) / (sqrt(2*Pi) * exp(1/4) * 2^(3/4) * n^(3/4)), where c = exp( Sum_{k>=2} 1/(k*(2^k-2)) ) = 1.3976490050836502... (see A247003). - _Vaclav Kotesovec_, Sep 08 2014
+%e A034691 The normal multiset partitions for a(4) = 18: {{1111},{1222},{1122},{1112},{1233},{1223},{1123},{1234},{1,111},{1,122},{1,112},{1,123},{11,11},{11,12},{12,12},{1,1,11},{1,1,12},{1,1,1,1}}
+%p A034691 oo := 101: mul( 1/(1-x^j)^(2^(j-1)),j=1..oo): series(%,x,oo): t1 := seriestolist(%); A034691 := n-> t1[n+1];
+%p A034691 with(combstruct); SetSeqSetU := [T, {T=Set(S), S=Sequence(U,card >= 1), U=Set(Z,card >=1)},unlabeled]; seq(count(SetSeqSetU,size=j),j=1..12);
+%p A034691 # Alternative, uses EulerTransform from A358369:
+%p A034691 a := EulerTransform(BinaryRecurrenceSequence(2, 0)):
+%p A034691 seq(a(n), n = 0..27); # _Peter Luschny_, Nov 17 2022
+%t A034691 nn = 30; b = Table[2^n, {n, 0, nn}]; CoefficientList[Series[Product[1/(1 - x^m)^b[[m]], {m, nn}], {x, 0, nn}],  x] (* _T. D. Noe_, Nov 21 2011 *)
+%t A034691 Table[SeriesCoefficient[E^(Sum[x^k/(1 - 2*x^k)/k, {k, 1, n}]), {x, 0, n}], {n, 0, 30}] (* _Vaclav Kotesovec_, Sep 08 2014 *)
+%t A034691 allnorm[n_Integer]:=Function[s,Array[Count[s,y_/;y<=#]+1&,n]]/@Subsets[Range[n-1]+1];
+%t A034691 allnmsp[0]={};allnmsp[1]={{{1}}};allnmsp[n_Integer]:=allnmsp[n]=Join[allnmsp[n-1],List/@allnorm[n],Join@@Function[ptn,Append[ptn,#]&/@Select[allnorm[n-Length[Join@@ptn]],OrderedQ[{Last[ptn],#}]&]]/@allnmsp[n-1]];
+%t A034691 Apply[SequenceForm,Select[allnmsp[4],Length[Join@@#]===4&],{2}] (* to construct the example *)
+%t A034691 Table[Length[Complement[allnmsp[n],allnmsp[n-1]]],{n,1,8}] (* _Gus Wiseman_, Mar 03 2016 *)
+%o A034691 (PARI) A034691(n,l=1+O('x^(n+1)))={polcoeff(1/prod(k=1,n,(l-'x^k)^2^(k-1)),n)} \\ _Michael Somos_, Nov 21 2011, edited by _M. F. Hasler_, Jul 24 2017
+%o A034691 (SageMath) # uses[EulerTransform from A166861]
+%o A034691 a = BinaryRecurrenceSequence(2, 0)
+%o A034691 b = EulerTransform(a)
+%o A034691 print([b(n) for n in range(30)]) # _Peter Luschny_, Nov 11 2020
+%Y A034691 Cf. A034899, A075729, A247003, A004211, A104500 (Euler transform), A290222 (Multiset transform).
+%K A034691 nonn
+%O A034691 0,3
+%A A034691 _N. J. A. Sloane_.

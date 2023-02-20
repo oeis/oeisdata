@@ -1,0 +1,53 @@
+%I A055266
+%S A055266 1,3,5,4,2,6,8,7,9,11,10,12,13,14,16,17,15,18,20,19,21,23,22,24,25,26,
+%T A055266 28,27,29,31,32,30,33,35,34,36,38,37,39,41,40,42,43,44,46,45,47,48,50,
+%U A055266 49,51,53,52,54,56,55,57,58,59,60,61,62,63,65,64,66,67,68,70,71,69,72
+%N A055266 a(n) + a(n+1) is never prime; lexicographically earliest such sequence of distinct positive integers.
+%C A055266 See A253074 for an essentially identical sequence (with a proof that the sequence is a permutation).
+%C A055266 Sequence A253074 is defined in the same way, but starting with 0. This happens to produce the same sequence from the next term on. This is the case (M,N) = (2,0) in the family of sequences where M consecutive terms yield N primes in their pairwise sums, see the wiki page for other examples. - _M. F. Hasler_, Nov 26 2019
+%H A055266 Robert Israel, <a href="/A055266/b055266.txt">Table of n, a(n) for n = 1..10000</a>
+%H A055266 M. F. Hasler, <a href="/wiki/User:M._F._Hasler/Prime_sums_from_neighboring_terms">Prime sums from neighboring terms</a>, OEIS wiki, Nov. 23, 2019
+%H A055266 <a href="/index/Per#IntegerPermutation">Index entries for sequences that are permutations of the natural numbers</a>
+%F A055266 a(n) = A253074(n+1) (as long as A253074(1) = 0). - _M. F. Hasler_, Nov 26 2019
+%e A055266 a(3) = 5 because 1 and 3 have already been used and both 3 + 2 = 5 and 3 + 4 = 7 are prime while 3 + 5 = 8 is not prime.
+%p A055266 N:= 1000; # to get a[n] for n up to N
+%p A055266 A:= {1};
+%p A055266 a[1]:= 1;
+%p A055266 for n from 2 to N do
+%p A055266   mA:= max(A);
+%p A055266   R:= {$1..mA} minus A;
+%p A055266   for x in R do
+%p A055266      if not isprime(a[n-1]+x) then
+%p A055266        a[n]:= x;
+%p A055266        break
+%p A055266      fi
+%p A055266    od:
+%p A055266    if not assigned(a[n]) then
+%p A055266      for x from mA+1 do
+%p A055266        if not isprime(a[n-1]+x) then
+%p A055266          a[n]:= x;
+%p A055266          break
+%p A055266        fi
+%p A055266      od
+%p A055266    fi;
+%p A055266    A:= A union {x};
+%p A055266 od:
+%p A055266 seq(a[n],n=1..N); # _Robert Israel_, Jun 03 2014
+%t A055266 f[ s_ ]:=Block[ {k=1,a=s[ [ -1 ] ]},While[ Or[ MemberQ[ s,k ],PrimeQ[ a+k ] ],k++ ];Append[ s,k ] ];Nest[ f,{1},121 ] (* _Zak Seidov_, Oct 21 2009 *)
+%t A055266 a={1};z=Range[2,2002];z=Complement[z,a];While[Length[z]>1,If[!PrimeQ[z[[1]]+Last[a]],AppendTo[a,z[[1]]],If[!PrimeQ[z[[2]]+Last[a]],AppendTo[a,z[[2]]],AppendTo[a,z[[3]]]]];z=Complement[z,a]];Print[a] (* significantly faster *) (* _Vladimir Joseph Stephan Orlovsky_, May 03 2011 *)
+%o A055266 (Haskell)
+%o A055266 import Data.List (delete)
+%o A055266 a055266 n = a055266_list !! (n-1)
+%o A055266 a055266_list = 1 : f 1 [2..] where
+%o A055266    f u vs = g vs where
+%o A055266      g (w:ws) | a010051' (u + w) == 0 = w : f w (delete w vs)
+%o A055266               | otherwise = g ws
+%o A055266 -- _Reinhard Zumkeller_, Jan 14 2015
+%o A055266 (PARI) v=[1]; n=1; while(n<100, if(!isprime(n+v[#v])&&!vecsearch(vecsort(v), n), v=concat(v, n); n=0); n++); v \\ _Derek Orr_, Jun 08 2015
+%o A055266 (PARI) A055266_upto(n=99, u=1, U, a)={vector(n, n, n=u; while(bittest(U, n-u)|| isprime(a+n), n++); if(n>u, U+=1<<(n-u), U>>=-u+u+=valuation(U+2, 2)); a=n) + if(default(debug), print([u]))} \\ Optional args allow to tweak computation. If debug > 0, print least unused number at the end. - _M. F. Hasler_, Nov 25 2019
+%Y A055266 Cf. A055265, A010051, A249920 (inverse), A203069, A253074.
+%K A055266 easy,nonn
+%O A055266 1,2
+%A A055266 _Henry Bottomley_, May 09 2000
+%E A055266 Corrected by _Zak Seidov_, Oct 21 2009
+%E A055266 Name edited by _M. F. Hasler_, Nov 26 2019

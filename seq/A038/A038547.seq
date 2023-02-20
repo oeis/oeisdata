@@ -1,0 +1,44 @@
+%I A038547
+%S A038547 1,3,9,15,81,45,729,105,225,405,59049,315,531441,3645,2025,945,
+%T A038547 43046721,1575,387420489,2835,18225,295245,31381059609,3465,50625,
+%U A038547 2657205,11025,25515,22876792454961,14175,205891132094649,10395,1476225,215233605
+%N A038547 Least number with exactly n odd divisors.
+%C A038547 Also least odd number with exactly n divisors. - _Lekraj Beedassy_, Aug 30 2006
+%C A038547 a(2n-1) = {1, 9, 81, 729, 225, 59049, ...} are the squares. A122842(n) = sqrt(a(2n-1)) = {1, 3, 9, 27, 15, 243, 729, 45, 6561, 19683, 135, 177147, 225, 105, 4782969, 14348907, 1215, ...}. - _Alexander Adamchuk_, Sep 13 2006
+%C A038547 Also the least number k such that there are n partitions of k whose elements are consecutive integers. I.e., 1=1, 3=1+2=3, 9=2+3+4=4+5=9, 15=1+2+3+4+5=4+5+6=7+8=15, etc. - _Robert G. Wilson v_, Jun 02 2007
+%C A038547 The politeness of an integer, A069283(n), is defined to be the number of its nontrivial runsum representations, and the sequence 3, 9, 15, 81, 45, 729, 105, ... represents the least integers to have a politeness of 1, 2, 3, 4, ... This is also the sequence of smallest integers with n+1 odd divisors and so apart from the leading 1, is precisely this sequence. - _Ant King_, Sep 23 2009
+%C A038547 a(n) is also the least number k with the property that the symmetric representation of sigma(k) has n subparts. - _Omar E. Pol_, Dec 31 2016
+%H A038547 Don Reble, <a href="/A038547/b038547.txt">Table of n, a(n) for n = 1..2000</a>
+%H A038547 Hartmut F. W. Hoft, <a href="/A038547/a038547.pdf">Description of general formula for A038547(n)</a>
+%H A038547 T. Verhoeff, <a href="https://cs.uwaterloo.ca/journals/JIS/trapzoid.html">Rectangular and Trapezoidal Arrangements</a>, J. Integer Sequences, Vol. 2, 1999, #99.1.6.
+%F A038547 a(p) = 3^(p-1) for primes p. - _Zak Seidov_, Apr 18 2006
+%F A038547 a(n) = A119265(n,n). - _Reinhard Zumkeller_, May 11 2006
+%F A038547 It was suggested by _Alexander Adamchuk_ that for all n >= 1, we have a(3^(n-1)) = (p(n)#/2)^2 = (A002110(n)/2)^2 = A070826(n)^2. But this is false! E.g., (p(n)#/2)^2 = 3^2 * 5^2 * 7^2 * ... * 23^2 * 29^2 does indeed have 3^9 odd factors, but it is greater than 3^8 * 5^2 * 7^2 * ... * 23^2 which has 9*3*3*3*3*3*3*3 = 9*3^7 = 3^9 odd factors. - _Richard Sabey_, Oct 06 2007
+%F A038547 a(A053640(m)) = a(A000005(A053624(m))) = A053624(m). - _Rick L. Shepherd_, Apr 20 2008
+%F A038547 a(p^k) = Product_{i=1..k} prime(i+1)^(p-1), p prime and k >= 0, only when p_(k+1) < 3^p. - _Hartmut F. W. Hoft_, Nov 03 2022
+%e A038547 a(2^3) = 105 = 3*5 while a(2^4) = 945 = 3^3 * 5 * 7. There are 5 partition lists for the exponents of numbers with 16 odd divisors; they are {1, 1, 1, 1}, {3, 1, 1}, {3, 3}, {7, 1}, and {15} that result in the 5 numbers 1155, 945, 3375, 10935, and 14348907. Number a(3^8) = a(6561) = 3^2 * 5^2 * ... * 19^2 * 23^2 = 12442607161209225 while a(3^9) = a(19683) = 3^8 * 5^2 * ... * 19^2 * 23^2 = 9070660620521525025. The numbers a(5^52) = 3^4 * 5^4 * 7^4 * ... and a(5^53) = 3^24 * 5^4 * 7^4 * ... have 393 and 402 digits, respectively.  - _Hartmut F. W. Hoft_, Nov 03 2022
+%t A038547 Table[Select[Range[1,532000,2],DivisorSigma[0,#]==k+1 &,1],{k,0,15}]//Flatten (* _Ant King_, Nov 28 2010 *)
+%t A038547 2#-1&/@With[{ds=DivisorSigma[0,Range[1,600000,2]]},Table[Position[ds,n,1,1],{n,16}]]//Flatten (* The program is not suitable for generating terms beyond a(16) *) (* _Harvey P. Dale_, Jun 06 2017 *)
+%t A038547 (* direct computation of A038547(n) *)
+%t A038547 partitionLists[n_] := Module[{nFact=Map[#[[1]]^IntegerPartitions[#[[2]]]-1&, FactorInteger[n]]}, Reverse[Map[Sort[#, GreaterEqual]&, Fold[Flatten[Outer[Join, #1, #2, 1], 1]&, First[nFact], Rest[nFact]]]]]
+%t A038547 value[expL_] := Apply[Times, Prime[Range[2, Length[expL]+1]]^expL]
+%t A038547 a038547[n_ ] := Module[{expLL=partitionLists[n], len, min, k=2, next}, len=Length[expLL]; min=value[First[expLL]]; While[k<=len&&3^First[expLL[[k]]]<min, next=value[expLL[[k]]]; If[next<min, min=next]; k++]; min]
+%t A038547 a038547[{m_, n_}] := Map[a038547, Range[m, n]]
+%t A038547 a038547[{1, 34}] (* _Hartmut F. W. Hoft_, Nov 03 2022 *)
+%o A038547 (PARI) for(nd=1,15,forstep(k=1,10^66,2,if(nd==numdiv(k),print1(k,", ");break())))
+%o A038547 (Haskell)
+%o A038547 import Data.List  (find)
+%o A038547 import Data.Maybe (fromJust)
+%o A038547 a038547 n = fromJust $ find ((== n) . length . divisors) [1,3..]
+%o A038547    where divisors m = filter ((== 0) . mod m) [1..m]
+%o A038547 -- _Reinhard Zumkeller_, Feb 24 2011
+%Y A038547 A122842 = sqrt( a(2n-1) ).
+%Y A038547 Cf. A001227, A005179, A002110, A070826, A000005, A053640, A053624, A237593, A279387.
+%Y A038547 Row 1 of A266531. - _Omar E. Pol_, Dec 31 2016
+%Y A038547 Cf. A006093, A076274, A080577.
+%K A038547 nonn,nice
+%O A038547 1,2
+%A A038547 _Tom Verhoeff_
+%E A038547 Corrected by _Ron Knott_, Feb 22 2001
+%E A038547 a(30) from _Zak Seidov_, Apr 18 2006
+%E A038547 a(32)-a(34) from _Lekraj Beedassy_, Aug 30 2006

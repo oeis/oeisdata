@@ -1,0 +1,53 @@
+%I A031443
+%S A031443 2,9,10,12,35,37,38,41,42,44,49,50,52,56,135,139,141,142,147,149,150,
+%T A031443 153,154,156,163,165,166,169,170,172,177,178,180,184,195,197,198,201,
+%U A031443 202,204,209,210,212,216,225,226,228,232,240
+%N A031443 Digitally balanced numbers: positive numbers that in base 2 have the same number of 0's as 1's.
+%C A031443 Also numbers n such that the binary digital mean dm(2, n) = sigma(i in [1, d]: d_i * 2 - 1) / (2 * d) = 0, where d is the number of digits in the binary representation of n and d_i the individual digits. - _Reikku Kulon_, Sep 21 2008
+%C A031443 From _Reikku Kulon_, Sep 29 2008: (Start)
+%C A031443 Each run of values begins with 2^(2k + 1) + 2^(k + 1) - 2^k - 1. The initial values increase according to the sequence {2^(k - 1), 2^(k - 2), 2^(k - 3), ..., 2^(k - k)}.
+%C A031443 After this, the values follow a periodic sequence of increases by successive powers of two with single odd values interspersed.
+%C A031443 Each run ends with an odd increase followed by increases of {2^(k - k), ..., 2^(k - 2), 2^(k - 1), 2^k}, finally reaching 2^(2k + 2) - 2^(k + 1).
+%C A031443 Similar behavior occurs in other bases. (End)
+%C A031443 Numbers n such that A000120(n)/A070939(n) = 1/2. - _Ctibor O. Zizka_, Oct 15 2008
+%C A031443 Subsequence of A053754; A179888 is a subsequence. - _Reinhard Zumkeller_, Jul 31 2010
+%C A031443 A000120(a(n)) = A023416(a(n)); A037861(a(n)) = 0.
+%C A031443 A001700 gives number of terms having length 2*n in binary representation: A001700(n-1) = #{m: A070939(a(m))=2*n}. - _Reinhard Zumkeller_, Jun 08 2011
+%C A031443 The number of terms below 2^k is A079309(floor(k/2)) for k > 1. - _Amiram Eldar_, Nov 21 2020
+%H A031443 Reikku Kulon, <a href="/A031443/b031443.txt">Table of n, a(n) for n = 1..10000</a>
+%H A031443 Jason Bell, Thomas F. Lidbetter and Jeffrey Shallit, <a href="https://doi.org/10.1142/S0129054120410014">Additive number theory via approximation by regular languages</a>, International Journal of Foundations of Computer Science, Vol. 31, No. 6 (2020), pp. 667-687; <a href="https://arxiv.org/abs/1804.07996">arXiv preprint</a>, arXiv:1804.07996 [cs.FL], 2018.
+%H A031443 Thomas Finn Lidbetter, <a href="https://uwspace.uwaterloo.ca/bitstream/handle/10012/14254/Lidbetter_Thomas.pdf">Counting, Adding, and Regular Languages</a>, Master's Thesis, University of Waterloo, Ontario, Canada, 2018.
+%H A031443 Reinhard Zumkeller, <a href="/A031443/a031443.hs.txt">Haskell Programs for Binary Digitally Balanced Numbers</a>.
+%H A031443 <a href="/index/Bi#binary">Index entries for sequences related to binary expansion of n</a>
+%F A031443 a(n+1) = a(n)+2^k+2^(m-1)-1+int((2^(k+m)-2^k)/a(n))*(2^(2*m)+2^(m-1)) where k is the largest integer such that 2^k divides a(n) and m is the largest integer such that 2^m divides a(n)/2^k+1. - Ulrich Schimke (UlrSchimke(AT)aol.com)
+%F A031443 A145037(a(n)) = 0. - _Reikku Kulon_, Oct 02 2008
+%e A031443 9 is a term because '1001' contains 2 '0's and 2 '1's
+%p A031443 a:=proc(n) local nn, n1, n0: nn:=convert(n,base,2): n1:=add(nn[i],i=1..nops(nn)): n0:=nops(nn)-n1: if n0=n1 then n else end if end proc: seq(a(n), n = 1..240); # _Emeric Deutsch_, Jul 31 2008
+%t A031443 Select[Range[250],DigitCount[#,2,1]==DigitCount[#,2,0]&] (* _Harvey P. Dale_, Jul 22 2013 *)
+%t A031443 FromDigits[#,2]&/@DeleteCases[Flatten[Permutations/@Table[PadRight[{},2n,{1,0}],{n,5}],1],_?(#[[1]]==0&)]//Sort (* _Harvey P. Dale_, May 30 2016 *)
+%o A031443 (PARI) for(n=1,100,b=binary(n); l=length(b); if(sum(i=1,l, component(b,i))==l/2,print1(n,",")))
+%o A031443 (PARI) is(n)=hammingweight(n)==hammingweight(bitneg(n,#binary(n))) \\ _Charles R Greathouse IV_, Mar 29 2013
+%o A031443 (PARI) is(n)=2*hammingweight(n)==exponent(n)+1 \\ _Charles R Greathouse IV_, Apr 18 2020
+%o A031443 (Magma) [ n: n in [2..250] | Multiplicity({* z: z in Intseq(n,2) *}, 0) eq &+Intseq(n,2) ];  // _Bruno Berselli_, Jun 07 2011
+%o A031443 (Haskell) See link, showing that Ulrich Schimkes formula provides a very efficient algorithm. -- _Reinhard Zumkeller_, Jun 15 2011
+%o A031443 (Perl) for my $half ( 1 .. 4 ) {
+%o A031443   my $N = 2 * $half;  # only even widths apply
+%o A031443   my $vector = (1 << ($N-1)) | ((1 << ($N/2-1)) - 1);  # first key
+%o A031443   my $n = 1; $n *= $_ for 2 .. $N;    # N!
+%o A031443   my $d = 1; $d *= $_ for 2 .. $N/2;  # (N/2)!
+%o A031443   for (1 .. $n/($d*$d*2)) {
+%o A031443     print "$vector, ";
+%o A031443     my ($v, $d) = ($vector, 0);
+%o A031443     until ($v & 1 or !$v) { $d = ($d << 1)|1; $v >>= 1 }
+%o A031443     $vector += $d + 1 + (($v ^ ($v + 1)) >> 2);  # next key
+%o A031443   }
+%o A031443 } # _Ruud H.G. van Tol_, Mar 30 2014
+%o A031443 (Python)
+%o A031443 from sympy.utilities.iterables import multiset_permutations
+%o A031443 A031443_list = [int('1'+''.join(p),2) for n in range(1,10) for p in multiset_permutations('0'*n+'1'*(n-1))] # _Chai Wah Wu_, Nov 15 2019
+%Y A031443 Subsets: A144777, A144798, A144799, A144800, A144801, A144812.
+%Y A031443 Cf. A049354-A049360, A000120, A001316, A006519, A070939, A145057, A145058, A145059, A145060, A144912, A145037, A191292, A090050, A014486, A061854, A037861, A079309.
+%Y A031443 Terms of binary width n are enumerated by A001700.
+%K A031443 nonn,base,easy,nice
+%O A031443 1,1
+%A A031443 _Clark Kimberling_

@@ -1,0 +1,63 @@
+%I A118350
+%S A118350 1,1,0,1,1,0,1,2,1,0,1,3,6,1,0,1,4,13,7,1,0,1,5,21,42,8,1,0,1,6,30,96,
+%T A118350 54,9,1,0,1,7,40,163,325,67,10,1,0,1,8,51,244,770,445,81,11,1,0,1,9,
+%U A118350 63,340,1353,2688,583,96,12,1,0,1,10,76,452,2093,6530,3842,740,112,13,1,0
+%N A118350 Pendular triangle, read by rows, where row n is formed from row n-1 by the recurrence: if n > 2k, T(n,k) = T(n,n-k) + T(n-1,k), else T(n,k) = T(n,n-1-k) + 3*T(n-1,k), for n>=k>=0, with T(n,0)=1 and T(n,n)=0^n.
+%C A118350 See definition of pendular triangle and pendular sums at A118340.
+%H A118350 G. C. Greubel, <a href="/A118350/b118350.txt">Rows n = 0..100 of the triangle, flattened</a>
+%F A118350 T(2*n+m,n) = [A118351^(m+1)](n), i.e., the m-th lower semi-diagonal forms the self-convolution (m+1)-power of the central terms A118351.
+%e A118350 Row 6 equals the pendular sums of row 5,
+%e A118350   [1,  4, 13,  7,  1,  0], where the sums proceed as follows:
+%e A118350   [1, __, __, __, __, __]: T(6,0) = T(5,0) = 1;
+%e A118350   [1, __, __, __, __,  1]: T(6,5) = T(6,0) + 3*T(5,5) = 1 + 3*0 = 1;
+%e A118350   [1,  5, __, __, __,  1]: T(6,1) = T(6,5) + T(5,1) = 1 + 4 = 5;
+%e A118350   [1,  5, __, __,  8,  1]: T(6,4) = T(6,1) + 3*T(5,4) = 5 + 3*1 = 8;
+%e A118350   [1,  5, 21, __,  8,  1]: T(6,2) = T(6,4) + T(5,2) = 8 + 13 = 21;
+%e A118350   [1,  5, 21, 42,  8,  1]: T(6,3) = T(6,2) + 3*T(5,3) = 21 + 3*7 = 42;
+%e A118350   [1,  5, 21, 42,  8,  1, 0] finally, append a zero to obtain row 6.
+%e A118350 Triangle begins:
+%e A118350   1;
+%e A118350   1,  0;
+%e A118350   1,  1,  0;
+%e A118350   1,  2,  1,   0;
+%e A118350   1,  3,  6,   1,    0;
+%e A118350   1,  4, 13,   7,    1,     0;
+%e A118350   1,  5, 21,  42,    8,     1,     0;
+%e A118350   1,  6, 30,  96,   54,     9,     1,    0;
+%e A118350   1,  7, 40, 163,  325,    67,    10,    1,   0;
+%e A118350   1,  8, 51, 244,  770,   445,    81,   11,   1,   0;
+%e A118350   1,  9, 63, 340, 1353,  2688,   583,   96,  12,   1,  0;
+%e A118350   1, 10, 76, 452, 2093,  6530,  3842,  740, 112,  13,  1, 0;
+%e A118350   1, 11, 90, 581, 3010, 11760, 23286, 5230, 917, 129, 14, 1, 0; ...
+%e A118350 Central terms are T(2*n,n) = A118351(n);
+%e A118350 semi-diagonals form successive self-convolutions of the central terms:
+%e A118350 T(2*n+1,n) = A118352(n) = [A118351^2](n),
+%e A118350 T(2*n+2,n) = A118353(n) = [A118351^3](n).
+%t A118350 T[n_, k_, p_]:= T[n,k,p] = If[n<k || k<0, 0, If[k==0, 1, If[k==n, 0, If[n<=2*k, T[n,n-k-1,p] + p*T[n-1,k,p], T[n,n-k,p] + T[n-1,k,p] ]]]];
+%t A118350 Table[T[n,k,3], {n,0,12}, {k,0,n}]//Flatten (* _G. C. Greubel_, Feb 17 2021 *)
+%o A118350 (PARI) T(n,k)=if(n<k || k<0,0,if(k==0,1,if(n==k,0, if(n>2*k,T(n,n-k)+T(n-1,k),T(n,n-1-k)+3*T(n-1,k)))))
+%o A118350 (Sage)
+%o A118350 @CachedFunction
+%o A118350 def T(n, k, p):
+%o A118350     if (k<0 or n<k): return 0
+%o A118350     elif (k==0): return 1
+%o A118350     elif (k==n): return 0
+%o A118350     elif (n>2*k): return T(n,n-k,p) + T(n-1,k,p)
+%o A118350     else: return T(n, n-k-1, p) + p*T(n-1, k, p)
+%o A118350 flatten([[T(n,k,3) for k in (0..n)] for n in (0..12)]) # _G. C. Greubel_, Feb 17 2021
+%o A118350 (Magma)
+%o A118350 function T(n,k,p)
+%o A118350   if k lt 0 or n lt k then return 0;
+%o A118350   elif k eq 0 then return 1;
+%o A118350   elif k eq n then return 0;
+%o A118350   elif n gt 2*k then return T(n,n-k,p) + T(n-1,k,p);
+%o A118350   else return T(n,n-k-1,p) + p*T(n-1,k,p);
+%o A118350   end if;
+%o A118350   return T;
+%o A118350 end function;
+%o A118350 [T(n,k,3): k in [0..n], n in [0..12]]; // _G. C. Greubel_, Feb 17 2021
+%Y A118350 Cf. A118351, A118352, A118353, A118354.
+%Y A118350 Cf. A167763 (p=0), A118340 (p=1), A118345 (p=2), this sequence (p=3).
+%K A118350 nonn,tabl
+%O A118350 0,8
+%A A118350 _Paul D. Hanna_, Apr 26 2006

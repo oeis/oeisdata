@@ -1,0 +1,52 @@
+%I A005326 M2382
+%S A005326 1,1,3,4,28,16,256,324,3600,3600,129744,63504,3521232,3459600,
+%T A005326 60891840,91240704,8048712960,3554067456,425476094976,320265446400,
+%U A005326 12474417291264,16417666704384,2778580249611264,1142807773593600,172593628397420544
+%N A005326 Permanent of "coprime?" matrix.
+%C A005326 Number of permutations p of (1,2,3,...,n) such that k and p(k) are relatively prime for all k in (1,2,3,...,n). - _Benoit Cloitre_, Aug 23 2002
+%C A005326 Coprime matrix M=[m(i,j)] is a square matrix defined by m(i,j)=1 if gcd(i,j)=1 else 0.
+%D A005326 N. J. A. Sloane and Simon Plouffe, The Encyclopedia of Integer Sequences, Academic Press, 1995 (includes this sequence).
+%H A005326 Stephen C. Locke, <a href="/A005326/b005326.txt">Table of n, a(n) for n = 1..50</a> (first 30 terms from Seiichi Manyama)
+%H A005326 D. M. Jackson, <a href="http://dx.doi.org/10.1016/0097-3165(77)90016-4">The combinatorial interpretation of the Jacobi identity from Lie algebra</a>, J. Combin. Theory, A 23 (1977), 233-256.
+%H A005326 Carl Pomerance, <a href="https://doi.org/10.48550/arXiv.2203.03085">Coprime permutations</a>, arXiv:2203.03085 [math.NT], 2022.
+%H A005326 Ashwin Sah and Mehtaab Sawhney, <a href="https://doi.org/10.48550/arXiv.2203.06268">Enumerating coprime permutations</a>, arXiv:2203.06268 [math.NT], 2022.
+%F A005326 a(2n) = A009679(n)^2. - _T. D. Noe_, Feb 10 2007
+%p A005326 Jackson2:=proc(n) local m,i,j,M,p,b,s,x;
+%p A005326 if 0=(n mod 2) then;
+%p A005326 m := n/2;
+%p A005326 M := Matrix(m, m, 0);
+%p A005326   for i from 1 to m do for j from 1 to m do;
+%p A005326     if 1= igcd(2*i,2*j-1) then M[i,j]:=1; fi; od; od;
+%p A005326 s := LinearAlgebra[Permanent](M);
+%p A005326 return s^2;
+%p A005326 else;
+%p A005326 m := (n + 1)/2;
+%p A005326 M := Matrix(m, m, 0);
+%p A005326     for i from 1 to m-1 do for j from 1 to m do;
+%p A005326       if 1=igcd(2*i,2*j-1) then M[i,j]:=1; fi; od; od;
+%p A005326 for j to m do
+%p A005326     M[m,j] := x[j];
+%p A005326 end do;
+%p A005326 p := LinearAlgebra[Permanent](M);
+%p A005326 b := [ ];
+%p A005326 for j to m do
+%p A005326     b := [op(b), coeff(p, x[j])];
+%p A005326 end do;
+%p A005326 s := 0;
+%p A005326   for i from 1 to m do for j from 1 to m do;
+%p A005326     if 1=igcd(2*i-1,2*j-1) then s:=s+b[i]*b[j]; fi; od; od; fi;
+%p A005326 return s;
+%p A005326 end;
+%p A005326 seq(Jackson2(n), n=1..25); # _Stephen C. Locke_, Feb 24 2022
+%t A005326 perm[m_?MatrixQ] := With[{v = Array[x, Length[m]]}, Coefficient[Times @@ (m.v), Times @@ v]]; a[n_] := perm[ Table[ Boole[GCD[i, j] == 1], {i, 1, n}, {j, 1, n}]]; Table[an = a[n]; Print[an]; an, {n, 1, 24}] (* _Jean-François Alcover_, Nov 15 2011 *)
+%t A005326 (* or, if version >= 10: *)
+%t A005326 a[n_] := Permanent[Table[Boole[GCD[i, j] == 1], {i, 1, n}, {j, 1, n}]]; Table[an = a[n]; Print[an]; an, {n, 1, 24}] (* _Jean-François Alcover_, Jul 25 2017 *)
+%o A005326 (PARI) permRWNb(a)=n=matsize(a)[1]; if(n==1,return(a[1,1])); sg=1; nc=0; in=vectorv(n); x=in; x=a[,n]-sum(j=1,n,a[,j])/2; p=prod(i=1,n,x[i]); for(k=1,2^(n-1)-1,sg=-sg; j=valuation(k,2)+1; z=1-2*in[j]; in[j]+=z; nc+=z; x+=z*a[,j]; p+=prod(i=1,n,x[i],sg)); return(2*(2*(n%2)-1)*p)
+%o A005326 for(n=1,26,a=matrix(n,n,i,j,gcd(i,j)==1); print1(permRWNb(a)",")) \\ Herman Jamke (hermanjamke(AT)fastmail.fm), May 13 2007
+%Y A005326 Cf. A009679.
+%K A005326 nonn,nice
+%O A005326 1,3
+%A A005326 _N. J. A. Sloane_
+%E A005326 Corrected by _Vladeta Jovovic_, Jul 05 2003
+%E A005326 More terms from _T. D. Noe_, Feb 10 2007
+%E A005326 a(25) from _Alois P. Heinz_, Nov 15 2016

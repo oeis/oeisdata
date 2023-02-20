@@ -1,0 +1,64 @@
+%I A158830
+%S A158830 1,1,0,2,0,0,5,1,0,0,14,10,0,0,0,42,70,8,0,0,0,132,424,160,4,0,0,0,
+%T A158830 429,2382,1978,250,1,0,0,0,1430,12804,19508,6276,302,0,0,0,0,4862,
+%U A158830 66946,168608,106492,15674,298,0,0,0,0,16796,343772,1337684,1445208,451948
+%N A158830 Triangle, read by rows n>=1, where row n is the n-th differences of column n of array A158825, where the g.f. of row n of A158825 is the n-th iteration of x*Catalan(x).
+%H A158830 Paul D. Hanna, <a href="/A158830/b158830.txt">Table of n, a(n), n = 1..1326 (rows 1..51).</a>
+%H A158830 Toufik Mansour, Howard Skogman, Rebecca Smith, <a href="https://arxiv.org/abs/1704.04288">Passing through a stack k times</a>, arXiv:1704.04288 [math.CO], 2017.
+%F A158830 Row sums equal the factorial numbers.
+%F A158830 G.f. of row n = (1-x)^n*[g.f. of column n of A158825] where the g.f. of row n of array A158825 is the n-th iteration of x*C(x) and C(x) is the g.f. of the Catalan sequence A000108.
+%F A158830 Row-reversal is triangle A122890 where g.f. of row n of A122890 = (1-x)^n*[g.f. of column n of A122888], and the g.f. of row n of array A122888 is the n-th iteration of x+x^2.
+%e A158830 Triangle begins:
+%e A158830 .1;
+%e A158830 .1,0;
+%e A158830 .2,0,0;
+%e A158830 .5,1,0,0;
+%e A158830 .14,10,0,0,0;
+%e A158830 .42,70,8,0,0,0;
+%e A158830 .132,424,160,4,0,0,0;
+%e A158830 .429,2382,1978,250,1,0,0,0;
+%e A158830 .1430,12804,19508,6276,302,0,0,0,0;
+%e A158830 .4862,66946,168608,106492,15674,298,0,0,0,0;
+%e A158830 .16796,343772,1337684,1445208,451948,33148,244,0,0,0,0;
+%e A158830 .58786,1744314,10003422,16974314,9459090,1614906,61806,162,0,0,0,0;
+%e A158830 .208012,8780912,71692452,180308420,161380816,51436848,5090124,103932,84,0,0,0,0;
+%e A158830 ....
+%e A158830 where the g.f. of row n is (1-x)^n*[g.f. of column n of A158825];
+%e A158830 g.f. of row n of array A158825 is the n-th iteration of x*C(x):
+%e A158830 .1,1,2,5,14,42,132,429,1430,4862,16796,58786,208012,742900,...;
+%e A158830 .1,2,6,21,80,322,1348,5814,25674,115566,528528,2449746,...;
+%e A158830 .1,3,12,54,260,1310,6824,36478,199094,1105478,6227712,...;
+%e A158830 .1,4,20,110,640,3870,24084,153306,993978,6544242,43652340,...;
+%e A158830 .1,5,30,195,1330,9380,67844,500619,3755156,28558484,...;
+%e A158830 .1,6,42,315,2464,19852,163576,1372196,11682348,100707972,...;
+%e A158830 .1,7,56,476,4200,38052,351792,3305484,31478628,303208212,...;
+%e A158830 .1,8,72,684,6720,67620,693048,7209036,75915708,807845676,...;
+%e A158830 ....
+%e A158830 ROW-REVERSAL yields triangle A122890:
+%e A158830 .1;
+%e A158830 .0,1;
+%e A158830 .0,0,2;
+%e A158830 .0,0,1,5;
+%e A158830 .0,0,0,10,14;
+%e A158830 .0,0,0,8,70,42;
+%e A158830 .0,0,0,4,160,424,132;
+%e A158830 .0,0,0,1,250,1978,2382,429;
+%e A158830 .0,0,0,0,302,6276,19508,12804,1430; ...
+%e A158830 where g.f. of row n = (1-x)^n*[g.f. of column n of A122888];
+%e A158830 g.f. of row n of A122888 is the n-th iteration of x+x^2:
+%e A158830 .1;
+%e A158830 .1,1;
+%e A158830 .1,2,2,1;
+%e A158830 .1,3,6,9,10,8,4,1;
+%e A158830 .1,4,12,30,64,118,188,258,302,298,244,162,84,32,8,1; ...
+%t A158830 nmax = 11;
+%t A158830 f[0][x_] := x; f[n_][x_] := f[n][x] = f[n - 1][x + x^2] // Expand;
+%t A158830 T = Table[SeriesCoefficient[f[n][x], {x, 0, k}], {n, 0, nmax}, {k, 1, nmax}];
+%t A158830 row[n_] := CoefficientList[(1-x)^n*(T[[All, n]].x^Range[0, nmax])+O[x]^nmax, x] // Reverse;
+%t A158830 Table[row[n], {n, 1, nmax}] // Flatten (* _Jean-François Alcover_, Oct 26 2018 *)
+%o A158830 (PARI) {T(n, k)=local(F=x, CAT=serreverse(x-x^2+x*O(x^(n+2))), M, N, P); M=matrix(n+2, n+2, r, c, F=x; for(i=1, r, F=subst(F, x, CAT)); polcoeff(F, c)); Vec(truncate(Ser(vector(n+1,r,M[r,n+1])))*(1-x)^(n+1) +x*O(x^k))[k+1]}
+%Y A158830 Cf. A158825, A122890 (row-reversal), A122888, columns: A000108, A122892.
+%K A158830 nonn,tabl
+%O A158830 1,4
+%A A158830 _Paul D. Hanna_, Mar 28 2009
+%E A158830 Edited by _N. J. A. Sloane_, Oct 04 2010, to make entries, offset, b-file and link to b-file all consistent.

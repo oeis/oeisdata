@@ -1,0 +1,38 @@
+%I A048653
+%S A048653 7,12,13,19,21,35,37,38,41,44,57,65,70,107,108,112,119,120,121,125,
+%T A048653 129,130,190,191,204,205,209,210,212,223,253,285,305,306,315,342,343,
+%U A048653 345,350,369,370,379,380,408,410,413,440,441,475,487,501,538,570,642,650
+%N A048653 Numbers k such that the decimal digits of k^2 can be partitioned into two or more nonzero squares.
+%H A048653 Reinhard Zumkeller, <a href="/A048653/b048653.txt">Table of n, a(n) for n = 1..10000</a>
+%e A048653 12 is present because 12^2=144 can be partitioned into three squares 1, 4 and 4.
+%e A048653 108^2 = 11664 = 1_16_64, 120^2 = 14400 = 1_4_400, so 108 and 120 are in the sequence.
+%t A048653 (* This non-optimized program is not suitable to compute a large number of terms. *) split[digits_, pos_] := Module[{pos2}, pos2 = Transpose[{Join[ {1}, Most[pos+1]], pos}]; FromDigits[Take[digits, {#[[1]], #[[2]]}]]& /@ pos2]; sel[n_] := Module[{digits, ip, ip2, accu, nn}, digits = IntegerDigits[n^2]; ip = IntegerPartitions[Length[digits]]; ip2 = Flatten[ Permutations /@ ip, 1]; accu = Accumulate /@ ip2; nn = split[ digits, #]& /@ accu; SelectFirst[nn, Length[#]>1 && Flatten[ IntegerDigits[#] ] == digits && AllTrue[#, #>0 && IntegerQ[Sqrt[#]]&]&] ]; k = 1; Reap[Do[If[(s = sel[n]) != {}, Print["a(", k++, ") = ", n, " ", n^2, " ", s]; Sow[n]], {n, 1, 10^4}]][[2, 1]] (* _Jean-François Alcover_, Sep 28 2016 *)
+%o A048653 (Haskell)
+%o A048653 a048653 n = a048653_list !! (n-1)
+%o A048653 a048653_list = filter (f . show . (^ 2)) [1..] where
+%o A048653    f zs = g (init $ tail $ inits zs) (tail $ init $ tails zs)
+%o A048653    g (xs:xss) (ys:yss)
+%o A048653      | h xs      = h ys || f ys || g xss yss
+%o A048653      | otherwise = g xss yss
+%o A048653      where h ds = head ds /= '0' && a010052 (read ds) == 1
+%o A048653    g _ _ = False
+%o A048653 -- _Reinhard Zumkeller_, Oct 11 2011
+%o A048653 (Python)
+%o A048653 from math import isqrt
+%o A048653 def issquare(n): return isqrt(n)**2 == n
+%o A048653 def ok(n, c):
+%o A048653     if n%10 in {2, 3, 7, 8}: return False
+%o A048653     if issquare(n) and c > 1: return True
+%o A048653     d = str(n)
+%o A048653     for i in range(1, len(d)):
+%o A048653         if d[i] != '0' and issquare(int(d[:i])) and ok(int(d[i:]), c+1):
+%o A048653             return True
+%o A048653     return False
+%o A048653 def aupto(lim): return [r for r in range(lim+1) if ok(r*r, 1)]
+%o A048653 print(aupto(650)) # _Michael S. Branicky_, Jul 10 2021
+%Y A048653 Cf. A048646, A048375, A010052, A000290; subsequence of A128783.
+%K A048653 base,nice,nonn
+%O A048653 1,1
+%A A048653 _Felice Russo_
+%E A048653 Corrected and extended by _Naohiro Nomoto_, Sep 01 2001
+%E A048653 Definition clarified by _Harvey P. Dale_, May 09 2021

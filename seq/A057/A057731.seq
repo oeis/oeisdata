@@ -1,0 +1,64 @@
+%I A057731
+%S A057731 1,1,1,1,3,2,1,9,8,6,1,25,20,30,24,20,1,75,80,180,144,240,1,231,350,
+%T A057731 840,504,1470,720,0,0,504,0,420,1,763,1232,5460,1344,10640,5760,5040,
+%U A057731 0,4032,0,3360,0,0,2688,1,2619,5768,30996,3024,83160,25920,45360,40320,27216,0,30240,0,25920,24192,0,0,0,0,18144
+%N A057731 Irregular triangle read by rows: T(n,k) = number of elements of order k in symmetric group S_n, for n >= 1, 1 <= k <= g(n), where g(n) = A000793(n) is Landau's function.
+%C A057731 Every row for n >= 7 contains zeros. Landau's function quickly becomes > 2*n, and there is always a prime between n and 2*n. T(n,p) = 0 for such a prime p. - _Franklin T. Adams-Watters_, Oct 25 2011
+%D A057731 Wilf, Herbert S. "The asymptotics of e^P(z) and the number of elements of each order in S_n." Bull. Amer. Math. Soc.,  15.2 (1986), 225-232.
+%H A057731 Alois P. Heinz, <a href="/A057731/b057731.txt">Rows n = 1..30, flattened</a>
+%H A057731 FindStat - Combinatorial Statistic Finder, <a href="http://www.findstat.org/St000058/">The order of a permutation</a>
+%H A057731 Koda, Tatsuhiko; Sato, Masaki; Takegahara, Yugen; <a href="https://core.ac.uk/download/pdf/59122805.pdf">2-adic properties for the numbers of involutions in the alternating groups</a>, J. Algebra Appl. 14 (2015), no. 4, 1550052 (21 pages). - _N. J. A. Sloane_, Mar 27 2015
+%F A057731 Sum_{k=1..A000793(n)} k*T(n,k) = A060014(n); A000793 = Landau's function.
+%e A057731 Triangle begins:
+%e A057731   1;
+%e A057731   1,   1;
+%e A057731   1,   3,   2;
+%e A057731   1,   9,   8,   6;
+%e A057731   1,  25,  20,  30,  24,   20;
+%e A057731   1,  75,  80, 180, 144,  240;
+%e A057731   1, 231, 350, 840, 504, 1470, 720, 0, 0, 504, 0, 420;
+%e A057731   ...
+%p A057731 with(group):
+%p A057731 for n from 1 do
+%p A057731     f := [seq(0,i=1..n!)] ;
+%p A057731     mknown := 0 ;
+%p A057731     # loop through the permutations of n
+%p A057731     Sn := combinat[permute](n) ;
+%p A057731     for per in Sn do
+%p A057731         # write this permutation in cycle notation
+%p A057731         gen := convert(per,disjcyc) ;
+%p A057731         # compute the list of lengths of the cycles, then the lcm of these
+%p A057731         cty := [seq(nops(op(i,gen)),i=1..nops(gen))] ;
+%p A057731         if cty <> [] then
+%p A057731             lcty := lcm(op(cty)) ;
+%p A057731         else
+%p A057731             lcty := 1 ;
+%p A057731         end if;
+%p A057731         f := subsop(lcty = op(lcty,f)+1,f) ;
+%p A057731         mknown := max(mknown,lcty) ;
+%p A057731     end do:
+%p A057731     ff := add(el,el=f) ;
+%p A057731     print(seq(f[i],i=1..mknown)) ;
+%p A057731 end do: # _R. J. Mathar_, May 26 2014
+%p A057731 # second Maple program:
+%p A057731 b:= proc(n, g) option remember; `if`(n=0, x^g, add((j-1)!
+%p A057731       *b(n-j, ilcm(g, j))*binomial(n-1, j-1), j=1..n))
+%p A057731     end:
+%p A057731 T:= n-> (p-> seq(coeff(p, x, i), i=1..degree(p)))(b(n, 1)):
+%p A057731 seq(T(n), n=1..12);  # _Alois P. Heinz_, Jul 11 2017
+%t A057731 <<Combinatorica`; Table[Distribution[Apply[LCM, Map[Length, Map[ToCycles, Permutations[n]], {2}], 1], Range[Max[Apply[LCM, IntegerPartitions[n], 1]]]], {n, 1, 8}] // Grid
+%t A057731 (* Second program: *)
+%t A057731 row[n_] := (orders = PermutationOrder /@ GroupElements[SymmetricGroup[n]]; Table[Count[orders, k], {k, 1, Max[orders]}]); Table[row[n], {n, 1, 9}] // Flatten (* _Jean-François Alcover_, Aug 31 2016 *)
+%t A057731 b[n_, g_] := b[n, g] = If[n == 0, x^g, Sum[(j-1)!*b[n-j, LCM[g, j]]* Binomial[n-1, j-1], {j, 1, n}]];
+%t A057731 T[n_] := Function[p, Table[Coefficient[p, x, i], {i, 1, Exponent[p, x]}]][ b[n, 1]];
+%t A057731 Array[T, 12] // Flatten (* _Jean-François Alcover_, May 03 2019, after _Alois P. Heinz_ *)
+%o A057731 (Magma) {* Order(g) : g in Sym(6) *};
+%o A057731 (PARI) T(n,k)={n!*polcoeff(sumdiv(k, i, moebius(k/i)*exp(sumdiv(i, j, x^j/j) + O(x*x^n))), n)} \\ _Andrew Howroyd_, Jul 02 2018
+%Y A057731 Cf. A000793, also A054522 (for cyclic group), A057740 (alternating group), A057741 (dihedral group).
+%Y A057731 Rows sums give A000142, last elements of rows give A074859, columns k=2, 3, 5, 7, 11 give A001189, A001471, A059593, A153760, A153761. - _Alois P. Heinz_, Feb 16 2013
+%Y A057731 Main diagonal gives A074351.
+%Y A057731 Cf. A222029.
+%K A057731 nonn,tabf,easy,look,nice
+%O A057731 1,5
+%A A057731 _Roger Cuculière_, Oct 29 2000
+%E A057731 More terms from _N. J. A. Sloane_, Nov 01 2000

@@ -1,0 +1,42 @@
+%I A075227
+%S A075227 3,5,7,17,37,43,43,151,151,409,491,491,491,1087,2011,3709,3709,7417,
+%T A075227 7417,7417,19699,30139,35573,35573,40237,40237,132151,132151,158551,
+%U A075227 158551,245639,245639,961459,1674769,1674769,1674769,1674769,4339207
+%N A075227 Smallest odd prime not occurring in the numerator of any of the 2^n subset sums generated from the set 1/1, 1/2, 1/3, ..., 1/n.
+%C A075227 The largest prime generated is given in A075226. For information about how often the numerator of these sums is prime, see A075188 and A075189.
+%e A075227 a(3) = 7 because 7 is the smallest prime not occurring in the numerator of any of the sums 1/1 + 1/2 = 3/2, 1/1 + 1/3 = 4/3, 1/2 + 1/3 = 5/6 and 1/1 + 1/2 + 1/3 = 11/6.
+%t A075227 Needs["DiscreteMath`Combinatorica`"]; maxN=20; For[lst={}; prms={}; i=0; n=1, n<=maxN, n++, While[i<2^n-1, i++; s=NthSubset[i, Range[n]]; k=Numerator[Plus@@(1/s)]; If[PrimeQ[k], AppendTo[prms, k]]]; prms=Union[prms]; j=2; While[MemberQ[prms, Prime[j]], j++ ]; AppendTo[lst, Prime[j]]]; lst
+%t A075227 (* Second program; does not need Combinatorica *)
+%t A075227 a[1] = 3; a[2] = 5; a[n_] := For[nums = (Total /@ Subsets[1/Range[n]]) // Numerator // Union // Select[#, PrimeQ]&; p = 3, p <= Last[nums], p = NextPrime[p], If[FreeQ[nums, p], Print[n, " ", p]; Return[p]]];
+%t A075227 Table[a[n], {n, 1, 23}] (* _Jean-François Alcover_, Sep 10 2017 *)
+%o A075227 (Haskell)
+%o A075227 import Data.Ratio ((%), numerator)
+%o A075227 import Data.Set (Set, empty, fromList, toList, union)
+%o A075227 a075227 n = a075227_list !! (n-1)
+%o A075227 a075227_list = f 1 empty a065091_list where
+%o A075227    f x s ps = head qs : f (x + 1) (s `union` fromList hs) qs where
+%o A075227      qs = foldl (flip del)
+%o A075227           ps $ filter ((== 1) . a010051') $ map numerator hs
+%o A075227      hs = map (+ 1 % x) $ 0 : toList s
+%o A075227    del u vs'@(v:vs) = case compare u v
+%o A075227                       of LT -> vs'; EQ -> vs; GT -> v : del u vs
+%o A075227 -- _Reinhard Zumkeller_, May 28 2013
+%o A075227 (Python)
+%o A075227 from sympy import sieve
+%o A075227 from fractions import Fraction
+%o A075227 fracs, newnums, primeset = {0}, {0}, set(sieve.primerange(3, 10**6+1))
+%o A075227 for n in range(1, 24):
+%o A075227   newfracs = set(Fraction(1, n) + f for f in fracs)
+%o A075227   fracs |= newfracs
+%o A075227   primeset -= set(f.numerator for f in newfracs)
+%o A075227   print(min(primeset), end=", ") # _Michael S. Branicky_, May 09 2021
+%Y A075227 Cf. A001008, A075135, A075188, A075189, A075226.
+%Y A075227 Cf. A010051, A065091.
+%Y A075227 Cf. A217712.
+%K A075227 nonn,nice,more
+%O A075227 1,1
+%A A075227 _T. D. Noe_, Sep 08 2002
+%E A075227 a(21)-a(28) from _Reinhard Zumkeller_, May 28 2013
+%E A075227 a(29)-a(33) from _Jon E. Schoenfield_, May 09 2021
+%E A075227 a(34)-a(36) from _Michael S. Branicky_, May 10 2021
+%E A075227 a(37)-a(38) from _Michael S. Branicky_, May 12 2021

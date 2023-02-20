@@ -1,0 +1,51 @@
+%I A121868
+%S A121868 0,-1,-1,0,5,23,74,161,-57,-3466,-27361,-155397,-687688,-1888525,
+%T A121868 4974059,134695952,1400820897,11055147275,70658948426,327448854237,
+%U A121868 223871274083,-19116044475298,-314203665206509,-3562429698724513,-33024521386113840,-250403183401213513
+%N A121868 Let A(0) = 1, B(0) = 0; A(n+1) = Sum_{k=0..n} binomial(n,k)*B(k), B(n+1) = Sum_{k=0..n} -binomial(n,k)*A(k); entry gives B sequence (cf. A121867).
+%C A121868 Stirling transform of (I^(n+1)+(-I)^(n+1))/2 = (0,-1,0,1,..) repeated.
+%H A121868 Alois P. Heinz, <a href="/A121868/b121868.txt">Table of n, a(n) for n = 0..250</a>
+%H A121868 A. Fekete and G. Martin, <a href="http://www.jstor.org/stable/2695545">Problem 10791: Squared Series Yielding Integers</a>, Amer. Math. Monthly, 108 (No. 2, 2001), 177-178.
+%H A121868 V. V. Kruchinin, <a href="http://arxiv.org/abs/1009.2565">Composition of ordinary generating functions</a>, arXiv:1009.2565 [math.CO], 2010.
+%F A121868 From _Peter Bala_, Aug 28 2008: (Start)
+%F A121868 This sequence and its companion A121867 are related to the pair of constants cos(1) + sin(1) and cos(1) - sin(1) and may be viewed as generalizations of the Uppuluri-Carpenter numbers (complementary Bell numbers) A000587.
+%F A121868 Define E_2(k) = Sum_{n >= 0} (-1)^floor(n/2) *n^k/n! for k = 0,1,2,... . Then E_2(0) = cos(1) + sin(1) and E_2(1) = cos(1) - sin(1). Furthermore, E_2(k) is an integral linear combination of E_2(0) and E_2(1) (a Dobinski-type relation). For example, E_2(2) = - E_2(0) + E_2(1), E_2(3) = -3*E_2(0) and E_2(4) = - 6*E_2(0) - 5*E_2(1). More examples are given below. The precise result is E_2(k) = A121867(k) * E_2(0) - A121868(k) * E_2(1).
+%F A121868 For similar results see A143628. The decimal expansions of E_2(0) and E_2(1) are given in A143623 and A143624 respectively. (End)
+%F A121868 From _Vladimir Kruchinin_, Jan 26 2011: (Start)
+%F A121868 E.g.f.: A(x) = -sin(exp(x)-1).
+%F A121868 a(n) = Sum_{k = 0..floor(n/2)} Stirling2(n,2*k+1)*(-1)^(k+1). (End)
+%e A121868 From _Peter Bala_, Aug 28 2008: (Start)
+%e A121868 E_2(k) as a linear combination of E_2(i), i = 0..1.
+%e A121868 ============================
+%e A121868 ..E_2(k)..|...E_2(0)..E_2(1)
+%e A121868 ============================
+%e A121868 ..E_2(2)..|....-1.......1...
+%e A121868 ..E_2(3)..|....-3.......0...
+%e A121868 ..E_2(4)..|....-6......-5...
+%e A121868 ..E_2(5)..|....-5.....-23...
+%e A121868 ..E_2(6)..|....33.....-74...
+%e A121868 ..E_2(7)..|...266....-161...
+%e A121868 ..E_2(8)..|..1309......57...
+%e A121868 ..E_2(9)..|..4905....3466...
+%e A121868 (End)
+%p A121868 # Maple code for A024430, A024429, A121867, A121868.
+%p A121868 M:=30; a:=array(0..100); b:=array(0..100); c:=array(0..100); d:=array(0..100); a[0]:=1; b[0]:=0; c[0]:=1; d[0]:=0;
+%p A121868 for n from 1 to M do a[n]:=add(binomial(n-1,k)*b[k], k=0..n-1); b[n]:=add(binomial(n-1,k)*a[k], k=0..n-1); c[n]:=add(binomial(n-1,k)*d[k], k=0..n-1); d[n]:=-add(binomial(n-1,k)*c[k], k=0..n-1); od: ta:=[seq(a[n],n=0..M)]; tb:=[seq(b[n],n=0..M)]; tc:=[seq(c[n],n=0..M)]; td:=[seq(d[n],n=0..M)];
+%p A121868 # Code based on Stirling transform:
+%p A121868 stirtr:= proc(p) proc(n) option remember;
+%p A121868             add(p(k) *Stirling2(n, k), k=0..n) end
+%p A121868          end:
+%p A121868 a:= stirtr(n-> (I^(n+1) + (-I)^(n+1))/2):
+%p A121868 seq(a(n), n=0..30);  # _Alois P. Heinz_, Jan 29 2011
+%t A121868 stirtr[p_] := Module[{f}, f[n_] := f[n] = Sum[p[k]*StirlingS2[n, k], {k, 0, n}]; f]; a = stirtr[(I^(#+1)+(-I)^(#+1))/2&]; Table[a[n], {n, 0, 30}] (* _Jean-François Alcover_, Mar 11 2014, after _Alois P. Heinz_ *)
+%t A121868 Table[Im[BellB[n, -I]], {n, 0, 25}] (* _Vladimir Reshetnikov_, Oct 22 2015 *)
+%o A121868 (PARI) a(n) = sum(k=0,n\2, (-1)^(k+1)*stirling(n,2*k+1,2));
+%o A121868 vector(30, n, a(n-1)) \\ _G. C. Greubel_, Oct 09 2019
+%o A121868 (Magma) [(&+[(-1)^(k+1)*StirlingSecond(n,2*k+1): k in [0..Floor(n/2)]]): n in [0..30]]; // _G. C. Greubel_, Oct 09 2019
+%o A121868 (Sage) [sum((-1)^(k+1)*stirling_number2(n,2*k+1) for k in (0..floor(n/2))) for n in (0..30)] # _G. C. Greubel_, Oct 09 2019
+%o A121868 (GAP) List([0..30], n-> Sum([0..Int(n/2)], k-> (-1)^(k+1)* Stirling2(n,2*k+1)) ); # _G. C. Greubel_, Oct 09 2019
+%Y A121868 Cf. A121867, A024430, A024429.
+%Y A121868 Cf. A000587, A143623, A143624, A143628, A143631.
+%K A121868 sign
+%O A121868 0,5
+%A A121868 _N. J. A. Sloane_, Sep 05 2006

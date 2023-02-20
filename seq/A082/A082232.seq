@@ -1,0 +1,50 @@
+%I A082232
+%S A082232 1,2,3,4,5,6,7,8,9,111,171,222,252,333,414,444,555,666,777,828,888,
+%T A082232 999,2112,2772,2992,4224,4554,4774,6336,6556,8118,8338,8448,10101,
+%U A082232 10701,10901,11511,12321,13131,15751,18981,19791,20202,20502,20702,21012,21112
+%N A082232 Palindromes divisible by their digit sum.
+%D A082232 P. J. Costello, More Palindromic Niven Numbers, Journal of Recreational Mathematics, vol. 33:1 pp. 18-21 2004-5 Baywood Amityville NY.
+%D A082232 W. McDaniel, Palindromic Niven Numbers, Journal of Recreational Mathematics, vol. 24 pp. 164-6 1992 Baywood Amityville NY.
+%H A082232 Chai Wah Wu, <a href="/A082232/b082232.txt">Table of n, a(n) for n = 1..10000</a>
+%p A082232 dmax:= 6; # to get all terms with at most dmax digits
+%p A082232 f1:= proc(n)
+%p A082232   local L, Ln, i,r,s,p;
+%p A082232   L:= convert(n, base, 10);
+%p A082232   Ln:= nops(L);
+%p A082232 r:= add(L[i]*10^(Ln-i), i=1..Ln);
+%p A082232 s:= convert(L,`+`);
+%p A082232 p:= 10^Ln*n+r;
+%p A082232 if p mod (2*s) = 0 then p else NULL fi;
+%p A082232 end proc:
+%p A082232 f2:= proc(n,d)
+%p A082232 local L, Ln, i,r,s,p;
+%p A082232 L:= convert(n, base, 10);
+%p A082232 Ln:= nops(L);
+%p A082232 r:= add(L[i]*10^(Ln-i), i=1..Ln);
+%p A082232 s:= convert(L,`+`);
+%p A082232 p:= 10^(1+Ln)*n+10^Ln*d+r;
+%p A082232 if p mod(2*s+d) = 0 then p else NULL fi;
+%p A082232 end proc:
+%p A082232 A:= {$1..9}:
+%p A082232 for d from 2 to dmax do
+%p A082232   if d::even then
+%p A082232     A:= A union {seq(f1(x),x=10^(d/2-1) .. 10^(d/2)-1)}
+%p A082232   else
+%p A082232     A:= A union {seq(seq(f2(x,y),x=10^((d-1)/2-1) .. 10^((d-1)/2)-1),y=0..9)}
+%p A082232   fi
+%p A082232 od:
+%p A082232 A; # _Robert Israel_, Aug 22 2014
+%t A082232 d[n_] := IntegerDigits[n]; Select[Range[20800], Reverse[x = d[#]] == x && Divisible[#, Plus @@ d[#]] &] (* _Jayanta Basu_, Jul 13 2013 *)
+%o A082232 (Python)
+%o A082232 A082232 = sorted([int(str(x)+str(x)[::-1]) for x in range(1,10**5) if not
+%o A082232 ....int(str(x)+str(x)[::-1]) % sum((int(d) for d in str(x)+str(x)[::-1]))]
+%o A082232 ....+ [int(str(x)+str(x)[-2::-1]) for x in range(1,10**5) if not
+%o A082232 ....int(str(x)+str(x)[-2::-1]) % sum((int(d) for d in str(x)+str(x)[-2::-1]))]) # _Chai Wah Wu_, Aug 22 2014
+%o A082232 (PARI)
+%o A082232 rev(n)=r="";d=digits(n);for(i=1,#d,r=concat(Str(d[i]),r));eval(r)
+%o A082232 for(n=1,10^5,if(rev(n)==n,if(n%sumdigits(n)==0,print1(n,", ")))) \\ _Derek Orr_, Aug 25 2014
+%K A082232 base,nonn
+%O A082232 1,2
+%A A082232 _Amarnath Murthy_, Apr 09 2003
+%E A082232 Corrected and extended by _Giovanni Resta_, Feb 08 2006
+%E A082232 More terms from _Chai Wah Wu_, Aug 22 2014

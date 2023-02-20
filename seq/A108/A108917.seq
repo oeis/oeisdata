@@ -1,0 +1,41 @@
+%I A108917
+%S A108917 1,1,2,3,4,6,7,11,12,17,19,29,25,41,41,58,56,84,75,117,99,149,140,211,
+%T A108917 172,259,237,334,292,434,348,547,465,664,588,836,681,1014,873,1243,
+%U A108917 1039,1502,1224,1822,1507,2094,1810,2605,2118,3038,2516
+%N A108917 Number of knapsack partitions of n.
+%C A108917 A knapsack partition is a partition such that for every integer there is at most one way to write it as a sum of a subset of the parts of the partition.
+%C A108917 Equivalently, a knapsack partition of n is a multiset of positive integers summing to n such that every distinct submultiset has a different sum. - _Gus Wiseman_, Oct 03 2015
+%H A108917 Fausto A. C. Cariboni, <a href="/A108917/b108917.txt">Table of n, a(n) for n = 0..700</a> (terms 0..165 from Vladimir A. Shlyk and A. S. Vroublevski)
+%H A108917 R. Ehrenborg and M. Readdy, <a href="http://dx.doi.org/10.1016/j.aam.2006.08.006">The Mobius function of partitions with restricted block sizes</a>, Advances in Applied Mathematics, Volume 39, Issue 3, September 2007, Pages 283-292.
+%H A108917 Vladimir A. Shlyk, <a href="https://arxiv.org/abs/1805.07989">Number of Vertices of the Polytope of Integer Partitions and Factorization of the Partitioned Number</a>, arXiv:1805.07989 [math.CO], 2018.
+%e A108917 a(4) = 4, since there are 5 partitions of 4 (see sequence A000041) and the partition 211 is the only partition of these that is not knapsack since 2=1+1.
+%e A108917 The a(5) = 6 knapsack partitions of 5 are {{5},{3,2},{4,1},{2,2,1},{3,1,1},{1,1,1,1,1}}.
+%p A108917 g:= proc(n, k) option remember;
+%p A108917 # list of pairs [multiset, generator] of knapsack partitions of n with max part k
+%p A108917 local res, i,p,p2;
+%p A108917 if k = 1 then return [[[n],add(x^i,i=0..n)]] fi;
+%p A108917 res:= NULL;
+%p A108917 for i from 0 to floor(n/k) do
+%p A108917   for p in procname(n-k*i,k-1) do
+%p A108917      p2:= p[2]*add(x^(k*j),j=0..i);
+%p A108917      if max(coeffs(expand(p2))) <= 1 then
+%p A108917         res:= res, [[op(p[1]),i],p2]
+%p A108917      fi
+%p A108917   od
+%p A108917 od;
+%p A108917 [res];
+%p A108917 end proc:
+%p A108917 1, seq(nops(g(n,n)), n=1..60); # _Robert Israel_, Oct 04 2015
+%t A108917 ksQ[ptn_] := UnsameQ @@ Plus @@@ Union[Subsets[ptn]];
+%t A108917 ksAll[n_Integer] :=
+%t A108917   ksAll[n] =
+%t A108917    If[n <= 0, {},
+%t A108917     With[{loe = Array[ksAll, n - 1, 1, Join]},
+%t A108917      Union[{{n}},
+%t A108917       Select[Sort[Append[#, n - Plus @@ #], Greater] & /@ loe, ksQ]]]];
+%t A108917 ksAll[5](*example*)
+%t A108917 Array[Length[ksAll[#]] &, 20](*sequence*) (* _Gus Wiseman_, Oct 02 2015 *)
+%Y A108917 Cf. A000041, A275972 (strict knapsack partitions).
+%K A108917 nonn
+%O A108917 0,3
+%A A108917 _Richard Ehrenborg_, Jul 20 2005

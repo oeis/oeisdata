@@ -1,0 +1,47 @@
+%I A141610
+%S A141610 1,1,2,2,10,9,4,44,102,64,9,196,870,1304,625,20,876,6744,18200,20080,
+%T A141610 7776,48,4020,50421,218260,416500,362322,117649,115,18766,371676,
+%U A141610 2427600,7133655,10465290,7503328,2097152,286,89322,2731569,25919692,110136425,242427438,288002582,175481056,43046721
+%N A141610 Number of rooted trees with n points and exactly k specified colors: C(n,k), 1<=n, 1<=k<=n.
+%C A141610 The number of rooted trees with n points having any of c colors is Sum_k C(n,k) {c choose k}.
+%H A141610 Andrew Howroyd, <a href="/A141610/b141610.txt">Table of n, a(n) for n = 1..1275</a>
+%H A141610 John Riordan, <a href="http://dx.doi.org/10.1007/BF02392398">The numbers of labeled colored and chromatic trees</a>, Acta Mathematica, 97 (1957), 211-225.
+%H A141610 John Riordan, <a href="http://www.kryakin.com/files/Acta_Mat_(2_55)/acta106_57/97/97_08.pdf">The numbers of labeled colored and chromatic trees</a> [Dead link]
+%e A141610 C(n,1) is the number of rooted trees with n points (A000081). C(n,n)=n^{n-1}. C(3,2)=10 is the number of rooted trees with three points and two colors: AAB, ABB, ABA, BAA, BAB, BBA, A(BB), A(AB), B(AA), B(AB), where ABC is a rooted tree with A the root, B attached to A and C; A(BC) is a rooted tree with A the root, A attached to B and C.
+%e A141610    1;
+%e A141610    1,   2;
+%e A141610    2,  10,    9;
+%e A141610    4,  44,  102,    64;
+%e A141610    9, 196,  870,  1304,   625;
+%e A141610   20, 876, 6744, 18200, 20080, 7776;
+%e A141610   ...
+%p A141610 b:= proc(n, k) option remember; `if`(n<2, k*n, (add(add(b(d, k)*
+%p A141610       d, d=numtheory[divisors](j))*b(n-j, k), j=1..n-1))/(n-1))
+%p A141610     end:
+%p A141610 C:= (n, k)-> add(b(n, k-j)*binomial(k, j)*(-1)^j, j=0..k):
+%p A141610 seq(seq(C(n, k), k=1..n), n=1..10);  # _Alois P. Heinz_, Dec 11 2020
+%t A141610 p[a_List]:=a;p[a_List,b_List,c___List]:=If[Length[a]
+%t A141610 <=Length[b],p[PadRight[a,Length[b]]+b,c],p[b,a,c]];
+%t A141610 c[i_,j_]:=If[i<j,c[j,i],PadLeft[Table
+%t A141610 [Binomial[j,k]Binomial[i+k,j],{k,0,j}],i+j]];
+%t A141610 t[a_List,b_List]:=Apply[p,Outer[c,Range[Length[a]],
+%t A141610 Range[Length[b]]]Outer[Times,a,b],{0,1}];
+%t A141610 s[n_,k_]:=s[n,k]=p[If[n<2k,{0},s[n-k,k]],a[n+1-k]];
+%t A141610 a[1]={1};a[n_]:=a[n]=Apply[p,Table
+%t A141610 [t[a[i],s[n-1,i]]i,{i,1,n-1}]]/(n-1);
+%t A141610 Flatten[Table[a[i],{i,1,10}]]
+%t A141610 (* Second program: *)
+%t A141610 b[n_, k_] := b[n, k] = If[n<2, k*n, (Sum[Sum[b[d, k]*d, {d, Divisors[j]}]* b[n-j, k], {j, 1, n-1}])/(n-1)];
+%t A141610 c[n_, k_] := Sum[b[n, k-j]*Binomial[k, j]*(-1)^j, {j, 0, k}];
+%t A141610 Table[Table[c[n, k], {k, 1, n}], {n, 1, 10}] // Flatten (* _Jean-François Alcover_, Jan 04 2021, after _Alois P. Heinz_ *)
+%o A141610 (PARI) \\ here U(N, m) is adaptation of A000081 for m colors.
+%o A141610 U(N, m)={my(A=vector(N, j, m)); for(n=1, N-1, A[n+1] = sum(k=1, n, sumdiv(k, d, d*A[d]) * A[n-k+1])/n); A}
+%o A141610 M(n)={my(v=vector(n, i, U(n,i)~)); Mat(vector(n, k, sum(i=1, k, (-1)^(k-i)*binomial(k, i)*v[i])))}
+%o A141610 {my(T=M(10)); for(n=1, #T~, print(T[n,][1..n]))} \\ _Andrew Howroyd_, Sep 15 2018
+%Y A141610 Columns 1..3 are A000081, A339642, A339643.
+%Y A141610 C(n,n) is A000169.
+%Y A141610 Row sums are A339644.
+%Y A141610 Cf. A256064.
+%K A141610 nonn,tabl
+%O A141610 1,3
+%A A141610 _Robert A. Russell_, Aug 22 2008, Aug 27 2008

@@ -1,0 +1,77 @@
+%I A159041
+%S A159041 1,1,1,1,-10,1,1,-25,-25,1,1,-56,246,-56,1,1,-119,1072,1072,-119,1,1,
+%T A159041 -246,4047,-11572,4047,-246,1,1,-501,14107,-74127,-74127,14107,-501,1,
+%U A159041 1,-1012,46828,-408364,901990,-408364,46828,-1012,1,1,-2035,150602,-2052886,7685228,7685228,-2052886,150602,-2035,1
+%N A159041 Triangle read by rows: row n (n>=0) gives the coefficients of the polynomial p(n,x) of degree n defined in comments.
+%C A159041 Let E(n,k) (1 <= k <= n) denote the Eulerian numbers as defined in A008292. Then we define polynomials p(n,x) for n >= 0 as follows.
+%C A159041 p(n,x) = (1/(1-x)) * ( Sum_{k=0..floor(n/2)} (-1)^k*E(n+2,k+1)*x^k + Sum_{k=ceiling((n+2)/2)..n+1} (-1)^(n+k)*E(n+2,k+1)*x^k ).
+%C A159041 For example,
+%C A159041 p(0,x) = (1-x)/(1-x) = 1,
+%C A159041 p(1,x) = (1-x^2)/(1-x) = 1 + x,
+%C A159041 p(2,x) = (1 - 11*x + 11*x^2 - x^3)/(1-x) = 1 - 10*x + x^2,
+%C A159041 p(3,x) = (1 - 26*x + 26*x^3 - x^4)/(1-x) = 1 - 25*x - 25*x^2 + x^3),
+%C A159041 p(4,x) = (1 - 57*x + 302*x^2 - 302*x^3 + 57*x^3 + x^5)/(1-x)
+%C A159041        = 1 - 56*x + 246*x^2 - 56*x^3 + x^4.
+%C A159041 More generally, there is a triangle-to-triangle transformation U -> T defined as follows.
+%C A159041 Let U(n,k) (1 <= k <= n) be a triangle of nonnegative numbers in which the rows are symmetric about the middle. Define polynomials p(n,x) for n >= 0 by
+%C A159041 p(n,x) = (1/(1-x)) * ( Sum_{k=0..floor(n/2)} (-1)^k*U(n+2,k+1)*x^k + Sum_{k=ceiling((n+2)/2)..n+1} (-1)^(n+k)*U(n+2,k+1)*x^k ).
+%C A159041 The n-th row of the new triangle T(n,k) (0 <= k <= n) gives the coefficients in the expansion of p(n+2).
+%C A159041 The new triangle may be defined recursively by: T(n,0)=1; T(n,k) = T(n,k-1) + (-1)^k*U(n+2,k) for 1 <= k <= floor(n/2); T(n,k) = T(n,n-k).
+%C A159041 Note that the central terms in the odd-numbered rows of U(n,k) do not get used.
+%C A159041 The following table lists various sequences constructed using this transform:
+%C A159041 Parameter Triangle  Triangle  Odd-numbered
+%C A159041 m             U         T        rows
+%C A159041 0          A007312  A007312   A034870
+%C A159041 1          A008292  A159041   A171692
+%C A159041 2          A060187  A225356   A225076
+%C A159041 3          A142458  A225433   A225398
+%C A159041 4          A142459  A225434   A225415
+%H A159041 G. C. Greubel, <a href="/A159041/b159041.txt">Rows n = 0..50 of the triangle, flattened</a>
+%H A159041 Roger L. Bagula, <a href="/A159041/a159041.txt">Another Mathematica program for A159041</a>.
+%F A159041 T(n, k) = T(n, k-1) + (-1)^k*A008292(n+2, k+1) if k <= floor(n/2), otherwise T(n, n-k), with T(n, 0) = T(n, n) = 1. - _R. J. Mathar_, May 08 2013
+%e A159041 Triangle begins as follows:
+%e A159041   1;
+%e A159041   1,     1;
+%e A159041   1,   -10,      1;
+%e A159041   1,   -25,    -25,        1;
+%e A159041   1,   -56,    246,      -56,       1;
+%e A159041   1,  -119,   1072,     1072,    -119,       1;
+%e A159041   1,  -246,   4047,   -11572,    4047,    -246,        1;
+%e A159041   1,  -501,  14107,   -74127,  -74127,   14107,     -501,      1;
+%e A159041   1, -1012,  46828,  -408364,  901990, -408364,    46828,  -1012,     1;
+%e A159041   1, -2035, 150602, -2052886, 7685228, 7685228, -2052886, 150602, -2035, 1;
+%p A159041 A008292 := proc(n, k) option remember; if k < 1 or k > n then 0; elif k = 1 or k = n then 1; else k*procname(n-1, k)+(n-k+1)*procname(n-1, k-1) ; end if; end proc:
+%p A159041 # row n of new triangle T(n,k) in terms of old triangle U(n,k):
+%p A159041 p:=proc(n) local k; global U;
+%p A159041 simplify( (1/(1-x)) * ( add((-1)^k*U(n+2,k+1)*x^k,k=0..floor(n/2)) + add((-1)^(n+k)*U(n+2,k+1)*x^k, k=ceil((n+2)/2)..n+1 )) );
+%p A159041 end;
+%p A159041 U:=A008292;
+%p A159041 for n from 0 to 6 do lprint(simplify(p(n))); od: # _N. J. A. Sloane_, May 11 2013
+%p A159041 A159041 := proc(n, k)
+%p A159041     if k = 0 then
+%p A159041         1;
+%p A159041     elif k <= floor(n/2) then
+%p A159041         A159041(n, k-1)+(-1)^k*A008292(n+2, k+1) ;
+%p A159041     else
+%p A159041         A159041(n, n-k) ;
+%p A159041     end if;
+%p A159041 end proc: # _R. J. Mathar_, May 08 2013
+%t A159041 A[n_, 1] := 1;
+%t A159041 A[n_, n_] := 1;
+%t A159041 A[n_, k_] := (n - k + 1)A[n - 1, k - 1] + k A[n - 1, k];
+%t A159041 p[x_, n_] = Sum[x^i*If[i == Floor[n/2] && Mod[n, 2] == 0, 0, If[i <= Floor[n/2], (-1)^i*A[n, i], -(-1)^(n - i)*A[n, i]]], {i, 0, n}]/(1 - x);
+%t A159041 Table[CoefficientList[FullSimplify[p[x, n]], x], {n, 1, 11}];
+%t A159041 Flatten[%]
+%o A159041 (Sage)
+%o A159041 def A008292(n,k): return sum( (-1)^j*(k-j)^n*binomial(n+1,j) for j in (0..k) )
+%o A159041 @CachedFunction
+%o A159041 def T(n,k):
+%o A159041     if (k==0 or k==n): return 1
+%o A159041     elif (k <= (n//2)): return T(n,k-1) + (-1)^k*A008292(n+2,k+1)
+%o A159041     else: return T(n,n-k)
+%o A159041 flatten([[T(n,k) for k in (0..n)] for n in (0..12)]) # _G. C. Greubel_, Mar 18 2022
+%Y A159041 Cf. A007312, A008292, A034870, A060187, A142458, A142459, A159041, A171692, A225076, A225356, A225398, A225415, A225433, A225434.
+%K A159041 sign,tabl
+%O A159041 0,5
+%A A159041 _Roger L. Bagula_, Apr 03 2009
+%E A159041 Edited by _N. J. A. Sloane_, May 07 2013, May 11 2013

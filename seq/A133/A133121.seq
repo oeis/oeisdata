@@ -1,0 +1,64 @@
+%I A133121
+%S A133121 1,1,1,2,0,1,2,2,0,1,3,2,1,0,1,4,2,3,1,0,1,5,4,2,2,1,0,1,6,6,3,3,2,1,
+%T A133121 0,1,8,7,5,4,2,2,1,0,1,10,8,10,3,5,2,2,1,0,1,12,13,8,9,4,4,2,2,1,0,1,
+%U A133121 15,15,14,10,8,5,4,2,2,1,0,1,18,21,15,16,8,9,4,4,2,2,1,0,1,22,25,23,17,17,7,10,4,4,2,2,1,0,1
+%N A133121 Triangle T(n,k) read by rows = number of partitions of n such that number of parts minus number of distinct parts is equal to k, k = 0..n-1.
+%H A133121 Alois P. Heinz, <a href="/A133121/b133121.txt">Rows n = 1..141, flattened</a>
+%F A133121 G.f.: Product_{n>=1} 1 + x^n/(1-y*x^n).
+%e A133121 1
+%e A133121 1,1
+%e A133121 2,0,1
+%e A133121 2,2,0,1
+%e A133121 3,2,1,0,1
+%e A133121 4,2,3,1,0,1
+%e A133121 5,4,2,2,1,0,1
+%e A133121 6,6,3,3,2,1,0,1
+%e A133121 8,7,5,4,2,2,1,0,1
+%e A133121 10,8,10,3,5,2,2,1,0,1
+%e A133121 12,13,8,9,4,4,2,2,1,0,1
+%e A133121 15,15,14,10,8,5,4,2,2,1,0,1
+%e A133121 18,21,15,16,8,9,4,4,2,2,1,0,1
+%e A133121 From _Gus Wiseman_, Jan 23 2019: (Start)
+%e A133121 It is possible to augment the triangle to cover the n = 0 and k = n cases, giving:
+%e A133121    1
+%e A133121    1  0
+%e A133121    1  1  0
+%e A133121    2  0  1  0
+%e A133121    2  2  0  1  0
+%e A133121    3  2  1  0  1  0
+%e A133121    4  2  3  1  0  1  0
+%e A133121    5  4  2  2  1  0  1  0
+%e A133121    6  6  3  3  2  1  0  1  0
+%e A133121    8  7  5  4  2  2  1  0  1  0
+%e A133121   10  8 10  3  5  2  2  1  0  1  0
+%e A133121   12 13  8  9  4  4  2  2  1  0  1  0
+%e A133121   15 15 14 10  8  5  4  2  2  1  0  1  0
+%e A133121   18 21 15 16  8  9  4  4  2  2  1  0  1  0
+%e A133121   22 25 23 17 17  7 10  4  4  2  2  1  0  1  0
+%e A133121   27 30 32 21 19 16  8  9  4  4  2  2  1  0  1  0
+%e A133121 Row seven {5, 4, 2, 2, 1, 0, 1, 0} counts the following integer partitions (empty columns not shown).
+%e A133121   (7)    (322)   (2221)  (22111)  (211111)  (1111111)
+%e A133121   (43)   (331)   (4111)  (31111)
+%e A133121   (52)   (511)
+%e A133121   (61)   (3211)
+%e A133121   (421)
+%e A133121 (End)
+%p A133121 b:= proc(n, i) option remember; expand(`if`(n=0, 1, `if`(i<1, 0,
+%p A133121        add(x^`if`(j=0, 0, j-1)*b(n-i*j, i-1), j=0..n/i))))
+%p A133121     end:
+%p A133121 T:= n-> (p-> seq(coeff(p, x, i), i=0..n-1))(b(n$2)):
+%p A133121 seq(T(n), n=1..16);  # _Alois P. Heinz_, Aug 21 2015
+%t A133121 b[n_, i_] := b[n, i] = Expand[If[n == 0, 1, If[i < 1, 0, Sum[x^If[j == 0, 0, j-1]*b[n - i*j, i - 1], {j, 0, n/i}]]]]; T[n_] := Function [p, Table[ Coefficient[p, x, i], {i, 0, n - 1}]][b[n, n]]; Table[T[n], {n, 1, 16}] // Flatten (* _Jean-François Alcover_, Jan 23 2016, after _Alois P. Heinz_ *)
+%t A133121 Table[Length[Select[IntegerPartitions[n],Length[#]-Length[Union[#]]==k&]],{n,0,15},{k,0,n}] (* augmented version, _Gus Wiseman_, Jan 23 2019 *)
+%o A133121 (PARI) partitm(n,m,nmin)={ local(resul,partj) ; if( n < 0 || m <0, return([;]) ; ) ; resul=matrix(0,m); if(m==0, return(resul); ) ; for(j=max(1,nmin),n\m, partj=partitm(n-j,m-1,j) ; for(r1=1,matsize(partj)[1], resul=concat(resul,concat([j],partj[r1,])) ; ) ; ) ; if(m==1 && n >= nmin, resul=concat(resul,[[n]]) ; ) ; return(resul) ; }
+%o A133121 partit(n)={ local(resul,partm,filr) ; if( n < 0, return([;]) ; ) ; resul=matrix(0,n) ; for(m=1,n, partm=partitm(n,m,1) ; filr=vector(n-m) ; for(r1=1,matsize(partm)[1], resul=concat( resul,concat(partm[r1,],filr) ) ; ) ; ) ; return(resul) ; }
+%o A133121 A133121row(n)={ local(p=partit(n),resul=vector(n),nprts,ndprts) ; for(r=1,matsize(p)[1], nprts=0 ; ndprts=0 ; for(c=1,n, if( p[r,c]==0, break, nprts++ ; if(c==1, ndprts++, if(p[r,c]!=p[r,c-1], ndprts++ ) ; ) ; ) ; ) ; k=nprts-ndprts; resul[k+1]++ ; ) ; return(resul) ; }
+%o A133121 A133121()={ for(n=1,20, arow=A133121row(n) ; for(k=1,n, print1(arow[k],",") ; ) ; ) ; }
+%o A133121 A133121() ; \\ _R. J. Mathar_, Sep 28 2007
+%o A133121 (PARI) tabl(nn) = my(pl = prod(n=1, nn, 1+x^n/(1-y*x^n)) + O(x^nn)); for (k=1, nn-1, print(Vecrev(polcoeff(pl,k,x)))); \\ _Michel Marcus_, Aug 23 2015
+%Y A133121 Row sums are A000041. Row polynomials evaluated at -1 are A268498. Row polynomials evaluated at 2 are A006951.
+%Y A133121 Cf. A000009, A090858, A100471, A116608.
+%K A133121 easy,nonn,tabl
+%O A133121 1,4
+%A A133121 _Vladeta Jovovic_, Sep 18 2007
+%E A133121 More terms from _R. J. Mathar_, Sep 28 2007

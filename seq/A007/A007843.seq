@@ -1,0 +1,49 @@
+%I A007843
+%S A007843 1,2,4,4,6,8,8,8,10,12,12,14,16,16,16,16,18,20,20,22,24,24,24,26,28,
+%T A007843 28,30,32,32,32,32,32,34,36,36,38,40,40,40,42,44,44,46,48,48,48,48,50,
+%U A007843 52,52,54,56,56,56,58,60,60,62,64,64,64,64,64,64,66,68,68,70,72,72,72,74,76,76,78
+%N A007843 Least positive integer k for which 2^n divides k!.
+%C A007843 Obtained by writing every natural number n k times where 2^k divides n but 2^(k+1) does not divide n. - _Amarnath Murthy_, Aug 22 2002
+%C A007843 An interval of the form (A007814(k!)-A007814(k), A007814(k!)] contains n >= 1 iff k = a(n). - _Vladimir Shevelev_, Mar 19 2012
+%C A007843 It appears than for n > 0, a(n) is divisible by 2, and that the resulting sequence a(n)/2 is A046699 (ignoring first term, this is the Meta-Fibonacci sequence for s=0). - _Michel Marcus_, Aug 19 2013
+%C A007843 The last part is proved in the Kullmann & Zhao preprint, Thm. 3.16. The first statement is obvious: to get a larger power of two in k!, k > 1 must be increased by 2, else the factor is odd and doesn't increase the 2-valuation of k!. The other part also follows from the comment in A046699: "n occurs A001511(n) times", where A001511 = A007814 + 1, A007814 = the number of powers of 2 in k. - _M. F. Hasler_, Dec 27 2019
+%D A007843 H. Ibstedt, Smarandache Primitive Numbers, Smarandache Notions Journal, Vol. 8, No. 1-2-3, 1997, 216-229.
+%H A007843 T. D. Noe, <a href="/A007843/b007843.txt">Table of n, a(n) for n = 0..1000</a>
+%H A007843 Oliver Kullmann and Xishun Zhao, <a href="http://arxiv.org/abs/1505.02318">Parameters for minimal unsatisfiability: Smarandache primitive numbers and full clauses</a>, arXiv preprint arXiv:1505.02318 [cs.DM], 2015.
+%H A007843 Kevin Ryde, <a href="/A007843/a007843_1.gp.txt">PARI/GP Code and Notes</a>
+%H A007843 F. Smarandache, <a href="http://www.gallup.unm.edu/~smarandache/OPNS.pdf">Only Problems, Not Solutions!</a>.
+%H A007843 Wikipedia, <a href="https://en.wikipedia.org/wiki/Legendre%27s_formula">Legendre's Formula</a>.
+%F A007843 a(n) = A002034(2^n). For n>1, it appears that a(n+1) = a(n)+2 if n is in A005187. - _Benoit Cloitre_, Sep 01 2002
+%F A007843 G.f.: 1 + 2*(x/(1-x))*Product_{k >= 1} (1+x^(2^k-1)). - _Wadim Zudilin_, Dec 07 2015
+%F A007843 a(n) = 2*A046699(n) for n > 0. - _Michel Marcus_ and _M. F. Hasler_, Dec 27 2019
+%F A007843 a(2^i + r) = 2^i + a(r+1) for 0 <= r <= 2^i-2, and a(2^i + r) = 2^(i+1) for r = 2^i-1. - _Kevin Ryde_, Aug 06 2022
+%p A007843 with(numtheory): ans := [ ]: p := ithprime(1): t0 := 1/p: for n from 0 to 50 do t0 := t0*p: t1 := 1: i := 1: while t1 mod t0 <> 0 do i := i+1: t1 := t1*i: od: ans := [ op(ans),i ]: od: ans;
+%p A007843 # Alternative:
+%p A007843 N:= 1000: # to get a(0) to a(N)
+%p A007843 A:= Array(0..N):
+%p A007843 A[0]:= 1:
+%p A007843 A[1]:= 2:
+%p A007843 B[2]:= 1:
+%p A007843 for k from 4 by 2 do
+%p A007843   B[k]:= B[k-2] + padic:-ordp(k,2);
+%p A007843   A[B[k-2]+1..min(N,B[k])]:= k;
+%p A007843   if B[k] >= N then break fi;
+%p A007843 od:
+%p A007843 seq(A[i],i=0..N); # _Robert Israel_, Dec 07 2015
+%t A007843 a[n_] := (k=0; While[Mod[++k!, 2^n] > 0]; k); Table[a[n], {n, 0, 74}] (* _Jean-François Alcover_, Dec 08 2011 *)
+%t A007843 Join[{1},Module[{nn=100,f},f=Table[{x!,x},{x,0,nn}];Table[ SelectFirst[ f,Divisible[#[[1]],2^n]&],{n,80}]][[All,2]]] (* _Harvey P. Dale_, Nov 20 2021 *)
+%o A007843 (PARI) a(n)=if(n<0,0,s=1; while(s!%(2^n)>0,s++); s)
+%o A007843 (PARI) a(n) = {k = 1; while (valuation(k!, 2) < n, k++); k;} \\ _Michel Marcus_, Aug 19 2013
+%o A007843 (PARI) apply( A007843(n)={for(k=1,oo,(n-=valuation(k,2))>0||return(k))}, [0..99]) \\ This idea can also be used to compute most efficiently a vector a(0..N). - _M. F. Hasler_, Dec 27 2019
+%o A007843 (Python)
+%o A007843 from itertools import count
+%o A007843 def A007843(n):
+%o A007843     c = 0
+%o A007843     for k in count(1):
+%o A007843         c += (~k&k-1).bit_length()
+%o A007843         if c >= n:
+%o A007843             return k # _Chai Wah Wu_, Jul 08 2022
+%Y A007843 Cf. A007814, A007844, A007845, A020646, A048841-A048846.
+%K A007843 nonn,easy,nice
+%O A007843 0,2
+%A A007843 Bruce Dearden and _Jerry Metzger_; R. Muller

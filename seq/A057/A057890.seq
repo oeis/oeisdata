@@ -1,0 +1,53 @@
+%I A057890
+%S A057890 0,1,2,3,4,5,6,7,8,9,10,12,14,15,16,17,18,20,21,24,27,28,30,31,32,33,
+%T A057890 34,36,40,42,45,48,51,54,56,60,62,63,64,65,66,68,72,73,80,84,85,90,93,
+%U A057890 96,99,102,107,108,112,119,120,124,126,127,128,129,130,132,136,144,146
+%N A057890 In base 2, either a palindrome or becomes a palindrome if trailing 0's are omitted.
+%C A057890 Symmetric bit strings (bit-reverse palindromes), including as many leading as trailing zeros.
+%C A057890 Fixed points of A057889, complement of A057891
+%C A057890 n such that A000265(n) is in A006995. - _Robert Israel_, Jun 07 2016
+%H A057890 Reinhard Zumkeller, <a href="/A057890/b057890.txt">Table of n, a(n) for n = 1..10000</a>
+%H A057890 Aayush Rajasekaran, Jeffrey Shallit, and Tim Smith, <a href="https://arxiv.org/abs/1706.10206">Sums of Palindromes: an Approach via Nested-Word Automata</a>, preprint arXiv:1706.10206 [cs.FL], June 30 2017.
+%F A057890 A030101(A030101(n)) = A030101(n). - _David W. Wilson_, Jun 09 2009, Jun 18 2009
+%F A057890 A178225(A000265(a(n))) = 1. - _Reinhard Zumkeller_, Oct 21 2011
+%F A057890 a(7*2^n-4*n-4) = 4^n + 1, a(10*2^n-4*n-6) = 2*4^n + 1. - _Gheorghe Coserea_, Apr 05 2017
+%e A057890 10 is included, since 01010 is a palindrome, but 11 is not because 1011 is not.
+%p A057890 dmax:= 10: # to get all terms < 2^dmax
+%p A057890 revdigs:= proc(n)
+%p A057890   local L, Ln, i;
+%p A057890   L:= convert(n, base, 2);
+%p A057890   Ln:= nops(L);
+%p A057890   add(L[i]*2^(Ln-i), i=1..Ln);
+%p A057890 end proc;
+%p A057890 P[0]:= {0}:
+%p A057890 P[1]:= {1}:
+%p A057890 for d from 2 to dmax do
+%p A057890   if d::even then
+%p A057890     P[d]:= { seq(2^(d/2)*x + revdigs(x), x=2^(d/2-1)..2^(d/2)-1)}
+%p A057890   else
+%p A057890     m:= (d-1)/2;
+%p A057890     B:={seq(2^(m+1)*x + revdigs(x), x=2^(m-1)..2^m-1)};
+%p A057890     P[d]:= B union map(`+`, B, 2^m)
+%p A057890   fi
+%p A057890 od:
+%p A057890 A:= `union`(seq(seq(map(`*`,P[d],2^k),k=0..dmax-d),d=0..dmax)):
+%p A057890 sort(convert(A,list)); # _Robert Israel_, Jun 07 2016
+%t A057890 PaleQ[n_Integer, base_Integer] := Module[{idn, trim = n/base^IntegerExponent[n, base]}, idn = IntegerDigits[trim, base]; idn == Reverse[idn]]; Select[Range[0, 150], PaleQ[#, 2] &] (* _Lei Zhou_, Dec 13 2013 *)
+%t A057890 pal2Q[n_]:=Module[{id=Drop[IntegerDigits[n,2],-IntegerExponent[n,2]]},id==Reverse[id]]; Join[{0},Select[Range[200],pal2Q]] (* _Harvey P. Dale_, Feb 26 2015 *)
+%t A057890 A057890Q = If[# > 0 && EvenQ@#, #0[#/2], # == #~IntegerReverse~2] &; Select[0~Range~146, A057890Q] (* _JungHwan Min_, Mar 29 2017 *)
+%t A057890 Select[Range[0, 200], PalindromeQ[IntegerDigits[#, 2] /. {b__, 0..} -> {b} ]&] (* _Jean-François Alcover_, Sep 18 2018 *)
+%o A057890 (Haskell)
+%o A057890 a057890 n = a057890_list !! (n-1)
+%o A057890 a057890_list = 0 : filter ((== 1) . a178225 . a000265) [1..]
+%o A057890 -- _Reinhard Zumkeller_, Oct 21 2011
+%o A057890 (Python)
+%o A057890 A057890 = [n for n in range(10**6) if bin(n)[2:].rstrip('0') == bin(n)[2:].rstrip('0')[::-1]] # _Chai Wah Wu_, Aug 12 2014
+%o A057890 (PARI)
+%o A057890 bitrev(n) = subst(Pol(Vecrev(binary(n>>valuation(n,2))), 'x), 'x, 2);
+%o A057890 is(n) = my(x = n >> valuation(n,2)); x == bitrev(x);
+%o A057890 concat(0, select(is,vector(147,n,n)))  \\ _Gheorghe Coserea_, Jun 07 2016
+%o A057890 (PARI) is(n)=n==0 || Vecrev(n=binary(n>>valuation(n,2)))==n \\ _Charles R Greathouse IV_, Aug 25 2016
+%Y A057890 Cf. A030101, A000265, A006519, A006995, A057889, A057891, A061917, A273245, A273329, A272670.
+%K A057890 easy,nonn,base,nice
+%O A057890 1,3
+%A A057890 _Marc LeBrun_, Sep 25 2000

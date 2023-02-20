@@ -1,0 +1,32 @@
+%I A091891
+%S A091891 1,1,2,1,4,1,2,1,10,3,2,1,5,1,2,1,36,6,12,1,11,3,2,1,24,3,3,1,5,1,2,1,
+%T A091891 202,67,55,9,93,4,5,1,112,8,13,1,10,3,2,1,304,22,18,1,20,3,3,1,34,3,3,
+%U A091891 1,5,1,2,1,1828,1267,1456,71,1629,77,100,2,2342,99,123,9,132,4,3,1
+%N A091891 Number of partitions of n into parts which are a sum of exactly as many distinct powers of 2 as n has 1's in its binary representation.
+%H A091891 Alois P. Heinz, <a href="/A091891/b091891.txt">Table of n, a(n) for n = 0..16384</a> (terms n = 1..1000 from Andrew Howroyd)
+%F A091891 a(A000079(n)) = A018819(n);
+%F A091891 a(A018900(n)) = A091889(n);
+%F A091891 a(A014311(n)) = A091890(n);
+%F A091891 a(A091892(n)) = 1.
+%e A091891 a(9) = 3 because there are 3 partitions of 9 into parts of size 3, 5, 6, 9 which are the numbers that have two 1's in their binary representations. The 3 partitions are: 9, 6 + 3 and 3 + 3 + 3. - _Andrew Howroyd_, Apr 20 2021
+%p A091891 H:= proc(n) option remember; add(i, i=Bits[Split](n)) end:
+%p A091891 v:= proc(n, k) option remember; `if`(n<1, 0,
+%p A091891       `if`(H(n)=k, n, v(n-1, k)))
+%p A091891     end:
+%p A091891 b:= proc(n, i, k) option remember; `if`(n=0, 1, `if`(i<1, 0,
+%p A091891       b(n, v(i-1, k), k)+b(n-i, v(min(n-i, i), k), k)))
+%p A091891     end:
+%p A091891 a:= n-> b(n$2, H(n)):
+%p A091891 seq(a(n), n=0..80);  # _Alois P. Heinz_, Dec 12 2021
+%t A091891 etr[p_] := Module[{b}, b[n_] := b[n] = If[n == 0, 1, Sum[Sum[d*p[d], {d, Divisors[j]}] b[n - j], {j, 1, n}]/n]; b];
+%t A091891 EulerT[v_List] := With[{q = etr[v[[#]]&]}, q /@ Range[Length[v]]];
+%t A091891 a[n_] := EulerT[Table[DigitCount[k, 2, 1] == DigitCount[n, 2, 1] // Boole, {k, 1, n}]][[n]];
+%t A091891 Array[a, 100] (* _Jean-François Alcover_, Dec 12 2021, after _Andrew Howroyd_ *)
+%o A091891 (PARI) EulerT(v)={Vec(exp(x*Ser(dirmul(v,vector(#v,n,1/n))))-1, -#v)}
+%o A091891 a(n) = {EulerT(vector(n,k,hammingweight(k)==hammingweight(n)))[n]} \\ _Andrew Howroyd_, Apr 20 2021
+%Y A091891 Cf. A000079, A000120, A000041, A018819, A018900, A014311.
+%Y A091891 Cf. A091889, A091890, A091892, A091893.
+%K A091891 nonn,look
+%O A091891 0,3
+%A A091891 _Reinhard Zumkeller_, Feb 10 2004
+%E A091891 a(0)=1 prepended by _Alois P. Heinz_, Dec 12 2021

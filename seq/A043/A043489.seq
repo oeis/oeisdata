@@ -1,0 +1,143 @@
+%I A043489
+%S A043489 0,10,20,30,40,50,60,70,80,90,101,102,103,104,105,106,107,108,109,110,
+%T A043489 120,130,140,150,160,170,180,190,201,202,203,204,205,206,207,208,209,
+%U A043489 210,220,230,240,250,260,270,280,290,301,302,303
+%N A043489 Numbers having one 0 in base 10.
+%C A043489 From _Hieronymus Fischer_, May 28 2014: (Start)
+%C A043489 Inversion:
+%C A043489 Given a term m, the index n such that a(n) = m can be calculated by the following procedure [see Prog section with an implementation in Smalltalk]. With k := floor(log_10(m)), z = digit position of the '0' in m counted from the right (starting with 0).
+%C A043489 Case 1: A043489_inverse(m) = 1 + Sum_{j=1..k} A052382_inverse(floor(m/10^j))*9^(j-1), if z = 0.
+%C A043489 Case 2: A043489_inverse(m) = 1 + A043489_inverse(m - c - m mod 10^z) + A052382_inverse(m mod 10^z)) - (9^z - 1)/8, if z > 0, where c := 1, if the digit at position z+1 of m is ‘1’ and k > z + 1, otherwise c := 10.
+%C A043489 Example 1: m = 990, k = 2, z = 0 (Case 1), A043489_inverse(990) = 1 + A052382_inverse(99))*1 + A052382_inverse(9))*9 = 1 + 90 + 81 = 172.
+%C A043489 Example 2: m = 1099, k = 3, z = 2 (Case 2), A043489_inverse(1099) = 1 + A043489_inverse(990) + A052382_inverse(99)) - 10 = 1 +  A043489_inverse(990) + 80 = 1 + 172 + 80 = 253.
+%C A043489 (End)
+%H A043489 Enrique Pérez Herrero and Hieronymus Fischer [terms 1..2000 from Enrique Pérez Herrero], <a href="/A043489/b043489.txt">Table of n, a(n) for n = 1..10000</a>
+%H A043489 <a href="/index/Ar#10-automatic">Index entries for 10-automatic sequences</a>.
+%F A043489 From _Hieronymus Fischer_, May 28 2014: (Start)
+%F A043489 a(1 + Sum_{j=1..n} j*9^j) = 10*(10^n - 1).
+%F A043489 a(2 + Sum_{j=1..n} j*9^j) = 10^(n+1) + (10^n - 1)/9 = (91*10^n - 1)/9.
+%F A043489 a((9^(n+1) - 1)/8 + 1 + Sum_{j=1..n} j*9^j) = 10*(10^(n+1) - 1)/9, where Sum_{j=1..n} j*9^j = (1-(n+1)*9^n+n*9^(n+1))*9/64.
+%F A043489 Iterative calculation:
+%F A043489 With i := digit position of the '0' in a(n) counted from the right (starting with 0), j = number of contiguous '9' digits in a(n) counted from position 1, if i = 0, and counted from position 0, if i > 0 (0 if none)
+%F A043489 a(n+1) = a(n) + 10 + (10^j - 1)/9, if i = 0.
+%F A043489 a(n+1) = a(n) + 1 + (10^(j-1) - 1)/9, if i = j > 0.
+%F A043489 a(n+1) = a(n) + 1 + (10^j - 1)/9, if i > j.
+%F A043489 [see Prog section for an implementation in Smalltalk].
+%F A043489 Direct calculation:
+%F A043489 Set j := max( m | (Sum_{i=1..m} i*9^i) < n) and c(1) := n - 2 - Sum_{i=1..j} i*9^i. Define successively,
+%F A043489 c(i+1) = c(i) mod ((j-i+2)*9^(j-i+1)) - 9^(j-i+1) while this value is >= 0, and set k := i for the last such index for which c(i) >= 0.
+%F A043489 Then a(n) = A052382(c(k) mod ((j-k+2)*9^(j-k+1)) + (9^(j-k+1)-1)/8) + Sum_{i=1..k} ((floor(c(i)/((j-i+2)*9^(j-i+1))) + 1) * 10^(j-i+2)). [see Prog section for an implementation in Smalltalk].
+%F A043489 Behavior for large n:
+%F A043489 a(n) = O(n^(log(10)/log(9))/log(n)).
+%F A043489 a(n) = O(n^1.047951651.../log(n)).
+%F A043489 Inequalities:
+%F A043489 a(n) < 2*(8n)^log_9(10)/(log_9(8n)*log_9(10)).
+%F A043489 a(n) < (8n)^log_9(10)/(log_9(8n)*log_9(10)), for large n (n > 10^50).
+%F A043489 a(n) > 0.9*(8n)^log_9(10)/(log_9(8n)*log_9(10)), for 2 < n < 10^50.
+%F A043489 a(n) >= A011540(n), equality holds for n <= 10.
+%F A043489 (End)
+%e A043489 a(10^1)= 90.
+%e A043489 a(10^2)= 590.
+%e A043489 a(10^3)= 4190.
+%e A043489 a(10^4)= 35209.
+%e A043489 a(10^5)= 308949.
+%e A043489 a(10^6)= 2901559.
+%e A043489 a(10^7)= 27250269.
+%e A043489 a(10^8)= 263280979.
+%e A043489 a(10^9)= 2591064889.
+%e A043489 a(10^10)= 25822705899.
+%e A043489 a(10^20)= 366116331598324670219.
+%e A043489 a(10^50)= 3.7349122484477433715662812...*10^51
+%e A043489 a(10^100)= 4.4588697999177752943575344...*10^103.
+%e A043489 a(10^1000)= 5.5729817962143143812258616...*10^1045.
+%e A043489 [Examples by _Hieronymus Fischer_, May 28 2014]
+%t A043489 Select[Range[0,9000],DigitCount[#,10,0]==1&] (* _Enrique Pérez Herrero_, Nov 29 2013 *)
+%o A043489 (Smalltalk)
+%o A043489 A043489_nextTerm
+%o A043489   "Answers the minimal number > m which contains exactly 1 zero digit (in base 10), where m is the receiver.
+%o A043489   Usage: a(n) A043489_nextTerm
+%o A043489   Answer: a(n+1)"
+%o A043489   | d d0 s n p |
+%o A043489   n := self.
+%o A043489   p := 1.
+%o A043489   s := n.
+%o A043489   (d0 := n // p \\ 10) = 0
+%o A043489      ifTrue:
+%o A043489           [p := 10 * p.
+%o A043489           s := s + 1].
+%o A043489   [(d := n // p \\ 10) = 9] whileTrue:
+%o A043489           [s := s - (8 * p).
+%o A043489           p := 10 * p].
+%o A043489   (d = 0 or: [d0 = 0]) ifTrue: [s := s - (p // 10)].
+%o A043489   ^s + p
+%o A043489 [by _Hieronymus Fischer_, May 28 2014]
+%o A043489 ------------------
+%o A043489 (Smalltalk)
+%o A043489 A043489
+%o A043489 "Answers the n-th number such that number of 0's in base 10 is 1, where n is the receiver. Uses the method zerofree: base from A052382.
+%o A043489   Usage: n A043489
+%o A043489   Answer: a(n)"
+%o A043489   | n a b dj cj gj ej j r |
+%o A043489   n := self.
+%o A043489   n <= 1 ifTrue: [^r := 0].
+%o A043489   n <= 10 ifTrue: [^r := (n - 1) * 10].
+%o A043489   j := n invGeometricSum2: 9.
+%o A043489   b := j geometricSum2: 9.
+%o A043489   cj := 9 ** j.
+%o A043489   dj := (j + 1) * cj.
+%o A043489   gj := (cj - 1) / 8.
+%o A043489   ej := 10 ** j.
+%o A043489   a := n - b - 2.
+%o A043489   b := a \\ dj.
+%o A043489   r := (a // dj + 1) * ej * 10.
+%o A043489   [b >= cj] whileTrue:
+%o A043489           [a := b - cj.
+%o A043489           cj := cj // 9.
+%o A043489           dj := j * cj.
+%o A043489           b := a \\ dj.
+%o A043489           r := (a // dj + 1) * ej + r.
+%o A043489           gj := gj - cj.
+%o A043489           ej := ej // 10.
+%o A043489           j := j - 1].
+%o A043489   r := (b + gj zerofree: 10) + r.
+%o A043489   ^r
+%o A043489 [by _Hieronymus Fischer_, May 28 2014]
+%o A043489 ------------------
+%o A043489 (Smalltalk)
+%o A043489 A043489_inverse
+%o A043489   "Answers the index n such that A043489(n) = m, where m is the receiver. Uses A052382_inverse from A052382.
+%o A043489   Usage: n zerofree_inverse: b [b = 10 for this sequence]
+%o A043489   Answer: a(n)"
+%o A043489   | m p q s r m1 mr |
+%o A043489   m := self.
+%o A043489   m < 100 ifTrue: [^m // 10 + 1].
+%o A043489   p := q := 1.
+%o A043489   s := 0.
+%o A043489   [m // p \\ 10 = 0] whileFalse:
+%o A043489      [p := 10 * p.
+%o A043489      s := s + q.
+%o A043489      q := 9 * q].
+%o A043489   p > 1
+%o A043489      ifTrue:
+%o A043489      [r := m \\ p.
+%o A043489      p := 10 * p.
+%o A043489      m1 := m // p.
+%o A043489      (m1 \\ 10 = 1 and: [m1 > 10])
+%o A043489           ifTrue: [mr := m - r - 1]
+%o A043489           ifFalse: [mr := m - r - 10].
+%o A043489      ^mr A043489_inverse + r A052382_inverse - s + 1]
+%o A043489      ifFalse:
+%o A043489      [s := 1.
+%o A043489      p := 10.
+%o A043489      q := 1.
+%o A043489      [p < m] whileTrue:
+%o A043489           [s := (m // p) A052382_inverse * q + s.
+%o A043489           p := 10 * p.
+%o A043489           q := 9 * q].
+%o A043489      ^s]
+%o A043489 [by _Hieronymus Fischer_, May 28 2014]
+%o A043489 (PARI) is(n)=#select(d->d==0, digits(n))==1 \\ _Charles R Greathouse IV_, Oct 06 2016
+%Y A043489 Cf. A043493, A043497, A043501, A043505, A043509, A043513, A043517, A043521, A043525, A011540, A052382.
+%K A043489 nonn,base,easy
+%O A043489 1,2
+%A A043489 _Clark Kimberling_

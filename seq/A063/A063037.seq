@@ -1,0 +1,55 @@
+%I A063037
+%S A063037 0,1,2,3,4,5,6,9,10,11,12,13,18,19,20,21,22,25,26,27,36,37,38,41,42,
+%T A063037 43,44,45,50,51,52,53,54,73,74,75,76,77,82,83,84,85,86,89,90,91,100,
+%U A063037 101,102,105,106,107,108,109,146,147,148,149,150,153,154,155,164,165,166
+%N A063037 Numbers without 3 consecutive equal binary digits.
+%C A063037 Complement of A136037; intersection of A003796 and A003726. - _Reinhard Zumkeller_, Dec 11 2007
+%C A063037 From _Emeric Deutsch_, Jan 27 2018: (Start)
+%C A063037 Also 0 together with the indices of the compositions that have no parts larger than 2. For the definition of the index of a composition see A298644.
+%C A063037 For example, 105 is in the sequence since its binary form is 1101001 and the composition [2,1,1,2,1] has no parts larger than 2.
+%C A063037 On the other hand, 132 is not in the sequence since its binary form is 10000100 and the composition [1,4,1,2] has a part larger than 2.
+%C A063037 The command c(n) from the Maple program yields the composition having index n. (End)
+%C A063037 The sequence contains A000045(n+1) positive terms with binary length n. - _Rémy Sigrist_, Sep 30 2022
+%H A063037 Reinhard Zumkeller, <a href="/A063037/b063037.txt">Table of n, a(n) for n = 1..10000</a>
+%F A063037 It appears (but has not yet been proved) that the terms of {a(n)} can be computed recursively as follows. Let {c(i)} be defined for i >= 4 by c(i) = 2c(i-1) + 1, if n is a multiple of 3, else c(i) = 2c(i-1) - 1, with c(4) = 1. I.e., {c(i)} = {1,1,3,5,9,19,37,73,147,...}, for i=4,5,6,... . Let a(1)=1, a(2)=2, a(3)=3. For n > 3, choose k so that F(k)-2 < n <= F(k+1)-2, where F(k) denotes the k-th Fibonacci number (A000045). Then a(n) = c(k) + 2a(F(k)-2) - a(2F(k)-n-3). This has been verified for n up to 1100. - _John W. Layman_, May 26 2009
+%e A063037 The binary representation of 9 (1001) has no 3 consecutive equal digits.
+%p A063037 isA063037 := proc(n)
+%p A063037     local bdgs,rep,d,i ;
+%p A063037     if n = 0 then
+%p A063037         return true;
+%p A063037     end if;
+%p A063037     bdgs := convert(n,base,2) ;
+%p A063037     rep := 1;
+%p A063037     d := op(1,bdgs) ;
+%p A063037     for i from 2 to nops(bdgs) do
+%p A063037         if op(i,bdgs) = op(i-1,bdgs) then
+%p A063037             rep := rep+1 ;
+%p A063037         else
+%p A063037             rep :=1 ;
+%p A063037         end if ;
+%p A063037         if rep > 2 then
+%p A063037             return false;
+%p A063037         end if;
+%p A063037     end do:
+%p A063037     return true ;
+%p A063037 end proc:
+%p A063037 for n from 0 to 50 do
+%p A063037     if isA063037(n) then
+%p A063037         printf("%d,",n) ;
+%p A063037     end if;
+%p A063037 end do: # _R. J. Mathar_, Dec 18 2013
+%p A063037 # Second Maple program:
+%p A063037 Runs := proc (L) local j, r, i, k: j := 1: r[j] := L[1]: for i from 2 to nops(L) do if L[i] = L[i-1] then r[j] := r[j], L[i] else j := j+1: r[j] := L[i] end if end do: [seq([r[k]], k = 1 .. j)] end proc: RunLengths := proc (L) map(nops, Runs(L)) end proc: c := proc (n) ListTools:-Reverse(convert(n, base, 2)): RunLengths(%) end proc: A := {0}: for n to 250 do if `subset`(convert(c(n), set), {1, 2}) then A := `union`(A, {n}) else end if end do: A; # most of this Maple program is due to _W. Edwin Clark_. - _Emeric Deutsch_, Jan 27 2018
+%t A063037 Select[Range[0, 168], AllTrue[Length /@ Split@ IntegerDigits[#, 2], # < 3 &] &] (* _Michael De Vlieger_, Aug 20 2017 *)
+%o A063037 (PARI) { n=0; for (m=0, 10^9, x=m; t=1; b=2; while (x>0, d=x-2*(x\2); x\=2; if (d==b, c++; if (c==3, t=x=0), b=d; c=1)); if (t, write("b063037.txt", n++, " ", m); if (n==1000, break)) ) } \\ _Harry J. Smith_, Aug 16 2009
+%o A063037 (PARI) a(n) = { n--; if (n<=1, return (n), my (s=1); for (i=1, oo, my (f=fibonacci(i+1)); if (n<s+f, return (2^i-1-a(2*s-n)), s+=f))) } \\ _Rémy Sigrist_, Sep 30 2022
+%o A063037 (Python)
+%o A063037 from itertools import count, islice
+%o A063037 def A063037_gen(startvalue=0): # generator of terms >= startvalue
+%o A063037     return filter(lambda n: not ('000' in (s:=bin(n)[2:]) or '111' in s), count(max(0,startvalue)))
+%o A063037 A063037_list = list(islice(A063037_gen(),20)) # _Chai Wah Wu_, Oct 04 2022
+%Y A063037 Cf. A000045, A000975, A166535, A286262.
+%K A063037 easy,nonn
+%O A063037 1,3
+%A A063037 _Lior Manor_, Jul 05 2001
+%E A063037 Missing "less than" sign supplied in the conjectured recurrence (thanks to _Franklin T. Adams-Watters_ for pointing this out) by _John W. Layman_, Nov 09 2009

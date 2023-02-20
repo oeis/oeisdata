@@ -1,0 +1,49 @@
+%I A071294
+%S A071294 2,4,6,2,10,12,2,16,18,2,22,4,2,28,30,2,2,36,2,40,42,2,46,6,2,52,2,2,
+%T A071294 58,60,2,6,66,2,70,72,2,2,78,2,82,6,2,88,18,2,2,96,2,100,102,2,106,
+%U A071294 108,2,112,2,2,2,10,2,4,126,2,130,18,2,136,138,2,2,6,2,148,150,2,2,156,2,2
+%N A071294 Number of witnesses for strong pseudoprimality of 2n+1, i.e., number of bases b, 1 <= b <= 2n, in which 2n+1 is a strong pseudoprime.
+%C A071294 Number of integers b, 1 <= b <= 2n, such that if 2n = 2^k*m with odd m, then the sequence (b^m, b^(2*m), ..., b^(2^k*m)) modulo 2n+1 satisfies the Rabin-Miller test.
+%C A071294 Comments from _R. J. Mathar_, Jul 03 2012 (Start)
+%C A071294 The subsequence related to composite 2n+1 is characterized with records in A195328 and associated 2n+1 tabulated in A141768.
+%C A071294 Let N = 2n+1 = product_{i=1..s} p_i^r_i be the prime factorization of the odd 2n+1. Related odd parts q and q_i are defined by N-1=2^k*q and p_i-1 = 2^(k_i)*q_i, with sorting such that k_1 <= k_2 <=k_3... Then a(n) = (1+sum_{j=0..k1-1} 2^(j*s)) *product_{i=1..s} gcd(q,qi).
+%C A071294 Reduces to A006093 if 2n+1 is prime.
+%C A071294 This might be correlated with 2*A195508(n). (End)
+%D A071294 Paulo Ribenboim, The Little Book of Bigger Primes, 2nd ed., Springer-Verlag, New York, 2004, p. 98.
+%H A071294 Amiram Eldar, <a href="/A071294/b071294.txt">Table of n, a(n) for n = 1..10000</a>
+%H A071294 F. Arnault, <a href="http://dx.doi.org/10.1090/S0025-5718-97-00836-3">The Rabin-Monier theorem for Lucas pseudoprimes</a>, Mathematics of Computation, vol. 66, no 218, April 1997, pp. 869-881.
+%H A071294 Louis Monier, <a href="https://doi.org/10.1016/0304-3975(80)90007-9">Evaluation and comparison of two efficient primality testing algorithms</a>, Theoretical Computer Science, Vol. 11 (1980), pp. 97-108.
+%H A071294 Wikipedia, <a href="https://en.wikipedia.org/wiki/Strong_pseudoprime">Strong pseudoprime</a>
+%H A071294 <a href="/index/Ps#pseudoprimes">Index entries for sequences related to pseudoprimes</a>
+%F A071294 For k = 2*n+1, a(k) = k - 1 if k is prime, otherwise, a(k) = (1 + 2^(omega(k)*nu(k)) - 1)/(2^omega(k)-1)) * Product_{p|k} gcd(od(k-1), od(p-1)), where omega(m) is the number of distinct prime factors of m (A001221), od(m) is the largest odd divisor of m (A000265) and nu(m) = min_{p|m} A007814(p-1). - _Amiram Eldar_, Nov 08 2019
+%p A071294 rabinmiller := proc(n,a); k := 0; mu := n-1; while irem(mu,2)=0 do k := k+1; mu := mu/2 od; G := a&^mu mod(n); h := 0; if G=1 then RETURN(1) else while h<k-1 and G&^2 mod n <>1 do h := h+1; G := G&^2 mod n; od; if h<k and G<> n-1 then RETURN(0) else RETURN(1) fi; if G=1 then RETURN(1); fi; fi; end; compte := proc(n) local l; RETURN(sum('rabinmiller(2*n+1,l)','l'=1..2*n)); end;
+%p A071294 Maple code from _R. J. Mathar_, Jul 03 2012 (Start)
+%p A071294 A000265 := proc(n)
+%p A071294      n/2^padic[ordp](n,2) ;
+%p A071294 end proc:
+%p A071294 a := proc(n)
+%p A071294      q := A000265(n-1) ;
+%p A071294      B := 1;
+%p A071294      s := 0 ;
+%p A071294      k1 := 10000000000000 ;
+%p A071294      for pf in ifactors(n)[2] do
+%p A071294          pi := op(1,pf) ;
+%p A071294          qi := A000265(pi-1) ;
+%p A071294          ki := ilog2((pi-1)/qi) ;
+%p A071294          k1 := min(k1,ki) ;
+%p A071294          B := B*igcd(q,qi) ;
+%p A071294          s := s+1 ;
+%p A071294      end do:
+%p A071294      1+add(2^(j*s),j=0..k1-1) ;
+%p A071294      return B*% ;
+%p A071294 end proc:
+%p A071294 seq(a(2*n+1),n=1..60) ;
+%t A071294 o[n_] := (n-1)/2^IntegerExponent[n-1, 2]; a[n_?PrimeQ] := n-1; a[n_] := Module[{p = FactorInteger[n][[;;, 1]]}, om = Length[p]; Product[GCD[o[n], o[p[[k]]]], {k, 1, om}] * (1 + (2^(om * Min[IntegerExponent[#, 2]& /@ (p - 1)]) - 1)/(2^om - 1))]; Table[a[n], {n, 3, 121, 2}] (* _Amiram Eldar_, Nov 08 2019 *)
+%Y A071294 Cf. A000265, A001221, A006093, A007814, A063994, A141768, A195328.
+%Y A071294 Cf. also A001262, A020229, A020231, A020233.
+%Y A071294 Different from A060684.
+%K A071294 nonn
+%O A071294 1,1
+%A A071294 J.-F. Guiffes (guiffes.jean-francois(AT)wanadoo.fr), Jun 11 2002
+%E A071294 Edited by _Max Alekseyev_, Sep 20 2018
+%E A071294 Edited by _N. J. A. Sloane_, Nov 15 2019, merging _R. J. Mathar_'s A182291 with this entry.

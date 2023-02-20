@@ -1,0 +1,47 @@
+%I A109129
+%S A109129 0,1,1,2,1,2,2,3,2,2,1,3,2,3,2,4,2,3,3,3,3,2,2,4,2,3,3,4,2,3,1,5,2,3,
+%T A109129 3,4,3,4,3,4,2,4,3,3,3,3,2,5,4,3,3,4,4,4,2,5,4,3,2,4,3,2,4,6,3,3,3,4,
+%U A109129 3,4,3,5,3,4,3,5,3,4,2,5,4,3,2,5,3,4,3,4,4,4,4,4,2,3,4,6,2,5,3,4
+%N A109129 Width (i.e., number of non-root vertices having degree 1) of the rooted tree with Matula-Goebel number n.
+%C A109129 The Matula-Goebel number of a rooted tree is defined in the following recursive manner: to the one-vertex tree there corresponds the number 1; to a tree T with root degree 1 there corresponds the t-th prime number, where t is the Matula-Goebel number of the tree obtained from T by deleting the edge emanating from the root; to a tree T with root degree m >= 2 there corresponds the product of the Matula-Goebel numbers of the m branches of T.
+%C A109129 A non-root vertex having degree 1 is called a leaf.
+%C A109129 Every positive integer has a unique factorization (see A324924) into factors q(i) = prime(i)/i for i > 0. The number of ones in this factorization is a(n). For example, 30 = q(1)^3 q(2)^2 q(3), so a(30) = 3. - _Gus Wiseman_, Mar 23 2019
+%H A109129 Reinhard Zumkeller, <a href="/A109129/b109129.txt">Table of n, a(n) for n = 1..10000</a>
+%H A109129 E. Deutsch, <a href="http://arxiv.org/abs/1111.4288">Tree statistics from Matula numbers</a>, arXiv preprint arXiv:1111.4288 [math.CO], 2011.
+%H A109129 F. Goebel, <a href="http://dx.doi.org/10.1016/0095-8956(80)90049-0">On a 1-1-correspondence between rooted trees and natural numbers</a>, J. Combin. Theory, B 29 (1980), 141-143.
+%H A109129 I. Gutman and A. Ivic, <a href="http://dx.doi.org/10.1016/0012-365X(95)00182-V">On Matula numbers</a>, Discrete Math., 150, 1996, 131-142.
+%H A109129 I. Gutman and Yeong-Nan Yeh, <a href="http://www.emis.de/journals/PIMB/067/3.html">Deducing properties of trees from their Matula numbers</a>, Publ. Inst. Math., 53 (67), 1993, 17-22.
+%H A109129 D. Matula, <a href="http://www.jstor.org/stable/2027327">A natural rooted tree enumeration by prime factorization</a>, SIAM Rev. 10 (1968) 273.
+%H A109129 <a href="/index/Mat#matula">Index entries for sequences related to Matula-Goebel numbers</a>
+%F A109129 a(1)=0; a(2)=1; if n = p(t) (= the t-th prime) and t >= 2, then a(n) = a(t); if n = rs (r, s >= 2), then a(n) = a(r) + a(s). The Maple program is based on this recursive formula.
+%F A109129 The Gutman et al. references contain a different recursive formula.
+%e A109129 a(7)=2 because the rooted tree with Matula-Goebel number 7 is the rooted tree Y.
+%e A109129 a(2^m) = m because the rooted tree with Matula-Goebel number 2^m is a star with m edges.
+%p A109129 with(numtheory): a := proc (n) local r, s: r := proc (n) options operator, arrow: op(1, factorset(n)) end proc: s := proc (n) options operator, arrow: n/r(n) end proc: if n = 1 then 0 elif n = 2 then 1 elif bigomega(n) = 1 then a(pi(n)) else a(r(n))+a(s(n)) end if end proc: seq(a(n), n = 1 .. 110);
+%t A109129 Nest[Function[{a, n}, Append[a, If[PrimeQ@ n, a[[PrimePi@ n]], Total@ Map[#2 a[[#1]] & @@ # &, FactorInteger[n]] ]]] @@ {#, Length@ # + 1} &, {0, 1}, 105] (* _Michael De Vlieger_, Mar 24 2019 *)
+%o A109129 (Haskell)
+%o A109129 import Data.List (genericIndex)
+%o A109129 a109129 n = genericIndex a109129_list (n - 1)
+%o A109129 a109129_list = 0 : 1 : g 3 where
+%o A109129    g x = y : g (x + 1) where
+%o A109129      y = if t > 0 then a109129 t else a109129 r + a109129 s
+%o A109129          where t = a049084 x; r = a020639 x; s = x `div` r
+%o A109129 -- _Reinhard Zumkeller_, Sep 03 2013
+%o A109129 (PARI) ML(n) = if( n==1, 1, my(f=factor(n)); sum(k=1,matsize(f)[1],ML(primepi(f[k,1]))*f[k,2])) ;
+%o A109129 A109129(n) = if( n==1, 0, ML(n) ); \\ _François Marques_, Mar 16 2021
+%o A109129 (Python)
+%o A109129 from functools import lru_cache
+%o A109129 from sympy import primepi, isprime, factorint
+%o A109129 @lru_cache(maxsize=None)
+%o A109129 def A109129(n):
+%o A109129     if n <= 2: return n-1
+%o A109129     if isprime(n): return A109129(primepi(n))
+%o A109129     return sum(e*A109129(p) for p, e in factorint(n).items()) # _Chai Wah Wu_, Mar 19 2022
+%Y A109129 Cf. A061775, A091233.
+%Y A109129 Cf. A049084, A020639.
+%Y A109129 Cf. A000081, A000720, A001222, A007097, A109082, A196050, A317713.
+%Y A109129 Cf. A324850, A324922, A324923, A324924, A324931.
+%K A109129 nonn
+%O A109129 1,4
+%A A109129 _Keith Briggs_, Aug 17 2005
+%E A109129 Typo in formula fixed by _Reinhard Zumkeller_, Sep 03 2013

@@ -1,0 +1,33 @@
+%I A163209
+%S A163209 5907,1194649,12327121
+%N A163209 Catalan pseudoprimes: odd composite integers n=2*m+1 satisfying A000108(m) == (-1)^m * 2 (mod n).
+%C A163209 Also, Wilson spoilers: composite n which divide A056040(n-1) - (-1)^floor(n/2). For the factorial function, a Wilson spoiler is a composite n that divides (n-1)! + (-1). Lagrange proved that no such n exists. For the swinging factorial (A056040), the situation is different.
+%C A163209 Also, composite odd integers n=2*m+1 such that A000984(m) == (-1)^m (mod n).
+%C A163209 Contains squares of A001220. In particular, a(2) = A001220(1)^2 = 1093^2 = 1194649 = A001567(274) and a(3) = A001220(2)^2 = 3511^2 = 12327121 = A001567(824).
+%C A163209 See the Vardi reference for a binomial setup.
+%C A163209 Aebi and Cairns 2008, page 9: a(4) either has more than 2 factors or is > 10^10. - _Dana Jacobsen_, May 27 2015
+%C A163209 a(4) > 10^10. - _Dana Jacobsen_, Mar 03 2018
+%D A163209 I. Vardi, Computational Recreations in Mathematica, 1991, p. 66.
+%H A163209 C. Aebi, G. Cairns (2008). "<a href="http://gradelle.educanet2.ch/christian.aebi/.ws_gen/9/catalan.pdf">Catalan numbers, primes and twin primes</a>". Elemente der Mathematik 63 (4): 153-164. doi:<a href="http://dx.doi.org/10.4171/EM/103">10.4171/EM/103</a>
+%H A163209 Peter Luschny, <a href="/A180000/a180000.pdf">Die schwingende Fakultät und Orbitalsysteme</a>, August 2011.
+%H A163209 Peter Luschny, <a href="http://www.luschny.de/math/primes/SwingingPrimes.html"> Swinging Primes.</a>
+%H A163209 <a href="/index/Ps#pseudoprimes">Index entries for sequences related to pseudoprimes</a>
+%p A163209 swing := proc(n) option remember; if n = 0 then 1 elif irem(n, 2) = 1 then swing(n-1)*n else 4*swing(n-1)/n fi end:
+%p A163209 WS := proc(f,r,n) select(p->(f(p-1)+r(p)) mod p = 0,[$2..n]);
+%p A163209 select(q -> not isprime(q),%) end:
+%p A163209 A163209 := n -> WS(swing,p->(-1)^iquo(p+2,2),n);
+%o A163209 (PARI) v(n,p)=my(s); n*=2; while(n\=p, s+=n%2); s
+%o A163209 is(n)=if(n%2==0,return(0)); my(m=Mod(1,n),a=n\2); fordiv(n,d,if(isprime(d) && v(a,d), return(0))); forprime(p=2,a, m*=p^v(a,p)); forprime(p=a+1,n,m*=p); m==(-1)^a
+%o A163209 forcomposite(n=4,2e7, if(is(n), print1(n", "))) \\ _Charles R Greathouse IV_, Mar 06 2015
+%o A163209 (Perl) # Reasonable for isolated values, slow for the sequence:
+%o A163209 use ntheory ":all";
+%o A163209 sub is { my $m = ($_[0]-1)>>1; (binomial($m<<1,$m) % $_[0]) == (($m&1) ? $_[0]-1 : 1); }
+%o A163209 foroddcomposites { say if is($_) } 2e7;  # _Dana Jacobsen_, May 03 2015
+%o A163209 (Perl) # Much faster for sequential testing:
+%o A163209 use Math::GMPz; use ntheory ":all"; { my($c,$l)=(Math::GMPz->new(1),1); sub catalan { while ($_[0] > $l) { $l++; $c *= 4*$l-2; Math::GMPz::Rmpz_divexact_ui($c,$c,$l+1); } $c; } } my $m; foroddcomposites { $m = ($_-1)>>1; say if (catalan($m) % $_) == (($m&1) ? $_-2 : 2); } 2e7;  # _Dana Jacobsen_, May 03 2015
+%K A163209 nonn,hard,more,bref
+%O A163209 1,1
+%A A163209 _Peter Luschny_, Jul 24 2009
+%E A163209 a(1) = 5907 = 3*11*179 was found by S. Skiena
+%E A163209 Typo corrected _Peter Luschny_, Jul 25 2009
+%E A163209 Edited by _Max Alekseyev_, Jun 22 2012

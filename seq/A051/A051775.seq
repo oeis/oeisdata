@@ -1,0 +1,40 @@
+%I A051775
+%S A051775 0,0,0,0,1,0,0,2,2,0,0,3,3,3,0,0,4,1,1,4,0,0,5,8,2,8,5,0,0,6,10,12,12,
+%T A051775 10,6,0,0,7,11,15,6,15,11,7,0,0,8,9,13,2,2,13,9,8,0,0,9,12,14,14,7,14,
+%U A051775 14,12,9,0,0,10,14,4,10,8,8,10,4,14,10,0,0,11,15,7,11
+%N A051775 Table T(n,m) = Nim-product of n and m, read by antidiagonals, for n >= 0, m >= 0.
+%C A051775 Note on an algorithm, _R. J. Mathar_, May 29 2011: (Start)
+%C A051775 Let N* denote the Nim-product and N+ the Nim-sum (A003987) of two numbers, and let * and + denote the usual multiplication and addition.
+%C A051775 To compute n N* m, write n and m separately as Nim-sums with the aid of the binary representation of n = n0 + n1*2 + n2*4 + n3*8 + n4*16.. and m = m0 + m1*2 + m2*4 + m3*8 + m4*16... . Because Nim-summation is the same as the binary XOR-function, the + may then be replaced by N+ in both sums:
+%C A051775 n = Nim-sum_i 2^a(i) and m = Nim-sum_j 2^b(j) with two integer sequences a(i) and b(j).
+%C A051775 Because N+ and N* are the operations in a field, N+ and N* are distributive, which is used to write the product over the sums as a double-Nim-sum over Nim-products:
+%C A051775 n N* m = Nim-sum_{i,j} 2^a(i) N* 2^b(j) .
+%C A051775 What remains is to compute the Nim-products of powers of 2.
+%C A051775 Splitting a(i) and b(j) separately into (ordinary) products of Fermat numbers A001146 (i.e., writing a(i) and b(j) in binary), and noting that the ordinary product of distinct Fermat numbers equals the Nim-product of distinct Fermat numbers,
+%C A051775 2^a(i) N* 2^b(j) = 2^(2^A0) N* 2^(2^A1) N* ... N* 2^(2^B0) N* 2^(2^B1) N* ... for two binary integer sequences A and B.
+%C A051775 This finite product is regrouped by pairing the cases for the same bit in the A-sequence and in the B-sequence. If the bit is set in both sequences, use that the Nim-square of a Fermat number is 3/2 times (ordinary multiple of) that Fermat number; if the bit is set only in one of the two sequences, use (again) that the Nim-product of distinct Fermat numbers is the ordinary product.
+%C A051775 Due to the potential presence of the Nim-squares, this leaves in general a Nim-product which is treated by recursion.
+%C A051775 This algorithm is implemented in the Maple program in the b-file. nimprodP2() calculates the Nim-product of two powers of 2. (End)
+%D A051775 J. H. Conway, On Numbers and Games, Academic Press, p. 52.
+%H A051775 R. J. Mathar, <a href="/A051775/b051775.txt">Table of n, a(n) for n = 0..1890</a>
+%H A051775 Tilman Piesk, <a href="/A051775/a051775.txt">256x256 table</a> and <a href="https://commons.wikimedia.org/wiki/Category:Nimber_multiplication_8_bit;_dual">dual matrix</a>
+%H A051775 Rémy Sigrist, <a href="/A051775/a051775.png">Colored representation of T(x,y) for x = 0..1023 and y = 0..1023</a> (where the hue is function of T(x,y))
+%H A051775 Wikipedia, <a href="http://en.wikipedia.org/wiki/Nimber">Nimber</a>
+%H A051775 <a href="/index/Ni#Nimmult">Index entries for sequences related to Nim-multiplication</a>
+%e A051775 The table begins:
+%e A051775   0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 ...
+%e A051775   0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 ...
+%e A051775   0  2  3  1  8 10 11  9 12 14 15 13  4  6  7  5 ...
+%e A051775   0  3  1  2 12 15 13 14  4  7  5  6  8 11  9 10 ...
+%e A051775   0  4  8 12  6  2 14 10 11 15  3  7 13  9  5  1 ...
+%e A051775   0  5 10 15  2  7  8 13  3  6  9 12  1  4 11 14 ...
+%e A051775   (...)
+%p A051775 We continue from A003987: to compute a Nim-multiplication table using (a) an addition table AT := array(0..NA, 0..NA) and (b) a nimsum procedure for larger values; MT := array(0..N,0..N); for a from 0 to N do MT[a,0] := 0; MT[0,a] := 0; MT[a,1] := a; MT[1,a] := a; od: for a from 2 to N do for b from a to N do t1 := {}; for i from 0 to a-1 do for j from 0 to b-1 do u1 := MT[i,b]; u2 := MT[a,j];
+%p A051775 if u1<=NA and u2<=NA then u12 := AT[u1,u2]; else u12 := nimsum(u1,u2); fi; u3 := MT[i,j]; if u12<=NA and u3<=NA then u4 := AT[u12,u3]; else u4 := nimsum(u12,u3); fi; t1 := { op(t1), u4}; #t1 := { op(t1), AT[ AT[ MT[i,b], MT[a,j] ], MT[i,j] ] }; od; od;
+%p A051775 t2 := sort(convert(t1,list)); j := nops(t2); for i from 1 to nops(t2) do if t2[i] <> i-1 then j := i-1; break; fi; od; MT[a,b] := j; MT[b,a] := j; od; od;
+%o A051775 (PARI) NP_table=Map(); NP(x,y)={ if(x<2 || y<2, x*y, mapisdefined(NP_table, if(y>x, [x,y]=[y,x], [x,y])), mapget(NP_table,[x,y]), x==3, y-1, x==2, 3, my(F=4); until(!F *= F, if(x<2*F, F=if(x>F, bitxor(NP(F,y), NP(x-F,y)), y<x, x*y, x\2*3); break); my(t = 2*F); until(F*F <= t *= 2, if(x==t, if(y<F, F=NP(NP(y,t\F),F); break(2)); my(i = F); until(t <= i *= 2, if(y<2*i, F=if(y>i, bitxor(NP(t,i), NP(t,y-i)), NP(F\2*3, NP(t/F,i/F))); break(3))); if(y==t, F=NP(F\2*3, NP(t/F,t/F)); break(2))); if(x<2*t, F=bitxor(NP(t,y), NP(x-t,y)); break(2)))); mapput(NP_table,[x,y], F); F)} \\ _M. F. Hasler_, Jan 18 2021
+%o A051775 A051775(n,m="")={if(m!="", NP(n,m), NP((1+m=sqrtint(8*n+1)\/2)*m/2-n-1, n-m*(m-1)/2))} \\ Then A051775(n) = a(n) [flattened sequence, cf. A025581 & A002262], A051775(n,m) = T(n,m): for example, {matrix(6,15,m,n, A051775(m,n))} - _M. F. Hasler_, Jan 22 2021
+%Y A051775 Cf. A051776, A003987.
+%K A051775 tabl,nonn,easy,nice
+%O A051775 0,8
+%A A051775 _N. J. A. Sloane_, Dec 19 1999

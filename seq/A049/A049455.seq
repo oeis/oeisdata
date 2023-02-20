@@ -1,0 +1,50 @@
+%I A049455
+%S A049455 0,1,0,1,1,0,1,1,2,1,0,1,1,2,1,3,2,3,1,0,1,1,2,1,3,2,3,1,4,3,5,2,5,3,
+%T A049455 4,1,0,1,1,2,1,3,2,3,1,4,3,5,2,5,3,4,1,5,4,7,3,8,5,7,2,7,5,8,3,7,4,5,
+%U A049455 1,0,1,1,2,1,3,2,3,1,4,3,5,2,5,3,4,1,5,4,7,3,8,5,7,2,7,5,8,3,7,4,5,1,6,5,9
+%N A049455 Triangle read by rows: T(n,k) = numerator of fraction in k-th term of n-th row of variant of Farey series.
+%C A049455 Stern's diatomic array read by rows (version 4, the 0,1 version).
+%C A049455 This sequence divided by A049456 gives another version of the Stern-Brocot tree.
+%C A049455 Row n has length 2^n + 1.
+%C A049455 Define mediant of a/b and c/d to be (a+c)/(b+d). We get A006842/A006843 if we omit terms from n-th row in which denominator exceeds n.
+%C A049455 Largest term of n-th row = A000045(n), Fibonacci numbers. - _Reinhard Zumkeller_, Apr 02 2014
+%D A049455 Martin Gardner, Colossal Book of Mathematics, Classic Puzzles, Paradoxes, and Problems, Chapter 25, Aleph-Null and Aleph-One, p. 328, W. W. Norton & Company, NY, 2001.
+%D A049455 J. C. Lagarias, Number Theory and Dynamical Systems, pp. 35-72 of S. A. Burr, ed., The Unreasonable Effectiveness of Number Theory, Proc. Sympos. Appl. Math., 46 (1992). Amer. Math. Soc.
+%D A049455 W. J. LeVeque, Topics in Number Theory. Addison-Wesley, Reading, MA, 2 vols., 1956, Vol. 1, p. 154.
+%H A049455 Robert G. Wilson v, <a href="/A049455/b049455.txt">Table of n, a(n) for n = 1..10000</a> (first 8204 terms from Reinhard Zumkeller)
+%H A049455 C. Giuli and R. Giuli, <a href="http://www.fq.math.ca/Scanned/17-2/giuli.pdf">A primer on Stern's diatomic sequence</a>, Fib. Quart., 17 (1979), 103-108, 246-248 and 318-320 (but beware errors).
+%H A049455 Jennifer Lansing, <a href="https://cs.uwaterloo.ca/journals/JIS/VOL17/Lansing/lansing2.html">Largest Values for the Stern Sequence</a>, J. Integer Seqs., 17 (2014), #14.7.5.
+%H A049455 M. Shrader-Frechette, <a href="http://www.jstor.org/stable/2690435">Modified Farey sequences and continued fractions</a>, Math. Mag., 54 (1981), 60-63.
+%H A049455 N. J. A. Sloane, <a href="/stern_brocot.html">Stern-Brocot or Farey Tree</a>
+%H A049455 <a href="/index/St#Stern">Index entries for sequences related to Stern's sequences</a>
+%F A049455 Row 1 is 0/1, 1/1. Obtain row n from row n-1 by inserting mediants between each pair of terms.
+%e A049455 0/1, 1/1; 0/1, 1/2, 1/1; 0/1, 1/3, 1/2, 2/3, 1/1; 0/1, 1/4, 1/3, 2/5, 1/2, 3/5, 2/3, 3/4, 1/1; 0/1, 1/5, 1/4, 2/7, 1/3, 3/8, 2/5, 3/7, 1/2, ... = A049455/A049456
+%e A049455 The 0,1 version of Stern's diatomic array (cf. A002487) begins:
+%e A049455 0,1,
+%e A049455 0,1,1,
+%e A049455 0,1,1,2,1,
+%e A049455 0,1,1,2,1,3,2,3,1,
+%e A049455 0,1,1,2,1,3,2,3,1,4,3,5,2,5,3,4,1,
+%e A049455 0,1,1,2,1,3,2,3,1,4,3,5,2,5,3,4,1,5,4,7,3,8,5,7,2,7,5,3,3,7,4,5,1,
+%e A049455 ...
+%t A049455 f[l_List] := Block[{k = Length@l, j = l}, While[k > 1, j = Insert[j, j[[k]] + j[[k - 1]], k]; k--]; j]; NestList[f, {0, 1}, 6] // Flatten (* _Robert G. Wilson v_, Nov 10 2019 *)
+%o A049455 (Haskell)
+%o A049455 import Data.List (transpose)
+%o A049455 import Data.Ratio ((%), numerator, denominator)
+%o A049455 a049455 n k = a049455_tabf !! (n-1) !! (k-1)
+%o A049455 a049455_row n = a049455_tabf !! (n-1)
+%o A049455 a049455_tabf = map (map numerator) $ iterate
+%o A049455    (\row -> concat $ transpose [row, zipWith (+/+) row $ tail row]) [0, 1]
+%o A049455    where u +/+ v = (numerator u + numerator v) %
+%o A049455                    (denominator u + denominator v)
+%o A049455 -- _Reinhard Zumkeller_, Apr 02 2014
+%o A049455 (PARI) mediant(x, y) = (numerator(x)+numerator(y))/(denominator(x)+denominator(y));
+%o A049455 newrow(rowa) = {my(rowb = []); for (i=1, #rowa-1, rowb = concat(rowb, rowa[i]); rowb = concat(rowb, mediant(rowa[i], rowa[i+1]));); concat(rowb, rowa[#rowa]);}
+%o A049455 rows(nn) = {my(rowa); for (n=1, nn, if (n==1, rowa = [0, 1], rowa = newrow(rowa)); print(apply(x->numerator(x), rowa)););} \\ _Michel Marcus_, Apr 03 2019
+%Y A049455 Cf. A049456. Also A007305, A007306, A006842, A006843, A070878, A070879.
+%Y A049455 Row sums are A007051.
+%Y A049455 Cf. A000051 (row lengths), A293165 (distinct terms).
+%K A049455 nonn,easy,tabf,frac,look
+%O A049455 1,9
+%A A049455 _N. J. A. Sloane_
+%E A049455 More terms from Larry Reeves (larryr(AT)acm.org), Apr 12 2000

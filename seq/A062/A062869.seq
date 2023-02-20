@@ -1,0 +1,69 @@
+%I A062869
+%S A062869 1,1,1,1,1,2,3,1,3,7,9,4,1,4,12,24,35,24,20,1,5,18,46,93,137,148,136,
+%T A062869 100,36,1,6,25,76,187,366,591,744,884,832,716,360,252,1,7,33,115,327,
+%U A062869 765,1523,2553,3696,4852,5708,5892,5452,4212,2844,1764,576,1,8,42,164,524
+%N A062869 Triangle read by rows: For n >= 0, k >= 0, T(n,k) is the number of permutations pi of n such that the total distance Sum_i abs(i-pi(i)) = 2k. Equivalently, k = Sum_i max(i-pi(i),0).
+%C A062869 Number of possible values is 1,2,3,5,7,10,13,17,21,... = A033638. Maximum distance divided by 2 is the same minus one, i.e., 0,1,2,4,6,9,12,16,20,... = A002620.
+%C A062869 T. Kyle Petersen and Bridget Eileen Tenner proved that T(n,k) is also the number of permutations of n for which the sum of descent differences equals k. - _Susanne Wienand_, Sep 11 2014
+%D A062869 D. E. Knuth, The Art of Computer Programming, vol. 3, (1998), page 22 (exercise 28) and page 597 (solution and comments).
+%H A062869 Daniel Graf and Alois P. Heinz, <a href="/A062869/b062869.txt">Rows n = 0..50, flattened</a> (first 31 rows from Alois P. Heinz)
+%H A062869 Max Alekseyev, <a href="/A062869/a062869.txt">Proof that T(n,k) is even for k>=n,</a> SeqFan Mailing List, Dec 07 2006
+%H A062869 A. Bärtschi, B. Geissmann, D. Graf, T. Hruz, P. Penna, T. Tschager <a href="https://arxiv.org/abs/1606.05538">On computing the total displacement number via weighted Motzkin paths</a>, arXiv:1606.05538 [cs.DS], 2016. - _Daniel Graf_, Jun 20 2016
+%H A062869 P. Diaconis and R. L. Graham, <a href="http://www-stat.stanford.edu/~cgates/PERSI/papers/77_04_spearmans.pdf">Spearman's Footrule as a Measure of Disarray</a>, J. Royal Stat. Soc. B, 39 (1977), 262-268.
+%H A062869 FindStat - Combinatorial Statistic Finder, <a href="http://www.findstat.org/StatisticsDatabase/St000029">The depth of a permutation.</a>, <a href="http://www.findstat.org/StatisticsDatabase/St000030">The sum of the descent differences of a permutations.</a>
+%H A062869 Mathieu Guay-Paquet and T. Kyle Petersen, <a href="http://arxiv.org/abs/1404.4674">The generating function for total displacement</a>, arXiv:1404.4674 [math.CO], 2014.
+%H A062869 M. Guay-Paquet, T. K. Petersen, <a href="http://www.combinatorics.org/ojs/index.php/eljc/article/view/v21i3p37">The generating function for total displacement</a>, The Electronic Journal of Combinatorics, 21(3) (2014), #P3.37.
+%H A062869 Dirk Liebhold, G Nebe, A Vazquez-Castro, <a href="http://arxiv.org/abs/1612.07177">Network coding and spherical buildings</a>, arXiv preprint arXiv:1612.07177 [cs.IT], 2016.
+%H A062869 T. Kyle Petersen and Bridget Eileen Tenner, <a href="http://arxiv.org/abs/1202.4765">The depth of a permutation</a>, arXiv:1202.4765 [math.CO], 2012.
+%F A062869 From _Mathieu Guay-Paquet_, Apr 30 2014: (Start)
+%F A062869 G.f.: 1/(1-z/(1-t*z/(1-2*t*z/(1-2*t^2*z/(1-3*t^2*z/(1-3*t^3*z/(1-4*t^3*z/(1-4*t^4*z/(...
+%F A062869 This is a continued fraction where the (2i)th numerator is (i+1)*t^i*z, and the (2i+1)st numerator is (i+1)*t^(i+1)*z for i >= 0. The coefficient of z^n gives row n, n >= 1, and the coefficient of t^k gives column k, k >= 0. (End)
+%F A062869 From _Alois P. Heinz_, Oct 02 2022: (Start)
+%F A062869 Sum_{k=0..floor(n^2/4)} k * T(n,k) = A005990(n).
+%F A062869 Sum_{k=0..floor(n^2/4)} (-1)^k * T(n,k) = A009006(n). (End).
+%e A062869 Triangle T(n,k) begins:
+%e A062869   1;
+%e A062869   1;
+%e A062869   1, 1;
+%e A062869   1, 2,  3;
+%e A062869   1, 3,  7,  9,   4;
+%e A062869   1, 4, 12, 24,  35,  24,  20;
+%e A062869   1, 5, 18, 46,  93, 137, 148, 136, 100,  36;
+%e A062869   1, 6, 25, 76, 187, 366, 591, 744, 884, 832, 716, 360, 252;
+%e A062869   ...
+%e A062869 (4,3,1,2) has distances (3,1,2,2), sum is 8 and there are 3 other permutations of degree 4 with this sum.
+%p A062869 # The following program yields the entries of the specified row n
+%p A062869 n := 9: with(combinat): P := permute(n): excsum := proc (p) (1/2)*add(abs(p[i]-i), i = 1 .. nops(p)) end proc: f[n] := sort(add(t^excsum(P[j]), j = 1 .. factorial(n))): seq(coeff(f[n], t, j), j = 0 .. floor((1/4)*n^2)); # _Emeric Deutsch_, Apr 02 2010
+%p A062869 # Maple program using the g.f. given by Guay-Paquey and Petersen:
+%p A062869 g:= proc(h, n) local i, j; j:= irem(h, 2, 'i');
+%p A062869        1-`if`(h=n, 0, (i+1)*z*t^(i+j)/g(h+1, n))
+%p A062869     end:
+%p A062869 T:= n-> (p-> seq(coeff(p, t, k), k=0..degree(p)))
+%p A062869         (coeff(series(1/g(0, n), z, n+1), z, n)):
+%p A062869 seq(T(n), n=0..10);  # _Alois P. Heinz_, May 02 2014
+%t A062869 g[h_, n_] := Module[{i, j}, {i, j} = QuotientRemainder[h, 2]; 1 - If[h == n, 0, (i + 1)*z*t^(i + j)/g[h + 1, n]]]; T[n_] := Function[p, Table[ Coefficient[p, t, k], {k, 0, Exponent[p, t]}]][SeriesCoefficient[ 1/g[0, n], {z, 0, n}]]; Table[T[n], {n, 1, 10}] // Flatten (* _Jean-François Alcover_, Jan 07 2016, after _Alois P. Heinz_ *)
+%t A062869 f[i_] := If[i == 1, 1, -(i-1)^2 t^(2i - 3) z^2];
+%t A062869 g[i_] := 1 - (2i - 1) t^(i-1) z;
+%t A062869 cf = ContinuedFractionK[f[i], g[i], {i, 1, 5}];
+%t A062869 CoefficientList[#, t]& /@ CoefficientList[cf + O[z]^10, z] // Rest // Flatten (* _Jean-François Alcover_, Nov 25 2018, after _Mathieu Guay-Paquet_ *)
+%o A062869 (Sage)
+%o A062869 # The following Sage program
+%o A062869 # yields the entries of the first n rows
+%o A062869 # as a list of lists
+%o A062869 def get_first_rows(n):
+%o A062869     R, t = PolynomialRing(ZZ, 't').objgen()
+%o A062869     S, z = PowerSeriesRing(R, 'z').objgen()
+%o A062869     gf = S(1).add_bigoh(1)
+%o A062869     for i in srange(n, 0, -1):
+%o A062869         a = (i+1) // 2
+%o A062869         b = i // 2
+%o A062869         gf = 1 / (1 - a * t^b * z * gf)
+%o A062869     return [list(row) for row in gf.shift(-1)]
+%o A062869 # _Mathieu Guay-Paquet_, Apr 30 2014
+%Y A062869 Cf. A005990, A009006, A062866, A062867, A062870, A072949, A301897.
+%Y A062869 Row sums give A000142.
+%Y A062869 A357329 is a sub-triangle.
+%K A062869 nonn,tabf,easy,look
+%O A062869 0,6
+%A A062869 _Olivier Gérard_, Jun 26 2001
+%E A062869 T(0,0)=1 prepended by _Alois P. Heinz_, Oct 03 2022

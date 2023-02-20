@@ -1,0 +1,17 @@
+%I A071553
+%S A071553 2,3,7,5,61,11,421,13,121,71,27721,23,360361,4159,841,307,12252241,
+%T A071553 1121,232792561,2393,4398241,483209,5354228881,4093,1460244241,
+%U A071553 11232649,61934401,7598557,2329089562801,406639,72201776446801,6998993
+%N A071553 Least x greater than 1 such that x^n == 1 (mod i) for each i=1,2,3,...,n.
+%C A071553 Let m(n) = A003418(n) = lcm(1,2,...,n). Then a(n) <= m(n)+1, with equality if and only if n=1 or n is prime. - _David W. Wilson_, _Vladeta Jovovic_, _Dean Hickerson_
+%t A071553 <<NumberTheory`NumberTheoryFunctions` (* Load ChineseRemainder function, needed below. *)
+%t A071553 f[n_, m_] := Select[Range[0, m-1], PowerMod[ #, n, m]==1&]; a[1]=2; a[n_] := Module[{lcm, pe, i, m, s, j, x}, lcm=LCM@@Range[n]; pe=Sort[Select[Range[n], Length[FactorInteger[ # ]]==1&&#*FactorInteger[ # ][[1, 1]]>n&], Length[f[n, #1]]/#1<Length[f[n, #2]]/#2&]; For[i=1; m=1; s={0}, i<=Length[pe], i++, s=Union@@Outer[ChineseRemainder[{#1, #2}, {m, pe[[i]]}]&, s, f[n, pe[[i]]]]; m*=pe[[i]]; For[j=2, j<=Length[s], j++, If[PowerMod[x=s[[j]], n, lcm]==1, Return[x]]]; If[PowerMod[1+m, n, lcm]==1, Return[1+m]]; ]]; (* f[n, m] is list of x with x^n==1 (mod m), 0 <= x < m *)
+%t A071553 a[1] = 2; a[n_ /; n <= 10] := (s = 2; While[ Sum[ Sign[ Mod[s^n - 1, i]], {i, 1, n}] > 0, s++]; s); a[n_?PrimeQ] := LCM @@ Range[n] + 1; a[n_] := a[n] = (km = If[n <= 24, 6, 7]; redu = Reduce[ And @@ Table[ Mod[x^n, n - k] == 1, {k, 0, km}], x, Integers]; candidates = Join @@ Table[ Sort[ List @@ (redu /. C[1] -> c)[[All, 2]]], {c, 0, n}]; First[ Select[ candidates, # > 1 && And @@ Table[ Mod[ #^n, k] == 1, {k, 2, n - km - 1}] & ]]); Table[ Print[a[n]]; a[n], {n, 1, 32}] (* _Jean-François Alcover_, Jan 13 2012, after PARI for n <= 10 *)
+%o A071553 (PARI) for(n=1,12,s=2; while(sum(i=1,n, sign((s^n-1)%i))>0,s++); print1(s,","))
+%K A071553 nonn,nice
+%O A071553 1,1
+%A A071553 _Benoit Cloitre_, May 30 2002
+%E A071553 Edited by _Robert G. Wilson v_, Jun 07 2002
+%E A071553 More terms from _Don Reble_, Jun 07 2002
+%E A071553 Corrected and extended by _Vladeta Jovovic_, Jun 09 2002
+%E A071553 Corrected and extended by _Dean Hickerson_, Jun 13 2002

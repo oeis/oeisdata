@@ -1,0 +1,56 @@
+%I A144903
+%S A144903 0,0,1,0,1,0,0,1,1,0,0,1,2,1,1,0,1,3,3,2,1,0,1,4,6,5,3,1,0,1,5,10,11,
+%T A144903 8,4,2,0,1,6,15,21,19,12,6,3,0,1,7,21,36,40,31,18,9,4,0,1,8,28,57,76,
+%U A144903 71,49,27,13,6,0,1,9,36,85,133,147,120,76,40,19,9,0,1,10,45,121,218,280,267,196,116,59,28,13
+%N A144903 Square array A(n,k), n>=0, k>=0, read by antidiagonals, where column k is the expansion of x/((1-x-x^3)*(1-x)^(k-1)).
+%H A144903 Alois P. Heinz, <a href="/A144903/b144903.txt">Antidiagonals n = 0..140, flattened</a>
+%F A144903 G.f. of column k: x/((1-x-x^3)*(1-x)^(k-1)).
+%F A144903 A(n, n) = A144904(n).
+%F A144903 From _G. C. Greubel_, Aug 01 2022: (Start)
+%F A144903 A(n, k) = Sum_{j=0..n-1} binomial(k+j-2, j)*A000930(n-j-1), with A(0, k) = 0.
+%F A144903 T(n, k) = Sum_{j=0..k-1} binomial(n-k-j-2, j)*A000930(k-j-1), with T(n, 0) = 0.
+%F A144903 T(2*n, n) = A144904(n). (End)
+%e A144903 Square array (A(n,k)) begins:
+%e A144903   0, 0,  0,  0,  0,   0,   0 ... A000004;
+%e A144903   1, 1,  1,  1,  1,   1,   1 ... A000012;
+%e A144903   0, 1,  2,  3,  4,   5,   6 ... A001477;
+%e A144903   0, 1,  3,  6, 10,  15,  21 ... A000217;
+%e A144903   1, 2,  5, 11, 21,  36,  57 ... A050407;
+%e A144903   1, 3,  8, 19, 40,  76, 133 ... ;
+%e A144903   1, 4, 12, 31, 71, 147, 200 ... A027658;
+%e A144903 Antidiagonal triangle (T(n,k)) begins as:
+%e A144903   0;
+%e A144903   0,  1;
+%e A144903   0,  1,  0;
+%e A144903   0,  1,  1,  0;
+%e A144903   0,  1,  2,  1,  1;
+%e A144903   0,  1,  3,  3,  2,  1;
+%e A144903   0,  1,  4,  6,  5,  3,  1;
+%e A144903   0,  1,  5, 10, 11,  8,  4,  2;
+%e A144903   0,  1,  6, 15, 21, 19, 12,  6,  3;
+%p A144903 A:= proc(n,k) coeftayl (x/ (1-x-x^3)/ (1-x)^(k-1), x=0, n) end:
+%p A144903 seq(seq(A(n, d-n), n=0..d), d=0..13);
+%t A144903 (* First program *)
+%t A144903 a[n_, k_] := SeriesCoefficient[x/((1-x-x^3)*(1-x)^(k-1)), {x, 0, n}];
+%t A144903 Table[a[n-k, k], {n,0,12}, {k,n,0,-1}]//Flatten (* _Jean-François Alcover_, Jan 15 2014 *)
+%t A144903 (* Second Program *)
+%t A144903 A000930[n_]:= A000930[n]= Sum[Binomial[n-2*j,j], {j,0,Floor[n/3]}];
+%t A144903 T[n_, k_]:= T[n, k]= If[k==0, 0, Sum[Binomial[n-k+j-2,j]*A000930[k-j-1], {j,0,k- 1}]];
+%t A144903 Table[T[n, k], {n,0,15}, {k,0,n}]//Flatten (* _G. C. Greubel_, Aug 01 2022 *)
+%o A144903 (Magma)
+%o A144903 A000930:= func< n | (&+[Binomial(n-2*j,j): j in [0..Floor(n/3)]]) >;
+%o A144903 A144903:= func< n,k | k eq 0 select 0 else (&+[Binomial(n-k+j-2,j)*A000930(k-j-1) : j in [0..k-1]]) >;
+%o A144903 [A144903(n,k): k in [0..n], n in [0..15]]; // _G. C. Greubel_, Aug 01 2022
+%o A144903 (SageMath)
+%o A144903 def A000930(n): return sum(binomial(n-2*j,j) for j in (0..(n//3)))
+%o A144903 def A144903(n,k):
+%o A144903     if (k==0): return 0
+%o A144903     else: return sum(binomial(n-k+j-2,j)*A000930(k-j-1) for j in (0..k-1))
+%o A144903 flatten([[A144903(n,k) for k in (0..n)] for n in (0..15)]) # _G. C. Greubel_, Aug 01 2022
+%Y A144903 Rows 0-4, 6 give: A000004, A000012, A001477, A000217, A050407(n+3), A027658.
+%Y A144903 Columns 0-9 give: A078012 and A135851(n+2), A078012(n+2) and A135851(n+4), A077868(n-1) for n>0, A050228(n-1) for n>0, A226405, A144898, A144899, A144900, A144901, A144902.
+%Y A144903 Main diagonal gives: A144904.
+%Y A144903 Cf. A000930.
+%K A144903 nonn,tabl
+%O A144903 0,13
+%A A144903 _Alois P. Heinz_, Sep 24 2008

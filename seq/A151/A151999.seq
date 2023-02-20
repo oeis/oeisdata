@@ -1,0 +1,54 @@
+%I A151999
+%S A151999 1,2,4,6,8,10,12,16,18,20,24,30,32,34,36,40,42,48,50,54,60,64,68,72,
+%T A151999 78,80,84,90,96,100,102,108,110,114,120,126,128,136,144,150,156,160,
+%U A151999 162,168,170,180,192,200,204,210,216,220,222,228,234,240,250,252,256,270
+%N A151999 Numbers k such that every prime that divides phi(k) also divides k.
+%C A151999 Alternative descriptions:
+%C A151999 (a) For every prime p|n and every prime q|p-1 we have q|n;
+%C A151999 (b) Numbers n such that radical of phi(n) divides radical of n, where phi is Euler's totient function and radical is the squarefree kernel function.
+%C A151999 These numbers are "valid bases".
+%C A151999 Numbers n such that radical of phi(n) divides n. - _Michel Marcus_, Nov 06 2017
+%C A151999 Pollack and Pomerance call these numbers "phi-deficient numbers". - _Amiram Eldar_, Jun 02 2020
+%H A151999 Paolo P. Lava, <a href="/A151999/b151999.txt">Table of n, a(n) for n = 1..10000</a>
+%H A151999 Paul Pollack and Carl Pomerance, <a href="http://www.emis.de/journals/INTEGERS/papers/a14self/a14self.Abstract.html">Prime-Perfect Numbers</a>, INTEGERS, Electronic J. of Combinatorial Number Theory, Vol. 12a, Paper A14, 2012.
+%H A151999 J. Jimenez Urroz and J. Luis A. Yebra, <a href="https://cs.uwaterloo.ca/journals/JIS/VOL12/Yebra/yebra4.html">On the equation a^x=x mod b^n</a>, Journal of Integer Sequences, Vol. 12 (2009), Article 09.8.8.
+%p A151999 A151999 := proc(n)
+%p A151999     if n = 1 then
+%p A151999         2;
+%p A151999     else
+%p A151999         for a from procname(n-1)+1 do
+%p A151999             pdvs := numtheory[factorset](a) ;
+%p A151999             aworks := true;
+%p A151999             for p in numtheory[factorset](a) do
+%p A151999                 for q in numtheory[factorset](p-1) do
+%p A151999                     if a mod q = 0 then
+%p A151999                         ;
+%p A151999                     else
+%p A151999                         aworks := false;
+%p A151999                     end if;
+%p A151999                 end do:
+%p A151999             end do:
+%p A151999             if aworks then
+%p A151999                 return a;
+%p A151999             end if;
+%p A151999         end do:
+%p A151999     end if;
+%p A151999 end proc: # _R. J. Mathar_, Jun 01 2013
+%p A151999 Alternative code:
+%p A151999 with(numtheory): P:=proc(n) local a,k,ok; a:=ifactors(phi(n))[2]; ok:=1;
+%p A151999   for k from 1 to nops(a) do if n mod a[k][1]>0 then ok:=0; break; fi;
+%p A151999 od; if ok=1 then n; fi; end: seq(P(i),i=1..270); # _Paolo P. Lava_, Nov 06 2017
+%t A151999 Rad[n_]:=Times@@Transpose[FactorInteger[n]][[1]]; Select[1 + Range[300], Mod[Rad[#], Rad[EulerPhi[#]]]==0 &] (* _José María Grau Ribas_, Jan 09 2012 *)
+%o A151999 (PARI) isok(n) = {fp = factor(n); for (i=1, #fp[, 1], fq = factor(fp[i, 1] - 1); for (j=1, #fq[, 1], if (n % fq[j, 1], return (0)););); return (1);} \\ _Michel Marcus_, Jun 01 2013
+%o A151999 (PARI) isok(n) = (n % factorback(factor(eulerphi(n))[, 1])) == 0; \\ _Michel Marcus_, Nov 04 2017
+%o A151999 (Magma) [n: n in [1..300] | forall{d: d in PrimeDivisors(EulerPhi(n)) | IsIntegral(n/d)}]; // _Bruno Berselli_, Nov 04 2017
+%Y A151999 Cf. A005117, A055744, A073539.
+%Y A151999 Cf. A007947 (radical of n), A007694 (phi(n) divides n, a subsequence).
+%Y A151999 Cf. A080400 (radical of phi(n)).
+%Y A151999 Cf. A152000.
+%K A151999 easy,nonn
+%O A151999 1,2
+%A A151999 J. Luis A. Yebra and J. Jimenez Urroz (yebra(AT)mat.upc.es), Nov 19 2008
+%E A151999 Corrected by _Michel Marcus_, Jun 01 2013
+%E A151999 Edited by _N. J. A. Sloane_, Jun 02 2013 at the suggestion of _Michel Marcus_, merging this with A204010
+%E A151999 Deleted erroneous comment and added correct b-file by _Paolo P. Lava_, Nov 06 2017

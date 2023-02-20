@@ -1,0 +1,60 @@
+%I A162508
+%S A162508 -1,-2,2,-4,10,-6,-8,38,-54,24,-16,130,-330,336,-120,-32,422,-1710,
+%T A162508 3000,-2400,720,-64,1330,-8106,21840,-29400,19440,-5040,-128,4118,
+%U A162508 -36414,141624,-285600,312480,-176400,40320
+%N A162508 A binomial sum of powers related to the Bernoulli numbers, triangular array, read by rows.
+%C A162508 T(n,k) = sum_{v=0..k} (-1)^v*v*binomial(k,v)*(v+1)^(n-1)
+%C A162508 for n >= 1, k >= 1; by convention T(0,0) = 1.
+%C A162508 Gives a representation of the Bernoulli numbers B_{n} = B_{n}(1) (with B_1 = 1/2)
+%C A162508 B_{n} = sum_{j=0..n} sum_{k=0..j} T(j,k)/(k+1)
+%C A162508 T(n,1) = -2^(n-1) (n>=1)
+%C A162508 T(n,n) = (-1)^n*n! (n>=1)
+%C A162508 sum_{k=0..n} T(n,k) = -A000007(n-1) = -1,0,0,0,0,... (n>=1)
+%C A162508 sum_{k=0..n} abs(T(n,k)) = A162509(n) = A073146(n,n-1) (n>=1)
+%C A162508 sum_{k=0..n} T(n,k)/(k+1) = Bernoulli(n,1)-Bernoulli(n-1,1) (n>=1)
+%C A162508 numer(sum(T(n,k)/(k+1),k=0..n)) = A051716(n) (n>=0)
+%C A162508 denom(sum(T(n,k)/(k+1),k=0..n)) = A051717(n) (n>=0)
+%C A162508 Contribution from _Peter Luschny_, Jul 08 2009: (Start)
+%C A162508 More generally, define the polynomials (assume p[0,0](x)=1 and 0^0=1)
+%C A162508 p[n,k](x) = sum_{v=0..k} (-1)^v*v*binomial(k,v)*(v+1+x)^(n-1)
+%C A162508 [1], [0, -1], [0, -2-x, 2], [0, -4-4x-x^2, 10+4x, -6], ...
+%C A162508 then T(n,k)=p[n,k](0) and (-1)^k*k!*Stirling2(n,k)=p[n,k](-1) (cf. A019538).
+%C A162508 Assume now k >= 1 and read by rows. Then
+%C A162508 p[n,k](1) = -1,-3,2,-9,14,-6,-27,74,-72,24,-81,350,-582,432,-120,...
+%C A162508 (-1)^n*(-2)^(n-k)*p[n,k](-1/2))=1,3,2,9,16,6,27,98,90,24,81,544,924,576,120,..
+%C A162508 (-1)^n*(-2)^(n-k)*p[n,k](-3/2))=1,1,2,1,8,6,1,26,54,24,1,80,348,384,120,... (End)
+%C A162508 Variant of A199400.
+%H A162508 Vincenzo Librandi, <a href="/A162508/b162508.txt">Rows n = 1..50, flattened</a>
+%F A162508 From _Peter Bala_, Jul 21 2014: (Start)
+%F A162508 T(n,k) = (-1)^k*k!*( Stirling2(n+1,k+1) - Stirling2(n,k+1) ), 1 <= k <= n.
+%F A162508 T(n,k) = (-1)^k*(k + 1)*A038719(n+1,k+1).
+%F A162508 E.g.f.: - B(-x,z)^2, where B(x,z) = 1/((1 + x)*exp(-z) - x) = 1 + (1 + x)*z + (1 + 3*x + 2*x^2)*z^2/2! + ... is an e.g.f. for A028246 (with an offset of 0).
+%F A162508 Recurrence: T(n,k) = (k + 1)*T(n-1,k) - k*T(n-1,k-1).
+%F A162508 The unsigned version of the triangle equals the matrix product A007318*A019538.
+%F A162508 Assuming this triangle is a signed version of A199400 then the n-th row polynomial R(n,x) = 1/(1 - x)*( sum {k = 1..inf} k*(k + 1)^(n-1)*(x/(x - 1))^k ), valid for x in the open interval (-inf, 1/2). (End)
+%e A162508 For n >= 1, k >= 1:
+%e A162508 ..................... -1
+%e A162508 ................... -2, 2
+%e A162508 ................. -4, 10, -6
+%e A162508 .............. -8, 38, -54, 24
+%e A162508 ......... -16, 130, -330, 336, -120
+%e A162508 ..... -32, 422, -1710, 3000, -2400, 720
+%e A162508 -64, 1330, -8106, 21840, -29400, 19440, -5040
+%p A162508 T := proc(n,k) local v; if n=0 and k=0 then 1 else
+%p A162508 add((-1)^v*v*binomial(k,v)*(v+1)^(n-1),v=0..k) fi end:
+%p A162508 # _Peter Bala_'s e.g.f. assuming offset 0:
+%p A162508 egf := (x, z) -> -((1-x)/exp(z) + x)^(-2):
+%p A162508 ser := series(egf(x, z), z, 10): coz := n -> n!*coeff(ser, z, n):
+%p A162508 row := n -> seq(coeff(coz(n), x, k), k = 0..n):
+%p A162508 seq(print(row(n)), n = 0..9); # _Peter Luschny_, Jan 28 2021
+%t A162508 t[n_, k_] := Sum[(-1)^v*v*Binomial[k, v]*(v + 1)^(n - 1), {v, 0, k}]; Table[t[n, k], {n, 1, 8}, {k, 1, n}] // Flatten (* _Jean-François Alcover_, Jul 26 2013, after Maple *)
+%o A162508 (Sage)
+%o A162508 def A162508(n, k):
+%o A162508     if n==0 and k==0: return 1
+%o A162508     return add((-1)^v*v*binomial(k, v)*(v+1)^(n-1) for v in (0..k))
+%o A162508 for n in (1..8): [A162508(n, k) for k in (1..n)] # _Peter Luschny_, Jul 21 2014
+%Y A162508 Cf. A162509, A073146, A051716, A051717, A199400. A019538, A028246, A038719.
+%K A162508 sign,tabl
+%O A162508 1,2
+%A A162508 _Peter Luschny_, Jul 05 2009
+%E A162508 More terms from _Philippe Deléham_, Nov 05 2011

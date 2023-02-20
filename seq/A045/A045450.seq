@@ -1,0 +1,28 @@
+%I A045450
+%S A045450 1,0,1,1,1,2,0,2,1,2,2,3,0,4,2,4,3,4,2,5,3,5,3,5,3,6,5,5,5,7,5,9,5,7,
+%T A045450 8,8,6,11,8,11,9,12,10,14,11,15,12,15,13,18,17,17,16,18,18,23,20,22,
+%U A045450 23,25,23,30,26,28,29,32,32,36,34,38,38,41,41,47,45,47,48,50,54,58,57,60,63
+%N A045450 Number of partitions of n into a prime number of distinct prime parts.
+%H A045450 Alois P. Heinz, <a href="/A045450/b045450.txt">Table of n, a(n) for n = 5..5000</a>
+%e A045450 a(50) = 15 because there are 15 partitions of 50 into a prime number of distinct prime parts: 2+7+11+13+17 = 2+5+11+13+19 = 2+5+7+17+19 = 2+5+7+13+23 = 2+3+5+17+23 = 2+3+5+11+29 = 2+19+29 = 2+17+31 = 2+11+37 = 2+7+41 = 2+5+43 = 19+31 = 13+37 = 7+43 = 3+47.
+%p A045450 s:= proc(n) if n<1 then 0 else ithprime(n)+s(n-1) fi end:
+%p A045450 b:= proc(n, i) option remember; expand(`if`(n=0, 1, `if`(s(i)<n, 0,
+%p A045450        b(n, i-1)+(p-> `if`(p>n, 0, x*b(n-p, i-1)))(ithprime(i)))))
+%p A045450     end:
+%p A045450 a:= n-> (p-> add(`if`(isprime(i), coeff(p, x, i), 0)
+%p A045450          , i=2..degree(p)))(b(n, numtheory[pi](n))):
+%p A045450 seq(a(n), n=5..100);  # _Alois P. Heinz_, Sep 18 2017
+%t A045450 partprim[n_] := Module[{sp, spq, sps},
+%t A045450 sp = Subsets[Prime[Range[PrimePi[n]]]];
+%t A045450 spq = Select[sp, PrimeQ@Length@# &];
+%t A045450 sps = Select[spq, n == Plus@@# &];
+%t A045450 sps // Length // Return];
+%t A045450 Table[partprim[n], {n, 5, 80}] (* _Andres Cicuttin_, Sep 17 2017 *)
+%t A045450 s[n_] := s[n] = If [n < 1, 0, Prime[n] + s[n - 1]];
+%t A045450 b[n_, i_] := b[n, i] = Expand[If[n == 0, 1, If[s[i] < n, 0, b[n, i - 1] + Function[p, If[p > n, 0, x*b[n - p, i - 1]]][Prime[i]]]]];
+%t A045450 a[n_] := Function[p, Sum[If[PrimeQ[i], Coefficient[p, x, i], 0], {i, 2, Exponent[p, x]}]][b[n, PrimePi[n]]];
+%t A045450 Table[a[n], {n, 5, 100}] (* _Jean-François Alcover_, Jun 11 2021, after _Alois P. Heinz_ *)
+%Y A045450 Cf. A000586.
+%K A045450 nonn
+%O A045450 5,6
+%A A045450 _Vladeta Jovovic_, Jul 21 2003

@@ -1,0 +1,92 @@
+%I A075463
+%S A075463 1,1,1,5,1,1,1,1,43,1,10,1,1,5,1,43,1,1,8356,1,1,1,2080,5,1,1,1,1,136,
+%T A075463 131720,1,131720,8356,5,10,1,1,1,536911936,1,1,1,1,5,1,1,134225920,1,
+%U A075463 43,43,1,1,1,5,1,1,1,1,524800,1,137439609088,2099728,1,33564704,549756338176,1,536911936,1,43,1,2080,1,1,5,1,1,1,1,2305843011898064896
+%N A075463 a(n) is the number of rotation-reflection inequivalent solutions to the all-ones lights out problem on an n X n square.
+%C A075463 Reflected and rotated solutions are considered identical.
+%D A075463 See A075462 for references.
+%H A075463 Zhao Hui Du, <a href="/A075463/b075463.txt">Table of n, a(n) for n = 1..1000</a>
+%H A075463 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/LightsOutPuzzle.html">Lights Out Puzzle</a>
+%t A075463 a[n_, i_, j_ ] := Table[If[Total[Abs[{i, j} - {r, s}]] <= 1, 1, 0], {r, n}, {s, n}] //Flatten
+%t A075463 a[n_, k_ ] := a[n, Quotient[k + n - 1, n], Mod[k, n, 1]]
+%t A075463 m[n_ ] := a[n, # ] & /@ Range[n^2]
+%t A075463 ker[n_ ] := NullSpace[m[n], Modulus -> 2]
+%t A075463 b[n_ ] := Table[1, {n^2}]
+%t A075463 sol[n_ ] := LinearSolve[m[n], b[n], Modulus -> 2];
+%t A075463 allSolutions[n_ ] := Module[{s, k},
+%t A075463 s = sol[n];
+%t A075463 k = ker[n];
+%t A075463 Mod[(s + # ) & /@ (Total[(#*k)] & /@ Tuples[{0, 1}, Length[k]]), 2]
+%t A075463 ] //Sort
+%t A075463 MatrixRotate[m_ ] := Transpose[Reverse[m]]
+%t A075463 MatrixRotate[m_, n_ ] := Nest[MatrixRotate, m, Mod[n, 4]]
+%t A075463 DihedralOrbit[m_ ] := Union@Join[
+%t A075463 MatrixRotate[m, # ] & /@ Range[0, 3],
+%t A075463 MatrixRotate[Reverse[m], # ] & /@ Range[0, 3]
+%t A075463 ]
+%t A075463 essentialSolutions[n_ ] := Module[{as},
+%t A075463 as = Partition[ #, n] & /@ allSolutions[n];
+%t A075463 Union[as, SameTest -> (MemberQ[DihedralOrbit[ #1], #2] &)]
+%t A075463 ]
+%t A075463 Length[essentialSolutions[ # ]] & /@ Range[16]
+%t A075463 (* _Jacob A. Siehler_ *)
+%o A075463 (PARI)H(n)={
+%o A075463    my(r);
+%o A075463    r=matrix(n,n,X,Y,Mod(0,2));
+%o A075463    for(u=1,n,r[u,u]=Mod(1,2));
+%o A075463    for(u=1,n-1,r[u,u+1]=Mod(1,2);r[u+1,u]=Mod(1,2));
+%o A075463    r
+%o A075463 }
+%o A075463 E(n)={
+%o A075463    my(r);
+%o A075463    r=matrix(n,n,X,Y,Mod(0,2));
+%o A075463    for(u=1,n,r[u,u]=Mod(1,2));
+%o A075463    r
+%o A075463 }
+%o A075463 b(n)={
+%o A075463    vector(n,X,Mod(1,2))~
+%o A075463 }
+%o A075463 a(n)={
+%o A075463    my(x0,x1,tmp,y,z,mH,vb,v0,v1,yb,zb);
+%o A075463    my(A159257,A075462,A075463,a2,a3,a4,a5,tm,tb);
+%o A075463    x0=E(n);mH=H(n);x1=mH;vb=b(n);
+%o A075463    y=matrix(n,n);yb=vector(n);
+%o A075463    z=matrix(n,n);zb=vector(n);
+%o A075463    v0=vb;v1=mH*vb+v0;
+%o A075463    y[1,]=x0[1,];yb[1]=Mod(0,2);
+%o A075463    y[2,]=x1[1,];yb[2]=v0[1];
+%o A075463    z[1,]=x0[n,];zb[1]=Mod(0,2);
+%o A075463    z[2,]=x1[n,];zb[2]=v0[n];
+%o A075463    for(u=2,n-1,
+%o A075463       tmp=mH*x1+x0;x0=x1;x1=tmp;
+%o A075463       y[u+1,]=x1[1,];z[u+1,]=x1[n,];
+%o A075463       tmp=mH*v1+v0+vb;v0=v1;v1=tmp;
+%o A075463       yb[u+1]=v0[1];zb[u+1]=v0[n]
+%o A075463    );
+%o A075463    x1=mH*x1+x0;
+%o A075463    A159257 = n-matrank(x1);
+%o A075463    A075462=2^A159257;
+%o A075463    tm=matrix(2*n,n,X,Y,Mod(0,2));tb=vector(2*n,X,Mod(0,2))~;
+%o A075463    for(u=1,n,tm[u,]=x1[u,];tb[u]=v1[u]);
+%o A075463    for(u=1,n,
+%o A075463        tm[n+u,u]=Mod(1,2);tm[n+u,n-u+1]+=Mod(1,2);tb[n+u]=Mod(0,2)
+%o A075463    );
+%o A075463    a2=matinverseimage(tm,tb);
+%o A075463    if(length(a2)==0, a2=0, a2=2^(n-matrank(tm)));
+%o A075463    for(u=1,n,tm[n+u,]=y[u,];tb[n+u]=yb[u];tm[n+u,u]+=Mod(1,2));
+%o A075463    a3=matinverseimage(tm,tb);
+%o A075463    if(length(a3)==0, a3=0, a3=2^(n-matrank(tm)));
+%o A075463    for(u=1,n,tm[n+u,]=y[n+1-u,];tb[n+u]=yb[n+1-u];tm[n+u,u]+=Mod(1,2));
+%o A075463    a4=matinverseimage(tm,tb);
+%o A075463    if(length(a4)==0, a4=0, a4=2^(n-matrank(tm)));
+%o A075463    for(u=1,n,tm[n+u,]=y[u,]+z[n+1-u,];tb[n+u]=yb[u]+zb[n+1-u]);
+%o A075463    a5=matinverseimage(tm,tb);
+%o A075463    if(length(a5)==0, a5=0, a5=2^(n-matrank(tm)));
+%o A075463    A075463=(A075462+2*(a2+a3+a4)+a5)/8
+%o A075463 } \\ _Zhao Hui Du_, Mar 29 2014
+%Y A075463 Cf. A075462, A075464.
+%K A075463 nonn,nice,hard
+%O A075463 1,4
+%A A075463 _Eric W. Weisstein_, Sep 17 2002
+%E A075463 a(19)-a(29) from _Jacob A. Siehler_, Apr 29 2008
+%E A075463 Terms a(30) and beyond from _Zhao Hui Du_, Mar 24 2014

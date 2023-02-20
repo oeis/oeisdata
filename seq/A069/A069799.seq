@@ -1,0 +1,64 @@
+%I A069799
+%S A069799 1,2,3,4,5,6,7,8,9,10,11,18,13,14,15,16,17,12,19,50,21,22,23,54,25,26,
+%T A069799 27,98,29,30,31,32,33,34,35,36,37,38,39,250,41,42,43,242,75,46,47,162,
+%U A069799 49,20,51,338,53,24,55,686,57,58,59,150,61,62,147,64,65
+%N A069799 The number obtained by reversing the sequence of nonzero exponents in the prime factorization of n with respect to distinct primes present, as ordered by their indices.
+%C A069799 Equivalent description nearer to the old name: a(n) is a number obtained by reversing the indices of the primes present in the prime factorization of n, from the smallest to the largest, while keeping the nonzero exponents of those same primes at their old positions.
+%C A069799 This self-inverse permutation of natural numbers fixes the numbers in whose prime factorization the sequence of nonzero exponents form a palindrome: A242414.
+%C A069799 Integers which are changed are A242416.
+%C A069799 Considered as a function on partitions encoded by the indices of primes in the prime factorization of n (as in table A112798), this implements an operation which reverses the order of vertical line segments of the "steps" in Young (or Ferrers) diagram of a partition, but keeps the order of horizontal line segments intact. Please see the last example in the example section.
+%H A069799 Alois P. Heinz (first 1000 terms) & Antti Karttunen, <a href="/A069799/b069799.txt">Table of n, a(n) for n = 1..8192</a>
+%H A069799 Wikipedia, <a href="http://en.wikipedia.org/wiki/Young_diagram">Young diagram</a>
+%H A069799 <a href="/index/Per#IntegerPermutation">Index entries for sequences that are permutations of the natural numbers</a>
+%F A069799 If n = p_a^e_a * p_b^e_b * ... * p_j^e_j * p_k^e_k, where p_a < ... < p_k are distinct primes of the prime factorization of n (sorted into ascending order), and e_a, ..., e_k are their nonzero exponents, then a(n) = p_a^e_k * p_b^e_j * ... * p_j^e_b * p_k^e_a.
+%F A069799 a(n) = product(A027748(o(n)+1-k)^A124010(k): k=1..o(n)) = product(A027748(k)^A124010(o(n)+1-k): k=1..o(n)), where o(n) = A001221(n). - _Reinhard Zumkeller_, Apr 27 2013
+%F A069799 From _Antti Karttunen_, Jun 01 2014: (Start)
+%F A069799 Can be obtained also by composing/conjugating related permutations:
+%F A069799 a(n) = A242415(A242419(n)) = A242419(A242415(n)).
+%F A069799 a(n) = A122111(A242415(A122111(n))) = A153212(A242415(A153212(n))).
+%F A069799 (End)
+%e A069799 a(24) = 54 as 24 = p_1^3 * p_2^1 = 2^3 * 3^1 and 54 = p_1^1 * p_2^3 = 2 * 3^3.
+%e A069799 For n = 2200, we see that it encodes the partition (1,1,1,3,3,5) in A112798 as 2200 = p_1 * p_1 * p_1 * p_3 * p_3 * p_5 = 2^3 * 5^2 * 11. This in turn corresponds to the following Young diagram in French notation:
+%e A069799    _
+%e A069799   | |
+%e A069799   | |
+%e A069799   | |_ _
+%e A069799   |     |
+%e A069799   |     |_ _
+%e A069799   |_ _ _ _ _|
+%e A069799 Reversing the order of vertical line segment lengths (3,2,1)  to (1,2,3), but keeping the order of horizontal line segment lengths as (1,2,2), we get a new Young diagram
+%e A069799    _
+%e A069799   | |_ _
+%e A069799   |     |
+%e A069799   |     |_ _
+%e A069799   |         |
+%e A069799   |         |
+%e A069799   |_ _ _ _ _|
+%e A069799 which represents the partition (1,3,3,5,5,5), encoded in A112798 by p_1 * p_3^2 * p_5^3 = 2 * 5^2 * 11^3 = 66550, thus a(2200) = 66550.
+%p A069799 A069799 := proc(n) local e,j; e := ifactors(n)[2]:
+%p A069799 mul (e[j][1]^e[nops(e)-j+1][2], j=1..nops(e)) end:
+%p A069799 seq (A069799(i), i=1..40);
+%p A069799 # _Peter Luschny_, Jan 17 2011
+%t A069799 f[n_] := Block[{a = Transpose[ FactorInteger[n]], m = n}, If[ Length[a] == 2, Apply[ Times, a[[1]]^Reverse[a[[2]] ]], m]]; Table[ f[n], {n, 1, 65}]
+%o A069799 (Haskell)
+%o A069799 a069799 n = product $
+%o A069799             zipWith (^) (a027748_row n) (reverse $ a124010_row n)
+%o A069799 -- _Reinhard Zumkeller_, Apr 27 2013
+%o A069799 (MIT/GNU Scheme, with Aubrey Jaffer's SLIB Scheme library)
+%o A069799 (require 'factor)
+%o A069799 (define (A069799 n) (let ((pf (ifactor n))) (apply * (map expt (uniq pf) (reverse (multiplicities pf))))))
+%o A069799 (define (ifactor n) (cond ((< n 2) (list)) (else (sort (factor n) <))))
+%o A069799 (define (uniq lista) (let loop ((lista lista) (z (list))) (cond ((null? lista) (reverse! z)) ((and (pair? z) (equal? (car z) (car lista))) (loop (cdr lista) z)) (else (loop (cdr lista) (cons (car lista) z))))))
+%o A069799 (define (multiplicities lista) (let loop ((mults (list)) (lista lista) (prev #f)) (cond ((not (pair? lista)) (reverse! mults)) ((equal? (car lista) prev) (set-car! mults (+ 1 (car mults))) (loop mults (cdr lista) prev)) (else (loop (cons 1 mults) (cdr lista) (car lista))))))
+%o A069799 ;; _Antti Karttunen_, May 24 2014
+%o A069799 (PARI) a(n) = {my(f = factor(n)); my(g = f); my(nbf = #f~); for (i=1, nbf, g[i, 1] = f[nbf-i+1, 1];); factorback(g);} \\ _Michel Marcus_, Jul 02 2015
+%Y A069799 A242414 gives the fixed points and A242416 is their complement.
+%Y A069799 Cf. A112798, A059404, A122111, A153212, A137502, A241916, A242418.
+%Y A069799 {A000027, A069799, A242415, A242419} form a 4-group.
+%Y A069799 The set of permutations {A069799, A105119, A225891} generates an infinite dihedral group.
+%K A069799 nonn
+%O A069799 1,2
+%A A069799 _Amarnath Murthy_, Apr 13 2002
+%E A069799 Edited, corrected and extended by _Robert G. Wilson v_ and _Vladeta Jovovic_, Apr 15 2002
+%E A069799 Definition corrected by _Reinhard Zumkeller_, Apr 27 2013
+%E A069799 Definition again reworded, Comments section edited and Young diagram examples added by _Antti Karttunen_, May 30 2014

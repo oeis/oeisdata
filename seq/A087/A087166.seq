@@ -1,0 +1,41 @@
+%I A087166
+%S A087166 17,31,67,73,107,109,127,151,157,173,181,191,197,211,227,241,257,271,
+%T A087166 277,307,313,337,353,373,379,401,409,419,421,433,443,457,461,463,487,
+%U A087166 521,523,541,577,587,601,617,619,631,647,661,673,683,701,719,727,743,757,761,773,787,797,809,857,859
+%N A087166 Primes which are palindromes in 3 or more bases.
+%C A087166 For the purposes of this sequence, single digits are not counted as palindromes (otherwise every number n is a palindrome in all bases > n). - _Robert Israel_, May 01 2020
+%H A087166 Robert Israel, <a href="/A087166/b087166.txt">Table of n, a(n) for n = 1..5867</a>
+%e A087166 31 is in the list, as 31 base 2 = 11111, 31 base 5 = 111 and 31 base 30 = 11, i.e. three different ways.
+%p A087166 N:= 1000: # for all terms <= N
+%p A087166 digrev:= proc(n,b)
+%p A087166   local L,i;
+%p A087166   L:= convert(n,base,b);
+%p A087166   add(L[-i]*b^(i-1),i=1..nops(L))
+%p A087166 end proc:
+%p A087166 bpalis:= proc(b, N)
+%p A087166   local Res,dmax,d,m;
+%p A087166   dmax:= floor(log[b](N))+1;
+%p A087166   if dmax < 2 then return [] fi;
+%p A087166   Res:= seq(i*(b+1),i=1..b-1);
+%p A087166   for d from 3 to dmax do
+%p A087166     if d::even then
+%p A087166       m:= d/2;
+%p A087166       Res:= Res, seq(n*b^m + digrev(n,b),n=b^(m-1)..b^m-1);
+%p A087166     else
+%p A087166       m:= (d-1)/2;
+%p A087166       Res:= Res, seq(seq(n*b^(m+1)+y*b^m+digrev(n,b), y=0..b-1), n=b^(m-1)..b^m-1);
+%p A087166     fi
+%p A087166   od;
+%p A087166   select(`<=`,[Res], N)
+%p A087166 end proc:
+%p A087166 V:= Vector(N):
+%p A087166 for b from 2 to N-1 do
+%p A087166   bp:= bpalis(b,N);
+%p A087166   V[bp]:= V[bp] +~ 1
+%p A087166 od:
+%p A087166 select(p -> isprime(p) and V[p] >= 3, [seq(i,i=3..N,2)]); # _Robert Israel_, May 01 2020
+%Y A087166 Primes in A253594.
+%K A087166 base,nonn
+%O A087166 1,1
+%A A087166 _Randy L. Ekl_, Oct 18 2003
+%E A087166 Corrected by _Robert Israel_, May 01 2020

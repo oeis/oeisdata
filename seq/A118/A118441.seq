@@ -1,0 +1,58 @@
+%I A118441
+%S A118441 0,1,0,-4,2,0,-12,12,3,0,32,-48,-24,4,0,80,-160,-120,40,5,0,-192,480,
+%T A118441 480,-240,-60,6,0,-448,1344,1680,-1120,-420,84,7,0,1024,-3584,-5376,
+%U A118441 4480,2240,-672,-112,8,0,2304,-9216,-16128,16128,10080,-4032,-1008,144,9,0
+%N A118441 Triangle L, read by rows, equal to the matrix log of A118435, with the property that L^2 consists of a single diagonal (two rows down from the main diagonal).
+%C A118441 L = log(A118435) = log(H*[C^-1]*H], where C=Pascal's triangle and H=A118433 where H^2 = I (identity matrix).
+%F A118441 For even exponents of L, L^(2m) is a single diagonal:
+%F A118441 if n == k+2m, then [L^(2m)](n,k) = n!/k!*2^(n-k-2m)/(n-k-2m)!; else if n != k+2m: [L^(2m)](n,k) = 0.
+%F A118441 For odd exponents of L:
+%F A118441 if n >= k+2m+1, then [L^(2m+1)](n,k) = n!/k!*2^(n-k-2m-1)/(n-k-2m-1)!*(-1)^(m+[(n+1)/2]-[k/2]+n-k); else if n < k+2m+1: [L^(2m)](n,k) = 0.
+%F A118441 Unsigned row sums equals A027471(n+1) = n*3^(n-1).
+%e A118441 The matrix log, L = log(H*[C^-1]*H], begins:
+%e A118441      0;
+%e A118441      1,     0;
+%e A118441     -4,     2,      0;
+%e A118441    -12,    12,      3,     0;
+%e A118441     32,   -48,    -24,     4,     0;
+%e A118441     80,  -160,   -120,    40,     5,     0;
+%e A118441   -192,   480,    480,  -240,   -60,     6,     0;
+%e A118441   -448,  1344,   1680, -1120,  -420,    84,     7,   0;
+%e A118441   1024, -3584,  -5376,  4480,  2240,  -672,  -112,   8,  0;
+%e A118441   2304, -9216, -16128, 16128, 10080, -4032, -1008, 144,  9,  0;
+%e A118441   ...
+%e A118441 The matrix square, L^2, is a single diagonal:
+%e A118441   0;
+%e A118441   0, 0;
+%e A118441   2, 0,  0;
+%e A118441   0, 6,  0,  0;
+%e A118441   0, 0, 12,  0,  0;
+%e A118441   0, 0,  0, 20,  0,  0;
+%e A118441   0, 0,  0,  0, 30,  0,  0;
+%e A118441   ...
+%e A118441 From _Peter Luschny_, Apr 23 2020: (Start)
+%e A118441 In unsigned form and without the main diagonal, as computed by the Maple script:
+%e A118441   [0], [0]
+%e A118441   [1], [1]
+%e A118441   [2], [4,   2]
+%e A118441   [3], [12,  12,   3]
+%e A118441   [4], [32,  48,   24,   4]
+%e A118441   [5], [80,  160,  120,  40,   5]
+%e A118441   [6], [192, 480,  480,  240,  60,  6]
+%e A118441   [7], [448, 1344, 1680, 1120, 420, 84, 7] (End)
+%p A118441 # Generalized Worpitzky transform of the harmonic numbers.
+%p A118441 CL := p -> PolynomialTools:-CoefficientList(expand(p), x):
+%p A118441 H := n -> add(1/k, k=1..n):
+%p A118441 Trow := proc(n) local k,v; if n=0 then return [0] fi;
+%p A118441 add(add((-1)^(n-v)*binomial(k,v)*H(k)*(-x+v-1)^n, v=0..k), k=0..n); CL(%) end:
+%p A118441 for n from 0 to 7 do Trow(n) od; # _Peter Luschny_, Apr 23 2020
+%o A118441 (PARI) /* From definition of L as matrix log of H*C^-1*H: */
+%o A118441 {L(n,k)=local(H=matrix(n+1,n+1,r,c,if(r>=c,binomial(r-1,c-1)*(-1)^(r\2-(c-1)\2+r-c))),C=matrix(n+1,n+1,r,c,if(r>=c,binomial(r-1,c-1))),N=(H*C^-1*H)); Log=sum(p=1,n+1,-(N^0-N)^p/p);Log[n+1,k+1]}
+%o A118441 for(n=0, 10, for(k=0, n, print1(L(n, k), ", ")); print(""))
+%o A118441 (PARI) /* The matrix power L^m is given by: */
+%o A118441 {L(n,k,m)=if(m%2==0,if(n==k+m,n!/k!*2^(n-k-m)/(n-k-m)!), if(n>=k+m,n!/k!*2^(n-k-m)/(n-k-m)!*(-1)^(m\2+(n+1)\2-k\2+n-k)))}
+%o A118441 for(n=0, 10, for(k=0, n, print1(L(n, k,1), ", ")); print(""))
+%Y A118441 Cf. A118435 (exp(L)), A118442 (column 0), A118443 (row sums), A027471 (unsigned row sums); A118433 (self-inverse triangle), A001815 (column 1?), A001789 (third of column 2?).
+%K A118441 sign,tabl
+%O A118441 0,4
+%A A118441 _Paul D. Hanna_, Apr 28 2006

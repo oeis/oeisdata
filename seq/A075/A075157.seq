@@ -1,0 +1,35 @@
+%I A075157
+%S A075157 0,1,2,3,5,4,8,7,11,14,6,9,17,24,26,15,23,44,34,29,13,10,20,19,35,74,
+%T A075157 48,49,53,124,80,31,47,134,174,89,69,76,104,59,27,32,12,21,41,54,62,
+%U A075157 39,71,224,244,149,97,120,146,99,107,374,342,249,161,624,242,63,95,404
+%N A075157 Run lengths in the binary expansion of n gives the vector of exponents in prime factorization of a(n)+1, with the least significant run corresponding to the exponent of the least prime, 2; with one subtracted from each run length, except for the most significant run of 1's.
+%C A075157 To make this a permutation of nonnegative integers, we subtract one from each run count except for the most significant run, e.g. a(11) = 9, as 11 = 1011 and 9+1 = 10 = 5^1 * 3^(1-1) * 2^(2-1).
+%H A075157 Paul Tek (terms 0..10000) & Antti Karttunen, <a href="/A075157/b075157.txt">Table of n, a(n) for n = 0..16384</a>
+%H A075157 <a href="/index/Per#IntegerPermutation">Index entries for sequences that are permutations of the natural numbers</a>
+%F A075157 a(n) = A075159(n+1) - 1.
+%F A075157 a(0) = 0; for n >= 1, a(n) = (A000040(A005811(n)) * A286468(n)) - 1.
+%F A075157 Other identities. For all n >= 1:
+%F A075157 a(A000975(n)) = A006093(n) = A000040(n)-1.
+%o A075157 (Haskell)
+%o A075157 import Data.List (group)
+%o A075157 a075157 0 = 0
+%o A075157 a075157 n = product (zipWith (^) a000040_list rs') - 1 where
+%o A075157    rs' = reverse $ r : map (subtract 1) rs
+%o A075157    (r:rs) = reverse $ map length $ group $ a030308_row n
+%o A075157 -- _Reinhard Zumkeller_, Aug 04 2014
+%o A075157 (PARI)
+%o A075157 A005811(n) = hammingweight(bitxor(n, n>>1));  \\ This function from _Gheorghe Coserea_, Sep 03 2015
+%o A075157 A286468(n) = { my(p=((n+1)%2), i=0, m=1); while(n>0, if(((n%2)==p), m *= prime(i), p = (n%2); i = i+1); n = n\2); m };
+%o A075157 A075157(n) = if(!n,n,(prime(A005811(n))*A286468(n))-1);
+%o A075157 (Scheme)
+%o A075157 (define (A075157 n) (if (zero? n) n (+ -1 (* (A000040 (A005811 n)) (fold-left (lambda (a r) (* (A003961 a) (A000079 (- r 1)))) 1 (binexp->runcount1list n))))))
+%o A075157 (define (binexp->runcount1list n) (if (zero? n) (list) (let loop ((n n) (rc (list)) (count 0) (prev-bit (modulo n 2))) (if (zero? n) (cons count rc) (if (eq? (modulo n 2) prev-bit) (loop (floor->exact (/ n 2)) rc (1+ count) (modulo n 2)) (loop (floor->exact (/ n 2)) (cons count rc) 1 (modulo n 2)))))))
+%o A075157 ;; Or, using the code of A286468:
+%o A075157 (define (A075157 n) (if (zero? n) n (- (* (A000040 (A005811 n)) (A286468 n)) 1)))
+%Y A075157 Inverse of A075158.
+%Y A075157 Cf. A008578, A056539, A059900, A075162.
+%Y A075157 Cf. A000040, A000975, A006093, A030308, A007088, A075159, A278217, A286617.
+%K A075157 nonn
+%O A075157 0,3
+%A A075157 _Antti Karttunen_, Sep 13 2002
+%E A075157 Entry revised, PARI-program added and the old incorrect Scheme-program replaced with a new one by _Antti Karttunen_, May 17 2017

@@ -1,0 +1,34 @@
+%I A096246
+%S A096246 2,3,5,7,11,13,19,23,29,37,43,47,53,59,61,73,79,83,101,107,109,137,
+%T A096246 149,151,157,163,167,173,179,197,211,229,277,281,293,307,311,313,317,
+%U A096246 331,347,349,359,389,397,419,421,457,461,467,557,563,569,587,599,601,613
+%N A096246 Base-2 deletable primes (written in base 10).
+%C A096246 A prime p is a base-b deletable prime if when written in base b it has the property that removing some digit leaves either the empty string or another deletable prime. However, in base 2 we adopt the convention that 2 = 10 and 3 = 11 are deletable.
+%C A096246 Deleting a digit cannot leave any leading zeros in the new string. For example, deleting the 2 in 2003 to obtain 003 is not allowed.
+%H A096246 Lei Zhou, <a href="/A096246/b096246.txt">Table of n, a(n) for n = 1..10000</a>
+%p A096246 isDel := proc(n::integer) local b2,redu,rpr,d; if n = 2 or n =3 then RETURN(true); elif not isprime(n) then RETURN(false); else b2 := convert(n,base,2); for d from 1 to nops(b2) do redu := [op(1..d-1,b2),op(d+1..nops(b2),b2) ]; if op(nops(redu),redu) = 1 then rpr := sum( op(i,redu)*2^(i-1),i=1..nops(redu)); if isDel(rpr) then RETURN(true); fi; fi; od; RETURN(false); fi; end: for n from 1 to 200 do if isDel(ithprime(n)) then printf("%d,",ithprime(n)); fi; od: # _R. J. Mathar_, Apr 25 2006
+%t A096246 a = {}; c = {1}; While[Length[a] < 100, b = c; c = {}; lb = Length[b]; Do[nb = b[[ib]]; cdb = RealDigits[nb, 2]; db = cdb[[1]]; ldb = cdb[[2]]; Do[dc = Insert[db, 0, j]; nc = FromDigits[dc, 2]; If[PrimeQ[nc], AppendTo[c, nc]], {j, 2, ldb + 1}]; Do[dc = Insert[db, 1, j]; nc = FromDigits[dc, 2]; If[PrimeQ[nc], AppendTo[c, nc]], {j, 2, ldb + 1}], {ib, 1, lb}]; c = Union[{}, c]; a = Union[a, c]]; a (* _Lei Zhou_, Mar 06 2015 *)
+%t A096246 a = {0, 2}; d = {2, 3};
+%t A096246 For[n = 3, n <= 15, n++,
+%t A096246   p = Select[Range[2^(n - 1), 2^n - 1], PrimeQ[#] &];
+%t A096246   For[i = 1, i <= Length[p], i++,
+%t A096246    c = IntegerDigits[p[[i]], 2];
+%t A096246    For[j = 1, j <= n, j++,
+%t A096246     t = Delete[c, j];
+%t A096246     If[t[[1]] == 0, Continue[]];
+%t A096246     If[MemberQ[d, FromDigits[t, 2]], AppendTo[d, p[[i]]];  Break[]]]]];
+%t A096246 d (* _Robert Price_, Nov 11 2018 *)
+%o A096246 (Python)
+%o A096246 from sympy import isprime
+%o A096246 def ok(n):
+%o A096246     if not isprime(n): return False
+%o A096246     if n == 2 or n == 3: return True
+%o A096246     b = bin(n)[2:]
+%o A096246     bi = (b[:i]+b[i+1:] for i in range(len(b)))
+%o A096246     return any(t[0] != '0' and ok(int(t, 2)) for t in bi)
+%o A096246 print([k for k in range(614) if ok(k)]) # _Michael S. Branicky_, Jan 13 2022
+%Y A096246 Cf. A080608, A080603, A096235-A096245.
+%K A096246 nonn,base,easy
+%O A096246 1,1
+%A A096246 _Michael Kleber_, Feb 28 2003
+%E A096246 More terms from _R. J. Mathar_, Apr 25 2006

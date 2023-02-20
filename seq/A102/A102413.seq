@@ -1,0 +1,53 @@
+%I A102413
+%S A102413 1,1,1,1,4,1,1,6,6,1,1,8,16,8,1,1,10,30,30,10,1,1,12,48,76,48,12,1,1,
+%T A102413 14,70,154,154,70,14,1,1,16,96,272,384,272,96,16,1,1,18,126,438,810,
+%U A102413 810,438,126,18,1,1,20,160,660,1520,2004,1520,660,160,20,1,1,22,198,946,2618,4334,4334,2618,946,198,22,1
+%N A102413 Triangle read by rows: T(n,k) is the number of k-matchings in the n-sunlet graph (0 <= k <= n).
+%C A102413 The n-sunlet graph is the corona C'(n) of the cycle graph C(n) and the complete graph K(1); in other words, C'(n) is the graph constructed from C(n) to which for each vertex v a new vertex v' and the edge vv' is added.
+%C A102413 Row n contains n+1 terms. Row sums yield A099425. T(n,k) = T(n,n-k).
+%C A102413 For n > 2: same recurrence like A008288 and A128966. - _Reinhard Zumkeller_, Apr 15 2014
+%D A102413 J. L. Gross and J. Yellen, Handbook of Graph Theory, CRC Press, Boca Raton, 2004, p. 894.
+%D A102413 F. Harary, Graph Theory, Addison-Wesley, Reading, Mass., 1969, p. 167.
+%H A102413 Reinhard Zumkeller, <a href="/A102413/b102413.txt">Rows n = 0..125 of table, flattened</a>
+%H A102413 Frédéric Bihan, Francisco Santos, Pierre-Jean Spaenlehauer, <a href="https://arxiv.org/abs/1804.5683">A Polyhedral Method for Sparse Systems with many Positive Solutions</a>, arXiv:1804.05683 [math.CO], 2018.
+%H A102413 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/Matching-GeneratingPolynomial.html">Matching-Generating Polynomial</a>
+%H A102413 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/SunletGraph.html">Sunlet Graph</a>
+%F A102413 G.f.: G(t,z) = (1 + t*z^2) / (1 - (1+t)*z - t*z^2).
+%F A102413 For n > 2: T(n,k) = T(n-1,k-1) + T(n-1,k) + T(n-2,k-1), 0 < k < n. - _Reinhard Zumkeller_, Apr 15 2014 (corrected by _Andrew Woods_, Dec 08 2014)
+%F A102413 From _Peter Bala_, Jun 25 2015: (Start)
+%F A102413 The n-th row polynomial R(n,t) = [z^n] G(z,t)^n, where G(z,t) = 1/2*( 1 + (1 + t)*z + sqrt(1 + 2*(1 + t)*z + (1 + 6*t + t^2)*z^2) ).
+%F A102413 exp( Sum_{n >= 1} R(n,t)*z^n/n ) = 1 + (1 + t)*z + (1 + 3*t + t^2)*z^2 + (1 + 5*t + 5*t^2 + t^3)*z^3 + ... is the o.g.f for A008288 read as a triangular array. (End)
+%e A102413 T(3,2) = 6 because in the graph with vertex set {A,B,C,a,b,c} and edge set {AB,AC,BC,Aa,Bb,Cc} we have the following six 2-matchings: {Aa,BC}, {Bb,AC}, {Cc,AB}, {Aa,Bb}, {Aa,Cc} and {Bb,Cc}.
+%e A102413 The triangle starts:
+%e A102413   1;
+%e A102413   1, 1;
+%e A102413   1, 4,  1;
+%e A102413   1, 6,  6, 1;
+%e A102413   1, 8, 16, 8, 1;
+%e A102413 From _Eric W. Weisstein_, Apr 03 2018: (Start)
+%e A102413 Rows as polynomials:
+%e A102413   1
+%e A102413   1 +    x,
+%e A102413   1 +  4*x +    x^2,
+%e A102413   1 +  6*x +  6*x^2 +    x^3,
+%e A102413   1 +  8*x + 16*x^2 +  8*x^3 +    x^4,
+%e A102413   1 + 10*x + 30*x^2 + 30*x^3 + 10*x^4 + x^5,
+%e A102413   ... (End)
+%p A102413 G:=(1+t*z^2)/(1-(1+t)*z-t*z^2): Gser:=simplify(series(G,z=0,38)): P[0]:=1: for n from 1 to 11 do P[n]:=coeff(Gser,z^n) od:for n from 0 to 11 do seq(coeff(t*P[n],t^k),k=1..n+1) od; # yields sequence in triangular form
+%t A102413 CoefficientList[Table[2^-n ((1 + x - Sqrt[1 + x (6 + x)])^n + (1 + x + Sqrt[1 + x (6 + x)])^n), {n, 10}], x] // Flatten (* _Eric W. Weisstein_, Apr 03 2018 *)
+%t A102413 LinearRecurrence[{1 + x, x}, {1, 1 + x, 1 + 4 x + x^2}, 10] // Flatten (* _Eric W. Weisstein_, Apr 03 2018 *)
+%t A102413 Join[{1}, CoefficientList[CoefficientList[Series[(-1 - x - 2 x z)/(-1 + z + x z + x z^2), {z, 0, 10}], z], x]] // Flatten (* _Eric W. Weisstein_, Apr 03 2018 *)
+%o A102413 (Haskell)
+%o A102413 a102413 n k = a102413_tabl !! n !! k
+%o A102413 a102413_row n = a102413_tabl !! n
+%o A102413 a102413_tabl = [1] : [1,1] : f [2] [1,1] where
+%o A102413    f us vs = ws : f vs ws where
+%o A102413              ws = zipWith3 (((+) .) . (+))
+%o A102413                   ([0] ++ us ++ [0]) ([0] ++ vs) (vs ++ [0])
+%o A102413 -- _Reinhard Zumkeller_, Apr 15 2014
+%Y A102413 Cf. A099425, A008288.
+%Y A102413 Cf. A241023 (central terms).
+%K A102413 nonn,tabl,easy
+%O A102413 0,5
+%A A102413 _Emeric Deutsch_, Jan 07 2005
+%E A102413 Row 0 in polynomials and Mathematica programs added by _Georg Fischer_, Apr 01 2019

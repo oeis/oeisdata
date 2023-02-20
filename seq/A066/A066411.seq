@@ -1,0 +1,85 @@
+%I A066411
+%S A066411 1,1,3,5,23,61,143,215,995,2481,5785,12907,29279,64963,144289,158049,
+%T A066411 683311,1471123,3166531,6759177,14404547,30548713
+%N A066411 Form a triangle with the numbers [0..n] on the base, where each number is the sum of the two below; a(n) is the number of different possible values for the apex.
+%C A066411 a(n) is the number of different possible sums of c_k * (n choose k) where the c_k are a permutation of 0 through n. - _Joshua Zucker_, May 08 2006
+%e A066411 For n = 2 we have three triangles:
+%e A066411 ..4.......5.......3
+%e A066411 .1,3.....2,3.....2,1
+%e A066411 0,1,2...0,2,1...2,0,1
+%e A066411 with three different values for the apex, so a(2) = 3.
+%t A066411 g[s_List] := Plus @@@ Partition[s, 2, 1]; f[n_] := Block[{k = 1, lmt = 1 + (n + 1)!, lst = {}, p = Permutations[Range[0, n]]}, While[k < lmt, AppendTo[ lst, Nest[g, p[[k]], n][[1]]]; k++]; lst]; Table[ Length@ Union@ f@ n, {n, 0, 10}] (* _Robert G. Wilson v_, Jan 24 2012 *)
+%o A066411 (MATLAB)
+%o A066411 for n=0:9
+%o A066411 size(unique(perms(0:n)*diag(fliplr(pascal(n+1)))),1)
+%o A066411 end % _Nathaniel Johnston_, Apr 20 2011
+%o A066411 (C++)
+%o A066411 #include <iostream>
+%o A066411 #include <vector>
+%o A066411 #include <set>
+%o A066411 #include <algorithm>
+%o A066411 using namespace std;
+%o A066411 inline long long pascApx(const vector<int> & s)
+%o A066411 {
+%o A066411     const int n = s.size() ;
+%o A066411     vector<long long> scp(n) ;
+%o A066411     for(int i=0; i<n; i++)
+%o A066411         scp[i] = s[i] ;
+%o A066411     for(int i=1; i<n; i++)
+%o A066411         for(int acc=0 ; acc < n-i ; acc++)
+%o A066411             scp[acc] += scp[acc+1] ;
+%o A066411     return scp[0] ;
+%o A066411 }
+%o A066411 int main(int argc, char *argv[])
+%o A066411 {
+%o A066411     for(int n=1 ; ;n++)
+%o A066411     {
+%o A066411         vector<int> s;
+%o A066411         for(int i=0;i<n;i++)
+%o A066411             s.push_back(i) ;
+%o A066411         set<long long> apx;
+%o A066411         do
+%o A066411         {
+%o A066411             apx.insert( pascApx(s)) ;
+%o A066411         } while( next_permutation(s.begin(),s.end()) ) ;
+%o A066411         cout << n << " " << apx.size() << endl ;
+%o A066411     }
+%o A066411     return 0 ;
+%o A066411 } /* _R. J. Mathar_, Jan 24 2012 */
+%o A066411 (PARI) A066411(n)={my(u=0,o=A189391(n),v,b=vector(n++,i,binomial(n-1,i-1))~);sum(k=1,n!\2,!bittest(u,numtoperm(n,k)*b-o) & u+=1<<(numtoperm(n,k)*b-o))}  \\ _M. F. Hasler_, Jan 24 2012
+%o A066411 (Haskell)
+%o A066411 import Data.List (permutations, nub)
+%o A066411 a066411 0 = 1
+%o A066411 a066411 n = length $ nub $ map
+%o A066411    apex [perm | perm <- permutations [0..n], head perm < last perm] where
+%o A066411    apex = head . until ((== 1) . length)
+%o A066411                        (\xs -> (zipWith (+) xs $ tail xs))
+%o A066411 -- _Reinhard Zumkeller_, Jan 24 2012
+%o A066411 (Python)
+%o A066411 from sympy import binomial
+%o A066411 def partitionpairs(xlist): # generator of all partitions into pairs and at most 1 singleton, returning the sums of the pairs
+%o A066411     if len(xlist) <= 2:
+%o A066411         yield [sum(xlist)]
+%o A066411     else:
+%o A066411         m = len(xlist)
+%o A066411         for i in range(m-1):
+%o A066411             for j in range(i+1,m):
+%o A066411                 rem = xlist[:i]+xlist[i+1:j]+xlist[j+1:]
+%o A066411                 y = [xlist[i]+xlist[j]]
+%o A066411                 for d in partitionpairs(rem):
+%o A066411                     yield y+d
+%o A066411 def A066411(n):
+%o A066411     b = [binomial(n,k) for k in range(n//2+1)]
+%o A066411     return len(set((sum(d[i]*b[i] for i in range(n//2+1)) for d in partitionpairs(list(range(n+1)))))) # _Chai Wah Wu_, Oct 19 2021
+%Y A066411 Cf. A062684, A062896, A099325, A189162, A189390 (maximum apex value), A189391 (minimum apex value).
+%K A066411 nonn,nice,more
+%O A066411 0,3
+%A A066411 _Naohiro Nomoto_, Dec 25 2001
+%E A066411 More terms from _John W. Layman_, Jan 07 2003
+%E A066411 a(10) from _Nathaniel Johnston_, Apr 20 2011
+%E A066411 a(11) from _Alois P. Heinz_, Apr 21 2011
+%E A066411 a(12) and a(13) from _Joerg Arndt_, Apr 21 2011
+%E A066411 a(14)-a(15) from _Alois P. Heinz_, Apr 27 2011
+%E A066411 a(0)-a(15) verified by _R. H. Hardin_ Jan 27 2012
+%E A066411 a(16) from _Alois P. Heinz_, Jan 28 2012
+%E A066411 a(17)-a(21) from _Graeme McRae_, Jan 28, Feb 01 2012

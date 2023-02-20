@@ -1,0 +1,47 @@
+%I A027852
+%S A027852 0,1,1,3,6,16,37,96,239,622,1607,4235,11185,29862,80070,216176,586218,
+%T A027852 1597578,4370721,12003882,33077327,91433267,253454781,704429853,
+%U A027852 1962537755,5479855546,15332668869,42983656210,120716987723,339596063606,956840683968
+%N A027852 Number of connected functions on n points with a loop of length 2.
+%C A027852 Number of unordered pairs of rooted trees with a total of n nodes.
+%C A027852 Equivalently, the number of rooted trees on n+1 nodes where the root has degree 2.
+%C A027852 Number of trees on n nodes rooted at an edge. - _Washington Bomfim_, Jul 06 2012
+%C A027852 Guy (1988) calls these tadpole graphs. - _N. J. A. Sloane_, Nov 04 2014
+%C A027852 Number of unicyclic graphs of n nodes with a cycle length of two (in other words, a double edge). - _Washington Bomfim_, Dec 02 2020
+%H A027852 Alois P. Heinz, <a href="/A027852/b027852.txt">Table of n, a(n) for n = 1..2136</a>
+%H A027852 Washington Bomfim, <a href="/A027852/a027852.png">Illustration of initial terms</a>
+%H A027852 R. K. Guy, <a href="/A000081/a000081.pdf">Letter to N. J. A. Sloane, 1988-04-12</a> (annotated scanned copy) Includes illustrations for n <= 6.
+%H A027852 R. J. Mathar, <a href="http://arxiv.org/abs/1603.00077">Topologically distinct sets of non-intersecting circles in the plane</a>, arXiv:1603.00077 [math.CO] (2016), Eq. (75).
+%H A027852 <a href="/index/Ro#rooted">Index entries for sequences related to rooted trees</a>
+%F A027852 G.f.: A(x) = (B(x)^2 + B(x^2))/2 where B(x) is g.f. of A000081.
+%F A027852 a(n) = Sum_{k=1..(n-1)/2}( f(k)*f(n-k) ) + [n mod 2 = 0] * ( f(n/2)^2+f(n/2) ) /2, where f(n) = A000081(n). - _Washington Bomfim_, Jul 06 2012 and Dec 01 2020
+%F A027852 a(n) ~ c * d^n / n^(3/2), where d = A051491 = 2.9557652856519949747148..., c = A187770 = 0.43992401257102530404090339... . - _Vaclav Kotesovec_, Sep 12 2014
+%F A027852 2*a(n) = A000106(n) + A000081(n/2), where A(.)=0 if the argument is non-integer. - _R. J. Mathar_, Jun 04 2020
+%p A027852 with(numtheory): b:= proc(n) option remember; local d, j; `if`(n<=1, n, (add(add(d*b(d), d=divisors(j)) *b(n-j), j=1..n-1))/ (n-1)) end: a:= n-> (add(b(i) *b(n-i), i=0..n) +`if`(irem(n, 2)=0, b(n/2), 0))/2: seq(a(n), n=1..50);  # _Alois P. Heinz_, Aug 22 2008, revised Oct 07 2011
+%p A027852 # second, re-usable version
+%p A027852 A027852 := proc(N::integer)
+%p A027852     local dh, Nprime;
+%p A027852     dh := 0 ;
+%p A027852     for Nprime from 0 to N do
+%p A027852         dh := dh+A000081(Nprime)*A000081(N-Nprime) ;
+%p A027852     end do:
+%p A027852     if type(N,'even') then
+%p A027852         dh := dh+A000081(N/2) ;
+%p A027852     end if;
+%p A027852     dh/2 ;
+%p A027852 end proc: # _R. J. Mathar_, Mar 06 2017
+%t A027852 Needs["Combinatorica`"];nn = 30; s[n_, k_] := s[n, k] = a[n + 1 - k] + If[n < 2 k, 0, s[n - k, k]]; a[1] = 1; a[n_] := a[n] = Sum[a[i] s[n - 1, i] i, {i, 1, n - 1}]/(n - 1); rt = Table[a[i], {i, 1, nn}]; Take[CoefficientList[CycleIndex[DihedralGroup[2], s] /. Table[s[j] -> Table[Sum[rt[[i]] x^(k*i), {i, 1, nn}], {k, 1, nn}][[j]], {j, 1, nn}], x], {2, nn}]  (* _Geoffrey Critzer_, Oct 12 2012, after code given by _Robert A. Russell_ in A000081 *)
+%t A027852 b[n_] := b[n] = If[n <= 1, n, (Sum[Sum[d b[d], {d, Divisors[j]}] b[n-j], {j, 1, n-1}])/(n-1)];
+%t A027852 a[n_] := (Sum[b[i] b[n-i], {i, 0, n}] + If[Mod[n, 2] == 0, b[n/2], 0])/2;
+%t A027852 Table[a[n], {n, 1, 50}] (* _Jean-François Alcover_, Oct 30 2018, after _Alois P. Heinz_ *)
+%o A027852 (PARI) seq(max_n)= { my(V = f = vector(max_n), i=1,s); f[1]=1;
+%o A027852 for(j=1, max_n - 1, f[j+1] = 1/j * sum(k=1, j, sumdiv(k,d, d * f[d]) * f[j-k+1]));
+%o A027852 for(n = 1, max_n, s = sum(k = 1, (n-1)/2, ( f[k] * f[n-k] ));
+%o A027852 if(n % 2 == 1, V[i] = s, V[i] = s + (f[n/2]^2 + f[n/2])/2); i++); V };
+%o A027852 \\ _Washington Bomfim_, Jul 06 2012 and Dec 01 2020
+%Y A027852 Column 2 of A033185 (forests of rooted trees), A217781 (unicyclic graphs), A339303 (unoriented linear forests) and A339428 (connected functions).
+%Y A027852 Cf. A000081, A000106, A000226, A000631, A001372, A002861.
+%K A027852 nonn
+%O A027852 1,4
+%A A027852 _Christian G. Bower_, Dec 14 1997
+%E A027852 Edited by _Christian G. Bower_, Feb 12 2002

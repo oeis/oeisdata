@@ -1,0 +1,78 @@
+%I A156703
+%S A156703 5,75,8,875,9,9375,95,96,96875,975,98,984375,9875,99,992,9921875,
+%T A156703 99375,995,996,99609375,996875,9975,998,998046875,9984,9984375,99875,
+%U A156703 999,9990234375,9992,99921875,999375,9995,99951171875,9996,999609375,99968,9996875,99975
+%N A156703 String of digits encountered in decimal expansion of successive ratios k/(k+1), treating only non-repeating expansions, with decimal point and leading and trailing zeros removed.
+%C A156703 The sequence seems infinite and may be volatile in its extrema.
+%C A156703 Conjecture: subsets of the sequence (as it fills out) will correspond to the odd integers by length.
+%C A156703 Thus, there are 3 single-digit entries in range {1-9}, ending at 9; 5 two-digit entries in range {10-99} ending at 99; 7 three-digit entries in range {100-999} ending at 999, etc. The remainder set of course are all repeating decimals.
+%C A156703 Denominators of the ratios that yield each term must be terms of A003592 (i.e., any integer m whose distinct prime factors p also divide 10, or m regular to 10), since only these denominators produce non-repeating decimal expansions. - _Michael De Vlieger_, Dec 30 2015
+%D A156703 G. H. Hardy and E. M. Wright, An Introduction to the Theory of Numbers, Sixth Edition, Oxford University Press, 2008, pages 141-144 (including Theorem 135).
+%H A156703 Robert Israel, <a href="/A156703/b156703.txt">Table of n, a(n) for n = 1..6000</a>
+%H A156703 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/DecimalExpansion.html">Decimal Expansion</a>
+%H A156703 Eric Weisstein's World of Mathematics,<a href="http://mathworld.wolfram.com/RegularNumber.html">Regular Number</a>
+%H A156703 Wikimedia Commons, <a href="http://commons.wikimedia.org/wiki/File:OEIS_A156703.svg">Alternate plot</a>
+%F A156703 a(n) = 10^d*(k-1)/k where k = A003592(n+1) = 2^i*5^j and d=max(i,j). - _Robert Israel_, Dec 29 2015
+%e A156703 1/2 = 0.5 (non-repeating), which yields a(1) = 5.
+%e A156703 2/3 = 0.6666... (repeating, so does not yield a term in the sequence).
+%e A156703 3/4 = 0.75 (non-repeating), which yields a(2) = 75.
+%e A156703 4/5 = 0.8 (non-repeating), which yields a(3) = 8.
+%p A156703 N:= 10^5: # to get terms for denominators <= N
+%p A156703 B:= sort([seq(seq(2^i*5^j,i=0..ilog2(N/5^j)),j=0..ilog(N,5))]):
+%p A156703 seq(10^max(padic:-ordp(n,2),padic:-ordp(n,5))*(n-1)/n, n=B[2..-1]); # _Robert Israel_, Dec 29 2015
+%t A156703 FromDigits@ First@ # & /@ RealDigits@ Apply[#1/#2 &, Transpose@ {# - 1, #} &@ Select[Range@ 10000, AllTrue[First /@ FactorInteger@ #, MemberQ[{2, 5}, #] &] &], 1] (* _Michael De Vlieger_, Dec 30 2015, Version 10 *)
+%t A156703 FromDigits@ First@# & /@ RealDigits@ Apply[#1/#2 &, Transpose@ {# - 1, #} &@ Select[Range@ 10000, First@ Union@ Map[MemberQ[{2, 5}, #] &, First /@ FactorInteger@ #] &], 1] (* _Michael De Vlieger_, Dec 30 2015, Version 6 *)
+%o A156703 (PARI)
+%o A156703 list(maxx)={my(N, vf=List()); maxx++;for(n=0, log(maxx)\log(5),
+%o A156703 N=5^n; maxVal= 0;while(N<=maxx, if (N != 1, listput(vf, (N-1)/N));
+%o A156703 N<<=1;)); vf = vecsort(Vec(vf));for (i=1,length(vf),
+%o A156703 while(denominator(vf[i]) != 1, vf[i] *= 10););print(vf);}
+%o A156703 \\ adapted from A158911 code, courtesy _Michel Marcus_, Dec 29 2015
+%o A156703 (Python)
+%o A156703 import string,copy
+%o A156703 from decimal import *
+%o A156703 getcontext().prec = 200
+%o A156703 maxx=1000
+%o A156703 n=1
+%o A156703 maxLen=0
+%o A156703 while n<maxx:
+%o A156703     q=Decimal(n)/Decimal(n+1)
+%o A156703     ratio=str(q)
+%o A156703     myLen=len(ratio)
+%o A156703     ratio.replace(" ","")
+%o A156703     if len(ratio[2:])<15:
+%o A156703         print(ratio[2:])
+%o A156703     else:
+%o A156703         strCopy=copy.copy(ratio[2:])
+%o A156703         match=0
+%o A156703         maxCnt=0
+%o A156703         keyStr=' '
+%o A156703         subLen=n
+%o A156703         cap=len(ratio[2:])
+%o A156703         for j5 in range(0,cap ):
+%o A156703             for i5 in range(subLen,1,-1):
+%o A156703                 if i5<=j5:
+%o A156703                     break
+%o A156703                 subStr=strCopy[j5:i5]
+%o A156703                 if len(subStr)<1:
+%o A156703                     continue
+%o A156703                 match=strCopy.count(subStr)
+%o A156703                 z=match*len(subStr)
+%o A156703                 if z>maxCnt and match>1:
+%o A156703                     if len(subStr)==1 and z<subLen:
+%o A156703                         maxCnt=z
+%o A156703                         keyStr=copy.copy(subStr)
+%o A156703                     else:
+%o A156703                         maxCnt=z
+%o A156703                         keyStr=copy.copy(subStr)
+%o A156703         if maxCnt>4:
+%o A156703             pass
+%o A156703         else:
+%o A156703             print(ratio[2:])
+%o A156703         getcontext().prec = max(2*subLen,200)
+%o A156703     n+=1
+%o A156703 # _Bill McEachen_, Dec 28 2015
+%Y A156703 Cf. A003592, A158911. See comment at A158911.
+%K A156703 easy,nonn,base
+%O A156703 1,1
+%A A156703 _Bill McEachen_, Feb 13 2009

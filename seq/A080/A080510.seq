@@ -1,0 +1,65 @@
+%I A080510
+%S A080510 1,1,1,1,3,1,1,9,4,1,1,25,20,5,1,1,75,90,30,6,1,1,231,420,175,42,7,1,
+%T A080510 1,763,2016,1015,280,56,8,1,1,2619,10024,6111,1890,420,72,9,1,1,9495,
+%U A080510 51640,38010,12978,3150,600,90,10,1,1,35695,276980,244035,91938,24024,4950,825,110,11,1
+%N A080510 Triangle read by rows: T(n,k) gives the number of set partitions of {1,...,n} with maximum block length k.
+%C A080510 Row sums are A000110 (Bell numbers). Second column is A001189 (Degree n permutations of order exactly 2).
+%C A080510 From _Peter Luschny_, Mar 09 2009: (Start)
+%C A080510 Partition product of Product_{j=0..n-1} ((k + 1)*j - 1) and n! at k = -1, summed over parts with equal biggest part (see the Luschny link).
+%C A080510 Underlying partition triangle is A036040.
+%C A080510 Same partition product with length statistic is A008277.
+%C A080510 Diagonal a(A000217) = A000012.
+%C A080510 Row sum is A000110. (End)
+%C A080510 From _Gary W. Adamson_, Feb 24 2011: (Start)
+%C A080510 Construct an array in which the n-th row is the partition function G(n,k), where G(n,1),...,G(n,6) = A000012, A000085, A001680, A001681, A110038, A148092, with the first few rows
+%C A080510   1,   1,   1,   1,   1,   1,    1, ... = A000012
+%C A080510   1,   2,   4,  10,  26,  76,  232, ... = A000085
+%C A080510   1,   2,   5,  14,  46, 166,  652, ... = A001680
+%C A080510   1,   2,   5,  15,  51, 196,  827, ... = A001681
+%C A080510   1,   2    5   15   52  202   869, ... = A110038
+%C A080510   1,   2,   5   15   52  203   876, ... = A148092
+%C A080510   ...
+%C A080510 Rows tend to A000110, the Bell numbers. Taking finite differences from the top, then reorienting, we obtain triangle A080510.
+%C A080510 The n-th row of the array is the eigensequence of an infinite lower triangular matrix with n diagonals of Pascal's triangle starting from the right and the rest zeros. (End)
+%H A080510 Alois P. Heinz, <a href="/A080510/b080510.txt">Rows n = 1..141, flattened</a>
+%H A080510 Peter Luschny, <a href="http://www.luschny.de/math/seq/CountingWithPartitions.html"> Counting with Partitions</a>.
+%H A080510 Peter Luschny, <a href="http://www.luschny.de/math/seq/stirling2partitions.html"> Generalized Stirling_2 Triangles</a>.
+%H A080510 J. Riordan, <a href="/A229223/a229223.pdf">Letter, 11/23/1970</a>. See second page of letter.
+%F A080510 E.g.f. for k-th column: exp(exp(x)*GAMMA(k, x)/(k-1)!-1)*(exp(x^k/k!)-1). - _Vladeta Jovovic_, Feb 04 2005
+%F A080510 From _Peter Luschny_, Mar 09 2009: (Start)
+%F A080510 T(n,0) = [n = 0] (Iverson notation) and for n > 0 and 1 <= m <= n.
+%F A080510 T(n,m) = Sum_{a} M(a)|f^a| where a = a_1,...,a_n such that
+%F A080510 1*a_1 + 2*a_2 + ... + n*a_n = n and max{a_i} = m, M(a) = n!/(a_1!*...*a_n!),
+%F A080510 f^a = (f_1/1!)^a_1*...*(f_n/n!)^a_n and f_n = Product_{j=0..n-1} (-1) = (-1)^n. (End)
+%F A080510 From _Ludovic Schwob_, Jan 15 2022: (Start)
+%F A080510 T(2n,n) = C(2n,n)*(A000110(n)-1/2) for n>0.
+%F A080510 T(n,m) = C(n,m)*A000110(n-m) for 2m > n > 0. (End)
+%e A080510 T(4,3) = 4 since there are 4 set partitions with longest block of length 3: {{1},{2,3,4}}, {{1,3,4},{2}}, {{1,2,3},{4}} and {{1,2,4},{3}}.
+%e A080510 Triangle begins:
+%e A080510   1;
+%e A080510   1,    1;
+%e A080510   1,    3,     1;
+%e A080510   1,    9,     4,    1;
+%e A080510   1,   25,    20,    5,    1;
+%e A080510   1,   75,    90,   30,    6,   1;
+%e A080510   1,  231,   420,  175,   42,   7,  1;
+%e A080510   1,  763,  2016, 1015,  280,  56,  8,  1;
+%e A080510   1, 2619, 10024, 6111, 1890, 420, 72,  9,  1;
+%e A080510   ...
+%p A080510 b:= proc(n, i) option remember; `if`(n=0, 1, `if`(i<1, 0,
+%p A080510        add(b(n-i*j, i-1) *n!/i!^j/(n-i*j)!/j!, j=0..n/i)))
+%p A080510     end:
+%p A080510 T:= (n, k)-> b(n, k) -b(n, k-1):
+%p A080510 seq(seq(T(n, k), k=1..n), n=1..12);  # _Alois P. Heinz_, Apr 20 2012
+%t A080510 << DiscreteMath`NewCombinatorica`; Table[Length/@Split[Sort[Max[Length/@# ]&/@SetPartitions[n]]], {n, 12}]
+%t A080510 (* Second program: *)
+%t A080510 b[n_, i_] := b[n, i] = If[n == 0, 1, If[i<1, 0, Sum[b[n-i*j, i-1]*n!/i!^j/(n-i*j)!/j!, {j, 0, n/i}]]]; T[n_, k_] := b[n, k]-b[n, k-1]; Table[Table[T[n, k], {k, 1, n}], {n, 1, 12}] // Flatten (* _Jean-François Alcover_, Feb 25 2014, after _Alois P. Heinz_ *)
+%Y A080510 Cf. A080107, A080337, A008277, A178979, A276922, A327884.
+%Y A080510 Cf. A157396, A157397, A157398, A157399, A157400, A157401, A157402, A157403, A157404, A157405. - _Peter Luschny_, Mar 09 2009
+%Y A080510 Cf. A000012, A000085, A001680, A001681, A110038, A148092. - _Gary W. Adamson_, Feb 24 2011
+%Y A080510 Columns k=1..10 give: A000012 (for n>0), A001189, A229245, A229246, A229247, A229248, A229249, A229250, A229251, A229252. - _Alois P. Heinz_, Sep 17 2013
+%Y A080510 T(2n,n) gives A276961.
+%Y A080510 Take differences along rows of A229223. - _N. J. A. Sloane_, Jan 10 2018
+%K A080510 nonn,tabl
+%O A080510 1,5
+%A A080510 _Wouter Meeussen_, Mar 22 2003

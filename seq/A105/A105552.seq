@@ -1,0 +1,51 @@
+%I A105552
+%S A105552 1,2,4,1,7,5,2,11,14,12,5,1,16,30,39,32,18,7,2,22,55,95,113,101,71,41,
+%T A105552 18,6,1,29,91,195,299,357,350,292,207,126,64,27,9,2,37,140,357,664,
+%U A105552 978,1204,1283,1198,992,731,482,284,148,66,25,7,1,46,204,602,1309,2274,3329,4253
+%N A105552 Irregular triangle T(n,k) read down columns: the number of compositions c of n with largest_part(c)+length(c)=k+1 in row n, column k.
+%C A105552 For each of the A000041(n) partitions of n, one can assign a weight to the partition which counts the permutations of that partition, given by the multinomial coefficient derived from the frequency representation of the parts.
+%C A105552 An equivalent representation is given by writing down all compositions of n.
+%C A105552 The entries count those partitions multiplied by their weights (=compositions) of n where the sum of the largest addend plus number of parts equals k+1. Only nonzero counts are entered into the sequence.
+%C A105552 Each entry can also be interpreted as counting a subset of numbers in A055932, because there is a 1-to-1 correspondence between their prime signature and ordered partitions.
+%C A105552 Each diagonal of T(n,k) can be decomposed into p(n) sequences. For example,
+%C A105552 A086602 = 2 12 39 95 195 ... is the sum of
+%C A105552 A000330 = 1 5 14 30 55 ... plus
+%C A105552 A001296 = 1 7 25 65 140 ...
+%C A105552 The main diagonal and subdiagonals in order of appearance are A000124, A000330, A086602, A089574, A107600, A107601, A109125, ...
+%H A105552 Alois P. Heinz, <a href="/A105552/b105552.txt">Columns k = 1..40, flattened</a>
+%F A105552 Row sums: Sum_{k=0..n} T(n,k) = 2^(n-1).
+%F A105552 Column sums: Sum_{n>=k} T(n,k) = A047970(n).
+%e A105552 The row n=7 starts from the partitions (weights in parentheses) 7 (1), 6+1 (2), 5+2 (2), 4+3 (2), 5+1+1 (3), 4+2+1 (6=3!/1!/1!/1!), 3+3+1 (3), 3+2+2 (3), 4+1+1+1 (4=4!/1!/3!), 3+2+1+1 (12 = 4!/1!/1!/2!), 2+2+2+1 (4), 3+1+1+1+1+1 (5), 2+2+1+1+1 (10=5!/2!/3!), 2+1+1+1+1 (6), 1+1+1+1+1+1 (1).
+%e A105552 Then T(7,7) = 1+2+3+4+5+6+1 = 22 is the sum of the weights of partitions with largest part 7 and length 1, largest part 6 and length 2,... largest part 1 and length 7.
+%e A105552 T(7,6) = 2+6+12+10 = 30 is the sum of the weights of the partitions with largest part 6 and length 1, largest part 5 and length 2, ..., largest part 1 and length 6.
+%e A105552 T(7,5) = 2+3+3+4 = 12 collects all the partitions with largest part 5 and length 1 down to largest part 1 and length 5.
+%e A105552 The array has A033638(k) nonzero entries per column, starting at n=1 as :
+%e A105552 1
+%e A105552 ..2
+%e A105552 ....4
+%e A105552 ....1..7
+%e A105552 .......5..11
+%e A105552 .......2..14..16
+%e A105552 ..........12..30..22
+%e A105552 ...........5..39..55..29
+%e A105552 ...........1..32..95..91..37
+%e A105552 ..............18.113.195.140
+%e A105552 ...............7.101.299.357
+%e A105552 ...............2
+%p A105552 A033638 := proc(n) ( (7+(-1)^n)/2 + n^2 )/4 ; end proc:
+%p A105552 freq := proc(L,n) local a,p; a := 0 ; for p in L do if p = n then a := a+1 ; end if; end do: a ; end proc:
+%p A105552 M3 := proc(L) local a,i; a := factorial(nops(L)) ; for i in convert(L,set) do a := a/factorial(freq(L,i)) ; end do: a ; end proc:
+%p A105552 A105552 := proc(n,k) local p,a,l ; a := 0 ; for p in combinat[partition](n) do if max(op(p)) + nops(p) = k+1 then a := a+ M3(p); end if; end do ; a ; end proc:
+%p A105552 for k from 1 to 15 do for n from k to k+A033638(k)+1 do T := A105552(n,k) ; if T >0 then printf("%d,", A105552(n,k)) ; end if; end do: printf("\n") ; end do: # _R. J. Mathar_, Jun 26 2010
+%p A105552 # second Maple program:
+%p A105552 b:= proc(n, k, p) option remember; `if`(n=0 and k=0, 1,
+%p A105552      `if`(k<1, 0, add(b(n-j, k-1-max(p, j)+p, max(p, j)), j=1..n)))
+%p A105552     end:
+%p A105552 T:= k-> seq(b(n, k+1, 0), n=k..k+floor((k-1)^2/4)):
+%p A105552 seq(T(k), k=1..10);  # _Alois P. Heinz_, Jul 24 2013
+%t A105552 b[n_, k_, p_] := b[n, k, p] = If[n == 0 && k == 0, 1, If[k < 1, 0, Sum[b[n - j, k - 1 - Max[p, j] + p, Max[p, j]], {j, 1, n}]]]; T[k_] := Table[b[n, k + 1, 0], {n, k, k + Floor[(k - 1)^2/4]}]; Table[T[k], {k, 1, 10}] // Flatten (* _Jean-François Alcover_, Jan 08 2016, after _Alois P. Heinz_ *)
+%Y A105552 Cf. A047969, A047970, A055932, A057335, A083480, A083906, A089349, A033638, A086602 (subdiagonal), A089574 (subdiagonal).
+%K A105552 nonn,tabf
+%O A105552 1,2
+%A A105552 _Alford Arnold_, May 03 2005
+%E A105552 Definition clarified by _R. J. Mathar_, Jun 26 2010

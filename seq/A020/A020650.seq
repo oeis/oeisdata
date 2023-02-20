@@ -1,0 +1,58 @@
+%I A020650
+%S A020650 1,2,1,3,1,3,2,4,1,4,3,5,2,5,3,5,1,5,4,7,3,7,4,7,2,7,5,8,3,8,5,6,1,6,
+%T A020650 5,9,4,9,5,10,3,10,7,11,4,11,7,9,2,9,7,12,5,12,7,11,3,11,8,13,5,13,8,
+%U A020650 7,1,7,6,11,5,11,6,13,4,13,9,14,5,14,9,13,3,13,10,17,7,17,10,15,4,15,11,18,7,18
+%N A020650 Numerators in recursive bijection from positive integers to positive rationals (the bijection is f(1) = 1, f(2n) = f(n)+1, f(2n+1) = 1/(f(n)+1)).
+%C A020650 The fractions are given in their reduced form, thus gcd(a(n), A020651(n)) = 1 for all n. - _Antti Karttunen_, May 26 2004
+%C A020650 From _Yosu Yurramendi_, Jul 13 2014 : (Start)
+%C A020650 If the terms (n>0) are written as an array (left-aligned fashion) with rows of length 2^m, m = 0,1,2,3,...
+%C A020650 1,
+%C A020650 2,1,
+%C A020650 3,1,3,2,
+%C A020650 4,1,4,3,5,2,5,3,
+%C A020650 5,1,5,4,7,3,7,4, 7,2, 7,5, 8,3, 8,5,
+%C A020650 6,1,6,5,9,4,9,5,10,3,10,7,11,4,11,7,9,2,9,7,12,5,12,7,11,3,11,8,13,5,13,8,
+%C A020650 then the sum of the m-th row is 3^m (m = 0,1,2,), and each column is an arithmetic sequence.
+%C A020650 If the rows are written in a right-aligned fashion:
+%C A020650                                                                         1,
+%C A020650                                                                       2,1,
+%C A020650                                                                  3,1, 3,2,
+%C A020650                                                        4,1, 4,3, 5,2, 5,3,
+%C A020650                                     5,1,5,4, 7,3, 7,4, 7,2, 7,5, 8,3, 8,5,
+%C A020650 6,1,6,5,9,4,9,5,10,3,10,7,11,4,11,7,9,2,9,7,12,5,12,7,11,3,11,8,13,5,13,8,
+%C A020650 each column k is a Fibonacci sequence.
+%C A020650 (End)
+%C A020650 a(n2^m+1) = a(2n+1), n > 0, m > 0. - _Yosu Yurramendi_, Jun 04 2016
+%H A020650 T. D. Noe, <a href="/A020650/b020650.txt">Table of n, a(n) for n = 1..10000</a>
+%H A020650 D. N. Andreev, <a href="http://www.mathnet.ru/eng/mp12">On a Wonderful Numbering of Positive Rational Numbers</a>, Matematicheskoe Prosveshchenie, Series 3, volume 1, 1997, pages 126-134 (in Russian).  a(n) = numerator of r(n).
+%H A020650 Shen Yu-Ting, <a href="https://doi.org/10.2307/2320374">A Natural Enumeration of Non-Negative Rational Numbers -- An Informal Discussion</a>, American Mathematical Monthly, volume 87, number 1, January 1980, pages 25-29.  a(n) = numerator of gamma_n.
+%H A020650 <a href="/index/Fo#fraction_trees">Index entries for fraction trees</a>
+%F A020650 a(1) = 1, a(2n) = a(n) + A020651(n), a(2n+1) = A020651(2n) = A020651(n). - _Antti Karttunen_, May 26 2004
+%F A020650 a(2n) = A020651(2n+1). - _Yosu Yurramendi_, Jul 17 2014
+%F A020650 a((2*n+1)*2^m + 1) = A086592(n), n > 0, m > 0. For n = 0, A086592(0) = 1 is needed. For m = 0, a((2*(n+1)) = A086592(n+1). - _Yosu Yurramendi_, Feb 19 2017
+%F A020650 a(n) = A002487(1+A231551(n)), n > 0. - _Yosu Yurramendi_, Aug 07 2021
+%e A020650 1, 2, 1/2, 3, 1/3, 3/2, 2/3, 4, 1/4, 4/3, ...
+%p A020650 A020650 := n -> `if`((n < 2),n, `if`(type(n,even), A020650(n/2)+A020651(n/2), A020651(n-1)));
+%t A020650 f[1] = 1; f[n_?EvenQ] := f[n] = f[n/2]+1; f[n_?OddQ] := f[n] = 1/(f[(n-1)/2]+1); a[n_] := Numerator[f[n]]; Table[a[n], {n, 1, 94}] (* _Jean-François Alcover_, Nov 22 2011 *)
+%t A020650 a[1]=1; a[2]=2; a[3]=1; a[n_] := a[n] = Switch[Mod[n, 4], 0, a[n/2+1] + a[n/2], 1, a[(n-1)/2+1], 2, a[(n-2)/2+1] + a[(n-2)/2], 3, a[(n-3)/2]]; Array[a, 100] (* _Jean-François Alcover_, Jan 22 2016, after _Yosu Yurramendi_ *)
+%o A020650 (Haskell)
+%o A020650 import Data.List (transpose); import Data.Ratio (numerator)
+%o A020650 a020650_list = map numerator ks where
+%o A020650    ks = 1 : concat (transpose [map (+ 1) ks, map (recip . (+ 1)) ks])
+%o A020650 -- _Reinhard Zumkeller_, Feb 22 2014
+%o A020650 (R)
+%o A020650 N <- 25 # arbitrary
+%o A020650 a <- c(1,2,1)
+%o A020650 for(n in 1:N){
+%o A020650   a[4*n]   <- a[2*n] + a[2*n+1]
+%o A020650   a[4*n+1] <-          a[2*n+1]
+%o A020650   a[4*n+2] <- a[2*n] + a[2*n+1]
+%o A020650   a[4*n+3] <- a[2*n]
+%o A020650 }
+%o A020650 a
+%o A020650 # _Yosu Yurramendi_, Jul 13 2014
+%Y A020650 Cf. A020651.
+%Y A020650 Bisection: A086592.
+%K A020650 nonn,easy,frac,nice
+%O A020650 1,2
+%A A020650 _David W. Wilson_

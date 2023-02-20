@@ -1,0 +1,39 @@
+%I A015616
+%S A015616 0,0,1,4,10,19,34,52,79,109,154,196,262,325,409,493,613,712,865,997,
+%T A015616 1171,1336,1567,1747,2017,2251,2548,2818,3196,3472,3907,4267,4717,
+%U A015616 5125,5665,6079,6709,7222,7858,8410,9190,9748,10609,11299,12127
+%N A015616 Number of triples (i,j,k) with 1 <= i < j < k <= n and gcd(i,j,k) = 1.
+%H A015616 Alois P. Heinz, <a href="/A015616/b015616.txt">Table of n, a(n) for n = 1..10000</a>
+%F A015616 a(n) = (A071778(n) - 3*A018805(n) + 2)/6. - _Vladeta Jovovic_, Dec 01 2004
+%F A015616 a(n) = Sum_{i=1..n} A000741(i). - _Alois P. Heinz_, Feb 08 2011
+%F A015616 For n > 1, a(n) = n(n-1)(n-2)/6 - Sum_{j=2..n} a(floor(n/j)) = A000292(n-2) - Sum_{j=2..n} a(floor(n/j)). - _Chai Wah Wu_, Mar 30 2021
+%e A015616 For n=6, the a(6) = 19 solutions are the binomial(6,3) = (6*5*4)/(1*2*3) = 20 possible triples minus the triple (2,4,6) with GCD=2.
+%p A015616 f:=proc(n) local i,j,k,t1,t2,t3; t1:=0; for i from 1 to n-2 do for j from i+1 to n-1 do t2:=gcd(i,j); for k from j+1 to n do t3:=gcd(t2,k); if t3 = 1 then t1:=t1+1; fi; od: od: od: t1; end;
+%p A015616 # program based on Moebius transform, partial sums of A000741:
+%p A015616 with(numtheory):
+%p A015616 b:= proc(n) option remember;
+%p A015616       add(mobius(n/d)*(d-2)*(d-1)/2, d=divisors(n))
+%p A015616     end:
+%p A015616 a:= proc(n) option remember;
+%p A015616       b(n) +`if`(n=1, 0, a(n-1))
+%p A015616     end:
+%p A015616 seq(a(n), n=1..100);  # _Alois P. Heinz_, Feb 08 2011
+%t A015616 a[n_] := (cnt = 0; Do[cnt += Boole[GCD[i, j, k] == 1], {i, 1, n-2}, {j, i+1, n-1}, {k, j+1, n}]; cnt); Table[a[n], {n, 1, 45}] (* _Jean-François Alcover_, Mar 05 2013 *)
+%o A015616 (PARI) print1(c=0);for(k=1,99,for(j=1,k-1, gcd(j,k)==1 && (c+=j-1) && next; for(i=1,j-1, gcd([i,j,k])>1 || c++)); print1(", "c))
+%o A015616 (Python)
+%o A015616 from functools import lru_cache
+%o A015616 @lru_cache(maxsize=None)
+%o A015616 def A015616(n):
+%o A015616     if n <= 1:
+%o A015616         return 0
+%o A015616     c, j = n*(n-1)*(n-2)//6, 2
+%o A015616     k1 = n//j
+%o A015616     while k1 > 1:
+%o A015616         j2 = n//k1 + 1
+%o A015616         c -= (j2-j)*A015616(k1)
+%o A015616         j, k1 = j2, n//j2
+%o A015616     return c # _Chai Wah Wu_, Mar 30 2021
+%Y A015616 Cf. A000292, A100448, A027430, A015631.
+%K A015616 nonn
+%O A015616 1,4
+%A A015616 _Olivier Gérard_

@@ -1,0 +1,69 @@
+%I A133258
+%S A133258 1,11,38,157,718,3039,12571
+%N A133258 Number of possible 3 X n arrangements of black and white squares that can form the middle three rows in an n X n crossword puzzle with rotational symmetry. In this sequence, n is ODD.
+%C A133258 For this sequence, n must be odd.
+%t A133258 (*This program counts, lists and displays the possible three - row centers \ of an n X n (n odd) crossword puzzle with rotational symmetry.*)
+%t A133258 plotnice = ArrayPlot [ #, Frame -> False, Mesh -> True, MeshStyle -> \
+%t A133258 GrayLevel [ 0 ] ] &;
+%t A133258 For [ w = 1, w <= 7, w++,
+%t A133258 n = 2w + 1;
+%t A133258 t = n - 3;
+%t A133258 arrangements = {};
+%t A133258 For [ r = 0, r <= t, r++,
+%t A133258 m = Compositions [ n - r, r + 1 ];
+%t A133258 m2 = Select [ m, FreeQ [ #, 2 ] & ];
+%t A133258 m1 = Select [ m2, FreeQ [ #, 1 ] & ];
+%t A133258 arrangements = Join [ arrangements, m1 ] ];
+%t A133258 possiblecolumns = {};
+%t A133258 For [ j = 1, j <= Length [ arrangements ], j++,
+%t A133258 original = arrangements [ [ j ] ];
+%t A133258 new = {};
+%t A133258 For [ i = 1, i <= Length [ original ], i++, new = Append [ new,
+%t A133258 Join [ Table [ 0, {original [ [ i ] ]} ], {1} ] ] ];
+%t A133258 new = Drop [ Flatten [ new ], -1 ];
+%t A133258 possiblecolumns = Append [ possiblecolumns, new ] ];
+%t A133258 symmetricrows =
+%t A133258 Select [ possiblecolumns,
+%t A133258 possiblecolumns [ [ # ] ] == Reverse [ possiblecolumns [ [ # ] ] ] & ];
+%t A133258 usablemods = {0, 1, 3, 7};
+%t A133258 usablenumbers = Function [ MemberQ [ usablemods, Mod [ #, 8 ] ] ];
+%t A133258 goodnumbers = Union [ Table [ k, {k, 0,
+%t A133258 2^(n - 3) - 1} ], Table [ k, {k, 2^(n - 1), 2^n - 2} ] ];
+%t A133258 numbers = Select [ goodnumbers, usablenumbers ];
+%t A133258 rows = Table [ PadLeft [ IntegerDigits [
+%t A133258 numbers [ [ j ] ], 2 ], n ], {j, 1, Length [ numbers ]} ];
+%t A133258 no101s = Function [ FreeQ [ Partition [ #1, 3, 1 ], {1, 0, 1} ] ];
+%t A133258 no1001s = Function [ FreeQ [ Partition [ #1, 4, 1 ], {1, 0, 0, 1} ] ];
+%t A133258 legalrows = Select [ Select [ rows, no1001s ], no101s ];
+%t A133258 reversedlegalrows = Reverse /@ legalrows;
+%t A133258 potentialcenters = Flatten [ Table [ {legalrows [ [ i ] ], symmetricrows [ [ j ] ],
+%t A133258 reversedlegalrows [ [ i ] ]}, {i, 1,
+%t A133258 Length [ legalrows ]}, {j, 1, Length [ symmetricrows ]} ], 1 ];
+%t A133258 transposedpotentialcenters = Transpose /@ potentialcenters;
+%t A133258 freeof101s = Function [ FreeQ [ #, {1, 0, 1} ] ];
+%t A133258 transposedno101s = Select [ transposedpotentialcenters, freeof101s ];
+%t A133258 almostcenters = Transpose /@ transposedno101s;
+%t A133258 insertzerorows =
+%t A133258 Function [ Append [ Prepend [ #, Table [ 0, {n} ] ], Table [ 0, {n} ] ] ];
+%t A133258 almostcenterswithzeros = insertzerorows /@ almostcenters;
+%t A133258 centers = {};
+%t A133258 centercount = 0;
+%t A133258 For [ v = 1, v <= Length [ almostcenterswithzeros ], v++,
+%t A133258 puzzlegraph = Table [ almostcenterswithzeros [ [ v, r, s ] ], {r, 1, 5}, {s,
+%t A133258 1, n} ];
+%t A133258 verts = {};
+%t A133258 For [ i2 = 1, i2 <= 5, i2++, For [ j2 = 1, j2 <= n, j2++, If [ puzzlegraph [ [ i2,
+%t A133258 j2 ] ] == 1, verts = Append [ verts, j2 + 5n - n*i2 ] ] ] ];
+%t A133258 thegraph = DeleteVertices [ GridGraph [ n, 5 ], verts ];
+%t A133258 If [ ConnectedQ [ thegraph ] ==
+%t A133258 True, centercount = centercount + 1;
+%t A133258 centers = Append [ centers, almostcenterswithzeros [ [ v ] ] ] ];
+%t A133258 ]
+%t A133258 plotnice /@ centers;
+%t A133258 Print [ "the number of center three-row arrangements in a ", n, " x ", n, " puzzle with rotational symmetry is ", centercount ];
+%t A133258 Print [ " " ];
+%t A133258 ]
+%Y A133258 Cf. A130578.
+%K A133258 nonn,more
+%O A133258 3,2
+%A A133258 Marc A. Brodie (mbrodie(AT)wju.edu), Jan 03 2008

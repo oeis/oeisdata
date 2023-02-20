@@ -1,0 +1,26 @@
+%I A005360 M4771
+%S A005360 11,13,19,22,23,25,26,27,29,37,38,39,41,43,44,46,47,50,52,53,54,55,57,
+%T A005360 58,59,61,67,71,74,76,77,78,79,81,82,83,86,87,88,91,92,94,95,97,99,
+%U A005360 100,101,103,104,106,107,108,109,110,111,113,114,115,116,117,118,119,121
+%N A005360 Flimsy numbers.
+%C A005360 Definition: n is flimsy if and only if there exists a k such that A000120(k*n) < A000120(n). That is, some multiple of n has fewer ones in its binary expansion than does n. What are the associated k for each n? What is the smallest n for each k? Stolarsky says "at least half the primes are flimsy." - _Jonathan Vos Post_, Jul 07 2008
+%C A005360 A143073(n) gives the least k for each n in this sequence. - _T. D. Noe_, Jul 22 2008
+%C A005360 If k is in this sequence then so is 2*k. - _David A. Corneth_, Oct 01 2016
+%D A005360 Bojan Basic, The existence of n-flimsy numbers in a given base, The Ramanujan Journal, March 7, 2016, pages 1-11. DOI 10.1007/s11139-015-9768-7.
+%D A005360 N. J. A. Sloane and Simon Plouffe, The Encyclopedia of Integer Sequences, Academic Press, 1995 (includes this sequence).
+%H A005360 T. D. Noe, <a href="/A005360/b005360.txt">Table of n, a(n) for n=1..1000</a>
+%H A005360 Trevor Clokie et al., <a href="https://arxiv.org/abs/2002.02731">Computational Aspects of Sturdy and Flimsy Numbers</a>, arxiv preprint arXiv:2002.02731 [cs.DS], February 7 2020.
+%H A005360 R. J. Mathar, <a href="/A005360/a005360.txt">Examples of a(n), k and the two binary representations of a(n) and a(n)*k</a>
+%H A005360 Tony D. Noe, <a href="http://integersequences.org/s000848.html">Odd sturdy numbers</a>, Integer Sequences #S000848.
+%H A005360 K. B. Stolarsky, <a href="http://matwbn.icm.edu.pl/ksiazki/aa/aa38/aa3825.pdf">Integers whose multiples have anomalous digital frequencies</a>, Acta Arith. 38 (1980) 117-128.
+%e A005360 11 is flimsy because A000120(3*11) = 2 < A000120(11) = 3.
+%e A005360 107 is flimsy because A000120(3*107) = 3 < A000120(107) = 5.
+%e A005360 The numbers 37*2^j are flimsy with k=7085. The numbers 67*2^j are flimsy with k = 128207979, 81*2^j are flimsy with k = 1657009, 83*2^j are flimsy with k = 395, 97*2^j with k = 172961, 101*2^j with k = 365, 113*2^j with k = 145, 137*2^j with k = 125400505, any j >= 0. - _R. J. Mathar_, Jul 14 2008
+%t A005360 nmax = 121; kmax = 200; nn = {37, 67, 81, 83, 97, 101, 113}; flimsyQ[n_ /; MemberQ[nn, n] || MatchQ[FactorInteger[n], {{2, _} , {Alternatives @@ nn, 1}}]] = True; flimsyQ[n_] := For[k = 2, True, k++, Which[DigitCount[k * n, 2, 1] < DigitCount[n, 2, 1], Return[True], k > kmax, Return[False]]]; Reap[Do[If[flimsyQ[n], Sow[n]], {n, 2, nmax}]][[2, 1]] (* _Jean-François Alcover_, May 23 2012, after _R. J. Mathar_ *)
+%t A005360 nmax = 200; Bits[n_Integer] := Count[IntegerDigits[n, 2], 1]; FlimsyQ[n_Integer] := FlimsyQ[n] = Module[{res, b = Bits[n], k}, If[b <= 2, False, If[EvenQ[n], FlimsyQ[n/2], res = Union[Mod[2^Range[n], n]]; If[Length[res] == n - 1, True, k = 2; While[k < b && ! MemberQ[Union[Mod[Plus @@@ Subsets[res, {k}], n]], 0], k++]; k < b]]]]; Select[Range[nmax], FlimsyQ] (* _Jean-François Alcover_, Feb 11 2016, this code is due to _T. D. Noe_ *)
+%o A005360 (C++) #include <iostream> #include <cstdlib> int A000120(unsigned long long n) { int b=0 ; while(n>0) { b += n & 1 ; n >>= 1 ; } return b; } using namespace std ; int main(int argc, char *argv[]) { unsigned long long kmax=atoi(argv[1]) ; for(unsigned long long n=1;;n++) { const int n120=A000120(n) ; for(unsigned long long k=3; k < kmax ; k+= 2) if ( A000120(k*n) < n120) { cout << n << " " << k << endl ; break ; } } } /* _R. J. Mathar_, Jul 14 2008 */
+%Y A005360 Cf. A000120, A125121 (complement).
+%K A005360 nonn,nice,base
+%O A005360 1,1
+%A A005360 _Jeffrey Shallit_
+%E A005360 More terms from _R. J. Mathar_, Jul 14 2008

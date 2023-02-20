@@ -1,0 +1,24 @@
+%I A120412
+%S A120412 1,1,2,2,3,5,7,10,16,25,40,66,111,191,343,627,1182,2301,4609,9511,
+%T A120412 20229,44252,99564,230171,546118,1328476,3309876,8436887,21980376,
+%U A120412 58473130,158692559,439012704,1237049733,3547984011,10350963267,30699209481,92508993842
+%N A120412 Number of unlabeled graphs with n equal to the number of vertices plus the number of edges.
+%C A120412 Given two integers p, q, one can count the different graphs having p vertices and q edges by the standard Polya counting technique. Our sequence is then obtained by summing up the terms with p + q = n.
+%F A120412 a(n) = Sum_{i=1..n} A008406(i, n-i). - _Andrew Howroyd_, Nov 07 2019
+%e A120412 a(3) = 2 because there is a graph with 3 vertices and no edges and a graph with 2 vertices and one edge.
+%t A120412 permcount[v_] := Module[{m = 1, s = 0, k = 0, t}, For[i = 1, i <= Length[v], i++, t = v[[i]]; k = If[i > 1 && t == v[[i - 1]], k + 1, 1]; m *= t*k; s += t]; s!/m];
+%t A120412 edges[v_, t_] := Product[Product[g = GCD[v[[i]], v[[j]]]; t[v[[i]]*v[[j]]/g]^g, {j, 1, i - 1}], {i, 2, Length[v]}]*Product[c = v[[i]]; t[c]^Quotient[c-1, 2]*If[OddQ[c], 1, t[c/2]], {i, 1, Length[v]}];
+%t A120412 row[n_] := row[n] = Module[{s = 0}, Do[s += permcount[p]*edges[p, 1+x^#&], {p, IntegerPartitions[n]}]; s/n!] // Expand // CoefficientList[#, x]&;
+%t A120412 T[n_, k_] := If[k <= Length[row[n]], row[n][[k]], 0];
+%t A120412 a[n_] := Sum[T[k, n-k+1], {k, 1, n}];
+%t A120412 Table[Print[n, " ", a[n]]; a[n], {n, 1, 37}] (* _Jean-François Alcover_, Jan 09 2021, after _Andrew Howroyd_ in A008406 *)
+%o A120412 (PARI)
+%o A120412 permcount(v) = {my(m=1, s=0, k=0, t); for(i=1, #v, t=v[i]; k=if(i>1&&t==v[i-1], k+1, 1); m*=t*k; s+=t); s!/m}
+%o A120412 edges(v, t) = {prod(i=2, #v, prod(j=1, i-1, my(g=gcd(v[i], v[j])); t(v[i]*v[j]/g)^g )) * prod(i=1, #v, my(c=v[i]); t(c)^((c-1)\2)*if(c%2, 1, t(c/2)))}
+%o A120412 G(n, x)={my(s=0); forpart(p=n, s+=permcount(p)*edges(p, i->1+x^i)); s/n!}
+%o A120412 seq(n)={Vec(sum(k=1, n, x^k*G(k, x + O(x*x^(n-k)))))} \\ _Andrew Howroyd_, Nov 07 2019
+%Y A120412 Cf. A008406.
+%K A120412 nonn
+%O A120412 1,3
+%A A120412 Petr Vojtechovsky (petr(AT)math.du.edu), Jul 05 2006
+%E A120412 Terms a(14) and beyond from _Andrew Howroyd_, Nov 07 2019

@@ -1,0 +1,58 @@
+%I A103415
+%S A103415 1,2,1,5,4,1,12,11,6,1,29,28,21,8,1,70,69,60,35,10,1,169,168,157,116,
+%T A103415 53,12,1,408,407,394,333,204,75,14,1,985,984,969,884,653,332,101,16,1,
+%U A103415 2378,2377,2360,2247,1870,1189,508,131,18,1,5741,5740,5721,5576,5001,3712,2029,740,165,20,1
+%N A103415 Triangle, read by rows, T(n,k) = A000129(n+1) - Sum_{j=1..k} t(n+1, j), where t(n, k) is defined in the formula section.
+%C A103415 Triangle is generated from the product A*B of the infinite lower triangular matrices A = A008288(n,k) and B =
+%C A103415   1;
+%C A103415   1 1;
+%C A103415   1 1 1;
+%C A103415   1 1 1 1; ...
+%C A103415 Determinant(A*B) = 1 for all n.
+%C A103415 Absolute values of coefficients of characteristic polynomials of n-th matrix are the (n+1)-th row of A007318 (Pascal's triangle). As they are:
+%C A103415   x^1 - 1;
+%C A103415   x^2 - 2*x^1 +  1;
+%C A103415   x^3 - 3*x^2 +  3*x^1 -  1;
+%C A103415   x^4 - 4*x^3 +  6*x^2 -  4*x^1 + 1;
+%C A103415   x^5 - 5*x^4 + 10*x^3 - 10*x^2 + 5*x^1 - 1.
+%H A103415 G. C. Greubel, <a href="/A103415/b103415.txt">Rows n = 0..50 of the triangle, flattened</a>
+%F A103415 T(n, k) = Pell(n+1) - ST(n, k), where ST(n, k) = Sum_{j=1..k} t(n+1, j), t(n, k) = t(n-1,k) + t(n-1,k-1) + t(n-2,k-1), t(n, 1) = t(n, n) = 1 and t(0, k) = t(1, k) = t(2, k) = 1.
+%F A103415 T(n, 0) = A000129(n+1).
+%F A103415 T(n, 1) = A005409(n) = A000129(n) - 1.
+%F A103415 Sum_{k=0..n} T(n, k) = A026937(n).
+%F A103415 From _G. C. Greubel_, May 25 2021: (Start)
+%F A103415 T(n, k) = A000129(n+1) - st(n,k), where st(n, k) = Sum_{j=1..k} t(n+1, j), t(n, k) = A008288(n-1, k-1) for n >= 1 and k >= 1, and t(n, 0) = (1/2)*(2*[n<2] + A002203(n-1)*[n>1]).
+%F A103415 T(n, n) = A000012(n).
+%F A103415 T(n, n-1) = A005843(n+1).
+%F A103415 T(n, n-2) = A093328(n-1).
+%F A103415 T(n, n-3) = (4/3)*((n-3)^3 + 5*(n-3) + 3).
+%F A103415 T(n, n-4) = (1/3)*(2*(n-4)^2 + 22*(n-4)^2 + 22*(n-4) + 39). (End)
+%e A103415 Triangle begins as:
+%e A103415     1;
+%e A103415     2,   1;
+%e A103415     5,   4,   1;
+%e A103415    12,  11,   6,   1;
+%e A103415    29,  28,  21,   8,   1;
+%e A103415    70,  69,  60,  35,  10,  1;
+%e A103415   169, 168, 157, 116,  53, 12,  1;
+%e A103415   408, 407, 394, 333, 204, 75, 14, 1;
+%t A103415 t[n_, k_]:= If[k==0, (2*Boole[n<2] + LucasL[n-1, 2]*Boole[n>1])/2, Binomial[n-1, k-1]*Hypergeometric2F1[1-k, k-n, 1-n, -1]];
+%t A103415 st[n_, k_]:= Sum[t[n+1, j], {j,k}];
+%t A103415 T[n_, k_]:= Fibonacci[n+1, 2] - st[n, k];
+%t A103415 Table[T[n, k], {n, 0, 12}, {k, 0, n}]//Flatten (* _G. C. Greubel_, May 25 2021 *)
+%o A103415 (PARI)
+%o A103415 Pell(n) = if( n<2, n, 2*Pell(n-1) + Pell(n-2) );
+%o A103415 t(n, k) = if(n<3, 1, if(k==1||k==n, 1, t(n-1,k) + t(n-1,k-1) + t(n-2,k-1) ));
+%o A103415 st(n, k) = sum(i=1, k, t(n+1,i));
+%o A103415 T(n, k) = Pell(n+1) - st(n,k);
+%o A103415 for(n=0, 10, for(k=0, n, print1(T(n,k), ",")); print()) \\ modified by _G. C. Greubel_, May 25 2021
+%o A103415 (Sage)
+%o A103415 @CachedFunction
+%o A103415 def t(n,k): return 1 if (n<3) else 1 if (k==1 or k==n) else t(n-1,k) + t(n-1,k-1) + t(n-2,k-1)
+%o A103415 def st(n,k): return sum(t(n+1, j) for j in (1..k))
+%o A103415 def T(n,k): return lucas_number1(n+1,2,-1) - st(n,k)
+%o A103415 flatten([[T(n,k) for k in (0..n)] for n in (0..12)]) # _G. C. Greubel_, May 25 2021
+%Y A103415 Cf. A000129, A002203, A005409, A007318, A008288, A026937, A093328, A103416.
+%K A103415 nonn,tabl
+%O A103415 0,2
+%A A103415 Lambert Klasen (lambert.klasen(AT)gmx.net) and _Gary W. Adamson_, Feb 04 2005

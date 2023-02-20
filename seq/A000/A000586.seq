@@ -1,0 +1,48 @@
+%I A000586 M0022 N0004 N0039
+%S A000586 1,0,1,1,0,2,0,2,1,1,2,1,2,2,2,2,3,2,4,3,4,4,4,5,5,5,6,5,6,7,6,9,7,9,
+%T A000586 9,9,11,11,11,13,12,14,15,15,17,16,18,19,20,21,23,22,25,26,27,30,29,
+%U A000586 32,32,35,37,39,40,42,44,45,50,50,53,55,57,61,64,67,70,71,76,78,83,87,89,93,96
+%N A000586 Number of partitions of n into distinct primes.
+%D A000586 H. Gupta, Certain averages connected with partitions. Res. Bull. Panjab Univ. no. 124 1957 427-430.
+%D A000586 N. J. A. Sloane, A Handbook of Integer Sequences, Academic Press, 1973 (includes this sequence in two entries, N0004 and N0039).
+%D A000586 N. J. A. Sloane and Simon Plouffe, The Encyclopedia of Integer Sequences, Academic Press, 1995 (includes this sequence).
+%H A000586 Seiichi Manyama, <a href="/A000586/b000586.txt">Table of n, a(n) for n = 0..10000</a> (terms 0..1000 from T. D. Noe)
+%H A000586 Edray Herber Goins and Talitha M. Washington, <a href="https://arxiv.org/abs/0909.5459">On the generalized climbing stairs problem</a>, Ars Combin.  117  (2014), 183-190.  MR3243840 (Reviewed), arXiv:0909.5459 [math.CO], 2009.
+%H A000586 H. Gupta, <a href="http://www.insa.nic.in/writereaddata/UpLoadedFiles/PINSA/Vol21A_1955_3_Art09.pdf">Partitions into distinct primes</a>, Proc. Nat. Acad. Sci. India, 21 (1955), 185-187. [broken link]
+%H A000586 BongJu Kim, <a href="https://arxiv.org/abs/1803.08095">Partition number identities which are true for all set of parts</a>, arXiv:1803.08095 [math.CO], 2018.
+%H A000586 Vaclav Kotesovec, <a href="/A000586/a000586.jpg">Plot of log(a(n)) / log(Qas(n)) for n = 2..10^8</a>, for Qas see the formula (25) from the article by Murthy, Brack and Bhaduri, p. 7.
+%H A000586 M. V. N. Murthy, M. Brack, R. K. Bhaduri, <a href="https://arxiv.org/abs/1904.02776">On the asymptotic distinct prime partitions of integers</a>, arXiv:1904.02776 [math.NT], Mar 22 2019.
+%H A000586 K. F. Roth and G. Szekeres, <a href="https://doi.org/10.1093/qmath/5.1.241">Some asymptotic formulae in the theory of partitions</a>, Quart. J. Math., Oxford Ser. (2) 5 (1954), 241-259.
+%F A000586 G.f.: Product_{k>=1} (1+x^prime(k)).
+%F A000586 a(n) = A184171(n) + A184172(n). - _R. J. Mathar_, Jan 10 2011
+%F A000586 a(n) = Sum_{k=0..A024936(n)} A219180(n,k). - _Alois P. Heinz_, Nov 13 2012
+%F A000586 log(a(n)) ~ Pi*sqrt(2*n/(3*log(n))) [Roth and Szekeres, 1954]. - _Vaclav Kotesovec_, Sep 13 2018
+%e A000586 n=16 has a(16) = 3 partitions into distinct prime parts: 16 = 2+3+11 = 3+13 = 5+11.
+%p A000586 b:= proc(n, i) option remember; `if`(n=0, 1, `if`(i<1, 0,
+%p A000586       b(n, i-1)+`if`(ithprime(i)>n, 0, b(n-ithprime(i), i-1))))
+%p A000586     end:
+%p A000586 a:= n-> b(n, numtheory[pi](n)):
+%p A000586 seq(a(n), n=0..100);  # _Alois P. Heinz_, Nov 15 2012
+%t A000586 CoefficientList[Series[Product[(1+x^Prime[k]), {k, 24}], {x, 0, Prime[24]}], x]
+%t A000586 b[n_, i_] := b[n, i] = If[n == 0, 1, If[i < 1, 0, b[n, i-1] + If[Prime[i] > n, 0, b[n - Prime[i], i-1]]]]; a[n_] := b[n, PrimePi[n]]; Table[a[n], {n, 0, 100}] (* _Jean-François Alcover_, Apr 09 2014, after _Alois P. Heinz_ *)
+%t A000586 nmax = 100; pmax = PrimePi[nmax]; poly = ConstantArray[0, nmax + 1]; poly[[1]] = 1; poly[[2]] = 0; poly[[3]] = 1; Do[p = Prime[k]; Do[poly[[j]] += poly[[j - p]], {j, nmax + 1, p + 1, -1}];, {k, 2, pmax}]; poly (* _Vaclav Kotesovec_, Sep 20 2018 *)
+%o A000586 (Haskell)
+%o A000586 a000586 = p a000040_list where
+%o A000586    p _  0 = 1
+%o A000586    p (k:ks) m = if m < k then 0 else p ks (m - k) + p ks m
+%o A000586 -- _Reinhard Zumkeller_, Aug 05 2012
+%o A000586 (PARI) a(n,k=n)=if(n<1, !n, my(s);forprime(p=2,k,s+=a(n-p,p-1));s) \\ _Charles R Greathouse IV_, Nov 20 2012
+%o A000586 (Python)
+%o A000586 from sympy import isprime, primerange
+%o A000586 from functools import cache
+%o A000586 @cache
+%o A000586 def a(n, k=None):
+%o A000586     if k == None: k = n
+%o A000586     if n < 1: return int(n == 0)
+%o A000586     return sum(a(n-p, p-1) for p in primerange(1, k+1))
+%o A000586 print([a(n) for n in range(83)]) # _Michael S. Branicky_, Sep 03 2021 after _Charles R Greathouse IV_
+%Y A000586 Cf. A000041, A070215, A000607 (parts may repeat), A112022, A000009, A046675, A319264, A319267.
+%K A000586 nonn,nice,easy
+%O A000586 0,6
+%A A000586 _N. J. A. Sloane_
+%E A000586 Entry revised by _N. J. A. Sloane_, Jun 10 2012

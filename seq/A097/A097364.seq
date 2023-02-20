@@ -1,0 +1,53 @@
+%I A097364
+%S A097364 1,2,0,2,1,0,3,1,1,0,2,3,1,1,0,4,2,3,1,1,0,2,5,3,3,1,1,0,4,4,6,3,3,1,
+%T A097364 1,0,3,6,6,7,3,3,1,1,0,4,6,10,7,7,3,3,1,1,0,2,9,10,12,8,7,3,3,1,1,0,6,
+%U A097364 6,15,14,13,8,7,3,3,1,1,0,2,11,15,20,16,14,8,7,3,3,1,1,0,4,10,21,22,24,17
+%N A097364 Triangle read by rows, 0 <= k < n: T(n,k) = number of partitions of n such that the differences between greatest and smallest parts are k.
+%C A097364 Sum_{k=0..n-1} T(n,k) = A000041(n); T(n,0) + T(n,1) = n for n > 1;
+%C A097364 T(n,0) = A000005(n); T(n,1) = A049820(n) for n > 1;
+%C A097364 T(n,2) = floor((n-2)/2))*(floor((n-2)/2)) + 1)/2 = A000217(floor((n-2)/2))) = A008805(n-4) for n > 3.
+%C A097364 Without the 0's (which are of no consequence for the triangle) this sequence is A116685. - _Emeric Deutsch_, Feb 23 2006
+%H A097364 Reinhard Zumkeller, <a href="/A097364/b097364.txt">Rows n = 1..60 of triangle, flattened</a>
+%H A097364 G. E. Andrews, M. Beck and N. Robbins, <a href="http://arxiv.org/abs/1406.3374">Partitions with fixed differences between largest and smallest parts</a>, arXiv:1406.3374 [math.NT], 2014.
+%F A097364 G.f.: Sum_{i>=1} x^i/((1 - x^i)*Product_{j=1..i-1} (1 - t*x^j)). - _Emeric Deutsch_, Feb 23 2006
+%e A097364 Triangle starts:
+%e A097364 01:  1
+%e A097364 02:  2  0
+%e A097364 03:  2  1  0
+%e A097364 04:  3  1  1  0
+%e A097364 05:  2  3  1  1  0
+%e A097364 06:  4  2  3  1  1  0
+%e A097364 07:  2  5  3  3  1  1 0
+%e A097364 08:  4  4  6  3  3  1 1 0
+%e A097364 09:  3  6  6  7  3  3 1 1 0
+%e A097364 10:  4  6 10  7  7  3 3 1 1 0
+%e A097364 11:  2  9 10 12  8  7 3 3 1 1 0
+%e A097364 12:  6  6 15 14 13  8 7 3 3 1 1 0
+%e A097364 13:  2 11 15 20 16 14 8 7 3 3 1 1 0
+%e A097364 14:  4 10 21 22 24 17 ...
+%e A097364 - _Joerg Arndt_, Feb 22 2014
+%e A097364 T(8,0)=4: 8=4+4=2+2+2+2=1+1+1+1+1+1+1+1,
+%e A097364 T(8,1)=4: 3+3+2=2+2+2+1+1=2+2+1+1+1+1=2+1+1+1+1+1+1,
+%e A097364 T(8,2)=6: 5+3=4+2+2=3+3+1+1=3+2+2+1=3+2+1+1+1=3+1+1+1+1+1,
+%e A097364 T(8,3)=3: 4+3+1=4+2+1+1=4+1+1+1+1,
+%e A097364 T(8,4)=3: 6+2=5+2+1=5+1+1+1,
+%e A097364 T(8,5)=1: 6+1+1,
+%e A097364 T(8,6)=1: 7+1,
+%e A097364 T(8,7)=0;
+%e A097364 Sum_{k=0..7} T(8,k) = 4+4+6+3+3+1+1+0 = 22 = A000041(8).
+%p A097364 g:=sum(x^i/(1-x^i)/product(1-t*x^j,j=1..i-1),i=1..50): gser:=simplify(series(g,x=0,18)): for n from 1 to 15 do P[n]:=coeff(gser,x^n) od: 1; for n from 2 to 15 do seq(coeff(P[n],t,j),j=0..n-1) od;
+%p A097364 # yields sequence in triangular form # _Emeric Deutsch_, Feb 23 2006
+%t A097364 rows = 14; max = rows+2; col[k0_ /; k0 > 0] := col[k0] = Sum[x^(2*k + k0) / Product[(1-x^(k+j)), {j, 0, k0}], {k, 1, Ceiling[max/2]}] + O[x]^max // CoefficientList[#, x]&; col[0] := Table[Switch[n, 1, 0, 2, 1, _, n - 1 - col[1][[n]]], {n, 1, Length[col[1]]}]; Table[col[k][[n+2]], {n, 0, rows-1 }, {k, 0, n}] // Flatten (* _Jean-François Alcover_, Sep 10 2017, after _Alois P. Heinz_ *)
+%o A097364 (Haskell)
+%o A097364 a097364 n k = length [qs | qs <- pss !! n, last qs - head qs == k] where
+%o A097364    pss = [] : map parts [1..] where
+%o A097364          parts x = [x] : [i : ps | i <- [1..x],
+%o A097364                                    ps <- pss !! (x - i), i <= head ps]
+%o A097364 a097364_row n = map (a097364 n) [0..n-1]
+%o A097364 a097364_tabl = map a097364_row [1..]
+%o A097364 -- _Reinhard Zumkeller_, Feb 01 2013
+%Y A097364 Cf. A116685 (same sequence with zeros omitted).
+%Y A097364 Columns k=3..10 give A128508, A218567, A218568, A218569, A218570, A218571, A218572, A218573. T(2*n,n) = A117989(n). - _Alois P. Heinz_, Nov 02 2012
+%K A097364 nonn,tabl
+%O A097364 1,2
+%A A097364 _Reinhard Zumkeller_, Aug 09 2004

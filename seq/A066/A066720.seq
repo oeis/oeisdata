@@ -1,0 +1,57 @@
+%I A066720
+%S A066720 1,2,3,5,7,8,11,13,17,18,19,23,29,31,37,41,43,47,50,53,59,60,61,67,71,
+%T A066720 73,79,81,83,89,97,98,101,103,105,107,109,113,127,128,131,137,139,149,
+%U A066720 151,157,163,167,173,179,181,191,193,197,199,211,223,227,229,233,239
+%N A066720 The greedy rational packing sequence: a(1) = 1; for n > 1, a(n) is smallest number such that the ratios a(i)/a(j) for 1 <= i < j <= n are all distinct.
+%C A066720 Sequence was apparently invented by Jeromino Wannhoff - see the Rosenthal link.
+%C A066720 An equivalent definition: a(1) = 1, a(2) = 2 and thereafter a(n) is the smallest number such that all a(i)*a(j) are different. - Thanks to _Jean-Paul Delahaye_ for this comment. - _N. J. A. Sloane_, Oct 01 2020
+%C A066720 If you replace the word "ratio" with "difference" and start from 1 using the same greedy algorithm you get A005282. - Sharon Sela (sharonsela(AT)hotmail.com), Jan 15, 2002
+%C A066720 Taking a(n) as the smallest number such that the pairwise sums a(i)+a(j) (i<j) are all different gives A011185. - _Jean-Paul Delahaye_, Oct 02 2020. [This replaces an incorrect comment.]
+%C A066720 Does every rational number appear as a ratio? See A066657, A066658.
+%C A066720 Contains all primes. Differs from A066724 in that the latter forbids only the products of distinct terms. - _Ivan Neretin_, Mar 02 2016
+%H A066720 N. J. A. Sloane, <a href="/A066720/b066720.txt">Table of n, a(n) for n = 1..20000</a>
+%H A066720 David Applegate, <a href="/A066721/a066721.txt">First 48186 terms of A066721 and their factorizations</a> (implies first 8165063 terms of current sequence)
+%H A066720 Rainer Rosenthal, <a href="https://groups.google.com/forum/#!searchin/de.rec.denksport/%22%22/de.rec.denksport/6AHOtVMj1iI/nPNhu3mmWjEJ">Posting to de.rec.denksport, Jan 15 2002</a>
+%H A066720 Robert E. Sawyer, <a href="https://groups.google.com/forum/?hl=en#!searchin/sci.math/%22%22/sci.math/0SPZNahXf-Y/CCHVZrIeswIJ">Is there such a sequence?</a> Posting by r.e.s. to sci.math newsgroup, Jan 13, 2002
+%e A066720 After 5, 7 is the next member and not 6 as 6*1 = 2*3.
+%p A066720 A[1]:= 1:
+%p A066720 F:= {1}:
+%p A066720 for n from 2 to 100 do
+%p A066720 for k from A[n-1]+1 do
+%p A066720 Fk:= {k^2, seq(A[i]*k,i=1..n-1)};
+%p A066720 if Fk intersect F = {} then
+%p A066720 A[n]:= k;
+%p A066720 F:= F union Fk;
+%p A066720 break
+%p A066720 fi
+%p A066720 od
+%p A066720 od:
+%p A066720 seq(A[i],i=1..100); # _Robert Israel_, Mar 02 2016
+%t A066720 s={1}; xok := Module[{}, For[i=1, i<=n, i++, For[j=1; k=Length[dl=Divisors[s[[i]]x]], j<=k, j++; k--, If[MemberQ[s, dl[[j]]]&&MemberQ[s, dl[[k]]], Return[False]]]]; True]; For[n=1, True, n++, Print[s[[n]]]; For[x=s[[n]]+1, True, x++, If[xok, AppendTo[s, x]; Break[]]]] (* _Dean Hickerson_ *)
+%t A066720 a[1] = 1; a[n_] := a[n] = Block[{k = a[n - 1] + 1, b = c = Table[a[i], {i, 1, n - 1}], d}, While[c = Append[b, k]; Length[ Union[ Flatten[ Table[ c[[i]]/c[[j]], {i, 1, n}, {j, 1, n}]]]] != n^2 - n + 1, k++ ]; Return[k]]; Table[ a[n], {n, 1, 75} ] (* _Robert G. Wilson v_ *)
+%t A066720 nmax = 100; a[1] = 1; F = {1};
+%t A066720 For[n = 2, n <= nmax, n++,
+%t A066720 For[k = a[n-1]+1, True, k++, Fk = Join[{k^2}, Table[a[i]*k, {i, 1, n-1}]] // Union; If[Fk ~Intersection~ F == {}, a[n] = k; F = F ~Union~ Fk; Break[]
+%t A066720 ]]];
+%t A066720 Array[a, nmax] (* _Jean-François Alcover_, Mar 26 2019, after _Robert Israel_ *)
+%o A066720 (PARI) {a066720(m) = local(a,rat,n,s,new,b,i,k,j); a=[]; rat=Set([]); n=0; s=0; while(s<m,s++; new=Set([]); b=1; i=1; while(b&&i<=n,k=s/a[i]; if(setsearch(rat,k),b=0,new=setunion(new,Set(k)); k=a[i]/s; if(setsearch(rat,k),b=0,new=setunion(new,Set(k)))); i++); if(b,rat=setunion(rat,new); a=concat(a,s); n++; print1(s,",")))} a066720(240) \\ _Klaus Brockhaus_, Feb 23 2002
+%o A066720 (Haskell)
+%o A066720 import qualified Data.Set as Set (null)
+%o A066720 import Data.Set as Set (empty, insert, member)
+%o A066720 a066720 n = a066720_list !! (n-1)
+%o A066720 a066720_list = f [] 1 empty where
+%o A066720    f ps z s | Set.null s' = f ps (z + 1) s
+%o A066720             | otherwise   = z : f (z:ps) (z + 1) s'
+%o A066720      where s' = g (z:ps) s
+%o A066720            g []     s                      = s
+%o A066720            g (x:qs) s | (z * x) `member` s = empty
+%o A066720                       | otherwise          = g qs $ insert (z * x) s
+%o A066720 -- _Reinhard Zumkeller_, Nov 19 2013
+%Y A066720 Consists of the primes together with A066721.
+%Y A066720 Cf. A011185, A005282, A066724, A066775, A079850, A079852.
+%Y A066720 For the rationals that are produced see A066657/A066658 and A066848, A066849.
+%K A066720 nonn,nice
+%O A066720 1,2
+%A A066720 _N. J. A. Sloane_, Jan 15 2002
+%E A066720 More terms from _Dean Hickerson_, _Klaus Brockhaus_ and _David Applegate_, Jan 15 2002
+%E A066720 Entry revised by _N. J. A. Sloane_, Oct 01 2020.

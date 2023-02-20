@@ -1,0 +1,27 @@
+%I A106237
+%S A106237 1,1,0,1,1,0,2,1,0,0,3,3,0,0,0,6,5,1,0,0,0,11,11,2,0,0,0,0,23,20,5,0,
+%T A106237 0,0,0,0,47,46,11,0,0,0,0,0,0,106,93,26,2,0,0,0,0,0,0,235,216,58,3,0,
+%U A106237 0,0,0,0,0,0,551,467,139,12,0,0,0,0,0,0,0,0,1301,1121,307,29,0,0,0,0,0,0,0,0,0
+%N A106237 Triangle of the numbers of different forests with m trees having distinct orders.
+%C A106237 a(n) = 0 if and only if n < m + (((1+m)*m - 1)^2 -1)/8, where m is the number of trees in the forests counted by a(n).
+%H A106237 Alois P. Heinz, <a href="/A106237/b106237.txt">Rows n = 1..141, flattened</a>
+%F A106237 a(n) = sum over the partitions of N: 1K1 + 2K2 +  ... + NKN, with exactly m distinct parts, of Product_{i=1..N}binomial(A000055(i)+Ki-1, Ki). Because all the multiplicities of the parts of the considered partitions are 1, or 0, we can simplify the formula to a(n) = sum over the partitions of N with exactly m distinct parts, of Product_{i=1..N}A000055(i). (Naturally, we do not consider the parts with multiplicity 0.)
+%e A106237 a(3) = 0 because m = 2 and (see comments) 3 < (2 + 3).
+%e A106237 a(4) > 0 because m = 1. Note that (((1+m)*m - 1)^2 - 1)/8 = 0, if m = 1. It is clear that n >= m.
+%p A106237 with(numtheory):
+%p A106237 g:= proc(n) option remember; `if`(n<=1, n, (add(add(
+%p A106237       d*g(d), d=divisors(j))*g(n-j), j=1..n-1))/(n-1))
+%p A106237     end:
+%p A106237 h:= n-> `if`(n=0, 1, g(n) -(add(g(k) *g(n-k), k=0..n)
+%p A106237     -`if`(irem(n, 2)=0, g(n/2), 0))/2):
+%p A106237 b:= proc(n, i) option remember; `if`(n=0, 1, `if`(i<1, 0,
+%p A106237       expand(add(x^j*b(n-i*j, i-1)*binomial(h(i)+j-1, j),
+%p A106237       j=0..min(1, n/i)))))
+%p A106237     end:
+%p A106237 T:= n-> (p-> seq(coeff(p, x, i), i=1..n))(b(n$2)):
+%p A106237 seq(T(n), n=1..14);  # _Alois P. Heinz_, Jun 25 2014
+%t A106237 g[n_] := g[n] = If[n <= 1, n, Sum[Sum[d*g[d], {d, Divisors[j]}]*g[n-j], {j, 1, n-1}]/(n-1)]; h[n_] := If[n == 0, 1, g[n] - (Sum[g[k]*g[n-k], {k, 0, n}] - If[Mod[n, 2] == 0, g[n/2], 0])/2]; b[n_, i_] := b[n, i] = If[n == 0, 1, If[i<1, 0, Expand[ Sum[x^j*b[n-i*j, i-1]*Binomial[h[i]+j-1, j], {j, 0, Min[1, n/i]}]]]]; T[n_] := Function[{p}, Table[Coefficient[p, x, i], {i, 1, n}]][b[n, n]]; Table[T[n], {n, 1, 14}] // Flatten (* _Jean-François Alcover_, Jan 28 2015, after _Alois P. Heinz_ *)
+%Y A106237 Cf. A000055, A106236.
+%K A106237 nonn,tabl
+%O A106237 1,7
+%A A106237 _Washington Bomfim_, Apr 28 2005

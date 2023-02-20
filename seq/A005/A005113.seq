@@ -1,0 +1,30 @@
+%I A005113 M2057
+%S A005113 2,13,37,73,1021,2917,15013,49681,532801,1065601,8524807,68198461,
+%T A005113 545587687,1704961513,23869461181,288310406533
+%N A005113 Smallest prime in class n (sometimes written n+) according to the Erdős-Selfridge classification of primes.
+%C A005113 A prime p is in class 1 if (p+1)'s largest prime factor is 2 or 3. If (p+1) has other prime factors, p's class is one more than the largest class of its prime factors. See also A005105.
+%C A005113 _John W. Layman_ observes that for n=10..13, the ratios r(n)= a(n)/a(n-1) are increasingly close to an integer, being 1.9999981, 7.99999906, 8.00000059 and 7.999999985.
+%C A005113 Layman's observation is a consequence of a(n+1) = m*a(n)-1 for (n,m)=(1,7),(3,2),(4,14),(9,2),(10,8),(12,8),(14,14), while a(12) = 8 a(11)+5 is a coincidence which does not fit into that scheme. This relationship is not unusual since any N+ prime p is by definition such that p+1 = m*q where q is a (N-1)+ prime and m = (p+1)/q must be even since p,q are odd (except for q=2, allowing the odd m=7 for n=1 above) and the least N+ prime has good chances of having q equal to the least (N-1)+ prime. - _M. F. Hasler_, Apr 09 2007
+%C A005113 a(n+1) >= 2*a(n)-1 since a(n+1)+1 = p*q with p of class n+ (thus >= a(n) and odd) and thus q >= 2 (even and positive). a(n+1) <= min { p = 2*k*a(n)-1 | k=1,2,3,... such that p is prime }. - _M. F. Hasler_, Apr 02 2007
+%C A005113 a(17) <= 1833174628057, with equality if 916587314029 is the 10th 16+ prime; a(18) <= 3666349256113, with equality if a(17) = 1833174628057; a(19) <= 65994286610033, with equality if 41431295033731 is the third 18+ prime; a(20) <= 764276710625653, with equality if 382138355312827 is the third 19+ prime. - _M. F. Hasler_, Apr 09 2007
+%D A005113 R. K. Guy, Unsolved Problems in Number Theory, A18.
+%D A005113 N. J. A. Sloane and Simon Plouffe, The Encyclopedia of Integer Sequences, Academic Press, 1995 (includes this sequence).
+%e A005113 1553 is in class 4 because 1553+1 = 2*3*7*37; 7 is in class 1 and 37 is in class 3. 37 is in class 3 because 37+1 = 2*19 and 19 is in class 2. 19 is in class 2 because 19+1 = 2*2*5 and 5 is in class 1. 5 is in class 1 because 5+1=2*3.
+%t A005113 PrimeFactors[n_Integer] := Flatten[ Table[ #[[1]], {1}] & /@ FactorInteger[n]]; NextPrime[n_] := Block[{k = n + 1}, While[ !PrimeQ[k], k++ ]; k]; f[n_Integer] := Block[{m = n}, If[m == 0, m = 1, While[ IntegerQ[m/2], m /= 2]; While[ IntegerQ[m/3], m /= 3]]; Apply[Times, PrimeFactors[m] + 1]]; ClassPlusNbr[n_] := Length[ NestWhileList[f, n, UnsameQ, All]] - 3; a = Table[0, {15}]; a[[1]] = 2; k = 5; Do[c = ClassPlusNbr[ k]; If[ a[[c]] == 0, a[[c]] = k]; k = NextPrime[k], {n, 1, 28700000}]; a
+%o A005113 (PARI) checkclass(n,p)={ n=factor(n+1)[,1]; n[#n] <= 3 && return(1); (#p <= 1 || n[#n] < p[#p]) && return(2); n[1]=p[#p]; p=vecextract(p,"^-1"); forstep( i=#n,2,-1, n[i] < n[1] && break; checkclass(n[i],p) > #p && return(2+#p)) }
+%o A005113 A005113(n,p,a=[])={ while( #a<n, until( checkclass(p,a) > #a, p=nextprime(p+1)); a=concat(a,p); p=a[#a]*2-2); a } \\ A005113(11) takes < 10 sec @ 2 GHz in 2007; less than 2.5 sec @ 2 GHz in 2013. \\ _M. F. Hasler_, Apr 02 2007
+%o A005113 (PARI) class(n, s=+1 /* for n+ class; -1 for n- class */)={ isprime(n) || return; (( n=factor(n+s)[,1] ) && n[ #n]>3 ) || return(1); vecsort( vector( #n,i,class( n[i],s )))[#n]+1 }
+%o A005113 someofnextclass( a, limit=0, s=0, b=[], p)={ if(!s,/* guess + or - */ s=( class(a[1]) && class(a[1])==class(a[2]) )*2-1 ); print("looking for primes of class ", 1+class( a[1], s), ["+","-"][1+(s<0)] ); for( i=1,#a, p=-s; until( p>=limit, until( isprime(p), p+=a[i]<<1 ); b=concat(b,p); if( !limit, limit=p)) ); vecsort(b) };
+%o A005113 c=A090468; for(i=15,20,c=someofnextclass(c,9e12);print("least prime of class ",i,"+ is <= ",c[1])) \\  _M. F. Hasler_, Apr 09 2007
+%Y A005113 Cf. A056637, A005105, A005106, A005107, A005108, A019268.
+%Y A005113 Cf. A081633 - A081639, A084071, A090468, A129474, A129475, A129469.
+%K A005113 more,nonn
+%O A005113 1,1
+%A A005113 _N. J. A. Sloane_
+%E A005113 Extended through a(12) by _Robert G. Wilson v_
+%E A005113 a(13) from _John W. Layman_
+%E A005113 a(14) from _Don Reble_, Apr 11 2003
+%E A005113 a(15) from Sam Handler (sam_5_5_5_0(AT)yahoo.com), Aug 17 2006
+%E A005113 a(7) corrected by _Tomás Oliveira e Silva_, Oct 27 2006
+%E A005113 a(16) calculated using A129475(n) up to n=19 by _M. F. Hasler_, Apr 16 2007
+%E A005113 Edited by _Max Alekseyev_, Aug 17 2013

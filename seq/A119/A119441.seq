@@ -1,0 +1,74 @@
+%I A119441
+%S A119441 1,2,1,3,2,1,5,3,4,2,1,7,5,6,3,4,2,1,11,7,10,9,5,6,8,3,4,2,1,15,11,14,
+%T A119441 15,7,10,9,12,5,6,8,3,4,2,1,22,15,22,21,25,11,14,15,20,18,7,10,9,12,
+%U A119441 16,5,6,8,3,4,2,1,30,22,30,33,35,15,22,21
+%N A119441 Distribution of A063834 in Abramowitz and Stegun order.
+%H A119441 M. Abramowitz and I. A. Stegun, eds., <a href="http://www.convertit.com/Go/ConvertIt/Reference/AMS55.ASP?Page=831">Handbook of Mathematical Functions</a>, National Bureau of Standards, Applied Math. Series 55, Tenth Printing, 1972 [alternative scanned copy].
+%F A119441 T(n,k) = product_{p=1..A036043(n,k)} A000041(c), 1<=k<=A000041(n), where c are the parts in the k-th partition of n. - _R. J. Mathar_, Jul 12 2013
+%e A119441 1;
+%e A119441 2, 1;
+%e A119441 3, 2, 1;
+%e A119441 5, 3, 4, 2, 1;
+%e A119441 7, 5, 6, 3, 4, 2, 1;
+%e A119441 T(5,2) = 5 because the second partition of 5 is 1+4 and 4 can be repartitioned in 5 different ways.
+%e A119441 T(5,3) = 6 because the third partition of 5 is 2+3, where the 2 can be partitioned in 2 ways (2, 1+1) and the 3 can be partitioned in 3 ways (3, 1+2, 1+1+1), 6=2*3.
+%e A119441 T(5,4) = 3 because the fourth partition of 5 is 1+1+3 and 3 can be partitioned in 3 different ways.
+%p A119441 # Compare two partitions (list) in AS order.
+%p A119441 AScompare := proc(p1,p2)
+%p A119441     if nops(p1) > nops(p2) then
+%p A119441         return 1;
+%p A119441     elif nops(p1) < nops(p2) then
+%p A119441         return -1;
+%p A119441     else
+%p A119441         for i from 1 to nops(p1) do
+%p A119441             if op(i,p1) > op(i,p2) then
+%p A119441                 return 1;
+%p A119441             elif op(i,p1) < op(i,p2) then
+%p A119441                 return -1;
+%p A119441             end if;
+%p A119441         end do:
+%p A119441         return 0 ;
+%p A119441     end if;
+%p A119441 end proc:
+%p A119441 # Produce list of partitions in AS order
+%p A119441 ASPrts := proc(n)
+%p A119441     local pi,insrt,p,ex ;
+%p A119441     pi := [] ;
+%p A119441     for p in combinat[partition](n) do
+%p A119441         insrt := 0 ;
+%p A119441         for ex from 1 to nops(pi) do
+%p A119441             if AScompare(p, op(ex,pi)) > 0 then
+%p A119441                 insrt := ex ;
+%p A119441             end if;
+%p A119441         end do:
+%p A119441         if nops(pi) = 0 then
+%p A119441             pi := [p] ;
+%p A119441         elif insrt = 0 then
+%p A119441             pi := [p,op(pi)] ;
+%p A119441         elif insrt = nops(pi) then
+%p A119441             pi := [op(pi),p] ;
+%p A119441         else
+%p A119441             pi := [op(1..insrt,pi),p,op(insrt+1..nops(pi),pi)] ;
+%p A119441         end if;
+%p A119441     end do:
+%p A119441     return pi ;
+%p A119441 end proc:
+%p A119441 A119441 := proc(n,k)
+%p A119441     local pi,a,p ;
+%p A119441     pi := ASPrts(n)[k] ;
+%p A119441     a := 1 ;
+%p A119441     for p in pi do
+%p A119441         a := a*combinat[numbpart](p) ;
+%p A119441     end do:
+%p A119441     a ;
+%p A119441 end proc:
+%p A119441 for n from 1 to 10 do
+%p A119441     for k from 1 to A000041(n) do
+%p A119441         printf("%d,",A119441(n,k)) ;
+%p A119441     end do:
+%p A119441     printf("\n") ;
+%p A119441 end do: # _R. J. Mathar_, Jul 12 2013
+%Y A119441 Cf. A063834, A119442, A000041 (row lengths and also first column)
+%K A119441 easy,nonn,tabf
+%O A119441 1,2
+%A A119441 _Alford Arnold_, May 19 2006

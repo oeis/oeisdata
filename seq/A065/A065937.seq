@@ -1,0 +1,36 @@
+%I A065937
+%S A065937 0,0,0,5,5,0,0,0,2,2,0,5,5,0,0,2,3,0,3,3,0,3,2,0,2,2,0,5,5,0,0,5,13,
+%T A065937 17,2,17,37,5,13,13,5,37,17,2,17,13,5,2,3,0,3,3,0,3,2,0,2,2,0,5,5,0,0,
+%U A065937 3,17,3,37,21,13,10,37,3,401,6,13,10,401,0,17,17,0,401,10,13,6,401,3,37
+%N A065937 a(n) is the integer (reduced squarefree) under the square root obtained when the inverse of Minkowski's question mark function is applied to the n-th ratio A007305(n+1)/A047679(n-1) in the full Stern-Brocot tree and zero when it results a rational value.
+%C A065937 Note: the underlying function N2Q (see the Maple code) maps natural numbers 1, 2, 3, 4, 5, ..., through all the positive rationals 1/1, 1/2, 2/1, 1/3, 2/3, 3/2, 3/1, 1/4, ... bijectively to the union of positive rationals and quadratic surds.
+%C A065937 In his "On Numbers and Games", Conway denotes Minkowski's question mark function with x enclosed in a box.
+%D A065937 J. H. Conway, On Numbers and Games, 2nd ed. Natick, MA: A. K. Peters, pp. 82-86 (First ed.), 2000.
+%H A065937 Robert Hill, <a href="http://groups.google.com/groups?hl=en&amp;selm=1998Jan30.190735.12371%40leeds.ac.uk">An article in sci.math newsgroup</a>
+%H A065937 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/MinkowskisQuestionMarkFunction.html">Minkowski's Question Mark Function.</a>
+%H A065937 Wikipedia, <a href="http://en.wikipedia.org/wiki/Minkowski%27s_question_mark_function">Minkowski's question mark function</a>
+%H A065937 <a href="/index/Me#MinkowskiQ">Index entries for sequences related to Minkowski's question mark function</a>
+%H A065937 <a href="/index/St#Stern">Index entries for sequences related to Stern's sequences</a>
+%e A065937 The first few values for this mapping are
+%e A065937   N2Q(1)  = Inverse_of_MinkowskisQMark(1)   = 1,
+%e A065937   N2Q(2)  = Inverse_of_MinkowskisQMark(1/2) = 1/2,
+%e A065937   N2Q(3)  = Inverse_of_MinkowskisQMark(2)   = 2,
+%e A065937   N2Q(4)  = Inverse_of_MinkowskisQMark(1/3) = (3-sqrt(5))/2,
+%e A065937   N2Q(5)  = Inverse_of_MinkowskisQMark(2/3) = (sqrt(5)-1)/2,
+%e A065937   N2Q(6)  = Inverse_of_MinkowskisQMark(3/2) = 3/2,
+%e A065937   N2Q(7)  = Inverse_of_MinkowskisQMark(3)   = 3,
+%e A065937   N2Q(8)  = Inverse_of_MinkowskisQMark(1/4) = 1/3,
+%e A065937   N2Q(9)  = Inverse_of_MinkowskisQMark(2/5) = sqrt(2)-1,
+%e A065937   N2Q(10) = Inverse_of_MinkowskisQMark(3/5) = 2-sqrt(2).
+%p A065937 [seq(find_sqrt(N2Q(j)),j=1..512)];
+%p A065937 N2Q := n -> Inverse_of_MinkowskisQMark(A007305(m+1)/A047679(m-1));
+%p A065937 Inverse_of_MinkowskisQMark := proc(r) local x,y,b,d,k,s,i,q; x := numer(r); y := denom(r); if(1 = y) then RETURN(x/y); fi; if(2 = y) then RETURN(x/y); fi; b := []; d := []; k := 0; s := 0; i := 0; while(x <> 0) do q := floor(x/y); if(i > 0) then b := [op(b),q]; d := [op(d),x]; fi; x := 2*(x-(q*y)); if(member(x,d,'k') and (k > 1) and (b[k] <> b[k-1]) and (q <> floor(x/y))) then s := eval_periodic_confrac_tail(list2runcounts(b[k..nops(b)])); b := b[1..(k-1)]; break; fi; i := i+1; od; if(0 = k) then b := b[1..(nops(b)-1)]; b := [op(b),b[nops(b)]]; fi; RETURN(factor(eval_confrac([floor(r),op(list2runcounts([0,op(b)]))],s))); end;
+%p A065937 eval_confrac := proc(c,z) local x,i; x := z; for i in reverse(c) do x := (`if`((0=x),x,(1/x)))+i; od; RETURN(x); end;
+%p A065937 eval_periodic_confrac_tail := proc(c) local x,i,u,r; x := (eval_confrac(c,u) - u) = 0; r := [solve(x,u)]; RETURN(max(r[1],r[2])); end; # Note: I am not sure if the larger root is always the correct one for the inverse of Minkowski's question mark function. However, whichever root we take, it does not change this sequence, as the integer under the square root is same in both cases. - _Antti Karttunen_, Aug 26 2006
+%p A065937 list2runcounts := proc(b) local a,p,y,c; if(0 = nops(b)) then RETURN([]); fi; a := []; c := 0; p := b[1]; for y in b do if(y <> p) then a := [op(a),c]; c := 0; p := y; fi; c := c+1; od; RETURN([op(a),c]); end;
+%p A065937 find_sqrt := proc(x) local n,i,y; n := nops(x); if(n < 2) then RETURN(0); fi; if((2 = n) and (`^` = op(0,x)) and (1/2 = op(2,x))) then RETURN(op(1,x)); else for i from 0 to n do y := find_sqrt(op(i,x)); if(y <> 0) then RETURN(y); fi; od; RETURN(0); fi; end; # This returns an integer under the square-root expression in Maple.
+%Y A065937 a(n) = A065936(A065935(n)). Positions of sqrt(n) in this mapping: A065939.
+%K A065937 nonn
+%O A065937 1,4
+%A A065937 _Antti Karttunen_, Dec 07 2001
+%E A065937 Description clarified by _Antti Karttunen_, Aug 26 2006

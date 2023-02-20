@@ -1,0 +1,59 @@
+%I A131514
+%S A131514 1,1,1,15,1,71,1,280,15,71,1,3660,1,71,71,5775,1,3660,1,3660,71,71,1,
+%T A131514 160440,15,71,280,3660,1,20365,1,126126,71,71,71,415185,1,71,71,
+%U A131514 160440,1,20365,1,3660,3660,71,1,6387150,15,3660,71,3660,1,160440,71,160440
+%N A131514 Number of ways to design a set of three n-sided dice (using nonnegative integers) such that summing the faces can give any integer from 0 to n^3 - 1.
+%C A131514 Also the number of ways to factor (x^(n^3)-1)/(x-1) into p(x)*q(x)*r(x), such that p(x),q(x),r(x) are polynomials with exactly n terms and all coefficients +1 (and all exponents nonnegative). (Krasner and Ranulac, 1937)
+%C A131514 a(n) depends only on the prime signature of n. Hence a(n) will be 1 for all primes, 15 for all squares of primes, 71 for all products of distinct primes, and so on. - _William P. Orrick_, Jan 26 2023
+%H A131514 William P. Orrick, <a href="/A131514/b131514.txt">Table of n, a(n) for n = 1..10000</a>
+%H A131514 M. Krasner and B. Ranulac, <a href="https://gallica.bnf.fr/ark:/12148/bpt6k31562/f397.item">Sur une propriété des polynomes de la division du cercle</a>, Comptes Rendus Académie des Sciences Paris, 240:397-399, 1937.
+%H A131514 Matthew C. Lettington and Karl Michael Schmidt, <a href="https://arxiv.org/abs/1910.02455">Divisor Functions and the Number of Sum Systems</a>, arXiv:1910.02455 [math.NT], 2019.
+%F A131514 Recurrence: a(1) = 1. For n > 1, a(n) = r(n,n,n) / 2 where r(i,1,1) = g(1,j,1) = b(1,1,k) = 1 for all i, j, k > 1, r(i,j,k) = Sum_{d|i,d<i} (g(d,j,k) + b(d,j,k)) for j, k not both 1, g(i,j,k) = Sum_{d|j,d<j} (r(i,d,k) + b(i,d,k)) for i, k not both 1, and b(i,j,k) = Sum_{d|k,d<k} (r(i,j,d) + g(i,j,d)) for i, j not both 1. - _William P. Orrick_, Jan 26 2023
+%e A131514 a(4)=15 because we can choose any of the following 15 configurations for our three dice:
+%e A131514   [ {0, 1,  2,  3}, {0, 4,  8, 12}, {0, 16, 32, 48} ],
+%e A131514   [ {0, 1,  2,  3}, {0, 4, 16, 20}, {0,  8, 32, 40} ],
+%e A131514   [ {0, 1,  2,  3}, {0, 4, 32, 36}, {0,  8, 16, 24} ],
+%e A131514   [ {0, 1,  4,  5}, {0, 2,  8, 10}, {0, 16, 32, 48} ],
+%e A131514   [ {0, 1,  4,  5}, {0, 2, 16, 18}, {0,  8, 32, 40} ],
+%e A131514   [ {0, 1,  4,  5}, {0, 2, 32, 34}, {0,  8, 16, 24} ],
+%e A131514   [ {0, 1,  8,  9}, {0, 2,  4,  6}, {0, 16, 32, 48} ],
+%e A131514   [ {0, 1,  8,  9}, {0, 2, 16, 18}, {0,  4, 32, 36} ],
+%e A131514   [ {0, 1,  8,  9}, {0, 2, 32, 34}, {0,  4, 16, 20} ],
+%e A131514   [ {0, 1, 16, 17}, {0, 2,  4,  6}, {0,  8, 32, 40} ],
+%e A131514   [ {0, 1, 16, 17}, {0, 2,  8, 10}, {0,  4, 32, 36} ],
+%e A131514   [ {0, 1, 16, 17}, {0, 2, 32, 34}, {0,  4,  8, 12} ],
+%e A131514   [ {0, 1, 32, 33}, {0, 2,  4,  6}, {0,  8, 16, 24} ],
+%e A131514   [ {0, 1, 32, 33}, {0, 2,  8, 10}, {0,  4, 16, 20} ],
+%e A131514   [ {0, 1, 32, 33}, {0, 2, 16, 18}, {0,  4,  8, 12} ].
+%o A131514 (SageMath)
+%o A131514 @cached_function
+%o A131514 def R3(i,j,k):
+%o A131514     if i > 1 and j==1 and k==1:
+%o A131514         return(1)
+%o A131514     elif j > 1 or k > 1:
+%o A131514         divList = divisors(i)[:-1]
+%o A131514         return(sum(G3(d,j,k) for d in divList) + sum(B3(d,j,k) for d in divList))
+%o A131514 @cached_function
+%o A131514 def G3(i,j,k):
+%o A131514     if i==1 and j > 1 and k==1:
+%o A131514         return(1)
+%o A131514     elif i > 1 or k > 1:
+%o A131514         divList = divisors(j)[:-1]
+%o A131514         return(sum(R3(i,d,k) for d in divList) + sum(B3(i,d,k) for d in divList))
+%o A131514 @cached_function
+%o A131514 def B3(i,j,k):
+%o A131514     if i==1 and j==1 and k > 1:
+%o A131514         return(1)
+%o A131514     elif i > 1 or j > 1:
+%o A131514         divList = divisors(k)[:-1]
+%o A131514         return(sum(R3(i,j,d) for d in divList) + sum(G3(i,j,d) for d in divList))
+%o A131514 def a3(n):
+%o A131514     if n == 1:
+%o A131514         return(1)
+%o A131514     else:
+%o A131514         return(R3(n,n,n) / 2) # _William P. Orrick_, Jan 26 2023
+%Y A131514 Cf. A273013, A002119.
+%K A131514 nonn,changed
+%O A131514 1,4
+%A A131514 H.B. Wassenaar (towr(AT)ai.rug.nl), Aug 14 2007
+%E A131514 Terms a(16) and beyond from _William P. Orrick_, Jan 26 2023

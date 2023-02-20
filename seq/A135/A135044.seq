@@ -1,0 +1,74 @@
+%I A135044
+%S A135044 1,4,9,2,16,7,6,13,3,19,26,17,8,23,41,5,12,67,10,29,59,37,14,83,179,
+%T A135044 11,43,331,20,47,39,109,277,157,53,431,22,1063,31,191,15,2221,27,61,
+%U A135044 211,71,30,599,1787,919,241,3001,35,73,8527,127,1153,79,21,19577,44,89,283
+%N A135044 a(1)=1, then a(c) = p and a(p) = c, where c = T_c(r,k) and p = T_p(r,k), and where T_p contains the primes arranged in rows by the prime index chain and T_c contains the composites arranged in rows by the order of compositeness. See Formula.
+%C A135044 Exchanges primes with composites, primeth primes with composith composites, etc.
+%C A135044 Exchange the k-th prime of order j with the k-th composite of order j and vice versa.
+%C A135044 Self-inverse permutation of positive integers.
+%C A135044 If n is the composite number A236536(r,k), then a(n) is the corresponding prime A236542(r,k) at the same position (r,k). Vice versa, if n is the prime A236542(r,k), then a(n) is the corresponding composite A236536(r,k) at the same position. - _Andrew Weimholt_, Jan 28 2014
+%C A135044 The original name for this entry did not produce this sequence, but instead A236854, which differs from this permutation for the first time at n=8, where A236854(8)=23, while here a(8)=13. - _Antti Karttunen_, Feb 01 2014
+%H A135044 R. J. Mathar, <a href="/A135044/b135044.txt">Table of n, a(n) for n = 1..197</a>
+%H A135044 N. Fernandez, <a href="http://www.borve.org/primeness/FOP.html">An order of primeness, F(p)</a>.
+%H A135044 N. Fernandez, <a href="/A006450/a006450.html">An order of primeness</a> [cached copy, included with permission of the author]
+%H A135044 <a href="/index/Per#IntegerPermutation">Index to permutations of positive integers</a>
+%F A135044 a(1)=1, a(A236536(r,k))=A236542(r,k), a(A236542(r,k))=A236536(r,k)
+%e A135044 From _Andrew Weimholt_, Jan 29 2014: (Start)
+%e A135044 More generally, takes the primes organized in an array according to the sieving process described in the Fernandez paper:
+%e A135044         Row[1](n) = 2, 7, 13, 19, 23, ...
+%e A135044         Row[2](n) = 3, 17, 41, 67, 83, ...
+%e A135044         Row[3](n) = 5, 59, 179, ...
+%e A135044         Row[4](n) = 11, 277, ...
+%e A135044         Lets call this  T_p (n, k)
+%e A135044 Also take the composites organized in a similar manner, except we use "composite" numbered positions in our sieve:
+%e A135044         Row[1](n) = 4, 6, 8, 10, 14, 20, 22, ...
+%e A135044         Row[2](n) = 9, 12, 15, 18, 24, ...
+%e A135044         Row[3](n) = 16, 21, 25, ...
+%e A135044         Lets call this T_c (n, k)
+%e A135044 If we now take the natural numbers and swap each number (except for 1) with the number which holds the same spot in the other array, then we get the sequence: 1, 4, 9, 2, 16, 7, 6, 13, with for example a(8) = 13 (13 holds the same position in the 'prime' table as 8 does in the 'composite' table). (End)
+%p A135044 A135044 := proc(n)
+%p A135044     if n = 1 then
+%p A135044         1;
+%p A135044     elif isprime(n) then
+%p A135044         idx := -1 ;
+%p A135044         for r from 1 do
+%p A135044             for c from 1 do
+%p A135044                 if A236542(r,c) = n then
+%p A135044                     idx := [r,c] ;
+%p A135044                 end if;
+%p A135044                 if A236542(r,c) >= n then
+%p A135044                     break;
+%p A135044                 end if;
+%p A135044             end do:
+%p A135044             if type(idx,list)  then
+%p A135044                 break;
+%p A135044             end if;
+%p A135044         end do:
+%p A135044         A236536(r,c) ;
+%p A135044     else
+%p A135044         idx := -1 ;
+%p A135044         for r from 1 do
+%p A135044             for c from 1 do
+%p A135044                 if A236536(r,c) = n then
+%p A135044                     idx := [r,c] ;
+%p A135044                 end if;
+%p A135044                 if A236536(r,c) >= n then
+%p A135044                     break;
+%p A135044                 end if;
+%p A135044             end do:
+%p A135044             if type(idx,list)  then
+%p A135044                 break;
+%p A135044             end if;
+%p A135044         end do:
+%p A135044         A236542(r,c) ;
+%p A135044     end if;
+%p A135044 end proc: # _R. J. Mathar_, Jan 28 2014
+%t A135044 Composite[n_Integer] := Block[{k = n + PrimePi@n + 1}, While[k != n + PrimePi@k + 1, k++ ]; k]; Compositeness[n_] := Block[{c = 1, k = n}, While[ !(PrimeQ@k || k == 1), k = k - 1 - PrimePi@k; c++ ]; c]; Primeness[n_] := Block[{c = 1, k = n}, While[ PrimeQ@k, k = PrimePi@k; c++ ]; c];
+%t A135044 ckj[k_, j_] := Select[ Table[Composite@n, {n, 10000}], Compositeness@# == j &][[k]]; pkj[k_, j_] := Select[ Table[Prime@n, {n, 3000}], Primeness@# == j &][[k]]; f[0]=0; f[1] = 1;
+%t A135044 f[n_] := If[ PrimeQ@ n, pn = Primeness@n; ckj[ Position[ Select[ Table[ Prime@ i, {i, 150}], Primeness@ # == pn &], n][[1, 1]], pn], cn = Compositeness@n; pkj[ Position[ Select[ Table[ Composite@ i, {i, 500}], Compositeness@ # == cn &], n][[1, 1]], cn]]; Array[f, 64] (* _Robert G. Wilson v_ *)
+%Y A135044 Cf. A000040, A007097, A049076, A049078 - A049081, A058322, A058324 - A058328, A093046, A002808, A006508, A059981, A078442, A236854.
+%K A135044 nonn
+%O A135044 1,2
+%A A135044 _Katarzyna Matylla_, Feb 11 2008
+%E A135044 Edited, corrected and extended by _Robert G. Wilson v_, Feb 18 2008
+%E A135044 Name corrected by _Andrew Weimholt_, Jan 29 2014

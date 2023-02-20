@@ -1,0 +1,40 @@
+%I A121331
+%S A121331 1,2,6,15,39,99,258,671,1762,4657,12372,33036,88590,238483,644045,
+%T A121331 1744542,4737341,12894158,35165994,96083192,262951511,720685274,
+%U A121331 1977846334,5434588909,14949284828,41163690109,113451949753,312955174089,863965424349,2386874582238
+%N A121331 Number of bridged bicyclic skeletons with n carbon atoms (see Parks et al. for precise definition).
+%C A121331 Equivalently, the number of connected graphs on n unlabeled nodes with exactly 2 cycles of the same even length joined along half their length and all nodes having degree at most 4. The resulting graph will have three equal length cycles. - _Andrew Howroyd_, May 25 2018
+%H A121331 Andrew Howroyd, <a href="/A121331/b121331.txt">Table of n, a(n) for n = 5..200</a>
+%H A121331 Camden A. Parks and James B. Hendrickson, <a href="https://doi.org/10.1021/ci00002a021">Enumeration of monocyclic and bicyclic carbon skeletons</a>, J. Chem. Inf. Comput. Sci., vol. 31, 334-339 (1991).
+%F A121331 a(n) ~ c * d^n / sqrt(n), where d = 1/A261340 = 2.815460033176150746526616778..., c = 0.0064202170754... . - _Vaclav Kotesovec_, Sep 08 2019
+%e A121331 From _Andrew Howroyd_, May 25 2018: (Start)
+%e A121331 Illustration of graphs for n=5 and n=6:
+%e A121331     o          o--o       o
+%e A121331    /|\        /|\        /|\
+%e A121331   o o o      o o o      o o o--o
+%e A121331    \|/        \|/        \|/
+%e A121331     o          o          o
+%e A121331 .
+%e A121331 Illustration of graphs for n=7:
+%e A121331     o--o      o--o--o   o--o        o        o          o   o
+%e A121331    /|\       /|\       /|\         /|\      /|\        /|\ /
+%e A121331   o o o     o o o     o o o--o    o o o    o o o--o   o o o
+%e A121331    \|/       \|/       \|/       / \|/ \    \|/   |    \|/ \
+%e A121331     o--o      o         o       o   o   o    o    o     o   o
+%e A121331 (End)
+%t A121331 G[n_] := Module[{g}, g[_] = 0; Do[g[x_] = 1 + x*(g[x]^3/6 + g[x^2]*g[x]/2 + g[x^3]/3) + O[x]^n // Normal, {n}]; g[x]];
+%t A121331 C1[n_] := Sum[(d1^(3*k)+3*d1^k*d2^k + 2*d3^k), {k, 1, Quotient[n, 3]}]/12;
+%t A121331 C2[n_] := Sum[(d1^Mod[k, 2]*d2^Quotient[k, 2])^3 + 3*d1^Mod[k, 2]* d2^(Quotient[k, 2] + k) + 2*d3^Mod[k, 2]*d6^Quotient[k, 2], {k, 1, Quotient[n, 3]}]/12;
+%t A121331 seq[n_] := Module[{s, d, g}, s = G[n]; d = x*(s^2 + (s /. x -> x^2))/2; g[p_, e_] := Normal[(p+O[x]^(Quotient[n, e]+1))] /. x :> x^e; g[s, 1]^2* (C1[n-2] /. Thread[{d1, d2, d3} :> {g[d, 1], g[d, 2], g[d, 3]}]) + g[s, 2]*(C2[n-2] /. Thread[{d1, d2, d3, d6} :> {g[d, 1], g[d, 2], g[d, 3], g[d, 6]}]) + O[x]^n] // CoefficientList[#, x]& // Drop[#, 3]&;
+%t A121331 seq[33] (* _Jean-François Alcover_, Sep 08 2019, after _Andrew Howroyd_ *)
+%o A121331 (PARI) \\ here G is A000598 as series
+%o A121331 G(n)={my(g=O(x)); for(n=1, n, g = 1 + x*(g^3/6 + subst(g, x, x^2)*g/2 + subst(g, x, x^3)/3) + O(x^n)); g}
+%o A121331 C1(n)={sum(k=1, n\3, (d1^(3*k) + 3*d1^k*d2^k + 2*d3^k))/12}
+%o A121331 C2(n)={sum(k=1, n\3, (d1^(k%2)*d2^(k\2))^3 + 3*d1^(k%2)*d2^(k\2+k) + 2*d3^(k%2)*d6^(k\2))/12}
+%o A121331 seq(n)={my(s=G(n)); my(d=x*(s^2+subst(s, x, x^2))/2); my(g(p,e)=subst(p + O(x*x^(n\e)), x, x^e)); Vec(O(x^n/x) + g(s,1)^2*substvec(C1(n-2),[d1,d2,d3],[g(d,1), g(d,2), g(d,3)]) + g(s,2)*substvec(C2(n-2), [d1,d2,d3,d6], [g(d,1), g(d,2), g(d,3), g(d,6)]))} \\ _Andrew Howroyd_, May 25 2018
+%Y A121331 Cf. A121158, A121162, A121165, A305132.
+%K A121331 nonn
+%O A121331 5,2
+%A A121331 _N. J. A. Sloane_, Aug 27 2006
+%E A121331 Corrected by _Franklin T. Adams-Watters_ and _T. D. Noe_, Oct 25 2006
+%E A121331 a(24) corrected and terms a(26) and beyond from _Andrew Howroyd_, May 25 2018

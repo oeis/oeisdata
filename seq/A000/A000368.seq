@@ -1,0 +1,45 @@
+%I A000368 M3365 N1356
+%S A000368 1,1,4,9,28,71,202,542,1507,4114,11381,31349,86845,240567,668553,
+%T A000368 1860361,5188767,14495502,40572216,113743293,319405695,898288484,
+%U A000368 2530058013,7135848125,20152898513,56986883801
+%N A000368 Number of connected graphs with one cycle of length 4.
+%D A000368 F. Harary and E. Palmer, Graphical Enumeration, Academic Press, 1973, page 69.
+%D A000368 J. Riordan, An Introduction to Combinatorial Analysis, Wiley, 1958, p. 150.
+%D A000368 N. J. A. Sloane, A Handbook of Integer Sequences, Academic Press, 1973 (includes this sequence).
+%D A000368 N. J. A. Sloane and Simon Plouffe, The Encyclopedia of Integer Sequences, Academic Press, 1995 (includes this sequence).
+%H A000368 Vaclav Kotesovec, <a href="/A000368/b000368.txt">Table of n, a(n) for n = 4..2000</a> (terms 4..43 from Sean A. Irvine, 44..200 from Washington Bomfim)
+%H A000368 Washington Bomfim, <a href="/A000368/a000368.png">Illustration of initial terms</a>
+%F A000368 From _Washington Bomfim_, Jul 19 2012 and Dec 22 2020: (Start)
+%F A000368 a(n) = Sum_{P}( g(Q) ), where P is the set of the partitions Q of n with 4 parts, Q with distinct parts D[1]..D[d], D[1] the part of maximum multiplicity m in Q, f(n) = A000081(n), and g(Q) given by,
+%F A000368        | 3 * f(D[1]) * f(D[2]) * f(D[3]) * f(D[4]),              if d = 4,
+%F A000368        | (f(D[1])^4 + 2*f(D[1])^3 + 3*f(D[1])^2 + 2 * f(D[1])/8, if d = 1,
+%F A000368 g(Q) = | f(D[1]) * f(D[2]) * f(D[3]) * (3 * f(D[1]) + 1)/2,      if d = 3,
+%F A000368        | ((3*f(D[2])^2+f(D[2]])*f(D[1])^2+(f(D[2])^2+3*f(D[2]])*f(D[1]])/4,
+%F A000368        |                                                   if d=2, and m=2,
+%F A000368        | f(D[1])^2 * f(D[2]) * (f(D[1]) + 1)/2,            if d=2, and m=3.
+%F A000368 (End)
+%F A000368 G.f.: (2*t(x^4) + 3*t(x^2)^2 + 2*t(x)^2*t(x^2) + t(x)^4)/8 where t(x) is the g.f. of A000081. - _Andrew Howroyd_, Dec 03 2020
+%F A000368 a(n) ~ (A187770 + A339986) * A051491^n / (2 * n^(3/2)). - _Vaclav Kotesovec_, Dec 25 2020
+%t A000368 Needs["Combinatorica`"]; nn = 30; s[n_, k_] := s[n, k] = a[n + 1 - k] + If[n < 2 k, 0, s[n - k, k]]; a[1] = 1; a[n_] := a[n] = Sum[a[i] s[n - 1, i] i, {i, 1, n - 1}]/(n - 1); rt = Table[a[i], {i, 1, nn}]; Take[CoefficientList[CycleIndex[DihedralGroup[4], s] /. Table[s[j] -> Table[Sum[rt[[i]] x^(k*i), {i, 1, nn}], {k, 1, nn}][[j]], {j, 1, nn}], x], {5, nn}]  (* _Geoffrey Critzer_, Oct 12 2012, after code given by _Robert A. Russell_ in A000081 *)
+%t A000368 A000081 = Rest[Cases[ Import["https://oeis.org/A000081/b000081.txt", "Table"], {_, _}][[All, 2]]]; max = 30; g81 = Sum[A000081[[k]]*x^k, {k, 1, max}]; g81x2 = Sum[A000081[[k]]*x^(2 k), {k, 1, max}]; g81x4 = Sum[A000081[[k]]*x^(4 k), {k, 1, max}]; Drop[CoefficientList[ Series[(2*g81x4 + 3*g81x2^2 + 2*g81^2*g81x2 + g81^4)/8, {x, 0, max}], x], 4] (* _Vaclav Kotesovec_, Dec 25 2020 *)
+%o A000368 (PARI) g(Q)={my(V=Vec(Q),D=Set(V),d=#D); if(d==4,return(3*f[D[1]]*f[D[2]]*f[D[3]]*f[D[4]]));
+%o A000368 if(d==1, return((f[D[1]]^4+2*f[D[1]]^3+3*f[D[1]]^2+2*f[D[1]])/8));
+%o A000368 my(k=1, m = #select(x->x == D[k],V), t); while(m==1, k++; m = #select(x->x == D[k], V)); t = D[1]; D[1] = D[k]; D[k] = t;
+%o A000368 if(d == 3, return( f[D[1]] * f[D[2]] * f[D[3]] * (3 * f[D[1]] + 1)/2 ) );
+%o A000368 if(m==3, return(f[D[1]]^2 * f[D[2]] * (f[D[1]] + 1)/2));
+%o A000368 ((3*f[D[2]]^2 + f[D[2]])*f[D[1]]^2 + (f[D[2]]^2 + 3*f[D[2]])*f[D[1]])/4 };
+%o A000368 seq(max_n) = { my(s, a = vector(max_n), U); f = vector(max_n); f[1] = 1;
+%o A000368 for(j=1, max_n - 1, if(j%100==0,print(j)); f[j+1] = 1/j * sum(k=1, j, sumdiv(k,d, d * f[d]) * f[j-k+1]));
+%o A000368 for(n=4, max_n, s=0; forpart(Q = n, if( (Q[4] > Q[3]) && (Q[3]-1 > Q[2]),
+%o A000368       U = U / (f[Q[4] + 1] * f[Q[3] - 1]) * f[Q[4]] * f[Q[3]],  U = g(Q)); s += U,
+%o A000368 [1,n],[4,4]); a[n] = s; if(n % 100 == 0, print(n": " s))); a[4..max_n] };
+%o A000368 \\ _Washington Bomfim_, Jul 19 2012 and Dec 22 2020
+%Y A000368 Column k=4 of A217781.
+%Y A000368 Cf. A000081, A000226, A001429, A005703.
+%Y A000368 Second diagonal of A058879.
+%K A000368 nonn
+%O A000368 4,3
+%A A000368 _N. J. A. Sloane_
+%E A000368 More terms from _Vladeta Jovovic_, Apr 20 2000
+%E A000368 Definition improved by _Franklin T. Adams-Watters_, May 16 2006
+%E A000368 More terms from _Sean A. Irvine_, Nov 14 2010

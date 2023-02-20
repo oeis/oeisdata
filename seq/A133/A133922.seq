@@ -1,0 +1,43 @@
+%I A133922
+%S A133922 1,2,2,16,16,192,192,6912,4608,230400,230400,11612160,11612160,
+%T A133922 1199923200,588349440,98594979840,98594979840,11076328488960,
+%U A133922 11076328488960,2102897147904000,1076597725593600,331238941183180800,331238941183180800,66325953940291584000,56326771107377971200
+%N A133922 a(n) is number of permutations (p(1),p(2),p(3),...,p(n)) of (1,2,3,...,n) such that p(k) is coprime to p(n+1-k) for k = all positive integers <= n.
+%C A133922 For n = odd integer the middle term of all counted permutations must be 1.
+%C A133922 From _Robert Israel_, Sep 12 2016: (Start)
+%C A133922 Consider the graph with vertices [1,...,n] if n is even, [2,...,n] if n is odd, and edges joining coprime integers.
+%C A133922 a(n) is A037223(n) times the number of perfect matchings in this graph.
+%C A133922 If n is even, a(n) = A037223(n)*A009679(n/2).
+%C A133922 If n is an odd prime, a(n) = a(n-1). (End)
+%H A133922 Robert Israel, <a href="/A133922/b133922.txt">Table of n, a(n) for n = 1..31</a>
+%e A133922 For n = 6, the permutation (3,2,1,6,4,5) is not counted because p(2)=2 is not coprime to p(5)=4. However, the permutation (3,6,1,4,5,2) is counted because GCD(3,2) = GCD(6,5) = GCD(1,4) = 1.
+%p A133922 M:= proc(A) option remember;
+%p A133922     local n,t,i,Ai,Ap,inds,isrt,As;
+%p A133922     n:= nops(A);
+%p A133922     if n = 0 then return 1 fi;
+%p A133922     t:= 0;
+%p A133922     for i in A[1] do
+%p A133922       inds:= [$2..i-1,$i+1..n];
+%p A133922       Ai:= subs([1=NULL,i=NULL,seq(inds[i]=i,i=1..n-2)],A[inds]);
+%p A133922       isrt:= sort([$1..n-2],(r,s) -> nops(Ai(r)) <= nops(Ai(s)),output=permutation);
+%p A133922       Ai:= subs([seq(isrt[i]=i,i=1..n-2)],Ai[isrt]);
+%p A133922       t:= t + procname(Ai);
+%p A133922     od;
+%p A133922     t;
+%p A133922 end proc:
+%p A133922 F:= proc(n) local A;
+%p A133922   if n::odd then
+%p A133922     if isprime(n) then return procname(n-1) fi;
+%p A133922     A:= [seq(select(t -> igcd(t+1,i+1)=1, [$1..i-1,$i+1..n-1]),i=1..n-1)];
+%p A133922   else
+%p A133922     A:= [seq(select(t -> igcd(t,i)=1,[$1..i-1,$i+1..n]),i=1..n)]
+%p A133922   fi;
+%p A133922   M(A)*floor(n/2)!*2^floor(n/2)
+%p A133922 end proc;
+%p A133922 seq(F(n),n=1..27); # _Robert Israel_, Sep 12 2016
+%Y A133922 Cf. A009679, A081123, A037223.
+%K A133922 hard,nonn
+%O A133922 1,2
+%A A133922 _Leroy Quet_, Jan 07 2008
+%E A133922 a(6)-a(15) from _Sean A. Irvine_, May 17 2010
+%E A133922 a(16)-a(25) from _Robert Israel_, Sep 12 2016

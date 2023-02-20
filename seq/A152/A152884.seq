@@ -1,0 +1,41 @@
+%I A152884
+%S A152884 1,1,1,1,1,3,1,1,1,7,3,1,7,3,1,1,1,15,7,3,1,31,17,7,7,3,1,15,7,3,1,1,
+%T A152884 1,31,15,7,3,1,115,69,37,15,31,17,7,7,3,1,115,69,31,37,17,7,15,7,3,1,
+%U A152884 31,15,7,3,1,1,1,63,31,15,7,3,1,391,245,145,77,31,115,69,37,15,31,17,7,7,3,1
+%N A152884 Triangle read by rows: T(n,k) is the number of permutations of {1,2,...,n} with excedance set equal to the k-th subset of {1,2,...,n-1} (n>=0, 0<=k<=ceiling(2^(n-1))-1). The subsets of {1,2,...,n-1} are ordered according to size, while the subsets of the same size follow the lexicographic order.
+%C A152884 For example, the eight subsets of {1,2,3} are ordered as empty,1,2,3,12,13,23,123. The excedance set of a permutation p of {1,2,...,n} is the set of indices i such that p(i)>i; it is a subset of {1,2,...,n-1}.
+%C A152884 Row n contains ceiling(2^(n-1)) entries.
+%C A152884 Sum of entries in row n is n! (A000142).
+%C A152884 The given Maple program yields the term of the sequence corresponding to a specified permutation size n and a specified excedance set A.
+%C A152884 All terms are odd. - _Alois P. Heinz_, Jan 31 2023
+%H A152884 Alois P. Heinz, <a href="/A152884/b152884.txt">Rows n = 0..15, flattened</a>
+%H A152884 R. Ehrenborg and E. Steingrimsson, <a href="http://dx.doi.org/10.1006/aama.1999.0671">The excedance set of a permutation</a>, Advances in Appl. Math., 24, 284-299, 2000.
+%e A152884 T(5,3) = 3 because the 3rd subset of {1,2,3,4} is {3} and the permutations of {1,2,3,4,5} with excedance set {3} are 12435, 12534 and 12543.
+%e A152884 T(5,4) = 1: 12354 (4th subset of {1,2,3,4} is {4}).
+%e A152884 Triangle starts:
+%e A152884   1;
+%e A152884   1;
+%e A152884   1,  1;
+%e A152884   1,  3, 1, 1;
+%e A152884   1,  7, 3, 1, 7,  3,  1, 1;
+%e A152884   1, 15, 7, 3, 1, 31, 17, 7, 7, 3, 1, 15, 7, 3, 1, 1;
+%e A152884   ...
+%p A152884 n := 7: A := {1, 2, 4}: with(combinat): P := permute(n): EX := proc (p) local S, i: S := {}: for i to n-1 do if i < p[i] then S := `union`(S, {i}) else end if end do: S end proc: ct := 0: for j to factorial(n) do if EX(P[j]) = A then ct := ct+1 else end if end do: ct;
+%p A152884 # second Maple program:
+%p A152884 T:= proc(n) option remember; uses combinat; local b, i, l;
+%p A152884       l:= map(x-> {x[]}, [seq(choose([$1..n-1], i)[], i=0..n-1)]):
+%p A152884       for i to nops(l) do h(l[i]):=i od:
+%p A152884       b:= proc(s, l) option remember; (m->
+%p A152884            `if`(m=0, x^h(l), add(b(s minus {i}, {l[],
+%p A152884            `if`(i<m, i, [][])}), i=s)))(nops(s))
+%p A152884           end; (p->
+%p A152884       seq(coeff(p, x, i), i=1..degree(p)))(b({$1..n}, {}))
+%p A152884     end: T(0):=1:
+%p A152884 seq(T(n), n=0..8);  # _Alois P. Heinz_, Jan 29 2023
+%Y A152884 Row sums are A000142.
+%Y A152884 See A360288, A360289 for similar triangles.
+%Y A152884 Cf. A011782, A082185, A136126, A193360, A329369 (binary version).
+%K A152884 nonn,look,tabf
+%O A152884 0,6
+%A A152884 _Emeric Deutsch_, Jan 13 2009
+%E A152884 T(0,0)=1 prepended and indexing adapted by _Alois P. Heinz_, Jan 29 2023

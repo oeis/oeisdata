@@ -1,0 +1,65 @@
+%I A048720
+%S A048720 0,0,0,0,1,0,0,2,2,0,0,3,4,3,0,0,4,6,6,4,0,0,5,8,5,8,5,0,0,6,10,12,12,
+%T A048720 10,6,0,0,7,12,15,16,15,12,7,0,0,8,14,10,20,20,10,14,8,0,0,9,16,9,24,
+%U A048720 17,24,9,16,9,0,0,10,18,24,28,30,30,28,24,18,10,0,0,11,20,27,32,27,20,27,32,27,20,11,0
+%N A048720 Multiplication table {0..i} X {0..j} of binary polynomials (polynomials over GF(2)) interpreted as binary vectors, then written in base 10; or, binary multiplication without carries.
+%C A048720 Essentially same as A091257 but computed starting from offset 0 instead of 1.
+%C A048720 Each polynomial in GF(2)[X] is encoded as the number whose binary representation is given by the coefficients of the polynomial, e.g., 13 = 2^3 + 2^2 + 2^0 = 1101_2 encodes 1*X^3 + 1*X^2 + 0*X^1 + 1*X^0 = X^3 + X^2 + X^0. - _Antti Karttunen_ and _Peter Munn_, Jan 22 2021
+%C A048720 To listen to this sequence, I find instrument 99 (crystal) works well with the other parameters defaulted. - _Peter Munn_, Nov 01 2022
+%H A048720 Alois P. Heinz, <a href="/A048720/b048720.txt">Antidiagonals n = 0..200, flattened</a>
+%H A048720 Antti Karttunen, <a href="/A091247/a091247.scm.txt">Scheme-program for computing this sequence.</a>
+%H A048720 N. J. A. Sloane, <a href="/transforms.txt">Transforms</a>: Maple implementation of binary eXclusive OR (XORnos).
+%H A048720 <a href="/index/Ca#CARRYLESS">Index entries for sequences related to carryless arithmetic</a>
+%H A048720 <a href="/index/Ge#GF2X">Index entries for sequences related to polynomials in ring GF(2)[X]</a>
+%F A048720 a(n) = Xmult( (((trinv(n)-1)*(((1/2)*trinv(n))+1))-n), (n-((trinv(n)*(trinv(n)-1))/2)) );
+%F A048720 T(2b, c)=T(c, 2b)=T(b, 2c)=2T(b, c); T(2b+1, c)=T(c, 2b+1)=2T(b, c) XOR c - _Henry Bottomley_, Mar 16 2001
+%F A048720 For n >= 0, A003188(2n) = T(n, 3); A003188(2n+1) = T(n, 3) XOR 1, where XOR is the bitwise exclusive-or operator, A003987. - _Peter Munn_, Feb 11 2021
+%e A048720 Top left corner of array:
+%e A048720   0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0 ...
+%e A048720   0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 ...
+%e A048720   0  2  4  6  8 10 12 14 16 18 20 22 24 26 28 30 ...
+%e A048720   0  3  6  5 12 15 10  9 24 27 30 29 20 23 18 17 ...
+%e A048720   ...
+%e A048720 From _Antti Karttunen_ and _Peter Munn_, Jan 23 2021: (Start)
+%e A048720 Multiplying 10 (= 1010_2) and 11 (= 1011_2), in binary results in:
+%e A048720      1011
+%e A048720   *  1010
+%e A048720   -------
+%e A048720    c1011
+%e A048720   1011
+%e A048720   -------
+%e A048720   1101110  (110 in decimal),
+%e A048720 and we see that there is a carry-bit (marked c) affecting the result.
+%e A048720 In carryless binary multiplication, the second part of the process (in which the intermediate results are summed) looks like this:
+%e A048720     1011
+%e A048720   1011
+%e A048720   -------
+%e A048720   1001110  (78 in decimal).
+%e A048720 (End)
+%p A048720 trinv := n -> floor((1+sqrt(1+8*n))/2); # Gives integral inverses of the triangular numbers
+%p A048720 # Binary multiplication of nn and mm, but without carries (use XOR instead of ADD):
+%p A048720 Xmult := proc(nn,mm) local n,m,s; n := nn; m := mm; s := 0; while (n > 0) do if(1 = (n mod 2)) then s := XORnos(s,m); fi; n := floor(n/2); # Shift n right one bit. m := m*2; # Shift m left one bit. od; RETURN(s); end;
+%t A048720 trinv[n_] := Floor[(1 + Sqrt[1 + 8*n])/2];
+%t A048720 Xmult[nn_, mm_] := Module[{n = nn, m = mm, s = 0}, While[n > 0, If[1 == Mod[n, 2], s = BitXor[s, m]]; n = Floor[n/2]; m = m*2]; Return[s]];
+%t A048720 a[n_] := Xmult[(trinv[n] - 1)*((1/2)*trinv[n] + 1) - n, n - (trinv[n]*(trinv[n] - 1))/2];
+%t A048720 Table[a[n], {n, 0, 100}] (* _Jean-François Alcover_, Mar 16 2015, updated Mar 06 2016 after Maple *)
+%o A048720 (PARI)
+%o A048720 up_to = 104;
+%o A048720 A048720sq(b,c) = fromdigits(Vec(Pol(binary(b))*Pol(binary(c)))%2, 2);
+%o A048720 A048720list(up_to) = { my(v = vector(1+up_to), i=0); for(a=0, oo, for(col=0, a, i++; if(i > up_to, return(v)); v[i] = A048720sq(col, a-col))); (v); };
+%o A048720 v048720 = A048720list(up_to);
+%o A048720 A048720(n) = v048720[1+n]; \\ _Antti Karttunen_, Feb 15 2021
+%Y A048720 Cf. A051776 (Nim-product), A091257 (subtable).
+%Y A048720 Carryless multiplication in other bases: A325820 (3), A059692 (10).
+%Y A048720 Ordinary {0..i} * {0..j} multiplication table: A004247 and its differences from this: A061858 (which lists further sequences related to presence/absence of carry in binary multiplication).
+%Y A048720 Carryless product of the prime factors of n: A234741.
+%Y A048720 Binary irreducible polynomials ("X-primes"): A014580, factorization table: A256170, table of "X-powers": A048723, powers of 3: A001317, rearranged subtable with distinct terms (comparable to A054582): A277820.
+%Y A048720 See A014580 for further sequences related to the difference between factorization into GF(2)[X] irreducibles and ordinary prime factorization of the integer encoding.
+%Y A048720 Row/column 3: A048724 (even bisection of A003188), 5: A048725, 6: A048726, 7: A048727; main diagonal: A000695.
+%Y A048720 Associated additive operation: A003987.
+%Y A048720 Equivalent sequences, as compared with standard integer multiplication: A048631 (factorials), A091242 (composites), A091255 (gcd), A091256 (lcm), A280500 (division).
+%Y A048720 See A091202 (and its variants) and A278233 for maps from/to ordinary multiplication.
+%Y A048720 See A115871, A115872 and A277320 for tables related to cross-domain congruences.
+%K A048720 nonn,look,hear,tabl
+%O A048720 0,8
+%A A048720 _Antti Karttunen_, Apr 26 1999

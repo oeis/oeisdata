@@ -1,0 +1,59 @@
+%I A060014
+%S A060014 1,1,3,13,67,471,3271,31333,299223,3291487,39020911,543960561,
+%T A060014 7466726983,118551513523,1917378505407,32405299019941,608246253790591,
+%U A060014 12219834139189263,253767339725277823,5591088918313739017,126036990829657056711,2956563745611392385211
+%N A060014 Sum of orders of all permutations of n letters.
+%C A060014 Conjecture: This sequence eventually becomes cyclic mod n for all n. - _Isaac Saffold_, Dec 01 2019
+%D A060014 D. S. Mitrinovic et al., Handbook of Number Theory, Kluwer, Section XIII.2, p. 460.
+%H A060014 Alois P. Heinz, <a href="/A060014/b060014.txt">Table of n, a(n) for n = 0..170</a>
+%H A060014 FindStat - Combinatorial Statistic Finder, <a href="http://www.findstat.org/St000058/">The order of a permutation</a>
+%H A060014 Joshua Harrington, Lenny Jones, and Alicia Lamarche, <a href="http://dx.doi.org/10.1155/2014/835125">Characterizing Finite Groups Using the Sum of the Orders of the Elements</a>, International Journal of Combinatorics, Volume 2014, Article ID 835125, 8 pages.
+%F A060014 E.g.f.: Sum_{n>0} (n*Sum_{i|n} (moebius(n/i)*Product_{j|i} exp(x^j/j))). - _Vladeta Jovovic_, Dec 29 2004; The sum over n should run to at least A000793(k) for producing the k-th entry. - _Wouter Meeussen_, Jun 16 2012
+%F A060014 a(n) = Sum_{k>=1} k* A057731(n,k). - _R. J. Mathar_, Aug 31 2017
+%e A060014 For n = 4 there is 1 permutation of order 1, 9 permutations of order 2, 8 of order 3 and 6 of order 4, for a total of 67.
+%p A060014 b:= proc(n, g) option remember; `if`(n=0, g, add((j-1)!
+%p A060014       *b(n-j, ilcm(g, j))*binomial(n-1, j-1), j=1..n))
+%p A060014     end:
+%p A060014 a:= n-> b(n, 1):
+%p A060014 seq(a(n), n=0..30);  # _Alois P. Heinz_, Jul 11 2017
+%t A060014 CoefficientList[Series[Sum[n Fold[#1+MoebiusMu[n/#2] Apply[Times, Exp[x^#/#]&/@Divisors[#2] ]&,0,Divisors[n]],{n,Max[Apply[LCM,Partitions[19],1]]}],{x,0,19}],x] Range[0,19]! (* _Wouter Meeussen_, Jun 16 2012 *)
+%t A060014 a[ n_] := If[ n < 1, Boole[n == 0], 1 + Total @ Apply[LCM, Map[Length, First /@ PermutationCycles /@ Drop[Permutations @ Range @ n, 1], {2}], 1]]; (* _Michael Somos_, Aug 19 2018 *)
+%o A060014 (PARI) \\ Naive method -- sum over cycles directly
+%o A060014 cycleDecomposition(v:vec)={
+%o A060014     my(cyc=List(), flag=#v+1, n);
+%o A060014     while((n=vecmin(v))<#v,
+%o A060014         my(cur=List(), i, tmp);
+%o A060014         while(v[i++]!=n,);
+%o A060014         while(v[i] != flag,
+%o A060014             listput(cur, tmp=v[i]);
+%o A060014             v[i]=flag;
+%o A060014             i=tmp
+%o A060014         );
+%o A060014         if(#cur>1, listput(cyc, Vec(cur)))    \\ Omit length-1 cycles
+%o A060014     );
+%o A060014     Vec(cyc)
+%o A060014 };
+%o A060014 permutationOrder(v:vec)={
+%o A060014     lcm(apply(length, cycleDecomposition(v)))
+%o A060014 };
+%o A060014 a(n)=sum(i=0,n!-1,permutationOrder(numtoperm(n,i)))
+%o A060014 \\ _Charles R Greathouse IV_, Nov 06 2014
+%o A060014 (PARI)
+%o A060014 A060014(n) =
+%o A060014 {
+%o A060014   my(factn = n!, part, nb, i, j, res = 0);
+%o A060014   forpart(part = n,
+%o A060014     nb = 1; j = 1;
+%o A060014     for(i = 1, #part,
+%o A060014       if (i == #part || part[i + 1] != part[i],
+%o A060014         nb *= (i + 1 - j)! * part[i]^(i + 1 - j);
+%o A060014         j = i + 1));
+%o A060014     res += (factn / nb) * lcm(Vec(part)));
+%o A060014   res;
+%o A060014 } \\ _Jerome Raulin_, Jul 11 2017 (much faster, O(A000041(n)) vs O(n!))
+%Y A060014 Cf. A000793, A028418, A060015, A057731, A074859, A290932.
+%K A060014 nonn,nice,easy
+%O A060014 0,3
+%A A060014 _N. J. A. Sloane_, Mar 17 2001
+%E A060014 More terms from _Vladeta Jovovic_, Mar 18 2001
+%E A060014 More terms from _Alois P. Heinz_, Feb 14 2013

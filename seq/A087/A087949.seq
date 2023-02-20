@@ -1,0 +1,48 @@
+%I A087949
+%S A087949 1,1,1,2,5,16,59,246,1131,5655,30428,174835,1066334,6870542,46581883,
+%T A087949 331237074,2463361903,19112314727,154364077009,1295325828045,
+%U A087949 11273167827343,101589943242179,946577526626181,9107029927925714,90359115887726302,923509462029444933
+%N A087949 G.f. satisfies A(x) = 1 + x*A(x*A(x)).
+%H A087949 Alois P. Heinz, <a href="/A087949/b087949.txt">Table of n, a(n) for n = 0..250</a>
+%F A087949 Let G(x) = x*A(x), then the following statements hold:
+%F A087949 * G(x) = x*(1 + sqrt(1 + 4*G(G(x))))/2;
+%F A087949 * G(x) = Series_Reversion[2*x/(1 + sqrt(1 + 4*G(x)))].
+%F A087949 - _Paul D. Hanna_, May 15 2008
+%F A087949 From _Paul D. Hanna_, Apr 16 2007: (Start)
+%F A087949 G.f. A(x) is the unique solution to variable A in the infinite system of simultaneous equations:
+%F A087949 A = 1 + xB;
+%F A087949 B = 1 + xAC;
+%F A087949 C = 1 + xABD;
+%F A087949 D = 1 + xABCE;
+%F A087949 E = 1 + xABCDF ; ... (End)
+%F A087949 From _Paul D. Hanna_, Jul 09 2009: (Start)
+%F A087949 Let A(x)^m = Sum_{n>=0} a(n,m)*x^n, then
+%F A087949 a(n,m) = Sum_{k=0..n} m*C(n-k+m,k)/(n-k+m) * a(n-k,k) with a(0,m)=1.
+%F A087949 (End)
+%F A087949 G.f. satisfies: A(x) = exp( Sum_{n>=0} [d^n/dx^n x^(2n+1)*A(x)^(n+1)] *A(x)^(-2n-2)/(n+1)! ). - _Paul D. Hanna_, Dec 18 2010
+%e A087949 G.f.: A(x) = 1 + x + x^2 + 2*x^3 + 5*x^4 + 16*x^5 +...
+%e A087949 A(xA(x)) = 1 + x + 2*x^2 + 5*x^3 + 16*x^4 + 59*x^5 +...
+%e A087949 Logarithmic series:
+%e A087949 log(A(x)) = x/A(x) + [d/dx x^3*A(x)^2]*A(x)^(-4)/2! + [d^2/dx^2 x^5*A(x)^3]*A(x)^(-6)/3! + [d^3/dx^3 x^7*A(x)^4]*A(x)^(-8)/4! +...
+%e A087949 Let G(x) = x*A(x) then
+%e A087949 x = G(x*[1 - G(x) + 2*G(x)^2 - 5*G(x)^3 + 14*G(x)^4 - 42*G(x)^5 +-...])
+%e A087949 where the unsigned coefficients are the Catalan numbers (A000108).
+%p A087949 A:= proc(n) option remember; `if`(n=0, 1, (T->
+%p A087949       unapply(convert(series(1+x*T(x*T(x)), x, n+1)
+%p A087949       , polynom), x))(A(n-1)))
+%p A087949     end:
+%p A087949 a:= n-> coeff(A(n)(x), x, n):
+%p A087949 seq(a(n), n=0..25);  # _Alois P. Heinz_, May 15 2016
+%t A087949 a[n_] := (A=x; If[n<1, 0, For[i=1, i <= n, i++, A = InverseSeries[2*(x/(1 + Sqrt[1 + 4*A + x*O[x]^n]))]]]; SeriesCoefficient[A, {x, 0, n}]); Array[a, 26] (* _Jean-François Alcover_, Oct 04 2016, adapted from PARI *)
+%o A087949 (PARI) {a(n)=my(A=x); if(n<1, 0, for(i=1,n,A=serreverse(2*x/(1 + sqrt(1+4*A +x*O(x^n))))); polcoeff(A, n))}
+%o A087949 (PARI) {a(n,m=1)=if(n==0,1,if(m==0,0^n,sum(k=0,n,m*binomial(n-k+m,k)/(n-k+m)*a(n-k,k))))} \\ _Paul D. Hanna_, Jul 09 2009
+%o A087949 (PARI) /* n-th Derivative: */
+%o A087949 {Dx(n,F)=my(D=F);for(i=1,n,D=deriv(D));D}
+%o A087949 /* G.f. */
+%o A087949 {a(n)=my(A=1+x+x*O(x^n));for(i=1,n,A=exp(sum(m=0,n,Dx(m,x^(2*m+1)*A^(m+1))*A^(-2*m-2)/(m+1)!)+x*O(x^n)));polcoeff(A,n)} \\ _Paul D. Hanna_, Dec 18 2010
+%Y A087949 Cf. A002449, A030266, A088714, A088717, A091713, A120971, A140092, A000108.
+%Y A087949 Cf. A139702, A143426, A143435, A182969.
+%K A087949 nonn
+%O A087949 0,4
+%A A087949 _Paul D. Hanna_, Sep 16 2003
+%E A087949 Edited by _N. J. A. Sloane_, May 19 2008

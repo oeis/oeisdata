@@ -1,0 +1,69 @@
+%I A080575
+%S A080575 1,1,1,1,3,1,1,4,3,6,1,1,5,10,10,15,10,1,1,6,15,15,10,60,20,15,45,15,
+%T A080575 1,1,7,21,21,35,105,35,70,105,210,35,105,105,21,1,1,8,28,28,56,168,56,
+%U A080575 35,280,210,420,70,280,280,840,560,56,105,420,210,28,1,1,9,36,36,84,252,84,126,504,378,756,126,315,1260,1260,1890,1260,126,280,2520,840,1260,3780,1260,84,945,1260,378,36,1,1,10,45,45,120,360,120,210,840,630,1260,210
+%N A080575 Triangle of multinomial coefficients, read by rows (version 2).
+%C A080575 This is different from A036040 and A178867.
+%C A080575 T[n,m] = count of set partitions of n with block lengths given by the m-th partition of n in the canonical ordering.
+%C A080575 From _Tilman Neumann_, Oct 05 2008: (Start)
+%C A080575 These are also the coefficients occurring in complete Bell polynomials, Faa di Bruno's formula (in its simplest form) and computation of moments from cumulants.
+%C A080575 Though the Bell polynomials seem quite unwieldy, they can be computed easily as the determinant of an n-dimensional square matrix. (see e.g. [Coffey] and program below)
+%C A080575 The complete Bell polynomial of the first n primes gives A007446. (End)
+%C A080575 The difference with A036040 and A178867 lies in the ordering of the monomials. This sequence uses lexicographic ordering, while in A036040 the total order (power) of the monomials prevails (Abramowitz-Stegun style): e.g., in row 6 we have ...+ 15*x[3]*x[5] + 15*x[3]*x[6]^2 + 10*x[4]^2 +...; in A036040 the coefficient of x[3]*x[6]^2 would come after that of x[4]^2 because the total order is higher, here it comes before in view of the lexicographic order. - _M. F. Hasler_, Jul 12 2015
+%D A080575 See A036040 for the column labeled "M_3" in Abramowitz and Stegun, Handbook, p. 831.
+%H A080575 Alois P. Heinz, <a href="/A080575/b080575.txt">Rows n = 1..26, flattened</a>
+%H A080575 M. Abramowitz and I. A. Stegun, eds., <a href="http://www.convertit.com/Go/ConvertIt/Reference/AMS55.ASP">Handbook of Mathematical Functions</a>, National Bureau of Standards, Applied Math. Series 55, Tenth Printing, 1972 [alternative scanned copy].
+%H A080575 Berg, Kimmo <a href="https://doi.org/10.1007/s10479-013-1334-3">Complexity of solution structures in nonlinear pricing</a>, Ann. Oper. Res. 206, 23-37 (2013).
+%H A080575 R. J. Cano, <a href="/A080575/a080575_8.txt">Sequencer program.</a>
+%H A080575 Mark W. Coffey, <a href="http://arxiv.org/abs/math-ph/0608049">A Set of Identities for a Class of Alternating Binomial Sums Arising in Computing Applications</a>, arXiv:math-ph/0608049, 2006.
+%H A080575 Wikipedia, <a href="http://en.wikipedia.org/wiki/Cumulant">Cumulant</a>.
+%H A080575 Wikipedia, <a href="http://en.wikipedia.org/wiki/Bell_polynomials">Bell polynomials</a>
+%e A080575 For n=4 the 5 integer partitions in canonical ordering with corresponding set partitions and counts are:
+%e A080575    [4]       -> #{1234} = 1
+%e A080575    [3,1]     -> #{123/4, 124/3, 134/2, 1/234} = 4
+%e A080575    [2,2]     -> #{12/34, 13/24, 14/23} = 3
+%e A080575    [2,1,1]   -> #{12/3/4, 13/2/4, 1/23/4, 14/2/3, 1/24/3, 1/2/34} = 6
+%e A080575    [1,1,1,1] -> #{1/2/3/4} = 1
+%e A080575 Thus row 4 is [1, 4, 3, 6, 1].
+%e A080575 Triangle begins:
+%e A080575 1;
+%e A080575 1, 1;
+%e A080575 1, 3,  1;
+%e A080575 1, 4,  3,  6,  1;
+%e A080575 1, 5, 10, 10, 15,  10,  1;
+%e A080575 1, 6, 15, 15, 10,  60, 20, 15,  45,  15,  1;
+%e A080575 1, 7, 21, 21, 35, 105, 35, 70, 105, 210, 35, 105, 105, 21, 1;
+%e A080575 ...
+%e A080575 Row 4 represents 1*k(4)+4*k(3)*k(1)+3*k(2)^2+6*k(2)*k(1)^2+1*k(1)^4 and T(4,4)=6 since there are six ways of partitioning four labeled items into one part with two items and two parts each with one item.
+%t A080575 runs[li:{__Integer}] := ((Length/@ Split[ # ]))&[Sort@ li]; Table[Apply[Multinomial, IntegerPartitions[w], {1}]/Apply[Times, (runs/@ IntegerPartitions[w])!, {1}], {w, 6}]
+%t A080575 (* Second program: *)
+%t A080575 completeBellMatrix[x_, n_] := Module[{M, i, j}, M[_, _] = 0; For[i=1, i <= n-1 , i++, M[i, i+1] = -1]; For[i=1, i <= n , i++, For[j=1, j <= i, j++, M[i, j] = Binomial[i-1, j-1]*x[i-j+1]]]; Array[M, {n, n}]]; completeBellPoly[x_, n_] := Det[completeBellMatrix[x, n]]; row[n_] := List @@ completeBellPoly[x, n] /. x[_] -> 1 // Reverse; Table[row[n], {n, 1, 10}] // Flatten (* _Jean-François Alcover_, Aug 31 2016, after _Tilman Neumann_ *)
+%t A080575 B[0] = 1;
+%t A080575 B[n_] := B[n] = Sum[Binomial[n-1, k] B[n-k-1] x[k+1], {k, 0, n-1}]//Expand;
+%t A080575 row[n_] := Reverse[List @@ B[n] /. x[_] -> 1];
+%t A080575 Table[row[n], {n, 1, 10}] // Flatten (* _Jean-François Alcover_, Aug 10 2018, after _Wolfdieter Lang_ *)
+%o A080575 (MuPAD)
+%o A080575 From _Tilman Neumann_, Oct 05 2008: (Start)
+%o A080575 completeBellMatrix := proc(x,n) // x - vector x[1]...x[m], m>=n
+%o A080575 local i,j,M; begin M:=matrix(n,n): // zero-initialized
+%o A080575 for i from 1 to n-1 do M[i,i+1]:=-1: end_for:
+%o A080575 for i from 1 to n do for j from 1 to i do
+%o A080575     M[i,j] := binomial(i-1,j-1)*x[i-j+1]:
+%o A080575 end_for: end_for:
+%o A080575 return (M): end_proc:
+%o A080575 completeBellPoly := proc(x, n) begin
+%o A080575 return (linalg::det(completeBellMatrix(x,n))): end_proc:
+%o A080575 for i from 1 to 10 do print(i,completeBellPoly(x,i)): end_for: (End)
+%o A080575 (PARI) See links.
+%o A080575 (PARI) From _M. F. Hasler_, Jul 12 2015: (Start)
+%o A080575 A080575_poly(n,V=vector(n,i,eval(Str('x,i))))={matdet(matrix(n,n,i,j,if(j<=i,binomial(i-1,j-1)*V[n-i+j],-(j==i+1))))}
+%o A080575 A080575_row(n)={(f(s)=if(type(s)!="t_INT",concat(apply(f,select(t->t,Vec(s)))),s))(A080575_poly(n))} \\ (End)
+%Y A080575 See A036040 for another version. Cf. A036036-A036039.
+%Y A080575 Row sums are A000110.
+%Y A080575 Row lengths are A000041.
+%Y A080575 Cf. A007446. - _Tilman Neumann_, Oct 05 2008
+%Y A080575 Cf. A178866 and A178867 (version 3). - _Johannes W. Meijer_, Jun 21, 2010
+%Y A080575 Maximum value in row n gives A102356(n).
+%K A080575 nonn,easy,nice,tabf,look
+%O A080575 1,5
+%A A080575 _Wouter Meeussen_, Mar 23 2003

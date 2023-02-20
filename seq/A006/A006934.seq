@@ -1,0 +1,45 @@
+%I A006934 M5119
+%S A006934 1,1,21,671,180323,20898423,7426362705,1874409467055,5099063967524835,
+%T A006934 2246777786836681835,2490122296790918386363,1694873049836486741425113,
+%U A006934 5559749161756484280905626951,5406810236613380495234085140851,12304442295910538475633061651918089
+%N A006934 A series for Pi.
+%C A006934 Formula (21) in Luke (see ref.): Let y = 4*n+1. Then for n -> oo
+%C A006934 Pi ~ 4*(n!)^4*2^(4*n)/(y*((2*n)!)^2)*(sum_{k>=0}((-1)^k*y^(-2*k)* A006934(k)/A123854(k)))^2. (Luke does not reference the sequences in this form.) - _Peter Luschny_, Mar 23 2014
+%C A006934 This might be related to the numerators of eq. (18) in N. Elezovic' "Asymptotic Expansions of Central Binomial...", J. Int. Seq. 17 (2014) # 14.2.1. - _R. J. Mathar_, Mar 23 2014
+%C A006934 Several references give an erroneous value of 1874409465055 instead of a(7) in the formula for pi. - _M. F. Hasler_, Mar 23 2014
+%D A006934 Y. L. Luke, The Special Functions and their Approximation, Vol. 1, Academic Press, NY, 1969, see p. 36.
+%D A006934 N. J. A. Sloane and Simon Plouffe, The Encyclopedia of Integer Sequences, Academic Press, 1995 (includes this sequence).
+%H A006934 J. L. Fields, <a href="https://doi.org/10.1017/S0013091500013171">A note on the asymptotic expansion of a ratio of gamma functions</a>, Proc. Edinburgh Math. Soc. (15), 43-45, 1966.
+%H A006934 A. Gil, J. Segura, N. M. Temme, <a href="http://dx.doi.org/10.1093/imanum/drq012">Fast and accurate computation of the Weber parabolic cylinder function W(a,x)</a>, IMA J. Num. Anal. 31 (2011), 1194-1216, eq (3.8).
+%H A006934 A. Lupas, <a href="http://mathforum.org/kb/message.jspa?messageID=457303">Re: Pi Calculation ?</a>, on mathforum.org, Feb 15 2003.
+%H A006934 C. Mortici, <a href="http://www.emis.de/journals/BMAA/repository/docs/BMAA2-4-17.pdf">On some accurate estimates of pi</a>, Bull. Math. Anal. Appl. 2(4) (2010) 137-139. (Formula (1.5), same typo as in Luke)
+%H A006934 <a href="/index/Ph#Pi314">Index entries for sequences related to the number Pi</a>
+%F A006934 Let p(n,x) = sum(k=0..n, x^k*A220412(n,k))/A220411(n) then a(n) = (-1)^n*p(n,1/4)*A123854(n)*A001448(n). - _Peter Luschny_, Mar 23 2014
+%F A006934 Pi = lim_{n->oo} 2^{4n+2}/((4n+1)*C(2n,n)^2)*(sum_{k=0..oo} (-1)^k*a(k)/(A123854(k)*(4n+1)^{2k}))^2. - _M. F. Hasler_, Mar 23 2014
+%p A006934 A006934_list := proc(n) local k, f, bp;
+%p A006934 bp := proc(n,x) option remember; local k; if n = 0 then 1 else -x*add(binomial(n-1,2*k+1)*bernoulli(2*k+2)/(k+1)*bp(n-2*k-2,x), k=0..n/2-1) fi end:
+%p A006934 f := n -> 2^(3*n-add(i, i=convert(n,base,2)));
+%p A006934 add(bp(2*k,1/4)*binomial(4*k,2*k)*x^(2*k), k=0..n-1);
+%p A006934 seq((-1)^k*f(k)*coeff(%,x,2*k), k=0..n-1) end:
+%p A006934 A006934_list(15);  # _Peter Luschny_, Mar 23 2014
+%p A006934 # Second solution, without using Nörlund's generalized Bernoulli polynomials, based on Euler numbers:
+%p A006934 A006934_list := proc(n) local a,c,j;
+%p A006934 c := n -> 4^n/2^add(i, i=convert(n,base,2));
+%p A006934 a := [seq((-4)^j*euler(2*j)/(4*j), j=1..n)];
+%p A006934 expand(exp(add(a[j]*x^(-j), j=1..n))); taylor(%, x=infinity, n+2);
+%p A006934 subs(x=1/x, convert(%,polynom)): seq(c(iquo(j,2))*coeff(%,x,j), j=0..n) end:
+%p A006934 A006934_list(14); # _Peter Luschny_, Apr 08 2014
+%t A006934 A006934List[n_] := Module[{c, a, s, sx}, c[k_] := 4^k/2^Total[ IntegerDigits[k, 2]]; a = Table[(-4)^j EulerE[2j]/(4j), {j, 1, n}]; s[x_] = Series[Exp[Sum[a[[j]] x^(-j), {j, 1, n}]], {x, Infinity, n+2}] // Normal; sx = s[1/x]; Table[c[Quotient[j, 2]] Coefficient[sx, x, j], {j, 0, n}]];
+%t A006934 A006934List[14] (* _Jean-François Alcover_, Jun 02 2019, from second Maple program *)
+%o A006934 (Sage)
+%o A006934 @CachedFunction
+%o A006934 def p(n):
+%o A006934     if n < 2: return 1
+%o A006934     return -add(binomial(n-1,k-1)*bernoulli(k)*p(n-k)/k for k in range(2,n+1,2))/2
+%o A006934 def A006934(n): return (-1)^n*p(2*n)*binomial(4*n,2*n)*2^(3*n-sum(n.digits(2)))
+%o A006934 [A006934(n) for n in (0..14)]  # _Peter Luschny_, Mar 24 2014
+%Y A006934 Cf. A088802, A123854, A220412.
+%K A006934 nonn
+%O A006934 0,3
+%A A006934 _Simon Plouffe_ and _N. J. A. Sloane_
+%E A006934 a(7) corrected, a(8)-a(14) from _Peter Luschny_, Mar 23 2014

@@ -1,0 +1,28 @@
+%I A082025
+%S A082025 1,2,3,4,5,7,6,11,13,9,8,17,12,19,23,10,29,25,31,35,27,14,37,16,41,18,
+%T A082025 43,21,20,47,49,53,15,59,55,39,22,61,24,67,26,71,30,73,33,28,79,77,83,
+%U A082025 45,89,65,97,85,57,32,91,36,101,34,103,38,107,40,109,51,44,95,63,113
+%N A082025 Square array of distinct positive integers, in which neighboring entries (both orthogonal and diagonal) are coprime. The array is read by antidiagonals, alternating upwards and downwards. Each entry is the smallest positive integer not already used that is coprime to all of the neighboring entries that are earlier in the sequence.
+%H A082025 Alois P. Heinz, <a href="/A082025/b082025.txt">Antidiagonals n = 1..100, flattened</a>
+%e A082025 1  2  7  6 23 10 ...
+%e A082025 3  5 11 19 ...
+%e A082025 4 13 12 ...
+%e A082025 9 17 ...
+%e A082025 8 ...
+%e A082025 ...
+%e A082025 T(2,2) = 5 and its neighbors are 1, 2, 7, 11, 12, 13, 4 and 3, which are all coprime to 5.
+%p A082025 iscoprime := proc(n,m) if gcd(n,m)=1 then RETURN(true); else RETURN(false); fi; end:
+%p A082025 isin := proc(a,n,nmax) for row from 1 to nmax do for col from 1 to nmax do if a[row,col] = n then RETURN(true); end; od; od; RETURN(false); end:
+%p A082025 iscoprMat := proc(a,candid,row,col,up) if not iscoprime(candid,a[row,col-1]) then RETURN(false); fi; if not iscoprime(candid,a[row-1,col]) then RETURN(false); fi; if not iscoprime(candid,a[row-1,col-1]) then RETURN(false); fi; if up then if not iscoprime(candid,a[row+1,col-1]) then RETURN(false); fi; else if not iscoprime(candid,a[row-1,col+1]) then RETURN(false); fi; fi; RETURN(true); end:
+%p A082025 find := proc(a,row,col,nmax,up) for candid from 1 to 5000000 do if isin(a,candid,nmax) then next; fi; if not iscoprMat(a,candid,row,col,up) then next; fi; a[row,col] := candid; RETURN(a[row,col]); od; RETURN(-1); end:
+%p A082025 nmax := 15; for row from 1 to nmax do for col from 1 to nmax do a[row,col] := -1; od : od : a[1,1]:= 1 : up := false:
+%p A082025 for dia from 2 to nmax do if up then for col from 1 to dia do row := dia+1-col; f := find(a,row,col,nmax,up); printf("%d,",f); a[row,col] := f; od; else for row from 1 to dia do col := dia+1-row; f := find(a,row,col,nmax,up); printf("%d,",f); a[row,col] := f; od; fi; up := not up : od : # _R. J. Mathar_, May 06 2006
+%t A082025 dmax = 12 (* number of antidiagonals *);
+%t A082025 a[1, 1] = 1; used = {1}; a[_, _] = 1;
+%t A082025 loop := For[i = d-j+1; k = 1, True, k++, If[FreeQ[used, k] && AllTrue[{ a[i-1, j+1], a[i-1, j], a[i-1, j-1], a[i, j-1], a[i+1, j-1]}, CoprimeQ[k, #]&], Sow[k]; AppendTo[used, k]; a[i, j] = k; Break[]]];
+%t A082025 {1}~Join~Reap[Do[If[EvenQ[d], Do[loop, {j, d, 1, -1}], Do[loop, {j, 1, d}]], {d, 2, dmax}]][[2, 1]] (* _Jean-François Alcover_, Dec 14 2019 *)
+%Y A082025 Cf. A082187, A082188, A082189, A082190.
+%K A082025 easy,look,nonn,tabl
+%O A082025 1,2
+%A A082025 _Amarnath Murthy_, Apr 07 2003
+%E A082025 Edited by _David Wasserman_, Aug 09 2004

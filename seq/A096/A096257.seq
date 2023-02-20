@@ -1,0 +1,28 @@
+%I A096257
+%S A096257 8,2,3,633,19703,89,69,56,46,39,33,29,25,22,20,18,16,14,13,12,11,10,2,
+%T A096257 2,2,2,2,2,2,2,2,2,2,2,3,3,138,133,128,124,120,116,113,109,106,103,
+%U A096257 100,97,95,92,90,87,85,83,81,79,77,75,74,72,70,69,67,66,65,63,62,61,59,58,57
+%N A096257 The least k whose n-th root contains k as a string of digits to the immediate right of the decimal point (excluding leading zeros).
+%t A096257 f[k_, n_] := Block[{l = Floor[ Log[10, k] + 1], rd = RealDigits[ k^(1/n), 10, 24], id = IntegerDigits[k]}, rdd = Drop[ rd[[1]], rd[[2]]]; While[ rdd[[1]] == 0, rdd = Drop[rdd, 1]]; Take[rdd, l] == id]; g[n_] := Block[{k = 2}, While[IntegerQ[k^(1/n)] || f[k, n] == False, k++ ]; k]; Table[ g[n], {n, 2, 72}]
+%o A096257 (Python)
+%o A096257 import re
+%o A096257 from sympy import perfect_power
+%o A096257 from decimal import *
+%o A096257 getcontext().prec = 24
+%o A096257 def lzs(s): return len(s) - 2 - len(s[2:].lstrip('0')) # # of leading zeros
+%o A096257 def cond(sk, sroot, k, n): # is condition true, with precision verification
+%o A096257     if perfect_power(k, [n]): return False # decimal part should be all 0's
+%o A096257     assert lzs(sroot) + len(sk) < len(sroot) - 3, (n, "increase precision")
+%o A096257     return re.match("0.0*"+sk, sroot)
+%o A096257 def a(n):
+%o A096257     k, power = 1, Decimal(1)/Decimal(n)
+%o A096257     rootk, sk = Decimal(k)**power, str(k)
+%o A096257     while not cond(sk, str(rootk - int(rootk)), k, n):
+%o A096257         k += 1
+%o A096257         rootk, sk = Decimal(k)**power, str(k)
+%o A096257     return k
+%o A096257 print([a(n) for n in range(2, 73)]) # _Michael S. Branicky_, Aug 02 2021
+%Y A096257 Cf. A074841, A074762.
+%K A096257 base,nonn
+%O A096257 2,1
+%A A096257 _Paul Lusch_ and _Robert G. Wilson v_, Jul 31 2004

@@ -1,0 +1,36 @@
+%I A046663
+%S A046663 1,1,1,2,2,2,2,2,2,2,4,3,5,3,4,4,4,4,4,4,4,7,5,7,8,7,5,7,8,7,7,8,8,7,
+%T A046663 7,8,12,9,12,9,17,9,12,9,12,14,11,12,12,13,13,12,12,11,14,21,15,19,15,
+%U A046663 21,24,21,15,19,15,21,24,19,20,19,21,22,22,21,19,20,19,24,34,23,30,24,30,25,46,25,30,24,30,23,34
+%N A046663 Triangle: T(n,k) = number of partitions of n (>=2) with no subsum equal to k (1 <= k <= n-1).
+%H A046663 Alois P. Heinz, <a href="/A046663/b046663.txt">Rows n = 2..98, flattened</a>
+%H A046663 P. Erdős, J. L. Nicolas and A. Sárközy, <a href="http://dx.doi.org/10.1016/0012-365X(89)90086-1">On the number of partitions of n without a given subsum (I)</a>, Discrete Math., 75 (1989), 155-166 = Annals Discrete Math. Vol. 43, Graph Theory and Combinatorics 1988, ed. B. Bollobas.
+%e A046663 For n = 4 there are two partitions (4, 2+2) with no subsum equal to 1, two (4, 3+1) with no subsum equal to 2 and two (4, 2+2) with no subsum equal to 3.
+%e A046663 Triangle T(n,k) begins:
+%e A046663    1;
+%e A046663    1,  1;
+%e A046663    2,  2,  2;
+%e A046663    2,  2,  2,  2;
+%e A046663    4,  3,  5,  3,  4;
+%e A046663    4,  4,  4,  4,  4,  4;
+%e A046663    7,  5,  7,  8,  7,  5,  7;
+%e A046663    8,  7,  7,  8,  8,  7,  7,  8;
+%e A046663   12,  9, 12,  9, 17,  9, 12,  9, 12;
+%e A046663   ...
+%p A046663 g:= proc(n, i) option remember;
+%p A046663      `if`(n=0, 1, `if`(i>1, g(n, i-1), 0)+`if`(i>n, 0, g(n-i, i)))
+%p A046663     end:
+%p A046663 b:= proc(n, i, s) option remember;
+%p A046663      `if`(0 in s or n in s, 0, `if`(n=0 or s={}, g(n, i),
+%p A046663      `if`(i<1, 0, b(n, i-1, s)+`if`(i>n, 0, b(n-i, i,
+%p A046663       select(y-> 0<=y and y<=n-i, map(x-> [x, x-i][], s)))))))
+%p A046663     end:
+%p A046663 T:= (n, k)-> b(n, n, {min(k, n-k)}):
+%p A046663 seq(seq(T(n, k), k=1..n-1), n=2..16);  # _Alois P. Heinz_, Jul 13 2012
+%t A046663 g[n_, i_] := g[n, i] = If[n == 0, 1, If[i > 1, g[n, i-1], 0] + If[i > n, 0, g[n-i, i]]]; b[n_, i_, s_] := b[n, i, s] = If[MemberQ[s, 0 | n], 0, If[n == 0 || s == {}, g[n, i], If[i < 1, 0, b[n, i-1, s] + If[i > n, 0, b[n-i, i, Select[Flatten[s /. x_ :> {x, x-i}], 0 <= # <= n-i &]]]]]]; t[n_, k_] := b[n, n, {Min[k, n-k]}]; Table[t[n, k], {n, 2, 16}, {k, 1, n-1}] // Flatten (* _Jean-François Alcover_, Aug 20 2013, translated from Maple *)
+%Y A046663 Cf. A006827.
+%Y A046663 First column and diagonal give: A002865.
+%K A046663 nonn,easy,look,nice,tabl
+%O A046663 2,4
+%A A046663 _N. J. A. Sloane_
+%E A046663 Corrected and extended by _Don Reble_, Nov 04 2001

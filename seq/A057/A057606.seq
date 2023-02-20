@@ -1,0 +1,31 @@
+%I A057606
+%S A057606 2,6,2,4,6,4,2,4,8,4,8,4,2,0,2,4,10,6,12,8,8,6,6,0,2,0,0,0,0,0,2,4,12,
+%T A057606 8,16,14,16,12,12,12,6,4,8,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,4,
+%U A057606 14,10,20,22,24,22,22,26,18,16,12,16,12,0,4,10,0,0,0,2,0,0,0,0
+%N A057606 Triangle read by rows: T(n,k) = number of binary n-tuples u having exactly k grandchildren, where a grandchild is a vector obtained by deleting any two coordinates of u (n >= 3, 1<=k<=2^(n-2)).
+%C A057606 Row lengths = 2^(n-2), row sums = 2^n.
+%D A057606 N. J. A. Sloane, On single-deletion-correcting codes, in Codes and Designs (Columbus, OH, 2000), 273-291, Ohio State Univ. Math. Res. Inst. Publ., 10, de Gruyter, Berlin, 2002.
+%H A057606 Reinhard Zumkeller, <a href="/A057606/b057606.txt">Rows n = 3..15 of triangle, flattened</a>
+%H A057606 N. J. A. Sloane, <a href="http://neilsloane.com/doc/dijen.txt">On single-deletion-correcting codes</a>
+%e A057606 2,6; 2,4,6,4; 2,4,8,4,8,4,2,0; ...
+%o A057606 (Haskell)
+%o A057606 import Data.List (group, sort, nub, inits, tails)
+%o A057606 a057606 n k = a057606_tabf !! (n-3) !! (k-1)
+%o A057606 a057606_row n = a057606_tabf !! (n-3)
+%o A057606 a057606_tabf = map g $ drop 3 $
+%o A057606   iterate (\xs -> (map (0 :) xs) ++ (map (1 :) xs)) [[]] where
+%o A057606   g xss = map length $ fill0 $ group $ sort $ map (length . del2) xss
+%o A057606     where fill0 uss = f0 uss [1 .. length xss `div` 4] where
+%o A057606            f0 _  []        = []
+%o A057606            f0 [] (j:js)    = [] : f0 [] js
+%o A057606            f0 vss'@(vs:vss) (j:js)
+%o A057606             | j == head vs = vs : f0 vss js
+%o A057606             | otherwise    = [] : f0 vss' js
+%o A057606   del2 = nub . (concatMap del1) . del1
+%o A057606   del1 xs = nub $
+%o A057606             zipWith (++) (init $ inits xs) (map tail $ init $ tails xs)
+%o A057606 -- _Reinhard Zumkeller_, Apr 30 2012
+%Y A057606 Cf. A057607.
+%K A057606 nonn,tabf,nice
+%O A057606 3,1
+%A A057606 _N. J. A. Sloane_, Oct 08 2000

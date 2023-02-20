@@ -1,0 +1,28 @@
+%I A129082
+%S A129082 1,3,11,25,123,53,275,581,5898,6337,81839,52193,794409,929481,611743,
+%T A129082 1609819,24076913,6686545,176364550,32690593,9049485,10684919,
+%U A129082 281305624,439838742,20192641459,17176118816,107883019372,142161870055,2874353551691,3214687921599
+%N A129082 a(n) = numerator of b(n): b(n) = the maximum possible value for a continued fraction whose terms are a permutation of the terms of the simple continued fraction for H(n) = sum{k=1 to n} 1/k, the n-th harmonic number.
+%H A129082 Alois P. Heinz, <a href="/A129082/b129082.txt">Table of n, a(n) for n = 1..1000</a>
+%e A129082 The continued fraction for H(5) = 137/60 is [2;3,1,1,8]. The maximum value a continued fraction can have with these same terms in some order is [8;1,3,1,2] = 123/14.
+%p A129082 H := proc(n) add(1/k,k=1..n) ; end: Ltoc := proc(L) numtheory[nthconver](L,nops(L)-1) ; end: r := proc(n) option remember ; local m,rL,rp,L ; if n = 1 then 1; else rL := numtheory[cfrac](H(n),'quotients') ; rp := combinat[permute](rL) ; m := Ltoc(rL) ; for L in rp do m := max(m, Ltoc(L)) ; od: m ; fi; end: A129082 := proc(n) numer(r(n)) ; end: for n from 1 do printf("%d,\n", A129082(n)) ; od: # _R. J. Mathar_, Jul 30 2009
+%p A129082 # second Maple program:
+%p A129082 with(numtheory):
+%p A129082 H:= proc(n) option remember; `if`(n=1, 1, H(n-1)+1/n) end:
+%p A129082 r:= proc(l) local j;
+%p A129082       infinity; for j from nops(l) to 1 by -1 do l[j]+1/% od
+%p A129082     end:
+%p A129082 sh:= proc(l) local ll, h, s, m; ll:= []; h:= nops(l); s:= 1; m:= h; while s<=h do ll:= [ll[], l[m]]; if m=h then h:= h-1; m:= s else s:= s+1; m:= h fi od; ll end:
+%p A129082 a:= n-> numer(r(sh(sort(cfrac(H(n), 'quotients'))))):
+%p A129082 seq(a(n), n=1..40);  # _Alois P. Heinz_, Aug 04 2009
+%t A129082 r[l_] := Module[{lj, j}, For[lj = Infinity; j = Length[l], j >= 1, j--, lj = l[[j]] + 1/lj]; lj];
+%t A129082 sh[l_] := Module[{ll, h, s, m}, ll = {}; h = Length[l]; s = 1; m = h; While[s <= h, ll = Append[ll, l[[m]]]; If[m == h, h--; m = s, s++; m = h ]]; ll];
+%t A129082 a[n_] := Numerator[ r[ sh[ Sort[ ContinuedFraction[ HarmonicNumber[n]]]]]];
+%t A129082 Table[a[n], {n, 1, 40}] (* _Jean-François Alcover_, Mar 20 2017, after _Alois P. Heinz_ *)
+%o A129082 (Magma) Q:=Rationals(); [ Numerator(Max([ r: r in R ])) where R:=[ c[1,1]/c[2,1]: c in C ] where C:=[ Convergents(s): s in S ] where S:=Seqset([ [m(p[i]):i in [1..#x] ]: p in P ]) where m:=map< x->y | [<x[i],y[i]>:i in [1..#x] ] > where P:=Permutations(Seqset(x)) where x:=[1..#y]: y in [ ContinuedFraction(h): h in [ &+[ 1/k: k in [1..n] ]: n in [1..8] ] ] ]; // _Klaus Brockhaus_, Jul 31 2009
+%Y A129082 Cf. A129083, A129084, A129085.
+%K A129082 frac,nonn
+%O A129082 1,2
+%A A129082 _Leroy Quet_, Mar 28 2007
+%E A129082 6 more terms from _R. J. Mathar_, Jul 30 2009
+%E A129082 Extended beyond a(12) _Alois P. Heinz_, Aug 04 2009

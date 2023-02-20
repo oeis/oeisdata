@@ -1,0 +1,48 @@
+%I A166340
+%S A166340 1,1,1,1,8,1,1,19,19,1,1,42,114,42,1,1,89,510,510,89,1,1,184,1975,
+%T A166340 4080,1975,184,1,1,375,7029,26195,26195,7029,375,1,1,758,23712,146954,
+%U A166340 261950,146954,23712,758,1,1,1525,77200,753800,2191474,2191474,753800,77200,1525,1
+%N A166340 Triangle T(n, k) = coefficients of ( t(n, x) ) where t(n, x) = (1-x)^(n+1)*p(n, x)/x, p(n, x) = x*D( p(n-1, x) ), with p(1, x) = x/(1-x)^2, p(2, x) = x*(1+x)/(1-x)^3, and p(3, x) = x*(1+8*x+x^2)/(1-x)^4, read by rows.
+%D A166340 Douglas C. Montgomery and Lynwood A. Johnson, Forecasting and Time Series Analysis, MaGraw-Hill, New York, 1976, page 91
+%H A166340 G. C. Greubel, <a href="/A166340/b166340.txt">Rows n = 1..50 of the triangle, flattened</a>
+%F A166340 T(n, k) = coefficients of ( t(n, x) ) where t(n, x) = (1-x)^(n+1)*p(n, x)/x, p(n, x) = x*D( p(n-1, x) ), with p(1, x) = x/(1-x)^2, p(2, x) = x*(1+x)/(1-x)^3, and p(3, x) = x*(1+8*x+x^2)/(1-x)^4.
+%F A166340 From _G. C. Greubel_, Mar 11 2022: (Start)
+%F A166340 T(n, k) = t(n-1, k) - t(n-1, k-1), T(n,1) = 1, where t(n, k) = Sum_{j=0..k} (-1)^(k-j)*binomial(n+1, k-j)*b(n, j), b(n, k) = k^(n-2)*A004466(k), b(n, 0) = 1, and b(1, k) = 1.
+%F A166340 T(n, n-k) = T(n, k). (End)
+%e A166340 Triangle begins as:
+%e A166340   1;
+%e A166340   1,    1;
+%e A166340   1,    8,     1;
+%e A166340   1,   19,    19,      1;
+%e A166340   1,   42,   114,     42,       1;
+%e A166340   1,   89,   510,    510,      89,       1;
+%e A166340   1,  184,  1975,   4080,    1975,     184,      1;
+%e A166340   1,  375,  7029,  26195,   26195,    7029,    375,     1;
+%e A166340   1,  758, 23712, 146954,  261950,  146954,  23712,   758,    1;
+%e A166340   1, 1525, 77200, 753800, 2191474, 2191474, 753800, 77200, 1525, 1;
+%t A166340 (* First program *)
+%t A166340 p[x_, 1]:= x/(1-x)^2;
+%t A166340 p[x_, 2]:= x*(1+x)/(1-x)^3;
+%t A166340 p[x_, 3]:= x*(1+8*x+x^2)/(1-x)^4;
+%t A166340 p[x_, n_]:= p[x, n]= x*D[p[x, n-1], x]
+%t A166340 Table[CoefficientList[(1-x)^(n+1)*p[x, n]/x, x], {n,12}]//Flatten
+%t A166340 (* Second program *)
+%t A166340 b[n_, k_, m_]:= If[n<2, 1, If[k==0, 0, k^(n-1)*((m+3)*k^2 - m)/3]];
+%t A166340 t[n_, k_, m_]:= t[n, k]= Sum[(-1)^(k-j)*Binomial[n+1, k-j]*b[n,j,m], {j,0,k}];
+%t A166340 T[n_, k_, m_]:= T[n, k, m]= If[k==1, 1, t[n-1, k, m] - t[n-1, k-1, m]];
+%t A166340 Table[T[n, k, 2], {n,12}, {k,n}]//Flatten (* _G. C. Greubel_, Mar 11 2022 *)
+%o A166340 (Sage)
+%o A166340 def b(n,k,m):
+%o A166340     if (n<2): return 1
+%o A166340     elif (k==0): return 0
+%o A166340     else: return k^(n-1)*((m+3)*k^2 - m)/3
+%o A166340 @CachedFunction
+%o A166340 def t(n,k,m): return sum( (-1)^(k-j)*binomial(n+1, k-j)*b(n,j,m) for j in (0..k) )
+%o A166340 def A166340(n,k): return 1 if (k==1) else t(n-1,k,2) - t(n-1,k-1,2)
+%o A166340 flatten([[A166340(n,k) for k in (1..n)] for n in (1..12)]) # _G. C. Greubel_, Mar 11 2022
+%Y A166340 Cf. A166341, A166343, A166344, A166345, A166346, A166349.
+%Y A166340 Cf. A004466, A123125.
+%K A166340 nonn,tabl
+%O A166340 1,5
+%A A166340 _Roger L. Bagula_, Oct 12 2009
+%E A166340 Edited by _G. C. Greubel_, Mar 11 2022

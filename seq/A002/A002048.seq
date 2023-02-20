@@ -1,0 +1,77 @@
+%I A002048 M0972 N0363
+%S A002048 1,2,4,5,8,10,14,15,16,21,22,25,26,28,33,34,35,36,38,40,42,46,48,49,
+%T A002048 50,53,57,60,62,64,65,70,77,80,81,83,85,86,90,91,92,100,104,107,108,
+%U A002048 116,119,124,127,132,133,137,141,144,145,148,150,151,154,158,159,163,165
+%N A002048 Segmented numbers, or prime numbers of measurement.
+%C A002048 The segmented numbers are the positive integers excluding those equal to the sum of two or more consecutive smaller terms. The prime numbers of measurement are their partial sums, cf. A002049. - _M. F. Hasler_, Jun 26 2019
+%C A002048 Without the requirement that the smaller terms be consecutive, the sequence becomes the sequence of powers of 2 (A000079). - _Alonso del Arte_, Jan 25 2020
+%D A002048 R. K. Guy, Unsolved Problems in Number Theory, E30.
+%D A002048 Š. Porubský, On MacMahon's segmented numbers and related sequences. Nieuw Arch. Wisk. (3) 25 (1977), no. 3, 403--408. MR0485763 (58 #5575)
+%D A002048 N. J. A. Sloane, A Handbook of Integer Sequences, Academic Press, 1973 (includes this sequence).
+%D A002048 N. J. A. Sloane and Simon Plouffe, The Encyclopedia of Integer Sequences, Academic Press, 1995 (includes this sequence).
+%H A002048 R. J. Mathar, <a href="/A002048/b002048.txt">Table of n, a(n) for n = 1..7836</a>
+%H A002048 G. E. Andrews, <a href="http://www.jstor.org/stable/2318498">MacMahon's prime numbers of measurement</a>, Amer. Math. Monthly, 82 (1975), 922-923.
+%H A002048 R. L. Graham and C. B. A. Peck, <a href="http://www.jstor.org/stable/2315138">Problem E1910</a>, Amer. Math. Monthly, 75 (1968), 80-81.
+%H A002048 R. K. Guy, <a href="/A002048/a002048.pdf">Letter to G. E. Andrews, Apr 14 1975</a>
+%H A002048 P. A. MacMahon, <a href="https://www.biodiversitylibrary.org/item/88477#page/679/mode/1up">The prime numbers of measurement on a scale</a>, Proc. Camb. Phil. Soc. 21 (1923), 651-654; reprinted in Coll. Papers I, pp. 797-800.
+%H A002048 Samuel B. Reid, <a href="/A002048/a002048_1.c.txt">C program for A002048</a>
+%H A002048 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/PrimeNumberofMeasurement.html">Prime Number of Measurement.</a>
+%F A002048 Andrews conjectures that lim_{n -> oo} n log n / (a(n) loglog n) = 1. - _N. J. A. Sloane_, Dec 01 2013
+%e A002048 Although 5 is the sum of the terms 1 and 4, those prior terms are not consecutive, and therefore 5 is in the sequence.
+%e A002048 6 is not in the sequence because it is the sum of consecutive prior terms 2 and 4.
+%e A002048 7 is not in the sequence either because it is also the sum of consecutive prior terms, in this case 1, 2, 4.
+%e A002048 8 is in the sequence because no sum whatsoever of distinct prior terms adds up to 8.
+%p A002048 A002048 := proc(anmax::integer,printlist::boolean)
+%p A002048 local a, asum,su,i,piv,j;
+%p A002048 a := [];
+%p A002048 for i from 1 to anmax do
+%p A002048 a := [op(a),i];
+%p A002048 od:
+%p A002048 if printlist then
+%p A002048 printf("%d %d\n",1,a[1]);
+%p A002048 printf("%d %d\n",2,a[2]);
+%p A002048 fi;
+%p A002048 asum := [a[1]+a[2],a[2]];
+%p A002048 for i from 3 to anmax do
+%p A002048 asum := [op(asum),0];
+%p A002048 od:
+%p A002048 piv := 3;
+%p A002048 while piv <= nops(a) do
+%p A002048 for i from 1 to piv-2 do
+%p A002048 a := remove(has,a, asum[i]);
+%p A002048 od:
+%p A002048 if printlist then
+%p A002048 printf("%a %a\n",piv,a[piv]);
+%p A002048 fi;
+%p A002048 for i from 1 to piv do
+%p A002048 asum := subsop(i=asum[i]+a[piv], asum);
+%p A002048 od:
+%p A002048 piv := piv+1;
+%p A002048 od;
+%p A002048 RETURN(a);
+%p A002048 end:
+%p A002048 A002048(40000,true);
+%p A002048 # _R. J. Mathar_, Jun 04 2006
+%t A002048 A002048[anmax_] := (a = {}; Do[AppendTo[a, i], {i, anmax}]; asum = {a[[1]] + a[[2]], a[[2]]}; Do[AppendTo[asum, 0], {i, 3, anmax}]; piv = 3; While[piv <= Length[a], Do[a = DeleteCases[a, asum[[i]]], {i, 1, piv - 2}]; Do[asum[[i]] += a[[piv]], {i, piv}]; piv = piv + 1;]; a); A002048[63] (* _Jean-François Alcover_, Jul 28 2011, converted from _R. J. Mathar_'s Maple prog. *)
+%t A002048 searchMax = 200; segmNums = {1}; curr = 2; While[curr < searchMax, If[Not[MemberQ[Apply[Plus, Subsequences[segmNums], 1], curr]], AppendTo[segmNums, curr], ];  curr = curr + 1]; segmNums (* _Alonso del Arte_, Jan 25 2020 *)
+%o A002048 (C++)
+%o A002048 #include <iostream>
+%o A002048 #include <vector>
+%o A002048 #include <algorithm>
+%o A002048 #define NMAX 400
+%o A002048 using namespace std;
+%o A002048 int main(int argc, char *argv[])
+%o A002048 { vector<int> a; for(int i = 0; i < NMAX; i++) a.push_back(i+1); for(int piv = 2; piv < a.size(); piv++) for(int i = 0; i < piv - 1 && i < a.size() - 1; i++) { int su = a[i] + a[i + 1]; remove(a.begin(), a.end(), su); for(int j = i + 2; j < piv && j < a.size(); j++) { su += a[j]; remove(a.begin(), a.end(), su); if(su > NMAX) break; } } for(int i = 0; i < a.size() && a[i] < NMAX; i++) cout << a[i] << ","; return 0;
+%o A002048 } /* _R. J. Mathar_, May 31 2006 */
+%o A002048 (Haskell)
+%o A002048 import Data.List ((\\))
+%o A002048 a002048 n = a002048_list !! (n-1)
+%o A002048 a002048_list = f [1..] [] where
+%o A002048    f (x:xs) ys = x : f (xs \\ scanl (+) x ys) (x : ys)
+%o A002048 -- _Reinhard Zumkeller_, May 23 2013
+%o A002048 (C) // See Links section for C program by _Samuel B. Reid_, Jan 26 2020
+%Y A002048 Cf. A002049 (partial sums), A004978, A005242, A033627.
+%K A002048 nonn,nice
+%O A002048 1,2
+%A A002048 _N. J. A. Sloane_
+%E A002048 More terms from _R. J. Mathar_, May 31 2006

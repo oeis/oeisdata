@@ -1,0 +1,77 @@
+%I A154566
+%S A154566 1023456789,3164252736,4642110594,5623720662,6312942339,6813614229,
+%T A154566 7197035958,7513755246,7747685775,7961085846,8120306331,8275283289,
+%U A154566 8393900487,8626922994,8594070624,8691229761,8800389678,8807854905,9873773268,8951993472,9473643936,9585032094
+%N A154566 Smallest 10-digit number whose n-th power contains each digit (0-9) n times, or -1 if no such number exists.
+%C A154566 A number with 10*n digits could contain all ten digits(0-9) n times. The probability of this is (10n)!/((n!)^10 * 10^((10*n)-10^(10*n-1)). There are 10^10-10^(10-1/n)) numbers which are n-th powers of some 10-digit numbers. So there are about (10n)!*(10^10-10^(10-1/n)))/((n!)^10 * 10^((10*n)-10^(10*n-1)) numbers which satisfy the requirements.
+%C A154566 Fortunately, I found a larger number than those shown here, for n=26, a(n)=9160395852. Since (10n)!*(10^10-10^(10-1/n))/((n!)^10 * 10^((10*n)-10^(10*n-1)) = 0.31691419..., this is a lucky event!
+%C A154566 The sequence is -1 beyond a certain point because when n > 23025850928 we have 9999999999^n < 10^(10*n-1), i.e., it is impossible to obtain a power with 10*n digits. From a(23) to a(600) the only terms which are not -1 are a(24)=9793730157, a(26)=9160395852, a(35)=9959167017, and a(38)=9501874278. - _Giovanni Resta_, Jan 17 2020
+%H A154566 Zhining Yang, <a href="http://blog.csdn.net/northwolves/archive/2009/01/11/3754517.aspx">Smallest Ten Digit Powers</a>
+%H A154566 Zhining Yang, <a href="http://blog.csdn.net/northwolves/archive/2009/01/11/3753011.aspx">Largest Ten Digit Powers</a>
+%e A154566 For n=18, a(n)=8807854905. That means 8807854905^18 has all digits 0-9 each 18 times and 8807854905 is the smallest 10-digit number which has this property.
+%o A154566 (VBA)
+%o A154566 Function Flag(ByVal s As String, ByVal num As Long) As Long
+%o A154566 Dim b&(9), t&, i&
+%o A154566 Flag = 1
+%o A154566 If Len(s) <> 10 * num Then
+%o A154566     Flag = 0
+%o A154566     Exit Function
+%o A154566 End If
+%o A154566 For i = 1 To Len(s)
+%o A154566     t = Val(Mid(s, i, 1))
+%o A154566     b(t) = b(t) + 1
+%o A154566     If b(t) > num Then
+%o A154566         Flag = 0
+%o A154566         Exit Function
+%o A154566     End If
+%o A154566 Next
+%o A154566 End Function
+%o A154566 '
+%o A154566 Function Mypower(ByVal num As Currency, ByVal power As Long) As String
+%o A154566 Dim b(), temp, i&, j&
+%o A154566 ReDim b(1 To 2 * power)
+%o A154566 ReDim s(1 To 2 * power)
+%o A154566 b(2 * power - 1) = Val(Left(num, 5))
+%o A154566 b(2 * power) = Val(Right(num, 5))
+%o A154566 For i = 2 To power
+%o A154566     temp = 0
+%o A154566     For j = 2 * power To 1 Step -1
+%o A154566         temp = b(j) * num + temp
+%o A154566         b(j) = Format(Val(Right(temp, 5)), "00000")
+%o A154566         temp = Int(temp / 10 ^ 5)
+%o A154566     Next
+%o A154566 Next
+%o A154566 Mypower = Join(b, "")
+%o A154566 End Function
+%o A154566 '
+%o A154566 Function a(ByVal n As Long)
+%o A154566 Dim j As Currency, s As String, num&
+%o A154566 For j = 3 * Int(1 + 10 ^ (10 - 1 / n) / 3) To 9999999999# Step 3
+%o A154566     DoEvents
+%o A154566     If Flag(Mypower(j, n), n) = 1 Then
+%o A154566         a = j
+%o A154566         Exit Function
+%o A154566     End If
+%o A154566 Next
+%o A154566 End Function ' _Zhining Yang_, Oct 11 2022
+%o A154566 (Python)
+%o A154566 def flag(p, n):
+%o A154566     for i in range(10):
+%o A154566         if not p.count(str(i)) == n:
+%o A154566             return False
+%o A154566     return True
+%o A154566 def a(n):
+%o A154566     for i in range(3*int(10**(10-1/n)/3), 10**10, 3):
+%o A154566         if flag(str(i**n), n):
+%o A154566             return i
+%o A154566 for i in range(1, 41):
+%o A154566     print(a(i), end=", ") # _Zhining Yang_, Oct 05 2022
+%Y A154566 Cf. A010784, A078255, A154532.
+%K A154566 nonn,base,fini
+%O A154566 1,1
+%A A154566 _Zhining Yang_, Jan 12 2009, Jan 13 2009
+%E A154566 Edited by _N. J. A. Sloane_, Jan 13 2009
+%E A154566 Edited by _Charles R Greathouse IV_, Nov 01 2009
+%E A154566 Further edits by _M. F. Hasler_, Oct 05 2012
+%E A154566 a(19)-a(22) from _Giovanni Resta_, Jan 17 2020
+%E A154566 Added escape clause to definition. - _N. J. A. Sloane_, Nov 22 2022

@@ -1,0 +1,31 @@
+%I A060500
+%S A060500 0,1,1,1,1,2,1,2,1,1,1,2,1,1,2,2,2,2,1,2,2,2,2,3,1,2,2,2,2,3,1,2,1,1,
+%T A060500 1,2,1,1,2,2,2,2,1,2,2,2,2,3,1,2,1,1,1,2,2,3,2,2,2,3,2,2,2,2,2,2,2,3,
+%U A060500 2,2,2,3,1,1,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,3,2,2,3,3,3,3,1,2,2,2,2,3,2,3,2
+%N A060500 a(n) = number of drops in the n-th permutation of list A060118; the average of digits (where "digits" may eventually obtain also any values > 9) in each siteswap pattern A060496(n).
+%H A060500 Antti Karttunen, <a href="/A060500/b060500.txt">Table of n, a(n) for n = 0..40320</a>
+%H A060500 <a href="/index/Fa#facbase">Index entries for sequences related to factorial base representation</a>
+%F A060500 From _Antti Karttunen_, Aug 18 2016: (Start)
+%F A060500 The following formula reflects the original definition of computing the average, with a few unnecessary steps eliminated:
+%F A060500 a(n) = 1/s * Sum_{i=1..s} ((i-p[i]) modulo s), where p is the permutation of rank n as ordered in the list A060117, and s is its size (the number of its elements) computed as s = 1+A084558(n).
+%F A060500 a(n) = 1/s * Sum_{i=1..s} ((p[i]-i) modulo s). [If inverse permutations from list A060118 are used, then we just flip the order of difference that is used in the first formula].
+%F A060500 a(n) = Sum_{i=1..s} [p[i]<i]. [And this is equal to the number of drops in that permutation p, see comments in A060502 for the proof].
+%F A060500 a(n) = A060502(A060125(n)).
+%F A060500 a(n) = A060129(n) - A060502(n).
+%F A060500 a(n) = A060501(n) - A275851(n) = 1 + A275849(n) - A275851(n).
+%F A060500 (End)
+%p A060500 A060500 := avg(Perm2SiteSwap1(PermUnrank3R(n)));
+%p A060500 # PermUnrank3R(r) gives the permutation with rank r in list A060117:
+%p A060500 PermUnrank3R := proc(r) local n; n := nops(factorial_base(r)); convert(PermUnrank3Raux(n+1, r, []), 'permlist', 1+(((r+2) mod (r+1))*n)); end;
+%p A060500 PermUnrank3Raux := proc(n, r, p) local s; if(0 = r) then RETURN(p); else s := floor(r/((n-1)!)); RETURN(PermUnrank3Raux(n-1, r-(s*((n-1)!)), permul(p, [[n, n-s]]))); fi; end;
+%p A060500 Perm2SiteSwap1 := proc(p) local ip, n, i, a; n := nops(p); ip := convert(invperm(convert(p, 'disjcyc')), 'permlist', n); a := []; for i from 1 to n do a := [op(a), ((ip[i]-i) mod n)]; od; RETURN(a); end;
+%p A060500 avg := a -> (convert(a,`+`)/nops(a));
+%o A060500 (Scheme)
+%o A060500 (define (A060500 n) (let ((s (+ 1 (A084558 n))) (p (A060118permvec-short n))) (let loop ((d 0) (i 1)) (if (> i s) d (loop (+ d (if (< (vector-ref p (- i 1)) i) 1 0)) (+ 1 i))))))
+%o A060500 (define (A060118permvec-short rank) (permute-A060118 (make-initialized-vector (+ 1 (A084558 rank)) 1+) (+ 1 (A084558 rank)) rank))
+%o A060500 (define (permute-A060118 elems size permrank) (let ((p (vector-head elems size))) (let unrankA060118 ((r permrank) (i 1)) (cond ((zero? r) p) (else (let* ((j (1+ i)) (m (modulo r j))) (cond ((not (zero? m)) (let ((org-i (vector-ref p i))) (vector-set! p i (vector-ref p (- i m))) (vector-set! p (- i m) org-i)))) (unrankA060118 (/ (- r m) j) j)))))))
+%Y A060500 Cf. A060125, A060129, A060501, A060502, A275849, A275851.
+%K A060500 nonn
+%O A060500 0,6
+%A A060500 _Antti Karttunen_, Mar 22 2001
+%E A060500 Maple code collected together, alternative definition and new formulas added by _Antti Karttunen_, Aug 24 2016

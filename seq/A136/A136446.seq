@@ -1,0 +1,53 @@
+%I A136446
+%S A136446 12,18,24,30,36,40,42,48,54,56,60,66,72,78,80,84,90,96,100,102,108,
+%T A136446 112,114,120,126,132,138,140,144,150,156,160,162,168,174,176,180,186,
+%U A136446 192,196,198,200,204,208,210,216,220,222,224,228,234,240,246
+%N A136446 Numbers n such that some subset of the numbers { 1 < d < n : d divides n } adds up to n.
+%C A136446 This is a subset of the pseudoperfect numbers A005835 and thus non-deficient (A023196), but in view of the definition actually abundant numbers (A005101). Sequence A122036 lists odd abundant numbers (A005231) which are not in this sequence. So far, 351351 is the only one we know. (As of today, no odd weird (A006037: abundant but not pseudoperfect) number is known.) - _M. F. Hasler_, Apr 13 2008
+%C A136446 This sequence contains infinitely many odd elements: any proper multiple of any pseudoperfect number is in the sequence, so odd proper multiples of odd pseudoperfect numbers are in the sequence. The first such is 2835 = 3 * 945 (which is in the b-file). - _Franklin T. Adams-Watters_, Jun 18 2009
+%C A136446 A211111(a(n)) > 1. - _Reinhard Zumkeller_, Apr 04 2012
+%D A136446 Mladen Vassilev, Two theorems concerning divisors, Bull. Number Theory Related Topics 12 (1988), pp. 10-19.
+%H A136446 M. F. Hasler, <a href="/A136446/b136446.txt">Table of n, a(n) for n = 1..24491</a> (confirmed by _R. J. Mathar_, Mar 20 2011).
+%p A136446 isA136446a := proc(s,n) if n in s then return true; elif add(i,i=s) < n then return false; elif nops(s) = 1 then is(op(1,s)=n) ; else sl := sort(convert(s,list),`>`) ; for i from 1 to nops(sl) do m := op(i,sl) ; if n -m = 0 then return true; end if ; if n-m > 0 then sr := [op(i+1..nops(sl),sl)] ; if procname(convert(sr,set),n-m) then return true; end if; end if; end do; return false; end if; end proc:
+%p A136446 isA136446 := proc(n) isA136446a( numtheory[divisors](n) minus {1,n},n) ; end proc:
+%p A136446 for n from 1 to 400 do if isA136446(n) then printf("%d,",n) ; end if; end do ; # _R. J. Mathar_, Mar 20 2011
+%t A136446 okQ[n_] := Module[{d}, If[PrimeQ[n], False, d = Most[Rest[Divisors[n]]]; MemberQ[Plus @@@ Subsets[d], n]]]; Select[Range[2, 246], okQ]
+%t A136446 (* _T. D. Noe_, Jul 24 2012 *)
+%o A136446 (PARI)
+%o A136446 N=72 \\ up to this value
+%o A136446 vv=vector(N);
+%o A136446 { for(n=2, N,
+%o A136446 if ( isprime(n), next() );
+%o A136446 d=divisors(n);
+%o A136446 d=vector(#d-2,j,d[j+1]); \\ not n, not 1
+%o A136446 for (k=1, (1<<#d)-1, \\ all subsets
+%o A136446 t=vecextract(d, k);
+%o A136446 if ( n==sum(j=1,#t,t[j]),
+%o A136446 vv[n] += 1;););); }
+%o A136446 for (j=1, #vv, if (vv[j]>0, print1(j,", "))) \\ A005835 (after correction)
+%o A136446 (PARI) is_A136446(n,d=divisors(n))={#d>2 && is_A005835(n,d[2..-2])} \\ Replaced old code not conforming to current PARI syntax. - _M. F. Hasler_, Jul 28 2016
+%o A136446 for( n=1,10^4, is_A136446(n) && print1(n", ")) \\ _M. F. Hasler_, Apr 13 2008
+%o A136446 (Haskell)
+%o A136446 a136446 n = a136446_list !! (n-1)
+%o A136446 a136446_list = map (+ 1) $ findIndices (> 1) a211111_list
+%o A136446 -- _Reinhard Zumkeller_, Apr 04 2012
+%o A136446 (Sage)
+%o A136446 def isa(s, n): # After R. J. Mathar's Maple code
+%o A136446     if n in s: return True
+%o A136446     if sum(s) < n: return False
+%o A136446     if len(s) == 1: return s[0] == n
+%o A136446     for i in srange(len(s)-1,-1,-1) :
+%o A136446         d = n - s[i]
+%o A136446         if d == 0: return True
+%o A136446         if d >  0:
+%o A136446             if isa(s[i+1:], d): return True
+%o A136446     return False
+%o A136446 isA136446 = lambda n : isa(divisors(n)[1:-1], n)
+%o A136446 [n for n in (1..246) if isA136446(n)]
+%o A136446 # _Peter Luschny_, Jul 23 2012
+%Y A136446 See A005835 (allowing for divisor 1).
+%Y A136446 Cf. A122036 = A005231 \ A136446.
+%K A136446 nonn
+%O A136446 1,1
+%A A136446 _Joerg Arndt_, Apr 06 2008
+%E A136446 More terms from _M. F. Hasler_, Apr 13 2008

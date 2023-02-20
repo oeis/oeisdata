@@ -1,0 +1,54 @@
+%I A164968
+%S A164968 10007,10009,40009,70001,70003,70009,90001,90007,100003,200003,200009,
+%T A164968 300007,400009,500009,700001,900001,900007,1000003,1000033,1000037,
+%U A164968 1000039,1000081,1000099,1000303,1000403,1000409,1000507,1000609,1000907,1001003,1003001
+%N A164968 Naughty primes: primes in which the number of zeros is greater than the number of all other digits.
+%C A164968 a(31) = 1003001 is the smallest palindromic naughty prime. - _M. F. Hasler_, Nov 22 2009
+%C A164968 This sequence can be considered as irregular table in which row n lists the terms with n digits. The row lengths (number of terms with n digits) are then 0, 0, 0, 0, 8, 9, 296, 275, 7934, 9527, 235729, ... - _M. F. Hasler_, Jul 13 2018
+%H A164968 M. F. Hasler and Arkadiusz Wesolowski, <a href="/A164968/b164968.txt">Table of n, a(n) for n = 1..10000</a> (first 5000 terms from M. F. Hasler).
+%H A164968 Chris Caldwell, The Prime Glossary, <a href="http://primes.utm.edu/glossary/xpage/NaughtyPrime.html">Naughty prime</a>.
+%e A164968 a(24) = 1000303 is a naughty prime because the number of zeros is greater than the number of all other digits.
+%p A164968 Q[1]:= [seq([i],i=1..9)]:
+%p A164968 for d from 2 to 6 do Q[d]:= map(t -> seq([i,op(t)],i=1..9),Q[d-1]) od:
+%p A164968 F:= proc(d) local R,dn,s,sp,q,x;
+%p A164968    R:= NULL;
+%p A164968    for dn from 2 to floor((d-1)/2) do
+%p A164968       for s in combinat:-choose([$1..d-2],dn-2) do
+%p A164968         sp:= [0,op(s),d-1];
+%p A164968         for q in Q[dn] do
+%p A164968           x:= add(q[i]*10^sp[i],i=1..dn);
+%p A164968           if isprime(x) then R:= R, x fi;
+%p A164968     od od od;
+%p A164968     sort([R])
+%p A164968 end proc:
+%p A164968 seq(op(F(d)),d=5..7); # _Robert Israel_, Jul 10 2018
+%t A164968 lst = {}; Do[If[PrimeQ[n] && Count[IntegerDigits[n], 0] > IntegerLength[n]/2, AppendTo[lst, n]], {n, 10^4 + 1, 3^13, 2}]; lst (* _Arkadiusz Wesolowski_, Sep 18 2011 *)
+%t A164968 Select[Prime[Range[100000]],DigitCount[#,10,0]>IntegerLength[#]/2&] (* _Harvey P. Dale_, Jun 09 2015 *)
+%o A164968 (PARI) next_A164968(p)={ for( n=#Str(p)\2+1,oo, my(L=10^(2*n+1)); p=max(10^(2*n-3),p); while( L>p=nextprime(p+1), vecsort(Vecsmall(Str(p)))[n]>48 || return(p));p=0) } \\ _M. F. Hasler_, Nov 22 2009, syntax update Jul 10 2018
+%o A164968 (PARI) A164968_row(n, a=List(), t=vectorv(n, i, 10^(n-i)))={for(z=2, (n-1)\2, my(v=vector(z, i, if(i<2, [1, 1], i<z, [2, n-1], [n, n]))); forvec(d=vector(z, i, [1, 9]), bittest(650, d[z])&& vecsum(d)%3&& forvec(p=v, isprime(d*vecextract(t, p))&& listput(a, d*vecextract(t, p)), 2))); Set(a)} \\ _M. F. Hasler_, Jul 13 2018
+%o A164968 (Python)
+%o A164968 from sympy import isprime
+%o A164968 from itertools import combinations, count, islice, product
+%o A164968 def agen(): # generator of terms
+%o A164968     for d in count(5):
+%o A164968         for first in "123456789":
+%o A164968             passed = set()
+%o A164968             for last in "1379":
+%o A164968                 for znum in range(d//2 + 1, d-1):
+%o A164968                     for zlocs in combinations(range(d-2), znum):
+%o A164968                         for rest in product("123456789", repeat=d-2-znum):
+%o A164968                             nzi, middle = 0, []
+%o A164968                             for i in range(d-2):
+%o A164968                                 if i in zlocs:
+%o A164968                                     middle.append("0")
+%o A164968                                 else:
+%o A164968                                     middle.append(rest[nzi])
+%o A164968                                     nzi += 1
+%o A164968                             t = int("".join(first + "".join(middle) + last))
+%o A164968                             if isprime(t):
+%o A164968                                 passed.add(t)
+%o A164968             yield from sorted(passed)
+%o A164968 print(list(islice(agen(), 31))) # _Michael S. Branicky_, Mar 11 2022
+%K A164968 base,nonn
+%O A164968 1,1
+%A A164968 _G. L. Honaker, Jr._, Sep 02 2009

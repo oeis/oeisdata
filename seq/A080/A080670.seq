@@ -1,0 +1,65 @@
+%I A080670
+%S A080670 1,2,3,22,5,23,7,23,32,25,11,223,13,27,35,24,17,232,19,225,37,211,23,
+%T A080670 233,52,213,33,227,29,235,31,25,311,217,57,2232,37,219,313,235,41,237,
+%U A080670 43,2211,325,223,47,243,72,252,317,2213,53,233,511,237,319,229,59,2235
+%N A080670 Literal reading of the prime factorization of n.
+%C A080670 Exponents equal to 1 are omitted and therefore this sequence differs from A067599.
+%C A080670 Here the first duplicate (ambiguous) term appears already with a(8)=23=a(6), in A067599 this happens only much later. - _M. F. Hasler_, Oct 18 2014
+%C A080670 The number n = 13532385396179 = 13·53^2·3853·96179 = a(n) is (maybe the first?) nontrivial fixed point of this sequence, making it the first known index of a -1 in A195264. - _M. F. Hasler_, Jun 06 2017
+%H A080670 T. D. Noe, <a href="/A080670/b080670.txt">Table of n, a(n) for n = 1..10000</a>
+%H A080670 Tony Padilla and Brady Haran, <a href="https://www.youtube.com/watch?v=3IMAUm2WY70">13532385396179</a>, Numberphile Video, 2017
+%H A080670 N. J. A. Sloane, <a href="/A195264/a195264.pdf">Confessions of a Sequence Addict (AofA2017)</a>, slides of invited talk given at AofA 2017, Jun 19 2017, Princeton. Mentions this sequence.
+%H A080670 N. J. A. Sloane, Three (No, 8) Lovely Problems from the OEIS, Experimental Mathematics Seminar, Rutgers University, Oct 05 2017, <a href="https://vimeo.com/237029685">Part I</a>, <a href="https://vimeo.com/237030304">Part 2</a>, <a href="https://oeis.org/A290447/a290447_slides.pdf">Slides.</a> (Mentions this sequence)
+%e A080670 8=2^3, which reads 23, hence a(8)=23; 12=2^2*3, which reads 223, hence a(12)=223.
+%p A080670 ifsSorted := proc(n)
+%p A080670         local fs,L,p ;
+%p A080670         fs := sort(convert(numtheory[factorset](n),list)) ;
+%p A080670         L := [] ;
+%p A080670         for p in fs do
+%p A080670                 L := [op(L),[p,padic[ordp](n,p)]] ;
+%p A080670         end do;
+%p A080670         L ;
+%p A080670 end proc:
+%p A080670 A080670 := proc(n)
+%p A080670         local a,p ;
+%p A080670         if n = 1 then
+%p A080670                 return 1;
+%p A080670         end if;
+%p A080670         a := 0 ;
+%p A080670         for p in ifsSorted(n) do
+%p A080670                 a := digcat2(a,op(1,p)) ;
+%p A080670                 if op(2,p) > 1 then
+%p A080670                         a := digcat2(a,op(2,p)) ;
+%p A080670                 end if;
+%p A080670         end do:
+%p A080670         a ;
+%p A080670 end proc: # _R. J. Mathar_, Oct 02 2011
+%p A080670 # second Maple program:
+%p A080670 a:= proc(n) option remember; `if`(n=1, 1, (l->
+%p A080670       parse(cat(seq(`if`(l[i, 2]=1, l[i, 1], [l[i, 1],
+%p A080670       l[i, 2]][]), i=1..nops(l)))))(sort(ifactors(n)[2])))
+%p A080670     end:
+%p A080670 seq(a(n), n=1..100);  # _Alois P. Heinz_, Mar 17 2020
+%t A080670 f[n_] := FromDigits[ Flatten@ IntegerDigits[ Flatten[ FactorInteger@ n /. {1 -> {}}]]]; f[1] = 1; Array[ f, 60] (* _Robert G. Wilson v_, Mar 02 2003 and modified Jul 22 2014 *)
+%o A080670 (PARI) A080670(n)=if(n>1, my(f=factor(n),s=""); for(i=1,#f~,s=Str(s,f[i,1],if(f[i,2]>1, f[i,2],""))); eval(s),1) \\ _Charles R Greathouse IV_, Oct 27 2013; case n=1 added by _M. F. Hasler_, Oct 18 2014
+%o A080670 (PARI) A080670(n)=if(n>1,eval(concat(apply(f->Str(f[1],if(f[2]>1,f[2],"")),Vec(factor(n)~)))),1) \\ _M. F. Hasler_, Oct 18 2014
+%o A080670 (Haskell)
+%o A080670 import Data.Function (on)
+%o A080670 a080670 1 = 1
+%o A080670 a080670 n = read $ foldl1 (++) $
+%o A080670 zipWith (c `on` show) (a027748_row n) (a124010_row n) :: Integer
+%o A080670 where c ps es = if es == "1" then ps else ps ++ es
+%o A080670 -- _Reinhard Zumkeller_, Oct 27 2013
+%o A080670 (Python)
+%o A080670 import sympy
+%o A080670 [int(''.join([str(y) for x in sorted(sympy.ntheory.factorint(n).items()) for y in x if y != 1])) for n in range(2,100)] # compute a(n) for n > 1
+%o A080670 # _Chai Wah Wu_, Jul 15 2014
+%Y A080670 Cf. A037276, A067599, A230305, A230625, A027748, A124010, A288818.
+%Y A080670 See A195330, A195331 for those n for which a(n) is a contraction.
+%Y A080670 See also home primes, A037271.
+%Y A080670 See A195264 for what happens when k -> a(k) is repeatedly applied to n.
+%Y A080670 Partial sums: A287881, A287882.
+%K A080670 nonn,base,look
+%O A080670 1,2
+%A A080670 _Jon Perry_, Mar 02 2003
+%E A080670 Edited and extended by _Robert G. Wilson v_, Mar 02 2003

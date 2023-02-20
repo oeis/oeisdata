@@ -1,0 +1,61 @@
+%I A007532 M0487
+%S A007532 1,2,3,4,5,6,7,8,9,24,43,63,89,132,135,153,175,209,224,226,262,264,
+%T A007532 267,283,332,333,334,357,370,371,372,373,374,375,376,377,378,379,407,
+%U A007532 445,463,518,598,629,739,794,849,935,994,1034
+%N A007532 Handsome numbers: sum of positive powers of its digits; a(n) = Sum_{i=1..k} d[i]^e[i] where d[1..k] are the decimal digits of a(n), e[i] > 0.
+%C A007532 The previous name was "Powerful numbers, Definition (2). Cf. A001694, A023052. - _N. J. A. Sloane_, Jan 16 2022
+%C A007532 J. Randle has suggested the name "powerful numbers" for the perfect digital invariants A023052, equal to the sum of a fixed power of the digits. However, "powerful" usually refers to a prime factorization related property, cf. A001694 (and references there as well as on the MathWorld page). C. Rivera has suggested the name "handsome" for these numbers (in view of narcissistic numbers A005188) in his prime puzzle #15: see also contributed comments concerning terminology on that page. - _M. F. Hasler_, Nov 21 2019
+%D A007532 N. J. A. Sloane and Simon Plouffe, The Encyclopedia of Integer Sequences, Academic Press, 1995 (includes this sequence).
+%H A007532 David W. Wilson, <a href="/A007532/b007532.txt">Table of n, a(n) for n = 1..10000</a>
+%H A007532 Giovanni Resta, <a href="http://www.numbersaplenty.com/set/d-powerful_number/">d-powerful numbers</a>, the 30067 terms and sums up to 10^6.
+%H A007532 Carlos Rivera, <a href="https://www.primepuzzles.net/puzzles/puzz_015.htm">Puzzle 15.- Narcissistic and Handsome Primes</a>, The Prime Puzzles and Problems Connection.
+%H A007532 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/PowerfulNumber.html">Powerful Number</a>.
+%H A007532 <a href="/index/Pow#powerful">Index entries for sequences related to powerful numbers</a>
+%F A007532 If n = d_1 d_2 ... d_k in decimal, then there are integers m_1, m_2, ..., m_k > 0 such that n = d_1^m_1 + ... + d_k^m_k.
+%e A007532 43 = 4^2 + 3^3 is OK; 254 = 2^7 + 5^3 + 4^0 is not OK since one of the powers is 0.
+%p A007532 N:= 10000; # to get all entries <= N
+%p A007532 Sums:= proc(L,N)
+%p A007532   option remember;
+%p A007532   local x1,L1;
+%p A007532   x1:= L[1];
+%p A007532   if x1 = 1 then L1:= {1}
+%p A007532   else L1:= {seq(x1^j,j=1..floor(log[x1](N)))};
+%p A007532   fi;
+%p A007532   if nops(L) = 1 then L1
+%p A007532   else select(`<=`,{seq(seq(a+b,a=L1),b=Sums(L[2..-1],N))},N)
+%p A007532   fi
+%p A007532 end proc;
+%p A007532 filter:= proc(x,N)
+%p A007532    local L;
+%p A007532    L:= sort(subs(0=NULL,convert(x,base,10))) ;
+%p A007532    member(x, Sums(L,N));
+%p A007532 end proc;
+%p A007532 A007532:= select(filter,[$1..N],N); # _Robert Israel_, Apr 13 2014
+%t A007532 Select[Range@1000,(s=#;MemberQ[Total/@(a^#&/@Tuples[Range@If[#==1||#==0,1,Floor[Log[#,s]]]&/@(a=IntegerDigits[s])]),s])&] (* _Giorgos Kalogeropoulos_, Aug 18 2021 *)
+%o A007532 (Haskell)
+%o A007532 a007532 n = a007532_list !! (n-1)
+%o A007532 a007532_list = filter f [1..] where
+%o A007532    f x = g x 0 where
+%o A007532      g 0 v = v == x
+%o A007532      g u v = if d <= 1 then g u' (v + d) else v <= x && h d
+%o A007532              where h p = p <= x && (g u' (v + p) || h (p * d))
+%o A007532                    (u', d) = divMod u 10
+%o A007532 -- _Reinhard Zumkeller_, Jun 02 2013
+%o A007532 (Python)
+%o A007532 from itertools import count, takewhile
+%o A007532 def cands(n, d):
+%o A007532     return takewhile(lambda x: x<=n, (d**i for i in count(1)))
+%o A007532 def handsome(s, t):
+%o A007532     if s == "":
+%o A007532         return t == 0
+%o A007532     if s[0] in "01":
+%o A007532         return handsome(s[1:], t - int(s[0]))
+%o A007532     return any(handsome(s[1:], t - p) for p in cands(t, int(s[0])))
+%o A007532 def ok(n):
+%o A007532     return n and handsome(str(n), n)
+%o A007532 print(list(filter(ok, range(1035)))) # _Michael S. Branicky_, Aug 18 2021
+%Y A007532 Cf. A001694, A005934, A005188, A003321, A014576, A023052, A046074, A050240 (>= 2 reps.), A050241.
+%Y A007532 Different from A061862.
+%K A007532 base,nonn,nice
+%O A007532 1,2
+%A A007532 _N. J. A. Sloane_, _Robert G. Wilson v_

@@ -1,0 +1,39 @@
+%I A097862
+%S A097862 1,1,1,1,1,3,1,7,1,1,15,5,1,31,18,1,1,63,56,7,1,127,161,33,1,1,255,
+%T A097862 441,129,9,1,511,1170,453,52,1,1,1023,3036,1485,242,11,1,2047,7753,
+%U A097862 4644,990,75,1,1,4095,19565,14040,3718,403,13,1,8191,48930,41392,13145,1872,102
+%N A097862 Triangle read by rows: T(n,k) is the number of Motzkin paths of length n and height k (n>=0, k>=0).
+%C A097862 Row sums are the Motzkin numbers (A001006).
+%H A097862 Alois P. Heinz, <a href="/A097862/b097862.txt">Rows n = 0..200, flattened</a>
+%H A097862 Richard J. Mathar, <a href="https://viXra.org/abs/2009.0152">Motzkin Islands: a 3-dimensional Embedding of Motzkin Paths</a>, viXra:2009.0152, 2020.
+%F A097862 The g.f. for column k is z^(2k)/[P_k*P_{k+1}], where the polynomials P_k are defined by P_0=1, P_1=1-z, P_k=(1-z)P_{k-1}-z^2*P_{k-2}.
+%F A097862 Sum_{k=1..floor(n/2)} k * T(n,k) = A333498(n). - _Alois P. Heinz_, Mar 28 2020
+%e A097862 Triangle begins:
+%e A097862   1;
+%e A097862   1;
+%e A097862   1,   1;
+%e A097862   1,   3;
+%e A097862   1,   7,    1;
+%e A097862   1,  15,    5;
+%e A097862   1,  31,   18,   1;
+%e A097862   1,  63,   56,   7;
+%e A097862   1, 127,  161,  33,  1;
+%e A097862   1, 255,  441, 129,  9;
+%e A097862   1, 511, 1170, 453, 52, 1;
+%e A097862   ...
+%e A097862 Row n contains 1+floor(n/2) terms.
+%e A097862 T(5,2) = 5 counts HUUDD, UUDDH, UUDHD, UHUDD and UUHDD, where U=(1,1), H=(1,0) and D=(1,-1).
+%p A097862 P[0]:=1: P[1]:=1-z: for n from 2 to 10 do P[n]:=sort(expand((1-z)*P[n-1]-z^2*P[n-2])) od: for k from 0 to 8 do h[k]:=series(z^(2*k)/P[k]/P[k+1],z=0,20) od: a:=proc(n,k) if k=0 then 1 elif n=0 then 0 else coeff(h[k],z^n) fi end: seq(seq(a(n,k),k=0..floor(n/2)),n=0..15);
+%p A097862 # second Maple program:
+%p A097862 b:= proc(x, y, h) option remember; `if`(x=0, z^h, add(
+%p A097862       b(x-1, y+j, max(h, y)), j=-min(1, y)..min(1, x-y-1)))
+%p A097862     end:
+%p A097862 T:= n-> (p-> seq(coeff(p, z, i), i=0..degree(p)))(b(n, 0$2)):
+%p A097862 seq(T(n), n=0..16);  # _Alois P. Heinz_, Mar 13 2017, revised Mar 28 2020
+%t A097862 b[x_, y_, m_] := b[x, y, m] = If[y > x, 0, If[x == 0, z^m, If[y > 0, b[x - 1, y - 1, m], 0] + b[x - 1, y, m] + b[x - 1, y + 1, Max[m, y + 1]]]];
+%t A097862 T[n_] := Function[p, Table[Coefficient[p, z, i], {i, 0, Exponent[p, z]}]][ b[n, 0, 0]];
+%t A097862 Table[T[n], {n, 0, 16}] // Flatten (* _Jean-François Alcover_, May 12 2017, after _Alois P. Heinz_ *)
+%Y A097862 Cf. A001006, A333498.
+%K A097862 nonn,tabf
+%O A097862 0,6
+%A A097862 _Emeric Deutsch_, Sep 01 2004

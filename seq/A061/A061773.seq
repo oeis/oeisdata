@@ -1,0 +1,58 @@
+%I A061773
+%S A061773 1,2,3,4,5,6,7,8,9,10,11,12,13,14,16,17,19,15,18,20,21,22,23,24,26,28,
+%T A061773 29,31,32,34,37,38,41,43,53,59,67,25,27,30,33,35,36,39,40,42,44,46,47,
+%U A061773 48,49,51,52,56,57,58,61,62,64,68,71,73,74,76,79,82,83,86,89,101,106
+%N A061773 Triangle in which n-th row lists Matula-Goebel numbers for all rooted trees with n nodes.
+%C A061773 Let p(1)=2, ... denote the primes. The label f(T) for a rooted tree T is 1 if T has 1 node, otherwise f(T) = Product p(f(T_i)) where the T_i are the subtrees obtained by deleting the root and the edges adjacent to it.
+%C A061773 n-th row has A000081(n) terms.
+%C A061773 First entry in row n is A005517(n).
+%C A061773 Last entry in row n is A005518(n).
+%C A061773 The Maple program yields row n after defining F = A005517(n) and L = A005518(n).
+%H A061773 Alois P. Heinz, <a href="/A061773/b061773.txt">Rows n = 1..12, flattened</a>
+%H A061773 F. Goebel, <a href="http://dx.doi.org/10.1016/0095-8956(80)90049-0">On a 1-1-correspondence between rooted trees and natural numbers</a>, J. Combin. Theory, B 29 (1980), 141-143.
+%H A061773 I. Gutman and A. Ivic, <a href="http://dx.doi.org/10.1016/0012-365X(95)00182-V">On Matula numbers</a>, Discrete Math., 150, 1996, 131-142.
+%H A061773 D. Matula, <a href="http://www.jstor.org/stable/2027327">A natural rooted tree enumeration by prime factorization</a>, SIAM Rev. 10 (1968) 273.
+%H A061773 Kevin Ryde, <a href="/A061773/a061773.gp.txt">PARI/GP code calculating rows</a>
+%H A061773 Gus Wiseman, <a href="/A061773/a061773.png">Matula-Goebel trees triangle illustration n=1..6</a>
+%H A061773 <a href="/index/Mat#matula">Index entries for sequences related to Matula-Goebel numbers</a>
+%H A061773 <a href="/index/Per#IntegerPermutation">Index entries for sequences that are permutations of the natural numbers</a>
+%H A061773 <a href="/index/Ro#rooted">Index entries for sequences related to rooted trees</a>
+%H A061773 <a href="/index/Tra#trees">Index entries for sequences related to trees</a>
+%e A061773 The labels for the rooted trees with at most 4 nodes are as follows (x is the root):
+%e A061773                                          o
+%e A061773                                          |
+%e A061773                o         o        o   o  o
+%e A061773                |          \        \ /   |
+%e A061773      o  o   o  o  o o o    o   o    o    o
+%e A061773      |   \ /   |   \|/      \ /     |    |
+%e A061773   x  x    x    x    x        x      x    x
+%e A061773   1  2    4    3    8        6      7    5 (label)
+%e A061773 Triangle begins:
+%e A061773 1;
+%e A061773 2;
+%e A061773 3,4;
+%e A061773 5,6,7,8;
+%e A061773 9,10,11,12,13,14,16,17,19;
+%e A061773 15,18,20,21,22,23,24,26,28,29,31,32,34,37,38,41,43,53,59,67;
+%e A061773 25,27,30,33,35,36,39,40,42,44,46,47,48,49,51,52,56,57,58,61,62,64,68,\
+%e A061773 71,73,74,76,79,82,83,86,89,101,106,107,109,118,127,131,134,139,157,163,\
+%e A061773 179,191,241,277,331;
+%e A061773 ...
+%e A061773 Triangle of rooted trees represented as finitary multisets begins:
+%e A061773 (),
+%e A061773 (()),
+%e A061773 ((())), (()()),
+%e A061773 (((()))), (()(())), ((()())), (()()()),
+%e A061773 ((())(())), (()((()))), ((((())))), (()()(())), ((()(()))), (()(()())), (()()()()), (((()()))), ((()()())). - _Gus Wiseman_, Dec 21 2016
+%p A061773 n := 8: F := 45: L := 2221: with(numtheory): N := proc (m) local r, s: r := proc (m) options operator, arrow: op(1, factorset(m)) end proc: s := proc (m) options operator, arrow: m/r(m) end proc: if m = 1 then 1 elif bigomega(m) = 1 then 1+N(pi(m)) else N(r(m))+N(s(m))-1 end if end proc: A := {}: for k from F to L do if N(k) = n then A := `union`(A, {k}) else  end if end do: A;
+%t A061773 F[n_] := F[n] = Which[n == 1, 1, n == 2, 2, Mod[n, 3] == 0, 3*5^(n/3-1), Mod[n, 3] == 1, 5^(n/3-1/3), True, 9*5^(n/3-5/3)]; L[n_] := L[n] = Switch[n, 1, 1, 2, 2, 3, 4, 4, 8, _, Prime[L[n-1]]]; r[m_] := FactorInteger[m][[1, 1]]; s[m_] := m/r[m]; NN[m_] := NN[m] = Which[m == 1, 1, PrimeOmega[m] == 1, 1+NN[PrimePi[m]], True, NN[r[m]]+NN[s[m]]-1]; row[n_] := Module[{A, k}, A = {}; For[k = F[n], k <= L[n], k++, If[NN[k] == n, A = Union[A, {k}]]]; A]; Table[row[n], {n, 1, 8}] // Flatten (* _Jean-François Alcover_, Mar 06 2014, after Maple *)
+%t A061773 nn=8;MGweight[n_]:=If[n===1,1,1+Total[Cases[FactorInteger[n],{p_,k_}:>k*MGweight[PrimePi[p]]]]];
+%t A061773 Take[GatherBy[Range[Switch[nn,1,1,2,2,3,4,_,Nest[Prime,8,nn-4]]],MGweight],nn] (* _Gus Wiseman_, Dec 21 2016 *)
+%o A061773 (PARI) See links.
+%Y A061773 Cf. A061775 (number of nodes), A000081 (row lengths), A005517 (row minimum), A005518 (row maximum), A214572 (row n=8).
+%Y A061773 Cf. A347620 (inverse permutation).
+%Y A061773 Cf. A276625, A279065, A279614.
+%K A061773 nonn,tabf,nice,easy
+%O A061773 1,2
+%A A061773 _N. J. A. Sloane_, Jun 22 2001
+%E A061773 More terms from _Emeric Deutsch_, May 01 2004

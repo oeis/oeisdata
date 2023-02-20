@@ -1,0 +1,58 @@
+%I A169608
+%S A169608 1,1,7,163,11602,2334244,1304066578,1972869433837,8012682343669366,
+%T A169608 86298937651093314877,2449381767217281163362301
+%N A169608 a(n) is the number of ways to evaluate a polynomial of degree n, say p0 + p1*x + ... + pn*x^n, where each addition or multiplication takes exactly two arguments.
+%D A169608 Guillaume Revy, Implementation of binary floating-point arithmetic on embedded integer processors, Ph D Thesis, University Lyon - ENS Lyon, December 2009, Table 6.1 in Section 6.1.6
+%e A169608 For example, there are 7 ways to evaluate a polynomial of degree 2:
+%e A169608 ((a0+(x*a1))+(x*(x*a2)))
+%e A169608 ((a0+(x*a1))+((x*x)*a2))
+%e A169608 (a0+(x*(a1+(x*a2))))
+%e A169608 (a0+((x*a1)+(x*(x*a2))))
+%e A169608 (a0+((x*a1)+((x*x)*a2)))
+%e A169608 ((x*a1)+(a0+(x*(x*a2))))
+%e A169608 ((x*a1)+(a0+((x*x)*a2)))
+%p A169608 cparen := proc(e)
+%p A169608 local i, l, s, a, b, pa, pb, la, ee, e1, v, t, g;
+%p A169608 option remember;
+%p A169608 if type(e, name) then 1
+%p A169608 elif type(e, `+`) then
+%p A169608 s := 0; ee := convert(e, list); e1 := ee[1]; ee := subsop(1=NULL, ee);
+%p A169608 for i from 0 to nops(ee)-1 do
+%p A169608 for la in combinat[choose](ee, i) do
+%p A169608 a := e1+convert(la, `+`); b := e-a; pa := procname(a); pb := procname(b); s := s + pa * pb;
+%p A169608 od
+%p A169608 od;
+%p A169608 g := 0;
+%p A169608 for a in e while g<>1 do g:=gcd(g, a) od;
+%p A169608 if g=1 then g:=[] elif type(g, `*`) then g:=convert(g, list) else g:=[g] fi;
+%p A169608 g := map(proc(t) if type(t, `^`) then op(1, t)$op(2, t) else t fi end, g);
+%p A169608 for i from 1 to nops(g) do
+%p A169608 for v in combinat[choose](g, i) do
+%p A169608 a := convert(v, `*`); t := expand(e/a); s := s + procname(a)*procname(t);
+%p A169608 od
+%p A169608 od;
+%p A169608 s
+%p A169608 elif type(e, `*`) or type(e, `^`) then
+%p A169608 s := 0;
+%p A169608 if type(e, `*`) then ee := convert(e, list) else ee:=[e] fi;
+%p A169608 ee := map(proc(t) if type(t, `^`) then op(1, t)$op(2, t) else t fi end, ee);
+%p A169608 for i from 1 to iquo(nops(ee), 2) do
+%p A169608 for la in combinat[choose](ee, i) do
+%p A169608 a := convert(la, `*`); b := e/a;
+%p A169608 if 2*i=nops(ee) and op(1, {a, b})<>a then next fi;
+%p A169608 if a=b then s := s + (procname(a) * (1+procname(a))) / 2;
+%p A169608 else s := s + procname(a)*procname(b);
+%p A169608 fi
+%p A169608 od
+%p A169608 od;
+%p A169608 s
+%p A169608 else ERROR("unexpected type", whattype(e), e)
+%p A169608 fi
+%p A169608 end:
+%p A169608 A169608 := proc(n) cparen(sum(p[i] * x^i, i=0..n)); end:
+%K A169608 nice,nonn
+%O A169608 0,3
+%A A169608 _Christophe Mouilleron_, Dec 03 2009, Jan 23 2010
+%E A169608 Author's name changed by _N. J. A. Sloane_, Dec 17 2009, at the request of _Paul Zimmermann_
+%E A169608 Minor editing of definition by _N. J. A. Sloane_, Dec 19 2009
+%E A169608 Add a(7) to a(10) _Christophe Mouilleron_, Jan 04 2010

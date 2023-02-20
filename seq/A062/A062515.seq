@@ -1,0 +1,48 @@
+%I A062515
+%S A062515 1,6,30,36,210,180,216,2310,1260,900,1080,1296,30030,13860,6300,7560,
+%T A062515 5400,6480,7776,510510,180180,69300,83160,44100,37800,45360,27000,
+%U A062515 32400,38880,46656,9699690,3063060,900900,1081080,485100,415800,498960,264600,189000
+%N A062515 Leading least prime signatures, ordered by forming the product of primorials greater than 2 with multiplicities given by the canonical sequence of partitions.
+%C A062515 From _Jack W Grahl_, Jul 06 2018: (Start)
+%C A062515 The least prime signatures (A025487) are the smallest numbers with a given 'prime signature'. For example, 24 = 2^3 * 3 is the smallest number consisting of the cube of a prime multiplied by a prime. They can be expressed as products 2^(k1) * 3^(k2) * 5(k3) * ..., where k1 >= k2 >= k3 >= ...
+%C A062515 These can also be defined as all products of primorials. Here the primorials (A002110) are the products of the first n primes. So 24 = 2 * 2 * 6.
+%C A062515 The leading least prime signatures (A056153) are the least prime signatures k such that k/2 is not a least prime signature. They can be expressed as products 2^(k1) * 3^(k2) * 5(k3) * ..., where k1 = k2 >= k3 >= ... (note the first operator is equality). A056153 lists these in increasing order.
+%C A062515 They can also be defined as all products of primorials 6 or greater. This sequence lists the leading least prime signatures in an ordering derived from this definition. The canonical sequence of partitions maps to this sequence under a mapping which sends 1 -> 6, 2 -> 30, 3 -> 210, etc., and then forms the product of these terms. Thus the first few partitions are [], [1], [2], [1,1], [3], [2,1] and so the first terms of this sequence are 1, 6, 30, 6 * 6 = 36, 210, 30 * 6 = 180.
+%C A062515 The previous description described this sequence as the 'leading least prime signatures ordered as in A063008'. This was in error. A063008 gives a different ordering of A025487, also based on the canonical sequence of partitions, but the definition is different from this sequence and the terms do not appear in the same order (with the transposition of 216 and 2310 being the first discrepancy). (End)
+%H A062515 Jack W Grahl, <a href="/A062515/b062515.txt">Table of n, a(n) for n = 0..1000</a>
+%e A062515 Values in A025487 can be generated via powers of two as follows:
+%e A062515 1
+%e A062515 2
+%e A062515 4,6
+%e A062515 8,12
+%e A062515 16,24,30
+%e A062515 32,48,60,36
+%e A062515 64,96,120,72
+%e A062515 128,192,240,144,210,180,216
+%e A062515 a(3) = 36 because we can write [1,1] and associate this exponent vector with 6*6
+%o A062515 (Haskell)
+%o A062515 import Data.List(inits)
+%o A062515 primes :: [Integer]
+%o A062515 primes = 2 : 3 : filter (\a -> all (not . divides a) (takeWhile (\x -> x <= a `div` 2) primes)) [4..]
+%o A062515     where
+%o A062515   divides a b = a `mod` b == 0
+%o A062515 primorials :: [Integer]
+%o A062515 primorials = map product $ inits primes
+%o A062515 partitions :: [[Integer]]
+%o A062515 partitions = concat $ map (partitions_of_n) [0..]
+%o A062515 partitions_of_n :: Integer -> [[Integer]]
+%o A062515 partitions_of_n n = partitions_at_most n n
+%o A062515 partitions_at_most :: Integer -> Integer -> [[Integer]]
+%o A062515 partitions_at_most _ 0 = [[]]
+%o A062515 partitions_at_most 0 _ = []
+%o A062515 partitions_at_most m n = concat $ map (\k -> map ([k] ++) (partitions_at_most k (n-k))) ( reverse [1..(min m n)])
+%o A062515 a062515 :: [Integer]
+%o A062515 a062515 = map primorial_signature partitions
+%o A062515     where
+%o A062515   primorial_signature p = product $ map ((drop 1 primorials) !!) (map fromIntegral p)
+%o A062515 -- _Jack W Grahl_, Jul 06 2018
+%Y A062515 Cf. A002110, A025487, A056153 and A063008.
+%K A062515 easy,nice,nonn
+%O A062515 0,2
+%A A062515 _Alford Arnold_, Jul 10 2001
+%E A062515 Clarified and extended by _Jack W Grahl_, Jul 06 2018

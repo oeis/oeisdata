@@ -1,0 +1,57 @@
+%I A106828
+%S A106828 1,0,0,1,0,2,0,6,3,0,24,20,0,120,130,15,0,720,924,210,0,5040,7308,
+%T A106828 2380,105,0,40320,64224,26432,2520,0,362880,623376,303660,44100,945,0,
+%U A106828 3628800,6636960,3678840,705320,34650,0,39916800,76998240,47324376,11098780,866250,10395
+%N A106828 Triangle T(n,k) read by rows: associated Stirling numbers of first kind (n >= 0 and 0 <= k <= floor(n/2)).
+%C A106828 Another version of the triangle is in A008306.
+%C A106828 A signed version of this triangle is given by the exponential Riordan array [1, log(1+t)-t]. Its row sums are (-1)^n*(1-n). Another version is [1, log(1-t)+t], whose row sums are 1-n. - _Paul Barry_, May 10 2008
+%D A106828 L. Comtet, Advanced Combinatorics, Reidel, 1974, p. 256.
+%D A106828 J. Riordan, An Introduction to Combinatorial Analysis, Wiley, 1958, p. 75.
+%H A106828 Reinhard Zumkeller, <a href="/A106828/b106828.txt">Rows n = 0..124 of table, flattened</a>
+%H A106828 Feng-Zhen Zhao, <a href="https://cs.uwaterloo.ca/journals/JIS/VOL11/Zhao/zhao79.html">Some Properties of Associated Stirling Numbers</a>, Journal of Integer Sequences, Article 08.1.7, 2008.
+%F A106828 T(n, k) = Sum_{j=0..n-k} binomial(j, n-2*k)*E2(n-k, j), where E2 are the second-order Eulerian numbers (A008517). - _Peter Luschny_, Jan 13 2016
+%F A106828 Also the Bell transform of the sequence g(k) = k! if k>0 else 0. For the definition of the Bell transform see A264428. - _Peter Luschny_, Jan 13 2016
+%e A106828 Rows 0 though 7 are:
+%e A106828   1;
+%e A106828   0,
+%e A106828   0,   1;
+%e A106828   0,   2,
+%e A106828   0,   6,   3;
+%e A106828   0,  24,  20,
+%e A106828   0, 120, 130,  15;
+%e A106828   0, 720, 924, 210;
+%p A106828 A106828 := (n,k) -> add(binomial(j,n-2*k)*combinat:-eulerian2(n-k,j),j=0..n-k):
+%p A106828 seq(print(seq(A106828(n,k),k=0..iquo(n,2))),n=0..9); # _Peter Luschny_, Apr 20 2011 (revised Jan 13 2016)
+%p A106828 # Second program, after David Callan in A008306:
+%p A106828 A106828 := proc(n, k) option remember; if k = 0 then k^n elif k = 1 then (n-1)! elif n <= 2*k-1 then 0 else (n-1)*(procname(n-1, k) + procname(n-2, k-1)) fi end: seq((seq(A106828(n, k), k = 0..iquo(n, 2))), n=0..12); # _Peter Luschny_, Aug 24 2021
+%t A106828 Eulerian2[n_, k_] := Eulerian2[n, k] = If[k == 0, 1, If[k == n, 0, Eulerian2[n - 1, k] (k + 1) + Eulerian2[n - 1, k - 1] (2 n - k - 1)]];
+%t A106828 T[n_, k_] := Sum[Binomial[j, n - 2 k] Eulerian2[n - k, j], {j, 0, n - k}];
+%t A106828 Table[T[n, k], {n, 0, 12}, {k, 0, n/2}] (* _Jean-François Alcover_, Jun 13 2019 *)
+%o A106828 (Haskell)
+%o A106828 a106828 n k = a106828_tabf !! n !! k
+%o A106828 a106828_row n = a106828_tabf !! n
+%o A106828 a106828_tabf = map (fst . fst) $ iterate f (([1], [0]), 1) where
+%o A106828    f ((us, vs), x) =
+%o A106828      ((vs, map (* x) $ zipWith (+) ([0] ++ us) (vs ++ [0])), x + 1)
+%o A106828 -- _Reinhard Zumkeller_, Aug 05 2013
+%o A106828 (Sage) # uses[bell_transform from A264428]
+%o A106828 # Computes the full triangle 0<=k<=n.
+%o A106828 def A106828_row(n):
+%o A106828     g = lambda k: factorial(k) if k>0 else 0
+%o A106828     s = [g(k) for k in (0..n)]
+%o A106828     return bell_transform(n, s)
+%o A106828 [A106828_row(n) for n in (0..8)] # _Peter Luschny_, Jan 13 2016
+%o A106828 (PARI) E2(n, m) = sum(k=0, n-m, (-1)^(n+k)*binomial(2*n+1, k)*stirling(2*n-m-k+1, n-m-k+1, 1)); \\ A008517
+%o A106828 T(n, k) = if ((n==0) && (k==0), 1, sum(j=0, n-k, binomial(j, n-2*k)*E2(n-k, j+1))); \\ _Michel Marcus_, Dec 07 2021
+%o A106828 (Python)
+%o A106828 from math import factorial
+%o A106828 def A106828(n, k):
+%o A106828     return k**n if k == 0 else factorial(n-1) if k == 1 else 0 if n <= 2*k - 1 else (n - 1)*(A106828(n-1, k) + A106828(n-2, k-1))
+%o A106828 for n in range(14): print([A106828(n, k) for k in range(n//2 + 1)])
+%o A106828 # _Mélika Tebni_, Dec 07 2021, after second Maple script.
+%Y A106828 See A008306 for more information.
+%Y A106828 Cf. A008619 (row lengths), A000166 (row sums).
+%K A106828 tabf,nonn,easy
+%O A106828 0,6
+%A A106828 _N. J. A. Sloane_, May 22 2005
+%E A106828 Removed extra 0 in row 1 from _Michael Somos_, Jan 19 2011

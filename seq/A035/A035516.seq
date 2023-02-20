@@ -1,0 +1,40 @@
+%I A035516
+%S A035516 0,1,2,3,3,1,5,5,1,5,2,8,8,1,8,2,8,3,8,3,1,13,13,1,13,2,13,3,13,3,1,
+%T A035516 13,5,13,5,1,13,5,2,21,21,1,21,2,21,3,21,3,1,21,5,21,5,1,21,5,2,21,8,
+%U A035516 21,8,1,21,8,2,21,8,3,21,8,3,1,34,34,1,34,2,34,3,34,3,1,34,5,34,5,1,34,5,2
+%N A035516 Triangular array formed from Zeckendorf expansion of integers: repeatedly subtract the largest Fibonacci number you can until nothing remains.
+%C A035516 Row n has A007895(n) terms.
+%D A035516 Zeckendorf, E., Représentation des nombres naturels par une somme des nombres de Fibonacci ou de nombres de Lucas, Bull. Soc. Roy. Sci. Liège 41, 179-182, 1972.
+%H A035516 T. D. Noe, <a href="/A035516/b035516.txt">Rows n=0..1000 of triangle, flattened</a>
+%H A035516 N. J. A. Sloane, <a href="/classic.html#WYTH">Classic Sequences</a>
+%e A035516 16 = 13 + 3, so row 16 is 13, 3. [Corrected by _Sean A. Irvine_, Oct 14 2020]
+%e A035516 The first few rows are:
+%e A035516   0;
+%e A035516   1;
+%e A035516   2;
+%e A035516   3;
+%e A035516   3, 1;
+%e A035516   5;
+%e A035516   5, 1;
+%e A035516   5, 2;
+%e A035516   8;
+%e A035516   8, 1;
+%e A035516   8, 2;
+%e A035516   ...
+%e A035516 Row 1000000 is 832040,121393,46368,144,55. Indeed, the Maple program yields in no time Z(1000000) = {55,144,46368,121393,832040}. - _Emeric Deutsch_, Oct 22 2014
+%p A035516 with(combinat): Z := proc (n) local F, LF, A, m: F := proc (n) options operator, arrow: fibonacci(n) end proc: LF := proc (m) local i: for i from 0 while F(i) <= m do  end do: F(i-1) end proc: A := {}: m := n: while 0 < m do A := `union`(A, {LF(m)}): m := m-LF(m) end do: A end proc: # The Maple program, with the command Z(n), yields the set of the Fibonacci numbers in the Zeckendorf representation of n (terms in {} are in reverse order). - _Emeric Deutsch_, Oct 21 2014
+%t A035516 t = Fibonacci /@ Range@ 12; Table[If[MemberQ[t, n], {n}, Most@ MapAt[# + 1 &, Abs@ Differences@ FixedPointList[# - First@ Reverse@ TakeWhile[t, Function[k, # >= k]] &, n], -1]], {n, 41}] // Flatten (* faster, or *)
+%t A035516 t = Fibonacci /@ Range@ 12; {{0}}~Join~Table[First@ Select[ Select[ IntegerPartitions@ n, Times @@ Boole@ Map[MemberQ[t, #] &, #] == 1 &], Times @@ Boole@ Map[# > 1 &, Abs@ Differences@ Map[Position[t, #][[1, 1]] &, #, {1}]] == 1 &], {n, 41}] // Flatten (* _Michael De Vlieger_, May 17 2016 *)
+%o A035516 (Haskell)
+%o A035516 a035516 n k = a035516_tabf !! n !! k
+%o A035516 a035516_tabf = map a035516_row [0..]
+%o A035516 a035516_row 0 = [0]
+%o A035516 a035516_row n = z n $ reverse $ takeWhile (<= n) a000045_list where
+%o A035516    z 0 _              = []
+%o A035516    z x (f:fs'@(_:fs)) = if f <= x then f : z (x - f) fs else z x fs'
+%o A035516 -- _Reinhard Zumkeller_, Mar 10 2013
+%Y A035516 Cf. A035517, A035514, A035515, A000045, A106530, A273156.
+%K A035516 nonn,easy,tabf
+%O A035516 0,3
+%A A035516 _N. J. A. Sloane_
+%E A035516 More terms from _James A. Sellers_, Dec 13 1999

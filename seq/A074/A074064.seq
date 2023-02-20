@@ -1,0 +1,22 @@
+%I A074064
+%S A074064 1,1,1,1,1,1,2,1,1,1,1,2,1,1,1,1,1,1,2,1,1,2,4,1,1,1,1,1,1,1,1,1,1,1,
+%T A074064 1,1,1,1,1,1,1,1,1,1,1,2,4,1,1,1,1,2,3,1,1,2,3,1,1,1,1,1,1,1,1,1,1,1,
+%U A074064 1,1,1,1,1,1,2,3,1,1,1,1,1,2,4,1,1,1,1,2,3,1,1,2,3,1,1,1,1,1,1,2,3,1,1,1,2,4
+%N A074064 Number of cycle types of degree-n permutations having the maximum possible order.
+%H A074064 Alois P. Heinz, <a href="/A074064/b074064.txt">Table of n, a(n) for n = 0..180</a>
+%F A074064 Coefficient of x^n in expansion of Sum_{i divides A000793(n)} mu(A000793(n)/i)*1/Product_{j divides i} (1-x^j).
+%e A074064 For n = 22 we have 4 such cycle types: [1, 1, 1, 3, 4, 5, 7], [1, 2, 3, 4, 5, 7], [3, 3, 4, 5, 7], [4, 5, 6, 7].
+%p A074064 A000793 := proc(n) option remember; local l,p,i ; l := 1: p := combinat[partition](n): for i from 1 to combinat[numbpart](n) do if ilcm( p[i][j] $ j=1..nops(p[i])) > l then l := ilcm( p[i][j] $ j=1..nops(p[i])) ; fi: od: RETURN(l) ; end proc:
+%p A074064 taylInv := proc(i,n) local resul,j,idiv,k ; resul := 1 ; idiv := numtheory[divisors](i) ; for k from 1 to nops(idiv) do j := op(k,idiv) ; resul := resul*taylor(1/(1-x^j),x=0,n+1) ; resul := convert(taylor(resul,x=0,n+1),polynom) ; od ; coeftayl(resul,x=0,n) ; end proc:
+%p A074064 A074064 := proc(n) local resul,a793,dvs,i,k ; resul := 0: a793 := A000793(n) ; dvs := numtheory[divisors](a793) ; for k from 1 to nops(dvs) do i := op(k,dvs) ; resul := resul+numtheory[mobius](a793/i)*taylInv(i,n) ; od : RETURN(resul) ; end proc: # _R. J. Mathar_, Mar 30 2007
+%t A074064 b[n_, i_] := b[n, i] = Module[{p}, p = If[i < 1, 1, Prime[i]]; If[n == 0 || i < 1, 1, Max[b[n, i-1], Table[p^j*b[n-p^j, i-1], {j, 1, Log[p, n] // Floor}]]]];
+%t A074064 g[n_] := g[n] = b[n, If[n < 8, 3, PrimePi[Ceiling[1.328*Sqrt[n*Log[n] // Floor]]]]];
+%t A074064 a[n_] := a[n] = SeriesCoefficient[Sum[MoebiusMu[g[n]/i]/Product[1-x^j, {j, Divisors[i]}], {i, Divisors[g[n]]}] + O[x]^(n+1), n];
+%t A074064 Table[Print["a(", n, ") = ", a[n]]; a[n], {n, 0, 100}] (* _Jean-François Alcover_, Apr 25 2017, after _Alois P. Heinz_ *)
+%Y A074064 Cf. A000793, A074859, A256067, A256554.
+%K A074064 easy,nonn
+%O A074064 0,7
+%A A074064 _Vladeta Jovovic_, Sep 15 2002
+%E A074064 More terms from _R. J. Mathar_, Mar 30 2007
+%E A074064 More terms from _Sean A. Irvine_, Oct 04 2011
+%E A074064 More terms from _Alois P. Heinz_, Mar 29 2015

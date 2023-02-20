@@ -1,0 +1,49 @@
+%I A050936
+%S A050936 5,8,10,12,15,17,18,23,24,26,28,30,31,36,39,41,42,48,49,52,53,56,58,
+%T A050936 59,60,67,68,71,72,75,77,78,83,84,88,90,95,97,98,100,101,102,109,112,
+%U A050936 119,120,121,124,127,128,129,131,132,138,139,143,144,150,152,155,156,158,159,160,161,162
+%N A050936 Sum of two or more consecutive prime numbers.
+%H A050936 T. D. Noe, <a href="/A050936/b050936.txt">Table of n, a(n) for n = 1..10000</a>
+%H A050936 Patrick De Geest, <a href="http://www.worldofnumbers.com/em122.htm">WONplate 122</a>
+%H A050936 Carlos Rivera, <a href="http://www.primepuzzles.net/puzzles/puzz_046.htm">Puzzle 46. Primes expressible as sum of consecutive primes in K ways</a>, The Prime Puzzles and Problems Connection.
+%H A050936 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/PrimeSums.html">Prime Sums</a>
+%e A050936 E.g., 5 = (2 + 3) or (#2,2).
+%e A050936 2+3 = 5, 3+5 = 8, 2+3+5 = 10, 7+5 = 12, 3+5+7 = 15, etc.
+%p A050936 # uses code of A084143
+%p A050936 isA050936 := proc(n::integer)
+%p A050936     if A084143(n) >= 1 then
+%p A050936         true;
+%p A050936     else
+%p A050936         false;
+%p A050936     end if;
+%p A050936 end proc:
+%p A050936 for n from 1 to 300 do
+%p A050936     if isA050936(n) then
+%p A050936         printf("%d,",n);
+%p A050936     end if;
+%p A050936 end do: # _R. J. Mathar_, Aug 19 2020
+%t A050936 lst={};Do[p=Prime[n];Do[p=p+Prime[k];AppendTo[lst, p], {k, n+1, 2*10^2}], {n, 2*10^2}];Take[Union[lst], 10^2] (* _Vladimir Joseph Stephan Orlovsky_, Aug 21 2008 *)
+%t A050936 f[n_] := Block[{len = PrimePi@ n}, p = Prime@ Range@ len; Count[ Flatten[ Table[ p[[i ;; j]], {i, len}, {j, i+1, len}],1], q_ /; Total@ q == n]]; Select[ Range@ 150, f@ # > 0 &] (* Or quicker for a larger range *)
+%t A050936 lmt = 150; p = Prime@ Range@ PrimePi@ lmt; t = Table[0, {lmt}]; Do[s = 0; j = i+1; While[s = s + p[[j]]; s <= lmt, t[[s]]++; j++], {i, Length@ p}]; Select[ Range@ lmt, t[[#]] > 0 &] (* _Robert G. Wilson v_ *)
+%t A050936 Module[{nn=70,prs},prs=Prime[Range[nn]];Take[Union[Flatten[Table[Total/@ Partition[prs,i,1],{i,2,nn}]]],nn]] (* _Harvey P. Dale_, Nov 13 2013 *)
+%o A050936 (Haskell)
+%o A050936 import Data.Set (empty, findMin, deleteMin, insert)
+%o A050936 import qualified Data.Set as Set (null)
+%o A050936 a050936 n = a050936_list !! (n-1)
+%o A050936 a050936_list = f empty [2] 2 $ tail a000040_list where
+%o A050936    f s bs c (p:ps)
+%o A050936      | Set.null s || head bs <= m = f (foldl (flip insert) s bs') bs' p ps
+%o A050936      | otherwise                  = m : f (deleteMin s) bs c (p:ps)
+%o A050936      where m = findMin s
+%o A050936            bs' = map (+ p) (c : bs)
+%o A050936 -- _Reinhard Zumkeller_, Aug 26 2011
+%o A050936 (PARI) is(n)=my(v,m=1,t); while(1,v=vector(m++); v[m\2]=precprime(n\m); for(i=m\2+1,m, v[i]=nextprime(v[i-1]+1)); forstep(i=m\2-1,1,-1, v[i]=precprime(v[i+1]-1)); if(v[1]==0, return(0)); t=vecsum(v); if(t==n,return(1)); if(t>n, while(t>n,t-=v[m]; v=concat(precprime(v[1]-1), v[1..m-1]); t+=v[1]), while(t<n,t-=v[1]; v=concat(v[2..m], nextprime(v[m]+1)); t+=v[m])); if(v[1]==0,return(0)); if(t==n,return(1))) \\ _Charles R Greathouse IV_, May 05 2016
+%o A050936 (PARI) list(lim)=my(v=List(),s,n=1,p); while(1, p=2; s=vecsum(primes(n++)); if(s>lim,return(Set(v))); listput(v,s); forprime(q=prime(n+1),, s+=q-p; if(s>lim,break); listput(v,s); p=nextprime(p+1))); \\ _Charles R Greathouse IV_, Nov 24 2021
+%Y A050936 Subsequence of A034707.
+%Y A050936 Cf. A067372 up to A067381, A054996, A000040.
+%Y A050936 A084143(a(n)) > 0, complement of A087072.
+%Y A050936 Cf. A054845, A097889.
+%K A050936 nice,nonn,easy
+%O A050936 1,1
+%A A050936 _G. L. Honaker, Jr._, Dec 31 1999
+%E A050936 More terms from _David W. Wilson_, Jan 13 2000

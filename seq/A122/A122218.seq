@@ -1,0 +1,78 @@
+%I A122218
+%S A122218 0,0,0,1,1,1,1,2,2,1,1,3,4,3,1,1,4,7,7,4,1,1,5,11,14,11,5,1,1,6,16,25,
+%T A122218 25,16,6,1,1,7,22,41,50,41,22,7,1,1,8,29,63,91,91,63,29,8,1,1,9,37,92,
+%U A122218 154,182,154,92,37,9,1
+%N A122218 Pascal array A(n,p,k) for selection of k elements from two sets L and U with n elements in total whereat the nl = n - p elements in L are labeled and the nu = p elements in U are unlabeled and (in this example) with p = 2 (read by rows).
+%C A122218 See Maple's command choose applied to lists (not sets): e.g. with p = 3 choose([1,2,a,a],3) gives [[1, 2, a], [1, a, a], [2, a, a]]. Furthermore nops(choose([1,2,a,a],3)) gives 3. For p = 0 one gets the usual Pascal triangle. For p=2 and k=2 we have the sequence 1,2,4,7,11,16,22,29,37 = A000124 = Central polygonal numbers. For p=2 and k=3 we have the sequence 3,7,14,25,41,63,92 = A004006 = C(n,1)+C(n,2)+C(n,3), or n*(n^2+5)/6. For p=2 the row sums form sequence A007283 = 3*2^n.
+%C A122218 This is a triangular array like the Pascal triangle.
+%C A122218 It appears that for n > 2, a(n) = A072405(n) (C(n,k)-C(n-2,k-1)). [From _Gerald McGarvey_, Sep 30 2008]
+%H A122218 H. S. Wilf, <a href="http://www.cis.upenn.edu/~wilf/lecnotes.html">Lecture notes on combinatorics and Maple</a>
+%F A122218 Let denote sum_{l+u=k, l<=nl, u<=nu} the sum over all integer partitions [l,u] of k into the 2 parts l and u with the following properties: 1.) l <= nl, u <= nu, 2.) [l,u] and [u,l] are considered as two different partitions, 3.) but the partition [l=k/2,u=k/2], i.e. if l=u, is taken only once, 4.) [l=k,0] and [0,u=k] are considered to be partitions of k into 2 parts also. As usual, C(nl,l) and C(u,u) are binomial coefficients ("nl choose l" and "u choose u"). The Pascal array A(nl,l,nu,u,k) = A(n,p,k) gives the number of possible sets which can be taken from L and U (with elements either from both sets L and U or just from one of the sets L or U). Then A(n,p,k) = sum_{l+u=k, l<=nl, u<=nu} C(n-p,l,k) C(u,u).
+%e A122218 For n = 4 and p = 2 we have nl = 2, nu = 2 and we have the sets L = {1,2} and U = {a,a}, or L+U = {1,2,a,a}.
+%e A122218 Then for k = 1 we have A(4,2,1) = 3 because we can select {1}, {2}, {a}.
+%e A122218 Then for k = 2 we have A(4,2,2) = 4 because we can select {1,2}, {1,a}, {2,a}, {a,a}.
+%e A122218 Then for k = 3 we have A(4,2,3) = 3 because we can select {1,2,a}, {1,a,a,}, {2,a,a}.
+%e A122218 Then for k = 4 we have A(4,2,4) = 1 because we can select {1,2,a,a}.
+%e A122218 For n = 4 and p = 3 we have nl = 1, nu = 3 and we have the sets L = {1} and U = {a,a,a}, or L+U = {1,a,a,a}.
+%e A122218 Then for k = 1 we have A(4,3,1) = 2 because we can select {1}, {a}.
+%e A122218 Then for k = 2 we have A(4,3,2) = 2 because we can select {1,a}, {a,a}.
+%e A122218 Then for k = 3 we have A(4,3,3) = 2 because we can select {1,a,a}, {a,a,a,}.
+%e A122218 Then for k = 4 we have A(4,3,4) = 1 because we can select {1,a,a,a}.
+%p A122218 CallPascalLU := proc() local n,p,k,nl,nv; global result,ierr;
+%p A122218 for n from 0 to 10 do p:=2; nl:=n-p; nv:=p; for k from 0 to n do PascalLU(n,nl,nv,k,result,ierr); if ierr <> 0 then print("An error has occured!"); fi; print("CallPascalLU: n, p, k, C(n,p,k):",n,p,k,result); end do; end do; end proc;
+%p A122218 PascalLU := proc(n::integer,nl::integer,nv::integer,k::integer)
+%p A122218 local i,l,u,prttn,prttnlst,swap;
+%p A122218 global result,ierr;
+%p A122218 ierr:=0;
+%p A122218 if nl+nv <> n or k > n or n < 0 or k < 0 then ierr=1; return; fi;
+%p A122218 prttnlst:=NULL;
+%p A122218 result:=0;
+%p A122218 if k>=2 then
+%p A122218 prttnlst:=PartitionList(k,2);
+%p A122218 prttnlst:=op(prttnlst);
+%p A122218 end if;
+%p A122218 prttnlst:=prttnlst,[k,0];
+%p A122218 prttnlst:=[prttnlst];
+%p A122218 #print("PascalLU: n, k, prttnlst:",n,k,prttnlst);
+%p A122218 for i from 1 to nops(prttnlst) do
+%p A122218 prttn:=op(i,prttnlst);
+%p A122218 l:=op(1,prttn);
+%p A122218 u:=op(2,prttn);
+%p A122218 #print("PascalLU: i, prttn, l, u:",i,prttn,l,u);
+%p A122218 if l <= nl and u <= nv then
+%p A122218 result:=result+binomial(nl,l)*binomial(u,u);
+%p A122218 end if;
+%p A122218 swap:=u; u:=l; l:=swap;
+%p A122218 if l <> u and l <= nl and u <= nv then
+%p A122218 result:=result+binomial(nl,l)*binomial(u,u);
+%p A122218 end if;
+%p A122218 end do;
+%p A122218 #print("n,k,result",n,k,summe)
+%p A122218 end proc;
+%p A122218 PartitionList := proc (n, k)
+%p A122218 # Herbert S. Wilf and Joanna Nordlicht,
+%p A122218 # Lecture Notes "East Side West Side,..."
+%p A122218 # Available from Wilf link.
+%p A122218 # Calculates the partitions of n into k parts.
+%p A122218 # E.g. PartitionList(5,2) --> [[4, 1], [3, 2]].
+%p A122218 local East, West;
+%p A122218 if n < 1 or k < 1 or n < k then
+%p A122218 RETURN([])
+%p A122218 elif n = 1 then
+%p A122218 RETURN([[1]])
+%p A122218 else if n < 2 or k < 2 or n < k then
+%p A122218 West := []
+%p A122218 else
+%p A122218 West := map(proc (x) options operator, arrow;
+%p A122218 [op(x), 1] end proc,PartitionList(n-1,k-1)) end if;
+%p A122218 if k <= n-k then
+%p A122218 East := map(proc (y) options operator, arrow;
+%p A122218 map(proc (x) options operator, arrow; x+1 end proc,y) end proc,PartitionList(n-k,k))
+%p A122218 else East := [] end if;
+%p A122218 RETURN([op(West), op(East)])
+%p A122218 end if;
+%p A122218 end proc;
+%Y A122218 Cf. A007318, A000124, A004006, A007283.
+%K A122218 nonn,tabl
+%O A122218 0,8
+%A A122218 _Thomas Wieder_, Aug 27 2006

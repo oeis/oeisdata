@@ -1,0 +1,35 @@
+%I A070166
+%S A070166 1,1,1,1,2,2,1,1,2,4,6,4,2,1,1,2,5,11,17,18,17,11,5,2,1,1,2,5,13,29,
+%T A070166 52,76,94,94,76,52,29,13,5,2,1,1,2,5,14,35,83,173,308,487,666,774,774,
+%U A070166 666,487,308,173,83,35,14,5,2,1,1,2,5,14,37,98,252,585,1239,2396,4135,6340
+%N A070166 Irregular triangle read by rows giving T(n,k) = number of rooted graphs on n + 1 nodes with k edges (n >= 0, 0 <= k <= n(n-1)/2).
+%C A070166 T(n,k) is also the number of graphs with n nodes and k edges which may contain loops. (Delete the root node and change every edge leading to it into a loop.)
+%C A070166 T(n,k) is also the number of symmetric relations with n points and k relations.
+%D A070166 E. Palmer and F. Harary, Graphical Enumeration, Academic Press, 1973.
+%H A070166 Andrew Howroyd, <a href="/A070166/b070166.txt">Table of n, a(n) for n = 0..1560</a>
+%H A070166 Marko R. Riedel, <a href="http://math.stackexchange.com/questions/2187019/">Number of distinct connected digraphs</a>
+%H A070166 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/RootedGraph.html">Rooted Graphs</a>
+%e A070166 Triangle begins:
+%e A070166 1;
+%e A070166 1, 1;
+%e A070166 1, 2, 2, 1;
+%e A070166 1, 2, 4, 6, 4, 2, 1;
+%e A070166 1, 2, 5, 11, 17, 18, 17, 11, 5, 2, 1; <- gives either the numbers of rooted graphs on 5 nodes, or the numbers of graphs with loops on 4 nodes; with from 0 to 10 edges
+%e A070166 1, 2, 5, 13, 29, 52, 76, 94, 94, 76, 52, 29, 13, 5, 2, 1;
+%e A070166 ...
+%t A070166 Join[{{1},{1,1}},CoefficientList[Table[CycleIndex[Join[PairGroup[SymmetricGroup[n]],Permutations[Range[Binomial[n,2]+1,Binomial[n,2]+n]],2],s]/.Table[s[i]->1+x^i,{i,1,n^2-n}],{n,2,7}],x]]//Grid  (* _Geoffrey Critzer_, Oct 01 2012 *)
+%t A070166 permcount[v_] := Module[{m = 1, s = 0, k = 0, t}, For[i = 1, i <= Length[v], i++, t = v[[i]]; k = If[i > 1 && t == v[[i - 1]], k + 1, 1]; m *= t*k; s += t]; s!/m];
+%t A070166 edges[v_, t_] := Product[Product[g = GCD[v[[i]], v[[j]]]; t[v[[i]]*v[[j]]/g]^g, {j, 1, i - 1}], {i, 2, Length[v]}]*Product[c = v[[i]]; t[c]^Quotient[c + 1, 2]*If[OddQ[c], 1, t[c/2]], {i, 1, Length[v]}];
+%t A070166 row[n_] := Module[{s = 0}, Do[s += permcount[p]*edges[p, 1 + x^# &], {p, IntegerPartitions[n]}]; s/n!] // Expand // CoefficientList[#, x] &
+%t A070166 row /@ Range[0, 7] // Flatten (* _Jean-François Alcover_, Jan 07 2021, after _Andrew Howroyd_ *)
+%o A070166 (PARI)
+%o A070166 permcount(v) = {my(m=1,s=0,k=0,t); for(i=1,#v,t=v[i]; k=if(i>1&&t==v[i-1],k+1,1); m*=t*k;s+=t); s!/m}
+%o A070166 edges(v, t) = {prod(i=2, #v, prod(j=1, i-1, my(g=gcd(v[i], v[j])); t(v[i]*v[j]/g)^g )) * prod(i=1, #v, my(c=v[i]); t(c)^((c+1)\2)*if(c%2, 1, t(c/2)))}
+%o A070166 Row(n) = {my(s=0); forpart(p=n, s+=permcount(p)*edges(p, i->1+x^i)); Vecrev(s/n!)}
+%o A070166 { for(n=0, 7, print(Row(n))) } \\ _Andrew Howroyd_, Oct 23 2019
+%Y A070166 Row sums are A000666.
+%Y A070166 Cf. A054921, A283755, A322114.
+%K A070166 nonn,tabf,nice
+%O A070166 0,5
+%A A070166 _Vladeta Jovovic_ and _Eric W. Weisstein_, Apr 23 2002
+%E A070166 Offset changed by _Andrew Howroyd_, Oct 23 2019

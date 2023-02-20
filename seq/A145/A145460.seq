@@ -1,0 +1,54 @@
+%I A145460
+%S A145460 1,1,1,1,1,2,1,0,3,5,1,0,1,10,15,1,0,0,3,41,52,1,0,0,1,9,196,203,1,0,
+%T A145460 0,0,4,40,1057,877,1,0,0,0,1,10,210,6322,4140,1,0,0,0,0,5,30,1176,
+%U A145460 41393,21147,1,0,0,0,0,1,15,175,7273,293608,115975,1,0,0,0,0,0,6,35,1176,49932,2237921,678570
+%N A145460 Square array A(n,k), n>=0, k>=0, read by antidiagonals, where sequence a_k of column k is the exponential transform of C(n,k).
+%C A145460 A(n,k) is also the number of ways of placing n labeled balls into indistinguishable boxes, where in each filled box k balls are seen at the top. E.g. A(3,1)=10:
+%C A145460   |1.| |2.| |3.| |1|2| |1|2| |1|3| |1|3| |2|3| |2|3| |1|2|3|
+%C A145460   |23| |13| |12| |3|.| |.|3| |2|.| |.|2| |1|.| |.|1| |.|.|.|
+%C A145460   +--+ +--+ +--+ +-+-+ +-+-+ +-+-+ +-+-+ +-+-+ +-+-+ +-+-+-+
+%H A145460 Alois P. Heinz, <a href="/A145460/b145460.txt">Antidiagonals n = 0..140, flattened</a>
+%H A145460 N. J. A. Sloane, <a href="/transforms.txt">Transforms</a>
+%F A145460 A(0,k) = 1 and A(n,k) = Sum_{i=0..n-1} binomial(n-1,i) * binomial(i+1,k) * A(n-1-i,k) for n > 0. - _Seiichi Manyama_, Sep 28 2017
+%e A145460 Square array A(n,k) begins:
+%e A145460    1,   1,  1,  1,  1,  1,  ...
+%e A145460    1,   1,  0,  0,  0,  0,  ...
+%e A145460    2,   3,  1,  0,  0,  0,  ...
+%e A145460    5,  10,  3,  1,  0,  0,  ...
+%e A145460   15,  41,  9,  4,  1,  0,  ...
+%e A145460   52, 196, 40, 10,  5,  1,  ...
+%p A145460 exptr:= proc(p) local g; g:=
+%p A145460           proc(n) option remember; `if`(n=0, 1,
+%p A145460              add(binomial(n-1, j-1) *p(j) *g(n-j), j=1..n))
+%p A145460         end: end:
+%p A145460 A:= (n,k)-> exptr(i-> binomial(i, k))(n):
+%p A145460 seq(seq(A(n, d-n), n=0..d), d=0..12);
+%t A145460 Exptr[p_] := Module[{g}, g[n_] := g[n] = If[n == 0, 1, Sum[Binomial[n-1, j-1] *p[j]*g[n-j], {j, 1, n}]]; g]; A[n_, k_] := Exptr[Function[i, Binomial[i, k]]][n]; Table[Table[A[n, d-n], {n, 0, d}], {d, 0, 12}] // Flatten (* _Jean-François Alcover_, Jan 15 2014, translated from Maple *)
+%o A145460 (Ruby)
+%o A145460 def ncr(n, r)
+%o A145460   return 1 if r == 0
+%o A145460   (n - r + 1..n).inject(:*) / (1..r).inject(:*)
+%o A145460 end
+%o A145460 def A(k, n)
+%o A145460   ary = [1]
+%o A145460   (1..n).each{|i| ary << (0..i - 1).inject(0){|s, j| s + ncr(i - 1, j) * ncr(j + 1, k) * ary[i - 1 - j]}}
+%o A145460   ary
+%o A145460 end
+%o A145460 def A145460(n)
+%o A145460   a = []
+%o A145460   (0..n).each{|i| a << A(i, n - i)}
+%o A145460   ary = []
+%o A145460   (0..n).each{|i|
+%o A145460     (0..i).each{|j|
+%o A145460       ary << a[i - j][j]
+%o A145460     }
+%o A145460   }
+%o A145460   ary
+%o A145460 end
+%o A145460 p A145460(20) # _Seiichi Manyama_, Sep 28 2017
+%Y A145460 Columns k=0-9 give: A000110, A000248, A133189, A145453, A145454, A145455, A145456, A145457, A145458, A145459.
+%Y A145460 A(2n,n) gives A029651.
+%Y A145460 Cf.: A007318, A143398, A292948.
+%K A145460 nonn,tabl
+%O A145460 0,6
+%A A145460 _Alois P. Heinz_, Oct 10 2008

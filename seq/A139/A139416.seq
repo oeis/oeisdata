@@ -1,0 +1,63 @@
+%I A139416
+%S A139416 3,6,12,70,600281,60,1458,264,450,266875,12670498046853,480,
+%T A139416 3998684814453099,11968722,299538,3640,49921080474853515591,1980,
+%U A139416 6107691150665283203125,14960,575047378296833,4068173828125,13936286848094463348388671875,6552,5035427051913
+%N A139416 a(n) is the smallest positive integer k such that d(k) = d(k+2*n) = 2*n, where d(m) (A000005) is the number of positive divisors of m, or 0 if no such k exists.
+%C A139416 Does this sequence have a term for every positive integer n, or are there no solutions for some n?
+%C A139416 There is no solution for any odd positive integer n to d(k) = d(k+n) = n.
+%C A139416 If n is prime, then a(n) exists if and only if there exist either three primes p, q, r such that p^(2*n-1) +- 2*n = q^(n-1)*r or four primes p_1, q_1, p_2, q_2 such that p_1^(n-1)*q_1 + 2*n = p_2^(n-1)*q_2. - _Vladimir Shevelev_, Jul 14 2015
+%e A139416 For a(4) we want the smallest integer m such that d(m) = d(m+8) = 8. The positive integers that have 8 divisors each form the sequence: 24, 30, 40, 42, 54, 56, 66, 70, 78, 88, 102, 104, 105, 110, ... (A030626)
+%e A139416 The first (not necessarily adjacent) pair of integers with 8 divisors each that is separated by exactly 8 is (70,78). So a(4) is the least element of this pair, which is 70.
+%e A139416 Let n=5, a(5) = 600281. According to our comment, 600281 is the smallest number such that there exist either three primes p, q, r such that p^9 +- 10 = q^4*r or four primes p_1, q_1, p_2, q_2 such that p_1^4*q_1 + 10 = p_2^4*q_2. Here p_1 = 11, q_1 = 41, p_2 = 3, q_2 = 7411. - _Vladimir Shevelev_, Jul 14 2015
+%t A139416 f[n_] := Block[{a = {}, d, k, lim = 1000000}, d[x_] := DivisorSigma[0, x]; Do[k = 1; While[Nand[d[k] == d[k + d[k]], d[k] == 2 i] && k <= lim, k++]; If[k > lim, AppendTo[a, 0], AppendTo[a, k]], {i, n}]; a]; f@ 10 (* _Michael De Vlieger_, Jul 13 2015 *)
+%o A139416 (PARI)
+%o A139416 A_simple(n)=local(m=2);n*=2;until(numdiv(m)==n&numdiv(m+n)==n,m++);m
+%o A139416 A_try_pair(p,q,n,limit)=
+%o A139416 {
+%o A139416 /* Helper for A_prime() */
+%o A139416 /* Look for solution which is 0 mod p^(n-1) and -n*2 mod q^(n-1) */
+%o A139416 local(m = chinese(Mod(0,p^(n-1)), Mod(-n*2,q^(n-1))));
+%o A139416 forstep(x=lift(m), limit, component(m,1),
+%o A139416 if(isprime(x\p^(n-1)) & isprime((x+n*2)\q^(n-1)), return(x)));
+%o A139416 limit
+%o A139416 }
+%o A139416 A_try_above_below(m,n)=
+%o A139416 {
+%o A139416 /* Helper for A_prime() */
+%o A139416 /* Function presumes that numdiv(m)==n*2 */
+%o A139416 if(numdiv(m-n*2)==n*2, limit=m-n*2,
+%o A139416 if(numdiv(m+n*2)==n*2, limit=m,
+%o A139416 0))
+%o A139416 }
+%o A139416 A_prime(n,limit,pairmax=30)=
+%o A139416 {
+%o A139416 if (n%2==0 || !isprime(n), error("Only works for odd primes"));
+%o A139416 if (default(primelimit) < limit\nextprime(pairmax+1)^(n-1),
+%o A139416 default(primelimit, limit\nextprime(pairmax+1)^(n-1));
+%o A139416 );
+%o A139416 /* Evens with numdiv==n*2 are {2^(n*2-1)} u {2*p^(n-1)} u {2^(n-1)*p} */
+%o A139416 /* Potential solutions must come from different sets */
+%o A139416 /* Try above and below first two sets */
+%o A139416 A_try_above_below(2^(n*2-1),n);
+%o A139416 forprime(p=3, (limit\2)^(1/(n-1)),
+%o A139416 if (A_try_above_below(2*p^(n-1),n), break));
+%o A139416 /* Odd numbers with numdiv==n*2 are {p^(n*2-1)} u {p^(n-1)*q} */
+%o A139416 /* Try where a(n) and a(n)+n*2 are (small prime)^(n-1)*(big prime) */
+%o A139416 forprime(p=3, pairmax, forprime(q=3, pairmax,
+%o A139416 if (p!=q, limit = A_try_pair(p,q,n,limit))));
+%o A139416 /* Try above and below all other odd numbers with numdiv==n*2 */
+%o A139416 forprime(p=pairmax+1, (limit\3)^(1/(n-1)),
+%o A139416 forprime(q=3, limit\p^(n-1),
+%o A139416 if (p!=q & A_try_above_below(p^(n-1)*q,n), break)));
+%o A139416 forprime(p=3, limit^(1/21),
+%o A139416 if (A_try_above_below(p^21,n), break));
+%o A139416 limit
+%o A139416 } /* _Martin Fuller_, Apr 20 2008 */
+%Y A139416 Cf. A000005, A137532.
+%Y A139416 A subsequence of A175304.
+%K A139416 nonn
+%O A139416 1,1
+%A A139416 _Leroy Quet_, Apr 20 2008
+%E A139416 First 10 terms calculated by _M. F. Hasler_
+%E A139416 a(11)-a(20) from _Martin Fuller_, Apr 20 2008
+%E A139416 a(21)-a(25) from _Jinyuan Wang_, Sep 24 2021

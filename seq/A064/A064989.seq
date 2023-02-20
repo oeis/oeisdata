@@ -1,0 +1,64 @@
+%I A064989
+%S A064989 1,1,2,1,3,2,5,1,4,3,7,2,11,5,6,1,13,4,17,3,10,7,19,2,9,11,8,5,23,6,
+%T A064989 29,1,14,13,15,4,31,17,22,3,37,10,41,7,12,19,43,2,25,9,26,11,47,8,21,
+%U A064989 5,34,23,53,6,59,29,20,1,33,14,61,13,38,15,67,4,71,31,18,17,35,22,73,3,16
+%N A064989 Multiplicative with a(2^e) = 1 and a(p^e) = prevprime(p)^e for odd primes p.
+%C A064989 From _Antti Karttunen_, May 12 2014: (Start)
+%C A064989 a(A003961(n)) = n for all n. [This is a left inverse function for the injection A003961.]
+%C A064989 Bisections are A064216 (the terms at odd indices) and A064989 itself (the terms at even indices), i.e., a(2n) = a(n) for all n.
+%C A064989 (End)
+%C A064989 From _Antti Karttunen_, Dec 18-21 2014: (Start)
+%C A064989 When n represents an unordered integer partition via the indices of primes present in its prime factorization (for n >= 2, n corresponds to the partition given as the n-th row of A112798) this operation subtracts one from each part. If n is of the form 2^k (a partition having just k 1's as its parts) the result is an empty partition (which is encoded by 1, having an "empty" factorization).
+%C A064989 For all odd numbers n >= 3, a(n) tells which number is located immediately above n in square array A246278. Cf. also A246277.
+%C A064989 (End)
+%C A064989 Alternatively, if numbers are represented as the multiset of indices of prime factors with multiplicity, this operation subtracts 1 from each element and discards the 0's. - _M. F. Hasler_, Dec 29 2014
+%H A064989 Harry J. Smith (first 1000 terms) & Antti Karttunen, <a href="/A064989/b064989.txt">Table of n, a(n) for n = 1..10000</a>
+%F A064989 From _Antti Karttunen_, Dec 18 2014: (Start)
+%F A064989 If n = product A000040(k)^e(k) then a(n) = product A008578(k)^e(k) [where A000040(n) gives the n-th prime, and A008578(n) gives 1 for 1 and otherwise the (n-1)-th prime].
+%F A064989 a(1) = 1; for n > 1, a(n) = A008578(A055396(n)) * a(A032742(n)). [Above formula represented as a recurrence. Cf. A252461.]
+%F A064989 a(1) = 1; for n > 1, a(n) = A008578(A061395(n)) * a(A052126(n)). [Compare to the formula of A252462.]
+%F A064989 This prime-shift operation is used in the definitions of many other sequences, thus it can be expressed in many alternative ways:
+%F A064989 a(n) = A200746(n) / n.
+%F A064989 a(n) = A242424(n) / A105560(n).
+%F A064989 a(n) = A122111(A122111(n)/A105560(n)) = A122111(A052126(A122111(n))). [In A112798-partition context: conjugate, remove the largest part (the largest prime factor), and conjugate again.]
+%F A064989 a(1) = 1; for n > 1, a(2n) = a(n), a(2n+1) = A163511((A243071(2n+1)-1) / 2).
+%F A064989 a(n) = A249818(A250470(A249817(n))). [A250470 is an analogous operation for "going one step up" in the square array A083221 (A083140).]
+%F A064989 (End)
+%F A064989 Product_{k=1..n} a(k) = n! / A307035(n). - _Vaclav Kotesovec_, Mar 21 2019
+%F A064989 Sum_{k=1..n} a(k) ~ c * n^2, where c = (1/2) * Product_{p prime} ((p^2-p)/(p^2-q(p))) = 0.220703928... , where q(p) = prevprime(p) (A151799) if p > 2 and q(2) = 1. - _Amiram Eldar_, Nov 18 2022
+%e A064989 a(20) = a(2^2*5) = a(2^2)*a(5) = prevprime(5) = 3.
+%p A064989 q:= proc(p) prevprime(p) end proc: q(2):= 1:
+%p A064989 [seq(mul(q(f[1])^f[2], f = ifactors(n)[2]), n = 1 .. 1000)]; # _Robert Israel_, Dec 21 2014
+%t A064989 Table[Times @@ Power[Which[# == 1, 1, # == 2, 1, True, NextPrime[#, -1]] & /@ First@ #, Last@ #] &@ Transpose@ FactorInteger@ n, {n, 81}] (* _Michael De Vlieger_, Jan 04 2016 *)
+%o A064989 (Haskell)
+%o A064989 a064989 1 = 1
+%o A064989 a064989 n = product $ map (a008578 . a049084) $ a027746_row n
+%o A064989 -- _Reinhard Zumkeller_, Apr 09 2012
+%o A064989 (MIT/GNU Scheme, with Aubrey Jaffer's SLIB Scheme library)
+%o A064989 (require 'factor)
+%o A064989 (define (A064989 n) (if (= 1 n) n (apply * (map (lambda (k) (if (zero? k) 1 (A000040 k))) (map -1+ (map A049084 (factor n)))))))
+%o A064989 ;; _Antti Karttunen_, May 12 2014
+%o A064989 (definec (A064989 n) (if (= 1 n) n (* (A008578 (A055396 n)) (A064989 (A032742 n))))) ;; One based on given recurrence and utilizing memoizing definec-macro.
+%o A064989 (definec (A064989 n) (cond ((= 1 n) n) ((even? n) (A064989 (/ n 2))) (else (A163511 (/ (- (A243071 n) 1) 2))))) ;; Corresponds to one of the alternative formulas, but is very unpractical way to compute this sequence. - _Antti Karttunen_, Dec 18 2014
+%o A064989 (PARI) { for (n=1, 1000, f=factor(n)~; a=1; j=1; if (n>1 && f[1, 1]==2, j=2); for (i=j, length(f), a*=precprime(f[1, i] - 1)^f[2, i]); write("b064989.txt", n, " ", a) ) } \\ _Harry J. Smith_, Oct 02 2009
+%o A064989 (PARI) a(n) = {my(f = factor(n)); for (i=1, #f~, if ((p=f[i,1]) % 2, f[i,1] = precprime(p-1), f[i,1] = 1);); factorback(f);} \\ _Michel Marcus_, Dec 18 2014
+%o A064989 (PARI) A064989(n)=factorback(Mat(apply(t->[max(precprime(t[1]-1),1),t[2]],Vec(factor(n)~))~)) \\ _M. F. Hasler_, Dec 29 2014
+%o A064989 (Python)
+%o A064989 from sympy import factorint, prevprime
+%o A064989 from operator import mul
+%o A064989 from functools import reduce
+%o A064989 def a(n):
+%o A064989     f=factorint(n)
+%o A064989     return 1 if n==1 else reduce(mul, [1 if i==2 else prevprime(i)**f[i] for i in f])
+%o A064989 print([a(n) for n in range(1, 101)]) # _Indranil Ghosh_, Jun 15 2017
+%o A064989 (Python)
+%o A064989 from math import prod
+%o A064989 from sympy import prevprime, factorint
+%o A064989 def A064989(n): return prod(prevprime(p)**e for p, e in  factorint(n>>(~n&n-1).bit_length()).items()) # _Chai Wah Wu_, Jan 05 2023
+%Y A064989 Cf. A064216 (odd bisection), A003961 (inverse), A151799.
+%Y A064989 Cf. A000040, A008578, A027746, A032742, A049084, A052126, A055396, A061395, A112798, A249817, A249818.
+%Y A064989 Other sequences whose definition involve or are some other way related with this sequence: A105560, A108951, A118306, A122111, A156552, A163511, A200746, A241909, A243070, A243071, A243072, A243073, A244319, A245605, A245607, A246165, A246266, A246268, A246277, A246278, A246361, A246362, A246371, A246372, A246373, A246374, A246376, A246380, A246675, A246682, A249745, A250470.
+%Y A064989 Similar prime-shifts towards smaller numbers: A252461, A252462, A252463.
+%K A064989 nonn,look,mult
+%O A064989 1,3
+%A A064989 _Vladeta Jovovic_, Oct 30 2001

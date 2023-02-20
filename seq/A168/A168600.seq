@@ -1,0 +1,28 @@
+%I A168600
+%S A168600 1,1,9,265,19889,3506801,1417530745,1302573091513,2700478102745057,
+%T A168600 12518436654808255585,128568477648089286062441,
+%U A168600 2900655737241126221237790185,142677722979145454671155940121233,15200178301599487957128451391538504145
+%N A168600 E.g.f. satisfies: A(x) = exp( x*A(2x)^2 ).
+%H A168600 Robert Israel, <a href="/A168600/b168600.txt">Table of n, a(n) for n = 0..76</a>
+%e A168600 E.g.f: A(x) = 1 + x + 9*x^2/2! + 265*x^3/3! + 19889*x^4/4! +...
+%p A168600 F:= A -> A(x) - exp(x*A(2*x)^2):
+%p A168600 Extend:= proc(ff)
+%p A168600   local f1x, m, f2, S, R, i;
+%p A168600   f1x:= ff(x); m:= degree(f1x,x);
+%p A168600   f2:= unapply(ff(x) + add(a[i]*x^i,i=m+1..2*m+1),x);
+%p A168600   S:= series(F(f2),x,2*m+2);
+%p A168600   R:= solve(identity(convert(S,polynom),x),{seq(a[i],i=m+1..2*m+1)});
+%p A168600   unapply(subs(R, f2(x)),x);
+%p A168600 end proc:
+%p A168600 g:= 1:
+%p A168600 for iter from 1 to 5 do g:= Extend(g) od:
+%p A168600 seq(coeff(g(x),x,j)*j!,j=0..31); # _Robert Israel_, Feb 22 2019
+%t A168600 nmax = 13; sol = {a[0] -> 1};
+%t A168600 Do[A[x_] = Sum[a[k] x^k, {k, 0, n}] /. sol; eq = CoefficientList[A[x] - Exp[x A[2 x]^2] + O[x]^(n + 1), x] == 0 /. sol; sol = sol ~Join~ Solve[eq][[1]], {n, 1, nmax}];
+%t A168600 sol /. HoldPattern[a[n_] -> k_] :> Set[a[n], k n!];
+%t A168600 a /@ Range[0, nmax] (* _Jean-François Alcover_, Nov 01 2019 *)
+%o A168600 (PARI) {a(n)=local(A=1+x+x*O(x^n)); for(i=0, n, A=exp(x*subst(A, x, 2*x)^2) ); n!*polcoeff(A, n)}
+%Y A168600 Cf. A096538, A168601.
+%K A168600 nonn
+%O A168600 0,3
+%A A168600 _Paul D. Hanna_, Dec 05 2009

@@ -1,0 +1,60 @@
+%I A091079
+%S A091079 16,96,416,496,576,2016,2496,2976,10016,10416,12096,12496,14976,50016,
+%T A091079 52416,60096,62496,74976,250016,252016,260416,262416,300096,302096,
+%U A091079 310496,312496,360576,374976,1250016,1262016,1300416,1312416,1500096,1512096,1550496
+%N A091079 Numbers n which when converted to base 5, reversed and converted back to base 10 yield a number m such that n mod m = 0. Cases which are trivial or result in digit loss are excluded.
+%C A091079 Trivial cases are those numbers which upon conversion result in a number which is palindromic (m = reverse(m)), or a palindrome plus trailing zeros such that m = reverse(m)*10^z where z=number of lost zeros. Nontrivial digit loss occurs when a converted number has trailing zeros that drop off when the number is reversed.
+%C A091079 n/m must be either 2 or 4. - _Robert Israel_, Apr 22 2021
+%H A091079 Robert Israel, <a href="/A091079/b091079.txt">Table of n, a(n) for n = 1..10000</a>
+%H A091079 C. Seggelin, <a href="http://www.plastereddragon.com/maths/asortdiv.htm">Numbers Divisible by Digit Permutations</a>. [Broken link?]
+%e A091079 a(1) = 16 because: 16 in base 5 is 31; 31 reversed is 13; 13 converted back to base 10 is 8 and 16 mod 8 = 0.
+%p A091079 F:= proc(d) local eq,m,R;
+%p A091079   R:= NULL;
+%p A091079   for m in [2,4] do
+%p A091079     eq:= m*add(a[i]*5^i,i=0..d)-add(a[d-i]*5^i,i=0..d);
+%p A091079     R:= R, F1(eq,[],d);
+%p A091079   od;
+%p A091079 sort([R]);
+%p A091079 end proc:
+%p A091079 F1:= proc(eq,A,d) local V,s,e1,i1,i2,vlo,R,v1,v2,Vp,Vm,emax,emin;
+%p A091079       V:= indets(eq);
+%p A091079       if nops(V) = 0 then
+%p A091079          if eq = 0 then subs(A,add(a[d-i]*5^i,i=0..d))
+%p A091079          else NULL
+%p A091079          fi
+%p A091079       elif nops(V) = 1 then
+%p A091079          s:= solve(eq,V[1]);
+%p A091079          if member(s,[$0..4]) then
+%p A091079             subs([op(A),V[1]=s],add(a[d-i]*5^i,i=0..d));
+%p A091079          fi
+%p A091079       else
+%p A091079           Vp,Vm:= selectremove(t -> coeff(eq,t)>0, V);
+%p A091079          emax:= subs(map(`=`,Vp,4),map(`=`,Vm,0),eq);
+%p A091079          if emax < 0 then return NULL fi;
+%p A091079          emin:= subs(map(`=`,Vp,0),map(`=`,Vm,4),eq);
+%p A091079          if emin > 0 then return NULL fi;
+%p A091079            e1:= eq mod 5;
+%p A091079          V:= indets(e1);
+%p A091079          if nops(V) = 0 then procname(e1/5,A,d)
+%p A091079          elif nops(V) = 1 then
+%p A091079            s:= msolve(e1, 5);
+%p A091079            procname(subs(s,eq)/5, [op(A),op(s)], d)
+%p A091079          else
+%p A091079            i1:= op(1,V[1]); i2:= op(1,V[2]);
+%p A091079            if i1 = 0 or i2 = 0 then vlo:= 1 else vlo:= 0 fi;
+%p A091079            R:= NULL;
+%p A091079            for v1 from vlo to 4 do
+%p A091079              s:= msolve(eval(e1, a[i1]=v1),5);
+%p A091079              R:= R, procname(subs(a[i1]=v1, op(s), eq)/5, [op(A),a[i1]=v1,op(s)],d)
+%p A091079            od;
+%p A091079            R
+%p A091079       fi fi
+%p A091079 end proc:
+%p A091079 seq(op(F(d)),d=1..8); # _Robert Israel_, Apr 22 2021
+%o A091079 (PARI) /* See A091077 and use PARI script with b=5 */
+%Y A091079 Cf. A091077 (same in base 3), A091078 (base 4), A091080 (base 6), A091081 (base 7), A091082 (base 8), A091083 (base 9), A031877 (base 10).
+%Y A091079 See also A222816, A214927.
+%K A091079 base,nonn
+%O A091079 1,1
+%A A091079 Chuck Seggelin (barkeep(AT)plastereddragon.com), Dec 18 2003
+%E A091079 More terms from _Michel Marcus_, Oct 10 2014

@@ -1,0 +1,35 @@
+%I A163411
+%S A163411 33,65,99,129,165,195,231,273,297,325,341,387,403,427,455,471,495,513,
+%T A163411 561,585,633,645,693,717,819,843,891,903,951,975,1023,1025,1057,1105,
+%U A163411 1137,1161,1273,1317,1365,1397,1421,1501,1539,1651,1675,1707
+%N A163411 A positive integer is included if it is a palindrome when written in binary, and it is divisible by at least one prime that is not a binary palindrome.
+%C A163411 All positive integers that are palindromes when written in binary are exclusively either in this sequence or in sequence A163410.
+%H A163411 Robert Israel, <a href="/A163411/b163411.txt">Table of n, a(n) for n = 1..10000</a>
+%e A163411 99 in binary is 1100011, which is a palindrome. 99 is divisible by the primes 3 and 11. 3 in binary is 11, a palindrome. But 11(decimal) in binary is 1011, not a palindrome. Since there is at least one prime dividing the binary palindrome 99 that is not a binary palindrome, then 99 is included in this sequence.
+%p A163411 dmax:= 15: # to get all terms with at most dmax binary digits
+%p A163411 revdigs:= proc(n)
+%p A163411   local L, Ln, i;
+%p A163411   L:= convert(n, base, 2);
+%p A163411   Ln:= nops(L);
+%p A163411   add(L[i]*2^(Ln-i), i=1..Ln);
+%p A163411 end proc:
+%p A163411 isbpali:= proc(n) option remember; local L; L:= convert(n,base,2); L=ListTools:-Reverse(L) end proc:
+%p A163411 Bp:= {0, 1}:
+%p A163411 for d from 2 to dmax do
+%p A163411   if d::even then
+%p A163411     Bp:= Bp union {seq(2^(d/2)*x + revdigs(x), x=2^(d/2-1)..2^(d/2)-1)}
+%p A163411   else
+%p A163411     m:= (d-1)/2;
+%p A163411     B:={seq(2^(m+1)*x + revdigs(x), x=2^(m-1)..2^m-1)};
+%p A163411     Bp:= Bp union B union map(`+`, B, 2^m)
+%p A163411   fi
+%p A163411 od:
+%p A163411 R:= select(t -> ormap(not isbpali, numtheory:-factorset(t)), Bp):
+%p A163411 sort(convert(R,list)); # _Robert Israel_, Dec 19 2016
+%t A163411 a = {}; For[n = 2, n < 10000, n++, If[FromDigits[Reverse[IntegerDigits[n, 2]], 2] == n, b = Table[FactorInteger[n][[i, 1]], {i, 1, Length[FactorInteger[n]]}]; For[i = 1, i < Length[b] + 1, i++, If[ ! FromDigits[Reverse[IntegerDigits[b[[i]], 2]], 2] == b[[i]], AppendTo[a, n]; Break]]]]; a (* _Stefan Steinerberger_, Aug 05 2009 *)
+%Y A163411 Cf. A006995, A163410, A207039.
+%K A163411 base,nonn
+%O A163411 1,1
+%A A163411 _Leroy Quet_, Jul 27 2009
+%E A163411 More terms from _Stefan Steinerberger_, Aug 05 2009
+%E A163411 Corrected by _Leroy Quet_, Aug 09 2009

@@ -1,0 +1,33 @@
+%I A064446
+%S A064446 1,2,3,4,5,12,7,8,9,40,11,72,13,56,45,16,17,144,19,80,63,176,23,144,
+%T A064446 25,208,27,112,29,10800,31,32,297,544,175,864,37,608,351,800,41,6048,
+%U A064446 43,352,675,736,47,864,49,800,459,416,53,864,275,1568,513,928,59,21600,61
+%N A064446 a(n) = gcd(n!, n^n, lcm(1, 2, ..., n)), or gcd(n^n, lcm(1, 2, ..., n)).
+%C A064446 gcd(n^n, lcm(1..n)) must be limited to products of all the distinct prime divisors p of n. We can regard lcm(1..n) as the product of a "regular" factor r produced by primes that also divide n and a coprime factor s produced by primes that are coprime to n. Since the distinct prime divisors p of n are the only distinct prime divisors of n^n, we need only consider r and can ignore s when considering gcd(n^n, lcm(1..n)). Because r is the product of the largest power e_1 of each distinct prime divisor p, and since the power e_2 of the corresponding primes that divide n^n must always be such that e_2 >= e_1, it is sufficient to compute r to determine a(n). - _Michael De Vlieger_, Oct 26 2015
+%H A064446 Michael De Vlieger, <a href="/A064446/b064446.txt">Table of n, a(n) for n = 1..10000</a> (First 1000 terms from Harry J. Smith)
+%F A064446 a(n) = gcd(A000142(n), A000312(n), A003418(n)) = gcd(A000312(n), A003418(n)) = gcd(A051696(n), A003418(n)).
+%F A064446 a(n) = Product_{prime p | n} p^floor(log_p(n)). - _Robert Israel_, Oct 26 2015
+%F A064446 a(n) = e^(Sum_{k=1..n} (floor(n^k/k) - floor((n^k - 1)/k))*Mangoldt(k)) where Mangoldt is the Mangoldt function. - _Anthony Browne_, Jun 16 2016
+%e A064446 n=6: a(6) = gcd(720, 60, 46656) = 12.
+%e A064446 Since only 1 and 5 are relatively prime to 6, a(6) = lcm(1,2,3,4,5,6) / lcm(1,5) = 60/5 = 12.
+%p A064446 A064446 := n -> ilcm(seq(i,i=1..n))/ilcm(op(select(k->igcd(n,k)=1,[$1..n])));
+%p A064446 seq(A064446(i),i=0..61); # _Peter Luschny_, Jun 25 2011
+%p A064446 N:= 1000: # to get a(1) to a(N)
+%p A064446 Primes:= select(isprime, [2,seq(2*i+1,i=1..floor((N-1)/2))]):
+%p A064446 A:= Vector(N,1):
+%p A064446 for p in Primes do
+%p A064446   for d from 1 to floor(log[p](N)) do
+%p A064446     for j from p^d to min(N, p^(d+1)-p) by p do
+%p A064446        A[j]:= A[j]*p^d
+%p A064446 od od od:
+%p A064446 convert(A,list); # _Robert Israel_, Oct 26 2015
+%t A064446 Table[GCD[n!,n^n,LCM@@Range[n]],{n,70}] (* _Harvey P. Dale_, Jun 25 2011 *)
+%t A064446 f[n_] := Block[{p = First /@ FactorInteger@ n}, Times @@ Power @@@ Transpose[{p, Floor@ Log[#, n] & /@ p}]]; {1}~Join~Table[f@ n, {n, 2, 10000}] (* _Michael De Vlieger_, Oct 26 2015 *)
+%o A064446 (PARI) L=1; for (n=1, 1000, L=lcm(L, n); write("b064446.txt", n, " ", gcd(n^n, L))) \\ _Harry J. Smith_, Sep 14 2009
+%o A064446 (PARI) a(n)=my(f=factor(n)); for(i=1,#f~, f[i,2]=logint(n,f[i,1])); factorback(f) \\ _Charles R Greathouse IV_, Nov 19 2015
+%o A064446 (PARI) a(n) = gcd(n^n, lcm(vector(n, k, k))); \\ _Michel Marcus_, Mar 18 2018
+%o A064446 (GAP) List([1..70],n->Gcd(Factorial(n),n^n,Lcm([1..n]))); # _Muniru A Asiru_, Mar 20 2018
+%Y A064446 Cf. A000142, A000312, A051696. Equals A003418(n)/A038610(n).
+%K A064446 nonn
+%O A064446 1,2
+%A A064446 _Labos Elemer_, Oct 02 2001

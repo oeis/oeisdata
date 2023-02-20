@@ -1,0 +1,51 @@
+%I A019294
+%S A019294 1,2,4,2,5,1,5,2,7,4,15,3,13,3,2,2,13,4,12,5,2,13,16,2,17,4,9,1,78,7,
+%T A019294 10,4,17,11,6,5,28,22,4,7,39,2,16,16,16,10,32,5,13,17,9,3,58,11,19,5,
+%U A019294 13,67,97,2,23,5,16,2,4,8,101,21,19,11,50,4,20,20,23,14,21,10,36,5,15
+%N A019294 Number (> 0) of iterations of sigma (A000203) required to reach a multiple of n when starting with n.
+%C A019294 Let sigma^m(n) be result of applying sum-of-divisors function m times to n; sequence gives m(n) = min m such that n divides sigma^m(n).
+%C A019294 Perfect numbers require one iteration.
+%C A019294 It is conjectured that the sequence is finite for all n.
+%C A019294 See also the Cohen-te Riele links under A019276.
+%C A019294 a(A111227(n)) > A111227(n). - _Reinhard Zumkeller_, Aug 02 2012
+%C A019294 a(659) > 870. - _Michel Marcus_, Jan 04 2017
+%D A019294 Richard K. Guy, Unsolved Problems in Number Theory, 3rd Edition, Springer, 2004. See Section B41, p. 147.
+%H A019294 Don Reble, <a href="/A019294/b019294.txt">Table of n, a(n) for n = 1..1578</a> (Terms a(1..400) from T. D. Noe, Nov 2007; a(401..659) from Michel Marcus, Jan 02 2017), Feb 20 2022.
+%H A019294 G. L. Cohen and H. J. J. te Riele, <a href="http://projecteuclid.org/euclid.em/1047565640">Iterating the sum-of-divisors function</a>, Experimental Mathematics, 5 (1996), pp. 93-100. See Table 2, p. 95.
+%H A019294 Paul Erdős, Andrew Granville, Carl Pomerance and Claudia Spiro, <a href="http://math.dartmouth.edu/~carlp/iterate.pdf">On the normal behavior of the iterates of some arithmetic functions</a>, Analytic number theory, Birkhäuser Boston, 1990, pp. 165-204.
+%H A019294 Paul Erdős, Andrew Granville, Carl Pomerance and Claudia Spiro, <a href="/A000010/a000010_1.pdf">On the normal behavior of the iterates of some arithmetic functions</a>, Analytic number theory, Birkhäuser Boston, 1990, pp. 165-204. [Annotated copy with A-numbers]
+%H A019294 Carl Pomerance, <a href="https://math.dartmouth.edu/~carlp/composition.pdf">On the composition of the functions sigma and phi</a>, Colloq. Math., 59 (1989), 11-15.
+%H A019294 Wikipedia, <a href="https://en.wikipedia.org/wiki/Iterated_function">Iterated function</a>, as of Jan 02 2020.
+%H A019294 Zeraoulia Rafik, <a href="https://arxiv.org/abs/2102.09941">On congruence of the iterated form sigma^k(m) = 0 mod m</a>, arXiv:2102.09941 [math.NT], 2021.
+%F A019294 Conjecture: lim_{n -> oo} log(Sum_{k=1..n} a(k))/log(n) = C = 1.6... - _Benoit Cloitre_, Aug 24 2002
+%F A019294 From _Michel Marcus_, Jan 02 2017: (Start)
+%F A019294 a(n) = 1 for n in A007691.
+%F A019294 a(n) = 2 for n in A019278 unless it belongs to A007691.
+%F A019294 a(n) = 3 for n in A019292 unless it belongs to A007691 or A019278. (End)
+%e A019294 If n = 9 the iteration sequence is s(9) = {9, 13, 14, 24, 60, 168, 480, 1512, 4800, 15748, 28672} and Mod[s(9), 9] = {0, 4, 5, 6, 6, 6, 3, 0, 3, 7, 7}. The first iterate which is a multiple of 9 is the 7th = 1512, so a(9) = 7. For n = 67, the 101st iterate is the first, so a(67) = 101. Usually several iterates are divisible by the initial value. E.g., if n = 6, then 91 of the first 100 iterates are divisible by 6.
+%e A019294 A difficult term to compute: a(461) = 557. - _Don Reble_, Jun 23 2005
+%p A019294 A019294 := proc(n)
+%p A019294     local a,nitr ;
+%p A019294     a := 1 ;
+%p A019294     nitr := numtheory[sigma](n);
+%p A019294     while modp(nitr,n) <> 0 do
+%p A019294         nitr := numtheory[sigma](nitr) ;
+%p A019294         a := a+1 ;
+%p A019294     end do:
+%p A019294     return a;
+%p A019294 end proc: # _R. J. Mathar_, Aug 22 2016
+%t A019294 f[n_, m_] := Block[{d = DivisorSigma[1, n]}, If[ Mod[d, m] == 0, 0, d]]; Table[ Length[ NestWhileList[ f[ #, n] &, n, # != 0 &]] - 1, {n, 84}] (* _Robert G. Wilson v_, Jun 24 2005 *)
+%t A019294 Table[Length[NestWhileList[DivisorSigma[1,#]&,DivisorSigma[1,n], !Divisible[ #,n]&]],{n,90}] (* _Harvey P. Dale_, Mar 04 2015 *)
+%o A019294 (PARI) a(n)=if(n<0,0,c=1; s=n; while(sigma(s)%n>0,s=sigma(s); c++); c)
+%o A019294 (PARI) apply( A019294(n,s=n)=for(k=1,oo,(s=sigma(s))%n||return(k)), [1..99]) \\ _M. F. Hasler_, Jan 07 2020
+%o A019294 (Haskell)
+%o A019294 a019294 n = snd $ until ((== 0) . (`mod` n) . fst)
+%o A019294                         (\(x, i) -> (a000203 x, i + 1)) (a000203 n, 1)
+%o A019294 -- _Reinhard Zumkeller_, Aug 02 2012
+%o A019294 (Magma) a:=[]; f:=func<n|DivisorSigma(1,n)>; for n in [1..81] do k:=n; s:=1; while f(k) mod n ne 0 do k:=f(k); s:=s+1; end while; Append(~a,s); end for; a; // _Marius A. Burtea_, Jan 11 2020
+%Y A019294 Cf. A019295 (ratio sigma^m(n)/n), A019276 (indices of records), A019277 (records), A000396.
+%K A019294 nonn,nice
+%O A019294 1,2
+%A A019294 _N. J. A. Sloane_
+%E A019294 Additional comments from _Labos Elemer_, Jun 20 2001
+%E A019294 Edited by _M. F. Hasler_, Jan 07 2020

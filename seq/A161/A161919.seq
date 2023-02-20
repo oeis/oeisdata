@@ -1,0 +1,34 @@
+%I A161919
+%S A161919 1,2,3,4,5,7,6,8,9,11,15,10,13,16,17,19,23,31,12,14,18,21,27,32,33,35,
+%T A161919 39,47,63,20,22,25,29,34,37,43,55,64,65,67,71,79,95,127,24,26,30,36,
+%U A161919 38,41,45,51,59,66,69,75,87,111,128,129,131,135,143,159,191,255,28,40
+%N A161919 Permutation of natural numbers: concatenation of subsequences A161924(A000070(k-1)..A026905(k)), k >= 1, each sorted into ascending order.
+%C A161919 This is the lexicographically earliest sequence a_n for which it holds that A161511(a(n)) = A036042(n) for all n.
+%C A161919 Triangle T(n,k) read by rows. Row n lists in increasing order the viabin numbers of the integer partitions of n (n >= 1, k >= 1). The viabin number of an integer partition is defined in the following way. Consider the southeast border of the Ferrers board of the integer partition and consider the binary number obtained by replacing each east step with 1 and each north step, except the last one, with 0. The corresponding decimal form is, by definition, the viabin number of the given integer partition. "Viabin" is coined from "via binary". For example, consider the integer partition [3,1,1] of 5. The southeast border of its Ferrers board yields 10011, leading to the viabin number 19 (an entry in the 5th row). - _Emeric Deutsch_, Sep 06 2017
+%C A161919 After specifying the value of n, the first Maple program yields the entries of row n. - _Emeric Deutsch_, Feb 26 2016
+%C A161919 After specifying the value of m, the third Maple program yields the first m rows; the command partovi(p) yields  the viabin number of the partition p = [a,b,c,...]. - _Emeric Deutsch_, Aug 31 2017
+%H A161919 Alois P. Heinz, <a href="/A161919/b161919.txt">Rows n = 1..28</a> (first 18 rows from A. Karttunen)
+%H A161919 <a href="/index/Per#IntegerPermutation">Index entries for sequences that are permutations of the natural numbers</a>
+%e A161919 This can be viewed as an irregular table, where row r (>= 1) has A000041(r) elements, i.e., as 1; 2,3; 4,5,7; 6,8,9,11,15; 10,13,16,17,19,23,31; etc. A125106 illustrates how each number is mapped to a partition.
+%p A161919 n := 11: s := proc (b) local t, i, j: t := 0: for i to nops(b) do for j from i+1 to nops(b) do if b[j]-b[i] = 1 then t := t+1 else  end if end do end do: t end proc: A[n] := {}: for i to 2^n do a[i] := convert(2*i, base, 2) end do: for k to 2^n do if s(a[k]) = n then A[n] := `union`(A[n], {k}) else  end if end do: A[n]; # _Emeric Deutsch_, Feb 26 2016
+%p A161919 # second Maple program:
+%p A161919 f:= proc(l) local i, r; r:= 0; for i to nops(l)-1 do
+%p A161919        r:= 2*((x-> 2*x+1)@@(l[i+1]-l[i]))(r) od; r/2
+%p A161919     end:
+%p A161919 b:= proc(n, i) `if`(n=0 or i=1, [[0, 1$n]], [b(n, i-1)[],
+%p A161919       `if`(i>n, [], map(x-> [x[], i], b(n-i, i)))[]])
+%p A161919     end:
+%p A161919 T:= n-> sort(map(f, b(n$2)))[]:
+%p A161919 seq(T(n), n=1..10);  # _Alois P. Heinz_, Jul 25 2017
+%p A161919 # 3rd Maple program:
+%p A161919 m := 10; with(combinat): ff := proc (X) local s: s := [1, seq(0, j = 1 .. X[2])]: s := map(convert, s, string): return cat(op(s)) end proc: partovi := proc (P) local X, n, Y, i: X := convert(P, multiset): n := X[-1][1]: Y := map(proc (t) options operator, arrow: t[1] end proc, X): for i to n do if member(i, Y) = false then X := [op(X), [i, 0]] end if end do: X := sort(X, proc (s, t) options operator, arrow: evalb(s[1] < t[1]) end proc): X := map(ff, X): X := cat(op(X)): n := parse(X): n := convert(n, decimal, binary): (1/2)*n end proc: for n to m do {seq(partovi(partition(n)[q]), q = 1 .. numbpart(n))} end do; # _Emeric Deutsch_, Aug 31 2017
+%t A161919 columns = 10;
+%t A161919 row[n_] := n - 2^Floor[Log2[n]];
+%t A161919 col[0] = 0; col[n_] := If[EvenQ[n], col[n/2] + DigitCount[n/2, 2, 1], col[(n-1)/2] + 1];
+%t A161919 Clear[T]; T[_, _] = 0; Do[T[row[k], col[k]] = k, {k, 1, 2^columns}];
+%t A161919 Table[DeleteCases[Sort @ Table[T[n-1, k], {n, 1, 2^(k-1)}], 0], {k, 1, columns}] // Flatten (* _Jean-François Alcover_, Feb 16 2021 *)
+%Y A161919 Inverse: A166277. Sequence A161924 gives the same rows before sorting.
+%K A161919 nonn,tabf
+%O A161919 1,2
+%A A161919 _Alford Arnold_, Jun 23 2009
+%E A161919 Edited and extended by _Antti Karttunen_, Oct 12 2009

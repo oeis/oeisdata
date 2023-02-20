@@ -1,0 +1,52 @@
+%I A109665
+%S A109665 11,12,273,714,15015,149226,22309287,60138078,25588752189,8720021310,
+%T A109665 55093966638711,197238101872812,92887605454857213,174457101106502214,
+%U A109665 25517925977422393515,951603427533949306116,832747507651789493981217
+%N A109665 Smallest number that has exactly n distinct prime factors and ends with the digits of n.
+%e A109665 a(2)=12 since 12 has 2 prime factors (2 and 3) and ends with 2 and is the smallest such number
+%t A109665 f[n_] := Block[{k = n, inc = 10^Floor[ Log[10, n] + 1]}, While[ Length[ FactorInteger[ k]] != n, k += inc]; k]; (* _Robert G. Wilson v_ *), Aug 08 2005)
+%o A109665 Contribution from _David Wasserman_, Sep 30 2008: (Start)
+%o A109665 (PARI) digitcount(n, base = 10) = local(d); if (n == 0, return(1)); d = 1 + floor(log(n)/log(base)); while (n >= base^d, d++); while (n < base^(d - 1), d--); d;
+%o A109665 leastCombo(numPrimes, firstPrime, limit, M, r) = lcHelper(numPrimes, firstPrime, limit, prod(i = firstPrime, firstPrime + numPrimes - 1, prime(i)), 1, firstPrime + numPrimes, M, r);
+%o A109665 lcHelper(left, i, limit, minimum, found, nextP, M, r) = local(p); if (left == 0, return(if (found%M == r, found, limit))); p = prime(i); limit = lcHelper(left - 1, i + 1, limit, minimum, found*p, nextP, M, r); if (minimum*prime(nextP)/p <= limit, limit = lcHelper(left, i + 1, limit, minimum*prime(nextP)/p, found, nextP + 1, M, r)); limit;
+%o A109665 {
+%o A109665 \This function returns 0 if its assumptions fail; otherwise it returns the correct answer. With the defaults 3 and 40, no failures occur in the first 1000 terms.
+%o A109665 a(n, searchP = 3, searchSize = 40) =
+%o A109665 local(r, num2, num5, d, M, pLeft, assumedP, fixed, x, rNeeded, y, best, z, zz, j, z3, pLimit);
+%o A109665 r = n;
+%o A109665 d = digitcount(n);
+%o A109665 if (n < 7,
+%o A109665 while (omega(r) != n, r += 10);
+%o A109665 return(r)
+%o A109665 );
+%o A109665 while (num2 < d && !(r%2),
+%o A109665 num2++;
+%o A109665 r = r/2
+%o A109665 );
+%o A109665 while (num5 < d && !(r%5),
+%o A109665 num5++;
+%o A109665 r = r/5
+%o A109665 );
+%o A109665 M = 10^d/2^num2/5^num5;
+%o A109665 pLeft = n - if (num2, 1, 0) - if (num5, 1, 0);
+%o A109665 searchP = 3;
+%o A109665 searchSize = 40;
+%o A109665 fixed = 2^num2*5^num5;
+%o A109665 assumedP = pLeft - searchP;
+%o A109665 x = 3*prod(i = 4, assumedP + 2, prime(i));
+%o A109665 rNeeded = lift(Mod(r, M)/Mod(x, M));
+%o A109665 best = prime(n + 40)^searchP;
+%o A109665 forvec (v = vector(searchP, i, [assumedP + 3, assumedP + searchSize + 2]), y = prod(i = 1, searchP, prime(v[i])); if (y%M == rNeeded, best = min(best, y)), 2);
+%o A109665 if (best == searchP ^prime(n + 40), return(0));
+%o A109665 y = fixed*x*best;
+%o A109665 z = fixed*x*prod(i = assumedP + 3, pLeft + 2, prime(i));
+%o A109665 if (z >= 2*y, return(0));
+%o A109665 rNeeded = lift(Mod(r, M)/3);
+%o A109665 return(fixed*3*leastCombo(pLeft - 1, 4, y/fixed/3, M, rNeeded));
+%o A109665 } (End)
+%Y A109665 A109687 [From _David Wasserman_, Sep 30 2008]
+%K A109665 base,nonn
+%O A109665 1,1
+%A A109665 _Erich Friedman_, Aug 06 2005
+%E A109665 a(11) - a(17) from _Robert G. Wilson v_, Aug 08 2005
+%E A109665 Corrected terms. Deleted second program, which appeared to be incorrect. - _David Wasserman_, Sep 30 2008

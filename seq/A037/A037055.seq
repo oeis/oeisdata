@@ -1,0 +1,37 @@
+%I A037055
+%S A037055 2,13,11,1117,10111,101111,1111151,11110111,101111111,1111111121,
+%T A037055 11111111113,101111111111,1111111118111,11111111111411,
+%U A037055 111111111116111,1111111111111181,11111111101111111,101111111111111111,1111111111111111171,1111111111111111111,111111111111111119111
+%N A037055 Smallest prime containing exactly n 1's.
+%C A037055 For n > 1, A037055 is conjectured to be identical to A084673. - _Robert G. Wilson v_, Jul 04 2003
+%C A037055 a(n) =  A002275(n) for n in A004023.  For all other n < 900, a(n) has n+1 digits. - _Robert Israel_, Feb 21 2016
+%H A037055 Robert Israel, <a href="/A037055/b037055.txt">Table of n, a(n) for n = 0..900</a>
+%F A037055 a(n) = the smallest prime in { R-10^n, R-10^(n-1), ..., R-10; R+a*10^b, a=1, ..., 8, b=0, 1, 2, ..., n }, where R = (10^(n+1)-1)/9 is the (n+1)-digit repunit. - _M. F. Hasler_, Feb 25 2016
+%p A037055 f:= proc(n) local m,d,r,x;
+%p A037055    r:= (10^n-1)/9;
+%p A037055    if isprime(r) then return r fi;
+%p A037055    r:= (10^(n+1)-1)/9;
+%p A037055    for m from n-1 to 1 by -1 do
+%p A037055      x:= r - 10^m;
+%p A037055      if isprime(x) then return x fi;
+%p A037055    od;
+%p A037055    for m from 0 to n do
+%p A037055      for d from 1 to 8 do
+%p A037055         x:= r + d*10^m;
+%p A037055         if isprime(x) then return x fi;
+%p A037055      od
+%p A037055    od;
+%p A037055    error("Needs more than n+1 digits")
+%p A037055 end proc:
+%p A037055 map(f, [$0..100]); # _Robert Israel_, Feb 21 2016
+%t A037055 f[n_, b_] := Block[{k = 10^(n + 1), p = Permutations[ Join[ Table[b, {i, 1, n}], {x}]], c = Complement[Table[j, {j, 0, 9}], {b}], q = {}}, Do[q = Append[q, Replace[p, x -> c[[i]], 2]], {i, 1, 9}]; r = Min[ Select[ FromDigits /@ Flatten[q, 1], PrimeQ[ # ] & ]]; If[r ? Infinity, r, p = Permutations[ Join[ Table[ b, {i, 1, n}], {x, y}]]; q = {}; Do[q = Append[q, Replace[p, {x -> c[[i]], y -> c[[j]]}, 2]], {i, 1, 9}, {j, 1, 9}]; Min[ Select[ FromDigits /@ Flatten[q, 1], PrimeQ[ # ] & ]]]]; Table[ f[n, 1], {n, 1, 18}]
+%t A037055 Join[{2, 13}, Table[Sort[Flatten[Table[Select[FromDigits/@Permutations[Join[{n}, PadRight[{}, i, 1]]], PrimeQ], {n, 0, 9}]]][[1]], {i, 2, 20}]] (* _Vincenzo Librandi_, May 11 2017 *)
+%o A037055 (PARI) A037055(n)={my(p,t=10^(n+1)\9); forstep(k=n+1,1,-1, ispseudoprime(p=t-10^k) && return(p)); forvec(v=[[0, n], [1, 8]], ispseudoprime(p=t+10^v[1]*v[2]) && return(p))} \\ _M. F. Hasler_, Feb 22 2016
+%Y A037055 Cf. A084673, A065584, A065821, A037054, A034388, A036507-A036536.
+%Y A037055 Cf. A037053, A037057, A037059, A037061, A037063, A037065, A037067, A037069, A037071.
+%K A037055 nonn,base
+%O A037055 0,1
+%A A037055 _Patrick De Geest_, Jan 04 1999
+%E A037055 More terms from _Sascha Kurz_, Feb 10 2003
+%E A037055 Edited by _Robert G. Wilson v_, Jul 04 2003
+%E A037055 a(0) = 2 inserted by _Robert Israel_, Feb 21 2016

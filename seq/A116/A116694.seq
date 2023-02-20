@@ -1,0 +1,40 @@
+%I A116694
+%S A116694 1,2,2,4,8,4,8,34,34,8,16,148,322,148,16,32,650,3164,3164,650,32,64,
+%T A116694 2864,31484,70878,31484,2864,64,128,12634,314662,1613060,1613060,
+%U A116694 314662,12634,128,256,55756,3149674,36911922,84231996,36911922,3149674,55756,256
+%N A116694 Array read by antidiagonals: number of ways of dividing an n X m rectangle into integer-sided rectangles.
+%H A116694 Alois P. Heinz, <a href="/A116694/b116694.txt">Antidiagonals n = 1..20, flattened</a>
+%H A116694 Joshua Smith and Helena Verrill, <a href="/A116694/a116694.pdf">On dividing rectangles into rectangles</a>
+%e A116694 Array begins:
+%e A116694    1,    2,      4,        8,         16,           32, ...
+%e A116694    2,    8,     34,      148,        650,         2864, ...
+%e A116694    4,   34,    322,     3164,      31484,       314662, ...
+%e A116694    8,  148,   3164,    70878,    1613060,     36911922, ...
+%e A116694   16,  650,  31484,  1613060,   84231996,   4427635270, ...
+%e A116694   32, 2864, 314662, 36911922, 4427635270, 535236230270, ...
+%p A116694 M:= proc(n) option remember; local k; k:= 2^(n-2);
+%p A116694       `if`(n=1, Matrix([2]), Matrix(2*k, (i, j)->`if`(i<=k,
+%p A116694       `if`(j<=k, M(n-1)[i, j], B(n-1)[i, j-k]),
+%p A116694       `if`(j<=k, B(n-1)[i-k, j], 2*M(n-1)[i-k, j-k]))))
+%p A116694     end:
+%p A116694 B:= proc(n) option remember; local k; k:=2^(n-2);
+%p A116694       `if`(n=1, Matrix([1]), Matrix(2*k, (i,j)->`if`(i<=k,
+%p A116694       `if`(j<=k, B(n-1)[i, j], B(n-1)[i, j-k]),
+%p A116694       `if`(j<=k, B(n-1)[i-k, j], M(n-1)[i-k, j-k]))))
+%p A116694     end:
+%p A116694 A:= proc(n, m) option remember; `if`(n=0 or m=0, 1, `if`(m>n, A(m, n),
+%p A116694       add(i, i=map(rhs, [op(op(2, M(m)^(n-1)))]))))
+%p A116694     end:
+%p A116694 seq(seq(A(n, 1+d-n), n=1..d), d=1..12);  # _Alois P. Heinz_, Dec 13 2012
+%t A116694 M[n_] := M[n] = Module[{k = 2^(n-2)}, If[n == 1, {{2}}, Table[If[i <= k, If[j <= k, M[n-1][[i, j]], B[n-1][[i, j-k]]], If[j <= k, B[n-1][[i-k, j]], 2*M[n-1][[i-k, j-k]]]], {i, 1, 2k}, {j, 1, 2k}]]]; B[n_] := B[n] = Module[{k = 2^(n-2)}, If[n == 1, {{1}}, Table[If[i <= k, If[j <= k, B[n-1][[i, j]], B[n-1][[i, j-k]]], If[j <= k, B[n-1][[i-k, j]], M[n-1][[i-k, j-k]]]], {i, 1, 2k}, {j, 1, 2k}]]]; A[0, 0] = 1; A[n_ , m_ ] /; m>n := A[m, n]; A[n_ , m_ ] :=MatrixPower[M[m], n-1] // Flatten // Total; Table[Table[A[n, 1+d-n], {n, 1, d}], {d, 1, 12}] // Flatten (* _Jean-François Alcover_, Feb 23 2015, after _Alois P. Heinz_ *)
+%o A116694 (PARI) A116694(m,n)=#fill(m,n) \\ where fill() below computes all tilings. - _M. F. Hasler_, Jan 22 2018
+%o A116694 fill(m,n,A=matrix(m,n),i=1,X=1,Y=1)={while((Y>n&&X++&&!Y=0)||A[X,Y], X>m&&return([A]); Y++); my(N=n,L=[]); for(x=X,m, A[x,Y]&&break; for(y=Y,N, if(A[x,y],for(j=y,N,for(k=X,x-1,A[k,j]=0));N=y-1;break); for(j=X,x,A[j,y]=i); L=concat(L,fill(m,n,A,i+1,X,y+1))); x<m&&!A[x+1,Y]&&for(j=Y+1,N, for(i=X,x,A[i,j]=0)));L}
+%Y A116694 Columns (or rows) 1-10 give: A011782, A034999, A208215, A220297, A220298, A220299, A220300, A220301, A220302, A220303.
+%Y A116694 Main diagonal gives A182275.
+%Y A116694 For irreducible or "tight" pavings, see also A285357.
+%Y A116694 Triangular version: A333476.
+%Y A116694 A(2n,n) gives A333495.
+%K A116694 nonn,tabl
+%O A116694 1,2
+%A A116694 Helena Verrill (verrill(AT)math.lsu.edu), Feb 23 2006
+%E A116694 Edited and more terms from _Alois P. Heinz_, Dec 09 2012

@@ -1,0 +1,42 @@
+%I A025435
+%S A025435 0,1,0,0,1,1,0,0,0,1,1,0,0,1,0,0,1,1,0,0,1,0,0,0,0,2,1,0,0,1,0,0,0,0,
+%T A025435 1,0,1,1,0,0,1,1,0,0,0,1,0,0,0,1,1,0,1,1,0,0,0,0,1,0,0,1,0,0,1,2,0,0,
+%U A025435 1,0,0,0,0,1,1,0,0,0,0,0,1,1,1,0,0,2,0
+%N A025435 Number of partitions of n into 2 distinct squares.
+%C A025435 a(A004435(n)) = 0; a(A001983(n)) > 0. - _Reinhard Zumkeller_, Dec 20 2013
+%H A025435 Reinhard Zumkeller, <a href="/A025435/b025435.txt">Table of n, a(n) for n = 0..10000</a>
+%F A025435 a(n) = A000161(n) - A010052(2*n). - _M. F. Hasler_, Aug 05 2018
+%F A025435 a(n) = Sum_{i=1..n} c(i) * c(2*n-i), where c is the square characteristic (A010052). - _Wesley Ivan Hurt_, Nov 26 2020
+%e A025435 G.f. = x + x^4 + x^5 + x^9 + x^10 + x^13 + x^16 + x^17 + x^20 + 2*x^25 + ...
+%p A025435 A025435 := proc(n)
+%p A025435     local i, j, ans;
+%p A025435     ans := 0;
+%p A025435     for i from 0 to n do
+%p A025435         for j from i+1 to n do
+%p A025435             if i^2+j^2=n then
+%p A025435                 ans := ans+1
+%p A025435             fi
+%p A025435         end do
+%p A025435     end do;
+%p A025435     ans ;
+%p A025435 end proc: # _R. J. Mathar_, Aug 04 2018
+%t A025435 a[ n_] := If[ n < 0, 0, Sum[ Boole[ n == i^2 + j^2], {i, Sqrt[n]}, {j, 0, i - 1}]]; (* _Michael Somos_, Jun 24 2015 *)
+%t A025435 a[ n_] := Length@ PowersRepresentations[ n, 2, 2] - Boole @ IntegerQ @ Sqrt[2 n]; (* _Michael Somos_, Jun 24 2015 *)
+%t A025435 a[ n_] := SeriesCoefficient[ With[ {f = (EllipticTheta[ 3, 0, x] + 1)/2, g = (EllipticTheta[ 3, 0, x^2] + 1)/2}, f f - g] / 2, {x, 0, n}]; (* _Michael Somos_, Jun 24 2015 *)
+%o A025435 (Haskell)
+%o A025435 a025435 0 = 0
+%o A025435 a025435 n = a010052 n + sum
+%o A025435    (map (a010052 . (n -)) $ takeWhile (< n `div` 2) $ tail a000290_list)
+%o A025435 -- _Reinhard Zumkeller_, Dec 20 2013
+%o A025435 (PARI) {a(n) = if( n<0, 0, sum(i=1, sqrtint(n), sum(j=0, i-1, n == i^2 + j^2)))}; /* _Michael Somos_, Jun 24 2015 */
+%o A025435 (PARI) A025435(n)=sum(k=sqrtint((n-1+!n)\2)+1, sqrtint(n), issquare(n-k^2))-issquare(n/2) \\ or A000161(n)-issquare(n/2). - _M. F. Hasler_, Aug 05 2018
+%o A025435 (Python)
+%o A025435 from math import prod
+%o A025435 from sympy import factorint
+%o A025435 def A025435(n):
+%o A025435     f = factorint(n)
+%o A025435     return int(not any(e&1 for p,e in f.items() if p>2))*(1-((f.get(2,0)&1)<<1)) + (((m:=prod(1 if p==2 else (e+1 if p&3==1 else (e+1)&1) for p, e in f.items()))+((((~n & n-1).bit_length()&1)<<1)-1 if m&1 else 0))>>1) if n else 0 # _Chai Wah Wu_, Sep 08 2022
+%Y A025435 Cf. A010052, A000290, A000161, A025441.
+%K A025435 nonn
+%O A025435 0,26
+%A A025435 _David W. Wilson_

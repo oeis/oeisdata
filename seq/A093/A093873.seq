@@ -1,0 +1,63 @@
+%I A093873
+%S A093873 1,1,1,1,2,1,2,1,3,2,3,1,3,2,3,1,4,3,4,2,5,3,5,1,4,3,4,2,5,3,5,1,5,4,
+%T A093873 5,3,7,4,7,2,7,5,7,3,8,5,8,1,5,4,5,3,7,4,7,2,7,5,7,3,8,5,8,1,6,5,6,4,
+%U A093873 9,5,9,3,10,7,10,4,11,7,11,2,9,7,9,5,12,7,12,3,11,8,11,5,13,8,13,1,6
+%N A093873 Numerators in Kepler's tree of harmonic fractions.
+%C A093873 Form a tree of fractions by beginning with 1/1 and then giving every node i/j two descendants labeled i/(i+j) and j/(i+j).
+%H A093873 R. Zumkeller, <a href="/A093873/b093873.txt">Table of n, a(n) for n = 1..10000</a>
+%H A093873 Johannes Kepler, <a href="http://archive.org/details/ioanniskepplerih00kepl">Harmonices Mundi</a>, Liber III, see p. 27.
+%H A093873 <a href="/index/Fo#fraction_trees">Index entries for fraction trees</a>
+%F A093873 a(n) = a([n/2])*(1 - n mod 2) + A093875([n/2])*(n mod 2).
+%F A093873 a(A029744(n-1)) = 1; a(A070875(n-1)) = 2; a(A123760(n-1)) = 3. - _Reinhard Zumkeller_, Oct 13 2006
+%F A093873 A011782(k) = SUM(a(n)/A093875(n): 2^k<=n<2^(k+1)), k>=0. [_Reinhard Zumkeller_, Oct 17 2010]
+%F A093873 a(1) =  1. For all n>0  a(2n) =  a(n), a(2n+1) =  A093875(n). - _Yosu Yurramendi_, Jan 09 2016
+%F A093873 a(4n+3) = a(4n+1), a(4n+2) = a(4n+1) - a(4n), a(4n+1) = A071585(n). - _Yosu Yurramendi_, Jan 11 2016
+%F A093873 G.f. G(x) satisfies G(x) = x + (1+x) G(x^2) + Sum_{k>=2} x (1+x^(2^(k-1))) G(x^(2^k)). - _Robert Israel_, Jan 11 2016
+%F A093873 a(2^(m+1)+k) = a(2^(m+1)+2^m+k) = A020651(2^m+k), m>=0, 0<=k<2^m. - _Yosu Yurramendi_, May 18 2016
+%F A093873 a(k) = A020651(2^(m+1)+k) - A020651(2^m+k), m>0, 0<k<2^m. - _Yosu Yurramendi_, Jun 01 2016
+%F A093873 a(2^(m+1)+k) - a(2^m+k) = a(k) , m >=0, 0 <= k < 2^m. For k=0 a(0)=0 is needed. - _Yosu Yurramendi_, Jul 22 2016
+%F A093873 a(2^(m+2)-1-k) = a(2^(m+1)-1-k) + a(2^m-1-k), m >= 1, 0 <= k < 2^m. - _Yosu Yurramendi_, Jul 22 2016
+%F A093873 a(2^m-1-(2^r -1)) = A000045(m-r), m >= 1, 0 <= r <= m-1. - _Yosu Yurramendi_, Jul 22 2016
+%F A093873 a(2^m+2^r) = m-r, , m >= 1, 0 <= r <= m-1 ; a(2^m+2^r+2^(r-1)) = m-(r-1), m >= 2, 0 <= r <= m-1. - _Yosu Yurramendi_, Jul 22 2016
+%F A093873 A093875(2n) - a(2n) = A093875(n), n > 0; A093875(2n+1) - a(2n+1) = a(n), n > 0. - _Yosu Yurramendi_, Jul 23 2016
+%e A093873 The first few fractions are:
+%e A093873 1 1 1 1 2 1 2 1 3 2 3 1 3 2 3 1 4 3 4 2 5 3 5 1 4 3 4 2 5 3 5
+%e A093873 - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ...
+%e A093873 1 2 2 3 3 3 3 4 4 5 5 4 4 5 5 5 5 7 7 7 7 8 8 5 5 7 7 7 7 8 8
+%p A093873 M:= 8: # to get a(1) .. a(2^M-1)
+%p A093873 gen[1]:= [1];
+%p A093873 for n from 2 to M do
+%p A093873   gen[n]:= map(t -> (numer(t)/(numer(t)+denom(t)),
+%p A093873       denom(t)/(numer(t)+denom(t))), gen[n-1]);
+%p A093873 od:
+%p A093873 seq(op(map(numer,gen[i])),i=1..M): # _Robert Israel_, Jan 11 2016
+%t A093873 num[1] = num[2] = 1; den[1] = 1; den[2] = 2; num[n_?EvenQ] := num[n] = num[n/2]; den[n_?EvenQ] := den[n] = num[n/2] + den[n/2]; num[n_?OddQ] := num[n] = den[(n-1)/2]; den[n_?OddQ] := den[n] = num[(n-1)/2] + den[(n-1)/2]; A093873 = Table[num[n], {n, 1, 97}] (* _Jean-François Alcover_, Dec 16 2011 *)
+%o A093873 (Haskell)
+%o A093873 {-# LANGUAGE ViewPatterns #-}
+%o A093873 import Data.Ratio((%), numerator, denominator)
+%o A093873 rat :: Rational -> (Integer,Integer)
+%o A093873 rat r = (numerator r, denominator r)
+%o A093873 data Harmony = Harmony Harmony Rational Harmony
+%o A093873 rows :: Harmony -> [[Rational]]
+%o A093873 rows (Harmony hL r hR) = [r] : zipWith (++) (rows hL) (rows hR)
+%o A093873 kepler :: Rational -> Harmony
+%o A093873 kepler r = Harmony (kepler (i%(i+j))) r (kepler (j%(i+j)))
+%o A093873 .......... where (rat -> (i,j)) = r
+%o A093873 -- Full tree of Kepler's harmonic fractions:
+%o A093873 k = rows $ kepler 1 :: [[Rational]] -- as list of lists
+%o A093873 h = concat k :: [Rational] -- flattened
+%o A093873 a093873 n = numerator $ h !! (n - 1)
+%o A093873 a093875 n = denominator $ h !! (n - 1)
+%o A093873 a011782 n = numerator $ (map sum k) !! n -- denominator == 1
+%o A093873 -- length (k !! n) == 2^n
+%o A093873 -- numerator $ (map last k) !! n == fibonacci (n + 1)
+%o A093873 -- denominator $ (map last k) !! n == fibonacci (n + 2)
+%o A093873 -- numerator $ (map maximum k) !! n == n
+%o A093873 -- denominator $ (map maximum k) !! n == n + 1
+%o A093873 -- eop.
+%o A093873 -- _Reinhard Zumkeller_, Oct 17 2010
+%Y A093873 The denominators are in A093875. Usually one only considers the left-hand half of the tree, which gives the fractions A020651/A086592. See A086592 for more information, references to Kepler, etc.
+%Y A093873 See A294442 for another version of Kepler's tree of fractions.
+%K A093873 nonn,easy,frac,look,hear
+%O A093873 1,5
+%A A093873 _N. J. A. Sloane_ and _Reinhard Zumkeller_, May 24 2004

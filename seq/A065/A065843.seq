@@ -1,0 +1,47 @@
+%I A065843
+%S A065843 0,1,1,2,2,3,5,12,11,24,34,79,105,194,362,734,1143,2045,3872,7758,
+%T A065843 13001,23902,45539,90436,159510,296210,563833,1110387,2030754,3876871,
+%U A065843 7333827,14353074,26730538,51246344,97529176,190928828
+%N A065843 Let u be any string of n digits from {0,1}; let f(u) = number of distinct primes, not beginning with 0, formed by permuting the digits of u; then a(n) = max_u f(u).
+%e A065843 a(4)=2 because 1011 and 1101 in base-2 notation are primes (11 and 13) and there is no set of three or more 4-digit primes with a common number of ones.
+%p A065843 A065843 := proc(n)
+%p A065843     local b,u,udgs,uperm,a;
+%p A065843     b :=2 ;
+%p A065843     a := 0 ;
+%p A065843     for u from b^(n-1) to b^n-1 do
+%p A065843         udgs := convert(u,base,b) ;
+%p A065843         prs := {} ;
+%p A065843         for uperm in combinat[permute](udgs) do
+%p A065843             if op(-1,uperm) <> 0 then
+%p A065843                 p := add( op(i,uperm)*b^(i-1),i=1..nops(uperm)) ;
+%p A065843                 if isprime(p) then
+%p A065843                     prs := prs union {p} ;
+%p A065843                 end if;
+%p A065843             end if;
+%p A065843         end do:
+%p A065843         a := max(a,nops(prs)) ;
+%p A065843     end do:
+%p A065843     a ;
+%p A065843 end proc:
+%p A065843 for n from 1 do
+%p A065843     print(n,A065843(n)) ;
+%p A065843 end do: # _R. J. Mathar_, Apr 23 2016
+%t A065843 c[x_] := Module[{},
+%t A065843    Length[Select[Permutations[x],
+%t A065843      First[#] != 0 && PrimeQ[FromDigits[#, 2]] &]]];
+%t A065843 A065843[n_] := Module[{i},
+%t A065843    Return[Max[Map[c, DeleteDuplicatesBy[Tuples[Range[0, 1], n],
+%t A065843        Table[Count[#, i], {i, 0, 1}] &]]]]];
+%t A065843 Table[A065843[n], {n, 1, 19}] (* _Robert Price_, Mar 30 2019 *)
+%o A065843 (PARI) lista(n) = {my(m = matrix(n,n),c); forprime(i=2,2^n, b = binary(i); m[#b,hammingweight(b)]++);vector(n,i,vecmax(m[i,]))} \\ _David A. Corneth_, Apr 23 2016
+%o A065843 (Python)
+%o A065843 from sympy import isprime
+%o A065843 from itertools import combinations_with_replacement as mc
+%o A065843 from sympy.utilities.iterables import multiset_permutations as mp
+%o A065843 def a(n): return n-1 if n < 3 else max(sum(1 for p in mp(c) if isprime(int("1"+"".join(p)+"1", 2))) for c in mc("01", n-2))
+%o A065843 print([a(n) for n in range(1, 21)]) # _Michael S. Branicky_, Oct 09 2022
+%Y A065843 Cf. A007053, A065844, A065845, A065846, A065847 A065848, A065849, A065850, A065851, A065852, A065853.
+%K A065843 base,nonn
+%O A065843 1,4
+%A A065843 _Sascha Kurz_, Nov 24 2001
+%E A065843 6 more terms from _Sean A. Irvine_, Sep 06 2009

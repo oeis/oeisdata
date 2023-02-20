@@ -1,0 +1,50 @@
+%I A130152
+%S A130152 1,1,1,1,2,3,1,4,9,10,1,7,23,47,42,1,12,60,157,274,216,1,20,151,503,
+%T A130152 1227,1818,1320,1,33,366,1669,4833,10402,13656,9360,1,54,877,5472,
+%U A130152 18827,50879,96090,115080,75600,1,88,2088,17531,75693,234061,569602,966456,1077840,685440,1,143,4937,55135,304900,1076807,3111243,6791994,10553640,11123280,6894720
+%N A130152 Triangle read by rows: T(n,k) = number of permutations p of [n] such that max(|p(i)-i|)=k (n>=1, 0<=k<=n-1).
+%C A130152 Row sums are the factorials. T(n,n) = (n-2)!*(2n-3) = A007680(n-2) (for n>=2). T(n,1) = Fibonacci(n+1)-1 = A000071(n+1). Sum_{k=0..n-1} k*T(n,k) = A130153(n). For the statistic max(p(i)-i) see A056151.
+%H A130152 Alois P. Heinz, <a href="/A130152/b130152.txt">Rows n = 1..23, flattened</a>
+%H A130152 Torleiv Kløve, <a href="http://www.ii.uib.no/publikasjoner/texrap/pdf/2008-376.pdf">Spheres of Permutations under the Infinity Norm - Permutations with limited displacement</a>, Reports in Informatics, Department of Informatics, University of Bergen, Norway, no. 376, November 2008.
+%F A130152 T(n,k) = A306209(n,k) - A306209(n,k-1) for k > 0, T(n,0) = 1. - _Alois P. Heinz_, Jan 29 2019
+%e A130152 T(4,1) = 4 because we have 1243, 1324, 2134 and 2143.
+%e A130152 Triangle starts:
+%e A130152   1;
+%e A130152   1,  1;
+%e A130152   1,  2,  3;
+%e A130152   1,  4,  9,  10;
+%e A130152   1,  7, 23,  47,  42;
+%e A130152   1, 12, 60, 157, 274, 216;
+%e A130152   ...
+%p A130152 with(combinat): for n from 1 to 7 do P:=permute(n): for i from 0 to n-1 do ct[i]:=0 od: for j from 1 to n! do if max(seq(abs(P[j][i]-i),i=1..n))=0 then ct[0]:=ct[0]+1 elif max(seq(abs(P[j][i]-i),i=1..n))=1 then ct[1]:=ct[1]+1 elif max(seq(abs(P[j][i]-i),i=1..n))=2 then ct[2]:=ct[2]+1 elif max(seq(abs(P[j][i]-i),i=1..n))=3 then ct[3]:=ct[3]+1 elif max(seq(abs(P[j][i]-i),i=1..n))=4 then ct[4]:=ct[4]+1 elif max(seq(abs(P[j][i]-i),i=1..n))=5 then ct[5]:=ct[5]+1 elif max(seq(abs(P[j][i]-i),i=1..n))=6 then ct[6]:=ct[6]+1 else fi od: a[n]:=seq(ct[i],i=0..n-1): od: for n from 1 to 7 do a[n] od; # a cumbersome program to obtain, by straightforward counting, the first 7 rows of the triangle
+%p A130152 n := 8: st := proc (p) max(seq(abs(p[j]-j), j = 1 .. nops(p))) end proc: with(combinat): P := permute(n): f := sort(add(t^st(P[i]), i = 1 .. factorial(n))); # program gives the row generating polynomial for the specified n - _Emeric Deutsch_, Aug 13 2009
+%p A130152 # second Maple program:
+%p A130152 b:= proc(s) option remember; (n-> `if`(n=0, 1, add((p-> add(
+%p A130152       coeff(p, x, i)*x^max(i, abs(n-j)), i=0..degree(p)))(
+%p A130152         b(s minus {j})), j=s)))(nops(s))
+%p A130152     end:
+%p A130152 T:= n-> (p-> seq(coeff(p, x, i), i=0..n-1))(b({$1..n})):
+%p A130152 seq(T(n), n=1..10);  # _Alois P. Heinz_, Jan 21 2019
+%p A130152 # third Maple program:
+%p A130152 A:= proc(n, k) option remember; LinearAlgebra[Permanent](
+%p A130152       Matrix(n, (i, j)-> `if`(abs(i-j)<=k, 1, 0)))
+%p A130152     end:
+%p A130152 T:= (n, k)-> A(n, k)-A(n, k-1):
+%p A130152 seq(seq(T(n, k), k=0..n-1), n=1..10);  # _Alois P. Heinz_, Jan 22 2019
+%t A130152 (* from second Maple program: *)
+%t A130152 b[s_List] := b[s] = Function[n, If[n == 0, 1, Sum[Function[p, Sum[ Coefficient[p, x, i]*x^Max[i, Abs[n - j]], {i, 0, Exponent[p, x]}]][b[s ~Complement~ {j}]], {j, s}]]][Length[s]];
+%t A130152 T[n_] := Function[p, Table[Coefficient[p, x, i], {i, 0, n-1}]][b[Range[n]] ];
+%t A130152 Table[T[n], {n, 1, 11}] // Flatten
+%t A130152 (* from third Maple program: *)
+%t A130152 A[n_, k_] := A[n, k] = Permanent[Table[If[Abs[i-j] <= k, 1, 0], {i, 1, n}, {j, 1, n}]];
+%t A130152 T[n_, k_] := A[n, k] - A[n, k - 1];
+%t A130152 Table[Table[T[n, k], {k, 0, n - 1}], {n, 1, 11}] // Flatten (* _Jean-François Alcover_, Dec 06 2019, after _Alois P. Heinz_ *)
+%o A130152 (C++) #include <iostream> #include <vector> #include <algorithm> using namespace std; inline int k(const vector<int> & s) { const int n = s.size() ; int kmax = 0 ; for(int i=0; i<n; i++) { const int thisdiff = abs(s[i]-i-1) ; if ( thisdiff > kmax) kmax = thisdiff ; } return kmax ; } int main(int argc, char *argv[]) { for(int n=1 ;;n++) { vector<int> s; for(int i=1;i<=n;i++) s.push_back(i) ; vector<unsigned long long> resul(n); do { resul[k(s)]++ ; } while( next_permutation(s.begin(),s.end()) ) ; for(int i=0;i<n;i++) cout << resul[i] << ", " ; cout << endl ; } return 0 ; } - _R. J. Mathar_, Oct 15 2007
+%Y A130152 Columns k=0-10 give: A000012, A000071(n+1), A323798, A323799, A323800, A323801, A323802, A323803, A323804, A323805, A323806.
+%Y A130152 Row sums give A000142.
+%Y A130152 T(n,floor(n/2)) gives A323807.
+%Y A130152 Cf. A007680, A130153, A056151, A299789, A306209.
+%K A130152 nonn,tabl
+%O A130152 1,5
+%A A130152 _Emeric Deutsch_, May 27 2007
+%E A130152 More terms from _R. J. Mathar_, Oct 15 2007

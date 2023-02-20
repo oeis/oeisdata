@@ -1,0 +1,46 @@
+%I A035928
+%S A035928 2,10,12,38,42,52,56,142,150,170,178,204,212,232,240,542,558,598,614,
+%T A035928 666,682,722,738,796,812,852,868,920,936,976,992,2110,2142,2222,2254,
+%U A035928 2358,2390,2470,2502,2618,2650,2730,2762,2866,2898,2978,3010,3132,3164,3244
+%N A035928 Numbers n such that BCR(n) = n, where BCR = binary-complement-and-reverse = take one's complement then reverse bit order.
+%C A035928 Numbers n such that A036044(n) = n.
+%C A035928 Also: numbers such that n+BR(n) is in A000225={2^k-1} (with BR = binary reversed). - _M. F. Hasler_, Dec 17 2007
+%C A035928 Also called "antipalindromes". - _Jeffrey Shallit_, Feb 04 2022
+%H A035928 Reinhard Zumkeller, <a href="/A035928/b035928.txt">Table of n, a(n) for n = 1..10000</a>
+%H A035928 James Haoyu Bai, Joseph Meleshko, Samin Riasat, and Jeffrey Shallit, <a href="https://doi.org/10.48550/arXiv.2202.13694">Quotients of Palindromic and Antipalindromic Numbers</a>, arXiv:2202.13694 [math.NT], 2022.
+%H A035928 Aayush Rajasekaran, Jeffrey Shallit, and Tim Smith, <a href="https://arxiv.org/abs/1706.10206">Sums of Palindromes: an Approach via Nested-Word Automata</a>, preprint arXiv:1706.10206 [cs.FL], June 30 2017.
+%F A035928 If offset were 0, a(2n+1) - a(2n) = 2^floor(log_2(n)+1).
+%F A035928 a(n) = n * A062383(n) + A036044(n). - _Rémy Sigrist_, Jun 11 2022
+%e A035928 38 is such a number because 38=100110; complement to get 011001, then reverse bit order to get 100110.
+%p A035928 [seq(ReflectBinSeq(j,(floor_log_2(j)+1)),j=1..256)];
+%p A035928 ReflectBinSeq := (x,n) -> (((2^n)*x)+binrevcompl(x));
+%p A035928 binrevcompl := proc(nn) local n,z; n := nn; z := 0; while(n <> 0) do z := 2*z + ((n+1) mod 2); n := floor(n/2); od; RETURN(z); end;
+%p A035928 floor_log_2 := proc(n) local nn,i: nn := n; for i from -1 to n do if(0 = nn) then RETURN(i); fi: nn := floor(nn/2); od: end; # Computes essentially the same as floor(log[2](n))
+%p A035928 # alternative Maple program:
+%p A035928 q:= n-> (l-> is(n=add((1-l[-i])*2^(i-1), i=1..nops(l))))(Bits[Split](n)):
+%p A035928 select(q, [$1..3333])[];  # _Alois P. Heinz_, Feb 10 2021
+%t A035928 bcrQ[n_]:=Module[{idn2=IntegerDigits[n,2]},Reverse[idn2/.{1->0,0->1}] == idn2]; Select[Range[3200],bcrQ] (* _Harvey P. Dale_, May 24 2012 *)
+%o A035928 (PARI) for(n=1,1000,l=length(binary(n)); b=binary(n); if(sum(i=1,l,abs(component(b,i)-component(b,l+1-i)))==l,print1(n,",")))
+%o A035928 (PARI) for(i=1,999,if(Set(vecextract(t=binary(i),"-1..1")+t)==[1],print1(i","))) \\ _M. F. Hasler_, Dec 17 2007
+%o A035928 (PARI) a(n) = my (b=binary(n)); (n+1)*2^#b-fromdigits(Vecrev(b),2)-1 \\ _Rémy Sigrist_, Mar 15 2021
+%o A035928 (Haskell)
+%o A035928 a035928 n = a035928_list !! (n-1)
+%o A035928 a035928_list = filter (\x -> a036044 x == x) [0,2..]
+%o A035928 -- _Reinhard Zumkeller_, Sep 16 2011
+%o A035928 (Python)
+%o A035928 def comp(s): z, o = ord('0'), ord('1'); return s.translate({z:o, o:z})
+%o A035928 def BCR(n): return int(comp(bin(n)[2:])[::-1], 2)
+%o A035928 def aupto(limit): return [m for m in range(limit+1) if BCR(m) == m]
+%o A035928 print(aupto(3244)) # _Michael S. Branicky_, Feb 10 2021
+%o A035928 (Python)
+%o A035928 from itertools import count, islice
+%o A035928 def A035928_gen(startvalue=1): # generator of terms >= startvalue
+%o A035928     return filter(lambda n:n==int(format(~n&(1<<(m:=n.bit_length()))-1,'0'+str(m)+'b')[::-1],2),count(max(startvalue,1)))
+%o A035928 A035928_list = list(islice(A035928_gen(),30)) # _Chai Wah Wu_, Jun 30 2022
+%Y A035928 Cf. A061855.
+%Y A035928 Cf. A000225, A036044, A062383.
+%Y A035928 Intersection of A195064 and A195066; cf. A195063, A195065.
+%K A035928 nonn,nice,easy,base
+%O A035928 1,1
+%A A035928 Mike Keith (domnei(AT)aol.com)
+%E A035928 More terms from _Erich Friedman_

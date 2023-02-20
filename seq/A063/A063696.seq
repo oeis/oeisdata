@@ -1,0 +1,20 @@
+%I A063696
+%S A063696 0,2,3,7,5,31,5,127,17,73,21,2047,17,8191,85,297,257,131071,65,524287,
+%T A063696 273,4681,1365,8388607,257,1082401,5461,262657,4369,536870911,387,
+%U A063696 2147483647,65537,1198665,87381,17454241,4097,137438953471,349525
+%N A063696 Positions of positive coefficients in cyclotomic polynomial Phi_n(x), converted from binary to decimal.
+%C A063696 Maple procedures Phi_pos_terms and Phi_neg_terms are modeled after the formula given in Lam and Leung paper and they compute correct results for all integers x > 1 and for all n with at most two distinct odd prime factors (that is, up to n=104). Other procedures as in A063698 and A063694.
+%H A063696 D. M. Bloom, <a href="http://www.jstor.org/stable/2313417">On the Coefficients of the Cyclotomic Polynomials</a>, Amer.Math.Monthly 75, 372-377, 1968.
+%H A063696 T. Y. Lam and K. H. Leung, <a href="http://www.jstor.org/stable/2974668">On the Cyclotomic Polynomial Phi_pq(X)</a>, Amer.Math.Monthly 103, 562-564, August-September 1996.
+%H A063696 H. W. Lenstra, <a href="http://hdl.handle.net/1887/3800">Vanishing sums of roots of unity</a>, in Proc. Bicentennial Congress Wiskundig Genootschap (Vrije Univ. Amsterdam, 1978), Part II, pp. 249-268.
+%H A063696 <a href="/index/Cy#CyclotomicPolynomialsCoefficients">Index entries for cyclotomic polynomials, positions of coefficients</a>
+%p A063696 with(numtheory); [seq(Phi_pos_terms(j,2),j=0..104)];
+%p A063696 inv_p_mod_q := (p,q) -> op(2,op(1,msolve(p*x=1,q))); # Find's p's inverse modulo q.
+%p A063696 dilate := proc(nn,x,e) local n,i,s; n := nn; i := 0; s := 0; while(n > 0) do s := s + (((x^e)^i)*(n mod x)); n := floor(n/x); i := i+1; od; RETURN(s); end;
+%p A063696 Phi_pos_terms := proc(n,x) local a,m,p,q,e,f,r,s; if(n < 2) then RETURN(x); fi; a := op(2, ifactors(n)); m := nops(a); p := a[1][1]; e := a[1][2]; if(1 = m) then RETURN(((x^(p^e))-1)/((x^(p^(e-1)))-1)); fi; if(2 = m) then q := a[2][1]; f := a[2][2]; r := inv_p_mod_q(p,q)-1; s := inv_p_mod_q(q,p)-1; RETURN( (`if`(0=s,1,(((x^((s+1)*((q^f)*(p^(e-1)))))-1)/((x^((q^f)*(p^(e-1))))-1)))) * (`if`(0=r,1,(((x^((r+1)*((p^e)*(q^(f-1)))))-1)/((x^((p^e)*(q^(f-1))))-1)))) ); fi; if((3 = m) and (2 = p)) then if(1 = e) then RETURN(every_other_pos(Phi_pos_terms(n/2,x),x,0)+every_other_pos(Phi_neg_terms(n/2,x),x,1)); else RETURN(dilate(Phi_pos_terms((n/(2^(e-1))),x),x,2^(e-1))); fi; else printf(`Cannot handle argument %a with three or more distinct odd prime factors!\n`,n); RETURN(0); fi; end;
+%t A063696 a[n_] := 2^(Flatten[Position[CoefficientList[Cyclotomic[n, x], x], _?Positive]] - 1) // Total; a[0] = 0; Table[a[n], {n, 0, 40}] (* _Jean-François Alcover_, Mar 05 2016 *)
+%o A063696 (PARI) a(n)=local(p); if(n<1,0,p=polcyclo(n); sum(i=0,n,2^i*(polcoeff(p,i)>0)))
+%Y A063696 A013594, A063698 gives the positions of the negative and A063697 the nonzero terms. This sequence in binary: A063697. A019320[n] = A063696[n]-A063698[n] for up to n=104
+%K A063696 nonn
+%O A063696 0,2
+%A A063696 _Antti Karttunen_, Aug 03 2001

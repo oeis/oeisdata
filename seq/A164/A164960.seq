@@ -1,0 +1,63 @@
+%I A164960
+%S A164960 0,0,1,1,2,0,2,0,3,1,0,3,1,0,4,0,2,0,1,0,0,4,2,1,5,0,0,1,0,0,1,0,2,0,
+%T A164960 1,0,0,5,3,0,2,0,0,0,6,0,1,1,1,0,0,0,0,0,2,1,0,0,3,1,0,0,1,0,0,1,6,4,
+%U A164960 1,0,0,3,1,0,0,1,1,7,1
+%N A164960 The minimum number of steps needed to generate prime(n) under the map x -> A060264(x) starting from any x taken from {2,3} or from A164333.
+%H A164960 V. Shevelev, <a href="https://arxiv.org/abs/0908.2319">On critical small intervals containing primes</a>, arXiv:0908.2319 [math.NT], 2009.
+%e A164960 a(3) = 1 because prime(3)=5 can be generated in 1 step starting from x=2.
+%e A164960 a(4) = 1 because prime(4)=7 can be generated in 1 step starting from x=3.
+%p A164960 # include source from A164333 and A060264 here
+%p A164960 A164333 := proc(n)
+%p A164960         if n = 1 then
+%p A164960                 13;
+%p A164960         else
+%p A164960                 for a from procname(n-1)+1 do
+%p A164960                         if isA164333(a) then
+%p A164960                                 return a;
+%p A164960                         end if;
+%p A164960                 end do;
+%p A164960         end if;
+%p A164960 end proc:
+%p A164960 A164960aux := proc(p,strt)
+%p A164960         local a,x;
+%p A164960         if strt > p then
+%p A164960                 return 1000000000;
+%p A164960         end if;
+%p A164960         a := 0 ;
+%p A164960         x := strt ;
+%p A164960         while x < p do
+%p A164960                 x := A060264(x) ;
+%p A164960                 a := a+1 ;
+%p A164960         end do;
+%p A164960         if x = p then
+%p A164960                 return a ;
+%p A164960         else
+%p A164960                 return 1000000000;
+%p A164960         end if;
+%p A164960 end proc:
+%p A164960 A164960 := proc(n)
+%p A164960         local p,a,strt,i;
+%p A164960         p := ithprime(n) ;
+%p A164960         a := A164960aux(p,2) ;
+%p A164960         a := min(a,A164960aux(p,3)) ;
+%p A164960         for i from 1 do
+%p A164960                 strt := A164333(i) ;
+%p A164960                 if strt > p then
+%p A164960                         return a;
+%p A164960                 else
+%p A164960                         a := min(a, A164960aux(p,strt)) ;
+%p A164960                 end if;
+%p A164960         end do:
+%p A164960         return a;
+%p A164960 end proc:
+%p A164960 seq(A164960(n),n=1..90) ; # _R. J. Mathar_, Oct 29 2011
+%t A164960 nmax = 100; kmax = nmax + 5;
+%t A164960 A164333 = Select[Table[{(Prime[k - 1] + 1)/2, (Prime[k] - 1)/2}, {k, 3, kmax}], AllTrue[Range[#[[1]], #[[2]]], CompositeQ] &][[All, 2]]*2 + 1;
+%t A164960 A164960aux[p_, strt_] := Module[{a, x}, If[strt > p, Return[10^9]]; a = 0; x = strt; While[x < p, x = NextPrime[2 x]; a++]; If[x == p, Return[a], Return[10^9]]];
+%t A164960 A164960[n_] := Module[{p, a, strt, i}, p = Prime[n]; a = A164960aux[p, 2]; a = Min[a, A164960aux[p, 3]]; For[i = 1, i < 100, i++, strt = A164333[[i]]; If[strt > p, Return[a], a = Min[a, A164960aux[p, strt]]]]; Return[a]];
+%t A164960 Table[A164960[n], {n, 1, nmax}] (* _Jean-François Alcover_, Dec 13 2017, after _R. J. Mathar_ *)
+%Y A164960 Cf. A164333.
+%K A164960 nonn
+%O A164960 1,5
+%A A164960 _Vladimir Shevelev_, Sep 02 2009
+%E A164960 One term corrected, sequence extended, examples added by _R. J. Mathar_, Oct 29 2011

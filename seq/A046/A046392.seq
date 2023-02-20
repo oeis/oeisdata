@@ -1,0 +1,43 @@
+%I A046392
+%S A046392 6,22,33,55,77,111,141,161,202,262,303,323,393,454,505,515,535,545,
+%T A046392 565,626,707,717,737,767,818,838,878,898,939,949,959,979,989,1111,
+%U A046392 1441,1661,1991,3113,3223,3443,3883,7117,7447,7997,9119,9229,9449,10001
+%N A046392 Palindromes with exactly 2 distinct prime factors.
+%H A046392 Robert Israel, <a href="/A046392/b046392.txt">Table of n, a(n) for n = 1..10000</a>
+%p A046392 revdigs:= proc(n) local L,i;
+%p A046392   L:= convert(n,base,10);
+%p A046392   add(L[-i]*10^(i-1),i=1..nops(L))
+%p A046392 end proc:
+%p A046392 f:= proc(n) local F;
+%p A046392   F:= ifactors(n)[2];
+%p A046392   if nops(F) = 2 and F[1,2]=1 and F[2,2]=1 then n fi
+%p A046392 end proc:
+%p A046392 N:=5: # for terms of up to N digits.
+%p A046392 Res:= 6:
+%p A046392 for d from 2 to N do
+%p A046392   if d::even then
+%p A046392     m:= d/2;
+%p A046392     Res:= Res, seq(f(n*10^m + revdigs(n)), n=10^(m-1)..10^m-1);
+%p A046392   else
+%p A046392     m:= (d-1)/2;
+%p A046392     Res:= Res, seq(seq(f(n*10^(m+1)+y*10^m+revdigs(n)), y=0..9), n=10^(m-1)..10^m-1);
+%p A046392   fi
+%p A046392 od:
+%p A046392 Res; # _Robert Israel_, Mar 24 2020
+%t A046392 pdpfQ[n_]:=Module[{idn=IntegerDigits[n]},idn==Reverse[idn] && PrimeNu[n] == PrimeOmega[n] == 2]; Select[Range[11000],pdpfQ] (* _Harvey P. Dale_, Dec 16 2012 *)
+%o A046392 (Python)
+%o A046392 from sympy import factorint
+%o A046392 from itertools import product
+%o A046392 def pals(d, base=10): # all d-digit palindromes
+%o A046392     digits = "".join(str(i) for i in range(base))
+%o A046392     for p in product(digits, repeat=d//2):
+%o A046392         if d > 1 and p[0] == "0": continue
+%o A046392         left = "".join(p); right = left[::-1]
+%o A046392         for mid in [[""], digits][d%2]: yield int(left + mid + right)
+%o A046392 def ok(pal): f = factorint(pal); return len(f) == 2 and sum(f.values()) == 2
+%o A046392 print(list(filter(ok, (p for d in range(1, 5) for p in pals(d) if ok(p))))) # _Michael S. Branicky_, Jun 22 2021
+%Y A046392 Cf. A046328, A046408.
+%Y A046392 Intersection of A002113 and A006881.
+%K A046392 nonn,base
+%O A046392 1,1
+%A A046392 _Patrick De Geest_, Jun 15 1998

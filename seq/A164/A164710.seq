@@ -1,0 +1,40 @@
+%I A164710
+%S A164710 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,19,21,22,23,24,25,26,27,28,
+%T A164710 29,30,31,32,33,35,36,39,42,43,45,46,47,48,49,51,53,54,55,56,57,58,59,
+%U A164710 60,61,62,63,64,65,67,71,73,76,79,85,86,87,90,91,93,94,95,96,97,99,100
+%N A164710 A positive integer n is included if all runs of 0's in binary n are of the same length.
+%C A164710 Clarification: A binary number consists of "runs" completely of 1's alternating with runs completely of 0's. No two or more runs all of the same digit are adjacent.
+%C A164710 This sequence contains in part positive integers that each contain one run of 0's. For those members of this sequence each with at least two runs of 0's, see A164712.
+%C A164710 Number of terms with n binary digits is A243815(n-1). - _Robert Israel_, Nov 09 2015
+%H A164710 Ivan Neretin, <a href="/A164710/b164710.txt">Table of n, a(n) for n = 1..10000</a>
+%p A164710 isA164710 := proc(n) local bdg,arl,lset ; bdg := convert(n,base,2) ; lset := {} ; arl := -1 ; for p from 1 to nops(bdg) do if op(p,bdg) = 0 then if p = 1 then arl := 1 ; else arl := arl+1 ; end if; else if arl > 0 then lset := lset union {arl} ; end if; arl := 0 ; end if; end do ; if arl > 0 then lset := lset union {arl} ; end if; return (nops(lset) <= 1 ); end proc: for n from 1 to 300 do if isA164710(n) then printf("%d,",n) ; end if; end do; # _R. J. Mathar_, Feb 27 2010
+%p A164710 F:= proc(d)
+%p A164710   local res,r,m,e,C,M;
+%p A164710   res:= [1$d];
+%p A164710   for r from 1 to floor(d/2) do
+%p A164710     for m from 1 to floor(d/r)-1 do
+%p A164710        e:= d - r*(m+1);
+%p A164710        for C in combinat:-choose(e+r,e) do
+%p A164710          M:= subsop(op(map(`=`,C,1)),[0$(e+r)]);
+%p A164710          res:= res, subs(0 = (1,0$m), M);
+%p A164710        od
+%p A164710     od
+%p A164710   od;
+%p A164710   sort(map(t -> add(t[-i]*2^(i-1),i=1..d), [res]));
+%p A164710 end proc:
+%p A164710 N:= 10: # to get all terms < 2^N
+%p A164710 map(op,[seq(F(d),d=1..N)]); # _Robert Israel_, Nov 09 2015
+%t A164710 Select[Range@ 100, SameQ @@ Map[Length, Select[Split@ IntegerDigits[#, 2], First@ # == 0 &]] &] (* _Michael De Vlieger_, Aug 20 2017 *)
+%o A164710 (Perl)
+%o A164710 foreach(1..100){
+%o A164710     %runs=();
+%o A164710     $runs{$_}++ foreach split /1+/, sprintf("%b",$_);
+%o A164710     delete $runs{''};
+%o A164710     print "$_, " if 1>=keys(%runs);
+%o A164710 }
+%o A164710 # _Ivan Neretin_, Nov 09 2015
+%Y A164710 Cf. A164707, A164711, A164712, A243815.
+%K A164710 base,nonn
+%O A164710 1,2
+%A A164710 _Leroy Quet_, Aug 23 2009
+%E A164710 Terms beyond 39 by _R. J. Mathar_, Feb 27 2010

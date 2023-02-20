@@ -1,0 +1,43 @@
+%I A047812
+%S A047812 1,1,1,1,3,1,1,5,7,1,1,9,20,11,1,1,13,48,51,18,1,1,20,100,169,112,26,
+%T A047812 1,1,28,194,461,486,221,38,1,1,40,352,1128,1667,1210,411,52,1,1,54,
+%U A047812 615,2517,4959,5095,2761,720,73,1,1,75,1034,5288,13241,18084,13894,5850,1221,97,1
+%N A047812 Parker's partition triangle T(n,k) read by rows (n >= 1 and 0 <= k <= n-1).
+%C A047812 The entries in row n are the coefficients of q^(k*(n+1)) in the q-binomial coefficient [2n, n], where k runs from 0 to n-1. - _James A. Sellers_
+%C A047812 T(n,k) is the number of partitions of k*(n+1) into at most n parts each no bigger than n (see the links). - _Petros Hadjicostas_, May 30 2020
+%C A047812 Named after the American mathematician Ernest Tilden Parker (1926-1991). - _Amiram Eldar_, Jun 20 2021
+%H A047812 Alois P. Heinz, <a href="/A047812/b047812.txt">Rows n = 1..141, flattened</a>
+%H A047812 Richard K. Guy, <a href="/A007042/a007042.pdf">Letter to N. J. A. Sloane, Aug. 1992</a>.
+%H A047812 Richard K. Guy, <a href="/A007042/a007042_1.pdf">Parker's permutation problem involves the Catalan numbers</a>, Preprint, 1992. (Annotated scanned copy)
+%H A047812 Richard K. Guy, <a href="http://www.jstor.org/stable/2324467">Parker's permutation problem involves the Catalan numbers</a>, Amer. Math. Monthly, Vol. 100, No. 3 (1993), pp. 287-289.
+%H A047812 Wikipedia, <a href="https://en.wikipedia.org/wiki/E._T._Parker">E. T. Parker</a>.
+%e A047812 Triangle T(n,k) (with rows n >= 1 and columns k = 0..n-1) starts:
+%e A047812   1;
+%e A047812   1,  1;
+%e A047812   1,  3,  1;
+%e A047812   1,  5,  7   1;
+%e A047812   1,  9, 20, 11,  1;
+%e A047812   1, 13, 48, 51, 18, 1;
+%e A047812   ...
+%p A047812 b:= proc(n, i, t) option remember; `if`(n=0, 1, `if`(t*i
+%p A047812       <n, 0, b(n, i-1, t)+b(n-i, min(i, n-i), t-1)))
+%p A047812     end:
+%p A047812 T:= (n, k)-> b(k*(n+1), n$2):
+%p A047812 seq(seq(T(n, k), k=0..n-1), n=1..12);  # _Alois P. Heinz_, May 30 2020
+%t A047812 s[n_] := s[n] = Series[Product[(1-q^(2n-k)) / (1-q^(k+1)), {k, 0, n-1}], {q, 0, n^2}];
+%t A047812 t[n_, k_] := SeriesCoefficient[s[n], k(n+1)];
+%t A047812 Flatten[Table[t[n, k], {n, 1, 12}, {k, 0, n-1}]] (* _Jean-François Alcover_, Jan 27 2012 *)
+%t A047812 b[n_, i_, t_] := b[n, i, t] = If[n == 0, 1, If[n < 0 || t i < n, 0, b[n, i - 1, t] + b[n - i, Min[i, n - i], t - 1]]];
+%t A047812 T[n_, k_] := b[k(n+1), n, n];
+%t A047812 Table[T[n, k], {n, 1, 12}, {k, 0, n - 1}] // Flatten (* _Jean-François Alcover_, Nov 27 2020, after _Alois P. Heinz_ *)
+%o A047812 (PARI) T(n,k) = #partitions(k*(n+1), n,n);
+%o A047812 for (n=1, 10, for (k=0, n-1, print1(T(n,k), ", "); ); print(); ); \\ _Petros Hadjicostas_, May 30 2020
+%o A047812 /* Second program, courtesy of _G. C. Greubel_ */
+%o A047812 T(n,k) = polcoeff(prod(j=0, n-1, (1-q^(2*n-j))/(1-q^(j+1)) ), k*(n+1) );
+%o A047812 vector(12, n, vector(n, k, T(n,k-1))); \\ _Petros Hadjicostas_, May 31 2020
+%Y A047812 Cf. A000108 (row sums), A136621 (mirror image).
+%K A047812 nonn,tabl,easy,nice
+%O A047812 1,5
+%A A047812 _N. J. A. Sloane_
+%E A047812 More terms from _James A. Sellers_
+%E A047812 Offset corrected by _Alois P. Heinz_, May 30 2020

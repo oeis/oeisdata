@@ -1,0 +1,42 @@
+%I A032171
+%S A032171 1,1,1,2,4,10,23,59,148,385,1006,2678,7170,19421,52933,145364,401421,
+%T A032171 1114713,3109710,8713076,24506121,69168705,195849114,556165311,
+%U A032171 1583601840,4520226558,12931917204,37075154703
+%N A032171 Number of rooted compound windmills (mobiles) of n nodes with no symmetries.
+%C A032171 Also the number of locally Lyndon plane trees with n nodes, where a plane tree is locally Lyndon if the sequence of branches directly under any given node is a Lyndon word. - _Gus Wiseman_, Sep 05 2018
+%H A032171 Andrew Howroyd, <a href="/A032171/b032171.txt">Table of n, a(n) for n = 1..200</a>
+%H A032171 Wikipedia, <a href="http://en.wikipedia.org/wiki/Lyndon_word">Lyndon word</a>
+%H A032171 <a href="/index/Mo#mobiles">Index entries for sequences related to mobiles</a>
+%F A032171 Shifts left under "CHK" (necklace, identity, unlabeled) transform.
+%F A032171 From _Petros Hadjicostas_, Dec 03 2017: (Start)
+%F A032171 a(n+1) = (1/n)*Sum_{d|n} mu(n/d)*c(d), where c(n) = n*a(n) + Sum_{s=1..n-1} c(s)*a(n-s) with a(1) = c(1) = 1.
+%F A032171 G.f.: If A(x) = Sum_{n>=1} a(n)*x^n, then Sum_{n>=1} a(n+1)*x^n = -Sum_{n>=1} (mu(n)/n)*log(1-A(x^n)).
+%F A032171 The g.f. of the auxiliary sequence (c(n): n>=1) is C(x) = Sum_{n>=1} c(n)*x^n = x*(dA(x)/dx)/(1-A(x)) = x + 3*x^2 + 7*x^3 + 19*x^4 + 51*x^5 + 147*x^6 + 414*x^7 + 1203*x^8 + ...
+%F A032171 (End)
+%e A032171 From _Gus Wiseman_, Sep 05 2018: (Start)
+%e A032171 The a(6) = 10 locally Lyndon plane trees:
+%e A032171   (((((o)))))
+%e A032171   (((o(o))))
+%e A032171   ((o((o))))
+%e A032171   (o(((o))))
+%e A032171   ((o)((o)))
+%e A032171   ((oo(o)))
+%e A032171   (o(o(o)))
+%e A032171   (oo((o)))
+%e A032171   (o(o)(o))
+%e A032171   (ooo(o))
+%e A032171 (End)
+%t A032171 T[n_, k_] := Module[{A}, A[_, _] = 0; If[k < 1 || k > n, 0, For[j = 1, j <= n, j++, A[x_, y_] = x*y - x*Sum[MoebiusMu[i]/i * Log[1 -  A [x^i, y^i]] + O[x]^j // Normal , {i, 1, j}]]; Coefficient[Coefficient[A[x, y], x, n], y, k]]];
+%t A032171 a[n_] := a[n] = Sum[T[n, k], {k, 1, n}];
+%t A032171 Table[Print["a(", n, ") = ", a[n]]; a[n], {n, 1, 28}] (* _Jean-François Alcover_, Jun 30 2017, using _Michael Somos_' code for A055363 *)
+%t A032171 LyndonQ[q_]:=Array[OrderedQ[{q,RotateRight[q,#]}]&,Length[q]-1,1,And]&&Array[RotateRight[q,#]&,Length[q],1,UnsameQ];
+%t A032171 lynplane[n_]:=If[n==1,{{}},Join@@Table[Select[Tuples[lynplane/@c],LyndonQ],{c,Join@@Permutations/@IntegerPartitions[n-1]}]];
+%t A032171 Table[Length[lynplane[n]],{n,10}] (* _Gus Wiseman_, Sep 05 2018 *)
+%o A032171 (PARI)
+%o A032171 CHK(p,n)={sum(d=1, n, moebius(d)/d*log(subst(1/(1+O(x*x^(n\d))-p), x, x^d)))}
+%o A032171 seq(n)={my(p=O(1));for(i=1, n, p=1+CHK(x*p, i)); Vec(p)} \\ _Andrew Howroyd_, Jun 20 2018
+%Y A032171 Cf. A032200, A055363.
+%Y A032171 Cf. A000108, A007853, A032171, A254040, A304173, A304175, A317852.
+%K A032171 nonn,eigen
+%O A032171 1,4
+%A A032171 _Christian G. Bower_

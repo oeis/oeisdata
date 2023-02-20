@@ -1,0 +1,54 @@
+%I A046893
+%S A046893 1,2,13,103,107,1007,1036,1019,1013,1049,1079,1237,10099,10013,10135,
+%T A046893 10123,10039,10127,10079,10238,10234,10235,10139,10478,12349,12347,
+%U A046893 10378,12359,14579,10789,100336,10237,12389,23579,10279,100136,12379,10379,100267,13789
+%N A046893 a(n) is the least number with exactly n permutations of digits that are primes.
+%C A046893 From _Robert Israel_, Feb 07 2023: (Start)
+%C A046893 Permutations that have leading zeros are included, in contrast to A046890 where they are not.
+%C A046893 If neither A046890(n) nor a(n) have the digit 0, then they are equal. (End)
+%H A046893 Robert Israel, <a href="/A046893/b046893.txt">Table of n, a(n) for n = 0..1477</a>
+%p A046893 g:= proc(d) local x,d1,y;
+%p A046893  [seq(seq(seq(x*10^d + y, y = [0,h(x,d1)]),d1=0..d-1),x=1..9)]
+%p A046893 end proc:
+%p A046893 g(0):= [$0..9]:
+%p A046893 h:= proc(x0, d) local y,z; option remember;
+%p A046893       seq(seq(y*10^d+z, z = [procname(y,d-1)]),y=x0..9)
+%p A046893 end proc:
+%p A046893 for x0 from 1 to 9 do h(x0,0):= $x0 .. 9 od:
+%p A046893 f:= proc(n) local t,L,d,P,i;
+%p A046893 t:= 0;
+%p A046893 L:= convert(n,base,10); d:= nops(L);
+%p A046893 for P in combinat:-permute(L) do
+%p A046893   if isprime(add(P[i]*10^(i-1),i=1..d)) then t:= t+1 fi
+%p A046893 od;
+%p A046893 t
+%p A046893 end proc:
+%p A046893 N:= 100: # for a(0)..a(N)
+%p A046893 V:= Array(0..N): count:= 0:
+%p A046893 for d from 0 while count < N+1 do
+%p A046893   for i in g(d) while count < N+1 do
+%p A046893   v:= f(i);
+%p A046893   if v <= N then
+%p A046893     if V[v] = 0 then V[v]:= i; count:= count+1; fi;
+%p A046893   fi
+%p A046893 od od:
+%p A046893 convert(V,list); # _Robert Israel_, Feb 07 2023
+%t A046893 a = Table[0, {40}]; Do[b = Count[ PrimeQ[ FromDigits /@ Permutations[ IntegerDigits[n]]], True]; If[b < 40 && a[[b + 1]] == 0, a[[b + 1]] = n; Print[b, " ", n]], {n, 1, 110000}]
+%o A046893 (Python)
+%o A046893 from sympy import isprime
+%o A046893 from sympy.utilities.iterables import multiset_permutations as mp
+%o A046893 from itertools import count, islice, combinations_with_replacement as mc
+%o A046893 def nd(d): yield from ("".join((f,)+m) for f in "123456789" for m in mc("0123456789", d-1))
+%o A046893 def c(s): return sum(1 for p in mp(s) if p[0]!="0" and isprime(int("".join(p))))
+%o A046893 def agen(): # generator of sequence terms
+%o A046893     n, adict = 0, dict()
+%o A046893     for digs in count(1):
+%o A046893         for s in nd(digs):
+%o A046893             v = c(s)
+%o A046893             if v not in adict: adict[v] = int(s)
+%o A046893             while n in adict: yield adict[n]; n += 1
+%o A046893 print(list(islice(agen(), 40))) # _Michael S. Branicky_, Feb 08 2023
+%Y A046893 Cf. A039999, A046890. All terms are in A179239.
+%K A046893 nonn,base,look,changed
+%O A046893 0,2
+%A A046893 _David W. Wilson_

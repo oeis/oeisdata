@@ -1,0 +1,57 @@
+%I A080608
+%S A080608 2,3,5,7,13,17,23,29,31,37,43,47,53,59,67,71,73,79,83,97,103,107,113,
+%T A080608 127,131,137,139,157,163,167,173,179,193,197,223,229,233,239,263,269,
+%U A080608 271,283,293,307,311,313,317,331,337,347,353,359,367,373,379,383,397,431,433,439
+%N A080608 Deletable primes: primes such that removing some digit leaves either the empty string or another deletable prime (possibly preceded by some zeros).
+%C A080608 Subsequence of A179336. - _Reinhard Zumkeller_, Jul 11 2010
+%C A080608 Leading zeros are allowed in the number that appears after the digit is deleted. For example the prime 100003 is deletable because of the sequence 00003, 0003, 003, 03, 3 consists of primes. Because of this, it appears that deletable primes are relatively common in the region just above a power of ten. For example 10^1000 + 2713 is a deletable prime. - _Jeppe Stig Nielsen_, Aug 01 2018
+%C A080608 For a version that does not allow leading zeros, see A305352. - _Jeppe Stig Nielsen_, Aug 01 2018
+%H A080608 David W. Wilson, <a href="/A080608/b080608.txt">Table of n, a(n) for n = 1..10000</a>
+%H A080608 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/DeletablePrime.html">Deletable Prime</a>
+%e A080608 410256793 is a deletable prime since each member of the sequence 410256793, 41256793, 4125673, 415673, 45673, 4567, 467, 67, 7 is prime (Weisstein, Caldwell).
+%p A080608 read("transforms"):
+%p A080608 isA080608 := proc(n)
+%p A080608     option remember;
+%p A080608     local dgs,i ;
+%p A080608     if isprime(n) then
+%p A080608         if n < 10 then
+%p A080608             true;
+%p A080608         else
+%p A080608             dgs := convert(n,base,10) ;
+%p A080608             for i from 1 to nops(dgs) do
+%p A080608                 subsop(i=NULL,dgs) ;
+%p A080608                 digcatL(ListTools[Reverse](%)) ;
+%p A080608                 if procname(%)  then
+%p A080608                     return true;
+%p A080608                 end if;
+%p A080608             end do:
+%p A080608             false ;
+%p A080608         end if;
+%p A080608     else
+%p A080608         false;
+%p A080608     end if;
+%p A080608 end proc:
+%p A080608 n := 1;
+%p A080608 for i from 1 to 500 do
+%p A080608     p := ithprime(i) ;
+%p A080608     if isA080608(p) then
+%p A080608         printf("%d %d\n",n,p) ;
+%p A080608         n := n+1 ;
+%p A080608     fi ;
+%p A080608 end do: # _R. J. Mathar_, Oct 11 2014
+%t A080608 Rest@ Union@ Nest[Function[{a, p}, Append[a, With[{w = IntegerDigits[p]}, If[# == True, p, 0] &@ AnyTrue[Array[FromDigits@ Delete[w, #] &, Length@ w], ! FreeQ[a, #] &]]]] @@ {#, Prime[Length@ # + 1]} &, Prime@ Range@ PrimePi@ 10, 81] (* _Michael De Vlieger_, Aug 02 2018 *)
+%o A080608 (PARI) is(n) = !ispseudoprime(n)&&return(0);my(d=digits(n));#d==1&&return(1);for(i=1,#d,is(fromdigits(vecextract(d,Str("^"i))))&&return(1));0 \\ _Jeppe Stig Nielsen_, Aug 01 2018
+%o A080608 (Perl) use ntheory ":all"; sub is { my $n=shift; return 0 unless is_prime($n); my @d=todigits($n); return 1 if @d==1; is(fromdigits([vecextract(\@d,~(1<<$_))])) && return 1 for 0..$#d; 0; } # _Dana Jacobsen_, Nov 16 2018
+%o A080608 (Python)
+%o A080608 from sympy import isprime
+%o A080608 def ok(n):
+%o A080608     if not isprime(n): return False
+%o A080608     if n < 10: return True
+%o A080608     s = str(n)
+%o A080608     si = (s[:i]+s[i+1:] for i in range(len(s)))
+%o A080608     return any(ok(int(t)) for t in si)
+%o A080608 print([k for k in range(440) if ok(k)]) # _Michael S. Branicky_, Jan 28 2023
+%Y A080608 Cf. A080603, A096235-A096246, A305352.
+%K A080608 nonn,easy,base
+%O A080608 1,1
+%A A080608 _David W. Wilson_, Feb 25 2003

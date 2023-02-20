@@ -1,0 +1,41 @@
+%I A023194
+%S A023194 2,4,9,16,25,64,289,729,1681,2401,3481,4096,5041,7921,10201,15625,
+%T A023194 17161,27889,28561,29929,65536,83521,85849,146689,262144,279841,
+%U A023194 458329,491401,531441,552049,579121,597529,683929,703921,707281,734449,829921,1190281
+%N A023194 Numbers whose sum of divisors is prime.
+%C A023194 All terms except the first are squares. Why? - _Zak Seidov_, Jun 10 2005
+%C A023194 Answer from Gabe Cunningham (gcasey(AT)mit.edu): "From the fact that the sigma (the sum-of-divisors function) is multiplicative, we can derive that the sigma(n) is even except when n is a square or twice a square.
+%C A023194 "If n = 2*(2*k + 1)^2, that is, n is twice an odd square, then sigma(n) = 3*sigma((2*k + 1)^2). If n = 2*(2*k)^2, that is, n is twice an even square, then sigma(n) is only prime if n is a power of 2; otherwise we have sigma(n) = sigma(8*2^m) * sigma(k/2^m) for some positive integer m.
+%C A023194 "So the only possible candidates for values of n other than squares such that sigma(n) is prime are odd powers of 2. But sigma(2^(2*m + 1)) = 2^(2*m + 2) - 1 = (2^(m + 1) + 1) * (2^(m + 1) - 1), which is only prime when m = 0, that is, when n = 2. So 2 is the only nonsquare n such that sigma(n) is prime."
+%C A023194 All terms in this sequence also have a prime number of divisors. - Howard Berman (howard_berman(AT)hotmail.com), Oct 29 2008
+%C A023194 This is because 1 + p + ... + p^k is divisible by 1 + p + ... + p^j if k + 1 is divisible by j + 1. - _Robert Israel_, Jan 13 2015
+%C A023194 From Gabe Cunningham's comment it follows that the alternate Mathematica program provided below is substantially more efficient as it only tests squares. - _Harvey P. Dale_, Dec 12 2010
+%C A023194 Each term of this sequence is a prime power. This follows from the facts that sigma is multiplicative and sigma(n) > 1 for n > 1. Thus, for n > 1, a(n) is of the form a(n) = k^2 where k = p^m, with p prime, so the divisors of a(n) are {1, p, p^2, p^3, ..., (p^m)^2}, and this set is a multiplicative group (modulo q); if q is prime, q = sigma(k^2). Reciprocally, if q is a prime of the form 1 + p + p^2 + ... + p^(2*m), then q = sigma(p^(2*m)) (definition of sigma). - _Michel Lagneau_, Aug 17 2011, edited by _Franklin T. Adams-Watters_, Aug 17 2011
+%C A023194 The sums of divisors of the even numbers in this sequence are the Mersenne primes, A000668. These even numbers are in A061652. - _Hartmut F. W. Hoft_, May 04 2015
+%C A023194 Numbers of the form p^(q - 1), where p is a prime, such that (p^q - 1)/(p - 1) is a prime. Then q must be a prime that does not divide p - 1. - _Thomas Ordowski_, Nov 18 2017
+%H A023194 T. D. Noe and David W. Wilson, <a href="/A023194/b023194.txt">Table of n, a(n) for n = 1..10000</a>
+%p A023194 N:= 10^8: # to get all entries <= N
+%p A023194 Primes:= select(isprime, [2,seq(2*i+1, i=1..floor((sqrt(N)-1)/2))]):
+%p A023194 P2:= select(t -> (t > 2 and t < 1 + ilog2(N)), Primes):
+%p A023194 cands:= {seq(seq([p,q],p=Primes), q=P2)} union {[2,2]}:
+%p A023194 f:= proc(pq) local t,j;
+%p A023194     t:= pq[1]^(pq[2]-1);
+%p A023194     if t <= N and isprime((t*pq[1]-1)/(pq[1]-1)) then t else NULL fi
+%p A023194 end proc:
+%p A023194 map(f,cands);
+%p A023194 # if using Maple 11 or earlier, uncomment the next line
+%p A023194 # sort(convert(%,list));  # _Robert Israel_, Jan 13 2015
+%t A023194 Select[ Range[ 100000 ], PrimeQ[ DivisorSigma[ 1, # ] ]& ] (* _David W. Wilson_ *)
+%t A023194 Prepend[Select[Range[1100]^2, PrimeQ[DivisorSigma[1,#]]&],2] (* _Harvey P. Dale_, Dec 12 2010 *)
+%o A023194 (PARI) for(x=1,1000,if(isprime(sigma(x)),print(x))) /* _Jorge Coveiro_, Dec 23 2004 */
+%o A023194 (PARI) list(lim)=my(v=List([2])); forprime(p=2,sqrtint(lim\=1), if(isprime(p^2+p+1), listput(v,p^2))); forstep(e=4,logint(lim,2),2, forprime(p=2,sqrtnint(lim,e), if(isprime((p^(e+1)-1)/(p-1)), listput(v,p^e)))); Set(v) \\ _Charles R Greathouse IV_, Aug 17 2011; updated Jul 22 2016
+%o A023194 (Magma) [n: n in [1..2*10^6] | IsPrime(SumOfDivisors(n))]; // _Vincenzo Librandi_, May 05 2015
+%o A023194 (Python)
+%o A023194 from sympy import isprime, divisor_sigma
+%o A023194 A023194_list = [2]+[n**2 for n in range(1,10**3) if isprime(divisor_sigma(n**2))] # _Chai Wah Wu_, Jul 14 2016
+%Y A023194 Cf. A000203.
+%Y A023194 Cf. A055638 (the square roots of the squares in this sequence).
+%Y A023194 Cf. A023195 (the primes produced by these n).
+%K A023194 nonn,easy,nice
+%O A023194 1,1
+%A A023194 _David W. Wilson_

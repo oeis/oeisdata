@@ -1,0 +1,69 @@
+%I A003961
+%S A003961 1,3,5,9,7,15,11,27,25,21,13,45,17,33,35,81,19,75,23,63,55,39,29,135,
+%T A003961 49,51,125,99,31,105,37,243,65,57,77,225,41,69,85,189,43,165,47,117,
+%U A003961 175,87,53,405,121,147,95,153,59,375,91,297,115,93,61,315,67,111,275,729,119
+%N A003961 Completely multiplicative with a(prime(k)) = prime(k+1).
+%C A003961 Meyers (see Guy reference) conjectures that for all r >= 1, the least odd number not in the set {a(i): i < prime(r)} is prime(r+1). - _N. J. A. Sloane_, Jan 08 2021
+%C A003961 Meyers' conjecture would be refuted if and only if for some r there were such a large gap between prime(r) and prime(r+1) that there existed a composite c for which prime(r) < c < a(c) < prime(r+1), in which case (by Bertrand's postulate) c would necessarily be a term of A246281. - _Antti Karttunen_, Mar 29 2021
+%C A003961 a(n) is odd for all n and for each odd m there exists a k with a(k) = m (see A064216). a(n) > n for n > 1: bijection between the odd and all numbers. - _Reinhard Zumkeller_, Sep 26 2001
+%C A003961 a(n) and n have the same number of distinct primes with (A001222) and without multiplicity (A001221). - _Michel Marcus_, Jun 13 2014
+%C A003961 From _Antti Karttunen_, Nov 01 2019: (Start)
+%C A003961 More generally, a(n) has the same prime signature as n, A046523(a(n)) = A046523(n). Also A246277(a(n)) = A246277(n) and A287170(a(n)) = A287170(n).
+%C A003961 Many permutations and other sequences that employ prime factorization of n to encode either polynomials, partitions (via Heinz numbers) or multisets in general can be easily defined by using this sequence as one of their constituent functions. See the last line in the Crossrefs section for examples.
+%C A003961 (End)
+%D A003961 Richard K. Guy, editor, Problems From Western Number Theory Conferences, Labor Day, 1983, Problem 367 (Proposed by Leroy F. Meyers, The Ohio State U.).
+%H A003961 Indranil Ghosh, <a href="/A003961/b003961.txt">Table of n, a(n) for n = 1..10000</a> (first 1000 terms from T. D. Noe)
+%H A003961 <a href="/index/Pri#prime_indices">Index entries for sequences computed from indices in prime factorization</a>.
+%H A003961 <a href="/index/He#Heinz">Index entries for sequences related to Heinz numbers</a>.
+%F A003961 If n = Product p(k)^e(k) then a(n) = Product p(k+1)^e(k).
+%F A003961 Multiplicative with a(p^e) = A000040(A000720(p)+1)^e. - _David W. Wilson_, Aug 01 2001
+%F A003961 a(n) = Product_{k=1..A001221(n)} A000040(A049084(A027748(n,k))+1)^A124010(n,k). - _Reinhard Zumkeller_, Oct 09 2011 [Corrected by _Peter Munn_, Nov 11 2019]
+%F A003961 A064989(a(n)) = n and a(A064989(n)) = A000265(n). - _Antti Karttunen_, May 20 2014 & Nov 01 2019
+%F A003961 A001221(a(n)) = A001221(n) and A001222(a(n)) = A001222(n). - _Michel Marcus_, Jun 13 2014
+%F A003961 From _Peter Munn_, Oct 31 2019: (Start)
+%F A003961 a(n) = A225546((A225546(n))^2).
+%F A003961 a(A225546(n)) = A225546(n^2).
+%F A003961 (End)
+%F A003961 Sum_{k=1..n} a(k) ~ c * n^2, where c = (1/2) * Product_{p prime} ((p^2-p)/(p^2-nextprime(p))) = 2.06399637... . - _Amiram Eldar_, Nov 18 2022
+%e A003961 a(12) = a(2^2 * 3) = a(prime(1)^2 * prime(2)) = prime(2)^2 * prime(3) = 3^2 * 5 = 45.
+%e A003961 a(A002110(n)) = A002110(n + 1) / 2.
+%p A003961 a:= n-> mul(nextprime(i[1])^i[2], i=ifactors(n)[2]):
+%p A003961 seq(a(n), n=1..80);  # _Alois P. Heinz_, Sep 13 2017
+%t A003961 a[p_?PrimeQ] := a[p] = Prime[ PrimePi[p] + 1]; a[1] = 1; a[n_] := a[n] = Times @@ (a[#1]^#2& @@@ FactorInteger[n]); Table[a[n], {n, 1, 65}] (* _Jean-François Alcover_, Dec 01 2011, updated Sep 20 2019 *)
+%t A003961 Table[Times @@ Map[#1^#2 & @@ # &, FactorInteger[n] /. {p_, e_} /; e > 0 :> {Prime[PrimePi@ p + 1], e}] - Boole[n == 1], {n, 65}] (* _Michael De Vlieger_, Mar 24 2017 *)
+%o A003961 (PARI) a(n)=local(f); if(n<1,0,f=factor(n); prod(k=1,matsize(f)[1],nextprime(1+f[k,1])^f[k,2]))
+%o A003961 (PARI) a(n) = my(f = factor(n)); for (i=1, #f~, f[i, 1] = nextprime(f[i, 1]+1)); factorback(f); \\ _Michel Marcus_, May 17 2014
+%o A003961 (Haskell)
+%o A003961 a003961 1 = 1
+%o A003961 a003961 n = product $ map (a000040 . (+ 1) . a049084) $ a027746_row n
+%o A003961 -- _Reinhard Zumkeller_, Apr 09 2012, Oct 09 2011
+%o A003961 (MIT/GNU Scheme, with Aubrey Jaffer's SLIB Scheme library)
+%o A003961 (require 'factor)
+%o A003961 (define (A003961 n) (apply * (map A000040 (map 1+ (map A049084 (factor n))))))
+%o A003961 ;; _Antti Karttunen_, May 20 2014
+%o A003961 (Perl) use ntheory ":all";  sub a003961 { vecprod(map { next_prime($_) } factor(shift)); }  # _Dana Jacobsen_, Mar 06 2016
+%o A003961 (Python)
+%o A003961 from sympy import factorint, prime, primepi, prod
+%o A003961 def a(n):
+%o A003961     f=factorint(n)
+%o A003961     return 1 if n==1 else prod(prime(primepi(i) + 1)**f[i] for i in f)
+%o A003961 [a(n) for n in range(1, 11)] # _Indranil Ghosh_, May 13 2017
+%Y A003961 See A045965 for another version.
+%Y A003961 Row 1 of table A242378 (which gives the "k-th powers" of this sequence), row 3 of A297845 and of A306697. See also arrays A066117, A246278, A255483, A308503, A329050.
+%Y A003961 Cf. A064989 (a left inverse), A064216, A000040, A002110, A000265, A027746, A046523, A048673 (= (a(n)+1)/2), A108228 (= (a(n)-1)/2), A191002 (= a(n)*n), A252748 (= a(n)-2n), A286385 (= a(n)-sigma(n)), A283980 (= a(n)*A006519(n)), A341529 (= a(n)*sigma(n)), A326042, A049084, A001221, A001222, A122111, A225546, A260443, A245606, A244319, A246269 (= A065338(a(n))), A322361 (= gcd(n, a(n))), A305293.
+%Y A003961 Cf. A191555, A252738.
+%Y A003961 Cf. A249734, A249735 (bisections).
+%Y A003961 Cf. A246261 (a(n) is of the form 4k+1), A246263 (of the form 4k+3), A246271, A246272, A246259, A246281 (n such that a(n) < 2n), A246282 (n such that a(n) > 2n), A252742.
+%Y A003961 Cf. A275717 (a(n) > a(n-1)), A275718 (a(n) < a(n-1)).
+%Y A003961 Cf. A003972 (Möbius transform), A003973 (Inverse Möbius transform), A318321.
+%Y A003961 Cf. A300841, A305421, A322991, A250469, A269379 for analogous shift-operators in other factorization and quasi-factorization systems.
+%Y A003961 Cf. also following permutations and other sequences that can be defined with the help of this sequence: A005940, A163511, A122111, A260443, A206296, A265408, A265750, A275733, A275735, A297845, A091202 & A091203, A250245 & A250246, A302023 & A302024, A302025 & A302026.
+%Y A003961 A version for partition numbers is A003964, strict A357853.
+%Y A003961 A permutation of A005408.
+%Y A003961 Applying the same transformation again gives A045966.
+%Y A003961 Other multiplicative sequences: A064988, A357977, A357978, A357980, A357983.
+%Y A003961 A056239 adds up prime indices, row-sums of A112798.
+%Y A003961 Cf. A000720, A076610, A296150.
+%K A003961 nonn,mult,nice
+%O A003961 1,2
+%A A003961 _Marc LeBrun_

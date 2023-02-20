@@ -1,0 +1,46 @@
+%I A057501
+%S A057501 0,1,3,2,7,8,5,4,6,17,18,20,21,22,12,13,10,9,11,15,14,16,19,45,46,48,
+%T A057501 49,50,54,55,57,58,59,61,62,63,64,31,32,34,35,36,26,27,24,23,25,29,28,
+%U A057501 30,33,40,41,38,37,39,43,42,44,47,52,51,53,56,60,129,130,132,133,134
+%N A057501 Signature-permutation of a Catalan Automorphism: Rotate non-crossing chords (handshake) arrangements; rotate the root position of general trees as encoded by A014486.
+%C A057501 This is a permutation of natural numbers induced when "noncrossing handshakes", i.e., Stanley's interpretation (n), "n nonintersecting chords joining 2n points on the circumference of a circle", are rotated.
+%C A057501 The same permutation is induced when the root position of plane trees (Stanley's interpretation (e)) is successively changed around the vertices.
+%C A057501 For a good illustration how the rotation of the root vertex works, please see the Figure 6, "Rotation of an ordered rooted tree" in Torsten Mütze's paper (on page 24 in 20 May 2014 revision).
+%C A057501 For yet another application of this permutation, please see the attached notes for A085197.
+%C A057501 By "recursivizing" either the left or right hand side argument of A085201 in the formula, one ends either with A057161 or A057503. By "recursivizing" the both sides, one ends with A057505. - _Antti Karttunen_, Jun 06 2014
+%H A057501 Antti Karttunen, <a href="/A057501/b057501.txt">Table of n, a(n) for n = 0..2055</a>
+%H A057501 A. Karttunen, <a href="http://web.archive.org/web/20121004142217/http://ndirty.cute.fi/~karttu/matikka/Nekomorphisms/CatBijections.pdf">Introductory Survey of Catalan Automorphisms and Bijections (an unfinished draft)</a>, pp. 56-57.
+%H A057501 A. Karttunen et al, <a href="/wiki/Combinatorial_interpretations_of_Catalan_numbers">Combinatorial interpretations of Catalan numbers</a>, OEIS Wiki.
+%H A057501 Torsten Mütze, <a href="http://arxiv.org/abs/1404.4442">Proof of the middle levels conjecture</a>, arXiv preprint arXiv:1404.4442 [math.CO], 2014 (p. 24).
+%H A057501 R. P. Stanley, <a href="http://www-math.mit.edu/~rstan/ec/catalan.pdf">Exercises on Catalan and Related Numbers</a> (This sequence is concerned with rotations of the interpretations (e) and (n) in the Exercise 19)
+%H A057501 <a href="/index/Per#IntegerPermutationCatAuto">Index entries for signature-permutations of Catalan automorphisms</a>
+%F A057501 a(0) = 0, and for n>=1, a(n) = A085201(A072771(n), A057548(A072772(n))). [This formula reflects directly the given non-destructive Lisp/Scheme function: A085201 is a 2-ary function corresponding to 'append', A072771 and A072772 correspond to 'car' and 'cdr' (known also as first/rest or head/tail in some dialects), and A057548 corresponds to unary form of function 'list'].
+%F A057501 As a composition of related permutations:
+%F A057501 a(n) = A057509(A069770(n)).
+%F A057501 a(n) = A057163(A069773(A057163(n))).
+%F A057501 Invariance-identities:
+%F A057501 A129599(a(n)) = A129599(n) holds for all n.
+%p A057501 map(CatalanRankGlobal,map(RotateHandshakes, A014486));
+%p A057501 RotateHandshakes := n -> pars2binexp(RotateHandshakesP(binexp2pars(n)));
+%p A057501 RotateHandshakesP := h -> `if`((0 = nops(h)),h,[op(car(h)),cdr(h)]); # This does the trick! In Lisp: (defun RotateHandshakesP (h) (append (car h) (list (cdr h))))
+%p A057501 car := proc(a) if 0 = nops(a) then ([]) else (op(1,a)): fi: end: # The name is from Lisp, takes the first element (head) of the list.
+%p A057501 cdr := proc(a) if 0 = nops(a) then ([]) else (a[2..nops(a)]): fi: end: # As well. Takes the rest (the tail) of the list.
+%p A057501 PeelNextBalSubSeq := proc(nn) local n,z,c; if(0 = nn) then RETURN(0); fi; n := nn; c := 0; z := 0; while(1 = 1) do z := 2*z + (n mod 2); c := c + (-1)^n; n := floor(n/2); if(c >= 0) then RETURN((z - 2^(floor_log_2(z)))/2); fi; od; end;
+%p A057501 RestBalSubSeq := proc(nn) local n,z,c; n := nn; c := 0; while(1 = 1) do c := c + (-1)^n; n := floor(n/2); if(c >= 0) then break; fi; od; z := 0; c := -1; while(1 = 1) do z := 2*z + (n mod 2); c := c + (-1)^n; n := floor(n/2); if(c >= 0) then RETURN(z/2); fi; od; end;
+%p A057501 pars2binexp := proc(p) local e,s,w,x; if(0 = nops(p)) then RETURN(0); fi; e := 0; for s in p do x := pars2binexp(s); w := floor_log_2(x); e := e * 2^(w+3) + 2^(w+2) + 2*x; od; RETURN(e); end;
+%p A057501 binexp2pars := proc(n) option remember; `if`((0 = n),[],binexp2parsR(binrev(n))); end;
+%p A057501 binexp2parsR := n -> [binexp2pars(PeelNextBalSubSeq(n)),op(binexp2pars(RestBalSubSeq(n)))];
+%p A057501 # Procedure CatalanRankGlobal given in A057117, other missing ones in A038776.
+%o A057501 (Scheme functions implementing this automorphism on S-expressions, "constructive" and "destructive" variants):
+%o A057501 (define (*A057501 s) (cond ((null? s) (list)) (else (append (car s) (list (cdr s))))))
+%o A057501 (define (*A057501! s) (cond ((pair? s) (*A074680! s) (*A057501! (cdr s)))) s)
+%o A057501 ;; A version working directly on nonnegative integers (definec is a memoization macro from _Antti Karttunen_'s IntSeq-library):
+%o A057501 (definec (A057501 n) (if (zero? n) n (A085201bi (A072771 n) (A057548 (A072772 n))))) ;; A085201bi, see: A085201.
+%Y A057501 Inverse: A057502.
+%Y A057501 Also, a "SPINE"-transform of A074680, and thus occurs as row 17 of A122203. (Also as row 65167 of A130403.)
+%Y A057501 Successive powers of this permutation, a^2(n) - a^6(n): A082315, A082317, A082319, A082321, A082323.
+%Y A057501 Other related permutations: A057161, A057163, A057503, A057505, A057508, A057509, A057511, A069770, A069771, A069772, A069773, A069888, A069889, A082313, A082314, A085173, A086427, A123501, A127291, A127292.
+%Y A057501 Cf. also A057548, A072771, A072772, A085201, A002995 (cycle counts), A057543 (max cycle lengths), A085197, A129599, A057517, A064638, A064640.
+%K A057501 nonn
+%O A057501 0,3
+%A A057501 _Antti Karttunen_, Sep 03 2000; entry revised Jun 06 2014

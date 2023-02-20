@@ -1,0 +1,65 @@
+%I A002094 M1383 N0541
+%S A002094 0,1,2,5,10,25,56,139,338,852,2145,5513,14196,36962,96641,254279,
+%T A002094 671640,1781840,4742295,12662282,33898923,90981264,244720490,
+%U A002094 659591378,1781048728,4817420360,13050525328,35405239155,96180222540,261603173201,712364210543
+%N A002094 Number of unlabeled connected loop-less graphs on n nodes containing exactly one cycle (of length at least 2) and with all nodes of degree <= 4.
+%C A002094 A pair of parallel edges is permitted and is regarded as a cycle of length 2.
+%C A002094 The original definition in A Handbook of Integer Sequences (1973) based on Schiff (1875) was simply "Alcohols". - _N. J. A. Sloane_, Mar 22 2018
+%C A002094 Schiff used an now outdated terminology and did not use the term "alcohols", but in German "zweiwerthige Kohlenwasserstoffe C_{n}H_{2n} ..." and later "... deren je zwei verfuegbare Affinitaeten ... durch Alkoholradikale befriedigt sind.", translated "bivalent hydrocarbons ... whose free valences ... are covered by alcohol radicals". At that time the meaning of "alcohol radical" was different from modern terminology, now meaning an -OH group, but in Schiff's terminology another C_{x}H{y} hydrocarbon group was meant. The organic compounds that are described by the graphs of this sequence in modern chemical terminology are the acyclic alkenes, with exactly one double carbon-to-carbon bond, and the monocyclic cycloalkanes (see Wikipedia links). - _Hugo Pfoertner_, Mar 29 2018
+%D A002094 N. J. A. Sloane, A Handbook of Integer Sequences, Academic Press, 1973 (includes this sequence).
+%D A002094 N. J. A. Sloane and Simon Plouffe, The Encyclopedia of Integer Sequences, Academic Press, 1995 (includes this sequence).
+%H A002094 Vaclav Kotesovec, <a href="/A002094/b002094.txt">Table of n, a(n) for n = 1..400</a>
+%H A002094 R. J. Mathar, <a href="/A002094/a002094_1.pdf">Illustration for graphs up to 6 carbons</a>, 2018
+%H A002094 Richard J. Mathar, <a href="https://arxiv.org/abs/1808.06264">Counting Connected Graphs without Overlapping Cycles</a>, arXiv:1808.06264 [math.CO], 2018.
+%H A002094 Hugo Schiff, <a href="http://dx.doi.org/10.1002/cber.187500802191">Zur Statistik chemischer Verbindungen</a>, Berichte der Deutschen Chemischen Gesellschaft, Vol. 8, pp. 1542-1547, 1875.
+%H A002094 Hugo Schiff, <a href="/A002094/a002094.pdf">Zur Statistik chemischer Verbindungen</a>, Berichte der Deutschen Chemischen Gesellschaft, Vol. 8, pp. 1542-1547, 1875. [Annotated scanned copy]
+%H A002094 Wikipedia, <a href="https://en.wikipedia.org/wiki/Alkene">Alkene</a>. Those with exactly one double carbon-to-carbon bond are covered by this sequence, the simplest being ethylene C_{2}H_{4}.
+%H A002094 Wikipedia, <a href="https://en.wikipedia.org/wiki/Cycloalkane">Cycloalkane</a>. The simplest alicyclic compounds, which are the monocyclic saturated hydrocarbons with formula C_{n}H_{2n}, are covered by this sequence, the first example being cyclopropane C_{3}H_{6}.
+%F A002094 Let A(x) denote the generating function for A000598 (Number of rooted ternary trees with n nodes), i.e., A(x) = 1+(1/6)*x*(A(x)^3+3*A(x)*A(x^2)+2*A(x^3)), and set B(x)=(A(x)^2+A(x^2))/2. With D_k(x) being the cycle polynomial of the regular k-gon for k>=2, the final generating function is then given by Sum_{k>=2} x^k*D_k(B(x)), which can be evaluated very quickly. - _Sascha Kurz_, Mar 18 2018
+%p A002094 # cycle index of cyclic group C_n
+%p A002094 cycC_n := proc(n::integer,a)
+%p A002094     local d ;
+%p A002094     add(numtheory[phi](d)*a[d]^(n/d),d=numtheory[divisors](n)) ;
+%p A002094     %/n ;
+%p A002094 end proc:
+%p A002094 # cycle index of dihedral group
+%p A002094 cyD_n := proc(n::integer,a)
+%p A002094     cycC_n(n,a)/2 ;
+%p A002094     if type(n,'odd') then
+%p A002094         %+ a[1]*a[2]^((n-1)/2)/2 ;
+%p A002094     else
+%p A002094         %+ ( a[1]^2*a[2]^((n-2)/2) +a[2]^(n/2) )/4 ;
+%p A002094     end if;
+%p A002094 end proc:
+%p A002094 a000642 := [
+%p A002094     1, 1, 2, 3, 7, 14, 32, 72, 171, 405, 989, 2426, 6045, 15167, 38422, 97925,
+%p A002094     251275, 648061, 1679869, 4372872, 11428365, 29972078, 78859809, 208094977,
+%p A002094     550603722, 1460457242, 3882682803, 10344102122, 27612603765, 73844151259,
+%p A002094     197818389539, 530775701520, 1426284383289] ;
+%p A002094 g := [add(a000642[i]*x^i,i=1..nops(a000642)) ];
+%p A002094 for i from 2 to nops(a000642) do
+%p A002094     g := [op(g), subs(x=x^i,g[1]) ] ;
+%p A002094 end do:
+%p A002094 Nmax := nops(a000642) :
+%p A002094 G := 0 ;
+%p A002094 for c from 2 to Nmax do
+%p A002094     f := cyD_n(c,g) ;
+%p A002094     G := G+ taylor(f,x=0,Nmax) ;
+%p A002094 end do:
+%p A002094 taylor(G,x=0,Nmax) ;
+%p A002094 gfun[seriestolist](%) ; # _R. J. Mathar_, Mar 17 2018
+%t A002094 terms = 31;
+%t A002094 cycC[n_, a_] := Sum[EulerPhi[d] a[[d]]^(n/d), {d, Divisors[n]}]/n;
+%t A002094 cyD[n_, a_] := Module[{cc}, cc = (1/2)cycC[n, a]; If[OddQ[n], (1/2)a[[1]]* a[[2]]^((n-1)/2)+cc, (1/4)(a[[1]]^2 a[[2]]^((n-2)/2) + a[[2]]^(n/2)) + cc]];
+%t A002094 B[_] = 0; Do[B[x_] = Normal[(1/6) x (2 B[x^3] + 3 B[x^2] B[x] + B[x]^3) + O[x]^terms+1], terms];
+%t A002094 A[x_] = (1/2) x (B[x^2] + B[x]^2) + O[x]^(terms+2);
+%t A002094 a000642 = Rest[CoefficientList[A[x], x]];
+%t A002094 g = {Sum[x^i a000642[[i]], {i, 1, terms+1}]};
+%t A002094 For[i = 2, i <= Length[a000642], i++, g = Flatten[Append[g, g[[1]] /. x -> x^i]]];
+%t A002094 For[G = 0; c = 2, c < terms+1, c++, f = cyD[c, g]; G = Series[f, {x, 0, terms+1}] + G];
+%t A002094 Most[Rest[CoefficientList[G, x]]] (* _Jean-François Alcover_, Mar 26 2020, after _R. J. Mathar_ *)
+%Y A002094 Cf. A000294, A000598, A000602, A000625, A000642, A001429 (unbound degrees), A068051.
+%K A002094 nonn
+%O A002094 1,3
+%A A002094 _N. J. A. Sloane_
+%E A002094 Better definition from _R. J. Mathar_; terms beyond 852 from _R. J. Mathar_ and _Sean A. Irvine_, Mar 17 2018

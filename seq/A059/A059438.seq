@@ -1,0 +1,54 @@
+%I A059438
+%S A059438 1,1,1,3,2,1,13,7,3,1,71,32,12,4,1,461,177,58,18,5,1,3447,1142,327,92,
+%T A059438 25,6,1,29093,8411,2109,531,135,33,7,1,273343,69692,15366,3440,800,
+%U A059438 188,42,8,1,2829325,642581,125316,24892,5226,1146,252,52,9,1
+%N A059438 Triangle T(n,k) (1 <= k <= n) read by rows: T(n,k) is the number of permutations of [1..n] with k components.
+%H A059438 G. C. Greubel, <a href="/A059438/b059438.txt">Table of n, a(n) for the first 50 rows, flattened</a>
+%H A059438 Louis Comtet, <a href="https://archive.org/details/Comtet_Louis_-_Advanced_Coatorics">Advanced Combinatorics</a>, Reidel, 1974, p. 262 (#14).
+%H A059438 Antonio Di Crescenzo, Barbara Martinucci, and Abdelaziz Rhandi, <a href="http://arxiv.org/abs/1405.4312">A linear birth-death process on a star graph and its diffusion approximation</a>, arXiv:1405.4312 [math.PR], 2014.
+%H A059438 FindStat - Combinatorial Statistic Finder, <a href="http://www.findstat.org/StatisticsDatabase/St000056">The decomposition number of a permutation.</a>
+%H A059438 Peter Hegarty and Anders Martinsson, <a href="http://arxiv.org/abs/1210.4798">On the existence of accessible paths in various models of fitness landscapes</a>, arXiv:1210.4798 [math.PR], 2012-2014. - From _N. J. A. Sloane_, Jan 01 2013
+%H A059438 Sergey Kitaev and Philip B. Zhang, <a href="https://arxiv.org/abs/1811.07679">Distributions of mesh patterns of short lengths</a>, arXiv:1811.07679 [math.CO], 2018.
+%F A059438 Let f(x) = Sum_{n >= 0} n!*x^n, g(x) = 1 - 1/f(x). Then g(x) is g.f. for first diagonal A003319 and Sum_{n >= k} T(n, k)*x^n = g(x)^k.
+%F A059438 Triangle T(n, k), n > 0 and k > 0, read by rows; given by [0, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, ...] DELTA A000007 where DELTA is Deléham's operator defined in A084938.
+%F A059438 T(n+k, k) = Sum_{a_1 + a_2 + ... + a_k = n} A003319(a_1)*A003319(a_2)*...*A003319(a_k). T(n, k) = 0 if n < k, T(n, 1) = A003319(n) and for n >= k T(n, k)= Sum_{j>=1} T(n-j, k-1)* A003319(j). A059438 is formed from the self convolution of its first column (A003319). - _Philippe Deléham_, Feb 04 2004
+%F A059438 Sum_{k>0} T(n, k) = n!; see A000142. - _Philippe Deléham_, Feb 05 2004
+%F A059438 If g(x) = x + x^2 + 3*x^3 + 13*x^4 + ... is the generating function for the number of permutations with no global descents, then 1/(1-g(x)) is the generating function for n!. Setting t=1 in f(x, t) implies Sum_{k=1..n} T(n,k) = n!. Let g(x) be the o.g.f. for A003319. Then the o.g.f. for this table is given by f(x, t) = 1/(1 - t*g(x)) - 1 (i.e., the coefficient of x^n*t^k in f(x,t) is T(n,k)). - _Mike Zabrocki_, Jul 29 2004
+%e A059438 Triangle begins:
+%e A059438 [1] [     1]
+%e A059438 [2] [     1,     1]
+%e A059438 [3] [     3,     2,     1]
+%e A059438 [4] [    13,     7,     3,    1]
+%e A059438 [5] [    71,    32,    12,    4,   1]
+%e A059438 [6] [   461,   177,    58,   18,   5,   1]
+%e A059438 [7] [  3447,  1142,   327,   92,  25,   6,  1]
+%e A059438 [8] [ 29093,  8411,  2109,  531, 135,  33,  7, 1]
+%e A059438 [9] [273343, 69692, 15366, 3440, 800, 188, 42, 8, 1]
+%p A059438 # Uses function PMatrix from A357368. Adds column 1, 0, 0, ... to the left.
+%p A059438 PMatrix(10, A003319); # _Peter Luschny_, Oct 09 2022
+%t A059438 (* p = indecomposable permutations = A003319 *) p[n_] := p[n] = n! - Sum[ k!*p[n-k], {k, 1, n-1}]; t[n_, k_] /; n < k = 0; t[n_, 1] := p[n]; t[n_, k_] /; n >= k := t[n, k] = Sum[ t[n-j, k-1]*p[j], {j, 1, n}]; Flatten[ Table[ t[n, k], {n, 1, 10}, {k, 1, n}] ] (* _Jean-François Alcover_, Mar 06 2012, after _Philippe Deléham_ *)
+%o A059438 (SageMath)
+%o A059438 def A059438_triangle(dim) :
+%o A059438     R = PolynomialRing(ZZ, 'x')
+%o A059438     C = [R(0)] + [R(1) for i in range(dim+1)]
+%o A059438     A = [(i + 2) // 2 for i in range(dim+1)]
+%o A059438     A[0] = R.gen(); T = []
+%o A059438     for k in range(1, dim+1) :
+%o A059438         for n in range(k, 0, -1) :
+%o A059438             C[n] = C[n-1] + C[n+1] * A[n-1]
+%o A059438         T.append(list(C[1])[1::])
+%o A059438     return T
+%o A059438 A059438_triangle(8) # _Peter Luschny_, Sep 10 2022
+%o A059438 (SageMath) Alternatively, using the function PartTrans from A357078:
+%o A059438 # Adds a (0,0)-based column (1, 0, 0, ...) to the left of the triangle.
+%o A059438 dim = 10
+%o A059438 A = ZZ[['t']]; g = A([0]+[factorial(n) for n in range(1, 30)]).O(dim+2)
+%o A059438 PartTrans(dim, lambda n: list(g / (1 +  g))[n]) # _Peter Luschny_, Sep 11 2022
+%Y A059438 A version with reflected rows is A263484.
+%Y A059438 Diagonals give A003319, A059439, A059440, A055998.
+%Y A059438 Cf. A000007, A085771, A084938.
+%Y A059438 T(2n,n) gives A308650.
+%K A059438 nonn,tabl,easy,nice
+%O A059438 1,4
+%A A059438 _N. J. A. Sloane_, Feb 01 2001
+%E A059438 More terms from _Vladeta Jovovic_, Mar 04 2001

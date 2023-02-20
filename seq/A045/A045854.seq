@@ -1,0 +1,46 @@
+%I A045854
+%S A045854 1,24,276,2024,10650,43056,140668,388608,948267,2121176,4448292,
+%T A045854 8811024,16535160,29632464,51256788,86069680,140300001,222302544,
+%U A045854 344353516,523941288,782700672,1146771168,1653111384,2354351232,3312339849,4594531176,6293753580,8546252072
+%N A045854 Number of nonnegative solutions of x1^2 + x2^2 + ... + x24^2 = n.
+%H A045854 Seiichi Manyama, <a href="/A045854/b045854.txt">Table of n, a(n) for n = 0..10000</a> (terms 0..2000 from T. D. Noe)
+%F A045854 Coefficient of q^n in (1 + q + q^4 + q^9 + q^16 + q^25 + q^36 + q^49 + q^64 + ...)^24.
+%F A045854 G.f.: ((1 + theta_3(x)) / 2)^24. - _Ilya Gutkovskiy_, Feb 10 2021
+%p A045854 b:= proc(n, k) option remember; `if`(n=0, 1, `if`(n<0 or k<1, 0,
+%p A045854       b(n, k-1)+add(b(n-j^2, k-1), j=1..isqrt(n))))
+%p A045854     end:
+%p A045854 a:= b(n, 24):
+%p A045854 seq(a(n), n=0..40);  # _Alois P. Heinz_, Feb 10 2021
+%t A045854 CoefficientList[((1 + EllipticTheta[3, 0, q])/2)^24 + O[q]^40, q] (* _Jean-François Alcover_, Mar 01 2021 *)
+%o A045854 (Ruby)
+%o A045854 def mul(f_ary, b_ary, m)
+%o A045854   s1, s2 = f_ary.size, b_ary.size
+%o A045854   ary = Array.new(s1 + s2 - 1, 0)
+%o A045854   (0..s1 - 1).each{|i|
+%o A045854     (0..s2 - 1).each{|j|
+%o A045854       ary[i + j] += f_ary[i] * b_ary[j]
+%o A045854     }
+%o A045854   }
+%o A045854   ary[0..m]
+%o A045854 end
+%o A045854 def power(ary, n, m)
+%o A045854   if n == 0
+%o A045854     a = Array.new(m + 1, 0)
+%o A045854     a[0] = 1
+%o A045854     return a
+%o A045854   end
+%o A045854   k = power(ary, n >> 1, m)
+%o A045854   k = mul(k, k, m)
+%o A045854   return k if n & 1 == 0
+%o A045854   return mul(k, ary, m)
+%o A045854 end
+%o A045854 def A(k, n)
+%o A045854   ary = Array.new(n + 1, 0)
+%o A045854   (0..Math.sqrt(n).to_i).each{|i| ary[i * i] = 1}
+%o A045854   power(ary, k, n)
+%o A045854 end
+%o A045854 p A(24, 100) # _Seiichi Manyama_, May 28 2017
+%Y A045854 Cf. A010052, A045847.
+%K A045854 nonn
+%O A045854 0,2
+%A A045854 _N. J. A. Sloane_

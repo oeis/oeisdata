@@ -1,0 +1,54 @@
+%I A005151 M4779
+%S A005151 1,11,21,1112,3112,211213,312213,212223,114213,31121314,41122314,
+%T A005151 31221324,21322314,21322314,21322314,21322314,21322314,21322314,
+%U A005151 21322314,21322314,21322314,21322314,21322314,21322314,21322314,21322314
+%N A005151 Summarize the previous term (digits in increasing order), starting with a(1) = 1.
+%C A005151 a(n) = 21322314 for n > 12. - _Reinhard Zumkeller_, Jan 25 2014
+%C A005151 The digits of each term a(n) are a permutation of those of the corresponding term A063850(n). - _Chayim Lowen_, Jul 16 2015
+%D A005151 C. Fleenor, "A litteral sequence", Solution to Problem 2562, Journal of Recreational Mathematics, vol. 31 No. 4 pp. 307 2002-3 Baywood NY.
+%D A005151 Problem in J. Recreational Math., 30 (4) (1999-2000), p. 309.
+%D A005151 N. J. A. Sloane and Simon Plouffe, The Encyclopedia of Integer Sequences, Academic Press, 1995 (includes this sequence).
+%H A005151 Colin Barker, <a href="/A005151/b005151.txt">Table of n, a(n) for n = 1..1000</a>
+%H A005151 V. Bronstein and A. S. Fraenkel, <a href="http://www.jstor.org/stable/2975323">On a curious property of counting sequences</a>, Amer. Math. Monthly, 101 (1994), 560-563.
+%H A005151 Onno M. Cain and Sela T. Enin, <a href="https://arxiv.org/abs/2004.00209">Inventory Loops (i.e. Counting Sequences) have Pre-period 2 max S_1 + 60</a>, arXiv:2004.00209 [math.NT], 2020.
+%H A005151 X. Gourdon and B. Salvy, <a href="http://dx.doi.org/10.1016/0012-365X(95)00133-H">Effective asymptotics of linear recurrences with rational coefficients</a>, Discrete Mathematics, vol. 153, no. 1-3, 1996, pages 145-163.
+%H A005151 James Henle, <a href="http://scholarship.claremont.edu/jhm/vol1/iss1/7">Is (some) mathematics poetry?</a>, Journal of Humanistic Mathematics 1:1 (2011), pp. 94-100.
+%H A005151 Madras Math's Amazing Number Facts, <a href="https://web.archive.org/web/20041105013844/http://www.users.zetnet.co.uk/madras/maths/amazingnofacts/fact013.html">Fact No. 13</a>
+%H A005151 Madras Math, <a href="https://web.archive.org/web/20041103085145/http://www.users.zetnet.co.uk/madras/maths/descriptive6.html">Descriptive Number</a>
+%H A005151 Trevor Scheopner, <a href="https://web.archive.org/web/20171109082421/http://pumj.org/docs/Issue1/Article_4.pdf">The Cyclic Nature (and Other Intriguing Properties) of Descriptive Numbers</a>, Princeton Undergraduate Mathematics Journal, Issue 1, Article 4.
+%H A005151 L. J. Upton, <a href="/A005151/a005151.pdf">Letter to N. J. A. Sloane</a>, Jan 8 1991.
+%H A005151 <a href="/index/Rec#order_01">Index entries for linear recurrences with constant coefficients</a>, signature (1).
+%F A005151 a(n+1) = A047842(a(n)). - _M. F. Hasler_, Feb 25 2018
+%F A005151 G.f.: x*(1 + 10*x + 10*x^2 + 1091*x^3 + 2000*x^4 + 208101*x^5 + 101000*x^6 - 99990*x^7 - 98010*x^8 + 31007101*x^9 + 10001000*x^10 - 9900990*x^11 - 9899010*x^12) / (1 - x). - _Colin Barker_, Aug 23 2018
+%e A005151 The term after 312213 is obtained by saying "Two 1's, two 2's, two 3's", which gives 21-22-23, i.e., 212223.
+%p A005151 P:=proc(q,h) local a,b,c,j,k,n; a:=h; print(a);
+%p A005151 for n from 1 to q do a:=convert(a,base,10); b:=0;
+%p A005151 for k from 0 to 9 do c:=0; for j from 1 to nops(a) do
+%p A005151 if a[j]=k then c:=c+1; fi; od;
+%p A005151 if c>0 then b:=b*10^(ilog10(c*10+k)+1)+c*10+k; fi; od;
+%p A005151 a:=b; print(a); od; end: P(10,1); # _Paolo P. Lava_, Mar 21 2018
+%t A005151 RunLengthEncode[x_List] := (Through[{Length, First}[ #1]] &) /@ Split[ Sort[x]]; LookAndSay[n_, d_:1] := NestList[ Flatten[ RunLengthEncode[ # ]] &, {d}, n - 1]; F[n_] := LookAndSay[n, 1][[n]]; Table[ FromDigits[ F[n]], {n, 25}] (* _Robert G. Wilson v_, Jan 22 2004 *)
+%t A005151 a[1] = 1; a[n_] := a[n] = FromDigits[Reverse /@ Sort[Tally[a[n-1] // IntegerDigits], #1[[1]] < #2[[1]]&] // Flatten]; Array[a, 26] (* _Jean-François Alcover_, Jan 25 2016 *)
+%o A005151 (Haskell)
+%o A005151 import Data.List (group, sort, transpose)
+%o A005151 a005151 n = a005151_list !! (n-1)
+%o A005151 a005151_list = 1 : f [1] :: [Integer] where
+%o A005151    f xs = (read $ concatMap show ys) : f ys where
+%o A005151           ys = concat $ transpose [map length zss, map head zss]
+%o A005151           zss = group $ sort xs
+%o A005151 -- _Reinhard Zumkeller_, Jan 25 2014
+%o A005151 (PARI) say(n) = {digs = digits(n); d = vecsort(digs,,8); s = ""; for (k=1, #d, nbk = #select(x->x==d[k], digs); s = concat(s, Str(nbk)); s = concat(s, d[k]);); eval(s);}
+%o A005151 lista(nn) = {print1(n = 1, ", "); for (k=1, nn, m = say(n); print1(m, ", "); n = m;);} \\ _Michel Marcus_, Feb 12 2016
+%o A005151 (PARI) a(n,show_all=1,a=1)={for(i=2,n,show_all&&print1(a",");a=A047842(a));a} \\ _M. F. Hasler_, Feb 25 2018
+%o A005151 (PARI) Vec(x*(1 + 10*x + 10*x^2 + 1091*x^3 + 2000*x^4 + 208101*x^5 + 101000*x^6 - 99990*x^7 - 98010*x^8 + 31007101*x^9 + 10001000*x^10 - 9900990*x^11 - 9899010*x^12) / (1 - x) + O(x^40)) \\ _Colin Barker_, Aug 23 2018
+%o A005151 (Python)
+%o A005151 from itertools import accumulate, groupby, repeat
+%o A005151 def summarize(n, _):
+%o A005151   return int("".join(str(len(list(g)))+k for k, g in groupby(sorted(str(n)))))
+%o A005151 def aupton(nn): return list(accumulate(repeat(1, nn+1), summarize))
+%o A005151 print(aupton(25)) # _Michael S. Branicky_, Jan 11 2021
+%Y A005151 Cf. A005150, A047842. See A083671 for another version.
+%Y A005151 Cf. A023989, A118628, A060857.
+%K A005151 nonn,base,easy
+%O A005151 1,2
+%A A005151 _N. J. A. Sloane_

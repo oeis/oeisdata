@@ -1,0 +1,85 @@
+%I A031366
+%S A031366 1,0,0,25,36,0,0,0,100,0,288,0,0,0,0,440,0,0,800,900,0,0,0,0,960,0,0,
+%T A031366 0,1800,0,2048,0,0,0,0,2500,0,0,0,0,3528,0,0,7200,3600,0,0,0,2550,0,0,
+%U A031366 0,0,0,10368,0,0,0,7200,0,7688,0,0,7330,0,0,0,0,0,0,10368,0,0,0,0,20000,0,0,12800,15840,8362,0,0,0,0,0,0,0,16200,0,0,0,0,0,28800,0,0,0,28800,23899
+%N A031366 Number of symmetrically inequivalent coincidence rotations of icosian ring of index n.
+%C A031366 The overall number of coincidence rotations is 7200 times this value. Some symmetrically distinct rotations generate the same coincidence site modules, hence a(n) >= A331143(n). - _Andrey Zabolotskiy_, Feb 16 2021
+%H A031366 M. Baake, <a href="https://arxiv.org/abs/math/0605222">Solution of the coincidence problem in dimensions d <= 4</a>, in R. V. Moody, ed., Math. of Long-Range Aperiodic Order, Kluwer 1997, pp. 9-44.; arXiv:math/0605222 [math.MG], 2006.
+%H A031366 Michael Baake and Peter Zeiner, <a href="https://doi.org/10.1080/14786430701846206">Coincidences in 4 dimensions</a>, Phil. Mag. 88 (2008), 2025-2032; arXiv:<a href="https://arxiv.org/abs/0712.0363">0712.0363</a> [math.MG]. See Section 4. Caution: there is a typo in a(19).
+%F A031366 See Baake (1997) for the Dirichlet g.f.
+%p A031366 read("transforms") :
+%p A031366 # expansion of 1/(1-5^(-s)) in (5.10)
+%p A031366 L1 := [1,seq(0,i=2..200)] :
+%p A031366 for k from 1 do
+%p A031366     if 5^k <= nops(L1) then
+%p A031366         L1 := subsop(5^k=1,L1) ;
+%p A031366     else
+%p A031366         break ;
+%p A031366     end if;
+%p A031366 end do:
+%p A031366 # multiplication with 1/(1-p^(-2s)) in (5.10)
+%p A031366 for i from 1 do
+%p A031366     p := ithprime(i) ;
+%p A031366     if modp(p,5) = 2 or modp(p,5)=3 then
+%p A031366         Laux := [1,seq(0,i=2..200)] :
+%p A031366         for k from 1 do
+%p A031366             if p^(2*k) <= nops(Laux) then
+%p A031366                 Laux := subsop(p^(2*k)=1,Laux) ;
+%p A031366             else
+%p A031366                 break ;
+%p A031366             end if;
+%p A031366         end do:
+%p A031366         L1 := DIRICHLET(L1,Laux) ;
+%p A031366     end if;
+%p A031366     if p > nops(L1) then
+%p A031366         break;
+%p A031366     end if;
+%p A031366 end do:
+%p A031366 # multiplication with 1/(1-p^(-s))^2 in (5.10)
+%p A031366 for i from 1 do
+%p A031366     p := ithprime(i) ;
+%p A031366     if modp(p,5) = 1 or modp(p,5)=4 then
+%p A031366         Laux := [1,seq(0,i=2..200)] :
+%p A031366         for k from 1 do
+%p A031366             if p^k <= nops(Laux) then
+%p A031366                 Laux := subsop(p^k=k+1,Laux) ;
+%p A031366             else
+%p A031366                 break ;
+%p A031366             end if;
+%p A031366         end do:
+%p A031366         L1 := DIRICHLET(L1,Laux) ;
+%p A031366     end if;
+%p A031366     if p > nops(L1) then
+%p A031366         break;
+%p A031366     end if;
+%p A031366 end do:
+%p A031366 # this is now Zeta_L(s), seems to be A035187
+%p A031366 # print(L1) ;
+%p A031366 # generate Zeta_L(s-1)
+%p A031366 L1shft := [seq(op(i,L1)*i,i=1..nops(L1))] ;
+%p A031366 # generate 1/Zeta_L(s)
+%p A031366 L1x := add(op(i,L1)*x^(i-1),i=1..nops(L1)) :
+%p A031366 taylor(1/L1x,x=0,nops(L1)) :
+%p A031366 L1i := gfun[seriestolist](%) ;
+%p A031366 # generate 1/Zeta_L(2s)
+%p A031366 L1i2 := [1,seq(0,i=2..nops(L1))] ;
+%p A031366 for k from 2 to nops(L1i) do
+%p A031366     if k^2 < nops(L1i2) then
+%p A031366         L1i2 := subsop(k^2=op(k,L1i),L1i2) ;
+%p A031366     else
+%p A031366         break ;
+%p A031366     end if;
+%p A031366 end do:
+%p A031366 # generate Zeta_L(s)*Zeta_L(s-1)
+%p A031366 DIRICHLET(L1,L1shft) ;
+%p A031366 # generate Zeta_L(s)*Zeta_L(s-1)/Zeta_L(2s) = Phi(s)
+%p A031366 Phis := DIRICHLET(%,L1i2) ;
+%p A031366 # generate Phis(s-1)
+%p A031366 Phishif := [seq(op(i,Phis)*i,i=1..nops(Phis))] ;
+%p A031366 DIRICHLET(Phis,Phishif) ;
+%Y A031366 Cf. A331143.
+%K A031366 nonn,mult
+%O A031366 1,4
+%A A031366 _N. J. A. Sloane_
+%E A031366 Terms beyond a(36) from _R. J. Mathar_, Mar 04 2018
+%E A031366 New name from _Andrey Zabolotskiy_, Feb 16 2021

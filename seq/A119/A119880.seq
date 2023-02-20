@@ -1,0 +1,44 @@
+%I A119880
+%S A119880 1,2,3,2,-3,2,63,2,-1383,2,50523,2,-2702763,2,199360983,2,
+%T A119880 -19391512143,2,2404879675443,2,-370371188237523,2,69348874393137903,
+%U A119880 2,-15514534163557086903,2,4087072509293123892363,2,-1252259641403629865468283,2,441543893249023104553682823
+%N A119880 E.g.f. exp(2x)*sech(x).
+%C A119880 Transform of 2^n under the matrix A119879.
+%C A119880 Also the Swiss-Knife polynomials A153641 evaluated at x=2. - _Peter Luschny_, Nov 23 2012
+%H A119880 Vincenzo Librandi, <a href="/A119880/b119880.txt">Table of n, a(n) for n = 0..200</a>
+%H A119880 Paul Barry, <a href="https://arxiv.org/abs/1702.04007">Eulerian-Dowling Polynomials as Moments, Using Riordan Arrays</a>, arXiv:1702.04007 [math.CO], 2017.
+%F A119880 a(n) = Sum_{k=0..n} A119879(n,k) * 2^k.
+%F A119880 From _Sergei N. Gladkovskii_, Oct 14 2012 to Dec 16 2013: (Start)
+%F A119880 Continued fractions:
+%F A119880 G.f.: 1/U(0) where U(k)=  1 - x - x*(k+1)/(1 + x*(k+1)/U(k+1)).
+%F A119880 G.f.: 1/Q(0), where Q(k)= 1 - 3*x + x*(k+1)/(1-x*(k+1)/Q(k+1)).
+%F A119880 G.f.: x/(1-x)/Q(0) + 1/(1-x), where Q(k)= 1 - x + x^2*(k+1)*(k+2)/Q(k+1).
+%F A119880 G.f.: T(0)/(1-2*x), where T(k) = 1 - x^2*(k+1)^2/(x^2*(k+1)^2 + (1-2*x)^2/T(k+1)).
+%F A119880 E.g.f.: 2/Q(0), where Q(k) = 1 + 3^k/( 1 - x/( x - 3^k*(k+1)/Q(k+1))). (End)
+%F A119880 a(n) = 2*(1+zeta(-n)*(2^n-1)+2^(2*n+1)*zeta(-n,3/4)). - _Peter Luschny_, Jul 16 2013
+%F A119880 a(n) = (-2)^n*Euler(n, -1/2). - _Peter Luschny_, Jul 21 2020
+%p A119880 A119880_list := proc(n) local S,A,m,k;
+%p A119880 A := array(0..n-1,0..n-1); S := NULL;
+%p A119880 for m from 0 to n-1 do
+%p A119880    A[m,0] := (-2)^m*euler(m,0);
+%p A119880    for k from m-1 by -1 to 0 do
+%p A119880        A[k,m-k] := A[k+1,m-k-1] + A[k,m-k-1] od;
+%p A119880     S := S,A[0,m] od;
+%p A119880 S end:
+%p A119880 A119880_list(31); # _Peter Luschny_, Jun 15 2012
+%p A119880 P := proc(n,x) option remember; if n = 0 then 1 else
+%p A119880   (n*x-(1/2)*(1-x))*P(n-1,x)+x*(1-x)*diff(P(n-1,x),x);
+%p A119880   expand(%) fi end:
+%p A119880 A119880 := n -> (-1)^n*subs(x=-1, P(n,x)):
+%p A119880 seq(A119880(n), n=0..30);  # _Peter Luschny_, Mar 07 2014
+%t A119880 Table[2 (1 + Zeta[-n] (2^n - 1) + 2^(2 n + 1) Zeta[-n, 3/4]), {n, 0, 30}] (* _Peter Luschny_, Jul 16 2013 *)
+%t A119880 Range[0, 30]! CoefficientList[Series[Exp[2 x] Sech[x], {x, 0, 30}], x] (* _Vincenzo Librandi_, Mar 08 2014 *)
+%o A119880 (Sage)
+%o A119880 def skp(n, x):
+%o A119880     A = lambda k: 0 if (k+1)%4 == 0 else (-1)^((k+1)//4)*2^(-(k//2))
+%o A119880     return add(A(k)*add((-1)^v*binomial(k,v)*(v+x+1)^n for v in (0..k)) for k in (0..n))
+%o A119880 A119880 = lambda n: skp(n,2)
+%o A119880 [A119880(n) for n in (0..30)]  # _Peter Luschny_, Nov 23 2012
+%K A119880 easy,sign
+%O A119880 0,2
+%A A119880 _Paul Barry_, May 26 2006

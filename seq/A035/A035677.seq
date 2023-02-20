@@ -1,0 +1,27 @@
+%I A035677
+%S A035677 0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,1,0,3,0,0,0,1,0,3,0,6,0,1,0,3,
+%T A035677 0,7,0,12,0,3,0,7,0,15,0,21,0,7,0,16,0,28,0,36,0,16,0,31,0,50,0,60,0,
+%U A035677 32,0,57,0,85,0,98,0,60,0,100,0,141,0,157,0,107,0,169,0,226,0,248,0
+%N A035677 Number of partitions of n into parts 8k and 8k + 6 with at least one part of each type.
+%H A035677 Alois P. Heinz, <a href="/A035677/b035677.txt">Table of n, a(n) for n = 1..20000</a> (first 361 terms from Antti Karttunen)
+%F A035677 G.f.: (-1 + 1/Product_{k>=0} (1 - x^(8*k + 6)))*(-1 + 1/Product_{k>=1} (1 - x^(8*k))). - _Robert Price_, Aug 13 2020
+%p A035677 b:= proc(n, i, t, s) option remember; `if`(n=0, t*s, `if`(i<1, 0,
+%p A035677        b(n, i-1, t, s)+(h-> `if`(h in {0, 3}, add(b(n-i*j, i-1,
+%p A035677       `if`(h=0, 1, t), `if`(h=3, 1, s)), j=1..n/i), 0))(irem(i, 4))))
+%p A035677     end:
+%p A035677 a:= n-> `if`(n::odd, 0, b(n/2$2, 0$2)):
+%p A035677 seq(a(n), n=1..100);  # _Alois P. Heinz_, Aug 17 2020
+%t A035677 nmax = 87; s1 = Range[1, nmax/8]*8; s2 = Range[0, nmax/8]*8 + 6;
+%t A035677 Table[Count[IntegerPartitions[n, All, s1~Join~s2],
+%t A035677 x_ /; ContainsAny[x, s1 ] && ContainsAny[x, s2 ]], {n, 1, nmax}] (* _Robert Price_, Aug 13 2020 *)
+%t A035677 nmax = 87; l = Rest@CoefficientList[Series[(-1 + 1/Product[(1 - x^(8 k)), {k, 1, nmax}])*(-1 + 1/Product[(1 - x^(8 k + 6)), {k, 0, nmax}]), {x, 0, nmax}], x]  (* _Robert Price_, Aug 13 2020 *)
+%o A035677 (PARI)
+%o A035677 parts8katleast(up_to,n) = select(x -> (x>=n), vector(((up_to+0)>>3),k,((k<<3)-0)));
+%o A035677 parts8kplus6(up_to) = vector(((up_to+2)>>3),k,((k<<3)-2));
+%o A035677 partitions_for_A035677(n,parts,from=1,has8k6parts=0) = if(!n,(has8k6parts>0), my(k = #parts, s=0); for(i=from,k,if(parts[i]<=n, s += partitions_for_A035677(n-parts[i],parts,i,(has8k6parts+(6==(parts[i]%8)))))); (s));
+%o A035677 A035677(n) = if(n%2,0,sum(i=1,n>>3, my(k = i*8); partitions_for_A035677(n-k,vecsort(setunion(parts8katleast(n-k,k),parts8kplus6(n-k)),,4)))); \\ _Antti Karttunen_, Feb 06 2019
+%Y A035677 Cf. A035441-A035468, A035618-A035676, A035678-A035699.
+%Y A035677 Bisections give: A035623 (even part), A000004 (odd part).
+%K A035677 nonn
+%O A035677 1,22
+%A A035677 _Olivier Gérard_

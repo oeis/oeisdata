@@ -1,0 +1,38 @@
+%I A005703 M1151
+%S A005703 1,1,1,2,4,8,19,44,112,287,763,2041,5577,15300,42419,118122,330785,
+%T A005703 929469,2621272,7411706,21010378,59682057,169859257,484234165,
+%U A005703 1382567947,3952860475,11315775161,32430737380,93044797486,267211342954,768096496093,2209772802169
+%N A005703 Number of n-node connected graphs with at most one cycle.
+%C A005703 a(n) is the number of pseudotrees on n nodes. - _Eric W. Weisstein_, Jun 11 2012
+%D A005703 J. Riordan, An Introduction to Combinatorial Analysis, Wiley, 1958, p. 150.
+%D A005703 N. J. A. Sloane and Simon Plouffe, The Encyclopedia of Integer Sequences, Academic Press, 1995 (includes this sequence).
+%H A005703 Washington Bomfim, <a href="/A005703/b005703.txt">Table of n, a(n) for n = 0..500</a>
+%H A005703 R. K. Guy, <a href="/A000123/a000123_1.pdf">Letters to N. J. A. Sloane and J. W. Moon, 1988</a>
+%H A005703 Richard J. Mathar, <a href="https://arxiv.org/abs/1808.06264">Counting Connected Graphs without Overlapping Cycles</a>, arXiv:1808.06264 [math.CO], 2018.
+%H A005703 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/Pseudotree.html">Pseudotree</a>
+%H A005703 Wikipedia, <a href="http://en.wikipedia.org/wiki/Pseudoforest">Pseudoforest</a>
+%F A005703 a(n) = A000055(n) + A001429(n).
+%t A005703 Needs["Combinatorica`"]; nn = 20; t[x_] := Sum[a[n] x^n, {n, 1, nn}];
+%t A005703 a[0] = 0;
+%t A005703 b = Drop[Flatten[
+%t A005703     sol = SolveAlways[
+%t A005703       0 == Series[
+%t A005703         t[x] - x Product[1/(1 - x^i)^a[i], {i, 1, nn}], {x, 0, nn}],
+%t A005703       x]; Table[a[n], {n, 0, nn}] /. sol], 1];
+%t A005703 r[x_] := Sum[b[[n]] x^n, {n, 1, nn}]; c =
+%t A005703 Drop[Table[
+%t A005703     CoefficientList[
+%t A005703      Series[CycleIndex[DihedralGroup[n], s] /.
+%t A005703        Table[s[i] -> r[x^i], {i, 1, n}], {x, 0, nn}], x], {n, 3,
+%t A005703      nn}] // Total, 1];
+%t A005703 d[x_] := Sum[c[[n]] x^n, {n, 1, nn}]; CoefficientList[
+%t A005703 Series[r[x] - (r[x]^2 - r[x^2])/2 + d[x] + 1, {x, 0, nn}], x] (* _Geoffrey Critzer_, Nov 17 2014 *)
+%o A005703 (PARI) \\ TreeGf gives gf of A000081.
+%o A005703 TreeGf(N)={my(A=vector(N, j, 1)); for (n=1, N-1, A[n+1] = 1/n * sum(k=1, n, sumdiv(k, d, d*A[d]) * A[n-k+1] ) ); x*Ser(A)}
+%o A005703 seq(n)={my(t=TreeGf(n)); my(g(e)=subst(t + O(x*x^(n\e)), x, x^e) + O(x*x^n)); Vec(1 + g(1) + (g(2) - g(1)^2)/2 + sum(k=3, n, sumdiv(k, d, eulerphi(d)*g(d)^(k/d))/k + if(k%2, g(1)*g(2)^(k\2), (g(1)^2+g(2))*g(2)^(k/2-1)/2))/2)}; \\ _Andrew Howroyd_ and _Washington Bomfim_, May 15 2021
+%Y A005703 Cf. A000055, A000081, A001429, A134964 (number of pseudoforests).
+%K A005703 nonn,easy,nice
+%O A005703 0,4
+%A A005703 _N. J. A. Sloane_, _R. K. Guy_
+%E A005703 More terms from _Vladeta Jovovic_, Apr 19 2000 and from _Michael Somos_, Apr 26 2000
+%E A005703 a(27) corrected and a(28) and a(29) computed by _Washington Bomfim_, May 14 2008

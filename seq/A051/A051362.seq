@@ -1,0 +1,43 @@
+%I A051362
+%S A051362 23,37,53,73,113,131,137,173,179,197,311,317,431,617,719,1013,1031,
+%T A051362 1097,1499,1997,2239,2293,3137,4019,4919,6173,7019,7433,9677,10193,
+%U A051362 10613,11093,19973,23833,26833,30011,37019,40013,47933,73331,74177
+%N A051362 Primes remaining prime if any digit is deleted (zeros allowed).
+%C A051362 These might be called "super-prime numbers". - Jaime Gutierrez (jgutierrez(AT)matematicas.net), Sep 27 2007
+%C A051362 A proper subset of A034895. - _Robert G. Wilson v_, Oct 12 2014
+%C A051362 The largest known number in this sequence is a 274-digit prime consisting of 163 4s, followed by 80 0s, followed by 31 1s. See the CodeGolf link. - _Dmitry Kamenetsky_, Feb 26 2021
+%H A051362 T. D. Noe and Giovanni Resta, <a href="/A051362/b051362.txt">Table of n, a(n) for n = 1..201</a> (terms < 10^13, first 100 terms from T. D. Noe)
+%H A051362 CodeGolf StackExchange, <a href="https://codegolf.stackexchange.com/questions/10739/find-largest-prime-which-is-still-a-prime-after-digit-deletion">Find largest prime which is still a prime after digit deletion</a>, 2013.
+%H A051362 Mathematics StackExchange, <a href="http://math.stackexchange.com/questions/33094">Deleting any digit yields a prime</a>, 2011.
+%H A051362 Mathematics StackExchange, <a href="https://math.stackexchange.com/questions/4038896/largest-prime-that-remains-prime-when-any-one-of-its-digits-is-deleted">Largest prime that remains prime when any one of its digits is deleted</a>, 2021.
+%p A051362 P:=proc(q) local a,b,i,ok,n; for n from 1 to q do a:=ithprime(n); b:=0;
+%p A051362 ok:=1; while a>0 do b:=b+1; a:=trunc(a/10); od; a:=ithprime(n);
+%p A051362 for i from 0 to b-1 do if not isprime(trunc(a/10^(i+1))*10^i+(a mod 10^i))
+%p A051362 then ok:=0; break; fi; od; if ok=1 then print(ithprime(n)); fi;
+%p A051362 od; end: P(10^6); # _Paolo P. Lava_, Oct 25 2013
+%t A051362 rpQ[n_]:=Module[{idn=IntegerDigits[n]},And@@PrimeQ[FromDigits/@ Subsets[ IntegerDigits[ n],{Length[idn]-1}]]]; Select[Prime[Range[40000]], rpQ]
+%t A051362 prpQ[n_]:=AllTrue[FromDigits/@Table[Delete[IntegerDigits[n],d],{d,IntegerLength[ n]}],PrimeQ]; Select[Prime[Range[7500]],prpQ] (* Requires Mathematica version 10 or later *) (* _Harvey P. Dale_, Nov 27 2020 *)
+%o A051362 (Haskell)
+%o A051362 import Data.List (inits, tails)
+%o A051362 a051362 n = a051362_list !! (n-1)
+%o A051362 a051362_list = filter p $ drop 4 a000040_list where
+%o A051362    p x = all (== 1) $ map (a010051 . read) $
+%o A051362              zipWith (++) (inits $ show x) (tail $ tails $ show x)
+%o A051362 -- _Reinhard Zumkeller_, Dec 17 2011, Aug 24 2011
+%o A051362 (PARI) is(n)=my(v=Vec(Str(n)),k);for(i=1, #v, k=eval(concat(vecextract(v, 2^#v-1-2^(i-1))));if(!isprime(k),return(0)));isprime(n) \\ _Charles R Greathouse IV_, Oct 05 2011
+%o A051362 (Sage)
+%o A051362 def is_A051362(n):
+%o A051362     prime = is_prime(n)
+%o A051362     if prime:
+%o A051362         L = ZZ(n).digits(10)
+%o A051362         for k in range(len(L)):
+%o A051362             K = L[:]; del K[k]
+%o A051362             prime = is_prime(ZZ(K, base=10))
+%o A051362             if not prime: break
+%o A051362     return prime
+%o A051362 A051362_list = lambda n: filter(is_A051362, range(n))
+%o A051362 A051362_list(77777) # _Peter Luschny_, Jul 17 2014
+%Y A051362 Cf. A034302, A010051, A000040, A034895.
+%K A051362 nonn,base,nice
+%O A051362 1,1
+%A A051362 _Harvey P. Dale_, May 31 2000

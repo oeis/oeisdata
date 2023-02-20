@@ -1,0 +1,100 @@
+%I A004250 M1046
+%S A004250 0,0,1,2,4,7,11,17,25,36,50,70,94,127,168,222,288,375,480,616,781,990,
+%T A004250 1243,1562,1945,2422,2996,3703,4550,5588,6826,8332,10126,12292,14865,
+%U A004250 17958,21618,25995,31165,37317,44562
+%N A004250 Number of partitions of n into 3 or more parts.
+%C A004250 Number of (n+1)-vertex spider graphs: trees with n+1 vertices and exactly 1 vertex of degree at least 3 (i.e. branching vertex). There is a trivial bijection with the objects described in the definition. - _Emeric Deutsch_, Feb 22 2014
+%C A004250 Also the number of graphical partitions of 2n into n parts. - _Gus Wiseman_, Jan 08 2021
+%D A004250 N. J. A. Sloane and Simon Plouffe, The Encyclopedia of Integer Sequences, Academic Press, 1995 (includes this sequence).
+%D A004250 P. R. Stein, On the number of graphical partitions, pp. 671-684 of Proc. 9th S-E Conf. Combinatorics, Graph Theory, Computing, Congr. Numer. 21 (1978).
+%H A004250 T. M. Barnes and C. D. Savage, <a href="https://doi.org/10.37236/1205">A recurrence for counting graphical partitions</a>, Electronic J. Combinatorics, 2 (1995).
+%H A004250 N. Metropolis and P. R. Stein, <a href="https://doi.org/10.1016/S0195-6698(80)80048-5">The enumeration of graphical partitions</a>, Europ. J. Combin., 1 (1980), 139-1532.
+%H A004250 P. R. Stein, <a href="/A004250/a004250.pdf">On the number of graphical partitions</a>, pp. 671-684 of Proc. 9th S-E Conf. Combinatorics, Graph Theory, Computing, Congr. Numer. 21 (1978). [Annotated scanned copy]
+%H A004250 Eric Weisstein's World of Mathematics. <a href="http://mathworld.wolfram.com/SpiderGraph.html">Spider Graph</a>
+%H A004250 Wikipedia, <a href="https://en.wikipedia.org/wiki/Starlike_tree">Starlike tree</a>
+%H A004250 <a href="/index/Gra#graph_part">Index entries for sequences related to graphical partitions</a>
+%F A004250 G.f.: Sum_{n>=0} (q^n / Product_{k=1..n+3} (1 - q^k)). -  _N. J. A. Sloane_
+%F A004250 a(n) = A000041(n) - floor((n+2)/2) = A000041(n)-A004526(n+1) = A058984(n)-1. - _Vladeta Jovovic_, Jun 18 2003
+%F A004250 Let P(n,i) denote the number of partitions of n into i parts. Then a(n) = Sum_{i=3..n} P(n,i). - _Thomas Wieder_, Feb 01 2007
+%F A004250 a(n) = A259873(n,n). - _Gus Wiseman_, Jan 08 2021
+%e A004250 a(6)=7 because there are three partitions of n=6 with i=3 parts: [4, 1, 1], [3, 2, 1], [2, 2, 2] and two partitions with i=4 parts: [3, 1, 1, 1], [2, 2, 1, 1] and one partition with i=5 parts: [2, 1, 1, 1, 1]] and one partition with i=6 parts: [1, 1, 1, 1, 1, 1].
+%e A004250 From _Gus Wiseman_, Jan 18 2021: (Start)
+%e A004250 The a(3) = 1 through a(7) = 11 graphical partitions of 2n into n parts:
+%e A004250   (222)  (2222)  (22222)  (222222)  (2222222)
+%e A004250          (3221)  (32221)  (322221)  (3222221)
+%e A004250                  (33211)  (332211)  (3322211)
+%e A004250                  (42211)  (333111)  (3332111)
+%e A004250                           (422211)  (4222211)
+%e A004250                           (432111)  (4322111)
+%e A004250                           (522111)  (4331111)
+%e A004250                                     (4421111)
+%e A004250                                     (5222111)
+%e A004250                                     (5321111)
+%e A004250                                     (6221111)
+%e A004250 (End)
+%p A004250 with(combinat);
+%p A004250 for i from 1 to 15 do pik(i,3) od;
+%p A004250 pik:= proc(n::integer, k::integer)
+%p A004250 # _Thomas Wieder_, Jan 30 2007
+%p A004250 local i, Liste, Result;
+%p A004250 if k > n or n < 0 or k < 1 then
+%p A004250 return fail
+%p A004250 end if;
+%p A004250 Result := 0;
+%p A004250 for i from k to n do
+%p A004250 Liste:= PartitionList(n,i);
+%p A004250 #print(Liste);
+%p A004250 Result := Result + nops(Liste);
+%p A004250 end do;
+%p A004250 return Result;
+%p A004250 end proc;
+%p A004250 PartitionList := proc (n, k)
+%p A004250 # Authors: Herbert S. Wilf and Joanna Nordlicht. Source: Lecture Notes
+%p A004250 # "East Side West Side,..." University of Pennsylvania, USA, 2002.
+%p A004250 # Available at: http://www.cis.upenn.edu/~wilf/lecnotes.html
+%p A004250 # Calculates the partition of n into k parts.
+%p A004250 # E.g. PartitionList(5,2) --> [[4, 1], [3, 2]].
+%p A004250 local East, West;
+%p A004250 if n < 1 or k < 1 or n < k then
+%p A004250 RETURN([])
+%p A004250 elif n = 1 then
+%p A004250 RETURN([[1]])
+%p A004250 else if n < 2 or k < 2 or n < k then
+%p A004250 West := []
+%p A004250 else
+%p A004250 West := map(proc (x) options operator, arrow;
+%p A004250 [op(x), 1] end proc,PartitionList(n-1,k-1)) end if;
+%p A004250 if k <= n-k then
+%p A004250 East := map(proc (y) options operator, arrow;
+%p A004250 map(proc (x) options operator, arrow; x+1 end proc,y) end proc,PartitionList(n-k,k))
+%p A004250 else East := [] end if;
+%p A004250 RETURN([op(West), op(East)])
+%p A004250 end if;
+%p A004250 end proc;
+%p A004250 #  _Thomas Wieder_, Feb 01 2007
+%p A004250 ZL :=[S, {S = Set(Cycle(Z),3 <= card)}, unlabelled]: seq(combstruct[count](ZL, size=n), n=1..41); # _Zerinvary Lajos_, Mar 25 2008
+%p A004250 B:=[S,{S = Set(Sequence(Z,1 <= card),card >=3)},unlabelled]: seq(combstruct[count](B, size=n), n=1..41); # _Zerinvary Lajos_, Mar 21 2009
+%t A004250 Length /@ Table[Select[Partitions[n], Length[#] > 2 &], {n, 20}] (* _Eric W. Weisstein_, May 16 2007 *)
+%t A004250 Table[Count[Length /@ Partitions[n], _?(# > 2 &)], {n, 20}] (* _Eric W. Weisstein_, May 16 2017 *)
+%t A004250 Table[PartitionsP[n] - Floor[n/2] - 1, {n, 20}] (* _Eric W. Weisstein_, May 16 2017 *)
+%t A004250 Length /@ Table[IntegerPartitions[n, {3, n}], {n, 20}] (* _Eric W. Weisstein_, May 16 2017 *)
+%o A004250 (PARI) a(n) = numbpart(n) - (n+2)\2; /* _Joerg Arndt_, Apr 03 2013 */
+%Y A004250 Cf. A004251, A029889, A035300, A095268, A058984.
+%Y A004250 Rightmost column of A259873.
+%Y A004250 Central column of A339659.
+%Y A004250 A000041 counts partitions of 2n into n parts, ranked by A340387.
+%Y A004250 A000569 counts graphical partitions, ranked by A320922.
+%Y A004250 A008284 counts partitions by sum and length.
+%Y A004250 A027187 counts partitions of even length.
+%Y A004250 A309356 ranks simple covering graphs.
+%Y A004250 The following count vertex-degree partitions and give their Heinz numbers:
+%Y A004250 - A209816 counts multigraphical partitions (A320924).
+%Y A004250 - A320921 counts connected graphical partitions (A320923).
+%Y A004250 - A339617 counts non-graphical partitions of 2n (A339618).
+%Y A004250 - A339656 counts loop-graphical partitions (A339658).
+%Y A004250 Cf. A000070, A000219, A339560, A339561, A339661.
+%Y A004250 Partial sums of A117995.
+%K A004250 nonn,easy
+%O A004250 1,4
+%A A004250 _N. J. A. Sloane_
+%E A004250 Definition corrected by _Thomas Wieder_, Feb 01 2007 and by _Eric W. Weisstein_, May 16 2007

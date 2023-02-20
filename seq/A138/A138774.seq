@@ -1,0 +1,33 @@
+%I A138774
+%S A138774 1,1,1,1,1,1,2,2,3,2,2,1,1,1,1,2,3,4,5,7,7,8,8,8,7,7,5,4,3,2,1,1,1,1,
+%T A138774 2,3,5,6,9,11,15,17,21,23,27,28,31,31,33,31,31,28,27,23,21,17,15,11,9,
+%U A138774 6,5,3,2,1,1,1,1,2,3,5,7,10,13,18,23,30,36,45,53,63,72,83,92,103,111,121
+%N A138774 Triangle read by rows: T(n,k) is the number of partitions of k that fit into a 2n by n box (n>=0; 0<=k<=2n^2).
+%C A138774 Row n contains 1+2n^2 terms.
+%C A138774 Sum of entries in row n is binomial(3n,n) (=A005809(n)).
+%C A138774 Also, number of n-multisets in [0..2n] whose elements sum up to k. _M. F. Hasler_, Apr 15 2012
+%D A138774 G. E. Andrews and K. Eriksson, Integer partitions, Cambridge Univ. Press, 2004, pp. 67-69.
+%H A138774 Alois P. Heinz, <a href="/A138774/b138774.txt">Rows n = 0..25, flattened</a>
+%F A138774 G.f. of row n = the q-binomial coefficient [3n,n].
+%e A138774 T(2,4)=3 because we have 4, 31 and 22.
+%e A138774 T(3,13)=5 because we have 661,652,643,553 and 544.
+%e A138774 Triangle starts:
+%e A138774 1;
+%e A138774 1,1,1;
+%e A138774 1,1,2,2,3,2,2,1,1;
+%e A138774 1,1,2,3,4,5,7,7,8,8,8,7,7,5,4,3,2,1,1;
+%p A138774 br:=proc(n) options operator, arrow: sum(q^i,i=0..n-1) end proc: f:= proc(n) options operator, arrow: mul(br(j),j=1..n) end proc: cbr:=proc(n,k) options operator, arrow: simplify(f(n)/(f(k)*f(n-k))) end proc: for n from 0 to 5 do P[n]:=sort(expand(cbr(3*n,n))) end do: for n from 0 to 5 do seq(coeff(P[n],q, j),j=0..2*n^2) end do; # yields sequence in triangular form
+%p A138774 # second Maple program:
+%p A138774 b:= proc(n, i, k) option remember;
+%p A138774       `if`(n=0, 1, `if`(i<1 or k<1, 0, b(n, i-1, k)+
+%p A138774       `if`(i>n, 0, b(n-i, i, k-1))))
+%p A138774     end:
+%p A138774 T:= n-> seq(b(k, min(n, k), 2*n), k=0..2*n^2):
+%p A138774 seq(T(n), n=0..6);  # _Alois P. Heinz_, Apr 05 2012
+%t A138774 b[n_, i_, k_] := b[n, i, k] = If[n == 0, 1, If[i<1 || k<1, 0, b[n, i-1, k] + If[i>n, 0, b[n-i, i, k-1]]]]; T[n_] := Table[b[k, Min[n, k], 2*n], {k, 0, 2 n^2}]; Table[T[n], {n, 0, 6}] // Flatten (* _Jean-François Alcover_, May 26 2015, after _Alois P. Heinz_ *)
+%o A138774 (PARI) T138774(n,k)=polcoeff(prod(i=0,2*n,sum(j=0,n,x^(j*(i*(2*n^2+n+1)+1)),O(x^(k*(2*n^2+n+1)+n+1)))),k*(2*n^2+n+1)+n) /* replacing the inner sum by the expression for the geometric series seems less efficient */
+%o A138774 for(n=0,5,for(k=0,2*n^2,print1(T138774(n,k)","))) \\ _M. F. Hasler_, Apr 15 2012
+%Y A138774 Cf. A005809, A063746.
+%K A138774 nonn,tabf
+%O A138774 0,7
+%A A138774 _Emeric Deutsch_, May 03 2008

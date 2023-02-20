@@ -1,0 +1,33 @@
+%I A124882
+%S A124882 2,2,3,3,3,4,5,4,5,4,4,4,5,5,5,6,5,6,6,7,9,6,7,6,9,7,7,6,10,5,7,8,6,5,
+%T A124882 6,7,6,6,6,6,6,6,7,9,7,6,7,7,7,6,7,7,13,7,6,7,9,7,10,7,9,9,7,11,9,7,8,
+%U A124882 9,8,6,8,8,9,6,8,8,8,8,9,13,8,12,7,9,10,8,9,9,8,8,11,13,8,8,10,8,9,8,10,10
+%N A124882 Maximum number of distinct squares in arithmetic progression modulo prime(n).
+%C A124882 For the natural numbers, it is well known that four squares cannot be in AP. Brown shows that this is not the case for modular arithmetic. There is no limit to the number of squares in AP modulo a prime: for the n-th prime pseudosquare A002223(n), the numbers 0,1,2,...,prime(n+1)-1 are squares in AP mod A002223(n).
+%C A124882 From _Travis Scott_, May 28 2022: (Start)
+%C A124882 Consider that a quadratic residue coloring of Z/pZ by R,N is essentially a binary string in a necklace of p strings in a chord of phi(p) necklaces.
+%C A124882 Our exhaustive search for APs of distinct squares, as described by the original Mathematica program, fixes two of the R (say r1,r2) and permutes an equivalent string x -> Ax+b (with A = r2-r1 and b = r1) to count the first run of R on that string. We can reduce our search space by two symmetries:
+%C A124882 I. R * color(x) = color(x) and N * color(x) = color^-1(x) implies that each Ax+b maps every cyclic k-term AP to a k-AP of the same color if A is a residue or to a k-AP of the opposite color if A is a nonresidue--we don't need to count runs in both colors for more than one A (or in one color for more than two A if those A transverse R,N).
+%C A124882 II. p == +-1 (mod 4) induces color(-x) = color^+-1(x) implies that every k-AP running counterclockwise from 0 maps to a k-AP of the same or opposite color running clockwise from 0--we also don't need to count both colors in both halves of the same necklace. (Note, however, that for +1 the first and last k-APs counted from 0 in either direction overlap the mirrors at 0 and p/2 by k-1 and k.)
+%C A124882 By I and II then, to certify a(n) for all differences on Z/pZ* and from all starting points on Z/pZ, it suffices to count the runs of R and N on the unpermuted coloring over the interval [0, p/2), weighting the first and last counts to 2k-1 and 2k if p == 1 (mod 4). (End)
+%H A124882 K. S. Brown, <a href="http://www.mathpages.com/home/kmath291.htm">Squares in Arithmetic Progression (mod p)</a>
+%H A124882 Pablo Saez, X. Vidaux, and M. Vsemirnov, <a href="https://doi.org/10.1016/j.jnt.2014.10.008">Optimal bounds for Buchi's problem in modular arithmetic</a>, Journal of Number Theory Volume 149, April 2015, Pages 368-403.
+%F A124882 a(n) = max(A048280(n), A002308(n)).
+%e A124882 Consider numbers modulo 13, the 6th prime. The squares mod 13 are 0,1,3,4,9,10,12. Exhaustive search finds that the four numbers 1,9,17,25 are in AP and are also distinct squares modulo 13. Hence a(6)=4. There are two other APs of squares having the same length: 4,10,16,22 and 10,12,14,16.
+%e A124882 From _Travis Scott_, May 28 2022: (Start)
+%e A124882 Taking the same example on Z/13Z but with no information other than the residues < 13/2 (0,1,3,4) and the polarity of 13 (+) we find that the string RRNRRNN adjusted to (2k-1)RRR N RR NNNN(2k) has no longer run in any color than NNNN so a(6)=4. We can also use the N values of that run to show a maximal AP of squares mod 13 starting from every residue:
+%e A124882    2 * 5,6,7,8 = 10,12, 1, 3 = 10,12,14,16
+%e A124882    5 * 5,6,7,8 = 12, 4, 9, 1 = 12,17,22,27
+%e A124882    6 * 5,6,7,8 =  4,10, 3, 9 =  4,10,16,22
+%e A124882    7 * 5,6,7,8 =  9, 3,10, 4 =  9,16,23,30
+%e A124882    8 * 5,6,7,8 =  1, 9, 4,12 =  1, 9,17,25
+%e A124882   11 * 5,6,7,8 =  3, 1,12,10 =  3,14,25,36. (End)
+%t A124882 t=Table[p=Prime[n]; sqs=Sort[Mod[Range[0,(p-1)/2]^2,p]]; kMx=0; Do[If[i!=j, df=sqs[[j]]-sqs[[i]]; k=2; While[MemberQ[sqs, Mod[sqs[[i]]+k*df,p]], k++ ]; k--; If[k>kMx, kMx=k]], {i,Length[sqs]}, {j,Length[sqs]}]; kMx+1, {n,2,PrimePi[617]}]; Join[{2},t]
+%t A124882 (* alternate program *)
+%t A124882 Qres1C=Compile[{{x,_Integer,1},{q,_Integer,0}},Module[{s=0,z=0,i=2},While[x[[i]]==x[[i-1]],i++];z=2i-1;s=i;While[i<q,While[i<q&&x[[i]]==x[[i-1]],i++];z=Max[If[i<q,1,2](i-s),z];s=i;i++];z],CompilationTarget->"C",RuntimeAttributes->{Listable},Parallelization->True];
+%t A124882 QresIC=Compile[{{x,_Integer,1},{q,_Integer,0}},Module[{s=2,z=2},Do[If[x[[i]]==x[[i-1]],s++,If[s>z,z=s];s=1],{i,2,q}];If[s>z,z=s];z],CompilationTarget->"C",RuntimeAttributes->{Listable},Parallelization->True];
+%t A124882 {2}~Join~Table[If[Mod[p,4]==1,Qres1C[#,(p+1)/2],QresIC[#,(p-1)/2]]&@Unitize[PowerMod[Range[(p-1)/2],(p-1)/2,p]-1],{p,Prime@Range[2,6543]}]
+%t A124882 (* _Travis Scott_, May 28 2022 Accelerated by symmetry per comment. *)
+%K A124882 nonn
+%O A124882 1,1
+%A A124882 _T. D. Noe_, Nov 13 2006

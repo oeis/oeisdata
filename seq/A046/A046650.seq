@@ -1,0 +1,74 @@
+%I A046650
+%S A046650 1,1,2,4,14,49,216,984,4862,24739,130338,701584,3852744,21489836,
+%T A046650 121525520,695307888,4019381790,23446201495,137875564710,816646459860,
+%U A046650 4868578092510,29196022525905,176022392938080,1066433501134560,6490009570139784,39659537885087124,243278423033093336,1497584057249141728,9249144367260811824
+%N A046650 Number of rooted planar maps.
+%C A046650 From _R. J. Mathar_, Apr 13 2019: (Start)
+%C A046650 Table III with row sums A000087 is (A046653 row-reversed):
+%C A046650      1;
+%C A046650      1,    1;
+%C A046650      2,    1,    1;
+%C A046650      4,    3,    2,    1;
+%C A046650     14,   12,    8,    2,   1;
+%C A046650     49,   43,   30,   12,   3,   1;
+%C A046650    216,  189,  134,   63,  22,   3,  1;
+%C A046650    984,  888,  608,  323, 133,  31,  4, 1;
+%C A046650   4862, 4332, 2988, 1671, 759, 238, 48, 4, 1;
+%C A046650   ...
+%C A046650 (End)
+%H A046650 W. G. Brown, <a href="http://dx.doi.org/10.4153/CJM-1963-056-7">Enumeration of non-separable planar maps</a>, Canad. J. Math., 15 (1963), 526-545.
+%F A046650 Reference gives generating functions.
+%p A046650 B1nm := proc(n,m) # eq (4.15)
+%p A046650     local j ;
+%p A046650     if m>=2 and n>= m  then
+%p A046650         add((3*m-2*j-1)*(2*j-m)*(j-2)!*(3*n-j-m-1)!/(n-j)!/(j-m)!/(j-m+1)!/(2*m-j)!,j=m..min(n,2*m) ) ;
+%p A046650         %*m/(2*n-m)! ;
+%p A046650     else
+%p A046650         0 ;
+%p A046650     end if;
+%p A046650 end proc:
+%p A046650 B2wj := proc(w,j) # eq (8.21)
+%p A046650     local k ;
+%p A046650     if  w >= j and j>=1 and w >= 1 then
+%p A046650         add((2*k-j+1)*(k-1)!*(3*w-k-j)!/(k-j+1)!/(k-j)!/(2*j-k-1)!/(w-k)!,k=j..min(w,2*j-1) ) ;
+%p A046650         %*j/(2*w-j+1)! ;
+%p A046650     else
+%p A046650         0;
+%p A046650     end if;
+%p A046650 end proc:
+%p A046650 Brwj := proc(r,w,j) # eq. (8.21)
+%p A046650     local k ;
+%p A046650     if  w >= j and j>=1 and w>=1 and r > 1 then
+%p A046650         add((2*k-j)*(k-1)!*(3*w-k-j-1)!/((k-j)!)^2/(2*j-k)!/(w-k)!,k=j..min(w,2*j) ) ;
+%p A046650         %*j/(2*w-j)! ;
+%p A046650     else
+%p A046650         0 ;
+%p A046650     end if;
+%p A046650 end proc:
+%p A046650 Brnm := proc(r,n,m)
+%p A046650     if r = 1 then
+%p A046650         B1nm(n,m) ;
+%p A046650     elif r = 2 and type(n,'odd') and type (m,'even') then
+%p A046650         B2wj((n-1)/2,m/2) ;
+%p A046650     elif modp(n,r) <> 0 or modp(m,r) <> 0 then
+%p A046650         0;
+%p A046650     else
+%p A046650         Brwj(r,n/r,m/r) ;
+%p A046650     end if;
+%p A046650 end proc:
+%p A046650 L := proc(n,m) # eq. (6.7)
+%p A046650     add(numtheory[phi](s)*Brnm(s,n,m),s=numtheory[divisors](m)) ;
+%p A046650     %/m ;
+%p A046650 end proc:
+%p A046650 seq(L(n,2),n=2..40) ; # _R. J. Mathar_, Apr 13 2019
+%t A046650 B1nm[n_, m_] := If[m >= 2 && n >= m, Sum[(3m - 2j - 1)(2j - m)(j - 2)! (3n - j - m - 1)!/(n - j)!/(j - m)!/(j - m + 1)!/(2m - j)!, {j, m, Min[n, 2m] }] m/(2n - m)!, 0];
+%t A046650 B2wj[w_, j_]  := If[w >= j && j >= 1 && w >= 1, Sum[(2k - j + 1)(k - 1)! (3 w - k - j)!/(k - j + 1)!/(k - j)!/(2j - k - 1)!/(w - k)!, {k, j, Min[w, 2 j - 1] }] j/(2w - j + 1)!, 0];
+%t A046650 Brwj[r_, w_, j_] := If[w >= j && j >= 1 && w >= 1 && r > 1 , Sum[(2k - j)(k - 1)! (3w - k - j - 1)!/((k - j)!)^2/(2j - k)!/(w - k)!, {k, j, Min[w, 2j]}] j/(2w - j)!, 0];
+%t A046650 Brnm[r_, n_, m_] := Which[r == 1, B1nm[n, m], r == 2 && OddQ[n] && EvenQ[m], B2wj[(n - 1)/2, m/2], Mod[n, r] != 0 || Mod[m, r] != 0, 0, True, Brwj[r, n/r, m/r]];
+%t A046650 L[n_, m_] := Sum[EulerPhi[s] Brnm[s, n, m], {s, Divisors[m]}]/m;
+%t A046650 Table[L[n, 2], {n, 2, 30}] // Flatten (* _Jean-François Alcover_, Apr 05 2020, after _R. J. Mathar_ *)
+%Y A046650 Cf. A000087.
+%K A046650 nonn,easy
+%O A046650 2,3
+%A A046650 _N. J. A. Sloane_
+%E A046650 More terms from _R. J. Mathar_, Apr 13 2019

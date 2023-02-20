@@ -1,0 +1,54 @@
+%I A125181
+%S A125181 1,1,1,1,3,1,1,4,2,6,1,1,5,5,10,10,10,1,1,6,6,15,3,30,20,5,30,15,1,1,
+%T A125181 7,7,21,7,42,35,21,21,105,35,35,70,21,1,1,8,8,28,8,56,56,4,56,28,168,
+%U A125181 70,28,84,168,280,56,14,140,140,28,1,1,9,9,36,9,72,84,9,72,36,252,126,36
+%N A125181 Triangle read by rows: T(n,k) is the number of Dyck paths of semilength n whose ascent lengths form the k-th partition of the integer n; the partitions of n are ordered in the "Mathematica" ordering.
+%C A125181 Equivalently, T(n,k) is the number of ordered trees with n edges whose node degrees form the k-th partition of the integer n.
+%C A125181 Also the number of non-crossing set partitions whose block sizes are the parts of the n-th integer partition in graded Mathematica ordering. - _Gus Wiseman_, Feb 15 2019
+%C A125181 For relations to Lagrange inversion through shifted reciprocals of a function, refined Narayana numbers, non-crossing partitions, trees, and other lattice paths, see A134264 and A091867. - _Tom Copeland_, Nov 01 2014
+%D A125181 R. P. Stanley, Enumerative Combinatorics Vol. 2, Cambridge University Press, Cambridge, 1999; Theorem 5.3.10.
+%H A125181 Alois P. Heinz, <a href="/A125181/b125181.txt">Rows n = 1..26, flattened</a>
+%H A125181 Germain Kreweras, <a href="https://doi.org/10.1016/0012-365X(72)90041-6">Sur les partitions non croisées d'un cycle</a>, Discrete Math. 1 333-350 (1972).
+%F A125181 Row n has A000041(n) terms (equal to the number of partitions of n).
+%F A125181 Row sums yield the Catalan numbers (A000108).
+%F A125181 Given a partition p = [a(1)^e(1), ..., a(j)^e(j)] into k parts (e(1) +...+ e(j) = k), the number of Dyck paths whose ascent lengths yield the partition p is n!/[(n-k+1)!e(1)!e(2)! ... e(j)! ]. - _Franklin T. Adams-Watters_
+%e A125181 Example: T(5,3)=5 because the 3rd partition of 5 is [3,2] and we have (UU)DD(UUU)DDD, (UUU)DDD(UU)DD, (UU)D(UUU)DDDD, (UUU)D(UU)DDDD and (UUU)DD(UU)DDD; here U=(1,1), D=(1,-1) and the ascents are shown between parentheses.
+%e A125181 Triangle begins:
+%e A125181   1
+%e A125181   1   1
+%e A125181   1   3   1
+%e A125181   1   4   2   6   1
+%e A125181   1   5   5  10  10  10   1
+%e A125181   1   6   6  15   3  30  20   5  30  15   1
+%e A125181   1   7   7  21   7  42  35  21  21 105  35  35  70  21   1
+%e A125181 Row 4 counts the following non-crossing set partitions:
+%e A125181   {{1234}}  {{1}{234}}  {{12}{34}}  {{1}{2}{34}}  {{1}{2}{3}{4}}
+%e A125181             {{123}{4}}  {{14}{23}}  {{1}{23}{4}}
+%e A125181             {{124}{3}}              {{12}{3}{4}}
+%e A125181             {{134}{2}}              {{1}{24}{3}}
+%e A125181                                     {{13}{2}{4}}
+%e A125181                                     {{14}{2}{3}}
+%p A125181 with(combinat): for n from 1 to 9 do p:=partition(n): for q from 1 to numbpart(n) do m:=convert(p[numbpart(n)+1-q],multiset): k:=nops(p[numbpart(n)+1-q]): s[n,q]:=n!/(n-k+1)!/product(m[j][2]!,j=1..nops(m)) od: od: for n from 1 to 9 do seq(s[n,q],q=1..numbpart(n)) od; # yields sequence in triangular form
+%p A125181 # second Maple program:
+%p A125181 b:= proc(n, i, k) `if`(n=0, [k!], `if`(i<1, [],
+%p A125181       [seq(map(x->x*j!, b(n-i*j, i-1, k-j))[], j=0..n/i)]))
+%p A125181     end:
+%p A125181 T:= proc(n) local l, m;
+%p A125181       l:= b(n, n, n+1); m:=nops(l);
+%p A125181       seq(n!/l[m-i], i=0..m-1)
+%p A125181     end:
+%p A125181 seq(T(n), n=1..10);  # _Alois P. Heinz_, May 25 2013
+%t A125181 b[n_, i_, k_] := b[n, i, k] = If[n == 0, {k!}, If[i<1, {}, Flatten @ Table[Map[#*j! &, b[n-i*j, i-1, k-j]], {j, 0, n/i}]]]; T[n_] := Module[{l, m}, l = b[n, n, n+1]; m = Length[l]; Table[n!/l[[m-i]], {i, 0, m-1}]]; Table[T[n], {n, 1, 10}] // Flatten (* _Jean-François Alcover_, May 26 2015, after _Alois P. Heinz_ *)
+%t A125181 Table[Binomial[Total[y],Length[y]-1]*(Length[y]-1)!/Product[Count[y,i]!,{i,Max@@y}],{y,Join@@Table[IntegerPartitions[n],{n,1,8}]}] (* _Gus Wiseman_, Feb 15 2019 *)
+%o A125181 (SageMath)
+%o A125181 def C(p):
+%o A125181     n = sum(p); l = n - len(p) + 1
+%o A125181     def f(x): return factorial(len(list(filter(lambda y: y == x, p))))
+%o A125181     return factorial(n) // (factorial(l) * prod(f(x) for x in set(p)))
+%o A125181 def row(n): return list(C(p) for p in Partitions(n))
+%o A125181 for n in range(1, 9): print(row(n))  # _Peter Luschny_, Jul 14 2022
+%Y A125181 Other orderings are A134264 and A306438.
+%Y A125181 Cf. A000041, A000108, A000110, A001263, A016098, A091867, A124794, A134264.
+%K A125181 nonn,look,tabf
+%O A125181 1,5
+%A A125181 _Emeric Deutsch_, Nov 23 2006

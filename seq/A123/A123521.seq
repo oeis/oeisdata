@@ -1,0 +1,52 @@
+%I A123521
+%S A123521 1,1,1,2,1,1,4,4,1,6,11,6,1,1,8,22,24,9,1,10,37,62,46,12,1,1,12,56,
+%T A123521 128,148,80,16,1,14,79,230,367,314,130,20,1,1,16,106,376,771,920,610,
+%U A123521 200,25,1,18,137,574,1444,2232,2083,1106,295,30,1,1,20,172,832,2486,4744,5776,4352,1897,420,36
+%N A123521 Triangle read by rows: T(n,k)=number of tilings of a 2 X n grid with k pieces of 1 X 2 tiles (in horizontal position) and 2n-2k pieces of 1 X 1 tiles (0<=k<=n).
+%C A123521 Also the triangle of the coefficients of the squares of the Fibonacci polynomials. Row n has 1+2*floor(n/2) terms. Sum of terms in row n = (Fibonacci(n+1))^2 (A007598).
+%C A123521 From _Michael A. Allen_, Jun 24 2020: (Start)
+%C A123521 T(n,k) is the number of tilings of an n-board (a board with dimensions n X 1) using k (1/2, 1/2)-fence tiles and 2*(n-k) half-squares (1/2 X 1 pieces, always placed so that the shorter sides are horizontal). A (1/2, 1/2)-fence is a tile composed of two 1/2 X 1 pieces separated by a gap of width 1/2.
+%C A123521 T(n,k) is the (n, (n-k))-th entry of the (1/(1-x^2), x/(1-x)^2) Riordan array.
+%C A123521 (-1)^(n+k)*T(n,k) is the (n, (n-k))-th entry of the (1/(1-x^2), x/(1+x)^2) Riordan array (A158454). (End)
+%D A123521 Kenneth Edwards, Michael A. Allen, A new combinatorial interpretation of the Fibonacci numbers squared, Part II, Fib. Q., 58:2 (2020), 169-177.
+%H A123521 G. C. Greubel, <a href="/A123521/b123521.txt">Rows n = 0..100 of the irregula triangle, flattened</a>
+%H A123521 Kenneth Edwards and Michael A. Allen, <a href="https://arxiv.org/abs/2009.04649">New combinatorial interpretations of the Fibonacci numbers squared, golden rectangle numbers, and Jacobsthal numbers using two types of tile</a>, arXiv:2009.04649 [math.CO], 2020.
+%H A123521 Kenneth Edwards and Michael A. Allen, <a href="https://cs.uwaterloo.ca/journals/JIS/VOL24/Allen/edwards2.html">New combinatorial interpretations of the Fibonacci numbers squared, golden rectangle numbers, and Jacobsthal numbers using two types of tile</a>, JIS 24 (2021) Article 21.3.8.
+%F A123521 G.f.: G = (1-t*z)/((1+t*z)*(1-z-2*t*z+t^2*z^2)). G = 1/(1-g), where g = z+t^2*z^2+2*t*z^2/(1-t*z) is the g.f. of the indecomposable tilings, i.e., of those that cannot be split vertically into smaller tilings. The row generating polynomials are P(n) = (Fibonacci(n))^2. They satisfy the recurrence relation P(n) = (1+t)*(P(n-1) + t*P(n-2)) - t^3*P(n-3).
+%F A123521 T(n,k) = T(n-2,k-2) + binomial(2*n-k-1, 2*n-2*k-1). - _Michael A. Allen_, Jun 24 2020
+%e A123521 T(3,1)=4 because the 1 X 2 tile can be placed in any of the four corners of the 2 X 3 grid.
+%e A123521 The irregular triangle begins as:
+%e A123521   1;
+%e A123521   1;
+%e A123521   1,  2,   1;
+%e A123521   1,  4,   4;
+%e A123521   1,  6,  11,   6,    1;
+%e A123521   1,  8,  22,  24,    9;
+%e A123521   1, 10,  37,  62,   46,   12,    1;
+%e A123521   1, 12,  56, 128,  148,   80,   16;
+%e A123521   1, 14,  79, 230,  367,  314,  130,   20,    1;
+%e A123521   1, 16, 106, 376,  771,  920,  610,  200,   25;
+%e A123521   1, 18, 137, 574, 1444, 2232, 2083, 1106,  295,  30,  1;
+%e A123521   1, 20, 172, 832, 2486, 4744, 5776, 4352, 1897, 420, 36;
+%p A123521 G:=(1-t*z)/(1+t*z)/(1-z-2*t*z+t^2*z^2): Gser:=simplify(series(G,z=0,14)): for n from 0 to 11 do P[n]:=sort(coeff(Gser,z,n)) od: for n from 0 to 11 do seq(coeff(P[n],t,k),k=0..2*floor(n/2)) od; # yields sequence in triangular form
+%t A123521 Block[{T}, T[0, 0]= T[1, 0]= 1; T[n_, k_]:= Which[k==0, 1, k==1, 2(n-1), True, T[n -2, k-2] + Binomial[2n-k-1, 2n-2k-1]]; Table[T[n, k], {n, 0, 14}, {k, 0, 2 Floor[n/2]}]] // Flatten (* _Michael De Vlieger_, Jun 24 2020 *)
+%o A123521 (Magma)
+%o A123521 function A123521(n,k)
+%o A123521   if k eq 0 then return 1;
+%o A123521   elif k eq 1 then return 2*(n-1);
+%o A123521   else return A123521(n-2,k-2) + Binomial(2*n-k-1, 2*n-2*k-1);
+%o A123521   end if; return A123521;
+%o A123521 end function;
+%o A123521 [A123521(n,k): k in [0..2*Floor(n/2)], n in [0..14]]; // _G. C. Greubel_, Sep 01 2022
+%o A123521 (SageMath)
+%o A123521 @CachedFunction
+%o A123521 def T(n,k): # T = A123521
+%o A123521     if (k==0): return 1
+%o A123521     elif (k==1): return 2*(n-1)
+%o A123521     else: return T(n-2, k-2) + binomial(2*n-k-1, 2*n-2*k-1)
+%o A123521 flatten([[T(n,k) for k in (0..2*(n//2))] for n in (0..12)]) # _G. C. Greubel_, Sep 01 2022
+%Y A123521 Cf. A007598, A158454.
+%Y A123521 Other triangles related to tiling using fences: A059259, A157897, A335964.
+%K A123521 nonn,tabf
+%O A123521 0,4
+%A A123521 _Emeric Deutsch_, Oct 16 2006

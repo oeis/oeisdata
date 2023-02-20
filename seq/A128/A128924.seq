@@ -1,0 +1,59 @@
+%I A128924
+%S A128924 1,1,2,2,3,3,1,3,1,1,4,4,4,4,4,2,6,3,4,3,6,2,4,2,1,1,2,4,2,3,2,1,0,3,
+%T A128924 0,1,2,5,2,2,2,2,2,2,5,4,8,4,8,4,8,4,8,4,8,1,3,2,1,0,1,0,0,1,0,1,2,5,
+%U A128924 2,2,1,5,0,1,1,2,2,1,4,4,2,2,0,4,0,0,4,0,2,2,4,2,8,2,2,1,4,4,4,4,4,1,2,2,8
+%N A128924 T(n,m) is the number of m's in the fundamental period of Fibonacci numbers mod n.
+%C A128924 T(n,m) is the triangle read by rows, 0<=m<n. First column is A001176. Row sums are A001175.
+%C A128924 A118965 and A066853 give numbers of zeros and nonzeros in n-th row, respectively. - _Reinhard Zumkeller_, Jan 16 2014
+%C A128924 T(n,n) = A235715(n). - _Reinhard Zumkeller_, Jan 17 2014
+%H A128924 Reinhard Zumkeller, <a href="/A128924/b128924.txt">Rows n = 1..125 of triangle, flattened</a>
+%H A128924 G. Darvasi and St. Eckmann, <a href="https://eudml.org/doc/141577">Zur Verteilung der Reste der Fibonacci-Folge modulo 5c</a>, Elemente der Mathematik 50 (1995) pp. 76-80.
+%e A128924 {F(k) mod 4} has fundamental period (0,1,1,2,3,1), see A079343, with
+%e A128924 T(4,0)=1 zero, T(4,1)=3 ones, T(4,2)=1 two's, T(4,3)=1 three's. The triangle starts
+%e A128924 1,
+%e A128924 1, 2,
+%e A128924 2, 3, 3,
+%e A128924 1, 3, 1, 1,
+%e A128924 4, 4, 4, 4, 4,
+%e A128924 2, 6, 3, 4, 3, 6,
+%e A128924 2, 4, 2, 1, 1, 2, 4,
+%e A128924 2, 3, 2, 1, 0, 3, 0, 1,
+%e A128924 2, 5, 2, 2, 2, 2, 2, 2, 5,
+%e A128924 4, 8, 4, 8, 4, 8, 4, 8, 4, 8,
+%e A128924 1, 3, 2, 1, 0, 1, 0, 0, 1, 0, 1,
+%e A128924 2, 5, 2, 2, 1, 5, 0, 1, 1, 2, 2, 1,
+%e A128924 4, 4, 2, 2, 0, 4, 0, 0, 4, 0, 2, 2, 4,
+%e A128924 2, 8, 2, 2, 1, 4, 4, 4, 4, 4, 1, 2, 2, 8,
+%e A128924 2, 3, 3, 2, 3, 3, 2, 3, 3, 2, 3, 3, 2, 3, 3,
+%e A128924 2, 3, 4, 1, 0, 3, 0, 1, 2, 3, 0, 1, 0, 3, 0, 1,
+%e A128924 4, 4, 2, 2, 4, 2, 0, 0, 2, 2, 0, 0, 2, 4, 2, 2, 4,
+%p A128924 A128924 := proc(m,h)
+%p A128924     local resul,k,M ;
+%p A128924     resul :=0 ;
+%p A128924     for k from 0 to A001175(m)-1 do
+%p A128924         M := combinat[fibonacci](k) mod m ;
+%p A128924         if M = h then
+%p A128924             resul := resul+1 ;
+%p A128924         end if ;
+%p A128924     end do;
+%p A128924     resul ;
+%p A128924 end proc:
+%p A128924 seq(seq(A128924(m,h),h=0..m-1),m=1..17) ;
+%t A128924 A001175[1] = 1; A001175[n_] := For[k = 1, True, k++, If[Mod[Fibonacci[k], n] == 0 && Mod[Fibonacci[k+1], n] == 1, Return[k]]]; T[m_, h_] := Module[{resul, k, M}, resul = 0; For[k = 0, k <= A001175[m]-1, k++, M = Mod[Fibonacci[k], m]; If[ M == h, resul++]]; Return[resul]]; Table[T[m, h], {m, 1, 17}, {h, 0, m-1}] // Flatten (* _Jean-François Alcover_, Feb 11 2015, after Maple code *)
+%o A128924 (Haskell)
+%o A128924 import Data.List (group, sort)
+%o A128924 a128924 n k = a128924_tabl !! (n-1) !! (k-1)
+%o A128924 a128924_tabl = map a128924_row [1..]
+%o A128924 a128924_row 1 = [1]
+%o A128924 a128924_row n = f [0..n-1] $ group $ sort $ g 1 ps where
+%o A128924    f []     _                            = []
+%o A128924    f (v:vs) wss'@(ws:wss) | head ws == v = length ws : f vs wss
+%o A128924                           | otherwise    = 0 : f vs wss'
+%o A128924    g 0 (1 : xs) = []
+%o A128924    g _ (x : xs) = x : g x xs
+%o A128924    ps = 1 : 1 : zipWith (\u v -> (u + v) `mod` n) (tail ps) ps
+%o A128924 -- _Reinhard Zumkeller_, Jan 16 2014
+%Y A128924 Cf. A053029, A053030, A053031.
+%K A128924 nonn,tabl
+%O A128924 1,3
+%A A128924 _R. J. Mathar_, Apr 25 2007

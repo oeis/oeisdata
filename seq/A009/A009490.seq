@@ -1,0 +1,36 @@
+%I A009490
+%S A009490 1,1,2,3,4,6,6,9,11,14,16,20,23,27,31,35,43,47,55,61,70,78,88,98,111,
+%T A009490 123,136,152,168,187,204,225,248,271,296,325,356,387,418,455,495,537,
+%U A009490 581,629,678,732,787,851,918,986,1056,1133,1217,1307,1399,1498,1600,1708,1823
+%N A009490 Number of distinct orders of permutations of n objects; number of nonisomorphic cyclic subgroups of symmetric group S_n.
+%C A009490 Also number of different LCM's of partitions of n.
+%C A009490 a(n) <= A023893(n), which counts the nonisomorphic Abelian subgroups of S_n. - _M. F. Hasler_, May 24 2013
+%H A009490 T. D. Noe and Alois P. Heinz, <a href="/A009490/b009490.txt">Table of n, a(n) for n = 0..10000</a> (first 1001 terms from T. D. Noe)
+%H A009490 <a href="/index/Lc#lcm">Index entries for sequences related to lcm's</a>
+%F A009490 Sum(b(k), k=0..n), where b(k) is the number of partitions of k into distinct prime power parts (1 excluded) (A051613). - _Vladeta Jovovic_
+%F A009490 G.f.: Prod(p prime, 1 + Sum(k >= 1, x^(p^k))) / (1-x). - _David W. Wilson_, Apr 19, 2000
+%p A009490 b:= proc(n,i) option remember; local p;
+%p A009490       p:= `if`(i<1, 1, ithprime(i));
+%p A009490       `if`(n=0 or i<1, 1, b(n, i-1)+
+%p A009490       add(b(n-p^j, i-1), j=1..ilog[p](n)))
+%p A009490     end:
+%p A009490 a:= n-> b(n, numtheory[pi](n)):
+%p A009490 seq(a(n), n=0..100);  # _Alois P. Heinz_, Feb 15 2013
+%t A009490 Table[ Length[ Union[ Apply[ LCM, Partitions[ n ], 1 ] ] ], {n, 30} ]
+%t A009490 f[n_] := Length@ Union[LCM @@@ IntegerPartitions@ n]; Array[f, 60, 0]
+%t A009490 (* Caution, the following is Extremely Slow and Resource Intensive *) CoefficientList[ Series[ Expand[ Product[1 + Sum[x^(Prime@ i^k), {k, 4}], {i, 10}]/(1 - x)], {x, 0, 30}], x]
+%t A009490 b[n_, i_] := b[n, i] = Module[{p}, p = If[i<1, 1, Prime[i]]; If[n == 0 || i<1, 1, b[n, i-1]+Sum[b[n-p^j, i-1], {j, 1, Log[p, n]}]]]; a[n_] := b[n, PrimePi[n]]; Table[a[n], {n, 0, 100}] (* _Jean-François Alcover_, Feb 03 2014, after _Alois P. Heinz_ *)
+%o A009490 (PARI) /* compute David W. Wilson's g.f., needs <1 sec for 1000 terms */
+%o A009490 N=1000;  x='x+O('x^N); /* N terms */
+%o A009490 gf=1; /* generating function */
+%o A009490 { forprime(p=2,N,
+%o A009490     sm = 1;  pp=p;  /* sum;  prime power */
+%o A009490     while ( pp<N, sm += x^pp; pp *= p; );
+%o A009490     gf *= sm;  /* update g.f. */
+%o A009490 ); }
+%o A009490 gf/=(1-x); /* cumulative sums */
+%o A009490 Vec(gf) /* show terms */  /* _Joerg Arndt_, Jan 19 2011 */
+%Y A009490 Cf. A051613 (first differences), A000792, A000793, A034891, A051625 (all cyclic subgroups), A256067.
+%K A009490 nonn,nice,easy
+%O A009490 0,3
+%A A009490 _David W. Wilson_

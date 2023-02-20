@@ -1,0 +1,42 @@
+%I A059871
+%S A059871 1,1,1,1,1,3,3,4,6,12,16,31,46,90,140,276,449,877,1443,2834,4725,9395,
+%T A059871 16153,32037,55872,110288,190815,380488,672728,1342395,2434797,
+%U A059871 4808180,8579625,17070112,30858078,61271317,110926277,220979544,402354848
+%N A059871 Number of solutions to the equation p_i = (1+mod(i,2))*p_{i-1} +- p_{i-2} +- p_{i-3} +- ... +- 2 +- 1, where p_i is the i-th prime number (where p_1 = 2 and the "zeroth prime" p_0 is defined to be 1).
+%C A059871 In Burton's book it is said that it is "known" that each prime can be represented as such sum. However, I do not know whether that means it has been proved.
+%C A059871 This is Scherk's theorem, which was conjectured by Scherk in 1833 and proved by Pillai in 1928. [_T. D. Noe_, Oct 03 2008]
+%D A059871 D. M. Burton, Elementary Number Theory.
+%D A059871 S. S. Pillai, "On some empirical theorem of Scherk", J. Indian Math. Soc. 17 (1927-28), pp. 164-171.
+%D A059871 W. Sierpiński, Elementary Theory of Numbers, Warszawa, 1964.
+%H A059871 Alois P. Heinz and Ray Chandler, <a href="/A059871/b059871.txt">Table of n, a(n) for n = 1..1000</a> (first 250 terms from Alois P. Heinz)
+%H A059871 J. L. Brown, <a href="http://www.jstor.org/stable/2314049">Proof of Scherk's Conjecture on the Representation of Primes</a>, Amer. Math. Monthly 74 (1967), 31-33.
+%H A059871 William Y. Lee, <a href="http://www.jstor.org/stable/2689273">On the representation of integers</a>, Math. Mag. 47 (1974), 150-152.
+%H A059871 H. F. Scherk, <a href="http://dx.doi.org/10.1515/crll.1833.10.201">Bemerkungen über die Bildung der Primzahlen aus einander</a>, Journal für die reine und angewandte Mathematik 10 (1883), pp. 201-208.
+%H A059871 H. F. Scherk, <a href="http://resolver.sub.uni-goettingen.de/purl?GDZPPN002139146">Bemerkungen über die Bildung der Primzahlen aus einander</a>, Journal für die reine und angewandte Mathematik 10 (1883), pp. 201-208.
+%e A059871 For the first five primes we have only one solution for each: 2 = 2*1, 3 = 1*2 + 1*1, 5 = 2*3 - 1*2 + 1*1, 7 = 1*5 + 1*3 - 1*2 + 1*1, 11 = 2*7 - 1*5 + 1*3 - 1*2 + 1*1 and for the next prime 13, we have 3 solutions: 13 = 11-7+5+3+2-1 = 11+7-5-3+2+1 = 11+7-5+3-2-1.
+%p A059871 map(nops, primesums_primes_mult(16)); primesums_primes_mult := proc(upto_n) local a,b,i,n,p,t; a := []; for n from 1 to upto_n do b := []; p := ithprime(n); for i from (2^(n-1)) to ((2^n)-1) do t := bin_prime_sum(i); if(t = p) then b := [op(b),i]; fi; od; a := [op(a),b]; print(a); od; RETURN(a); end;
+%p A059871 # second Maple program
+%p A059871 p:= n-> `if`(n<0, 0, `if`(n=0, 1, ithprime(n))):
+%p A059871 sp:= proc(n) sp(n):= `if`(n<0, 0, p(n)+sp(n-1)) end:
+%p A059871 b := proc(n, i) option remember; `if`(n>sp(i), 0, `if`(i<0, 1,
+%p A059871         b(n+p(i), i-1)+ b(abs(n-p(i)), i-1)))
+%p A059871      end:
+%p A059871 a:= n-> b(p(n) -(1+irem(n, 2))*p(n-1), n-2):
+%p A059871 seq(a(n), n=1..40);  # _Alois P. Heinz_, Aug 05 2012
+%t A059871 nmax = 40; d = {1}; a1 = {}; pp = 1;
+%t A059871 Do[
+%t A059871   p = Prime[n];
+%t A059871   i = Ceiling[Length[d]/2] +  Abs[p - (1 + Mod[n, 2])*pp];
+%t A059871   AppendTo[a1, If[i > Length[d], 0, d[[i]]]];
+%t A059871   d = PadLeft[d, Length[d] + 2 pp] + PadRight[d, Length[d] + 2 pp];
+%t A059871   pp = p;
+%t A059871   , {n, nmax}];
+%t A059871 a1 (* _Ray Chandler_, Mar 11 2014 *)
+%Y A059871 See A059872 for the table of all solutions encoded as binary vectors and A059873-A059875 for specific sequences. A059876 gives the function bin_prime_sum.
+%Y A059871 Cf. A022894, A083309.
+%K A059871 nonn
+%O A059871 1,6
+%A A059871 _Antti Karttunen_, Feb 05 2001
+%E A059871 More terms from _Naohiro Nomoto_, Sep 11 2001
+%E A059871 More terms from Larry Reeves (larryr(AT)acm.org), Nov 20 2003
+%E A059871 a(33)-a(39) from _Donovan Johnson_, Oct 01 2010

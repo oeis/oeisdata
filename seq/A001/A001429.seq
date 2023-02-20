@@ -1,0 +1,39 @@
+%I A001429 M1438 N0568
+%S A001429 1,2,5,13,33,89,240,657,1806,5026,13999,39260,110381,311465,880840,
+%T A001429 2497405,7093751,20187313,57537552,164235501,469406091,1343268050,
+%U A001429 3848223585,11035981711,31679671920,91021354454,261741776369,753265624291,2169441973139,6252511838796
+%N A001429 Number of n-node connected unicyclic graphs.
+%D A001429 R. C. Read and R. J. Wilson, An Atlas of Graphs, Oxford, 1998.
+%D A001429 J. Riordan, An Introduction to Combinatorial Analysis, Wiley, 1958, p. 150.
+%D A001429 N. J. A. Sloane, A Handbook of Integer Sequences, Academic Press, 1973 (includes this sequence).
+%D A001429 N. J. A. Sloane and Simon Plouffe, The Encyclopedia of Integer Sequences, Academic Press, 1995 (includes this sequence).
+%H A001429 Andrew Howroyd, <a href="/A001429/b001429.txt">Table of n, a(n) for n = 3..500</a>
+%H A001429 Washington G. Bomfim, <a href="http://commons.wikimedia.org/wiki/File:The21.GIF">A picture of the twenty one unicycles with 3,4,5 and 6 vertices</a>
+%H A001429 Audace A. V. Dossou-Olory, <a href="https://arxiv.org/abs/1812.02422">Graphs and unicyclic graphs with extremal connected subgraphs</a>, arXiv:1812.02422 [math.CO], 2018.
+%H A001429 R. K. Guy, <a href="/A000081/a000081.pdf">Letter to N. J. A. Sloane, 1988-04-12</a> (annotated scanned copy) Includes illustrations for n <= 6.
+%H A001429 R. K. Guy, <a href="/A005347/a005347.pdf">The Second Strong Law of Small Numbers</a>, Math. Mag, 63 (1990), no. 1, 3-20. [Annotated scanned copy]
+%H A001429 S. Karim, J. Sawada, Z. Alamgirz and S. M. Husnine, <a href="https://doi.org/10.1016/j.tcs.2012.11.024">Generating bracelets with fixed content</a>, Theoretical Computer Science, Volume 475, 4 March 2013, Pages 103-112.
+%H A001429 Richard J. Mathar, <a href="https://arxiv.org/abs/1808.06264">Counting Connected Graphs without Overlapping Cycles</a>, arXiv:1808.06264 [math.CO], 2018.
+%H A001429 Marko Riedel et al., <a href="https://math.stackexchange.com/questions/2992385/">Non-isomorphic, connected, unicyclic graphs</a>, Math Stackexchange, November 2018. (Derivation of algorithm and Maple implementation using PET.)
+%H A001429 Marko Riedel, <a href="/A001429/a001429_1.maple.txt">Maple implementation using PET.</a>
+%H A001429 M. L. Stein and P. R. Stein, <a href="https://digital.library.unt.edu/ark:/67531/metadc864419/">Enumeration of Linear Graphs and Connected Linear Graphs up to p = 18 Points</a>, Report LA-3775, Los Alamos Scientific Laboratory of the University of California, Los Alamos, NM, Oct 1967. doi: 10.2172/4180737.
+%H A001429 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/UnicyclicGraph.html">Unicyclic Graph</a>
+%F A001429 a(n) = A068051(n) - A027852(n) - A000081(n).
+%t A001429 Needs["Combinatorica`"];
+%t A001429 nn=30;s[n_,k_]:=s[n,k]=a[n+1-k]+If[n<2k,0,s[n-k,k]];a[1]=1;a[n_]:=a[n]=Sum[a[i]s[n-1,i]i,{i,1,n-1}]/(n-1);rt=Table[a[i],{i,1,nn}];Apply[Plus,Table[Take[CoefficientList[CycleIndex[DihedralGroup[n],s]/.Table[s[j]->Table[Sum[rt[[i]]x^(k*i),{i,1,nn}],{k,1,nn}][[j]],{j,1,nn}],x],nn],{n,3,nn}]]  (* _Geoffrey Critzer_, Oct 12 2012, after code given by _Robert A. Russell_ in A000081 *)
+%t A001429 (* Second program: *)
+%t A001429 TreeGf[nn_] := Module[{A}, A = Table[1, {nn}]; For[n = 1, n <= nn 1, n++, A[[n + 1]] = 1/n * Sum[Sum[ d*A[[d]], {d, Divisors[k]}]*A[[n - k + 1]], {k, 1, n}]]; x A.x^Range[0, nn-1]];
+%t A001429 seq[n_] := Module[{t, g}, If[n < 3, {}, t = TreeGf[n - 2]; g[e_] := Normal[t + O[x]^(Quotient[n, e]+1)] /. x -> x^e  + O[x]^(n+1); Sum[Sum[ EulerPhi[d]*g[d]^(k/d), {d, Divisors[k]}]/k + If[OddQ[k], g[1]* g[2]^Quotient[k, 2], (g[1]^2 + g[2])*g[2]^(k/2-1)/2], {k, 3, n}]]/2 // Drop[CoefficientList[#, x], 3]&];
+%t A001429 seq[32] (* _Jean-François Alcover_, Oct 05 2019, after _Andrew Howroyd_'s PARI code *)
+%o A001429 (PARI) \\ TreeGf gives gf of A000081
+%o A001429 TreeGf(N)={my(A=vector(N, j, 1)); for (n=1, N-1, A[n+1] = 1/n * sum(k=1, n, sumdiv(k, d, d*A[d]) * A[n-k+1] ) ); x*Ser(A)}
+%o A001429 seq(n)={if(n<3, [], my(t=TreeGf(n-2)); my(g(e)=subst(t + O(x*x^(n\e)),x,x^e) + O(x*x^n)); Vec(sum(k=3, n, sumdiv(k, d, eulerphi(d)*g(d)^(k/d))/k + if(k%2, g(1)*g(2)^(k\2), (g(1)^2+g(2))*g(2)^(k/2-1)/2))/2))} \\ _Andrew Howroyd_, May 05 2018
+%Y A001429 Next-to-main diagonal of A054924. Cf. A000055.
+%Y A001429 Cf. A236570 (number of not necessarily connected n-node unicyclic graphs).
+%K A001429 nonn,nice
+%O A001429 3,2
+%A A001429 _N. J. A. Sloane_
+%E A001429 More terms from R. C. Read (rcread(AT)math.uwaterloo.ca)
+%E A001429 a(27) corrected, more terms, formula from _Christian G. Bower_, Feb 12 2002
+%E A001429 Edited by _Charles R Greathouse IV_, Oct 05 2009
+%E A001429 Terms a(30) and beyond from _Andrew Howroyd_, May 05 2018

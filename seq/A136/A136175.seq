@@ -1,0 +1,100 @@
+%I A136175
+%S A136175 1,2,3,4,6,5,7,11,9,8,13,20,17,15,10,24,37,31,28,19,12,44,68,57,51,35,
+%T A136175 22,14,81,125,105,94,64,41,26,16,149,230,193,173,118,75,48,30,18,274,
+%U A136175 423,355,318,217,138,88,55,33,21,504,778,653,585,399,254,162,101,61,39,23
+%N A136175 Tribonacci array, T(n,k).
+%C A136175 As an interspersion (and dispersion), the array is, as a sequence, a permutation of the positive integers. Column k consists of the numbers m such that the least summand in the tribonacci representation of m is T(1,k). For example, column 1 consists of numbers with least summand 1. This array arises from tribonacci representations in much the same way that the Wythoff array, A035513, arises from Fibonacci (or Zeckendorf) representations.
+%C A136175 From _Abel Amene_, Jul 29 2012: (Start)
+%C A136175 (Row 1) = A000073 (offset=4) a(0)=0, a(1)=0, a(2)=1
+%C A136175 (Row 2) = A001590 (offset=5) a(0)=0, a(1)=1, a(2)=0
+%C A136175 (Row 3) = A000213 (offset=4) a(0)=1, a(1)=1, a(2)=1
+%C A136175 (Row 4) = A214899 (offset=5) a(0)=2, a(1)=1, a(2)=2
+%C A136175 (Row 5) = A020992 (offset=6) a(0)=0, a(1)=2, a(2)=1
+%C A136175 (Row 6) = A100683 (offset=6) a(0)=-1,a(1)=2, a(2)=2
+%C A136175 (Row 7) = A135491 (offset=4) a(0)=2, a(1)=4, a(2)=8
+%C A136175 (Row 8) = A214727 (offset=6) a(0)=1, a(1)=1, a(2)=2
+%C A136175 (Row 9) = A081172 (offset=8) a(0)=1, a(1)=1, a(2)=0
+%C A136175 (column 1) = A003265
+%C A136175 (column 2) = A353083
+%C A136175 (End) [Corrected and extended by _John Keith_, May 09 2022]
+%F A136175 T(1,1)=1, T(1,2)=2, T(1,3)=4, T(1,k)=T(1,k-1)+T(1,k-2)+T(1,k-3) for k>3. Row 1 is the tribonacci basis; write B(k)=T(1,k). Each row satisfies the recurrence T(n,k)=T(n,k-1)+T(n,k-2)+T(n,k-3). T(n,1) is least number not in an earlier row. If T(n,1) has tribonacci representation B(k(1))+B(k(2))+...+B(k(m)), then T(n,2) = B(k(2))+B(k(3))+...+B(k(m+1)) and T(n,3) = B(k(3))+B(k(4))+...+B(k(m+2)). (Continued shifting of indices gives the other terms in row n, also.)
+%e A136175 Northwest corner:
+%e A136175 1  2   4   7   13  24   44   81  149 274 504
+%e A136175 3  6   11  20  37  68   125  230 423 778
+%e A136175 5  9   17  31  57  105  193  355 653
+%e A136175 8  15  28  51  94  173  318  585
+%e A136175 10 19  35  64  118 217  399
+%e A136175 12 22  41  75  138 254
+%e A136175 14 26  48  88  162
+%e A136175 16 30  55 101
+%e A136175 18 33  61
+%e A136175 21 39
+%e A136175 23
+%p A136175 # maximum index in A73 such that A73 <= n.
+%p A136175 A73floorIdx := proc(n)
+%p A136175     local k ;
+%p A136175     for k from 3 do
+%p A136175         if A000073(k) = n then
+%p A136175             return k ;
+%p A136175         elif A000073(k) > n then
+%p A136175             return k -1 ;
+%p A136175         end if ;
+%p A136175     end do:
+%p A136175 end proc:
+%p A136175 # tribonacci expansion coeffs of n
+%p A136175 A278038 := proc(n)
+%p A136175     local k,L,nres ;
+%p A136175     k := A73floorIdx(n) ;
+%p A136175     L := [1] ;
+%p A136175     nres := n-A000073(k) ;
+%p A136175     while k >= 4 do
+%p A136175         k := k-1 ;
+%p A136175         if nres >= A000073(k) then
+%p A136175             L := [1,op(L)] ;
+%p A136175             nres := nres-A000073(k) ;
+%p A136175         else
+%p A136175             L := [0,op(L)] ;
+%p A136175         end if ;
+%p A136175     end do:
+%p A136175     return L ;
+%p A136175 end proc:
+%p A136175 A278038inv := proc(L)
+%p A136175     add( A000073(i+2)*op(i,L),i=1..nops(L)) ;
+%p A136175 end proc:
+%p A136175 A135175 := proc(n,k)
+%p A136175     option remember ;
+%p A136175     local a,known,prev,nprev,kprev,freb ;
+%p A136175     if n =1 then
+%p A136175         A000073(k+2) ;
+%p A136175     elif k>3 then
+%p A136175         procname(n,k-1)+procname(n,k-2)+procname(n,k-3) ;
+%p A136175     else
+%p A136175         if k = 1 then
+%p A136175             for a from 1 do
+%p A136175                 known := false ;
+%p A136175                 for nprev from 1 to n-1 do
+%p A136175                     for kprev from 1 do
+%p A136175                         if procname(nprev,kprev) > a then
+%p A136175                             break ;
+%p A136175                         elif procname(nprev,kprev) = a then
+%p A136175                             known := true ;
+%p A136175                         end if;
+%p A136175                     end do:
+%p A136175                 end do:
+%p A136175                 if not known then
+%p A136175                     return a ;
+%p A136175                 end if;
+%p A136175             end do:
+%p A136175         else
+%p A136175             prev := procname(n,k-1) ;
+%p A136175             freb := A278038(prev) ;
+%p A136175             return A278038inv([0,op(freb)]) ;
+%p A136175         end if;
+%p A136175     end if;
+%p A136175 end proc:
+%p A136175 seq(seq(A135175(n,d-n),n=1..d-1),d=2..12) ; # _R. J. Mathar_, Jun 07 2022
+%Y A136175 Cf. A035513, A353083, A353084.
+%K A136175 nonn,tabl
+%O A136175 1,2
+%A A136175 _Clark Kimberling_, Dec 18 2007
+%E A136175 T(3, 4) corrected and more terms by _John Keith_, May 09 2022

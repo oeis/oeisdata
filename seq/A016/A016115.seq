@@ -1,0 +1,56 @@
+%I A016115
+%S A016115 4,1,15,0,93,0,668,0,5172,0,42042,0,353701,0,3036643,0,27045226,0,
+%T A016115 239093865,0,2158090933,0,19742800564,0
+%N A016115 Number of prime palindromes with n digits.
+%C A016115 Every palindrome with an even number of digits is divisible by 11 and therefore is composite (not prime). Hence there is only one palindromic prime with an even number of digits, namely 11 itself. - _Martin Renner_, Apr 15 2006
+%H A016115 K. S. Brown, <a href="http://www.mathpages.com/home/kmath359.htm">On General Palindromic Numbers</a>
+%H A016115 Patrick De Geest, <a href="http://www.worldofnumbers.com/palpri.htm">World!Of Palindromic Primes</a>
+%H A016115 Shyam Sunder Gupta, <a href="http://listserv.nodak.edu/cgi-bin/wa.exe?A1=ind0602&amp;L=nmbrthry">Palindromic Primes up to 10^19</a>.
+%H A016115 Shyam Sunder Gupta, <a href="https://listserv.nodak.edu/cgi-bin/wa.exe?A2=NMBRTHRY;b79493a6.1310">Palindromic Primes up to 10^23</a>.
+%H A016115 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/PalindromicPrime.html">Palindromic Prime.</a>
+%F A016115 a(2n) = 0 for n > 1. - _Chai Wah Wu_, Nov 21 2021
+%p A016115 # A016115 Gets numbers of base-10 palindromic primes with exactly d digits, 1 <= d <= 13 (say), in the list "lis"
+%p A016115 lis:=[4,1];
+%p A016115 for d from 3 to 13 do
+%p A016115 if d::even then
+%p A016115     lis:=[op(lis),0];
+%p A016115 else
+%p A016115     m:= (d-1)/2:
+%p A016115     Res2 := [seq(seq(n*10^(m+1)+y*10^m+digrev(n), y=0..9), n=10^(m-1)..10^m-1)]:
+%p A016115     ct:=0; for x in Res2 do if isprime(x) then ct:=ct+1; fi: od:
+%p A016115     lis:=[op(lis),ct];
+%p A016115 fi:
+%p A016115 lprint(d,lis);
+%p A016115 od:
+%p A016115 lis; # _N. J. A. Sloane_, Oct 18 2015
+%t A016115 A016115[n_] := Module[{i}, If[EvenQ[n] && n > 2, Return[0]]; Return[Length[Select[Range[10^(n - 1), 10^n - 1], # == IntegerReverse[#] && PrimeQ[#] &]]]];
+%t A016115 Table[A016115[n], {n, 6}] (* _Robert Price_, May 25 2019 *)
+%t A016115 (* -OR-  A less straightforward implementation, but more efficient in that the palindromes are constructed instead of testing every number in the range. *)
+%t A016115 A016115[n_] := Module[{c, f, t0, t1},
+%t A016115    If[n == 2, Return[1]];
+%t A016115    If[EvenQ[n], Return[0]];
+%t A016115    c = 0; t0 = 10^((n - 1)/2); t1 = t0*10;
+%t A016115    For[f = t0, f < t1, f++,
+%t A016115     If[n != 1 && MemberQ[{2,4,5,6,8}, Floor[f/t0]], f = f + t0 - 1; Continue[]];
+%t A016115     If[PrimeQ[f*t0 + IntegerReverse[Floor[f/10]]], c++]]; Return[c]];
+%t A016115 Table[A016115[n], {n, 1, 12}] (* _Robert Price_, May 25 2019 *)
+%o A016115 (Python)
+%o A016115 from sympy import isprime
+%o A016115 from itertools import product
+%o A016115 def pals(d, base=10): # all d-digit palindromes
+%o A016115     digits = "".join(str(i) for i in range(base))
+%o A016115     for p in product(digits, repeat=d//2):
+%o A016115         if d > 1 and p[0] == "0": continue
+%o A016115         left = "".join(p); right = left[::-1]
+%o A016115         for mid in [[""], digits][d%2]: yield int(left + mid + right)
+%o A016115 def a(n): return int(n==2) if n%2 == 0 else sum(isprime(p) for p in pals(n))
+%o A016115 print([a(n) for n in range(1, 13)]) # _Michael S. Branicky_, Jun 23 2021
+%Y A016115 Cf. A002113 (palindromes), A002385 (palindromic primes), A040025 (bisection), A050251 (partial sums).
+%K A016115 nonn,hard,base,more
+%O A016115 1,1
+%A A016115 _Robert G. Wilson v_
+%E A016115 Corrected and extended by _Patrick De Geest_, Jun 15 1998
+%E A016115 a(17) = 27045226 was found in collaboration with Martin Eibl (M.EIBL(AT)LINK-R.de), _Carlos Rivera_, _Warut Roonguthai_
+%E A016115 a(19) from _Shyam Sunder Gupta_, Feb 12 2006
+%E A016115 a(21)-a(22) from _Shyam Sunder Gupta_, Mar 13 2009
+%E A016115 a(23)-a(24) from _Shyam Sunder Gupta_, Oct 05 2013

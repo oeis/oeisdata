@@ -1,0 +1,49 @@
+%I A073103
+%S A073103 1,1,2,2,4,2,2,4,2,4,2,4,4,2,8,8,4,2,2,8,4,2,2,8,4,4,2,4,4,8,2,8,4,4,
+%T A073103 8,4,4,2,8,16,4,4,2,4,8,2,2,16,2,4,8,8,4,2,8,8,4,4,2,16,4,2,4,8,16,4,
+%U A073103 2,8,4,8,2,8,4,4,8,4,4,8,2,32,2,4,2,8,16,2,8,8,4,8,8,4,4,2,8,16,4,2,4,8
+%N A073103 Number of solutions to x^4 == 1 (mod n).
+%C A073103 a(n) = 2*A060594(n) for n = 5, 10, 13, 15, 16, 17, 20, 25, 26, 29, .... This subsequence, which contains all the primes of form 4k+1, seems to be asymptotic to 2n.
+%C A073103 Shadow transform of A123865. - _Michel Marcus_, Jun 06 2013
+%H A073103 T. D. Noe, <a href="/A073103/b073103.txt">Table of n, a(n) for n = 1..1000</a>
+%H A073103 Steven R. Finch, <a href="http://arxiv.org/abs/0907.4894">Quartic and Octic Characters Modulo n</a>, arXiv:0907.4894 [math.NT], 2009.
+%H A073103 Steven Finch, Greg Martin and Pascal Sebah, <a href="https://doi.org/10.1090/S0002-9939-10-10341-4">Roots of unity and nullity modulo n</a>, Proc. Amer. Math. Soc., Vol. 138, No. 8 (2010), pp. 2729-2743.
+%H A073103 Lorenz Halbeisen and Norbert Hungerbühler, Number theoretic aspects of a combinatorial function, Notes on Number Theory and Discrete Mathematics 5(4) (1999), 138-150. (<a href="http://math.berkeley.edu/~halbeis/publications/psf/seq.ps">ps</a>, <a href="http://math.berkeley.edu/~halbeis/publications/pdf/seq.pdf">pdf</a>); see Definition 7 for the shadow transform.
+%H A073103 Lorenz Halbeisen and Norbert Hungerbühler, <a href="https://www.semanticscholar.org/paper/Number-theoretic-aspects-of-a-combinatorial-Halbeisen-Hungerb%C3%BChler/5743ff2f9c14d22d1a9e570d6951a7c9ef79a612">Number theoretic aspects of a combinatorial function</a>, Notes on Number Theory and Discrete Mathematics 5(4) (1999), 138-150; see Definition 7 for the shadow transform.
+%H A073103 N. J. A. Sloane, <a href="/transforms.txt">Transforms</a>.
+%F A073103 Sum_{k=1..n} a(k) seems to be asymptotic to C*n*Log(n) with C>1.4...(when Sum_{k=1..n} A060594(k) is asymptotic to C/2*n*Log(n)).
+%F A073103 Multiplicative with a(p^e) = p^min(e-1, 3) if p = 2, 4 if p == 1 (mod 4), 2 if p == 3 (mod 4). - _David W. Wilson_, Jun 09 2005
+%F A073103 In fact, Sum_{k=1..n} a(k) is asymptotic to c*n*log(n)^2 where 2*c=0.190876.... - _Steven Finch_, Aug 12 2009 [c = 7/(2*Pi^3) * Product_{p prime == 1 (mod 4)} (1 - 4/(p+1)^2) = 0.0954383605... (Finch et al., 2010). - _Amiram Eldar_, Mar 26 2021]
+%p A073103 a:= n-> add(`if`(irem(j^4-1, n)=0, 1, 0), j=0..n-1):
+%p A073103 seq(a(n), n=1..120);  # _Alois P. Heinz_, Jun 06 2013
+%p A073103 # alternative
+%p A073103 A073103 := proc(n)
+%p A073103     local a,pf,p,r;
+%p A073103     a := 1 ;
+%p A073103     for pf in ifactors(n)[2] do
+%p A073103         p := op(1,pf);
+%p A073103         r := op(2,pf);
+%p A073103         if p = 2 then
+%p A073103             a := a*p^min(r-1,3) ;
+%p A073103         else
+%p A073103             if modp(p,4) = 1 then
+%p A073103                 a := 4*a ;
+%p A073103             else
+%p A073103                 a := 2*a ;
+%p A073103             end if;
+%p A073103         end if;
+%p A073103     end do:
+%p A073103     a ;
+%p A073103 end proc: # _R. J. Mathar_, Mar 02 2015
+%t A073103 a[n_] := Sum[If[Mod[j^4-1, n] == 0, 1, 0], {j, 0, n-1}]; Table[a[n], {n, 1, 120}] (* _Jean-François Alcover_, Jun 12 2015, after _Alois P. Heinz_ *)
+%t A073103 f[2, e_] := 2^Min[e-1, 3]; f[p_, e_] := If[Mod[p, 4] == 1, 4, 2]; a[1] = 1; a[n_] := Times @@ f @@@ FactorInteger[n]; Array[a, 100] (* _Amiram Eldar_, Sep 17 2020 *)
+%o A073103 (PARI) a(n)=sum(i=1,n,if((i^4-1)%n,0,1))
+%o A073103 (PARI) a(n)=my(f=factor(n)); prod(i=1,#f~, if(f[i,1]==2, 2^min(f[i,2]-1,3), if(f[i,1]%4==1, 4, 2))) \\ _Charles R Greathouse IV_, Mar 02 2015
+%o A073103 (Python)
+%o A073103 from math import prod
+%o A073103 from sympy import primefactors
+%o A073103 def A073103(n): return (1<<min(s-1,3) if (s:=(~n & n-1).bit_length()) else 1)*prod(1<<(5-(p&3)>>1) for p in primefactors(n>>s)) # _Chai Wah Wu_, Oct 26 2022
+%Y A073103 Cf. A060594, A060839.
+%K A073103 easy,nonn,mult
+%O A073103 1,3
+%A A073103 _Benoit Cloitre_, Aug 19 2002

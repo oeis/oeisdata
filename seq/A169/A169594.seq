@@ -1,0 +1,55 @@
+%I A169594
+%S A169594 1,2,2,4,2,4,2,6,4,4,2,7,2,4,4,9,2,7,2,7,4,4,2,10,4,4,6,7,2,8,2,11,4,
+%T A169594 4,4,12,2,4,4,10,2,8,2,7,7,4,2,14,4,7,4,7,2,10,4,10,4,4,2,13,2,4,7,15,
+%U A169594 4,8,2,7,4,8,2,16,2,4,7,7,4,8,2,14,9,4,2,13,4,4,4,10,2,13,4,7,4,4,4,17,2,7
+%N A169594 Number of divisors of n, counting divisor multiplicity in n.
+%C A169594 The multiplicity of a divisor d > 1 in n is defined as the largest power i for which d^i divides n; and for d = 1 it is defined as 1.
+%C A169594 a(n) is also the sum of the multiplicities of the divisors of n.
+%C A169594 In other words, a(n) = 1 + sum of the highest exponents e_i for which each number k_i in range 2 .. n divide n, as {k_i}^{e_i} | n. For nondivisors of n this exponent e_i is 0, for n itself it is 1. - _Antti Karttunen_, May 20 2017
+%C A169594 From _Gus Wiseman_, Mar 25 2021: (Start)
+%C A169594 Also the number of strict chains of divisors ending with n and having constant (equal) first quotients. The case starting with 1 is A089723. For example, the a(1) = 1 through a(12) = 7 chains are:
+%C A169594   1  2    3    4      5    6    7    8        9      10    11    12
+%C A169594      1|2  1|3  1|4    1|5  1|6  1|7  1|8      1|9    1|10  1|11  1|12
+%C A169594                2|4         2|6       2|8      3|9    2|10        2|12
+%C A169594                1|2|4       3|6       4|8      1|3|9  5|10        3|12
+%C A169594                                      2|4|8                       4|12
+%C A169594                                      1|2|4|8                     6|12
+%C A169594                                                                  3|6|12
+%C A169594 (End)
+%C A169594 a(n) only depends on the prime signature of n. - _David A. Corneth_, Mar 28 2021
+%H A169594 Antti Karttunen, <a href="/A169594/b169594.txt">Table of n, a(n) for n = 1..10000</a>
+%e A169594 The divisors of 8 are 1, 2, 4, 8 of multiplicity 1, 3, 1, 1, respectively. So a(8) = 1 + 3 + 1 + 1 = 6.
+%t A169594 divmult[d_, n_] := Module[{output, i}, If[d == 1, output = 1, If[d == n, output = 1, i = 0; While[Mod[n, d^(i + 1)] == 0, i = i + 1]; output = i]]; output]; dmt0[n_] := Module[{divs, l}, divs = Divisors[n]; l = Length[divs]; Sum[divmult[divs[[i]], n], {i, 1, l}]]; Table[dmt0[i], {i, 1, 40}]
+%t A169594 Table[1 + DivisorSum[n, IntegerExponent[n, #] &, # > 1 &], {n, 98}] (* _Michael De Vlieger_, May 20 2017 *)
+%o A169594 (PARI)
+%o A169594 A286561(n,k) = { my(i=1); if(1==k, 1, while(!(n%(k^i)), i = i+1); (i-1)); };
+%o A169594 A169594(n) = sumdiv(n,d,A286561(n,d)); \\ _Antti Karttunen_, May 20 2017
+%o A169594 (PARI) a(n) = { if(n == 1, return(1)); my(f = factor(n), u = vecmax(f[, 2]), cf = f, res = numdiv(f) - u + 1); for(i = 2, u, cf[, 2] = f[, 2]\i; res+=numdiv(factorback(cf)) ); res } \\ _David A. Corneth_, Mar 29 2021
+%o A169594 (Scheme)
+%o A169594 (define (A169594 n) (add (lambda (k) (A286561bi n k)) 1 n))
+%o A169594 ;; Implements sum_{i=lowlim..uplim} intfun(i)
+%o A169594 (define (add intfun lowlim uplim) (let sumloop ((i lowlim) (res 0)) (cond ((> i uplim) res) (else (sumloop (1+ i) (+ res (intfun i)))))))
+%o A169594 ;; For A286561bi see A286561. - _Antti Karttunen_, May 20 2017
+%o A169594 (Python)
+%o A169594 def a286561(n, k):
+%o A169594     i=1
+%o A169594     if k==1: return 1
+%o A169594     while n%(k**i)==0:
+%o A169594         i+=1
+%o A169594     return i-1
+%o A169594 def a(n): return sum([a286561(n, d) for d in divisors(n)]) # _Indranil Ghosh_, May 20 2017
+%Y A169594 Cf. A168512.
+%Y A169594 Row sums of A286561, A286563 and A286564.
+%Y A169594 A001055 counts factorizations (strict: A045778, ordered: A074206).
+%Y A169594 A057567 counts chains of divisors with weakly increasing first quotients.
+%Y A169594 A067824 counts strict chains of divisors ending with n.
+%Y A169594 A253249 counts strict chains of divisors.
+%Y A169594 A334997 counts chains of divisors of n by length.
+%Y A169594 A342086 counts chains of divisors with strictly increasing first quotients.
+%Y A169594 A342496 counts partitions with equal first quotients (strict: A342515, ranking: A342522, ordered: A342495).
+%Y A169594 A342530 counts chains of divisors with distinct first quotients.
+%Y A169594 Cf. A003238, A003242, A069916, A122651, A318991, A318992, A325545.
+%K A169594 nonn,easy
+%O A169594 1,2
+%A A169594 _Joseph L. Pe_, Dec 02 2009
+%E A169594 Extended by _Ray Chandler_, Dec 08 2009

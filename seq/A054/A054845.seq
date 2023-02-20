@@ -1,0 +1,79 @@
+%I A054845
+%S A054845 0,0,1,1,0,2,0,1,1,0,1,1,1,1,0,1,0,2,1,1,0,0,0,2,1,0,1,0,1,1,1,2,0,0,
+%T A054845 0,0,2,1,0,1,0,3,1,1,0,0,0,1,1,1,0,0,1,2,0,0,1,0,1,2,2,1,0,0,0,0,0,2,
+%U A054845 1,0,0,2,2,1,0,1,0,1,1,1,0,0,0,3,1,0,0,0,1,1,2,0,0,0,0,1,0,2,1,0,2,2
+%N A054845 Number of ways of representing n as the sum of one or more consecutive primes.
+%C A054845 Moser shows that the average order of a(n) is log 2, that is, Sum_{i=1..n} a(i) ~ n log 2. This shows that a(n) = 0 infinitely often (and with positive density); Moser asks if a(n) = 1 infinitely often, if a(n) = k is solvable for all k, whether these have positive density, and whether the sequence is bounded. - _Charles R Greathouse IV_, Mar 21 2011
+%D A054845 R. K. Guy, Unsolved Problems In Number Theory, C2.
+%H A054845 T. D. Noe, <a href="/A054845/b054845.txt">Table of n, a(n) for n = 0..10000</a>
+%H A054845 Leo Moser, <a href="https://doi.org/10.4153/CMB-1963-013-1">Notes on number theory. III. On the sum of consecutive primes</a>, Canad. Math. Bull. 6 (1963), pp. 159-161.
+%H A054845 Carlos Rivera, <a href="http://www.primepuzzles.net/problems/prob_009.htm">Problem 9</a>, The Prime Puzzles and Problems Connection.
+%F A054845 G.f.: Sum_{i>=1} Sum_{j>=i} Product_{k=i..j} x^prime(k). - _Ilya Gutkovskiy_, Apr 18 2019
+%e A054845 a(5)=2 because of 2+3 and 5. a(17)=2 because of 2+3+5+7 and 17.
+%e A054845 41 = 41 = 11+13+17 = 2+3+5+7+11+13, so a(41)=3.
+%p A054845 A054845 := proc(n)
+%p A054845     local a,mipri,npr,ps ;
+%p A054845     a := 0 ;
+%p A054845     for mipri from 1 do
+%p A054845         for npr from 1 do
+%p A054845             ps := add(ithprime(i),i=mipri..mipri+npr-1) ;
+%p A054845             if ps = n then
+%p A054845                 a := a+1 ;
+%p A054845             elif ps >n then
+%p A054845                 break;
+%p A054845             end if;
+%p A054845         end do:
+%p A054845         if ithprime(mipri) > n then
+%p A054845             break ;
+%p A054845         end if;
+%p A054845     end do:
+%p A054845     a ;
+%p A054845 end proc: # _R. J. Mathar_, Nov 27 2018
+%t A054845 f[n_] := Block[{p = Prime@ Range@ PrimePi@ n}, len = Length@ p; Count[(Flatten[#, 1] &)[Table[ p[[i ;; j]], {i, len}, {j, i, len}]], q_ /; Total@ q == n]]; f[0] = 0; Array[f, 102, 0](* _Jean-François Alcover_, Feb 16 2011 *) (* fixed by _Robert G. Wilson v_ *)
+%t A054845 nn=100; p=Prime[Range[PrimePi[nn]]]; t=Table[0,{nn}]; Do[s=0; j=i; While[s=s+p[[j]]; s<=nn,t[[s]]++; j++], {i,Length[p]}]; Join[{0},t]
+%o A054845 (PARI){/* program gives values of a(n) for n=0..precprime(nn)-1 */
+%o A054845 nn=2000;t=vector(nn+1);forprime(x=2,nn,s=x;
+%o A054845 forprime(y=x+1,nn,if(s<=nn,t[s+1]++,break());s=s+y));t[1..precprime(nn)]} \\ _Zak Seidov_, Feb 17 2011, corrected by _Michael S. Branicky_, Feb 28 2022
+%o A054845 (Magma) S:=[0]; for n in [1..104] do count:=0; for q in PrimesUpTo(n) do p:=q; s:=p; while s lt n do p:=NextPrime(p); s+:=p; end while; if s eq n then count+:=1; end if; end for; Append(~S, count); end for; S; // _Klaus Brockhaus_, Feb 17 2011
+%o A054845 (Perl) use ntheory ":all"; my $n=10000; my @W=(0)x($n+1); forprimes { my $s=$_; do { $W[$s]++; $s += ($_=next_prime($_)); } while $s <= $n; } $n; print "$_ $W[$_]\n" for 0..$#W;  # _Dana Jacobsen_, Aug 22 2018
+%o A054845 (Python)
+%o A054845 from sympy import primerange
+%o A054845 def aupton(nn): # modification of PARI by Zak Seidov
+%o A054845     alst = [0 for n in range(nn+1)]
+%o A054845     for x in primerange(2, nn+1):
+%o A054845         s = x
+%o A054845         alst[s] += 1
+%o A054845         for y in primerange(x+1, nn+1):
+%o A054845             s += y
+%o A054845             if s <= nn:
+%o A054845                 alst[s] += 1
+%o A054845             else:
+%o A054845                 break
+%o A054845     return alst
+%o A054845 print(aupton(101)) # _Michael S. Branicky_, Feb 17 2022
+%o A054845 (Python) # alternate version for going to large n
+%o A054845 import heapq
+%o A054845 from sympy import prime
+%o A054845 from itertools import islice
+%o A054845 def agen(): # generator of terms
+%o A054845     p = v = prime(1); h = [(p, 1, 1)]; nextcount = 2; oldv = ways = 0
+%o A054845     while True:
+%o A054845         (v, s, l) = heapq.heappop(h)
+%o A054845         if v == oldv: ways += 1
+%o A054845         else:
+%o A054845             yield ways
+%o A054845             for n in range(oldv+1, v): yield 0
+%o A054845             ways = 1
+%o A054845         if v >= p:
+%o A054845             p += prime(nextcount)
+%o A054845             heapq.heappush(h, (p, 1, nextcount))
+%o A054845             nextcount += 1
+%o A054845         oldv = v
+%o A054845         v -= prime(s); s += 1; l += 1; v += prime(l)
+%o A054845         heapq.heappush(h, (v, s, l))
+%o A054845 print(list(islice(agen(), 102))) # _Michael S. Branicky_, Feb 17 2022
+%Y A054845 Cf. A000586, A054859.
+%K A054845 nice,nonn
+%O A054845 0,6
+%A A054845 _Jud McCranie_, May 25 2000
+%E A054845 Edited by _N. J. A. Sloane_, Oct 27 2008 at the suggestion of Jake M. Foster

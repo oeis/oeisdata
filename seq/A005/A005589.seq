@@ -1,0 +1,46 @@
+%I A005589 M2277
+%S A005589 4,3,3,5,4,4,3,5,5,4,3,6,6,8,8,7,7,9,8,8,6,9,9,11,10,10,9,11,11,10,6,
+%T A005589 9,9,11,10,10,9,11,11,10,5,8,8,10,9,9,8,10,10,9,5,8,8,10,9,9,8,10,10,
+%U A005589 9,5,8,8,10,9,9,8,10,10,9,7,10,10,12,11,11,10,12,12,11,6,9,9,11
+%N A005589 Number of letters in the US English name of n, excluding spaces and hyphens.
+%C A005589 Diane Karloff observes (Nov 27 2007) that repeatedly applying the map k->A005589(k) to any starting value n always leads to 4 (cf. A016037, A133418).
+%C A005589 For terms beyond a(100), this sequence uses the US English style, "one hundred one" (not "one hundred and one"), and the short scale (a billion = 10^9, not 10^12). - _M. F. Hasler_, Nov 03 2013
+%C A005589 Explanation of Diane Karloff's observation above: In many languages there exists a number N, after which all numbers are written with fewer letters than the number itself. N is 4 in English, German and Bulgarian, and 11 in Russian. If in the interval [1,N] there are numbers equal to the number of their letters, then they are attractors. In English and German the only attractor is 4, in Bulgarian 3, in Russian there are two, 3 and 11. In the interval [1,N] there may also exist loops of numbers, for instance 4 and 6 in Bulgarian (6 and 4 letters respectively) or 4,5 and 6 in Russian (6,4 and 5 letters respectively). There are no loops in English, therefore the above observation is true. - _Ivan N. Ianakiev_, Sep 20 2014
+%D A005589 Problems Drive, Eureka, 37 (1974), 8-11 and 33.
+%D A005589 N. J. A. Sloane and Simon Plouffe, The Encyclopedia of Integer Sequences, Academic Press, 1995 (includes this sequence).
+%H A005589 Ely Golden, <a href="/A005589/b005589.txt">Table of n, a(n) for n = 0..11159</a>
+%H A005589 Eureka, <a href="/A005589/a005589.pdf">Problems Drive</a>, Eureka, 37 (1974), 8-11, 32-33, 24-27. (Annotated scanned copy)
+%H A005589 Ely Golden, <a href="/A005589/a005589_2.java.txt">Arbitrary precision number naming program in Java</a>
+%H A005589 Mathematica Stack Exchange, <a href="http://mathematica.stackexchange.com/questions/1065/how-to-express-an-integer-number-in-english-words/1067#1067"> How to express an integer number in English words?</a>
+%H A005589 Landon Curt Noll, <a href="http://www.isthe.com/chongo/tech/math/number/number.html">The English Name of a Number</a>.
+%H A005589 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/Number.html">Number</a>
+%H A005589 Robert G. Wilson v, <a href="/A000027/a000027.txt">English names for the numbers from 0 to 11159 without spaces or hyphens</a>.
+%H A005589 <a href="/index/Lc#letters">Index entries for sequences related to number of letters in n</a>
+%e A005589 Note that A052360(373373) = 64 whereas a(373373) = 56.
+%t A005589 inWords[n_] := Module[{r,
+%t A005589 numNames = {"", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"},
+%t A005589 teenNames = {"ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"},
+%t A005589 tensNames = {"", "ten", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"},
+%t A005589 decimals = {"", "thousand", "million", "billion", "trillion", "quadrillion", "quintillion", "sextillion", "septillion", "octillion", "nonillion", "decillion", "undecillion", "duodecillion", "tredecillion", "quattuordecillion", "quindecillion", "sexdecillion", "septendecillion", "octodecillion", "novemdecillion", "vigintillion", "unvigintillion", "duovigintillion", "trevigintillion", "quattuorvigintillion", "quinvigintillion", "sexvigintillion", "septenvigintillion", "octovigintillion", "novemvigintillion", "trigintillion", "untrigintillion", "duotrigintillion"}},
+%t A005589 r = If[# != 0, numNames[[# + 1]] <> "hundred"
+%t A005589 (* <> If[#2 != 0||#3 != 0," and",""] *),
+%t A005589 ""] <> Switch[#2, 0, numNames[[#3 + 1]], 1, teenNames[[#3 + 1]], _, tensNames[[#2 + 1]] <> numNames[[#3 + 1]]] & @@@
+%t A005589 (PadLeft[ FromDigits /@ Characters@ StringReverse@#, 3] & /@ StringCases[ StringReverse@ IntegerString@ n, RegularExpression["\\d{1,3}"]]);
+%t A005589 StringJoin@ Reverse@ MapThread[ If[# != "", StringJoin[##], ""] &, {r, Take[decimals, Length@ r]} ]]; (* modified for this sequence from what is presented in the link and good to 10^102 -1 *)
+%t A005589 f[n_] := StringLength@ inWords@ n; f[0] = 4; Array[f, 84, 0]
+%t A005589 (* _Robert G. Wilson v_, Nov 04 2007 and revised Mar 31 2015, small revision by _Ivan Panchenko_, Nov 10 2019 *)
+%t A005589 a[n_] := StringLength[ StringReplace[ IntegerName[n, "Words"], "," | " " | "\[Hyphen]" -> ""]]; a /@ Range[0, 83] (* Mma version >= 10, _Giovanni Resta_, Apr 10 2017 *)
+%o A005589 (PARI) A005589(n, t=[10^12, #"trillion", 10^9, #"billion", 10^6, #"million", 1000, #"thousand", 100, #"hundred"])={ n>99 && forstep( i=1, #t, 2, n<t[i] && next; n=divrem(n, t[i]); n[1]>999 && error("n >= 10^",valuation(t[1],10)+3," requires extended 2nd argument"); return( A005589(n[1])+t[i+1]+if( n[2], A005589( n[2] )))); if( n<20, #(["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"][n+1]), #([ "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety" ][n\10-1])+if( n%10, A005589(n%10)))}  \\ Extension of 2nd arg to larger numbers is easy using the names listed in Mathematica section above. Only the string lengths are required, so it's easy to extend this list further without additional knowledge and without writing out the names. - _M. F. Hasler_, Jul 26 2011, minor edit on Jun 15 2021
+%o A005589 (Python)
+%o A005589 from num2words import num2words
+%o A005589 def a(n):
+%o A005589     x = num2words(n).replace(' and ', '')
+%o A005589     l = [chr(i) for i in range(97, 123)]
+%o A005589     return sum(1 for i in x if i in l)
+%o A005589 print([a(n) for n in range(101)]) # _Indranil Ghosh_, Jul 05 2017
+%Y A005589 Cf. A006944 (ordinals), A052360, A052362, A052363, A134629, A133418, A016037.
+%K A005589 nonn,word,nice,easy
+%O A005589 0,1
+%A A005589 _N. J. A. Sloane_
+%E A005589 Corrected and extended by Larry Reeves (larryr(AT)acm.org) and _Allan C. Wechsler_, Mar 20 2000
+%E A005589 Erroneous b-file deleted by _N. J. A. Sloane_, Sep 25 2008

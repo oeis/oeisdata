@@ -1,0 +1,66 @@
+%I A124927
+%S A124927 1,1,2,1,4,2,1,6,6,2,1,8,12,8,2,1,10,20,20,10,2,1,12,30,40,30,12,2,1,
+%T A124927 14,42,70,70,42,14,2,1,16,56,112,140,112,56,16,2,1,18,72,168,252,252,
+%U A124927 168,72,18,2,1,20,90,240,420,504,420,240,90,20,2,1,22,110,330,660,924,924,660,330,110,22,2
+%N A124927 Triangle read by rows: T(n,0)=1, T(n,k)=2*binomial(n,k) if k>0 (0<=k<=n).
+%C A124927 Pascal triangle with all entries doubled except for the first entry in each row. A028326 with first column replaced by 1's. Row sums are 2^(n+1)-1.
+%C A124927 From _Paul Barry_, Sep 19 2008: (Start)
+%C A124927 Reversal of A129994. Diagonal sums are A001595. T(2n,n) is A100320.
+%C A124927 Binomial transform of matrix with 1,2,2,2,... on main diagonal, zero elsewhere. (End)
+%C A124927 This sequence is jointly generated with A210042 as an array of coefficients of polynomials v(n,x):  initially, u(1,x)=v(1,x)=1; for n>1, u(n,x)=u(n-1,x)+v(n-1,x) +1 and v(n,x)=x*u(n-1,x)+x*v(n-1,x).  See the Mathematica section. - _Clark Kimberling_, Mar 09 2012
+%C A124927 Subtriangle of the triangle given by (1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, ...) DELTA (0, 2, -1, 0, 0, 0, 0, 0, 0, 0, ...) where DELTA is the operator defined in A084938. - _Philippe Deléham_, Mar 25 2012
+%H A124927 Reinhard Zumkeller, <a href="/A124927/b124927.txt">Rows n=0..150 of triangle, flattened</a>
+%H A124927 <a href="/index/Pas#Pascal">Index entries for triangles and arrays related to Pascal's triangle</a>
+%F A124927 T(n,0) = 1; for n>0: T(n,n) = 2, T(n,k) = T(n-1,k) + T(n-1,n-k), 1<k<n. - _Reinhard Zumkeller_, Mar 04 2012
+%F A124927 T(n,k) = 2*T(n-1,k) + T(n-1,k-1) - T(n-2,k) - T(n-2,k-1), T(0,0) = T(1,0) = 1, T(1,1) = 2, T(n,k) = 0 if k<0 or if k>n. - _Philippe Deléham_, Mar 25 2012
+%F A124927 G.f.: (1-x+x*y)/((-1+x)*(x*y+x-1)). - _R. J. Mathar_, Aug 11 2015
+%e A124927 Triangle starts:
+%e A124927   1;
+%e A124927   1,  2;
+%e A124927   1,  4,  2;
+%e A124927   1,  6,  6,  2;
+%e A124927   1,  8, 12,  8,  2;
+%e A124927   1, 10, 20, 20, 10, 2;
+%e A124927 (1, 0, 0, 1, 0, 0, ...) DELTA (0, 2, -1, 0, 0, ...) begins:
+%e A124927   1;
+%e A124927   1,  0;
+%e A124927   1,  2,  0;
+%e A124927   1,  4,  2,  0;
+%e A124927   1,  6,  6,  2,  0;
+%e A124927   1,  8, 12,  8,  2, 0;
+%e A124927   1, 10, 20, 20, 10, 2, 0. - _Philippe Deléham_, Mar 25 2012
+%p A124927 T:=proc(n,k) if k=0 then 1 else 2*binomial(n,k) fi end: for n from 0 to 12 do seq(T(n,k),k=0..n) od; # yields sequence in triangular form
+%t A124927 (* First program *)
+%t A124927 u[1, x_] := 1; v[1, x_] := 1; z = 16;
+%t A124927 u[n_, x_] := u[n - 1, x] + v[n - 1, x] + 1;
+%t A124927 v[n_, x_] := x*u[n - 1, x] + x*v[n - 1, x] + 1;
+%t A124927 Table[Expand[u[n, x]], {n, 1, z/2}]
+%t A124927 Table[Expand[v[n, x]], {n, 1, z/2}]
+%t A124927 cu = Table[CoefficientList[u[n, x], x], {n, 1, z}];
+%t A124927 TableForm[cu]
+%t A124927 Flatten[%]    (* A210042 *)
+%t A124927 Table[Expand[v[n, x]], {n, 1, z}]
+%t A124927 cv = Table[CoefficientList[v[n, x], x], {n, 1, z}];
+%t A124927 TableForm[cv]
+%t A124927 Flatten[%]    (* A124927 *) (* _Clark Kimberling_, Mar 17 2012 *)
+%t A124927 (* Second program *)
+%t A124927 Table[If[k==0, 1, 2*Binomial[n, k]], {n,0,12}, {k,0,n}]//Flatten (* _G. C. Greubel_, Jul 10 2019 *)
+%o A124927 (Haskell)
+%o A124927 a124927 n k = a124927_tabl !! n !! k
+%o A124927 a124927_row n = a124927_tabl !! n
+%o A124927 a124927_tabl = iterate
+%o A124927    (\row -> zipWith (+) ([0] ++ reverse row) (row ++ [1])) [1]
+%o A124927 -- _Reinhard Zumkeller_, Mar 04 2012
+%o A124927 (PARI) T(n,k) = if(k==0,1, 2*binomial(n,k)); \\ _G. C. Greubel_, Jul 10 2019
+%o A124927 (Magma) [k eq 0 select 1 else 2*Binomial(n,k): k in [0..n], n in [0..12]]; // _G. C. Greubel_, Jul 10 2019
+%o A124927 (Sage)
+%o A124927 def T(n, k):
+%o A124927     if (k==0): return 1
+%o A124927     else: return 2*binomial(n,k)
+%o A124927 [[T(n, k) for k in (0..n)] for n in (0..12)] # _G. C. Greubel_, Jul 10 2019
+%Y A124927 Cf. A000225.
+%Y A124927 Cf. A074909.
+%K A124927 nonn,easy,tabl
+%O A124927 0,3
+%A A124927 _Gary W. Adamson_, Nov 12 2006
+%E A124927 Edited by _N. J. A. Sloane_, Nov 24 2006

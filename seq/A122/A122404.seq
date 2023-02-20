@@ -1,0 +1,69 @@
+%I A122404
+%S A122404 0,1,2,8,25,102,619,3012,17210,100980,796797,5350138,41054864,
+%T A122404 313424464,2545451783,23433207732,206742504343,1964483722070,
+%U A122404 18932563920493,189888762507928,1933963299246176,21213419239538308,230266075236104673,2633055815662413522
+%N A122404 Number of preferential arrangements of n labeled elements where the exchange of elements among the levels is restricted to levels of different occupation numbers.
+%C A122404 Consider a hierarchy H(n,L) of n labeled elements {1,2,3,...,n} with up to L=n levels like in the preferential arrangement (A000670). Let | denote a separator between two elements. A hierarchy will be written as a list of elements and level separators.
+%C A122404 For example, [1|2|3,4,5] is a hierarchy with n=5 elements in which element 1 is on level l_1, element 2 on level l_2 and elements 3,4,5 on level l_3. Usually the elements can be permuted among the levels.
+%C A122404 In the particular hierarchy H(n,L,o), among levels with the same number of elements no permutation of elements is allowed. These "permutation restricted" levels are marked with o for clarification. Thus in hierarchy [1,2|o3|o4] the levels l_2 and l_3 do not exchange elements with each other. We may say that the hierarchies [1,2|o3|o4] and [1,2|o4|o3] are to be considered as equivalent and count as one hierarchy only.
+%C A122404 However l_2 and l_3 can swap elements with level l1. Then we can have the 12 hierarchies H(n=4,L=3): [1,2|o3|o4], [1,3|o2|o4],...,[o1|o4|2,3] (see the example section) instead of 36 hierarchies H(n=4,L=3) as in the restricted case (A000670).
+%e A122404 For H(n=4,L=n,o) we have a(4) = 25 hierarchies:
+%e A122404 [[o1|o2|o3|o4]] --> 1;
+%e A122404 [[1,2|o3|o4], [1,3|o2|o4], [1,4|o2|o3], [2,3|o1|o4],
+%e A122404 [o3|1,2|o4], [o2|1,3|o4], [o2|1,4|o3], [o1|2,3|o4],
+%e A122404 [o3|o4|1,2], [o2|o4|1,3], [o2|o3|1,4], [o1|o4|2,3]] --> 12;
+%e A122404 [[1,2,3|4], [4,1,2|3], [3,4,1|2], [2,3,4|1], [4|1,2,3], [3|4,1,2], [[2|3,4,1], [1|2,3,4]] --> 8;
+%e A122404 [[o1,2|o3,4], [o1,3|o2,4], [o1,4|o2,3]] --> 3;
+%e A122404 [[o1,2,3,4]] --> 1;
+%p A122404 The Maple program is the same as for the preferential arrangement (A000670) with one exception.
+%p A122404 In the factor Fac2 the numerator NumberOfParts (= number of parts of a partition) is replaced by NumberOfDifferentParts (= number of different parts of a partition). This replacement restricts the exchange of elements to levels with different occupation numbers.
+%p A122404 with(combinat):
+%p A122404 A122404 := proc(n::integer)
+%p A122404 local i,k,prttnlst,prttn,NumberOfParts,liste,NumberOfDifferentParts,Fac1,Fac2,F3;
+%p A122404 # prttn = an integer partition of n
+%p A122404 # E.g. [1,1,1,2] is a partition of n=5 with four parts.
+%p A122404 # op(j,prttn) = the j-th part of prttn.
+%p A122404 # op(2,op(j,liste)) = multiplicity of the j-th part.
+%p A122404 # E.g. in [1,1,1,2] the digit "1" has a multiplicity of 3.
+%p A122404 F3 := 0;
+%p A122404 for k from 1 to n do
+%p A122404 prttnlst := PartitionList(n,k);
+%p A122404 NumberOfParts := 0;
+%p A122404 NumberOfDifferentParts := 0;
+%p A122404 for i from 1 to nops(prttnlst) do
+%p A122404 prttn := prttnlst[i];
+%p A122404 NumberOfParts := nops(prttn);
+%p A122404 liste := convert(prttn,multiset);
+%p A122404 NumberOfDifferentParts := nops(liste);
+%p A122404 Fac1 := n!/mul(op(j,prttn)!,j=1..NumberOfParts);
+%p A122404 Fac2 := (NumberOfDifferentParts!/ mul(op(2,op(j,liste))!,j=1..NumberOfDifferentParts));
+%p A122404 F3 := F3 + Fac1*Fac2;
+%p A122404 od;
+%p A122404 od;
+%p A122404 print(F3);
+%p A122404 end proc;
+%p A122404 PartitionList := proc (n, k)
+%p A122404 local East, West;
+%p A122404 if n < 1 or k < 1 or n < k then
+%p A122404 RETURN([])
+%p A122404 elif n = 1 then
+%p A122404 RETURN([[1]])
+%p A122404 else if n < 2 or k < 2 or n < k then
+%p A122404 West := []
+%p A122404 else
+%p A122404 West := map(proc (x) options operator, arrow;
+%p A122404 [op(x), 1] end proc,PartitionList(n-1,k-1)) end if;
+%p A122404 if k <= n-k then
+%p A122404 East := map(proc (y) options operator, arrow;
+%p A122404 map(proc (x) options operator, arrow; x+1 end proc,y) end proc,PartitionList(n-k,k))
+%p A122404 else East := [] end if;
+%p A122404 RETURN([op(West), op(East)])
+%p A122404 end if;
+%p A122404 end proc;
+%p A122404 A122404 := proc (n) local p, q, k, s; p := combinat:-partition(n); s := 0; for k to nops(p) do q := convert(p[k],multiset); s := s+nops(q)!/mul(q[i][2]!*q[i][1]!^q[i][2],i = 1 .. nops(q)) end do; return n!*s end proc: seq(A122404(n),n=1..30); # _Vladeta Jovovic_, Sep 17 2007
+%p A122404 A122404 := proc (n) local f, s, c, deg, ss, sm; f := mul(1+y*(exp(x^k/k!)-1),k = 1 .. n+1); s := series(f,x,n+1); c := n!*coeff(s,x,n); ss := series(c,y,floor(1/2*sqrt(1+8*n)+1/2)); sm := add(l!*coeff(ss,y,l),l = 1 .. n); return sm end proc: seq(A122404(n),n=1..30); # _Vladeta Jovovic_, Sep 17 2007
+%Y A122404 Cf. A000670.
+%K A122404 nonn
+%O A122404 0,3
+%A A122404 _Thomas Wieder_, Sep 01 2006
+%E A122404 Edited by _N. J. A. Sloane_, Sep 14 2006

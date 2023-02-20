@@ -1,0 +1,52 @@
+%I A066897
+%S A066897 1,2,5,8,15,24,39,58,90,130,190,268,379,522,722,974,1317,1754,2330,
+%T A066897 3058,4010,5200,6731,8642,11068,14076,17864,22528,28347,35490,44320,
+%U A066897 55100,68355,84450,104111,127898,156779,191574,233625,284070,344745,417292,504151
+%N A066897 Total number of odd parts in all partitions of n.
+%C A066897 Also sum of all odd-indexed parts minus the sum of all even-indexed parts of all partitions of n (Cf. A206563). - _Omar E. Pol_, Feb 12 2012
+%C A066897 Suppose that p=[p(1),p(2),p(3),...] is a partition of n with parts in nonincreasing order.  Let f(p) = p(1) - p(2) + p(3) - ... be the alternating sum of parts of p and let F(n) = sum of alternating sums of all partitions of n.  Conjecture: F(n) = A066897(n) for n >= 1. - _Clark Kimberling_, May 17 2019
+%H A066897 Vaclav Kotesovec, <a href="/A066897/b066897.txt">Table of n, a(n) for n = 1..10000</a> (terms 1..1000 from Alois P. Heinz)
+%F A066897 a(n) = Sum_{k=1..n} b(k)*numbpart(n-k), where b(k)=A001227(k)=number of odd divisors of k and numbpart() is A000041. - _Vladeta Jovovic_, Jan 26 2002
+%F A066897 a(n) = Sum_{k=0..n} k*A103919(n,k). - _Emeric Deutsch_, Mar 13 2006
+%F A066897 G.f.: Sum_{j>=1}(x^(2j-1)/(1-x^(2j-1)))/Product_{j>=1}(1-x^j). - _Emeric Deutsch_, Mar 13 2006
+%F A066897 a(n) = A066898(n) + A209423(n) = A006128(n) - A066898(n). [_Reinhard Zumkeller_, Mar 09 2012]
+%F A066897 a(n) = A207381(n) - A207382(n). - _Omar E. Pol_, Mar 11 2012
+%F A066897 a(n) = (A006128(n) + A209423(n))/2. - _Vaclav Kotesovec_, May 25 2018
+%F A066897 a(n) ~ exp(Pi*sqrt(2*n/3)) * (2*gamma + log(24*n/Pi^2)) / (8*Pi*sqrt(2*n)), where gamma is the Euler-Mascheroni constant A001620. - _Vaclav Kotesovec_, May 25 2018
+%e A066897 a(4) = 8 because in the partitions of 4, namely [4],[3,1],[2,2],[2,1,1],[1,1,1,1], we have a total of 0+2+0+2+4=8 odd parts.
+%p A066897 g:=sum(x^(2*j-1)/(1-x^(2*j-1)),j=1..70)/product(1-x^j,j=1..70): gser:=series(g,x=0,45): seq(coeff(gser,x^n),n=1..44);
+%p A066897 # _Emeric Deutsch_, Mar 13 2006
+%p A066897 b:= proc(n, i) option remember; local f, g;
+%p A066897       if n=0 or i=1 then [1, n]
+%p A066897     else f:= b(n, i-1); g:= `if`(i>n, [0, 0], b(n-i, i));
+%p A066897          [f[1]+g[1], f[2]+g[2]+ (i mod 2)*g[1]]
+%p A066897       fi
+%p A066897     end:
+%p A066897 a:= n-> b(n, n)[2]:
+%p A066897 seq(a(n), n=1..50);
+%p A066897 # _Alois P. Heinz_, Mar 22 2012
+%t A066897 f[n_, i_] := Count[Flatten[IntegerPartitions[n]], i]
+%t A066897 o[n_] := Sum[f[n, i], {i, 1, n, 2}]
+%t A066897 e[n_] := Sum[f[n, i], {i, 2, n, 2}]
+%t A066897 Table[o[n], {n, 1, 45}]  (* A066897 *)
+%t A066897 Table[e[n], {n, 1, 45}]  (* A066898 *)
+%t A066897 %% - %                   (* A209423 *)
+%t A066897 (* _Clark Kimberling_, Mar 08 2012 *)
+%t A066897 b[n_, i_] := b[n, i] = Module[{f, g}, If[n==0 || i==1, {1, n}, f = b[n, i-1]; g = If[i>n, {0, 0}, b[n-i, i]]; {f[[1]] + g[[1]], f[[2]] + g[[2]] + Mod[i, 2]*g[[1]]}] ]; a[n_] := b[n, n][[2]]; Table[a[n], {n, 1, 50}] (* _Jean-François Alcover_, Sep 26 2015, after _Alois P. Heinz_ *)
+%o A066897 (Haskell)
+%o A066897 a066897 = p 0 1 where
+%o A066897    p o _             0 = o
+%o A066897    p o k m | m < k     = 0
+%o A066897            | otherwise = p (o + mod k 2) k (m - k) + p o (k + 1) m
+%o A066897 -- _Reinhard Zumkeller_, Mar 09 2012
+%o A066897 (Haskell)
+%o A066897 a066897 = length . filter odd . concat . ps 1 where
+%o A066897    ps _ 0 = [[]]
+%o A066897    ps i j = [t:ts | t <- [i..j], ts <- ps t (j - t)]
+%o A066897 -- _Reinhard Zumkeller_, Jul 13 2013
+%Y A066897 Cf. A000041, A001227, A006128, A066898, A103919.
+%Y A066897 Column 1 of A206563. - _Omar E. Pol_, Feb 15 2012
+%K A066897 easy,nonn
+%O A066897 1,2
+%A A066897 _Naohiro Nomoto_, Jan 24 2002
+%E A066897 More terms from _Vladeta Jovovic_, Jan 26 2002
