@@ -3,11 +3,31 @@
 %T A216638 17711,83295,59861,22334,19659,301848,977089,59943,414086,536681,
 %U A216638 649382
 %N A216638 First appearance of the Fibonacci numbers in the decimals of Pi.
-%C A216638 Fibonacci(4) is 3, 3 appears for the first time in decimals of Pi in position 9.
-%t A216638 p=RealDigits[N[Pi,1000000]-3][[1]];
-%t A216638 n[a_,b_]:=FromDigits[Part[p,a;;b]]
-%t A216638 h=0;k=0;v={};Do[Do[If[n[a,a]>0,Do[If[Fibonacci[x]n[a,b],h=a;k=b;Goto[sale]],{b,a,Min[a+Length[IntegerDigits[Fibonacci[x]]]-1,Length[p]]}]],{a,Length[p]}];Label[sale];If[h>0,AppendTo[v,h];Print[{h,k,x,Fibonacci[x]}]],{x,1,30}]; v
-%Y A216638 Cf. A000796.
-%K A216638 nonn,base
+%e A216638 Fibonacci(4) is 3, 3 appears for the first time in decimals of Pi in position 9, so a(4) = 9.
+%t A216638 (* Determine the decimal digits of Pi following the decimal point. *)
+%t A216638 decimalPiDigits[n_] := First@RealDigits[Pi, 10, n, -1];
+%t A216638 (* Find the position of first occurrence of 'sublist' in 'list', or Indeterminate if it doesn't occur. *)
+%t A216638 firstPosition[sublist_, list_] :=
+%t A216638   With[{p = SequencePosition[list, sublist]},
+%t A216638    If[Length[p] == 0, Indeterminate, First@First@p]];
+%t A216638 (* Find the first occurrence of the given digits in the decimal digits of Pi by calculating ever more digits of Pi, as needed. *)
+%t A216638 findDigitSequenceInDecimalPiDigits[seq_] :=
+%t A216638   First@NestWhile[
+%t A216638     With[
+%t A216638       {
+%t A216638        numdigits = Max[1, 2*Last[#]] (*
+%t A216638        How many digits will we calculate in this iteration? *)
+%t A216638        },
+%t A216638       {firstPosition[seq, decimalPiDigits[numdigits]], numdigits}
+%t A216638       ] &,
+%t A216638     {Indeterminate, 0},
+%t A216638     Not@*IntegerQ@*First
+%t A216638     ];
+%t A216638 (* Find the first 30 entries. *)
+%t A216638 Table[findDigitSequenceInDecimalPiDigits[
+%t A216638   IntegerDigits@Fibonacci[n]], {n, 1, 30}]
+%t A216638 (* _Sidney Cadot_, Feb 25 2023 *)
+%Y A216638 Cf. A000045, A000796.
+%K A216638 nonn,base,more,changed
 %O A216638 1,3
 %A A216638 _Vicente Izquierdo Gomez_, Sep 11 2012
