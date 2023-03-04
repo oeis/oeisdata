@@ -3,9 +3,9 @@
 %T A147563 102,-17,4,480,2832,-1088,-2208,1488,-248,4,988,11122,5536,-20840,
 %U A147563 8896,832,-992,124,4,2008,39772,74296,-118190,-2144,51952,-22112,2764
 %N A147563 Irregular triangle, T(n, k) = [x^k] p(n, x), where p(n, x) = 4*Sum_{j=0..n} A008292(n+1, j) * (x/2)^j * (1-x/2)^(n-j), read by rows.
-%C A147563 The Eulerian number scaling is based on the quadratic Sierpinski number: (1, 2*k, 1}: to give a Bernstein Sierpinski probability scale of: p = x/2*(k-1). Here k=2 so k-1 is 2; for Pascal it is k=1 or 2^0.
 %H A147563 G. C. Greubel, <a href="/A147563/b147563.txt">Row n = 0..50 of the irregular triangle, flattened</a>
 %F A147563 T(n, k) = coefficients [x^k]( p(n, x) ), where p(n, x) = 4*Sum_{j=0..n} A008292(n+1, j) * (x/2)^j * (1-x/2)^(n-j).
+%F A147563 T(n, k) = round( (-1/2)^(k-2) * Sum_{j=0..k} (-1)^j*binomial(n-j, k-j) * A008292(n+1, j+1) ). - _G. C. Greubel_, Mar 03 2023
 %e A147563 Irregular triangle begins as:
 %e A147563   4;
 %e A147563   4;
@@ -17,21 +17,28 @@
 %e A147563   4,  480,  2832, -1088,   -2208,  1488,  -248;
 %e A147563   4,  988, 11122,  5536,  -20840,  8896,   832,   -992,  124;
 %e A147563   4, 2008, 39772, 74296, -118190, -2144, 51952, -22112, 2764;
+%t A147563 (* First program *)
+%t A147563 nmax:= 15;
 %t A147563 p[x_, n_]= (1-x)^(n+1)*PolyLog[-n, x]/x;
-%t A147563 b= Table[CoefficientList[p[x, n], x], {n,15}];
-%t A147563 Table[CoefficientList[4*Sum[b[[n+1]][[m+1]]*(x/2)^(n-m)*(1-x/2)^m, {m,0,n}], x], {n,0,12}]
-%o A147563 (Magma) // As a triangle
-%o A147563 A008292:= func< n,k | (&+[(-1)^(k-j)*Binomial(n+1, k-j)*(j+1)^n: j in [0..k]]) >;
-%o A147563 p:= func< n,x | 4*(&+[A008292(n+1,j)*(x/2)^j*(1-x/2)^(n-j): j in [0..n]]) >;
-%o A147563 R<x>:=PowerSeriesRing(Integers(), 30);
-%o A147563 [Coefficients(R!( p(n,x) )): n in [0..12]]; // _G. C. Greubel_, Oct 27 2022
+%t A147563 b= Table[CoefficientList[p[x, n], x], {n, nmax+1}];
+%t A147563 F[n_]:= CoefficientList[4*Sum[b[[n+1]][[m+1]]*(x/2)^(n-m)*(1-x/2)^m, {m, 0, n}], x];
+%t A147563 T[n_]:= If[IntegerQ[F[n]], F[n], Sign[F[n]]*Abs[Round[F[n] - 1/2]]];
+%t A147563 Table[T[n], {n, 0, nmax}]//Flatten
+%t A147563 (* Second program *)
+%t A147563 A008292[n_, k_]:= Sum[(-1)^j*(k-j)^n*Binomial[n+1,j], {j,0,k}];
+%t A147563 F[n_, k_]:= (-1/2)^(k-2)*Sum[(-1)^j*Binomial[n-j, k-j]*A008292[n+1, j+ 1], {j,0,k}];
+%t A147563 T[n_, k_]:= If[IntegerQ[F[n,k]], F[n,k], Sign[F[n,k]]*Abs[Round[F[n, k] - 1/2]]];
+%t A147563 Table[T[n, k], {n,0,16}, {k, 0, 2*Floor[n/2]}]//Flatten (* _G. C. Greubel_, Mar 03 2023 *)
+%o A147563 (Magma)
+%o A147563 A008292:= func< n,k | (&+[(-1)^j*Binomial(n+1, j)*(k-j)^n: j in [0..k]]) >;
+%o A147563 T:= func< n,k | (-1/2)^(k-2)*(&+[(-1)^j*Binomial(n-j,k-j)*A008292(n+1,j+1): j in [0..k]]) >;
+%o A147563 [Floor(T(n,k)): k in [0..2*Floor(n/2)], n in [0..16]]; // _G. C. Greubel_, Oct 27 2022; Mar 03 2023
 %o A147563 (SageMath)
-%o A147563 def A008292(n,k): return sum( (-1)^(k-j)*binomial(n+1, k-j)*(j+1)^n for j in range(k+1) )
-%o A147563 def p(n, x): return 4*sum( A008292(n+1, j)*(x/2)^j*(1-x/2)^(n-j) for j in range( (n+1) ) ).expand()
-%o A147563 def A147563(n,k): return ( p(n,x) ).series(x, n+1).list()[k]
-%o A147563 flatten([[A147563(n,k) for k in range(2*floor(n/2) + 1)] for n in range(14)]) # _G. C. Greubel_, Oct 27 2022
+%o A147563 def A008292(n,k): return sum( (-1)^j*binomial(n+1, j)*(k-j)^n for j in range(k+1) )
+%o A147563 def A147563(n,k): return floor((-1/2)^(k-2)*sum((-1)^j*binomial(n-j, k-j)*A008292(n+1,j+1) for j in range(k+1)))
+%o A147563 flatten([[A147563(n,k) for k in range(2*floor(n/2) + 1)] for n in range(16)]) # _G. C. Greubel_, Oct 27 2022; Mar 03 2023
 %Y A147563 Cf. A008292.
-%K A147563 sign,tabf
+%K A147563 sign,tabf,changed
 %O A147563 0,1
 %A A147563 _Roger L. Bagula_, Nov 07 2008
 %E A147563 Edited by _G. C. Greubel_, Oct 27 2022
