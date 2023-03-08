@@ -2,13 +2,34 @@
 %S A138792 2,11,67,23,89,53,83,29,173,19,197,193,337,167,269,79,757,397,379,479,
 %T A138792 3677,769,997,6967,1699,3889,9857,7867,6959,9949,16987,9887,49697,
 %U A138792 47599,18899,67979,73999,56999,197699,49999,159899,189989,98899,98999,988877
-%N A138792 Least prime, p, such that p == n (Mod sum of the digits of p).
-%C A138792 First occurrence of k in A136251.
-%H A138792 Robert G. Wilson v, <a href="/A138792/b138792.txt">Table of n, a(n) for n = 0..85</a>.
-%e A138792 a(2) = 67 = 13*5+2 <--> 2 == 67 (mod 13).
+%N A138792 Least prime, p, such that p mod (sum of the digits of p) = n.
+%C A138792 First occurrence of n in A136251.
+%H A138792 David A. Corneth, <a href="/A138792/b138792.txt">Table of n, a(n) for n = 0..181</a> (first 74 terms from Robert G. Wilson v)
+%e A138792 a(2) = 67 = 13*5+2 <--> 67 (mod 13) = 2.
+%p A138792 V:= Array(0..50): count:= 0: p:= 1:
+%p A138792 while count < 51 do
+%p A138792   p:= nextprime(p);
+%p A138792   s:= convert(convert(p,base,10),`+`);
+%p A138792   v:= p mod s;
+%p A138792   if v <= 50 and V[v] = 0 then V[v]:= p; count:= count+1;  fi
+%p A138792 od:
+%p A138792 convert(V,list); # _Robert Israel_, Mar 07 2023
 %t A138792 f[n_] := Block[{p = Prime@ n}, Mod[p, Plus @@ IntegerDigits@ p]]; t = Table[0, {1000}]; Do[ a = f@n; If[a < 1000 && t[[a + 1]] == 0, t[[a + 1]] = Prime@ n; Print[{a, Prime@n}]], {n, 503200000}]
 %t A138792 lp[n_]:=Module[{p=2},While[Mod[p,Total[IntegerDigits[p]]]!=n,p= NextPrime[ p]];p]; Array[lp,50,0] (* _Harvey P. Dale_, Jan 15 2019 *)
+%o A138792 (PARI) a(n) = my(p=2); while ((p % sumdigits(p)) != n, p=nextprime(p+1)); p; \\ _Michel Marcus_, Mar 07 2023
+%o A138792 (Python)
+%o A138792 from sympy import nextprime
+%o A138792 from itertools import islice
+%o A138792 def agen(): # generator of terms
+%o A138792     adict, n, p = dict(), 0, 2
+%o A138792     while True:
+%o A138792         v = p%sum(map(int, str(p)))
+%o A138792         if v not in adict: adict[v] = p
+%o A138792         while n in adict: yield adict[n]; n += 1
+%o A138792         p = nextprime(p)
+%o A138792 print(list(islice(agen(), 45))) # _Michael S. Branicky_, Mar 07 2023
 %Y A138792 Cf. A136251, A138791.
-%K A138792 base,nonn
+%K A138792 base,nonn,changed
 %O A138792 0,1
 %A A138792 _Robert G. Wilson v_, Mar 28 2008
+%E A138792 Name corrected by _Robert Israel_, Mar 07 2023
