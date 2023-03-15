@@ -1,0 +1,118 @@
+%I A358404
+%S A358404 2,3,5,8,13,21,23,34,41,61,85,89,144,233,255,264,377,383,397,443,610,
+%T A358404 762,875,987
+%N A358404 Multipliers involving Fibonacci-like sequences and Pythagorean triples.
+%C A358404 A positive integer m is an element of this sequence if and only if there exists a Pythagorean triple of the form (m*G_0, m*G_1, G_n), where (G_k) is a Fibonacci-like sequence, i.e., a sequence with arbitrary positive integer starting values G_0 and G_1 and satisfying the recurrence G_k = G_{k-1} + G_{k-2} for every index k > 1.
+%F A358404 Each element of this list has a unique representation of the form m = m(c, j) = G_n / c, where j is an arbitrary nonnegative integer and c is "good", meaning that all of its prime divisors are of the form 4k + 1 and the Fibonacci entry point t of c is odd, in which case n = ((2j + 1)t + 1)/2 and (G_0, G_1, c) is the unique primitive Pythagorean triple such that G_0/G_1 is congruent to F_n/F_{n-1} modulo c.
+%e A358404 m = m(5, 0) = 2, since the Fibonacci-like sequence (G_n) with G_0 = 4 and G_1 = 3 has G_3 = 10 and (m*G_0, m*G_1, G_3) = (8, 6, 10) is a Pythagorean triple. Since m = 2 is the smallest positive integer with this property, m(1) = 2.
+%t A358404 (* Fibonacci entry point *)
+%t A358404 T[m_] :=
+%t A358404   Module[{fi = FactorInteger[m], lenN, i, fi2, p, e, q, n1, divs,
+%t A358404     nDivs, d, found, preres, result = 1},
+%t A358404    If[m == 1, Return[1]];
+%t A358404    len = Length[fi];
+%t A358404    {p, e} = fi[[1]];
+%t A358404    q = p^e;
+%t A358404    If[len == 1,
+%t A358404     If[p == 5, Return[q]];
+%t A358404     If[e == 1,
+%t A358404      result = p - JacobiSymbol[p, 5];
+%t A358404      While[EvenQ[result] && Mod[Fibonacci[result], m] == 0,
+%t A358404       result /= 2];
+%t A358404      If[Mod[Fibonacci[result], m] != 0, result *= 2];
+%t A358404      fi2 = FactorInteger[result];
+%t A358404      If[EvenQ[result], Drop[fi2, 1]];
+%t A358404      n1 = Product[fi2[[i, 1]]^fi2[[i, 2]], {i, Length[fi2]}];
+%t A358404      divs = Divisors[n1];
+%t A358404      nDivs = Length[divs];
+%t A358404      found = False;
+%t A358404      For[i = 2, i <= nDivs && ! found, i++,
+%t A358404       d = divs[[i]];
+%t A358404       If[Mod[Fibonacci[d], m] == 0,
+%t A358404        found = True;
+%t A358404        result = d;
+%t A358404        Return[result];
+%t A358404        ];
+%t A358404       ],
+%t A358404      result = p^(e - 1 - If[p == 2 && e > 2, 1, 0])*T[p];
+%t A358404      Return[result];
+%t A358404      ],
+%t A358404     result = LCM[T[q], T[m/q]];
+%t A358404     ];
+%t A358404    result
+%t A358404    ];
+%t A358404 (* Good moduli *)
+%t A358404 GoodQ[m_] :=
+%t A358404   Module[{fi, len, i, p, t},
+%t A358404    If[m < 5, Return[False]];
+%t A358404    fi = FactorInteger[m];
+%t A358404    len = Length[fi];
+%t A358404    For[i = 1, i <= len, i++,
+%t A358404     p = fi[[i, 1]];
+%t A358404     If[Mod[p, 4] != 1, Return[False]];
+%t A358404     ];
+%t A358404    True
+%t A358404    ];
+%t A358404 {* Great moduli *)
+%t A358404 GreatQ[m_] := GoodQ[m] && OddQ[T[m]];
+%t A358404 (* Fibonacci modular ratio *)
+%t A358404 R[c_, k_] :=
+%t A358404   Module[{f0 = Fibonacci[k], f1},
+%t A358404    If[GCD[f0, c] > 1, Return[$Failed]];
+%t A358404    f1 = Fibonacci[k + 1];
+%t A358404    Mod[f1*PowerMod[f0, -1, c], c]
+%t A358404    ];
+%t A358404 (* Starting pair for Fibonacci-like sequence *)
+%t A358404 StartingPair[c_] :=
+%t A358404   Module[{pr, len, i, r0, t, n, r, u, v, g0, g1, preres},
+%t A358404    If[! GreatQ[c], Return[$Failed]];
+%t A358404    t = T[c];
+%t A358404    n = (t + 1)/2;
+%t A358404    r0 = R[c, n - 1];
+%t A358404    pr = PowersRepresentations[c, 2, 2];
+%t A358404    len = Length[pr];
+%t A358404    For[i = 1, i <= len, i++,
+%t A358404     {u, v} = pr[[i]];
+%t A358404     If[GCD[u, v] == 1,
+%t A358404      r = Mod[v*PowerMod[u, -1, c], c];
+%t A358404      preres = {Abs[u^2 - v^2], 2 u*v};
+%t A358404      If[r == c - r0, Return[preres]];
+%t A358404      If[r == r0, Return[Reverse[preres]]];
+%t A358404      ];
+%t A358404     ];
+%t A358404    $Failed
+%t A358404    ];
+%t A358404 (* Great modulus multiplier *)
+%t A358404 M[c_, j_] :=
+%t A358404   Module[{t, n0, n, g0, g1, result},
+%t A358404    If[! GreatQ[c], Return[$Failed]];
+%t A358404    {g0, g1} = StartingPair[c];
+%t A358404    t = T[c];
+%t A358404    n0 = (t + 1)/2;
+%t A358404    n = n0 + j*t;
+%t A358404    (g0*Fibonacci[n - 1] + g1*Fibonacci[n])/c
+%t A358404    ];
+%t A358404 (* Master table *)
+%t A358404 MasterTable[mMax_] :=
+%t A358404   Module[{c, j, m, g0, g1, t, n0, n, done, result = {}},
+%t A358404    For[c = 5, c <= GoldenRatio*mMax^2, c += 4,
+%t A358404     While[! GreatQ[c], c += 4];
+%t A358404     If[c <= GoldenRatio*mMax^2,
+%t A358404      {g0, g1} = StartingPair[c];
+%t A358404      t = T[c];
+%t A358404      n0 = (t + 1)/2;
+%t A358404      For[j = 0, j <= JMax[mMax, n0], j++,
+%t A358404       n = n0 + j*t;
+%t A358404       m = M[c, j];
+%t A358404       If[m <= mMax, AppendTo[result, {g0, g1, c, m, n}]];
+%t A358404       ];
+%t A358404      ];
+%t A358404     ];
+%t A358404    result
+%t A358404    ];
+%t A358404 (* Multiplier list *)
+%t A358404 MList[mMax_] := Union[MasterTable[mMax][[All, 4]]];
+%Y A358404 Cf. A000045.
+%K A358404 new,nonn,new
+%O A358404 1,1
+%A A358404 _David Terr_, Nov 14 2022
