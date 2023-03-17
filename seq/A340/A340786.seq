@@ -3,6 +3,7 @@
 %T A340786 2,7,1,2,2,6,1,4,1,4,3,2,1,10,2,3,2,4,1,4,2,6,2,2,1,8,1,2,3,12,2,4,1,
 %U A340786 4,2,4,1,10,1,2,3,4,2,4,1,10,3,2,1,8,2,2
 %N A340786 Number of factorizations of 4n into an even number of even factors > 1.
+%H A340786 Robert Israel, <a href="/A340786/b340786.txt">Table of n, a(n) for n = 1..10000</a>
 %e A340786 The a(n) factorizations for n = 6, 12, 24, 36, 60, 80, 500:
 %e A340786   4*6   6*8      2*48      2*72      4*60      4*80          40*50
 %e A340786   2*12  2*24     4*24      4*36      6*40      8*40          4*500
@@ -14,6 +15,22 @@
 %e A340786                                      2*2*6*10  2*2*8*10      2*2*2*250
 %e A340786                                                2*4*4*10      2*10*10*10
 %e A340786                                                2*2*2*2*2*10
+%p A340786 g:= proc(n, m, p)
+%p A340786  option remember;
+%p A340786  local F,r,x,i;
+%p A340786  # number of factorizations of n into even factors > m with number of factors == p (mod 2)
+%p A340786  if n = 1 then if p = 0 then return 1 else return 0 fi fi;
+%p A340786  if m > n  or n::odd then return 0 fi;
+%p A340786  F:= sort(convert(select(t -> t > m and t::even, numtheory:-divisors(n)),list));
+%p A340786  r:= 0;
+%p A340786  for x in F do
+%p A340786    for i from 1 while n mod x^i = 0 do
+%p A340786      r:= r + procname(n/x^i, x, (p+i) mod 2)
+%p A340786  od od;
+%p A340786  r
+%p A340786 end proc:
+%p A340786 f:= n -> g(4*n, 1, 0):
+%p A340786 map(f, [$1..100]); # _Robert Israel_, Mar 16 2023
 %t A340786 facs[n_]:=If[n<=1,{{}},Join@@Table[Map[Prepend[#,d]&,Select[facs[n/d],Min@@#>=d&]],{d,Rest[Divisors[n]]}]];
 %t A340786 Table[Length[Select[facs[4n],EvenQ[Length[#]]&&Select[#,OddQ]=={}&]],{n,100}]
 %o A340786 (PARI)
@@ -38,6 +55,6 @@
 %Y A340786 A236913 counts partitions of even length and sum (A340784).
 %Y A340786 A340601 counts partitions of even rank (A340602).
 %Y A340786 Cf. A001147, A001222, A001749, A035363, A050320, A066207, A066208, A160786, A174725, A320655, A320656, A339890, A340851.
-%K A340786 nonn
+%K A340786 nonn,changed
 %O A340786 1,4
 %A A340786 _Gus Wiseman_, Jan 31 2021
