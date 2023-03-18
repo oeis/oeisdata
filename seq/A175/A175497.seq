@@ -4,7 +4,7 @@
 %U A175497 10710,12654,14175,14820,16296,16380,17220,19866,22770,25172,25944,29103
 %N A175497 Numbers k with the property that k^2 is a product of two distinct triangular numbers.
 %C A175497 From _Robert G. Wilson v_, Jul 24 2010: (Start)
-%C A175497 Terms in line (i) are products contributed with a factor A000217(i):
+%C A175497 Terms in the i-th row are products contributed with a factor A000217(i):
 %C A175497 (1) 0, 6, 35, 204, 1189, 6930, 40391, 235416, 1372105, 7997214, 46611179, ...
 %C A175497 (2) 30, 297, 2940, 29103, 288090, 2851797, 28229880, ...
 %C A175497 (3) 84, 1170, 16296, 226974, 3161340, ...
@@ -21,9 +21,11 @@
 %C A175497 (14) 6090, 353115, 20474580, ...
 %C A175497 (15) 7440, 461160, 28584480, ...
 %C A175497 (End)
-%H A175497 R. J. Mathar, <a href="/A175497/b175497.txt">Table of n, a(n) for n = 1..1954</a> replacing an earlier list of 427 terms with missing values.
-%H A175497 Project Euler <a href="https://projecteuler.net/problem=833">Square Triangle Products</a>, Problem 833.
-%H A175497 M. Ulas, <a href="https://arxiv.org/abs/0811.2477">On certain diophantine equations related to triangular and tetrahedral numbers</a>, arXiv:0811.2477 (2008) Theorem. 5.6.
+%C A175497 Numbers m with property that m^2 is a product of two distinct triangular numbers T(i) and T(j) such that i and j are in the same row of the square array A(n, k) defined in A322699. - _Onur Ozkan_, Mar 17 2023
+%H A175497 R. J. Mathar, <a href="/A175497/b175497.txt">Table of n, a(n) for n = 1..1000</a> replacing a b-file of _Robert G. Wilson v_ of 2010.
+%H A175497 R. J. Mathar, <a href="/A175497/a175497.pdf">OEIS A175497</a>, Mar 16 2023
+%H A175497 Project Euler <a href="https://projecteuler.net/problem=833">Problem 833. Square Triangle Products</a>.
+%H A175497 M. Ulas, <a href="https://arxiv.org/abs/0811.2477">On certain diophantine equations related to triangular and tetrahedral numbers</a>, arXiv:0811.2477 [math.NT], 2008. Theorem 5.6.
 %F A175497 a(n)^2 = A169836(n). - _R. J. Mathar_, Mar 12 2023
 %p A175497 isA175497 := proc(n)
 %p A175497     local i,Ti,Tj;
@@ -56,6 +58,39 @@
 %o A175497 def A175497_gen(startvalue=0): # generator of terms >= startvalue
 %o A175497     return filter(lambda k:not k or any(map(lambda d: is_square((d<<3)+1) and is_square((k**2//d<<3)+1), takewhile(lambda d:d**2<k,divisors(k**2)))),count(max(startvalue,0)))
 %o A175497 A175497_list = list(islice(A175497_gen(),20)) # _Chai Wah Wu_, Mar 13 2023
+%o A175497 (Python)
+%o A175497 def A175497_list(n):
+%o A175497     def A322699_A(k, n):
+%o A175497         p, q, r, m = 0, k, 4*k*(k+1), 0
+%o A175497         while m < n:
+%o A175497             p, q, r = q, r, (4*k+3)*(r-q) + p
+%o A175497             m += 1
+%o A175497         return p
+%o A175497     def a(k, n, j):
+%o A175497         if n == 0: return 0
+%o A175497         p = A322699_A(k, n)*(A322699_A(k, n)+1)*(2*k+1) - a(k, n-1, 1)
+%o A175497         q = (4*k+2)*p - A322699_A(k, n)*(A322699_A(k, n)+1)//2
+%o A175497         m = 1
+%o A175497         while m < j: p, q = q, (4*k+2)*q - p; m += 1
+%o A175497         return p
+%o A175497     A = set([a(k, 1, 1) for k in range(n+1)])
+%o A175497     k, l, m = 1, 1, 2
+%o A175497     while True:
+%o A175497         x = a(k, l, m)
+%o A175497         if x < max(A):
+%o A175497             A |= {x}
+%o A175497             A  = set(sorted(A)[:n+1])
+%o A175497             m += 1
+%o A175497         else:
+%o A175497             if m == 1 and l == 1:
+%o A175497                 if k > n:
+%o A175497                     return sorted(A)
+%o A175497                 k += 1
+%o A175497             elif m > 1:
+%o A175497                 l += 1; m = 1
+%o A175497             elif l > 1:
+%o A175497                 k += 1; l, m = 1, 1
+%o A175497 # _Onur Ozkan_, Mar 15 2023
 %Y A175497 From _Robert G. Wilson v_, Jul 24 2010: (Start)
 %Y A175497 A001109 (with the exception of 1), A011945, A075848 and A055112 are all proper subsets.
 %Y A175497 Many terms are in common with A147779.
