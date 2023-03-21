@@ -3,6 +3,16 @@
 %T A198060 462,64,1,8,190,1700,5626,5812,1716,128,1,9,382,5831,35466,69062,
 %U A198060 40048,6435,256,1,10,766,19682,219626,795312,882540,281374,24310,512
 %N A198060 Array read by antidiagonals, m>=0, n>=0, A(m,n) = Sum_{k=0..n} Sum_{j=0..m} Sum_{i=0..m} (-1)^(j+i)*C(i,j)*C(n,k)^(m+1)*(n+1)^j*(k+1)^(m-j)/(k+1)^m.
+%C A198060 We repeat the definition of a meander as given in the link below and used in the sequences in the cross-references:
+%C A198060 A binary curve C is a triple (m, S, dir) such that:
+%C A198060 (a) S is a list with values in {L, R} which starts with an L,
+%C A198060 (b) dir is a list of m different values, each value of S being allocated a value of dir,
+%C A198060 (c) consecutive Ls increment the index of dir,
+%C A198060 (d) consecutive Rs decrement the index of dir,
+%C A198060 (e) the integer m > 0 divides the length of S.
+%C A198060 (f) C is a meander if each value of dir occurs length(S) / m times.
+%C A198060 The rows of the array A(m, n) show the number of meanders of length n and central angle 360/m as specified by the columns of a table in the given link. - _Peter Luschny_, Mar 20 2023
+%H A198060 Peter Luschny, <a href="http://oeis.org/wiki/User:Peter_Luschny/Meander">Meanders and walks on the circle</a>.
 %F A198060 From _Peter Bala_, Apr 22 2022: (Start)
 %F A198060 Conjectures:
 %F A198060 1) the m-th row entries satisfy the Gauss congruences T(m, n*p^r - 1) == T(m, n*p^(r-1) - 1) (mod p^r)) for primes p >= 3 and positive integers n and r.
@@ -16,10 +26,56 @@
 %e A198060 [3]   1   5   46   485    5626    69062     882540   A198256
 %e A198060 [4]   1   6   94  1700   35466   795312   18848992   A198257
 %e A198060 [5]   1   7  190  5831  219626  8976562  394800204   A198258
+%e A198060 .
+%e A198060 Using a representation of meanders as multisets as given in the program section:
+%e A198060 A(1, 2) = 10 = card(110000, 100100, 100001, 111100, 111001, 110110, 110011, 101101, 100111, 111111). Note that this is a subset of the 32 multiset permutations A361043(2, 4).
 %p A198060 A198060 := proc(m, n) local i, j, k; add(add(add((-1)^(j+i)*binomial(i, j)*binomial(n, k)^(m+1)*(n+1)^j*(k+1)^(m-j)/(k+1)^m, i=0..m), j=0..m), k=0..n) end: for m from 0 to 6 do seq(A198060(m, n), n=0..6) od;
 %t A198060 a[m_, n_] := Sum[ Sum[ Sum[(-1)^(j + i)*Binomial[i, j]*Binomial[n, k]^(m+1)*(n+1)^j*(k+1)^(m-j)/(k+1)^m, {i, 0, m}], {j, 0, m}], {k, 0, n}]; Table[ a[m-n, n], {m, 0, 9}, {n, 0, m}] // Flatten (* _Jean-François Alcover_, Jun 27 2013 *)
+%o A198060 # These functions compute the number of meanders by generating and counting.
+%o A198060 # Their primary purpose is to illustrate that meanders are a special class of
+%o A198060 # multiset permutations. They are not suitable for numerical calculation.
+%o A198060 (Julia)
+%o A198060 using Combinatorics
+%o A198060 function isMeander(m::Int, c::Vector{Bool})::Bool
+%o A198060     l = length(c)
+%o A198060     (l == 0 || c[1] != true) && return false
+%o A198060     vec = fill(Int(0), m)
+%o A198060     max = div(l, m)
+%o A198060     dir = Int(1)
+%o A198060     ob = c[1]
+%o A198060     for b in c
+%o A198060         if b && ob
+%o A198060             dir += 1
+%o A198060         elseif !b && !ob
+%o A198060             dir -= 1
+%o A198060         end
+%o A198060         dir = mod(dir, m)
+%o A198060         v = vec[dir + 1] + 1
+%o A198060         vec[dir + 1] = v
+%o A198060         if v > max
+%o A198060             return false
+%o A198060         end
+%o A198060         ob = b
+%o A198060     end
+%o A198060 true end
+%o A198060 function CountMeanders(n, k)
+%o A198060     n == 0 && return k + 1
+%o A198060     count = 0
+%o A198060     size = n * k
+%o A198060     for a in range(0, stop=size; step=n)
+%o A198060         S = [(i <= a) for i in 1:size]
+%o A198060         count += sum(1 for c in multiset_permutations(S, size)
+%o A198060                      if isMeander(n, c); init = 0)
+%o A198060     end
+%o A198060 count end
+%o A198060 A198060ByCount(m, n) = CountMeanders(m + 1, n + 1)
+%o A198060 for n in 0:4
+%o A198060     [A198060ByCount(n, k) for k in 0:4] |> println
+%o A198060 end
+%o A198060 # _Peter Luschny_, Mar 20 2023
 %Y A198060 T(n, 2) = A033484(n+1).
 %Y A198060 Cf. A033484, A000079, A001700, A197657, A198256, A198257, A198258, A198061.
-%K A198060 nonn,tabl
+%Y A198060 Cf. A361043.
+%K A198060 nonn,tabl,changed
 %O A198060 0,3
 %A A198060 _Peter Luschny_, Nov 01 2011
