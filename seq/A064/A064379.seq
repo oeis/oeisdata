@@ -2,28 +2,31 @@
 %S A064379 1,1,2,1,2,3,1,2,3,4,1,4,5,1,2,3,4,5,6,1,3,5,7,1,2,3,4,5,6,7,8,1,3,4,
 %T A064379 7,9,1,2,3,4,5,6,7,8,9,10,1,2,5,7,9,10,11,1,2,3,4,5,6,7,8,9,10,11,12,
 %U A064379 1,3,4,5,9,11,12,13,1,2,4,7,8,9,11,13,14,1,2,3,4,5,6,7,8,9,10,11,12,13,14
-%N A064379 Triangle whose n-th row is list of numbers that are infinitarily relatively prime to n (n=2,3,..).
+%N A064379 Irregular triangle whose n-th row is a list of numbers that are infinitarily relatively prime to n (n = 2, 3, ...).
 %C A064379 The integers less than n that have no common infinitary divisors with n.
-%H A064379 Eric Weisstein, <a href="http://mathworld.wolfram.com/InfinitaryDivisor.html">Infinitary Divisor</a>
-%e A064379 irelprime[6]={1, 4, 5} because iDivisors[6]={1, 2, 3, 6} and iDivisors[4]={1, 4} so 4 is infinitary_relatively_prime to 6 since it lacks common infinitary divisors with 6.
-%e A064379 For n = 2 ..8 irelprime[n] gives {1}, {1,2}, {1,2,3}, {1,2,3,4}, {1,4,5}, {1,2,3,4,5,6}, {1,3,5,7}
+%H A064379 Eric Weisstein, <a href="http://mathworld.wolfram.com/InfinitaryDivisor.html">Infinitary Divisor</a>.
+%e A064379 irelprime[6] = {1, 4, 5} because iDivisors[6] = {1, 2, 3, 6} and iDivisors[4] = {1, 4} so 4 is infinitary_relatively_prime to 6 since it lacks common infinitary divisors with 6.
+%e A064379 For n = 2 ..8 irelprime[n] gives {1}, {1,2}, {1,2,3}, {1,2,3,4}, {1,4,5}, {1,2,3,4,5,6}, {1,3,5,7}.
 %e A064379 Triangle starts:
-%e A064379 02: 1,
-%e A064379 03: 1, 2,
-%e A064379 04: 1, 2, 3,
-%e A064379 05: 1, 2, 3, 4,
-%e A064379 06: 1, 4, 5,
-%e A064379 07: 1, 2, 3, 4, 5, 6,
-%e A064379 08: 1, 3, 5, 7,
-%e A064379 09: 1, 2, 3, 4, 5, 6, 7, 8,
-%e A064379 10: 1, 3, 4, 7, 9,
-%e A064379 11: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-%e A064379 12: 1, 2, 5, 7, 9, 10, 11,
-%e A064379 13: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
-%e A064379 14: 1, 3, 4, 5, 9, 11, 12, 13,
-%e A064379 15: 1, 2, 4, 7, 8, 9, 11, 13, 14,
+%e A064379    2: 1;
+%e A064379    3: 1, 2;
+%e A064379    4: 1, 2, 3;
+%e A064379    5: 1, 2, 3, 4;
+%e A064379    6: 1, 4, 5;
+%e A064379    7: 1, 2, 3, 4, 5, 6;
+%e A064379    8: 1, 3, 5, 7;
+%e A064379    9: 1, 2, 3, 4, 5, 6, 7, 8;
+%e A064379   10: 1, 3, 4, 7, 9;
+%e A064379   11: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10;
+%e A064379   12: 1, 2, 5, 7, 9, 10, 11;
+%e A064379   13: 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12;
+%e A064379   14: 1, 3, 4, 5, 9, 11, 12, 13;
+%e A064379   15: 1, 2, 4, 7, 8, 9, 11, 13, 14;
 %t A064379 irelprime[ n_ ] := Select[ temp=iDivisors[ n ]; Range[ n ], Intersection[ iDivisors[ # ], temp ]==={1}& ]; (* with iDivisors of n as *) bitty[ k_ ] := Union[ Flatten[ Outer[ Plus, Sequence@@{0, #1}&/@Union[ 2^Range[ 0, Floor[ Log[ 2, k ] ] ]*Reverse[ IntegerDigits[ k, 2 ] ] ] ] ] ]; iDivisors[ k_Integer ] := Sort[ (Times @@(First[ it ]^(#1/.z-> List))&)/@Flatten[ Outer[ z, Sequence@@bitty/@Last[ it=Transpose[ FactorInteger[ k ] ] ], 1 ] ] ]; iDivisors[ 1 ] := {1};
+%t A064379 infCoprimeQ[n1_, n2_] := Module[{g = GCD[n1, n2]}, If[g == 1, True, AllTrue[ FactorInteger[g][[;; , 1]], BitAnd @@ IntegerExponent[{n1, n2}, #] == 0 &]]]; row[n_] := Select[Range[n - 1], infCoprimeQ[#, n] &]; Table[row[n], {n, 2, 16}] // Flatten (* _Amiram Eldar_, Mar 26 2023 *)
+%o A064379 (PARI) isinfcoprime(n1, n2) = {my(g = gcd(n1, n2), p, e1, e2); if(g == 1,return(1)); p = factor(g)[, 1]; for(i=1, #p, e1 = valuation(n1, p[i]); e2 = valuation(n2, p[i]); if(bitand(e1, e2) > 0, return(0))); 1; }
+%o A064379 row(n) = select(x->isinfcoprime(x, n), vector(n-1, i, i)); \\ _Amiram Eldar_, Mar 26 2023
 %Y A064379 Cf. A037445, A064380.
-%K A064379 nonn,tabf
+%K A064379 nonn,tabf,changed
 %O A064379 2,3
 %A A064379 _Wouter Meeussen_, Sep 27 2001

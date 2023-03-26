@@ -9,7 +9,6 @@
 %C A038547 The politeness of an integer, A069283(n), is defined to be the number of its nontrivial runsum representations, and the sequence 3, 9, 15, 81, 45, 729, 105, ... represents the least integers to have a politeness of 1, 2, 3, 4, ... This is also the sequence of smallest integers with n+1 odd divisors and so apart from the leading 1, is precisely this sequence. - _Ant King_, Sep 23 2009
 %C A038547 a(n) is also the least number k with the property that the symmetric representation of sigma(k) has n subparts. - _Omar E. Pol_, Dec 31 2016
 %H A038547 Don Reble, <a href="/A038547/b038547.txt">Table of n, a(n) for n = 1..2000</a>
-%H A038547 Hartmut F. W. Hoft, <a href="/A038547/a038547.pdf">Description of general formula for A038547(n)</a>
 %H A038547 T. Verhoeff, <a href="https://cs.uwaterloo.ca/journals/JIS/trapzoid.html">Rectangular and Trapezoidal Arrangements</a>, J. Integer Sequences, Vol. 2, 1999, #99.1.6.
 %F A038547 a(p) = 3^(p-1) for primes p. - _Zak Seidov_, Apr 18 2006
 %F A038547 a(n) = A119265(n,n). - _Reinhard Zumkeller_, May 11 2006
@@ -20,11 +19,12 @@
 %t A038547 Table[Select[Range[1,532000,2],DivisorSigma[0,#]==k+1 &,1],{k,0,15}]//Flatten (* _Ant King_, Nov 28 2010 *)
 %t A038547 2#-1&/@With[{ds=DivisorSigma[0,Range[1,600000,2]]},Table[Position[ds,n,1,1],{n,16}]]//Flatten (* The program is not suitable for generating terms beyond a(16) *) (* _Harvey P. Dale_, Jun 06 2017 *)
 %t A038547 (* direct computation of A038547(n) *)
-%t A038547 partitionLists[n_] := Module[{nFact=Map[#[[1]]^IntegerPartitions[#[[2]]]-1&, FactorInteger[n]]}, Reverse[Map[Sort[#, GreaterEqual]&, Fold[Flatten[Outer[Join, #1, #2, 1], 1]&, First[nFact], Rest[nFact]]]]]
-%t A038547 value[expL_] := Apply[Times, Prime[Range[2, Length[expL]+1]]^expL]
-%t A038547 a038547[n_ ] := Module[{expLL=partitionLists[n], len, min, k=2, next}, len=Length[expLL]; min=value[First[expLL]]; While[k<=len&&3^First[expLL[[k]]]<min, next=value[expLL[[k]]]; If[next<min, min=next]; k++]; min]
-%t A038547 a038547[{m_, n_}] := Map[a038547, Range[m, n]]
-%t A038547 a038547[{1, 34}] (* _Hartmut F. W. Hoft_, Nov 03 2022 *)
+%t A038547 (* Function by _Vaclav Kotesovec_in A005179, Apr 04 2021, modified for odd divisors *)
+%t A038547 mp[1, m_] := {{}}; mp[n_, 1] := {{}}; mp[n_?PrimeQ, m_] := If[m<n, {}, {{n}}];
+%t A038547 mp[n_, m_] := Join@@Table[Map[Prepend[#, d]&, mp[n/d, d]], {d, Select[Rest[Divisors[n]], #<=m&]}];
+%t A038547 mp[n_]:=mp[n,n];
+%t A038547 a038547[bound_] := Module[{mulpar}, Table[mulpar=mp[n]-1; Min[Table[Product[Prime[s+1]^mulpar[[j, s]], {s, 1, Length[mulpar[[j]]]}], {j, 1, Length[mulpar]}]], {n, 1, bound}]]
+%t A038547 a038547[34] (* _Hartmut F. W. Hoft_, Mar 05 2023 *)
 %o A038547 (PARI) for(nd=1,15,forstep(k=1,10^66,2,if(nd==numdiv(k),print1(k,", ");break())))
 %o A038547 (Haskell)
 %o A038547 import Data.List  (find)
@@ -36,7 +36,7 @@
 %Y A038547 Cf. A001227, A005179, A002110, A070826, A000005, A053640, A053624, A237593, A279387.
 %Y A038547 Row 1 of A266531. - _Omar E. Pol_, Dec 31 2016
 %Y A038547 Cf. A006093, A076274, A080577.
-%K A038547 nonn,nice
+%K A038547 nonn,nice,changed
 %O A038547 1,2
 %A A038547 _Tom Verhoeff_
 %E A038547 Corrected by _Ron Knott_, Feb 22 2001

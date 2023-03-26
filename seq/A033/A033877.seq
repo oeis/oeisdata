@@ -27,6 +27,17 @@
 %F A033877 G.f.: Sum T(n, k)*x^n*y^k = (1-x*y-(x^2*y^2-6*x*y+1)^(1/2)) / (x*(2*y+x*y-1+(x^2*y^2-6*x*y+1)^(1/2))). - _Vladeta Jovovic_, Feb 16 2003
 %F A033877 Another version of A000007 DELTA [0, 2, 1, 2, 1, 2, 1, 2, 1, 2, ...] = 1, 1, 0, 1, 2, 0, 1, 4, 6, 0, 1, 6, 16, 22, 0, 1, ..., where DELTA is Deléham's operator defined in A084938.
 %F A033877 Sum_{n=1..floor((k+1)/2)} T(n+p-1, k-n+p) = A026003(2*p+k-3) - A008288(2*p+k-3, p-2), p >= 2, k >= 1. - _Johannes W. Meijer_, Sep 28 2013
+%F A033877 From _G. C. Greubel_, Mar 23 2023: (Start)
+%F A033877 (t(n, k) as a lower triangle)
+%F A033877 t(n, k) = t(n, k-1) + t(n-1, k-1) + t(n-1, k) with t(n, 1) = 1.
+%F A033877 t(n, n) = A006318(n-1).
+%F A033877 t(2*n-1, n) = A330801(n-1).
+%F A033877 t(2*n-2, n) = A103885(n-1), n > 1.
+%F A033877 Sum_{k=1..n-1} t(n, k) = A238112(n), n > 1.
+%F A033877 Sum_{k=1..n} t(n, k) = A001003(n).
+%F A033877 Sum_{k=1..n-1} (-1)^(k-1)*t(n, k) = (-1)^n*A001003(n-1), n > 1.
+%F A033877 Sum_{k=1..n} (-1)^(k-1)*t(n, k) = A080243(n-1).
+%F A033877 Sum_{k=1..floor((n+1)/2)} t(n-k+1, k) = A026003(n-1). (End)
 %e A033877 Triangle starts:
 %e A033877   1;
 %e A033877   1,    2;
@@ -37,7 +48,7 @@
 %e A033877   1,   12,   70,  264,  714, 1412, 1806;
 %e A033877   ... - _Joerg Arndt_, Sep 29 2013
 %p A033877 T := proc(n, k) option remember; if n=1 then return(1) fi; if k<n then return(0) fi; T(n, k-1)+T(n-1, k-1)+T(n-1, k) end: seq(seq(T(n,k), n = 1..k), k=1..10); # _Johannes W. Meijer_, Sep 22 2010, revised Jul 17 2013
-%t A033877 T[ 1, _ ] := 1; T[ n_, k_ ]/;(k<n) := 0; T[ n_, k_ ] := T[ n, k ]=T[ n, k-1 ]+T[ n-1, k-1 ]+T[ n-1, k ];
+%t A033877 T[1, _]:= 1; T[n_, k_]/;(k<n):= 0; T[n_, k_]:= T[n, k]= T[n, k-1] +T[n-1, k-1] + T[n-1, k]; Table[T[k,n], {n,15}, {k,n}]//Flatten
 %o A033877 (Haskell)
 %o A033877 a033877 n k = a033877_tabl !! n !! k
 %o A033877 a033877_row n = a033877_tabl !! n
@@ -53,11 +64,27 @@
 %o A033877         return prec(n-1,k-1)-2*sum(prec(n,k+i-1) for i in (2..n-k+1))
 %o A033877     return [(-1)^k*prec(n, n-k) for k in (0..n-1)]
 %o A033877 for n in (1..10): print(A033877_row(n)) # _Peter Luschny_, Mar 16 2016
+%o A033877 (SageMath)
+%o A033877 @CachedFunction
+%o A033877 def t(n, k): # t = A033847
+%o A033877     if (k<0 or k>n): return 0
+%o A033877     elif (k==1): return 1
+%o A033877     else: return t(n, k-1) + t(n-1, k-1) + t(n-1, k)
+%o A033877 flatten([[t(n,k) for k in range(1,n+1)] for n in range(1, 16)]) # _G. C. Greubel_, Mar 23 2023
+%o A033877 (Magma)
+%o A033877 function t(n,k)
+%o A033877   if k le 0 or k gt n then return 0;
+%o A033877   elif k eq 1 then return 1;
+%o A033877   else return t(n,k-1) + t(n-1,k-1) + t(n-1,k);
+%o A033877   end if;
+%o A033877 end function;
+%o A033877 [t(n,k): k in [1..n], n in [1..12]]; // _G. C. Greubel_, Mar 23 2023
 %Y A033877 Essentially same triangle as A080247 and A080245 but with rows read in reversed order. Also essentially the same triangle as A106579.
-%Y A033877 Cf. A008288, A006318, A006319, A006320, A006321, A001003 (row sums), A000007, A084938.
-%Y A033877 Cf. A026003 (antidiagonal sums).
+%Y A033877 Cf. A000007, A006318, A006319, A006320, A006321, A008288, A080243.
+%Y A033877 Cf. A084938, A103885, A238112, A330801.
+%Y A033877 Cf. A001003 (row sums), A026003 (antidiagonal sums).
 %Y A033877 Triangle sums (see the comments): A001003 (Row1, Row2), A026003 (Kn1p, p >= 1), A006603 (Kn21), A227504 (Kn22), A227505 (Kn23), A006603(2*n) (Kn3), A001850 (Kn4), A227506 (Fi1), A010683 (Fi2).
-%K A033877 nonn,tabl,nice
+%K A033877 nonn,tabl,nice,changed
 %O A033877 1,3
 %A A033877 _N. J. A. Sloane_
 %E A033877 More terms from _David W. Wilson_
