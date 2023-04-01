@@ -1,0 +1,20 @@
+%I A361923
+%S A361923 1,1,2,2,2,2,2,2,2,2,2,4,2,2,4,2,2,2,2,4,4,2,2,4,2,2,4,4,2,4,2,2,4,2,
+%T A361923 4,4,2,2,4,4,2,4,2,4,4,2,2,4,2,2,4,4,2,4,4,4,4,2,2,8,2,2,4,4,4,4,2,4,
+%U A361923 4,4,2,4,2,2,4,4,4,4,2,4,2,2,2,7,4,2,4
+%N A361923 Number of distinct values obtained when the infinitary totient function (A091732) is applied to the infinitary divisors of n.
+%C A361923 First differs from A348001 at n = 27.
+%H A361923 Amiram Eldar, <a href="/A361923/b361923.txt">Table of n, a(n) for n = 1..10000</a>
+%t A361923 f[p_, e_] := p^(2^(-1 + Position[Reverse@ IntegerDigits[e, 2], 1]));
+%t A361923 iphi[1] = 1; iphi[n_] := Times @@ (Flatten@ (f @@@ FactorInteger[n]) - 1);
+%t A361923 idivs[n_] := Sort@ Flatten@ Outer[Times, Sequence @@ (FactorInteger[n] /. {p_, m_Integer} :> p^Select[Range[0, m], BitOr[m, #] == m &])]; idivs[1] = {1};
+%t A361923 a[n_] := Length @ Union[iphi /@ idivs[n]]; Array[a, 100]
+%o A361923 (PARI) iphi(n) = {my(f=factor(n), b); prod(i=1, #f~, b = binary(f[i, 2]); prod(k=1, #b, if(b[k], f[i, 1]^(2^(#b-k)) - 1, 1)))}
+%o A361923 isidiv(d, f) = {if (d==1, return (1)); for (k=1, #f~, bne = binary(f[k, 2]); bde = binary(valuation(d, f[k, 1])); if (#bde < #bne, bde = concat(vector(#bne-#bde), bde)); for (j=1, #bne, if (! bne[j] && bde[j], return (0)); ); ); return (1); }
+%o A361923 idivs(n) = {my(d = divisors(n), f = factor(n), idiv = []); for (k=1, #d, if(isidiv(d[k], f), idiv = concat(idiv, d[k])); ); idiv; } \\ _Michel Marcus_ at A077609
+%o A361923 a(n) = {my(d = idivs(n)); #Set(apply(x->iphi(x), d));}
+%Y A361923 Cf. A077609, A091732.
+%Y A361923 Similar sequences: A319696, A348001.
+%K A361923 nonn,new
+%O A361923 1,3
+%A A361923 _Amiram Eldar_, Mar 30 2023
