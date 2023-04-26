@@ -1,19 +1,19 @@
-%I A226158
+%I A226158 #75 Apr 23 2023 07:28:16
 %S A226158 0,-1,-1,0,1,0,-3,0,17,0,-155,0,2073,0,-38227,0,929569,0,-28820619,0,
 %T A226158 1109652905,0,-51943281731,0,2905151042481,0,-191329672483963,0,
 %U A226158 14655626154768697,0,-1291885088448017715,0,129848163681107301953
-%N A226158 a(n) = zeta(1-n)*2*n*(2^n-1) where in the case n=0 the limit is understood, zeta(s) the Riemann zeta function.
+%N A226158 a(n) = 2*n*(2^n - 1)*zeta(1-n) where in the case n=0 the limit is understood, zeta(s) the Riemann zeta function.
 %C A226158 Also known as the Genocchi numbers, apart from a(0) and a(1) same as A036968.
 %C A226158 Consider the difference table of a(n), which is a variant of Seidel's Genocchi table A014781:
-%C A226158     0       -1       -1        0        1        0       -3        0       17
-%C A226158    -1        0        1        1       -1       -3        3       17      -17
-%C A226158     1        1        0       -2       -2        6       14      -34     -138
-%C A226158     0       -1       -2        0        8        8      -48     -104      448
-%C A226158    -1       -1        2        8        0      -56      -56      552     1160
-%C A226158     0        3        6       -8      -56        0      608      608    -8832
-%C A226158     3        3      -14      -48       56      608        0    -9440    -9440
-%C A226158     0      -17      -34      104      552     -608    -9440        0   198272
-%C A226158   -17      -17      138      448    -1160    -8832     9440   198272        0
+%C A226158     0   -1   -1    0      1      0     -3       0      17
+%C A226158    -1    0    1    1     -1     -3      3      17     -17
+%C A226158     1    1    0   -2     -2      6     14     -34    -138
+%C A226158     0   -1   -2    0      8      8    -48    -104     448
+%C A226158    -1   -1    2    8      0    -56    -56     552    1160
+%C A226158     0    3    6   -8    -56      0    608     608   -8832
+%C A226158     3    3  -14  -48     56    608      0   -9440   -9440
+%C A226158     0  -17  -34  104    552   -608  -9440       0  198272
+%C A226158   -17  -17  138  448  -1160  -8832   9440  198272       0
 %C A226158 a(n) is an autosequence: its inverse binomial transform is the sequence signed (see A181722). The first column (inverse binomial transform) is 0, followed by -A036968. - _Paul Curtz_, Jul 22 2013
 %C A226158 a(n+1) = p(0) where p(x) is the unique degree-n polynomial such that p(k) = a(k) for k = 1, ..., n+1. - _Michael Somos_, Apr 23 2014
 %H A226158 Vincenzo Librandi, <a href="/A226158/b226158.txt">Table of n, a(n) for n = 0..550</a>
@@ -31,10 +31,11 @@
 %p A226158 # Second program:
 %p A226158 A226158 := proc(n) local f; f := z -> Zeta(1-z)*2*z*(2^z-1);
 %p A226158 if n=0 then limit(f(z), z=0) else f(n) fi end: seq(A226158(n), n=0..32);
-%t A226158 a[0] = 0; a[1] = -1; a[n_] := n*EulerE[n-1, 0]; Table[a[n], {n, 0, 32}] (* _Jean-François Alcover_, Sep 12 2013 *)
-%t A226158 a[ n_] := If[ n < 1, 0, -n EulerE[n - 1, 1]]; (* _Michael Somos_, Apr 23 2014 *)
-%t A226158 a[ n_] := If[ n < 0, 0, 2 (1 - 2^n) BernoulliB[n, 1]]; (* _Michael Somos_, Apr 23 2014 *)
-%t A226158 Table[2 n PolyLog[1 - n, -1], {n, 0, 32}] (* _Peter Luschny_, Aug 17 2021 *)
+%t A226158 a[0]=0; a[1]= -1; a[n_]:= n*EulerE[n-1, 0]; Table[a[n], {n,0,32}] (* _Jean-François Alcover_, Sep 12 2013 *)
+%t A226158 (* Programs from _Michael Somos_, Apr 23 2014 *)
+%t A226158 a[n_]:= If[n<1, 0, -n*EulerE[n-1, 1]];
+%t A226158 a[n_]:= If[n<0, 0, 2*(1-2^n)*BernoulliB[n,1]]; (* End *)
+%t A226158 Table[2*n*PolyLog[1-n, -1], {n,0,32}] (* _Peter Luschny_, Aug 17 2021 *)
 %o A226158 (Sage)
 %o A226158 def A226158(n): return -2*n*zeta(1-n)*(1-2^n) if n != 0 else 0
 %o A226158 [A226158(n) for n in (0..32)]
@@ -49,8 +50,9 @@
 %o A226158         f *= n; e *= 2
 %o A226158     return R
 %o A226158 print(A226158_list(34)) # _Peter Luschny_, Feb 22 2016
-%o A226158 (PARI) x='x+O('x^10); concat([0], Vec(serlaplace(-2*x/(1+exp(-x))))) \\ _G. C. Greubel_, Jan 19 2018
-%Y A226158 Cf. A036968, A227577, A005439.
-%K A226158 sign
+%o A226158 (PARI) my(x='x+O('x^40)); concat([0], Vec(serlaplace(-2*x/(1+exp(-x))))) \\ _G. C. Greubel_, Jan 19 2018
+%o A226158 (Magma) R<x>:=PowerSeriesRing(Rationals(), 50); [0] cat Coefficients(R!(Laplace( -2*x/(1+Exp(-x)) ))); // _G. C. Greubel_, Apr 22 2023
+%Y A226158 Cf. A000367, A005439, A014781, A036968, A090648, A181722, A227577.
+%K A226158 sign,changed
 %O A226158 0,7
 %A A226158 _Peter Luschny_, Jun 28 2013
