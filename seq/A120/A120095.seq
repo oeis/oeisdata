@@ -1,10 +1,10 @@
-%I A120095 #14 Aug 19 2021 05:12:14
+%I A120095 #18 May 04 2023 03:30:31
 %S A120095 1,1,2,1,5,3,1,11,15,4,1,23,57,34,5,1,47,195,200,65,6,1,95,633,1010,
 %T A120095 550,111,7,1,191,1995,4704,3850,1281,175,8,1,383,6177,20874,24255,
 %U A120095 11886,2646,260,9,1,767,18915,89800,143115,97272,31458,4992,369,10
 %N A120095 Triangle T(n,k) = total of number at last index for all set partitions of n into k parts.
 %H A120095 Alois P. Heinz, <a href="/A120095/b120095.txt">Rows n = 1..150, flattened</a>
-%F A120095 T(n,k) = k(k+1)/2 S2(n-1,k) + k S2(n-1,k-1) = 1/2 (S2(n+1,k) + S2(n,k) - S2(n-1,k-2)) = k T(n-1,k) + T(n-1,k-1) + S2(n-2,k-2), where S2 is the Stirling numbers of the second kind (A008277).
+%F A120095 T(n,k) = (k*(k+1)/2)*S2(n-1,k) + k*S2(n-1,k-1) = 1/2 (S2(n+1,k) + S2(n,k) - S2(n-1,k-2)) = k T(n-1,k) + T(n-1,k-1) + S2(n-2,k-2), where S2 is the Stirling numbers of the second kind (A008277).
 %e A120095 The set partitions of 4 objects into 2 parts are {1,1,1,2}, {1,1,2,1}, {1,1,2,2}, {1,2,1,1}, {1,2,1,2}, {1,2,2,1} and {1,2,2,2}. The last terms of these sum to 2+1+2+1+2+1+2 = 11, so T(4,2) = 11.
 %e A120095 Table starts:
 %e A120095   1;
@@ -19,12 +19,19 @@
 %p A120095     end:
 %p A120095 T:= n-> (p-> seq(coeff(p, x, i), i=1..n))(b(n, 0)):
 %p A120095 seq(T(n), n=1..10);  # _Alois P. Heinz_, Aug 02 2021
-%t A120095 b[n_, m_] := b[n, m] = If[n == 0, 1, Sum[
-%t A120095      If[n == 1, j*x^#, b[n - 1, #]]&[Max[m, j]], {j, 1, m + 1}]];
+%t A120095 b[n_, m_]:= b[n, m]= If[n==0, 1, Sum[
+%t A120095      If[n==1, j*x^#, b[n-1, #]]&[Max[m, j]], {j,m+1}]];
 %t A120095 T[n_] := Table[Coefficient[#, x, i], {i, 1, n}]&[b[n, 0]];
-%t A120095 Table[T[n], {n, 1, 10}] // Flatten (* _Jean-François Alcover_, Aug 19 2021, after _Alois P. Heinz_ *)
+%t A120095 Table[T[n], {n,10}]//Flatten (* _Jean-François Alcover_, Aug 19 2021, after _Alois P. Heinz_ *)
+%o A120095 (Magma)
+%o A120095 A120095:= func< n,k | (&+[Binomial(j+k,j+1)*StirlingSecond(n-1,k+j-1): j in [0..1]]) >;
+%o A120095 [A120095(n,k): k in [1..n], n in [1..15]]; // _G. C. Greubel_, May 03 2023
+%o A120095 (SageMath)
+%o A120095 def A120095(n,k):
+%o A120095     return sum(binomial(j+k,j+1)*stirling_number2(n-1,k+j-1) for j in range(2))
+%o A120095 flatten([[A120095(n,k) for k in range(1,n+1)] for n in range(1,16)]) # _G. C. Greubel_, May 03 2023
 %Y A120095 Cf. A008277, A120058.
 %Y A120095 Row sums are A087648(n-1).
-%K A120095 nonn,tabl
+%K A120095 nonn,tabl,changed
 %O A120095 1,3
 %A A120095 _Franklin T. Adams-Watters_, Jun 07 2006
