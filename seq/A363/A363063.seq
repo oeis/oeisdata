@@ -1,27 +1,52 @@
-%I A363063 #12 May 18 2023 19:35:32
+%I A363063 #33 May 20 2023 14:49:18
 %S A363063 1,2,4,8,12,16,24,32,48,64,96,128,144,192,256,288,384,512,576,720,768,
 %T A363063 864,1024,1152,1440,1536,1728,2048,2304,2880,3072,3456,4096,4320,4608,
 %U A363063 5760,6144,6912,8192,8640,9216,10368,11520,12288,13824,16384,17280,18432
 %N A363063 Positive integers k such that the largest power of p dividing k is larger than or equal to the largest power of q dividing k (i.e., A305720(k,p) >= A305720(k,q)) for all primes p and q with p < q.
+%C A363063 Includes all products of terms in A347284, but there are also other terms such as 4320.
+%H A363063 Pontus von Brömssen, <a href="/A363063/b363063.txt">Table of n, a(n) for n = 1..10000</a>
+%H A363063 Michael De Vlieger, <a href="/A363063/a363063.png">Plot p^e | a(n) at (x,y) = (n, pi(p))</a>, n = 1..1024, showing multiplicity e with a color function such that e = 1 is black, e = 2 is red, e = 3 is orange, etc., 12X vertical exaggeration. On the bottom, a color code represents a(n) is empty product (black), prime (red), composite prime power (gold), neither squarefree nor prime power (blue).
+%H A363063 Michael De Vlieger, <a href="/A363063/a363063_1.png">Plot multiplicities e in a(n) = Product p^e at (x,y) = (e, -n)</a> for n = 1..1024, 8X horizontal exaggeration.
 %e A363063 151200 = 2^5 * 3^3 * 5^2 * 7 is a term, because 2^5 >= 3^3 >= 5^2 >= 7.
 %e A363063 72 = 2^3 * 3^2 is not a term, because 2^3 < 3^2.
 %e A363063 40 = 2^3 * 3^0 * 5 is not a term, because 3^0 < 5.
+%e A363063 From _Michael De Vlieger_, May 19 2023: (Start)
+%e A363063 Sequence read as an irregular triangle delimited by appearance of 2^m:
+%e A363063      1
+%e A363063      2
+%e A363063      4
+%e A363063      8     12
+%e A363063     16     24
+%e A363063     32     48
+%e A363063     64     96
+%e A363063    128    144    192
+%e A363063    256    288    384
+%e A363063    512    576    720    768    864
+%e A363063   1024   1152   1440   1536   1728
+%e A363063   2048   2304   2880   3072   3456
+%e A363063   4096   4320   4608   5760   6144   6912
+%e A363063   8192   8640   9216  10368  11520  12288  13824
+%e A363063   ... (End)
 %t A363063 Select[Range[20000], # == 1 || PrimePi[(f = FactorInteger[#])[[-1, 1]]] == Length[f] && Greater @@ (Power @@@ f) &] (* _Amiram Eldar_, May 16 2023 *)
 %o A363063 (Python)
-%o A363063 from sympy import factorint,primerange
-%o A363063 def is_A363063(k):
-%o A363063     if k == 1: return True
-%o A363063     f = factorint(k)
-%o A363063     q0 = float('inf')
-%o A363063     for p in primerange(2,k+1):
-%o A363063         q = p**f[p] if p in f else 1
-%o A363063         if q == 1 and k != 1 or q > q0: return False
-%o A363063         k //= q
-%o A363063         if k == 1: return True
-%o A363063         q0 = q
+%o A363063 from sympy import nextprime
+%o A363063 primes = [2] # global list of first primes
+%o A363063 def f(kmax,pi,ppmax):
+%o A363063     # Generate numbers up to kmax with nonincreasing prime-powers <= ppmax, starting at the (pi+1)-st prime.
+%o A363063     if len(primes) <= pi: primes.append(nextprime(primes[-1]))
+%o A363063     p0 = primes[pi]
+%o A363063     ppmax = min(ppmax,kmax)
+%o A363063     if ppmax < p0:
+%o A363063         yield 1
+%o A363063         return
+%o A363063     pp = 1
+%o A363063     while pp <= ppmax:
+%o A363063         for x in f(kmax//pp,pi+1,pp):
+%o A363063             yield pp*x
+%o A363063         pp *= p0
 %o A363063 def A363063_list(kmax):
-%o A363063     return [k for k in range(1,kmax+1) if is_A363063(k)]
-%Y A363063 Cf. A087980, A181818, A305720.
+%o A363063     return sorted(f(kmax,0,kmax))
+%Y A363063 Cf. A087980, A181818, A305720, A347284, A363098 (primitive terms).
 %K A363063 nonn,new
 %O A363063 1,2
 %A A363063 _Pontus von Brömssen_, May 16 2023

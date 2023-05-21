@@ -1,0 +1,72 @@
+%I A362344 #33 May 20 2023 16:06:44
+%S A362344 1,2,2,2,2,2,3,3,3,4,4,4,4,4,4,4,4,4,5
+%N A362344 Maximum number of distinct real roots of degree-n polynomial with coefficients 0,1.
+%H A362344 Enrico Bertolazzi, <a href="https://github.com/ebertolazzi/Sturm">Sturm</a>
+%e A362344 For n = 7, the maximum number of distinct real roots of a degree-7 polynomial with coefficients 0,1 is 3; e.g., the polynomial x^7 + x^4 + x^2 + x has 3 distinct real roots.
+%p A362344 f:= proc(n) local i,j,L,p,v,m;
+%p A362344   m:= 0:
+%p A362344   for i from 2^n to 2^(n+1)-1 do
+%p A362344     L:= convert(i,base,2);
+%p A362344     p:= add(L[j]*x^(j-1),j=1..n+1);
+%p A362344     v:= sturm(sturmseq(p,x),x,-infinity,infinity);
+%p A362344     if v > m then m:= v fi;
+%p A362344   od;
+%p A362344 m
+%p A362344 end proc:
+%p A362344 map(f, [$1..19]); # _Robert Israel_, May 07 2023
+%t A362344 For[n=1,n<=8,n++,Print[Max[Length@DeleteDuplicates@NSolve[Total[x^#]+x^n==0,x,Reals]&/@Subsets[Range[0,n-1]]]]]
+%o A362344 (MATLAB)
+%o A362344 % uses the Sturm toolbox; see links
+%o A362344 for i=2:13
+%o A362344     display([i-1 maxroots(i)]);
+%o A362344 end
+%o A362344 function max_len=maxroots(n)
+%o A362344     max_len = 0;
+%o A362344     combinations = dec2bin(1:2:2^n-1) - '0';
+%o A362344     for i = 1:2^(n-1)
+%o A362344         c = combinations(i,:);
+%o A362344         if sum(c, 2) == 1
+%o A362344             continue;
+%o A362344         end
+%o A362344         len = distinct_real_roots(c);
+%o A362344         if len > max_len
+%o A362344             max_len = len;
+%o A362344         end
+%o A362344     end
+%o A362344 end
+%o A362344 function sign_var=distinct_real_roots(a)
+%o A362344 S=Sturm();
+%o A362344 S.build(Poly(a));
+%o A362344 sign_var=0;
+%o A362344 last_sign=0;
+%o A362344 last_sign_parity=0;
+%o A362344 parity=1;
+%o A362344 for i=1:length(S.m_sturm)
+%o A362344     v=S.m_sturm{i}.m_coeffs(end);
+%o A362344     if v>0
+%o A362344         if last_sign<0
+%o A362344             sign_var = sign_var - 1;
+%o A362344         end
+%o A362344         if last_sign_parity == -parity
+%o A362344             sign_var = sign_var + 1;
+%o A362344         end
+%o A362344         last_sign = 1;
+%o A362344         last_sign_parity = parity;
+%o A362344     elseif v<0
+%o A362344         if last_sign>0
+%o A362344             sign_var = sign_var - 1;
+%o A362344         end
+%o A362344         if last_sign_parity == parity
+%o A362344             sign_var = sign_var + 1;
+%o A362344         end
+%o A362344         last_sign = -1;
+%o A362344         last_sign_parity = -parity;
+%o A362344     end
+%o A362344     parity = -parity;
+%o A362344 end
+%o A362344 end
+%Y A362344 possible duplicate of A090735 or A090736
+%K A362344 nonn,more,new
+%O A362344 1,2
+%A A362344 _Keyang Li_, May 05 2023
+%E A362344 a(14) on corrected by _Robert Israel_, May 07 2023
