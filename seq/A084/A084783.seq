@@ -1,26 +1,49 @@
-%I A084783 #7 Apr 24 2014 17:49:16
+%I A084783 #12 Jun 08 2023 08:50:58
 %S A084783 1,1,2,2,3,5,6,8,11,16,25,31,39,50,66,137,162,193,232,282,348,944,
 %T A084783 1081,1243,1436,1668,1950,2298,7884,8828,9909,11152,12588,14256,16206,
-%U A084783 18504,77514,85398,94226,104135,115287,127875,142131,158337,176841,877002
+%U A084783 18504,77514,85398,94226,104135,115287,127875,142131,158337,176841
 %N A084783 Triangle, read by rows, such that the diagonal (A084785) is the self-convolution of the first column (A084784) and the row sums (A084786) gives the differences of the diagonal and the first column.
 %H A084783 Paul D. Hanna, <a href="/A084783/b084783.txt">Table of rows n=0..45, flattened.</a>
-%F A084783 T(0, 0)=1, T(n, 0)=A084784(n), T(k, k)=A084785(k), T(n, k)=T(n, k-1)+T(n-1, k-1) for n>0, k>0.
+%F A084783 T(0, 0) = 1, T(n, 0) = A084784(n), T(n, n) = A084785(n), T(n, k) = T(n, k-1) + T(n-1, k-1) for n>0, k>0.
 %e A084783 Triangle begins:
-%e A084783 1;
-%e A084783 1, 2;
-%e A084783 2, 3, 5;
-%e A084783 6, 8, 11, 16;
-%e A084783 25, 31, 39, 50, 66;
-%e A084783 137, 162, 193, 232, 282, 348;
-%e A084783 944, 1081, 1243, 1436, 1668, 1950, 2298;
-%e A084783 7884, 8828, 9909, 11152, 12588, 14256, 16206, 18504;
-%e A084783 77514, 85398, 94226, 104135, 115287, 127875, 142131, 158337, 176841;
-%e A084783 877002, 954516, 1039914, 1134140, 1238275, 1353562, 1481437, 1623568, 1781905; 1958746;
-%e A084783 11218428, 12095430, 13049946, 14089860, 15224000, 16462275, 17815837, 19297274, 20920842, 22702747, 24661493; ...
+%e A084783       1;
+%e A084783       1,     2;
+%e A084783       2,     3,     5;
+%e A084783       6,     8,    11,     16;
+%e A084783      25,    31,    39,     50,     66;
+%e A084783     137,   162,   193,    232,    282,    348;
+%e A084783     944,  1081,  1243,   1436,   1668,   1950,   2298;
+%e A084783    7884,  8828,  9909,  11152,  12588,  14256,  16206,  18504;
+%e A084783   77514, 85398, 94226, 104135, 115287, 127875, 142131, 158337, 176841;
+%t A084783 b[n_]:= b[n]= If[n<1, Boole[n==0], Module[{A= 1/x -1/x^2}, Do[A=2A - Normal@Series[(x A^2)/. x-> x-1, {x, Infinity, k+1}], {k,2,n}]; (-1)^n Coefficient[A, x, -n-1]]]; (* b = A084784 *)
+%t A084783 T[n_, k_]:= T[n, k]= If[k==0, b[n], T[n, k-1] +T[n-1, k-1]];
+%t A084783 Table[T[n,k], {n,0,15}, {k,0,n}]//Flatten (* _G. C. Greubel_, Jun 07 2023 *)
 %o A084783 (PARI) {A084784(n) = local(A); if( n<0, 0, A=1; for(k=1, n, A = truncate(A + O(x^k)) + x * O(x^k); A += A - 1 / subst(A^-2, x, x /(1 + x)) / (1 + x); ); polcoeff(A, n))}; /* After Michael Somos */
 %o A084783 {T(n,k)=if(k==0,if(n==0,1,A084784(n)),T(n, k-1)+T(n-1, k-1))}
 %o A084783 for(n=0,10,for(k=0,n,print1(T(n,k),", "));print(""))
+%o A084783 (Magma)
+%o A084783 m:=50;
+%o A084783 f:= func< n,x | Exp((&+[(&+[Factorial(j)*StirlingSecond(k,j)*x^k/k: j in [1..k]]): k in [1..n+2]])) >;
+%o A084783 R<x>:=PowerSeriesRing(Rationals(), m+1);
+%o A084783 b:=Coefficients(R!( f(m,x) )); // b = A084784
+%o A084783 function T(n,k) // T = A084783
+%o A084783   if k eq 0 then return b[n+1];
+%o A084783   else return T(n,k-1) + T(n-1,k-1);
+%o A084783   end if;
+%o A084783 end function;
+%o A084783 [T(n,k): k in [0..n], n in [0..15]]; // _G. C. Greubel_, Jun 08 2023
+%o A084783 (SageMath)
+%o A084783 def f(n, x): return exp(sum(sum( factorial(j)*stirling_number2(k,j) *x^k/k for j in range(1,k+1)) for k in range(1,n+2)))
+%o A084783 m=50
+%o A084783 def A084784_list(prec):
+%o A084783     P.<x> = PowerSeriesRing(QQ, prec)
+%o A084783     return P( f(m,x) ).list()
+%o A084783 b=A084784_list(m)
+%o A084783 def T(n,k): # T = A084783
+%o A084783     if k==0: return b[n]
+%o A084783     else: return T(n, k-1) + T(n-1, k-1)
+%o A084783 flatten([[T(n, k) for k in range(n+1)] for n in range(16)]) # _G. C. Greubel_, Jun 08 2023
 %Y A084783 Cf. A084784, A084785, A084786.
-%K A084783 nonn,tabl
+%K A084783 nonn,tabl,changed
 %O A084783 0,3
 %A A084783 _Paul D. Hanna_, Jun 13 2003
