@@ -1,14 +1,31 @@
-%I A084786 #9 Nov 19 2014 05:44:45
+%I A084786 #16 Jun 09 2023 18:03:44
 %S A084786 1,3,10,41,211,1354,10620,99327,1081744,13443065,187538132,2899087774,
 %T A084786 49149083790,906169148064,18044322039456,385825735367745,
-%U A084786 8814867042465387,214270073007359704,5520898403200292418
+%U A084786 8814867042465387,214270073007359704,5520898403200292418,150290771692227728963,4309813692713979537503
 %N A084786 Row sums of the triangle (A084783) and the differences of the main diagonal (A084785) and the first column (A084784).
 %C A084786 In the triangle (A084783), the diagonal (A084785) is the self-convolution of the first column (A084784) and the row sums (this sequence) gives the differences of the diagonal and the first column.
 %H A084786 Vaclav Kotesovec, <a href="/A084786/b084786.txt">Table of n, a(n) for n = 0..400</a>
 %F A084786 a(n) ~ n! / (2 * (log(2))^(n+2)). - _Vaclav Kotesovec_, Nov 19 2014
-%o A084786 (PARI) A = matrix(25, 25); A[1, 1] = 1; rs = 1; print(1); for (n = 2, 25, sc = sum (i = 2, n - 1, A[i, 1]*A[n + 1 - i, 1]); A[n, 1] = rs - sc; rs = A[n, 1]; for (k = 2, n, A[n, k] = A[n, k - 1] + A[n - 1, k - 1]; rs += A[n, k]); print(rs)); (Wasserman)
+%t A084786 A084784= With[{m=60}, CoefficientList[Series[Exp[Sum[Sum[ j!*StirlingS2[k, j], {j, k}]*x^k /k , {k, m + 1}]], {x,0,m}], x]];
+%t A084786 T[n_, k_]:= T[n, k]= If[k==0, A084784[[n+1]], T[n, k-1] + T[n-1, k-1]]; (* A084783 *)
+%t A084786 A084786[n_]:= A084786[n]= Sum[T[n, k], {k,0,n}];
+%t A084786 Table[A084786[n], {n,0,40}] (* _G. C. Greubel_, Jun 08 2023 *)
+%o A084786 (PARI) A = matrix(25, 25); A[1, 1] = 1; rs = 1; print(1); for (n = 2, 25, sc = sum (i = 2, n - 1, A[i, 1]*A[n + 1 - i, 1]); A[n, 1] = rs - sc; rs = A[n, 1]; for (k = 2, n, A[n, k] = A[n, k - 1] + A[n - 1, k - 1]; rs += A[n, k]); print(rs)); \\ _David Wasserman_, Jan 06 2005
+%o A084786 (SageMath)
+%o A084786 def f(n, x): return exp(sum(sum( factorial(j)*stirling_number2(k,j) *x^k/k for j in range(1,k+1)) for k in range(1,n+2)))
+%o A084786 m=50
+%o A084786 def A084784_list(prec):
+%o A084786     P.<x> = PowerSeriesRing(QQ, prec)
+%o A084786     return P( f(m,x) ).list()
+%o A084786 b=A084784_list(m)
+%o A084786 @CachedFunction
+%o A084786 def T(n,k): # T = A084783
+%o A084786     if k==0: return b[n]
+%o A084786     else: return T(n, k-1) + T(n-1, k-1)
+%o A084786 def A084786(n): return sum(T(n, k) for k in range(n+1))
+%o A084786 [A084786(n) for n in range(m-9)] # _G. C. Greubel_, Jun 08 2023
 %Y A084786 Cf. A084783, A084784, A084785.
-%K A084786 nonn
+%K A084786 nonn,changed
 %O A084786 0,2
 %A A084786 _Paul D. Hanna_, Jun 13 2003
 %E A084786 More terms from _David Wasserman_, Jan 06 2005
