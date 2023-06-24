@@ -1,10 +1,10 @@
-%I A134319 #20 Feb 16 2019 06:57:13
+%I A134319 #25 Jun 23 2023 10:31:44
 %S A134319 1,1,1,1,2,3,1,3,9,7,1,4,18,28,15,1,5,30,70,75,31,1,6,45,140,225,186,
 %T A134319 63,1,7,63,245,525,651,441,127,1,8,84,392,1050,1736,1764,1016,255,1,9,
 %U A134319 108,588,1890,3906,5292,4572,2295,511,1,10,135,840,3150,7812,13230,15240,11475,5110,1023
-%N A134319 A007318 * a triangle by rows: for n > 0, n zeros followed by 2^n - 1.
-%C A134319 Row sums = A083323: (1, 2, 6, 20, 66, 212, 666, ...).
+%N A134319 Triangle read by rows. T(n, k) = binomial(n, k)*(2^k - 1 + 0^k).
 %H A134319 Alois P. Heinz, <a href="/A134319/b134319.txt">Rows n = 0..140, flattened</a>
+%F A134319 Previous definition: A007318 * a triangle by rows: for n > 0, n zeros followed by 2^n - 1.
 %F A134319 Binomial transform of a diagonalized infinite lower triangular matrix with (1, 1, 3, 7, 15, ...) in the main diagonal and the rest zeros.
 %F A134319 T(n,k) = |[1/(2^x)^k] 1 + (1-1/2^x)^n - (1-2/2^x)^n|. - _Alois P. Heinz_, Dec 10 2008
 %F A134319 T(n,k) = binomial(n,k)*M(k) where M is Mersenne-like A255047. - _Yuchun Ji_, Feb 13 2019
@@ -19,9 +19,17 @@
 %e A134319   1, 7, 63, 245, 525, 651, 441, 127;
 %e A134319   ...
 %p A134319 x:= 'x': T:= (n,k)-> `if` (k=0, 1, abs(coeff(expand((1-1/2^x)^n -(1-2/2^x)^n), 1/(2^x)^k))): seq(seq(T(n,k), k=0..n), n=0..12); # _Alois P. Heinz_, Dec 10 2008
+%p A134319 # Alternative:
+%p A134319 T := (n, k) -> binomial(n, k)*(2^k - 1 + 0^k):
+%p A134319 for n from 0 to 7 do seq(T(n, k), k=0..n) od;
+%p A134319 # Or as a recursion:
+%p A134319 p := proc(n, m) option remember; if n = 0 then max(1, m) else
+%p A134319     (m + x)*p(n - 1, m) - (m + 1)*p(n - 1, m + 1) fi end:
+%p A134319 Trow := n -> seq((-1)^k * coeff(p(n, 0), x, n - k), k = 0..n):  # _Peter Luschny_, Jun 23 2023
 %t A134319 max = 10; T1 = Table[Binomial[n, k], {n, 0, max}, {k, 0, max}]; T2 = Table[ If[n == k, 2^n-1, 0], {n, 0, max}, {k, 0, max}]; TT = T1.T2 ; T[_, 0]=1; T[n_, k_] := TT[[n+1, k+1]]; Table[T[n, k], {n, 0, max}, {k, 0, n}] // Flatten (* _Jean-François Alcover_, May 26 2016 *)
-%Y A134319 Cf. A083313.
-%K A134319 nonn,tabl
+%Y A134319 Cf. A083313, A083323 (row sums), A255047 (main diagonal).
+%K A134319 nonn,tabl,changed
 %O A134319 0,5
 %A A134319 _Gary W. Adamson_, Oct 19 2007
 %E A134319 More terms from _Alois P. Heinz_, Dec 10 2008
+%E A134319 New name using a formula of _Yuchun Ji_ by _Peter Luschny_, Jun 23 2023
