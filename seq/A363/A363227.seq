@@ -1,0 +1,55 @@
+%I A363227 #51 Jul 04 2023 15:13:27
+%S A363227 1,2,3,4,6,8,9,10,12,14,15,16,18,20,21,24,27,28,30,32,36,40,42,44,45,
+%T A363227 48,50,52,54,56,60,63,64,66,70,72,75,78,80,81,84,88,90,96,98,99,100,
+%U A363227 102,104,105,108,110,112,114,117,120,126,128,130,132,135,136,138,140,144,147,150
+%N A363227 Positive integers m such that every k with 1 <= k <= m is a linear combination of distinct divisors of m with coefficients +1 or -1.
+%C A363227 All practical numbers are terms of this sequence.
+%H A363227 Alois P. Heinz, <a href="/A363227/b363227.txt">Table of n, a(n) for n = 1..10000</a>
+%H A363227 James Grime, <a href="https://www.youtube.com/watch?v=IlZOLwf87gM">Practical Numbers</a>, Numberphile video (2023).
+%p A363227 q:= proc(n) uses numtheory, ListTools; local b, l, s;
+%p A363227       l:= [divisors(n)[]]; s:= PartialSums(l);
+%p A363227       b:= proc(m, i) option remember; m=0 or i>0 and m<=s[i] and
+%p A363227            (b(m, i-1) or b(abs(m-l[i]), i-1) or b(m+l[i], i-1))
+%p A363227           end;
+%p A363227       andmap(x-> b(x, nops(l)), [$1..n])
+%p A363227     end:
+%p A363227 select(q, [$1..256])[];  # _Alois P. Heinz_, May 23 2023
+%o A363227 (Python)
+%o A363227 import math
+%o A363227 def divisorGenerator(n):
+%o A363227   large_divisors = []
+%o A363227   for i in range(1, int(math.sqrt(n) + 1)):
+%o A363227     if n % i == 0:
+%o A363227       yield i
+%o A363227       if i*i != n:
+%o A363227         large_divisors.append(int(n / i))
+%o A363227     for divisor in reversed(large_divisors):
+%o A363227       yield divisor
+%o A363227 from itertools import chain, combinations
+%o A363227 def all_combinations(iterable,n):
+%o A363227   s = list(iterable)
+%o A363227   for sumset in chain.from_iterable(combinations(s, r) for r in range(len(s)+1)):
+%o A363227     remaining = list(set(s).symmetric_difference(set(list(sumset))))
+%o A363227     for subtractset in chain.from_iterable(combinations(remaining, r) for r in range(len(remaining)+1)):
+%o A363227       value = sum(list(sumset))-sum(list(subtractset))
+%o A363227       if value>0 and value<=n:
+%o A363227         yield value
+%o A363227 def is_A363227(n):
+%o A363227   return len(set(all_combinations(divisorGenerator(n),n)))==n
+%o A363227 max_n = 250
+%o A363227 print([x for x in range(max_n+1) if is_A363227(x)])
+%o A363227 (Python)
+%o A363227 from itertools import count, islice
+%o A363227 from sympy import divisors
+%o A363227 def A363227_gen(startvalue=1): # generator of terms >= startvalue
+%o A363227     for m in count(max(startvalue,1)):
+%o A363227         c = {0}
+%o A363227         for d in divisors(m,generator=True):
+%o A363227             c |= {a+d for a in c}|{a-d for a in c}
+%o A363227         if all(k in c for k in range(1,m+1)):
+%o A363227             yield m
+%o A363227 A363227_list = list(islice(A363227_gen(),20)) # _Chai Wah Wu_, Jul 04 2023
+%Y A363227 Cf. A005153 (practical numbers).
+%K A363227 nonn,new
+%O A363227 1,2
+%A A363227 _Guy Ziv_, May 21 2023
