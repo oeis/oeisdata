@@ -1,4 +1,4 @@
-%I A005153 M0991 #266 Jun 05 2023 01:25:19
+%I A005153 M0991 #268 Jul 07 2023 10:21:32
 %S A005153 1,2,4,6,8,12,16,18,20,24,28,30,32,36,40,42,48,54,56,60,64,66,72,78,
 %T A005153 80,84,88,90,96,100,104,108,112,120,126,128,132,140,144,150,156,160,
 %U A005153 162,168,176,180,192,196,198,200,204,208,210,216,220,224,228,234,240,252
@@ -62,6 +62,34 @@
 %p A005153 with(numtheory): with(combinat): P:=proc(n) local a,b,k,j,ok; a:=choose([op(divisors(n))]); b:=[]; for k from 1 to nops(a) do b:=[op(b),add(a[k][j],j=1..nops(a[k]))]; od; for j from 0 to n-1 do ok:=0; for k in b do if k=j then ok:=1; break; fi; od;
 %p A005153 if ok=0 then break; fi; od; if ok=1 then n; fi;end:
 %p A005153 seq(P(i),i=1..252); # _Paolo P. Lava_, Jun 13 2017
+%p A005153 # alternative
+%p A005153 isA005153 := proc(n)
+%p A005153     local ifs,pprod,p,i ;
+%p A005153     if n = 1 then
+%p A005153         return true;
+%p A005153     elif type(n,'odd') then
+%p A005153         return false ;
+%p A005153     end if;
+%p A005153     # not using ifactors here directly because no guarantee primes are sorted...
+%p A005153     ifs := ifactors(n)[2] ;
+%p A005153     pprod := 1;
+%p A005153     for p in sort(numtheory[factorset](n) ) do
+%p A005153         for i in ifs do
+%p A005153             if op(1,i) = p then
+%p A005153                 if p > 2 and p > 1+numtheory[sigma](pprod) then
+%p A005153                     return false ;
+%p A005153                 end if;
+%p A005153                 pprod := pprod*p^op(2,i) ;
+%p A005153             end if;
+%p A005153         end do:
+%p A005153     end do:
+%p A005153     return true ;
+%p A005153 end proc:
+%p A005153 for n from 1 to 300 do
+%p A005153     if isA005153(n)  then
+%p A005153         printf("%d,",n) ;
+%p A005153     end if;
+%p A005153 end do: # _R. J. Mathar_, Jul 07 2023
 %t A005153 PracticalQ[n_] := Module[{f,p,e,prod=1,ok=True}, If[n<1 || (n>1 && OddQ[n]), False, If[n==1, True, f=FactorInteger[n]; {p,e} = Transpose[f]; Do[If[p[[i]] > 1+DivisorSigma[1,prod], ok=False; Break[]]; prod=prod*p[[i]]^e[[i]], {i,Length[p]}]; ok]]]; Select[Range[200], PracticalQ] (* _T. D. Noe_, Apr 02 2010 *)
 %o A005153 (Haskell)
 %o A005153 a005153 n = a005153_list !! (n-1)
@@ -86,7 +114,7 @@
 %Y A005153 Subsequence of A103288.
 %Y A005153 Cf. A002093, A007620 (second definition), A030057, A033630, A119348, A174533, A174973.
 %Y A005153 Cf. A027750.
-%K A005153 nonn,nice,easy
+%K A005153 nonn,nice,easy,changed
 %O A005153 1,2
 %A A005153 _N. J. A. Sloane_
 %E A005153 More terms from Pab Ter (pabrlos(AT)yahoo.com), May 09 2004
