@@ -1,0 +1,57 @@
+%I A363500 #22 Jul 16 2023 10:37:09
+%S A363500 6,109505970,1519435260,22606027290,25980888360,33995114580,
+%T A363500 42029719620,45284475810,56527358160,63402770550,73924546080,
+%U A363500 82625597670,121883654550,150444654360,192416460810,210205659510
+%N A363500 Numbers k between twin primes p, q where k+p and k+q are also twin primes, and k*p and k*q are between twin primes.
+%C A363500 Larger twin primes are found on either side of 6x, so my highly-unoptimized code simply keeps adding 6 and performing the requisite primality checks using golang's "ProbablyPrime" function, a combination of Miller-Rabin and Baillie-PSW, accurate up to 2^64. Based on seminal work by fellow OEIS contributor _Antonio Gimenez_.
+%C A363500 To generate, k = 6x.
+%C A363500 p = k-1, q = k+1, check the primality of k+p, k+q, then check the primality of ((k*p) +/- 1) and ((k*q) +/- 1).
+%o A363500 (golang)
+%o A363500 package main
+%o A363500 import (
+%o A363500 	"math/big"
+%o A363500 	"os"
+%o A363500 	"os/signal"
+%o A363500 	"syscall"
+%o A363500 )
+%o A363500 //lint:ignore U1000 wrong
+%o A363500 var a big.Int
+%o A363500 func cleanup(z string) {
+%o A363500 	println()
+%o A363500 	println("last checked number: " + z)
+%o A363500 }
+%o A363500 func main() {
+%o A363500 	a := big.NewInt(6)
+%o A363500 	breaker := make(chan os.Signal, 1)
+%o A363500 	signal.Notify(breaker, os.Interrupt, syscall.SIGTERM)
+%o A363500 	go func() {
+%o A363500 		<-breaker
+%o A363500 		cleanup(a.String())
+%o A363500 		os.Exit(1)
+%o A363500 	}()
+%o A363500 	for {
+%o A363500 		var b, c, d, e, f, g, h, i, j, k big.Int
+%o A363500 		b.Add(a, big.NewInt(-1))
+%o A363500 		c.Add(a, big.NewInt(1))
+%o A363500 		if b.ProbablyPrime(20) && c.ProbablyPrime(20) {
+%o A363500 			d.Add(a, &b)
+%o A363500 			e.Add(a, &c)
+%o A363500 			if d.ProbablyPrime(20) && e.ProbablyPrime(20) {
+%o A363500 				f.Mul(a, &b)
+%o A363500 				g.Mul(a, &c)
+%o A363500 				h.Add(&f, big.NewInt(-1))
+%o A363500 				i.Add(&f, big.NewInt(1))
+%o A363500 				j.Add(&g, big.NewInt(-1))
+%o A363500 				k.Add(&g, big.NewInt(1))
+%o A363500 				if h.ProbablyPrime(20) && i.ProbablyPrime(20) && j.ProbablyPrime(20) && k.ProbablyPrime(20) {
+%o A363500 					println(a.String() + " found!")
+%o A363500 				}
+%o A363500 			}
+%o A363500 		}
+%o A363500 		a.Add(a, big.NewInt(6))
+%o A363500 	}
+%o A363500 }
+%Y A363500 Subsequence of A066388.
+%K A363500 nonn,more,new
+%O A363500 1,1
+%A A363500 _Bryce Case, Jr._ and _Antonio Gimenez_, Jun 05 2023
