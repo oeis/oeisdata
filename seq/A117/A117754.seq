@@ -1,22 +1,53 @@
-%I A117754 #10 Mar 12 2014 16:36:51
+%I A117754 #14 Jul 21 2023 17:28:19
 %S A117754 0,0,0,1,1,0,2,2,3,2,7,7,8,7,12,1,1,2,1,6,0,25,25,26,25,30,144,48,211,
 %T A117754 211,212,211,216,330,234,420,1,1,2,1,6,120,24,210,0,1729,1729,1730,
-%U A117754 1729,1734,1848,1752,1938,42048,3456,211,211,212,211,216,330,234,420,40530
-%N A117754 Triangular array based on addition of A034386 and A117682 and the factorial function modulo the factorial function.
-%C A117754 This triangular array is organized like a group addition table.
-%e A117754 0
-%e A117754 0, 0
-%e A117754 1, 1, 0
-%e A117754 2, 2, 3, 2
-%e A117754 7, 7, 8, 7, 12
-%e A117754 1, 1, 2, 1, 6, 0
-%e A117754 25, 25, 26, 25, 30, 144, 48
-%e A117754 211, 211, 212, 211, 216, 330, 234, 420
-%e A117754 1, 1, 2, 1, 6, 120, 24, 210, 0
-%e A117754 1729, 1729, 1730, 1729, 1734, 1848, 1752, 1938, 42048, 3456
-%e A117754 211, 211, 212, 211, 216, 330, 234, 420, 40530, 1938, 420
-%t A117754 Clear[f, g, cf, p, a, b] f[n_] := If[PrimeQ[n] == True, 1, n] cf[0] = 1; cf[n_Integer?Positive] := cf[n] = f[n]*cf[n - 1] g[n_] := If[PrimeQ[n] == True, n, 1] p[0] = 1; p[n_Integer?Positive] := p[n] = g[n]*p[n - 1] f[n_, 1] = cf[n]; f[n_, 2] = p[n]; f[n_, 3] = n!; a = Table[Table[Mod[f[n, 1 + Mod[n, 3]]+f[m, 1 + Mod[m, 3]], n! ], {m, 0, n}], {n, 0, 10}] Flatten[a]
-%Y A117754 Cf. A034386 and A117682.
-%K A117754 nonn,tabl,uned
+%U A117754 1729,1734,1848,1752,1938,42048,3456,211,211,212,211,216,330,234,420,40530,1938,420
+%N A117754 Triangle T(n, k) = (f(n, 1 + (n mod 3)) + f(k, 1 + (k mod 3))) mod n!, read by rows (see formula for f(n, k)).
+%H A117754 G. C. Greubel, <a href="/A117754/b117754.txt">Rows n = 0..50 of the triangle, flattened</a>
+%F A117754 T(n, k) = (f(n, 1 + (n mod 3)) + f(k, 1 + (k mod 3))) mod n!, where f(n, 1) = A049614(n), f(n, 2) = A034386(n), and f(n, 3) = n!.
+%e A117754 Triangle begins as:
+%e A117754      0;
+%e A117754      0,    0;
+%e A117754      1,    1,    0;
+%e A117754      2,    2,    3,    2;
+%e A117754      7,    7,    8,    7,   12;
+%e A117754      1,    1,    2,    1,    6,    0;
+%e A117754     25,   25,   26,   25,   30,  144,   48;
+%e A117754    211,  211,  212,  211,  216,  330,  234,  420;
+%e A117754      1,    1,    2,    1,    6,  120,   24,  210,     0;
+%e A117754   1729, 1729, 1730, 1729, 1734, 1848, 1752, 1938, 42048, 3456;
+%e A117754    211,  211,  212,  211,  216,  330,  234,  420, 40530, 1938, 420;
+%t A117754 f[n_]:= If[PrimeQ[n],1,n];
+%t A117754 cf[n_]:= cf[n]= If[n==0, 1, f[n]*cf[n-1]]; (* A049614 *)
+%t A117754 g[n_]:= If[PrimeQ[n], n, 1];
+%t A117754 p[n_]:= p[n]= If[n==0, 1, g[n]*p[n-1]];  (* A034386 *)
+%t A117754 f[n_, 1]=cf[n]; f[n_, 2]=p[n]; f[n_, 3]=n!;
+%t A117754 T[n_, k_]:= Mod[f[n, 1 + Mod[n, 3]] + f[k, 1 + Mod[k, 3]], n!];
+%t A117754 Table[T[n, k], {n,0,10}, {k,0,n}]//Flatten
+%o A117754 (Magma)
+%o A117754 A049614:= func< n | n le 1 select 1 else Factorial(n)/(&*[NthPrime(j): j in [1..#PrimesUpTo(n)]]) >;
+%o A117754 A034386:= func< n | n eq 0 select 1 else LCM(PrimesInInterval(1,n)) >;
+%o A117754 function f(n,k)
+%o A117754   if k eq 1 then return A049614(n);
+%o A117754   elif k eq 2 then return A034386(n);
+%o A117754   else return Factorial(n);
+%o A117754   end if;
+%o A117754 end function;
+%o A117754 A117754:= func< n,k | Floor(f(n, 1+(n mod 3))+f( k, 1+(k mod 3))) mod
+%o A117754  Factorial(n) >;
+%o A117754 [A117754(n,k): k in [0..n], n in [0..12]]; // _G. C. Greubel_, Jul 21 2023
+%o A117754 (SageMath)
+%o A117754 from sympy import primorial
+%o A117754 def A049614(n): return factorial(n)/product(nth_prime(j) for j in range(1,1+prime_pi(n)))
+%o A117754 def A034386(n): return 1 if n == 0 else primorial(n, nth=False)
+%o A117754 def f(n,m):
+%o A117754     if m==1: return A049614(n)
+%o A117754     elif m==2: return A034386(n)
+%o A117754     else: return factorial(n)
+%o A117754 def A117754(n, k): return (f(n, 1+(n%3))+f(k, 1+(k%3)))%factorial(n)
+%o A117754 flatten([[A117754(n,k) for k in range(n+1)] for n in range(13)]) # _G. C. Greubel_, Jul 21 2023
+%Y A117754 Cf. A034386, A049614, A117682, A117753.
+%K A117754 nonn,tabl,changed
 %O A117754 0,7
 %A A117754 _Roger L. Bagula_, Apr 14 2006
+%E A117754 Edited by _G. C. Greubel_, Jul 21 2023

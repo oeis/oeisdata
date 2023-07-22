@@ -1,22 +1,48 @@
-%I A117753 #9 Mar 12 2014 16:36:51
+%I A117753 #15 Jul 21 2023 17:29:04
 %S A117753 0,0,0,0,0,0,1,1,2,1,6,6,12,6,12,0,0,0,0,0,0,24,24,48,24,144,0,576,
 %T A117753 210,210,420,210,1260,0,0,3780,0,0,0,0,0,0,0,0,0,1728,1728,3456,1728,
-%U A117753 10368,207360,41472,0,0,82944,210,210,420,210,1260,25200,5040,44100,1209600
-%N A117753 Triangular array based on multiplication of A034386 and A117682 and the factorial function modulo the factorial function.
-%C A117753 This triangular array is organized like a group multiplication table.
-%F A117753 f[n_, 1] = cf[n]; f[n_, 2] = p[n]; f[n_, 3] = n!; a(n,m) = Mod[f[n, 1 + Mod[n, 3]]*f[m, 1 + Mod[m, 3]], n! ]
-%e A117753 0
-%e A117753 0, 0
-%e A117753 0, 0, 0
-%e A117753 1, 1, 2, 1
-%e A117753 6, 6, 12, 6, 12
-%e A117753 0, 0, 0, 0, 0, 0
-%e A117753 24, 24, 48, 24, 144, 0, 576
-%e A117753 0, 0, 0, 0, 0, 0, 0, 0, 0
-%e A117753 1728, 1728, 3456, 1728, 10368, 207360, 41472, 0, 0, 82944
-%e A117753 210, 210, 420, 210, 1260, 25200, 5040, 44100, 1209600, 362880, 44100
-%t A117753 Clear[f, g, cf, p, a, b] f[n_] := If[PrimeQ[n] == True, 1, n] cf[0] = 1; cf[n_Integer?Positive] := cf[n] = f[n]*cf[n - 1] g[n_] := If[PrimeQ[n] == True, n, 1] p[0] = 1; p[n_Integer?Positive] := p[n] = g[n]*p[n - 1] f[n_, 1] = cf[n]; f[n_, 2] = p[n]; f[n_, 3] = n!; a = Table[Table[Mod[f[n, 1 + Mod[n, 3]]*f[m, 1 + Mod[m, 3]], n! ], {m, 0, n}], {n, 0, 10}] Flatten[a]
-%Y A117753 Cf. A034386 and A117682.
-%K A117753 nonn,tabl,uned
+%U A117753 10368,207360,41472,0,0,82944,210,210,420,210,1260,25200,5040,44100,1209600,362880,44100
+%N A117753 Triangle T(n, k) = f(n, 1 + (n mod 3))*f(k, 1 + (k mod 3)) mod n!, read by rows (see formula for f(n, k)).
+%H A117753 G. C. Greubel, <a href="/A117753/b117753.txt">Rows n = 0..50 of the triangle, flattened</a>
+%F A117753 T(n, k) = f(n, 1 + (n mod 3))*f(k, 1 + (k mod 3)) mod n!, where f(n, 1) = A049614(n), f(n, 2) = A034386(n), and f(n, 3) = n!.
+%e A117753 Triangle begins as:
+%e A117753      0;
+%e A117753      0,    0;
+%e A117753      0,    0,    0;
+%e A117753      1,    1,    2,    1;
+%e A117753      6,    6,   12,    6,    12;
+%e A117753      0,    0,    0,    0,     0,      0;
+%e A117753     24,   24,   48,   24,   144,      0,   576;
+%e A117753    210,  210,  420,  210,  1260,      0,     0,  3780;
+%e A117753      0,    0,    0,    0,     0,      0,     0,     0,   0;
+%e A117753   1728, 1728, 3456, 1728, 10368, 207360, 41472,     0,   0, 82944;
+%t A117753 f[n_]:= If[PrimeQ[n], 1, n]; cf[n_]:= cf[n]= If[n==0, 1, f[n]*cf[n-1]]; (* A049614 *)
+%t A117753 g[n_]:= If[PrimeQ[n], n, 1]; p[n_]:= p[n]= If[n==0, 1, g[n]*p[n-1]];  (* A034386 *)
+%t A117753 f[n_, 1]= cf[n]; f[n_, 2]= p[n]; f[n_, 3]= n!;
+%t A117753 Table[Mod[f[n, 1 + Mod[n, 3]]*f[m, 1 + Mod[m, 3]], n!], {n, 0, 10}, {m, 0, n}]//Flatten
+%o A117753 (Magma)
+%o A117753 A049614:= func< n | n le 1 select 1 else Factorial(n)/(&*[NthPrime(j): j in [1..#PrimesUpTo(n)]]) >;
+%o A117753 A034386:= func< n | n eq 0 select 1 else LCM(PrimesInInterval(1,n)) >;
+%o A117753 function f(n,k)
+%o A117753   if k eq 1 then return A049614(n);
+%o A117753   elif k eq 2 then return A034386(n);
+%o A117753   else return Factorial(n);
+%o A117753   end if;
+%o A117753 end function;
+%o A117753 A117753:= func< n,k | Floor( f( n, 1 + (n mod 3) )*f( k, 1 + (k mod 3)) ) mod Factorial(n) >;
+%o A117753 [A117753(n,k): k in [0..n], n in [0..12]]; // _G. C. Greubel_, Jul 21 2023
+%o A117753 (SageMath)
+%o A117753 from sympy import primorial
+%o A117753 def A049614(n): return factorial(n)/product(nth_prime(j) for j in range(1,1+prime_pi(n)))
+%o A117753 def A034386(n): return 1 if n == 0 else primorial(n, nth=False)
+%o A117753 def f(n,m):
+%o A117753     if m==1: return A049614(n)
+%o A117753     elif m==2: return A034386(n)
+%o A117753     else: return factorial(n)
+%o A117753 def A117753(n, k): return (f(n, 1+(n%3))*f(k, 1+(k%3)))%factorial(n)
+%o A117753 flatten([[A117753(n,k) for k in range(n+1)] for n in range(13)]) # _G. C. Greubel_, Jul 21 2023
+%Y A117753 Cf. A034386, A049614, A117682.
+%K A117753 nonn,tabl,changed
 %O A117753 0,9
 %A A117753 _Roger L. Bagula_, Apr 14 2006
+%E A117753 Edited by _G. C. Greubel_, Jul 21 2023
