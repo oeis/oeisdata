@@ -1,11 +1,13 @@
-%I A117724 #7 Feb 06 2019 00:41:51
+%I A117724 #12 Jul 24 2023 01:24:49
 %S A117724 0,0,0,1,1,1,0,0,0,0,1,2,3,4,5,1,1,1,1,1,1,1,4,9,16,25,36,49,2,4,6,8,
 %T A117724 10,12,14,16,2,9,28,65,126,217,344,513,730,3,12,27,48,75,108,147,192,
-%U A117724 243,300,4,22,90,268,640,1314,2422,4120,6588,10030,14674,5,33
-%N A117724 Triangle with the coefficient [x^n] x/(1-m*x^2-x^3) in row n, columns m = 1..n+2.
-%C A117724 The column m=1 is A000931. m=2 is essentially A008346, m=3 essentially A052931.
-%C A117724 Row n=-1 contains a single 0 by convention.
-%H A117724 Nathaniel Johnston, <a href="/A117724/b117724.txt">Table of n, a(n) for n = -1..5000</a>
+%U A117724 243,300,4,22,90,268,640,1314,2422,4120,6588,10030,14674
+%N A117724 Triangle T(n,k) = coefficient [x^n] of x^2/(1-(k+1)*x^2-x^3) for row n, and columns k = 0..n, read by rows.
+%H A117724 Nathaniel Johnston, <a href="/A117724/b117724.txt">Rows n = 0..50, flattened</a>
+%F A117724 T(n,k) = coefficient [x^n] ( x^2/(1-(k+1)*x^2-x^3) ).
+%F A117724 T(n, 0) = A000931(n+1).
+%F A117724 T(n, 1) = A008346(n-2) = (-1)^(n-1)*A119282(n-1).
+%F A117724 T(n, 2) = A052931(n-2).
 %e A117724 The table starts:
 %e A117724   0;
 %e A117724   0,  0;
@@ -17,10 +19,23 @@
 %e A117724   2,  4,  6,  8,  10,  12,  14,  16;
 %e A117724   2,  9, 28, 65, 126, 217, 344, 513, 730;
 %e A117724   3, 12, 27, 48,  75, 108, 147, 192, 243, 300;
-%p A117724 t:=taylor(x/(1-m*x^2-x^3),x,11):seq(seq(coeff(t,x,n),m=1..n+2),n=-1..10); # _Nathaniel Johnston_, Apr 27 2011
-%t A117724 (* define the polynomial *) p[x_] = x/(1 - m*x^2 - x^3); (* Taylor derivative expansion of the polynomial*) a = Table[Flatten[{{p[0]}, Table[Coefficient[Series[p[x], {x, 0, 30}], x^n], {n, 1, 10}]}], {m, 1, 10}] (*antidiagonal expansion to give triangular function*) b = Join[{{0}}, Delete[Table[Table[a[[ n]][[m]], {n, 1, m + 1}], {m, 0, 9}], 1]]
-%Y A117724 Cf. A000931.
-%K A117724 nonn,tabl,easy
-%O A117724 -1,12
+%p A117724 t:=taylor(x^2/(1-(k+1)*x^2-x^3), x, 15):
+%p A117724 seq(seq(coeff(t,x,n), k=0..n),n=0..12); # _Nathaniel Johnston_, Apr 27 2011
+%t A117724 T[n_, k_]:= T[n, k]= Coefficient[Series[x^2/(1-(k+1)*x^2-x^3), {x,0,n+ 2}], x, n];
+%t A117724 Table[T[n,k], {n,0,12}, {k,0,n}]//Flatten
+%o A117724 (Magma)
+%o A117724 m:=12;
+%o A117724 R<x>:=PowerSeriesRing(Integers(), m+2);
+%o A117724 A117724:= func< n, k | Coefficient(R!( x^2/(1-(k+1)*x^2-x^3) ), n) >;
+%o A117724 [A117724(n, k): k in [0..n], n in [0..m]]; // _G. C. Greubel_, Jul 23 2023
+%o A117724 (SageMath)
+%o A117724 def A117724(n, k):
+%o A117724     P.<x> = PowerSeriesRing(QQ)
+%o A117724     return P( x^2/(1-(k+1)*x^2-x^3) ).list()[n]
+%o A117724 flatten([[A117724(n, k) for k in range(n+1)] for n in range(13)]) # _G. C. Greubel_, Jul 23 2023
+%Y A117724 Cf. A000931, A008346, A052931, A117716, A119282.
+%K A117724 nonn,tabl,easy,changed
+%O A117724 0,12
 %A A117724 _Roger L. Bagula_, Apr 13 2006
 %E A117724 Sign in definition corrected, offset set to -1 by Assoc. Eds. of the OEIS, Jun 15 2010
+%E A117724 Edited by _G. C. Greubel_, Jul 23 2023
