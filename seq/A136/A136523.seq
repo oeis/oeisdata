@@ -1,25 +1,59 @@
-%I A136523 #8 Mar 12 2014 16:41:38
+%I A136523 #15 Jul 27 2023 08:21:26
 %S A136523 1,1,1,-1,1,2,-1,-3,2,4,1,-3,-8,4,8,1,5,-8,-20,8,16,-1,5,18,-20,-48,
 %T A136523 16,32,-1,-7,18,56,-48,-112,32,64,1,-7,-32,56,160,-112,-256,64,128,1,
 %U A136523 9,-32,-120,160,432,-256,-576,128,256,-1,9,50,-120,-400,432,1120,-576,-1280,256,512
-%N A136523 Triangle T(n,k) = A053120(n,k)+A053120(n-1,k).
-%C A136523 Row sums are A040000(n).
-%C A136523 Gram-Schmidt vector analysis indicates this is orthogonal.
-%C A136523 Integration of products of the associated polynomials p_n(x) = sum_{k>=0} T(n,k)*x^k with the Chebyshev weight function 1/sqrt(1-x^2) over the interval (-1..1) gives it is tridiagonal orthogonal:
-%C A136523 Table[Table[Integrate[Sqrt[1/(1 - x^2)]*Q[x,n]*Q[x, m], {x, -1, 1}], {n, 0, 10}], {m, 0, 10}];
-%e A136523 1;
-%e A136523 1, 1;
-%e A136523 -1, 1, 2;
-%e A136523 -1, -3, 2, 4;
-%e A136523 1, -3, -8, 4, 8;
-%e A136523 1, 5, -8, -20, 8, 16;
-%e A136523 -1, 5, 18, -20, -48, 16, 32;
-%e A136523 -1, -7, 18, 56, -48, -112,32, 64;
-%e A136523 1, -7, -32, 56,160, -112, -256, 64, 128;
-%e A136523 1, 9, -32, -120, 160, 432, -256, -576, 128,256;
-%e A136523 -1, 9, 50, -120, -400, 432, 1120, -576, -1280, 256, 512;
-%t A136523 Clear[B, x, n] (* A053120*) B[x, -1] = 0; B[x, 0] = 1; B[x, 1] = x; B[x_, n_] := B[x, n] = 2*x*B[x, n - 1] - B[x, n - 2]; Table[ExpandAll[B[x, n] + B[x, n - 1]], {n, 0, 10}]; a0 = Table[CoefficientList[B[x, n] + B[x, n - 1], x], {n, 0, 10}]; Flatten[a0] (* alternative definition*) Q[x, 0] = 1; Q[x, 1] = x + 1; Q[x_, n_] := Q[x, n] = B[x, n] + B[x, n - 1];
-%Y A136523 Cf. A053120, A081277, A124182.
-%K A136523 easy,tabl,sign
+%N A136523 Triangle T(n,k) = A053120(n,k) + A053120(n-1,k), read by rows.
+%H A136523 G. C. Greubel, <a href="/A136523/b136523.txt">Rows n = 0..50 of the triangle, flattened</a>
+%F A136523 T(n, k) = A053120(n,k) + A053120(n-1,k).
+%F A136523 Sum_{k=0..n} T(n, k) = A040000(n).
+%F A136523 From _G. C. Greubel_, Jul 26 2023: (Start)
+%F A136523 T(n, 0) = A057077(n).
+%F A136523 T(n, 1) = (-1)^floor((n-1)/2) * A109613(n-1).
+%F A136523 T(n, 2) = (-1)^floor((n-2)/2) * A008794(n-1).
+%F A136523 T(n, 3) = (-1)^floor((n+1)/2) * A000330(n-1).
+%F A136523 T(n, n) = A011782(n).
+%F A136523 T(n, n-1) = A011782(n-1).
+%F A136523 T(n, n-2) = -A001792(n-2).
+%F A136523 T(n, n-4) = A001793(n-3).
+%F A136523 T(n, n-6) = -A001794(n-6).
+%F A136523 Sum_{k=0..n} (-1)^k*T(n,k) = A000007(n).
+%F A136523 Sum_{k=0..floor(n/2)} T(n-k, k) = A000007(n) + [n=1].
+%F A136523 Sum_{k=0..floor(n/2)} (-1)^k*T(n-k, k) = (-1)^floor(n/2)*A025192(floor(n/2)). (End)
+%e A136523 Triangle begins as:
+%e A136523    1;
+%e A136523    1,  1;
+%e A136523   -1,  1,   2;
+%e A136523   -1, -3,   2,    4;
+%e A136523    1, -3,  -8,    4,    8;
+%e A136523    1,  5,  -8,  -20,    8,   16;
+%e A136523   -1,  5,  18,  -20,  -48,   16,   32;
+%e A136523   -1, -7,  18,   56,  -48, -112,   32,   64;
+%e A136523    1, -7, -32,   56,  160, -112, -256,   64,   128;
+%e A136523    1,  9, -32, -120,  160,  432, -256, -576,   128, 256;
+%e A136523   -1,  9,  50, -120, -400,  432, 1120, -576, -1280, 256, 512;
+%t A136523 A053120[n_, k_]:= Coefficient[ChebyshevT[n,x], x, k];
+%t A136523 T[n_, k_]:= T[n, k]= A053120[n,k] + A053120[n-1,k];
+%t A136523 Table[T[n,k], {n,0,12}, {k,0,n}]//Flatten
+%o A136523 (Magma)
+%o A136523 function A053120(n,k)
+%o A136523   if ((n+k) mod 2) eq 1 then return 0;
+%o A136523   elif n eq 0 then return 1;
+%o A136523   else return (-1)^Floor((n-k)/2)*(n/(n+k))*Binomial(Floor((n+k)/2), k)*2^k;
+%o A136523   end if;
+%o A136523 end function;
+%o A136523 A136523:= func< n,k | A053120(n,k) + A053120(n-1,k) >;
+%o A136523 [A136523(n,k): k in [0..n], n in [0..12]]; // _G. C. Greubel_, Jul 26 2023
+%o A136523 (SageMath)
+%o A136523 def A053120(n,k):
+%o A136523     if (n+k)%2==1: return 0
+%o A136523     elif n==0: return 1
+%o A136523     else: return floor((-1)^((n-k)//2)*(n/(n+k))*binomial((n+k)//2, k)*2^k)
+%o A136523 def A136523(n,k): return A053120(n,k) + A053120(n-1,k)
+%o A136523 flatten([[A136523(n,k) for k in range(n+1)] for n in range(13)]) # _G. C. Greubel_, Jul 26 2023
+%Y A136523 Cf. A000007, A001792, A001793, A001794, A000330, A008794, A011782.
+%Y A136523 Cf. A025192, A040000 (row sums), A053120, A057077, A081277, A109613.
+%Y A136523 Cf. A124182.
+%K A136523 easy,tabl,sign,changed
 %O A136523 0,6
 %A A136523 _Roger L. Bagula_, Mar 23 2008
+%E A136523 Edited by _G. C. Greubel_, Jul 26 2023

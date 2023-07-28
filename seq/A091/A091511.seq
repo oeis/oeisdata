@@ -1,10 +1,59 @@
-%I A091511 #9 Dec 19 2021 13:54:45
-%S A091511 1,1,5,5887172299,1025638889935309161425800069552344,
+%I A091511 #19 Jul 27 2023 12:17:39
+%S A091511 1,1,30,5887172299,1025638889935309161425800069552344,
 %T A091511 11337715575060644543768059040620852798601554512475786008052416860406653219312996
 %N A091511 Number of n X n X n 3-D matrices over symbol set {1,...,n} equivalent under any permutation of rows, columns, stacks or the symbol set.
-%F A091511 a(n) = sum {1*s_1+2*s_2+...=n, 1*t_1+2*t_2+...=n, 1*u_1+2*u_2+...=n, 1*v_1+2*v_2+...=n} (fixA[s_1, s_2, ...;t_1, t_2, ...;u_1, u_2, ...;v_1, v_2, ...]/ (1^s_1*s_1!*2^s_2*s_2!*... *1^t_1*t_1!*2^t_2*t_2!*... *1^u_1*u_1!*2^u_2*u_2!*... *1^v_1*v_1!*2^v_2*v_2!*...)) where fixA[...] = prod {i, j, k>=1} ( (sum {d|lcm(i, j, k)} (d*v_d))^(s_i*t_j*u_k *lcm(i, j, k)/(i*j*k))).
+%H A091511 Philip Turecek, <a href="/A091511/b091511.txt">Table of n, a(n) for n = 0..8</a>
+%F A091511 a(n) = Sum_{1*s_1+2*s_2+...=n, 1*t_1+2*t_2+...=n, 1*u_1+2*u_2+...=n, 1*v_1+2*v_2+...=n} (fixA[s_1, s_2, ...;t_1, t_2, ...;u_1, u_2, ...;v_1, v_2, ...]/ (1^s_1*s_1!*2^s_2*s_2!*... *1^t_1*t_1!*2^t_2*t_2!*... *1^u_1*u_1!*2^u_2*u_2!*... *1^v_1*v_1!*2^v_2*v_2!*...)) where fixA[...] = Product_{i, j, k>=1} ( (Sum_{d|lcm(i, j, k)} (d*v_d))^(s_i*t_j*u_k *lcm(i, j, k)/(i*j*k))).
 %F A091511 a(n) asymptotic to n^(n^3)/(n!^4).
+%o A091511 (Sage)
+%o A091511 Pol.<x> = InfinitePolynomialRing(QQ)
+%o A091511 @cached_function
+%o A091511 def Z(n):
+%o A091511     if n == 0: return Pol.one()
+%o A091511     return sum(x[k]*Z(n-k) for k in (1..n))/n
+%o A091511 @cached_function
+%o A091511 def monprod(M):
+%o A091511     p = Pol.one()
+%o A091511     V = [m.variables() for m in M]
+%o A091511     T = cartesian_product(V)
+%o A091511     for t in T:
+%o A091511         r = [Pol.varname_key(str(u))[1] for u in t]
+%o A091511         j = [Pol(M[u[0]]).degree(u[1]) for u in enumerate(t)]
+%o A091511         lcm_r = lcm(r)
+%o A091511         p *= x[lcm_r]^(prod(r)/lcm_r*prod(j))
+%o A091511     return p
+%o A091511 @cached_function
+%o A091511 def pol_isotop(n,k):
+%o A091511     P = Z(n)
+%o A091511     p = Pol.zero()
+%o A091511     coeffs = P.coefficients()
+%o A091511     mons = P.monomials()
+%o A091511     C = cartesian_product(k*[mons])
+%o A091511     Csorted = [tuple(sorted(u)) for u in C]
+%o A091511     Cset = set(Csorted)
+%o A091511     for c in Cset:
+%o A091511         p += Csorted.count(c)*prod([coeffs[mons.index(u)] for u in c])*monprod(c)
+%o A091511     return p
+%o A091511 @cached_function
+%o A091511 def rule_sub(r,m):
+%o A091511     D = 0
+%o A091511     for d in divisors(r):
+%o A091511         try: D += d*m.degrees()[-d-1]
+%o A091511         except: break
+%o A091511     return D
+%o A091511 def a(n,k=3):
+%o A091511     P = Z(n)
+%o A091511     coeffs = P.coefficients()
+%o A091511     Q = pol_isotop(n,k)
+%o A091511     inds = [Pol.varname_key(str(u))[1] for u in Q.variables()]
+%o A091511     p = 0
+%o A091511     for mon in enumerate(P.monomials()):
+%o A091511         m = Pol(mon[1])
+%o A091511         p += coeffs[mon[0]]*Q.subs({x[i]:rule_sub(i,m) for i in inds})
+%o A091511     return p
+%o A091511 # _Philip Turecek_, Jun 17 2023
 %Y A091511 Cf. A091058, A091510.
-%K A091511 nonn
+%K A091511 nonn,changed
 %O A091511 0,3
 %A A091511 _Christian G. Bower_, Jan 16 2004
+%E A091511 a(2) corrected by _Philip Turecek_, Jun 13 2023
