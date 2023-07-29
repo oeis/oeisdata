@@ -1,8 +1,8 @@
-%I A163511 #72 Dec 05 2020 10:25:51
+%I A163511 #97 Jul 28 2023 10:39:39
 %S A163511 1,2,4,3,8,9,6,5,16,27,18,25,12,15,10,7,32,81,54,125,36,75,50,49,24,
 %T A163511 45,30,35,20,21,14,11,64,243,162,625,108,375,250,343,72,225,150,245,
 %U A163511 100,147,98,121,48,135,90,175,60,105,70,77,40,63,42,55,28,33,22,13,128
-%N A163511 a(0)=1. a(n) = p(A000120(n)) * product{m=1 to A000120(n)} p(m)^A163510(n,m), where p(m) is the m-th prime.
+%N A163511 a(0)=1. a(n) = p(A000120(n)) * Product_{m=1..A000120(n)} p(m)^A163510(n,m), where p(m) is the m-th prime.
 %C A163511 This is a permutation of the positive integers.
 %C A163511 From _Antti Karttunen_, Jun 20 2014: (Start)
 %C A163511 Note the indexing: the domain starts from 0, while the range excludes zero, thus this is neither a bijection on the set of nonnegative integers nor on the set of positive natural numbers, but a bijection from the former set to the latter.
@@ -30,6 +30,12 @@
 %C A163511 This sequence is generated from A228351 by applying the following procedure: 1) eliminate the compositions that end in one unless the first one, 2) subtract one unit from every component, 3) replace every tuple [t_1, ..., t_r] by Product_{k=1..r} A000040(k)^(t_k) (see the examples).
 %C A163511 Is it true that a(n) = A337909(n+1) if and only if a(n+1) is not a term of A161992?
 %C A163511 Does this permutation have any other cycle apart from (1), (2) and (6, 9, 16, 7)? (End)
+%C A163511 From _Antti Karttunen_, Jul 25 2023: (Start)
+%C A163511 (In the above question, it is assumed that the starting offset would be 1 instead of 0).
+%C A163511 Questions:
+%C A163511 Does a(n) = 1+A054429(n) hold only when n is of the form 2^k times 1, 3 or 7, i.e., one of the terms of A029748?
+%C A163511 It seems that A007283 gives all fixed points of map n -> a(n), like A335431 seems to give all fixed points of map n -> A332214(n). Is there a general rule for mappings like these that the fixed points (if they exist) must be of the form 2^k times a certain kind of prime, i.e., that any odd composite (times 2^k) can certainly be excluded? See also note in A029747.
+%C A163511 (End)
 %H A163511 Antti Karttunen, <a href="/A163511/b163511.txt">Table of n, a(n) for n = 0..8192</a>
 %H A163511 <a href="/index/Bi#binary">Index entries for sequences related to binary expansion of n</a>
 %H A163511 <a href="/index/Per#IntegerPermutation">Index entries for sequences that are permutations of the natural numbers</a>
@@ -77,6 +83,10 @@
 %F A163511 a(A252756(n)) = A250246(n).
 %F A163511 (1+A008836(a(n)))/2 = A059448(n).
 %F A163511 (End)
+%F A163511 From _Antti Karttunen_, Jul 26 2023: (Start)
+%F A163511 For all n >= 0, a(A007283(n)) = A007283(n).
+%F A163511 A001222(a(n)) = A290251(n).
+%F A163511 (End)
 %e A163511 For n=3, whose binary representation is "11", we have A000120(3)=2, with A163510(3,1) = A163510(3,2) = 0, thus a(3) = p(2) * p(1)^0 * p(2)^0 = 3*1*1 = 3.
 %e A163511 For n=9, "1001" in binary, we have A000120(9)=2, with A163510(9,1) = 0 and A163510(9,2) = 2, thus a(9) = p(2) * p(1)^0 * p(2)^2 = 3*1*9 = 27.
 %e A163511 For n=10, "1010" in binary, we have A000120(10)=2, with A163510(10,1) = 1 and A163510(10,2) = 1, thus a(10) = p(2) * p(1)^1 * p(2)^1 = 3*2*3 = 18.
@@ -90,10 +100,22 @@
 %o A163511 ;; Version based on Quet's original formula:
 %o A163511 (define (A163511 n) (if (zero? n) 1 (let ((w (A000120 n))) (let loop ((p (A000040 w)) (m w)) (cond ((zero? m) p) (else (loop (* p (expt (A000040 m) (A163510 (+ (A000788 (- n 1)) m)))) (- m 1))))))))
 %o A163511 ;; _Antti Karttunen_, Jun 20 2014
+%o A163511 (Python)
+%o A163511 from sympy import prime
+%o A163511 def A163511(n):
+%o A163511     if n:
+%o A163511         k, c, m = n, 0, 1
+%o A163511         while k:
+%o A163511             c += 1
+%o A163511             m *= prime(c)**(s:=(~k&k-1).bit_length())
+%o A163511             k >>= s+1
+%o A163511         return m*prime(c)
+%o A163511     return 1 # _Chai Wah Wu_, Jul 17 2023
 %Y A163511 Inverse: A243071.
-%Y A163511 Cf. A000040, A000120, A000225, A000788, A003961, A005940, A007814, A054429, A055396, A064216, A135523, A161992, A163510, A245605, A245612, A246375, A246378, A246681, A161511, A228351, A243499, A243503, A243504, A269854, A280873, A285727, A293437, A337909.
+%Y A163511 Cf. A000040, A000120, A000225, A000788, A003961, A005940, A007814, A054429, A055396, A064216, A135523, A161992, A163510, A245605, A245612, A246375, A246378, A246681, A161511, A228351, A243499, A243503, A243504, A269854, A280873, A285727, A290251, A293437, A337909.
+%Y A163511 Cf. A007283 (known positions where a(n)=n), A029747, A029748, A364255 [= gcd(n,a(n))], A364258 [= a(n)-n], A364287 (where a(n) < n), A364292 (where a(n) <= n), A364494 (where n|a(n)), A364496 (where a(n)|n).
 %Y A163511 Cf. A332214, A332817 (variants).
-%K A163511 base,nonn,look
+%K A163511 base,nonn,look,changed
 %O A163511 0,2
 %A A163511 _Leroy Quet_, Jul 29 2009
 %E A163511 More terms computed and examples added by _Antti Karttunen_, Jun 20 2014
