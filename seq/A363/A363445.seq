@@ -1,0 +1,63 @@
+%I A363445 #60 Aug 02 2023 14:26:13
+%S A363445 3,-2,3,-2,3,2,0,2,-3,2,3,2,-3,2,3,-2,3,-2,3,-2,0,2,-3,2,3,-2,0,2,-3,
+%T A363445 2,3,-2,0,2,-3,2,3,2,-3,-2,3,-2,0,2,-3,2,3,-2,0,2,-3,2,3,2,-3,-2,3,-2,
+%U A363445 3,-2,3,-2,0,2,-3,-2,3,-2,0,2,-3,2,3,-2,0,2,-3,2,3,2,-3,-2,3,-2,0,2,-3,-2
+%N A363445 Turn sequence of a fractal like curve which is also the perimeter around an aperiodic tiling based on the "hat" monotile. See the comments section for details.
+%C A363445 The curve can be drawn by turtle graphics rules. Each term of the sequence encodes an angle of rotation in units of (1/6)*Pi. For example, a(k) = 3 would mean a turn of 90 degrees to the left, a(k) = -2 a turn of 60 degrees to the right. To draw the tiling we draw a line of length l and then take a term of the sequence to determine the direction of further drawing by rotation relative to the current drawing orientation. The length of the line segments between each term of the sequence is either sqrt(3) or 1 units. We start by drawing with sqrt(3) units of length; every time we reach a term with 3 or -3 in the sequence we toggle the selected line length from sqrt(3) in 1, or back again from 1 in sqrt(3).
+%C A363445 The curve is defined by recursion; this means a(1..14) draws a single "hat" monotile. Then the interval a(15..56) draws the perimeter around the H8 metatile and a(57..202) will be the perimeter around the next higher composition of these tiles. (For details regarding H8 see page 18 in arXiv:2303.10798.) The number of "hat" tiles enclosed by this curve after k recursions is Fibonacci(4*k + 2) (A033890).
+%C A363445 The number of new terms added after each iteration can be calculated as m(k) = 5*m(k-1) - 5*m(k-2) + m(k-3) with m(1..3) = {14, 42, 146, ...}. After each such iteration the curve will be closed with an enclosed area equivalent to A033890(k+1) "hat" tiles.
+%H A363445 David Smith, Joseph Samuel Myers, Craig S. Kaplan, and Chaim Goodman-Strauss, <a href="https://arxiv.org/abs/2303.10798">An aperiodic monotile</a>, arXiv:2303.10798 [math.CO], 2023.
+%H A363445 Thomas Scheuerle, <a href="/A363445/a363445.m.txt">MATLAB program</a>
+%H A363445 Thomas Scheuerle, <a href="/A363445/a363445.png">a(1..140480) drawn out by turtle graphics. This is the result of the seventh iteration.</a>
+%F A363445 a(1..14) = {3,-2, 3,-2, 3, 2, 0, 2, -3, 2, 3, 2,-3, 2} = a(1..L(1)) and for k > 0:
+%F A363445 a(1..L(k+1)) = {a(1..L(k-1)), a(L(k)+1..c1(k)-1), -a(c1(k)), a(c1(k)+1..c2(k)-1), -a(c1(k)), a(c1(k)+1..c2(k)-1), -a(c1(k)), a(c1(k)+1..c3(k)-1), -a(c4(k)), a(c4(k)+1..c2(k)-1), -a(c1(k)), a(c1(k)+1..c2(k)-1), -a(c1(k)),  a(c1(k)+1..c3(k)-1), -a(c3(k)), a(c3(k)+1..L(k))}. With:
+%F A363445 L(k) = 6*L(k-1) - 10*L(k-2) + 6*L(k-3) - L(k-4), for k > 3 and L(0..3) = {0, 14, 56, 202}.
+%F A363445 L(k) = L(k-1) + r1(k-1) + 3*r3(k-1) + 2*r4(k-1) + r6(k-1).
+%F A363445 r1(k) = r5(k-1) + r1(k-1) + r7(k-1), with r1(1) = 6.
+%F A363445 r2(k) = r2(k-1) + r7(k-1), with r2(1) = 6.
+%F A363445 r3(k) = 2*r6(k-1) + r3(k-1) + r4(k-1) + r7(k-1), with r3(1) = 6 (A003699).
+%F A363445 r4(k) = r6(k+1) = 2*r5(k-1) + 3*r3(k-1) + r4(k-1), with r4(1) = 8 (A052530).
+%F A363445 r5(k) = r5(k-1) + r3(k-1), with r5(1) = 2.  r4, r5, r6 are in the case of this tiling accidentally essentially the the same recurrence.
+%F A363445 r6(k) = r5(k) = r5(k-1) + r6(k-1) + r7(k-1), with r6(1) = 2 (A052530).
+%F A363445 r7(k) = r6(k-1) + 2*r3(k-1), with r7(1) = 4 (A003500).
+%F A363445 c1(k) = r2(k) + L(k)         = {6, 24, 80, ...}.
+%F A363445 c2(k) = r2(k) + r3(k) + L(k) = {12, 46, 162, ...}.
+%F A363445 c3(k) = r2(k) + r4(k) + L(k) = {14, 54, 192, ...}.
+%F A363445 c4(k) = r2(k) + r7(k) + L(k) = {10, 38, 132, ...}.
+%F A363445 Description of curve position:
+%F A363445   OrientationAngle(n) = Sum_{k = 1..n-1} a(k)*Pi*(1/6).
+%F A363445 Xcoordinate(n) = Sum_{k = 1..n} cos(OrientationAngle(n))*sqrt(1 + 2*((1 + Sum_{k = 1..n-1} [abs(a(k)) = 3]) mod 2)).
+%F A363445 Ycoordinate(n) = Sum_{k = 1..n} sin(OrientationAngle(n))*sqrt(1 + 2*((1 + Sum_{k = 1..n-1} [abs(a(k)) = 3]) mod 2)). [] is the Iversion bracket here.
+%F A363445 For some nonnegative integers b and c:
+%F A363445   OrientationAngle(L(b)) = OrientationAngle(L(c)).
+%F A363445   Xcoordinate(L(b)) = Xcoordinate(L(c)).
+%F A363445   Ycoordinate(L(b)) = Ycoordinate(L(c)).
+%e A363445 We start by drawing a line of length sqrt(3):
+%e A363445 ___
+%e A363445 We then take the first term of the sequence, a(1) = 3: this means
+%e A363445 we turn our drawing turtle 90 degrees to the left and also switch to a length unit of 1.
+%e A363445 ___|
+%e A363445 We take the second term from the sequence, a(2) = -2: this means
+%e A363445 we turn our drawing turtle 60 degrees to the right, and we keep the selected line length of 1 unit.
+%e A363445     /
+%e A363445 ___|
+%e A363445 (In this ASCII representation, angles and length units are only symbolically represented and do not match the exact values in the description.)
+%o A363445 (MATLAB) See link.
+%o A363445 (PARI)
+%o A363445 L(k) = { my(v = [0, 14, 56, 202]); if(k > 3,return(6*L(k-1) - 10*L(k-2) + 6*L(k-3) - L(k-4)),return(v[k+1])) }
+%o A363445 r1(k) = if(k > 1, return(r5(k-1) + r1(k-1) + r7(k-1)), return(6))
+%o A363445 r2(k) = if(k > 1, return(r2(k-1) + r7(k-1)), return(6))
+%o A363445 r3(k) = if(k > 1, return(2*r5(k-1) + r3(k-1) + r5(k) + r7(k-1)), return(6))
+%o A363445 r5(k) = if(k > 1, return(r5(k-1) + r3(k-1)), return(2))
+%o A363445 r7(k) = if(k > 1, return(r5(k-1) + 2*r3(k-1)), return(4))
+%o A363445 c1(k) = r2(k) + L(k-1)
+%o A363445 c2(k) = r2(k) + r3(k) + L(k-1)
+%o A363445 c3(k) = r2(k) + r5(k+1) + L(k-1)
+%o A363445 c4(k) = r2(k) + r7(k) + L(k-1)
+%o A363445 a(NumIter) = { my(a = [3,-2, 3,-2, 3, 2, 0, 2, -3, 2, 3, 2,-3, 2]); for(k = 1, NumIter, a = concat([a, a[(L(k-1)+1)..(c1(k)-1)], -a[c1(k)], a[(c1(k)+1)..(c2(k)-1)], -a[c1(k)], a[(c1(k)+1)..(c2(k)-1)], -a[c1(k)], a[(c1(k)+1)..(c3(k)-1)], -a[c4(k)], a[(c4(k)+1)..(c2(k)-1)], -a[c1(k)], a[(c1(k)+1)..(c2(k)-1)], -a[c1(k)],  a[(c1(k)+1)..(c3(k)-1)], -a[c3(k)], a[(c3(k)+1)..length(a)] ]) ); return(a) }
+%o A363445 draw(NumIter) = {my(p = [0, sqrt(3)]); my(dl = [1]); my(s = a(NumIter)); for(j=2,length(s), dl = concat(dl, ((dl[j-1]+(abs(s[j-1])==3))%2)); p = concat(p, p[j]+sqrt(1+2*dl[j])*exp(I*Pi*vecsum(s[1..j-1])*(1/6)) )); plothraw(apply(real,p),apply(imag,p), 1);}
+%Y A363445 Cf. A363348 describes how to draw this curve together with all "hat" monotiles enclosed by it.
+%Y A363445 Cf. A003500, A003699, A033890, A052530, A061278, A108946.
+%K A363445 sign,new
+%O A363445 1,1
+%A A363445 _Thomas Scheuerle_, Jul 09 2023
