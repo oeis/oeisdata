@@ -1,9 +1,39 @@
-%I A116244 #2 Mar 30 2012 17:40:40
+%I A116244 #13 Aug 24 2023 07:31:10
 %S A116244 94,461,532,714,818,994,3424,6569,9994,90903,99994,980198,999994,
 %T A116244 3636357,6363636,9999994,41176464,58823529,99999994,413533834,
 %U A116244 426573426,428571422,432620005,567379988,571428571,573426567
-%N A116244 n times n+8 gives the concatenation of two numbers m and m-7.
+%N A116244 Numbers k such that k * (k + 8) is the concatenation of two numbers m and m-7.
+%C A116244 From _Robert Israel_, Aug 22 2023: (Start)
+%C A116244 Numbers k = a*c-1 such that for some positive integers a,b,c,d,e we have
+%C A116244   10^e + 1 = a*b
+%C A116244   10^(e-1) <= c*d < 10^e
+%C A116244   a*c + 6 = b*d.
+%C A116244 Includes 10^k-6 for k >= 2. (End)
+%H A116244 Robert Israel, <a href="/A116244/b116244.txt">Table of n, a(n) for n = 1..10000</a>
+%p A116244 F:= proc(d) local R, t,alpha, beta, gamma, delta, B,C,n,m,i0,i,gamma0, delta0;
+%p A116244    R:= NULL;
+%p A116244    t:= 10^d+1;
+%p A116244    for alpha in numtheory:-divisors(t) do
+%p A116244      beta:= t/alpha;
+%p A116244      if igcd(alpha,beta) > 1 then next fi;
+%p A116244      delta0:= 6/beta mod alpha;
+%p A116244      gamma0:= (beta*delta0-6)/alpha;
+%p A116244      B:= 2*alpha*gamma0 + 6;
+%p A116244      C:= gamma0*delta0 - 10^(d-1) - 7;
+%p A116244      if C < 0 then i0:= 0 else i0:= ceil((-B + sqrt(B^2-4*t*C))/(2*t)) fi;
+%p A116244      for i from i0 do
+%p A116244        gamma:= gamma0 + i*beta;
+%p A116244        delta:= delta0 + i*alpha;
+%p A116244        m:= gamma*delta;
+%p A116244        if m -7 >= 10^d then break fi;
+%p A116244        if m - 7 >= 10^(d-1) then R:= R, alpha*gamma-1 fi;
+%p A116244      od
+%p A116244    od;
+%p A116244    sort(convert({R},list))
+%p A116244 end proc:
+%p A116244 seq(op(F(d)),d=1..10); # _Robert Israel_, Aug 22 2023
+%t A116244 a[n_] := Module[{solutions = {}, kvalues, e = 2}, While[Length[solutions] < n, sol = Solve[{a*b == 10^e + 1, 10^(e - 1) <= c*d < 10^e, a*c + 6 == b*d, a > 0, b > 0, c > 0, d > 0}, {a, b, c, d}, Integers]; kvalues = (a*c - 1) /. sol; solutions = Union[solutions, kvalues]; e++]; Take[solutions, n]]; a[26] (* _Robert P. P. McKone_, Aug 22 2023 *)
 %Y A116244 Cf. A116113, A116239, A116243, A116245, A116257.
-%K A116244 nonn,base
+%K A116244 nonn,base,changed
 %O A116244 1,1
 %A A116244 _Giovanni Resta_, Feb 06 2006
