@@ -1,4 +1,4 @@
-%I A036969 #114 Jan 15 2023 09:51:52
+%I A036969 #137 Aug 27 2023 14:54:10
 %S A036969 1,1,1,1,5,1,1,21,14,1,1,85,147,30,1,1,341,1408,627,55,1,1,1365,13013,
 %T A036969 11440,2002,91,1,1,5461,118482,196053,61490,5278,140,1,1,21845,
 %U A036969 1071799,3255330,1733303,251498,12138,204,1,1,87381,9668036,53157079,46587905
@@ -33,15 +33,19 @@
 %F A036969 The n-th row sum = A135920(n). (End)
 %F A036969 T(n,k) = (2/(2*k)!)*Sum_{j=0..k-1} (-1)^(j+k+1) * binomial(2*k,j+k+1) * (j+1)^(2*n). This formula is valid for n >= 0 and 0 <= k <= n. - _Peter Luschny_, Feb 03 2012
 %F A036969 From _Peter Bala_, Sep 27 2012: (Start)
-%F A036969 Let E(x) = cosh(sqrt(2*x)) = Sum_{n >= 0} x^n/{(2*n)!/2^n}. A generating function for the triangle is E(t*(E(x)-1)) = 1 + t*x + t*(1 + t)*x^2/6 + t*(1 + 5*t + t^2)*x^3/90 + ..., where the sequence of denominators [1, 1, 6, 90, ...] is given by (2*n)!/2^n. Cf. A008277 which has generating function exp(t*(exp(x)-1)). An e.g.f. is E(t*(E(x^2/2)-1)) = 1 + t*x^2/2! + t*(1 + t)*x^4/4! + t*(1 + 5*t + t^2)*x^6/6! + ....
-%F A036969 Put c(n) := (2*n)!/2^n. The column k generating function is 1/c(k)*(E(x)-1)^k = Sum_{n >= k} T(n,k)*x^n/c(n). The inverse array is A204579.
+%F A036969 Let E(x) = cosh(sqrt(2*x)) = Sum_{n >= 0} x^n/((2*n)!/2^n). A generating function for the triangle is E(t*(E(x)-1)) = 1 + t*x + t*(1 + t)*x^2/6 + t*(1 + 5*t + t^2)*x^3/90 + ..., where the sequence of denominators [1, 1, 6, 90, ...] is given by (2*n)!/2^n. Cf. A008277 which has generating function exp(t*(exp(x)-1)). An e.g.f. is E(t*(E(x^2/2)-1)) = 1 + t*x^2/2! + t*(1 + t)*x^4/4! + t*(1 + 5*t + t^2)*x^6/6! + ....
+%F A036969 Put c(n) := (2*n)!/2^n. The column k generating function is (1/c(k))*(E(x)-1)^k = Sum_{n >= k} T(n,k)*x^n/c(n). The inverse array is A204579.
 %F A036969 The production array begins:
 %F A036969   1,  1;
 %F A036969   0,  4,  1;
 %F A036969   0,  0,  9,  1;
-%F A036969   0,  0,  0, 16, 1;
+%F A036969   0,  0,  0, 16,  1;
 %F A036969   ... (End)
-%F A036969 x^n = T(n,k)*Product_{i=0..k} (x-i^2), see Stanley link. - _Michel Marcus_, Nov 19 2014
+%F A036969 x^n = Sum_{k=1..n} T(n,k)*Product_{i=0..k-1} (x-i^2), see Stanley link. - _Michel Marcus_, Nov 19 2014; corrected by _Kolosov Petro_, Jul 26 2023
+%F A036969 From _Kolosov Petro_, Jul 26 2023: (Start)
+%F A036969 T(n,k) = (1/(2*k)!) * Sum_{j=0..2k} binomial(2k, j)*(-1)^j*(k - j)^(2n).
+%F A036969 T(n,k) = (1/(k*(2k-1)!)) * Sum_{j=0..k} (-1)^(k-j)*binomial(2k, k-j)*j^(2n).
+%F A036969 (End)
 %e A036969 Triangle begins:
 %e A036969   1;
 %e A036969   1,   1;
@@ -52,6 +56,7 @@
 %e A036969 T(3,2) = 5: The five set partitions into two sets are {1,1',2,2'}{3,3'}, {1,1',3,3'}{2,2'}, {1,1'}{2,2',3,3'}, {1,1',3}{2,2',3'} and {1,1',3'}{2,2',3}.
 %p A036969 A036969 := proc(n,k) local j; 2*add(j^(2*n)*(-1)^(k-j)/((k-j)!*(k+j)!),j=1..k); end;
 %t A036969 t[n_, k_] := 2*Sum[j^(2*n)*(-1)^(k-j)/((k-j)!*(k+j)!), {j, 1, k}]; Flatten[ Table[t[n, k], {n, 1, 10}, {k, 1, n}]] (* _Jean-François Alcover_, Oct 11 2011 *)
+%t A036969 t1[n_, k_] := (1/(2 k)!) * Sum[Binomial[2 k, j]*(-1)^j*(k - j)^(2 n), {j, 0, 2 k}]; Column[Table[t1[n, k], {n, 1, 10}, {k, 1, n}]] (* _Kolosov Petro_ ,Jul 26 2023 *)
 %o A036969 (PARI) T(n,k)=if(1<k && k<=n, T(n-1,k-1) + k^2*T(n-1,k),k==1) \\ for illustrative purpose, not efficient ; _M. F. Hasler_, Feb 03 2012
 %o A036969 (PARI) T(n,k)=2*sum(j=1,k,(-1)^(k-j)*j^(2*n)/(k-j)!/(k+j)!)  \\ _M. F. Hasler_, Feb 03 2012
 %o A036969 (Sage)
@@ -66,7 +71,7 @@
 %o A036969 -- _Reinhard Zumkeller_, Feb 18 2013
 %Y A036969 Diagonals are A002450, A002451, A000330 and A060493.
 %Y A036969 Transpose of A008957. Cf. A008955, A008956, A156289, A135920 (row sums), A204579 (inverse), A000290.
-%K A036969 nonn,easy,nice,tabl
+%K A036969 nonn,easy,nice,tabl,changed
 %O A036969 1,5
 %A A036969 _N. J. A. Sloane_
 %E A036969 More terms from _Vladeta Jovovic_, Apr 16 2000
