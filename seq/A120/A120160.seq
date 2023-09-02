@@ -1,4 +1,4 @@
-%I A120160 #28 Aug 06 2020 11:36:06
+%I A120160 #33 Sep 01 2023 04:21:30
 %S A120160 1,1,1,1,1,2,2,3,3,4,5,6,8,10,12,15,19,24,30,37,47,58,73,91,114,142,
 %T A120160 178,222,278,347,434,543,678,848,1060,1325,1656,2070,2588,3235,4043,
 %U A120160 5054,6318,7897,9871,12339,15424,19280,24100,30125,37656,47070,58838,73547
@@ -12,6 +12,7 @@
 %C A120160 When m = 5, 19, 91, 434, 1656, 2070, 5054, ... the last survivor is person 2.
 %C A120160 When m = 8, 10, 24, 30, 73, 114, 178, 278, ... the last survivor is person 3.
 %C A120160 When m = 47, 543, 2588, 3235, 6318, 58838, ... the last survivor is person 4. (End)
+%H A120160 G. C. Greubel, <a href="/A120160/b120160.txt">Table of n, a(n) for n = 1..1000</a>
 %H A120160 K. Burde, <a href="http://dx.doi.org/10.1016/0022-314X(87)90078-3">Das Problem der Abzählreime und Zahlentwicklungen mit gebrochenen Basen [The problem of counting rhymes and number expansions with fractional bases]</a>, J. Number Theory 26(2) (1987), 192-209. [The author deals with the representation of n in fractional bases k/(k-1) and its relation to counting-off games (variations of Josephus problem). Here k = 5. See the review in MathSciNet (MR0889384) by R. G. Stoneham.]
 %H A120160 Nicolas Thériault, <a href="https://pdfs.semanticscholar.org/341d/f5787ba71d62a9e4fb4f7b506351521cbf06.pdf">Generalizations of the Josephus problem</a>, Utilitas Mathematica, 58 (2000), 161-173 (MR1801309).
 %H A120160 Nicolas Thériault, <a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.164.2015&amp;rep=rep1&amp;type=pdf">Generalizations of the Josephus problem</a>, Utilitas Mathematica, 58 (2000), 161-173 (MR1801309).
@@ -21,15 +22,34 @@
 %e A120160 When we place m = 6 people on a circle, label them 1 through 6, start counting at person 1, and remove every 5th person, the list of people we remove is 5 -> 4 -> 6 -> 2 -> 3. Thus the last survivor is person 1, so 6 belongs to this sequence.
 %e A120160 When we place m = 7 people on a circle, label them 1 through 7, start counting at person 1, and remove every 5th person, the list of people we remove is 5 -> 3 -> 2 -> 4 -> 7 -> 1. Thus the last survivor is person 6 (not in {1, 2, 3, 4}), so 7 does not belong to this sequence.
 %e A120160 When we place m = 8 people on a circle, label them 1 through 8, start the counting at person 1, and remove every 5th person, the list of people we remove is 5 -> 2 -> 8 -> 7 -> 1 -> 4 -> 6. Thus the last survivor is 3, so 8 belongs to this sequence. (End)
-%t A120160 f[s_] := Append[s, Ceiling[Plus @@ s/4]]; Nest[f, 1, 53] (* _Robert G. Wilson v_ *)
+%t A120160 f[s_]:= Append[s, Ceiling[Plus @@ s/4]]; Nest[f,1,53] (* _Robert G. Wilson v_ *)
+%t A120160 (* Second program *)
+%t A120160 f[n_]:= f[n]= 1 + Quotient[Sum[f[k], {k,n-1}], 4];
+%t A120160 A120160[n_]:= If[n==1, 1, f[n-1]];
+%t A120160 Table[A120160[n], {n, 60}] (* _G. C. Greubel_, Sep 01 2023 *)
 %o A120160 /* PARI program for the general case of Josephus problem. We use the Burde-Thériault algorithm. Here k = 5. To get the corresponding last survivors, modify the program to get the vector j. */
 %o A120160 lista(nn, k) = {my(j=vector(nn)); my(f=vector(nn)); my(N=vector(nn));
 %o A120160 j[1]=1; f[1]=0; N[1] = 1;
 %o A120160 for(n=1, nn-1, f[n+1] = ((j[n]-N[n]-1) % (k-1)) + 1 - j[n];
 %o A120160 j[n+1] = j[n] + f[n+1]; N[n+1] = (k*N[n] + f[n+1])/(k-1); );
 %o A120160 for(n=1, nn, if(N[n] > k-1, print1(N[n], ", "))); } \\ _Petros Hadjicostas_, Jul 23 2020
+%o A120160 (Magma)
+%o A120160 function f(n, a, b)
+%o A120160   t:=0;
+%o A120160     for k in [1..n-1] do
+%o A120160       t+:= a+Ceiling((b+t)/4);
+%o A120160     end for;
+%o A120160   return t;
+%o A120160 end function;
+%o A120160 g:= func< n, a, b | f(n+1, a, b)-f(n, a, b) >;
+%o A120160 A120160:= func< n | n le 4 select 1 else g(n-4, 1, 0) >;
+%o A120160 [A120160(n): n in [1..60]]; // _G. C. Greubel_, Sep 01 2023
+%o A120160 (SageMath)
+%o A120160 @CachedFunction
+%o A120160 def A120160(n): return 1 + ceil( sum(A120160(k) for k in range(1,n))//4 )
+%o A120160 [A120160(n) for n in range(1,61)] # _G. C. Greubel_, Sep 01 2023
 %Y A120160 Cf. A011782, A024634, A072493, A073941, A112088, A120170, A120178, A120186, A120194, A120202.
-%K A120160 nonn
+%K A120160 nonn,changed
 %O A120160 1,6
 %A A120160 _Graeme McRae_, Jun 10 2006
 %E A120160 Edited and extended by _Robert G. Wilson v_, Jul 07 2006
