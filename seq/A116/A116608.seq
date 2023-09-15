@@ -1,14 +1,14 @@
-%I A116608 #58 Nov 04 2020 11:04:29
+%I A116608 #64 Sep 14 2023 14:06:12
 %S A116608 1,2,2,1,3,2,2,5,4,6,1,2,11,2,4,13,5,3,17,10,4,22,15,1,2,27,25,2,6,29,
 %T A116608 37,5,2,37,52,10,4,44,67,20,4,44,97,30,1,5,55,117,52,2,2,59,154,77,5,
-%U A116608 6,68,184,117,10,2,71,235,162,20,6,81,277,227,36,4,82,338,309,58,1,4,102
+%U A116608 6,68,184,117,10,2,71,235,162,20,6,81,277,227,36,4,82,338,309,58,1
 %N A116608 Triangle read by rows: T(n,k) is number of partitions of n having k distinct parts (n>=1, k>=1).
 %C A116608 Row n has floor([sqrt(1+8n)-1]/2) terms (number of terms increases by one at each triangular number).
 %C A116608 Row sums yield the partition numbers (A000041).
 %C A116608 Row n has length A003056(n), hence the first element of column k is in row A000217(k). - _Omar E. Pol_, Jan 19 2014
 %H A116608 Alois P. Heinz, <a href="/A116608/b116608.txt">Rows n = 1..500, flattened</a>
 %H A116608 Emmanuel Briand, <a href="https://arxiv.org/abs/2004.13180">On partitions with k corners not containing the staircase with one more corner</a>, arXiv:2004.13180 [math.CO], 2020.
-%H A116608 Sang June Lee, Jun Seok Oh, <a href="https://arxiv.org/abs/2003.02511">On zero-sum free sequences contained in random subsets of finite cyclic groups</a>, arXiv:2003.02511 [math.CO], 2020.
+%H A116608 Sang June Lee and Jun Seok Oh, <a href="https://arxiv.org/abs/2003.02511">On zero-sum free sequences contained in random subsets of finite cyclic groups</a>, arXiv:2003.02511 [math.CO], 2020.
 %F A116608 G.f.: -1 + Product_{j=1..infinity} 1 + tx^j/(1-x^j).
 %F A116608 T(n,1) = A000005(n) (number of divisors of n).
 %F A116608 T(n,2) = A002133(n).
@@ -39,9 +39,29 @@
 %p A116608 seq(T(n), n=1..30); # _Alois P. Heinz_, Nov 07 2012
 %t A116608 p=Product[1+(y x^i)/(1-x^i),{i,1,20}];f[list_]:=Select[list,#>0&];Flatten[Map[f,Drop[CoefficientList[Series[p,{x,0,20}],{x,y}],1]]] (* _Geoffrey Critzer_, Nov 28 2011 *)
 %t A116608 Table[Length /@ Split[Sort[Length /@ Union /@ IntegerPartitions@n]], {n, 22}] // Flatten (* _Robert Price_, Jun 13 2020 *)
+%o A116608 (Python)
+%o A116608 from math import isqrt
+%o A116608 from itertools import count, islice
+%o A116608 from sympy.utilities.iterables import partitions
+%o A116608 def A116608_gen(): # generator of terms
+%o A116608     return (sum(1 for p in partitions(n) if len(p)==k) for n in count(1) for k in range(1,(isqrt((n<<3)+1)-1>>1)+1))
+%o A116608 A116608_list = list(islice(A116608_gen(),30)) # _Chai Wah Wu_, Sep 14 2023
+%o A116608 (Python)
+%o A116608 from functools import cache
+%o A116608 @cache
+%o A116608 def P(n: int, k: int, r: int) -> int:
+%o A116608     if n == 0: return 1 if k == 0 else 0
+%o A116608     if k == 0: return 0
+%o A116608     if r == 0: return 0
+%o A116608     return sum(P(n - r * j, k - 1, r - 1)
+%o A116608                for j in range(1, n // r + 1)) + P(n, k, r - 1)
+%o A116608 def A116608triangle(rows: int) -> list[int]:
+%o A116608     return list(filter(None, [P(n, k, n) for n in range(1, rows)
+%o A116608                               for k in range(1, n + 1)]))
+%o A116608 print(A116608triangle(22)) # _Peter Luschny_, Sep 14 2023, courtesy of Amir Livne Bar-on
 %Y A116608 Cf. A000041, A000005, A000070, A002133, A002134.
 %Y A116608 Cf. A060177 (reflected rows). - _Alois P. Heinz_, Jan 29 2014
 %Y A116608 Cf. A274174.
-%K A116608 nonn,tabf,look
+%K A116608 nonn,tabf,look,changed
 %O A116608 1,2
 %A A116608 _Emeric Deutsch_, Feb 19 2006
