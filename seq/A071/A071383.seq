@@ -1,4 +1,4 @@
-%I A071383 #53 Mar 06 2022 23:05:15
+%I A071383 #63 Sep 15 2023 07:53:11
 %S A071383 0,1,5,25,65,325,1105,4225,5525,27625,71825,138125,160225,801125,
 %T A071383 2082925,4005625,5928325,29641625,77068225,148208125,243061325,
 %U A071383 1215306625,3159797225,6076533125,12882250225,53716552825,64411251125
@@ -13,8 +13,42 @@
 %F A071383 For n>1 we have 1 < a(n+1)/a(n) <= 5, since one can multiply the points x+iy for which x^2 + y^2 = N by either 2+i or 2-i to get two new sets of points X+iY for which X^2 + Y^2 = 5N. This strictly increases the number since it is easy to see that the two sets aren't the same. - _J. H. Conway_, Jun 04 2002
 %F A071383 lim n ->infinity Log(a(n))/n = 1. [Conjectured by _Benoit Cloitre_, proved by _J. H. Conway_]
 %o A071383 (PARI) my(v=list(10^15), rec=0); print1(0, ", "); for(n=1, #v, if(numdiv(v[n])>rec, rec=numdiv(v[n]); print1(v[n], ", "))) \\ _Jianing Song_, May 20 2021, see program for A054994
-%Y A071383 Cf. A000448, A048610, A052199, A071384, A071385, A230655, A300162. Subsequence of A054994 (excluding first term). Where records occur in A004018.
+%o A071383 (Python)
+%o A071383 from math import prod
+%o A071383 from sympy import isprime
+%o A071383 primes_congruent_1_mod_4 = [5]
+%o A071383 def prime_4k_plus_1(i): # the i-th prime that is congruent to 1 mod 4
+%o A071383     while i>=len(primes_congruent_1_mod_4): # generate primes on demand
+%o A071383         n = primes_congruent_1_mod_4[-1]+4
+%o A071383         while not isprime(n): n += 4
+%o A071383         primes_congruent_1_mod_4.append(n)
+%o A071383     return primes_congruent_1_mod_4[i]
+%o A071383 def generate_A054994():
+%o A071383     TO_DO = {(1,())}
+%o A071383     while True:
+%o A071383         radius, exponents = min(TO_DO)
+%o A071383         yield radius, exponents
+%o A071383         TO_DO.remove((radius, exponents))
+%o A071383         TO_DO.update(successors(radius,exponents))
+%o A071383 def successors(r,exponents):
+%o A071383     for i,e in enumerate(exponents):
+%o A071383         if i==0 or exponents[i-1]>e:
+%o A071383             yield (r*prime_4k_plus_1(i), exponents[:i]+(e+1,)+exponents[i+1:])
+%o A071383     if exponents==() or exponents[-1]>0:
+%o A071383         yield (r*prime_4k_plus_1(len(exponents)), exponents+(1,))
+%o A071383 n,record,radius=1,1,0
+%o A071383 print(radius, end="") # or record, for A071385
+%o A071383 for radius,expo in generate_A054994():
+%o A071383     num_points = 4*prod((e+1) for e in expo)
+%o A071383     if num_points>record:
+%o A071383         record = num_points
+%o A071383         n += 1
+%o A071383         print (",", radius, end="") # or record, for A071385
+%o A071383         if n==27: break
+%o A071383 print()
+%o A071383 # _Günter Rote_, Sep 12 2023
+%Y A071383 Cf. A000448, A048610, A052199, A071384, A071385, A230655, A300162. Subsequence of A054994 (excluding first term). Where records occur in A004018. See A088959 for circles with integer radius.
 %Y A071383 Indices of records of Sum_{d|n} kronecker(m, d): A230655 (m=-3), this sequence (m=-4), A279541 (m=-6).
-%K A071383 nonn
+%K A071383 nonn,changed
 %O A071383 1,3
 %A A071383 _Hugo Pfoertner_, May 23 2002
