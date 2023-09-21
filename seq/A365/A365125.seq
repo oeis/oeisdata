@@ -1,0 +1,46 @@
+%I A365125 #31 Sep 20 2023 07:46:51
+%S A365125 6,8,7,8,4,1,8,1,0,3,2,8,3,8,9,2,6,3,2,7,1,3,4,4,0,4,4,0,9,8,8,3,3,4,
+%T A365125 8,6,1,1,5,8,3,9,7,9,4,8,7,6,6,8,9,5,4,1,1,7,4,7,5,8,6,6,9,4,4,1,0,7,
+%U A365125 8,5,2,8,1,7,2,1,2,4,7,5,3,8,9,1,0,8,7,9,1,2,6,5,7,8,9,7,8,5,3,6
+%N A365125 Put a positive charge at 0 and a negative charge at 1, then keep adding alternating charges at points of zero potential; this is the decimal expansion of the limit.
+%C A365125 The potential is inversely proportional to the distance: a positive charge at p has potential 1/abs(x-p). Starting from a positive charge at 0 and a negative charge at 1, the potential is zero at the midpoint 1/2, so another positive charge is added there. Then the potential is zero at 0.7886... and a negative charge is added there, and so on. The first few zero potential points are: 0.5, 0.7886..., 0.6325..., 0.7179..., 0.6714..., ... The limit is the constant of this sequence.
+%C A365125 After initial points p_0 = 0 and p_1 = 1, each new zero point fits between previous two points and is the solution to Sum_{n>=0} 1/(x-p_n) = 0.
+%H A365125 Rok Cestnik, <a href="/A365125/a365125.png">Visualization</a>
+%e A365125 0.68784181032838926327134404409883348611583979...
+%t A365125 p={0,1};
+%t A365125 For[r=1,r<39,++r,p=Append[p,x/.NSolve[{Sum[1/(x-p[[k]]),{k,1,Length[p]}]==0,(x-p[[-1]])*(x-p[[-2]])<0},x,WorkingPrecision -> 30][[1,1]]];];
+%t A365125 A365125 = RealDigits[Floor[10^10*p[[-1]]]][[1]]
+%o A365125 (Python)
+%o A365125 from decimal import Decimal, getcontext, ROUND_UP, ROUND_DOWN
+%o A365125 getcontext().prec = 100
+%o A365125 def nm(f, df, x):
+%o A365125     for i in range(10):
+%o A365125         x -= f(x)/df(x)
+%o A365125     return x
+%o A365125 def flip_rounding():
+%o A365125     if getcontext().rounding == ROUND_UP: getcontext().rounding = ROUND_DOWN
+%o A365125     else: getcontext().rounding = ROUND_UP
+%o A365125 def get_zero(vs, rounding):
+%o A365125     getcontext().rounding = rounding
+%o A365125     def p(x,v):
+%o A365125         flip_rounding(); t = x-v
+%o A365125         flip_rounding(); return 1/t
+%o A365125     def dp(x,v):
+%o A365125         flip_rounding(); t = x-v; t = t**2
+%o A365125         flip_rounding(); return -1/t
+%o A365125     def f(x): return sum(p(x,vs[n]) for n in range(len(vs)))
+%o A365125     def df(x): return sum(dp(x,vs[n]) for n in range(len(vs)))
+%o A365125     sign = -1 if rounding == ROUND_DOWN else 1
+%o A365125     return nm(f, df, (vs[-1]+vs[-2])/2+sign*abs(vs[-1]-vs[-2])/3)
+%o A365125 v_lo = [Decimal(0), Decimal(1)]
+%o A365125 v_up = [Decimal(0), Decimal(1)]
+%o A365125 for r in range(150):
+%o A365125     v_lo.append(get_zero(v_lo, ROUND_DOWN))
+%o A365125     v_up.append(get_zero(v_up, ROUND_UP))
+%o A365125 lower_bounds = [v_lo[i] for i in range(0, len(v_lo), 2)]
+%o A365125 upper_bounds = [v_up[i] for i in range(1, len(v_up), 2)]
+%o A365125 right = True
+%o A365125 A365125 = [int(l) for l, u in zip(str(lower_bounds[-1])[2:], str(upper_bounds[-1])[2:]) if right and (right := (l == u))]
+%K A365125 nonn,cons,new
+%O A365125 0,1
+%A A365125 _Rok Cestnik_, Aug 22 2023
