@@ -1,0 +1,34 @@
+%I A364200 #21 Sep 22 2023 05:29:58
+%S A364200 0,1,1,1,2,2,3,3,3,2,2,3,4,3,4,4,4,4,4,5,5,4,5,5,5,4,5,5,4,4,5,5,5,5,
+%T A364200 5,5,5,5,5,6,6,6
+%N A364200 Minimal number of terms of mixed-sign Egyptian fraction f such that H(n) + f is an integer, where H(n) is the n-th harmonic number.
+%C A364200 For H(n) - floor(H(n)) and ceiling(H(n)) - H(n), the shortest mixed-sign Egyptian fractions are calculated, and the smaller length of fractions is selected.
+%C A364200 Similar to A106394 and A224820. But those sequences use the greedy algorithm, which does not guarantee the shortest length of expansion.
+%C A364200 For 1 < n < 41, a(n) < A363937(n) only for n = 10 and n = 22.
+%H A364200 Ron Knott, <a href="https://r-knott.surrey.ac.uk/Fractions/egyptian.html">Egyptian Fractions</a>
+%F A364200 a(n) <= A363937(n).
+%e A364200 For n=10: H(10) = 7381/2520 = 2.928...; H(10) - floor(H(10)) = 7381/2520 - 2 = 2341/2520 = 1/2 + 1/7 + 1/8 + 1/9 + 1/20, which cannot be expressed as the sum of fewer than 5 reciprocals, and ceiling(H(10)) - H(10) = 3 - 7381/2520 = 179/2520 = 1/30 + 1/42 + 1/72, which cannot be expressed as the sum of fewer than 3 reciprocals, so A363937(10) = 3.
+%e A364200 But 179/2520 = 1/14 - 1/2520 (a "mixed-sign Egyptian fraction"), so a(10) = 2.
+%t A364200 check[f_, k_] := (If[Numerator@f == 1, Return@True];
+%t A364200    If[k == 1, Return@False];
+%t A364200    Catch[Do[If[check[f - 1/i, k - 1], Throw@True],
+%t A364200      {i, Range[Ceiling[1/f], Floor[k/f]]}];
+%t A364200     Throw@False]);
+%t A364200 checkMixed[f_, k_, m_] := If[m == 1,
+%t A364200    Catch[Do[If[check[1/i - f, k], Throw@True],
+%t A364200      {i, Range[2, Floor[1/f]]}];
+%t A364200     Throw@False],
+%t A364200    checkMixed[f, k, m - 1]];
+%t A364200 a[n_] := (h = HarmonicNumber[n];
+%t A364200   d = Min[h - Floor@h, Ceiling@h - h];
+%t A364200   j = 1;
+%t A364200   While[Not@check[d, j], j++];
+%t A364200   res = j;
+%t A364200   Do[
+%t A364200    If[checkMixed[d, i - m, m], res = i],
+%t A364200    {i, 2, j - 1}, {m, 1, i - 1}];
+%t A364200   res);
+%Y A364200 Cf. A363937.
+%K A364200 nonn,more,new
+%O A364200 1,5
+%A A364200 _Denis Ivanov_, Jul 13 2023
