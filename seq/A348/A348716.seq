@@ -1,11 +1,30 @@
-%I A348716 #6 Oct 31 2021 09:35:50
+%I A348716 #13 Sep 25 2023 02:35:44
 %S A348716 1,12,24,60,84,120,240,360,420,672
 %N A348716 Numbers whose divisors can be partitioned into two disjoint sets without singletons whose harmonic means are both integers in a record number of ways.
 %C A348716 The corresponding record values are 0, 1, 3, 10, 26, 198, 1093, 7035, 12391, 17625, ...
 %e A348716 12 is the smallest number whose set of divisors can be partitioned into two disjoint sets whose harmonic means are both integers: {1, 2, 3, 6} and {4, 12}.
 %e A348716 24 is the smallest number whose set of divisors can be partitioned into two disjoint sets whose harmonic means are both integers in three ways: ({3, 6}, {1, 2, 4, 8, 12, 24}), ({1, 3, 6}, {2, 4, 8, 12, 24}) and ({1, 2, 3, 6}, {4, 8, 12, 24}).
 %t A348716 q[d_] := Length[d] > 1 && IntegerQ@HarmonicMean[d]; c[n_] := Count[Subsets[(d = Divisors[n])], _?(q[#] && q[Complement[d, #]] &)]/2; cm = -1; s = {}; Do[If[(c1 = c[n]) > cm, cm = c1; AppendTo[s, n]], {n, 1, 240}]; s
+%o A348716 (Python)
+%o A348716 from fractions import Fraction
+%o A348716 from itertools import count, islice, combinations
+%o A348716 from sympy import divisors
+%o A348716 def A348716_gen(): # generator of terms
+%o A348716     c = 0
+%o A348716     yield 1
+%o A348716     for n in count(2):
+%o A348716         divs = tuple(divisors(n, generator=True))
+%o A348716         l, b = len(divs), sum(Fraction(1,d) for d in divs)
+%o A348716         if l>=4 and 2**(l-1)-l>c:
+%o A348716             m = sum(1 for k in range(2,(l-1>>1)+1) for p in combinations(divs,k) if not ((s:=sum(Fraction(1,d) for d in p)).denominator*k%(s.numerator) or (r:=b-s).denominator*(l-k)%(r.numerator)))
+%o A348716             if l&1 == 0:
+%o A348716                 k = l>>1
+%o A348716                 m += sum(1 for p in combinations(divs,k) if 1 in p and not ((s:=sum(Fraction(1,d) for d in p)).denominator*k%(s.numerator) or (r:=b-s).denominator*k%(r.numerator)))
+%o A348716             if m > c:
+%o A348716                 yield n
+%o A348716                 c = m
+%o A348716 A348716_list = list(islice(A348716_gen(),5)) # _Chai Wah Wu_, Sep 24 2023
 %Y A348716 Cf. A348715.
-%K A348716 nonn,more
+%K A348716 nonn,more,changed
 %O A348716 1,2
 %A A348716 _Amiram Eldar_, Oct 31 2021
