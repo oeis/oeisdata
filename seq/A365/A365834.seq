@@ -1,0 +1,37 @@
+%I A365834 #11 Sep 25 2023 08:18:47
+%S A365834 51,130,260,520,1040,3120,21440,42880,85760,171520,343040,686080,
+%T A365834 1372160,2744320,5488640,10977280,21954560,43909120,87818240,
+%U A365834 175636480,351272960,702545920,1405091840,2810183680,5620367360,11240734720,22481469440,44962938880,89925877760,179851755520,359703511040
+%N A365834 a(n) is the first number k with n prime divisors such that, if m is the next number with n prime divisors, k + m and k - m also have n prime divisors.  In each case the divisors are counted with multiplicity.
+%C A365834 The offset is 2 because it is impossible for the sum and difference of primes to both be prime.
+%H A365834 Robert Israel, <a href="/A365834/b365834.txt">Table of n, a(n) for n = 2..1000</a>
+%F A365834 a(n) = 2^(n-2) * 5 * 67 for all n >= 8, the next number with n prime divisors being 2^(n-2) * 3 * 113.
+%F A365834 Proof:
+%F A365834 k, m, k + m and m - k all have n prime divisors iff 2*k, 2*m, 2*k + 2*m and 2*m - 2*k all have n+1 prime divisor. 2*m is the next number after 2*k with n+1 prime divisors iff m is the next number after k with n prime divisors and between 2*k and 2*m there are no odd numbers with n+1 prime divisors.  But the smallest odd number with n+1 prime divisors is 3^(n+1), and 3^(n+1) > 2^(n-1) * 3 * 113 for n >= 10. To complete the proof, we verify computationally the claim for n = 8, 9 and 10.
+%e A365834 a(3) = 130 because  130 = 2 * 5 * 13 is a triprime, the next triprime is 138 = 2 * 3 * 23, and 130 + 138 = 268 = 2^2 * 67 and 138 - 130 = 8 are triprimes, and this is the first triprime that works.
+%p A365834 with(priqueue);
+%p A365834 f:= proc(n) local M,a,b,v,q,w;
+%p A365834   M:= 10^1000:
+%p A365834   a:= 2^n:
+%p A365834   initialize(Aprimes);
+%p A365834   insert([-2^n,0,2],Aprimes);
+%p A365834   do
+%p A365834     v:= extract(Aprimes);
+%p A365834     if v[2] = n then
+%p A365834       b:= -v[1];
+%p A365834       if numtheory:-bigomega(b-a) = n and numtheory:-bigomega(b+a)= n then return a
+%p A365834       fi;
+%p A365834       a:= b;
+%p A365834     else
+%p A365834       insert(v+[0,1,0],Aprimes);
+%p A365834       q:= nextprime(v[3]);
+%p A365834       w:= v[1]*(q/v[3])^(n-v[2]);
+%p A365834       if w >= -M then insert([w,v[2],q],Aprimes) fi
+%p A365834     fi
+%p A365834   od:
+%p A365834 end proc:
+%p A365834 map(f, [$2..60]);
+%Y A365834 Cf. A001222, A365833.
+%K A365834 nonn,new
+%O A365834 2,1
+%A A365834 _Zak Seidov_ and _Robert Israel_, Sep 19 2023
