@@ -1,14 +1,32 @@
-%I A357035 #11 Oct 14 2022 08:53:05
+%I A357035 #17 Sep 27 2023 11:23:05
 %S A357035 1,2,10,36,150,180,420,840,900,3420,2520,5040,6300,7560,12600,15120,
 %T A357035 18900,42840,32760,37800,95760,105840,69300,124740,163800,138600,
-%U A357035 166320,327600,249480,207900,491400,491400,622440,498960,706860,415800,963900,1496880,1164240,1081080
+%U A357035 166320,327600,249480,207900,491400,622440,498960,706860,415800,963900,1496880,1164240,1081080
 %N A357035 a(n) is the smallest number that has exactly n divisors that are digitally balanced numbers (A031443).
+%H A357035 Robert Israel, <a href="/A357035/b357035.txt">Table of n, a(n) for n = 0..97</a>
 %e A357035 1 has no divisors in A031443, so a(0) = 1;
 %e A357035 2 has divisors 1 = 1_2, 2 = 10_2 and 2 = A031443(1), so a(1) = 2.
 %e A357035 10 has divisors 2 = 10_2 and 10 = 1010_2 in A031443, so a(2) = 10.
+%p A357035 N:= 20: # for terms before the first term >= 2^(N+1)
+%p A357035 W:= Vector(2^(N+1),datatype=integer[4]):
+%p A357035 for d from 2 to N by 2 do
+%p A357035 for t from 2^(d-1) to 2^d-1 do
+%p A357035   if convert(convert(t,base,2),`+`) = d/2 then
+%p A357035     J:= [seq(i,i=t..2^(N+1), t)];
+%p A357035     W[J]:= W[J] +~ 1;
+%p A357035 fi od od:
+%p A357035 M:= max(W);
+%p A357035 V:= Array(0..M); count:= 0:
+%p A357035 for i from 1 to 2^(N+1) do
+%p A357035   if V[W[i]] = 0 then V[W[i]]:= i; count:= count+1 fi
+%p A357035 od:
+%p A357035 L:= convert(V,list):
+%p A357035 if not member(0,L,'m') then m:= M+2 fi:
+%p A357035 L[1..m-1]; # _Robert Israel_, Sep 27 2023
 %t A357035 digBalQ[n_] := Module[{d = IntegerDigits[n, 2], m}, EvenQ @ (m = Length[d]) && Count[d, 1] == m/2]; f[n_] := DivisorSum[n, 1 &, digBalQ[#] &]; seq[len_, nmax_] := Module[{s = Table[0, {len}], c = 0, n = 1, i}, While[c < len && n < nmax, i = f[n] + 1; If[i <= len && s[[i]] == 0, c++; s[[i]] = n]; n++]; s]; seq[40, 10^7] (* _Amiram Eldar_, Sep 26 2022 *)
 %o A357035 (Magma) bal:=func<n|Multiplicity(Intseq(n,2),1) eq Multiplicity(Intseq(n,2),0)>; a:=[]; for n in [0..38] do k:=1; while #[d:d in Divisors(k)|bal(d)] ne n  do k:=k+1; end while; Append(~a,k); end for; a;
 %Y A357035 Cf. A031443.
-%K A357035 nonn,base
+%K A357035 nonn,base,changed
 %O A357035 0,2
 %A A357035 _Marius A. Burtea_, Sep 20 2022
+%E A357035 Corrected by _Robert Israel_, Sep 27 2023
