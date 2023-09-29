@@ -1,7 +1,7 @@
-%I A144299 #54 Jun 25 2023 04:23:54
+%I A144299 #58 Sep 29 2023 02:11:47
 %S A144299 1,1,0,1,1,0,1,3,0,0,1,6,3,0,0,1,10,15,0,0,0,1,15,45,15,0,0,0,1,21,
 %T A144299 105,105,0,0,0,0,1,28,210,420,105,0,0,0,0,1,36,378,1260,945,0,0,0,0,0,
-%U A144299 1,45,630,3150,4725,945,0,0,0,0,0,1,55,990,6930,17325,10395,0,0,0,0,0,0,1,66,1485,13860,51975,62370
+%U A144299 1,45,630,3150,4725,945,0,0,0,0,0,1,55,990,6930,17325,10395,0,0,0,0,0,0
 %N A144299 Triangle of Bessel numbers read by rows. Row n gives T(n,n), T(n,n-1), T(n,n-2), ..., T(n,0) for n >= 0.
 %C A144299 T(n,k) is the number of partitions of an n-set into k nonempty subsets, each of size at most 2.
 %C A144299 The Grosswald and Choi-Smith references give many further properties and formulas.
@@ -16,6 +16,10 @@
 %F A144299 T(n, k) = T(n-1, k-1) + (n-1)*T(n-2, k-1).
 %F A144299 E.g.f.: Sum_{k >= 0} Sum_{n = 0..2k} T(n,k) y^k x^n/n! = exp(y(x+x^2/2)). (The coefficient of y^k is the e.g.f. for the k-th row of the rotated triangle shown below.)
 %F A144299 T(n, k) = n!/((n - 2*k)!*k!*2^k) for 0 <= k <= floor(n/2) and 0 otherwise. - _Stefano Spezia_, Jun 15 2023
+%F A144299 From _G. C. Greubel_, Sep 29 2023: (Start)
+%F A144299 T(n, 1) = A000217(n-1).
+%F A144299 Sum_{k=0..n} T(n,k) = A000085(n).
+%F A144299 Sum_{k=0..n} (-1)^k*T(n,k) = A001464(n). (End)
 %e A144299 Triangle begins:
 %e A144299   n:
 %e A144299   0: 1
@@ -23,11 +27,11 @@
 %e A144299   2: 1  1   0
 %e A144299   3: 1  3   0    0
 %e A144299   4: 1  6   3    0   0
-%e A144299   5: 1 10  15    0   0 0
-%e A144299   6: 1 15  45   15   0 0 0
-%e A144299   7: 1 21 105  105   0 0 0 0
-%e A144299   8: 1 28 210  420 105 0 0 0 0
-%e A144299   9: 1 36 378 1260 945 0 0 0 0 0
+%e A144299   5: 1 10  15    0   0  0
+%e A144299   6: 1 15  45   15   0  0  0
+%e A144299   7: 1 21 105  105   0  0  0  0
+%e A144299   8: 1 28 210  420 105  0  0  0  0
+%e A144299   9: 1 36 378 1260 945  0  0  0  0  0
 %e A144299   ...
 %e A144299 The row sums give A000085.
 %e A144299 For some purposes it is convenient to rotate the triangle by 45 degrees:
@@ -55,7 +59,8 @@
 %p A144299 end if;
 %p A144299 end proc;
 %p A144299 for n from 0 to 12 do lprint([seq(b1(n,k),k=0..2*n)]); od:
-%t A144299 T[n_, 0] = 0; T[1, 1] = 1; T[2, 1] = 1; T[n_, k_] := T[n - 1, k - 1] + (n - 1)T[n - 2, k - 1]; Table[T[n, k], {n, 12}, {k, n, 1, -1}] // Flatten (* _Robert G. Wilson v_ *)
+%t A144299 T[n_,0]=0; T[1,1]=1; T[2,1]=1; T[n_, k_]:= T[n-1,k-1] + (n-1)T[n-2,k-1];
+%t A144299 Table[T[n,k], {n,12}, {k,n,1,-1}]//Flatten (* _Robert G. Wilson v_ *)
 %t A144299 Table[If[k<=Floor[n/2],n!/((n-2 k)! k! 2^k),0], {n, 0, 12},{k,0,n}]//Flatten (* _Stefano Spezia_, Jun 15 2023 *)
 %o A144299 (Haskell)
 %o A144299 a144299 n k = a144299_tabl !! n !! k
@@ -64,10 +69,15 @@
 %o A144299    f i us vs = ws : f (i + 1) vs ws where
 %o A144299                ws = (zipWith (+) (0 : map (i *) us) vs) ++ [0]
 %o A144299 -- _Reinhard Zumkeller_, Jan 01 2014
+%o A144299 (Magma)
+%o A144299 A144299:= func< n,k | k le Floor(n/2) select Factorial(n)/(Factorial(n-2*k)*Factorial(k)*2^k) else 0 >;
+%o A144299 [A144299(n,k): k in [0..n], n in [0..12]]; // _G. C. Greubel_, Sep 29 2023
+%o A144299 (SageMath)
+%o A144299 def A144299(n,k): return factorial(n)/(factorial(n-2*k)*factorial(k)*2^k) if k <= (n//2) else 0
+%o A144299 flatten([[A144299(n,k) for k in range(n+1)] for n in range(13)]) # _G. C. Greubel_, Sep 29 2023
 %Y A144299 Other versions of this same triangle are given in A111924 (which omits the first row), A001498 (which left-adjusts the rows in the bottom view), A001497 and A100861. Row sums give A000085.
-%Y A144299 Cf. A144385, A144643.
-%Y A144299 Cf. A004526, A118930.
-%K A144299 nonn,tabl,easy
+%Y A144299 Cf. A000085, A000217, A001464, A004526, A118930, A144385, A144643..
+%K A144299 nonn,tabl,easy,changed
 %O A144299 0,8
 %A A144299 _David Applegate_ and _N. J. A. Sloane_, Dec 06 2008
 %E A144299 Offset fixed by _Reinhard Zumkeller_, Jan 01 2014
