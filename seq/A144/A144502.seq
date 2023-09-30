@@ -1,12 +1,13 @@
-%I A144502 #34 Feb 01 2023 08:17:27
+%I A144502 #39 Sep 29 2023 04:11:55
 %S A144502 1,1,1,2,2,1,7,7,5,1,37,37,30,16,1,266,266,229,155,65,1,2431,2431,
 %T A144502 2165,1633,946,326,1,27007,27007,24576,19714,13219,6687,1957,1,353522,
 %U A144502 353522,326515,272501,198773,119917,53822,13700,1,5329837,5329837,4976315,4269271,3289726,2199722,1205857,486355,109601,1
 %N A144502 Square array read by antidiagonals upwards: T(n,k) is the number of scenarios for the gift exchange problem in which each gift can be stolen at most once, when there are n gifts in the pool and k gifts (not yet frozen) in peoples' hands.
+%H A144502 G. C. Greubel, <a href="/A144502/b144502.txt">Antidiagonals n = 0..50, flattened</a>
 %H A144502 Moa Apagodu, David Applegate, N. J. A. Sloane, and Doron Zeilberger, <a href="http://arxiv.org/abs/1701.08394">Analysis of the Gift Exchange Problem</a>, arXiv:1701.08394 [math.CO], 2017.
 %H A144502 David Applegate and N. J. A. Sloane, <a href="http://arxiv.org/abs/0907.0513">The Gift Exchange Problem</a>, arXiv:0907.0513 [math.CO], 2009.
 %F A144502 Let A_n(x) be the e.g.f. for row n. Then A_0(x) = exp(x) and for n >= 1, A_n(x) = (d/dx)A_{n-1}(x)/(1-x).
-%e A144502 The array begins:
+%e A144502 The array, A(n,k), begins:
 %e A144502     1,    1,     1,      1,       1,        1, ...
 %e A144502     1,    2,     5,     16,      65,      326, ...
 %e A144502     2,    7,    30,    155,     946,     6687, ...
@@ -14,16 +15,49 @@
 %e A144502    37,  266,  2165,  19714,  198773,  2199722, ...
 %e A144502   266, 2431, 24576, 272501, 3289726, 42965211, ...
 %e A144502   ...
+%e A144502 Antidiagonal triangle, T(n,k), begins as:
+%e A144502       1;
+%e A144502       1,     1;
+%e A144502       2,     2,     1;
+%e A144502       7,     7,     5,     1;
+%e A144502      37,    37,    30,    16,     1;
+%e A144502     266,   266,   229,   155,    65,    1;
+%e A144502    2431,  2431,  2165,  1633,   946,  326,    1;
+%e A144502   27007, 27007, 24576, 19714, 13219, 6687, 1957,   1;
 %p A144502 B:=proc(p,r) option remember;
 %p A144502 if p=0 then RETURN(1); fi;
 %p A144502 if r=0 then RETURN(B(p-1,1)); fi;
 %p A144502 B(p-1,r+1)+r*B(p,r-1); end;
 %p A144502 seq(seq(B(d-k, k), k=0..d), d=0..9);
-%t A144502 t[0, _] = 1; t[n_, 0] := t[n, 0] = t[n-1, 1]; t[n_, k_] := t[n, k] = t[n-1, k+1] + k*t[n, k-1]; Table[t[n-k, k], {n, 0, 9}, {k, 0, n}] // Flatten (* _Jean-François Alcover_, Jan 14 2014, after Maple *)
+%t A144502 t[0, _]= 1; t[n_, 0]:= t[n, 0]= t[n-1, 1];
+%t A144502 t[n_, k_]:= t[n, k]= t[n-1, k+1] + k*t[n, k-1];
+%t A144502 Table[t[n-k, k], {n,0,12}, {k,0,n}]//Flatten (* _Jean-François Alcover_, Jan 14 2014, after Maple *)
+%o A144502 (Magma)
+%o A144502 A144301:= func< n | (&+[ Binomial(n+k-1,2*k)*Factorial(2*k)/( Factorial(k)*2^k): k in [0..n]]) >;
+%o A144502 function A(n,k)
+%o A144502   if n eq 0 then return 1;
+%o A144502   elif k eq 0 then return A144301(n);
+%o A144502   elif k eq 1 then return A144301(n+1);
+%o A144502   else return A(n-1,k+1) + k*A(n,k-1);
+%o A144502   end if;
+%o A144502 end function;
+%o A144502 A144502:= func< n,k | A(n-k, k) >;
+%o A144502 [A144502(n,k): k in [0..n], n in [0..12]]; // _G. C. Greubel_, Sep 29 2023
+%o A144502 (SageMath)
+%o A144502 def A144301(n): return 1 if n<2 else (2*n-3)*A144301(n-1)+A144301(n-2)
+%o A144502 @CachedFunction
+%o A144502 def A(n,k):
+%o A144502     if n==0: return 1
+%o A144502     elif k==0: return A144301(n)
+%o A144502     elif k==1: return A144301(n+1)
+%o A144502     else: return A(n-1,k+1) + k*A(n,k-1)
+%o A144502 def A144502(n,k): return A(n-k,k)
+%o A144502 flatten([[A144502(n,k) for k in range(n+1)] for n in range(13)]) # _G. C. Greubel_, Sep 29 2023
 %Y A144502 Rows include A000522, A144495, A144496, A144497.
 %Y A144502 Columns include A144301, A001515, A144498, A144499, A144500.
-%Y A144502 Main diagonal is A144501. Antidiagonal sums give A144503.
-%K A144502 nonn,tabl
+%Y A144502 Main diagonal is A144501.
+%Y A144502 Antidiagonal sums give A144503.
+%K A144502 nonn,tabl,changed
 %O A144502 0,4
 %A A144502 _David Applegate_ and _N. J. A. Sloane_, Dec 13 2008
 %E A144502 6 more terms from _Michel Marcus_, Feb 01 2023
