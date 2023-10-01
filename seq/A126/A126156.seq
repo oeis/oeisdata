@@ -1,4 +1,4 @@
-%I A126156 #81 Sep 20 2023 01:49:53
+%I A126156 #96 Sep 30 2023 05:13:02
 %S A126156 1,1,7,139,5473,357721,34988647,4784061619,871335013633,
 %T A126156 203906055033841,59618325600871687,21297483077038703899,
 %U A126156 9127322584507530151393,4621897483978366951337161,2730069675607609356178641127
@@ -21,6 +21,7 @@
 %F A126156 a(n) ~ 2^(5*n+2) * n^(2*n) / (exp(2*n) * Pi^(2*n+1/2)). - _Vaclav Kotesovec_, Jul 13 2014
 %F A126156 a(n) = (1/(4*n))*Sum_{k=1..n} binomial(2*n,2*k)*((2^(2*k)-1)*2^(3*k)*(-1)^((k-1))*Bernoulli(2*k)*a(n-k)), a(0)=1. - _Vladimir Kruchinin_, Feb 25 2015
 %F A126156 a(n) = Sum_{k=1..n} a(n-k)*binomial(2*n,2*k)*(k/(2*n)-1)*(-2)^k, a(0)=1. - _Tani Akinari_, Sep 11 2023
+%F A126156 For n > 0, a(n) = -Sum_{j=0..n} Sum_{k=0..floor(j/2)} (2*n+1)!*(2*k-j)^(2*n)/(n!*(2*j+1)*(n-j)!*k!*(j-k)!*(-2)^(n+j-1)). - _Tani Akinari_, Sep 28 2023
 %e A126156 E.g.f.: A(x) = 1 + x^2/2! + 7*x^4/4! + 139*x^6/6! + 5473*x^8/8! + 357721*x^10/10! + ...
 %e A126156 where the logarithm begins:
 %e A126156 log(A(x)) = x^2/2! + 4*x^4/4! + 64*x^6/6! + 2176*x^8/8! + 126976*x^10/10! + 11321344*x^12/12! + ...
@@ -36,6 +37,9 @@
 %p A126156 if n=0 then g0 else if n=1 then 0 else add(binomial(n, m)*g(f,m)* g(f,n-m), m=1..n-1) fi; (f(n)-%)/(2*g0) fi end:
 %p A126156 a := n -> (-2)^n*g(euler, 2*n);
 %p A126156 seq(a(n), n=0..14); # _Peter Luschny_, May 07 2014
+%p A126156 # Alternative: an algorithm as described by _Peter Bala_, see also A365672:
+%p A126156 T := proc(n, k) option remember; if k = 0 then 1 else if k = n then T(n, k-1) else (n - k + 1) * (2 * (n - k) + 1) * T(n, k - 1) + T(n - 1, k) fi fi end:
+%p A126156 a := n -> T(n, n): seq(a(n), n = 0..14);  # _Peter Luschny_, Sep 29 2023
 %t A126156 a[n_] := SeriesCoefficient[ Sqrt[ Sec[ Sqrt[2]*x]], {x, 0, 2 n}]*(2*n)!; Table[a[n], {n, 0, 14}] (* _Jean-François Alcover_, Nov 29 2013, after _Sergei N. Gladkovskii_ *)
 %o A126156 (Maxima)
 %o A126156 a(n):=if n=0 then 1 else 1/(4*n)*sum(binomial(2*n,2*k)*((2^(2*k)-1)*2^(3*k)*(-1)^((k-1))*bern(2*k)*a(n-k)),k,1,n); /* _Vladimir Kruchinin_, Feb 25 2015 */
@@ -47,7 +51,9 @@
 %o A126156 for(n=0,20,print1(a(n),", "))
 %o A126156 (PARI) {a(n) = local(A=1+x); for(i=1,n, A = exp( intformal( A^2 * intformal( 1/A^2 + x*O(x^n)) ) ) ); n!*polcoeff(A,n)}
 %o A126156 for(n=0,20,print1(a(2*n),", "))
-%Y A126156 Cf. A126155; diagonals: A126157, A126158.
+%o A126156 (PARI) {a(n)=-(n<1)-sum(j=0,n,sum(k=0,j/2,(2*n+1)!*(2*k-j)^(2*n)/(n!*(2*j+1)*(n-j)!*k!*(j-k)!*(-2)^(n+j-1))))}; /* _Tani Akinari_, Sep 28 2023 */
+%Y A126156 Diagonals: A126157, A126158.
+%Y A126156 Cf. A126155, A365672.
 %K A126156 nonn,changed
 %O A126156 0,3
 %A A126156 _Paul D. Hanna_, Dec 20 2006
