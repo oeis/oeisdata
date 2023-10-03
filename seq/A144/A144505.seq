@@ -1,4 +1,4 @@
-%I A144505 #18 Apr 06 2019 09:27:50
+%I A144505 #22 Oct 02 2023 04:42:39
 %S A144505 1,1,-1,2,1,-5,7,-1,9,-30,37,1,-14,81,-229,266,-1,20,-175,835,-2165,
 %T A144505 2431,1,-27,330,-2330,9990,-24576,27007,-1,35,-567,5495,-34300,137466,
 %U A144505 -326515,353522,1,-44,910,-11522,97405,-561386,2148139,-4976315,5329837
@@ -6,18 +6,18 @@
 %H A144505 Seiichi Manyama, <a href="/A144505/b144505.txt">Rows n = 0..140, flattened</a>
 %H A144505 N. J. A. Sloane, <a href="/A144505/a144505.txt">Rows 0 through 25 of the triangle, together with the corresponding polynomials P[n](x).</a>
 %F A144505 Let A[0](x) = exp(x), A[n](x) = A[n-1]'(x)/(1-x) for n>0 and let P[n](x) = A[n](x)*(1-x)^(2n-1)/exp(x). Row n of triangle gives coefficients of P[n](x) with exponents of x in decreasing order.
-%F A144505 P[n] = Sum((n+k)!/(n-k)!/k!/2^k*(1-x)^(n-k),k=0..n). E.g.f.: exp((1-x)*(1-sqrt(1-2*y)))/sqrt(1-2*y). [_Vladeta Jovovic_, Dec 15 2008]
+%F A144505 From _Vladeta Jovovic_, Dec 15 2008: (Start)
+%F A144505 P[n] = Sum_{k=0..n} ((n+k)!/((n-k)!*k!*2^k)) * (1-x)^(n-k).
+%F A144505 E.g.f.: exp((1-x)*(1-sqrt(1-2*y)))/sqrt(1-2*y). (End)
 %e A144505 The first few polynomials P[n] (n >= 0) are:
-%e A144505 1
-%e A144505 1
-%e A144505 -x+2
-%e A144505 x^2-5*x+7
-%e A144505 -x^3+9*x^2-30*x+37
-%e A144505 x^4-14*x^3+81*x^2-229*x+266
-%e A144505 -x^5+20*x^4-175*x^3+835*x^2-2165*x+2431
-%e A144505 x^6-27*x^5+330*x^4-2330*x^3+9990*x^2-24576*x+27007
-%e A144505 -x^7+35*x^6-567*x^5+5495*x^4-34300*x^3+137466*x^2-326515*x+353522
-%e A144505 x^8-44*x^7+910*x^6-11522*x^5+97405*x^4-561386*x^3+2148139*x^2-4976315*x+5329837
+%e A144505   P[0] = 1;
+%e A144505   P[1] = 1;
+%e A144505   P[2] = -x +2;
+%e A144505   P[3] =  x^2 -5*x +7;
+%e A144505   P[4] = -x^3 + 9*x^2 - 30*x +37;
+%e A144505   P[5] =  x^4 -14*x^3 + 81*x^2 - 229*x +266;
+%e A144505   P[6] = -x^5 +20*x^4 -175*x^3 + 835*x^2 -2165*x +2431;
+%e A144505   P[7] =  x^6 -27*x^5 +330*x^4 -2330*x^3 +9990*x^2 -24576*x +27007;
 %e A144505 ...
 %e A144505 Triangle of coefficients begins:
 %e A144505    1;
@@ -41,7 +41,22 @@
 %p A144505 lprint(P[n]);
 %p A144505 lprint(seriestolist(t2));
 %p A144505 od:
-%Y A144505 Columns give A001515 (really A144301), A144498, A001514, A144506, A144507. Row sums give A001147. Alternating row sums give A043301.
-%K A144505 sign,tabf
+%t A144505 f[n_, x_]:= x^n*Sum[((n+j)!/((n-j)!*j!*2^j))*(1-1/x)^(n-j), {j,0,n}];
+%t A144505 t[n_, k_]:= Coefficient[Series[f[n,x], {x,0,30}], x, k];
+%t A144505 Join[{1}, Table[t[n,k], {n,0,12}, {k,0,n}]//Flatten] (* _G. C. Greubel_, Oct 02 2023 *)
+%o A144505 (Magma)
+%o A144505 R<x>:=PowerSeriesRing(Integers(), 50);
+%o A144505 f:= func< n,x | x^n*(&+[Binomial(n,j)*Factorial(n+j)*(1-1/x)^(n-j)/(2^j*Factorial(n)) : j in [0..n]]) >;
+%o A144505 T:= func< n,k | Coefficient(R!( f(n,x) ), k) >;
+%o A144505 [1] cat [T(n,k): k in [0..n], n in [0..12]]; // _G. C. Greubel_, Oct 02 2023
+%o A144505 (SageMath)
+%o A144505 P.<x> = PowerSeriesRing(QQ, 50)
+%o A144505 def f(n,x): return x^n*sum(binomial(n,j)*rising_factorial(n+1,j)*(1-1/x)^(n-j)/2^j for j in range(n+1))
+%o A144505 def T(n,k): return P( f(n,x) ).list()[k]
+%o A144505 [1] + flatten([[T(n,k) for k in range(n+1)] for n in range(13)]) # _G. C. Greubel_, Oct 02 2023
+%Y A144505 Columns give A001515 (really A144301), A144498, A001514, A144506, A144507.
+%Y A144505 Row sums give A001147.
+%Y A144505 Alternating row sums give A043301.
+%K A144505 sign,tabf,changed
 %O A144505 0,4
 %A A144505 _N. J. A. Sloane_, Dec 14 2008
