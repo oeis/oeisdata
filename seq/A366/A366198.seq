@@ -1,0 +1,59 @@
+%I A366198 #27 Oct 04 2023 12:41:56
+%S A366198 0,1,2,3,4,5,6,7,8,9,19,11,21,12,31,13,41,14,51,15,61,16,71,17,81,18,
+%T A366198 91,29,22,32,23,42,24,52,25,62,26,72,27,82,28,92,39,33,43,34,53,35,63,
+%U A366198 36,73,37,83,38,93,49,44,54,45,64,46,74,47,84,48,94,59,55,65,56,75,57,85,58,95
+%N A366198 Any a(n) replacing the first digit of a(n+1) forms a palindrome. This is the lexicographically earliest sequence of distinct nonnegative integers with this property.
+%C A366198 No integer > 1 ending in zero will appear in the sequence.
+%C A366198 For n >= 10 the concatenation of a(n) and A217657(a(n+1)) is a palindrome.
+%H A366198 Michael S. Branicky, <a href="/A366198/b366198.txt">Table of n, a(n) for n = 1..10000</a>
+%F A366198 For n >= 92, a(n) = 10*a(n-81) + 90 - 9*(a(n-81) mod 10). - _David A. Corneth_, Oct 04 2023
+%e A366198 a(9)  =  8 replacing the first digit of a(10) =  9 forms   8, a palindrome;
+%e A366198 a(10) =  9 replacing the first digit of a(11) = 19 forms  99, a palindrome;
+%e A366198 a(11) = 19 replacing the first digit of a(12) = 11 forms 191, a palindrome;
+%e A366198 a(12) = 11 replacing the first digit of a(13) = 21 forms 111, a palindrome;
+%e A366198 a(13) = 21 replacing the first digit of a(14) = 12 forms 212, a palindrome; etc.
+%t A366198 terms=75; b[0]=0;
+%t A366198 b[n_]:=b[n]=(k=1; While[MemberQ[Array[b,n-1],k]||!PalindromeQ[FromDigits@Flatten@ReplacePart[IntegerDigits@k,1-> IntegerDigits@b[n-1]]],k++]; k); t=0;While[Length[a=Join[Range[0,9],Flatten@Table[FromDigits@Flatten@Insert[#,Table[9,i],-2]&/@(IntegerDigits/@Array[b,9^2,10]),{i,0,t++}]]]<terms];a[[;;terms]] (* _Giorgos Kalogeropoulos_, Oct 04 2023 *)
+%o A366198 (Python)
+%o A366198 from itertools import count, islice
+%o A366198 def ispal(n): return (s:=str(n))==s[::-1]
+%o A366198 def agen(): # generator of terms
+%o A366198     an, seen = 0, set()
+%o A366198     while True:
+%o A366198         yield an; seen.add(an); s = str(an)
+%o A366198         an = next(k for k in count(0) if k not in seen and ispal(s+str(k)[1:]))
+%o A366198 print(list(islice(agen(), 80))) # _Michael S. Branicky_, Oct 04 2023
+%o A366198 (Python) # faster version suitable for generating b-file
+%o A366198 from sympy import isprime
+%o A366198 from itertools import count, islice, product
+%o A366198 def pals(digs):
+%o A366198     yield from digs
+%o A366198     for d in count(2):
+%o A366198         for p in product(digs, repeat=d//2):
+%o A366198             left = "".join(p)
+%o A366198             for mid in [[""], digs][d%2]:
+%o A366198                 yield left + mid + left[::-1]
+%o A366198 def folds(s): # generator of suffixes of palindromes starting with s
+%o A366198     for i in range((len(s)+1)//2, len(s)+1):
+%o A366198         for mid in [True, False]:
+%o A366198             t = s[:i] + (s[:i-1][::-1] if mid else s[:i][::-1])
+%o A366198             if t.startswith(s):
+%o A366198                 yield t[len(s):]
+%o A366198     yield from ("".join(p)+s[::-1] for p in pals("0123456789"))
+%o A366198 def agen():
+%o A366198     s, seen = "0", {"0"}
+%o A366198     while True:
+%o A366198         yield int(s)
+%o A366198         found = False
+%o A366198         for end in folds(s):
+%o A366198             for start in "123456789":
+%o A366198                 t = start + end
+%o A366198                 if t not in seen:
+%o A366198                     found = True; break
+%o A366198             if found: break
+%o A366198         s, seen = t, seen | {t}
+%o A366198 print(list(islice(agen(), 60))) # _Michael S. Branicky_, Oct 04 2023
+%Y A366198 Cf. A082216, A217657, A318486.
+%K A366198 base,nonn,new
+%O A366198 1,3
+%A A366198 _Eric Angelini_, Oct 03 2023
