@@ -1,11 +1,36 @@
-%I A366188 #15 Oct 03 2023 15:09:03
+%I A366188 #21 Oct 08 2023 04:50:54
 %S A366188 1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,
 %T A366188 27,28,29,30,31,32,33,34,35,36,37,38,39,40,42,43,44,45,46,49,50,51,52,
 %U A366188 53,54,55,56,57,58,59,60,61,62,63,64,66,67,68,69,70,71
 %N A366188 Positive integers k such that the fifth derivative of the k-th Bernoulli polynomial B(k, x) contains only integer coefficients.
-%C A366188 Conjecture: The sequence is finite and full and includes A366187.
+%C A366188 From _Bernd C. Kellner_, Oct 04 2023: (Start)
+%C A366188 As a published result on Oct 02 2023 (cf. A366169), all such sequences regarding higher derivatives of the Bernoulli polynomials having only integer coefficients are finite. We have an infinite chain of subsets: A094960 subset of A366169 subset of A366186 subset of A366187 subset of A366188 subset of ... . See Kellner 2023 (Theorem 13).
+%C A366188 The sequence is finite and is a supersequence of A366187. It remains to show that 904 is the last term. This is very likely, since the terms depend on the estimate of a product of primes satisfying certain p-adic conditions that is connected with A324370. A proven asymptotic formula related to that product implies that this sequence is finite. See Kellner 2017, 2023, and BLMS 2018. (End)
 %H A366188 Peter Luschny, <a href="/A366188/b366188.txt">Table of n, a(n) for n = 1..125</a>
+%H A366188 Olivier Bordellès, Florian Luca, Pieter Moree, and Igor E. Shparlinski, <a href="https://doi.org/10.1112/S0025579318000153">Denominators of Bernoulli polynomials</a>, Mathematika 64 (2018), 519-541.
+%H A366188 Bernd C. Kellner, <a href="https://doi.org/10.1016/j.jnt.2017.03.020">On a product of certain primes</a>, J. Number Theory, 179 (2017), 126-141; arXiv:<a href="https://arxiv.org/abs/1705.04303">1705.04303</a> [math.NT], 2017.
+%H A366188 Bernd C. Kellner, <a href="https://arxiv.org/abs/2310.01325">On the finiteness of Bernoulli polynomials whose derivative has only integral coefficients</a>, 9 pp.; arXiv:2310.01325 [math.NT], 2023.
+%H A366188 Bernd C. Kellner and Jonathan Sondow, <a href="https://doi.org/10.4169/amer.math.monthly.124.8.695">Power-Sum Denominators</a>, Amer. Math. Monthly, 124 (2017), 695-709; arXiv:<a href="https://arxiv.org/abs/1705.03857">1705.03857</a> [math.NT], 2017.
+%H A366188 Bernd C. Kellner and Jonathan Sondow, <a href="http://math.colgate.edu/~integers/s95/s95.pdf">The denominators of power sums of arithmetic progressions</a>, Integers 18 (2018), #A95, 17 pp.; arXiv:<a href="https://arxiv.org/abs/1705.05331">1705.05331</a> [math.NT], 2017.
+%H A366188 Bernd C. Kellner and Jonathan Sondow, <a href="http://math.colgate.edu/~integers/v52/v52.pdf">On Carmichael and polygonal numbers, Bernoulli polynomials, and sums of base-p digits</a>, Integers 21 (2021), #A52, 21 pp.; arXiv:<a href="https://arxiv.org/abs/1902.10672">1902.10672</a> [math.NT], 2019.
+%F A366188 From _Bernd C. Kellner_, Oct 04 2023: (Start)
+%F A366188 Let (n)_m be the falling factorial. Let s_p(n) be the sum of the p-adic digits of n.
+%F A366188 The denominator of the fifth derivative of the n-th Bernoulli polynomial B(n, x) is given as follows (Kellner 2023, Theorem 12).
+%F A366188 D_5(n) = 1 for 1 <= n <= 5. For n > 5, D_5(n) = A324370(n-4)/gcd(A324370(n-4), (n)_4) = Product_{prime p <= (n-3)/(2+((n-3) mod 2)): gcd(p,(n)_5)=1, s_p(n-4) >= p} p.
+%F A366188 Then k is a term if and only if D_5(k) = 1. (End)
 %p A366188 aList := len -> select(n -> denom(diff(bernoulli(n, x), `$`(x, 5))) = 1, [seq(1..len)]): aList(1000);
+%t A366188 (* From _Bernd C. Kellner_, Oct 04 2023 (Start) *)
+%t A366188 (* k-th derivative of BP *)
+%t A366188 k = 5; Select[Range[1000], Denominator[Together[D[BernoulliB[#, x], {x, k}]]] == 1&]
+%t A366188 (* Exact denominator formula *)
+%t A366188 SD[n_, p_] := If[n < 1 || p < 2, 0, Plus@@IntegerDigits[n, p]];
+%t A366188 DBP[n_,
+%t A366188  k_] := Module[{m = n-k+1, fac = FactorialPower[n, k]}, If[n < 1 || k
+%t A366188  < 1 || n <= k, Return[1]];
+%t A366188 Times@@Select[Prime[Range[PrimePi[(m+1)/(2 + Mod[m+1, 2])]]],
+%t A366188 !Divisible[fac, #] && SD[m, #] >= #&]];
+%t A366188 k = 5; Select[Range[1000], DBP[#, k] == 1&]
+%t A366188 (* End *)
 %o A366188 (PARI) isok(k) = #select(x->denominator(x)>1, Vec(deriv(deriv(deriv(deriv(deriv(bernpol(k)))))))) == 0; \\ _Michel Marcus_, Oct 03 2023
 %o A366188 (Python)
 %o A366188 from itertools import count, islice
@@ -15,6 +40,6 @@
 %o A366188     return filter(lambda k:k<=5 or all(c.is_integer for c in Poly(diff(bernoulli(k,x),x,5)).coeffs()),count(1))
 %o A366188 A366188_list = list(islice(A366188_gen(),30)) # _Chai Wah Wu_, Oct 03 2023
 %Y A366188 Cf. A094960 (m=1), A366169 (m=2), A366186 (m=3), A366187 (m=4), (this sequence) (m=5), A366189.
-%K A366188 nonn,more,hard,new
+%K A366188 nonn,fini,new
 %O A366188 1,2
 %A A366188 _Peter Luschny_, Oct 03 2023
