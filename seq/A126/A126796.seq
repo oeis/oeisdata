@@ -1,4 +1,4 @@
-%I A126796 #84 Sep 06 2023 01:12:03
+%I A126796 #90 Oct 15 2023 09:26:31
 %S A126796 1,1,1,2,2,4,5,8,10,16,20,31,39,55,71,100,125,173,218,291,366,483,600,
 %T A126796 784,971,1244,1538,1957,2395,3023,3693,4605,5604,6942,8397,10347,
 %U A126796 12471,15235,18309,22267,26619,32219,38414,46216,54941,65838,77958,93076,109908
@@ -15,9 +15,23 @@
 %H A126796 SeungKyung Park, <a href="http://www.fq.math.ca/Scanned/36-4/park.pdf">Complete Partitions</a>, Fibonacci Quarterly, Vol. 36 (1998), pp. 354-360.
 %F A126796 G.f.: 1 = Sum_{n>=0} a(n)*x^n*Product_{k=1..n+1} (1-x^k). - _Paul D. Hanna_, Mar 08 2012
 %F A126796 a(n) ~ exp(Pi*sqrt(2*n/3)) / (4*sqrt(3)*n) * (1 - (sqrt(3/2)/Pi + 25*Pi/(24*sqrt(6))) / sqrt(n) + (25/16 - 1679*Pi^2/6912)/n). - _Vaclav Kotesovec_, May 24 2018, extended Nov 02 2019
+%F A126796 a(n) = A000041(n) - A365924(n). - _Gus Wiseman_, Oct 14 2023
 %e A126796 There are a(5) = 4 complete partitions of 5:
 %e A126796   [1, 1, 1, 1, 1], [1, 1, 1, 2], [1, 2, 2], and [1, 1, 3].
 %e A126796 G.f.: 1 = 1*(1-x) + 1*x*(1-x)*(1-x^2) + 1*x^2*(1-x)*(1-x^2)*(1-x^3) + 2*x^3*(1-x)*(1-x^2)*(1-x^3)*(1-x^4) + 2*x^4*(1-x)*(1-x^2)*(1-x^3)*(1-x^4)*(1-x^5) + ...
+%e A126796 From _Gus Wiseman_, Oct 14 2023: (Start)
+%e A126796 The a(1) = 1 through a(8) = 10 partitions:
+%e A126796   (1)  (11)  (21)   (211)   (221)    (321)     (421)      (3221)
+%e A126796              (111)  (1111)  (311)    (2211)    (2221)     (3311)
+%e A126796                             (2111)   (3111)    (3211)     (4211)
+%e A126796                             (11111)  (21111)   (4111)     (22211)
+%e A126796                                      (111111)  (22111)    (32111)
+%e A126796                                                (31111)    (41111)
+%e A126796                                                (211111)   (221111)
+%e A126796                                                (1111111)  (311111)
+%e A126796                                                           (2111111)
+%e A126796                                                           (11111111)
+%e A126796 (End)
 %p A126796 isCompl := proc(p,n) local m,pers,reps,f,lst,s; reps := {}; pers := combinat[permute](p); for m from 1 to nops(pers) do lst := op(m,pers); for f from 1 to nops(lst) do s := add( op(i,lst),i=1..f); reps := reps union {s}; od; od; for m from 1 to n do if not m in reps then RETURN(false); fi; od; RETURN(true); end: A126796 := proc(n) local prts, res,p; prts := combinat[partition](n); res :=0; for p from 1 to nops(prts) do if isCompl(op(p,prts),n) then res := res+1; fi; od; RETURN(res); end: for n from 1 to 40 do printf("%d %d ",n,A126796(n)); od; # _R. J. Mathar_, Feb 27 2007
 %p A126796 # At the beginning of the 2nd Maple program replace the current 15 by any other positive integer n in order to obtain a(n). - _Emeric Deutsch_, Mar 04 2007
 %p A126796 with(combinat): a:=proc(n) local P,b,k,p,S,j: P:=partition(n): b:=0: for k from 1 to numbpart(n) do p:=powerset(P[k]): S:={}: for j from 1 to nops(p) do S:=S union {add(p[j][i],i=1..nops(p[j]))} od: if nops(S)=n+1 then b:=b+1 else b:=b: fi: od: end: seq(a(n),n=1..30); # _Emeric Deutsch_, Mar 04 2007
@@ -25,6 +39,7 @@
 %t A126796 T[n_, k_] := T[n, k] = If[k <= 1, 1, If[n < 2k-1, T[n, Floor[(n+1)/2]], T[n, k-1] + T[n-k, k]]];
 %t A126796 a[n_] := T[n, Floor[(n+1)/2]];
 %t A126796 Table[a[n], {n, 0, 50}] (* _Jean-François Alcover_, Apr 11 2017, after _Franklin T. Adams-Watters_ *)
+%t A126796 nmz[y_]:=Complement[Range[Total[y]], Total/@Subsets[y]]; Table[Length[Select[IntegerPartitions[n], nmz[#]=={}&]],{n,0,15}] (* _Gus Wiseman_, Oct 14 2023 *)
 %o A126796 (PARI) {T(n,k)=if(k<=1,1,if(n<2*k-1,T(n,floor((n+1)/2)),T(n,k-1)+T(n-k,k)))}
 %o A126796 {a(n)=T(n,floor((n+1)/2))} /* If modified to save earlier results, this would be efficient. */ /* _Franklin T. Adams-Watters_, Mar 22 2007 */
 %o A126796 (PARI) /* As coefficients in g.f.: */
@@ -40,8 +55,14 @@
 %o A126796      | k > min m s = 0
 %o A126796      | otherwise   = pMemo (s + k) k (m - k) + pMemo s (k + 1) m
 %o A126796 -- _Reinhard Zumkeller_, Aug 07 2015
-%Y A126796 Cf. A002033, A003513, A188431, A209405, A261036, A286929, A286097.
-%K A126796 nonn,nice
+%Y A126796 Cf. A002033, A003513, A209405, A261036, A286929, A286097.
+%Y A126796 For parts instead of sums we have A000009 (sc. coverings), ranks A055932.
+%Y A126796 The strict case is A188431, complement A365831.
+%Y A126796 These partitions have ranks A325781.
+%Y A126796 First column k = 0 of A365923.
+%Y A126796 The complement is counted by A365924, ranks A365830.
+%Y A126796 Cf. A000041, A018818, A046663, A047967, A276024, A304792, A325799, A365543, A365658, A365918, A365921.
+%K A126796 nonn,nice,changed
 %O A126796 0,4
 %A A126796 _Brian Hopkins_, Feb 20 2007
 %E A126796 More terms from _R. J. Mathar_, Feb 27 2007
