@@ -1,4 +1,4 @@
-%I A090601 #13 Dec 19 2021 13:44:19
+%I A090601 #24 Oct 24 2023 10:09:23
 %S A090601 1,2,45,43968,6358196250,236919104155855296,
 %T A090601 3682959509036574988532481464,
 %U A090601 35398008251644050232134479709365068115968,292415292106611727928759157427747328169866020125762652311
@@ -9,6 +9,44 @@
 %H A090601 <a href="/index/Gre#groupoids">Index entries for sequences related to groupoids</a>
 %F A090601 a(n+1) = sum {1*s_1+2*s_2+...=n} (fixA[s_1, s_2, ...]/(1^s_1*s_1!*2^s_2*s2!*...)) where fixA[s_1, s_2, ...] = prod {i, j>=1} ( (1 + sum {d|lcm(i, j)} (d*s_d))^(gcd(i, j)*s_i*s_j))
 %F A090601 a(n) asymptotic to n^((n-1)^2+1)/n! = A090602(n)/A000142(n) = A090603(n)/A000142(n-1)
-%K A090601 nonn
+%o A090601 (Sage)
+%o A090601 R.<a> = InfinitePolynomialRing(QQ)
+%o A090601 @cached_function
+%o A090601 def Z(n):
+%o A090601     if n==0:
+%o A090601         return R.one()
+%o A090601     return sum(a[k]*Z(n-k) for k in (1..n))/n
+%o A090601 def magmas_identity(n):
+%o A090601     P = Z(n-1)
+%o A090601     q = 0
+%o A090601     c = P.coefficients()
+%o A090601     count = 0
+%o A090601     for m in P.monomials():
+%o A090601         r = 1
+%o A090601         T = m.variables()
+%o A090601         S = list(T)
+%o A090601         for u in T:
+%o A090601             i = R.varname_key(str(u))[1]
+%o A090601             j = m.degree(u)
+%o A090601             D = 1
+%o A090601             for d in divisors(i):
+%o A090601                 D += d*m.degrees()[-d-1]
+%o A090601             r *= D^(i*j^2)
+%o A090601             S.remove(u)
+%o A090601             for v in S:
+%o A090601                 k = R.varname_key(str(v))[1]
+%o A090601                 l = m.degree(v)
+%o A090601                 D = 1
+%o A090601                 for d in divisors(lcm(i,k)):
+%o A090601                     try:
+%o A090601                         D += d*m.degrees()[-d-1]
+%o A090601                     except:
+%o A090601                         break
+%o A090601                 r *= D^(gcd(i,k)*j*l*2)
+%o A090601         q += c[count]*r
+%o A090601         count += 1
+%o A090601     return q
+%o A090601 # _Philip Turecek_, Oct 10 2023
+%K A090601 nonn,changed
 %O A090601 1,2
 %A A090601 _Christian G. Bower_, Dec 05 2003
