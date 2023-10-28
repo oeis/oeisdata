@@ -1,8 +1,9 @@
-%I A108736 #8 Aug 08 2015 21:56:44
+%I A108736 #14 Oct 27 2023 13:10:12
 %S A108736 0,1,0,0,1,1,0,0,0,1,0,1,1,1,0,0,0,0,1,0,1,0,1,1,0,1,1,1,1,0,0,0,0,0,
 %T A108736 1,1,0,0,1,0,0,1,1,1,0,1,0,0,0,1,1,1,1,1,0,0,0,0,0,0,1,0,0,0,1,1,0,1,
 %U A108736 0,0,0,0,1,0,0,1,0,1,0,0,1,0,1,0,1,0,1,1,0,0,1,1,0,1,0,1,1,0,1,1,0,1,1,1,0
 %N A108736 Start with S = {}. For m = 1, 2, 3, ... in turn, examine all 2^m m-bit strings u in arithmetic order. If u is not a substring of S, append the minimal number of 0's and 1's to S to remedy this. Sequence gives S.
+%H A108736 Michael S. Branicky, <a href="/A108736/b108736.txt">Table of n, a(n) for n = 1..10001</a>
 %e A108736 We construct S as follows, starting with S = {}.
 %e A108736 0 is missing, so S = {0};
 %e A108736 1 is missing, so S = {0,1};
@@ -10,8 +11,21 @@
 %e A108736 01 and 10 are now visible, but 11 is missing, so S = {0,1,0,0,1,1};
 %e A108736 000 is missing, so S = {0,1,0,0,1,1,0,0,0}; etc.
 %p A108736 bString := proc(n,m) local a,i; a := [] ; for i from m-1 to 0 by -1 do a := [op(a), floor(n/2^i) mod 2] ; od: RETURN(a) ; end: A108736 := proc(nmax) local S,m,b,partoverl,overl,mbstr; S := [] ; m := 1: while nops(S) < nmax do for b from 0 to 2^m-1 do mbstr := bString(b,m) ; if verify(mbstr,S,'sublist') = false then partoverl := false ; for overl from m-1 to 1 by -1 do if verify(mbstr[1..overl],S[ -overl..-1],'sublist') = true then S := [op(S),op(mbstr[overl+1..nops(mbstr)])] ; partoverl := true ; break ; fi ; od; if partoverl = false then S := [op(S),op(mbstr)] ; fi ; fi ; od: m := m+1: od: RETURN(S) ; end: op(A108736(80)) ; # _R. J. Mathar_, Aug 15 2007
+%o A108736 (Python)
+%o A108736 from itertools import count, islice, product
+%o A108736 def a(): # generator of terms
+%o A108736     S = ""
+%o A108736     for Sm in ("".join(w) for i in count(1) for w in product("01", repeat=i)):
+%o A108736         if Sm in S: continue
+%o A108736         for i in range(1, len(Sm)+1):
+%o A108736             v = Sm[-i:]
+%o A108736             t = "" if len(v) == len(Sm) else S[-len(Sm)+i:]
+%o A108736             if t+v == Sm: break
+%o A108736         S += v
+%o A108736         yield from list(map(int, v))
+%o A108736 print(list(islice(a(), 105))) # _Michael S. Branicky_, Oct 27 2023
 %Y A108736 Cf. A108737.
-%K A108736 nonn,easy
+%K A108736 nonn,easy,changed
 %O A108736 1,1
 %A A108736 _N. J. A. Sloane_, Jun 23 2005
 %E A108736 More terms from _R. J. Mathar_, Aug 15 2007

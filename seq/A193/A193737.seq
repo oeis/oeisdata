@@ -1,11 +1,21 @@
-%I A193737 #24 Feb 27 2021 14:46:17
+%I A193737 #29 Oct 27 2023 13:09:44
 %S A193737 1,1,1,1,2,1,2,4,3,1,3,8,8,4,1,5,15,19,13,5,1,8,28,42,36,19,6,1,13,51,
 %T A193737 89,91,60,26,7,1,21,92,182,216,170,92,34,8,1,34,164,363,489,446,288,
-%U A193737 133,43,9,1,55,290,709,1068,1105,826,455,184,53,10,1,89,509,1362
+%U A193737 133,43,9,1,55,290,709,1068,1105,826,455,184,53,10,1,89,509,1362,2266,2619,2219,1414,682,246,64,11,1
 %N A193737 Mirror of the triangle A193736.
 %C A193737 This triangle is obtained by reversing the rows of the triangle A193736.
+%H A193737 G. C. Greubel, <a href="/A193737/b193737.txt">Rows n = 0..50 of the triangle, flattened</a>
 %F A193737 Write w(n,k) for the triangle at A193736.  This is then given by w(n,n-k).
 %F A193737 T(0,0) = T(1,0) = T(1,1) = T(2,0) = 1; T(n,k) = 0 if k<0 or k>n; T(n,k) = T(n-1,k) + T(n-1,k-1) + T(n-2,k). - _Philippe Deléham_, Feb 13 2020
+%F A193737 From _G. C. Greubel_, Oct 24 2023: (Start)
+%F A193737 T(n, 0) = Fibonacci(n) + [n=0] = A324969(n+1).
+%F A193737 T(n, n-1) = n, for n >= 1.
+%F A193737 T(n, n-2) = A034856(n-1), for n >= 2.
+%F A193737 T(2*n, n) = A330793(n).
+%F A193737 Sum_{k=0..n} T(n,k) = A052542(n).
+%F A193737 Sum_{k=0..n} (-1)^k * T(n,k) = A000007(n).
+%F A193737 Sum_{k=0..floor(n/2)} T(n-k, k) = A011782(n).
+%F A193737 Sum_{k=0..floor(n/2)} (-1)^k * T(n-k,k) = A019590(n). (End)
 %e A193737 First six rows:
 %e A193737   1;
 %e A193737   1,  1;
@@ -13,20 +23,39 @@
 %e A193737   2,  4,  3,  1;
 %e A193737   3,  8,  8,  4,  1;
 %e A193737   5, 15, 19, 13,  5,  1;
-%t A193737 p[0, x_] := 1
-%t A193737 p[n_, x_] := Fibonacci[n + 1, x] /; n > 0
-%t A193737 q[n_, x_] := (x + 1)^n
-%t A193737 t[n_, k_] := Coefficient[p[n, x], x^(n - k)];
-%t A193737 t[n_, n_] := p[n, x] /. x -> 0;
-%t A193737 w[n_, x_] := Sum[t[n, k]*q[n + 1 - k, x], {k, 0, n}]; w[-1, x_] := 1
-%t A193737 g[n_] := CoefficientList[w[n, x], {x}]
+%t A193737 (* First program *)
+%t A193737 z=20;
+%t A193737 p[0, x_]:= 1;
+%t A193737 p[n_, x_]:= Fibonacci[n+1, x] /; n > 0
+%t A193737 q[n_, x_]:= (x + 1)^n;
+%t A193737 t[n_, k_]:= Coefficient[p[n, x], x^(n-k)];
+%t A193737 t[n_, n_]:= p[n, x] /. x -> 0;
+%t A193737 w[n_, x_]:= Sum[t[n, k]*q[n-k+1, x], {k,0,n}]; w[-1, x_] := 1;
+%t A193737 g[n_]:= CoefficientList[w[n, x], {x}]
 %t A193737 TableForm[Table[Reverse[g[n]], {n, -1, z}]]
-%t A193737 Flatten[Table[Reverse[g[n]], {n, -1, z}]] (* A193736 *)
-%t A193737 TableForm[Table[g[n], {n, -1, z}]]
-%t A193737 Flatten[Table[g[n], {n, -1, z}]]          (* A193737 *)
+%t A193737 Flatten[Table[Reverse[g[n]], {n,-1,z}]] (* A193736 *)
+%t A193737 TableForm[Table[g[n], {n,-1,z}]]
+%t A193737 Flatten[Table[g[n], {n,-1,z}]]          (* A193737 *)
+%t A193737 (* Additional programs *)
 %t A193737 (* Function RiordanSquare defined in A321620. *)
-%t A193737 RiordanSquare[1 + 1/(1 - x - x^2), 11] // Flatten  (* _Peter Luschny_, Feb 27 2021 *)
-%Y A193737 Cf. A193736, A321620.
-%K A193737 nonn,tabl
+%t A193737 RiordanSquare[1 + 1/(1 - x - x^2), 11]//Flatten  (* _Peter Luschny_, Feb 27 2021 *)
+%t A193737 T[n_, k_]:= T[n, k]= If[n<3, Binomial[n, k], T[n-1,k] + T[n-1,k-1] + T[n-2,k]];
+%t A193737 Table[T[n, k], {n,0,12}, {k,0,n}]//Flatten (* _G. C. Greubel_, Oct 24 2023 *)
+%o A193737 (Magma)
+%o A193737 function T(n,k) // T = A193737
+%o A193737   if k lt 0 or n lt 0 then return 0;
+%o A193737   elif n lt 3 then return Binomial(n,k);
+%o A193737   else return T(n - 1, k) + T(n - 1, k - 1) + T(n - 2, k);
+%o A193737   end if;
+%o A193737 end function;
+%o A193737 [T(n,k): k in [0..n], n in [0..12]]; // _G. C. Greubel_, Oct 24 2023
+%o A193737 (SageMath)
+%o A193737 def T(n,k): # T = A193737
+%o A193737     if (n<3): return binomial(n,k)
+%o A193737     else: return T(n-1,k) +T(n-1,k-1) +T(n-2,k)
+%o A193737 flatten([[T(n,k) for k in range(n+1)] for n in range(13)]) # _G. C. Greubel_, Oct 24 2023
+%Y A193737 Cf. A000007, A011782 (diagonal sums), A019590, A052542 (row sums).
+%Y A193737 Cf. A034856, A193736, A321620, A324969, A330793.
+%K A193737 nonn,tabl,changed
 %O A193737 0,5
 %A A193737 _Clark Kimberling_, Aug 04 2011
