@@ -1,4 +1,4 @@
-%I A063448 #68 Aug 11 2023 15:55:18
+%I A063448 #91 Nov 06 2023 02:03:25
 %S A063448 4,4,4,2,8,8,2,9,3,8,1,5,8,3,6,6,2,4,7,0,1,5,8,8,0,9,9,0,0,6,0,6,9,3,
 %T A063448 6,9,8,6,1,4,6,2,1,6,8,9,3,7,5,6,9,0,2,2,3,0,8,5,3,9,5,6,0,6,9,5,6,4,
 %U A063448 3,4,7,9,3,0,9,9,4,7,3,9,1,0,5,7,5,3,2,6,9,3,4,7,6,4,7,6,5,2,3
@@ -7,7 +7,9 @@
 %C A063448 Circumference of the circumcircle of the unit square. - _Jonathan Sondow_, Nov 23 2017
 %C A063448 Half-perimeter of the closed curve with implicit Cartesian equation x^2 + y^2 = abs(x) + abs(y). - _Stefano Spezia_, Oct 20 2020
 %H A063448 Harry J. Smith, <a href="/A063448/b063448.txt">Table of n, a(n) for n = 1..20000</a>
+%H A063448 Peter Bala, <a href="/A063448/a063448.txt">Series for sqrt(2)*Pi</a>
 %H A063448 Eric Weisstein's World of Mathematics, <a href="https://mathworld.wolfram.com/GaussMultiplicationFormula.html">Gauss Multiplication Formula</a>.
+%H A063448 Wikipedia, <a href="https://en.wikipedia.org/wiki/Bailey%E2%80%93Borwein%E2%80%93Plouffe_formula">Bailey-Borwein-Plouffe formula</a>.
 %H A063448 <a href="/index/Tra#transcendental">Index entries for transcendental numbers</a>
 %F A063448 Equals Gamma(1/4)*Gamma(3/4). - _Jean-François Alcover_, Nov 24 2014
 %F A063448 From _Amiram Eldar_, Aug 06 2020: (Start)
@@ -18,12 +20,36 @@
 %F A063448 From _Andrea Pinos_, Jul 03 2023: (Start)
 %F A063448 Equals (Product_{k=1..4} Gamma(k/8)*Gamma(1 - k/8))^(1/4).
 %F A063448 General result: 2*Pi/(4*y)^(1/(2*y)) = (Product_{k=1..y} Gamma(k/(2*y))*Gamma(1 - k/(2*y)) )^(1/y). (End)
+%F A063448 From _Peter Bala_, Oct 22 2023: (Start)
+%F A063448 sqrt(2)*Pi = 4 + 8*Sum_{n >= 0} (-1)^n/(16*n^2 + 32*n + 15). See A141759.
+%F A063448 In the following the Eisenstein summation convention is assumed: that is,
+%F A063448 Sum_{n = -oo..oo} means Limit_{N -> oo} Sum_{n = -N..N}:
+%F A063448 sqrt(2)*Pi = 4*Sum_{n = -oo..oo} (-1)^n/(4*n + 1).
+%F A063448 More generally, it appears that for k >= 0, k not of the form 4*m + 1,
+%F A063448 sqrt(2)*Pi = -sign(cos(Pi*(k - 3)/4)) * 4*(2^floor(k/2))*k! * Sum_{n = -oo..oo} (-1)^n/((4*n + 1)*(4*n + 3)*...*(4*n + 2*k + 1)) (verified up to k = 50).
+%F A063448 sqrt(2)*Pi = (2^4)*Sum_{n >= 0} (-1)^n * (2*n + 1)/((4*n + 1)*(4*n + 3)) = 512/105 - (2^6)*4!*Sum_{n >= 0} (-1)^n * (2*n + 3)/((4*n + 1)*(4*n + 3)*...*(4*n + 11)).
+%F A063448 sqrt(2)*Pi = 4 + (2^3)*Sum_{n >= 0} (-1)^n * (4*n + 1)/((4*n + 1)*(4*n + 3)*(4*n + 5)) = 1408/315 - (2^5)*5!*Sum_{n >= 0} (-1)^n * (4*n + 1)/((4*n + 1)*(4*n + 3)*...*(4*n + 13)).
+%F A063448 sqrt(2)*Pi = 16/3 - (2^4)*3!*Sum_{n >= 0} (-1)^n/((4*n + 1)*(4*n + 3)*(4*n + 5)*(4*n + 7)) = 14848/3465 + (2^6)*7!*Sum_{n >= 0} (-1)^n/((4*n + 1)*(4*n + 3)*...*(4*n + 15)). (End)
 %e A063448 4.4428829381583662470158809900606936986146216893756902230853...
 %t A063448 RealDigits[N[Pi*Sqrt[2], 200]][[1]] (* _Vladimir Joseph Stephan Orlovsky_, Mar 21 2011*)
 %o A063448 (PARI) \p 400; Pi * sqrt(2)
 %o A063448 (PARI) default(realprecision, 20080); x=Pi*sqrt(2); for (n=1, 20000, d=floor(x); x=(x-d)*10; write("b063448.txt", n, " ", d)) \\ _Harry J. Smith_, Aug 21 2009
+%o A063448 (Python)  # Use some guard digits when computing.
+%o A063448 # BBP formula (1/8) P(1, 64, 12, (32, 0, 8, 0, 8, 0, -4, 0, -1, 0, -1, 0))
+%o A063448 from decimal import Decimal as dec, getcontext
+%o A063448 def BBPpisqrt2(n: int) -> dec:
+%o A063448     getcontext().prec = n
+%o A063448     s = dec(0); f = dec(1); g = dec(64)
+%o A063448     for k in range(int(n * 0.5536546824812272) + 1):
+%o A063448         twk = dec(12 * k)
+%o A063448         s += f * ( dec(32) / (twk + 1) + dec(8)  / (twk + 3)
+%o A063448                  + dec(8)  / (twk + 5) - dec(4)  / (twk + 7)
+%o A063448                  - dec(1)  / (twk + 9) - dec(1)  / (twk + 11))
+%o A063448         f /= g
+%o A063448     return s / dec(8)
+%o A063448 print(BBPpisqrt2(200))  # _Peter Luschny_, Nov 03 2023
 %Y A063448 Cf. A063447 (continued fraction), A093954, A153799, A193887, A244976, A247719.
-%K A063448 cons,nonn
+%K A063448 cons,nonn,changed
 %O A063448 1,1
 %A A063448 _Jason Earls_, Jul 24 2001
 %E A063448 Edited by _N. J. A. Sloane_, May 05 2007
