@@ -1,8 +1,8 @@
-%I A094471 #54 Jul 22 2020 13:24:32
+%I A094471 #74 Nov 15 2023 02:11:47
 %S A094471 0,1,2,5,4,12,6,17,14,22,10,44,12,32,36,49,16,69,18,78,52,52,22,132,
 %T A094471 44,62,68,112,28,168,30,129,84,82,92,233,36,92,100,230,40,240,42,180,
 %U A094471 192,112,46,356,90,207,132,214,52,312,148,328,148,142,58,552,60
-%N A094471 a(n) = n*tau(n) - sigma(n) = n*A000005(n) - A000203(n).
+%N A094471 a(n) = Sum_{(n - k)|n, 0 <= k <= n} k.
 %C A094471 Not all values arise and some arise more than once.
 %C A094471 Row sums of triangle A134866. - _Gary W. Adamson_, Nov 14 2007
 %C A094471 Sum of the largest parts of the partitions of n into two parts such that the smaller part divides the larger. - _Wesley Ivan Hurt_, Dec 21 2017
@@ -10,6 +10,7 @@
 %C A094471 If and only if sigma(n) divides a(n), then n is one of Ore's Harmonic numbers, A001599. - _Antti Karttunen_, Jul 18 2020
 %D A094471 P. A. MacMahon, Combinatory Analysis, Cambridge Univ. Press, London and New York, Vol. 1, 1915 and Vol. 2, 1916; see vol. 2, p 30.
 %H A094471 T. D. Noe, <a href="/A094471/b094471.txt">Table of n, a(n) for n = 1..10000</a>
+%F A094471 a(n) = n*tau(n) - sigma(n) = n*A000005(n) - A000203(n). [Previous name.]
 %F A094471 If p is prime, then a(p) = p*tau(p)-sigma(p) = 2p-(p+1) = p-1 = phi(p).
 %F A094471 If n>1, then a(n)>0.
 %F A094471 a(n) = Sum_{d|n} (n-d). - _Amarnath Murthy_, Jul 31 2005
@@ -18,10 +19,30 @@
 %e A094471 q^2 + 2*q^3 + 5*q^4 + 4*q^5 + 12*q^6 + 6*q^7 + 17*q^8 + 14*q^9 + ...
 %e A094471 For n = 4 the partitions of 4 into equal parts are [4], [2,2], [1,1,1,1]. The sum of all parts is 4 + 2 + 2 + 1 + 1 + 1 + 1 = 12. There are 7 parts, so a(4) = 12 - 7 = 5. - _Omar E. Pol_, Nov 30 2019
 %p A094471 with(numtheory); A094471:=n->n*tau(n)-sigma(n); seq(A094471(k), k=1..100); # _Wesley Ivan Hurt_, Oct 27 2013
+%p A094471 divides := (k, n) -> k = n or (k > 0 and irem(n, k) = 0):
+%p A094471 a := n -> local k; add(`if`(divides(n - k, n), k, 0), k = 0..n):
+%p A094471 seq(a(n), n = 1..61);  # _Peter Luschny_, Nov 14 2023
 %t A094471 Table[n*DivisorSigma[0, n] - DivisorSigma[1, n], {n, 1, 100}]
-%o A094471 (PARI) {a(n) = if( n<1, 0, n * numdiv(n) - sigma(n))} /* _Michael Somos_, Jan 25 2008 */
+%o A094471 (PARI) {a(n) = n*numdiv(n) - sigma(n)} /* _Michael Somos_, Jan 25 2008 */
+%o A094471 (SageMath)
+%o A094471 def A094471(n): return sum(k for k in (0..n) if (n-k).divides(n))
+%o A094471 print([A094471(n) for n in range(1, 62)])  # _Peter Luschny_, Nov 14 2023
+%o A094471 (Julia)
+%o A094471 using AbstractAlgebra
+%o A094471 function A094471(n)
+%o A094471     sum(k for k in 0:n if is_divisible_by(n, n - k))
+%o A094471 end
+%o A094471 [A094471(n) for n in 1:61] |> println  # _Peter Luschny_, Nov 14 2023
+%o A094471 (Python)
+%o A094471 from math import prod
+%o A094471 from sympy import factorint
+%o A094471 def A094471(n):
+%o A094471     f = factorint(n).items()
+%o A094471     return n*prod(e+1 for p,e in f)-prod((p**(e+1)-1)//(p-1) for p,e in f)
+%o A094471 # _Chai Wah Wu_, Nov 14 2023
 %Y A094471 Cf. A000005, A000010, A000203, A001599, A038040, A134866, A152211, A244051, A324121 (= gcd(a(n), sigma(n)).
 %Y A094471 Cf. A088827 (positions of odd terms).
-%K A094471 nonn,easy
+%K A094471 nonn,easy,changed
 %O A094471 1,3
 %A A094471 _Labos Elemer_, May 28 2004
+%E A094471 Simpler name by _Peter Luschny_, Nov 14 2023
