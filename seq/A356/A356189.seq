@@ -1,0 +1,58 @@
+%I A356189 #45 Nov 28 2023 01:09:03
+%S A356189 0,2,0,4,24,56,64,160,192,448,256,2816,1536,3584,18432,47104,77824,
+%T A356189 159744,385024,163840,360448,3932160,8126464,16515072,6029312,
+%U A356189 63963136,128974848,266338304,524288000,1069547520,2071986176,4211081216,8438939648,16240345088,32614907904,65364033536
+%N A356189 Optimal link functions for repeat avoidance in double elimination tournaments.
+%C A356189 A definition of the sequence in summary:
+%C A356189 n refers to the round number of the tournament, where the finals are 0, semifinals are 1, quarterfinals are 2, etc. Note that the sequence begins at index 1, as f_0 is the empty string.
+%C A356189 f_n is a link function, a binary string of n bits, and a(n) is the equivalent integer (shown in decimal). Note that the binary strings of some terms contain leading zeros. The link function pairs matches in the upper and lower brackets of a double elimination tournament (which are also labeled using a binary string of n bits) by a bitwise XOR operation.
+%H A356189 Chris Shaw, <a href="https://github.com/InvisiAU/masters-thesis-2022/blob/main/oeis.py">Generating Program</a>
+%H A356189 Chris Shaw, <a href="https://hdl.handle.net/1959.4/101364">Optimising Double Elimination Tournaments and The Effect of Character Choice in Esports</a> (2023), Master's thesis, pp. 29-34.
+%e A356189 The first 3 terms of the sequence are worked through (with accompanying diagrams) on pages 30 to 33 of the thesis found in the links section.
+%o A356189 (Python) # See linked file oeis.py
+%o A356189 (Julia)  # after the linked Python program
+%o A356189 function nearestparent(round1, round2, link1, link2)
+%o A356189     link2 *= 1 << (round1 - round2)
+%o A356189     parentround = 0
+%o A356189     while parentround <= round2
+%o A356189         parent1 = link1 >> (round1 - parentround)
+%o A356189         parent2 = link2 >> (round1 - parentround)
+%o A356189         if parent1 == parent2
+%o A356189             parentround += 1
+%o A356189         else break end
+%o A356189     end
+%o A356189 return parentround - 1 end
+%o A356189 function distance(round1, round2, link1, link2)
+%o A356189     lowerdist = upperdist = round1 - round2
+%o A356189     linkdiff = link1 - (link2 << upperdist)
+%o A356189     if !(0 <= linkdiff < (1 << upperdist))
+%o A356189         parentround = nearestparent(round1, round2, link1, link2)
+%o A356189         dist1 = round1 - parentround
+%o A356189         dist2 = round2 - parentround
+%o A356189         lowerdist = dist1 + dist2 - 1
+%o A356189     end
+%o A356189 return upperdist + 2 * lowerdist end
+%o A356189 function A356189(maxround::Int = 10)::Vector{Int}
+%o A356189     seq = [0]
+%o A356189     depth = 2
+%o A356189     for round in 2:maxround
+%o A356189         step = 2^(round - depth)
+%o A356189         conflicts = []
+%o A356189         for i in 0:step:(2^round - 1)
+%o A356189             distances = []
+%o A356189             for j in 1:round - 1
+%o A356189                 dist = distance(round, j, i, seq[j])
+%o A356189                 push!(distances, dist)
+%o A356189             end
+%o A356189             total = sum(1.0 / 2.0^k for k in distances)
+%o A356189             push!(conflicts, total * 2.0^round)
+%o A356189         end
+%o A356189         push!(seq, step * (argmin(conflicts) - 1))
+%o A356189         linkbinary = string(seq[end], base=2, pad=round)
+%o A356189         depth += linkbinary[depth] == '1' ? 1 : 0
+%o A356189     end
+%o A356189 return seq end
+%o A356189 println(A356189(36))  # _Peter Luschny_, Nov 28 2023
+%K A356189 nonn,new
+%O A356189 1,2
+%A A356189 _Chris Shaw_, Jul 28 2022
