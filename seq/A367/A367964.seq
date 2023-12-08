@@ -1,0 +1,58 @@
+%I A367964 #21 Dec 07 2023 16:07:25
+%S A367964 0,1,2,3,4,6,6,7,9,12,10,11,13,16,20,15,16,18,21,25,30,21,22,24,27,31,
+%T A367964 36,42,28,29,31,34,38,43,49,56,36,37,39,42,46,51,57,64,72,45,46,48,51,
+%U A367964 55,60,66,73,81,90,55,56,58,61,65,70,76,83,91,100,110
+%N A367964 Triangle read by rows. T(n, k) = (n*(n + 1) + k*(k + 1)) / 2.
+%C A367964 Second-order triangular numbers.
+%C A367964 If the rows of the triangle are extended for k > n, the array A144216 is created, which is symmetrical to the main diagonal and therefore contains no new information compared to this triangle.
+%F A367964 Recurrence: T(n, n) = n + T(n, n-1) starting with T(0, 0) = 0.
+%F A367964 For k <> n: T(n, k) = n + T(n-1, k).
+%F A367964 T(n, k) = t(n) + t(k), where t(n) are the triangular numbers A000217.
+%F A367964 G.f.: (x + x*(2 - 5*x + x^2)*y + x^4*y^2)/((1 - x)^3*(1 - x*y)^3). - _Stefano Spezia_, Dec 07 2023
+%e A367964 Triangle T(n, k) starts:
+%e A367964   0 |  0;
+%e A367964   1 |  1,  2;
+%e A367964   2 |  3,  4,  6;
+%e A367964   3 |  6,  7,  9, 12;
+%e A367964   4 | 10, 11, 13, 16, 20;
+%e A367964   5 | 15, 16, 18, 21, 25, 30;
+%e A367964   6 | 21, 22, 24, 27, 31, 36, 42;
+%e A367964   7 | 28, 29, 31, 34, 38, 43, 49, 56;
+%e A367964   8 | 36, 37, 39, 42, 46, 51, 57, 64, 72;
+%e A367964   9 | 45, 46, 48, 51, 55, 60, 66, 73, 81,  90;
+%e A367964  10 | 55, 56, 58, 61, 65, 70, 76, 83, 91, 100, 110;
+%e A367964 .
+%e A367964 Start at row 0, column 0 with 0. Go down by adding the column index in step n. At row n, restart the counting and go n steps right by adding the row index in step n, then change direction and go down again by adding the column index. After 3*n steps on this path you are at T(2*n, n) which is 2*triangular(n) + (triangular(2*n) - triangular(n)) = (5*n^2 + 3*n)/2. These are the sliced heptagonal numbers A147875 (see the illustration of Leo Tavares).
+%e A367964 .
+%e A367964 The equation T(n, k) = (n*(n + 1) + k*(k + 1))/2 can be extended to all n, k in ZZ.
+%e A367964   [n\k] ... -6  -5  -4  -3  -2  -1   0   1   2   3   4   5  ...
+%e A367964   -------------------------------------------------------------
+%e A367964   [-5] ..., 25, 20, 16, 13, 11, 10, 10, 11, 13, 16, 20, 25, ...
+%e A367964   [-4] ..., 21, 16, 12,  9,  7,  6,  6,  7,  9, 12, 16, 21, ...
+%e A367964   [-3] ..., 18, 13,  9,  6,  4,  3,  3,  4,  6,  9, 13, 18, ...
+%e A367964   [-2] ..., 16, 11,  7,  4,  2,  1,  1,  2,  4,  7, 11, 16, ...
+%e A367964   [-1] ..., 15, 10,  6,  3,  1,  0,  0,  1,  3,  6, 10, 15, ...
+%e A367964   [ 0] ..., 15, 10,  6,  3,  1,  0,  0,  1,  3,  6, 10, 15, ...
+%e A367964   [ 1] ..., 16, 11,  7,  4,  2,  1,  1,  2,  4,  7, 11, 16, ...
+%e A367964   [ 2] ..., 18, 13,  9,  6,  4,  3,  3,  4,  6,  9, 13, 18, ...
+%e A367964   [ 3] ..., 21, 16, 12,  9,  7,  6,  6,  7,  9, 12, 16, 21, ...
+%e A367964   [ 4] ..., 25, 20, 16, 13, 11, 10, 10, 11, 13, 16, 20, 25, ...
+%p A367964 T := (n, k) -> (n*(n + 1) + k*(k + 1)) / 2:
+%p A367964 for n from 0 to 10 do seq(T(n, k), k = 0..n) od;
+%t A367964 Module[{n=1},NestList[Append[#+n,n*++n]&,{0},10]] (* or *)
+%t A367964 Table[(n(n+1)+k(k+1))/2,{n,0,10},{k,0,n}] (* _Paolo Xausa_, Dec 07 2023 *)
+%o A367964 (Python)  # A purely additive construction:
+%o A367964 from functools import cache
+%o A367964 @cache
+%o A367964 def a_row(n: int) -> list[int]:
+%o A367964     if n == 0: return [0]
+%o A367964     row = a_row(n - 1) + [0]
+%o A367964     for k in range(n): row[k] += n
+%o A367964     row[n] = row[n - 1] + n
+%o A367964     return row
+%Y A367964 Columns: A000217, A000124, A152950, A166136, A121263.
+%Y A367964 Diagonals: A002378, A000290, A002061, A059100, A027689.
+%Y A367964 Cf. A147875 (T(2*n, n)), A016061 (row sums), A367965 (alternating row sums), A143216 (the multiplicative equivalent), A144216 (extended array).
+%K A367964 nonn,tabl,new
+%O A367964 0,3
+%A A367964 _Peter Luschny_, Dec 07 2023

@@ -1,14 +1,29 @@
-%I A058376 #20 Aug 01 2021 13:00:52
+%I A058376 #27 Dec 07 2023 09:51:00
 %S A058376 2,16,50,80,88,108,110,264,273,291,326,336,669,671,678,685,718,721,
 %T A058376 738,764,773,791,826,836,1433,1435,1558,1560,1616,1629,1636,1694,1696,
 %U A058376 1764,1773,1791,1826,1836,1928,1935,1968,1971,1988,2014,2023,2041,2076,2086
 %N A058376 Where the race of the count of final nonzero digit of k! changes, starting at k=2.
+%H A058376 Chai Wah Wu, <a href="/A058376/b058376.txt">Table of n, a(n) for n = 1..10000</a>
 %H A058376 <a href="/index/Fi#final">Index entries for sequences related to final digits of numbers</a>
 %e A058376 a(1) = 2 to start the race. At 15! the number of final twos is 5 and so is the number of eights. But at 16, eights now lead twos, so a(2) = 16 to reflect this fact.
 %e A058376 When k=10000 is reached, the count stands at 2509 twos, 2486 fours, 2494 sixes, and 2510 eights.
 %t A058376 f[ n_Integer, m_Integer ] := (c = 0; p = 1; While[ d = Floor[ n/5^p ]; d > 0, c = c + d; p++ ]; Mod[ n!/10^c, m ]); a = Table[ 0, {4} ]; r = 4; Do[ b = f[ n, 10 ]; Switch[ b, 2, a[ [ 1 ] ]++, 4, a[ [ 2 ] ]++, 6, a[ [ 3 ] ]++, 8, a[ [ 4 ] ]++ ]; If[ a[ [ b/2 ] ] > a[ [ r/2 ] ], r = b; Print[ n ] ], {n, 2, 10^4} ]
+%o A058376 (Python)
+%o A058376 from functools import reduce
+%o A058376 from itertools import count, islice
+%o A058376 from sympy.ntheory.factor_ import digits
+%o A058376 def A058376_gen(): # generator of terms
+%o A058376     a, k, i = [0]*4, 0, 1
+%o A058376     for n in count(2):
+%o A058376         m = (reduce(lambda x,y:x*y%10,((1,1,2,6,4)[a]*((6,2,4,8)[i*a&3] if i*a else 1) for i, a in enumerate(digits(n,5)[-1:0:-1])))*6%10>>1)-1
+%o A058376         a[m] += 1
+%o A058376         if a[m] > k:
+%o A058376             if m!=i:
+%o A058376                 yield n
+%o A058376             i, k = m, a[m]
+%o A058376 A058376_list = list(islice(A058376_gen(),48)) # _Chai Wah Wu_, Dec 07 2023
 %Y A058376 Cf. A045547, A045548, A045549, A045550.
-%K A058376 nonn,base
+%K A058376 nonn,base,changed
 %O A058376 1,1
 %A A058376 _Robert G. Wilson v_, Dec 19 2000
 %E A058376 Offset 1 from _Michel Marcus_, Jul 25 2021
