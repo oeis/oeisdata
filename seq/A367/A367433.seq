@@ -1,0 +1,35 @@
+%I A367433 #41 Dec 17 2023 11:20:56
+%S A367433 0,1,2,5,3,6,4
+%N A367433 Number of successive Patcail predecessors of n-th binary tree.
+%C A367433 A binary tree is either 0 or a pair [s,t] of binary trees. Binary trees are counted by Catalan numbers A000108 and ordered by their binary code as given by A014486. Subtrees s and t correspond to A072771 and A072772.
+%C A367433 Patcail defined the predecessor of [0,t] as t, and of [s,t], where s has predecessor s', as the result of replacing with [s',t] each occurrence of t within [s',t].
+%C A367433 a(7), corresponding to [[0,[0,0]],0], is too large to show, exceeding an exponential tower of 2^63 2's. a(8), corresponding to [[[0,0],0],0], is much larger still, starting to approach Graham's Number. The next 3 terms are modest again, at a(9)=4, a(10)=7, a(11)=5.
+%C A367433 The (A014138 indexed) subsequence for left skewed binary trees 0, [0,0], [[0,0],0], [[[0,0],0],0] ... forms an extremely fast growing sequence, at Buchholz's Ordinal in the Fast Growing Hierarchy.
+%C A367433 Initial predecessors of these left skewed trees have sizes a(n) satisfying
+%C A367433 a(n+1) = (a(n)+1)*(a(n)+3), which is A056207 counting the number of binary trees of height <= n.
+%H A367433 Code Golf, <a href="https://codegolf.stackexchange.com/questions/139355/golf-a-number-bigger-than-tree3/219466#219466">Patcail's winning answer to Code Golf challenge "Golf a number bigger than TREE(3)"</a>.
+%e A367433 a(3)=5, since the 3rd binary tree is [[0,0],0] and its 5 successive Patcail predecessors are [[0,0],[0,0]], [0,[0,[0,0]]], [0,[0,0]], [0,0], and 0:
+%e A367433 Index   n         3              6              4          2      1   0
+%e A367433 A014486(n)       12             50             42         10      2   0
+%e A367433 A063171(n)     1100         110010         101010       1010     10   0
+%e A367433 Tree       [[0,0],0]  [[0,0],[0,0]]  [0,[0,[0,0]]]  [0,[0,0]]  [0,0]  0
+%e A367433 A367433(n)        5              4              3          2      1   0
+%o A367433 (Haskell)
+%o A367433 data T = N | C T T deriving (Eq,Show)
+%o A367433 a014486 = [0..] >>= at where
+%o A367433   at 0 = [N]
+%o A367433   at n = [C s t | (ns,s) <- to$n-1, t <- at$n-1-ns]
+%o A367433   to n = (0,N):[(1+ns+nt,C s t)|n>0,(ns,s)<-to$n-1,(nt,t)<-to$n-1-ns]
+%o A367433 predT (C N t) = t
+%o A367433 predT (C s t) = go u where
+%o A367433   u = [predT s) t
+%o A367433   go v = if v==t then u else case v of
+%o A367433     N     -> N
+%o A367433     C s t -> [go s) (go t)
+%o A367433 a367433 = map nPred a014486 where
+%o A367433   nPred N = 0
+%o A367433   nPred t = 1 + nPred (predT t)
+%Y A367433 Cf. A000108, A014486, A014138, A056207.
+%K A367433 nonn,new
+%O A367433 0,3
+%A A367433 _John Tromp_, Nov 18 2023
