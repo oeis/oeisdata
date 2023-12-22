@@ -1,21 +1,51 @@
-%I A077439 #10 Jan 15 2017 10:30:02
+%I A077439 #30 Dec 21 2023 12:12:32
 %S A077439 0,1,10,100,1000,1049,10000,10490,100000,100499,104900,1000000,
 %T A077439 1004990,1049000,10000000,10004999,10049900,10490000,100000000,
 %U A077439 100049990,100499000,104900000,1000000000,1000049999,1000499900,1004990000,1044049999,1049000000,10000000000,10000499990,10004999000,10049900000,10440499990
-%N A077439 Numbers n such that n and n^2 have square decimal digits.
-%C A077439 Numbers n such that n and the square of n use only the digits 0, 1, 4 and 9.
-%C A077439 Notice the trick used in the first Mathematica program to convert decimal numbers to base 4 numbers and then map threes into nines and then twos into fours. This saves a lot of computing. - _Robert G. Wilson v_, Nov 08 2002
-%H A077439 Jonathan Wellons, <a href="/A077439/b077439.txt">Table of n, a(n) for n=1..68</a>
-%H A077439 J. Wellons, <a href="http://jonathanwellons.com/shared-digits/">Tables of Shared Digits</a>
-%e A077439 1049^2 = 1100401, therefore 1049 is a term; whereas A046030(6)=14 is not a term, as 14^2=196 and 6 is not a square digit.
-%e A077439 104900499999000^2 = 11004114900040199000001000000
+%N A077439 Numbers k such that k and k^2 have square decimal digits.
+%C A077439 Numbers k such that k and the square of k use only the digits 0, 1, 4 and 9.
+%C A077439 Notice the trick used in the first Mathematica program to convert decimal numbers to base-4 numbers and then map threes into nines and then twos into fours. This saves a lot of computing. - _Robert G. Wilson v_, Nov 08 2002
+%C A077439 From _Robert Israel_, Dec 18 2023: (Start)
+%C A077439 If k is a term, then so is 10 * k.
+%C A077439 Terms that do not end in 0 include
+%C A077439   10^(2*j+1) + 5*10^j - 1 for j >= 1, and
+%C A077439   10^(2*j+1) + 5*10^(2*j-i) - 10^(2*j-2*i) + 5*10^j - 1 for i >= 1 and j >= 4*i + 3. (End)
+%H A077439 David A. Corneth, <a href="/A077439/b077439.txt">Table of n, a(n) for n = 1..466</a> (first 68 terms from Jonathan Wellons)
+%H A077439 J. Wellons, <a href="http://jonathanwellons.com/shared-digits/">Tables of Shared Digits</a>.
+%H A077439 David A. Corneth, <a href="/A077439/a077439.gp.txt">PARI program</a>
+%H A077439 David A. Corneth, <a href="/A077439/a077439.png">pixelart from first 466 terms in b-file</a>
+%e A077439 1049^2 = 1100401, therefore 1049 is a term.
+%e A077439 A046030(6)=14 is not a term, as 14^2=196 and 6 is not a square digit.
+%e A077439 104900499999000^2 = 11004114900040199000001000000.
+%p A077439 M:= 15: # for terms of up to M digits
+%p A077439 f:= proc(n,d) n >= 10^(d-1) and convert(convert(n^2,base,10),set) subset {0,1,4,9} end proc:
+%p A077439 g:= proc(n,d) convert(convert(n^2 mod 10^d,base,10),set) subset {0,1,4,9} end proc:
+%p A077439 R:= 0, 1:
+%p A077439 C:= [0,1,9]:
+%p A077439 for d from 2 to M do
+%p A077439   C:= select(g,map(t -> (t, t+10^(d-1), t+4*10^(d-1), t+9*10^(d-1)), C),d);
+%p A077439   V:= select(f, C,d);
+%p A077439   R:= R, op(V);
+%p A077439 od:
+%p A077439 sort([R]); # _Robert Israel_, Dec 18 2023
 %t A077439 a = {}; Do[d = FromDigits[ ReplaceAll[ IntegerDigits[n, 4], {3 -> 9, 2 -> 4}]]; If[ Union[ Join[ IntegerDigits[d^2], {0, 1, 4, 9}]] == {0, 1, 4, 9}, a = Append[a, d]], {n, 0, 3*10^5}]; a
 %t A077439 With[{c={0,1,4,9}},Select[FromDigits/@Tuples[c,11],SubsetQ[c, IntegerDigits[ #^2]]&]] (* Requires Mathematica version 10 or later *) (* _Harvey P. Dale_, Jan 15 2017 *)
+%o A077439 (Python)
+%o A077439 from itertools import count, islice
+%o A077439 def A077429_gen(): # generator of terms
+%o A077439     for m in count(0):
+%o A077439         s = bin(m)[2:]
+%o A077439         if len(s)&1: s='0'+s
+%o A077439         n = int(''.join({'00':'0','01':'1','10':'4','11':'9'}[s[i:i+2]] for i in range(0,len(s),2)))
+%o A077439         if set(str(n**2)) <= {'0','1','4','9'}:
+%o A077439             yield n
+%o A077439 A077429_list = list(islice(A077429_gen(),20)) # _Chai Wah Wu_, Dec 19 2023
+%o A077439 (PARI) See PARI link
 %Y A077439 A077440(n) = a(n)^2.
 %Y A077439 Cf. A046030, A019544, A000290.
-%K A077439 base,nonn
+%K A077439 base,nonn,changed
 %O A077439 1,3
 %A A077439 _Reinhard Zumkeller_, Nov 06 2002
 %E A077439 Edited by _Robert G. Wilson v_, Nov 08 2002
 %E A077439 More terms from Jonathan Wellons (wellons(AT)gmail.com), Jan 22 2008
-%E A077439 Edited by _N. J. A. Sloane_, May 15 2008 at the suggestion of R. J. Mathar.
+%E A077439 Edited by _N. J. A. Sloane_, May 15 2008 at the suggestion of _R. J. Mathar_
