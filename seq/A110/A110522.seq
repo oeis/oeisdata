@@ -1,14 +1,25 @@
-%I A110522 #17 Jan 20 2018 16:46:12
+%I A110522 #27 Dec 29 2023 08:05:57
 %S A110522 1,-1,1,1,-5,1,-1,12,-9,1,1,-22,39,-13,1,-1,35,-115,82,-17,1,1,-51,
 %T A110522 270,-344,141,-21,1,-1,70,-546,1106,-773,216,-25,1,1,-92,994,-2954,
-%U A110522 3199,-1466,307,-29,1,-1,117,-1674,6888,-10791,7461,-2487,414,-33,1,1,-145,2655,-14484,31179,-30645,15060,-3900,537,-37,1,-1
-%N A110522 Riordan array (1/(1+x), x(1-2x)/(1+x)^2).
-%C A110522 Inverse of A110519. Row sums are A110523. Diagonal sums are A110524. Product of inverse binomial transform matrix (1/(1+x), x/(1+x)) and (1, x(1-3x)) (A110517).
-%H A110522 G. C. Greubel, <a href="/A110522/b110522.txt">Table of n, a(n) for the first 50 rows, flattened</a>
-%H A110522 P. Barry, <a href="https://cs.uwaterloo.ca/journals/JIS/VOL16/Barry2/barry231.html">A Note on a Family of Generalized Pascal Matrices Defined by Riordan Arrays</a>, J. Int. Seq. 16 (2013) #13.5.4
+%U A110522 3199,-1466,307,-29,1,-1,117,-1674,6888,-10791,7461,-2487,414,-33,1,1,-145,2655,-14484,31179,-30645,15060,-3900,537,-37,1
+%N A110522 Riordan array (1/(1+x), x*(1-2*x)/(1+x)^2).
+%C A110522 Inverse of A110519.
+%C A110522 Product of inverse binomial transform matrix (1/(1+x), x/(1+x)) and (1, x*(1-3*x)) (A110517).
+%H A110522 G. C. Greubel, <a href="/A110522/b110522.txt">Rows n = 0..50 of the triangle, flattened</a>
+%H A110522 Paul Barry, <a href="https://cs.uwaterloo.ca/journals/JIS/VOL16/Barry2/barry231.html">A Note on a Family of Generalized Pascal Matrices Defined by Riordan Arrays</a>, J. Int. Seq. 16 (2013) #13.5.4.
 %F A110522 Number triangle T(n, k) = Sum_{j=0..n} (-1)^(n-j)*C(n, j)*(-3)^(j-k)*C(k, j-k).
 %F A110522 T(n, k) = Sum_{j=0..n} Sum_{i=0..k} C(k, i)*C(n+k-i-j-1, n-k-i-j)*(-1)^(n-k)*2^i.
+%F A110522 Sum_{k=0..n} T(n, k) = A110523(n) (row sums).
+%F A110522 Sum_{k=0..floor(n/2)} T(n-k, k) = A110524(n) (diagonal sums).
 %F A110522 T(n,k) = T(n-1,k-1) - 2*T(n-1,k) - T(n-2,k) - 2*T(n-2,k-1), T(0,0) = 1, T(1,0) = -1, T(1,1) = 1, T(n,k) = 0 if k < 0 or if k > n. - _Philippe Deléham_, Jan 12 2014
+%F A110522 From _G. C. Greubel_, Dec 28 2023: (Start)
+%F A110522 T(n, 0) = A033999(n).
+%F A110522 T(n, 1) = (-1)^(n-1)*A000326(n), n >= 1.
+%F A110522 T(n, n) = 1.
+%F A110522 T(n, n-1) = -A016813(n-1), n >= 1.
+%F A110522 T(n, n-2) = A236267(n-2), n >= 2.
+%F A110522 Sum_{k=0..n} (-1)^k*T(n, k) = (-1)^n*A052924(n).
+%F A110522 Sum_{k=0..floor(n/2)} (-1)^k*T(n-k, k) = (-1)^n*A078005(n). (End)
 %e A110522 Rows begin
 %e A110522    1;
 %e A110522   -1,    1;
@@ -16,8 +27,18 @@
 %e A110522   -1,   12,   -9,    1;
 %e A110522    1,  -22,   39,  -13,    1;
 %e A110522   -1,   35, -115,   82,  -17,    1;
-%t A110522 T[0, 0] := 1; T[n_, k_] := Sum[(-1)^(n - j)*(-3)^(j - k)*Binomial[k, j - k]*Binomial[n, j], {j, 0, n}]; Table[T[n, k], {n, 0, 20}, {k, 0, n}] // Flatten (* _G. C. Greubel_, Aug 30 2017 *)
-%o A110522 (PARI) concat([1], for(n=1,20, for(k=0,n, print1(sum(j=0,n, (-1)^(n-j)*(-3)^(j-k)*binomial(n,j)*binomial(k, j-k)), ", ")))) \\ _G. C. Greubel_, Aug 30 2017
-%K A110522 easy,sign,tabl
+%t A110522 T[n_,k_]:= Sum[(-1)^(n-j)*(-3)^(j-k)*Binomial[k, j- k]*Binomial[n, j], {j,0,n}];
+%t A110522 Table[T[n,k], {n,0,20}, {k,0,n}]//Flatten (* _G. C. Greubel_, Aug 30 2017 *)
+%o A110522 (PARI) A110522(n,k) = if(n==0, 1, sum(j=0,n, (-1)^(n-j)*(-3)^(j-k)*binomial(n,j)*binomial(k, j-k)));
+%o A110522 for(n=0,12, for(k=0,n, print1(A110522(n,k), ", "))) \\ _G. C. Greubel_, Aug 30 2017; Dec 28 2023
+%o A110522 (Magma)
+%o A110522 A110522:= func< n,k | (-1)^(n+k)*(&+[ 3^(j-k)*Binomial(k,j-k)*Binomial(n,j) : j in [0..n]] ) >;
+%o A110522 [A110522(n,k): k in [0..n], n in [0..12]]; // _G. C. Greubel_, Dec 28 2023
+%o A110522 (SageMath)
+%o A110522 def A110522(n,k): return (-1)^(n+k)*sum(3^(j-k)*binomial(k,j-k)*binomial(n,j) for j in range(n+1))
+%o A110522 flatten([[A110522(n,k) for k in range(n+1)] for n in range(13)]) # _G. C. Greubel_, Dec 28 2023
+%Y A110522 Cf. A110519 (inverse), A110523 (row sums), A110524 (diagonal sums).
+%Y A110522 Cf. A000326, A016813, A033999, A052924, A078005, A110517, A236267.
+%K A110522 easy,sign,tabl,changed
 %O A110522 0,5
 %A A110522 _Paul Barry_, Jul 24 2005
