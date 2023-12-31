@@ -1,0 +1,64 @@
+%I A367900 #10 Dec 30 2023 23:12:45
+%S A367900 2,83,81131,894500063,88990607813,8499228209501,8597793891803,
+%T A367900 800072140300001,859981720058603,899969843983163,82943190509220401,
+%U A367900 86999838571212401,88290616680100001,89991996902408171,83909667566050103,89690298128004023,89919974791600043,8069990701280128001,8299959944574088001
+%N A367900 a(n) is the greatest prime q such that A367798(n)^2 is the sum of q and its reversal.
+%C A367900 a(n) is the last term q of A367796 such that A056964(q) = A367798(n)^2.
+%F A367900 A056964(a(n)) = A367798(n)^2.
+%e A367900 a(4) = 894500063 because A367798(3) = 35419 and 35419^2 = 1254505561 = 894500063 + 360005498 and 894500063 is the greatest prime that works.
+%p A367900 f:= proc(n) local y, c, d, dp, i, delta, m;
+%p A367900  y:= convert(n^2, base, 10);
+%p A367900  d:= nops(y);
+%p A367900  if d::even then
+%p A367900     if y[-1] <> 1 then return false fi;
+%p A367900     dp:= d-1;
+%p A367900     y:= y[1..-2];
+%p A367900     c[dp]:= 1;
+%p A367900  else
+%p A367900     dp:= d;
+%p A367900     c[dp]:= 0;
+%p A367900  fi;
+%p A367900  c[0]:= 0;
+%p A367900  for i from 1 to floor(dp/2) do
+%p A367900     delta:= y[i] - y[dp+1-i] - c[i-1] - 10*c[dp+1-i];
+%p A367900     if delta = 0 then c[dp-i]:= 0; c[i]:= 0;
+%p A367900     elif delta = -1 then c[dp-i]:= 1; c[i]:= 0;
+%p A367900     elif delta = -10 then c[dp-i]:= 0 ; c[i]:= 1;
+%p A367900     elif delta = -11 then c[dp-i]:= 1; c[i]:= 1;
+%p A367900     else return false
+%p A367900     fi;
+%p A367900     if y[i] + 10*c[i] - c[i-1] < 0  or (i=1 and y[i]+10*c[i]-c[i-1]=1) then return false fi;
+%p A367900   od;
+%p A367900   m:= (dp+1)/2;
+%p A367900   delta:= y[m] + 10*c[m] - c[m-1];
+%p A367900   if not member(delta, [seq(i, i=0..18, 2)]) then return false fi;
+%p A367900   [seq(y[i]+ 10*c[i]-c[i-1], i=1..m)]
+%p A367900 end proc:
+%p A367900 g:= proc(L) local T, d, t, p,  x, i; uses combinat;
+%p A367900   d:= nops(L);
+%p A367900   T:= cartprod([select(t -> t[1]::odd, [seq([L[1]-x, x], x=min(L[1], 9)..max(1, L[1]-9),-1)]),
+%p A367900     seq([seq([L[i]-x, x], x=min(9, L[i])..max(0, L[i]-9),-1)], i=2..d-1)]);
+%p A367900   while not T[finished] do
+%p A367900     t:= T[nextvalue]();
+%p A367900     p:= add(t[i][1]*10^(i-1), i=1..d-1) + L[-1]/2 * 10^(d-1) +
+%p A367900       add(t[i][2]*10^(2*d-i-1), i=1..d-1);
+%p A367900     if isprime(p) then return p fi;
+%p A367900   od;
+%p A367900 -1
+%p A367900 end proc:
+%p A367900 p:= 2, 11: Q:= 83:
+%p A367900  while p < 10^10 do
+%p A367900   p:= nextprime(p);
+%p A367900   d:= 1+ilog10(p^2);
+%p A367900   if d::even and p^2 >= 2*10^(d-1) then p:= nextprime(floor(10^(d/2)));  fi;
+%p A367900   v:= f(p);
+%p A367900   if v = false then next fi;
+%p A367900   q:= g(v);
+%p A367900   if q = -1 then next fi;
+%p A367900   Q:= Q, q;
+%p A367900 od:
+%p A367900 Q;
+%Y A367900 Cf. A056964, A367796, A367798, A367871.
+%K A367900 nonn,base,new
+%O A367900 1,1
+%A A367900 _Robert Israel_, Dec 04 2023
