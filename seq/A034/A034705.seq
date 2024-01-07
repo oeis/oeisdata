@@ -1,11 +1,14 @@
-%I A034705 #19 Sep 03 2015 08:34:22
+%I A034705 #38 Jan 06 2024 13:10:35
 %S A034705 0,1,4,5,9,13,14,16,25,29,30,36,41,49,50,54,55,61,64,77,81,85,86,90,
 %T A034705 91,100,110,113,121,126,135,139,140,144,145,149,169,174,181,190,194,
 %U A034705 196,199,203,204,221,225,230,245,255,256,265,271,280,284,285,289,294,302
 %N A034705 Numbers that are sums of consecutive squares.
 %C A034705 Also, differences of any pair of square pyramidal numbers (A000330). These could be called "truncated square pyramidal numbers". - _Franklin T. Adams-Watters_, Nov 29 2006
+%C A034705 If n is the sum of d consecutive squares up to m^2, n = A000330(m) - A000330(m-d) = d*(m^2 - (d-1)m + (d-1)(2d-1)/6 <=> m^2 - (d-1)m = c := n/d - (d-1)(2d-1)/6 <=> m = (d-1)/2 + sqrt((d-1)^2/4 + c) which must be an integer. Moreover, A000330(x) >= x^3/3, so m and d can't be larger than (3n)^(1/3). - _M. F. Hasler_, Jan 02 2024
 %H A034705 T. D. Noe, <a href="/A034705/b034705.txt">Table of n, a(n) for n = 1..10000</a>
 %H A034705 <a href="/index/Su#ssq">Index entries for sequences related to sums of squares</a>
+%e A034705 All squares (A000290: 0, 1, 4, 9, ...) are in this sequence, since "consecutive" in the definition means a subsequence without interruption, so a single term qualifies.
+%e A034705 5 = 1^2 + 2^2 = A000330(2) is in this sequence, and similarly 13 = 2^2 + p3^2  = A000330(3) - A000330(1) and 14 = 1^2 + 2^2 + 3^2 = A000330(3), etc.
 %t A034705 nMax = 1000; t = {0}; Do[k = n; s = 0; While[s = s + k^2; s <= nMax, AppendTo[t, s]; k++], {n, Sqrt[nMax]}]; t = Union[t] (* _T. D. Noe_, Oct 23 2012 *)
 %o A034705 (Haskell)
 %o A034705 import Data.Set (deleteFindMin, union, fromList); import Data.List (inits)
@@ -17,8 +20,26 @@
 %o A034705      where ws@(w:_) = reverse vs
 %o A034705            (y, s') = deleteFindMin s
 %o A034705 -- _Reinhard Zumkeller_, May 12 2015
+%o A034705 (PARI) {is_A034705(n)= for(d=1,sqrtnint(n*3,3), my(b = (d-1)/2, s = n/d - (d-1)*(d*2-1)/6 + b^2); denominator(s)==denominator(b)^2 && issquare(s, &s) && return(b+s)); !n} \\ Return the index of the largest square of the sum (or 1 for n = 0) if n is in the sequence, else 0. - _M. F. Hasler_, Jan 02 2024
+%o A034705 (Python)
+%o A034705 import heapq
+%o A034705 from itertools import islice
+%o A034705 def agen(): # generator of terms
+%o A034705     m = 0; h = [(m, 0, 0)]; nextcount = 1; v1 = None
+%o A034705     while True:
+%o A034705         (v, s, l) = heapq.heappop(h)
+%o A034705         if v != v1: yield v; v1 = v
+%o A034705         if v >= m:
+%o A034705             m += nextcount*nextcount
+%o A034705             heapq.heappush(h, (m, 1, nextcount))
+%o A034705             nextcount += 1
+%o A034705         v -= s*s; s += 1; l += 1; v += l*l
+%o A034705         heapq.heappush(h, (v, s, l))
+%o A034705 print(list(islice(agen(), 60))) # _Michael S. Branicky_, Jan 06 2024
 %Y A034705 Cf. A000290, A000330, A034706.
 %Y A034705 Cf. A217843-A217850 (sums of consecutive powers 3 to 10).
-%K A034705 nonn
+%Y A034705 Cf. A368570 (first of each pair of consecutive integers in this sequence).
+%K A034705 nonn,changed
 %O A034705 1,3
 %A A034705 _Erich Friedman_
+%E A034705 Terms a(1..10^4) double-checked with independent code by _M. F. Hasler_, Jan 02 2024
