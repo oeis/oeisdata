@@ -1,10 +1,11 @@
-%I A368096 #5 Dec 29 2023 16:42:16
+%I A368096 #9 Jan 11 2024 20:04:08
 %S A368096 1,0,1,0,1,1,0,1,2,1,0,1,4,3,1,0,1,5,8,3,1,0,1,8,18,13,3,1,0,1,9,32,
 %T A368096 37,15,3,1,0,1,13,55,96,59,16,3,1,0,1,14,91,209,196,74,16,3,1,0,1,19,
-%U A368096 138,449,573,313,82,16,3,1
+%U A368096 138,449,573,313,82,16,3,1,0,1,20,206,863,1529,1147,403,84,16,3,1
 %N A368096 Triangle read by rows where T(n,k) is the number of non-isomorphic set-systems of length k and weight n.
 %C A368096 A set-system is a finite set of finite nonempty sets.
 %C A368096 Conjecture: Column k = 2 is A101881.
+%H A368096 Andrew Howroyd, <a href="/A368096/b368096.txt">Table of n, a(n) for n = 0..1325</a> (rows 0..50)
 %e A368096 Triangle begins:
 %e A368096    1
 %e A368096    0   1
@@ -17,6 +18,7 @@
 %e A368096    0   1  13  55  96  59  16   3   1
 %e A368096    0   1  14  91 209 196  74  16   3   1
 %e A368096    0   1  19 138 449 573 313  82  16   3   1
+%e A368096    ...
 %e A368096 Non-isomorphic representatives of the set-systems counted in row n = 5:
 %e A368096   .  {12345}  {1}{1234}  {1}{2}{123}  {1}{2}{3}{12}  {1}{2}{3}{4}{5}
 %e A368096               {1}{2345}  {1}{2}{134}  {1}{2}{3}{14}
@@ -30,6 +32,13 @@
 %t A368096 mpm[n_]:=Join@@Table[Union[Sort[Sort /@ (#/.x_Integer:>s[[x]])]& /@ sps[Range[n]]],{s,Flatten[MapIndexed[Table[#2,{#1}]&,#]]& /@ IntegerPartitions[n]}];
 %t A368096 brute[m_]:=First[Sort[Table[Sort[Sort /@ (m/.Rule@@@Table[{i,p[[i]]},{i,Length[p]}])], {p,Permutations[Union@@m]}]]];
 %t A368096 Table[Length[Union[brute /@ Select[mpm[n],UnsameQ@@#&&And@@UnsameQ@@@#&&Length[#]==k&]]], {n,0,5},{k,0,n}]
+%o A368096 (PARI)
+%o A368096 WeighT(v)={Vec(exp(x*Ser(dirmul(v, vector(#v, n, (-1)^(n-1)/n))))-1, -#v)}
+%o A368096 permcount(v) = {my(m=1, s=0, k=0, t); for(i=1, #v, t=v[i]; k=if(i>1&&t==v[i-1], k+1, 1); m*=t*k; s+=t); s!/m}
+%o A368096 K(q, t, k)={WeighT(Vec(sum(j=1, #q, my(g=gcd(t, q[j])); g*x^(q[j]/g)) + O(x*x^k), -k))}
+%o A368096 G(n)={my(s=0); forpart(q=n, my(p=sum(t=1, n, y^t*subst(x*Ser(K(q, t, n\t))/t, x, x^t))); s+=permcount(q)*exp(p-subst(subst(p, x, x^2), y, y^2))); s/n!}
+%o A368096 T(n)={[Vecrev(p) | p <- Vec(G(n))]}
+%o A368096 { my(A=T(10)); for(n=1, #A, print(A[n])) } \\ _Andrew Howroyd_, Jan 11 2024
 %Y A368096 Row sums are A283877, connected case A300913.
 %Y A368096 For multiset partitions we have A317533.
 %Y A368096 Counting connected components instead of edges gives A321194.
@@ -46,3 +55,4 @@
 %K A368096 nonn,tabl,new
 %O A368096 0,9
 %A A368096 _Gus Wiseman_, Dec 28 2023
+%E A368096 Terms a(66) and beyond from _Andrew Howroyd_, Jan 11 2024
