@@ -1,0 +1,37 @@
+%I A368930 #15 Jan 12 2024 22:47:45
+%S A368930 1,11,27,17,33,70,23,29,51,37,92,41,74,43,82,65,69,47,53,136,106,87,
+%T A368930 59,67,71,154,172,118,111,79,146,83,123,378,89,97,153,212,125,101,103,
+%U A368930 121,119,107,113,225,250,127,159,206,202,218,155,183,143,131,137,139,161,1020,151,169,157,149,286
+%N A368930 a(n) is the least k which is divisible by none of its digits in exactly n bases, or 0 if there is no such k.
+%C A368930 a(n) is the least k, if it exists, such that A055240(k) = n.
+%C A368930 It appears that a(n) = 0 for n = 159, 208, 266, 267, 328, 405, 484, 492, ....
+%C A368930 Entries of 0 in the a-file are conjectural: if they are not 0, they are > 35000.
+%H A368930 Robert Israel, <a href="/A368930/a368930.txt">Table of n, a(n) for n = 1..1000</a>.  Entries of 0 are conjectural.
+%e A368930 a(3) = 17 because there are exactly 3 bases in which 17 is divisible by none of its digits: these bases are 5, 6, 7, because 17 = 32_5 = 25_6 = 23_7, and 17 is not divisible by any of the digits 2, 3 and 5 from these bases.  In every other base, 17 is divisible by at least one of its digits; e.g., in base 10, 17 is divisible by 1.  And 17 is the first number for which there are exactly 3 such bases.
+%p A368930 f:= proc(n)
+%p A368930    nops(select(b -> not ormap(d -> d <> 0 and n mod d = 0, convert(n,base,b)), [$3 .. (n-1)/2]))
+%p A368930 end proc:
+%p A368930 V:= Array(0..100): count:= 0:
+%p A368930 for n from 1 while count < 101 do
+%p A368930 v:= f(n);
+%p A368930 if v <= 100 and V[v] = 0 then V[v]:= n; count:= count+1 fi;
+%p A368930 od:
+%p A368930 convert(V,list);
+%t A368930 isDiv[k_, b_] := Module[{d}, d = IntegerDigits[k, b]; Or @@ (Mod[k, #] == 0 & /@ DeleteCases[d, 0])];
+%t A368930 co[k_] := co[k] = Module[{c = 0, b = 2}, While[b <= k, If[Not[isDiv[k, b]], c++]; b++]; c];
+%t A368930 a[n_] := a[n] = Module[{k = 1}, While[co[k] != n, k++;]; k];
+%t A368930 Table[a[n], {n, 0, 64}] (* _Robert P. P. McKone_, Jan 10 2024 *)
+%o A368930 (Python)
+%o A368930 from itertools import count, islice
+%o A368930 from sympy.ntheory.factor_ import digits
+%o A368930 def agen():
+%o A368930     adict, n = dict(), 0
+%o A368930     for k in count(1):
+%o A368930         v = sum(1 for i in range(2, k) if all(d==0 or k%d for d in digits(k, i)[1:]))
+%o A368930         if v not in adict: adict[v] = k
+%o A368930         while n in adict: yield adict[n]; n += 1
+%o A368930 print(list(islice(agen(), 65))) # _Michael S. Branicky_, Jan 10 2024
+%Y A368930 Cf. A055240.
+%K A368930 nonn,base,new
+%O A368930 0,2
+%A A368930 _Robert Israel_, Jan 09 2024
