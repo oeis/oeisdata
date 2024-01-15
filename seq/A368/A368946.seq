@@ -1,4 +1,4 @@
-%I A368946 #37 Jan 13 2024 16:14:45
+%I A368946 #43 Jan 14 2024 08:08:43
 %S A368946 31,310,311,31010,3110,31111,310101010,3110110,311110,311111111,301,
 %T A368946 310,31010101010101010,3110110110110,31111011110,3010,3100,3111111110,
 %U A368946 31111111111111111,3011111,3101111,3110111,3111011,3111101,3111110,3010,30101,31010
@@ -14,7 +14,7 @@
 %C A368946 See A368953 for a variant where, within a row, duplicates (if present) are removed and encoded strings are lexicographically ordered.
 %D A368946 Douglas R. Hofstadter, Gödel, Escher, Bach: an Eternal Golden Braid, Basic Books, 1979, pp. 41-49 and pp. 269-270.
 %H A368946 Paolo Xausa, <a href="/A368946/b368946.txt">Table of n, a(n) for n = 0..3670</a> (rows 0..7 of the triangle, flattened).
-%H A368946 Wikipedia, <a href="https://en.wikipedia.org/wiki/MU_puzzle">MU Puzzle</a>
+%H A368946 Wikipedia, <a href="https://en.wikipedia.org/wiki/MU_puzzle">MU Puzzle</a>.
 %H A368946 <a href="/index/Go#GEB">Index entries for sequences from "Goedel, Escher, Bach"</a>
 %e A368946 After recursively applying the rules three times, we get the following tree (cf. Hofstadter (1979), page 48, Figure 11).
 %e A368946 .
@@ -49,6 +49,28 @@
 %e A368946 Please note that some strings may be duplicated in different rows and within the same row: within the first four rows, the string MIU (310) is present in rows 1 and 3. In row 4, the string MUIU (3010) is present twice: it can be generated both by applying rule 3 to MIIIIU (311110) and by applying rule 1 to MUI (301). The initial string MI (31) first reappears in row 5.
 %t A368946 MIUStepO[s_] := Flatten[Map[{If[StringEndsQ[#, "1"], # <> "0", Nothing], # <> StringDrop[#, 1], StringReplaceList[#, "111" -> "0"], StringReplaceList[#, "00" -> ""]}&, s]];
 %t A368946 With[{rowmax = 4}, Map[FromDigits, NestList[MIUStepO, {"31"}, rowmax], {2}]]
+%o A368946 (Python)
+%o A368946 from itertools import islice
+%o A368946 def occurrence_swaps(w, s, t):
+%o A368946     out, oi = [], w.find(s)
+%o A368946     while oi != -1:
+%o A368946         out.append(w[:oi] + t + w[oi+len(s):])
+%o A368946         oi = w.find(s, oi+1)
+%o A368946     return out
+%o A368946 def moves(w): # moves for word w in MIU system, encoded as 310
+%o A368946     nxt = []
+%o A368946     if w[-1] == '1': nxt.append(w + '0')        # Rule 1
+%o A368946     if w[0] == '3': nxt.append(w + w[1:])       # Rule 2
+%o A368946     nxt.extend(occurrence_swaps(w, '111', '0')) # Rule 3
+%o A368946     nxt.extend(occurrence_swaps(w, '00', ''))   # Rule 4
+%o A368946     return nxt
+%o A368946 def agen(): # generator of terms
+%o A368946     frontier = ['31']
+%o A368946     while len(frontier) > 0:
+%o A368946         yield from [int(t) for t in frontier]
+%o A368946         reach1 = [m for p in frontier for m in moves(p)]
+%o A368946         frontier, reach1 = reach1, []
+%o A368946 print(list(islice(agen(), 28))) # _Michael S. Branicky_, Jan 14 2024
 %Y A368946 Cf. A331536, A368947 (row lengths), A368953 (variant).
 %K A368946 nonn,tabf,new
 %O A368946 0,1
