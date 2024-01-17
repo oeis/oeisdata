@@ -1,0 +1,58 @@
+%I A369203 #13 Jan 16 2024 12:12:30
+%S A369203 2,15,117,135,1224,10023,10026,50688,104445,100368,1012257,1002258,
+%T A369203 1034568,10027899,10024569,100002789,100234566,100236789
+%N A369203 a(n) is the first number that has n anagrams that each have n prime divisors, counted by multiplicity.
+%C A369203 a(n) is the first number that has n anagrams k such that A001222(k) = n.
+%H A369203 Robert Israel, <a href="/A369203/a369203.txt">Anagrams of a(n) with n prime divisors, for n = 1 to 18</a>
+%e A369203 a(4) = 135 is a term because 135 has 4 anagrams having 4 prime divisors, counted by multiplicity: 135 = 3^3 * 5, 315 = 3^2 * 5 * 7, 351 = 3^3 * 13 and 513 == 3^3 * 19, and no number < 135 works.
+%p A369203 f:= proc(n) # numbers k such that n has k anagrams with Omega = k
+%p A369203         local L, W,WS,V,d, w, x, i;
+%p A369203       L:= convert(n, base, 10); d:= nops(L);
+%p A369203       L:= select(t -> t[-1] <> 0, combinat:-permute(L));
+%p A369203       L:= map(t-> add(t[i]*10^(i-1), i=1..d), L);
+%p A369203       W:= map(t -> numtheory:-bigomega(t), L);
+%p A369203       WS:= convert(W,set);
+%p A369203       for x in WS do V[x]:= 0 od;
+%p A369203       for x in W do V[x]:= V[x]+1 od;
+%p A369203       select(x -> V[x] = x, WS);
+%p A369203 end proc:
+%p A369203 g:= proc(xin,d,n) # first anagrams with n digits starting xin, all other digits >= d
+%p A369203   option remember;
+%p A369203   local i;
+%p A369203   if 1 + ilog10(xin) = n then return xin fi;
+%p A369203   seq(procname(10*xin+i,i,n), i=d..9)
+%p A369203 end proc:
+%p A369203 h:= proc(n) # first anagrams with n digits
+%p A369203   local i,j;
+%p A369203   seq(seq(g(i*10^j,i,n),j=n-1..0,-1),i=1..9)
+%p A369203 end proc:
+%p A369203 V:= 'V': m:= 0:
+%p A369203 for d from 1 to 9 do
+%p A369203   for x in h(d) do
+%p A369203     for y in f(x) do
+%p A369203       if not assigned(V[y]) then V[y]:= x: m:= max(m,y) fi
+%p A369203 od od od:
+%p A369203 seq(V[y],y=1..m);
+%o A369203 (Python)
+%o A369203 from collections import Counter
+%o A369203 from sympy import primeomega as W
+%o A369203 from sympy.utilities.iterables import multiset_permutations as MP
+%o A369203 from itertools import combinations_with_replacement, count, islice
+%o A369203 def counteq(n):
+%o A369203     c = Counter(W(int("".join(p))) for p in MP(str(n)) if p[0]!='0')
+%o A369203     return [i for i in c if c[i] == i]
+%o A369203 def agen(): # generator of terms
+%o A369203     adict, n = dict(), 1
+%o A369203     for d in count(len(str(2**n))):
+%o A369203         for f in "123456789":
+%o A369203             for r in combinations_with_replacement("0123456789", d-1):
+%o A369203                 k = int(f+"".join(r))
+%o A369203                 for v in counteq(k):
+%o A369203                     if v not in adict:
+%o A369203                         adict[v] = k
+%o A369203                 while n in adict: yield adict[n]; n += 1
+%o A369203 print(list(islice(agen(), 8))) # _Michael S. Branicky_, Jan 16 2024
+%Y A369203 Cf. A001222, A369184. All terms are in A179239.
+%K A369203 nonn,base,more,new
+%O A369203 1,1
+%A A369203 _Robert Israel_, Jan 15 2024
