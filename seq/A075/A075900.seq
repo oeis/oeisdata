@@ -1,8 +1,8 @@
-%I A075900 #59 Aug 22 2020 18:50:19
+%I A075900 #63 Jan 25 2024 04:55:55
 %S A075900 1,1,3,7,19,43,115,259,659,1523,3731,8531,20883,47379,113043,259219,
 %T A075900 609683,1385363,3245459,7344531,17028499,38579603,88585619,199845267,
 %U A075900 457864595,1028904339,2339763603,5256820115,11896157587,26626389395
-%N A075900 G.f.: Product_{n>0} 1/(1 - 2^(n-1)*x^n).
+%N A075900 Expansion of g.f.: Product_{n>0} 1/(1 - 2^(n-1)*x^n).
 %C A075900 Number of compositions of partitions of n. a(3) = 7: 3, 21, 12, 111, 2|1, 11|1, 1|1|1. - _Alois P. Heinz_, Sep 16 2019
 %C A075900 Also the number of ways to split an integer composition of n into consecutive subsequences with weakly decreasing (or increasing) sums. - _Gus Wiseman_, Jul 13 2020
 %C A075900 This sequence is obtained from the generalized Euler transform in A266964 by taking f(n) = 1, g(n) = 2^(n-1). - _Seiichi Manyama_, Aug 22 2020
@@ -12,7 +12,7 @@
 %F A075900 G.f.: Sum_{n>=0} (a(n)/2^n)*x^n = Product_{n>0} 1/(1-x^n/2). - _Vladeta Jovovic_, Feb 11 2003
 %F A075900 a(n) = 1/n*Sum_{k=1..n} A080267(k)*a(n-k). - _Vladeta Jovovic_, Feb 11 2003
 %F A075900 G.f.: exp( Sum_{n>=1} x^n / (n*(1 - 2^n*x^n)) ). - _Paul D. Hanna_, Jan 13 2013
-%F A075900 a(n) = s(1,n), a(0)=1, where s(m,n)=sum(k=m..n/2, 2^(k-1)*s(k,n-k))+2^(n-1), s(n,n) = 2^(n-1), s(m,n)=0, m>. - _Vladimir Kruchinin_, Sep 06 2014
+%F A075900 a(n) = s(1,n), a(0)=1, where s(m,n) = Sum_{k=m..n/2} 2^(k-1)*s(k, n-k)  + 2^(n-1), s(n,n) = 2^(n-1), s(m,n)=0, m>. - _Vladimir Kruchinin_, Sep 06 2014
 %F A075900 a(n) ~ 2^(n-2) * (Pi^2 - 6*log(2)^2)^(1/4) * exp(sqrt((Pi^2 - 6*log(2)^2)*n/3)) / (3^(1/4) * sqrt(Pi) * n^(3/4)). - _Vaclav Kotesovec_, Mar 09 2018
 %e A075900 From _Gus Wiseman_, Jul 13 2020: (Start)
 %e A075900 The a(0) = 1 through a(4) = 19 splittings:
@@ -38,24 +38,35 @@
 %e A075900 (End)
 %p A075900 oo := 101; t1 := mul(1/(1-x^n/2),n=1..oo): t2 := series(t1,x,oo-1): t3 := seriestolist(t2): A075900 := n->2^n*t3[n+1];
 %p A075900 with(combinat); A075900 := proc(n) local i,t1,t2,t3; t1 := partition(n); t2 := 0; for i from 1 to nops(t1) do t3 := t1[i]; t2 := t2+2^(n-nops(t3)); od: t2; end;
-%t A075900 b[n_] := b[n] = Sum[d*2^(n - n/d), {d, Divisors[n]}]; a[0] = 1; a[n_] := a[n] = 1/n*Sum[b[k]*a[n - k], {k, 1, n}]; Table[a[n], {n, 0, 30}] (* _Jean-François Alcover_, Mar 20 2014, after _Vladeta Jovovic_, fixed by _Vaclav Kotesovec_, Mar 08 2018 *)
+%t A075900 b[n_]:= b[n]= Sum[d*2^(n - n/d), {d, Divisors[n]}];
+%t A075900 a[0]= 1; a[n_]:= a[n]= 1/n*Sum[b[k]*a[n-k], {k,n}];
+%t A075900 Table[a[n], {n,0,30}] (* _Jean-François Alcover_, Mar 20 2014, after _Vladeta Jovovic_, fixed by _Vaclav Kotesovec_, Mar 08 2018 *)
 %o A075900 (PARI) {a(n)=polcoeff(prod(k=1,n,1/(1-2^(k-1)*x^k+x*O(x^n))),n)} \\ _Paul D. Hanna_, Jan 13 2013
 %o A075900 (PARI) {a(n)=polcoeff(exp(sum(k=1,n+1,x^k/(k*(1-2^k*x^k)+x*O(x^n)))),n)} \\ _Paul D. Hanna_, Jan 13 2013
 %o A075900 (Maxima)
 %o A075900 s(m,n):=if n<m then 0 else if n=m then 2^(n-1) else sum(2^(k-1)*s(k,n-k),k,m,ceiling(n/2))+2^(n-1);
 %o A075900 makelist(s(1,n),n,1,27); /* _Vladimir Kruchinin_, Sep 06 2014 */
-%Y A075900 Cf. A300579, A327548.
+%o A075900 (Magma)
+%o A075900 m:=80;
+%o A075900 R<x>:=PowerSeriesRing(Integers(), m);
+%o A075900 Coefficients(R!( 1/(&*[1-2^(j-1)*x^j: j in [1..m+2]]) )); // _G. C. Greubel_, Jan 25 2024
+%o A075900 (SageMath)
+%o A075900 m=80;
+%o A075900 def A075900_list(prec):
+%o A075900     P.<x> = PowerSeriesRing(QQ, prec)
+%o A075900     return P( 1/product(1-2^(j-1)*x^j for j in range(1,m+1)) ).list()
+%o A075900 A075900_list(m) # _G. C. Greubel_, Jan 25 2024
 %Y A075900 Row sums of A327549.
 %Y A075900 The strict case is A304961.
-%Y A075900 Starting with a partition instead of composition gives A336136.
-%Y A075900 Starting with a reversed partition gives A316245.
 %Y A075900 Partitions of partitions are A001970.
 %Y A075900 Splittings with equal sums are A074854.
 %Y A075900 Splittings of compositions are A133494.
 %Y A075900 Splittings of partitions are A323583.
 %Y A075900 Splittings with distinct sums are A336127.
-%Y A075900 Cf. A006951, A063834, A317715, A319794, A323582, A336135.
-%K A075900 nonn
+%Y A075900 Starting with a reversed partition gives A316245.
+%Y A075900 Starting with a partition instead of composition gives A336136.
+%Y A075900 Cf. A006951, A063834, A300579, A317715, A319794, A323582, A327548, A336135.
+%K A075900 nonn,changed
 %O A075900 0,3
 %A A075900 _N. J. A. Sloane_, Oct 15 2002
 %E A075900 More terms from _Vladeta Jovovic_, Feb 11 2003

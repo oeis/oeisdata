@@ -1,13 +1,13 @@
-%I A307068 #21 Dec 16 2022 14:17:09
+%I A307068 #27 Jan 25 2024 08:02:53
 %S A307068 1,1,2,6,14,34,88,216,532,1322,3290,8142,20192,50080,124144,307878,
 %T A307068 763474,1893038,4694060,11639580,28861736,71567206,177460750,
 %U A307068 440037738,1091134276,2705618900,6708953156,16635775698,41250705518,102286806130,253634237896,628921097352,1559496588628
 %N A307068 Expansion of 1/(1 - Sum_{k>=1} k!*x^(k*(k+1)/2) / Product_{j=1..k} (1 - x^j)).
 %C A307068 Invert transform of A032020.
 %C A307068 Number of ways to choose a strict composition of each part of a composition of n. - _Gus Wiseman_, Jul 18 2020
+%C A307068 The Invert transform T(a) of a sequence a is given by T(a)_n = Sum_c Product_i a(c_i), where the sum is over all compositions c of n. - _Gus Wiseman_, Aug 01 2020
 %H A307068 Alois P. Heinz, <a href="/A307068/b307068.txt">Table of n, a(n) for n = 0..2536</a>
 %F A307068 a(0) = 1; a(n) = Sum_{k=1..n} A032020(k)*a(n-k).
-%F A307068 The Invert transform T(a) of a sequence a is given by T(a)_n = Sum_c Product_i a(c_i), where the sum is over all compositions c of n. - _Gus Wiseman_, Aug 01 2020
 %e A307068 From _Gus Wiseman_, Jul 18 2020: (Start)
 %e A307068 The a(1) = 1 through a(4) = 14 ways to choose a strict composition of each part of a composition:
 %e A307068     (1)  (2)      (3)          (4)
@@ -33,8 +33,19 @@
 %p A307068       add(a(n-i)*g(i), i=1..n))
 %p A307068     end:
 %p A307068 seq(a(n), n=0..32);  # _Alois P. Heinz_, Dec 16 2022
-%t A307068 nmax = 32; CoefficientList[Series[1/(1 - Sum[k! x^(k (k + 1)/2)/Product[(1 - x^j), {j, 1, k}], {k, 1, nmax}]), {x, 0, nmax}], x]
-%Y A307068 Cf. A307067, A317536.
+%t A307068 nmax = 32; CoefficientList[Series[1/(1 - Sum[k!*x^(k*(k+1)/2)/Product[ (1-x^j), {j,k}], {k,nmax}]), {x, 0, nmax}], x]
+%o A307068 (Magma)
+%o A307068 m:=80;
+%o A307068 R<x>:=PowerSeriesRing(Integers(), m);
+%o A307068 Coefficients(R!( 1/(1 - (&+[Factorial(k)*x^Binomial(k+1,2)/(&*[ 1-x^j: j in [1..k]]): k in [1..m+2]]) ) )); // _G. C. Greubel_, Jan 25 2024
+%o A307068 (SageMath)
+%o A307068 m=80;
+%o A307068 def p(x, j): return product(1-x^k for k in range(1,j+1))
+%o A307068 def f(x): return 1/(1 - sum(factorial(j)*x^binomial(j+1,2)/p(x,j) for j in range(1, m+3)) )
+%o A307068 def A307068_list(prec):
+%o A307068     P.<x> = PowerSeriesRing(QQ, prec)
+%o A307068     return P( f(x) ).list()
+%o A307068 A307068_list(m) # _G. C. Greubel_, Jan 25 2024
 %Y A307068 The version for partitions is A270995.
 %Y A307068 Starting with a strict composition gives A336139.
 %Y A307068 Strict compositions are counted by A032020.
@@ -47,7 +58,7 @@
 %Y A307068 Compositions of each part of a strict composition are A336127.
 %Y A307068 Set partitions of strict compositions are A336140.
 %Y A307068 Strict compositions of each part of a partition are A336141.
-%Y A307068 Cf. A001970, A318683, A318684, A319794, A323583, A336128, A336130, A336132.
-%K A307068 nonn
+%Y A307068 Cf. A001970, A307067, A317536, A318683, A318684, A319794, A323583, A336128, A336130, A336132.
+%K A307068 nonn,changed
 %O A307068 0,3
 %A A307068 _Ilya Gutkovskiy_, Mar 22 2019
