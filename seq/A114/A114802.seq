@@ -1,14 +1,29 @@
-%I A114802 #10 Jun 16 2016 02:50:48
+%I A114802 #15 Feb 01 2024 12:07:30
 %S A114802 1,2,3,4,5,6,7,8,9,10,11,20,22,30,33,40,44,50,55,60,66,70,77,80,88,90,
 %T A114802 99,100,121,131,141,151,161,171,181,191,200,212,232,242,252,262,272,
 %U A114802 282,292,300,313,323,343,353,363,373,383,393,400,414,424,434,454
 %N A114802 3-concatenation-free sequence starting (1,2).
 %C A114802 Starting with the terms (1,2) this sequence consists of minimum increasing integer terms such that no term is the concatenation of any two or three previous distinct terms. The next consecutive numbers skipped after 121 are 122 = Concatenate(1,22) and 123 = Concatenate(1,2,3). This is the analog of a 3-Stöhr sequence with concatenation (base 10) substituting for addition. A026474 is a 3-Stöhr sequence.
+%H A114802 Michael S. Branicky, <a href="/A114802/b114802.txt">Table of n, a(n) for n = 1..823</a>
 %H A114802 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/StoehrSequence.html">Stöhr Sequence.</a>
 %F A114802 a(0) = 1, a(1) = 2, for n>2: a(n) = least k > a(n-1) such that k is not an element of {Concatenate[a(h),a(i),a(j)]} or  {Concatenate[a(i),a(j)]} for any three distinct a(h), a(i), and a(j), where h, i, j < n.
 %t A114802 conc[w_] := Flatten[ (FromDigits /@ Flatten /@ IntegerDigits /@ (Permutations[#]) &) /@ Subsets[w, {2, 3}]]; up = 10^3; L = {1, 2, 3}; cc = conc[L]; Do[k = 1 + Max@L; While[MemberQ[cc, k], k++]; If[k > up, Break[]]; Do[cc = Union[cc, Select[ conc[{k, L[[i]], L[[j]]}], # <= up &]], {i, Length[L]}, {j, i - 1}]; AppendTo[L, k], {60}]; L (* _Giovanni Resta_, Jun 15 2016 *)
+%o A114802 (Python)
+%o A114802 from itertools import combinations, count, islice
+%o A114802 def agen(): # generator of terms
+%o A114802     cats1, cats2, cats3, an, s = {"1", "2"}, {"12", "21"}, set(), 3, "3"
+%o A114802     yield from [1, 2]
+%o A114802     while True:
+%o A114802         yield an
+%o A114802         for c, d in combinations(cats1, 2):
+%o A114802             cats3.update({s+c+d, s+d+c, c+s+d, d+s+c, c+d+s, d+c+s})
+%o A114802         cats2 |= {s + c for c in cats1} | {c + s for c in cats1}
+%o A114802         cats1.add(s)
+%o A114802         while (s:=str(an)) in cats1 or s in cats2 or s in cats3:
+%o A114802             an += 1
+%o A114802 print(list(islice(agen(), 59)))  # _Michael S. Branicky_, Feb 01 2024
 %Y A114802 Cf. A084383, A033627, A026474.
-%K A114802 base,easy,nonn
+%K A114802 base,easy,nonn,changed
 %O A114802 1,2
 %A A114802 _Jonathan Vos Post_, Feb 18 2006
 %E A114802 Corrected and edited by _Giovanni Resta_, Jun 15 2016
