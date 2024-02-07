@@ -1,21 +1,54 @@
-%I A334600 #17 Mar 07 2023 00:13:01
+%I A334600 #30 Feb 06 2024 11:43:45
 %S A334600 0,2,2,8,14,32,62,130,254,528,1038,2102,4194,8436,16826,33756,67438,
 %T A334600 135076,270022,540410,1080542,2161904,4323226,8647964,17294978,
 %U A334600 34592956,69183794,138373842,276743558,553499312,1106990758,2214005762,4427995526,8856040664
 %N A334600 Number of length-n binary strings having a unique border.
 %C A334600 A border of a string x is a nonempty prefix w != x that is also a suffix of x. For example, "ent" is a border of "entanglement".
 %C A334600 The formula given in Harju and Nowotka (2005) below does not seem to be correct.
+%H A334600 Daniel Gabric, <a href="/A334600/b334600.txt">Table of n, a(n) for n = 1..3322</a>
 %H A334600 Daniel Gabric and Jeffrey Shallit, <a href="https://arxiv.org/abs/2302.13147">Smallest and Largest Block Palindrome Factorizations</a>, arXiv:2302.13147 [math.CO], 2023.
 %H A334600 T. Harju and D. Nowotka, <a href="https://doi.org/10.1016/j.tcs.2005.03.040">Counting bordered and primitive words with a fixed weight</a>, Theoret. Comput. Sci. 340 (2005), 273-279.
 %F A334600 Formula due to Daniel Gabric: let u(n) denote the number of unbordered words of length n (that is, A003000(n)). Then
 %F A334600 a(n) = Sum_{i = 1..floor(n/2)} u(i)*B(n,i), where
 %F A334600 B(n,t) = 0 for n < 2t;
-%F A334600 B(n,t) = k^{n-2t} for 2t <= n < 3t;
-%F A334600 B(n,t) = k^{n-2t} - Sum_{i=2t..floor(n/2)} B(i,t)k^{n-2i},  for n >= 3t and (n+t) mod 2 == 1;
-%F A334600 B(n,t) = k^{n-2t} - B((n+t)/2,t) - sum(B(i,t)k^{n-2i}, i=2t..floor(n/2)) for n >= 3t and (n+t) mod 2 == 0.
+%F A334600 B(n,t) = k^(n-2t) for 2t <= n < 3t;
+%F A334600 B(n,t) = k^(n-2t) - Sum_{i=2t..floor(n/2)} B(i,t)*k^(n-2i), for n >= 3t and (n+t) mod 2 = 1;
+%F A334600 B(n,t) = k^(n-2t) - B((n+t)/2,t) - Sum_{i=2t..floor(n/2)} B(i,t)*k^(n-2i) for n >= 3t and (n+t) mod 2 = 0.
 %F A334600 Asymptotically the number of such strings is C*2^n, where C = 0.51549041372...
 %e A334600 For n = 5 the 14 strings counted are {00010, 00110, 01000, 01001, 01100, 01101, 01110} and their binary complements.
+%o A334600 (Python2)
+%o A334600 #code to count the number of words over a
+%o A334600 #k-letter alphabet that have a unique border
+%o A334600 N=10000
+%o A334600 k=2
+%o A334600 u = [0 for i in xrange(N+1)]
+%o A334600 dictionary={}
+%o A334600 def B(n,t,k):
+%o A334600     if n - 2*t < 0:
+%o A334600         return 0
+%o A334600     if n - 2*t < t:
+%o A334600         return k**(n-2*t)
+%o A334600     if (n,t,k) not in dictionary:
+%o A334600         total = 0
+%o A334600         for i in xrange(2*t, int(n/2)+1):
+%o A334600             total += B(i,t,k)*(k**(n-2*i))
+%o A334600         if n - 2*t >= t and (n+t) % 2 == 0:
+%o A334600             total += B((n+t)//2, t,k)
+%o A334600         dictionary[(n,t,k)] = (k**(n-2*t))-total
+%o A334600     return dictionary[(n,t,k)]
+%o A334600 #compute the number of binary unbordered words (A003000)
+%o A334600 u[0] = 1
+%o A334600 for i in xrange(1, N+1):
+%o A334600     if i % 2 == 0:
+%o A334600         u[i] = k*u[i-1]-u[i/2]
+%o A334600     else:
+%o A334600         u[i] = k*u[i-1]
+%o A334600 for n in xrange(1, N+1):
+%o A334600     total = 0
+%o A334600     for t in xrange(1, int(n/2)+1):
+%o A334600         total += u[t]*B(n,t,k)
+%o A334600     print n,total
 %Y A334600 Cf. A003000.
-%K A334600 nonn
+%K A334600 nonn,changed
 %O A334600 1,2
 %A A334600 _Jeffrey Shallit_, May 07 2020
