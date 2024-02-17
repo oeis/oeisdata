@@ -1,9 +1,11 @@
-%I A368110 #6 Dec 18 2023 08:28:59
+%I A368110 #15 Feb 16 2024 09:57:10
 %S A368110 1,2,3,5,6,7,9,10,11,13,14,15,17,19,21,22,23,25,26,29,30,31,33,34,35,
 %T A368110 37,38,39,41,42,43,45,46,47,49,51,53,55,57,58,59,61,62,63,65,66,67,69,
 %U A368110 70,71,73,74,75,77,78,79,82,83,85,86,87,89,91,93,94,95,97
 %N A368110 Numbers of which it is possible to choose a different divisor of each prime index.
 %C A368110 A prime index of n is a number m such that prime(m) divides n. The multiset of prime indices of n is row n of A112798.
+%C A368110 By Hall's marriage theorem, k is a term if and only if there is no sub-multiset S of the prime indices of k such that fewer than |S| numbers are divisors of a member of S. Equivalently, there is no divisor of k in A370348. - _Robert Israel_, Feb 15 2024
+%H A368110 Robert Israel, <a href="/A368110/b368110.txt">Table of n, a(n) for n = 1..10000</a>
 %e A368110 The terms together with their prime indices begin:
 %e A368110    1: {}
 %e A368110    2: {1}
@@ -26,6 +28,20 @@
 %e A368110   26: {1,6}
 %e A368110   29: {10}
 %e A368110   30: {1,2,3}
+%p A368110 filter:= proc(n) uses numtheory, GraphTheory; local B,S,F,D,E,G,t,d;
+%p A368110   F:= ifactors(n)[2];
+%p A368110   F:= map(t -> [pi(t[1]),t[2]], F);
+%p A368110   D:= `union`(seq(divisors(t[1]), t = F));
+%p A368110   F:= map(proc(t) local i;seq([t[1],i],i=1..t[2]) end proc,F);
+%p A368110   if nops(D) < nops(F) then return false fi;
+%p A368110   E:= {seq(seq({t,d},d=divisors(t[1])),t = F)};
+%p A368110   S:= map(t -> convert(t,name), [op(F),op(D)]);
+%p A368110   E:= map(e -> map(convert,e,name),E);
+%p A368110   G:= Graph(S,E);
+%p A368110   B:= BipartiteMatching(G);
+%p A368110   B[1] = nops(F);
+%p A368110 end proc:
+%p A368110 select(filter, [$1..100]); # _Robert Israel_, Feb 15 2024
 %t A368110 prix[n_]:=If[n==1,{},Flatten[Cases[FactorInteger[n],{p_,k_}:>Table[PrimePi[p],{k}]]]];
 %t A368110 Select[Range[100],Select[Tuples[Divisors/@prix[#]],UnsameQ@@#&]!={}&]
 %Y A368110 Positions of nonzero terms in A355739.
@@ -38,7 +54,7 @@
 %Y A368110 A324850 lists numbers divisible by the product of their prime indices.
 %Y A368110 A355731 counts choices of a divisor of each prime index, firsts A355732.
 %Y A368110 A355741 chooses prime factors of prime indices, variations A355744, A355745.
-%Y A368110 Cf. A000720, A076610, A111774, A335433, A335448, A340852, A355733, A355734, A355737, A355749.
-%K A368110 nonn
+%Y A368110 Cf. A000720, A076610, A111774, A335433, A335448, A340852, A355733, A355734, A355737, A355749, A370348.
+%K A368110 nonn,changed
 %O A368110 1,2
 %A A368110 _Gus Wiseman_, Dec 15 2023
