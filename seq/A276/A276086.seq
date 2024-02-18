@@ -1,4 +1,4 @@
-%I A276086 #200 Nov 27 2022 11:37:16
+%I A276086 #207 Feb 17 2024 18:23:20
 %S A276086 1,2,3,6,9,18,5,10,15,30,45,90,25,50,75,150,225,450,125,250,375,750,
 %T A276086 1125,2250,625,1250,1875,3750,5625,11250,7,14,21,42,63,126,35,70,105,
 %U A276086 210,315,630,175,350,525,1050,1575,3150,875,1750,2625,5250,7875,15750,4375,8750,13125,26250,39375,78750,49,98,147,294,441,882,245,490,735,1470,2205,4410,1225,2450
@@ -13,7 +13,7 @@
 %C A276086 From _Bill McEachen_, Oct 15 2022: (Start)
 %C A276086 From inspection, the least significant decimal digits of a(n) terms form continuous chains of 30 as follows. For n == i (mod 30), i=0..5, there are 6 ordered elements of these 8 {1,2,3,6,9,8,7,4}. Then for n == i (mod 30), i=6..29, there are 12 repeated pairs = {5,0}.
 %C A276086 Moreover, when the individual elements of any of the possible groups of 6 are transformed via (7*digit) (mod 10), the result matches one of the other 7 groupings (not all 7 may be seen). As example, {1,2,3,6,9,8} transforms to {7,4,1,2,3,6}. (End)
-%C A276086 The least significant digit of a(n) in base 4 is given by A353486. - _Antti Karttunen_, Oct 25 2022
+%C A276086 The least significant digit of a(n) in base 4 is given by A353486, and in base 6 by A358840. - _Antti Karttunen_, Oct 25 2022, Feb 17 2024
 %H A276086 Antti Karttunen, <a href="/A276086/b276086.txt">Table of n, a(n) for n = 0..2310</a>
 %H A276086 Antti Karttunen, <a href="https://github.com/loda-lang/loda-programs/blob/main/oeis/276/A276086.asm">Program in LODA-assembly</a>
 %H A276086 Antti Karttunen, <a href="/A276086/a276086.asm.txt">Program in LODA-assembly</a> [Cached copy]
@@ -82,12 +82,9 @@
 %t A276086 Table[a[n], {n, 0, 100}] (* _Jean-François Alcover_, Dec 01 2021, after _Antti Karttunen_'s Sage code *)
 %o A276086 (PARI) A276086(n) = { my(i=0,m=1,pr=1,nextpr); while((n>0),i=i+1; nextpr = prime(i)*pr; if((n%nextpr),m*=(prime(i)^((n%nextpr)/pr));n-=(n%nextpr));pr=nextpr); m; }; \\ _Antti Karttunen_, May 12 2017
 %o A276086 (PARI) A276086(n) = { my(m=1, p=2); while(n, m *= (p^(n%p)); n = n\p; p = nextprime(1+p)); (m); }; \\ (Better than above one, avoids unnecessary construction of primorials). - _Antti Karttunen_, Oct 14 2019
-%o A276086 (Scheme)
-%o A276086 (define (A276086 n) (let loop ((n n) (t 1) (i 1)) (if (zero? n) t (let* ((p (A000040 i)) (d (modulo n p))) (loop (/ (- n d) p) (* t (expt p d)) (+ 1 i))))))
-%o A276086 ;; A version following the given recurrence:
-%o A276086 (definec (A276086 n) (if (zero? n) 1 (* (expt (A053669 n) (A276088 n)) (A276086 (A276093 n)))))
-%o A276086 ;; Or even simpler:
-%o A276086 (definec (A276086 n) (if (zero? n) 1 (* (A053669 n) (A276086 (- n (A002110 (A276084 n)))))))
+%o A276086 (Scheme) (define (A276086 n) (let loop ((n n) (t 1) (i 1)) (if (zero? n) t (let* ((p (A000040 i)) (d (modulo n p))) (loop (/ (- n d) p) (* t (expt p d)) (+ 1 i))))))
+%o A276086 (Scheme) (definec (A276086 n) (if (zero? n) 1 (* (expt (A053669 n) (A276088 n)) (A276086 (A276093 n))))) ;; Needs macro definec from http://oeis.org/wiki/Memoization#Scheme
+%o A276086 (Scheme) (definec (A276086 n) (if (zero? n) 1 (* (A053669 n) (A276086 (- n (A002110 (A276084 n))))))) ;; Needs macro definec from http://oeis.org/wiki/Memoization#Scheme
 %o A276086 (Python)
 %o A276086 from sympy import prime
 %o A276086 def a(n):
@@ -112,8 +109,9 @@
 %o A276086         i += 1
 %o A276086     return (m)
 %o A276086 # _Antti Karttunen_, Oct 14 2019, after _Indranil Ghosh_'s Python code above, and my own leaner PARI code from Oct 14 2019. This avoids unnecessary construction of primorials.
+%o A276086 (APL, Dyalog Dialect) A276086 ← { P←47 43 41 37 31 29 23 19 17 13 11 7 5 3 2 ⋄ ×/P*¨P⊤⍵ } ⍝ _Antti Karttunen_, Feb 17 2024
 %Y A276086 Cf. A276085 (a left inverse) and also A276087, A328403.
-%Y A276086 Cf. A000040, A001221, A001222, A002110, A020639, A049345, A053669, A055396, A057588, A071178, A143293, A257993, A267263, A276084, A276088, A276092, A276093, A276147, A276150, A276151, A276153, A276156, A283477, A324198 (= gcd(n, a(n))), A328584 (= lcm(n, a(n))), A324646, A324289, A328386, A328403, A328475, A328571, A328572, A328578, A328612, A328613, A328620, A328624, A328627, A328763, A328766, A328828, A328835, A328841, A328842, A328843, A328844, A329041, A324580 [= n*a(n)], A324895 (largest proper divisor of a(n)), A351252, A353486 (reduced modulo 4), A353489, A353516.
+%Y A276086 Cf. A000040, A001221, A001222, A002110, A020639, A049345, A053669, A055396, A057588, A071178, A143293, A257993, A267263, A276084, A276088, A276092, A276093, A276147, A276150, A276151, A276153, A276156, A283477, A324198 (= gcd(n, a(n))), A328584 (= lcm(n, a(n))), A324646, A324289, A328386, A328403, A328475, A328571, A328572, A328578, A328612, A328613, A328620, A328624, A328627, A328763, A328766, A328828, A328835, A328841, A328842, A328843, A328844, A329041, A324580 [= n*a(n)], A324895 (largest proper divisor of a(n)), A351252, A353486 (reduced modulo 4), A358840 (modulo 6), A353489, A353516.
 %Y A276086 Cf. A048103 (terms sorted into ascending order), A100716 (natural numbers not present in this sequence).
 %Y A276086 Cf. A278226 (associated filter-sequence), A286626 (and its rgs-version), A328477.
 %Y A276086 Cf. A328316 (iterates started from zero).
@@ -121,7 +119,7 @@
 %Y A276086 Cf. also A327167, A329037.
 %Y A276086 Cf. A019565 and A054842 for base-2 and base-10 analogs and A276076 for the analogous "factorial base exp-function", from which this differs for the first time at n=24, where a(24)=625 while A276076(24)=7.
 %Y A276086 Cf. A327969, A351088, A351458 for sequences with conjectures involving this sequence.
-%K A276086 nonn,base,look
+%K A276086 nonn,base,look,changed
 %O A276086 0,2
 %A A276086 _Antti Karttunen_, Aug 21 2016
 %E A276086 Name edited and new link-formulas added by _Antti Karttunen_, Oct 29 2019
