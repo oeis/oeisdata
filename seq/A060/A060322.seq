@@ -1,24 +1,27 @@
-%I A060322 #26 Jan 24 2022 07:42:40
+%I A060322 #53 Feb 20 2024 10:50:26
 %S A060322 1,1,1,1,2,3,4,5,6,8,12,18,24,31,39,50,68,91,120,159,211,282,381,505,
 %T A060322 665,885,1187,1590,2122,2829,3765,5014,6682,8902,11878,15844,21122,
 %U A060322 28150,37536,50067,66763,89009,118631,158171,210939,281334,375129
 %N A060322 Consider the version of the Collatz or 3x+1 problem where x -> x/2 if x is even, x -> (3x+1)/2 if x is odd. Define the stopping time of x to be the number of steps needed to reach 1. Sequence gives the number of integers x with stopping time n.
-%C A060322 The Mathematica function StoppingTime[n] is the length of the Collatz sequence starting at n before hitting 1.
-%C A060322 I think the offset, examples, formula and code are all off by 1 - they all treat the stopping time of 1 to be 1, rather than 0. - _David Applegate_, Oct 16 2008
-%C A060322 a(n+1), n >= 0, is the row length of A248573(n,m) (Collatz-Terras tree). For the first differences see A131450(n+1), but with A131450(2) = 1 (the number of 2 (mod 3) numbers in row n, for n>= 0, of A248573).  - _Wolfdieter Lang_, May 04 2015
+%C A060322 The Mathematica function StoppingTime[n] is the length of the Collatz sequence starting at n before reaching 1.
+%C A060322 Suppose we have a list L of the numbers with StoppingTime n. Then the list LL of StoppingTime n+1 can be produced as: First. Add to LL all numbers in L multiplied by 2. Second. For the numbers x now in LL, if x == 1 (mod 3), AppendTo LL the number (x-1)/3 (if (x-1)/3 != 1). These two steps make LL complete.
+%C A060322 I think the offset, examples, formula and code are all off by 1 -- they all treat the stopping time of 1 to be 1, rather than 0. - _David Applegate_, Oct 16 2008
+%C A060322 a(n+1), n >= 0, is the row length of A248573(n,m) (Collatz-Terras tree). For the first differences see A131450(n+1), but with A131450(2) = 1 (the number of 2 (mod 3) numbers in row n, for n >= 0, of A248573). - _Wolfdieter Lang_, May 04 2015
 %H A060322 <a href="/index/3#3x1">Index entries for sequences related to 3x+1 (or Collatz) problem</a>
-%F A060322 Suppose we have a list L of the numbers with StoppingTime n. Then the list LL of StoppingTime n+1 can be produced as: First. Add to LL all numbers in L multiplied by 2. Second. For the numbers x now in LL, if x == 1 (mod 3), AppendTo LL the number (x-1)/3 (if (x-1)/3 != 1). These two steps make LL complete.
+%F A060322 Conjecture: lim_{n->oo} a(n) = a(n-1)*4/3. - _Joe Slater_, Jan 27 2024
 %e A060322 StoppingTime = 1: L = {1}, a(1)=1.
 %e A060322 StoppingTime = 2: L = {2}, a(2)=1.
 %e A060322 StoppingTime = 3: L = {4}, a(3)=1.
 %e A060322 StoppingTime = 4: L = {8}, a(4)=1.
-%e A060322 StoppingTime = 5: L = {5, 16}, a(5)=2. First, LL = {10, 32} (= 2*L) Second, 10 == 1 (mod 3), so we AppendTo LL also (10-1)/3 = 3. We get LL = {3, 10, 32}. So a(6) == 3.
+%e A060322 StoppingTime = 5: L = {5, 16}, a(5)=2. First, LL = {10, 32} (= 2*L). Second, 10 == 1 (mod 3), so we AppendTo LL also (10-1)/3 = 3. We get LL = {3, 10, 32}. So a(6) = 3.
 %t A060322 (*** Program #1 ***) For[v = 1, v <= 12, v++, lst = {}; For[n = 1, n < 2^v, n++, If[StoppingTime[n] == v, AppendTo[lst, n]]]; Print[lst]; Print[Length[lst]]; ]
 %t A060322 (*** Program #2 ***) lst1 = {1}; For[v = 1, v <= 12, v++, L1 = Length[lst1]; Print["Number of numbers with StoppingTime ", v, ": ", L1]; Print["List of numbers: ", lst1]; (* Numbers with StoppingTime n *) Print["Control of StoppingTime: ", Map[StoppingTime, lst1]]; (* Controll *) Print[""]; lst2 = 2 lst1; For[i = 1, i <= L1, i++, x = (lst2[[i]] - 1)/3; If[IntegerQ[x] && x != 1, AppendTo[lst2, x]]; ]; lst1 = Sort[lst2]; ]
 %t A060322 (*** Program #3 ***) lst0 = {}; lst1 = {1}; For[v = 1, v <= 35, v++, L1 = Length[lst1]; AppendTo[lst0, L1]; lst2 = 2 lst1; For[i = 1, i <= L1, i++, x = (lst2[[i]] - 1)/3; If[IntegerQ[x], AppendTo[lst2, x]]; ]; lst1 = Complement[lst2, {1}]; ]; lst0
-%o A060322 #Perl code to calculate terms after a(4): @x=(8,0);for($n=5;$n<=60;$n++){do{$q=2*shift(@x);push(@x,($q-1)/3)if($q%3==1);push @x,$q}while $q;print($#x,", ");} - _Carl R. White_, Oct 03 2006
-%Y A060322 See A005186 for another version. A248573, A131450.
-%K A060322 nonn
+%o A060322 (Perl) # code to calculate terms after a(4):
+%o A060322 @x=(8,0);for($n=5;$n<=60;$n++){do{$q=2*shift(@x);push(@x,($q-1)/3)if($q%3==1);push @x,$q}while $q;print($#x,", ");} # _Carl R. White_, Oct 03 2006
+%Y A060322 See A005186 for another version.
+%Y A060322 Cf. A248573, A131450.
+%K A060322 nonn,changed
 %O A060322 1,5
 %A A060322 Bo T. Ahlander (ahlboa(AT)isk.kth.se), Mar 29 2001
 %E A060322 More terms from _Carl R. White_, Oct 03 2006
