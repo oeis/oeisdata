@@ -1,10 +1,11 @@
-%I A178534 #24 Jan 24 2021 05:51:34
+%I A178534 #36 Feb 23 2024 14:24:57
 %S A178534 1,2,1,3,1,1,5,2,1,1,8,3,1,1,1,13,5,3,1,1,1,21,8,4,2,1,1,1,34,13,6,4,
 %T A178534 2,1,1,1,55,21,11,6,3,2,1,1,1,89,34,17,9,6,3,2,1,1,1,144,55,27,15,9,5,
 %U A178534 3,2,1,1,1,233,89,45,25,14,9,5,3,2,1,1,1,377,144,72,40,23,14,8,5,3,2,1,1,1
 %N A178534 Triangle T(n,k) read by rows. T(n,1) = A000045(n+1), k > 1: T(n,k) = (Sum_{i=1..k-1} T(n-i,k-1)) - (Sum_{i=1..k-1} T(n-i,k)).
+%H A178534 Andrew Howroyd, <a href="/A178534/b178534.txt">Table of n, a(n) for n = 1..1275</a> (rows 1..50)
 %F A178534 T(n,1) = A000045(n+1), k>1: T(n,k) = Sum_{i=1..k-1} T(n-i,k-1) - Sum_{i=1..k-1} T(n-i,k).
-%F A178534 T(n,k) = A129713*A051731. [_Mats Granvik_, Oct 22 2010]
+%F A178534 T(n,k) = A129713*A051731. - _Mats Granvik_, Oct 22 2010
 %F A178534 From _R. J. Mathar_, Sep 16 2017: (Start)
 %F A178534 G.f. 3rd column: x^3*(1+x)/((1-x-x^2)*(1+x+x^2)).
 %F A178534 G.f. 4th column: x^4/((1-x-x^2)*(1+x^2)) =x^4*(1+x)/((1-x-x^2)*(1+x+x^2+x^3)).
@@ -15,6 +16,7 @@
 %F A178534 Conjecture (by extrapolating): G.f. k-th column: x^k*(1-x^2)/((1-x-x^2)*(1-x^k)).
 %F A178534 G.f. (1-x^2)/(1-x-x^2)*Sum_{i>=1} (x*y)^i/(1-x^i) = (1-x^2)/(1-x-x^2)*A051731(x,y).
 %F A178534 (End)
+%F A178534 T(n,k) = A051731(n,k) + Sum_{j=1..floor(n/k)} Fibonacci(n-j*k). - _Andrew Howroyd_, Feb 23 2024
 %e A178534 Table begins:
 %e A178534    1;
 %e A178534    2,  1;
@@ -37,14 +39,18 @@
 %p A178534     end if;
 %p A178534 end proc:
 %p A178534 seq(seq(A178534(n,k),k=1..n),n=1..12) ; # _R. J. Mathar_, Oct 28 2010
-%o A178534 (Excel) =if(column()=1;if(row()=1;1;if(row()=2;2;indirect(address(row()-1;1))+indirect(address(row()-2;1)))); if(row()>=column(); sum(indirect(address(row()-column()+1; column()-1; 4)&":"&address(row()-column()+column()-1; column()-1; 4); 4))-sum(indirect(address(row()-column()+1; column(); 4)&":"&address(row()-column()+column()-1; column(); 4); 4)); 0))
+%t A178534 T[n_, 1] := Fibonacci[n+1];
+%t A178534 T[n_, k_] := T[n, k] = If[k > n, 0, Sum[T[n-i, k-1], {i, 1, k-1}] - Sum[T[n-i, k], {i, 1, k-1}]];
+%t A178534 Table[T[n, k], {n, 1, 13}, {k, 1, n}] // Flatten (* _Jean-François Alcover_, Feb 23 2024 *)
 %o A178534 (Python)
 %o A178534 from sympy.core.cache import cacheit
 %o A178534 from sympy import fibonacci
 %o A178534 @cacheit
 %o A178534 def A(n, k): return fibonacci(n + 1) if k==1 else 0 if k>n else sum([A(n - i, k - 1) for i in range(1, k)]) - sum([A(n - i, k) for i in range(1, k)])
 %o A178534 for n in range(1, 13): print([A(n, k) for k in range(1, n + 1)]) # _Indranil Ghosh_, Sep 15 2017
+%o A178534 (PARI) T(n,k)=(n % k==0) + sum(j=1,n\k,fibonacci(n-j*k)) \\ _Andrew Howroyd_, Feb 23 2024
 %Y A178534 Cf. 1st column=A000045(n+1), 2nd=A000045, 3rd=A093040, 4th=A006498. Matrix inverse of A178535.
-%K A178534 nonn,tabl
+%Y A178534 Cf. A051731, A129713.
+%K A178534 nonn,tabl,changed
 %O A178534 1,2
 %A A178534 _Mats Granvik_, May 29 2010
