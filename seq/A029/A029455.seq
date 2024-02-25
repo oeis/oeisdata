@@ -1,10 +1,10 @@
-%I A029455 #42 Sep 26 2023 19:26:34
+%I A029455 #50 Feb 24 2024 14:59:38
 %S A029455 1,2,3,5,6,9,10,12,15,18,20,25,27,30,36,45,50,54,60,69,75,90,100,108,
 %T A029455 120,125,135,150,162,180,200,216,225,248,250,270,300,324,360,375,405,
 %U A029455 450,470,500,540,558,600,648,675,710,750,810,900,1000,1053,1080,1116
 %N A029455 Numbers k that divide the (right) concatenation of all numbers <= k written in base 10 (most significant digit on left).
 %C A029455 Numbers k such that k divides A007908(k).
-%H A029455 Chai Wah Wu, <a href="/A029455/b029455.txt">Table of n, a(n) for n = 1..637</a> (first 236 terms from M. F. Hasler)
+%H A029455 Jason Yuen, <a href="/A029455/b029455.txt">Table of n, a(n) for n = 1..1195</a> (terms 1..236 from M. F. Hasler, terms 237..637 from Chai Wah Wu)
 %e A029455 k = 13 is not a term since 12345678910111213 is not divisible by 13.
 %t A029455 b = 10; c = {}; Select[Range[10^5], Divisible[FromDigits[c = Join[c, IntegerDigits[#, b]], b], #] &] (* _Robert Price_, Mar 11 2020 *)
 %t A029455 Select[Range[1200],Divisible[FromDigits[Flatten[IntegerDigits/@Range[#]]],#]&] (* _Harvey P. Dale_, Dec 31 2020 *)
@@ -12,12 +12,27 @@
 %o A029455 (PARI) c=0;for(d=1,1e9,for(n=d,-1+d*=10,(c=c*d+n)%n || print1(n","));d--) \\ _M. F. Hasler_, Sep 11 2011
 %o A029455 (Python)
 %o A029455 A029455_list, r = [], 0
-%o A029455 for n in range(1,10**6+1):
-%o A029455 ....r = r*10**len(str(n))+n
-%o A029455 ....if not (r % n):
-%o A029455 ........A029455_list.append(n) # _Chai Wah Wu_, Nov 05 2014
+%o A029455 for n in range(1,10**4+1):
+%o A029455     r = r*10**len(str(n))+n
+%o A029455     if not (r % n):
+%o A029455         A029455_list.append(n) # _Chai Wah Wu_, Nov 05 2014
+%o A029455 (Python)
+%o A029455 def concat_mod(base, k, mod):
+%o A029455   total, digits, n1 = 0, 1, 1
+%o A029455   while n1 <= k:
+%o A029455     n2, p = min(n1*base-1, k), n1*base
+%o A029455     # Compute ((p-1)*n1+1)*p**(n2-n1+1)-(n2+1)*p+n2 divided by (p-1)**2.
+%o A029455     # Since (a//b)%mod == (a%(b*mod))//b, compute the numerator mod (p-1)**2*mod.
+%o A029455     tmp = pow(p, n2-n1+1, (p-1)**2*mod)
+%o A029455     tmp = ((p-1)*n1+1)*tmp-(n2+1)*p+n2
+%o A029455     tmp = (tmp%((p-1)**2*mod))//(p-1)**2
+%o A029455     total = (total*pow(p, n2-n1+1, mod)+tmp)%mod
+%o A029455     digits, n1 = digits+1, p
+%o A029455   return total
+%o A029455 for k in range(1, 10**10+1):
+%o A029455   if concat_mod(10, k, k) == 0: print(k) # _Jason Yuen_, Jan 27 2024
 %Y A029455 Cf. A029447-A029470, A029471-A029494, A029495-A029518, A029519-A029542, A061931-A061954, A061955-A061978, A332580.
 %Y A029455 See A171785 for numbers that divide the concatenation of a(1) through a(n).
-%K A029455 nonn,base
+%K A029455 nonn,base,changed
 %O A029455 1,2
 %A A029455 _Olivier Gérard_
