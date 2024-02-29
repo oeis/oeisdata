@@ -1,23 +1,26 @@
-%I A348211 #13 Apr 23 2023 13:00:18
+%I A348211 #18 Feb 29 2024 01:45:04
 %S A348211 1,1,1,1,3,1,1,11,11,1,1,31,90,31,1,1,85,554,554,85,1,1,225,2997,6559,
 %T A348211 2997,225,1,1,595,15049,62755,62755,15049,595,1,1,1576,72496,527911,
 %U A348211 985758,527911,72496,1576,1,1,4203,341166,4094762,12956604,12956604,4094762,341166,4203,1
 %N A348211 Triangle read by rows giving coefficients of polynomials arising as numerators of certain Hilbert series.
 %C A348211 This corrects 544 -> 554 in row 8 of A013561.
 %C A348211 Write the g.f. of row n of A348210 as a rational polynomial nu(x)/(1-x)^(n-2). The triangle contains the coefficients [x^k] nu(x) in row n.
+%H A348211 G. C. Greubel, <a href="/A348211/b348211.txt">Rows n = 3..53 of the triangle, flattened</a>
 %H A348211 D.-N. Verma, <a href="/A012249/a012249.pdf">Towards Classifying Finite Point-Set Configurations</a>, 1997, Unpublished. [Scanned copy of annotated version of preprint given to me by the author in 1997. - _N. J. A. Sloane_, Oct 04 2021]
+%F A348211 Sum_{k=0..n-3} T(n, k) = A012249(n-2) (row sums).
+%F A348211 From _G. C. Greubel_, Feb 28 2024: (Start)
+%F A348211 T(n, k) = [x^k]( (1-x)^(n-2) * Sum_{k=0..n-3} A(n,k)*x^k ), where A(n,k) is the array of A348210.
+%F A348211 T(n, n-k) = T(n, k). (End)
 %e A348211 Triangle begins:
-%e A348211 1,
-%e A348211 1, 1,
-%e A348211 1, 3, 1,
-%e A348211 1, 11, 11, 1,
-%e A348211 1, 31, 90, 31, 1,
-%e A348211 1, 85, 554, 554, 85, 1,
-%e A348211 1, 225, 2997, 6559, 2997, 225, 1,
-%e A348211 1, 595, 15049, 62755, 62755, 15049, 595, 1,
-%e A348211 1, 1576, 72496, 527911, 985758, 527911, 72496, 1576, 1,
-%e A348211 1, 4203, 341166, 4094762, 12956604, 12956604, 4094762, 341166, 4203, 1,
-%e A348211 1, 11287, 1585343, 30113535, 151365138, 254018578, 151365138, 30113535, 1585343, 11287, 1
+%e A348211   1;
+%e A348211   1,    1;
+%e A348211   1,    3,     1;
+%e A348211   1,   11,    11,      1;
+%e A348211   1,   31,    90,     31,      1;
+%e A348211   1,   85,   554,    554,     85,      1;
+%e A348211   1,  225,  2997,   6559,   2997,    225,     1;
+%e A348211   1,  595, 15049,  62755,  62755,  15049,   595,    1;
+%e A348211   1, 1576, 72496, 527911, 985758, 527911, 72496, 1576,   1;
 %p A348211 read("transforms"):
 %p A348211 A348211_row := proc(n)
 %p A348211     local x,b,opoly ;
@@ -33,7 +36,18 @@
 %t A348211 A348210[n_, k_] := (-1/2)*Sum[(-1)^j*Binomial[n, j]* Binomial[(n-2*j)*k+n-j-2, n-3], {j, 0, Floor[(n-1)/2]}];
 %t A348211 row[n_] := Switch[n, 3, {1}, 4, {1, 1}, _, FindGeneratingFunction[Table[A348210[n, k], {k, 0, n-2}], x] // Numerator // CoefficientList[#, x]& // Abs];
 %t A348211 Table[row[n], {n, 3, 12}] // Flatten (* _Jean-François Alcover_, Apr 23 2023 *)
-%Y A348211 Cf. A012249 (row sums), A013561.
-%K A348211 tabl,nonn
+%o A348211 (Magma)
+%o A348211 R<x>:=PowerSeriesRing(Rationals(), 50);
+%o A348211 A:= func< n, k | (&+[(-1)^(j+1)*Binomial(n, j)*Binomial((n-2*j)*k+n-j-2, n-3)/2 : j in [0..Floor((n-1)/2)]]) >; // A=A348210
+%o A348211 p:= func< n,x | (1-x)^(n-2)*(&+[A(n,k)*x^k: k in [0..n]]) >;
+%o A348211 A348211:= func< n,k | Coefficient(R!( p(n,x) ), k) >;
+%o A348211 [A348211(n,k): k in [0..n-3], n in [3..15]]; // _G. C. Greubel_, Feb 28 2024
+%o A348211 (SageMath)
+%o A348211 def A(n, k): return sum( (-1)^(j+1)*binomial(n, j)*binomial((n-2*j)*k+n-j-2, n-3) for j in range(1+(n-1)//2) )/2 # A = A348210
+%o A348211 def p(n,x): return (1-x)^(n-2)*sum( A(n,k)*x^k for k in range(n+1) )
+%o A348211 def A348211(n,k): return ( p(n,x) ).series(x, n+1).list()[k]
+%o A348211 flatten([[A348211(n,k) for k in range(n-2)] for n in range(3,17)]) # _G. C. Greubel_, Feb 28 2024
+%Y A348211 Cf. A012249 (row sums), A013561, A013630.
+%K A348211 tabl,nonn,changed
 %O A348211 3,5
 %A A348211 _R. J. Mathar_, Oct 07 2021
