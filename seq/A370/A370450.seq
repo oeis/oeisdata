@@ -1,0 +1,59 @@
+%I A370450 #15 Mar 02 2024 14:20:58
+%S A370450 1,1,1,3,2,3,377,9,9,377,1037891564126671,754,27,754,1037891564126671
+%N A370450 Numerator triangle of PDF coefficients for probability A370448/A370449 read by rows.
+%C A370450 Given the problem case given in A370448 and A370449, the choice in positioning the first random number r_1 leads to a success probability density function PDF_L(r_1), where the success probability is the probability that with this choice, all future numbers will still be able to be placed following the optimal strategy.
+%C A370450 With a list of n spaces, placing r_1 such that there are L free places to the left and R=n-1-L free places to the right, the PDF is of the form C_{L,R} * r_1^L * (1-r_1)^R (see also: A370448, example section).
+%C A370450 {C(n)} = A370450(n)/A370451(n) provides the C coefficient triangle row by row, where the row number N is defined by N=L+R, and the column is either L or R (the triangle is symmetric).
+%C A370450 As such, n is converted to an (N,L,R) tuple as follows: 0 -> (0,0,0), 1 -> (1,0,1), 2 -> (1,1,0), 3 -> (2,0,2), 4 -> (2,1,1), 5 -> (2,2,0), 6 -> (3,0,3), 7 -> (3,1,2), ...
+%C A370450 All coefficients {C(n)}(n) are rational.
+%H A370450 Philip Geißler, <a href="/A370450/b370450.txt">Table of n, a(n) for n = 0..27</a>
+%F A370450 P(0) = 1
+%F A370450 P(n+1) = Integral_{x=0..1} max_{L=0..n} C_{L,n-L} x^L (1-x)^{n-L} dx
+%F A370450 C_{L,R} = (L+R)!/(L!R!) a(L) a(R)
+%F A370450 where P(n) = A370448(n)/A370449(n)
+%F A370450 and C(L,R) = A370450(L,R)/A370451(L,R)
+%e A370450 For n=3 (L=0, R=2), the first number r_1 was placed on the leftmost free space of the 3 space list (0 free spaces on the left, 2 on the right).
+%e A370450 The problem can now be constrained to solving the case of a list with only 2 spaces to fill.
+%e A370450 For such a list, the success probability is 3/4 = A370448(2)/A370449(2) (see A370448, example section).
+%e A370450 However, there is the extra constraint that both other random numbers r_2 and r_3 need to be smaller than r_1 as well.
+%e A370450 This results in the success probability density function PDF(r_1) = 3/4 * (1-r_1)*(1-r_1), which is dependent on the value of r_1, but assumes no knowledge of r_2 and r_3.
+%e A370450 The coefficient of the PDF is 3/4 = A370450(3)/A370451(3), and the numerator is thus a(3)=3.
+%e A370450 For n=4 (L=1, R=1), the first number r_1 was placed on the middle free space of the 3 space list (1 free spaces on the left, 1 on the right).
+%e A370450 The problem can now be constrained to solving the case of a list with only 1 space to fill twice.
+%e A370450 For such a list, the success probability is P(1) = 1 = A370448(1)/A370449(1) (see A370448, example section).
+%e A370450 However, there is the extra constraint that one of the other random numbers r_2 and r_3 needs to be smaller than r_1, and the other needs to be greater than r_1.
+%e A370450 There are 2 permutations that achieve this, and thus PDF(r_1) = 2 * 1 * 1 * (1-r_1)*(r_1) = Number of Permutations * P(1) * P(1) * (1-r_1)^1 * (r_1)^1
+%e A370450 The coefficient of the PDF is 2*1*1 = 2 = 2/1 = A370450(4)/A370451(4), and the numerator is thus a(4)=2.
+%e A370450 The triangle begins:
+%e A370450             1;
+%e A370450          1     1;
+%e A370450       3     2     3;
+%e A370450   377    9     9    377;
+%o A370450 (Python)
+%o A370450 import sympy
+%o A370450 binomial_sym_sympy = lambda L, R : sympy.functions.combinatorial.factorials.binomial(L+R, L)
+%o A370450 @functools.cache
+%o A370450 def C_analytic(L, R):
+%o A370450     return binomial_sym_sympy(L, R) * P_analytic(L) * P_analytic(R)
+%o A370450 @functools.cache
+%o A370450 def P_analytic(n):
+%o A370450     _zero, _one, _x = sympy.core.numbers.Zero(), sympy.core.numbers.One(), sympy.symbols("x")
+%o A370450     if n == 0: return _one
+%o A370450     # provide analytic expressions for the functions to integrate and the bounds of them
+%o A370450     int_bounds = [_zero, *[1/(1 + C_analytic(L+1, n-L-2)/C_analytic(L, n-L-1)) for L in range(n-1)], _one]
+%o A370450     int_polys = [sympy.poly(C_analytic(L, n-1-L) * _x**L * (1-_x)**(n-1-l), _x, domain="Q").integrate() for L in range(n)]
+%o A370450     int_summands = [int_poly(R_bound)-int_poly(L_bound) for int_poly, (L_bound, R_bound) in zip(int_polys, rolling(int_bounds, 2))]
+%o A370450     return sum(int_summands)
+%o A370450 # quickly convert n to (l,r) tuple up to n=999
+%o A370450 lrs, row, col = [], 0, 0
+%o A370450 for n in range(1000):
+%o A370450     lrs.append((row-col, col))
+%o A370450     if col == row: row, col = row+1, 0
+%o A370450     else: col += 1
+%o A370450 def A370450(n): return C_analytic(*lrs[n]).numerator
+%o A370450 def A370451(n): return C_analytic(*lrs[n]).denominator
+%Y A370450 Cf. A370451 (denominators).
+%Y A370450 Cf. A370448, A370449.
+%K A370450 tabl,frac,nonn,new
+%O A370450 0,4
+%A A370450 _Philip Geißler_, Feb 18 2024
