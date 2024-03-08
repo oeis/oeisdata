@@ -1,0 +1,59 @@
+%I A370707 #40 Mar 07 2024 10:46:22
+%S A370707 1,1,1,1,4,12,1,9,72,360,1,16,240,2880,20160,1,25,600,12600,201600,
+%T A370707 1814400,1,36,1260,40320,1088640,21772800,239500800,1,49,2352,105840,
+%U A370707 4233600,139708800,3353011200,43589145600,1,64,4032,241920,13305600,638668800,24908083200,697426329600,10461394944000
+%N A370707 Triangle read by rows: T(n, k) = (-1)^k*Product_{j=0..k-1} (j - n)*(j + n), for 0 <= k <= n.
+%C A370707 The definition, and also the representation T(n, k) = ff(n, k) * rf(n, k) (see the first formula), makes it natural to call this triangle the central factorial numbers.
+%F A370707 T(n, k) = FallingFactorial(n, k) * RisingFactorial(n, k).
+%F A370707 T(n, k) = (n*(n + k - 1)!)/(n - k)! if k > 0, and T(n, 0) = 1.
+%F A370707 Calling the numbers in the second formula cf leads to the memorable form cf(n, k) = ff(n, k) * rf(n, k). This identity generalizes to the function
+%F A370707   cf(x, n) = x*Gamma(x + n)/Gamma(x - n + 1) for n > 0 and cf(x, 0) = 1.
+%F A370707 The last equation shows that the variable 'n' does not have to be an integer but can be any complex number if only the quotient remains defined (which one often can achieve by taking the limit). Indeed, in the classical Steffensen-Riordan case, n/2 is used instead of n, which leads to the complex situation Sloane discusses in A008955.
+%F A370707 T(n, k) = -n*Pochhammer(1 - n - k, 2*k - 1) for n > 0.
+%F A370707 T(n, k) = k!*binomial(n, k)*Pochhammer(n, k) = k!*A370706(n, k).
+%F A370707 T(n, n) = n!*Pochhammer(n, n) (valid for n >= 0, whereas T(n, n) = (2*n)!/2 = A002674(n) is valid for n >= 1 only).
+%F A370707 T(n, k) = T(n, k - 1)*(n^2 - (k - 1)^2) if k > 0, otherwise 1. (Recurrence)
+%F A370707 The cf(n, k) are values of the polynomials Pcf(n, x) = Product_{k=0..n-1} (x^2 - k^2), whose coefficients vanish for odd powers and for even powers are A269944.
+%F A370707 T(n, k) = Pcf(k, n) where Pcf(k,x) = Sum_{j=0..k) (-1)^(k-j)*A269944(k,j)*x^(2*j).
+%F A370707 The central factorials can be described in three different ways: By the product T(n, k) = f(n, k) * rf(n, k), by the complex function cf(x, n), and through the polynomials Pcf(n, x). Although these relations are self-contained, they are regarded as only one-half of a more general notion, namely as central factorials of the first kind.
+%F A370707 There is a fundamental connection with the Stirling numbers of first kind (A048994). The easiest way to see this is to generalize the definition: Let CF(z, s) = Product_{j=0..n-1} (z - s(j)), where s(j) is some complex sequence. Then the coefficients of CF(z, s) are equal to the Stirling_1 numbers if s = 0, 1, 2, ..., n, ..., and they are equal to the coefficients of our Pcf(n, z) polynomials if s = 0, 1, 4, ..., n^2, .... (This is also why A269944 is called the 'Stirling cycle numbers of order 2'. For completeness, if s = 1, 1, 1, ..., then the coefficients of CF(z, s), the 'Stirling cycle numbers of order 0', are the signed Pascal triangle A130595. See A269947 for order 3.)
+%e A370707 Triangle starts:
+%e A370707   [0] 1;
+%e A370707   [1] 1,  1;
+%e A370707   [2] 1,  4,   12;
+%e A370707   [3] 1,  9,   72,    360;
+%e A370707   [4] 1, 16,  240,   2880,   20160;
+%e A370707   [5] 1, 25,  600,  12600,  201600,   1814400;
+%e A370707   [6] 1, 36, 1260,  40320, 1088640,  21772800,  239500800;
+%e A370707   [7] 1, 49, 2352, 105840, 4233600, 139708800, 3353011200, 43589145600;
+%e A370707 .
+%e A370707 T(n, k) is a product where 'n' is the 'center' and 'k' is the 'half-length' of the product. For instance, T(5, 4) = (5-3)*(5-2)*(5-1)*5 * 5*(5+1)*(5+2)*(5+3) = 201600. Now consider the polynomial P(4, x) = -36*x^2 + 49*x^4 - 14*x^6 + x^8. Evaluating this polynomial at x = 5 shows P(4, 5) = 201600 = T(5, 4). The coefficients of the polynomial are row 4 of A269944.
+%p A370707 T := (n, k) -> local j; (-1)^k * mul((j - n)*(j + n), j = 0..k-1):
+%p A370707 seq(seq(T(n, k), k = 0..n), n = 0..8);
+%p A370707 # The central factorial numbers:
+%p A370707 cf := (n, k) -> ifelse(k = 0, 1, n*(n + k - 1)! / (n - k)! ):
+%p A370707 for n from 0 to 6 do seq(cf(n, k), k = 0..n) od;
+%p A370707 # Alternative (recurrence):
+%p A370707 T := proc(n, k) option remember;
+%p A370707 if k = 0 then 1 else T(n, k - 1)*(n^2 - (k - 1)^2) fi end:
+%p A370707 for n from 0 to 7 do seq(T(n, k), k = 0..n) od;
+%p A370707 # Illustrating the connection with the cf-polynomials and their coefficients:
+%p A370707 cfpoly := (n,x) -> local k; mul(x^2 - k^2, k = 0..n-1):
+%p A370707 A370707row := n -> local k; [seq(cfpoly(k, n), k = 0..n)]:
+%p A370707 A204579row := n -> local k; [seq(coeff(cfpoly(n, x), x, 2*k), k = 0..n)]:
+%p A370707 for n from 0 to 5 do lprint([n], A370707row(n), A204579row(n)) od;
+%t A370707 T[n_, k_] := If[n == 0, 1, -n Pochhammer[1 - n - k, 2 k - 1]];
+%t A370707 Table[T[n, k], {n, 0, 8}, {k, 0, n}] // Flatten
+%o A370707 (SageMath)
+%o A370707 def T(n, k): return falling_factorial(n, k) * rising_factorial(n, k)
+%o A370707 for n in range(9): print([T(n, k) for k in range(n + 1)])
+%o A370707 (Python)
+%o A370707 from math import prod
+%o A370707 def T(n, k): return (-1)**k * prod((j - n)*(j + n) for j in range(k))
+%o A370707 print([T(n, k) for n in range(8) for k in range(n + 1)])
+%Y A370707 Diagonals: A002674, A327882.
+%Y A370707 Columns: A000290, A047928.
+%Y A370707 Cf. A370704 (row sums), A370706, A094728, A048994 (Stirling1), A130595 (order 0), A269947 (order 3)
+%K A370707 nonn,tabl,new
+%O A370707 0,5
+%A A370707 _Peter Luschny_, Feb 27 2024
