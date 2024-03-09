@@ -1,0 +1,54 @@
+%I A370915 #21 Mar 08 2024 12:30:02
+%S A370915 1,0,1,0,1,1,0,5,2,1,0,45,12,3,1,0,585,120,21,4,1,0,9945,1680,231,32,
+%T A370915 5,1,0,208845,30240,3465,384,45,6,1,0,5221125,665280,65835,6144,585,
+%U A370915 60,7,1,0,151412625,17297280,1514205,122880,9945,840,77,8,1
+%N A370915 A(n, k) = 4^n*Pochhammer(k/4, n). Square array read by ascending antidiagonals.
+%C A370915 The sequence of square arrays A(m, n, k) starts: A094587 (m = 1), A370419 (m = 2), A136212 (m = 3), this array (m = 4).
+%F A370915 A(n, k) = 4^n*Product_{j=0..n-1} (j + k/4).
+%F A370915 A(n, k) = 4^n*Gamma(k/4 + n) / Gamma(k/4) for k >= 1.
+%F A370915 The exponential generating function for column k is (1 - 4*x)^(-k/4). But much more is true: (1 - m*x)^(-k/m) are the exponential generating functions for the columns of the arrays A(m, n, k) = m^n*Pochhammer(k/m, n).
+%F A370915 The polynomials P(n, x) = Sum_{k=0..n} Stirling1(n, k)*(-4)^(n-k)*x^k are ordinary generating functions for row n, i.e., A(n, k) = P(n, k).
+%F A370915 In A370419 _Werner Schulte_ pointed out how A371025 is related to the LU decomposition of A370419. Here the same procedure can be used and amounts to A = A371026 * transpose(binomial triangle), where '*' denotes matrix multiplication. See the Maple section for an implementation.
+%e A370915 The array starts:
+%e A370915 [0] 1,    1,     1,     1,      1,      1,      1,      1,      1, ...
+%e A370915 [1] 0,    1,     2,     3,      4,      5,      6,      7,      8, ...
+%e A370915 [2] 0,    5,    12,    21,     32,     45,     60,     77,     96, ...
+%e A370915 [3] 0,   45,   120,   231,    384,    585,    840,   1155,   1536, ...
+%e A370915 [4] 0,  585,  1680,  3465,   6144,   9945,  15120,  21945,  30720, ...
+%e A370915 [5] 0, 9945, 30240, 65835, 122880, 208845, 332640, 504735, 737280, ...
+%e A370915 .
+%e A370915 Seen as the triangle T(n, k) = A(n - k, k):
+%e A370915 [0] 1;
+%e A370915 [1] 0,      1;
+%e A370915 [2] 0,      1,     1;
+%e A370915 [3] 0,      5,     2,    1;
+%e A370915 [4] 0,     45,    12,    3,   1;
+%e A370915 [5] 0,    585,   120,   21,   4,  1;
+%e A370915 [6] 0,   9945,  1680,  231,  32,  5, 1;
+%e A370915 [7] 0, 208845, 30240, 3465, 384, 45, 6, 1;
+%p A370915 A := (n, k) -> 4^n*pochhammer(k/4, n):
+%p A370915 for n from 0 to 5 do seq(A(n, k), k = 0..9) od;
+%p A370915 T := (n, k) -> A(n - k, k): seq(seq(T(n, k), k = 0..n), n = 0..9);
+%p A370915 # Using the exponential generating functions of the columns:
+%p A370915 EGFcol := proc(k, len) local egf, ser, n; egf := (1 - 4*x)^(-k/4);
+%p A370915 ser := series(egf, x, len+2): seq(n!*coeff(ser, x, n), n = 0..len) end:
+%p A370915 seq(lprint(EGFcol(n, 9)), n = 0..5);
+%p A370915 # Using the generating polynomials for the rows:
+%p A370915 P := (n, x) -> local k; add(Stirling1(n, k)*(-4)^(n - k)*x^k, k=0..n):
+%p A370915 seq(lprint([n], seq(P(n, k), k = 0..8)), n = 0..5);
+%p A370915 # Implementing the LU decomposition of A:
+%p A370915 with(LinearAlgebra):
+%p A370915 L := Matrix(7, 7, (n, k) -> A371026(n-1, k-1)):
+%p A370915 U := Matrix(7, 7, (n, k) -> binomial(n-1, k-1)):
+%p A370915 MatrixMatrixMultiply(L, Transpose(U));
+%t A370915 A[n_, k_] := 4^n * Pochhammer[k/4, n]; Table[A[n - k, k], {n, 0, 9}, {k, 0, n}] // Flatten (* _Amiram Eldar_, Mar 06 2024 *)
+%o A370915 (SageMath)
+%o A370915 def A(n, k): return 4**n * rising_factorial(k/4, n)
+%o A370915 for n in range(6): print([A(n, k) for k in range(9)])
+%Y A370915 Similar square arrays: A094587, A370419, A136212.
+%Y A370915 Rows: A000012, A001477, A028347, A370914.
+%Y A370915 Columns: A000007, A007696, A001813, A008545, A047053, A007696, A000407, A034176, A052570 and A034177, A051617, A051618, A051619, A051620.
+%Y A370915 Cf. A370913 (row sums of triangle), A371026.
+%K A370915 nonn,tabl,easy,new
+%O A370915 0,8
+%A A370915 _Peter Luschny_, Mar 06 2024
