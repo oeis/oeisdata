@@ -1,10 +1,11 @@
-%I A370448 #17 Mar 02 2024 14:19:43
+%I A370448 #21 Mar 10 2024 11:44:19
 %S A370448 1,1,3,377,1037891564126671,
 %T A370448 300437410741595765908031780282088610389625054477278441195747716452053155421581064323185688795147
 %N A370448 Numerator of probability to directly sort n uniform random values in [0,1] with perfect strategy.
 %C A370448 Given n random numbers distributed uniformly in [0,1], and a list of n places to put them, P(n) = A370448(n)/A370449(n) describes the probability that one is able to sort them directly in order with the following procedure:
 %C A370448 Take the first number. Without knowledge about the following numbers, place the number in the list such that the list is ordered (without moving any other number). Repeat until this is not possible anymore (i.e. because the new number would need to be inserted between two previously placed numbers directly next to each other on the list). If there are multiple valid spaces for placing the number in the list, the space is chosen that maximizes the total success probability. These probabilities are rational.
 %H A370448 Philip Geißler, <a href="/A370448/b370448.txt">Table of n, a(n) for n = 0..6</a>
+%H A370448 Reddit, User: Sarah_Carrygun, <a href="https://www.reddit.com/r/theydidthemath/comments/11rm4ka/comment/jciqo9z/">Original derivation of the success probability with perfect strategy</a>.
 %F A370448 P(0) = 1
 %F A370448 P(n+1) = Integral_{x=0..1} max_{L=0..n} C_{L,n-L} x^L (1-x)^{n-L} dx
 %F A370448 C_{L,R} = (L+R)!/(L!R!) a(L) a(R)
@@ -20,7 +21,8 @@
 %e A370448 {P(n)}(2) = Integral_{x=0..1} max(x, 1-x) dx = 3/4 = A370448(2)/A370449(2).
 %e A370448 This means that A370448(2) = 3.
 %o A370448 (Python)
-%o A370448 import sympy
+%o A370448 import sympy, functools
+%o A370448 from numpy.lib.stride_tricks import sliding_window_view as rolling
 %o A370448 binomial_sym_sympy = lambda L, R : sympy.functions.combinatorial.factorials.binomial(L+R, L)
 %o A370448 @functools.cache
 %o A370448 def C_analytic(L, R):
@@ -31,7 +33,7 @@
 %o A370448     if n == 0: return _one
 %o A370448     # provide analytic expressions for the functions to integrate and the bounds of them
 %o A370448     int_bounds = [_zero, *[1/(1 + C_analytic(L+1, n-L-2)/C_analytic(L, n-L-1)) for L in range(n-1)], _one]
-%o A370448     int_polys = [sympy.poly(C_analytic(L, n-1-L) * _x**L * (1-_x)**(n-1-l), _x, domain="Q").integrate() for L in range(n)]
+%o A370448     int_polys = [sympy.poly(C_analytic(L, n-1-L) * _x**L * (1-_x)**(n-1-L), _x, domain="Q").integrate() for L in range(n)]
 %o A370448     int_summands = [int_poly(R_bound)-int_poly(L_bound) for int_poly, (L_bound, R_bound) in zip(int_polys, rolling(int_bounds, 2))]
 %o A370448     return sum(int_summands)
 %o A370448 def A370448(n): return P_analytic(n).numerator
