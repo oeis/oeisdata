@@ -1,17 +1,40 @@
-%I A202805 #41 Jul 02 2023 12:48:56
+%I A202805 #53 Mar 11 2024 08:28:58
 %S A202805 6,12,25,48,94,184,363,719,1430,2851,5691,11371,22728,45443,90870
 %N A202805 a(n) is the largest k in an n_nacci(k) sequence (Fibonacci(k) for n=2, tribonacci(k) for n=3, etc.) such that n_nacci(k) >= 2^(k-n-1).
 %C A202805 From _Frank M Jackson_, Jul 02 2023: (Start)
-%C A202805 The family of Fibonacci sequences {2_nacci, 3_nacci,...,n_nacci} where 2_nacci is the Fibonacci sequence, 3_nacci is the tribonacci sequence etc. are all sequences that can be used as bases to code an integer because they are "complete" (sic) sequences. For instance, the Zenkendorf representation of integers as the sum of distinct Fibonacci numbers can be found using a greedy algorithm.
-%C A202805 If the n_nacci sequence starts with an offset of 0, then n_nacci(k) = 0 for 0 <= k <= n-2 and n_nacci(n-1) = 1. Thereafter, n_nacci(k) for k >= n continues as the sum of its previous n terms. This means that n_nacci(k) = 2^(k-n) for n <= k <= 2n-1. In the limit as n tends to infinity the n_nacci sequence after an initial large set of zeros followed by 1 has successive terms of ascending powers of 2. The sequence 2^n with n starting at 0 is, lexicologically, the most minimal "complete" (sic) sequence. Consequently for each n_nacci sequence there must be a largest k such that n_nacci(k) >= 2^(k-n-1). (End)
-%H A202805 Wikipedia, <a href="http://en.wikipedia.org/wiki/Complete_sequence">"Complete" sequence</a>. [Wikipedia calls a sequence "complete" (sic) if every positive integer is a sum of distinct terms. This name is extremely misleading and should be avoided. - _N. J. A. Sloane_, May 20 2023]
-%H A202805 Wikipedia, <a href="https://en.wikipedia.org/wiki/Zeckendorf%27s_theorem">Zeckendorf's theorem </a>.
-%F A202805 a(n) = greatest k such that n_nacci(k) >= 2^(k-n-1).
+%C A202805 Define the n_nacci sequence, basically row n in A092921, with an offset of 0, n_nacci(k) = 0 for 0 <= k <= n-2 and n_nacci(n-1) = 1. Thereafter, n_nacci(k) for k >= n continues as the sum of its previous n terms.
+%C A202805 This means that n_nacci(k) = 2^(k-n) for n <= k <= 2n-1. In the limit as n tends to infinity the n_nacci sequence after an initial large set of zeros followed by 1 has successive terms of ascending powers of 2.
+%C A202805 As the n-acci constants, (A001622, A058265, A086088, A103814,...) are smaller than 2, for each n_nacci sequence there is a largest k such that n_nacci(k) >= 2^(k-n-1). (End)
 %e A202805 For n=3, the tribonacci sequence is 0,0,1,1,2,4,7,...,149,274,504,... and the 13th term is 504 < 512 so a(n)=12 because 274 is greatest term >= 2^(12-3-1) = 256.
-%t A202805 fib[n_, m_] := (Block[{nacci}, (Do[nacci[g]=0, {g, 0, m - 2}];nacci[m-1]=1;nacci[p_] := (nacci[p]=Sum[nacci[h], {h, p-m, p-1}]);nacci[n])]);crossover[q_] := (Block[{$RecursionLimit=Infinity}, (k=0;While[fib[k+q+1, q]>=2^k, k++];k+q)]);Table[crossover[j], {j, 2, 12}]
+%p A202805 nAcci := proc(n,k)
+%p A202805     option remember ;
+%p A202805     if k <= n-2 then
+%p A202805         0;
+%p A202805     elif k = n-1 then
+%p A202805         1;
+%p A202805     else
+%p A202805         add( procname(n,i),i=k-n..k-1) ;
+%p A202805     end if;
+%p A202805 end proc:
+%p A202805 A202805 := proc(n)
+%p A202805     local k ;
+%p A202805     for k from n do
+%p A202805         if nAcci(n,k) < 2^(k-n-1) then
+%p A202805             return k-1;
+%p A202805         end if;
+%p A202805     end do:
+%p A202805 end proc:
+%p A202805 for n from 2 do
+%p A202805     print(n,A202805(n)) ;
+%p A202805 end do: # _R. J. Mathar_, Mar 11 2024
+%t A202805 fib[n_, m_] := (Block[{nacci}, (Do[nacci[g]=0, {g, 0, m - 2}];
+%t A202805 nacci[m-1]=1;nacci[p_] := (nacci[p]=Sum[nacci[h], {h, p-m, p-1}]);nacci[n])]);
+%t A202805 crossover[q_] := (Block[{$RecursionLimit=Infinity}, (k=0;While[fib[k+q+1, q]>=2^k, k++];k+q)]);
+%t A202805 Table[crossover[j], {j, 2, 12}]
 %Y A202805 Cf. A000045, A000073, A000078.
-%K A202805 nonn,more,uned
+%K A202805 nonn,more,changed
 %O A202805 2,1
 %A A202805 _Frank M Jackson_, Dec 24 2011
 %E A202805 Edited by _N. J. A. Sloane_, May 20 2023
 %E A202805 There seems to be an error in the Comment. See "History" tab. - _N. J. A. Sloane_, Jun 24 2023
+%E A202805 Removed musing about what might define "complete" sequences. - _R. J. Mathar_, Mar 11 2024
