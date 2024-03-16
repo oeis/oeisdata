@@ -1,4 +1,4 @@
-%I A063171 #76 Mar 12 2024 10:54:04
+%I A063171 #107 Mar 15 2024 21:30:27
 %S A063171 0,10,1010,1100,101010,101100,110010,110100,111000,10101010,10101100,
 %T A063171 10110010,10110100,10111000,11001010,11001100,11010010,11010100,
 %U A063171 11011000,11100010,11100100,11101000,11110000,1010101010,1010101100,1010110010,1010110100,1010111000
@@ -7,19 +7,35 @@
 %C A063171 Replacing "1" by "(" and "0" by ")" yields well-formed bracket expressions (the first term being the empty string)
 %C A063171   , (), ()(), (()), ()()(), ()(()), (())(), (()()), ((())), ()()()(), ()()(()), ()(())(), ()(()()), ()((())), (())()(), (())(()), (()())(), (()()()), (()(())), ((()))(), ((())()), ((()())), (((()))), ()()()()(), ()()()(()), ()()(())(), ()()(()()), ()()((())), ()(())()(), ()(())(()), ()(()())(), ()(()()()), ()(()(())), ()((()))(), ()((())()), ()((()())), ()(((()))), (())()()(), (())()(()), (())(())(), (())(()()), (())((())), (()())()(), (()())(()), (()()())(), (()()()()), (()()(())), (()(()))(), (()(())()), (()(()())), (()((()))), ((()))()(), ((()))(()), ((())())(), ((())()()), ((())(())), ((()()))(), ((()())()), ((()()())), ((()(()))), (((())))(), (((()))()), (((())())), (((()()))), ((((()))))
 %C A063171 The term a(0)=0 stands for the empty string. - _Joerg Arndt_, Feb 27 2013
+%D A063171 Donald E. Knuth, The Art of Computer Programming, Vol. 4A: Combinatorial Algorithms, Part 1, Addison-Wesley, 2011, Section 7.2.1.6, pp. 443 (Algorithm P).
 %H A063171 Paolo Xausa, <a href="/A063171/b063171.txt">Table of n, a(n) for n = 0..23713</a> (terms 0..2055 from Reinhard Zumkeller)
 %H A063171 Gennady Eremin, <a href="https://arxiv.org/abs/1909.07675">Dynamics of balanced parentheses, lexicographic series and Dyck polynomials</a>, arXiv:1909.07675 [math.CO], 2019.
-%H A063171 FindStat - Combinatorial Statistic Finder, <a href="http://www.findstat.org/DyckPaths">Dyck paths</a>
-%H A063171 A. Karttunen, <a href="https://web.archive.org/web/20070202072844/http://ndirty.cute.fi/~karttu/matikka/Nekomorphisms/a014486.ps.gz">Illustration of initial terms up to size n=7</a>
-%H A063171 A. Karttunen, <a href="http://oeis.org/wiki/Catalan_Automorphisms">Catalan Automorphisms</a>
+%H A063171 FindStat - Combinatorial Statistic Finder, <a href="https://www.findstat.org/CollectionsDatabase/DyckPaths/">Dyck paths</a>.
+%H A063171 A. Karttunen, <a href="https://web.archive.org/web/20070202072844/http://ndirty.cute.fi/~karttu/matikka/Nekomorphisms/a014486.ps.gz">Illustration of initial terms up to size n=7</a>.
+%H A063171 A. Karttunen, <a href="http://oeis.org/wiki/Catalan_Automorphisms">Catalan Automorphisms</a>.
+%H A063171 Zoltán Kása, <a href="https://doi.org/10.48550/arXiv.1002.2625">Generating and ranking of Dyck words</a>, arXiv:1002.2625 [cs.DM], Feb 2010.
+%H A063171 Peter Luschny, <a href="/A063171/a063171_1.txt">A Python implementation of Knuth's algorithms P and U</a>.
 %H A063171 R. J. Mathar, <a href="http://arxiv.org/abs/1603.00077">Topologically Distinct Sets of Non-intersecting Circles in the Plane</a>, arXiv:1603.00077 [math.CO], 2016.
-%H A063171 Indranil Ghosh, <a href="/A063171/a063171.txt">Python program for computing this sequence</a>
-%F A063171 Chomsky-2 grammar with axiom s, terminal alphabet {0, 1} and three rules s -> ss, s -> 1s0, s ->10.
+%H A063171 Indranil Ghosh, <a href="/A063171/a063171.txt">Python program for computing this sequence</a>.
+%H A063171 Paolo Xausa, <a href="/A063171/a063171_5.txt">A Mathematica implementation of Knuth's algorithms P and U</a>.
+%F A063171 Chomsky-2 grammar with axiom s, terminal alphabet {0, 1} and three rules s -> ss, s -> 1s0, s -> 10.
 %F A063171 a(n) = A071152(n)/2.
 %F A063171 a(n) = A007088(A014486(n)).
 %e A063171 s -> ss -> 1s0s -> 11s00s -> 111000s -> 11100010
+%p A063171 seq(convert(d, binary), d in select(isA014486, [seq(0..640)]));  # _Peter Luschny_, Mar 13 2024
 %t A063171 balancedQ[0] = True; balancedQ[n_] := (s = 0; Do[s += If[b == 1, 1, -1]; If[s < 0, Return[False]], {b, IntegerDigits[n, 2]}]; Return[s == 0]); FromDigits /@ IntegerDigits[ Select[Range[0, 684], balancedQ], 2] (* _Jean-François Alcover_, Jul 24 2013 *)
-%t A063171 slist[m_] := Select[Permutations[PadLeft[Table[1, m], Max[0, 2*m-1], -1]], Min[Accumulate[#]] >=0 &]; Array[Map[FromDigits[# /. -1->0]*10 &, slist[#]] &, 6, 0] (* _Paolo Xausa_, Mar 12 2024 *)
+%t A063171 (* Uses Algorithm P from Knuth's TAOCP section 7.2.1.6 - see References and Links. *)
+%t A063171 alist[n_] := Block[{a = Flatten[Table[{1, 0}, n]], m = 2*n - 1, j, k},
+%t A063171     FromDigits /@ Reap[
+%t A063171     While[True,
+%t A063171         Sow[a]; a[[m]] = 0;
+%t A063171         If[a[[m - 1]] == 0,
+%t A063171             a[[--m]] = 1, j = m - 1; k = 2*n - 1;
+%t A063171             While[j > 1 && a[[j]] == 1, a[[j--]] = 0; a[[k]] = 1; k -= 2];
+%t A063171             If[j == 1, Break[]];
+%t A063171             a[[j]] = 1; m = 2*n - 1]
+%t A063171     ]][[2, 1]]];
+%t A063171 Join[{{0}, {10}}, Array[alist, 4, 2]] (* _Paolo Xausa_, Mar 15 2024 *)
 %o A063171 (Haskell)
 %o A063171 import Data.Set (singleton, deleteFindMin, union, fromList)
 %o A063171 newtype Word = Word String deriving (Eq, Show, Read)
