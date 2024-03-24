@@ -1,8 +1,8 @@
-%I A060818 #96 Sep 08 2022 08:45:03
+%I A060818 #101 Mar 23 2024 09:24:48
 %S A060818 1,1,2,2,8,8,16,16,128,128,256,256,1024,1024,2048,2048,32768,32768,
 %T A060818 65536,65536,262144,262144,524288,524288,4194304,4194304,8388608,
 %U A060818 8388608,33554432,33554432,67108864,67108864,2147483648,2147483648,4294967296
-%N A060818 a(n) = 2^(floor(n/2) + floor(n/4) + floor(n/8) + floor(n/16) + ...).
+%N A060818 a(n) = 2^(n - HammingWeight(n)) = 2^(n - BitCount(n)) = 2^(n - A000120(n)).
 %C A060818 a(n) is the size of the Sylow 2-subgroup of the symmetric group S_n.
 %C A060818 Also largest power of 2 which is a factor of n! and (apart from a(3)) the largest perfect power which is a factor of n!.
 %C A060818 Denominator of e(n,n) (see Maple line).
@@ -13,6 +13,7 @@
 %H A060818 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/RandomWalk1-Dimensional.html">Random Walk 1-Dimensional</a>.
 %H A060818 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/LegendrePolynomial.html">Legendre Polynomial</a>.
 %H A060818 <a href="/index/Di#divseq">Index to divisibility sequences</a>
+%F A060818 a(n) = 2^(floor(n/2) + floor(n/4) + floor(n/8) + floor(n/16) + ...).
 %F A060818 a(n) = 2^(A011371(n)).
 %F A060818 a(n) = gcd(n!, 2^n). - _Labos Elemer_, Apr 22 2003
 %F A060818 a(n) = denominator(L(n)) with rational L(n):=binomial(2*n,n)/2^n. L(n) is the leading coefficient of the Legendre polynomial P_n(x).
@@ -25,10 +26,12 @@
 %e A060818 G.f. = 1 + x + 2*x^2 + 2*x^3 + 8*x^4 + 8*x^5 + 16*x^6 + 16*x^7 + 128*x^8 + ...
 %e A060818 e(n,n) sequence begins 1, 1, 3/2, 5/2, 35/8, 63/8, 231/16, 429/16, 6435/128, 12155/128, 46189/256, ... .
 %p A060818 e := proc(l,m) local k; add(2^(k-2*m) * binomial(2*m-2*k,m-k) * binomial(m+k,m) * binomial(k,l), k=l..m); end;
-%p A060818 A060818 := proc(n) option remember;
-%p A060818 `if`(n=0,1,2^(padic[ordp](n,2))*A060818(n-1)) end:
-%p A060818 seq(A060818(i), i=0..34); # _Peter Luschny_, Nov 16 2012
+%p A060818 A060818 := proc(n) option remember; `if`(n=0,1,2^(padic[ordp](n,2))*A060818(n-1)) end: seq(A060818(i), i=0..34); # _Peter Luschny_, Nov 16 2012
+%p A060818 HammingWeight := n -> add(convert(n, base, 2)):
+%p A060818 seq(2^(n - HammingWeight(n)), n = 0..34); # _Peter Luschny_, Mar 23 2024
 %t A060818 Table[GCD[w!, 2^w], {w, 100}]
+%t A060818 (* Second program, more efficient *)
+%t A060818 Array[2^(# - DigitCount[#, 2, 1]) &, 35, 0] (* _Michael De Vlieger_, Mar 23 2024 *)
 %o A060818 (PARI) {a(n) = denominator( polcoeff( pollegendre(n), n))};
 %o A060818 (PARI) {a(n) = if( n<0, 0, 2^sum(k=1, n, n\2^k))};
 %o A060818 (PARI) { for (n=0, 200, s=0; d=2; while (n>=d, s+=n\d; d*=2); write("b060818.txt", n, " ", 2^s); ) } \\ _Harry J. Smith_, Jul 12 2009
@@ -40,10 +43,11 @@
 %o A060818 (Magma) [1] cat [Denominator(Catalan(n)/2^n): n in [0..50]]; // _Vincenzo Librandi_, Sep 01 2014
 %o A060818 (Python 3.10+)
 %o A060818 def A060818(n): return 1<<n-n.bit_count() # _Chai Wah Wu_, Jul 11 2022
-%Y A060818 Cf. A001790, A011371, A334907.
+%Y A060818 Cf. A000120, A005187, A001790, A011371, A334907.
 %Y A060818 a(n) = A046161([n/2]).
 %Y A060818 Row sums of triangle A100258.
-%K A060818 nonn,easy,frac
+%K A060818 nonn,easy,frac,changed
 %O A060818 0,3
 %A A060818 Ahmed Fares (ahmedfares(AT)my-deja.com), Apr 29 2001
 %E A060818 Additional comments from _Henry Bottomley_, May 01 2001
+%E A060818 New name from _Peter Luschny_, Mar 23 2024
