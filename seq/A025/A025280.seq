@@ -1,4 +1,4 @@
-%I A025280 #25 Mar 12 2015 17:57:59
+%I A025280 #29 Mar 24 2024 10:48:50
 %S A025280 1,2,3,4,5,5,6,5,5,6,7,7,8,8,8,6,7,7,8,8,9,9,10,8,7,8,6,7,8,9,10,7,8,
 %T A025280 9,10,7,8,9,10,10,11,11,12,11,10,11,12,9,8,9,10,10,11,8,9,9,10,10,11,
 %U A025280 11,12,12,11,7,8,9,10,11,12,12,13,9,10,10,10,11,12,11,12,11,7,8,9,10,11,12,11
@@ -18,7 +18,24 @@
 %p A025280     end:
 %p A025280 seq(a(n), n=1..100);  # _Alois P. Heinz_, Mar 08 2013
 %t A025280 root[x_, n_] := With[{f = FactorInteger[x]}, Times @@ (f[[All, 1]]^(f[[All, 2]]/n))]; Clear[a]; a[n_] := a[n] = If[n == 1, 1, Min[Table[a[i] + a[n-i], {i, 1, n-1}], Table[a[d] + a[n/d], {d, Divisors[n][[2 ;; -2]]}], Table[a[root[n, p]] + a[p], {p, DeleteCases[Divisors[GCD @@ FactorInteger[n][[All, 2]]], 0|1]}]]]; Table[a[n], {n, 1, 100}] (* _Jean-François Alcover_, Mar 12 2014, after _Alois P. Heinz_ *)
+%o A025280 (Python)
+%o A025280 from math import gcd
+%o A025280 from sympy import divisors, factorint, integer_nthroot
+%o A025280 from functools import cache
+%o A025280 @cache
+%o A025280 def a(n):
+%o A025280     if n == 1: return 1
+%o A025280     p = min(a(i)+a(n-1) for i in range(1, n//2+1))
+%o A025280     divs, m = divisors(n), n
+%o A025280     if len(divs) > 2:
+%o A025280         m = min(a(d)+a(n//d) for d in divs[1:len(divs)//2+1])
+%o A025280     f = factorint(n)
+%o A025280     edivs, e = divisors(gcd(*f.values())), n
+%o A025280     if len(edivs) > 1:
+%o A025280         e = min(a(integer_nthroot(n, r)[0])+a(r) for r in edivs[1:])
+%o A025280     return min(p, m, e)
+%o A025280 print([a(n) for n in range(1, 88)]) # _Michael S. Branicky_, Mar 24 2024 after _Alois P. Heinz_
 %Y A025280 Cf. A003037, A005245, A005520, A005208.
-%K A025280 nonn
+%K A025280 nonn,changed
 %O A025280 1,2
 %A A025280 _N. J. A. Sloane_, _David W. Wilson_
