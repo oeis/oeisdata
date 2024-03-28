@@ -1,4 +1,4 @@
-%I A370219 #32 Feb 20 2024 01:15:32
+%I A370219 #36 Mar 27 2024 15:45:56
 %S A370219 1,1,1,0,2,1,1,1,1,0,2,0,2,1,0,1,2,0,0,3,1,1,1,1,1,1,0,2,1,0,2,1,1,0,
 %T A370219 1,2,1,0,0,3,0,2,1,1,0,2,0,2,0,1,2,1,0,1,1,2,0,1,0,3,0,0,3,1,0,0,2,2,
 %U A370219 0,0,1,3,0,0,0,4,1,1,1,1,1,1,1,1,0,2,1,1,0,2,1
@@ -36,10 +36,24 @@
 %e A370219    21 | ((()())) | 11101000 | 0 0 1 3 | 1 2 3 5 | 3 4 2 1 | 0 1 2 2
 %e A370219    22 | (((()))) | 11110000 | 0 0 0 4 | 1 2 3 4 | 4 3 2 1 | 0 1 2 3
 %t A370219 zlist[m_] := With[{r = 2*Range[2, m]}, Reverse[Map[Join[{1}, #] &, Select[Subsets[Range[2, 2*m-1], {m-1}], Min[r-#] > 0 &]]]];
-%t A370219 dlist[m_] := Map[Append[#, m-Total[#]] &, Map[Differences, zlist[m]]-1];
+%t A370219 dlist[m_] := Map[Append[#, m - Total[#]] &, Map[Differences, zlist[m]] - 1];
 %t A370219 Array[Delete[dlist[#], 0] &, 5]
+%t A370219 (* 2nd program: uses Algorithm Z from Knuth's TAOCP section 7.2.1.6, exercise 2 *)
+%t A370219 zlist[m_] := Block[{z = 2*Range[m] - 1, j},
+%t A370219     Reap[
+%t A370219     While[True,
+%t A370219         Sow[z];
+%t A370219         If[z[[m-1]] < z[[m]] - 1,
+%t A370219             z[[m]]--,
+%t A370219             j = m - 1; z[[m]] = 2*m - 1;
+%t A370219             While[j > 1 && z[[j-1]] == z[[j]] - 1, z[[j]] = 2*j - 1; j--];
+%t A370219             If[j == 1,Break[]];
+%t A370219             z[[j]]--]
+%t A370219     ]][[2]][[1]]];
+%t A370219 dlist[m_] := Map[Append[#, m - Total[#]] &, Map[Differences, zlist[m]] - 1];
+%t A370219 Join[{{1}}, Array[Delete[dlist[#], 0] &, 4, 2]] (* _Paolo Xausa_, Mar 25 2024 *)
 %Y A370219 Cf. A000108, A063171, A072643 (row lengths and row sums).
 %Y A370219 Cf. A370220, A370221, A370222.
-%K A370219 nonn,tabf
+%K A370219 nonn,tabf,changed
 %O A370219 1,5
 %A A370219 _Paolo Xausa_, Feb 12 2024

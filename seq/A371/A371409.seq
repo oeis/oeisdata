@@ -1,10 +1,11 @@
-%I A371409 #14 Mar 23 2024 20:26:43
+%I A371409 #21 Mar 27 2024 16:32:28
 %S A371409 2,2,4,3,4,2,4,6,2,5,6,3,4,6,3,5,6,4,5,6,2,4,6,8,2,4,7,8,2,5,6,8,2,5,
 %T A371409 7,8,2,6,7,8,3,4,6,8,3,4,7,8,3,5,6,8,3,5,7,8,3,6,7,8,4,5,6,8,4,5,7,8,
 %U A371409 4,6,7,8,5,6,7,8,2,4,6,8,10,2,4,6,9,10,2,4,7,8,10
 %N A371409 Irregular triangle T(n,k) read by rows: row n lists the positions of right parentheses in the properly nested string of parentheses encoded by A063171(n).
 %C A371409 See A370220 for the positions of left parentheses.
 %D A371409 Donald E. Knuth, The Art of Computer Programming, Vol. 4A: Combinatorial Algorithms, Part 1, Addison-Wesley, 2011, Section 7.2.1.6, pp. 440-444.
+%H A371409 Paolo Xausa, <a href="/A371409/b371409.txt">Table of n, a(n) for n = 1..15521</a> (rows 1..2055 of the triangle, flattened).
 %e A371409 The following table lists the positions of right parentheses for properly nested strings having lengths up to 8, along with the positions of left parentheses.
 %e A371409 .
 %e A371409       | Properly |          | Pos. of right | Pos. of left
@@ -33,19 +34,21 @@
 %e A371409    20 | ((())()) | 11100100 | 4 5 7 8       | 1 2 3 6
 %e A371409    21 | ((()())) | 11101000 | 4 6 7 8       | 1 2 3 5
 %e A371409    22 | (((()))) | 11110000 | 5 6 7 8       | 1 2 3 4
-%t A371409 (* Uses Algorithm P from Knuth's TAOCP section 7.2.1.6 to generate A063171 *)
-%t A371409 plist[n_] := Block[{a = PadLeft [{}, 2*n, {1, 0}], m = 2*n - 1, j, k},
+%t A371409 zlist[m_] := With[{r = 2*Range[2, m]}, Reverse[Map[Join[{1}, #] &, Select[Subsets[Range[2, 2*m-1], {m-1}], Min[r-#] > 0 &]]]];
+%t A371409 Table[Delete[Map[Complement[Range[2*m], #] &, zlist[m]], 0], {m, 5}] (* _Paolo Xausa_, Mar 27 2024 *)
+%t A371409 (* 2nd program: uses Algorithm Z from Knuth's TAOCP section 7.2.1.6, exercise 2 *)
+%t A371409 zlist[m_] := Block[{z = 2*Range[m] - 1, j},
 %t A371409     Reap[
 %t A371409     While[True,
-%t A371409         Sow[a]; a[[m]] = 0;
-%t A371409         If[a[[m - 1]] == 0,
-%t A371409             a[[--m]] = 1,
-%t A371409             j = m - 1; k = 2*n - 1;
-%t A371409             While[j > 1 && a[[j]] == 1, a[[j--]] = 0; a[[k]] = 1; k -= 2];
-%t A371409             If[j == 1, Break[]];
-%t A371409             a[[j]] = 1; m = 2*n - 1]
-%t A371409     ]][[2, 1]]];
-%t A371409 Join[{{2}}, Array[Delete[Map[PositionIndex[#][0] &, plist[#]], 0] &, 4, 2]]
+%t A371409         Sow[z];
+%t A371409         If[z[[m-1]] < z[[m]] - 1,
+%t A371409             z[[m]]--,
+%t A371409             j = m - 1; z[[m]] = 2*m - 1;
+%t A371409             While[j > 1 && z[[j-1]] == z[[j]] - 1, z[[j]] = 2*j - 1; j--];
+%t A371409             If[j == 1,Break[]];
+%t A371409             z[[j]]--]
+%t A371409     ]][[2]][[1]]];
+%t A371409 Join[{{2}}, Table[Delete[Map[Complement[Range[2*m], #] &, zlist[m]], 0], {m, 2, 5}]] (* _Paolo Xausa_, Mar 27 2024 *)
 %Y A371409 Cf. A063171, A370220, A072643 (row lengths), A371410 (row sums).
 %K A371409 nonn,tabf,new
 %O A371409 1,1

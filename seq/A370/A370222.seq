@@ -1,4 +1,4 @@
-%I A370222 #33 Feb 20 2024 01:15:06
+%I A370222 #37 Mar 27 2024 15:44:27
 %S A370222 0,0,0,0,1,0,0,0,0,0,1,0,1,0,0,1,1,0,1,2,0,0,0,0,0,0,0,1,0,0,1,0,0,0,
 %T A370222 1,1,0,0,1,2,0,1,0,0,0,1,0,1,0,1,1,0,0,1,1,1,0,1,1,2,0,1,2,0,0,1,2,1,
 %U A370222 0,1,2,2,0,1,2,3,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0
@@ -39,8 +39,21 @@
 %e A370222    22 | (((()))) | 11110000 | 0 0 0 4 | 1 2 3 4 | 4 3 2 1 | 0 1 2 3
 %t A370222 clist[m_] := With[{r = 2*Range[2, m]-1}, Reverse[Map[Join[{0}, r-#] &, Select[Subsets[Range[2, 2*m-1], {m-1}], Min[r-#] >= 0 &]]]];
 %t A370222 Array[Delete[clist[#], 0] &, 5]
+%t A370222 (* 2nd program: uses Algorithm Z from Knuth's TAOCP section 7.2.1.6, exercise 2 *)
+%t A370222 zlist[m_] := Block[{z = 2*Range[m] - 1, j},
+%t A370222     Reap[
+%t A370222     While[True,
+%t A370222         Sow[z];
+%t A370222         If[z[[m-1]] < z[[m]] - 1,
+%t A370222             z[[m]]--,
+%t A370222             j = m - 1; z[[m]] = 2*m - 1;
+%t A370222             While[j > 1 && z[[j-1]] == z[[j]] - 1, z[[j]] = 2*j - 1; j--];
+%t A370222             If[j == 1,Break[]];
+%t A370222             z[[j]]--]
+%t A370222     ]][[2]][[1]]];
+%t A370222 Join[{{0}}, Table[Delete[Map[2*Range[n] - 1 - # &, zlist[n]], 0], {n, 2, 5}]] (* _Paolo Xausa_, Mar 25 2024 *)
 %Y A370222 Cf. A000108, A063171, A072643 (row lengths), A239903.
 %Y A370222 Cf. A370219, A370220, A370221, A370292 (row sums).
-%K A370222 nonn,tabf
+%K A370222 nonn,tabf,changed
 %O A370222 1,20
 %A A370222 _Paolo Xausa_, Feb 12 2024

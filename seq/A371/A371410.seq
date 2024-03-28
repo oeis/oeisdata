@@ -1,23 +1,26 @@
-%I A371410 #8 Mar 23 2024 20:26:53
+%I A371410 #12 Mar 27 2024 16:32:13
 %S A371410 2,6,7,12,13,13,14,15,20,21,21,22,23,21,22,22,23,24,23,24,25,26,30,31,
 %T A371410 31,32,33,31,32,32,33,34,33,34,35,36,31,32,32,33,34,32,33,33,34,35,34,
 %U A371410 35,36,37,33,34,34,35,36,35,36,37,38,36,37,38,39,40,42,43,43,44,45,43
 %N A371410 Row sums of A371409: sums of the positions of right parentheses in the properly nested string of parentheses encoded by A063171(n).
 %C A371410 See A370220 and A371409 for more information.
 %D A371410 Donald E. Knuth, The Art of Computer Programming, Vol. 4A: Combinatorial Algorithms, Part 1, Addison-Wesley, 2011, Section 7.2.1.6, pp. 440-444.
-%t A371410 (* Uses Algorithm P from Knuth's TAOCP section 7.2.1.6 to generate A063171 *)
-%t A371410 plist[n_] := Block[{a = PadLeft [{}, 2*n, {1, 0}], m = 2*n - 1, j, k},
+%H A371410 Paolo Xausa, <a href="/A371410/b371410.txt">Table of n, a(n) for n = 1..10000</a>
+%t A371410 zlist[m_] := With[{r = 2*Range[2, m]}, Reverse[Map[Join[{1}, #] &, Select[Subsets[Range[2, 2*m-1], {m-1}], Min[r-#] > 0 &]]]];
+%t A371410 Table[Delete[Map[Total[Complement[Range[2*m], #]] &, zlist[m]], 0], {m, 5}] (* _Paolo Xausa_, Mar 25 2024 *)
+%t A371410 (* 2nd program: uses Algorithm Z from Knuth's TAOCP section 7.2.1.6, exercise 2 *)
+%t A371410 zlist[m_] := Block[{z = 2*Range[m] - 1, j},
 %t A371410     Reap[
 %t A371410     While[True,
-%t A371410         Sow[a]; a[[m]] = 0;
-%t A371410         If[a[[m - 1]] == 0,
-%t A371410             a[[--m]] = 1,
-%t A371410             j = m - 1; k = 2*n - 1;
-%t A371410             While[j > 1 && a[[j]] == 1, a[[j--]] = 0; a[[k]] = 1; k -= 2];
-%t A371410             If[j == 1, Break[]];
-%t A371410             a[[j]] = 1; m = 2*n - 1]
-%t A371410     ]][[2, 1]]];
-%t A371410 Join[{2}, Flatten[Array[Map[Total[PositionIndex[#][0]] &, plist[#]] &, 4, 2]]]
+%t A371410         Sow[z];
+%t A371410         If[z[[m-1]] < z[[m]] - 1,
+%t A371410             z[[m]]--,
+%t A371410             j = m - 1; z[[m]] = 2*m - 1;
+%t A371410             While[j > 1 && z[[j-1]] == z[[j]] - 1, z[[j]] = 2*j - 1; j--];
+%t A371410             If[j == 1,Break[]];
+%t A371410             z[[j]]--]
+%t A371410     ]][[2]][[1]]];
+%t A371410 Join[{2}, Table[Delete[Map[Total[Complement[Range[2*m], #]] &, zlist[m]], 0], {m, 2, 5}]] (* _Paolo Xausa_, Mar 25 2024 *)
 %Y A371410 Cf. A063171, A370220, A370290, A371409.
 %K A371410 nonn,new
 %O A371410 1,1

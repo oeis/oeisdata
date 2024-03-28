@@ -1,30 +1,38 @@
-%I A106309 #25 Mar 24 2024 03:33:49
+%I A106309 #34 Mar 27 2024 23:55:52
 %S A106309 5,7,11,13,17,31,37,41,53,79,107,199,233,239,311,331,337,389,463,523,
 %T A106309 541,547,557,563,577,677,769,853,937,971,1009,1021,1033,1049,1061,
 %U A106309 1201,1237,1291,1307,1361,1427,1453,1543,1657,1699,1723,1747,1753,1759,1787,1801,1811,1861,1877,1997,1999
-%N A106309 Primes p such that the polynomial x^5 - x^4 - x^3 - x^2 - x - 1 is irreducible mod p.
-%C A106309 Also, primes that yield a simple orbit structure in 5-step recursions. Consider the 5-step recursion x(k)=x(k-1)+x(k-2)+x(k-3)+x(k-4)+x(k-5) mod n. For any of the n^5 initial conditions x(1), x(2), x(3), x(4) and x(5) in Zn, the recursion has a finite period. When n is a prime in this sequence, all of the orbits, except the one containing (0,0,0,0,0), have the same length.
+%N A106309 Primes p such that for all initial conditions (x(0),x(1),x(2),x(3),x(4)) in [0..p-1]^5 except [0,0,0,0,0], the 5-step recurrence x(k) = x(k-1) + x(k-2) + x(k-3) + x(k-4) + x(k-5) (mod p) has the same period.
+%C A106309 The first term not in A371566 is a(105) = 4259.
 %H A106309 Robert Israel, <a href="/A106309/b106309.txt">Table of n, a(n) for n = 1..10000</a>
 %H A106309 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/Fibonaccin-StepNumber.html">Fibonacci n-Step Number</a>
-%p A106309 P:= x^5 - x^4 - x^3 - x^2 - x - 1:
-%p A106309 select(p -> Irreduc(P) mod p, [seq(ithprime(i), i=1..1000)]); # _Robert Israel_, Mar 13 2024
-%t A106309 P = x^5 - x^4 - x^3 - x^2 - x - 1;
-%t A106309 Select[Prime[Range[1000]], IrreduciblePolynomialQ[P, Modulus -> #]&] (* _Jean-François Alcover_, Mar 24 2024, after _Robert Israel_ *)
-%o A106309 (Python)
-%o A106309 from itertools import islice
-%o A106309 from sympy import Poly, nextprime
-%o A106309 from sympy.abc import x
-%o A106309 def A106309_gen(): # generator of terms
-%o A106309     p = 2
-%o A106309     while True:
-%o A106309         if Poly(x*(x*(x*(x*(x-1)-1)-1)-1)-1, x, modulus=p).is_irreducible:
-%o A106309             yield p
-%o A106309         p = nextprime(p)
-%o A106309 A106309_list = list(islice(A106309_gen(),20)) # _Chai Wah Wu_, Mar 14 2024
-%o A106309 (PARI) a106309(upto) = forprime (p=2, upto, my(f=factormod(x^5 - x^4 - x^3 - x^2 - x - 1, p)); if(#f[,1]==1, print1(p,", "))) \\ _Hugo Pfoertner_, Mar 22 2024
-%Y A106309 Cf. A106287 (orbits of 5-step sequences), A370830.
+%H A106309 Robert Israel, <a href="/A106309/a106309.pdf">Linear Recurrences With a Single Minimal Period</a>
+%e A106309 a(3) = 11 is a term because the recurrence has period 16105 for all initial conditions except (0,0,0,0,0).
+%p A106309 filter:= proc(p) local Q,q,F,i,z,d,k,kp,G,alpha;
+%p A106309   Q:= z^5  - z^4 - z^3 - z^2 - z - 1;
+%p A106309   if Irreduc(Q) mod p then return true fi;
+%p A106309   F:= (Factors(Q) mod p)[2];
+%p A106309   if ormap(t -> t[2]>1, F) then return false fi;
+%p A106309   for i from 1 to nops(F) do
+%p A106309     q:= F[i][1];
+%p A106309     d:= degree(q);
+%p A106309     if d = 1 then
+%p A106309        kp:= numtheory:-order(solve(q,z),p);
+%p A106309     else
+%p A106309        G:= GF(p,d, q);
+%p A106309        alpha:= G:-ConvertIn(z);
+%p A106309        kp:= G:-order(alpha);
+%p A106309     fi;
+%p A106309     if i = 1 then k:= kp
+%p A106309     elif kp <> k then return false
+%p A106309     fi;
+%p A106309   od;
+%p A106309   true
+%p A106309 end proc:
+%p A106309 select(filter, [seq(ithprime(i),i=1..1000)]);
+%Y A106309 Cf. A106287 (orbits of 5-step sequences). Contains A371566.
 %K A106309 nonn,more,changed
 %O A106309 1,1
 %A A106309 _T. D. Noe_, May 02 2005, revised May 12 2005
-%E A106309 More terms from _Robert Israel_, Mar 13 2024
-%E A106309 Entry revised by _N. J. A. Sloane_, Mar 22 2024
+%E A106309 4259 found by D. S. McNeil.
+%E A106309 Edited by _Robert Israel_, Mar 27 2024
