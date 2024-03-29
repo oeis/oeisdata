@@ -1,0 +1,49 @@
+%I A370887 #31 Mar 28 2024 23:52:36
+%S A370887 1,1,2,1,2,5,1,2,6,16,1,2,8,28,67,1,2,10,64,212,374,1,2,14,116,1120,
+%T A370887 2664,2825,1,2,16,268,3652,42176,56632,29212,1,2,20,368,19156,285704,
+%U A370887 3583232,2052656,417199,1,2,22,616,35872,3961832,61946920,666124288
+%N A370887 Square array read by descending antidiagonals: T(n,k) is the number of subgroups of the elementary abelian group of order A000040(k)^n for n >= 0 and k >= 1.
+%C A370887 As an elementary abelian group G of order p^n is isomorphic to an n-dimensional vector space V over the finite field of characteristic p, T(n,k) is also the number of subspaces of V.
+%C A370887 V defined as above, T(n,k) is also the sum of the Gaussian binomial coefficients (n,r), 0 <= r < n, for a prime q number, since (n,r) counts the number of r-dimensional subspaces of V. The sequences of these sums for a fixed prime q number correspond to the columns of T(n,k).
+%F A370887 T(n,k) = 2*T(n-1,k) + (A000040(k)^(n-1)-1)*T(n-2,k).
+%F A370887 T(0,k) = 1.
+%F A370887 T(1,k) = 2.
+%F A370887 T(2,k) = A000040(k) + 3 = A113935(k).
+%F A370887 T(3,k) = 2*(A000040(k)^3 + (A000040(k)-2))/(A000040(k)-1).
+%e A370887 T(1,1) = 2 since the elementary abelian of order A000040(1)^1 = 2^1 has 2 subgroups.
+%e A370887 T(3,5) = 2*T(2,5) + (A000040(5)^(3-1)-1)*T(1,5) = 2*14 + ((11^2)-1)*2 = 268.
+%e A370887 First 6 rows and 8 columns:
+%e A370887 n\k|   1     2       3        4          5           6            7            8
+%e A370887 ----+---------------------------------------------------------------------------
+%e A370887  0 |   1     1       1        1          1           1            1            1
+%e A370887  1 |   2     2       2        2          2           2            2            2
+%e A370887  2 |   5     6       8       10         14          16           20           22
+%e A370887  3 |  16    28      64      116        268         368          616          764
+%e A370887  4 |  67   212    1120     3652      19156       35872        99472       152404
+%e A370887  5 | 374  2664   42176   285704    3961832    10581824     51647264     99869288
+%e A370887  6 |2825 56632 3583232 61946920 3092997464 13340150272 141339210560 377566978168
+%o A370887 (PARI) T(n,k)=polcoeff(sum(i=0,n,x^i/prod(j=0,i,1-primes(k)[k]^j*x+x*O(x^n))),n) \\ will produce the (n,k)th entry of the array.
+%o A370887 (GAP)
+%o A370887 # produces an array A of the first (7(7+1))/2 terms. However computation quickly becomes expensive for values > 7.
+%o A370887 LoadPackage("sonata");    # sonata package needs to be loaded to call function Subgroups. Sonata is included in latest versions of GAP.
+%o A370887 N:=[1..7];; R:=[];; S:=[];;
+%o A370887 for i in N do
+%o A370887     for j in N do
+%o A370887         if j>i then
+%o A370887             break;
+%o A370887         fi;
+%o A370887         Add(R,j);
+%o A370887     od;
+%o A370887     Add(S,R);
+%o A370887     R:=[];;
+%o A370887 od;
+%o A370887 A:=[];;
+%o A370887 for n in N do
+%o A370887     L:=List([1..Length(S[n])],m->Size(Subgroups(ElementaryAbelianGroup( Primes[Reversed(S[n])[m]]^(S[n][m]-1)))));
+%o A370887     Add(A,L);
+%o A370887 od;
+%o A370887 A:=Flat(A);
+%Y A370887 Cf. A000040, A113935, A006116, A006117, A006119, A006121, A015197.
+%K A370887 nonn,tabl,new
+%O A370887 0,3
+%A A370887 _Miles Englezou_, Mar 05 2024
