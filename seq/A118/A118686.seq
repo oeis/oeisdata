@@ -1,20 +1,34 @@
-%I A118686 #8 Mar 12 2014 16:36:52
+%I A118686 #15 Mar 31 2024 08:45:37
 %S A118686 1,1,-1,1,-2,1,1,-4,5,-2,1,-10,29,-32,12,1,-16,89,-206,204,-72,1,-46,
 %T A118686 569,-2876,6384,-6192,2160,1,-76,1949,-19946,92664,-197712,187920,
-%U A118686 -64800,1,-286,17909,-429236,4281324,-19657152,41707440,-39528000,13608000,1,-496,77969,-4190126,94420884,-918735192
-%N A118686 Triangle read by rows. Let g[n] = n if n is a prime, otherwise g[n] = 1. Let p[0] = 1; p[n] = g[n]*p[n - 1]. Row n gives coefficients of Product_{k=0..n} [x - p[k]], with row 0 = {1}.
+%U A118686 -64800,1,-286,17909,-429236,4281324,-19657152,41707440,-39528000,13608000,1,-496,77969,-4190126,94420884,-918735192,4169709360,-8798090400,8314488000,-2857680000
+%N A118686 Triangle read by rows. Let g(n) = n if n is a prime, otherwise g(n) = 1. Let p(0) = 1, p(n) = g(n)*p(n-1). Row n gives coefficients of Product_{j=0..n} (x - p(j)), with row 0 = {1}.
+%H A118686 G. C. Greubel, <a href="/A118686/b118686.txt">Rows n = 0..50 of the triangle, flattened</a>
+%F A118686 Sum_{k=0..n} abs(T(n, k)) = A119489(n).
 %e A118686 Triangle begins:
-%e A118686 1
-%e A118686 1, -1,
-%e A118686 1, -2, 1
-%e A118686 1, -4, 5, -2
-%e A118686 1, -10, 29,-32, 12
-%e A118686 1, -16, 89, -206, 204, -72
-%e A118686 1, -46, 569, -2876, 6384, -6192, 2160
-%t A118686 g[n_] := If[PrimeQ[n] == True, n, 1] p[0] = 1; p[n_Integer?Positive] := p[n] = g[n]*p[n - 1] a = Join[{{1}}, Table[Reverse[CoefficientList[Product[x - p[n], {n, 0, m}], x]], {m, 0, 10}]] aout = Flatten[a]
+%e A118686   1;
+%e A118686   1,  -1;
+%e A118686   1,  -2,   1;
+%e A118686   1,  -4,   5,    -2;
+%e A118686   1, -10,  29,   -32,   12;
+%e A118686   1, -16,  89,  -206,  204,   -72;
+%e A118686   1, -46, 569, -2876, 6384, -6192, 2160;
+%t A118686 g[n_]:= If[PrimeQ[n]==True, n, 1]; p[0]=1; p[n_]:= p[n]= g[n]*p[n-1];
+%t A118686 Join[{{1}}, Table[Reverse[CoefficientList[Product[x-p[n], {n,0,m}], x]], {m, 0, 10}]]//Flatten
+%o A118686 (Magma)
+%o A118686 R<x>:=PowerSeriesRing(Rationals(), 50);
+%o A118686 g:= func< n | IsPrime(n) select n else 1 >;
+%o A118686 p:=[1] cat [n le 1 select 1 else g(n)*Self(n-1): n in [1..50]];
+%o A118686 A118686:= func< n,k | k eq 0 select 1 else Coefficient(R!( (&*[x-p[j+1]: j in [0..n-1]]) ), n-k) >;
+%o A118686 [A118686(n,k): k in [0..n], n in [0..12]]; // _G. C. Greubel_, Mar 31 2024
+%o A118686 (SageMath)
+%o A118686 def g(n): return n if is_prime(n) else 1
+%o A118686 def p(n): return 1 if n==0 else g(n)*p(n-1)
+%o A118686 def A118686(n,k): return 1 if k==0 else ( product(x-p(j) for j in range(n)) ).series(x, n+2).list()[n-k]
+%o A118686 flatten([[A118686(n,k) for k in range(n+1)] for n in range(12)]) # _G. C. Greubel_, Mar 31 2024
 %Y A118686 Cf. primorial numbers A034386, Stirling numbers of the first kind A008275.
 %Y A118686 Cf. A034386, A008275, A119724, A119489 (row sums of absolute values).
-%K A118686 sign,tabl
+%K A118686 sign,tabl,changed
 %O A118686 0,5
 %A A118686 _Roger L. Bagula_, May 20 2006
 %E A118686 Edited by _N. J. A. Sloane_, Oct 08 2006
