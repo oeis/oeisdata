@@ -1,9 +1,53 @@
-%I A069024 #11 Mar 29 2024 17:57:10
+%I A069024 #19 Apr 01 2024 20:10:41
 %S A069024 0,1,2,3,4,5,6,7,8,9,10,20,30,33,40,60,66,80,90,99,252,272,292,313,
 %T A069024 330,585,626,660,717,990,2112,2720,2772,2920,4224,5850,6336,7447,7470,
 %U A069024 8448,8580,9009,15351,21120,22122,25752,32223,39993,40904,42240,44244,48384
-%N A069024 Palindromic in base 2 as well as in base 10 (initial zeros may be prepended).
-%e A069024 66 in base 2 is 1000010 which is palindromic if rewritten as 01000010.
+%N A069024 Numbers that are palindromic in base 2 as well as in base 10 (initial zeros may be prepended).
+%H A069024 Robert Israel, <a href="/A069024/b069024.txt">Table of n, a(n) for n = 1..243</a>
+%e A069024 66 in base 2 is 1000010, which is palindromic if rewritten as 01000010.
+%p A069024 nextpal:= proc(p,d,V,b)
+%p A069024   local i,i2,pp,m,m2;
+%p A069024   pp:=p;
+%p A069024   V[1]:= V[1]+1;
+%p A069024   m2:= floor(d/2);
+%p A069024   i2:= ceil(d/2);
+%p A069024   if d::odd then pp:= pp + b^m2 else pp:= pp + b^m2 + b^(m2-1) fi;
+%p A069024   for i from 1 while V[i] = b do
+%p A069024     V[i]:= 0:
+%p A069024     if i = i2 then
+%p A069024       if d::even then
+%p A069024         ArrayTools:-Extend(V,[1],inplace);
+%p A069024         return b^d+1, d+1, V
+%p A069024       else
+%p A069024         V[i2]:= 1;
+%p A069024         return b^d+1, d+1, V;
+%p A069024       fi;
+%p A069024     fi;
+%p A069024     V[i+1]:= V[i+1]+1;
+%p A069024     if (d::odd and i=1) then pp:= pp + b^(i2-i-1) else
+%p A069024       pp:= pp + b^(i2-i-1) - b^(i2-i+1) fi;
+%p A069024   od;
+%p A069024   return pp, d, V
+%p A069024 end proc:
+%p A069024 count:= 1:
+%p A069024 S:= 0:
+%p A069024 p2[0]:=1: V2[0]:= <1>: d2[0]:= 1:m2:= 0:
+%p A069024 p10[0]:= 1: V10[0]:= <1>: d10[0]:= 1: m10:= 0:
+%p A069024 while count < 100 do
+%p A069024   i2:= min[index]([seq(p2[i],i=0..m2)])-1; p2o:= p2[i2];
+%p A069024   i10:= min[index]([seq(p10[i],i=0..m10)])-1; p10o:= p10[i10];
+%p A069024   if p2o = p10o then
+%p A069024     S:= S, p2o; count:= count+1;
+%p A069024   fi;
+%p A069024   if p2o <= p10o then x, d2[i2], V2[i2]:= nextpal(p2o/2^i2, d2[i2], V2[i2],2); p2[i2]:= 2^i2 *x;
+%p A069024     if i2 = m2 then m2:= m2+1; p2[m2]:= 2^m2; V2[m2]:= <1>; d2[m2]:= 1;
+%p A069024  fi;
+%p A069024   else
+%p A069024     x, d10[i10], V10[i10]:= nextpal(p10o/10^i10, d10[i10], V10[i10],10);
+%p A069024     p10[i10]:= 10^i10 * x;
+%p A069024     if i10 = m10 then m10:= m10+1; p10[m10]:= 10^m10; V10[m10]:= <1>; d10[m10]:= 1
+%p A069024 fi fi od:
+%p A069024 S; # _Robert Israel_, Apr 01 2024
 %t A069024 pal[n_, b_] := (z=IntegerDigits[n, b]) == Reverse[z]; extpal[n_, b_] := If[Mod[n, b]>0, pal[n, b], extpal[n/b, b]]; Select[Range[50000], extpal[ #, 10]&&extpal[ #, 2]&]
 %Y A069024 Cf. A007632.
 %Y A069024 Intersection of A061917 and A057890.
