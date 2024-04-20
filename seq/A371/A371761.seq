@@ -1,4 +1,4 @@
-%I A371761 #48 Apr 17 2024 10:33:37
+%I A371761 #54 Apr 19 2024 04:29:28
 %S A371761 1,0,0,0,1,0,0,1,1,0,0,1,5,1,0,0,1,13,13,1,0,0,1,29,73,29,1,0,0,1,61,
 %T A371761 301,301,61,1,0,0,1,125,1081,2069,1081,125,1,0,0,1,253,3613,11581,
 %U A371761 11581,3613,253,1,0,0,1,509,11593,57749,95401,57749,11593,509,1,0
@@ -18,12 +18,13 @@
 %F A371761 A(n, k) = Sum_{j=0..min(n,k)} (j!)^2 * Stirling2(n, j) * Stirling2(k, j).
 %F A371761 A(n, k) = Sum_{j=0..n} (-1)^(n-j)*A028246(n, j) * j^k; this is explicit:
 %F A371761 A(n, k) = Sum_{j=0..n} Sum_{m=0..n} binomial(n-m, n-j) * Eulerian1(n, m) * j^k *(-1)^(n-j), where Eulerian1 = A173018.
+%F A371761 A(n, k) = Sum_{j=0..k} binomial(k + [j>0], j+1)*A(n-1, k-j) for n > 0.
 %F A371761 A(n, k) = Sum_{j=1..n} binomial(n, j)*(A(n-j, k-1) + A(n-j+1, k-1)) for n,k >= 1.
 %F A371761 Row n (>=1) satisfies a linear recurrence:
 %F A371761 A(n, k) = -Sum_{j=1..n} Stirling1(n + 1, n + 1 - j)*A(n, k - j) if k > n.
 %F A371761 A(n, k) = [x^k] (Sum_{j=0..n} A371762(n, j)*x^j) / (Sum_{j=0..n} Stirling1(n + 1, n + 1 - j)*x^j).
 %F A371761 A(n, k) = A(k, n). (From the symmetry of the bivariate exponential g.f.)
-%F A371761 Let T(n, k) = A(n - k, k) and G(n) = Sum_{k=0..n} (-1)^k*T(n, k) the alternating row sums. Then G(n) = (n + 2)*Euler(n + 1, 1) and as shifted Genocchi numbers G(n) = -2*(n + 2)*PolyLog(-n - 1, -1) = -A226158(n + 2).
+%F A371761 Let T(n, k) = A(n - k, k) and G(n) = Sum_{k=0..n} (-1)^k*T(n, k) the alternating row sums of the triangle. Then G(n) = (n + 2)*Euler(n + 1, 1) and as shifted Genocchi numbers G(n) = -2*(n + 2)*PolyLog(-n - 1, -1) = -A226158(n + 2).
 %e A371761 Array starts:
 %e A371761 [0] 1, 0,   0,     0,      0,       0,        0,         0,          0, ...
 %e A371761 [1] 0, 1,   1,     1,      1,       1,        1,         1,          1, ...
@@ -62,9 +63,11 @@
 %p A371761 WT := (a, len) -> local n, k;
 %p A371761 seq(add((-1)^(n - k)*k!*Stirling2(n + 1, k + 1)*a(k), k=0..n), n = 0..len-1):
 %p A371761 Arow := n -> WT(x -> x^n, 8): seq(lprint(Arow(n)), n = 0..8);
-%p A371761 # Recurrence:
+%p A371761 # Two recurrences:
 %p A371761 A := proc(n, k) option remember; local j; if k = 0 then return k^n fi;
 %p A371761 add(binomial(n, j)*(A(n-j, k-1) + A(n-j+1, k-1)), j = 1..n) end:
+%p A371761 A := proc(n, k) option remember; local j; if n = 0 then 0^k else
+%p A371761 add(binomial(k + `if`(j=0,0,1), j+1)*A(n-1, k-j), j = 0..k) fi end:
 %t A371761 (* Using the unsigned Worpitzky transform. *)
 %t A371761 Unprotect[Power]; Power[0, 0] = 1;
 %t A371761 W[n_, k_] := (-1)^(n - k) k! StirlingS2[n + 1, k + 1];
@@ -82,9 +85,9 @@
 %o A371761 from math import comb as binomial
 %o A371761 @cache
 %o A371761 def A(n, k):
-%o A371761     if k == 0: return int(n == 0)
-%o A371761     return sum(binomial(n, j) * (A(n - j, k - 1) + A(n - j + 1, k - 1))
-%o A371761            for j in range(1, n + 1))
+%o A371761     if n == 0: return int(k == 0)
+%o A371761     return sum(binomial(k + int(j > 0), j + 1) * A(n - 1, k - j)
+%o A371761            for j in range(k + 1))
 %o A371761 for n in range(8): print([A(n, k) for k in range(8)])
 %o A371761 (Python)
 %o A371761 # The Akiyama-Tanigawa algorithm for powers generates the rows.
