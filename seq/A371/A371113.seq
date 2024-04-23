@@ -1,4 +1,4 @@
-%I A371113 #75 Apr 20 2024 12:23:57
+%I A371113 #79 Apr 22 2024 19:43:13
 %S A371113 0,1,10,2,3,32,4,5,54,6,7,76,8,9,98,11,12,111,13,14,131,15,16,151,17,
 %T A371113 18,171,19,20,291,21,22,212,23,24,232,25,26,252,27,28,272,29,30,392,
 %U A371113 31,33,313,34,35,343,36,37,363,38,39,383,40,41,404,42,43,424,44,45,444,46,47,464,48,49,484,50,51,505
@@ -8,32 +8,29 @@
 %C A371113 See A369856 for the inverse permutation.
 %C A371113 Conjecture 1: The only fixed points of this permutation are n = 0 and 1.
 %C A371113 Conjecture 2: For all k >= 0, a(3k+2) <= R(concatenate(a(3k), a(3k+1), 1)), where R = A004086 = reverse.
-%C A371113 Conjecture 3: For all k >= 0, a(3k+1) - a(3k) = 1 or 2.
+%C A371113 Conjecture 3: For all k >= 0, a(3k+1) - a(3k) = 1 or 2. (Verified up to k = 3333. a(3k+1) - a(3k) = 2 for k = 15, 36, 62, 81, 110, 129, 138, 163, 182, ...)
 %C A371113 (End)
 %F A371113 a(3k) = 2k + o(log k) ; a(3k) + 1 <= a(3k+1) <= a(3k) + 2 (conjectured). - _M. F. Hasler_, Apr 20 2024
 %e A371113 Triples begin (0,1,10), (2,3,32), (4,5,54), (6,7,76), (8,9,98), ... where the palindromic pattern is clearly visible in each triple.
 %t A371113 a[0]=0;a[n_]:=a[n]=(k=1;While[MemberQ[Array[a,n-1],k]|| If[Mod[n,3]==2, !PalindromeQ[Flatten[IntegerDigits/@Join[{a[n-2]},{a[n-1]},{k}]]]],k++];k); Array[a,100,0]
 %o A371113 (PARI) A371113_upto(N)={my(L, U=[-1], F=fromdigits); vector(N, n, [L, N]=[N, if(n%3, U[1]+1, L=eval(Vec(Str(L,N))); N=0; for(k=1, #L, L[k] && Vecrev(n=concat(L, Vecrev(L,k)))==n && !setsearch(U, n=F(Vecrev(L,k))) && n>U[1] && [N=n; break]); if(!N, L=Vecrev(L,-1-#L); until(!setsearch(U, N=F(L))&& N>U[1], L[1]++)); N)]; U=setunion(U,[N]); while(#U>1 && U[1]+1==U[2], U=U[^1]); N)} \\ _M. F. Hasler_, Apr 19 2024
 %o A371113 (Python)
-%o A371113 def palindromes(k = 1, L = -2, M = 10):
-%o A371113     while True:
-%o A371113         yield str(k)+str(k)[L::-1]; k+=1
-%o A371113         if k==M: (k:=k//10, L:=-1) if L<-1 else (M:=M*10, L:=-2)
 %o A371113 def A371113(n):
-%o A371113     while len(A371113.terms) <= n:
-%o A371113         if len(A371113.terms)%3 == 2:
-%o A371113             suffix = ''.join(map(str, A371113.terms[-2:]))[::-1]
-%o A371113             for i in range(1,len(suffix)+1):
-%o A371113                 if suffix[-i] != '0' and (s:=suffix[:-i-1:-1]+suffix)==s[::-1]\
-%o A371113                     and (x := int(suffix[-i:])) not in A371113.terms: break
-%o A371113             else: all((x:=int(p+suffix)) in A371113.terms for p in palindromes())
-%o A371113         else: x = A371113.next_available
-%o A371113         A371113.terms.append(x)
-%o A371113         if x == A371113.next_available:
-%o A371113             while x+1 in A371113.terms: x += 1
-%o A371113             A371113.next_available = x+1
-%o A371113     return A371113.terms[n]
-%o A371113 A371113.terms = []; A371113.next_available = 0 # _M. F. Hasler_, Apr 19 2024
+%o A371113     try: return A371113.terms[n]
+%o A371113     except AttributeError: A371113.terms = []; A371113.least_unused = 0
+%o A371113     except IndexError: pass # just need to compute more terms
+%o A371113     while len(T := A371113.terms) <= n:
+%o A371113         if len(T)%3 < 2:
+%o A371113             T.append(x := A371113.least_unused)
+%o A371113             while x+1 in T: x += 1
+%o A371113             A371113.least_unused = x+1
+%o A371113         else:
+%o A371113             for i in range(1,len(suffix := (str(T[-2])+str(T[-1]))[::-1])+1):
+%o A371113                 if suffix[-i] != '0' and (s := suffix[:-i-1:-1] + suffix
+%o A371113                     )==s[::-1] and (x := int(suffix[-i:])) not in T: break
+%o A371113             else: x = int('1'+suffix); assert x not in T
+%o A371113             T.append(x); assert x > A371113.least_unused
+%o A371113     return T[n] # _M. F. Hasler_, Apr 19 2024
 %Y A371113 Cf. A238880 (analog for pairs instead of triples), A369856 (inverse permutation), A004086 (read n backwards).
 %K A371113 nonn,base,new
 %O A371113 0,3
