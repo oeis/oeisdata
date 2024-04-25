@@ -1,12 +1,8 @@
-%I A007305 M0113 #102 Apr 18 2023 09:44:32
+%I A007305 M0113 #107 Apr 24 2024 12:39:19
 %S A007305 0,1,1,1,2,1,2,3,3,1,2,3,3,4,5,5,4,1,2,3,3,4,5,5,4,5,7,8,7,7,8,7,5,1,
 %T A007305 2,3,3,4,5,5,4,5,7,8,7,7,8,7,5,6,9,11,10,11,13,12,9,9,12,13,11,10,11,
 %U A007305 9,6,1,2,3,3,4,5,5,4,5,7,8,7,7,8,7,5,6,9,11,10,11,13,12,9,9,12,13,11
 %N A007305 Numerators of Farey (or Stern-Brocot) tree fractions.
-%C A007305 From _Reinhard Zumkeller_, Dec 22 2008: (Start)
-%C A007305 For n>1: a(n+2) = if A025480(n-1) != 0 and A025480(n) != 0 then a(A025480(n-1)+2) + a(A025480(n)+2) else if A025480(n)=0 then a(A025480(n-1)+2)+1 else 0+a(A025480(n-1)+2);
-%C A007305 a(A054429(n)+2) = A047679(n) and a(n+2) = A047679(A054429(n));
-%C A007305 A153036(n+1) = floor(a(n+2)/A047679(n)). (End)
 %C A007305 From _Yosu Yurramendi_, Jun 25 2014: (Start)
 %C A007305 If the terms (n>0) are written as an array (left-aligned fashion) with rows of length 2^m, m = 0,1,2,3,...
 %C A007305    1,
@@ -44,6 +40,11 @@
 %H A007305 <a href="/index/Fo#fraction_trees">Index entries for fraction trees</a>
 %H A007305 <a href="/index/St#Stern">Index entries for sequences related to Stern's sequences</a>
 %F A007305 a(n) = SternBrocotTreeNum(n-1) # n starting from 2 gives the sequence from 1, 1, 2, 1, 2, 3, 3, 1, 2, 3, 3, 4, 5, 5, 4, 1, ...
+%F A007305 From _Reinhard Zumkeller_, Dec 22 2008: (Start)
+%F A007305 For n > 1: a(n+2) = if A025480(n-1) != 0 and A025480(n) != 0 then a(A025480(n-1)+2) + a(A025480(n)+2) else if A025480(n)=0 then a(A025480(n-1)+2)+1 else 0 + a(A025480(n-1)+2).
+%F A007305 a(A054429(n)+2) = A047679(n).
+%F A007305 a(n+2) = A047679(A054429(n)).
+%F A007305 A153036(n+1) = floor(a(n+2)/A047679(n)). (End)
 %F A007305 From _Yosu Yurramendi_, Jun 25 2014: (Start)
 %F A007305 For m = 1,2,3,..., and k = 0,1,2,...,2^(m-1)-1, with a(1)=1:
 %F A007305 a(2^m+k) = a(2^(m-1)+k);
@@ -57,7 +58,10 @@
 %F A007305 a(n) = A002487(A059893(n)), n > 0. - _Yosu Yurramendi_, Sep 29 2021
 %e A007305 A007305/A007306 = [ 0/1; 1/1; ] 1/2; 1/3, 2/3; 1/4, 2/5, 3/5, 3/4; 1/5, 2/7, 3/8, 3/7, 4/7, 5/8, 5/7, 4/5, ...
 %e A007305 Another version of Stern-Brocot is A007305/A047679 = 1, 2, 1/2, 3, 1/3, 3/2, 2/3, 4, 1/4, 4/3, 3/4, 5/2, 2/5, 5/3, 3/5, 5, 1/5, 5/4, 4/5, ...
-%p A007305 SternBrocotTreeNum := proc(n) option remember; local msb,r; if(n < 2) then RETURN(n); fi; msb := floor_log_2(n); r := n - (2^msb); if(floor_log_2(r) = (msb-1)) then RETURN(SternBrocotTreeNum(r) + SternBrocotTreeNum(((3*(2^(msb-1)))-r)-1)); else RETURN(SternBrocotTreeNum((2^(msb-1))+r)); fi; end; # _Antti Karttunen_, Mar 19 2000 [Broken program - _N. J. A. Sloane_, Aug 05 2020]
+%p A007305 A007305 := proc(n) local b; b := proc(n) option remember; local msb, r;
+%p A007305 if n < 3 then return 1 fi; msb := ilog2(n); r := n - 2^msb;
+%p A007305 if ilog2(r) = msb - 1 then b(r) + b(3*2^(msb-1) - r - 1) else b(2^(msb - 1) + r) fi end: if n = 0 then 0 else b(n-1) fi end: # _Antti Karttunen_, Mar 19 2000 [Corrected and rewritten by _Peter Luschny_, Apr 24 2024]
+%p A007305 seq(A007305(n), n = 0..92);
 %t A007305 sbt[n_] := Module[{R,L,Y}, R={{1,0},{1,1}}; L={{1,1},{0,1}}; Y={{1,0},{0,1}}; w[b_] := Fold[ #1.If[ #2 == 0,L,R] &,Y,b]; u[a_] := {a[[2,1]]+a[[2,2]],a[[1,1]]+a[[1,2]]}; Map[u,Map[w,Tuples[{0,1},n]]]]
 %t A007305 A007305(n) = Flatten[Append[{0,1},Table[Map[First,sbt[i]],{i,0,5}]]]
 %t A007305 A047679(n) = Flatten[Table[Map[Last,sbt[i]],{i,0,5}]]
@@ -71,6 +75,6 @@
 %o A007305 a
 %o A007305 # _Yosu Yurramendi_, Jun 25 2014
 %Y A007305 Cf. A007306, A006842, A006843, A047679, A054424, A057114, A152975.
-%K A007305 nonn,frac,tabf,nice,look
+%K A007305 nonn,frac,tabf,nice,look,changed
 %O A007305 0,5
 %A A007305 _N. J. A. Sloane_
