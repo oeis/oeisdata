@@ -1,0 +1,23 @@
+%I A372299 #7 Apr 27 2024 03:36:31
+%S A372299 24,30,40,42,54,56,66,70,72,78,88,96,102,104,114,138,150,174,186,222,
+%T A372299 246,258,282,294,318,354,366,402,420,426,438,474,486,498,534,540,582,
+%U A372299 606,618,642,654,660,678,726,756,762,780,786,822,834,894,906,924,942,945,960,978,990
+%N A372299 Primitive infinitary abundant numbers (definition 2): infinitary abundant numbers (A129656) having no proper infinitary divisors that are infinitary abundant numbers.
+%H A372299 Amiram Eldar, <a href="/A372299/b372299.txt">Table of n, a(n) for n = 1..10000</a>
+%e A372299 24 is a term since it is an infinitary abundant number and none of its proper infinitary divisors, {1, 2, 3, 4, 6, 8, 12}, are infinitary abundant numbers.
+%e A372299 The least infinitary abundant number that is not primitive is 120. It has 3 infinitary divisors, 24, 30, and 40, that are also infinitary abundant numbers.
+%t A372299 f[p_, e_] := Module[{b = IntegerDigits[e, 2]}, m = Length[b]; Product[If[b[[j]] > 0, 1 + p^(2^(m - j)), 1], {j, 1, m}]];
+%t A372299 isigma[1] = 1; isigma[n_] := Times @@ f @@@ FactorInteger[n]; iabQ[n_] := isigma[n] > 2*n; idivs[1] = {1};
+%t A372299 idivs[n_] := Sort@ Flatten@ Outer[Times, Sequence @@ (FactorInteger[n] /. {p_, e_Integer} :> p^Select[Range[0, e], BitOr[e, #] == e &])];
+%t A372299 q[n_] := Module[{d = idivs[n]}, Total[d] > 2*n && AllTrue[Most[d], !iabQ[#] &]]; Select[Range[1000], q]
+%o A372299 (PARI) isidiv(d, f) = {if (d==1, return (1)); for (k=1, #f~, bne = binary(f[k, 2]); bde = binary(valuation(d, f[k, 1])); if (#bde < #bne, bde = concat(vector(#bne-#bde), bde)); for (j=1, #bne, if (! bne[j] && bde[j], return (0)); ); ); return (1); }
+%o A372299 idivs(n) = {my(f = factor(n), d = divisors(f), idiv = []); for (k=1, #d, if (isidiv(d[k], f), idiv = concat(idiv, d[k])); ); idiv; } \\ _Michel Marcus_ at A077609
+%o A372299 isigma(n) = {my(f = factor(n), b); prod(i=1, #f~, b = binary(f[i, 2]); prod(k=1, #b, if(b[k], 1+f[i, 1]^(2^(#b-k)), 1)))} ;
+%o A372299 is(n) = isigma(n) > 2*n && select(x -> x < n && isigma(x) > 2*x, idivs(n)) == [];
+%Y A372299 Subsequence of A129656.
+%Y A372299 A372298 is a subsequence.
+%Y A372299 Cf. A077609, A129657.
+%Y A372299 Similar sequences: A091191, A302574, A339940.
+%K A372299 nonn,easy,new
+%O A372299 1,1
+%A A372299 _Amiram Eldar_, Apr 25 2024
