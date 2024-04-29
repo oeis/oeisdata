@@ -1,4 +1,4 @@
-%I A002845 M1139 N0435 #74 Apr 21 2024 14:01:08
+%I A002845 M1139 N0435 #87 Apr 28 2024 21:55:39
 %S A002845 1,1,1,2,4,8,17,36,78,171,379,851,1928,4396,10087,23273,53948,125608,
 %T A002845 293543,688366,1619087,3818818,9029719,21400706,50828664,120963298,
 %U A002845 288405081,688821573,1647853491,3948189131,9473431479
@@ -31,6 +31,18 @@
 %e A002845      | 2^2^512, 2^2^2^16, 2^2^65537, 2^2^2^17, 2^2^2^32, 2^2^2^256, 2^2^2^2^16
 %e A002845   ...| ...
 %e A002845 (When parentheses are omitted above, we use that ^ is right associative.) (End)
+%o A002845 (PARI) /* Define operators for numbers represented (recursively) as list of positions of bits 1. Illustration using the commands below: T = 3.bits; T.int */
+%o A002845 n.bits = vector(hammingweight(n), v,  n -= 1 << v= valuation(n, 2); v.bits)
+%o A002845 ONE = 1.bits; m.int = sum(i=1, #m, 1<<m[i].int) /* Convert back. (Not needed.) */
+%o A002845 {POW(m,n)= if(#m==1, [MUL(m[1], n)], my(p=ONE); until(!#n || !#m=MUL(m,m), #n[1] || p=MUL(p, m); n=RSHIFT(n)); p)}\\ binary exponentiation unless only 1 bit set
+%o A002845 {MUL(m,n)= my(S=[]); #n && foreach(m, b, S=ADD(S, [ADD(c, b)| c<-n])); S}
+%o A002845 {RSHIFT(m, n=ONE)= if(!#m|| !#n|| !(#m[1]|| #m=m[^1]), m, [SUB(b, n)| b<-m, CMP(b, n)>=0])}
+%o A002845 {ADD(m, n, a=#m, b=#n)= if(!a, n, !b, m, a=b=1; until(a>#m|| b>#n, if(m[a]==n[b], until(a>=#m|| m[a]!=m[a+1]|| !#m=m[^a], m[a]=ADD(m[a],ONE)); b++, CMP(m[a], n[b])<0, a++, m=concat([m[1..a-1], [n[b]], m[a..#m]]); b++)); b>#n|| m=concat(m,n[b..#n]); m)}
+%o A002845 {CMP(m, n, a=#m, b=#n, c=0)= if(!b, a, !a, -1, while(!(c=CMP(m[a], n[b]))&& a--&& b--, ); if(c, c, 1-b))}
+%o A002845 {SUB(m, n, a=#n)= if(!a, m, my(b=a=1, c, i); while(a<=#m && b<=#n, if(0>c=CMP(m[a], n[b]), a++, c, i=[c=n[b]]; b++; while(m[a]!=c=ADD(c, ONE), if(b<=#n && c==n[b], b++, i=concat(i, [c]))); m=concat([m[1..a-1], i, m[a+1..#m]]); a += #i, m=m[^a]; b++)); m)}
+%o A002845 A2845 = List([[2.bits]]) /* List of values for each n */
+%o A002845 {A002845(n)= while(#A2845<n, my(S=[], n=#A2845); for(k=1, n, foreach(A2845[n-k+1], b, S=setunion(S, Set([POW(a,b)| a<-A2845[k]])))); listput(A2845,S)); #A2845[n]}
+%o A002845 \\ Unoptimized code, for illustration. Slow for n >= 15. - _M. F. Hasler_, Apr 28 2024
 %Y A002845 Cf. A003018, A003019, A145545, A145546, A145547, A145548, A145549, A145550, A000081.
 %K A002845 nonn,nice,more,changed
 %O A002845 1,4
