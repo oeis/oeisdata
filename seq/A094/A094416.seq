@@ -1,4 +1,4 @@
-%I A094416 #40 Jan 12 2024 10:04:42
+%I A094416 #55 May 12 2024 18:20:41
 %S A094416 1,2,3,3,10,13,4,21,74,75,5,36,219,730,541,6,55,484,3045,9002,4683,7,
 %T A094416 78,905,8676,52923,133210,47293,8,105,1518,19855,194404,1103781,
 %U A094416 2299754,545835,9,136,2359,39390,544505,5227236,26857659,45375130,7087261
@@ -9,6 +9,7 @@
 %C A094416 Also, Bo(r,s) is ((x*d/dx)^n)(1/(1+r-r*x)) evaluated at x=1.
 %C A094416 r-th ordered Bell polynomial (A019538) evaluated at n.
 %C A094416 Bo(r,n) is the n-th moment of a geometric distribution with probability parameter = 1/(r+1).  Here, geometric distribution is the number of failures prior to the first success. - _Geoffrey Critzer_, Jan 01 2019
+%C A094416 Row r (starting at r=0), Bo(r+1, n), is the Akiyama-Tanigawa algorithm applied to the powers of r+1. See Python program below. - _Shel Kaphan_, May 03 2024
 %H A094416 G. C. Greubel, <a href="/A094416/b094416.txt">Antidiagonals n = 1..50, flattened</a>
 %H A094416 Paul Barry, <a href="https://arxiv.org/abs/1803.06408">Three Études on a sequence transformation pipeline</a>, arXiv:1803.06408 [math.CO], 2018.
 %H A094416 P. Blasiak, K. A. Penson and A. I. Solomon, <a href="https://arxiv.org/abs/quant-ph/0303030">Dobinski-type relations and the log-normal distribution</a>, arXiv:quant-ph/0303030, 2003.
@@ -32,12 +33,27 @@
 %o A094416 (SageMath)
 %o A094416 def A094416(n,k): return sum(factorial(j)*n^j*stirling_number2(k,j) for j in range(k+1)) # array
 %o A094416 flatten([[A094416(n-k+1,k) for k in range(1,n+1)] for n in range(1,13)]) # _G. C. Greubel_, Jan 12 2024
+%o A094416 (Python)
+%o A094416 # The Akiyama-Tanigawa algorithm applied to the powers of r + 1
+%o A094416 # generates the rows. Adds one row (r=0) and one column (n=0).
+%o A094416 # Adapted from Peter Luschny on A371568.
+%o A094416 def f(n, r): return (r + 1)**n
+%o A094416 def ATtransform(r, len, f):
+%o A094416   A = [0] * len
+%o A094416   R = [0] * len
+%o A094416   for n in range(len):
+%o A094416       R[n] = f(n, r)
+%o A094416       for j in range(n, 0, -1):
+%o A094416           R[j - 1] = j * (R[j] - R[j - 1])
+%o A094416       A[n] = R[0]
+%o A094416   return A
+%o A094416 for r in range(8): print([r], ATtransform(r, 8, f)) # _Shel Kaphan_, May 03 2024
 %Y A094416 Rows 1-10 are A000670, A004123, A032033, A094417, A094418, A094419, A238464, A238465, A238466, A238467.
 %Y A094416 Columns include A014105, A094421.
 %Y A094416 Main diagonal is A094420.
 %Y A094416 Antidiagonal sums are A094422.
 %Y A094416 Cf. A019538, A131689, A344499.
-%K A094416 nonn,tabl
+%K A094416 nonn,tabl,changed
 %O A094416 1,2
 %A A094416 _Ralf Stephan_, May 02 2004
 %E A094416 Offset corrected by _Geoffrey Critzer_, Jan 01 2019
