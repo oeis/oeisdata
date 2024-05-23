@@ -1,4 +1,4 @@
-%I A000364 M4019 N1667 #491 Apr 06 2024 09:03:11
+%I A000364 M4019 N1667 #501 May 22 2024 12:55:56
 %S A000364 1,1,5,61,1385,50521,2702765,199360981,19391512145,2404879675441,
 %T A000364 370371188237525,69348874393137901,15514534163557086905,
 %U A000364 4087072509293123892361,1252259641403629865468285,441543893249023104553682821,177519391579539289436664789665
@@ -13,6 +13,7 @@
 %C A000364 The sequence starting with a(1) is periodic modulo any odd prime p. The minimal period is (p-1)/2 if p == 1 mod 4 and p-1 if p == 3 mod 4 [Knuth & Buckholtz, 1967, Theorem 2]. - _Allen Stenger_, Aug 03 2020
 %C A000364 Conjecture: taking the sequence [a(n) : n >= 1] modulo an integer k gives a purely periodic sequence with period dividing phi(k). For example, the sequence taken modulo 21 begins [1, 5, 19, 20, 16, 2, 1, 5, 19, 20, 16, 2, 1, 5, 19, 20, 16, 2, 1, 5, 19, ...] with an apparent period of 6 = phi(21)/2. - _Peter Bala_, May 08 2023
 %D A000364 M. Abramowitz and I. A. Stegun, eds., Handbook of Mathematical Functions, National Bureau of Standards Applied Math. Series 55, 1964 (and various reprintings), p. 810; gives a version with signs: E_{2n} = (-1)^n*a(n) (this is A028296).
+%D A000364 Miklos Bona, editor, Handbook of Enumerative Combinatorics, CRC Press, 2015, page 932.
 %D A000364 J. M. Borwein and D. M. Bailey, Mathematics by Experiment, Peters, Boston, 2004; p. 49
 %D A000364 J. M. Borwein, D. H. Bailey and R. Girgensohn, Experimentation in Mathematics, A K Peters, Ltd., Natick, MA, 2004. x+357 pp. See p. 141.
 %D A000364 G. Chrystal, Algebra, Vol. II, p. 342.
@@ -32,7 +33,6 @@
 %H A000364 R. Bacher and P. Flajolet, <a href="http://arxiv.org/abs/0901.1379">Pseudo-factorials, elliptic functions, and continued fractions</a>, arXiv:0901.1379 [math.CA], 2009.
 %H A000364 C. M. Bender and K. A. Milton, <a href="http://arxiv.org/abs/hep-th/9304052">Continued fraction as a discrete nonlinear transform</a>, arXiv:hep-th/9304052, 1993.
 %H A000364 Natasha Blitvić and Einar Steingrímsson, <a href="https://arxiv.org/abs/2001.00280">Permutations, moments, measures</a>, arXiv:2001.00280 [math.CO], 2020.
-%H A000364 Miklos Bona, editor, Handbook of Enumerative Combinatorics, CRC Press, 2015, page 932.
 %H A000364 J. M. Borwein, <a href="https://carmamaths.org/resources/jon/OEIStalk.pdf">Adventures with the OEIS: Five sequences Tony may like</a>, Guttmann 70th [Birthday] Meeting, 2015, revised May 2016.
 %H A000364 J. M. Borwein, <a href="/A060997/a060997.pdf">Adventures with the OEIS: Five sequences Tony may like</a>, Guttmann 70th [Birthday] Meeting, 2015, revised May 2016. [Cached copy, with permission]
 %H A000364 J. M. Borwein, P. B. Borwein, and K. Dilcher, <a href="http://www.jstor.org/stable/2324715">Pi, Euler numbers and asymptotic expansions</a>, Amer. Math. Monthly, 96 (1989), 681-687.
@@ -191,6 +191,7 @@
 %t A000364 a[ n_] := If[ n < 0, 0, With[{m = 2 n}, m! SeriesCoefficient[ Sec[ x], {x, 0, m}]]]; (* _Michael Somos_, Nov 22 2013 *)
 %t A000364 a[ n_] := If[ n < 0, 0, With[{m = 2 n + 1}, m! SeriesCoefficient[ InverseGudermannian[ x], {x, 0, m}]]]; (* _Michael Somos_, Nov 22 2013 *)
 %t A000364 a[n_] := Sum[Sum[Binomial[k, m] (-1)^(n+k)/(2^(m-1)) Sum[Binomial[m, j]* (2j-m)^(2n), {j, 0, m/2}] (-1)^(k-m), {m, 0, k}], {k, 1, 2n}]; Table[ a[n], {n, 0, 16}] (* _Jean-François Alcover_, Jun 26 2019, after _Vladimir Kruchinin_ *)
+%t A000364 a[0] := 1; a[n_] := a[n] = -Sum[a[n - k]/(2 k)!, {k, 1, n}]; Map[(-1)^# (2 #)! a[#] &, Range[0, 16]] (* _Oliver Seipel_, May 18 2024 *)
 %o A000364 (PARI) {a(n)=local(CF=1+x*O(x^n));if(n<0,return(0), for(k=1,n,CF=1/(1-(n-k+1)^2*x*CF));return(Vec(CF)[n+1]))} \\ _Paul D. Hanna_ Oct 07 2005
 %o A000364 (PARI) {a(n) = if( n<0, 0, (2*n)! * polcoeff( 1 / cos(x + O(x^(2*n + 1))), 2*n))}; /* _Michael Somos_, Jun 18 2002 */
 %o A000364 (PARI) {a(n) = my(A); if( n<0, 0, n = 2*n+1 ; A = x * O(x^n); n! * polcoeff( log(1 / cos(x + A) + tan(x + A)), n))}; /* _Michael Somos_, Aug 15 2007 */
@@ -224,7 +225,7 @@
 %Y A000364 Left edge of triangle A210108, see also A125053, A076552. Cf. A255881.
 %Y A000364 Bisection (even part) of A317139.
 %Y A000364 The sequences [(-k^2)^n*Euler(2*n, 1/k), n = 0, 1, ...] are: A000007 (k=1), A000364 (k=2), |A210657| (k=3), A000281 (k=4), A272158 (k=5), A002438 (k=6), A273031 (k=7).
-%K A000364 nonn,easy,nice,core
+%K A000364 nonn,easy,nice,core,changed
 %O A000364 0,3
 %A A000364 _N. J. A. Sloane_
 %E A000364 Typo in name corrected by _Anders Claesson_, Dec 01 2015
