@@ -1,0 +1,51 @@
+%I A372406 #18 May 30 2024 06:53:22
+%S A372406 1,1,1,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,4,4,3,4,4,4,4,
+%T A372406 3,4,4,3,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,
+%U A372406 4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4
+%N A372406 a(n) is the size of the largest set of positive integers S from 1..prime(n)-1 such that for any subset R of S, Sum {R} + prime(n) is prime.
+%C A372406 This sequence is not monotonically increasing.
+%e A372406 Let n=5, so p=prime(5)=11. From A070046, there are 3 positive integers x such that 1 <= x < 11 and 11+x is prime, which are {2, 6, 8}, so a(5) <= 3. Next, we see that 11 + 2 + 6 + 8 = 27 which is not prime so a(5) < 3. Last, we see that 11 + 2 + 6 = 19 is prime, and we already checked that 11 + 2 and 11 + 6 were prime, so S = {2, 6} and a(5) = 2.
+%e A372406 11 is the first n such that a(n) = 3. Here, prime(11) = 31, and there are multiple sets which work. One is S = {6, 22, 30}.
+%e A372406   31 + {} = 31 (empty set subset of S),
+%e A372406   31 +  6 = 37,
+%e A372406   31 + 22 = 53,
+%e A372406   31 + 30 = 61,
+%e A372406   31 +  6 + 22 = 59,
+%e A372406   31 +  6 + 30 = 67,
+%e A372406   31 + 22 + 30 = 83,
+%e A372406   31 +  6 + 22 + 30 = 89, all of which are prime.
+%e A372406 28 is the first n such that a(n) = 4. Here, prime(28) = 107, and there are multiple sets which work. One is S = {2, 30, 42, 90}.
+%p A372406 f:= proc(n)
+%p A372406   local k,p,C,S,s,t,q;
+%p A372406   p:= ithprime(n);
+%p A372406   C:= select(isprime,[$p+1 .. 2*p-1]) -~ p;
+%p A372406   S[1]:= map(t -> [{t},{0,t}],C);
+%p A372406   for k from 2 do
+%p A372406     S[k]:= NULL;
+%p A372406     for s in S[k-1] do
+%p A372406       for t in select(`>`,C,max(s[1])) do
+%p A372406         q:= s[2] +~ t;
+%p A372406         if andmap(isprime, q +~  p) then
+%p A372406           S[k]:= S[k], [s[1] union {t}, s[2] union q] ;
+%p A372406         fi
+%p A372406     od od;
+%p A372406     S[k]:= {S[k]};
+%p A372406     if S[k] = {} then return k-1 fi
+%p A372406   od
+%p A372406 end proc:
+%p A372406 map(f, [$1..90]); # _Robert Israel_, May 06 2024
+%t A372406 nmax = 87; a372406 = {{1, 1}};
+%t A372406 For[n = 2, n <= nmax, n++, d = {}; p = Prime[n];
+%t A372406  For[a = 2, a < p, a += 2, If[PrimeQ[p + a], AppendTo[d, a]]]; q = 1; k = 0;
+%t A372406  While[q == 1 && k <= Length[d], k++; su = Subsets[d, {k}];
+%t A372406   For[i = 1, i <= Length[su], i++, s = su[[i]];
+%t A372406    If[PrimeQ[Total[s] + p], y = Subsets[s]; t = 1;
+%t A372406     For[z = 1, z <= Length[y], z++,
+%t A372406      If[CompositeQ[Total[y[[z]]] + p], t = 0; q = 0; Break[]]];
+%t A372406     If[t == 1, q = 1; Break[]], q = 0]]];
+%t A372406  AppendTo[a372406, {n, k - 1}]]
+%t A372406 Print[a372406]
+%Y A372406 Cf. A070046.
+%K A372406 nonn,new
+%O A372406 1,4
+%A A372406 _Samuel Harkness_, Apr 29 2024
