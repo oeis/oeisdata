@@ -1,0 +1,47 @@
+%I A370470 #35 May 31 2024 23:52:38
+%S A370470 1,1,3,2,1,6,7,4,5,1,3,3,6,28,15,8,19,5,2,2,1,6,7,6,7,6,13,14,28,120,
+%T A370470 31,16,71,19,9,10,5,4,5,4,5,1,3,3,6,28,15,12,27,7,3,12,6,26,27,7,29,
+%U A370470 28,57,60,120,496,63,32,271,71,35,38,19,18,4,20,21,5
+%N A370470 In the binary expansion of n, change the i-th run length to the difference of the i-th and (i-1)-th run lengths. The first run length remains as is.
+%H A370470 Aritra Mitra, <a href="/A370470/b370470.txt">Table of n, a(n) for n = 1..8191</a>
+%H A370470 Michael De Vlieger, <a href="/A370470/a370470.png">Plot bits of a(n)</a>, n = 1..4096, with the least bit at bottom and greatest bit at top, with 1s in black and 0s in white.
+%H A370470 Michael De Vlieger, <a href="/A370470/a370470_1.png">Fan style binary tree for a(n)</a>, n = 1..8192, with a color function showing binary weight, where red represents 1 and darkest blue 13.
+%F A370470 a(2^j-1) = 2^j-1, as there is only one run.
+%F A370470 a(2^j-2) = (2^(j-1)-1)*(2^(j-2)).
+%F A370470 a(5*2^k+r) = a(2^k+r) for 0 <= r < 2^k; i.e., appending a '10' to the start of the binary expansion has no effect on the value.
+%e A370470 Consider n = 988:
+%e A370470   binary(n)            1111  0  111  00
+%e A370470   run_length            4    1   3   2
+%e A370470   modified run_length   4    3   2   1
+%e A370470   binary(a(n))         1111 000  11  0
+%e A370470 a(n) = 966.
+%t A370470 Array[FromDigits[Flatten@ MapIndexed[ConstantArray[Mod[First[#2], 2], #1] &, Prepend[Abs@ Differences[#], First[#]]], 2] &@ Map[Length, Split[IntegerDigits[#, 2]]] &, 120] (* _Michael De Vlieger_, Apr 19 2024 *)
+%o A370470 (Python)
+%o A370470 def A370470(n):
+%o A370470     s = bin(n)[2:]
+%o A370470     run_length = 0
+%o A370470     runs = []
+%o A370470     last_char = '2'
+%o A370470     for j in range(len(s)):
+%o A370470         if(s[j] != last_char):
+%o A370470             last_char = s[j]
+%o A370470             runs.append(run_length)
+%o A370470             run_length = 1
+%o A370470         else:
+%o A370470             run_length+=1
+%o A370470     runs.append(run_length)
+%o A370470     k = ''
+%o A370470     for j in range(1, len(runs)):
+%o A370470         k+=str(chr(ord('0')+(j%2)))*abs(runs[j]-runs[j-1])
+%o A370470     return int(k, 2)
+%o A370470 (Python)
+%o A370470 from itertools import groupby
+%o A370470 def a(n):
+%o A370470     r = [len(list(g)) for k, g in groupby(bin(n)[2:])]
+%o A370470     return int("1"*r[0]+"".join(str(i&1)*abs(r[i+1]-r[i]) for i in range(len(r)-1)), 2)
+%o A370470 print([a(n) for n in range(1, 64)]) # _Michael S. Branicky_, Apr 10 2024
+%Y A370470 Run lengths are as in A101211.
+%K A370470 nonn,base,new
+%O A370470 1,3
+%A A370470 _Aritra Mitra_, Mar 30 2024
+%E A370470 More terms from _Michael De Vlieger_, Apr 19 2024
