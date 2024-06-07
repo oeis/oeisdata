@@ -1,4 +1,4 @@
-%I A005179 M1026 #107 Jul 05 2023 15:46:45
+%I A005179 M1026 #112 Jun 06 2024 11:15:22
 %S A005179 1,2,4,6,16,12,64,24,36,48,1024,60,4096,192,144,120,65536,180,262144,
 %T A005179 240,576,3072,4194304,360,1296,12288,900,960,268435456,720,1073741824,
 %U A005179 840,9216,196608,5184,1260,68719476736,786432,36864,1680,1099511627776,2880
@@ -34,6 +34,46 @@
 %p A005179 od:
 %p A005179 print(L) end: A005179_list(65537,18);
 %p A005179 # If a '0' appears in the list the search limit has to be increased. - _Peter Luschny_, Mar 09 2011
+%p A005179 # alternative
+%p A005179 # Construct list of ordered lists of factorizations of n with
+%p A005179 # minimum divisors mind.
+%p A005179 # Returns a list with A001055(n) entries if called with mind=2.
+%p A005179 # Example: print(ofact(10^3,2))
+%p A005179 ofact := proc(n,mind)
+%p A005179     local fcts,d,rec,r ;
+%p A005179     fcts := [] ;
+%p A005179     for d in numtheory[divisors](n) do
+%p A005179         if d >= mind then
+%p A005179             if d = n then
+%p A005179                 fcts := [op(fcts),[n]] ;
+%p A005179             else
+%p A005179                 # recursive call supposed one more factor fixed now
+%p A005179                 rec := procname(n/d,max(d,mind)) ;
+%p A005179                 for r in rec do
+%p A005179                     fcts := [op(fcts),[d,op(r)]] ;
+%p A005179                 end do:
+%p A005179             end if;
+%p A005179         end if;
+%p A005179     end do:
+%p A005179     return fcts ;
+%p A005179 end proc:
+%p A005179 A005179 := proc(n)
+%p A005179     local Lexp,a,eList,cand,maxxrt ;
+%p A005179     if n = 1 then
+%p A005179         return 1;
+%p A005179     end if;
+%p A005179     Lexp := ofact(n,2) ;
+%p A005179     a := 0 ;
+%p A005179     for eList in Lexp do
+%p A005179         maxxrt := ListTools[Reverse](eList) ;
+%p A005179         cand := mul( ithprime(i)^ ( op(i,maxxrt)-1),i=1..nops(maxxrt)) ;
+%p A005179         if a =0 or cand < a then
+%p A005179             a := cand ;
+%p A005179         end if;
+%p A005179     end do:
+%p A005179     a ;
+%p A005179 end proc:
+%p A005179 seq(A005179(n),n=1..40) ; # _R. J. Mathar_, Jun 06 2024
 %t A005179 a = Table[ 0, {43} ]; Do[ d = Length[ Divisors[ n ]]; If[ d < 44 && a[[ d ]] == 0, a[[ d]] = n], {n, 1, 1099511627776} ]; a
 %t A005179 (* Second program: *)
 %t A005179 Function[s, Map[Lookup[s, #] &, Range[First@ Complement[Range@ Max@ #, #] - 1]] &@ Keys@ s]@ Map[First, KeySort@ PositionIndex@ Table[DivisorSigma[0, n], {n, 10^7}]] (* _Michael De Vlieger_, Dec 11 2016, Version 10 *)
@@ -46,7 +86,7 @@
 %o A005179 a005179 n = succ $ fromJust $ elemIndex n $ map a000005 [1..]
 %o A005179 -- _Reinhard Zumkeller_, Apr 01 2011
 %Y A005179 Cf. A000005, A007416, A099316, A003586, A025487, A099311, A099313, A050376, A037992, A061799, A262981, A262983.
-%K A005179 nonn,nice,easy
+%K A005179 nonn,nice,easy,changed
 %O A005179 1,2
 %A A005179 _N. J. A. Sloane_, David Singmaster
 %E A005179 More terms from _David W. Wilson_
