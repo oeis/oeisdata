@@ -1,17 +1,37 @@
-%I A063737 #19 Jan 20 2024 09:21:33
+%I A063737 #28 Jun 16 2024 06:53:33
 %S A063737 2,3,4,5,7,27,378,576,588,648,729,2688,17496,19683,49896,69888,
 %T A063737 3796875,3857868,4898880,5878656,7077888,8957952,2499898464,
 %U A063737 34998578496,49997969280,2928898896840,7625597484987,184958866998359685
 %N A063737 Numbers n such that sum of digits of n is equal to the sum of the prime factors of n, counted with multiplicity.
 %C A063737 a(29) > 10^30. - _Giovanni Resta_, Apr 23 2017
+%C A063737 a(29) > 10^50 if it exists. - _Bert Dobbelaere_, Jun 16 2024
 %e A063737 27=3*3*3, 2+7=9, 3+3+3=9. 49896 = 2*2*2*3*3*3*3*7*11, 4+9+8+9+6 = 36, 2+2+2+3+3+3+3+7+11 = 36.
 %t A063737 g@n_ := Cases[Union@(Times @@ # & /@Select[Flatten[Table[IntegerPartitions[k, All, Prime@Range@PrimePi@(9*n)], {k,1,9*n}],1],Plus@@#==DigitSum@(Times @@ #) &]),
 %t A063737 _?(#<10^n&)];
 %t A063737 g@18 (*Requires Mathematica version 14 or later*) (* _Hans Rudolf Widmer_, Jan 20 2024 *)
 %o A063737 (ARIBAS): var stk: stack; end; for n := 1 to 2000000 do s := itoa(n); for j := 0 to length(s) - 1 do stack_push(stk,atoi(s[j..j])); end; if sum(stack2array(stk)) = sum(factorlist(n)) then write(n," "); end; end;.
 %o A063737 (PARI) isok(m) = my(f=factor(m)); sumdigits(m) == f[, 1]~*f[, 2]; \\ _Michel Marcus_, Dec 18 2020
+%o A063737 (Python) MAXDIGITS=20
+%o A063737 maxsum,maxval = 9*MAXDIGITS,10**MAXDIGITS-1
+%o A063737 from sympy import primerange
+%o A063737 primes=list(primerange(0,maxsum))
+%o A063737 nprimes, results = len(primes), []
+%o A063737 def lensumdigits(x):
+%o A063737     s,t = str(x),0
+%o A063737     for c in s: t+= ord(c)-48
+%o A063737     return len(s),t
+%o A063737 def solve(startidx, sump, val):
+%o A063737     for idx in range(startidx,nprimes):
+%o A063737         p=primes[idx]
+%o A063737         s2,v2 = sump+p,val*p
+%o A063737         ld,sd = lensumdigits(v2)
+%o A063737         if sd==s2: results.append(v2)
+%o A063737         if (s2 > maxsum) or (v2 > maxval) or ((p>10) and (s2 > 9*ld)):
+%o A063737             return
+%o A063737         solve(idx, s2, v2)
+%o A063737 solve(0, 0, 1) ; print(sorted(results)) # _Bert Dobbelaere_, Jun 16 2024
 %Y A063737 Cf. A001414, A007953.
-%K A063737 nonn,base,more
+%K A063737 nonn,base,more,changed
 %O A063737 1,1
 %A A063737 _Felice Russo_, Aug 13 2001
 %E A063737 More terms from _Klaus Brockhaus_, Aug 17 2001
