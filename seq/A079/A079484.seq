@@ -1,9 +1,9 @@
-%I A079484 #144 Apr 29 2023 00:06:39
+%I A079484 #155 Jun 18 2024 20:01:36
 %S A079484 1,3,45,1575,99225,9823275,1404728325,273922023375,69850115960625,
 %T A079484 22561587455281875,9002073394657468125,4348001449619557104375,
 %U A079484 2500100833531245335015625,1687568062633590601135546875,1321365793042101440689133203125
 %N A079484 a(n) = (2n-1)!! * (2n+1)!!, where the double factorial is A006882.
-%C A079484 a(n) is the determinant of M(2n-1) where M(k) is the k X k matrix with m(i,j)=j if i+j=k m(i,j)=i otherwise.
+%C A079484 a(n) is the determinant of M(2n+1) where M(k) is the k X k matrix with m(i,j)=j if i+j=k m(i,j)=i otherwise.
 %C A079484 (-1)^n*a(n)/2^(2n-1) is the permanent of the (m X m) matrix {1/(x_i-y_j), 1<=i<=m, 1<=j<=m}, where x_1,x_2,...,x_m are the zeros of x^m-1 and y_1,y_2,...,y_m the zeros of y^m+1 and m=2n-1.
 %C A079484 a(n) is the number of permutations in S_{2n+1} in which all cycles have odd length. - _José H. Nieto S._, Jan 09 2012
 %C A079484 In 1881, R. F. Scott posed a conjecture that the absolute value of permanent of square matrix with elements a(i,j)= (x_i - y_j)^(-1), where x_1,...,x_n are roots of x^n=1, while y_1,...,y_n are roots of y^n=-1, equals a((n-1)/2)/2^n, if n>=1 is odd, and 0, if n>=2 is even. After a century (in 1979), the conjecture was proved by H. Minc. - _Vladimir Shevelev_, Dec 01 2013
@@ -47,24 +47,26 @@
 %e A079484   [4, 2, 3, 4, 5]
 %e A079484   [1, 2, 3, 4, 5].
 %e A079484 Integral_{x=0..oo} x^3*BesselK(1, sqrt(x)) = 1575*Pi. - _Olivier Gérard_, May 20 2009
-%p A079484 A079484:= n-> doublefactorial(2*n-1)*doublefactorial(2*n+1):
-%p A079484 seq(A079484(n), n=0..15);  # _Alois P. Heinz_, Jan 30 2013
+%p A079484 a:= n-> (d-> d(2*n-1)*d(2*n+1))(doublefactorial):
+%p A079484 seq(a(n), n=0..15);  # _Alois P. Heinz_, Jan 30 2013
+%p A079484 # second Maple program:
+%p A079484 A079484 := proc(n) local k,m,M,i,j; k := 2*n+1; m := (i,j) -> `if`(i+j=k,j,i); M := Matrix([seq([seq(m(i,j),j=1..k)],i=1..k)]); return LinearAlgebra:-Determinant(M); end: seq(A079484(n),n=0..14); # _Rainer Rosenthal_, Jun 18 2024
 %t A079484 a[n_] := (2n - 1)!!*(2n + 1)!!; Table[a[n], {n, 0, 13}] (* _Jean-François Alcover_, Jan 30 2013 *)
 %o A079484 (PARI) /* Formula using the zeta function and a log integral:*/
-%o A079484 L(n)=  intnum(t=0,1,log(1-1/t)^n);
+%o A079484 L(n)=  intnum(t=0, 1, log(1-1/t)^n);
 %o A079484 Zetai(n)= -I*I^n*(2*Pi)^(n-1)/(n-1)*L(1-n);
 %o A079484 a(n)=-I*2^(2*n-1)*Zetai(1/2-n)*L(-1/2+n)/(Zetai(-1/2+n)*L(1/2-n));
-%o A079484 /* _Gerry Martens_, Mar 07 2011 */
-%o A079484 (Magma)  I:=[1,3]; [n le 2 select I[n] else (4*n^2-8*n+3)*Self(n-1): n in [1..20]]; // _Vincenzo Librandi_, Nov 18 2014
-%o A079484 (PARI) {a(n) = if( n<0, -1 / self()(-1-n), (2*n + 1)! * (2*n)! / (n! * 2^n)^2 )}; /* _Michael Somos_, May 04 2017 */
-%o A079484 (PARI) {a(n) = if( n<0, -1 / self()(-1-n), my(m = 2*n + 1); m! * polcoeff( x / sqrt( 1 - x^2 + x * O(x^m) ), m))}; /* _Michael Somos_, May 04 2017 */
+%o A079484 /* Gerry Martens, Mar 07 2011 */
+%o A079484 (Magma)  I:=[1, 3]; [n le 2 select I[n] else (4*n^2-8*n+3)*Self(n-1): n in [1..20]]; // Vincenzo Librandi, Nov 18 2014
+%o A079484 (PARI) {a(n) = if( n<0, -1 / self()(-1-n), (2*n + 1)! * (2*n)! / (n! * 2^n)^2 )}; /* Michael Somos, May 04 2017 */
+%o A079484 (PARI) {a(n) = if( n<0, -1 / self()(-1-n), my(m = 2*n + 1); m! * polcoeff( x / sqrt( 1 - x^2 + x * O(x^m) ), m))}; /* Michael Somos, May 04 2017 */
 %Y A079484 Cf. A001818, A000165.
 %Y A079484 Bisection of A000246, A053195, |A013069|, |A046126|. Cf. A000909.
 %Y A079484 Cf. A001044, A010791, |A129464|, A114779, are also values of similar moments.
 %Y A079484 Equals the row sums of A162005.
 %Y A079484 Cf. A316728.
 %Y A079484 Diagonal elements of A306364 in even-numbered rows.
-%K A079484 nonn
+%K A079484 nonn,changed
 %O A079484 0,2
 %A A079484 _Benoit Cloitre_, Jan 17 2003
 %E A079484 Simpler description from Daniel Flath (deflath(AT)yahoo.com), Mar 05 2004
