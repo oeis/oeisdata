@@ -1,4 +1,4 @@
-%I A162306 #36 Mar 30 2020 20:59:20
+%I A162306 #41 Jun 20 2024 02:34:04
 %S A162306 1,1,2,1,3,1,2,4,1,5,1,2,3,4,6,1,7,1,2,4,8,1,3,9,1,2,4,5,8,10,1,11,1,
 %T A162306 2,3,4,6,8,9,12,1,13,1,2,4,7,8,14,1,3,5,9,15,1,2,4,8,16,1,17,1,2,3,4,
 %U A162306 6,8,9,12,16,18,1,19,1,2,4,5,8,10,16,20,1,3,7,9,21,1,2,4,8,11,16,22,1,23
@@ -11,7 +11,9 @@
 %C A162306 Numbers 1 <= k <= n such that (floor(n^k/k) - floor((n^k - 1)/k)) = 1. - _Michael De Vlieger_, May 26 2016
 %C A162306 Numbers 1 <= k <= n such that k | n^e with e >= 0. - _Michael De Vlieger_, May 29 2018
 %H A162306 T. D. Noe and Michael De Vlieger, <a href="/A162306/b162306.txt">Rows n = 1..1000 of triangle, flattened</a>  (first rows n=1..200 from T. D. Noe)
+%H A162306 Michael De Vlieger, <a href="/A162306/a162306.png">Plot k in row n at (x,y) = (k,-n)</a> for n = 1..2^10.
 %F A162306 Union of A027750 and nonzero terms of A272618.
+%F A162306 Row n of this sequence is {k <= n : rad(k) | n }, where rad = A007947. - _Michael De Vlieger_, Jun 18 2024
 %e A162306 n =  6: {1, 2, 3, 4, 6}.
 %e A162306 n =  7: {1, 7}.
 %e A162306 n =  8: {1, 2, 4, 8}.
@@ -29,9 +31,19 @@
 %p A162306 end proc; map(op,[seq(A(n), n=1..100)]); # _Robert Israel_, Jul 15 2014
 %t A162306 pf[n_] := If[n==1, {}, Transpose[FactorInteger[n]][[1]]]; SubsetQ[lst1_, lst2_] := Intersection[lst1,lst2]==lst1; Flatten[Table[pfn=pf[n]; Select[Range[n], SubsetQ[pf[ # ],pfn] &], {n,27}]]
 %t A162306 (* Second program: *)
-%t A162306 Table[Select[Range@ n, PowerMod[n, Floor@ Log2@ n, #] == 0 &], {n,
-%t A162306    23}] // Flatten (* _Michael De Vlieger_, May 29 2018 *)
-%Y A162306 Cf. A010846 (number of terms in row n), A027750 (terms k that divide n), A243103 (product of terms in row n), A244974 (sum of terms in row n), A272618 (terms k that do not divide n).
-%K A162306 nonn,tabf,look
+%t A162306 f[x_, y_ : 0] :=
+%t A162306   Block[{m, n, nn, j, k, p, t, v, z},
+%t A162306     n = Abs[x]; nn = If[y == 0, n, y];
+%t A162306     If[n == 1, {1},
+%t A162306       z = Length@
+%t A162306         MapIndexed[Set[{p[#2], m[#2]}, {#1, 0}] & @@
+%t A162306         {#1, First[#2]} &, FactorInteger[n][[All, 1]] ];
+%t A162306     k = Times @@ Array[p[#]^m[#] &, z]; Set[{v, t}, {1, False}];
+%t A162306     Union@ Reap[Do[Set[t, k > nn];
+%t A162306       If[t, k /= p[v]^m[v]; m[v] = 0; v++; If[v > z, Break[]],
+%t A162306       v = 1; Sow[k] ]; m[v]++; k *= p[v], {i, Infinity}] ][[-1, 1]] ] ];
+%t A162306 Array[f, 120] (* _Michael De Vlieger_, Jun 18 2024 *)
+%Y A162306 Cf. A007947, A010846 (number of terms in row n), A027750 (terms k that divide n), A243103 (product of terms in row n), A244974 (sum of terms in row n), A272618 (terms k that do not divide n).
+%K A162306 nonn,tabf,look,changed
 %O A162306 1,3
 %A A162306 _T. D. Noe_, Jun 30 2009
