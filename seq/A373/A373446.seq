@@ -1,10 +1,11 @@
-%I A373446 #37 Jun 12 2024 18:55:23
+%I A373446 #47 Jun 23 2024 21:59:40
 %S A373446 1,1,1,2,2,3,3,6,7,10,10,18,19,27,30,50,53,80,85,133,146,209,223,350,
 %T A373446 382,544,597,886,962,1385,1507,2197,2426,3422,3740,5413,5941,8295,
 %U A373446 9159,12994,14298,19947,21982,30763,34111,47005,51895,72202,79974,109468,121545,167032,185276,252534,280427,382274,425703,575650,640243,867942
-%N A373446 Number of distinct ways of expressing n using only addition, multiplication, necessary parentheses, the number 1, and no "1*" multiply.
+%N A373446 Number of distinct ways of expressing n using only addition, multiplication (with all factors greater than 1), necessary parentheses, and the number 1.
 %C A373446 Expressions that are the same after commuting their terms are not considered distinct from one another.
 %C A373446 Parentheses are used around a sum which is being multiplied, but not otherwise.
+%H A373446 Pontus von Brömssen, <a href="/A373446/b373446.txt">Table of n, a(n) for n = 1..10000</a>
 %F A373446 a(n) >= a(n-1) since, if "+1" is appended to each expression used to calculate a(n-1), then each of the resulting expressions equate to n and are distinct from each other. There may or may not be other ways to express n that do not include an isolated "+1", hence the greater-than possibility.
 %e A373446 a(10)=10, as 10 can be expressed in the following ways:
 %e A373446   1+1+1+1+1+1+1+1+1+1
@@ -17,7 +18,48 @@
 %e A373446   (1+1+1)*(1+1+1)+1
 %e A373446   (1+1)*(1+1+1+1+1)
 %e A373446   (1+1)*((1+1)*(1+1)+1).
-%Y A373446 Cf. A002095, A214833.
-%K A373446 nonn,new
+%o A373446 (Python)
+%o A373446 from itertools import count,islice
+%o A373446 from collections import Counter
+%o A373446 from math import comb
+%o A373446 from sympy import divisors
+%o A373446 def euler_transform(x):
+%o A373446     xlist = []
+%o A373446     z = []
+%o A373446     y = []
+%o A373446     for n,x in enumerate(x,1):
+%o A373446         xlist.append(x)
+%o A373446         z.append(sum(d*xlist[d-1] for d in divisors(n)))
+%o A373446         yy = (z[-1]+sum(zz*yy for zz,yy in zip(z,reversed(y))))//n
+%o A373446         yield yy
+%o A373446         y.append(yy)
+%o A373446 def factorizations(n,fmin=2):
+%o A373446     if n == 1:
+%o A373446         yield []
+%o A373446         return
+%o A373446     for d in divisors(n,generator=True):
+%o A373446         if d < fmin: continue
+%o A373446         for f in factorizations(n//d,d):
+%o A373446             yield [d]+f
+%o A373446 def A373446_generator():
+%o A373446     alist = []
+%o A373446     def bgen():
+%o A373446         blist = []
+%o A373446         for n in count(1):
+%o A373446             b = 0
+%o A373446             for p in factorizations(n):
+%o A373446                 if len(p) == 1: continue
+%o A373446                 m = 1
+%o A373446                 for k,c in Counter(p).items():
+%o A373446                     m *= comb(alist[k-1]-blist[k-1]+c-1,c)
+%o A373446                 b += m
+%o A373446             yield b
+%o A373446             blist.append(b)
+%o A373446     for a in euler_transform(bgen()):
+%o A373446         yield a
+%o A373446         alist.append(a)
+%o A373446 print(list(islice(A373446_generator(),60))) # _Pontus von Brömssen_, Jun 13 2024
+%Y A373446 Cf. A002095, A005245, A214833.
+%K A373446 nonn,nice,new
 %O A373446 1,4
 %A A373446 _Daniel W. Grace_, Jun 05 2024
