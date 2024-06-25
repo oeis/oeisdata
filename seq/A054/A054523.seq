@@ -1,4 +1,4 @@
-%I A054523 #59 Oct 05 2020 12:24:42
+%I A054523 #64 Jun 25 2024 02:02:02
 %S A054523 1,1,1,2,0,1,2,1,0,1,4,0,0,0,1,2,2,1,0,0,1,6,0,0,0,0,0,1,4,2,0,1,0,0,
 %T A054523 0,1,6,0,2,0,0,0,0,0,1,4,4,0,0,1,0,0,0,0,1,10,0,0,0,0,0,0,0,0,0,1,4,2,
 %U A054523 2,2,0,1,0,0,0,0,0,1,12,0,0,0,0,0,0,0,0,0,0,0,1,6,6
@@ -17,13 +17,23 @@
 %C A054523 The multivariable row polynomials give n times the cycle index for the cyclic group C_n, called Z(C_n) (see the MathWorld link with the Harary reference): n*Z(C_n) = Sum_{k=1..n} T(n,k)*(y_{n/k})^k, n >= 1. E.g., 6*Z(C_6) = 2*(y_6)^1 + 2*(y_3)^2 + 1*(y_2)^3 + 1*(y_1)^6. - _Wolfdieter Lang_, May 22 2012
 %C A054523 See A102190 (no 0's, rows reversed). - _Wolfdieter Lang_, May 29 2012
 %C A054523 This is the number of permutations in the n-th cyclic group which are the product of k disjoint cycles. - _Robert A. Beeler_, Aug 09 2013
-%C A054523 From _Werner Schulte_, Sep 06 2020: (Start)
-%C A054523 Sum_{k=1..n} T(n,k) * A000010(k) = A029935(n) for n > 0.
-%C A054523 Sum_{k=1..n} T(n,k) * k^2 = A069097(n) for n > 0. (End)
-%D A054523 Ronald L. Graham, D. E. Knuth, Oren Patashnik, Concrete Mathematics, Addison-Wesley, 2nd ed., 1994, p. 136. [_Gary W. Adamson_, Aug 03 2008]
+%D A054523 Ronald L. Graham, D. E. Knuth, Oren Patashnik, Concrete Mathematics, Addison-Wesley, 2nd ed., 1994, p. 136.
 %H A054523 Reinhard Zumkeller, <a href="/A054523/b054523.txt">Rows n = 1..125 of triangle, flattened</a>
 %H A054523 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/CycleIndex.html">Cycle Index</a>.
+%F A054523 Sum_{k=1..n} k * T(n, k) = A018804(n). - _Gary W. Adamson_, Jan 08 2007
 %F A054523 Equals A054525 * A126988 as infinite lower triangular matrices. - _Gary W. Adamson_, Aug 03 2008
+%F A054523 From _Werner Schulte_, Sep 06 2020: (Start)
+%F A054523 Sum_{k=1..n} T(n,k) * A000010(k) = A029935(n) for n > 0.
+%F A054523 Sum_{k=1..n} k^2 * T(n,k) = A069097(n) for n > 0. (End)
+%F A054523 From _G. C. Greubel_, Jun 24 2024: (Start)
+%F A054523 T(2*n-1, n) = A000007(n-1), n >= 1.
+%F A054523 T(2*n, n) = A000012(n), n >= 1.
+%F A054523 Sum_{k=1..n} (-1)^(k-1)*T(n, k) = (1 - (-1)^n)*n/2.
+%F A054523 Sum_{k=1..floor(n+1)/2) T(n-k+1, k) = A092843(n+1).
+%F A054523 Sum_{k=1..n} (k+1)*T(n, k) = A209295(n).
+%F A054523 Sum_{k=1..n} k^3 * T(n, k) = A343497(n).
+%F A054523 Sum_{k=1..n} k^4 * T(n, k) = A343498(n).
+%F A054523 Sum_{k=1..n} k^5 * T(n, k) = A343499(n). (End)
 %e A054523 Triangle begins
 %e A054523    1;
 %e A054523    1, 1;
@@ -38,14 +48,27 @@
 %e A054523   10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1;
 %e A054523    4, 2, 2, 2, 0, 1, 0, 0, 0, 0, 0, 1;
 %p A054523 A054523 := proc(n,k) if n mod k = 0 then numtheory[phi](n/k) ; else 0; end if; end proc: # _R. J. Mathar_, Apr 11 2011
-%t A054523 T[n_, k_] := If[Divisible[n, k], EulerPhi[n/k], 0]; T[1, 1] = 1; Table[T[n, k], {n, 1, 10}, {k, 1, n}]//Flatten (* _G. C. Greubel_, Dec 15 2017 *)
+%t A054523 T[n_, k_]:= If[k==n,1,If[Divisible[n, k], EulerPhi[n/k], 0]];
+%t A054523 Table[T[n,k], {n,15}, {k,n}]//Flatten (* _G. C. Greubel_, Dec 15 2017 *)
 %o A054523 (Haskell)
 %o A054523 a054523 n k = a054523_tabl !! (n-1) !! (k-1)
 %o A054523 a054523_row n = a054523_tabl !! (n-1)
 %o A054523 a054523_tabl = map (map (\x -> if x == 0 then 0 else a000010 x)) a126988_tabl
 %o A054523 -- _Reinhard Zumkeller_, Jan 20 2014
 %o A054523 (PARI) for(n=1, 10, for(k=1, n, print1(if(!(n % k), eulerphi(n/k), 0), ", "))) \\ _G. C. Greubel_, Dec 15 2017
-%Y A054523 Cf. A054521, A054525, A102190, A000027, A007431, A029935, A069097.
-%K A054523 nonn,tabl
+%o A054523 (Magma)
+%o A054523 A054523:= func< n,k | k eq n select 1 else (n mod k) eq 0 select EulerPhi(Floor(n/k)) else 0 >;
+%o A054523 [A054523(n,k): k in [1..n], n in [1..15]]; // _G. C. Greubel_, Jun 24 2024
+%o A054523 (SageMath)
+%o A054523 def A054523(n,k):
+%o A054523     if (k==n): return 1
+%o A054523     elif (n%k)==0: return euler_phi(int(n//k))
+%o A054523     else: return 0
+%o A054523 flatten([[A054523(n,k) for k in range(1,n+1)] for n in range(1,16)]) # _G. C. Greubel_, Jun 24 2024
+%Y A054523 Cf. A000005, A000007, A000010, A000012, A000203, A007431, A008683.
+%Y A054523 Cf. A038040, A051731, A054521, A054525, A102190, A126988.
+%Y A054523 Sums incliude: A029935, A069097, A092843 (diagonal), A209295.
+%Y A054523 Sums of the form Sum_{k} k^p * T(n, k): A000027 (p=0), A018804 (p=1), A069097 (p=2), A343497 (p=3), A343498 (p=4), A343499 (p=5).
+%K A054523 nonn,tabl,changed
 %O A054523 1,4
 %A A054523 _N. J. A. Sloane_, Apr 09 2000
