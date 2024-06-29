@@ -1,0 +1,59 @@
+%I A373417 #24 Jun 28 2024 22:54:19
+%S A373417 1,1,0,1,0,0,1,0,0,0,1,0,0,0,3,1,0,0,0,15,20,1,0,0,0,45,120,130,1,0,0,
+%T A373417 0,105,420,910,924,1,0,0,0,210,1120,3640,7392,7413,1,0,0,0,378,2520,
+%U A373417 10920,33264,66717,66744,1,0,0,0,630,5040,27300,110880,333585,667440,667476
+%N A373417 Triangle T(n,k) for the number of permutations in symmetric group S_n with (n-k) fixed points and an even number of non-fixed point cycles. Equivalent to the number of cycles of n items with cycle type defined by non-unity partitions of k<=n that contain an even number of parts.
+%C A373417 A343418(n) + a(n) = A098825(n) = partial derangement "rencontres" triangle
+%C A373417 A343418(n) - a(n) = (k-1) * binomial(n,k) = A127717(n-1,k-1)
+%C A373417 Difference of 1st and 2nd leading diagonals (n > 0)
+%C A373417 T(n,n) - T(n,n-1) = -1,0,0,3,5,10,14,21,27,36,44,...
+%C A373417                   = (-1) + (1+0) + (3+2) + (5+4) + (7+6) + (9+8) + ...
+%C A373417 Cf. A176222(n) with 2 terms -1,0 prepended (moving its offset from 3 to 1) - _Julian Hatfield Iacoponi_, Jun 07 2024
+%F A373417 T(n,k) = (n!/(n-k)!/2) * (Sum_{j=0..k} (-1)^j/j! - (k-1)/k!) Cf. Sum_{j=0..k} (-1)^j/j! = A053557(k) / A053556(k) - _Julian Hatfield Iacoponi_, Jun 07 2024
+%e A373417 Triangle array T(n,k)
+%e A373417 n:  {k<=n}
+%e A373417 0:  {1}
+%e A373417 1:  {1, 0}
+%e A373417 2:  {1, 0, 0}
+%e A373417 3:  {1, 0, 0, 0}
+%e A373417 4:  {1, 0, 0, 0,   3}
+%e A373417 5:  {1, 0, 0, 0,  15,   20}
+%e A373417 6:  {1, 0, 0, 0,  45,  120,   130}
+%e A373417 7:  {1, 0, 0, 0, 105,  420,   910,    924}
+%e A373417 8:  {1, 0, 0, 0, 210, 1120,  3640,   7392,   7413}
+%e A373417 9:  {1, 0, 0, 0, 378, 2520, 10920,  33264,  66717,  66744}
+%e A373417 10: {1, 0, 0, 0, 630, 5040, 27300, 110880, 333585, 667440, 667476}
+%e A373417 T(n,0) = 1 due to sole permutation in S_n with n fixed points, namely the identity permutation, with 0 non-fixed point cycles, an even number. (T(0,0)=1 relies on S_0 containing an empty permutation.)
+%e A373417 T(n,1) = 0 due to no permutations in S_n with (n-1) fixed points.
+%e A373417 T(n,2) = T(n,3) = 0 due to only non-unity partitions of 2 and 3 being of odd length, namely the trivial partitions (2),(3).
+%e A373417 Example:
+%e A373417 T(4,4) = 3 since S_4 contains 3 permutations with 0 fixed points and an even number of non-fixed point cycles, namely the derangements: (12)(34),(13)(24),(14)(23).
+%e A373417 Worked Example:
+%e A373417 T(7,6) = 910 permutations in S_7 with 1 fixed point and an even number of non-fixed point cycles.
+%e A373417 T(7,6) = 910 possible (4,2)- and (3,3)-cycles of 7 items.
+%e A373417 N(n,y) = possible y-cycles of n items.
+%e A373417 N(n,y) = (n!/(n-k)!) / (M(y) * s(y)).
+%e A373417 y = partition of k<=n with q parts = (p_1, p_2,..., p_i, ..., p_q)
+%e A373417 s.t. k = Sum_{i=1..q} p_i.
+%e A373417 Or:
+%e A373417 y = partition of k<=n with d distinct parts, each with multiplicity m_j = (y_1^m_1, y_2^m^2, ..., y_j^m_j, ..., y_d^m_d)
+%e A373417 s.t. k = Sum_{j=1..d) m_j*y_j.
+%e A373417 M(y) = Product_{i=1..q} p_i = Product_{j=1..d} y_j^m_j.
+%e A373417 s(y) = Product_{j=1..d} m_j! ("symmetry of repeated parts").
+%e A373417 Note: (n!/(n-k)!) / s(y) = multinomial(n, {m_j}).
+%e A373417 Therefore:
+%e A373417 T(7,6) = N(7,y=(4,2)) + N(7,y=(3^2))
+%e A373417        = (7!/(4*2)) + (7!/(3^2)/2!)
+%e A373417        = 7! * (1/8 + 1/18)
+%e A373417        = 5040 * (13/72)
+%e A373417 T(7,6) = 910. - _Julian Hatfield Iacoponi_, Jun 07 2024
+%p A373417 b:= proc(n, t) option remember; `if`(n=0, t, add(expand(`if`(j>1, x^j, 1)*
+%p A373417       b(n-j, irem(t+signum(j-1), 2)))*binomial(n-1, j-1)*(j-1)!, j=1..n))
+%p A373417     end:
+%p A373417 T:= n-> (p-> seq(coeff(p, x, i), i=0..n))(b(n, 1)):
+%p A373417 seq(T(n), n=0..10);  # _Alois P. Heinz_, Jun 04 2024
+%t A373417 Table[Table[n!/(n-k)!/2 * (Sum[(-1)^j/j!, {j, 0, k}] - ((k - 1)/k!)),{k,1,n}], {n,1,10}] (*_Julian Hatfield Iacoponi_, Jun 07 2024*).
+%Y A373417 Cf. A373418 (odd case), A373339 (row sums), A216778 (main diagonal).
+%K A373417 nonn,tabl,new
+%O A373417 0,15
+%A A373417 _Julian Hatfield Iacoponi_, Jun 04 2024
