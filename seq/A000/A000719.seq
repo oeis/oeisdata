@@ -1,4 +1,4 @@
-%I A000719 M1452 N0574 #45 Aug 15 2019 17:08:02
+%I A000719 M1452 N0574 #53 Jul 04 2024 01:39:31
 %S A000719 0,0,1,2,5,13,44,191,1229,13588,288597,12297299,1031342116,
 %T A000719 166123498733,50668194387427,29104827043066808,31455591302381718651,
 %U A000719 64032471448906164191208,245999896712611657677614268,1787823725136869060356731751124
@@ -15,8 +15,22 @@
 %H A000719 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/k-ConnectedGraph.html">k-Connected Graph.</a>
 %H A000719 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/k-Edge-ConnectedGraph.html">k-Edge-Connected Graph.</a>
 %t A000719 << "Combinatorica`"; max = 18; A000088 = Table[ NumberOfGraphs[n], {n, 0, max}]; f[x_] = 1 - Product[ 1/(1 - x^k)^b[k], {k, 1, max}]; b[0] = b[1] = b[2] = 1; coes = CoefficientList[ Series[ f[x], {x, 0, max}], x]; sol = First[ Solve[ Thread[ Rest[ coes + A000088 ] == 0]]]; a[n_] := a[n] = A000088[[n+1]] - b[n] /. sol; a[0] = a[1] = 0; Table[a[n], {n, 0, max}] (* _Jean-François Alcover_, Nov 24 2011 *)
+%o A000719 (Python)
+%o A000719 from functools import lru_cache
+%o A000719 from itertools import combinations
+%o A000719 from fractions import Fraction
+%o A000719 from math import prod, gcd, factorial
+%o A000719 from sympy import mobius, divisors
+%o A000719 from sympy.utilities.iterables import partitions
+%o A000719 def A000719(n):
+%o A000719     if n == 0: return 0
+%o A000719     @lru_cache(maxsize=None)
+%o A000719     def b(n): return int(sum(Fraction(1<<sum(p[r]*p[s]*gcd(r,s) for r,s in combinations(p.keys(),2))+sum((q>>1)*r+(q*r*(r-1)>>1) for q, r in p.items()),prod(q**r*factorial(r) for q, r in p.items())) for p in partitions(n)))
+%o A000719     @lru_cache(maxsize=None)
+%o A000719     def c(n): return n*b(n)-sum(c(k)*b(n-k) for k in range(1,n))
+%o A000719     return b(n)-sum(mobius(n//d)*c(d) for d in divisors(n,generator=True))//n # _Chai Wah Wu_, Jul 03 2024
 %Y A000719 Equals (A000088) minus (A001349).
-%K A000719 nonn,easy,nice
+%K A000719 nonn,easy,nice,changed
 %O A000719 0,4
 %A A000719 _N. J. A. Sloane_
 %E A000719 More terms from _Christian G. Bower_

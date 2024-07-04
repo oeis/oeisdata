@@ -1,4 +1,4 @@
-%I A054915 #21 Sep 11 2018 00:10:58
+%I A054915 #26 Jul 04 2024 01:46:13
 %S A054915 1,0,0,1,8,68,662,9888,247492,11427974,994403266,163028488360,
 %T A054915 50169784370486,28952819268460634,31368276315718175152,
 %U A054915 63938104521922794457626,245807799210635120355337360,1787085725352186477232522962312,24634233605674730786262294027930520
@@ -10,8 +10,21 @@
 %t A054915 g[z_] := Sum[NumberOfGraphs[n] z^n, {n, 0, nn}]; sol =
 %t A054915 SolveAlways[ 0 == Series[g[z] - Product[1/(1 - z^i)^a[i], {i, 1, nn}], {z, 0, nn}], z]; 2*(Flatten[Table[a[n], {n, 1, nn}] /. sol]) - (Drop[
 %t A054915 CoefficientList[Series[g[z], {z, 0, nn + 1}], z], 1]) (* _Geoffrey Critzer_, Aug 12 2016 *)
+%o A054915 (Python)
+%o A054915 from functools import lru_cache
+%o A054915 from itertools import combinations
+%o A054915 from fractions import Fraction
+%o A054915 from math import prod, gcd, factorial
+%o A054915 from sympy import mobius, divisors
+%o A054915 from sympy.utilities.iterables import partitions
+%o A054915 def A054915(n):
+%o A054915     @lru_cache(maxsize=None)
+%o A054915     def b(n): return int(sum(Fraction(1<<sum(p[r]*p[s]*gcd(r,s) for r,s in combinations(p.keys(),2))+sum((q>>1)*r+(q*r*(r-1)>>1) for q, r in p.items()),prod(q**r*factorial(r) for q, r in p.items())) for p in partitions(n)))
+%o A054915     @lru_cache(maxsize=None)
+%o A054915     def c(n): return n*b(n)-sum(c(k)*b(n-k) for k in range(1,n))
+%o A054915     return (sum(mobius(n//d)*c(d) for d in divisors(n,generator=True))//n<<1)-b(n) # _Chai Wah Wu_, Jul 03 2024
 %Y A054915 Cf. A000088, A001349.
-%K A054915 nonn,easy
+%K A054915 nonn,easy,changed
 %O A054915 1,5
 %A A054915 _N. J. A. Sloane_, May 23 2000
 %E A054915 More terms from _Vladeta Jovovic_, Jul 17 2000

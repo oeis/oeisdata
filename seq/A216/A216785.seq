@@ -1,7 +1,7 @@
-%I A216785 #66 Mar 03 2024 09:30:54
+%I A216785 #73 Jul 04 2024 02:23:33
 %S A216785 0,0,1,2,8,28,145,1022,12320,274785,12007355,1019030127,165091859656,
 %T A216785 50502058491413,29054157815353374,31426486309136268658,
-%U A216785 64001015806929213894372
+%U A216785 64001015806929213894372,245935864212056913811498454,1787577725208700551275529005084,24637809253253259917745389824933448
 %N A216785 Number of unlabeled graphs on n nodes that have exactly two non-isomorphic components.
 %C A216785 Stated more precisely: Number of unlabeled graphs on n nodes that have exactly two connected components and these components are not isomorphic (and nonempty).
 %D A216785 F. Harary and E. M. Palmer, Graphical Enumeration, Academic Press, 1973, page 48.
@@ -13,8 +13,23 @@
 %o A216785 (PARI) {c=[1, 1, 2, 6, 21, 112, 853, 11117, 261080, 11716571, 1006700565, 164059830476, 50335907869219, 29003487462848061, 31397381142761241960, 63969560113225176176277, 245871831682084026519528568, 1787331725248899088890200576580, 24636021429399867655322650759681644];}
 %o A216785 for(n=3,19,print([n,sum(j=1,(n-1)\2,c[j]*c[n-j])+if(n%2==0,c[n/2]*(c[n/2]-1)/2)]
 %o A216785 )); /* _David Broadhurst_, Jul 18 2016 */
+%o A216785 (Python)
+%o A216785 from functools import lru_cache
+%o A216785 from itertools import combinations
+%o A216785 from fractions import Fraction
+%o A216785 from math import prod, gcd, factorial, comb
+%o A216785 from sympy import mobius, divisors
+%o A216785 from sympy.utilities.iterables import partitions
+%o A216785 def A216785(n):
+%o A216785     @lru_cache(maxsize=None)
+%o A216785     def b(n): return int(sum(Fraction(1<<sum(p[r]*p[s]*gcd(r,s) for r,s in combinations(p.keys(),2))+sum((q>>1)*r+(q*r*(r-1)>>1) for q, r in p.items()),prod(q**r*factorial(r) for q, r in p.items())) for p in partitions(n)))
+%o A216785     @lru_cache(maxsize=None)
+%o A216785     def c(n): return n*b(n)-sum(c(k)*b(n-k) for k in range(1,n))
+%o A216785     @lru_cache(maxsize=None)
+%o A216785     def d(n): return sum(mobius(n//d)*c(d) for d in divisors(n,generator=True))//n
+%o A216785     return sum(d(i)*d(n-i) for i in range(1,n+1>>1)) + (0 if n&1 else comb(d(n>>1),2)) # _Chai Wah Wu_, Jul 03 2024
 %Y A216785 Cf. A058915, A001349, A217955, A275165, A275166 (allows an empty component), A274934 (allows isomorphic components).
-%K A216785 nonn
+%K A216785 nonn,changed
 %O A216785 1,4
 %A A216785 _Geoffrey Critzer_, Oct 15 2012
 %E A216785 Two zeros prepended (offset changed), formula updated, and entries corrected by _R. J. Mathar_, _N. J. A. Sloane_, Jul 18 2016. (Thanks to _Allan C. Wechsler_ for pointing out that all the entries above a(19) were wrong.)
