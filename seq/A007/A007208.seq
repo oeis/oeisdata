@@ -1,4 +1,4 @@
-%I A007208 M3222 #47 Apr 09 2023 02:07:00
+%I A007208 M3222 #57 Jul 06 2024 01:38:58
 %S A007208 4,4,4,4,4,4,5,6,4,4,4,3,5,8,8,8,8,8,8,8,7,13,14,14,14,14,15,16,14,14,
 %T A007208 7,13,14,14,14,14,15,16,14,14,7,13,14,14,14,14,15,16,14,14,7,13,14,14,
 %U A007208 14,14,15,16,14,14,7,13,14,14,14,14,15,16,14,14,7
@@ -10,12 +10,24 @@
 %D A007208 N. J. A. Sloane and Simon Plouffe, The Encyclopedia of Integer Sequences, Academic Press, 1995 (includes this sequence).
 %H A007208 Wikipedia, <a href="https://de.wiktionary.org/wiki/Wiktionary:Deutsch/%C3%9Cbersicht_der_Zahlen">Deutsch/Übersicht der Zahlen</a>.
 %H A007208 <a href="/index/Lc#letters">Index entries for sequences related to number of letters in n</a>
-%o A007208 (PARI) /* Diacritics on umlauts are omitted and ß is represented by "B" because the GP interface cannot deal with these. The version below produces "einhundert" and "eintausend"; give a 4th argument "" to s(n, 100...) after "hundert" and "tausend" to get this instead. Names for larger numbers are easily added. */
-%o A007208 German(n, eins="eins")={my(s(n, p, z, e="ein")=n=divrem(n,p); if(n[2], Str(German(n[1]*p), German(n[2])), Str(German(n[1], e), z))); if(n<20, ["null", eins, "zwei", "drei", "vier", "funf", "sechs", "sieben", "acht", "neun", "zehn", "elf", "zwolf","dreizehn","vierzehn","funfzehn", "sechzehn", "siebzehn", "achtzehn", "neunzehn"][n+1], n<100 && n%10, Str(German(n%10, e, e), "und", German(n\10*10, e)), n<100, ["zwanzig", "dreiBig", "vierzig", "funfzig", "sechzig", "siebzig", "achtzig", "neunzig"][n\10-1], n<1000, s(n, 100, "hundert"), n<10^6, s(n, 1000, "tausend"), my(t=3); while(n>=10^t, t+=3); s(n, 10^t-=3, strprintf(if(n\10^t>1, " %sen ", t%2, "e %se ", "e %s "), Str(["M", "B", "Tr", "Quadr", "Quint", "Sext", "Sept", "Oct", "Non", "Dez"][t\6], "illi", ["on", "ard"][t%2+1]))))} \\ updated Mar 03 2020, Apr 08 2023
+%o A007208 (PARI) /* Because names with ä, ö, ü or ß can't be entered directly as a string in the GP interface, we use a separate list for the names, for efficiency and readability of the main function. Note that the default lexicographical order is that of ISO 8859-1 character codes ("z" < "ß" < "ä"). In applications where this is not suitable, the special characters below can be replaced, e.g., with "ae, oe, ue, ss" or "a, o, u, s". [_M. F. Hasler_, Jul 05 2024] */
+%o A007208 {deutsch = ["eins", "zwei", "drei", "vier", Str("f"Strchr(252)"nf"), "sechs", "sieben", "acht", "neun", "zehn", "elf", Str("zw"Strchr(246)"lf"),  "dreizehn", "vierzehn", Str("f"Strchr(252)"nfzehn"), "sechzehn", "siebzehn", "achtzehn", "neunzehn", "zwanzig", Str("drei"Strchr(223)"ig"), "vierzig", Str("f"Strchr(252)"nfzig"), "sechzig", "siebzig", "achtzig", "neunzig"]}
+%o A007208 German(n, e="eins", power=0, name="")={ if(power /* internal helper function */
+%o A007208   , n = divrem(n, power); Str(German(n[1], e) name, if(n[2], German(n[2]), ""))
+%o A007208   , n < 20, if(n>1, deutsch[n], n, e, "null")
+%o A007208   , n < 100, Str(if(n%10, Str(German(n%10, "ein") "und"), "") deutsch[n\10+18])
+%o A007208   , n < 1000, German(n, "ein", 100, "hundert") \\ replace "ein" with "" to get
+%o A007208   , n < 10^6, German(n, "ein", 1000, "tausend")\\ hundert/tausend without "ein-"
+%o A007208   , my(t=3); while(n>=10^t, t+=3); German(n, "ein", 10^t-=3, strprintf(
+%o A007208       if(n\10^t>1, " %sen", t%2, "e %se", "e %s")  if(n%10^t, " ", ""),
+%o A007208       Str(["M", "B", "Tr", "Quadr", "Quint", "Sext", "Sept", "Oct", "Non",
+%o A007208            "Dez", "Undez" /* etc. */][t\6], "illi", ["on", "ard"][t%2+1])))
+%o A007208   )} \\ updated Mar 03 2020, Apr 08 2023, Jul 05 2024
 %o A007208 A007208 = n -> #German(n) \\ _M. F. Hasler_, Nov 01 2013
+%o A007208 A007208(n) = vecsum([c>32|c<-Vecsmall(German(n))]) \\ To exclude spaces; irrelevant for n < 10^6. - _M. F. Hasler_, Jul 05 2024
 %Y A007208 Cf. A005589 and A052360 (English analog).
 %Y A007208 Cf. A007005 and A167507 (French analog).
-%K A007208 nonn,word
+%K A007208 nonn,word,changed
 %O A007208 0,1
 %A A007208 _N. J. A. Sloane_.
 %E A007208 Corrected by Markus Stausberg (markus(AT)polomi.de), Aug 08 2004
