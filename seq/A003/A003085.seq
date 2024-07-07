@@ -1,4 +1,4 @@
-%I A003085 M2067 #64 Oct 06 2023 03:26:13
+%I A003085 M2067 #72 Jul 06 2024 09:26:08
 %S A003085 1,2,13,199,9364,1530843,880471142,1792473955306,13026161682466252,
 %T A003085 341247400399400765678,32522568098548115377595264,
 %U A003085 11366712907233351006127136886487,14669074325902449468573755897547924182
@@ -25,11 +25,24 @@
 %t A003085 A003084 = CoefficientList[Log[Sum[d[n] x^n, {n, 0, terms+1}]] + O[x]^(terms + 1), x] Range[0, terms] // Rest;
 %t A003085 a[n_] := (1/n)*Sum[MoebiusMu[n/d] * A003084[[d]], {d, Divisors[n]}];
 %t A003085 Table[a[n], {n, 1, terms}] (* _Jean-François Alcover_, Aug 30 2019, after _Andrew Howroyd_ in A003084 *)
+%o A003085 (Python)
+%o A003085 from functools import lru_cache
+%o A003085 from itertools import product, combinations
+%o A003085 from fractions import Fraction
+%o A003085 from math import prod, gcd, factorial
+%o A003085 from sympy import mobius, divisors
+%o A003085 from sympy.utilities.iterables import partitions
+%o A003085 def A003085(n):
+%o A003085     @lru_cache(maxsize=None)
+%o A003085     def b(n): return int(sum(Fraction(1<<sum(p[r]*p[s]*gcd(r,s)<<1 for r,s in combinations(p.keys(),2))+sum(r*(q*r-1) for q, r in p.items()),prod(q**r*factorial(r) for q, r in p.items())) for p in partitions(n)))
+%o A003085     @lru_cache(maxsize=None)
+%o A003085     def c(n): return n*b(n)-sum(c(k)*b(n-k) for k in range(1,n))
+%o A003085     return sum(mobius(n//d)*c(d) for d in divisors(n,generator=True))//n # _Chai Wah Wu_, Jul 05 2024
 %Y A003085 Row sums of A054733.
 %Y A003085 Column sums of A350789.
 %Y A003085 The labeled case is A003027.
 %Y A003085 Cf. A000273, A003084, A035512 (strongly connected).
-%K A003085 nonn,nice
+%K A003085 nonn,nice,changed
 %O A003085 1,2
 %A A003085 _N. J. A. Sloane_
 %E A003085 More terms from _Vladeta Jovovic_, Jan 09 2000
