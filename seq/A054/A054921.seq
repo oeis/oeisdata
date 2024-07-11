@@ -1,4 +1,4 @@
-%I A054921 #29 Oct 26 2018 02:47:23
+%I A054921 #35 Jul 10 2024 15:02:51
 %S A054921 1,2,3,10,50,354,3883,67994,2038236,109141344,10693855251,
 %T A054921 1934271527050,648399961915988,404093642681273382,
 %U A054921 469756524755173254759,1022121472711196824292810,4176802133456105622904206409,32159648543645931290004658982846
@@ -15,8 +15,21 @@
 %t A054921 unlabeledSimpleMluts[n_Integer]:=unlabeledSimpleMluts[n]=Total[Power[2,PermutationCycles[Ordering[Map[Sort,Select[Tuples[Range[n],2],OrderedQ]/.Table[i->Part[#,i],{i,n}]]],Length]]&/@Permutations[Range[n]]]/n!;
 %t A054921 multing[t_,n_]:=Array[(t+#-1)/#&,n,1,Times];
 %t A054921 ReplaceAll[a/@Range[0,nn],Solve[Table[unlabeledSimpleMluts[n]==If[n===0,a[0],Total[Function[ptn,Times@@(multing[a[First[#]],Length[#]]&/@Split[ptn])]/@IntegerPartitions[n]]],{n,0,nn}],a/@Range[0,nn]][[1]]] (* _Gus Wiseman_, Jul 21 2016 *)
+%o A054921 (Python)
+%o A054921 from functools import lru_cache
+%o A054921 from itertools import combinations
+%o A054921 from math import prod, factorial, gcd
+%o A054921 from fractions import Fraction
+%o A054921 from sympy.utilities.iterables import partitions
+%o A054921 from sympy import mobius, divisors
+%o A054921 def A054921(n):
+%o A054921     @lru_cache(maxsize=None)
+%o A054921     def b(n): return int(sum(Fraction(1<<sum(p[r]*p[s]*gcd(r,s) for r,s in combinations(p.keys(),2))+sum(((q>>1)+1)*r+(q*r*(r-1)>>1) for q, r in p.items()),prod(q**r*factorial(r) for q, r in p.items())) for p in partitions(n)))
+%o A054921     @lru_cache(maxsize=None)
+%o A054921     def c(n): return n*b(n)-sum(c(k)*b(n-k) for k in range(1,n))
+%o A054921     return sum(mobius(d)*c(n//d) for d in divisors(n,generator=True))//n if n else 1 # _Chai Wah Wu_, Jul 10 2024
 %Y A054921 Cf. A000666. Row sums of A304311.
-%K A054921 nonn,easy
+%K A054921 nonn,easy,changed
 %O A054921 0,2
 %A A054921 _N. J. A. Sloane_, May 24 2000
 %E A054921 More terms from _Vladeta Jovovic_, Jul 17 2000
