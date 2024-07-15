@@ -1,0 +1,50 @@
+%I A373581 #23 Jul 14 2024 18:51:14
+%S A373581 3,7,31,73,127,443,1453,5981,8191,19609,21157,28123,29671,83269,
+%T A373581 131071,262657,287281,324217,354997,367309,431947,456571,462727,
+%U A373581 499663,524287,1348901,1488301,1715851,1875751,5548693,6298627,7331323,7355911,8093551,8191903
+%N A373581 Prime numbers whose base-2 representation is a "nested" palindrome.
+%C A373581 The definition of "nested" palindrome per A344550 is used: both the right and left halves of the base-2 representation of each term are themselves palindromes. "Half" means ceiling(m/2) for a m-bit term. (By contrast, A240601 uses floor(m/2).)
+%H A373581 Michael S. Branicky, <a href="/A373581/b373581.txt">Table of n, a(n) for n = 1..10000</a>
+%H A373581 James S. DeArmon, <a href="/A373581/a373581.txt">Common LISP code for A373581</a>
+%e A373581 Terms 1,2,and 3 are 3,7,31, with respective base-2 valuations of 11, 111, 11111. The fourth term, 73, is the smallest term containing zeros in the base-2 representation: 1001001. Note the middle bit is shared by both halves; the nested palindrome is "1001".
+%o A373581 (Python)
+%o A373581 import sympy
+%o A373581 def ispal(n):
+%o A373581     return str(n) == str(n)[::-1]
+%o A373581 def isodd(n): return n%2
+%o A373581 outVec = []
+%o A373581 for n in range(9999999):
+%o A373581     if not sympy.isprime(n): continue
+%o A373581     binStr = (bin(n))[2:]
+%o A373581     if not ispal(binStr): continue
+%o A373581     lenB = len(binStr)
+%o A373581     halfB = int(lenB/2)
+%o A373581     if isodd(lenB): halfB += 1
+%o A373581     if not ispal(binStr[:halfB]): continue
+%o A373581     print(n,binStr)
+%o A373581     outVec.append(n)
+%o A373581 print(outVec)
+%o A373581 (Python)
+%o A373581 from sympy import isprime
+%o A373581 from itertools import count, islice, product
+%o A373581 def pals(d, base=10): # returns a string
+%o A373581     digits = "".join(str(i) for i in range(base))
+%o A373581     for p in product(digits, repeat=d//2):
+%o A373581         if d//2 > 0 and p[0] == "0": continue
+%o A373581         left = "".join(p); right = left[::-1]
+%o A373581         for mid in [[""], digits][d%2]:
+%o A373581             yield left + mid + right
+%o A373581 def nbp_gen(): # generator of nested binary palindromes (as strings)
+%o A373581     yield '0'
+%o A373581     for d in count(1):
+%o A373581         yield from (p+p[-1-d%2::-1] for p in pals((d+1)//2, base=2))
+%o A373581 def agen(): # generator of terms
+%o A373581     yield from filter(isprime, (int(nbp, 2) for nbp in nbp_gen()))
+%o A373581 print(list(islice(agen(), 36))) # _Michael S. Branicky_, Jun 12 2024
+%o A373581 (Common LISP) ; See LINKS section.
+%Y A373581 Subsequence of A016041.
+%Y A373581 Primes in A373941.
+%Y A373581 Cf. A344550.
+%K A373581 nonn,base,new
+%O A373581 1,1
+%A A373581 _James S. DeArmon_, Jun 10 2024
