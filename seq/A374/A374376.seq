@@ -1,0 +1,47 @@
+%I A374376 #26 Jul 16 2024 15:57:56
+%S A374376 2,23,-1,223,22,-1,2237,235,27,-1,22273,2227,222,132,-1,222323,22223,
+%T A374376 2222,225,32,-1,2222273,222223,22222,2223,252,729,-1,22222223,2222557,
+%U A374376 222227,22225,2322,352,192,-1,222222227,22222237,2222222,222225,22232,2232,2352,2112,-1,2222222377,222222223
+%N A374376 Array read by downward antidiagonals: T(k,n) is the least number that has k prime factors (counted with multiplicity) and is the concatenation of n primes, or -1 if there is no such number.
+%D A374376 T(k,1) = -1 for k > 1.
+%e A374376 Array starts
+%e A374376   2  23   223   2237   22273  ...
+%e A374376  -1  22   235   2227   22223  ...
+%e A374376  -1  27   222   2222   22222  ...
+%e A374376  -1 132   225   2223   22225  ...
+%e A374376  -1  32   252   2322   22232  ...
+%e A374376 A(4,3) = 225 because 225 = 3^2 * 5^2 is the product of 4 primes (with multiplicity) and is the concatenation of the 3 primes 2, 2 and 5, and is the least number that works.
+%p A374376 PD[1]:= [2,3,5,7]:
+%p A374376 for i from 2 to 7 do PD[i]:= select(isprime,[seq(i,i=10^(i-1)+1..10^i-1,2)]) od:
+%p A374376 dcat:= proc(a,b) 10^(ilog10(b)+1)*a+b end proc:
+%p A374376 cp:= proc(m,n) option remember; local d,p,x,R;
+%p A374376   if n = 1 then return PD[m] fi;
+%p A374376   R:= {};
+%p A374376   for d from 1 to m-n+1 do
+%p A374376     R:= R union {seq(seq(dcat(p,x),p=PD[d]),x=procname(m-d,n-1))}
+%p A374376   od;
+%p A374376   R
+%p A374376 end proc:
+%p A374376 F:= proc(n,N)
+%p A374376 local V,count,d,x,v;
+%p A374376 if n = 1 then return <2,(-1)$(N-1)> fi;
+%p A374376 V:= Vector(N); count:= 0;
+%p A374376 for d from n while count < N do
+%p A374376   for x in sort(convert(cp(d,n),list)) while count < N do
+%p A374376     v:= numtheory:-bigomega(x);
+%p A374376     if v <= N and V[v] = 0 then
+%p A374376       V[v]:= x; count:= count+1;
+%p A374376     fi
+%p A374376 od od:
+%p A374376 V;
+%p A374376 end proc:
+%p A374376 N:= 10: M:= Matrix(N,N):
+%p A374376 for i from 1 to N do
+%p A374376   V:= F(i,N+1-i);
+%p A374376   M[i,1..N+1-i]:= V;
+%p A374376 od:
+%p A374376 [seq(seq(M[t-i,i],i=1..t-1),t=2..N+1)];
+%Y A374376 Cf. A001222, A069837 (first row), A374665 (main diagonal), A374669 (second column).
+%K A374376 sign,base,new
+%O A374376 1,1
+%A A374376 _Robert Israel_, Jul 14 2024
