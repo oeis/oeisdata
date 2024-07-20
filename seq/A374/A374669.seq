@@ -1,0 +1,36 @@
+%I A374669 #8 Jul 19 2024 19:15:05
+%S A374669 23,22,27,132,32,729,192,2112,1792,5632,3072,59392,64512,90112,110592,
+%T A374669 950272,2260992,3244032,786432,30277632,7340032,23068672,12582912,
+%U A374669 494927872,1333788672,1375731712,704643072,3892314112,1879048192,37446746112,27380416512,196494753792,30064771072,94489280512
+%N A374669 a(n) is the least number with n prime factors (counted with multiplicity) that is the concatenation of two primes.
+%H A374669 Robert Israel, <a href="/A374669/b374669.txt">Table of n, a(n) for n = 1..1000</a>
+%e A374669 a(4) = 132 because 132 = 2^2 * 3 * 11 is the product of 4 primes (counted with multiplicity) and is the concatenation of the two primes 13 and 2.
+%p A374669 cp:= proc(n) local k;
+%p A374669   if n::even then n mod 10 = 2 and isprime((n-2)/10)
+%p A374669   elif n mod 5 = 0 then isprime((n-5)/10)
+%p A374669   else for k from 1 to ilog10(n) do
+%p A374669     if isprime(n mod 10^k) and isprime(floor(n/10^k)) then return true fi
+%p A374669     od;
+%p A374669     false
+%p A374669   fi
+%p A374669 end proc:
+%p A374669 f:= proc(n) uses priqueue; local pq, p, q, T, TP, j, v;
+%p A374669   initialize(pq);
+%p A374669   insert([-2^n,2$n],pq);
+%p A374669   do
+%p A374669     T:= extract(pq);
+%p A374669     v:= -T[1];
+%p A374669     if cp(v) then return(v) fi;
+%p A374669     q:= T[-1];
+%p A374669     p:= nextprime(q);
+%p A374669     for j from n+1 to 2 by -1 do
+%p A374669       if T[j] <> q then break fi;
+%p A374669       TP:= [T[1]*(p/q)^(n+2-j), op(T[2..j-1]), p$(n+2-j)];
+%p A374669       insert(TP, pq)
+%p A374669   od od;
+%p A374669 end proc:
+%p A374669 map(f, [$1..30]);
+%Y A374669 Cf.  A001222. Second column of A374376.
+%K A374669 nonn,base,new
+%O A374669 1,1
+%A A374669 _Robert Israel_, Jul 15 2024
