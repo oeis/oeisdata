@@ -1,10 +1,24 @@
-%I A093807 #2 Mar 31 2012 14:40:00
+%I A093807 #12 Jul 26 2024 20:21:15
 %S A093807 212,232,272,292,313,353,373,515,535,575,595,737,757,797,12121,12521,
 %T A093807 12721,13331,13531,13931,15151,15551,15751,17171,17371,17771,20102,
 %U A093807 20302,20702,20902,21112,21512,21712,22322,22522,23332,23732,24142
 %N A093807 Palindromic numbers with property that sum of digits is prime and number of prime digits is prime.
 %C A093807 a(1)=212, 212 is palindromic number, sum of digits 5 is prime, number of prime digits {2,2} 2 is prime, a(10)=575, 575 is palindromic number, sum of digits 17 is prime, number of prime digits {5,5,7} 3 is prime, a(15)=12121, 12121 is palindromic number, sum of digits 7 is prime, number of prime digits {2,2} 2 is prime, ...
+%H A093807 Michael S. Branicky, <a href="/A093807/b093807.txt">Table of n, a(n) for n = 1..10000</a>
 %p A093807 # Return list of digits stev_sez:=proc(n) local i, tren, st, ans,anstren; ans:=[ ]: anstren:=[ ]: tren:=n: for i while (tren>0) do st:=round( 10*frac(tren/10) ): ans:=[ op(ans), st ]: tren:=trunc(tren/10): end do; for i from nops(ans) to 1 by -1 do anstren:=[ op(anstren), op(i,ans) ]; od; RETURN(anstren); end: # Return number of prime digits ts_stpf:=proc(n) local i, stpf, ans, ans1; ans:=stev_sez(n): ans1:=[ ]: stpf:=0: for i from 1 to nops(ans) do if (isprime(op(i,ans))='true') then stpf:=stpf+1; ans1:=[ op(ans1), op(i,ans) ]: fi od; RETURN(stpf) end: # Return 0, if palindrome, otherwise return 1 ts_numpal:=proc(n) local ad; ad:=convert(n,base,10): if (ListTools[Reverse](ad)=ad) then return 0; else return 1; fi end: # Return sum of digits ts_vsota_stevk:=proc(n) local i, stpf, ans; ans:=stev_sez(n): stpf:=0: for i from 1 to nops(ans) do stpf:=stpf+op(i,ans); od; RETURN(stpf) end: ts_pras_vsota_pra_stevk_palind:=proc(n) local i, ans; ans:=[ ]: for i from 1 to n do if ( isprime(ts_vsota_stevk(i)) = 'true' and isprime(ts_stpf(i))='true' and ts_numpal(i)=0) then ans:=[ op(ans), i ]: fi od; RETURN(ans) end: ts_pras_vsota_pra_stevk_palind(100000);
-%K A093807 nonn,base
+%t A093807 Cases[If[PalindromeQ@#,{#, {Count[IntegerDigits@#, _?PrimeQ], DigitSum@#}}, Nothing] & /@ Range@60000, {a_, {_?PrimeQ ..}} :>a] (* _Hans Rudolf Widmer_, Jul 26 2024 *)
+%o A093807 (Python)
+%o A093807 from sympy import isprime, nextprime
+%o A093807 from itertools import count, islice, product
+%o A093807 def pals(d): # all d-digit palindromes with odd middle digit, as strings
+%o A093807     for p in product("0123456789", repeat=d//2):
+%o A093807         if d//2 > 0 and p[0] == "0": continue
+%o A093807         left = "".join(p); right = left[::-1]
+%o A093807         for mid in [[""], "13579"][d%2]: yield left + mid + right
+%o A093807 def agen(): # generator of terms
+%o A093807     for d in count(3, 2):
+%o A093807         yield from (int(p) for p in pals(d) if isprime(sum(1 for s in p if s in "2357")) and isprime(sum(map(int, p))))
+%o A093807 print(list(islice(agen(), 38))) # _Michael S. Branicky_, Jul 26 2024
+%K A093807 nonn,base,changed
 %O A093807 1,1
 %A A093807 _Jani Melik_, May 19 2004
