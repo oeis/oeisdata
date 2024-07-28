@@ -1,12 +1,20 @@
-%I A373797 #33 Jul 26 2024 21:57:05
-%S A373797 1,1,1,3,3,4,4,6,6,8,8,10,10,11,11,13,15
+%I A373797 #98 Jul 27 2024 21:34:55
+%S A373797 1,1,1,3,3,4,4,6,6,8,8,10,10,11,11,13,13,14,14,16,16,17,17,19,19
 %N A373797 a(n) = maximal k such that there exists a sequence S = [s_1, s_2, ..., s_k] with s_i distinct and in the range 1 <= s_i <= n such that if any s_i is divisible by a prime p, then p also divides exactly one of s_{i-1} and s_{i+1}.
 %C A373797 This is a finite version of the "cup of coffee" sequence A280864.
 %C A373797 An obvious upper bound is a(n) <= n-C, where C is the number of primes p <= n such that 2*p > n. For example a(4) <= 3, since we cannot make use of the prime 3.
-%C A373797 When going from n=p-1 to n=p (where p is a prime), the new p cannot be used, so a(p) = a(p-1).
-%C A373797 We can obtain a sequence of lower bounds by taking S to consist of the first A280774(m) terms of A280864, for m = 1,2,3,...  This gives a(m) >= max_{1 <= i <= A280774(m)} A280864(i). For example, with m=4, we can take the first A280774(4) = 10 terms of A280864, that is, the sequence S = 1,2,4,3,6,8,5,10,12,9, to get a(12) >= 10.  In fact equality holds: a(12) = 10 (see EXAMPLES below). (It is possible that equality will always hold.)
-%C A373797 [Computed by hand, needs checking and extending, and then this comment can be deleted.]
-%e A373797 Solutions for small n:
+%C A373797 Note that for a prime p <= n/2, the number of terms in S that are divisible by p must be even. So if floor(n/p) is odd for any p <= n/2, we have a(n) <= n-C-1.
+%C A373797 When going from n=p-1 to n=p (where p is a prime), the new p cannot be used, so a(p) = a(p-1) for p prime.
+%C A373797 We can obtain a sequence of lower bounds by taking S to consist of the first A280774(m) terms of A280864, for m = 1,2,3,...  This gives
+%C A373797    a(m) >= max_{1 <= i <= A280774(m)} A280864(i).... (**)
+%C A373797  For example, with m=4, we can take the first A280774(4) = 10 terms of A280864, that is, the sequence S = 1,2,4,3,6,8,5,10,12,9, to get a(12) >= 10.  In fact equality holds: a(12) = 10 (see EXAMPLES below).
+%C A373797 It is possible that equality will always hold in (**). (**) gives a(4) >= 3, a(8) >= 6, a(12) >= 10, a(16) >= 13 (equality holds up to this point), then a(28) >= 23, a(45) >= 27, ...
+%C A373797 From _N. J. A. Sloane_, Jul 27 2024 (Start)
+%C A373797 a(24) = 19 so a(25) >= 19. Here is an argument that shows that a(25) = 20 is impossible. We can't use 13 17 19 23. There are 5 multiples of 5 we could use, 5 10 15 20 25, but we can only use 4 of them.  There are 3 multiples of 7 we could use, namely 7 14 21, but we can only use 2 of them. These two lists are disjoint. So a(25) >= 25 - 4 - 2 = 19.
+%C A373797 I suspect that a(26) = 20, from 1 / 2 4 / 3 6 10 15 12 8 / 11 22 24 21 7 / 13 26 18 9 / 5 25 /.
+%C A373797 (End)
+%H A373797 Rémy Sigrist, <a href="/A373797/a373797_1.txt">C++ program</a>
+%e A373797 Solutions for small n (note that the solutions are a long way from being unique):
 %e A373797   n   a(n)    Solution S
 %e A373797   1    1        1
 %e A373797   4    3        1,2,4
@@ -16,6 +24,14 @@
 %e A373797   12   10       1,2,4,3,6,8,5,10,12,9
 %e A373797   14   11       1,2,4,3,6,10,5,7,14,12,9
 %e A373797   16   13       1,2,4,3,6,8,5,10,12,9,7,14,16
+%e A373797 As an example, let us verify that the prime-divisibility condition holds for the n=14 solution (we write Y to indicate divisibility):
+%e A373797   S = 1,2,4,3,6,10,5,7,14,12,9
+%e A373797   2?....Y.Y...Y..Y......Y..Y..
+%e A373797   3?........Y.Y............Y.Y
+%e A373797   5?.............Y.Y..........
+%e A373797   7?.................Y..Y.....
+%e A373797 The Y's occur in disjoint pairs, as required.
+%e A373797 Also, a(18) = 14, from S = 1,8,16,3,6,14,7,5,15,18,4,9,12,2. (We cannot use 11, 13, and 17, and there are an odd number of multiples of 2 and of 5, so we must lose at least one more term - we can take care of this by sacrificing 10 - so 18-4 = 14 is optimal. This implies a(19) = 14 also.)
 %o A373797 (Python)
 %o A373797 from itertools import permutations
 %o A373797 from sympy import primefactors, primepi
@@ -26,7 +42,17 @@
 %o A373797             alist = [0]+list(a)+[n+1]
 %o A373797             if all((p in c[alist[i-1]])^(p in c[alist[i+1]]) for i, d in enumerate(alist[1:-1],1) for p in c[d]):
 %o A373797                 return k # _Chai Wah Wu_, Jul 26 2024
+%o A373797 (Python)
+%o A373797 # Given a list S = [s_1, s_2, ..., s_k], this function checks if the terms s_i are such that if any s_i is divisible by a prime p, then p also divides exactly one of s_{i-1} and s_{i+1}.
+%o A373797 from sympy import primefactors
+%o A373797 def isSolution(S: list[int]) -> bool:
+%o A373797     return all(not any((S[i-1] % p == 0) == (S[i+1] % p == 0)
+%o A373797            for p in primefactors(S[i])) for i in range(1, len(L)-1))
+%o A373797 # _Peter Luschny_, Jul 27 2024
+%o A373797 (C++) // See Links section.
 %Y A373797 Cf. A280864, A280774.
 %K A373797 nonn,more,new
 %O A373797 1,4
 %A A373797 _N. J. A. Sloane_, Jul 26 2024
+%E A373797 a(20)-a(24) from _Rémy Sigrist_, Jul 27 2024
+%E A373797 a(25) from _N. J. A. Sloane_, Jul 27 2024
