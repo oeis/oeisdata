@@ -1,18 +1,22 @@
-%I A165772 #12 Jul 28 2024 17:04:40
+%I A165772 #16 Jul 31 2024 11:43:07
 %S A165772 30,84,140,308,364,476,532,644,1488,2480,3472,5456,6448,8432,9424,
 %T A165772 11408,14384,18352,20336,21328,23312,24384,26288,29264,30256,33232,
 %U A165772 35216,36208,39184,40640,41168,44144,48112,50096,51088,53072,54064,56048
 %N A165772 Numbers d*p where d is a perfect number and p<d a prime not dividing d.
 %C A165772 A subsequence of A109321, and thus admirable numbers (A111592, solutions to sigma(x)-2x = 2d with d being a proper divisor of x): If d is a perfect number (A000396), then for any prime p<d coprime to d, sigma(dp)-2dp = 2d (thus dp is in A111592) and d > sqrt(dp).
 %H A165772 Amiram Eldar, <a href="/A165772/b165772.txt">Table of n, a(n) for n = 1..10000</a>
-%e A165772 For d=6=2*3, we get a(1)=5d=30.
-%e A165772 For d=28=4*7, we get a(2)=3d=84, a(3)=5d=140, omitting 7d, a(4)=11d=308, a(5)=13d=364, a(6)=17d=476, a(7)=19d=532, a(8)=23d=644.
-%e A165772 For d=496=16*31, we get a(9)=3d=1488 through a(21)=47d=23312 (omitting 31d), a(23)=53d=26288 through a(29)=39184, a(31)=41168 through a(38)=56048 and a(40)=62992.
-%e A165772 For d=8128=64*127, we get a(22)=3d=24384, a(30)=5d=40640, a(39)=56896, a(41)=89408, and all following terms up to 3*4096*8191.
+%e A165772 For d = 6 = 2*3, we must omit 3*d (because 3 | d) and get a(1) = 5*d = 30.
+%e A165772 For d = 28 = 4*7, we get a(2) = 3*d = 84, a(3) = 5*d = 140, we omit 7*d,
+%e A165772   a(4) = 11*d = 308, a(5) = 13*d = 364, a(6) = 17*d = 476, a(7) = 19*d = 532,
+%e A165772   a(8) = 23*d = 644. So far all terms are in order of increasing size.
+%e A165772 For d = 496 = 16*31, we get a(9) = 3*d = 1488 through a(21) = 47*d = 23312 (omitting 31*d), but the next larger term a(22) comes from the next perfect number, see below. Then we get a(23) = 53*d = 26288 through a(29) = 39184, a(31) = 41168 through a(38) = 56048, and a(40) = 62992.
+%e A165772 For d = 8128 = 64*127, we get a(22) = 3*d = 24384, a(30) = 5*d = 40640, a(39) = 56896, a(41) = 89408, and all following terms up to 3*4096*8191.
 %t A165772 f[p_] := (2^p - 1)*2^(p - 1); evenPerf[n_] := f[MersennePrimeExponent[n]]; sp[p_, max_] := With[{pn = f[p]}, pn * Select[Complement[Range[3, Min[pn - 1, max/pn]], {2^p - 1}], PrimeQ]];
 %t A165772 seq[max_] := Module[{s = {}, k = 1}, While[(pn = evenPerf[k]) < max/3, s = Join[s, sp[MersennePrimeExponent[k], max]]; k++]; Union[s]]; seq[60000] (* _Amiram Eldar_, Aug 05 2023, assuming that there are no odd perfect numbers below max *)
-%o A165772 (PARI) forprime(q=1,9, isprime(2^q-1)||next; print("\n/* q="q", d=",d=(2^q-1)<<(q-1)," */"); forprime(p=3,d-1, d%p || next; print1(d*p,", ")))
-%o A165772 (PARI) is_A165772(n)={ my(q=valuation(n,2)); q | return; n=divrem(n>>q,2^q-1); n[2]==0 && n[1] < (2^q-1)<<q && isprime(n[1]) }
+%o A165772 (PARI) forprime(q=1,9, isprime(2^q-1)||next; print("\n/* q="q", d=",d=(2^q-1)<<(q-1)," */"); forprime(p=3,d-1, d%p || next; print1(d*p,", "))) /* Note: This prints the terms in order of increasingly large perfect numbers, not in order of increasing terms: e.g., 243536, the last value for d = 496 = (2^5-1)*2^4, is printed before 24384, first term for d = 8128 = (2^7-1)*2^6. */
+%o A165772 (PARI) A165772_upto(N=10^5)=select({
+%o A165772   is_A165772(n)=my(v=valuation(n, 2), P); isprime(v+1) && (n=divrem(n>>v, P=2^(v+1)-1))[2]==0 && n[1] < P<<v && n[1]!=P && isprime(n[1]) && isprime(P)
+%o A165772 }, [1..N\2]*2) \\ Older code updated and extended by _M. F. Hasler_, Jul 30 2024
 %Y A165772 Cf. A000396, A109321, A111592.
 %K A165772 nonn,changed
 %O A165772 1,1
