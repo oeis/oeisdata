@@ -1,11 +1,15 @@
-%I A050412 #74 Jul 31 2024 22:43:07
+%I A050412 #80 Aug 01 2024 13:16:49
 %S A050412 1,1,1,2,1,1,2,1,1,2,1,3,4,1,1,2,2,1,2,1,1,4,1,3,2,1,3,4,1,1,2,2,1,2,
 %T A050412 1,1,2,3,1,2,1,7,24,1,3,4,2,1,2,1,1,2,1,1,2,1,3,12,2,3,4,2,1,4,1,5,2,
 %U A050412 1,1,2,4,7,2552,1,1,2,2,1,4,3,1,2,1,5,6,1,23,4,1,1,2,3,3,2,1,1,4,1,1
 %N A050412 Riesel problem: start with n; repeatedly double and add 1 until reaching a prime. Sequence gives number of steps to reach a prime or 0 if no prime is ever reached.
 %C A050412 a(n) is the smallest m >= 1 such that (n+1)*2^m - 1 is prime (or 0 if no such prime exists).
-%C A050412 It is conjectured that n = 509203 is the smallest Riesel number, i.e., n*2^k - 1 is composite for every k>0. - _Robert G. Wilson v_, Mar 01 2015. This would imply that a(509203) is the first zero term in this sequence. - _N. J. A. Sloane_, Jul 31 2024
-%C A050412 Both the Ballinger-Keller and Prime Wiki links assert that 104917*2^340181-1 is prime, but leave open the possibility that there is an m < 340181 which makes 104917^m - 1 a prime. This question was finally settled by _Lucas A. Brown_ on Jul 31 2024, who showed that m = 340181 is the smallest value that gives a prime. This implies that a(104917) = 340181. - _N. J. A. Sloane_, Jul 31 2024
+%C A050412 It is conjectured that n = 509203 is the smallest Riesel number, i.e., n*2^k - 1 is composite for every k>0. - _Robert G. Wilson v_, Mar 01 2015. [This would imply that a(509203) is the first zero term in this sequence. - _N. J. A. Sloane_, Jul 31 2024]
+%C A050412 Comment from _N. J. A. Sloane_, Aug 01 2024 (Start)
+%C A050412 Both the Ballinger-Keller and Prime Wiki links assert that 104917*2^340181-1 is prime, but leave open the possibility that there is an m < 340181 which makes 104917^m - 1 a prime.
+%C A050412 This question was finally settled by _Lucas A. Brown_ on Jul 31 2024, who showed that m = 340181 is the smallest value that gives a prime. This implies that a(104917) = 340181.
+%C A050412 Brown used a Python program (see below), with BPSW for the primality testing and gmpy2 to handle the arithmetic. The program was started on Jul 30 2024 and finished on Jul 31 2024.
+%C A050412 He reports that It took about 15 hours in wall-clock time, and used 24 threads running in parallel.  (End)
 %H A050412 Robert G. Wilson v, <a href="/A050412/b050412.txt">Table of n, a(n) for n = 1..2291</a> (first 657 terms from T. D. Noe)
 %H A050412 Ray Ballinger and Wilfrid Keller, <a href="http://www.prothsearch.com/rieselprob.html">The Riesel Problem: Definition and Status</a>, Proth Search Page.
 %H A050412 Prime Wiki, <a href="https://rieselprime.de/ziki/Riesel_prime_2_104917">Riesel primes of the form 104917•2^n-1</a>
@@ -25,6 +29,21 @@
 %t A050412 a[n_] := Block[{s=n, c=1}, While[ ! PrimeQ[2*s+1], s = 2*s+1; c++]; c]; Table[ a[n], {n, 1, 99} ] (* _Jean-François Alcover_, Feb 06 2012, after Pari *)
 %t A050412 a[n_] := Block[{k = 1}, While[ !PrimeQ[2^k (n + 1) - 1], k++];k]; Array[a, 100] (* _Robert G. Wilson v_, Feb 14 2015 *) (* Corrected by _Paolo Xausa_, Jul 30 2024 *)
 %o A050412 (PARI) a(n)=if(n<0,0,s=n; c=1; while(isprime(2*s+1)==0,s=2*s+1; c++); c)
+%o A050412 (Python, designed specifically for n = 104917)
+%o A050412 #! /usr/bin/env python3
+%o A050412 from labmath import primegen, isprime, mpz, count
+%o A050412 from multiprocessing import Pool
+%o A050412 primes = list(primegen(1000000))
+%o A050412 def test(n):
+%o A050412     for p in primes:
+%o A050412         if (104917 * pow(2, n, p)) % p == 1:
+%o A050412             return (n, False)
+%o A050412     return (n, isprime(104917 * mpz(2)**n - 1, tb=[]))
+%o A050412 with Pool(24) as P:
+%o A050412     for (n, result) in P.imap(test, count()):
+%o A050412         print('\b'*80, n, end='', flush=True)
+%o A050412         if result:
+%o A050412             break # _Lucas A. Brown_, Aug 01 2024
 %Y A050412 Cf. A051914, A052333 (primes reached), A052334, A052339, A052340, A050413, A076337, A078680, A101036.
 %Y A050412 Cf. A040081 (allows m >= 0).
 %K A050412 nonn,nice,easy,changed
