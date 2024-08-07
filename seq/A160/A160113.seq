@@ -1,12 +1,12 @@
-%I A160113 #17 Jan 26 2022 07:32:30
+%I A160113 #38 Aug 07 2024 02:33:11
 %S A160113 1,2,4,7,14,27,54,107,214,427,854,1706,3410,6815,13629,27259,54521,
 %T A160113 109042,218080,436158,872318,1744638,3489278,6978546,13957092,
 %U A160113 27914186,55828364,111656716,223313428,446626866,893253744,1786507472,3573014938
 %N A160113 Number of cubefree integers not exceeding 2^n.
 %C A160113 An alternate definition specifying "less than 2^n" would yield the same sequence except for the first 3 terms: 0,1,3,7,14,27,54,107, etc. (since powers of 2 beyond 8 are not cubefree).
 %C A160113 The limit of a(n)/2^n is the inverse of Apery's constant, 1/zeta(3) [see A088453].
-%H A160113 G. P. Michon, <a href="/A160113/b160113.txt">Table of n, a(n) for n = 0..80</a>
-%H A160113 G. P. Michon, <a href="http://www.numericana.com/answer/counting.htm#cubefree">On the number of cubefree integers not exceeding N</a>.
+%H A160113 Chai Wah Wu, <a href="/A160113/b160113.txt">Table of n, a(n) for n = 0..99</a> (terms 0..80 from Gerard P. Michon)
+%H A160113 Gerard P. Michon, <a href="http://www.numericana.com/answer/counting.htm#cubefree">On the number of cubefree integers not exceeding N</a>.
 %F A160113 a(n) = Sum_{i=1..2^(n/3)} A008683(i)*floor(2^n/i^3).
 %e A160113 a(0)=1 because there is just one cubefree integer (1) not exceeding 2^0 = 1.
 %e A160113 a(3)=7 because 1,2,3,4,5,6,7 are cubefree but 8 is not.
@@ -14,8 +14,37 @@
 %t A160113 Module[{nn=20,mu},mu=Table[If[Max[FactorInteger[n][[All,2]]]<3,1,0],{n,2^nn}];Table[Total[Take[mu,2^k]],{k,0,nn}]] (* The program generates the first 20 terms of the sequence. To get more, increase the value (constant) for nn, but the program may take a long time to run. *) (* _Harvey P. Dale_, Aug 13 2021 *)
 %o A160113 (Haskell)
 %o A160113 a160113 = a060431 . (2 ^)  -- _Reinhard Zumkeller_, Jul 27 2015
-%Y A160113 A004709 (cubefree numbers). A160112 (decimal counterpart for cubefree integers). A143658 (binary counterpart for squarefree integers). A071172 & A053462 (decimal counterpart for squarefree integers).
+%o A160113 (Python)
+%o A160113 from sympy import mobius, integer_nthroot
+%o A160113 def A160113(n): return sum(mobius(k)*((1<<n)//k**3) for k in range(1, integer_nthroot(1<<n,3)[0]+1)) # _Chai Wah Wu_, Aug 06 2024
+%o A160113 (Python)
+%o A160113 from bitarray import bitarray
+%o A160113 from sympy import integer_nthroot
+%o A160113 def A160113(n): # faster program
+%o A160113     q = 1<<n
+%o A160113     m = integer_nthroot(q,3)[0]+1
+%o A160113     a, b = bitarray(m), bitarray(m)
+%o A160113     a[1], p, i, c = 1, 2, 4, q-sum(q//k**3 for k in range(2,m))
+%o A160113     while i < m:
+%o A160113         j = 2
+%o A160113         while i < m:
+%o A160113             if j==p:
+%o A160113                 c -= (b[i]^1 if a[i] else -1)*(q//i**3)
+%o A160113                 j, a[i], b[i] = 0, 1, 1
+%o A160113             else:
+%o A160113                 t1, t2 = a[i], b[i]
+%o A160113                 if (t1&t2)^1:
+%o A160113                     a[i], b[i] = (t1^1)&t2, ((t1^1)&t2)^1
+%o A160113                     c += (t2 if t1 else 2)*(q//i**3) if (t1^1)&t2 else (t2-2 if t1 else 0)*(q//i**3)
+%o A160113             i += p
+%o A160113             j += 1
+%o A160113         p += 1
+%o A160113         while a[p]|b[p]:
+%o A160113             p += 1
+%o A160113         i = p<<1
+%o A160113     return c # _Chai Wah Wu_, Aug 06 2024
+%Y A160113 Cf. A004709 (cubefree numbers), A160112 (decimal counterpart for cubefree integers), A143658 (binary counterpart for squarefree integers), A071172 & A053462 (decimal counterpart for squarefree integers).
 %Y A160113 Cf. A060431.
-%K A160113 easy,nice,nonn
+%K A160113 easy,nice,nonn,changed
 %O A160113 0,2
-%A A160113 _Gerard P. Michon_, May 02 2009, May 06 2009
+%A A160113 _Gerard P. Michon_, May 02 2009
