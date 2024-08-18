@@ -1,13 +1,17 @@
-%I A080368 #27 Sep 05 2017 03:12:37
+%I A080368 #35 Aug 17 2024 09:02:00
 %S A080368 0,2,3,0,5,2,7,0,0,2,11,3,13,2,3,0,17,2,19,5,3,2,23,3,0,2,0,7,29,2,31,
 %T A080368 0,3,2,5,0,37,2,3,5,41,2,43,11,5,2,47,3,0,2,3,13,53,2,5,7,3,2,59,3,61,
 %U A080368 2,7,0,5,2,67,17,3,2,71,0,73,2,3,19,7,2,79,5,0,2,83,3,5,2,3,11,89,2,7,23,3,2
 %N A080368 a(n) is the least unitary prime divisor of n, or 0 if no such prime divisor exists.
 %H A080368 Reinhard Zumkeller, <a href="/A080368/b080368.txt">Table of n, a(n) for n = 1..10000</a>
 %F A080368 If A277697(n) = 0, then a(n) = 0, otherwise a(n) = A000040(A277697(n)). - _Antti Karttunen_, Oct 28 2016
-%e A080368 n = 252100 = 2*2*3*5*5*7*11*11, unitary prime divisors = {3,7}; smallest is 3, so a(252100)=3.
-%t A080368 ffi[x_] := Flatten[FactorInteger[x]] lf[x_] := Length[FactorInteger[x]] ba[x_] := Table[Part[ffi[x], 2*w-1], {w, 1, lf[x]}] gb[x_] := GCD[ba[x], x/ba[x]] fpg[x_] := Flatten[Position[gb[x], 1]] upd[x_] := Part[ba[x], fpg[x]] mxu[x_] := Max[upd[x]] miu[x_] := Min[upd[x]] Do[If[Equal[upd[n], {}], Print[0]]; If[ !Equal[upd[n], {}], Print[miu[n]]], {n, 2, 256}]
+%F A080368 from _Amiram Eldar_, Aug 17 2024: (Start)
+%F A080368 a(n) = 0 if and only of n is powerful (A001694).
+%F A080368 a(n) = A020639(A055231(n)) if n is not powerful. (End)
+%e A080368 For n = 252100 = 2*2*3*5*5*7*11*11, the unitary prime divisors are {3,7}, the smallest is 3, so a(252100) = 3.
+%t A080368 ffi[x_] := Flatten[FactorInteger[x]]; lf[x_] := Length[FactorInteger[x]]; ba[x_] := Table[Part[ffi[x], 2*w-1], {w, 1, lf[x]}]; gb[x_] := GCD[ba[x], x/ba[x]]; fpg[x_] := Flatten[Position[gb[x], 1]]; upd[x_] := Part[ba[x], fpg[x]]; mxu[x_] := Max[upd[x]]; miu[x_] := Min[upd[x]]; Do[If[Equal[upd[n], {}], Print[0]]; If[ !Equal[upd[n], {}], Print[miu[n]]], {n, 2, 256}]
 %t A080368 Table[If[Or[n == 1, Length@ # == 0], 0, First@ #] &@ Select[FactorInteger[n][[All, 1]], GCD[#, n/#] == 1 &], {n, 94}] (* _Michael De Vlieger_, Oct 30 2016 *)
+%t A080368 a[n_] := If[(p = Select[FactorInteger[n], Last[#] == 1 &][[;; , 1]]) == {}, 0, Min[p]]; a[1] = 0; Array[a, 100] (* _Amiram Eldar_, Aug 17 2024 *)
 %o A080368 (Haskell)
 %o A080368 a080368 n = if null us then 0 else fst $ head us
 %o A080368   where us = filter ((== 1) . snd) $ zip (a027748_row n) (a124010_row n)
@@ -25,11 +29,12 @@
 %o A080368     return 0 if n==1 else f[min(f)]
 %o A080368 def a277697(n): return 0 if n==1 else a055396(n) if a067029(n)==1 else a277697(a028234(n))
 %o A080368 def a(n): return 0 if a277697(n)==0 else prime(a277697(n)) # _Indranil Ghosh_, May 16 2017
+%o A080368 (PARI) a(n) = {my(f = factor(n), pmin = 0); for(i = 1, #f~, if(f[i, 2] == 1, if(pmin == 0, pmin = f[i, 1], if(f[i, 1] < pmin, pmin = f[i, 1])))); pmin;} \\ _Amiram Eldar_, Aug 17 2024
 %Y A080368 Cf. A000040, A034444, A056169, A080367, A277697.
-%Y A080368 Cf. A027748, A124010.
+%Y A080368 Cf. A020639, A027748, A055231, A124010.
 %Y A080368 Cf. A001694 (positions of zeros).
 %Y A080368 Cf. A277698 for a variant which gives 1's instead of 0's for numbers with no unitary prime divisors (A001694).
-%K A080368 nonn
+%K A080368 nonn,easy,changed
 %O A080368 1,2
 %A A080368 _Labos Elemer_, Feb 21 2003
 %E A080368 a(1)=0 inserted by _Reinhard Zumkeller_, Jul 23 2014
