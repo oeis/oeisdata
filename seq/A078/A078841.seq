@@ -1,4 +1,4 @@
-%I A078841 #32 May 03 2020 03:47:53
+%I A078841 #37 Aug 24 2024 01:58:04
 %S A078841 1,3,9,20,54,112,240,648,1344,2816,5760,12800,26624,62208,129024,
 %T A078841 270336,552960,1114112,2293760,4915200,9961472,20447232,47775744,
 %U A078841 96468992,198180864,411041792,830472192,1698693120,3422552064,7046430720
@@ -16,8 +16,27 @@
 %t A078841 f[n_] := Plus @@ Last /@ FactorInteger@n; t = Table[{}, {40}]; Do[a = f[n]; AppendTo[ t[[a]], n]; t[[a]] = Take[t[[a]], 10], {n, 2, 148*10^8}]; Table[ t[[n, n + 1]], {n, 30}] (* _Robert G. Wilson v_, Feb 11 2006 *)
 %t A078841 AlmostPrimePi[k_Integer, n_] := Module[{a, i}, a[0] = 1; If[k == 1, PrimePi[n], Sum[PrimePi[n/Times @@ Prime[Array[a, k - 1]]] - a[k - 1] + 1, Evaluate[ Sequence @@ Table[{a[i], a[i - 1], PrimePi[(n/Times @@ Prime[ Array[a,i - 1]])^(1/(k - i + 1))]}, {i, k - 1}]]]]]; (* _Eric W. Weisstein_ Feb 07 2006 *)
 %t A078841 AlmostPrime[k_, n_] := Block[{e = Floor[ Log[2, n] + k], a, b}, a = 2^e; Do[b = 2^p; While[ AlmostPrimePi[k, a] < n, a = a + b]; a = a - b/2, {p, e, 0, -1}]; a + b/2]; AlmostPrime[1, 1] = 2; lst = {}; Do[ AppendTo[lst, AlmostPrime[n-1, n]], {n, 30}]; lst (* _Robert G. Wilson v_, Nov 13 2007 *)
+%o A078841 (Python)
+%o A078841 from math import prod, isqrt
+%o A078841 from sympy import primerange, integer_nthroot, primepi
+%o A078841 def A078841(n):
+%o A078841     if n <= 1: return (n<<1)+1
+%o A078841     def g(x,a,b,c,m): yield from (((d,) for d in enumerate(primerange(b,isqrt(x//c)+1),a)) if m==2 else (((a2,b2),)+d for a2,b2 in enumerate(primerange(b,integer_nthroot(x//c,m)[0]+1),a) for d in g(x,a2,b2,c*b2,m-1)))
+%o A078841     def f(x): return int(n+x-sum(primepi(x//prod(c[1] for c in a))-a[-1][0] for a in g(x,0,1,1,n)))
+%o A078841     kmin, kmax = 1,2
+%o A078841     while f(kmax) >= kmax:
+%o A078841         kmax <<= 1
+%o A078841     while True:
+%o A078841         kmid = kmax+kmin>>1
+%o A078841         if f(kmid) < kmid:
+%o A078841             kmax = kmid
+%o A078841         else:
+%o A078841             kmin = kmid
+%o A078841         if kmax-kmin <= 1:
+%o A078841             break
+%o A078841     return kmax # _Chai Wah Wu_, Aug 23 2024
 %Y A078841 Cf. A078840, A078842, A078843, A078844, A078445, A078846, A101695.
-%K A078841 nonn
+%K A078841 nonn,changed
 %O A078841 0,2
 %A A078841 _Benoit Cloitre_ and _Paul D. Hanna_, Dec 10 2002
 %E A078841 a(14)-a(29) from _Robert G. Wilson v_, Feb 11 2006

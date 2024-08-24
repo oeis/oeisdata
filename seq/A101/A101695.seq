@@ -1,4 +1,4 @@
-%I A101695 #32 Mar 02 2019 02:22:30
+%I A101695 #37 Aug 23 2024 12:19:48
 %S A101695 2,6,18,40,108,224,480,1296,2688,5632,11520,25600,53248,124416,258048,
 %T A101695 540672,1105920,2228224,4587520,9830400,19922944,40894464,95551488,
 %U A101695 192937984,396361728,822083584,1660944384,3397386240,6845104128
@@ -28,8 +28,27 @@
 %p A101695 end proc: # _R. J. Mathar_, Aug 09 2012
 %t A101695 AlmostPrimePi[k_Integer, n_] := Module[{a, i}, a[0] = 1; If[k == 1, PrimePi[n], Sum[PrimePi[n/Times @@ Prime[Array[a, k - 1]]] - a[k - 1] + 1, Evaluate[ Sequence @@ Table[{a[i], a[i - 1], PrimePi[(n/Times @@ Prime[Array[a, i - 1]])^(1/(k - i + 1))]}, {i, k - 1}]]]]]; (* _Eric W. Weisstein_ Feb 07 2006 *)
 %t A101695 AlmostPrime[k_, n_] := Block[{e = Floor[ Log[2, n] + k], a, b}, a = 2^e; Do[b = 2^p; While[ AlmostPrimePi[k, a] < n, a = a + b]; a = a - b/2, {p, e, 0, -1}]; a + b/2]; AlmostPrime[1, 1] = 2; lst = {}; Do[ AppendTo[lst, AlmostPrime[n, n]], {n, 30}]; lst (* _Robert G. Wilson v_, Oct 07 2007 *)
+%o A101695 (Python)
+%o A101695 from math import prod, isqrt
+%o A101695 from sympy import primerange, primepi, integer_nthroot
+%o A101695 def A101695(n):
+%o A101695     if n == 1: return 2
+%o A101695     def g(x,a,b,c,m): yield from (((d,) for d in enumerate(primerange(b,isqrt(x//c)+1),a)) if m==2 else (((a2,b2),)+d for a2,b2 in enumerate(primerange(b,integer_nthroot(x//c,m)[0]+1),a) for d in g(x,a2,b2,c*b2,m-1)))
+%o A101695     def f(x): return int(n-1+x-sum(primepi(x//prod(c[1] for c in a))-a[-1][0] for a in g(x,0,1,1,n)))
+%o A101695     kmin, kmax = 1,2
+%o A101695     while f(kmax) >= kmax:
+%o A101695         kmax <<= 1
+%o A101695     while True:
+%o A101695         kmid = kmax+kmin>>1
+%o A101695         if f(kmid) < kmid:
+%o A101695             kmax = kmid
+%o A101695         else:
+%o A101695             kmin = kmid
+%o A101695         if kmax-kmin <= 1:
+%o A101695             break
+%o A101695     return kmax # _Chai Wah Wu_, Aug 23 2024
 %Y A101695 Cf. A000040, A001358, A014612, A014613, A046314, A046306, A046308, A046310, A046312, A046314, A069272, A069273, A069274, A069275, A069276, A069277, A069278, A069279, A069280, A069281, A101637, A101638, A101605, A101606.
-%K A101695 nonn
+%K A101695 nonn,changed
 %O A101695 1,1
 %A A101695 _Jonathan Vos Post_, Dec 12 2004
 %E A101695 a(21)-a(30) from _Robert G. Wilson v_, Feb 11 2006
