@@ -1,4 +1,4 @@
-%I A128644 #8 Sep 08 2022 08:45:30
+%I A128644 #15 Aug 24 2024 05:56:50
 %S A128644 1,1,1,2,1,2,1,5,2,2,1,5,1,2,1,1,5,1,5,2,2,1,2,2,5,4,1,4,1,1,2,1,1,2,
 %T A128644 2,1,6,1,4,2,2,1,2,5,1,5,1,2,2,2,1,1,2,4,1,4,1,5,1,4,1,1,2,3,4,1,6,1,
 %U A128644 2,1,1,2,1,1,1,4,2,2,1,1,5,2,1,4,1,2,2,1,1,6,2,1,6,1,5,4,2,1,2,2,1,4,5,1,2
@@ -10,8 +10,41 @@
 %F A128644 a(n) = A000001(A037144(n)).
 %e A128644 A037144(17) = 18 and there are 5 groups of order 18 (A000001(18) = 5), hence a(17) = 5.
 %o A128644 (Magma) D:=SmallGroupDatabase(); [ NumberOfSmallGroups(D, n) : n in [ h: h in [1..130] | h eq 1 or &+[ t[2]: t in Factorization(h) ] le 3 ] ];
-%o A128644 (PARI) /* based on the formulas from Mitch Harris in A000001 */ {ngoam3pf(n) = local(f, g, nf, ng, p, q, r, qmp, rmp, rmq); f=factor(n); nf=matsize(f)[1]; g=sum(i=1, nf, f[i, 2]); if(g<1, ng=1, if(g>3, ng=-1, if(nf==1, if(f[1, 2]==1, ng=1, if(f[1, 2]==2, ng=2, if(f[1, 2]==3, ng=5, ng=-1))), if(nf==2, if(f[1, 2]*f[2, 2]==1, if(gcd(f[1, 1], f[2, 1]-1)==1, ng=1, ng=2), if(f[1, 2]==1, p=f[1, 1]; q=f[2, 1], q=f[1, 1]; p=f[2, 1]); if(p==2&&q%2>0, ng=5, if(q%p==1&&p%2>0, ng=(p+9)/2, if(p==3&&q==2, ng=5, if(p%2>0&&q%2>0&&q%p==p-1, ng=3, if(p>3&&p%q==1&&p%q^2!=1, ng=4, if(p%q^2==1, ng=5, if(q%p!=1&&q%p!=(p-1)&&p%q!=1, ng=2)))))))), p=f[1, 1]; q=f[2, 1]; r=f[3, 1]; qmp=q%p==1; rmp=r%p==1; rmq=r%q==1; if(qmp, if(rmp, if(rmq, ng=p+4, ng=p+2), if(rmq, ng=3, ng=2)), if(rmp, if(rmq, ng=4, ng=2), if(rmq, ng=2, ng=1))))))); return(ng)} for(n=1, 100, k=ngoam3pf(n); if(k>=0, print1(k, ",")))
+%o A128644 (PARI) /* based on the formulas from Mitch Harris in A000001 */ {ngoam3pf(n) = local(f, g, nf, ng, p, q, r, qmp, rmp, rmq); f=factor(n); nf=matsize(f)[1]; g=sum(i=1, nf, f[i, 2]); if(g<1, ng=1, if(g>3, ng=-1, if(nf==1, if(f[1, 2]==1, ng=1, if(f[1, 2]==2, ng=2, if(f[1, 2]==3, ng=5, ng=-1))), if(nf==2, if(f[1, 2]*f[2, 2]==1, if(gcd(f[1, 1], f[2, 1]-1)==1, ng=1, ng=2), if(f[1, 2]==1, p=f[1, 1]; q=f[2, 1], q=f[1, 1]; p=f[2, 1]); if(p==2&&q%2>0, ng=5, if(q%p==1&&p%2>0, ng=(p+9)/2, if(p==3&&q==2, ng=5, if(p%2>0&&q%2>0&&q%p==p-1, ng=3, if(p>3&&p%q==1&&p%q^2!=1, ng=4, if(p%q^2==1, ng=5, if(q%p!=1&&q%p!=(p-1)&&p%q!=1, ng=2)))))))), p=f[1, 1]; q=f[2, 1]; r=f[3, 1]; qmp=q%p==1; rmp=r%p==1; rmq=r%q==1; if(qmp, if(rmp, if(rmq, ng=p+4, ng=p+2), if(rmq, ng=3, ng=2)), if(rmp, if(rmq, ng=4, ng=2), if(rmq, ng=2, ng=1))))))); return(ng)}
+%o A128644 for(n=1, 100, k=ngoam3pf(n); if(k>=0, print1(k, ",")))
+%o A128644 (Python)
+%o A128644 from itertools import combinations
+%o A128644 from math import prod, isqrt
+%o A128644 from sympy import primerange, integer_nthroot, primepi, factorint
+%o A128644 def A128644(n):
+%o A128644     if n == 1: return 1
+%o A128644     def g(x,a,b,c,m): yield from (((d,) for d in enumerate(primerange(b,isqrt(x//c)+1),a)) if m==2 else (((a2,b2),)+d for a2,b2 in enumerate(primerange(b,integer_nthroot(x//c,m)[0]+1),a) for d in g(x,a2,b2,c*b2,m-1)))
+%o A128644     def f(x): return int(n+x-2-primepi(x)-sum(sum(primepi(x//prod(c[1] for c in a))-a[-1][0] for a in g(x,0,1,1,i)) for i in range(2,4)))
+%o A128644     kmin, kmax = 1,2
+%o A128644     while f(kmax) >= kmax:
+%o A128644         kmax <<= 1
+%o A128644     while True:
+%o A128644         kmid = kmax+kmin>>1
+%o A128644         if f(kmid) < kmid:
+%o A128644             kmax = kmid
+%o A128644         else:
+%o A128644             kmin = kmid
+%o A128644         if kmax-kmin <= 1:
+%o A128644             break
+%o A128644     fs = factorint(kmax)
+%o A128644     if max(fs.values()) == 1:
+%o A128644         a = set(fs.keys())
+%o A128644         return sum(prod((p**sum(1 for q in b if q%p==1)-1)//(p-1) for p in a-set(b)) for l in range(0, len(a)+1) for b in combinations(a, l))
+%o A128644     if len(fs)==1: return 3*list(fs.values())[0]-4
+%o A128644     p, q = list(fs.keys())
+%o A128644     if fs[p] > 1: p, q = q, p
+%o A128644     if q%p==1 and p&1: return p+9>>1
+%o A128644     r = (p-1)%(q**2)
+%o A128644     if (p==3 and q==2) or (p==2 and q&1) or not r: return 5
+%o A128644     if not (p-1)%q and p>3 and r: return 4
+%o A128644     if not (q+1)%p and p&1 and q&1: return 3
+%o A128644     if (q+1)%p and (q-1)%p and (p-1)%q: return 2 # _Chai Wah Wu_, Aug 23 2024
 %Y A128644 Cf. A000001 (number of groups of order n), A037144 (numbers with at most 3 prime factors), A128604 (number of groups whose order divides p^6 for p a prime).
-%K A128644 nonn
+%K A128644 nonn,changed
 %O A128644 1,4
 %A A128644 _Klaus Brockhaus_, Mar 20 2007
