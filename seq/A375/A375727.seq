@@ -1,0 +1,45 @@
+%I A375727 #8 Aug 25 2024 17:00:22
+%S A375727 15,475,1023,222,1924475,26910204
+%N A375727 a(n) is the least number that is a Smith number in all bases 2 to n but not in base n+1.
+%e A375727 a(3) = 475 = 5^2 * 19.
+%e A375727 In base 2,
+%e A375727 475 = 111011011_2 with digit sum 7, 5 = 101_2 with digit sum 2, 19 = 10011_2 with digit sum 3, and 7 = 2 * 2 + 3.
+%e A375727 In base 3,
+%e A375727   475 = 122121_3 with digit sum 9, 5 = 12_3 with digit sum 3, 19 = 201_3 with digit sum 3, and 9 = 2 * 3 + 3.
+%e A375727 In base 4,
+%e A375727   475 = 13123_4 with digit sum 10, 5 = 11_4 with digit sum 2, 19 = 103_4 with digit sum 4, and 10 <> 2 * 2 + 4.
+%p A375727 f:= proc(n) local F, t,b;
+%p A375727      if isprime(n) then return 0 fi;
+%p A375727      F:= ifactors(n)[2];
+%p A375727      for b from 2 while convert(convert(n,base,b),`+`) = add(t[2]*convert(convert(t[1],base,b),`+`), t = F) do od:
+%p A375727      if b = 2 then 0 else b-1 fi
+%p A375727 end proc:
+%p A375727 N:= 7: # for a(2) .. a(N)
+%p A375727 V:= Vector(N): count:= 0:
+%p A375727 for n from 4 while count < N-1 do
+%p A375727   v:= f(n);
+%p A375727   if v > 0 and V[v] = 0 then V[v]:= n; count:= count+1 fi;
+%p A375727 od:
+%p A375727 convert(V[2..N],list);
+%o A375727 (Python)
+%o A375727 from sympy.ntheory import digits
+%o A375727 from sympy import factorint, isprime
+%o A375727 from itertools import count, islice
+%o A375727 def sd(n, base=10): return sum(digits(n, base)[1:])
+%o A375727 def f(n, factors):
+%o A375727     for b in count(2):
+%o A375727         if sd(n, base=b) != sum(sd(p, base=b)*factors[p] for p in factors):
+%o A375727             break
+%o A375727     return b-1
+%o A375727 def agen(): # generator of terms
+%o A375727     adict, n = dict(), 2
+%o A375727     for k in count(1):
+%o A375727         if isprime(k): continue
+%o A375727         v = f(k, factorint(k))
+%o A375727         if v not in adict: adict[v] = k
+%o A375727         while n in adict: yield adict[n]; n += 1
+%o A375727 print(list(islice(agen(), 4))) # _Michael S. Branicky_, Aug 25 2024
+%Y A375727 Cf. A006753, A278909.
+%K A375727 nonn,base,more,new
+%O A375727 2,1
+%A A375727 _Robert Israel_, Aug 25 2024
