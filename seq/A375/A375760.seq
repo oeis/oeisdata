@@ -1,0 +1,47 @@
+%I A375760 #22 Aug 28 2024 10:59:07
+%S A375760 2,2,3,2,2,2,2,2,2,2,101,13,2,3,41,5,61,7,83,19,1009,11,223,233,443,
+%T A375760 557,661,277,881,199,10007,1117,2221,2333,4441,5557,6661,1777,8887,
+%U A375760 1999,100003,10111,22229,23333,44449,155557,166667,47777,88883,49999,1000003,101111,1222229,313333,444443,555557,666667,727777,888887,199999
+%N A375760 Array read by rows: T(n,k) is the first prime with exactly n occurrences of decimal digit k.
+%H A375760 Robert Israel, <a href="/A375760/b375760.txt">Table of n, a(n) for n = 0..1009</a> (rows 0 to 100)
+%e A375760 T(4,1) = 10111 because 10111 is the first prime with four 1's.
+%e A375760 Array starts
+%e A375760       2      2       3      2      2      2      2      2      2      2
+%e A375760     101     13       2      3     41      5     61      7     83     19
+%e A375760    1009     11     223    233    443    557    661    277    881    199
+%e A375760   10007   1117    2221   2333   4441   5557   6661   1777   8887   1999
+%e A375760  100003  10111   22229  23333  44449 155557 166667  47777  88883  49999
+%e A375760 1000003 101111 1222229 313333 444443 555557 666667 727777 888887 199999
+%p A375760 F:= proc(v,x) local d,y,z,L,S,SS,Cands,t,i,k;
+%p A375760    for d from v do
+%p A375760      Cands:= NULL;
+%p A375760      if x = 0 then SS:= combinat:-choose([$2..d-1],v)
+%p A375760      elif member(x,[1,3,7,9]) then SS:= combinat:-choose(d,v)
+%p A375760      else SS:= combinat:-choose([$2..d],v)
+%p A375760      fi;
+%p A375760      for S in SS do
+%p A375760        for y from 9^(d-v+1) to 9^(d-v+1)+9^(d-v)-1 do
+%p A375760          L:= convert(y,base,9)[1..d-v+1];
+%p A375760          L:= map(proc(s) if s < x then s else s+1 fi end proc, L);
+%p A375760          i:= 1;
+%p A375760          t:= 0:
+%p A375760          for k from 1 to d do
+%p A375760            if member(k,S) then t:= t + x*10^(k-1)
+%p A375760            else t:= t + L[i]*10^(k-1); i:= i+1;
+%p A375760            fi;
+%p A375760          od;
+%p A375760          Cands:= Cands, t
+%p A375760      od od;
+%p A375760      Cands:= sort([Cands]);
+%p A375760      for t in Cands do if isprime(t) then return t fi od;
+%p A375760    od
+%p A375760 end proc:
+%p A375760 F(0,0):= 2: F(1,2):= 2: F(1,5):= 5:
+%p A375760 for i from 0 to 10 do
+%p A375760   seq(F(i,x), x=0..9)
+%p A375760 od;
+%t A375760 T[n_,k_]:=Module[{p=2},While[Count[IntegerDigits[p],k]!=n, p=NextPrime[p]]; p]; Table[T[n,k],{n,0,5},{k,0,9}]//Flatten (* _Stefano Spezia_, Aug 27 2024 *)
+%Y A375760 Cf. A037053, A037055, A037057, A037059, A037061, A037063, A037065, A037067, A037069, A037071
+%K A375760 nonn,tabf,base,new
+%O A375760 0,1
+%A A375760 _Robert Israel_, Aug 27 2024
