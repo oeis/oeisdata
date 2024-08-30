@@ -1,11 +1,31 @@
-%I A106429 #6 Sep 14 2013 04:20:39
+%I A106429 #11 Aug 30 2024 02:54:45
 %S A106429 97,9,92,90,918,96,972,960,9072,9600,90624,9216,93312,90112,903168,
 %T A106429 98304,995328,917504,9043968,9175040,90243072,9437184,95551488,
 %U A106429 92274688,924844032,922746880,9042919424,905969664,9172942848,9059696640
 %N A106429 Smallest number beginning with 9 and having exactly n prime divisors counted with multiplicity.
 %e A106429 a(2) = 9 = 3^2.
 %o A106429 (PARI) a(n) = {i = 2^n; while ((digits(i)[1] != 9) || (bigomega(i)!=n), i++); i;} \\ _Michel Marcus_, Sep 14 2013
+%o A106429 (Python)
+%o A106429 from itertools import count
+%o A106429 from math import isqrt, prod
+%o A106429 from sympy import primerange, integer_nthroot, primepi
+%o A106429 def A106429(n):
+%o A106429     if n == 1: return 97
+%o A106429     def g(x,a,b,c,m): yield from (((d,) for d in enumerate(primerange(b,isqrt(x//c)+1),a)) if m==2 else (((a2,b2),)+d for a2,b2 in enumerate(primerange(b,integer_nthroot(x//c,m)[0]+1),a) for d in g(x,a2,b2,c*b2,m-1)))
+%o A106429     def f(x): return int(sum(primepi(x//prod(c[1] for c in a))-a[-1][0] for a in g(x,0,1,1,n)))
+%o A106429     for l in count(len(str(1<<n))-1):
+%o A106429         kmin, kmax = 9*10**l-1, 10**(l+1)-1
+%o A106429         mmin, mmax = f(kmin), f(kmax)
+%o A106429         if mmax>mmin:
+%o A106429             while kmax-kmin > 1:
+%o A106429                 kmid = kmax+kmin>>1
+%o A106429                 mmid = f(kmid)
+%o A106429                 if mmid > mmin:
+%o A106429                     kmax, mmax = kmid, mmid
+%o A106429                 else:
+%o A106429                     kmin, mmin = kmid, mmid
+%o A106429     return kmax # _Chai Wah Wu_, Aug 29 2024
 %Y A106429 Cf. A077326-A077334, A106411-A106419, A106421-A106429.
-%K A106429 base,nonn
+%K A106429 base,nonn,changed
 %O A106429 1,1
 %A A106429 _Ray Chandler_, May 02 2005
