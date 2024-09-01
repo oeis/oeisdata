@@ -1,10 +1,31 @@
-%I A106418 #3 Mar 30 2012 17:29:22
+%I A106418 #8 Aug 31 2024 18:00:33
 %S A106418 83,82,805,858,8610,81510,870870,80150070,800509710,8254436190,
 %T A106418 800680310430,8222980095330,800160280950030,80008785365579070,
 %U A106418 843685980760953330,80058789202898516010,8003887646839494820410
 %N A106418 Smallest number beginning with 8 that is the product of exactly n distinct primes.
 %e A106418 a(3) = 805 = 5*7*23.
+%o A106418 (Python)
+%o A106418 from itertools import count
+%o A106418 from math import prod, isqrt
+%o A106418 from sympy import primerange, integer_nthroot, primepi, primorial
+%o A106418 def A106418(n):
+%o A106418     if n == 1: return 83
+%o A106418     def g(x,a,b,c,m): yield from (((d,) for d in enumerate(primerange(b+1,isqrt(x//c)+1),a+1)) if m==2 else (((a2,b2),)+d for a2,b2 in enumerate(primerange(b+1,integer_nthroot(x//c,m)[0]+1),a+1) for d in g(x,a2,b2,c*b2,m-1)))
+%o A106418     def f(x): return int(sum(primepi(x//prod(c[1] for c in a))-a[-1][0] for a in g(x,0,1,1,n)))
+%o A106418     def bisection(f,kmin,kmax,mmin,mmax):
+%o A106418         while kmax-kmin > 1:
+%o A106418             kmid = kmax+kmin>>1
+%o A106418             mmid = f(kmid)
+%o A106418             if mmid > mmin:
+%o A106418                 kmax, mmax = kmid, mmid
+%o A106418             else:
+%o A106418                 kmin, mmin = kmid, mmid
+%o A106418         return kmax
+%o A106418     for l in count(len(str(primorial(n)))-1):
+%o A106418         kmin, kmax = 8*10**l-1, 9*10**l-1
+%o A106418         mmin, mmax = f(kmin), f(kmax)
+%o A106418         if mmax>mmin: return bisection(f,kmin,kmax,mmin,mmax) # _Chai Wah Wu_, Aug 31 2024
 %Y A106418 Cf. A077326-A077334, A106411-A106419, A106421-A106429.
-%K A106418 base,nonn
+%K A106418 base,nonn,changed
 %O A106418 1,1
 %A A106418 _Ray Chandler_, May 02 2005
