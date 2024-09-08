@@ -1,0 +1,36 @@
+%I A375965 #13 Sep 07 2024 16:02:29
+%S A375965 13,17,31,37,71,73,79,97,101,103,107,109,113,131,137,139,149,163,167,
+%T A375965 173,179,181,191,193,197,199,239,241,251,277,281,283,293,307,311,313,
+%U A375965 317,331,337,349,373,379,389,397,401,419,421,439,457,461,463,467,491,503
+%N A375965 Primes which can be turned into a different prime by exchanging two consecutive digits.
+%C A375965 Heuristically, both this sequence and its complement should have positive density within the primes. Empirically, n/pi(a(n)) approaches ~0.75 for large n. But is this sequence even infinite?
+%C A375965 Dickson's conjecture implies it is infinite, e.g. it implies that there are infinitely many primes ending in 13 for which changing the last two digits to 31 produces a prime. - _Robert Israel_, Sep 04 2024
+%H A375965 Matthew House, <a href="/A375965/b375965.txt">Table of n, a(n) for n = 1..10000</a>
+%e A375965 2, 3, 5, and 7 are excluded, since they have no two digits to exchange.
+%e A375965 11 is excluded, since it yields only itself.
+%e A375965 13 and 17 are included, since they yield the primes 31 and 71.
+%e A375965 19, 23, and 29 are excluded, since they yield the composite numbers 91, 32, and 92.
+%p A375965 filter:= proc(n) local L,d,i;
+%p A375965   if not isprime(n) then return false fi;
+%p A375965   L:= convert(n,base,10); d:= nops(L);
+%p A375965   for i from 1 to d-1 do
+%p A375965       if L[i] <> L[i+1] and isprime(n + (L[i]-L[i+1])*(10^i-10^(i-1))) then return true fi
+%p A375965   od;
+%p A375965   false
+%p A375965 end proc:
+%p A375965 select(filter, [seq(i,i=11 .. 1---,2)]); # _Robert Israel_, Sep 04 2024
+%t A375965 Select[Prime[Range[100]], With[{digits = IntegerDigits[#]}, AnyTrue[Complement[FromDigits[Permute[digits, Cycles[{{#, # + 1}}]]] & /@ Range[Length[digits] - 1], {#}], PrimeQ]] &]
+%o A375965 (Python)
+%o A375965 from sympy import isprime
+%o A375965 def ok(n):
+%o A375965     if not isprime(n): return False
+%o A375965     s = str(n)
+%o A375965     for i in range(len(s)-1):
+%o A375965         t = int(s[:i]+s[i+1]+s[i]+s[i+2:])
+%o A375965         if t != n and isprime(t): return True
+%o A375965     return False
+%o A375965 print([k for k in range(504) if ok(k)]) # _Michael S. Branicky_, Sep 04 2024
+%Y A375965 Subsequence of A225035.
+%K A375965 nonn,base,easy,new
+%O A375965 1,1
+%A A375965 _Matthew House_, Sep 04 2024
