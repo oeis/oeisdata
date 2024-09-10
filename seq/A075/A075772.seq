@@ -1,4 +1,4 @@
-%I A075772 #18 May 04 2021 12:53:00
+%I A075772 #22 Sep 10 2024 00:23:56
 %S A075772 3,3,1,1,7,2,2,4,4,13,15,17,19,4,3,3,16,25,20,9,9,13,13,33,19,18,18,
 %T A075772 39,41,28,17,17,47,49,51,53,55,57,59,39,24,24,65,67,69,35,35,38,75,77,
 %U A075772 79,47,36,36,85,87,23,23,68,10,10,12,95,97,99,101,40,40,65,107,100,11,11
@@ -10,8 +10,25 @@
 %t A075772 pp = {-2, 1}; Do[ If[ !PrimeQ[n] && Apply[GCD, Last[ Transpose[ FactorInteger[n]]]] > 1, pp = Append[pp, n]], {n, 2, 10^4}]; Table[ Min[pp[[n + 1]] - pp[[n]], pp[[n + 2]] - pp[[n + 1]]], {n, 1, 75}]
 %t A075772 perfPQ[n_]:=GCD@@FactorInteger[n][[All,2]]>1;Join[{3,3},Min[ Differences[ #]]&/@Partition[Select[Range[5000],perfPQ],3,1]] (* _Harvey P. Dale_, May 04 2021 *)
 %o A075772 (PARI) for(n=L=3+P=-2,99,ispower(n)&&print1(min(-P+P=L,-L+L=n)",")) \\ Note: ispower(1)=0. - _M. F. Hasler_, May 08 2018
+%o A075772 (Python)
+%o A075772 from sympy import mobius, integer_nthroot
+%o A075772 def A075772(n):
+%o A075772     if n == 1: return 3
+%o A075772     def f(x): return int(n-2+x+sum(mobius(k)*(integer_nthroot(x,k)[0]-1) for k in range(2,x.bit_length())))
+%o A075772     def bisection(f,kmin=0,kmax=1):
+%o A075772         while f(kmax) > kmax: kmax <<= 1
+%o A075772         while kmax-kmin > 1:
+%o A075772             kmid = kmax+kmin>>1
+%o A075772             if f(kmid) <= kmid:
+%o A075772                 kmax = kmid
+%o A075772             else:
+%o A075772                 kmin = kmid
+%o A075772         return kmax
+%o A075772     a = bisection(f,n-1,n-1)
+%o A075772     b = bisection(lambda x:f(x)+1,a,a)
+%o A075772     return min(b-a,bisection(lambda x:f(x)+2,b,b)-b) # _Chai Wah Wu_, Sep 09 2024
 %Y A075772 Cf. A001597, A053289, A075773.
-%K A075772 nonn
+%K A075772 nonn,changed
 %O A075772 1,1
 %A A075772 _Neil Fernandez_, Oct 09 2002
 %E A075772 More terms from _Robert G. Wilson v_ and _John W. Layman_, Oct 10 2002

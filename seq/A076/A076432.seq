@@ -1,11 +1,35 @@
-%I A076432 #19 Feb 17 2015 00:02:12
+%I A076432 #22 Sep 10 2024 00:24:06
 %S A076432 36,144,2209,6436369,312079766881,328081510656,11305787558464,
 %T A076432 62854912315881,79723540870416,4550858480922601,11435943732416784,
 %U A076432 3109406220195722500,6258210474706101136,7596357574791306304,21016258678615763761,32645304184825666489
 %N A076432 Perfect powers for which the three closest perfect powers are smaller.
 %e A076432 The three closest perfect powers to 36 are 32 (difference = 4), 27 (difference = 9) and 25 (difference = 11). The fourth closest is 49 (difference = 13). 32, 27 and 25 are smaller than 36, so 36 is in the sequence.
+%o A076432 (Python)
+%o A076432 from itertools import count, islice
+%o A076432 from sympy import mobius, integer_nthroot
+%o A076432 def A076432_gen(): # generator of terms
+%o A076432     def f(x): return int(x+sum(mobius(k)*(integer_nthroot(x,k)[0]-1) for k in range(2,x.bit_length())))
+%o A076432     def bisection(f,kmin=0,kmax=1):
+%o A076432         while f(kmax) > kmax: kmax <<= 1
+%o A076432         while kmax-kmin > 1:
+%o A076432             kmid = kmax+kmin>>1
+%o A076432             if f(kmid) <= kmid:
+%o A076432                 kmax = kmid
+%o A076432             else:
+%o A076432                 kmin = kmid
+%o A076432         return kmax
+%o A076432     a = bisection(f)
+%o A076432     b = bisection(lambda x:f(x)+1,a,a)
+%o A076432     c = bisection(lambda x:f(x)+2,b,b)
+%o A076432     d = bisection(lambda x:f(x)+3,c,c)
+%o A076432     for i in count(4):
+%o A076432         e = bisection(lambda x:f(x)+i,d,d)
+%o A076432         if d-a < e-d:
+%o A076432             yield d
+%o A076432         a,b,c,d=b,c,d,e
+%o A076432 A076432_list = list(islice(A076432_gen(),5)) # _Chai Wah Wu_, Sep 09 2024
 %Y A076432 Cf. A001597, A053289, A075772, A076431, A076433.
-%K A076432 nonn
+%K A076432 nonn,changed
 %O A076432 1,1
 %A A076432 _Neil Fernandez_, Oct 10 2002
 %E A076432 More terms from _Jud McCranie_ and _Robert G. Wilson v_, Oct 11 2002
