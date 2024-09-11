@@ -1,4 +1,4 @@
-%I A247246 #41 Oct 01 2020 04:05:10
+%I A247246 #45 Sep 10 2024 19:40:34
 %S A247246 36,92,88,104,40,68,148,27,125,64,104,4,153,27,171,29,20,196,232,144,
 %T A247246 56,312,280,108,188,199,113,67,189,72,344,16,112,232,268,63,45,392,
 %U A247246 292,32,76,8,80,587,50,147,456,184,288,488,115,772,137,36,40,212,248
@@ -17,7 +17,33 @@
 %t A247246 Select[Range[10^4], achillesQ] // Differences (* _Jean-François Alcover_, Sep 26 2020 *)
 %o A247246 (PARI) isA052486(n) = { n>1 & vecmin(factor(n)[, 2])>1 & !ispower(n); }
 %o A247246 lista(nn) = {v = select(n->isA052486(n), vector(nn, i, i)); vector(#v-1, n, v[n+1] - v[n]);} \\ _Michel Marcus_, Nov 29 2014
+%o A247246 (Python)
+%o A247246 from math import isqrt
+%o A247246 from sympy import mobius, integer_nthroot
+%o A247246 def A247246(n):
+%o A247246     def squarefreepi(n):
+%o A247246         return int(sum(mobius(k)*(n//k**2) for k in range(1, isqrt(n)+1)))
+%o A247246     def bisection(f, kmin=0, kmax=1):
+%o A247246         while f(kmax) > kmax: kmax <<= 1
+%o A247246         while kmax-kmin > 1:
+%o A247246             kmid = kmax+kmin>>1
+%o A247246             if f(kmid) <= kmid:
+%o A247246                 kmax = kmid
+%o A247246             else:
+%o A247246                 kmin = kmid
+%o A247246         return kmax
+%o A247246     def f(x):
+%o A247246         c, l = n+x+1, 0
+%o A247246         j = isqrt(x)
+%o A247246         while j>1:
+%o A247246             k2 = integer_nthroot(x//j**2,3)[0]+1
+%o A247246             w = squarefreepi(k2-1)
+%o A247246             c -= j*(w-l)
+%o A247246             l, j = w, isqrt(x//k2**3)
+%o A247246         c -= squarefreepi(integer_nthroot(x,3)[0])-l+sum(mobius(k)*(integer_nthroot(x, k)[0]-1) for k in range(2, x.bit_length()))
+%o A247246         return c
+%o A247246     return -(a:=bisection(f,n,n))+bisection(lambda x:f(x)+1,a,a) # _Chai Wah Wu_, Sep 10 2024
 %Y A247246 Cf. A052486, A076446, A053289.
-%K A247246 nonn,easy
+%K A247246 nonn,easy,changed
 %O A247246 1,1
 %A A247246 _Eric Chen_, Nov 28 2014

@@ -1,4 +1,4 @@
-%I A374291 #11 Jul 03 2024 01:42:38
+%I A374291 #16 Sep 11 2024 00:35:02
 %S A374291 1,16,64,81,256,625,729,1024,1296,2401,4096,5184,6561,10000,11664,
 %T A374291 14641,15625,16384,20736,28561,38416,40000,46656,50625,59049,65536,
 %U A374291 82944,83521,104976,117649,130321,153664,160000,186624,194481,234256,250000,262144,279841,331776
@@ -16,10 +16,36 @@
 %F A374291 Sum_{n>=1} 1/a(n)^s =  Product_{p prime} (1 + 1/(p^(2*s)*(p^(2*s)-1))) = zeta(4*s)*zeta(6*s)/zeta(12*s), for s > 1/4.
 %t A374291 powQ[n_] := n==1 || AllTrue[FactorInteger[n][[;; , 2]], # > 1 &]; Select[Range[600], powQ]^2
 %o A374291 (PARI) is(k) = issquare(k) && ispowerful(sqrtint(k));
+%o A374291 (Python)
+%o A374291 from math import isqrt
+%o A374291 from sympy import mobius, integer_nthroot
+%o A374291 def A374291(n):
+%o A374291     def squarefreepi(n):
+%o A374291         return int(sum(mobius(k)*(n//k**2) for k in range(1, isqrt(n)+1)))
+%o A374291     def bisection(f, kmin=0, kmax=1):
+%o A374291         while f(kmax) > kmax: kmax <<= 1
+%o A374291         while kmax-kmin > 1:
+%o A374291             kmid = kmax+kmin>>1
+%o A374291             if f(kmid) <= kmid:
+%o A374291                 kmax = kmid
+%o A374291             else:
+%o A374291                 kmin = kmid
+%o A374291         return kmax
+%o A374291     def f(x):
+%o A374291         c, l = n+x, 0
+%o A374291         j = isqrt(x)
+%o A374291         while j>1:
+%o A374291             k2 = integer_nthroot(x//j**2, 3)[0]+1
+%o A374291             w = squarefreepi(k2-1)
+%o A374291             c -= j*(w-l)
+%o A374291             l, j = w, isqrt(x//k2**3)
+%o A374291         c -= squarefreepi(integer_nthroot(x, 3)[0])-l
+%o A374291         return c
+%o A374291     return bisection(f,n,n)**2 # _Chai Wah Wu_, Sep 10 2024
 %Y A374291 Intersection of A000290 and A036967 (or A036966).
 %Y A374291 Intersection of A000290 and A337050.
 %Y A374291 Subsequence of A322449.
 %Y A374291 Cf. A000290, A001694, A007947, A078615, A335988, A340588.
-%K A374291 nonn,easy
+%K A374291 nonn,easy,changed
 %O A374291 1,2
 %A A374291 _Amiram Eldar_, Jul 02 2024

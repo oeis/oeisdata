@@ -1,12 +1,14 @@
-%I A069492 #15 Jul 09 2020 04:51:13
+%I A069492 #28 Sep 11 2024 00:32:23
 %S A069492 1,32,64,128,243,256,512,729,1024,2048,2187,3125,4096,6561,7776,8192,
 %T A069492 15552,15625,16384,16807,19683,23328,31104,32768,46656,59049,62208,
 %U A069492 65536,69984,78125,93312,100000,117649,124416,131072,139968,161051
-%N A069492 5-full numbers: if p divides n then so does p^5.
+%N A069492 5-full numbers: if a prime p divides k then so does p^5.
 %C A069492 a(m) mod prime(n) > 0 for m < A258602(n); a(A258602(n)) = A050997(n) = prime(n)^5. - _Reinhard Zumkeller_, Jun 06 2015
-%H A069492 Reinhard Zumkeller, <a href="/A069492/b069492.txt">Table of n, a(n) for n = 1..10000</a>
+%H A069492 Reinhard Zumkeller, <a href="/A069492/b069492.txt">Table of n, a(n) for n = 1..10000</a> (terms n=148..10000 corrected by Andrew Howroyd)
 %F A069492 Sum_{n>=1} 1/a(n) = Product_{p prime} (1 + 1/(p^4*(p-1))) = 1.0695724994489739263413712783666538355049945684326048537289707764272637... - _Amiram Eldar_, Jul 09 2020
 %o A069492 (PARI) for(n=1,250000,if(n*sumdiv(n,d,isprime(d)/d^5)==floor(n*sumdiv(n,d,isprime(d)/d^5)),print1(n,",")))
+%o A069492 (PARI) \\ Gen(limit,k) defined in A036967.
+%o A069492 Gen(170000, 5) \\ _Andrew Howroyd_, Sep 10 2024
 %o A069492 (Haskell)
 %o A069492 import Data.Set (singleton, deleteFindMin, fromList, union)
 %o A069492 a069492 n = a069492_list !! (n-1)
@@ -18,9 +20,35 @@
 %o A069492            (m, s') = deleteFindMin s
 %o A069492    (z:zs) = a050997_list
 %o A069492 -- _Reinhard Zumkeller_, Jun 03 2015
+%o A069492 (Python)
+%o A069492 from math import gcd
+%o A069492 from sympy import integer_nthroot, factorint
+%o A069492 def A069492(n):
+%o A069492     def bisection(f,kmin=0,kmax=1):
+%o A069492         while f(kmax) > kmax: kmax <<= 1
+%o A069492         while kmax-kmin > 1:
+%o A069492             kmid = kmax+kmin>>1
+%o A069492             if f(kmid) <= kmid:
+%o A069492                 kmax = kmid
+%o A069492             else:
+%o A069492                 kmin = kmid
+%o A069492         return kmax
+%o A069492     def f(x):
+%o A069492         c = n+x
+%o A069492         for t in range(1,integer_nthroot(x,9)[0]+1):
+%o A069492             if all(d<=1 for d in factorint(t).values()):
+%o A069492                 for u in range(1,integer_nthroot(s:=x//t**9,8)[0]+1):
+%o A069492                     if gcd(t,u)==1 and all(d<=1 for d in factorint(u).values()):
+%o A069492                         for w in range(1,integer_nthroot(a:=s//u**8,7)[0]+1):
+%o A069492                             if gcd(u,w)==1 and gcd(t,w)==1 and all(d<=1 for d in factorint(w).values()):
+%o A069492                                 for y in range(1,integer_nthroot(z:=a//w**7,6)[0]+1):
+%o A069492                                     if gcd(w,y)==1 and gcd(u,y)==1 and gcd(t,y)==1 and all(d<=1 for d in factorint(y).values()):
+%o A069492                                         c -= integer_nthroot(z//y**6,5)[0]
+%o A069492         return c
+%o A069492     return bisection(f,n,n) # _Chai Wah Wu_, Sep 10 2024
 %Y A069492 Cf. A036967, A036966, A001694.
 %Y A069492 Cf. A050997.
 %Y A069492 Cf. A258602.
-%K A069492 easy,nonn
+%K A069492 easy,nonn,changed
 %O A069492 1,2
 %A A069492 _Benoit Cloitre_, Apr 15 2002

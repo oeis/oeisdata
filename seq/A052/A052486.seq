@@ -1,4 +1,4 @@
-%I A052486 #90 Feb 19 2022 11:29:10
+%I A052486 #96 Sep 10 2024 11:04:06
 %S A052486 72,108,200,288,392,432,500,648,675,800,864,968,972,1125,1152,1323,
 %T A052486 1352,1372,1568,1800,1944,2000,2312,2592,2700,2888,3087,3200,3267,
 %U A052486 3456,3528,3872,3888,4000,4232,4500,4563,4608,5000,5292,5324,5400,5408,5488,6075
@@ -34,8 +34,33 @@
 %o A052486 def A052486_gen(startvalue=1): # generator of terms >= startvalue
 %o A052486     return (n for n in count(max(startvalue,1)) if (lambda x: all(e > 1 for e in x) and gcd(*x) == 1)(factorint(n).values()))
 %o A052486 A052486_list = list(islice(A052486_gen(),20)) # _Chai Wah Wu_, Feb 19 2022
+%o A052486 (Python)
+%o A052486 from math import isqrt
+%o A052486 from sympy import mobius, integer_nthroot
+%o A052486 def A052486(n):
+%o A052486     def squarefreepi(n): return int(sum(mobius(k)*(n//k**2) for k in range(1, isqrt(n)+1)))
+%o A052486     def bisection(f,kmin=0,kmax=1):
+%o A052486         while f(kmax) > kmax: kmax <<= 1
+%o A052486         while kmax-kmin > 1:
+%o A052486             kmid = kmax+kmin>>1
+%o A052486             if f(kmid) <= kmid:
+%o A052486                 kmax = kmid
+%o A052486             else:
+%o A052486                 kmin = kmid
+%o A052486         return kmax
+%o A052486     def f(x):
+%o A052486         c, l = n+x+1, 0
+%o A052486         j = isqrt(x)
+%o A052486         while j>1:
+%o A052486             k2 = integer_nthroot(x//j**2,3)[0]+1
+%o A052486             w = squarefreepi(k2-1)
+%o A052486             c -= j*(w-l)
+%o A052486             l, j = w, isqrt(x//k2**3)
+%o A052486         c -= squarefreepi(integer_nthroot(x,3)[0])-l+sum(mobius(k)*(integer_nthroot(x, k)[0]-1) for k in range(2, x.bit_length()))
+%o A052486         return c
+%o A052486     return bisection(f,n,n) # _Chai Wah Wu_, Sep 10 2024
 %Y A052486 Cf. A001597, A001694, A007916, A072102, A082695.
-%K A052486 nonn
+%K A052486 nonn,changed
 %O A052486 1,1
 %A A052486 _Henry Bottomley_, Mar 16 2000
 %E A052486 Example edited by Mac Coombe (mac.coombe(AT)gmail.com), Sep 18 2010

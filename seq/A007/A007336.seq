@@ -1,18 +1,45 @@
-%I A007336 M0137 #28 May 27 2024 11:18:57
+%I A007336 M0137 #42 Sep 11 2024 00:36:40
 %S A007336 1,2,1,3,2,1,4,3,2,5,1,4,3,6,2,5,1,4,7,3,6,2,5,8,1,4,7,3,6,9,2,5,8,1,
 %T A007336 4,7,10,3,6,9,2,5,8,1,11,4,7,10,3,6,9,2,12,5,8,1,11,4,7,10,3,13,6,9,2,
 %U A007336 12,5,8,1,11,4,14,7,10,3,13,6,9,2,12,5,15,8,1,11,4,14,7,10,3,13,6,16,9,2
 %N A007336 Signature sequence of sqrt 2 (arrange the numbers i+j*x (i,j >= 1) in increasing order; the sequence of i's is the signature of x).
-%D A007336 C. Kimberling, "Fractal Sequences and Interspersions", Ars Combinatoria, vol. 45 p 157 1997.
+%D A007336 Clark Kimberling, "Fractal Sequences and Interspersions", Ars Combinatoria, vol. 45 p 157 1997.
 %D A007336 N. J. A. Sloane and Simon Plouffe, The Encyclopedia of Integer Sequences, Academic Press, 1995 (includes this sequence).
 %H A007336 T. D. Noe, <a href="/A007336/b007336.txt">Table of n, a(n) for n=1..1000</a>
-%H A007336 C. Kimberling, <a href="http://faculty.evansville.edu/ck6/integer/intersp.html">Interspersions</a>
 %H A007336 Dale Gerdemann, <a href="https://www.youtube.com/watch?v=W7D2-jIY1Gw">Plot of Adjacent Terms</a>, YouTube Video, 2015.
+%H A007336 Clark Kimberling, <a href="http://faculty.evansville.edu/ck6/integer/intersp.html">Interspersions</a>
 %H A007336 <a href="/index/Si#signature_sequences">Index entries for sequences related to signature sequences</a>
 %F A007336 If delete first occurrence of 1, 2, 3, ... the sequence is unchanged.
 %t A007336 Take[ Transpose[ Sort[ Flatten[ Table[{i + j*Sqrt[2], i}, {i, 17}, {j, 15}], 1], #1[[1]] < #2[[1]] &]][[2]], 96] (* _Robert G. Wilson v_, Jul 24 2004 *)
-%Y A007336 Cf. A007337.
-%K A007336 nonn,easy,nice,eigen
+%t A007336 Quiet[Block[{$ContextPath}, Needs["Combinatorica`"]], {General::compat}]
+%t A007336 memos = <||>;
+%t A007336 zeroBasedC[theta_, i_] := zeroBasedC[theta, i] = Module[{memo, depth},
+%t A007336   memo = Lookup[memos, theta, {-1, 0}];
+%t A007336   While[memo[[-1]] <= i, AppendTo[memo, memo[[-1]] + Ceiling[theta * (Length[memo] - 1)]]];
+%t A007336   memos[i] = memo;
+%t A007336   depth = Combinatorica`BinarySearch[memo, i] - 3/2;
+%t A007336   If[IntegerQ[depth] && depth <= i, 1 + zeroBasedC[theta, i - depth], 0]
+%t A007336 ];
+%t A007336 A007336[i_] := zeroBasedC[2^(1/2), i - 1] + 1;
+%t A007336 Table[A007336[i], {i, 1, 100}] (* _Brady J. Garvin_, Aug 19 2024 *)
+%o A007336 (Python)
+%o A007336 from bisect import bisect
+%o A007336 from collections import defaultdict
+%o A007336 from functools import cache
+%o A007336 from math import ceil
+%o A007336 memos = defaultdict(lambda: [-1, 0])
+%o A007336 @cache
+%o A007336 def zero_based_c(theta, i):
+%o A007336     memo = memos[theta]
+%o A007336     while memo[-1] <= i:
+%o A007336         memo.append(memo[-1] + ceil(theta * (len(memo) - 1)))
+%o A007336     depth = bisect(memo, i) - 1
+%o A007336     return 0 if depth > i or memo[depth] == i else 1 + zero_based_c(theta, i - depth)
+%o A007336 def A007336(i):
+%o A007336     return zero_based_c(2 ** 0.5, i - 1) + 1
+%o A007336 print([A007336(i) for i in range(1, 1001)])  # _Brady J. Garvin_, Aug 18 2024
+%Y A007336 Cf. A007337, A022775.
+%K A007336 nonn,easy,nice,eigen,changed
 %O A007336 1,2
 %A A007336 _N. J. A. Sloane_, _Clark Kimberling_
 %E A007336 More terms from _Robert G. Wilson v_, Jul 24 2004
