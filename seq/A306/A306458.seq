@@ -1,4 +1,4 @@
-%I A306458 #10 Mar 20 2019 15:09:20
+%I A306458 #16 Sep 15 2024 22:01:19
 %S A306458 1,2,4,3,8,5,9,16,6,7,32,12,27,10,18,11,25,64,24,13,14,20,36,15,81,
 %T A306458 128,48,17,54,49,19,28,40,72,21,22,50,256,23,96,125,108,45,26,243,56,
 %U A306458 80,29,144,30,31,44,162,100,512,33,75,192,34,35,216,63,121,52
@@ -18,7 +18,31 @@
 %p A306458 map(t -> t/rad(t), sort(convert(S,list))); # _Robert Israel_, Mar 20 2019
 %t A306458 p=Join[{1}, Select[ Range@ 12500, Min@ FactorInteger[#][[All, 2]] > 1 &]]; rad[n_] := Times @@ (First@# & /@ FactorInteger@ n);  p/(rad/@p) (* after _Harvey P. Dale_ at A001694 and _Robert G. Wilson v_ at A007947 *)
 %o A306458 (PARI) apply(x->(x/factorback(factorint(x)[, 1])), select(x->ispowerful(x), vector(1600, k, k))) \\ _Michel Marcus_, Feb 17 2019
+%o A306458 (Python)
+%o A306458 from math import isqrt, prod
+%o A306458 from sympy import mobius, integer_nthroot, primefactors
+%o A306458 def A306458(n):
+%o A306458     def squarefreepi(n): return int(sum(mobius(k)*(n//k**2) for k in range(1, isqrt(n)+1)))
+%o A306458     def bisection(f,kmin=0,kmax=1):
+%o A306458         while f(kmax) > kmax: kmax <<= 1
+%o A306458         while kmax-kmin > 1:
+%o A306458             kmid = kmax+kmin>>1
+%o A306458             if f(kmid) <= kmid:
+%o A306458                 kmax = kmid
+%o A306458             else:
+%o A306458                 kmin = kmid
+%o A306458         return kmax
+%o A306458     def f(x):
+%o A306458         c, l = n+x-squarefreepi(integer_nthroot(x,3)[0]), 0
+%o A306458         j = isqrt(x)
+%o A306458         while j>1:
+%o A306458             k2 = integer_nthroot(x//j**2,3)[0]+1
+%o A306458             w = squarefreepi(k2-1)
+%o A306458             c -= j*(w-l)
+%o A306458             l, j = w, isqrt(x//k2**3)
+%o A306458         return c+l
+%o A306458     return (m:=bisection(f,n,n))//prod(primefactors(m)) # _Chai Wah Wu_, Sep 14 2024
 %Y A306458 Cf. A001694, A007947, A064549.
-%K A306458 nonn,look
+%K A306458 nonn,look,changed
 %O A306458 1,2
 %A A306458 _Amiram Eldar_, Feb 17 2019

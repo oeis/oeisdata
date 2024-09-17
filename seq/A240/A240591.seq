@@ -1,17 +1,47 @@
-%I A240591 #19 Jan 30 2023 02:38:59
+%I A240591 #34 Sep 16 2024 02:50:21
 %S A240591 8,25,32,121,288,675,1331,1369,1936,2187,2700,3125,5324,6724,9800,
 %T A240591 10800,12167,15125,32761,39200,48668,70225,79507,88200,97336,107648,
 %U A240591 143641,156800,212521,228484,235224,280900,312481,332928,456968,465124,574564,674028,744769,829921,830297,857476,877952,940896
 %N A240591 The smaller of a pair of successive powerful numbers (A001694) without any prime number between them.
-%H A240591 Amiram Eldar, <a href="/A240591/b240591.txt">Table of n, a(n) for n = 1..103</a> (terms below 10^9)
+%H A240591 Amiram Eldar, <a href="/A240591/b240591.txt">Table of n, a(n) for n = 1..373</a> (terms below 10^15; terms 1..103 from Amiram Eldar, terms 104..235 from Chai Wah Wu)
 %e A240591 25 is in the sequence because A001694(6)=25, A001694(7)=27, without primes between them.
 %t A240591 Select[Partition[Join[{1},Select[Range[10^6],Min@FactorInteger[#][[All, 2]]> 1&]],2,1],PrimePi[#[[1]]]==PrimePi[#[[2]]]&][[All,1]] (* _Harvey P. Dale_, Mar 28 2018 *)
 %o A240591 (PARI)
 %o A240591 ispowerful(n)={local(h);if(n==1,h=1,h=(vecmin(factor(n)[, 2])>1));return(h)}
 %o A240591 nextpowerful(n)={local(k);k=n+1;while(!ispowerful(k),k+=1);return(k)}
 %o A240591 {for(i=1,10^6,if(ispowerful(i),if(nextprime(i)>=nextpowerful(i),print1(i, ", "))))}
+%o A240591 (Python)
+%o A240591 from itertools import count, islice
+%o A240591 from math import isqrt
+%o A240591 from sympy import mobius, integer_nthroot, nextprime
+%o A240591 def A240591_gen(): # generator of terms
+%o A240591     def squarefreepi(n): return int(sum(mobius(k)*(n//k**2) for k in range(1, isqrt(n)+1)))
+%o A240591     def bisection(f,kmin=0,kmax=1):
+%o A240591         while f(kmax) > kmax: kmax <<= 1
+%o A240591         while kmax-kmin > 1:
+%o A240591             kmid = kmax+kmin>>1
+%o A240591             if f(kmid) <= kmid:
+%o A240591                 kmax = kmid
+%o A240591             else:
+%o A240591                 kmin = kmid
+%o A240591         return kmax
+%o A240591     def f(x):
+%o A240591         c, l, j = x-squarefreepi(integer_nthroot(x,3)[0]), 0, isqrt(x)
+%o A240591         while j>1:
+%o A240591             k2 = integer_nthroot(x//j**2,3)[0]+1
+%o A240591             w = squarefreepi(k2-1)
+%o A240591             c -= j*(w-l)
+%o A240591             l, j = w, isqrt(x//k2**3)
+%o A240591         return c+l
+%o A240591     m = 1
+%o A240591     for n in count(2):
+%o A240591         k = bisection(lambda x:f(x)+n,m,m)
+%o A240591         if nextprime(m) > k:
+%o A240591             yield m
+%o A240591         m = k
+%o A240591 A240591_list = list(islice(A240591_gen(),30)) # _Chai Wah Wu_, Sep 14 2024
 %Y A240591 Supersequence of A060355.
 %Y A240591 Cf. A001694, A240590.
-%K A240591 nonn
+%K A240591 nonn,changed
 %O A240591 1,1
 %A A240591 _Antonio Roldán_, Apr 08 2014

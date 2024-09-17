@@ -1,16 +1,52 @@
-%I A371189 #8 Mar 14 2024 11:13:44
+%I A371189 #23 Sep 16 2024 15:05:51
 %S A371189 27,125,243,625,1000,1944,2187,3375,4000,4913,10000,15552,16807,17496,
 %T A371189 27648,34992,50625,83349,107811,139968,157216,194481,250000,279841,
 %U A371189 389017,390224,405000,614125,628864,810000,970299,1366875,1372000,1874048,2000000,2238728,2248091
 %N A371189 The smaller of a pair of successive cubefull numbers without a powerful number between them.
-%H A371189 Amiram Eldar, <a href="/A371189/b371189.txt">Table of n, a(n) for n = 1..500</a>
+%H A371189 Chai Wah Wu, <a href="/A371189/b371189.txt">Table of n, a(n) for n = 1..2123</a> (terms 1..500 from Amiram Eldar)
 %H A371189 <a href="/index/Pow#powerful">Index entries for sequences related to powerful numbers</a>.
 %e A371189 27 = 3^3 is a term since it is cubefull, and the next powerful number, 32 = 2^5, is also cubefull.
 %t A371189 cubQ[n_] := n == 1 || AllTrue[FactorInteger[n][[;; , 2]], # > 2 &];
 %t A371189 seq[max_] := Module[{pows = Union[Flatten[Table[i^2*j^3, {j, 1, Surd[max, 3]}, {i, 1, Sqrt[max/j^3]}]]], ind = {}, d}, Do[If[cubQ[pows[[k]]], AppendTo[ind, k]], {k, 1, Length[pows]}];  d = Differences[ind]; pows[[ind[[Position[d, 1] // Flatten]]]]]; seq[10^6]
 %o A371189 (PARI) iscubefull(n) = n == 1 || vecmin(factor(n)[, 2]) > 2;
 %o A371189 lista(mx) = {my(s = List(), is1, is2); for(j = 1, sqrtnint(mx, 3), for(i = 1, sqrtint(mx\j^3), listput(s, i^2 * j^3))); s = Set(s); is1 = 1; for(i = 2, #s, is2 = iscubefull(s[i]); if(is1 && is2, print1(s[i-1], ", ")); is1 = is2);}
+%o A371189 (Python)
+%o A371189 from math import isqrt, gcd
+%o A371189 from sympy import mobius, integer_nthroot, factorint
+%o A371189 def A371189_gen(): # generator of terms
+%o A371189     def squarefreepi(n): return int(sum(mobius(k)*(n//k**2) for k in range(1, isqrt(n)+1)))
+%o A371189     def bisection(f,kmin=0,kmax=1):
+%o A371189         while f(kmax) > kmax: kmax <<= 1
+%o A371189         while kmax-kmin > 1:
+%o A371189             kmid = kmax+kmin>>1
+%o A371189             if f(kmid) <= kmid:
+%o A371189                 kmax = kmid
+%o A371189             else:
+%o A371189                 kmin = kmid
+%o A371189         return kmax
+%o A371189     def f(x):
+%o A371189         c, l, j = x-squarefreepi(integer_nthroot(x,3)[0]), 0, isqrt(x)
+%o A371189         while j>1:
+%o A371189             k2 = integer_nthroot(x//j**2,3)[0]+1
+%o A371189             w = squarefreepi(k2-1)
+%o A371189             c -= j*(w-l)
+%o A371189             l, j = w, isqrt(x//k2**3)
+%o A371189         return c+l
+%o A371189     def g(x):
+%o A371189         c = x
+%o A371189         for w in range(1,integer_nthroot(x,5)[0]+1):
+%o A371189             if all(d<=1 for d in factorint(w).values()):
+%o A371189                 for y in range(1,integer_nthroot(z:=x//w**5,4)[0]+1):
+%o A371189                     if gcd(w,y)==1 and all(d<=1 for d in factorint(y).values()):
+%o A371189                         c -= integer_nthroot(z//y**4,3)[0]
+%o A371189         return c
+%o A371189     m, w = 1, 1
+%o A371189     for n in count(2):
+%o A371189         k = bisection(lambda x:g(x)+n,m,m)
+%o A371189         if (a:=f(k))-w== k-1-m:
+%o A371189             yield m
+%o A371189         m, w = k, a # _Chai Wah Wu_, Sep 15 2024
 %Y A371189 Cf. A001694, A036966.
-%K A371189 nonn
+%K A371189 nonn,changed
 %O A371189 1,1
 %A A371189 _Amiram Eldar_, Mar 14 2024

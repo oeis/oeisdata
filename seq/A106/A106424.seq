@@ -1,10 +1,30 @@
-%I A106424 #3 Mar 30 2012 17:29:22
+%I A106424 #7 Sep 12 2024 19:34:39
 %S A106424 41,4,42,40,48,400,432,4000,4032,40000,4608,4096,41472,40960,49152,
 %T A106424 409600,442368,4063232,4128768,40310784,4718592,4194304,42467328,
 %U A106424 41943040,411041792,419430400,452984832,402653184,4076863488,4026531840
 %N A106424 Smallest number beginning with 4 and having exactly n prime divisors counted with multiplicity.
 %e A106424 a(1) = 41, a(3) = 42 = 2*3*7.
+%o A106424 (Python)
+%o A106424 from itertools import count
+%o A106424 from math import isqrt, prod
+%o A106424 from sympy import primerange, integer_nthroot, primepi
+%o A106424 def A106424(n):
+%o A106424     if n == 1: return 41
+%o A106424     def g(x,a,b,c,m): yield from (((d,) for d in enumerate(primerange(b,isqrt(x//c)+1),a)) if m==2 else (((a2,b2),)+d for a2,b2 in enumerate(primerange(b,integer_nthroot(x//c,m)[0]+1),a) for d in g(x,a2,b2,c*b2,m-1)))
+%o A106424     def f(x): return int(sum(primepi(x//prod(c[1] for c in a))-a[-1][0] for a in g(x,0,1,1,n)))
+%o A106424     for l in count(len(str(1<<n))-1):
+%o A106424         kmin, kmax = 4*10**l-1, 5*10**l-1
+%o A106424         mmin, mmax = f(kmin), f(kmax)
+%o A106424         if mmax>mmin:
+%o A106424             while kmax-kmin > 1:
+%o A106424                 kmid = kmax+kmin>>1
+%o A106424                 mmid = f(kmid)
+%o A106424                 if mmid > mmin:
+%o A106424                     kmax, mmax = kmid, mmid
+%o A106424                 else:
+%o A106424                     kmin, mmin = kmid, mmid
+%o A106424     return kmax # _Chai Wah Wu_, Sep 12 2024
 %Y A106424 Cf. A077326-A077334, A106411-A106419, A106421-A106429.
-%K A106424 base,nonn
+%K A106424 base,nonn,changed
 %O A106424 1,1
 %A A106424 _Ray Chandler_, May 02 2005

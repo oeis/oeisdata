@@ -1,10 +1,49 @@
-%I A106413 #3 Mar 30 2012 17:29:22
+%I A106413 #10 Sep 12 2024 17:34:46
 %S A106413 3,33,30,330,3570,30030,3015870,30120090,300690390,30043474230,
 %T A106413 304075581810,30035662366710,304250263527210,30078810535603830,
 %U A106413 3001252188252588270,32589158477190044730,3003056284355533696290
 %N A106413 Smallest number beginning with 3 that is the product of exactly n distinct primes.
+%H A106413 Chai Wah Wu, <a href="/A106413/b106413.txt">Table of n, a(n) for n = 1..45</a>
 %e A106413 a(1) = 3, a(6) = 30030 = 2*3*5*7*11*13.
+%p A106413 f:= proc(n) uses priqueue; local pq, t, p, x, i,L,v,Lp;
+%p A106413     initialize(pq);
+%p A106413     L:= [seq(ithprime(i),i=1..n)];
+%p A106413     v:= convert(L,`*`);
+%p A106413     insert([-v, L], pq);
+%p A106413     do
+%p A106413       t:= extract(pq);
+%p A106413       x:= -t[1];
+%p A106413       if floor(x/10^ilog10(x)) = 3 then return x fi;
+%p A106413       L:= t[2];
+%p A106413       p:= nextprime(L[-1]);
+%p A106413       for i from n to 1 by -1 do
+%p A106413         if i < n and L[i] <> prevprime(L[i+1]) then break fi;
+%p A106413         Lp:= [op(L[1..i-1]),op(L[i+1..n]),p];
+%p A106413         insert([-convert(Lp,`*`),Lp], pq)
+%p A106413     od od;
+%p A106413 end proc:
+%p A106413 map(f, [$1..30]); # _Robert Israel_, Sep 12 2024
+%o A106413 (Python)
+%o A106413 from itertools import count
+%o A106413 from math import prod, isqrt
+%o A106413 from sympy import primerange, integer_nthroot, primepi, primorial
+%o A106413 def A106413(n):
+%o A106413     if n == 1: return 3
+%o A106413     def g(x,a,b,c,m): yield from (((d,) for d in enumerate(primerange(b+1,isqrt(x//c)+1),a+1)) if m==2 else (((a2,b2),)+d for a2,b2 in enumerate(primerange(b+1,integer_nthroot(x//c,m)[0]+1),a+1) for d in g(x,a2,b2,c*b2,m-1)))
+%o A106413     def f(x): return int(sum(primepi(x//prod(c[1] for c in a))-a[-1][0] for a in g(x,0,1,1,n)))
+%o A106413     for l in count(len(str(primorial(n)))-1):
+%o A106413         kmin, kmax = 3*10**l-1, 4*10**l-1
+%o A106413         mmin, mmax = f(kmin), f(kmax)
+%o A106413         if mmax>mmin:
+%o A106413             while kmax-kmin > 1:
+%o A106413                 kmid = kmax+kmin>>1
+%o A106413                 mmid = f(kmid)
+%o A106413                 if mmid > mmin:
+%o A106413                     kmax, mmax = kmid, mmid
+%o A106413                 else:
+%o A106413                     kmin, mmin = kmid, mmid
+%o A106413     return kmax # _Chai Wah Wu_, Sep 12 2024
 %Y A106413 Cf. A077326-A077334, A106411-A106419, A106421-A106429.
-%K A106413 base,nonn
+%K A106413 base,nonn,changed
 %O A106413 1,1
 %A A106413 _Ray Chandler_, May 02 2005

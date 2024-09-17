@@ -1,4 +1,4 @@
-%I A240590 #20 Jan 30 2023 03:27:47
+%I A240590 #24 Sep 15 2024 22:00:52
 %S A240590 2,2,0,2,3,0,2,0,4,3,2,2,3,3,2,0,1,3,5,5,2,1,1,5,1,7,0,5,2,4,5,1,5,2,
 %T A240590 7,3,2,2,6,9,4,4,0,7,8,2,7,4,4,8,1,1,4,4,9,7,2,1,9,10,6,1,0,2,0,9,12,
 %U A240590 7,4,12,6,5,4,5,12,0,8,3,3,10,8,0,2,13,2,13,10,10,1,15,0,7,9,9,3,13,7,4,0,7,5,4,13,2
@@ -9,7 +9,32 @@
 %o A240590 ispowerful(n)={local(h);if(n==1,h=1,h=(vecmin(factor(n)[, 2])>1));return(h)}
 %o A240590 proxpowerful(n)={local(k);k=n+1;while(!ispowerful(k),k+=1);return(k)}
 %o A240590 {for(i=1,5000,if(ispowerful(i),m=proxpowerful(i);p=primepi(m)-primepi(i);print1(p, ", ")))}
+%o A240590 (Python)
+%o A240590 from math import isqrt
+%o A240590 from sympy import mobius, integer_nthroot, primepi
+%o A240590 def A240590(n):
+%o A240590     def squarefreepi(n): return int(sum(mobius(k)*(n//k**2) for k in range(1, isqrt(n)+1)))
+%o A240590     def bisection(f,kmin=0,kmax=1):
+%o A240590         while f(kmax) > kmax: kmax <<= 1
+%o A240590         while kmax-kmin > 1:
+%o A240590             kmid = kmax+kmin>>1
+%o A240590             if f(kmid) <= kmid:
+%o A240590                 kmax = kmid
+%o A240590             else:
+%o A240590                 kmin = kmid
+%o A240590         return kmax
+%o A240590     def f(x):
+%o A240590         c, l = n+x, 0
+%o A240590         j = isqrt(x)
+%o A240590         while j>1:
+%o A240590             k2 = integer_nthroot(x//j**2,3)[0]+1
+%o A240590             w = squarefreepi(k2-1)
+%o A240590             c -= j*(w-l)
+%o A240590             l, j = w, isqrt(x//k2**3)
+%o A240590         c -= squarefreepi(integer_nthroot(x,3)[0])-l
+%o A240590         return c
+%o A240590     return -primepi(a:=bisection(f,n,n))+primepi(bisection(lambda x:f(x)+1,a,a)) # _Chai Wah Wu_, Sep 15 2024
 %Y A240590 Cf. A001694, A240591.
-%K A240590 nonn
+%K A240590 nonn,changed
 %O A240590 1,1
 %A A240590 _Antonio Roldán_, Apr 08 2014

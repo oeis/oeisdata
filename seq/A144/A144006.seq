@@ -1,4 +1,4 @@
-%I A144006 #25 Aug 20 2024 16:02:31
+%I A144006 #28 Sep 12 2024 21:36:57
 %S A144006 1,1,1,3,-1,15,-10,3,-1,105,-105,55,-30,10,-3,1,945,-1260,910,-630,
 %T A144006 350,-168,76,-30,10,-3,1,10395,-17325,15750,-12880,9135,-5789,3381,
 %U A144006 -1806,910,-434,196,-76,30,-10,3,-1,135135,-270270,294525,-275275,228375
@@ -28,8 +28,35 @@
 %e A144006 0,0,0,0,0,0, 10395, -17325, 15750, -12880, 9135, -5789, 3381, -1806, 910, -434, 196, -76, 30, -10, 3, -1;
 %e A144006 0,0,0,0,0,0,0, 135135, -270270, 294525, -275275, 228375, -172200, 120960, -78519, 48006, -28336, 16065, -8609, 4461, -2166, 1018, -470, 196, -76, 30, -10, 3, -1; ...
 %o A144006 (PARI) {T(n,k)=local(A=1+x*O(x^n)); for(i=0,n,A=1+serreverse(intformal(subst(A,x,-x*y))));n!*polcoeff(polcoeff(A,n,x),k,y)}
+%o A144006 (Python)
+%o A144006 #This is only correct if the observation in the comment from 2024/08/20 is true.
+%o A144006 def T(n,k):
+%o A144006     if 0 <= n <= 1:
+%o A144006         return 1 if k == 0 else 0
+%o A144006     c = {(-1,):1} #Polynomial in infinitely many variables (function iterates)
+%o A144006     for _ in range(n-1):
+%o A144006         cnext = {}
+%o A144006         for key, value in c.items():
+%o A144006             key += (0,)
+%o A144006             for i, ni in enumerate(key):
+%o A144006                 term = tuple(nj-2 if j==i else nj-1 if j<=i+1 else nj
+%o A144006                              for j,nj in enumerate(key))
+%o A144006                 cnext[term] = cnext.get(term,0) + value*ni
+%o A144006                 if cnext[term] == 0:
+%o A144006                     del cnext[term]
+%o A144006         c = cnext
+%o A144006     pairs = {} #Reduction to single variable (evaluation at fixpoint)
+%o A144006     for key, value in c.items():
+%o A144006         s = -sum(key)
+%o A144006         pairs[s] = pairs.get(s,0) + value
+%o A144006     _, row = zip(*sorted(pairs.items())) #Coefficients
+%o A144006     if 0 <= k-n+1 < len(row): #Correcting number of leading 0s
+%o A144006         return (-1)**(n+k+1)*abs(row[k-n+1]) #Correcting signs
+%o A144006     else:
+%o A144006         return 0
+%o A144006 # _Lucas Larsen_, Aug 22 2024
 %Y A144006 Cf. A144005, A067146.
 %Y A144006 Generates A014621, A014622 and A014623, which are related to Levine's sequence A011784.
-%K A144006 sign,tabf
+%K A144006 sign,tabf,changed
 %O A144006 0,4
 %A A144006 _Paul D. Hanna_, Sep 10 2008

@@ -1,4 +1,4 @@
-%I A084371 #17 May 13 2023 06:18:02
+%I A084371 #22 Sep 14 2024 15:51:21
 %S A084371 1,2,2,3,2,5,3,2,6,7,2,6,3,10,6,11,5,2,6,13,14,10,6,15,3,2,6,17,6,7,
 %T A084371 19,14,10,6,21,22,10,2,23,6,5,6,15,26,3,14,10,29,6,30,31,22,6,10,2,33,
 %U A084371 15,6,34,35,6,21,11,26,37,14,38,39,14,10,41,6,42,30,43,22,6,10
@@ -15,7 +15,30 @@
 %t A084371 s = {1}; Do[f = FactorInteger[n]; If[Min @ f[[;;, 2]] > 1, AppendTo[s, Times @@ f[[;;, 1]]]], {n, 2, 10^4}]; s (* _Amiram Eldar_, Aug 22 2019 *)
 %o A084371 (PARI) rad(n) = factorback(factorint(n)[, 1]); \\ A007947
 %o A084371 lista(nn) = apply(x->rad(x), select(x->ispowerful(x), [1..nn])); \\ _Michel Marcus_, Aug 22 2019
+%o A084371 (Python)
+%o A084371 from math import prod, isqrt
+%o A084371 from sympy import mobius, integer_nthroot, primefactors
+%o A084371 def A084371(n):
+%o A084371     def squarefreepi(n): return int(sum(mobius(k)*(n//k**2) for k in range(1, isqrt(n)+1)))
+%o A084371     def bisection(f,kmin=0,kmax=1):
+%o A084371         while f(kmax) > kmax: kmax <<= 1
+%o A084371         while kmax-kmin > 1:
+%o A084371             kmid = kmax+kmin>>1
+%o A084371             if f(kmid) <= kmid:
+%o A084371                 kmax = kmid
+%o A084371             else:
+%o A084371                 kmin = kmid
+%o A084371         return kmax
+%o A084371     def f(x):
+%o A084371         c, l, j = n+x-squarefreepi(integer_nthroot(x,3)[0]), 0, isqrt(x)
+%o A084371         while j>1:
+%o A084371             k2 = integer_nthroot(x//j**2,3)[0]+1
+%o A084371             w = squarefreepi(k2-1)
+%o A084371             c -= j*(w-l)
+%o A084371             l, j = w, isqrt(x//k2**3)
+%o A084371         return c+l
+%o A084371     return prod(primefactors(bisection(f,n,n))) # _Chai Wah Wu_, Sep 13 2024
 %Y A084371 Cf. A001694, A007947, A090699.
-%K A084371 nonn
+%K A084371 nonn,changed
 %O A084371 1,2
 %A A084371 _Reinhard Zumkeller_, Jun 23 2003
