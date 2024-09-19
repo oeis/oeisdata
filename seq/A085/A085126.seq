@@ -1,12 +1,47 @@
-%I A085126 #9 Apr 10 2019 15:02:28
+%I A085126 #21 Sep 18 2024 09:28:53
 %S A085126 3,6,9,12,15,18,21,24,27,30,36,42,45,48,54,60,63,72,75,81,84,90,96,
 %T A085126 105,108,120,126,135,144,147,150,162,168,180,189,192,210,216,225,240,
 %U A085126 243,252,270,288,294,300,315,324,336,360,375,378,384,405,420,432,441,450
 %N A085126 Multiples of 3 which are members of A002473. Or multiples of 3 with the largest prime divisor < 10.
-%H A085126 Harvey P. Dale, <a href="/A085126/b085126.txt">Table of n, a(n) for n = 0..1000</a>
+%H A085126 Michael S. Branicky, <a href="/A085126/b085126.txt">Table of n, a(n) for n = 1..10001</a> (first 1001 terms from Harvey P. Dale)
+%F A085126 a(n) = 3*A002473(n). - _Chai Wah Wu_, Sep 18 2024
 %t A085126 Select[3*Range[200],FactorInteger[#][[-1,1]]<10&] (* _Harvey P. Dale_, Apr 10 2019 *)
+%o A085126 (Python)
+%o A085126 from sympy import integer_log
+%o A085126 def A085126(n):
+%o A085126     def bisection(f,kmin=0,kmax=1):
+%o A085126         while f(kmax) > kmax: kmax <<= 1
+%o A085126         while kmax-kmin > 1:
+%o A085126             kmid = kmax+kmin>>1
+%o A085126             if f(kmid) <= kmid:
+%o A085126                 kmax = kmid
+%o A085126             else:
+%o A085126                 kmin = kmid
+%o A085126         return kmax
+%o A085126     def f(x):
+%o A085126         c = n+x
+%o A085126         for i in range(integer_log(x,7)[0]+1):
+%o A085126             for j in range(integer_log(m:=x//7**i,5)[0]+1):
+%o A085126                 for k in range(integer_log(r:=m//5**j,3)[0]+1):
+%o A085126                     c -= (r//3**k).bit_length()
+%o A085126         return c
+%o A085126     return bisection(f,n,n)*3 # _Chai Wah Wu_, Sep 17 2024
+%o A085126 (Python) # faster for initial segment of sequence
+%o A085126 import heapq
+%o A085126 from itertools import islice
+%o A085126 def A085126gen(): # generator of terms
+%o A085126     v, oldv, h, psmooth_primes, = 1, 0, [1], [2, 3, 5, 7]
+%o A085126     while True:
+%o A085126         v = heapq.heappop(h)
+%o A085126         if v != oldv:
+%o A085126             yield 3*v
+%o A085126             oldv = v
+%o A085126             for p in psmooth_primes:
+%o A085126                     heapq.heappush(h, v*p)
+%o A085126 print(list(islice(A085126gen(), 65))) # _Michael S. Branicky_, Sep 17 2024
 %Y A085126 Cf. A085125, A085127, A085128, A085129, A080194, A085131, A085132.
-%K A085126 base,easy,nonn
-%O A085126 0,1
+%K A085126 base,easy,nonn,changed
+%O A085126 1,1
 %A A085126 _Amarnath Murthy_, Jul 06 2003
 %E A085126 More terms from _David Wasserman_, Jan 28 2005
+%E A085126 Offset changed to 1 by _Michael S. Branicky_, Sep 17 2024

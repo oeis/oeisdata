@@ -1,15 +1,62 @@
-%I A085908 #17 May 04 2022 00:33:01
+%I A085908 #36 Sep 19 2024 02:11:32
 %S A085908 1,2,3,4,5,6,7,8,9,10,112,12,135,14,15,16,175,18,192,20,21,224,2304,
 %T A085908 24,25,2625,27,28,294,30,315,32,336,343,35,36,375,384,392,40,4116,42,
 %U A085908 432,441,45,4608,4704,48,49,50,512,525,5376,54,55125,56,576,588,59049,60
 %N A085908 Smallest 7-smooth number beginning with n.
+%H A085908 Chai Wah Wu, <a href="/A085908/b085908.txt">Table of n, a(n) for n = 1..10000</a>
 %e A085908 a(23) = 2304 = 2^8*3^2 is the smallest 7-smooth number beginning with 23. (23, 230, 231, 232, ..., 239, 2301, 2302, 2303 etc. have a divisor > 10.)
+%p A085908 N:= 300: # for a(1) .. a(N)
+%p A085908 V:= Vector(N): count:= 0:with(priqueue):
+%p A085908 initialize(pq);
+%p A085908 insert([-1,0,0,0,0],pq);
+%p A085908 while count < N do
+%p A085908   t:= extract(pq);
+%p A085908   x:= -t[1];
+%p A085908   for d from ilog10(x) to 0 by -1 do
+%p A085908     xd:= floor(x/10^d);
+%p A085908     if xd > N then break fi;
+%p A085908     if V[xd] = 0 then V[xd]:= x; count:= count+1; fi;
+%p A085908   od;
+%p A085908   insert([-7*x,t[2],t[3],t[4],t[5]+1],pq);
+%p A085908   if t[5]=0 then
+%p A085908     insert([-5*x,t[2],t[3],t[4]+1,0],pq);
+%p A085908     if t[4] = 0 then
+%p A085908       insert([-3*x,t[2],t[3]+1,0,0],pq);
+%p A085908       if t[3] = 0 then
+%p A085908         insert([-2*x,t[2]+1,0,0,0],pq);
+%p A085908   fi fi fi;
+%p A085908 od:
+%p A085908 convert(V,list); # _Robert Israel_, Sep 18 2024
 %t A085908 a[n_] := Module[{d = IntegerDigits[n], k = 1}, While[Max[FactorInteger[k][[;; , 1]]] > 7 || Length[IntegerDigits[k]] < Length[d] || IntegerDigits[k][[1 ;; Length[d]]] != d, k++]; k]; Array[a, 60] (* _Amiram Eldar_, Apr 30 2022 *)
 %o A085908 (PARI) hc(n) = local(f); f = factor(n); f[matsize(f)[1], 1] < 10;
 %o A085908 a(n) = local(d, x); if (hc(n), return(n)); d = 1; while (d, for (i = 1, 10^d - 1, x = n*10^d + i; if (hc(x), return(x))); d++); \\ _David Wasserman_, Feb 11 2005
+%o A085908 (Python)
+%o A085908 from itertools import count
+%o A085908 from sympy import integer_log
+%o A085908 def A085908(n):
+%o A085908     if n<2: return n
+%o A085908     def f(x):
+%o A085908         c = 0
+%o A085908         for i in range(integer_log(x,7)[0]+1):
+%o A085908             for j in range(integer_log(m:=x//7**i,5)[0]+1):
+%o A085908                 for k in range(integer_log(r:=m//5**j,3)[0]+1):
+%o A085908                     c += (r//3**k).bit_length()
+%o A085908         return c
+%o A085908     for l in count(0):
+%o A085908         kmin, kmax = n*10**l-1, (n+1)*10**l-1
+%o A085908         mmin, mmax = f(kmin), f(kmax)
+%o A085908         if mmax>mmin:
+%o A085908             while kmax-kmin > 1:
+%o A085908                 kmid = kmax+kmin>>1
+%o A085908                 mmid = f(kmid)
+%o A085908                 if mmid > mmin:
+%o A085908                     kmax, mmax = kmid, mmid
+%o A085908                 else:
+%o A085908                     kmin, mmin = kmid, mmid
+%o A085908             return kmax # _Chai Wah Wu_, Sep 17 2024
 %Y A085908 Cf. A002473.
-%K A085908 base,nonn
-%O A085908 0,2
+%K A085908 base,nonn,look,changed
+%O A085908 1,2
 %A A085908 _Amarnath Murthy_, Jul 09 2003
 %E A085908 Corrected and extended by _David Wasserman_, Feb 11 2005
 %E A085908 Name corrected by _J. Lowell_, Apr 30 2022

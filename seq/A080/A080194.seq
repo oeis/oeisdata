@@ -1,4 +1,4 @@
-%I A080194 #27 Nov 10 2020 03:21:03
+%I A080194 #34 Sep 18 2024 06:07:49
 %S A080194 7,14,21,28,35,42,49,56,63,70,84,98,105,112,126,140,147,168,175,189,
 %T A080194 196,210,224,245,252,280,294,315,336,343,350,378,392,420,441,448,490,
 %U A080194 504,525,560,567,588,630,672,686,700,735,756,784,840,875,882,896,945,980
@@ -13,8 +13,42 @@
 %t A080194 Select[Range[999], FactorInteger[#][[-1, 1]] == 7 &] (* _Giovanni Resta_, Nov 22 2018 *)
 %o A080194 (PARI) A080194_list(M)={my(L=List(),a,b,c); for(r=1,logint(M\1,7), a=7^r; for(s=0, logint(M\a,3), b=a*3^s; for(t=0,logint(M\b,5), c=b*5^t; for(u=0,logint(M\c,2), listput(L,c<<u))))); Set(L)} \\ Could be replaced by smooth(primes(4),M) from A051037. - Edited by _M. F. Hasler_, Nov 22 2018
 %o A080194 (PARI) select( is_A080194(n)={n>1 && vecmax(factor(n,7)[,1])==7}, [0..10^3]) \\ Defines is_A080194(), used elsewhere. The select() command is a check and illustration. For longer lists, use list() above. - _M. F. Hasler_, Nov 21 2018
+%o A080194 (Python)
+%o A080194 from sympy import integer_log
+%o A080194 def A080194(n):
+%o A080194     def bisection(f,kmin=0,kmax=1):
+%o A080194         while f(kmax) > kmax: kmax <<= 1
+%o A080194         while kmax-kmin > 1:
+%o A080194             kmid = kmax+kmin>>1
+%o A080194             if f(kmid) <= kmid:
+%o A080194                 kmax = kmid
+%o A080194             else:
+%o A080194                 kmin = kmid
+%o A080194         return kmax
+%o A080194     def f(x):
+%o A080194         c = n+x
+%o A080194         for i in range(integer_log(x,7)[0]+1):
+%o A080194             for j in range(integer_log(m:=x//7**i,5)[0]+1):
+%o A080194                 for k in range(integer_log(r:=m//5**j,3)[0]+1):
+%o A080194                     c -= (r//3**k).bit_length()
+%o A080194         return c
+%o A080194     return bisection(f,n,n)*7 # _Chai Wah Wu_, Sep 17 2024
+%o A080194 (Python) # faster for initial segment of sequence
+%o A080194 import heapq
+%o A080194 from itertools import islice
+%o A080194 from sympy import primerange
+%o A080194 def A080194gen(p=7): # generator of terms
+%o A080194     v, oldv, h, psmooth_primes, = 1, 0, [1], list(primerange(1, p+1))
+%o A080194     while True:
+%o A080194         v = heapq.heappop(h)
+%o A080194         if v != oldv:
+%o A080194             yield 7*v
+%o A080194             oldv = v
+%o A080194             for p in psmooth_primes:
+%o A080194                 heapq.heappush(h, v*p)
+%o A080194 print(list(islice(A080194gen(), 65))) # _Michael S. Branicky_, Sep 17 2024
 %Y A080194 Cf. A002473, A051037.
 %Y A080194 Cf. A085125, A085126, A085127, A085128, A085129, A085131, A085132.
-%K A080194 easy,nonn
+%K A080194 easy,nonn,changed
 %O A080194 1,1
 %A A080194 _Klaus Brockhaus_, Feb 10 2003
