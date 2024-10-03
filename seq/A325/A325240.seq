@@ -1,4 +1,4 @@
-%I A325240 #10 Jan 30 2023 02:40:56
+%I A325240 #14 Oct 02 2024 12:25:35
 %S A325240 4,9,25,36,49,72,100,108,121,144,169,196,200,225,288,289,324,361,392,
 %T A325240 400,441,484,500,529,576,675,676,784,800,841,900,961,968,972,1089,
 %U A325240 1125,1152,1156,1225,1323,1352,1369,1372,1444,1521,1568,1600,1681,1764,1800
@@ -31,10 +31,40 @@
 %e A325240   400: {1,1,1,1,3,3}
 %t A325240 Select[Range[1000],Min@@FactorInteger[#][[All,2]]==2&]
 %o A325240 (PARI) is(n)={my(e=factor(n)[,2]); n>1 && vecmin(e) == 2; } \\ _Amiram Eldar_, Jan 30 2023
+%o A325240 (Python)
+%o A325240 from math import isqrt, gcd
+%o A325240 from sympy import integer_nthroot, factorint, mobius
+%o A325240 def A325240(n):
+%o A325240     def squarefreepi(n): return int(sum(mobius(k)*(n//k**2) for k in range(1, isqrt(n)+1)))
+%o A325240     def bisection(f,kmin=0,kmax=1):
+%o A325240         while f(kmax) > kmax: kmax <<= 1
+%o A325240         while kmax-kmin > 1:
+%o A325240             kmid = kmax+kmin>>1
+%o A325240             if f(kmid) <= kmid:
+%o A325240                 kmax = kmid
+%o A325240             else:
+%o A325240                 kmin = kmid
+%o A325240         return kmax
+%o A325240     def f(x):
+%o A325240         c, l = n+x, 0
+%o A325240         j = isqrt(x)
+%o A325240         while j>1:
+%o A325240             k2 = integer_nthroot(x//j**2,3)[0]+1
+%o A325240             w = squarefreepi(k2-1)
+%o A325240             c -= j*(w-l)
+%o A325240             l, j = w, isqrt(x//k2**3)
+%o A325240         c -= squarefreepi(integer_nthroot(x,3)[0])-l
+%o A325240         for w in range(1,integer_nthroot(x,5)[0]+1):
+%o A325240             if all(d<=1 for d in factorint(w).values()):
+%o A325240                 for y in range(1,integer_nthroot(z:=x//w**5,4)[0]+1):
+%o A325240                     if gcd(w,y)==1 and all(d<=1 for d in factorint(y).values()):
+%o A325240                         c += integer_nthroot(z//y**4,3)[0]
+%o A325240         return c
+%o A325240     return bisection(f,n,n**2) # _Chai Wah Wu_, Oct 02 2024
 %Y A325240 Positions of 2's in A051904.
 %Y A325240 Maximum instead of minimum gives A067259.
 %Y A325240 Cf. A001221, A001222, A001358, A001694, A007774, A036966, A051903, A052485, A118914, A244515, A325241.
 %Y A325240 Cf. A065483, A082695.
-%K A325240 nonn
+%K A325240 nonn,changed
 %O A325240 1,1
 %A A325240 _Gus Wiseman_, Apr 15 2019
