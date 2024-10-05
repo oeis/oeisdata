@@ -1,0 +1,33 @@
+%I A376702 #29 Oct 04 2024 20:50:53
+%S A376702 1,2,4,5,6,12,13,14,18,19,20,22,23,24,48,49,50,54,72,73,74,76,77,78,
+%T A376702 84,85,86,96,97,98,100,101,102,108,109,110,114,115,116,118,119,120,
+%U A376702 240,241,242,246,264,360,361,362,364,365,366,372,373,374,384,408,409,410
+%N A376702 Numbers k whose nonzero digits are strictly decreasing when written in factoradic.
+%C A376702 Base factorial is defined as the right hand digit being the units, the next left being the 2's, then the 6's, and so on.
+%H A376702 Michael S. Branicky, <a href="/A376702/b376702.txt">Table of n, a(n) for n = 1..10000</a>
+%H A376702 Wikipedia, <a href="https://en.wikipedia.org/wiki/Factorial_number_system">Factorial number system</a>
+%e A376702 50, being 2010 (base !), is included, whereas 51, being 2011 (base !), is not included.
+%o A376702 (Python)
+%o A376702 def f(n, i=2): return [n] if n < i else [*f(n//i, i=i+1), n%i]
+%o A376702 def ok(n):
+%o A376702     fnz = [d for d in f(n) if d != 0]
+%o A376702     return len(fnz) == len(set(fnz)) and fnz == sorted(fnz, reverse=True)
+%o A376702 print([k for k in range(1, 411) if ok(k)]) # _Michael S. Branicky_, Oct 02 2024
+%o A376702 (Python) # faster for initial segment of sequence
+%o A376702 from math import factorial
+%o A376702 from itertools import count, islice
+%o A376702 def bgen(d, i): # strictly decreasing non-zero elmts <= i and dth digit from left <= d
+%o A376702     if d < 1: yield tuple(); return
+%o A376702     yield from ((j,) + t for j in range(0, min(i+1, d+1)) for t in bgen(d-1, i if j == 0 else j-1))
+%o A376702 def agen(): # generator of terms
+%o A376702     for digits in count(1):
+%o A376702         for first in range(1, digits+1):
+%o A376702             for rest in bgen(digits-1, first-1):
+%o A376702                 t = (first, ) + rest
+%o A376702                 yield sum(factorial(i)*d for i, d in enumerate(t[::-1], 1))
+%o A376702 print(list(islice(agen(), 60))) # _Michael S. Branicky_, Oct 02 2024
+%o A376702 (PARI) isok(n)={my(k=1,p=0); while(n, k++; my(r=n%k); if(r, if(r<=p, return(0)); p=r); n\=k); 1} \\ _Andrew Howroyd_, Oct 04 2024
+%Y A376702 Cf. A007623, A108731.
+%K A376702 nonn,base,new
+%O A376702 1,2
+%A A376702 _Douglas Boffey_, Oct 02 2024
