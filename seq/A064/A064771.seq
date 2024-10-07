@@ -1,4 +1,4 @@
-%I A064771 #30 Oct 04 2019 09:21:52
+%I A064771 #54 Oct 06 2024 09:17:41
 %S A064771 6,20,28,78,88,102,104,114,138,174,186,222,246,258,272,282,304,318,
 %T A064771 354,366,368,402,426,438,464,474,490,496,498,534,572,582,606,618,642,
 %U A064771 650,654,678,748,762,786,822,834,860,894,906,940,942,978,1002,1014,1038
@@ -8,15 +8,36 @@
 %C A064771 A065205(a(n)) = 1. - _Reinhard Zumkeller_, Jan 21 2013
 %H A064771 Giovanni Resta, <a href="/A064771/b064771.txt">Table of n, a(n) for n = 1..10000</a> (terms 1..200 from T. D. Noe, terms 201..5000 from Amiram Eldar)
 %e A064771 Proper divisors of 20 are 1, 2, 4, 5 and 10. {1,4,5,10} is the only subset that sums to 20, so 20 is in the sequence.
+%p A064771 filter:= proc(n)
+%p A064771   local P,x,d;
+%p A064771   P:= mul(x^d+1, d = numtheory:-divisors(n) minus {n});
+%p A064771   coeff(P,x,n) = 1
+%p A064771 end proc:
+%p A064771 select(filter, [$1..2000]); # _Robert Israel_, Sep 25 2024
 %t A064771 okQ[n_]:= Module[{d=Most[Divisors[n]]}, SeriesCoefficient[Series[ Product[ 1+x^i, {i, d}], {x, 0, n}], n] == 1];Select[ Range[ 1100],okQ] (* _Harvey P. Dale_, Dec 13 2010 *)
 %o A064771 (Haskell)
 %o A064771 a064771 n = a064771_list !! (n-1)
 %o A064771 a064771_list = map (+ 1) $ elemIndices 1 a065205_list
 %o A064771 -- _Reinhard Zumkeller_, Jan 21 2013
+%o A064771 (Python)
+%o A064771 from sympy import divisors
+%o A064771 def isok(n):
+%o A064771     dp = {0: 1}
+%o A064771     for d in divisors(n)[:-1]:
+%o A064771         u = {}
+%o A064771         for k in dp.keys():
+%o A064771             if (s := (d + k)) <= n:
+%o A064771                 u[s] = dp.get(s, 0) + dp[k]
+%o A064771                 if s == n and u[s] > 1:
+%o A064771                     return False
+%o A064771         for k,v in u.items():
+%o A064771             dp[k] = v
+%o A064771     return dp.get(n, 0) == 1
+%o A064771 print([n for n in range(1, 1039) if isok(n)]) # _Darío Clavijo_, Sep 17 2024
 %Y A064771 A005835 gives n such that some subset of S(n) sums to n. Cf. A065205.
 %Y A064771 Cf. A000396, A006037, A065205, A065235.
 %Y A064771 Cf. A027751.
-%K A064771 nonn,nice
+%K A064771 nonn,nice,changed
 %O A064771 1,1
 %A A064771 Jonathan Ayres (jonathan.ayres(AT)btinternet.com), Oct 19 2001
 %E A064771 More terms from _Don Reble_, _Jud McCranie_ and _Naohiro Nomoto_, Oct 22 2001
