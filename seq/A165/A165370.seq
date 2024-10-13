@@ -1,13 +1,38 @@
-%I A165370 #12 Aug 04 2021 20:53:25
+%I A165370 #35 Oct 12 2024 14:52:32
 %S A165370 0,1,11,111,1111,11111,111111,1111111,2,12,112,1112,11112,111112,
 %T A165370 1111112,11111112,22,122,1122,11122,111122,1111122,11111122,111111122,
 %U A165370 222,1222,11222,3,13,113,1113,11113,2222,12222,112222,23,123,1123,11123
 %N A165370 Smallest number whose sum of cubes of digits is n.
-%C A165370 A055012(a(n)) = n and A055012(m) <> n for m < a(n);
-%C A165370 for all terms the digits are in nondecreasing order.
+%C A165370 A055012(a(n)) = n and A055012(m) <> n for m < a(n).
+%C A165370 For all terms the digits are in nondecreasing order.
+%C A165370 From _Ondrej Kutal_, Oct 06 2024: (Start)
+%C A165370 a(n) can be formulated as a solution to an integer linear programming problem: Let c_i be the number of occurrences of digit i in the number (1 <= i <= 9). We want to minimize c_1 + c_2 + ... + c_9 (total number of digits) subject to the constraints c_1 + 8*c_2 + 27*c_3 + ... + 729*c_9 = n and c_i >= 0 for all i. To get the smallest solution among all with this number of digits, we further maximize the number of 1s (c_1), then the number of 2s (c_2), and so on up to 9s (c_9). This approach ensures we find the lexicographically smallest number with the minimum number of digits whose sum of cubes equals n.
+%C A165370 a(n) can be computed by selecting a digit d (1 <= d <= 9) that minimizes the result of concatenating d with a(n-d^3), where n-d^3 >= 0. This can be done efficiently using dynamic programming.
+%C A165370 As it turns out, the sequence is periodic (up to the trailing 9s) for n >= 4609, with a period of 729. Therefore, only a finite amount of values need to be computed; the rest can be derived by appending the appropriate number of 9s.
+%C A165370 (End)
 %H A165370 Jon E. Schoenfield, <a href="/A165370/b165370.txt">Table of n, a(n) for n = 0..10000</a> (first 1001 terms from Reinhard Zumkeller)
 %o A165370 (PARI) a(n) = my(k=1); while(vecsum(apply(x->(x^3), digits(k))) != n, k++); k; \\ _Michel Marcus_, Sep 08 2019
+%o A165370 (Python)
+%o A165370 # using dynamic programming
+%o A165370 def A165370(n):
+%o A165370     # caching numbers,their tenth power (for fast concatenation) and cube sum
+%o A165370     cache = [(None, None, None)] * (n + 1)
+%o A165370     cache[0] = (0, 1, 0)
+%o A165370     cubes = [i**3 for i in range(10)]
+%o A165370     for i in range(1, min(n + 1, 5832)):
+%o A165370         for d in range(1, 10):
+%o A165370             if i - cubes[d] >= 0:
+%o A165370                 sub_result, tenthpower, cubesum = cache[i - cubes[d]]
+%o A165370                 if sub_result is not None:
+%o A165370                     current = d * tenthpower + sub_result
+%o A165370                     if cache[i][0] is None or current < cache[i][0]:
+%o A165370                         cache[i] = (current, 10 * tenthpower, cubesum + cubes[d])
+%o A165370     if n < 5832:
+%o A165370         return cache[n][0]
+%o A165370     sub_result, _, cubesum = cache[5103 + n % 729]
+%o A165370     nines = (n - cubesum) // 729
+%o A165370     return (sub_result + 1) * (10 ** nines) - 1 # _Ondrej Kutal_, Oct 06 2024
 %Y A165370 Cf. A009994, A052382, A055012, A055016.
-%K A165370 nonn,look,base
+%K A165370 nonn,look,base,changed
 %O A165370 0,3
 %A A165370 _Reinhard Zumkeller_, Sep 17 2009
