@@ -1,0 +1,33 @@
+%I A376932 #6 Oct 13 2024 11:20:25
+%S A376932 1,2,6,18,166,1806,20382,272706,8323326,158143194,4319806194,
+%T A376932 139715547110,4563596609414,154716297384250,6051527318503338,
+%U A376932 315946019303255670,18477283150919171654,1191953715632050834242,76457609628854745786262,4838004466153152832995822,312401901306255000752991994,20039165126917559409941672886
+%N A376932 a(n) is the index of the first GF(2)[X] polynomial that has n distinct irreducible factors.
+%C A376932 a(n) is the least k such that A091221(k) = n.
+%e A376932 a(3) = 18 because the 18th GF(2)[X] polynomial is X^4 + X = X * (X + 1) * (X^2 + X + 1) with 3 distinct irreducible factors over GF(2).
+%p A376932 pol:= proc(x) local L,i;
+%p A376932   L:= convert(x,base,2);
+%p A376932   add(L[i]*X^(i-1),i=1..nops(L));
+%p A376932 end proc:
+%p A376932 for m from 1 to 10 do
+%p A376932   IP[m]:= select(t -> Irreduc(pol(t)) mod 2, [seq(x,x=2^m..2^(m+1)-1)]);
+%p A376932 od:
+%p A376932 nIP:= [seq(nops(IP[m]),m=1..10)]:
+%p A376932 psnIP:= ListTools:-PartialSums(nIP):
+%p A376932 f:= proc(n) local k,P0,r, xmin, x, i, s, P;
+%p A376932   for k from 1 while n > psnIP[k] do od:
+%p A376932   P0:= expand(mul(convert(map(pol,IP[i]),`*`),i=1..k-1)) mod 2;
+%p A376932   if k = 1 then r:= n else r:= n - psnIP[k-1] fi;
+%p A376932   xmin:= infinity;
+%p A376932   for s in combinat:-choose(IP[k],r) do
+%p A376932     P:= expand(P0 * mul(pol(i),i=s)) mod 2;
+%p A376932     x:= eval(P,X=2);
+%p A376932     xmin:= min(xmin, x);
+%p A376932   od;
+%p A376932   xmin
+%p A376932 end proc:
+%p A376932 seq(f(i),i=0..25);
+%Y A376932 Cf. A091221.
+%K A376932 nonn,new
+%O A376932 0,2
+%A A376932 _Robert Israel_, Oct 11 2024
