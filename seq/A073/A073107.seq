@@ -1,8 +1,8 @@
-%I A073107 #66 Sep 30 2022 14:36:02
+%I A073107 #82 Oct 16 2024 20:52:47
 %S A073107 1,2,1,5,4,1,16,15,6,1,65,64,30,8,1,326,325,160,50,10,1,1957,1956,975,
 %T A073107 320,75,12,1,13700,13699,6846,2275,560,105,14,1,109601,109600,54796,
 %U A073107 18256,4550,896,140,16,1,986410,986409,493200,164388,41076,8190,1344,180,18,1
-%N A073107 Triangle T(n,k) read by rows, where e.g.f. for T(n,k) is exp((1+y)*x)/(1-x) (with n >= 0 and 0 <= k <= n).
+%N A073107 Triangle T(n,k) read by rows, where e.g.f. for T(n,k) is exp((1+y)*x)/(1-x).
 %C A073107 Triangle is second binomial transform of A008290. - _Paul Barry_, May 25 2006
 %C A073107 Ignoring signs, n-th row is the coefficient list of the permanental polynomial of the n X n matrix with 2's along the main diagonal and 1's everywhere else (see Mathematica code below). - _John M. Campbell_, Jul 02 2012
 %H A073107 Seiichi Manyama, <a href="/A073107/b073107.txt">Rows n = 0..139, flattened</a>
@@ -17,30 +17,46 @@
 %F A073107 From _Peter Bala_, Sep 20 2012: (Start)
 %F A073107 Exponential Riordan array [exp(x)/(1-x),x] belonging to the Appell subgroup, which factorizes in the Appell group as [1/1-x,x]*[exp(x),x] = A094587*A007318.
 %F A073107 The n-th row polynomial R(n,x) of the triangle satisfies d/dx(R(n,x)) = n*R(n-1,x), as well as R(n,x + y) = Sum {k = 0..n} binomial(n,k)*R(k,x)*y^(n-k). The row polynomials are a Sheffer sequence of Appell type.
-%F A073107 Matrix inverse of triangle is a signed version of A093375.
-%F A073107 (End)
+%F A073107 Matrix inverse of triangle is a signed version of A093375. (End)
 %F A073107 From _Tom Copeland_, Oct 20 2015: (Start)
 %F A073107 The raising operator, with D = d/dx, for the row polynomials is RP = x + d{log[e^D/(1-D)]}/dD = x + 1 + 1/(1-D) =  x + 2 + D + D^2 + ..., i.e., RP R(n,x) = R(n+1,x).
 %F A073107 This operator is the limit as t tends to 1 of the raising operator of the polynomials p(n,x;t) described in A046802, implying R(n,x) = p(n,x;1). Compare with the raising operator of A094587, x + 1/(1-D), and that of signed A093375, x - 1 - 1/(1-D).
-%F A073107 From the Appell formalism, the row polynomials RI(n,x) of signed A093375 are the umbral inverse of this entry's row polynomials; that is, R(n,RI(.,x)) = x^n = RI(n,R(.,x)) under umbral composition.
-%F A073107 (End)
+%F A073107 From the Appell formalism, the row polynomials RI(n,x) of signed A093375 are the umbral inverse of this entry's row polynomials; that is, R(n,RI(.,x)) = x^n = RI(n,R(.,x)) under umbral composition. (End)
 %F A073107 From _Werner Schulte_, Sep 07 2020: (Start)
 %F A073107 T(n,k) = (n! / k!) * (Sum_{i=k..n} 1 / (n-i)!) for 0 <= k <= n.
 %F A073107 T(n,k) = n * T(n-1,k) + binomial(n,k) for 0 <= k <= n with initial values T(0,0) = 1 and T(i,j) = 0 if j < 0 or j > i.
 %F A073107 T(n,k) = A000522(n-k) * binomial(n,k) for 0 <= k <= n. (End)
 %e A073107 exp((1 + y)*x)/(1 - x) =
 %e A073107   1 +
-%e A073107   1/1 * (2 + y) * x +
+%e A073107   1/1! * (2 + y) * x +
 %e A073107   1/2! * (5 + 4*y + y^2) * x^2 +
 %e A073107   1/3! * (16 + 15*y + 6*y^2 + y^3) * x^3 +
 %e A073107   1/4! * (65 + 64*y + 30*y^2 + 8*y^3 + y^4) * x^4 +
 %e A073107   1/5! * (326 + 325*y + 160*y^2 + 50*y^3 + 10*y^4 + y^5) * x^5 + ...
-%t A073107 Permanent[m_List] := With[{v=Array[x,Length[m]]},Coefficient[Times@@(m.v),Times@@v]] ;
+%e A073107 Triangle starts:
+%e A073107   [0]     1;
+%e A073107   [1]     2,     1;
+%e A073107   [2]     5,     4,    1;
+%e A073107   [3]    16,    15,    6,    1;
+%e A073107   [4]    65,    64,   30,    8,   1;
+%e A073107   [5]   326,   325,  160,   50,  10,   1;
+%e A073107   [6]  1957,  1956,  975,  320,  75,  12,  1;
+%e A073107   [7] 13700, 13699, 6846, 2275, 560, 105, 14, 1;
+%p A073107 T := (n, k) -> binomial(n,k)*KummerU(k-n, k-n, 1);
+%p A073107 seq(seq(simplify(T(n, k)), k = 0..n), n=0..8);  # _Peter Luschny_, Oct 16 2024
+%t A073107 perm[m_List] := With[{v=Array[x,Length[m]]},Coefficient[Times@@(m.v),Times@@v]] ;
 %t A073107 A[q_] := Array[KroneckerDelta[#1,#2] + 1&,{q,q}] ;
-%t A073107 n = 1 ; While[n < 10, Print[Abs[CoefficientList[Permanent[A[n] - IdentityMatrix[n] * k], k]]]; n++] (* _John M. Campbell_, Jul 02 2012 *)
-%Y A073107 Cf. A008290, A008291, A046802, A093375 (unsigned inverse), A094587.
+%t A073107 n = 1 ; Print[{1}]; While[n < 10, Print[Abs[CoefficientList[perm[A[n] - IdentityMatrix[n] * k], k]]]; n++] (* _John M. Campbell_, Jul 02 2012 *)
+%t A073107 A073107[n_, k_] := If[n == k, 1, Floor[E*(n - k)!]*Binomial[n, k]];
+%t A073107 Table[A073107[n, k], {n, 0, 10}, {k, 0, n}] (* _Paolo Xausa_, Oct 16 2024 *)
+%o A073107 (SageMath)
+%o A073107 def T(n, k):
+%o A073107     return sum(binomial(j,k) * factorial(n) // factorial(j) for j in range(n+1))
+%o A073107 for n in range(8): print([T(n, k) for k in range(n+1)])
+%o A073107 # _Peter Luschny_, Oct 16 2024
+%Y A073107 Cf. A008290, A008291, A046802, A093375 (unsigned inverse), A094587, A010842 (row sums), A000142 (alternating row sums), A367963 (central terms).
 %Y A073107 Column k=0..4 give A000522, A007526, A038155, A357479, A357480.
-%K A073107 easy,nonn,tabl
+%K A073107 easy,nonn,tabl,changed
 %O A073107 0,2
 %A A073107 _Vladeta Jovovic_, Aug 19 2002
 %E A073107 More terms from _Emeric Deutsch_, Feb 23 2004

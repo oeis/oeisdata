@@ -1,11 +1,12 @@
-%I A107668 #24 Mar 11 2021 17:42:36
+%I A107668 #32 Oct 16 2024 21:32:28
 %S A107668 1,4,45,816,20225,632700,23836540,1048592640,52696514169,
 %T A107668 2976295383100,186548057815801,12845016620629488,963644465255618276,
-%U A107668 78224633235142116240,6830914919397129328500,638477522900795994967040
+%U A107668 78224633235142116240,6830914919397129328500,638477522900795994967040,63599377775480137499907561,6725771848938288950491594140
 %N A107668 Column 0 of triangle A107667.
 %C A107668 Shift right of column 1 of triangle A107670, which is the matrix square of triangle A107667.
 %C A107668 The o.g.f. A(x) = Sum_{m >= 0} a(m)*x^m is such that, for each integer n > 0, the coefficient of x^n in the expansion of exp(n^2*x)*(1 - x*A(x)) is equal to 0.
 %C A107668 Given the o.g.f. A(x), the o.g.f. of A304322 equals 1/(1 - x*A(x)).
+%C A107668 Also, the number of 2-symbol Turing Machine state graphs in which n states are reached in canonical order. A canonical TM state graph lists for each state 1..n, and each of 2 symbols 0,1 in lexicographic order, a next state that is either the halt state, an already listed state, or the lowest unlisted state, as in Haskell program below. Multiplied by 4^(2*n), this gives a much smaller number of TMs to be considered for the Busy Beaver function than given by A052200. - _John Tromp_, Oct 15 2024
 %F A107668 O.g.f. A(x) satisfies: [x^n] exp( n^2*x ) * (1 - x*A(x)) = 0 for n > 0. - _Paul D. Hanna_, May 12 2018
 %F A107668 a(n) = (n+1)^2 * A107669(n).
 %F A107668 a(n) = (n+1)^(2*n+2)/(n+1)! - Sum_{k=1..n} (n+1)^(2*k)/k! * a(n-k) for n > 0 with a(0) = 1. - _Paul D. Hanna_, May 12 2018
@@ -25,8 +26,21 @@
 %o A107668 (PARI) /* From Recurrence: */
 %o A107668 {a(n) = if(n==0,1, (n+1)^(2*n+2)/(n+1)! - sum(k=1,n, (n+1)^(2*k)/k! * a(n-k) ))}
 %o A107668 for(n=0,25, print1( a(n),", ")) \\ _Paul D. Hanna_, May 12 2018
-%Y A107668 Cf. A107667, A107669, A107670.
+%o A107668 (Haskell)
+%o A107668 a107668 0 = 1
+%o A107668 a107668 n = a!(2*n,1) where -- start state is listed
+%o A107668     -- a!(m,s) is number of choices for last m of 2n edges, with s listed states
+%o A107668     a = array ((0,1), (2*n,n))
+%o A107668       (  [ ((0,s),1) | s<-[1..n]] -- done choosing edges
+%o A107668       -- choose next state for (state,symbol) pair m `divMod` 2
+%o A107668       ++ [ ((m,s), if m <= 2*(n-s) then 0 -- current state must be listed
+%o A107668                    -- goto one of listed states, or next unlisted
+%o A107668                    else reached * a!(m-1,s) + if s<n then a!(m-1,s+1) else 0)
+%o A107668 | m<-[1..2*n], s<-[1..n], let reached = 1 + fromIntegral s]) -- _John Tromp_, Oct 14 2024
+%o A107668 (Haskell) -- low memory version
+%o A107668 a107668 n = (foldl' (\r i->sum r`seq`listArray(0,n)(0:[if i+1<2*j then 0 else r!j*(n+2-j)+r!(j-1)|j<-[1..n]])) (listArray(0,n)(0:repeat 1)) [1..2*n])!n -- _John Tromp_, Oct 15 2024
+%Y A107668 Cf. A107667, A107669, A107670, A052200.
 %Y A107668 Cf. A304322, A107675, A304394, A304395, A342202.
-%K A107668 nonn
+%K A107668 nonn,changed
 %O A107668 0,2
 %A A107668 _Paul D. Hanna_, Jun 07 2005

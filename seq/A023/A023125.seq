@@ -1,12 +1,53 @@
-%I A023125 #11 May 27 2024 10:53:54
+%I A023125 #21 Oct 16 2024 21:49:55
 %S A023125 1,2,3,4,5,6,7,8,1,9,2,10,3,11,4,12,5,13,6,14,7,15,8,1,16,9,2,17,10,3,
 %T A023125 18,11,4,19,12,5,20,13,6,21,14,7,22,15,8,23,1,16,9,24,2,17,10,25,3,18,
 %U A023125 11,26,4,19,12,27,5,20,13,28,6,21,14,29,7,22,15,30,8,23,1,16
 %N A023125 Signature sequence of e^2 (arrange the numbers i+j*x (i,j >= 1) in increasing order; the sequence of i's is the signature of x).
-%D A023125 C. Kimberling, "Fractal Sequences and Interspersions", Ars Combinatoria, vol. 45 p 157 1997.
+%C A023125 If one deletes the first occurrence of 1, the first occurrence of 2, the first occurrence of 3, etc., then the sequence is unchanged. - _Brady J. Garvin_, Sep 11 2024
+%C A023125 Any signature sequence A is closely related to the partial sums of the corresponding homogeneous Beatty sequence: Let Q(d) = d + the sum from g=0 to g=d-1 of floor(theta * g) and Qinv(i) = the maximum integer d such that Q(d) <= i. If there is some d for which Q(d) = i, then A_i = 1. Otherwise, A_i = A_{i - Qinv(i)} + 1. - _Brady J. Garvin_, Sep 13 2024
+%D A023125 Clark Kimberling, "Fractal Sequences and Interspersions", Ars Combinatoria, vol. 45 p 157 1997.
 %H A023125 T. D. Noe, <a href="/A023125/b023125.txt">Table of n, a(n) for n=1..1000</a>
-%H A023125 C. Kimberling, <a href="http://faculty.evansville.edu/ck6/integer/intersp.html">Interspersions</a>
+%H A023125 Clark Kimberling, <a href="http://faculty.evansville.edu/ck6/integer/intersp.html">Interspersions</a>
 %H A023125 <a href="/index/Si#signature_sequences">Index entries for sequences related to signature sequences</a>
-%K A023125 nonn
+%t A023125 Quiet[Block[{$ContextPath}, Needs["Combinatorica`"]], {General::compat}]
+%t A023125 theta = E * E;
+%t A023125 sums = {0};
+%t A023125 cached = <||>;
+%t A023125 A023125[i_] := Module[{term, path, base},
+%t A023125   While[sums[[-1]] < i,
+%t A023125     term = sums[[-1]] + Floor[theta * (Length[sums] - 1)] + 1;
+%t A023125     AppendTo[sums, term];
+%t A023125     cached[term] = 1
+%t A023125   ];
+%t A023125   path = {i};
+%t A023125   While[Not[KeyExistsQ[cached, path[[-1]]]],
+%t A023125     AppendTo[path, path[[-1]] - Combinatorica`BinarySearch[sums, path[[-1]]] + 3/2];
+%t A023125   ];
+%t A023125   base = cached[path[[-1]]];
+%t A023125   MapIndexed[(cached[#1] = base + Length[path] - First[#2]) &, path];
+%t A023125   cached[i]
+%t A023125 ];
+%t A023125 Print[Table[A023125[i], {i, 1, 100}]]; (* _Brady J. Garvin_, Sep 13 2024 *)
+%o A023125 (Python)
+%o A023125 from bisect import bisect
+%o A023125 from sympy import floor, E
+%o A023125 theta = E * E
+%o A023125 sums = [0]
+%o A023125 cached = {}
+%o A023125 def A023125(i):
+%o A023125     while sums[-1] < i:
+%o A023125         term = sums[-1] + floor(theta * (len(sums) - 1)) + 1
+%o A023125         sums.append(term)
+%o A023125         cached[term] = 1
+%o A023125     path = [i]
+%o A023125     while path[-1] not in cached:
+%o A023125         path.append(path[-1] - bisect(sums, path[-1]) + 1)
+%o A023125     base = cached[path[-1]]
+%o A023125     for offset, vertex in enumerate(reversed(path)):
+%o A023125         cached[vertex] = base + offset
+%o A023125     return cached[i]
+%o A023125 print([A023125(i) for i in range(1, 1001)])  # _Brady J. Garvin_, Sep 13 2024
+%Y A023125 Cf. A023126
+%K A023125 nonn,easy,eigen,changed
 %O A023125 1,2
 %A A023125 _Clark Kimberling_
