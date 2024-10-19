@@ -1,0 +1,70 @@
+%I A376918 #58 Oct 18 2024 20:30:09
+%S A376918 1,2,4,11,51,177,876,3965,20782,114462,678568,4160919
+%N A376918 Number of distinct digital types of length n that satisfy no divisibility rules.
+%C A376918 If p divides 10^r-1 (or 10^r+1), then the divisibility by p can be tested by checking if the sum (or alternating sum) of r-digit blocks is divisible by p. If an integer has 10 distinct digits that all occur an equal number of times, it is divisible by 3 because its sum of digits is a multiple of 45.
+%C A376918 These divisibility rules allow one to prove that certain digital types (digit patterns) cannot correspond to primes without the need to check every individual number.
+%C A376918 a(n) results from the total number of possible digital types A164864(n) after subtracting the number of those that satisfy at least one divisibility rule. This number of excluded patterns tends to be larger whenever n itself has a large number of divisors, implying that a larger number of subdivisions into r-digit blocks are possible, hence more divisibility rules need to be checked.
+%C A376918 a(n) gives the upper bound for the number of distinct digital types of n-digit primes A267013(n). The two sequences are distinct, since some digit patterns such as "AAABBCABCCCAACCB" happen to contain no primes accidentally, without satisfying any divisibility rules. We call such patterns primonumerophobic.
+%C A376918 Sequence {a(n)-A267013(n)}_(n>=1) gives the number of primonumerophobic digit patterns of length n and begins 0,0,0,0,0,0,0,0,0,3,(32),(9),(207),(362),(363),(1448),... The terms in brackets are conjectured based on the calculated number of primonumerophobic digit patterns with only 2 or 3 distinct digits and the vanishingly small combinatorial probability for the existence of additional primonumerophobic digit patterns of this length with 4 or more distinct digits.
+%C A376918 a(n) coincides with A267013(n) for n<10 because the shortest primonumerophobic digit patterns "AAABBBAAAB", "AABABBBBBA", and "ABAAAAABBB" have length 10.
+%C A376918 a(n) is obtained as row sums of a(n,k) that give contributions with k<=10 distinct decimal digits:
+%C A376918 -----------------------------------------------------------------------------------------------
+%C A376918 n\k 1,      2,        3,       4,       5,       6,       7,       8,      9,     10; |   Total
+%C A376918 -----------------------------------------------------------------------------------------------
+%C A376918  1| 1;                                                                                |       1
+%C A376918  2| 1,      1;                                                                        |       2
+%C A376918  3| 0,      3,        1;                                                              |       4
+%C A376918  4| 0,      4,        6,       1;                                                     |      11
+%C A376918  5| 0,     15,       25,      10,       1;                                            |      51
+%C A376918  6| 0,     12,       84,      65,      15,       1;                                   |     177
+%C A376918  7| 0,     63,      301,     350,     140,      21,       1;                          |     876
+%C A376918  8| 0,     80,      868,    1672,    1050,     266,      28,       1;                 |    3965
+%C A376918  9| 0,    171,     2745,    7770,    6951,    2646,     462,      36,      1;         |   20782
+%C A376918 10| 0,    370,     8680,   33505,   42405,   22827,    5880,     750,     45,      0; |  114462
+%C A376918 11| 0,   1023,    28501,  145750,  246730,  179487,   63987,   11880,   1155,     55; |  678568
+%C A376918 12| 0,    912,    69792,  583438, 1373478, 1322896,  627396,  159027,  22275,   1705; | 4160919
+%C A376918 13| 0,   3965,   261495, 2532517, ...                   ..., 1899612, 359502,  39325; | ...
+%C A376918 14| 0,   6411,   745209, ...                                             ..., 752752; |
+%C A376918 15| 0,  10046,  2107764, ...
+%C A376918 16| 0,  22848,  6703102, ...
+%C A376918 17| 0,  65535, 21457825, ...
+%C A376918 18| 0,  55638, 53630973, ...
+%C A376918 19| 1, 262143, ...
+%C A376918 20| 0, 399820, ...
+%C A376918 ...
+%C A376918 a(n,1)=1 either when n=1 or when n is a term in A004023 (indices of prime repunits); otherwise a(n,1)=0 because divisibility by any prime divisor of a nonprime repunit (10^r-1)/9 can be checked using the sum of r-digit blocks.
+%C A376918 a(n,2) is nonmonotonic because a larger number of digit patterns is excluded whenever n has a large number of divisors, resulting in anomalously low values, for example, for n=12 or n=18.
+%F A376918 a(n) >= A267013(n).
+%F A376918 a(n+1,n) = A000217(n) for n <= 10.
+%F A376918 a(n,k) <= S2(n,k) -- k'th column of A008277
+%e A376918 The pattern "ABCA" is counted toward a(4) because it satisfies no divisibility rules. Numbers of the form ABCA share no common prime divisor.
+%e A376918 The pattern "ABAB" is not counted toward a(4) because it is divisible by 101 for any A > 0 and B >= 0 and therefore cannot be prime. Indeed, 101 divides 10^r+1 for r=2, and the alternating sum of 2-digit blocks in ABAB gives AB-AB=0, hence ABAB is divisible by 101. Equivalently, ABAB = A*1010+B*101, which is divisible by 101.
+%e A376918 In total there are four 4-digit patterns that satisfy divisibility rules: ABBA, AABB, AAAA (all of them divisible by 11) and ABAB (divisible by 101). Therefore, a(4) = A164864(4)-4 = 11.
+%e A376918 The pattern "ABCDEFGHIJ" that contains all possible digits exactly once does not contribute to a(10) because its sum of digits is 1+2+...+9 = 45, which is divisible by 3, hence no number with this pattern can be prime.
+%t A376918 MinLength = 1; MaxLength = 10; (* the range of n to calculate a(n) for *)
+%t A376918 (* Function that checks is any of the divisibility rules is satisfied *)
+%t A376918 DivisibilityRules[pat_] := (If[Divisible[Length[pat], 10] && Length[Counts[pat]] == 10 && AllTrue[Table[Counts[pat][[i]] == Length[pat]/10, {i, 1, 10}], TrueQ], Return[True]]; DivRulFac = Association[]; ListOfDivisors = Divisors[Length[pat]];
+%t A376918 For[t = Length[ListOfDivisors], t > 0, t--,
+%t A376918 ListOfFactors = Select[FactorInteger[10^ListOfDivisors[[t]] - 1][[All, 1]], IntegerLength[#1] < Length[pat] & ];
+%t A376918 For[g = 1, g <= Length[ListOfFactors], g++,
+%t A376918 AssociateTo[DivRulFac, ListOfFactors[[g]] -> {ListOfDivisors[[t]], 1, ListOfFactors[[g]]}];]; ListOfFactors = Select[FactorInteger[10^ListOfDivisors[[t]] + 1][[All, 1]], IntegerLength[#1] < Length[pat] & ];
+%t A376918 For[g = 1, g <= Length[ListOfFactors], g++,
+%t A376918 AssociateTo[DivRulFac, ListOfFactors[[g]] -> {ListOfDivisors[[t]], -1, ListOfFactors[[g]]}]; ]; ];
+%t A376918 DivRulFac = Values[Sort[DivRulFac]];
+%t A376918 AnyTrue[Table[AllTrue[(Divisible[#1, DivRulFac[[u]][[3]]] & ) /@ Table[Sum[DivRulFac[[u]][[2]]^i*Sum[If[pat[[DivRulFac[[u]][[1]]*i + l]] == j, 10^(DivRulFac[[u]][[1]] - l), 0],
+%t A376918 {l, 1, DivRulFac[[u]][[1]]}], {i, 0, Length[pat]/DivRulFac[[u]][[1]] - 1}], {j, 1, CountDistinct[pat]}], TrueQ], {u, 1, Length[DivRulFac]}], TrueQ]);
+%t A376918 (* Function that generates all patterns that do not satisfy divisibility rules *)
+%t A376918 Patterns[len_, k_] := (Clear[dfs];
+%t A376918 ResultingPatterns = {};
+%t A376918 dfs[number_List] := If[Length[number] == len,
+%t A376918 If[Length[Union[If[# < 10, #, 0] & /@ number]] == k,
+%t A376918 AppendTo[ResultingPatterns, If[# < 10, #, 0] & /@ number]],
+%t A376918 Do[If[i <= 10, dfs[Append[number, i]]], {i, Range[1, Last[Union[number]] + 1]}]];
+%t A376918 dfs[{1}];
+%t A376918 FromDigits /@ Select[ResultingPatterns, ! DivisibilityRules[#] &]);
+%t A376918 (* Counting the patterns a(n,k) and their sum, a(n) *)
+%t A376918 Do[Print[{n, #, Sum[#[[m]], {m, 1, Length[#]}]}]&[Table[Length[Patterns[n, j]], {j, 1, Min[10, n]}]], {n, MinLength, MaxLength}];
+%Y A376918 Cf. A267013, A164864
+%K A376918 nonn,base,more,new
+%O A376918 1,2
+%A A376918 _Dmytro Inosov_, Oct 10 2024
