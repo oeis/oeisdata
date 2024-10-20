@@ -1,0 +1,50 @@
+%I A376900 #16 Oct 19 2024 22:25:47
+%S A376900 1,1,1,1,1,0,1,2,1,0,1,0,1,0,0,2,1,0,1,0,0,0,1,0,1,0,1,0,1,0,1,5,0,0,
+%T A376900 0,0,1,0,0,0,1,0,1,0,0,0,1,1,1,0,0,0,1,0,0,0,0,0,1,1,1,0,0,19,0,0,1,0,
+%U A376900 0,0,1,0,1,0,0,0,0,0,1,0,2,0,1,0,0,0,0
+%N A376900 Number of isomorphism classes k of groups G of order n where G is not a semidirect product.
+%C A376900 There are a few equivalent conditions for a group G to be a semidirect product of subgroups N and H, where N is normal in G (if H is also normal, then the semidirect product is a direct product). See the Wikipedia link for these equivalent conditions.
+%C A376900 One condition with an interesting consequence is the following. If G is a semidirect product of N and H, then the exact sequence of homomorphisms 1 -> N -> G -> H -> 1 is split, meaning there exists a homomorphism f: H -> G. When a sequence is split, H = G/N is isomorphic to the image of f, which is a subgroup of G. This means that the extension factors which form G are contained within G (up to isomorphism). For a sequence 1 -> A -> G -> B -> 1 which is not split (and therefore G is not a semidirect product) the factor B = G/A is not isomorphic to a subgroup of G, and therefore G, seen as an extension of B by A, is composed of a factor B which lies outside of it.
+%H A376900 Wikipedia, <a href="https://en.wikipedia.org/wiki/Semidirect_product">Semidirect product</a>
+%F A376900 a(A000040(n)) = 1 since the only group of prime order is prime cyclic which is trivially not a semidirect product as it contains no proper subgroups let alone proper normal subgroups.
+%F A376900 a(A120944(n)) = 0. This is because every group of squarefree order contains a normal Hall subgroup (a subgroup whose order is coprime to its index). Every such group is a semidirect product by the Schur-Zassenhaus theorem.
+%F A376900 a(p^a*q^b) = 0 for distinct primes p and q, a >= 1, b >= 1. This is also because every G of order p^a*q^b contains a normal Hall subgroup and is therefore a semidirect product by the Schur-Zassenhaus theorem.
+%e A376900 a(2) = 1 since the cyclic group C2 is not a semidirect product and is the only group of order 2.
+%e A376900 a(6) = 0 since C6 and S3, the symmetric group on 3 elements, are both semidirect products and are the only groups of order 6. (C6 = C2 x C3, and S3 = D6 = C2 : C3).
+%e A376900 a(8) = 2 since C8 and Q8, the quaternion group, are not semidirect products and every other group of order 8 is a semidirect product.
+%o A376900 (GAP)
+%o A376900 M:=[]; U:=[]; LoadPackage("sonata");
+%o A376900 for n in [1..63] do
+%o A376900     M:=Concatenation(M,[NrSmallGroups(n)]);
+%o A376900     S:=[];
+%o A376900     for i in [1..NrSmallGroups(n)] do
+%o A376900         breakout:=false;
+%o A376900         G:=SmallGroup(n,i);
+%o A376900         T:=[];
+%o A376900             for j in [1..Size(Subgroups(G))] do
+%o A376900                 for k in [1..Size(Subgroups(G))] do
+%o A376900                     A:=Subgroups(G)[j]; B:=Subgroups(G)[k];
+%o A376900                     if Size(A) = 1 then
+%o A376900                         continue;
+%o A376900                     fi;
+%o A376900                     if G <> A and IsNormal(G,A)=true and Size(Intersection(A,B))= 1
+%o A376900                     and G=Group(Union(GeneratorsOfGroup(A),GeneratorsOfGroup(B)))
+%o A376900                     then
+%o A376900                         T:=Concatenation(T,[i]);
+%o A376900                         S:=Concatenation(S,[T]);
+%o A376900                         breakout:=true;
+%o A376900                         break;
+%o A376900                     fi;
+%o A376900                 od;
+%o A376900                 if breakout=true then
+%o A376900                     break;
+%o A376900                 fi;
+%o A376900             od;
+%o A376900         od;
+%o A376900     U:=Concatenation(U,[Size(S)]);
+%o A376900 od;
+%o A376900 Print(M-U);
+%Y A376900 Cf. A000001, A000040, A120944.
+%K A376900 nonn,new
+%O A376900 1,8
+%A A376900 _Miles Englezou_, Oct 08 2024
