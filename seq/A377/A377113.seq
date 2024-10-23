@@ -1,0 +1,46 @@
+%I A377113 #7 Oct 23 2024 01:06:05
+%S A377113 1,3,14,72,400,2328,13904,84192,513472,3143232,19278464,118359552,
+%T A377113 727045120,4467233280,27452300288,168714381312,1036914921472,
+%U A377113 6372994560000,39169586880512,240744913207296,1479676193996800,9094462273585152,55896907276156928
+%N A377113 a(n) = coefficient of the term that is independent of sqrt(2), sqrt(3), and sqrt(6) in the expansion of (3 + sqrt(2) + sqrt(3))^n.
+%C A377113 Conjecture: every prime divides a(n) for infinitely many n, and if K(p) = (k(1), k(2),...) is the maximal subsequence of indices n such that p divides a(n), then the difference sequence of K(p) is eventually periodic; indeed, K(p) is purely periodic for the first 4 primes, with respective period lengths 1,5,9,7 and these periods:
+%C A377113  p = 2: (2)
+%C A377113  p = 3: (8, 1, 4, 3, 8)
+%C A377113  p = 5: (12,12,1,6,4,1,5,7,12)
+%C A377113  p = 7: (3,15,9,9,15,3,18)
+%C A377113 See A377109 for a guide to related sequences.
+%H A377113 <a href="/index/Rec#order_04">Index entries for linear recurrences with constant coefficients</a>, signature (12,-44,48,8).
+%F A377113 a(n) = 12*a(n-1) - 44*a(n-2) + 48*a(n-3) + 8*a(n-4), with a(0)=1, a(1)=3, a(3)=14, a(4)=72.
+%F A377113 G.f.: (-1 + 9 x - 22 x^2 + 12 x^3)/(-1 + 12 x - 44 x^2 + 48 x^3 + 8 x^4).
+%e A377113 (3 + sqrt(2) + sqrt(3))^3 = 14 + 6*sqrt(2) + 6*sqrt(3) + 2*sqrt(6), so a(3) = 14.
+%t A377113 (*Program 1 generates sequences A377109-A37712.*)
+%t A377113 tbl = Table[Expand[(3 + Sqrt[2] + Sqrt[3])^n], {n, 0, 24}];
+%t A377113 u = MapApply[{#1/#2, #2} /. {1, #} -> {{1}, {#}} &,
+%t A377113    Map[({#1, #1 /. _^_ -> 1} &), Map[(Apply[List, #1] &), tbl]]];
+%t A377113 {s1, s2, s3, s4} = Transpose[(PadRight[#1, 4] &) /@ Last /@ u][[1 ;; 4]];
+%t A377113 s1  (* _Peter J. C. Moses_, Oct 16 2024*)
+%t A377113 (*Program 2 generates this sequence.*)
+%t A377113 LinearRecurrence[{12, -44, 48, 8}, {1, 3, 14, 72}, 15]
+%t A377113 (*Program 3 confirms the periodicity properties described in Comments.*)
+%t A377113 tbl = Table[Expand[(3 + Sqrt[2] + Sqrt[3])^n], {n, 0, 1000}];
+%t A377113 u = MapApply[{#1/#2, #2} /. {1, #} -> {{1}, {#}} &,
+%t A377113    Map[({#1, #1 /. _^_ -> 1} &), Map[(Apply[List, #1] &), tbl]]];
+%t A377113 v = {s1, s2, s3, s4} = Transpose[(PadRight[#1, 4] &) /@ Last /@ u][[1 ;; 4]];
+%t A377113 Position[Partition[list, Length[#], 1], Flatten[{___, #, ___}]] &[
+%t A377113   seqtofind];
+%t A377113 period[seq_] := (If[Last[#1] == {} || Length[#1] == Length[seq] - 1,
+%t A377113       0, Length[#1]] &)[NestWhileList[Rest, Rest[seq], #1 != Take[seq, Length[#1]] &, 1]];
+%t A377113 periodicityReport[seq_] := ({Take[seq, Length[seq] - Length[#1]], period[#1],
+%t A377113       Take[#1, period[#1]]} &)[Take[seq, -Length[
+%t A377113       NestWhile[Rest[#1] &, seq, period[#1] == 0 &, 1, Length[seq]]]]];
+%t A377113 seq = s1; Take[seq, 10]
+%t A377113 f[n_] := Flatten[Position[Mod[s1, Prime[n]], 0]];
+%t A377113 d[n_] := Differences[f[n]];
+%t A377113 Table[Take[f[n], 10], {n, 2, 4}]
+%t A377113 Table[Take[d[n], 10], {n, 2, 4}]
+%t A377113 Column[Table[{n, Prime[n], periodicityReport[d[Prime[n]]]}, {n, 1, 8}]]
+%t A377113 (* _Peter J. C. Moses_, Aug 07 2014, Oct 16 2024 *)
+%Y A377113 Cf. A377109, A377114, A377115, A377116.
+%K A377113 nonn,new
+%O A377113 0,2
+%A A377113 _Clark Kimberling_, Oct 21 2024

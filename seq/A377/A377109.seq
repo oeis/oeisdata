@@ -1,0 +1,64 @@
+%I A377109 #14 Oct 23 2024 01:03:19
+%S A377109 1,2,9,38,185,922,4689,23998,123217,633458,3258489,16765718,86273225,
+%T A377109 443967370,2284733313,11757749038,60508271137,311391065570,
+%U A377109 1602499602537,8246883961094,42440638964825,218410733951098,1123999345270833,5784397706237854
+%N A377109 a(n) = coefficient of the term that is independent of sqrt(2), sqrt(3), and sqrt(6) in the expansion of (2 + sqrt(2) + sqrt(3))^n.
+%C A377109 Conjecture: every prime divides a(n) for infinitely many n, and if K(p) = (k(1), k(2),...) is the maximal subsequence of indices n such that p divides a(n), then the difference sequence of K(p) is eventually periodic; indeed, K(p) is purely periodic for the first 7 primes, with respective period lengths 1,5,7,17,3,11,35 and these periods:
+%C A377109 p = 2: (4)
+%C A377109 p = 3: (8, 1, 4, 3, 8)
+%C A377109 p = 5: (10, 20, 9, 8, 32, 21, 20)
+%C A377109 p = 7: (2, 30, 9, 19, 6, 28, 12, 5, 16, 26, 22, 13, 2, 1, 24, 16, 57)
+%C A377109 p = 11: (61, 29, 70)
+%C A377109 p = 13: (9, 15, 24, 3, 21, 21, 3, 24, 15, 9, 24)
+%C A377109 p = 17: (30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 1, 29, 29, 1, 30, 30, 30, 30, 2, 28, 30, 30, 28, 2, 17, 13, 30, 30, 30, 13, 17)
+%C A377109 Guide to related sequences:
+%C A377109 (1 + sqrt (2) + sqrt (3))^n, coefficients of absolute terms: A188570
+%C A377109 (1 + sqrt (2) + sqrt (3))^n, coefficients of sqrt (2): A188571
+%C A377109 (1 + sqrt (2) + sqrt (3))^n, coefficients of sqrt (3): A188572
+%C A377109 (1 + sqrt (2) + sqrt (3))^n, coefficients of sqrt (6): A188573
+%C A377109 (2 + sqrt (2) + sqrt (3))^n, coefficients of absolute terms: this sequence
+%C A377109 (2 + sqrt (2) + sqrt (3))^n, coefficients of sqrt(2): A377110
+%C A377109 (2 + sqrt (2) + sqrt (3))^n, coefficients of sqrt(3): A377111
+%C A377109 (2 + sqrt (2) + sqrt (3))^n, coefficients of sqrt(6): A377112
+%C A377109 (3 + sqrt (2) + sqrt (3))^n, coefficients of absolute terms: A377113
+%C A377109 (3 + sqrt (2) + sqrt (3))^n, coefficients of sqrt(2): A377114
+%C A377109 (3 + sqrt (2) + sqrt (3))^n, coefficients of sqrt(3): A377115
+%C A377109 (3 + sqrt (2) + sqrt (3))^n, coefficients of sqrt(6): A377116
+%C A377109 (-1 + sqrt (2) + sqrt (3))^n, coefficients of absolute terms: A377117
+%C A377109 (-1+ sqrt (2) + sqrt (3))^n, coefficients of sqrt(2): A377118
+%C A377109 (-1 + sqrt (2) + sqrt (3))^n, coefficients of sqrt(3): A377119
+%C A377109 (-1 + sqrt (2) + sqrt (3))^n, coefficients of sqrt(6): A377120
+%H A377109 <a href="/index/Rec#order_04">Index entries for linear recurrences with constant coefficients</a>, signature (8,-14,-8,23).
+%F A377109 a(n) = 8*a(n-1) - 14*a(n-2) - 8*a(n-3) + 23*a(n-4), with a(0)=1, a(1)=2, a(3)=9, a(4)=38.
+%F A377109 G.f.: (-1 + 6 x - 7 x^2 - 2 x^3)/(-1 + 8 x - 14 x^2 - 8 x^3 + 23 x^4).
+%e A377109 (2 + sqrt(2) + sqrt(3))^3 = 9 + 4*sqrt(2) + 4*sqrt(3) + 2*sqrt(6), so a(3) = 9.
+%t A377109 (*Program 1 generates sequences A377109-A377112.*)
+%t A377109 tbl = Table[Expand[(2 + Sqrt[2] + Sqrt[3])^n], {n, 0, 24}];
+%t A377109 u = MapApply[{#1/#2, #2} /. {1, #} -> {{1}, {#}} &,
+%t A377109    Map[({#1, #1 /. _^_ -> 1} &), Map[(Apply[List, #1] &), tbl]]];
+%t A377109 {s1, s2, s3, s4} = Transpose[(PadRight[#1, 4] &) /@ Last /@ u][[1 ;; 4]];
+%t A377109 s1  (*Peter J.C.Moses,Oct 16 2024*)
+%t A377109 (*Program 2 generates this sequence.*)
+%t A377109 LinearRecurrence[{8, -14, -8, 23}, {1, 2, 9, 38}, 15]
+%t A377109 (*Program 3 confirms the periodicity properties described in Comments.*)
+%t A377109 tbl = Table[Expand[(2 + Sqrt[2] + Sqrt[3])^n], {n, 0, 1000}];
+%t A377109 u = MapApply[{#1/#2, #2} /. {1, #} -> {{1}, {#}} &,
+%t A377109   Map[({#1, #1 /. _^_ -> 1} &), Map[(Apply[List, #1] &), tbl]]];
+%t A377109 v = {s1, s2, s3, s4} = Transpose[(PadRight[#1, 4] &) /@ Last /@ u][[1 ;; 4]];
+%t A377109 Position[Partition[list, Length[#], 1], Flatten[{___, #, ___}]] &[seqtofind];
+%t A377109 period[seq_] := (If[Last[#1] == {} || Length[#1] == Length[seq] - 1,
+%t A377109   0, Length[#1]] &)[NestWhileList[Rest, Rest[seq], #1 != Take[seq, Length[#1]] &, 1]];
+%t A377109 periodicityReport[seq_] := ({Take[seq, Length[seq] - Length[#1]], period[#1],
+%t A377109       Take[#1, period[#1]]} &)[Take[seq, -Length[
+%t A377109       NestWhile[Rest[#1] &, seq, period[#1] == 0 &, 1, Length[seq]]]]];
+%t A377109 seq = s1; Take[seq, 10]
+%t A377109 f[n_] := Flatten[Position[Mod[s1, Prime[n]], 0]];
+%t A377109 d[n_] := Differences[f[n]];
+%t A377109 Table[Take[f[n], 10], {n, 2, 4}]
+%t A377109 Table[Take[d[n], 10], {n, 2, 4}]
+%t A377109 Column[Table[{n, Prime[n], periodicityReport[d[Prime[n]]]}, {n, 1, 8}]]
+%t A377109 (* _Peter J. C. Moses_,Aug 07 2014,Oct 16 2024*)
+%Y A377109 Cf. A188570, A377110, A377111, A377112.
+%K A377109 nonn,easy,new
+%O A377109 0,2
+%A A377109 _Clark Kimberling_, Oct 20 2024
