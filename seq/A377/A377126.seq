@@ -1,0 +1,77 @@
+%I A377126 #16 Oct 25 2024 10:17:09
+%S A377126 1,2,4,1,4,4,4,1,-1,1,2,4,1,1,2,1,2,4,-1,4,4,4,1,1,2,4,4,4,-1,4,4,2,2,
+%T A377126 1,1,4,2,2,-1,2,4,2,4,1,4,1,1,4,-1,1,1,1,4,1,4,4,4,1,-1,4,2,4,1,1,2,2,
+%U A377126 4,4,-1,4,4,4,4,1,4,4,4,4,-1,4,4,4,4,1
+%N A377126 Number of digits of A376842(n) or -1 if A376842(n) = -1.
+%C A377126 For any integer n > 1 not a multiple of 10, a(n) belongs to the set {1, 2, 4}. Furthermore, if the last digit of n is 5, then A376446(n) = 5 so that a(n) = 1. Conversely, by definition, a(n) -1 if and only if n is congruent to 0 modulo 10.
+%C A377126 This sequence is also equal to the number of digits of A376446(n) and -1 if A376446(n) = -1; for the values of the phase shifts at heights 2 and 3 of any tetration base n which is a multiple of 10, see A376838 and A377124 (respectively).
+%D A377126 Marco Ripà, La strana coda della serie n^n^...^n, Trento, UNI Service, Nov 2011. ISBN 978-88-6178-789-6.
+%H A377126 Marco Ripà, <a href="https://doi.org/10.7546/nntdm.2020.26.3.245-260">On the constant congruence speed of tetration</a>, Notes on Number Theory and Discrete Mathematics, Volume 26, 2020, Number 3, Pages 245-260.
+%H A377126 Marco Ripà, <a href="https://doi.org/10.7546/nntdm.2021.27.4.43-61">The congruence speed formula</a>, Notes on Number Theory and DiscreteMathematics, 2021, 27(4), 43-61.
+%H A377126 Marco Ripà and Luca Onnis, <a href="https://doi.org/10.7546/nntdm.2022.28.3.441-457">Number of stable digits of any integer tetration</a>, Notes on Number Theory and Discrete Mathematics, 2022, 28(3), 441-457.
+%H A377126 Wikipedia, <a href="https://en.wikipedia.org/wiki/Tetration">Tetration</a>.
+%F A377126 a(n) = floor(log_(10)(A376842(n))) + 1.
+%F A377126 a(n) = floor(log_(10)(A376446(n))) + 1.
+%F A377126 a(n) = -1 iff A376446(n) = -1; a(n) = 1 iff 1 <= A376446(n) <= 9; a(n) = 2 iff A376446(n) = {19, 28, 37, 46, 64, 73, 82, 91}; a(n) = 4 otherwise.
+%e A377126 a(4) = 4 since A376446(4) = 2486 is a 4 digit number.
+%o A377126 (Python)
+%o A377126 def p_adic_valuation(n, p):
+%o A377126     count = 0
+%o A377126     while n % p == 0 and n != 0:
+%o A377126         n //= p
+%o A377126         count += 1
+%o A377126     return count
+%o A377126 def tetration(base, height, last_digits=500):
+%o A377126     results = [base]
+%o A377126     for n in range(1, height):
+%o A377126         result = pow(base, results[-1], 10**last_digits)
+%o A377126         results.append(result)
+%o A377126     return results
+%o A377126 def find_difference_mod_10(tetrations):
+%o A377126     differences = []
+%o A377126     for n in range(len(tetrations) - 1):
+%o A377126         string_n = str(tetrations[n]).zfill(500)
+%o A377126         string_n_plus_1 = str(tetrations[n+1]).zfill(500)
+%o A377126         for i in range(499, -1, -1):
+%o A377126             if string_n[i] != string_n_plus_1[i]:
+%o A377126                 difference = (int(string_n[i]) - int(string_n_plus_1[i])) % 10
+%o A377126                 differences.append(difference)
+%o A377126                 break
+%o A377126     return differences
+%o A377126 def calculate_initial_exponent(a):
+%o A377126     mod_5 = a % 5
+%o A377126     if mod_5 == 1:
+%o A377126         valuation = p_adic_valuation(a - 1, 5)
+%o A377126         initial_exponent = valuation + 2
+%o A377126     elif mod_5 in [2, 3]:
+%o A377126         valuation = p_adic_valuation(a**2 + 1, 5)
+%o A377126         initial_exponent = valuation + 2
+%o A377126     elif mod_5 == 4:
+%o A377126         valuation = p_adic_valuation(a + 1, 5)
+%o A377126         initial_exponent = valuation + 2
+%o A377126     else:
+%o A377126         valuation = p_adic_valuation(a**2 - 1, 2)
+%o A377126         initial_exponent = valuation + 1
+%o A377126     return initial_exponent
+%o A377126 try:
+%o A377126     a = int(input("Write a tetration base (between 2 and 100): "))
+%o A377126     if a < 2 or a > 100:
+%o A377126         raise ValueError("The base must be between 2 and 100.")
+%o A377126     if a % 10 == 0:
+%o A377126         print("-1 (since the Asymptotic phase shift is only defined for n not a multiple of 10)")
+%o A377126     else:
+%o A377126         initial_exponent = calculate_initial_exponent(a)
+%o A377126         tetrations = tetration(a, 30, last_digits=500)
+%o A377126         mod_10_differences = find_difference_mod_10(tetrations[initial_exponent-1:initial_exponent+4])
+%o A377126         if mod_10_differences[:2] == mod_10_differences[2:]:
+%o A377126             mod_10_differences = mod_10_differences[:2]
+%o A377126         if len(set(mod_10_differences)) == 1:
+%o A377126             mod_10_differences = [mod_10_differences[0]]
+%o A377126         result_str = ''.join(map(str, mod_10_differences))
+%o A377126         print(f"Number of digits of the Asymptotic phase shift of n: {len(result_str)}")
+%o A377126 except Exception as e:
+%o A377126     print(f"ERROR!\n{e}")
+%Y A377126 Cf. A317905, A372490, A373387, A376446, A376838, A376842, A377124.
+%K A377126 sign,base,new
+%O A377126 2,2
+%A A377126 _Marco Ripà_, Oct 17 2024
