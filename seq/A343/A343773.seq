@@ -1,4 +1,4 @@
-%I A343773 #55 Sep 30 2021 18:11:55
+%I A343773 #63 Oct 31 2024 01:13:50
 %S A343773 1,1,0,-2,-3,1,11,15,-13,-77,-86,144,595,495,-1520,-4810,-2485,15675,
 %T A343773 39560,6290,-159105,-324805,87075,1592843,2616757,-2136539,-15726114,
 %U A343773 -20247800,32296693,152909577,145139491,-417959049,-1460704685,-885536173,4997618808,13658704994
@@ -6,8 +6,10 @@
 %C A343773 All terms a(n), n >= 0, are contained in both A100223 and A214649, as well as in A007440 (if the signs of integers are not taken into account). So these sequences form a cluster, the base of which is the current sequence.
 %C A343773 The Motzkin number A001006(n) is split into two parts A107587(n) and A343386(n) (see A343386). The value a(n), the difference between A107587(n) and A343386(n), can be called the "shadow" of A001006(n). This is clearly seen if we compare the g.f. for the Motzkin numbers M(x) = 1 + x*M(x) + x^2*M(x)^2 and the current g.f. A(x) = 1 + x*A(x) - x^2*A(x)^2.
 %C A343773 Binomial transform of 1, 0, -1, 0, 2, 0, -5, 0, 14, 0, -42, 0, ... (see A000108). - _Gennady Eremin_, Jul 14 2021
+%C A343773 The Toeplitz Number Wall of a sequence a(0), a(1), ... is defined to be the 2D array A(m, n) of determinants of Toeplitz matrices a(i-j+n)_{i,j=1..m} where a(i) = 0 if i<0. Thus A(0, n) = 1, A(1, n) = a(n), A(2, n) = a(n)^2 - a(n+1)*a(n-1), A(m, n)^2 = A(m-1, n)*A(m+1, n) + A(m, n-1)*A(m, n+1) in general. For this sequence A(n, n) = F(n+1), A(n+1, n) = 1 and it is the unique sequence with this property. - _Michael Somos_, Oct 27 2024
 %H A343773 Gennady Eremin, <a href="/A343773/b343773.txt">Table of n, a(n) for n = 0..800</a>
 %H A343773 Gennady Eremin, <a href="https://arxiv.org/abs/2108.10676">Walking in the OEIS: From Motzkin numbers to Fibonacci numbers. The "shadows" of Motzkin numbers</a>, arXiv:2108.10676 [math.CO], 2021.
+%H A343773 W. F. Lunnon, <a href="https://cs.uwaterloo.ca/journals/JIS/VOL4/LUNNON/numbwall10.html">The number-wall algorithm: an LFSR cookbook</a>, Journal of Integer Sequences 4 (2001), no. 1, 01.1.1.
 %F A343773 a(n) = A107587(n) - A343386(n), n>=0.
 %F A343773 a(n) = A100223(n+2) = A214649(n+1), n>=0.
 %F A343773 a(n) = (-1)^n * A007440(n+1), n>=0.
@@ -16,19 +18,24 @@
 %F A343773 G.f. A(x) satisfies A(x) = 1 + x*A(x) - x^2*A(x)^2.
 %F A343773 a(n) = Sum_{k=0..floor(n/2)} (-1)^k * binomial(n, 2*k) * A000108(k).
 %F A343773 a(n) = 2*A107587(n) - A001006(n) = A001006(n) - 2*A343386(n).
-%F A343773 Lim_{n->infinity} a(n)/A001006(n) = 0.
+%F A343773 Limit_{n->oo} a(n)/A001006(n) = 0.
 %F A343773 a(n) = hypergeom([(1 - n)/2, -n/2], [2], -4). - _Peter Luschny_, May 30 2021
 %F A343773 G.f. A(x) with offset 1 is the reversion of g.f. for signed Fibonacci numbers 1, -1, 2, -3, 5, -8, 13, -21, 34, -55, ... (see A039834 starting at offset 1). - _Gennady Eremin_, Jul 15 2021
 %e A343773 G.f. = 1 + x - 2*x^3 - 3*x^4 + x^5 + 11*x^6 + 15*x^7 - 13*x^8 - 77*x^9 - 86*x^10 + 144*x^11 + ...
 %t A343773 With[{$MaxExtraPrecision = 1000}, CoefficientList[Series[(-1 + x + Sqrt[1 - 2 x + 5 x^2])/(2 x^2), {x, 0, 36}], x] ] (* _Michael De Vlieger_, May 01 2021 *)
 %t A343773 a[n_] := Hypergeometric2F1[(1 - n)/2, -n/2, 2, -4];
 %t A343773 Table[a[n], {n, 0, 35}] (* _Peter Luschny_, May 30 2021 *)
+%t A343773 a[ n_] := If[n<0, 0, SeriesCoefficient[Nest[1 + x*# - (x*#)^2&, 1 + O[x], n], {x, 0, n}]]; (* _Michael Somos_, Oct 27 2024 *)
+%t A343773 a[ n_] := SeriesCoefficient[2/(1 - x + (1 - 2*x + 5*x^2)^(1/2)), {x, 0, n}]; (* _Michael Somos_, Oct 27 2024 *)
 %o A343773 (Python)
 %o A343773 A343773 = [1, 1]
 %o A343773 for n in range(2, 801):
 %o A343773     A343773.append(((2*n+1)*A343773[-1]
 %o A343773       - 5*(n-1)*A343773[-2]) // (n+2))
+%o A343773 (PARI) {a(n) = my(y = 1 + O(x)); for(i = 1, n, y = 1 + x*y - x^2*y^2); polcoeff(y, n)}; /* _Michael Somos_, Oct 27 2024 */
+%o A343773 (PARI) {a(n) = polcoeff( 2/(1 - x + (1 - 2*x + 5*x^2 + x*O(x^n))^(1/2)), n)}; /* _Michael Somos_, Oct 27 2024 */
 %Y A343773 Cf. A107587, A343386, A100223, A214649, A007440, A001006, A000108, A039834.
-%K A343773 sign,easy
+%Y A343773 Cf. A085143.
+%K A343773 sign,easy,changed
 %O A343773 0,4
 %A A343773 _Gennady Eremin_, _Sergey Kirgizov_, Apr 29 2021
