@@ -1,0 +1,31 @@
+%I A269982 #23 Sep 19 2019 19:55:18
+%S A269982 1,1,2,2,1,1,2,2,3,1,2,1,2,3,2,3,2,1,4,3,2,2,2,3,2,2,4,1,3,1,2,2,4,4,
+%T A269982 3,2,2,2,4,3,3,1,3,4,4,4,2,2,4,4,3,2,2,3,4,2,2,1,4,2,3,4,2,4,2,1,5,4,
+%U A269982 5,5,3,1,3,4,3,4,2,1,4,2,4,2,4,5,2,2
+%N A269982 Factorial fractility of n.
+%C A269982 In order to define (factorial) fractility of an integer n > 1, we first define nested interval sequences. Suppose that r = (r(n)) is a sequence satisfying (i) 1 = r(1) > r(2) > r(3) > ... and (ii) r(n) -> 0. For x in (0,1], let n(1) be the index n such that r(n+1) < x <= r(n), and let L(1) = r(n(1))-r(n(1)+1). Let n(2) be the largest index n such that x <= r(n(1)+1) + L(1)*r(n), and let L(2) = (r(n(2)) - r(n(2)+1))*L(1). Continue inductively to obtain the sequence (n(1), n(2), n(3), ...) =: NI(x), the r-nested interval sequence of x.
+%C A269982 For fixed r, call x and y equivalent if NI(x) and NI(y) are eventually equal (up to an offset). For n > 1, the r-fractility of n is the number of equivalence classes of sequences NI(m/n) for 0 < m < n. Taking r = (1/1, 1/2!, 1/3!, 1/4!, ... ) gives factorial fractility.
+%C A269982 For factorial fractility, r(n) = 1/n!, n(j+1) = A084558(L(j)/(x - Sum_{i=1..j} L(i-1)/(n(i)+1)!)) for all j >= 0, L(0) = 1. - _M. F. Hasler_, Nov 05 2018
+%H A269982 Robert Price, <a href="/A269982/b269982.txt">Table of n, a(n) for n = 2..500</a>
+%e A269982 NI(1/10) = (3, 2, 1, 1, 1, 2, 3, 2, 1, 1, 1, 2, 3, 2, 1, 1, 1, ...)
+%e A269982 NI(2/10) = (2, 3, 2, 1, 1, 1, 2, 3, 2, 1, 1, 1, 2, 3, 2, 1, 1, ...)
+%e A269982 NI(3/10) = (2, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, ...)
+%e A269982 NI(4/10) = (2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, ...)
+%e A269982 NI(5/10) = (2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, ...)
+%e A269982 NI(6/10) = (1, 2, 3, 2, 1, 1, 1, 2, 3, 2, 1, 1, 1, 2, 3, 2, 1, ...)
+%e A269982 NI(7/10) = (1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, ...)
+%e A269982 NI(8/10) = (1, 1, 2, 3, 2, 1, 1, 1, 2, 3, 2, 1, 1, 1, 2, 3, 2, ...)
+%e A269982 NI(9/10) = (1, 1, 1, 2, 3, 2, 1, 1, 1, 2, 3, 2, 1, 1, 1, 2, 3, ...),
+%e A269982 so that there are 3 equivalence classes for n = 10, and the factorial fractility of 10 is 3.
+%t A269982 A269982[n_] := CountDistinct[With[{l = NestWhileList[Rescale[#, {1/(Floor[x] + 1)!, 1/Floor[x]!} /. FindRoot[1/x! == #, {x, 1}]] &, #, UnsameQ, All]}, Min@l[[First@First@Position[l, Last@l] ;;]]] & /@ Range[1/n, 1 - 1/n, 1/n]] (* _Davin Park_, Nov 19 2016 *)
+%o A269982 From _M. F. Hasler_, Nov 05 2018: (Start)
+%o A269982 (PARI) A269982(n)=#Set(vector(n-1, k, NIFR(k/n))) \\ where:
+%o A269982 NIFR(x, n, L=1, S=[], c=0)={for(i=2, oo, n=A084558(L\x); S=setunion(S, [x/L]); x-=L/(n+1)!; L/=(n+1)!\n; setsearch(S, x/L)&& if(c, break, c=!S=[])); S[1]} \\ variant of the function NIF() below; returns just a unique representative (smallest x/L occurring within the period) of the equivalence class.
+%o A269982 NIF(x, n=[], L=1, S=[], c=0)={for(i=2, oo, n=concat(n, A084558(L\x)); c|| S=setunion(S, [x/L]); x-=L/(n[#n]+1)!; L/=(n[#n]-1)!*(n[#n]+1); if(!c, setsearch(S, x/L)&& [c, S]=[i, x/L], x/L==S, c-=i; break)); [n[1..2*c-1], n[c..-1]]} \\ Returns [transition, period] of "factorial" NI(x). (End)
+%Y A269982 Cf. A000142 (factorial numbers), A084558 (largest m: m! < n).
+%Y A269982 Cf. A269983, A269984, A269985, A269986, A269987, A269988: numbers with factorial fractility k = 1, 2, ..., 6, respectively.
+%Y A269982 Cf. A269570 (binary fractility), A270000 (harmonic fractility).
+%K A269982 nonn
+%O A269982 2,3
+%A A269982 _Clark Kimberling_ and _Peter J. C. Moses_, Mar 10 2016
+%E A269982 Edited by _M. F. Hasler_, Nov 05 2018

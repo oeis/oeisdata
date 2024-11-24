@@ -1,0 +1,60 @@
+%I A286237 #35 Dec 07 2019 12:18:29
+%S A286237 1,2,1,4,0,3,7,2,0,3,11,0,0,0,10,16,4,5,0,0,3,22,0,0,0,0,0,21,29,7,0,
+%T A286237 5,0,0,0,10,37,0,8,0,0,0,0,0,21,46,11,0,0,14,0,0,0,0,10,56,0,0,0,0,0,
+%U A286237 0,0,0,0,55,67,16,12,8,0,5,0,0,0,0,0,10,79,0,0,0,0,0,0,0,0,0,0,0,78,92,22,0,0,0,0,27,0,0,0,0,0,0,21,106,0,17,0,19,0,0,0,0,0,0,0,0,0,36
+%N A286237 Triangular table: T(n,k) = 0 if k does not divide n, otherwise T(n,k) = P(phi(k), n/k), where P is sequence A000027 used as a pairing function N x N -> N, and phi is Euler totient function, A000010. Table is read by rows as T(1,1), T(2,1), T(2,2), etc.
+%C A286237 Equally: square array A(n,k) = P(A000010(n), (n+k-1)/n) if n divides (n+k-1), 0 otherwise, read by descending antidiagonals as A(1,1), A(1,2), A(2,1), etc. Here P is sequence A000027 used as a pairing function N x N -> N.
+%C A286237 When viewed as a triangular table, this sequence packs the values of phi(k) and quotient n/k (when it is integral) to a single value with the pairing function A000027. The two "components" can be accessed with functions A002260 & A004736, which allows us generate from this sequence various sums related to necklace enumeration (among other things).
+%C A286237 For example, we have:
+%C A286237   Sum_{i=A000217(n-1) .. A000217(n)} [a(i) > 0] * A002260(a(i)) * 2^(A004736(a(i))) = A053635(n).
+%C A286237 and
+%C A286237   Sum_{i=A000217(n-1) .. A000217(n)} [a(i) > 0] * A002260(a(i)) * 3^(A004736(a(i))) = A054610(n).
+%H A286237 Antti Karttunen, <a href="/A286237/b286237.txt">Table of n, a(n) for n = 1..10585; the first 145 rows of triangle/antidiagonals of array</a>
+%H A286237 MathWorld, <a href="http://mathworld.wolfram.com/PairingFunction.html">Pairing Function</a>
+%F A286237 As a triangle (with n >= 1, 1 <= k <= n):
+%F A286237 T(n,k) = 0 if k does not divide n, otherwise T(n,k) = (1/2)*(2 + ((A000010(k)+(n/k))^2) - A000010(k) - 3*(n/k)).
+%F A286237 T(n,k) = A051731(n,k) * A286235(n,k).
+%F A286237 Other identities. For all n >= 1:
+%F A286237 T(prime(n),prime(n)) = A000217(prime(n)-1).
+%e A286237 The first fifteen rows of the triangle:
+%e A286237     1,
+%e A286237     2,  1,
+%e A286237     4,  0,  3,
+%e A286237     7,  2,  0,  3,
+%e A286237    11,  0,  0,  0, 10,
+%e A286237    16,  4,  5,  0,  0,  3,
+%e A286237    22,  0,  0,  0,  0,  0, 21,
+%e A286237    29,  7,  0,  5,  0,  0,  0, 10,
+%e A286237    37,  0,  8,  0,  0,  0,  0,  0, 21,
+%e A286237    46, 11,  0,  0, 14,  0,  0,  0,  0, 10,
+%e A286237    56,  0,  0,  0,  0,  0,  0,  0,  0,  0, 55,
+%e A286237    67, 16, 12,  8,  0,  5,  0,  0,  0,  0,  0, 10,
+%e A286237    79,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 78,
+%e A286237    92, 22,  0,  0,  0,  0, 27,  0,  0,  0,  0,  0,  0, 21,
+%e A286237   106,  0, 17,  0, 19,  0,  0,  0,  0,  0,  0,  0,  0,  0, 36
+%e A286237 ---------------------------------------------------------------
+%e A286237 Note how triangle A286239 contains on each row the same numbers in the same "divisibility-allotted" positions, but in reverse order.
+%e A286237 In the following examples: a = this sequence interpreted as a one-dimensional sequence, A = interpreted as a square array, T = interpreted as a triangular table, P = A000027 interpreted as a pairing function N x N -> N, phi = Euler totient function, A000010.
+%e A286237 ---
+%e A286237 a(7) = A(1,4) = T(4,1) = P(phi(1),4/1) = P(1,4) = 1+(((1+4)^2 - 1 - (3*4))/2) = 7.
+%e A286237 a(30) = A(2,7) = T(8,2) = P(phi(2),8/2) = P(1,4) (i.e., same as above) = 7.
+%e A286237 a(10) = A(5,1) = T(5,5) = P(phi(5),5/5) = P(4,1) = 1+(((4+1)^2 - 4 - (3*1))/2) = 10.
+%e A286237 a(110) = A(5,11) = T(15,5) = P(phi(5),15/5) = P(4,3) = 1+((4+3)^2 - 4 - (3*3))/2 = 19.
+%o A286237 (Scheme)
+%o A286237 (define (A286237 n) (A286237bi (A002260 n) (A004736 n)))
+%o A286237 (define (A286237bi row col) (if (not (zero? (modulo (+ row col -1) row))) 0 (let ((a (A000010 row)) (b (quotient (+ row col -1) row))) (* (/ 1 2) (+ (expt (+ a b) 2) (- a) (- (* 3 b)) 2)))))
+%o A286237 ;; Alternatively, with triangular indexing:
+%o A286237 (define (A286237 n) (A286237tr (A002024 n) (A002260 n)))
+%o A286237 (define (A286237tr n k) (if (not (zero? (modulo n k))) 0 (let ((a (A000010 k)) (b (/ n k))) (* (/ 1 2) (+ (expt (+ a b) 2) (- a) (- (* 3 b)) 2)))))
+%o A286237 ;; Note that: (A286237tr n k) is equal to (A286237bi k (+ 1 (- n k))).
+%o A286237 (Python)
+%o A286237 from sympy import totient
+%o A286237 def T(n, m): return ((n + m)**2 - n - 3*m + 2)/2
+%o A286237 def t(n, k): return 0 if n%k!=0 else T(totient(k), n/k)
+%o A286237 for n in range(1, 21): print [t(n, k) for k in range(1, n + 1)] # _Indranil Ghosh_, May 10 2017
+%Y A286237 Transpose: A286236.
+%Y A286237 Cf. A000124 (left edge of the triangle), A000217 (every number at the right edge is a triangular number).
+%Y A286237 Cf. A000010, A000027, A002024, A002260, A004736, A051731, A053635, A054610, A286235, A286239, A286247.
+%K A286237 nonn,tabl
+%O A286237 1,2
+%A A286237 _Antti Karttunen_, May 05 2017

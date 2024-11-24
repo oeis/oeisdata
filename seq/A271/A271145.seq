@@ -1,0 +1,21 @@
+%I A271145 #9 Nov 08 2016 20:56:52
+%S A271145 2,14,482,6346
+%N A271145 a(n) = k is the least number at which an isolated alternating run of nonsquarefree/squarefree (nsf/sf) numbers of size n starts.
+%C A271145 A contiguous sequence of numbers satisfying the pattern sf sf nsf sf ... nsf sf nsf sf sf with k+1 nsf numbers alternating with k sf numbers that are bounded by a pair of sf numbers at both ends is called an isolated alternating nsf/sf run of size k. The left sf bounding number is the start of the run.
+%C A271145 Any such run must start at an even number i and have an even size j, since for i odd i+3 is nsf, and for i even and j odd i+2*j+4 is nsf.
+%C A271145 For all n>=0, a(n)+2 is divisible by 4.
+%C A271145 a(4) > 5*10^9
+%e A271145 a(0) = 2 since 2, 3, 5 and 6 are sf while 4 is nsf.
+%e A271145 a(2) = 482 since in the interval 482...494 the nsf/sf pattern is sf sf nsf sf nsf sf nsf sf nsf sf nsf sf sf and it is the first occurrence of that 13-number run.
+%t A271145 nsfRun[n_] := Module[{i=n}, While[!SquareFreeQ[i], i++]; i-n]
+%t A271145 sfRun[n_] := Module[{i=n}, While[SquareFreeQ[i], i++]; i-n]
+%t A271145 sfBlockSearch[i_] := Module[{searching=True, j=i, r, s}, While[searching, r=nsfRun[j]; s=sfRun[j+r]; If[s<2, j+=r+s, searching=False]]; j+r+s]
+%t A271145 nsfsfPairQ[i_] := nsfRun[i]==1 && sfRun[i+1]==1
+%t A271145 nsfsfEndQ[i_] := nsfRun[i]==1 && sfRun[i+1]>1
+%t A271145 nsfsfRun[i_] := Module[{searching=True, count, j=i, s, e}, j=sfBlockSearch[j]; While[searching, count=0; s=j; While[nsfsfPairQ[j], count++; j+=2]; e=j; If[count==0 || !nsfsfEndQ[j], j=sfBlockSearch[j], searching=False]]; {s, e, count}]
+%t A271145 a271145[{low_, high_}, b_] := Module[{i=low, k, k3, list=Table[{}, b]}, While[i<=high, k=nsfsfRun[i]; k3=Last[k]/2; If[list[[k3]]=={}, list[[k3]]=k[[1]]-2]; i=k[[2]]]; list]
+%t A271145 a271145[{0, 10000}, 3] (* computes a(1), a(2), a(3) *)
+%Y A271145 Cf. A005117, A073247, A073248, A268330, A270344.
+%K A271145 nonn,more
+%O A271145 0,1
+%A A271145 _Hartmut F. W. Hoft_, Mar 31 2016

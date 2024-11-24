@@ -1,0 +1,46 @@
+%I A253315 #65 May 28 2024 06:47:27
+%S A253315 0,0,1,1,2,2,3,3,3,3,2,2,1,1,0,0,4,4,5,5,6,6,7,7,7,7,6,6,5,5,4,4,5,5,
+%T A253315 4,4,7,7,6,6,6,6,7,7,4,4,5,5,1,1,0,0,3,3,2,2,2,2,3,3,0,0,1,1,6,6,7,7,
+%U A253315 4,4,5,5,5,5,4,4,7,7,6,6,2,2,3,3,0,0,1,1,1,1,0,0,3,3,2,2,3,3,2,2,1,1,0,0,0
+%N A253315 a(n) = bitwise XOR of all the bit numbers for the bits that are set in n.
+%C A253315 The least significant bit is numbered 0.
+%C A253315 For any x < 2^m, for any y < m, there exist x' < 2^m s.t. x' differs from x by a single bit and a(x') = y.
+%C A253315 Because of the above property, sequence a is a solution to the "coins on a chessboard" problem which states: given an 8x8 chessboard filled with coins randomly flipped "head" or "tail" and a cell number (from 0 to 63) find a way to communicate the cell number by flipping a single coin.
+%C A253315 See A261283(n) = a(2n) for the version where the terms are not duplicated, which is equivalent to number the bits starting with 1 for the LSB. - _M. F. Hasler_, Aug 14 2015
+%H A253315 Philippe Beaudoin, <a href="/A253315/b253315.txt">Table of n, a(n) for n = 0..4095</a>
+%H A253315 Oliver Nash, <a href="http://olivernash.org/2009/10/31/yet-another-prisoner-puzzle/index.html">Yet another prisoner puzzle</a>, coins on a chessboard problem.
+%F A253315 a(n) = f(0,0,n) where f(z,y,x) = if x = 0 then y else f (z+1) (y XOR (z * (x mod 2))) floor(x/2). - _Reinhard Zumkeller_, Jan 18 2015
+%e A253315 a(12) = a(0b1100) = XOR(2, 3) = XOR(0b10, 0b11) = 1, where the prefix "0b" means that the number is written in binary.
+%p A253315 # requires Maple 12 or later
+%p A253315 b:= proc(n) local t, L,i;
+%p A253315   L:= convert(n,base,2);
+%p A253315   t:= 0;
+%p A253315   for i from 1 to nops(L) do if L[i]=1 then
+%p A253315     t:= Bits:-Xor(t,i-1)
+%p A253315   fi od;
+%p A253315   t;
+%p A253315 end proc:
+%p A253315 seq(b(n),n=0..100); # _Robert Israel_, Dec 30 2014
+%t A253315 a[n_] := BitXor @@ Flatten[Position[IntegerDigits[n, 2] // Reverse, 1] - 1]; Table[a[n], {n, 0, 100}] (* _Jean-François Alcover_, Jan 07 2015 *)
+%o A253315 (Python)
+%o A253315 def a(n):
+%o A253315     r = 0
+%o A253315     b = 0
+%o A253315     while n > 0:
+%o A253315         if (n & 1):
+%o A253315             r = r ^ b
+%o A253315         b = b + 1
+%o A253315         n = n >> 1
+%o A253315     return r
+%o A253315 print([a(n) for n in range(20)])
+%o A253315 (Haskell)
+%o A253315 import Data.Bits (xor)
+%o A253315 a253315 :: Integer -> Integer
+%o A253315 a253315 = f 0 0 where
+%o A253315    f _ y 0 = y
+%o A253315    f z y x = f (z + 1) (y `xor` b * z) x' where (x', b) = divMod x 2
+%o A253315 -- _Reinhard Zumkeller_, Jan 18 2015
+%o A253315 (PARI) A253315(n, b=bittest(n, 1))={for(i=2, #binary(n), bittest(n, i)&&b=bitxor(b, i)); b} \\ _M. F. Hasler_, Aug 14 2015
+%K A253315 nonn,base,easy
+%O A253315 0,5
+%A A253315 _Philippe Beaudoin_, Dec 30 2014

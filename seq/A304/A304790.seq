@@ -1,0 +1,39 @@
+%I A304790 #20 Aug 24 2021 07:01:12
+%S A304790 1,1,2,3,5,8,13,21,36,55,95,149,281,430,781,1211,2245,3456,6728,10092,
+%T A304790 18061,31529,51378,85659,167089,252748,431819,817991,1292697
+%N A304790 The maximal number of different domino tilings allowed by the Ferrers-Young diagram of a single partition of 2n.
+%H A304790 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/FerrersDiagram.html">Ferrers Diagram</a>
+%H A304790 Wikipedia, <a href="https://en.wikipedia.org/wiki/Domino_(mathematics)">Domino</a>
+%H A304790 Wikipedia, <a href="https://en.wikipedia.org/wiki/Domino_tiling">Domino tiling</a>
+%H A304790 Wikipedia, <a href="https://en.wikipedia.org/wiki/Ferrers_diagram">Ferrers diagram</a>
+%H A304790 Wikipedia, <a href="https://en.wikipedia.org/wiki/Mutilated_chessboard_problem">Mutilated chessboard problem</a>
+%H A304790 Wikipedia, <a href="https://en.wikipedia.org/wiki/Partition_(number_theory)">Partition (number theory)</a>
+%H A304790 Wikipedia, <a href="https://en.wikipedia.org/wiki/Young_tableau#Diagrams">Young tableau, Diagrams</a>
+%H A304790 <a href="/index/Do#domino">Index entries for sequences related to dominoes</a>
+%F A304790 a(n) = max { k : A304789(n,k) > 0 }.
+%F A304790 a(A001105(n)) = A004003(n).
+%F A304790 a(n) = A000045(n+1) for n < 8.
+%e A304790 a(11) = 149 different domino tilings are possible for 444442 and 6655.
+%e A304790 a(18) = 6728 different domino tilings are possible for 666666.
+%p A304790 h:= proc(l, f) option remember; local k; if min(l[])>0 then
+%p A304790      `if`(nops(f)=0, 1, h(map(u-> u-1, l[1..f[1]]), subsop(1=[][], f)))
+%p A304790     else for k from nops(l) while l[k]>0 by -1 do od;
+%p A304790         `if`(nops(f)>0 and f[1]>=k, h(subsop(k=2, l), f), 0)+
+%p A304790         `if`(k>1 and l[k-1]=0, h(subsop(k=1, k-1=1, l), f), 0)
+%p A304790       fi
+%p A304790     end:
+%p A304790 g:= l-> `if`(add(`if`(l[i]::odd, (-1)^i, 0), i=1..nops(l))=0,
+%p A304790         `if`(l=[], 1, h([0$l[1]], subsop(1=[][], l))), 0):
+%p A304790 b:= (n, i, l)-> `if`(n=0 or i=1, g([l[], 1$n]), max(b(n, i-1, l),
+%p A304790                    b(n-i, min(n-i, i), [l[], i]))):
+%p A304790 a:= n-> b(2*n$2, []):
+%p A304790 seq(a(n), n=0..15);
+%t A304790 h[l_, f_] := h[l, f] = Module[{k}, If[Min[l] > 0, If[Length[f] == 0, 1, h[Map[# - 1&, l[[1 ;; f[[1]]]]], ReplacePart[f, 1 -> Nothing]]], For[k = Length[l], l[[k]] > 0 , k--]; If[Length[f] > 0 && f[[1]] >= k, h[ReplacePart[l, k -> 2], f], 0] + If[k > 1 && l[[k - 1]] == 0, h[ReplacePart[l, {k -> 1, k - 1 -> 1}], f], 0]]];
+%t A304790 g[l_] := If[Sum[If[OddQ@l[[i]], (-1)^i, 0], {i, 1, Length[l]}] == 0, If[l == {}, 1, h[Table[0, {l[[1]]}], ReplacePart[l, 1 -> Nothing]]], 0];
+%t A304790 b[n_, i_, l_] := If[n == 0 || i == 1, g[Join[l, Table[1, {n}]]], Max[b[n, i - 1, l], b[n - i, Min[n - i, i], Append[l, i]]]];
+%t A304790 a[n_] := b[2n, 2n, {}];
+%t A304790 Table[a[n], {n, 0, 15}] (* _Jean-François Alcover_, Aug 24 2021, after _Alois P. Heinz_ *)
+%Y A304790 Cf. A000045, A001105, A004003, A304789.
+%K A304790 nonn
+%O A304790 0,3
+%A A304790 _Alois P. Heinz_, May 18 2018

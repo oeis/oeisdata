@@ -1,0 +1,43 @@
+%I A374449 #13 Jul 10 2024 18:42:09
+%S A374449 5,2,4,9,33,8,27,170,1083,602,2522,211673,16,135,1274,4023,12122,
+%T A374449 204323,355923,6612470,3405122,49799889,202536181,3195380868,
+%U A374449 5208143601
+%N A374449 Triangle read by rows: T(m,k) is the first number that starts a sequence of exactly k consecutive numbers with m prime factors, counted with multiplicity, if such a sequence is possible.
+%C A374449 For m > 1, row m can have at most 2^m - 1 terms, because one out of every 2^m consecutive numbers is divisible by 2^m.
+%C A374449 T(4,15) = A117969(4) = 97524222465.
+%F A374449 T(m,1) = 2^m for m >= 2.
+%e A374449 Triangle starts
+%e A374449   5 2
+%e A374449   4 9 33
+%e A374449   8 27 170 1083 603 3533 211673
+%e A374449 T(3,2) = 27 because 27 = 3^3 and 28 = 2^2 * 7 each have 3 prime factors (counted with multiplicity) while 26 = 2*13 and 29 (prime) do not.
+%p A374449 f:= proc(n)
+%p A374449 uses priqueue;
+%p A374449 local V,L, count, T, v, j, q, p, TP;
+%p A374449 V:= Vector(2^n-1); count:= 0;
+%p A374449 L:= [(-1)$(2^n),2^n];
+%p A374449 initialize(pq);
+%p A374449 insert([-2^(n),2$n],pq);
+%p A374449 while count < 2^n-1 do
+%p A374449   T:= extract(pq); v:= -T[1];
+%p A374449   if L[-1] <> v-1 then
+%p A374449     for j from 1 while L[-1]-L[-j] = j-1 do
+%p A374449        if L[-j]-L[-j-1] <> 1 and V[j] = 0 then
+%p A374449          V[j]:= L[-j]; count:= count+1;
+%p A374449   fi od fi;
+%p A374449   L:= [op(L[2..-1]),v];
+%p A374449   q:= T[-1];
+%p A374449   p:= nextprime(q);
+%p A374449   for j from n+1 to 2 by -1 do
+%p A374449     if T[j] <> q then break fi;
+%p A374449     TP:= [T[1]*(p/q)^(n+2-j), op(T[2..j-1]), p$(n+2-j)];
+%p A374449     insert(TP,pq);
+%p A374449 od od;
+%p A374449 op(convert(V,list));
+%p A374449 end proc:
+%p A374449 f(1):= 5,2:
+%p A374449 seq(f(i),i=1..3);
+%Y A374449 Cf. A000079 (first column except for row 1), A115186, A113752, A117969 (last term in each row).
+%K A374449 nonn,tabf,more
+%O A374449 1,1
+%A A374449 _Robert Israel_, Jul 08 2024

@@ -1,0 +1,70 @@
+%I A225693 #73 May 28 2023 08:46:58
+%S A225693 0,1,2,3,4,5,6,7,8,9,1,0,-1,-2,-3,-4,-5,-6,-7,-8,2,1,0,-1,-2,-3,-4,-5,
+%T A225693 -6,-7,3,2,1,0,-1,-2,-3,-4,-5,-6,4,3,2,1,0,-1,-2,-3,-4,-5,5,4,3,2,1,0,
+%U A225693 -1,-2,-3,-4,6,5,4,3,2,1,0,-1,-2,-3,7,6,5,4,3,2,1,0,-1,-2,8,7,6,5,4,3,2
+%N A225693 Alternating sum of digits of n.
+%C A225693 A number n is divisible by 11 if and only if a(n) is divisible by 11. For generalizations see Sharpe and Webster, or the links below.
+%C A225693 The primes p for which the absolute value of the alternating sum of digits of p is also a prime begin: 2, 3, 5, 7, 13, 29, 31, 41, 47, 53, 61, 79, 83, 97, 101, 113, 137, 139, 151. - _Jonathan Vos Post_, May 27 2013
+%C A225693 The above prime sequence is A115261. - _Jens Kruse Andersen_, Jul 13 2014
+%C A225693 Digital sum with alternating signs starting with a positive sign for the most significant digit. - _Hieronymus Fischer_, Mar 23 2014
+%H A225693 Hieronymus Fischer, <a href="/A225693/b225693.txt">Table of n, a(n) for n = 0..10000</a>
+%H A225693 Jim Loy, <a href="https://web.archive.org/web/20140110034618/http://www.jimloy.com:80/number/divis.htm">Divisibility Tests</a>
+%H A225693 Stu Savory, <a href="http://www.savory.de/maths1.htm">Divisibility by prime numbers under 50</a>
+%H A225693 D. Sharpe and R. Webster, <a href="https://drive.google.com/file/d/1JBk4rHc22u3ulVKFX2fhkGciHhKNBIMB/view">Reversing digits: divisibility by 27, 81, and 121</a>, Mathematical Spectrum, 45 (2012/2013), 69-71.
+%F A225693 If n has decimal expansion abc..xyz with least significant digit z, a(n) = a - b + c - d + ...
+%F A225693 From _Hieronymus Fischer_, Mar 23 2014: (Start)
+%F A225693 Formulas for general bases b > 1 (b = 10 for this sequence). Always m := floor(log_b(n)).
+%F A225693 a(n) = Sum_{k>=0} (-1)^k*(floor(n*b^(k-m)) mod b). The sum is finite with floor(log_b(n)) as the highest index.
+%F A225693 a(n) = (-1)^m*n - (b+1)*Sum_{k=1..m} (-1)^k*floor(n*b^(k-m-1)).
+%F A225693 a(n) = (-1)^m*(n + (b+1)*Sum_{k>=1} (-1)^k*floor(n/b^k)).
+%F A225693 a(n) = -(-1)^(m-k)*a(n mod b^k) + a(floor(n/b^k)), for 0 <= k <= m+1.
+%F A225693 a(n) = (-1)^m*a(n mod b) + a(floor(n/b)).
+%F A225693 a(n) = -(-1)^m*a(n mod b^2) + a(floor(n/b^2)).
+%F A225693 a(n) = (-1)^m*A055017(n).
+%F A225693 a(n) = A055017(A004086(n)).
+%F A225693 a(A004086(A004086(n))) = a(n).
+%F A225693 (End)
+%F A225693 a(A135499(n)) = 0; a(A061470(n)) = 1. - _Reinhard Zumkeller_, Aug 08 2014
+%F A225693 a(A061471(n)) = 2; a(A061472(n)) = 3. - _Bernard Schott_, Jul 14 2022
+%p A225693 A225693 :=proc(n) local t1,i;
+%p A225693 t1:=convert(n,base,10);
+%p A225693 add((-1)^(i+nops(t1))*t1[i],i=1..nops(t1));
+%p A225693 end;
+%p A225693 [seq(A225693(n),n=0..120)];
+%t A225693 Table[Total[Times@@@Partition[Riffle[IntegerDigits[n],{1,-1},{2,-1,2}],2]],{n,0,90}] (* _Harvey P. Dale_, Nov 27 2015 *)
+%o A225693 (Smalltalk)
+%o A225693 "Version for general bases"
+%o A225693 "Set base = 10 for this sequence"
+%o A225693 altDigitalSumLeft: base
+%o A225693 base > 1 ifTrue:  [m:= self integerFloorLog: base]
+%o A225693          ifFalse: [^self \\ 2].
+%o A225693 p:=1.
+%o A225693 s:=0.
+%o A225693 1 to: m by: 2 do: [ :k |
+%o A225693     p := p*base.
+%o A225693     s := s - (self // p) .
+%o A225693     p := p*base.
+%o A225693     s := s + (self // p) ].
+%o A225693 ^(self + ((base + 1)*s)) * (m alternate)
+%o A225693 "Version for base 10 using altDigitalSumRight from A055017"
+%o A225693 A225693
+%o A225693 ^(self A004086) altDigitalSumLeft: 10
+%o A225693 [by _Hieronymus Fischer_, Mar 23 2014]
+%o A225693 (Haskell)
+%o A225693 a225693 = f 1 0 where
+%o A225693    f _ a 0 = a
+%o A225693    f s a x = f (negate s) (s * a + d) x' where (x', d) = divMod x 10
+%o A225693 -- _Reinhard Zumkeller_, May 11 2015, Aug 08 2014
+%o A225693 (Python)
+%o A225693 def a(n): return sum(int(d)*(-1)**i for i, d in enumerate(str(n)))
+%o A225693 print([a(n) for n in range(87)]) # _Michael S. Branicky_, Jul 14 2022
+%o A225693 (PARI) a(n) = my(d=digits(n)); sum(k=1, #d, (-1)^(k+1)*d[k]); \\ _Michel Marcus_, Jul 15 2022
+%Y A225693 A055017 is closely related (but less natural).
+%Y A225693 Cf. A061479.
+%Y A225693 Cf. A004086.
+%Y A225693 Indices of 0..3: A135499, A061470, A061471, A061472.
+%Y A225693 Cf. A007953, A257588.
+%K A225693 sign,base,look
+%O A225693 0,3
+%A A225693 _N. J. A. Sloane_, May 27 2013
+%E A225693 Comment corrected by _Jens Kruse Andersen_, Jul 13 2014

@@ -1,0 +1,44 @@
+%I A370448 #21 Mar 10 2024 11:44:19
+%S A370448 1,1,3,377,1037891564126671,
+%T A370448 300437410741595765908031780282088610389625054477278441195747716452053155421581064323185688795147
+%N A370448 Numerator of probability to directly sort n uniform random values in [0,1] with perfect strategy.
+%C A370448 Given n random numbers distributed uniformly in [0,1], and a list of n places to put them, P(n) = A370448(n)/A370449(n) describes the probability that one is able to sort them directly in order with the following procedure:
+%C A370448 Take the first number. Without knowledge about the following numbers, place the number in the list such that the list is ordered (without moving any other number). Repeat until this is not possible anymore (i.e. because the new number would need to be inserted between two previously placed numbers directly next to each other on the list). If there are multiple valid spaces for placing the number in the list, the space is chosen that maximizes the total success probability. These probabilities are rational.
+%H A370448 Philip Geißler, <a href="/A370448/b370448.txt">Table of n, a(n) for n = 0..6</a>
+%H A370448 Reddit, User: Sarah_Carrygun, <a href="https://www.reddit.com/r/theydidthemath/comments/11rm4ka/comment/jciqo9z/">Original derivation of the success probability with perfect strategy</a>.
+%F A370448 P(0) = 1
+%F A370448 P(n+1) = Integral_{x=0..1} max_{L=0..n} C_{L,n-L} x^L (1-x)^{n-L} dx
+%F A370448 C_{L,R} = (L+R)!/(L!R!) a(L) a(R)
+%F A370448 where P(n) = A370448(n)/A370449(n)
+%F A370448 and C(L,R) = A370450(L,R)/A370451(L,R)
+%e A370448 For n=2, one has two options to place the first number in the list of 2 spaces.
+%e A370448 If the first random number r_1 is >0.5, one should place it on the right space (assuming an ascending list) because it maximizes the probability that the next number r_2 can still be placed in the list.
+%e A370448 Without knowledge of r_2: P(r_2 can be placed after r_1 is placed on the right space) = P(r_2<r_1) = r_1.
+%e A370448 Equivalently, if r_1 is <0.5, one should place it on the left space.
+%e A370448 Without knowledge of r_2: P(r_2 can be placed after r_1 is placed on the left space) = P(r_2>r_1) = 1-r_1.
+%e A370448 Thus, P(r_2 can be placed after r_1 is placed optimally) = max(r_1, 1-r_1).
+%e A370448 For the total probability {P(n)}(2) that both numbers can be placed such that they are ordered, the above expression needs to be integrated over r_1:
+%e A370448 {P(n)}(2) = Integral_{x=0..1} max(x, 1-x) dx = 3/4 = A370448(2)/A370449(2).
+%e A370448 This means that A370448(2) = 3.
+%o A370448 (Python)
+%o A370448 import sympy, functools
+%o A370448 from numpy.lib.stride_tricks import sliding_window_view as rolling
+%o A370448 binomial_sym_sympy = lambda L, R : sympy.functions.combinatorial.factorials.binomial(L+R, L)
+%o A370448 @functools.cache
+%o A370448 def C_analytic(L, R):
+%o A370448     return binomial_sym_sympy(L, R) * P_analytic(L) * P_analytic(R)
+%o A370448 @functools.cache
+%o A370448 def P_analytic(n):
+%o A370448     _zero, _one, _x = sympy.core.numbers.Zero(), sympy.core.numbers.One(), sympy.symbols("x")
+%o A370448     if n == 0: return _one
+%o A370448     # provide analytic expressions for the functions to integrate and the bounds of them
+%o A370448     int_bounds = [_zero, *[1/(1 + C_analytic(L+1, n-L-2)/C_analytic(L, n-L-1)) for L in range(n-1)], _one]
+%o A370448     int_polys = [sympy.poly(C_analytic(L, n-1-L) * _x**L * (1-_x)**(n-1-L), _x, domain="Q").integrate() for L in range(n)]
+%o A370448     int_summands = [int_poly(R_bound)-int_poly(L_bound) for int_poly, (L_bound, R_bound) in zip(int_polys, rolling(int_bounds, 2))]
+%o A370448     return sum(int_summands)
+%o A370448 def A370448(n): return P_analytic(n).numerator
+%Y A370448 Cf. A370449 (denominators).
+%Y A370448 Cf. A370450, A370451.
+%K A370448 frac,nonn
+%O A370448 0,3
+%A A370448 _Philip Geißler_, Feb 18 2024

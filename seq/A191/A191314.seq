@@ -1,0 +1,38 @@
+%I A191314 #21 Jul 16 2017 20:43:19
+%S A191314 1,1,1,1,1,2,1,4,1,1,7,2,1,12,6,1,1,20,12,2,1,33,27,8,1,1,54,53,16,2,
+%T A191314 1,88,108,44,10,1,1,143,208,88,20,2,1,232,405,208,65,12,1,1,376,768,
+%U A191314 415,130,24,2,1,609,1459,908,350,90,14,1,1,986,2734,1804,700,180,28,2,1,1596,5117,3776,1700,544,119,16,1
+%N A191314 Triangle read by rows: T(n,k) is the number of dispersed Dyck paths (i.e., Motzkin paths with no (1,0) steps at positive heights) of length n and height k.
+%C A191314 Row n has 1 + floor(n/2) entries.
+%C A191314 Sum of entries in row n is binomial(n, floor(n/2)) = A001405(n).
+%C A191314 T(n,1) = A000071(n+1) (Fibonacci numbers minus 1).
+%C A191314 Sum_{k>=0} k * T(n,k) = A191315(n).
+%C A191314 Extracting the even numbered rows, we obtain triangle A205946 with row sums A000984. The odd numbered rows yield triangle A205945 with row sums A001700. - _Gary W. Adamson_, Feb 01 2012
+%H A191314 Alois P. Heinz, <a href="/A191314/b191314.txt">Rows n = 0..200, flattened</a>
+%F A191314 G.f.: The g.f. of column k is z^{2k}/(F[k]*F[k+1]), where F[k] are polynomials in z defined by F[0]=1, F[1]=1-z, F[k]=F[k-1]-z^2*F[k-2] for k>=2. The coefficients of these polynomials form the triangle A108299.
+%F A191314 Rows may be obtained by taking finite differences of A205573 columns from the top -> down. - _Gary W. Adamson_, Feb 01 2012
+%e A191314 T(5,2) = 2 because we have HUUDD and UUDDH, where U=(1,1), D=(1,-1), H=(1,0).
+%e A191314 Triangle starts:
+%e A191314 1;
+%e A191314 1;
+%e A191314 1,  1;
+%e A191314 1,  2;
+%e A191314 1,  4,  1;
+%e A191314 1,  7,  2;
+%e A191314 1, 12,  6, 1;
+%e A191314 1, 20, 12, 2;
+%e A191314 1, 33, 27, 8, 1;
+%p A191314 F[0] := 1: F[1] := 1-z: for k from 2 to 12 do F[k] := sort(expand(F[k-1]-z^2*F[k-2])) end do: for k from 0 to 11 do h[k] := z^(2*k)/(F[k]*F[k+1]) end do: T := proc (n, k) options operator, arrow: coeff(series(h[k], z = 0, 20), z, n) end proc: for n from 0 to 16 do seq(T(n, k), k = 0 .. floor((1/2)*n)) end do; # yields sequence in triangular form
+%p A191314 # second Maple program:
+%p A191314 b:= proc(x, y) option remember; `if`(y>x or y<0, 0, `if`(x=0, 1,
+%p A191314       (p->add(coeff(p, z, i)*z^max(i, y), i=0..degree(p,z)))
+%p A191314       (b(x-1, y-1))+ b(x-1, y+1)+`if`(y=0, b(x-1, y), 0)))
+%p A191314     end:
+%p A191314 T:= n-> (p-> seq(coeff(p, z, i), i=0..degree(p)))(b(n, 0)):
+%p A191314 seq(T(n), n=0..14);  # _Alois P. Heinz_, Mar 12 2014
+%t A191314 b[x_, y_] := b[x, y] = If[y>x || y<0, 0, If[x==0, 1, Function [{p}, Sum[ Coefficient[p, z, i]*z^Max[i, y], {i, 0, Exponent[p, z]}]][b[x-1, y-1]] + b[x-1, y+1] + If[y==0, b[x-1, y], 0]]]; T[n_] := Function[{p}, Table[Coefficient[p, z, i], {i, 0, Exponent[p, z]}]][b[n, 0]]; Table[T[n], {n, 0, 14}] // Flatten (* _Jean-François Alcover_, Mar 31 2015, after _Alois P. Heinz_ *)
+%Y A191314 Cf. A001405, A000071, A191315.
+%Y A191314 Cf. A205573, A205945, A001700, A205946, A000984.
+%K A191314 nonn,tabf
+%O A191314 0,6
+%A A191314 _Emeric Deutsch_, May 31 2011

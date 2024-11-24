@@ -1,0 +1,42 @@
+%I A296806 #43 May 16 2022 08:53:02
+%S A296806 13,23,31,37,43,47,59,71,79,103,127,139,151,163,167,191,211,223,251,
+%T A296806 263,271,283,331,379,463,523,547,571,587,599,607,619,631,647,659,691,
+%U A296806 719,727,739,787,811,827,839,859,907,911,967,971,991,1031,1039,1051,1063,1087
+%N A296806 Take a prime, convert it to base 2, remove its most significant digit and its least significant digit and convert it back to base 10. Sequence lists primes that generate another prime by this process.
+%C A296806 From an idea of Ken Abbott (see link).
+%C A296806 From _Paolo Iachia_, Dec 21 2017: (Start)
+%C A296806 Let us call these numbers "core of a prime".
+%C A296806 Let C(q) be the core of a prime q.
+%C A296806 Then C(q) = (q - 2^floor(log_2(q)) - 1)/2.
+%C A296806 Examples: C(59) = (59 - 2^5 - 1)/2 = 13; C(71) = (71 - 2^6 - 1)/2 = 3; C(73) = (73 - 2^6 - 1)/2 = 4; C(251) = (251 - 2^7 - 1)/2 = 61.
+%C A296806 0 <= C(q) <= 2^(floor(log_2(q)) - 1) - 1. The minimum (0) occurs when q = 2^n+1, with n > 2. Example: 17 = 2^4+1, C(17) = (17 - 2^4 - 1)/2 = 0.  The maximum is reached when q = 2^n-1 is a Mersenne prime. Example: 127 = 2^7 - 1, C(127) = (127 - 2^6 - 1)/2 = 31 = 2^5 - 1.
+%C A296806 The last example is particularly interesting, as both the prime q and its core are Mersenne primes. The same holds for C(31) = 7 and for C(524247) = 131071, with 524247 = 2^19-1 and 131071 = 2^17-1, both Mersenne primes. Are there more such cases?
+%C A296806 Note that the core of Mersenne number (prime or not) is a Mersenne number by definition. Counterexamples include C(8191) = 2047, with 8191 = 2^13 - 1, a Mersenne prime, but 2047 = 2^11 - 1 = 23*89, a Mersenne number not prime, and C(131071) = 32767 = 2^15 - 1 = 7*31*151, with 2 of its factors being Mersenne primes.
+%C A296806 Primes whose binary expansion is of the form q = 1 0 ... 0 c_1 c_2 ... c_k 1 - with none or any number of consecutive 0's and with binary core c_1 c_2 ... c_k, k >= 0 - share the same core value. Let p = C(q), then we can write, in decimal form, q = (2p+1) + 2^n, for an appropriate n. While the property is true for p prime, it can be generalized to any positive integer.
+%C A296806 Conjecture: for any positive integer p, there are infinitely many primes q for which there exists an integer n such that q-(2p+1) = 2^n. (End)
+%H A296806 Iain Fox, <a href="/A296806/b296806.txt">Table of n, a(n) for n = 1..10000</a>
+%H A296806 Ken Abbott, <a href="https://www.linkedin.com/groups/4510047/4510047-6347101799618531332">Prime Cores</a>, Number Theory group on LinkedIn.
+%F A296806 Primes q such that C(q) = (q - 2^floor(log_2(q)) - 1)/2 is prime too.
+%e A296806 13 in base 2 is 1101 and 10 is 2;
+%e A296806 23 in base 2 is 10111 and 011 is 3;
+%e A296806 31 in base 2 is 11111 and 111 is 7.
+%p A296806 with(numtheory): P:=proc(q) local a,b,c,j,n,ok,x;  x:=5; for n from x to q do ok:=1; a:=convert(ithprime(n),base,2); b:=nops(a)-1; while a[b]=0 do b:=b-1; od; c:=0;
+%p A296806 for j from b by -1 to 2 do c:=2*c+a[j]; od;if isprime(c) then x:=n; print(ithprime(n)); fi; od; end: P(10^6);
+%p A296806 # simpler alternative:
+%p A296806 select(t -> isprime(t) and isprime((t - 2^ilog2(t) - 1)/2), [seq(i,i=3..10^4,2)]); # _Robert Israel_, Dec 28 2017
+%t A296806 Select[Prime[Range[200]],PrimeQ[FromDigits[Most[Rest[IntegerDigits[ #,2]]],2]]&] (* _Harvey P. Dale_, Jul 19 2020 *)
+%o A296806 (PARI) lista(nn) = forprime(p=13, nn, if(isprime((p - 2^logint(p, 2) - 1)/2), print1(p, ", "))) \\ _Iain Fox_, Dec 28 2017
+%o A296806 (Python)
+%o A296806 from itertools import islice
+%o A296806 from sympy import isprime, nextprime
+%o A296806 def agen(): # generator of terms
+%o A296806     p = 7
+%o A296806     while True:
+%o A296806         if isprime(int(bin(p)[3:-1], 2)):
+%o A296806             yield p
+%o A296806         p = nextprime(p)
+%o A296806 print(list(islice(agen(), 54))) # _Michael S. Branicky_, May 16 2022
+%Y A296806 Cf. A000030, A000225, A001348, A004676, A010879, A057195, A057196, A059242, A123250, A296807.
+%K A296806 nonn,base,easy
+%O A296806 1,1
+%A A296806 _Paolo P. Lava_, _Paolo Iachia_, Dec 21 2017

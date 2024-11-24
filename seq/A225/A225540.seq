@@ -1,0 +1,64 @@
+%I A225540 #62 Feb 15 2022 20:29:27
+%S A225540 1,1,4,21,6,148,84,24,1305,1160,540,120,13806,17610,10560,3960,720,
+%T A225540 170401,296772,214410,104160,32760,5040,2403640,5536440,4692576,
+%U A225540 2686320,1115520,302400,40320,38143377,113680800,111488328,72080064,35637840
+%N A225540 Triangle of functions in a size n set for which the sequence of composition powers starts with a length k stem (index) before entering a cycle (period).
+%C A225540 Given a transformation t from the transformation semigroup Tn and a positive integer i, the largest whole number s such that there does not exist an i such that t^s = t^(s+i) under transformation composition with t is the stem length. Terms in t^(s+i) form a cycle under repeated composition with t and do not return to transformations contained in the stem. Permutations by definition have stem length 0.
+%H A225540 Chad Brewbaker, <a href="/A225540/b225540.txt">Table of n, a(n) for n = 0..46</a>
+%e A225540 Triangle begins:
+%e A225540        1;
+%e A225540        1;
+%e A225540        4;
+%e A225540       21,      6;
+%e A225540      148,     84,     24;
+%e A225540     1305,   1160,    540,    120;
+%e A225540    13806,  17610,  10560,   3960,   720;
+%e A225540   170401, 296772, 214410, 104160, 32760, 5040;
+%e A225540   ...
+%t A225540 nn = 10; Map[Select[#, # > 0 &] &,Table[Range[0, nn]! CoefficientList[      Series[Prepend[Exp[Log[1/(1 - NestList[x Exp[#] &, x Exp[x], nn])]],0][[k + 1]] - Prepend[Exp[Log[1/(1 - NestList[x Exp[#] &, x Exp[x], nn])]], 0][[k]], {x, 0, nn}], x], {k, 1, nn - 1}] // Transpose] // Grid (* _Geoffrey Critzer_, Feb 13 2022 *)
+%o A225540 (Ruby) # needs version 1.9+
+%o A225540 counting_numbers = Enumerator.new do |yielder|
+%o A225540   (0..1.0/0).each do |number|
+%o A225540     yielder.yield number
+%o A225540   end
+%o A225540 end
+%o A225540 def trans_mult(transa, transb)
+%o A225540   trans_ret = Array.new
+%o A225540   0.upto(transa.length-1) do |index|
+%o A225540     trans_ret.push(transa[transb[index]])
+%o A225540   end
+%o A225540   return trans_ret
+%o A225540 end
+%o A225540 def lolipop(trans)
+%o A225540   trans_hash ={}
+%o A225540   trans_hash[trans.clone] =0
+%o A225540   index = 1
+%o A225540   trans_current = trans_mult(trans, trans)
+%o A225540   while  trans_hash[trans_current] == nil
+%o A225540     trans_hash[trans_current.clone] = index
+%o A225540     index = index +1
+%o A225540     trans_current = trans_mult(trans_current, trans)
+%o A225540   end
+%o A225540   cycle_length =trans_hash.size - trans_hash[trans_current]
+%o A225540   return [trans_hash.size, cycle_length]
+%o A225540 end
+%o A225540 1.upto(10) do |index|
+%o A225540   tran_size =index
+%o A225540   histo_hash = {}
+%o A225540   counting_numbers.take(tran_size).repeated_permutation(tran_size).each { |x|
+%o A225540     size, cycle_length = lolipop(x)
+%o A225540     #tail_length = size-cycle_length
+%o A225540     if (histo_hash[size-cycle_length] == nil)
+%o A225540       histo_hash[size-cycle_length] =1
+%o A225540     else
+%o A225540       histo_hash[size-cycle_length] = histo_hash[size-cycle_length]+1
+%o A225540     end
+%o A225540   }
+%o A225540   puts "#{tran_size}|" + histo_hash.inspect
+%o A225540 end
+%Y A225540 The first column is A006153.
+%Y A225540 Row sums give A000312.
+%Y A225540 Cf. A216242.
+%K A225540 nonn,tabf
+%O A225540 0,3
+%A A225540 _Chad Brewbaker_, May 14 2013

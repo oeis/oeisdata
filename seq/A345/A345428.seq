@@ -1,0 +1,31 @@
+%I A345428 #20 Mar 31 2023 14:14:19
+%S A345428 1,4,7,12,15,22,23,32,33,38,41,54,41,54,55,60,65,64,47,70,53,60,69,
+%T A345428 102,47,36,35,22,41,70,47,80,13,-4,15,-8,-49,-22,-49,-46,-53,-36,-141,
+%U A345428 -32,-57,-76,-63,-66,-205,-298,-275,-252,-289,-298
+%N A345428 For 1<=x<=n, 1<=y<=n, write gcd(x,y) = u*x+v*y with u,v minimal; a(n) = sum of the values of u+v.
+%C A345428 Minimal means minimize u^2+v^2. We follow Maple, PARI, etc., in setting u=0 and v=1 when x=y.
+%H A345428 Robert Israel, <a href="/A345428/b345428.txt">Table of n, a(n) for n = 1..2500</a>
+%p A345428 T:= proc(x,y) option remember; local g,u0,v0,t0,t1,t2;
+%p A345428    g:= igcd(x,y);
+%p A345428    if g > 1 then return procname(x/g,y/g) fi;
+%p A345428    v0:= y^(-1) mod x;
+%p A345428    u0:= (1-y*v0)/x;
+%p A345428    t0:= (v0*x-u0*y)/(x^2+y^2);
+%p A345428    t1:= floor(t0);
+%p A345428    if t0 < t1 + 1/2 then u0+v0 + t1*(y-x)
+%p A345428    else u0+v0 + (t1+1)*(y-x)
+%p A345428    fi
+%p A345428 end proc:
+%p A345428 R:= 1: v:= 1:
+%p A345428 for n from 2 to 100 do v:= v+1+2*add(T(i,n),i=1..n-1); R:= R,v od:
+%p A345428 R; # _Robert Israel_, Mar 28 2023
+%t A345428 T[x_, y_] := T[x, y] = Module[{u, v}, MinimalBy[{u, v} /. Solve[u^2 + v^2 <= x^2 + y^2 && u*x + v*y == GCD[x, y], {u, v}, Integers], #.# &]];
+%t A345428 a[n_] := a[n] = Sum[T[x, y][[1]]//Total, {x, 1, n}, {y, 1, n}];
+%t A345428 Table[Print[n, " ", a[n]]; a[n], {n, 1, 54}] (* _Jean-François Alcover_, Mar 28 2023 *)
+%o A345428 (Python)
+%o A345428 from sympy.core.numbers import igcdex
+%o A345428 def A345428(n): return sum(u+v for u, v, w in (igcdex(x,y) for x in range(1,n+1) for y in range(1,n+1))) # _Chai Wah Wu_, Jun 24 2021
+%Y A345428 Cf. A345415-A345427.
+%K A345428 sign
+%O A345428 1,2
+%A A345428 _N. J. A. Sloane_, Jun 22 2021

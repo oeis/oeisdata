@@ -1,0 +1,53 @@
+%I A276380 #35 May 31 2023 11:21:03
+%S A276380 1,2,3,4,1,4,6,1,6,8,9,1,9,2,9,12,1,12,2,12,3,12,16,1,16,18,1,18,2,18,
+%T A276380 3,18,4,18,1,4,18,24,1,24,2,24,27,1,27,2,27,3,27,4,27,32,1,32,2,32,3,
+%U A276380 32,36,1,36,2,36,3,36,4,36,1,4,36,6,36,1,6,36,8,36,9,36,1,9,36,2,9,36,48,1,48
+%N A276380 Irregular triangle where row n contains terms k of the partition of n produced by greedy algorithm such that all elements are in A003586.
+%C A276380 This sequence uses a greedy algorithm f(x) to find the largest number k <= n such that k is in A003586. The function is recursively applied to the result until it reaches 1. This is the algorithm described in the reference p. 36. This sequence presents the terms in order from least to greatest term.
+%C A276380 The reference suggests the greedy algorithm is one way to render n in a "dual-base number system", essentially base (2,3) with bases 2 and 3 arranged orthogonally to produce a matrix of places with values that are the tensor product of prime power ranges of 2 and 3. Place values are signified by 0 or 1. Thus we can boil down the matrix to simply list the values of places harboring digit 1.
+%C A276380 Row n = n for n that are in A003586.
+%C A276380 The reference defines a "canonic" representation of n on page 33 as having the lowest number of terms. The greedy algorithm does not always render the canonic representation. a(41) = {1,4,36}, but {9,32} is the shortest possible partition of 41 such that all terms are in A003586.
+%C A276380 The terms in row n differ from the canonic terms at n = 41, 43, 59, 86, 88, 91, 113, 118, 123, 135, 155, 172, 176, 177, 182, 185, 209, 215, 226, 236, 239, 248... (i.e., A277071).
+%D A276380 V. Dimitrov, G. Jullien, and R. Muscedere, Multiple Number Base System Theory and Applications, 2nd ed., CRC Press, 2012, pp. 35-39.
+%H A276380 Michael De Vlieger, <a href="/A276380/b276380.txt">Table of n, a(n) for n = 1..11006</a> (Rows 1 <= n <= 3600)
+%e A276380 Triangle begins:
+%e A276380 1
+%e A276380 2
+%e A276380 3
+%e A276380 4
+%e A276380 1,4
+%e A276380 6
+%e A276380 1,6
+%e A276380 8
+%e A276380 9
+%e A276380 1,9
+%e A276380 2,9
+%e A276380 12
+%e A276380 1,12
+%e A276380 2,12
+%e A276380 3,12
+%e A276380 16
+%e A276380 1,16
+%e A276380 18
+%e A276380 1,18
+%e A276380 2,18
+%e A276380 3,18
+%e A276380 4,18
+%e A276380 1,4,18
+%e A276380 ...
+%t A276380 Table[Reverse@ DeleteCases[Append[Abs@ Differences@ #, Last@ #], k_ /; k == 0] &@ NestWhileList[# - SelectFirst[# - Range[0, # - 1], Block[{m = #, n = 6}, While[And[m != 1, ! CoprimeQ[m, n]], n = GCD[m, n]; m = m/n]; m == 1] &] &, n, # > 1 &], {n, 49}]
+%o A276380 (Python)
+%o A276380 from itertools import count, takewhile
+%o A276380 N = 50
+%o A276380 def B(p): return list(takewhile(lambda x: x<=N, (p**i for i in count(0))))
+%o A276380 B23set = set(b*t for b in B(2) for t in B(3) if b*t <= N)
+%o A276380 B23lst = sorted(B23set, reverse=True)
+%o A276380 def row(n):
+%o A276380     if n in B23set: return [n]
+%o A276380     big = next(t for t in B23lst if t <= n)
+%o A276380     return row(n - big) + [big]
+%o A276380 print([t for r in range(1, N) for t in row(r)]) # _Michael S. Branicky_, Sep 14 2022
+%Y A276380 Cf. A003586, A237442 (least number of 3-smooth numbers that add up to n), A277070 (row lengths), A277071, A347860, A348599.
+%K A276380 nonn,tabf,easy
+%O A276380 1,2
+%A A276380 _Michael De Vlieger_, Sep 25 2016

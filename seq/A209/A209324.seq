@@ -1,0 +1,43 @@
+%I A209324 #45 Dec 30 2021 12:58:02
+%S A209324 1,1,3,1,9,17,1,45,68,142,1,165,680,710,1569,1,855,6290,8520,9414,
+%T A209324 21576,1,3843,47600,134190,131796,151032,355081,1,21819,481712,
+%U A209324 1838900,2372328,2416512,2840648,6805296,1,114075,5025608,21488292,50609664,48934368,51131664,61247664,148869153
+%N A209324 Triangular array read by rows: T(n,k) is the number of endofunctions f:{1,2,...,n}-> {1,2,...,n} whose largest component has exactly k nodes; n>=1, 1<=k<=n.
+%C A209324 Here component means weakly connected component in the functional digraph of f.
+%C A209324 Row sums are n^n.
+%C A209324 T(n,n) = A001865.
+%C A209324 For the statistic "length of the smallest component", see A347999.
+%D A209324 R. Sedgewick and P. Flajolet, Analysis of Algorithms, Addison Wesley, 1996, Chapter 8.
+%H A209324 Alois P. Heinz, <a href="/A209324/b209324.txt">Rows n = 1..141, flattened</a>
+%H A209324 Steven Finch, <a href="https://arxiv.org/abs/2111.05720">Permute, Graph, Map, Derange</a>, arXiv:2111.05720 [math.CO], 2021.
+%H A209324 D. Panario and B. Richmond, <a href="https://doi.org/10.1007/s00453-001-0047-1">Exact largest and smallest size of components</a>, Algorithmica, 31 (2001), 413-432.
+%F A209324 E.g.f. for column k:  exp( Sum_{n=1..k} A001865(n) x^n/n!) - exp( Sum_{n=1..k-1} A001865(n) x^n/n!).
+%F A209324 Sum_{k=1..n} k * T(n,k) = A209327(n). - _Alois P. Heinz_, Dec 16 2021
+%e A209324 Triangle T(n,k) begins:
+%e A209324   1;
+%e A209324   1,     3;
+%e A209324   1,     9,     17;
+%e A209324   1,    45,     68,     142;
+%e A209324   1,   165,    680,     710,    1569;
+%e A209324   1,   855,   6290,    8520,    9414,   21576;
+%e A209324   1,  3843,  47600,  134190,  131796,  151032,  355081;
+%e A209324   1, 21819, 481712, 1838900, 2372328, 2416512, 2840648, 6805296;
+%e A209324   ...
+%p A209324 g:= proc(n) option remember; add(n^(n-j)*(n-1)!/(n-j)!, j=1..n) end:
+%p A209324 b:= proc(n, m) option remember; `if`(n=0, x^m, add(g(i)*
+%p A209324       b(n-i, max(m, i))*binomial(n-1, i-1), i=1..n))
+%p A209324     end:
+%p A209324 T:= n-> (p-> seq(coeff(p, x, i), i=1..n))(b(n, 0)):
+%p A209324 seq(T(n), n=1..12);  # _Alois P. Heinz_, Dec 16 2021
+%t A209324 nn=8;t=Sum[n^(n-1)x^n/n!,{n,1,nn}];c=Log[1/(1-t)];b=Drop[Range[0,nn]!CoefficientList[Series[c,{x,0,nn}],x],1];f[list_]:=Select[list,#>0&];Map[f,Drop[Transpose[Table[Range[0,nn]!CoefficientList[Series[ Exp[Sum[b[[i]]x^i/i!,{i,1,n+1}]]-Exp[Sum[b[[i]]x^i/i!,{i,1,n}]],{x,0,nn}],x],{n,0,nn-1}]],1]]//Grid
+%t A209324 (* Second program: *)
+%t A209324 g[n_] := g[n] = Sum[n^(n - j)*(n - 1)!/(n - j)!, {j, 1, n}];
+%t A209324 b[n_, m_] := b[n, m] = If[n == 0, x^m, Sum[g[i]*b[n - i, Max[m, i]]* Binomial[n - 1, i - 1], {i, 1, n}]];
+%t A209324 T[n_] := With[{p = b[n, 0]}, Table[Coefficient[p, x, i], {i, 1, n}]];
+%t A209324 Table[T[n], {n, 1, 12}] // Flatten (* _Jean-François Alcover_, Dec 30 2021, after _Alois P. Heinz_ *)
+%Y A209324 Main diagonal gives A001865.
+%Y A209324 Row sums give A000312.
+%Y A209324 Cf. A209327, A347999.
+%K A209324 nonn,tabl
+%O A209324 1,3
+%A A209324 _Geoffrey Critzer_, Jan 19 2013

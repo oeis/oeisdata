@@ -1,0 +1,35 @@
+%I A253296 #39 Feb 07 2015 18:04:55
+%S A253296 8,12,16,18,24,27,30,32,36,45,48,50,54,63,64,70,72,75,81,90,96,98,105,
+%T A253296 108,125,128,135,144,147,150,154,162,165,175,182,189,192,195,216,225,
+%U A253296 231,242,243,245,250,256,270,273,275,286,288,315,324,325,338,343,350
+%N A253296 Numbers with more composite divisors than prime divisors such that all the prime divisors are smaller than the composite divisors.
+%C A253296 List of composite numbers with n >= 2 nontrivial divisors where the k smallest nontrivial divisors are all primes and the n - k largest nontrivial divisors are all nonprimes, 1 <= k < n.
+%C A253296 Here the term "nontrivial divisors" only serves to exclude 1.
+%C A253296 Except for semiprimes, all composite numbers have more composite divisors than prime divisors. - _Robert G. Wilson v_, Jan 12 2015
+%e A253296 36 is in the sequence because its nontrivial divisors are 2, 3, 4, 6, 9, 12, 18, and of these, the first two are prime and the rest are composite.
+%e A253296 40 is not in the sequence because its nontrivial divisors are 2, 4, 5, 8, 10, 20, and the composite divisor 4 falling between the prime divisors 2 and 5 disqualifies 40 from membership in the sequence.
+%p A253296 filter:= proc(n)
+%p A253296 local f,x;
+%p A253296 f:= ifactors(n)[2];
+%p A253296 if mul(t[2]+1,t=f) <= 2*nops(f)+1 then return false fi;
+%p A253296 if f[1,2] > 1 then x:= f[1,1]^2 else x:= f[1,1]*f[2,1] fi;
+%p A253296 max(seq(t[1],t=f)) < x
+%p A253296 end proc:
+%p A253296 select(filter, [$1..1000]); # _Robert Israel_, Jan 01 2015
+%t A253296 ntd[n_] := (dlist = Divisors[n]; dlist[[2 ;; Length[dlist] - 1]])
+%t A253296 test[n_] := (tlist = ntd[n];
+%t A253296   If[tlist == {}, False,
+%t A253296    index = 1;
+%t A253296    While[index <= Length[tlist] && PrimeQ[tlist[[index]]] == True,
+%t A253296     index = index + 1];
+%t A253296    If[index == 1 || index > Length[tlist], False,
+%t A253296     While[index <= Length[tlist] && PrimeQ[tlist[[index]]] == False,
+%t A253296      index = index + 1];
+%t A253296     If[index <= Length[tlist], False, True]]])
+%t A253296 Select[Table[n, {n, 2, 2500, 1}], test] (* Savoric *)
+%t A253296 primeDivs[n_Integer] := Select[Divisors[n], PrimeQ]; compDivs[n_Integer] := Drop[Complement[Divisors[n], primeDivs[n]], 1]; Select[Range[4, 500], Not[PrimeQ[#]] && primeDivs[#][[-1]] < compDivs[#][[1]] && Length[primeDivs[#]] < Length[compDivs[#]] &] (* _Alonso del Arte_, Dec 31 2014 *)
+%t A253296 fQ[n_] := Block[{d = PrimeQ@ Most@ Rest@ Divisors@ n}, d[[1]] == True && d[[-1]] == False && Length@ Split@ d == 2]; Select[ Range@ 350, fQ] (* _Robert G. Wilson v_, Jan 12 2015 *)
+%Y A253296 Cf. A137428.
+%K A253296 nonn
+%O A253296 1,1
+%A A253296 _Michael Savoric_, Dec 30 2014

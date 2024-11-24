@@ -1,0 +1,44 @@
+%I A276710 #44 Jul 31 2022 13:50:38
+%S A276710 36,40,63,80,84,90,105,108,132,144,150,154,160,165,168,175,176,180,
+%T A276710 182,195,198,200,208,210,220,260,264,270,273,275,280,286,288,297,300,
+%U A276710 306,308,312,315,320,324,330,340,351,357,360,364,374,378,380,385,390
+%N A276710 Composite numbers m such that Product_{k=0..m} binomial(m,k) is divisible by m^(m-1).
+%C A276710 The numbers Product_{k=0..m} binomial(m,k) form the sequence A001142(m). When m is a prime, the m-1 factors for 0 < k < m are all divisible by m and therefore A001142(m) is divisible by m^(m-1). When m is a composite, this is generally not so, except for the numbers listed here (a variety of pseudoprimes).
+%C A276710 Conjecture, tested so far up to m = 3828: "When m belongs to this list, Product_{k=0..m} binomial(m,k) is divisible also by m^m". Since this is impossible for prime m (see, e.g., A109874), the conjecture is equivalent to the statement "m is prime if and only if Product_{k=0..m} binomial(m,k) is divisible by m^(m-1) but not by m^m".
+%C A276710 From _Hagen von Eitzen_, Jul 31 2022: (Start)
+%C A276710 This conjecture has been proved, see corollary 3 in PDF link below.
+%C A276710 The set of all numbers in this sequence has natural density 1 - log(2), see theorem 2 in PDF link below. (End)
+%H A276710 Stanislav Sykora and Chai Wah Wu, <a href="/A276710/b276710.txt">Table of n, a(n) for n = 1..10000</a>, terms for n = 1..797 from Stanislav Sykora
+%H A276710 Hagen von Eitzen, <a href="/A276710/a276710.txt">C source code for fast computation</a>
+%H A276710 Hagen von Eitzen, <a href="/A276710/a276710.pdf">Some Results About Sequence A276710</a>
+%e A276710 Since 36 is composite and 36^35 divides Product_{k=1..36} binomial(36,k), 36 is a member. In addition, it turns out that 36^36 also divides the product.
+%t A276710 Select[DeleteCases[Range[2, 400], p_ /; PrimeQ@ p], Divisible[Product[Binomial[#, k], {k, 0, #}], #^(# - 1)] &] (* _Michael De Vlieger_, Sep 16 2016 *)
+%o A276710 (PARI) generator() = { /* Operates on two pre-defined integer vectors a, b of the same size. a(n) receives the terms of this sequence, while b(n) receives 0 if n^n|Product(binomial(n,k)), or 1 otherwise, and serves exclusively to test the conjecture. */
+%o A276710   my (m=1,n=0,p);for(k=1,#a,a[k]=0;b[k]=0);
+%o A276710   while(1,m++;p=prod(k=1,m-1,binomial(m,k));
+%o A276710     if((p%m^(m-1)==0)&&(!isprime(m)),n++;a[n]=m;
+%o A276710     if(p%m^m==0,b[n]=0,b[n]=1);if(n==#a,break)));
+%o A276710 }
+%o A276710   a=vector(1000);b=a;generator();
+%o A276710   a /* Displays the result.
+%o A276710   Note: execution was interrupted due to excessive execution time */
+%o A276710 (Python)
+%o A276710 from itertools import islice
+%o A276710 from math import comb
+%o A276710 from sympy import nextprime
+%o A276710 def A276710_gen(): # generator of terms
+%o A276710     p, q = 3, 5
+%o A276710     while True:
+%o A276710         for m in range(p+1,q):
+%o A276710             r = m**(m-1)
+%o A276710             c = 1
+%o A276710             for k in range(m+1):
+%o A276710                 c = c*comb(m,k) % r
+%o A276710             if c == 0:
+%o A276710                 yield m
+%o A276710         p, q = q, nextprime(q)
+%o A276710 A276710_list = list(islice(A276710_gen(),40)) # _Chai Wah Wu_, Jun 08 2022
+%Y A276710 Cf. A000169 (n^(n-1)), A001142, A109873, A109874.
+%K A276710 nonn
+%O A276710 1,1
+%A A276710 _Stanislav Sykora_, Sep 15 2016

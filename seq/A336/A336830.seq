@@ -1,0 +1,70 @@
+%I A336830 #53 May 27 2023 03:14:26
+%S A336830 0,1,2,5,9,4,10,3,11,20,30,19,7,91,77,62,46,29,47,28,8,168,146,123,99,
+%T A336830 74,48,21,49,78,108,139,107,140,106,71,35,72,34,73,33,1353,1311,1268,
+%U A336830 1224,1179,1133,1086,1038,989,939,888,836,783,729,674,618,561,503,444,384,323,261
+%N A336830 The Sydney Opera House sequence: a(0) = 0, a(1) = 1; for n > 0, a(n) = min(a(n-1)/n if n|a(n-1), a(n-1)-n) where a(n) is nonnegative and not already in the sequence. Otherwise a(n) = min(a(n-1)+n, a(n-1)*n) where a(n) is not already in the sequence. Otherwise a(n) = a(n-1) + n.
+%C A336830 This sequence is similar to the Recamán sequence A005132 except that division and multiplication by n are also permitted. This leads to larger variations in the values of the terms while minimizing the repetition of previously visited terms.
+%C A336830 To determine a(n), initially a(n-1)-n is calculated if a(n-1)-n is nonnegative, along with a(n-1)/n if n|a(n-1). If one or both of these have not already appeared in the sequence then a(n) is set to the minimum of these candidates. If neither are candidates then both a(n-1)+n and a(n-1)*n are calculated. If one or both of these have not already appeared in the sequence then a(n) is set to the minimum of these candidates. If neither are candidates, i.e., all of a(n-1)-n, a(n-1)/n, a(n-1)+n, a(n-1)*n are either invalid or have already been visited, then a(n) = a(n-1)+n. However for the first 100 million terms no instance is found where all four options are unavailable, although it is unknown if this eventually occurs for very large n.
+%C A336830 For the first 100 million terms the smallest value not appearing is 6. As with the Recamán sequence it is unknown if this and other small unseen terms eventually appear. The largest term is a(50757703) = 6725080695952885. In the same range, division, subtraction, addition, and multiplication are chosen for the next term 38, 99965692, 34188, and 81 times, respectively.
+%H A336830 Michael S. Branicky, <a href="/A336830/b336830.txt">Table of n, a(n) for n = 0..20000</a>
+%H A336830 Scott R. Shannon, <a href="/A336830/a336830.png">Line graph of the first 10 million terms</a>.
+%H A336830 <a href="/index/Rea#Recaman">Index entries for sequences related to Recamán's sequence</a>
+%e A336830 a(2) = 2. As a(1) = 1, which is not divisible by 2 nor greater than 2, a(2) must be the minimum of 1*2=2 and 1+2=3, so multiplication is chosen.
+%e A336830 a(5) = 4. As a(4) = 9, which is not divisible by 5, and 4 has not appeared previously in the sequence, a(5) = a(4)-5 = 9-5 = 4.
+%e A336830 a(82) = 52. As a(81) = 4264 one candidate is 4264-82 = 4182. However 82|4264 and 4264/82 = 52. Neither of these candidates has previously appeared in the sequence, but 52 is the minimum of the two. This is the first time a division operation is used for a(n).
+%o A336830 (Python)global arr
+%o A336830 arr = []
+%o A336830 def a(n):
+%o A336830     # Case 1
+%o A336830     if n == 0:
+%o A336830         return 0
+%o A336830     a_prev = arr[-1]
+%o A336830     cand = []
+%o A336830     # Case 2
+%o A336830     x = a_prev - n
+%o A336830     y = a_prev / n
+%o A336830     if x > 0 and not x in arr:
+%o A336830         cand.append(x)
+%o A336830     if y == int(y) and not y in arr:
+%o A336830         cand.append(y)
+%o A336830     if cand != []:
+%o A336830         return min(cand)
+%o A336830     # Case 3
+%o A336830     cand = []
+%o A336830     x = a_prev + n
+%o A336830     y = a_prev * n
+%o A336830     if not x in arr:
+%o A336830         cand.append(x)
+%o A336830     if not y in arr:
+%o A336830         cand.append(y)
+%o A336830     if cand != []:
+%o A336830         return min(cand)
+%o A336830     # Case 4
+%o A336830     return a_prev + n
+%o A336830 def seq(n):
+%o A336830     for i in range(n):
+%o A336830         print("{}, ".format(a(i)), end="")
+%o A336830         arr.append(a(i))
+%o A336830 seq(60)
+%o A336830 # _Christoph B. Kassir_, Apr 08 2022
+%o A336830 (Python)
+%o A336830 from itertools import count, islice
+%o A336830 def A336830(): # generator of terms
+%o A336830     aset, an, oo = {0, 1}, 1, float('inf')
+%o A336830     yield from [0, 1]
+%o A336830     for n in count(2):
+%o A336830         v1, v2 = an - n if an >= n else oo, an//n if an%n == 0 else oo
+%o A336830         v = min((vi for vi in [v1, v2] if vi not in aset), default=oo)
+%o A336830         if v != oo: an = v
+%o A336830         else:
+%o A336830             v3, v4 = an+n, an*n
+%o A336830             v = min((vi for vi in [v3, v4] if vi not in aset), default=oo)
+%o A336830             if v != oo: an = v
+%o A336830             else: an = an+n
+%o A336830         yield an
+%o A336830         aset.add(an)
+%o A336830 print(list(islice(A336830(), 60))) # _Michael S. Branicky_, Apr 15 2023
+%Y A336830 Cf. A005132, A113880, A171884, A330791, A362398, A362399.
+%K A336830 nonn
+%O A336830 0,3
+%A A336830 _Scott R. Shannon_, Aug 05 2020

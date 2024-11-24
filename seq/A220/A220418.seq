@@ -1,0 +1,39 @@
+%I A220418 #67 Apr 09 2023 08:59:39
+%S A220418 1,1,2,3,6,8,18,27,54,84,186,296,630,1008,2106,3711,7710,12924,27594,
+%T A220418 48528,97902,173352,364722,647504,1340622,2382660,4918482,9052392,
+%U A220418 18512790,33361776,69273666,127198287,258155910,475568220,981288906,1814542704,3714566310
+%N A220418 Express 1 - x - x^2 - x^3 - x^4 - ... as product (1 + g(1)*x) * (1 + g(2)*x^2) *(1 + g(3)*x^3) * ... and use a(n) = - g(n).
+%C A220418 This is the PPE (power product expansion) of A153881 (with offset 0).
+%C A220418 When p is prime, a(p) = (2^p-2)/p (A064535).
+%C A220418 From _Petros Hadjicostas_, Oct 04 2019: (Start)
+%C A220418 This sequence appears as an example in Gingold and Knopfmacher (1995) starting at p. 1223.
+%C A220418 In Section 3 of Gingold and Knopfmacher (1995), it is proved that, if f(z) = Product_{n >= 1} (1 + g(n))*z^n = 1/(Product_{n >= 1} (1 - h(n))*z^n), then g(2*n - 1) = h(2*n - 1) and Sum_{d|n} (1/d)*h(n/d)^d = -Sum_{d|n} (1/d)*(-g(n/d))^d. The same results were proved more than ten years later by Alkauskas (2008, 2009). [If we let a(n) = -g(n), then Alkauskas works with f(z) = Product_{n >= 1} (1 - a(n))*z^n; i.e., a(2*n - 1) = -h(2*n - 1) etc.]
+%C A220418 The PPE of 1/(1 - x - x^2 - x^3 - x^4 - ...) is given in A290261, which is also studied in Gingold and Knopfmacher (1995, p. 1234).
+%C A220418 (End)
+%C A220418 The number of terms in the Zassenhaus formula exponent of order n, as computed by the algorithm by Casas, Murua & Nadinic, is equal to a(n) at least for n = 2..24. - _Andrey Zabolotskiy_, Apr 09 2023
+%H A220418 Alois P. Heinz, <a href="/A220418/b220418.txt">Table of n, a(n) for n = 1..2000</a>
+%H A220418 Giedrius Alkauskas, <a href="http://arxiv.org/abs/0801.0805">One curious proof of Fermat's little theorem</a>, arXiv:0801.0805 [math.NT], 2008.
+%H A220418 Giedrius Alkauskas, <a href="https://www.jstor.org/stable/40391097">A curious proof of Fermat's little theorem</a>, Amer. Math. Monthly 116(4) (2009), 362-364.
+%H A220418 Fernando Casas, Ander Murua and Mladen Nadinic, <a href="https://doi.org/10.1016/j.cpc.2012.06.006">Efficient computation of the Zassenhaus formula</a>, Computer Physics Communications, 183 (2012), 2386-2391; arXiv:<a href="https://arxiv.org/abs/1204.0389">1204.0389</a> [math-ph], 2012.
+%H A220418 H. Gingold, H. W. Gould, and Michael E. Mays, <a href="https://www.researchgate.net/publication/268023169_Power_product_expansions">Power Product Expansions</a>, Utilitas Mathematica 34 (1988), 143-161.
+%H A220418 H. Gingold and A. Knopfmacher, <a href="http://dx.doi.org/10.4153/CJM-1995-062-9">Analytic properties of power product expansions</a>, Canad. J. Math. 47 (1995), 1219-1239.
+%H A220418 W. Lang, <a href="/A157162/a157162.txt">Recurrences for the general problem</a>.
+%F A220418 g(1) = -1 and for k > 1, g(k) satisfies Sum_{d|k} (1/d)*(-g(k/d))^d = (2^k - 1)/k, where a(k) = -g(k). - _Gevorg Hmayakyan_, Jun 05 2016 [Corrected by _Petros Hadjicostas_, Oct 04 2019. See p. 1224 in Gingold and Knopfmacher (1995).]
+%F A220418 From _Petros Hadjicostas_, Oct 04 2019: (Start)
+%F A220418 a(2*n - 1) = A290261(2*n - 1) for n >= 1 because A290261 gives the PPE of 1/(1 - x - x^2 - x^3 - ...) = (1 - x)/(1 - 2*x).
+%F A220418 Define (A(m,n): n,m >= 1) by A(m=1,n) = -1 for n >= 1, A(m,n) = 0 for m > n >= 1 (upper triangular), and A(m,n) = A(m-1,n) - A(m-1,m-1) * A(m,n-m+1) for n >= m >= 2. Then a(n) = A(n,n). [Theorem 3 in Gingold et al. (1988).]
+%F A220418 (End)
+%p A220418 b:= proc(n, i) option remember; `if`(n=0 or i<1, 1,
+%p A220418       b(n, i-1)+a(i)*b(n-i, min(n-i, i)))
+%p A220418     end:
+%p A220418 a:= proc(n) option remember; 2^n-b(n, n-1) end:
+%p A220418 seq(a(n), n=1..40);  # _Alois P. Heinz_, Jun 22 2018
+%t A220418 b[n_, i_] := b[n, i] = If[n == 0 || i < 1, 1, b[n, i - 1] + a[i]*b[n - i, Min[n - i, i]]];
+%t A220418 a[n_] := a[n] = 2^n - b[n, n - 1] ;
+%t A220418 Array[a, 40] (* _Jean-François Alcover_, Jul 09 2018, after _Alois P. Heinz_ *)
+%o A220418 (PARI) a(m) = {default(seriesprecision, m+1); gk = vector(m); pol = 1 + sum(n=1, m, -x^n); gk[1] = polcoeff( pol, 1); for (k=2, m, pol = taylor(pol/(1+gk[k-1]*x^(k-1)), x); gk[k] = polcoeff(pol, k, x);); for (k=1, m, print1(-gk[k], ", "););}
+%Y A220418 Cf. A064535, A147541, A153881, A157162, A170908, A170909, A170910, A170911, A170912, A170913, A170914, A170915, A170916, A170917, A220420, A273866, A290261.
+%K A220418 nonn
+%O A220418 1,3
+%A A220418 _Michel Marcus_, Dec 14 2012
+%E A220418 Name edited by _Petros Hadjicostas_, Oct 04 2019

@@ -1,0 +1,49 @@
+%I A238880 #31 Apr 24 2024 03:00:37
+%S A238880 0,10,1,11,2,12,3,13,4,14,5,15,6,16,7,17,8,18,9,19,20,102,21,112,22,
+%T A238880 122,23,32,24,42,25,52,26,62,27,72,28,82,29,92,30,103,31,113,33,133,
+%U A238880 34,43,35,53,36,63,37,73,38,83,39,93,40,104,41,114,44,144,45,54,46,64,47,74,48,84,49,94,50,105,51,115,55,155,56,65,57,75,58,85,59,95,60,106,61,116,66,166,67,76,68,86,69,96,70,107,71,117,77,177,78,87,79,97,80,108
+%N A238880 The sequence is a succession of pairs of nonnegative integers. The digits in each pair form a palindromic pattern. The sequence starts with a(1) = 0 and is always extended with the smallest available integer not yet present in the sequence.
+%C A238880 This sequence is a permutation of the nonnegative integers.
+%C A238880 See A245234 for the inverse permutation.
+%C A238880 From _M. F. Hasler_, Apr 22 2024: (Start)
+%C A238880 Due to the offset 1, this isn't a permutation of the nonnegative integers stricto sensu (but a bijection from positive integers to nonnegative integers), and the only fixed point appears to be a(18) = 18.
+%C A238880 If the offset was chosen to be zero, the list of fixed points of this sequence would be 0, 19, 20, 85, 885, 1007, 1017, 1027, 4603, 5353, ...
+%C A238880 By construction/definition, the terms a(2k-1) are always smaller than all subsequent terms a(m), m > 2k-1, k > 0. Therefore, when the "reversal" A004086(a(2k-1)) > a(2k-1), then a(2k) = A004086(a(2k-1)): this obviously yields a palindromic pair (a(2k-1), a(2k)), and any smaller a(2k) with this property would have to be a left-truncation of this term, which would have less digits and therefore be strictly smaller and have occurred earlier than a(2k-1).
+%C A238880 Otherwise, when A004086(a(2k-1)) <= a(2k-1), in particular when a(2k-1) is a palindrome or divisible by 10 or when A000030(a(2k-1)) > A010879(a(2k-1)) (first digit > last digit), then a(m) = A004086(a(2k-1)) for some m < 2k-1, and in this case, a(2k) = A004086(a(2k-1)*10+1) (except for a(2) = 10 where 10*a(1) vanishes) is the smallest possible number that yields a palindromic pair: again, any smaller solution would have to be a left truncation of this, which all have occurred earlier. (End)
+%H A238880 Giovanni Resta, <a href="/A238880/b238880.txt">Table of n, a(n) for n = 1..10000</a>
+%F A238880 From _M. F. Hasler_, Apr 22 2024: (Start)
+%F A238880 a(2k) = A004086(a(2k-1)) if this is greater than a(2k-1), else A004086(a(2k-1)*10+1), for all k > 0.
+%F A238880 A000030(a(2k-1)) = A010879(a(2k)) for all k > 0, where A000030 = initial digit and A010879(m) = m % 10 = final digit of m.
+%F A238880 A010879(a(2k)) > 0 for all k > 1: a(2) is the only even-indexed term multiple of 10. (End)
+%e A238880 (0,10), (1,11), (2,12), (3,13), (4,14), (5,15), ...: The palindromic pattern is clearly visible in each pair.
+%t A238880 (* first 10000 terms *) s = {0, 10}; t = 0*Range[20000]; t[[10]] = 1; Do[ j = Position[t, 0, 1, 1][[1, 1]]; AppendTo[s, j]; t[[j]] = 1; d = IntegerDigits[j]; h = 1; While[t[[h]] == 1 || (p = Join[d, IntegerDigits[h]]; p != Reverse[p]), h++]; AppendTo[s, h]; t[[h]] = 1; If[Mod[Length@s, 500] == 0, Print[Length@s, " ", {j, h}]], {4999}]; s (* _Giovanni Resta_, Mar 06 2014 *)
+%o A238880 (Haskell)
+%o A238880 import Data.List (delete)
+%o A238880 a238880 n = a238880_list !! (n-1)
+%o A238880 a238880_list = f [0..] where
+%o A238880    f (u:us) = u : g us where
+%o A238880      g vs = h vs where
+%o A238880        h (w:ws) = if reverse ys == ys then w : f (delete w vs) else h ws
+%o A238880                   where ys = xs ++ show w
+%o A238880      xs = show u
+%o A238880 -- _Reinhard Zumkeller_, Jul 14 2014
+%o A238880 (PARI)
+%o A238880 A238880_upto(N, U=[-1])={vector(N, n, U=setunion(U, [N=if(n%2, U[1]+1, N < n=fromdigits(Vecrev(digits(N))), n, n+10^logint(N+!N,10)*10)]); while(#U>1&& U[1]+1==U[2], U=U[^1]); N)} \\ _M. F. Hasler_, Apr 22 2024
+%o A238880 (Python)
+%o A238880 def A238880(n: int) -> int:
+%o A238880     try: return A238880.terms[n-1]
+%o A238880     except AttributeError: A238880.terms = T = []; A238880.least_unused = 0
+%o A238880     except IndexError: T = A238880.terms # more terms needed
+%o A238880     while len(T) < n:
+%o A238880         if len(T) & 1 == 0: x = A238880.least_unused # even index
+%o A238880         elif T[-1] >= (x := int(s := str(T[-1])[::-1])): x = int('1'+s)
+%o A238880         T.append(x)
+%o A238880         if x == A238880.least_unused: # also e.g. for a(20) = 19
+%o A238880             while x+1 in T: x += 1
+%o A238880             A238880.least_unused = x+1
+%o A238880     return T[n-1] # _M. F. Hasler_, Apr 19 2024, simplified Apr 22, 2024
+%Y A238880 Cf. A245234 (inverse), A004086 (read n backwards), A000030 (first digit of n), A010879 (last digit of n).
+%Y A238880 Cf. A371113 (analog for triples instead of pairs).
+%K A238880 nonn,easy,base,nice,look
+%O A238880 1,2
+%A A238880 _Eric Angelini_, Mar 06 2014

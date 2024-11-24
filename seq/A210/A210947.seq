@@ -1,0 +1,36 @@
+%I A210947 #21 Mar 11 2015 11:36:26
+%S A210947 1,2,3,4,5,6,7,10,11,12,12,16,18,19,20,19,27,31,33,34,35,30,41,47,50,
+%T A210947 52,53,54,45,64,73,79,82,84,85,86,67,93,108,116,121,124,126,127,128,
+%U A210947 97,138,159,172,180,185,188,190,191,192
+%N A210947 Triangle read by rows: T(n,k) = total number of parts <= k of all partitions of n.
+%C A210947 Row n lists the partial sums of row n of triangle A066633.
+%H A210947 Alois P. Heinz, <a href="/A210947/b210947.txt">Rows n = 1..141, flattened</a>
+%F A210947 T(n,k) = Sum_{j=1..k} A066633(n,j).
+%e A210947 Triangle begins:
+%e A210947 1;
+%e A210947 2,   3;
+%e A210947 4,   5,  6;
+%e A210947 7,  10,  11,  12;
+%e A210947 12, 16,  18,  19,  20;
+%e A210947 19, 27,  31,  33,  34,  35;
+%e A210947 30, 41,  47,  50,  52,  53,  54;
+%e A210947 45, 64,  73,  79,  82,  84,  85,  86;
+%e A210947 67, 93, 108, 116, 121, 124, 126, 127, 128;
+%p A210947 p:= (f, g)-> zip((x, y)-> x+y, f, g, 0):
+%p A210947 b:= proc(n, i) option remember; local f, g;
+%p A210947       if n=0 then [1]
+%p A210947     elif i=1 then [1, n]
+%p A210947     else f:= b(n, i-1); g:= `if`(i>n, [0], b(n-i, i));
+%p A210947          p (p (f, g), [0$i, g[1]])
+%p A210947       fi
+%p A210947     end:
+%p A210947 T:= proc(n, k) option remember;
+%p A210947        b(n, n)[k+1] +`if`(k<2, 0, T(n, k-1))
+%p A210947     end:
+%p A210947 seq (seq (T(n,k), k=1..n), n=1..11); # _Alois P. Heinz_, May 02 2012
+%t A210947 p[f_, g_] := With[{m = Max[Length[f], Length[g]]}, PadRight[f, m, 0] + PadRight[g, m, 0]]; b[n_, i_] := b[n, i] = Module[{f, g}, If[n == 0, {1}, If[i == 1, {1, n}, f = b[n, i-1]; g = If[i>n, {0}, b[n-i, i]]; p[p[f, g], Append[Array[0&, i], g[[1]] ]]]]]; T[n_, k_] := T[n, k] = b[n, n][[k+1]] + If[k<2, 0, T[n, k-1]]; Table [Table [T[n, k], {k, 1, n}], {n, 1, 11}] // Flatten (* _Jean-François Alcover_, Mar 11 2015, after _Alois P. Heinz_ *)
+%Y A210947 Column 1 is A000070(n-1). Right border gives A006128.
+%Y A210947 Cf. A066633, A181187, A206563, A210948, A210955.
+%K A210947 nonn,tabl
+%O A210947 1,2
+%A A210947 _Omar E. Pol_, May 01 2012

@@ -1,0 +1,33 @@
+%I A288346 #28 Jan 06 2018 19:44:03
+%S A288346 3,4,6,9,12,20,24,40,64,80,128,160,256,320,528,768,1088,1536,2176,
+%T A288346 3072,4352,6144,9216,12288,18432,32768,36864,65536,73728,131072,
+%U A288346 163840,264192,327680,532480,655360,1064960,1310720,2162688,2621440,4325376,6291456,8650752
+%N A288346 Median of 2^X + 2^Y where X and Y are independent random variables with B(n,1/2) distributions.
+%C A288346 Interpretation: Start with a portfolio of stocks A and B each worth $1, and flip a pair of coins. Stock A doubles if the first coin is heads and otherwise stays constant. Stock B doubles if the second coin is heads and otherwise stays constant. This sequence gives your median portfolio value after n pairs of coin flips.
+%C A288346 Although a median of integers can be a half-integer, as an empirical observation only integers appear in this sequence.
+%C A288346 The mean of 2^X + 2^Y is 2(3/2)^n.
+%H A288346 Robert Israel, <a href="/A288346/b288346.txt">Table of n, a(n) for n = 1..5299</a>
+%p A288346 f:= proc(n)
+%p A288346 local PX, i, pt, j;
+%p A288346 for i from 0 to n do PX[i]:= binomial(n,i)/2^n od:
+%p A288346 pt:= 0:
+%p A288346 for j from 0 while pt^2 < 1/2 do pt:= pt + PX[j] od:
+%p A288346 j:= j-1:
+%p A288346 pt:= (pt-PX[j])^2:
+%p A288346 for i from 0 do
+%p A288346   pt:= pt + 2*PX[j]*PX[i];
+%p A288346   if pt = 1/2 then error("Probability 1/2 for i=%1 j=%2",i,j) fi;
+%p A288346   if pt > 1/2 then return(2^i + 2^j) fi
+%p A288346 od:
+%p A288346 end proc:
+%p A288346 map(f, [$1..60]); # _Robert Israel_, Jun 21 2017
+%t A288346 TwoToThe[x_] := 2^x;
+%t A288346 WeightsMatrix[n_] := Table[Binomial[n, i] Binomial[n, j], {i, 0, n}, {j, 0, n}]/2^(2 n);
+%t A288346 ValuesMatrix[n_, f_] := Table[f[i] + f[j], {i, 0, n}, {j, 0, n}];
+%t A288346 Distribution[n_, f_] := EmpiricalDistribution[Flatten[WeightsMatrix[n]] -> Flatten[ValuesMatrix[n, f]]];
+%t A288346 NewMedian[n_, f_] := Mean[Quantile[Distribution[n, f], {1/2, 1/2 + 1/2^(2 n)}]];
+%t A288346 Table[NewMedian[n, TwoToThe], {n, 42}]
+%Y A288346 Cf. A288347, A288416, which are additive rather than multiplicative.
+%K A288346 nonn
+%O A288346 1,1
+%A A288346 _Matt Frank_, Jun 08 2017

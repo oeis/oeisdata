@@ -1,0 +1,45 @@
+%I A336244 #40 Aug 21 2020 15:46:57
+%S A336244 1,1,1,1,5,2,1,12,29,6,1,22,131,206,24,1,35,385,1525,1774,120,1,51,
+%T A336244 895,6585,19624,18204,720,1,70,1792,21070,117019,281260,218868,5040,1,
+%U A336244 92,3234,55496,492849,2210348,4483436,3036144,40320
+%N A336244 Triangle read by rows: row n gives coefficients T(n,k), in descending powers of m, of a polynomial Q_n(m) (of degree n - 1) in an expression for the number of subdivisions A(m,n) of a grid with two rows.
+%C A336244 Let P_(m,n) denote a grid with 2 rows that has m points in the top row and n points in the bottom, aligned at the left, and let the bottom left point be at the origin.
+%C A336244 For m > n, the number of subdivisions of P_(m,n) is given by A(m,n) = 2^(m-2)/(n-1)!*Q_n(m), where Q_n(m) is some monic polynomial of degree n-1. See Theorem 2, p. 6, in Robeva and Sun (2020).
+%C A336244 By symmetry, A(m,n) = A(n,m). For more information and formulas, see A059576.
+%H A336244 Elina Robeva and Melinda Sun, <a href="https://arxiv.org/abs/2007.00877">Bimonotone Subdivisions of Point Configurations in the Plane</a>, arXiv:2007.00877 [math.CO], 2020. See Table 2, p. 5.
+%H A336244 Wikipedia, <a href="https://en.wikipedia.org/wiki/Faulhaber%27s_formula">Faulhaber's formula</a>.
+%F A336244 A(m,n) = (2^(m-2)/(n-1)!) * Sum_{k=1..n} T(n,k)*m^(n-k).
+%F A336244 A(m,n) = (2^(m-2)/(n-1)!) * Q_n(m) = A059576(m-1, n-1) (provided the latter is viewed as a square array rather than a triangle).
+%F A336244 A(m,n) = (2^(m-2)/(n-2)!) * (Q_(n-1)(m) + Sum_{i=1..m} Q_(n-1)(i)).
+%F A336244 A(m,n) = 2*(A(m,n-1) + A(m-1,n) - A(m-1,n-1)) for m > n.
+%F A336244 T(n, 1) = 1 and T(n, n) = (n - 1)!.
+%F A336244 Conjectures:
+%F A336244 (a) T(n,2) = (n - 1)*(3*n - 4)/2.
+%F A336244 (b) T(n,3) = (n - 2)*(n - 1)*(27*n^2 - 97*n + 72)/24.
+%F A336244 (c) T(n,4) = (n - 3)*(n - 2)*(n - 1)^2*(27*n^2 - 156*n + 208)/48.
+%F A336244 (d) T(n, n - 1) = (n - 1)!*Sum_{k=1..n-1} binomial(n-1, k)/k = A103213(n-1).
+%e A336244 Triangle T(n,k) (with rows n >= 1 and columns k = 1..n) begins
+%e A336244   1;
+%e A336244   1,  1;
+%e A336244   1,  5,   2;
+%e A336244   1, 12,  29,   6;
+%e A336244   1, 22, 131, 206, 24;
+%e A336244   ...
+%e A336244 Q_3(m) = m^2 + 5*m + 2.
+%p A336244 # We assume the rows indexed by the degree of the polynomials, n = 0,1,2,...
+%p A336244 A336244row := proc(n) local p, k, s, b; p := 1;
+%p A336244 b := n -> bernoulli(n, x+1) - bernoulli(n, 1);
+%p A336244 for k from 1 to n-1 do
+%p A336244   s := p + add(coeff(p, x, i-1)*b(i)/i, i=1..k-1);
+%p A336244   p := b(k) + k*s od;
+%p A336244 seq(coeff(p, x, n-i), i=1..n) end:
+%p A336244 seq(A336244row(n), n=0..9); # _Peter Luschny_, Jul 15 2020
+%t A336244 b[n_] := BernoulliB[n, x + 1] - BernoulliB[n, 1]; b[1] = x;
+%t A336244 row[n_] := Module[{p = 1, s}, Do[s = p + Sum[Coefficient[p, x, i-1] b[i]/i, {i, 1, k-1}]; p = b[k] + k s, {k, 1, n-1}]; CoefficientList[p, x] // Reverse];
+%t A336244 row /@ Range[9] // Flatten (* _Jean-François Alcover_, Aug 21 2020, after _Peter Luschny_ *)
+%o A336244 (PARI) polf(n) = if (n==0, return(m)); my(p=bernpol(n+1,m)); (subst(p, m, m+1) - subst(p, m, 0))/(n+1);  \\ Faulhaber
+%o A336244 tabl(nn) = {my(p = 1, q); for (n=1, nn, if (n==1, q = p, q = (n-1)*(p + polf(n-2) + sum(i=0, n-3, polcoef(p, i, m)*polf(i)))); print(Vec(q)); p = q;);}
+%Y A336244 Cf. A059576, A103213, A336245.
+%K A336244 nonn,tabl
+%O A336244 1,5
+%A A336244 _Michel Marcus_ and _Petros Hadjicostas_, Jul 14 2020

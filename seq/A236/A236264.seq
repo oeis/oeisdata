@@ -1,0 +1,55 @@
+%I A236264 #38 Jun 28 2022 01:48:18
+%S A236264 0,2,6,12,14,26,38,62,74,86,98,122,134,146,158,182,222,254,326,338,
+%T A236264 366,398,446,614,626,698,722,794,866,1022,1046,1082,1226,1238,1418,
+%U A236264 1646,1814,2174,2246,2258,2294,2426,2558
+%N A236264 Even indices of Fibonacci numbers which are the sum of two squares.
+%C A236264 The first 10 such Fibonacci numbers are 0, 1, 8, 144, 377, 121393, 39088169, 4052739537881, 1304969544928657, 420196140727489673.
+%C A236264 Ballot & Luca (Proposition 1) show that this sequence has asymptotic density 0. - _Charles R Greathouse IV_, Jan 21 2014
+%C A236264 a(43) >= 2558. Determining this term requires factoring the Lucas number L_1279. - _Charles R Greathouse IV_, Jan 21 2014
+%C A236264 3002 <= a(44) <= 3302. 3302, 3698, 4898 are terms. - _Chai Wah Wu_, Jul 23 2020
+%H A236264 Christian Ballot and Florian Luca, <a href="http://dx.doi.org/10.4064/aa127-2-4">On the equation x^2+dy^2=Fn</a>, Acta Arith. 127 (2007), 145-155.
+%H A236264 Kevin O'Bryant, <a href="http://mathoverflow.net/questions/67601">Which Fibonacci numbers are the sum of two squares?</a>, MathOverflow.
+%F A236264 a(n) = 2*A124132(n-1).
+%e A236264 Fibonacci(14) = 377 = 19^2 + 4^2, so 14 is in the sequence.
+%t A236264 Reap[For[n = 0, n <= 400, n = n+2, If[Reduce[Fibonacci[n] == x^2 + y^2, {x, y}, Integers] =!= False, Print[n]; Sow[n]]]][[2, 1]]
+%o A236264 (PARI) is(n)=if(n%2, return(0)); my(f=factor(fibonacci(n))); for(i=1,#f~, if(f[i,1]%4==3 && f[i,2]%2, return(0))); 1 \\ _Charles R Greathouse IV_, Jan 21 2014
+%o A236264 (PARI) default(factor_add_primes, 1);
+%o A236264 is(n)={
+%o A236264     if(n%2,return(0));
+%o A236264     my(f=fibonacci(n),t);
+%o A236264     if(f%4==3,return(0));
+%o A236264     forprime(p=2,min(log(f)^2,1e5),
+%o A236264         if(f%p==0,
+%o A236264             t=valuation(f,p);
+%o A236264             if(p%4==3&&t%2,return(0));
+%o A236264             f/=p^t;
+%o A236264             if(f%4==3,return(0))
+%o A236264         )
+%o A236264     );
+%o A236264     fordiv(n,d,
+%o A236264         if(d==n, break);
+%o A236264         t=factor(fibonacci(d))[,1];
+%o A236264         for(i=1,#t,
+%o A236264             if(t[i]%4==3 && valuation(f,t[i])%2, return(0));
+%o A236264             f/=t[i]^valuation(f,t[i]);
+%o A236264             if(f%4==3,return(0))
+%o A236264         )
+%o A236264     );
+%o A236264     f=factor(f);
+%o A236264     for(i=1,#f[,1],
+%o A236264         if(f[i,2]%2&&f[i,1]%4==3,return(0))
+%o A236264     );
+%o A236264     1
+%o A236264 }; \\ _Charles R Greathouse IV_, Jan 21 2014
+%o A236264 (Python)
+%o A236264 from itertools import count, islice
+%o A236264 from sympy import factorint, fibonacci
+%o A236264 def A236264_gen(): # generator of terms
+%o A236264     return filter(lambda n:all(p & 3 != 3 or e & 1 == 0 for p, e in factorint(fibonacci(n)).items()),count(0,2))
+%o A236264 a236264_list = list(islice(A236264_gen(),10)) # _Chai Wah Wu_, Jun 27 2022
+%Y A236264 Cf. A000045, A001481, A124132.
+%K A236264 nonn,more
+%O A236264 1,2
+%A A236264 _Jean-François Alcover_, Jan 21 2014
+%E A236264 a(32)-a(42) from _Charles R Greathouse IV_, Jan 21 2014
+%E A236264 a(43) from _Chai Wah Wu_, Jul 23 2020

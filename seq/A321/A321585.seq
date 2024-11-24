@@ -1,0 +1,28 @@
+%I A321585 #14 Jan 19 2024 10:55:25
+%S A321585 1,1,3,11,52,312,2290,19920,200522,2293677,29389005,416998371,
+%T A321585 6490825772,109972169413,2014696874717,39684502845893,836348775861331,
+%U A321585 18777970539419957,447471215460930665,11279275874429302811,299844572529989373703,8383794111721619471384,245956060268568277412668
+%N A321585 Number of connected nonnegative integer matrices with sum of entries equal to n and no zero rows or columns.
+%C A321585 A matrix is connected if the positions in each row (or each column) of the nonzero entries form a connected hypergraph.
+%H A321585 Andrew Howroyd, <a href="/A321585/b321585.txt">Table of n, a(n) for n = 0..100</a>
+%e A321585 The a(3) = 11 matrices:
+%e A321585   [3] [2 1] [1 2] [1 1 1]
+%e A321585 .
+%e A321585   [2] [1 1] [1 1] [1] [1 0] [0 1]
+%e A321585   [1] [1 0] [0 1] [2] [1 1] [1 1]
+%e A321585 .
+%e A321585   [1]
+%e A321585   [1]
+%e A321585   [1]
+%t A321585 multsubs[set_,k_]:=If[k==0,{{}},Join@@Table[Prepend[#,set[[i]]]&/@multsubs[Drop[set,i-1],k-1],{i,Length[set]}]];
+%t A321585 csm[s_]:=With[{c=Select[Tuples[Range[Length[s]],2],And[OrderedQ[#],UnsameQ@@#,Length[Intersection@@s[[#]]]>0]&]},If[c=={},s,csm[Union[Append[Delete[s,List/@c[[1]]],Union@@s[[c[[1]]]]]]]]];
+%t A321585 Table[Length[Select[multsubs[Tuples[Range[n],2],n],And[Union[First/@#]==Range[Max@@First/@#],Union[Last/@#]==Range[Max@@Last/@#],Length[csm[Map[Last,GatherBy[#,First],{2}]]]==1]&]],{n,5}] (* Mathematica 7.0+ *)
+%o A321585 (PARI)
+%o A321585 NonZeroCols(M)={my(C=Vec(M)); Mat(vector(#C, n,  sum(k=1, n, (-1)^(n-k)*binomial(n,k)*C[k])))}
+%o A321585 ConnectedMats(M)={my([m,n]=matsize(M), R=matrix(m,n)); for(m=1, m, for(n=1, n, R[m,n] = M[m,n] - sum(i=1, m-1, sum(j=1, n-1, binomial(m-1,i-1)*binomial(n,j)*R[i,j]*M[m-i,n-j])))); R}
+%o A321585 seq(n)={my(M=matrix(n,n,i,j,sum(k=1, n, binomial(i*j+k-1,k)*x^k, O(x*x^n) ))); Vec(1 + vecsum(vecsum(Vec( ConnectedMats( NonZeroCols( NonZeroCols(M)~))))))} \\ _Andrew Howroyd_, Jan 17 2024
+%Y A321585 Cf. A007718, A056156, A120733, A319557, A319565, A319647, A319616-A319629, A321584.
+%K A321585 nonn
+%O A321585 0,3
+%A A321585 _Gus Wiseman_, Nov 13 2018
+%E A321585 a(7) onwards from _Andrew Howroyd_, Jan 17 2024

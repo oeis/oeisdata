@@ -1,0 +1,71 @@
+%I A373195 #26 Jun 17 2024 15:32:12
+%S A373195 1,2,3,4,5,6,7,8,8,8,9,9,10,10,10,10,11,12,13,13,13,13,14,14,14,15,15,
+%T A373195 15,16,16,17,17,17,18,18,18,19
+%N A373195 Cardinality of the largest subset of {1,...,n} such that no six distinct elements of this subset multiply to a square.
+%C A373195 a(n) >= A000720(n) + A000720(n/2).
+%C A373195 a(n) ~ 3n/2log n (Erdős-Sárközy-Sós).  Best bounds currently are due to Pach-Vizer.
+%C A373195 a(n+1)-a(n) is either 0 or 1 for any n. (Is equal to 1 when n+1 is prime.)
+%C A373195 If "six" is replaced by "one", "two", "three", "four", "five", or "any odd", one obtains A028391, A013928, A372306, A373178, A373119, and A373114 respectively.
+%H A373195 P. Erdős, A. Sárközy, and V. T. Sós, <a href="https://doi.org/10.1016/0195-6698(95)90039-X">On Product Representations of Powers, I</a>, Europ. J. Combinatorics 16 (1995), 567-588.
+%H A373195 P. Pach and M. Vizer, <a href="https://doi.org/10.37236/11477">Improved Lower Bounds for Multiplicative Square-Free Sequences</a>, The Electronic Journal of Combinatorics, Volume 30, Issue 4 (2023), P4.31.
+%e A373195 a(9)=8, because {1,2,3,4,5,7,8,9} does not contain six distinct elements that multiply to a square, but {1,2,3,4,5,6,7,8,9} has 1*2*3*4*6*9 = 36^2.
+%e A373195 From _David A. Corneth_, May 29 2024: (Start)
+%e A373195 a(p) = a(p-1) + 1 for prime p.
+%e A373195 a(k^2) = a(k^2 - 1) for k >= 6.
+%e A373195 a(s*k^2) = a(s*k^2 - 1) + a(36*k^2) - a(36*k^2 - 1). (End)
+%o A373195 (Python)
+%o A373195 from math import isqrt
+%o A373195 def is_square(n):
+%o A373195     return isqrt(n) ** 2 == n
+%o A373195 def precompute_tuples(N):
+%o A373195     tuples = []
+%o A373195     for i in range(1, N + 1):
+%o A373195         for j in range(i + 1, N + 1):
+%o A373195             for k in range(j + 1, N + 1):
+%o A373195                 for l in range(k + 1, N + 1):
+%o A373195                     for m in range(l + 1, N + 1):
+%o A373195                         for n in range(m + 1, N + 1):
+%o A373195                             if is_square(i * j * k * l * m * n):
+%o A373195                                 tuples.append((i, j, k, l, m, n))
+%o A373195     return tuples
+%o A373195 def valid_subset(A, tuples):
+%o A373195     set_A = set(A)
+%o A373195     for i, j, k, l, m, n in tuples:
+%o A373195         if i in set_A and j in set_A and k in set_A and l in set_A and m in set_A and n in set_A:
+%o A373195             return False
+%o A373195     return True
+%o A373195 def largest_subset_size(N, tuples):
+%o A373195     from itertools import combinations
+%o A373195     for size in reversed(range(1, N + 1)):
+%o A373195         for subset in combinations(range(1, N + 1), size):
+%o A373195             if valid_subset(subset, tuples):
+%o A373195                 return size
+%o A373195 for N in range(1, 26):
+%o A373195     print(largest_subset_size(N, precompute_tuples(N)))
+%o A373195 (Python)
+%o A373195 from math import prod
+%o A373195 from itertools import combinations
+%o A373195 from functools import lru_cache
+%o A373195 from sympy.ntheory.primetest import is_square
+%o A373195 @lru_cache(maxsize=None)
+%o A373195 def A373195(n):
+%o A373195     if n==1: return 1
+%o A373195     i = A373195(n-1)+1
+%o A373195     if sum(1 for p in combinations(range(1,n),5) if is_square(n*prod(p))) > 0:
+%o A373195         a = [set(p) for p in combinations(range(1,n+1),6) if is_square(prod(p))]
+%o A373195         for q in combinations(range(1,n),i-1):
+%o A373195             t = set(q)|{n}
+%o A373195             if not any(s<=t for s in a):
+%o A373195                 return i
+%o A373195         else:
+%o A373195             return i-1
+%o A373195     else:
+%o A373195         return i # _Chai Wah Wu_, May 30 2024
+%Y A373195 Similar to A028391, A013928, A372306, A373178, A373119, A373114.
+%Y A373195 Cf. A000720.
+%K A373195 nonn,more
+%O A373195 1,2
+%A A373195 _Terence Tao_, May 27 2024
+%E A373195 a(26)-a(27) from _Paul Muljadi_, May 28 2024
+%E A373195 a(28)-a(35) from _Michael S. Branicky_, May 29 2024
+%E A373195 a(36)-a(37) from _David A. Corneth_, May 29 2024

@@ -1,0 +1,46 @@
+%I A325109 #19 Jun 03 2021 09:31:33
+%S A325109 1,1,2,3,4,5,8,10,12,15,18,23,28,32,41,52,57,66,76,90,99,117,131,157,
+%T A325109 172,194,216,255,276,313,358,410,447,511,546,630,677,750,818,945,990,
+%U A325109 1108,1200,1338,1429,1606,1713,1928,2062,2263,2412,2725,2847,3142,3389
+%N A325109 Number of integer partitions of n whose distinct parts have no binary containments.
+%C A325109 A pair of positive integers is a binary containment if the positions of 1's in the reversed binary expansion of the first are a subset of the positions of 1's in the reversed binary expansion of the second.
+%H A325109 Fausto A. C. Cariboni, <a href="/A325109/b325109.txt">Table of n, a(n) for n = 0..400</a>, (terms up to a(200) from Alois P. Heinz)
+%e A325109 The a(1) = 1 through a(8) = 12 partitions:
+%e A325109   (1)  (2)   (3)    (4)     (5)      (6)       (7)        (8)
+%e A325109        (11)  (21)   (22)    (41)     (33)      (43)       (44)
+%e A325109              (111)  (211)   (221)    (42)      (52)       (53)
+%e A325109                     (1111)  (2111)   (222)     (61)       (422)
+%e A325109                             (11111)  (411)     (421)      (611)
+%e A325109                                      (2211)    (2221)     (2222)
+%e A325109                                      (21111)   (4111)     (4211)
+%e A325109                                      (111111)  (22111)    (22211)
+%e A325109                                                (211111)   (41111)
+%e A325109                                                (1111111)  (221111)
+%e A325109                                                           (2111111)
+%e A325109                                                           (11111111)
+%p A325109 c:= proc() option remember; local i, x, y;
+%p A325109       x, y:= map(n-> Bits[Split](n), [args])[];
+%p A325109       for i to nops(x) do
+%p A325109         if x[i]=1 and y[i]=0 then return false fi
+%p A325109       od; true
+%p A325109     end:
+%p A325109 b:= proc(n, i, s) option remember; `if`(n=0, 1, `if`(i<1, 0,
+%p A325109       b(n, i-1, s)+`if`(ormap(j-> c(i, j), s), 0, add(
+%p A325109       b(n-i*j, i-1, s union {i}), j=1..n/i))))
+%p A325109     end:
+%p A325109 a:= n-> b(n$2, {}):
+%p A325109 seq(a(n), n=0..55);  # _Alois P. Heinz_, Mar 29 2019
+%t A325109 binpos[n_]:=Join@@Position[Reverse[IntegerDigits[n,2]],1];
+%t A325109 stableQ[u_,Q_]:=!Apply[Or,Outer[#1=!=#2&&Q[#1,#2]&,u,u,1],{0,1}];
+%t A325109 Table[Length[Select[IntegerPartitions[n],stableQ[#,SubsetQ[binpos[#1],binpos[#2]]&]&]],{n,0,15}]
+%t A325109 (* Second program: *)
+%t A325109 c[args_List] := c[args] = Module[{i, x, y}, {x, y} = Reverse@IntegerDigits[#, 2]& /@ args; For[i = 1, i <= Length[x], i++, If[x[[i]] == 1 && y[[i]] == 0, Return[False]]]; True];
+%t A325109 b[n_, i_, s_List] := b[n, i, s] = If[n == 0, 1, If[i < 1, 0, b[n, i - 1, s] + If[AnyTrue[s, c[{i, #}]&], 0, Sum[b[n - i*j, i-1, s ~Union~ {i}], {j, 1, n/i}]]]];
+%t A325109 a[n_] := b[n, n, {}];
+%t A325109 a /@ Range[0, 55] (* _Jean-François Alcover_, Jun 03 2021, after _Alois P. Heinz_ *)
+%Y A325109 Cf. A019565, A247935, A267610, A267700.
+%Y A325109 Cf. A325098, A325101, A325106, A325107, A325108, A325110.
+%K A325109 nonn
+%O A325109 0,3
+%A A325109 _Gus Wiseman_, Mar 28 2019
+%E A325109 a(31)-a(54) from _Alois P. Heinz_, Mar 29 2019

@@ -1,0 +1,39 @@
+%I A322750 #20 Aug 02 2022 09:12:51
+%S A322750 0,0,2,48,2640,250368,34110720,6347520000
+%N A322750 Number of directed graphs of 2*n vertices each having an in-degree and out-degree of 1 such that the graph specifies a pairwise connected gift exchange with no reciprocal gifts.
+%C A322750 The sequence is the number of unique arrangements of directed graphs connecting 2*n vertices, where vertices occur in pairs, and meeting the following requirements:
+%C A322750 1. Each vertex has an out-degree and in-degree of 1.
+%C A322750 2. No edge connects vertices that are paired.
+%C A322750 3. Starting with any pair, following the edges of paired vertices connects all vertices.
+%C A322750 4. There are no closed walks of two vertices (i.e., no reciprocal connections).
+%C A322750 The requirements were chosen to yield a nice gift exchange between a set of couples. Acknowledgement to the additional members of the initial, inspirational gift exchange group: Cat, Brad, Kim, Ada, Graham, Nolan, and Leah.
+%C A322750 The fraction of graphs meeting the requirements is approximately 0.07. Starting with n=2, the fractions are (0.083333333, 0.066666667, 0.06547619, 0.068994709, 0.071212121, 0.072810787). Is there a way to compute the percentage of graphs satisfying the condition in the limit as n approaches infinity?
+%e A322750 For n = 0, there are no pairs; a(0) = 0 since no edges exist.
+%e A322750 For n = 1, there is one pair; a(1) = 0 since requirements 1 and 2 can't be satisfied.
+%e A322750 For n = 2, there are two pairs; a(2) = 2 graphs given by these edge destinations:
+%e A322750     ((2, 3), (1, 0))
+%e A322750     ((3, 2), (0, 1))
+%e A322750 while ((2, 3), (0, 1)) is not allowed because the first and third edges form a 2-vertex walk.
+%o A322750 (Python)
+%o A322750 from itertools import permutations as perm
+%o A322750 def num_connected_by_pairs(assigned, here=0, seen=None):
+%o A322750     seen = (seen, set())[seen is None]
+%o A322750     for proposed in [(here - 1, here), (here, here + 1)][(here % 2) == 0]:
+%o A322750         if proposed not in seen:
+%o A322750             seen.add(proposed)
+%o A322750             num_connected_by_pairs(assigned, assigned[proposed], seen)
+%o A322750     return len(seen)
+%o A322750 def valid(assigned, pairs):
+%o A322750     self_give = [assigned[i] == i for i in range(len(assigned))]
+%o A322750     is_reciprocal = [assigned[a] == i for i, a in enumerate(assigned)]
+%o A322750     same_pair = [assigned[i] == i + 1 or assigned[i+1] == i for i in range(0, 2*pairs, 2)]
+%o A322750     if pairs == 0 or True in self_give + is_reciprocal + same_pair:
+%o A322750         return False
+%o A322750     num_connected = [num_connected_by_pairs(assigned, here) for here in range(2, 2*pairs, 2)]
+%o A322750     return min(num_connected) == 2*pairs
+%o A322750 print([len([x for x in perm(range(2*pairs)) if valid(x, pairs)]) for pairs in range(0, 6)])
+%Y A322750 A322751 allows reciprocal connections.
+%Y A322750 A010050 is the number of graphs (2n)!.
+%K A322750 nonn,more
+%O A322750 0,3
+%A A322750 _Russell Y. Webb_, Dec 25 2018

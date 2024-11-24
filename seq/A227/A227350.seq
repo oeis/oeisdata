@@ -1,0 +1,30 @@
+%I A227350 #16 Mar 03 2016 02:53:52
+%S A227350 1,1,1,1,2,1,1,1,3,2,1,1,2,1,1,1,4,3,2,2,2,1,1,1,3,2,1,1,2,1,1,1,5,4,
+%T A227350 3,3,4,2,2,2,3,2,1,1,2,1,1,1,4,3,2,2,2,1,1,1,3,2,1,1,2,1,1,1,6,5,4,4,
+%U A227350 6,3,3,3,6,4,2,2,4,2,2,2,4,3,2,2,2,1,1
+%N A227350 Product of lengths of runs of 0-bits in binary representation of n, or 1 if no nonleading zeros present.
+%H A227350 Antti Karttunen, <a href="/A227350/b227350.txt">Table of n, a(n) for n = 0..8192</a>
+%F A227350 A167489(n) = a(n) * A227349(n).
+%F A227350 A227193(n) = A227349(n) - a(n).
+%F A227350 A227355(n) = a(A003714(n)).
+%F A227350 A003714 gives the only terms k for which a(k) = A167489(k).
+%e A227350 a(0) = 1, regardless whether one considers the binary representation of zero to have one zero or no digits at all, because also the empty product is 1. Similarly for any numbers of form (2^k)-1, where no nonleading 0-bits occur, the result of an empty product is always 1.
+%e A227350 a(8) = 3, as 8 is "1000" in binary, and there is one run of three 0-bits present.
+%e A227350 a(68) = 6, 68 is "1000100" in binary, there are one run of three 0-bits and one run of two 0-bits, thus 2*3 = 6.
+%p A227350 a:= proc(n) local i, m, r; m, r:= n, 1;
+%p A227350       while m>0 do
+%p A227350         for i from 0 while irem(m, 2, 'h')=0 do m:=h od;
+%p A227350         while irem(m, 2, 'h')=1 do m:=h od;
+%p A227350         r:= r*max(i, 1)
+%p A227350       od; r
+%p A227350     end:
+%p A227350 seq(a(n), n=0..100);  # _Alois P. Heinz_, Jul 11 2013
+%t A227350 a[n_] := Times @@ Length /@ Select[Split @ IntegerDigits[n, 2], #[[1]] == 0 &]; Array[a, 100, 0] (* _Jean-François Alcover_, Mar 03 2016 *)
+%o A227350 (Scheme)
+%o A227350 (define (A227350 n) (apply * (bisect (reverse (binexp->runcount1list n)) (modulo n 2))))
+%o A227350 (define (bisect lista parity) (let loop ((lista lista) (i 0) (z (list))) (cond ((null? lista) (reverse! z)) ((eq? i parity) (loop (cdr lista) (modulo (1+ i) 2) (cons (car lista) z))) (else (loop (cdr lista) (modulo (1+ i) 2) z)))))
+%o A227350 (define (binexp->runcount1list n) (if (zero? n) (list) (let loop ((n n) (rc (list)) (count 0) (prev-bit (modulo n 2))) (if (zero? n) (cons count rc) (if (eq? (modulo n 2) prev-bit) (loop (floor->exact (/ n 2)) rc (1+ count) (modulo n 2)) (loop (floor->exact (/ n 2)) (cons count rc) 1 (modulo n 2)))))))
+%Y A227350 Cf. A023416 (sum of lengths of runs of 0-bits), A167489, A227349, A227355, A227193.
+%K A227350 nonn,base,look
+%O A227350 0,5
+%A A227350 _Antti Karttunen_, Jul 08 2013

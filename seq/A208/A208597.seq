@@ -1,0 +1,58 @@
+%I A208597 #27 Nov 08 2017 02:28:08
+%S A208597 1,1,2,1,3,3,1,4,7,6,1,5,13,23,11,1,6,21,60,77,26,1,7,31,125,291,297,
+%T A208597 57,1,8,43,226,791,1564,1163,142,1,9,57,371,1761,5457,8671,4783,351,1,
+%U A208597 10,73,568,3431,14838,39019,49852,20041,902,1,11,91,825,6077,34153,129823
+%N A208597 T(n,k) = number of n-bead necklaces labeled with numbers -k..k not allowing reversal, with sum zero.
+%H A208597 Andrew Howroyd, <a href="/A208597/b208597.txt">Table of n, a(n) for n = 1..1275</a> (first 185 terms from R. H. Hardin)
+%F A208597 T(n,k) = Sum_{d|n} phi(n/d) * A201552(d, k). - _Andrew Howroyd_, Oct 14 2017
+%F A208597 Empirical for row n:
+%F A208597 n=1: a(k) = 1.
+%F A208597 n=2: a(k) = k + 1.
+%F A208597 n=3: a(k) = k^2 + k + 1.
+%F A208597 n=4: a(k) = (4/3)*k^3 + 2*k^2 + (5/3)*k + 1.
+%F A208597 n=5: a(k) = (23/12)*k^4 + (23/6)*k^3 + (37/12)*k^2 + (7/6)*k + 1.
+%F A208597 n=6: a(k) = (44/15)*k^5 + (22/3)*k^4 + (23/3)*k^3 + (14/3)*k^2 + (12/5)*k + 1.
+%F A208597 n=7: a(k) = (841/180)*k^6 + (841/60)*k^5 + (325/18)*k^4 + (51/4)*k^3 + (949/180)*k^2 + (37/30)*k + 1.
+%e A208597 Table starts
+%e A208597 ...1....1.....1......1.......1.......1........1........1........1.........1
+%e A208597 ...2....3.....4......5.......6.......7........8........9.......10........11
+%e A208597 ...3....7....13.....21......31......43.......57.......73.......91.......111
+%e A208597 ...6...23....60....125.....226.....371......568......825.....1150......1551
+%e A208597 ..11...77...291....791....1761....3431.....6077....10021....15631.....23321
+%e A208597 ..26..297..1564...5457...14838...34153....69784...130401...227314....374825
+%e A208597 ..57.1163..8671..39019..129823..353333...833253..1764925..3438877...6267735
+%e A208597 .142.4783.49852.288317.1172298.3770475.10259448.24627705.53630854.108036775
+%t A208597 comps[r_, m_, k_] := Sum[(-1)^i*Binomial[r-1-i*m, k-1]*Binomial[k, i], {i, 0, Floor[(r-k)/m]}]; a[n_, k_] := DivisorSum[n, EulerPhi[n/#] comps[#*(k + 1), 2k+1, #]&]/n; Table[a[n-k+1, k], {n, 1, 11}, {k, n, 1, -1}] // Flatten (* _Jean-François Alcover_, Oct 07 2017, after _Andrew Howroyd_'s PARI code *)
+%o A208597 (PARI)
+%o A208597 comps(r,m,k)=sum(i=0,floor((r-k)/m),(-1)^i*binomial(r-1-i*m, k-1)*binomial(k, i));
+%o A208597 a(n,k)=sumdiv(n,d,eulerphi(n/d)*comps(d*(k+1), 2*k+1, d))/n;
+%o A208597 for(n=1,8,for(k=1,10,print1(a(n,k),", ")); print()); \\ _Andrew Howroyd_, May 16 2017
+%o A208597 (Python)
+%o A208597 from sympy import binomial, divisors, totient, floor
+%o A208597 def comps(r, m, k): return sum([(-1)**i*binomial(r - 1 - i*m, k - 1)*binomial(k, i) for i in range(floor((r - k)/m) + 1)])
+%o A208597 def a(n, k): return sum([totient(n//d)*comps(d*(k + 1), 2*k + 1, d) for d in divisors(n)])//n
+%o A208597 for n in range(1, 12): print([a(k, n - k + 1) for k in range(1, n + 1)]) # _Indranil Ghosh_, Nov 07 2017, after PARI code
+%o A208597 (R)
+%o A208597 require(numbers)
+%o A208597 comps <- function(r, m, k) {
+%o A208597   S <- numeric()
+%o A208597   for (i in 0:floor((r-k)/m)) S <- c(S, (-1)^i*choose(r-1-i*m, k-1)*choose(k, i))
+%o A208597   return(sum(S))
+%o A208597 }
+%o A208597 a <- function(n, k) {
+%o A208597   S <- numeric()
+%o A208597   for (d in divisors(n)) S <- c(S, eulersPhi(n/d)*comps(d*(k+1), 2*k+1, d))
+%o A208597   return(sum(S)/n)
+%o A208597 }
+%o A208597 for (n in 1:11) {
+%o A208597   for (k in 1:n) {
+%o A208597     print(a(k,n-k+1))
+%o A208597   }
+%o A208597 } # _Indranil Ghosh_, Nov 07 2017, after PARI code
+%Y A208597 Columns 1-7 are A208602, A208591, A208592, A208593, A208594, A208595, A208596.
+%Y A208597 Rows 3-7 are A002061(n+1), A208598, A208599, A208600, A208601.
+%Y A208597 Main diagonal is A208590.
+%Y A208597 Cf. A201552, A286928, A208825.
+%K A208597 nonn,tabl
+%O A208597 1,3
+%A A208597 _R. H. Hardin_, Feb 29 2012

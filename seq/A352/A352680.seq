@@ -1,0 +1,69 @@
+%I A352680 #20 Mar 31 2022 18:12:41
+%S A352680 1,1,0,1,1,1,1,2,2,3,1,3,3,5,9,1,4,4,7,14,28,1,5,5,9,19,42,90,1,6,6,
+%T A352680 11,24,56,132,297,1,7,7,13,29,70,174,429,1001,1,8,8,15,34,84,216,561,
+%U A352680 1430,3432,1,9,9,17,39,98,258,693,1859,4862,11934,1,10,10,19,44,112,300,825,2288,6292,16796,41990
+%N A352680 Array read by ascending antidiagonals. A family of Catalan-like sequences. A(n, k) = [x^k] ((n - 1)*x + 1)*(1 - sqrt(1 - 4*x))/(2*x).
+%F A352680 A(n, k) = (n-1)*CatalanNumber(k-1) + CatalanNumber(k) for n >= 0 and k >= 1, A(n, 0) = 1. (Cf. A352682.)
+%F A352680 D-finite with recurrence: A(n, k) = A(n, k-1)*((6 - 4*k)*(n - 3 + k*(3 + n)))/((1 + k)*(6 - k*(3 + n))) for k >= 3, otherwise 1, n, n + 1 for k = 0, 1, 2.
+%F A352680 Given a list T let PS(T) denote the list of partial sums of T. Given two list S and T let [S, T] denote the concatenation of the lists. Further let P[end] denote the last element of the list P. Row n of the array A with length k can be computed by the following procedure:
+%F A352680      A = [n], P = [1], R = [1];
+%F A352680      Repeat k times: R = [R, A], P = PS([P, A]), A = [P[end]];
+%F A352680      Return R.
+%e A352680 Array starts:
+%e A352680 n\k 0, 1,  2,  3,  4,   5,   6,    7,    8,     9, ...
+%e A352680 ------------------------------------------------------
+%e A352680 [0] 1, 0,  1,  3,  9,  28,  90,  297, 1001,  3432, ... A071724
+%e A352680 [1] 1, 1,  2,  5, 14,  42, 132,  429, 1430,  4862, ... A000108
+%e A352680 [2] 1, 2,  3,  7, 19,  56, 174,  561, 1859,  6292, ... A071716
+%e A352680 [3] 1, 3,  4,  9, 24,  70, 216,  693, 2288,  7722, ... A038629
+%e A352680 [4] 1, 4,  5, 11, 29,  84, 258,  825, 2717,  9152, ... A352681
+%e A352680 [5] 1, 5,  6, 13, 34,  98, 300,  957, 3146, 10582, ...
+%e A352680 [6] 1, 6,  7, 15, 39, 112, 342, 1089, 3575, 12012, ...
+%e A352680 [7] 1, 7,  8, 17, 44, 126, 384, 1221, 4004, 13442, ...
+%e A352680 [8] 1, 8,  9, 19, 49, 140, 426, 1353, 4433, 14872, ...
+%e A352680 [9] 1, 9, 10, 21, 54, 154, 468, 1485, 4862, 16302, ...
+%e A352680 .
+%e A352680 Seen as a triangle:
+%e A352680 [0] 1;
+%e A352680 [1] 1, 0;
+%e A352680 [1] 1, 1, 1;
+%e A352680 [2] 1, 2, 2,  3;
+%e A352680 [3] 1, 3, 3,  5,  9;
+%e A352680 [4] 1, 4, 4,  7, 14, 28;
+%e A352680 [5] 1, 5, 5,  9, 19, 42,  90;
+%e A352680 [6] 1, 6, 6, 11, 24, 56, 132, 297;
+%p A352680 for n from 0 to 9 do
+%p A352680     ogf := ((n - 1)*x + 1)*(1 - sqrt(1 - 4*x))/(2*x);
+%p A352680     ser := series(ogf, x, 12):
+%p A352680     print(seq(coeff(ser, x, k), k = 0..9)); od:
+%p A352680 # Alternative:
+%p A352680 alias(PS = ListTools:-PartialSums):
+%p A352680 CatalanRow := proc(n, len) local a, k, P, R;
+%p A352680 a := n; P := [1]; R := [1];
+%p A352680 for k from 0 to len-1 do
+%p A352680     R := [op(R), a]; P := PS([op(P), a]); a := P[-1] od;
+%p A352680 R end: seq(lprint(CatalanRow(n, 9)), n = 0..9);
+%p A352680 # Recurrence:
+%p A352680 A := proc(n, k) option remember: if k < 3 then [1, n, n + 1][k + 1] else
+%p A352680 A(n, k-1)*((6 - 4*k)*(n - 3 + k*(3 + n)))/((1 + k)*(6 - k*(3 + n))) fi end:
+%p A352680 seq(print(seq(A(n, k), k = 0..9)), n = 0..9);
+%t A352680 T[n_, 0] := 1;
+%t A352680 T[n_, k_] := (n - 1) CatalanNumber[k - 1] + CatalanNumber[k];
+%t A352680 Table[T[n, k], {n, 0, 9}, {k, 0, 9}] // TableForm
+%o A352680 (Julia) # Compare with the Julia function A352686Row.
+%o A352680 function A352680Row(n, len)
+%o A352680     a = BigInt(n)
+%o A352680     P = BigInt[1]; T = BigInt[1]
+%o A352680     for k in 0:len-1
+%o A352680         T = push!(T, a)
+%o A352680         P = cumsum(push!(P, a))
+%o A352680         a = P[end]
+%o A352680     end
+%o A352680 T end
+%o A352680 for n in 0:9 println(A352680Row(n, 9)) end
+%Y A352680 Rows: A071724, A000108, A071716, A038629, A352681.
+%Y A352680 Diagonals: A077587 (main), A271823.
+%Y A352680 Compare A352682 for a similar array based on the Bell numbers.
+%K A352680 nonn,tabl
+%O A352680 0,8
+%A A352680 _Peter Luschny_, Mar 27 2022

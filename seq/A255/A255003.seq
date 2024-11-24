@@ -1,0 +1,56 @@
+%I A255003 #43 Apr 30 2019 08:24:10
+%S A255003 1,2,4,3,5,6,8,10,7,9,12,11,13,14,15,16,18,20,17,19,22,21,24,26,23,25,
+%T A255003 28,27,30,29,32,31,33,34,35,36,38,40,37,39,42,41,44,43,46,45,47,48,50,
+%U A255003 52,49,51,54,53,56,55,58,57,60,59,62,61,64,66,63,65,68,67,70,69,72,71,73
+%N A255003 Lexicographically earliest permutation of positive integers such that a(a(n)+a(n+1)) is even for all n.
+%C A255003 From _Eric Angelini_, Feb 11 2015: (Start)
+%C A255003 Let S denote this sequence.  Then:
+%C A255003 a)  take two adjacent integers x and y in S
+%C A255003 b)  let (x + y) = z
+%C A255003 c)  a(z) is even.
+%C A255003 S is extended with the smallest integer not yet in S and not leading to a contradiction.
+%C A255003 Additional remarks:
+%C A255003 The sequence T where a(a(n)+a(n+1)) is always odd is simply A000027.
+%C A255003 But if we force a(1)=2 we then get again a permutation of A000027:
+%C A255003 U = 2, 1, 3, 5, 4, 6, 7, 9, 11, 13, 8, 10, 15, 12, ,14, 17, 16, 19, 18, 21, 23, 20, 22, 25, 27, 29, 31, 24, 26, 28, 33, ... (A256210).
+%C A255003 The sequence V where a(a(n)+a(n+1)) is always prime is also a permutation of A000027:
+%C A255003 V = 1, 2, 3, 4, 5, 6, 7, 8, 11, 9, 13, 10, 17, 12, 19, 14, 15, 23, 29, 31, 16, 37, 41, 18, ... (A255004).
+%C A255003 (End)
+%C A255003 At least for the first 73 elements, successive blocks of numbers of size 2^m for various m>=0 each form permutations of some set of consecutive positive integers. We see blocks [1], [2], [4, 3], ..., [8, 10, 7, 9], ..., [62, 61, 64, 66, 63, 65, 68, 67]. If b(0) is the first element in such a block and b(2^m-1) the last, then for 0 <= i <= 2^m-1, b(i) + b(2^m-i-1) is constant. For example, in the latter block, 62 + 67 = 61 + 68 = 64 + 65 = 66 + 63, etc. - _David A. Corneth_, Mar 22 2015
+%H A255003 Alois P. Heinz, <a href="/A255003/b255003.txt">Table of n, a(n) for n = 1..20000</a>
+%e A255003 Checking the definition:
+%e A255003 n = 1  2  3  4  5  6  7   8  9  10 11  12  13  14  15  16  17  18  19  20  21  22 ...
+%e A255003 S = 1, 2, 4, 3, 5, 6, 8, 10, 7, 9, 12, 11, 13, 14, 15, 16, 18, 20, 17, 19, 22, 21,...
+%e A255003 for n=1 then a(1)=1 and a(2)=2 and a(sum) reads a(1+2) reads a(3) which is 4 (even);
+%e A255003 for n=2 then a(2)=2 and a(3)=4 and a(sum) reads a(2+4) reads a(6) which is 6 (even);
+%e A255003 for n=3 then a(3)=4 and a(4)=3 and a(sum) reads a(4+3) reads a(7) which is 8 (even);
+%e A255003 for n=4 then a(4)=3 and a(5)=5 and a(sum) reads a(3+5) reads a(8) which is 10 (even);
+%e A255003 ... etc.
+%p A255003 N:= 100: # to get a(n) for n <= N
+%p A255003 maxodd:= 1:
+%p A255003 maxeven:= 0:
+%p A255003 a[1]:= 1:
+%p A255003 needeven:= {}:
+%p A255003 for n from 2 to N do
+%p A255003   if member(n,needeven) or maxeven < maxodd then
+%p A255003      a[n]:= maxeven + 2;
+%p A255003      maxeven:= a[n];
+%p A255003   else
+%p A255003      a[n]:= maxodd + 2;
+%p A255003      maxodd:= a[n];
+%p A255003   fi;
+%p A255003   needeven:= needeven union {a[n-1]+a[n]};
+%p A255003 od:
+%p A255003 seq(a[n],n=1..N); # _Robert Israel_, Mar 26 2015
+%t A255003 M = 100;
+%t A255003 maxodd = 1;
+%t A255003 maxeven = 0;
+%t A255003 a[1] = 1;
+%t A255003 needeven = {};
+%t A255003 For[n = 2, n <= M, n++, If[ MemberQ[needeven, n] || maxeven < maxodd, a[n] = maxeven + 2; maxeven = a[n], a[n] = maxodd + 2; maxodd = a[n]]; needeven = needeven ~Union~ {a[n-1] + a[n]}];
+%t A255003 Array[a, M] (* _Jean-François Alcover_, Apr 30 2019, after _Robert Israel_ *)
+%o A255003 (PARI) {a=vector(100,i,1); u=[1]/* used numbers beyond u[1] */; for(n=2,#a, if( a[n] < 0, a[n]=u[1]-u[1]%2; while(setsearch(u,a[n]+=2),), a[n]=u[1]; while(setsearch(u,a[n]++),)); u=setunion(u,[a[n]]); while( #u>1 && u[2]==u[1]+1, u=u[2..#u]); a[n]+a[n-1]>#a || a[a[n]+a[n-1]]=-1)}
+%Y A255003 Cf. A000027, A256210, A255004.
+%K A255003 nonn
+%O A255003 1,2
+%A A255003 _Eric Angelini_ and _M. F. Hasler_, Feb 11 2015

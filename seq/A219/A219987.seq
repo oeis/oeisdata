@@ -1,0 +1,57 @@
+%I A219987 #40 Jul 26 2023 19:41:47
+%S A219987 1,1,1,1,0,1,1,1,1,1,1,0,2,0,1,1,1,5,5,1,1,1,0,11,8,11,0,1,1,1,24,55,
+%T A219987 55,24,1,1,1,0,53,140,380,140,53,0,1,1,1,117,633,2319,2319,633,117,1,
+%U A219987 1,1,0,258,1984,15171,21272,15171,1984,258,0,1
+%N A219987 Number A(n,k) of tilings of a k X n rectangle using dominoes and right trominoes; square array A(n,k), n>=0, k>=0, read by antidiagonals.
+%H A219987 Alois P. Heinz, <a href="/A219987/b219987.txt">Antidiagonals n = 0..31, flattened</a>
+%H A219987 Wikipedia, <a href="https://en.wikipedia.org/wiki/Domino_(mathematics)">Domino</a>
+%H A219987 Wikipedia, <a href="https://en.wikipedia.org/wiki/Tromino">Tromino</a>
+%e A219987 A(3,3) = 8, because there are 8 tilings of a 3 X 3 rectangle using dominoes and right trominoes:
+%e A219987   .___._.   .___._.   .___._.   .___._.
+%e A219987   |___| |   |___| |   |___| |   |_. | |
+%e A219987   | ._|_|   | | |_|   | |___|   | |_|_|
+%e A219987   |_|___|   |_|___|   |_|___|   |_|___|
+%e A219987   ._.___.   ._.___.   ._.___.   ._.___.
+%e A219987   | |___|   | | ._|   | |___|   | |___|
+%e A219987   |___| |   |_|_| |   |_|_. |   |_| | |
+%e A219987   |___|_|   |___|_|   |___|_|   |___|_|
+%e A219987 Square array A(n,k) begins:
+%e A219987   1,  1,   1,    1,     1,       1,         1,          1, ...
+%e A219987   1,  0,   1,    0,     1,       0,         1,          0, ...
+%e A219987   1,  1,   2,    5,    11,      24,        53,        117, ...
+%e A219987   1,  0,   5,    8,    55,     140,       633,       1984, ...
+%e A219987   1,  1,  11,   55,   380,    2319,     15171,      96139, ...
+%e A219987   1,  0,  24,  140,  2319,   21272,    262191,    2746048, ...
+%e A219987   1,  1,  53,  633, 15171,  262191,   5350806,  100578811, ...
+%e A219987   1,  0, 117, 1984, 96139, 2746048, 100578811, 3238675344, ...
+%p A219987 b:= proc(n, l) option remember; local k, t;
+%p A219987       if max(l[])>n then 0 elif n=0 or l=[] then 1
+%p A219987     elif min(l[])>0 then t:=min(l[]); b(n-t, map(h->h-t, l))
+%p A219987     else for k do if l[k]=0 then break fi od;
+%p A219987          b(n, subsop(k=2, l))+
+%p A219987          `if`(k>1 and l[k-1]=1, b(n, subsop(k=2, k-1=2, l)), 0)+
+%p A219987          `if`(k<nops(l) and l[k+1]=1, b(n, subsop(k=2, k+1=2, l)), 0)+
+%p A219987          `if`(k<nops(l) and l[k+1]=0, b(n, subsop(k=1, k+1=1, l))+
+%p A219987             b(n, subsop(k=1, k+1=2, l))+b(n, subsop(k=2, k+1=1, l)), 0)+
+%p A219987          `if`(k+1<nops(l) and l[k+1]=0 and l[k+2]=0,
+%p A219987             b(n, subsop(k=2, k+1=2, k+2=2, l))+
+%p A219987             b(n, subsop(k=2, k+1=2, k+2=1, l)), 0)
+%p A219987       fi
+%p A219987     end:
+%p A219987 A:= (n, k)-> `if`(n>=k, b(n, [0$k]), b(k, [0$n])):
+%p A219987 seq(seq(A(n, d-n), n=0..d), d=0..14);
+%t A219987 b[n_, l_] := b[n, l] = Module[{k, t}, If[Max[l] > n, 0, If[n == 0 || l == {}, 1, If[Min[l] > 0, t = Min[l]; b[n-t, l-t], For[k = 1, True, k++, If[l[[k]] == 0, Break[]]]; b[n, ReplacePart[l, k -> 2]] + If[k > 1 && l[[k-1]] == 1, b[n, ReplacePart[l, {k -> 2, k-1 -> 2}]], 0] + If[k < Length[l] && l[[k+1]] == 1, b[n, ReplacePart[l, {k -> 2, k+1 -> 2}]], 0] + If[k < Length[l] && l[[k+1]] == 0, b[n, ReplacePart[l, {k -> 1, k+1 -> 1}]] + b[n, ReplacePart[l, {k -> 1, k+1 -> 2}]] + b[n, ReplacePart[l, {k -> 2, k+1 -> 1}]], 0] + If[k+1 < Length[l] && l[[k+1]] == 0 && l[[k+2]] == 0, b[n, ReplacePart[l, {k -> 2, k+1 -> 2, k+2 -> 2}]] + b[n, ReplacePart[l, {k -> 2, k+1 -> 2, k+2 -> 1}]], 0]]]]]; a[n_, k_] := If[n >= k, b[n, Array[0&, k]], b[k, Array[0&, n]]]; Table[Table[a[n, d-n], {n, 0, d}], {d, 0, 14}] // Flatten (* _Jean-François Alcover_, Dec 05 2013, translated from _Alois P. Heinz_'s Maple program *)
+%o A219987 (Sage)
+%o A219987 from sage.combinat.tiling import TilingSolver, Polyomino
+%o A219987 def A(n,k):
+%o A219987     p = Polyomino([(0,0), (0,1)])
+%o A219987     q = Polyomino([(0,0), (0,1), (1,0)])
+%o A219987     T = TilingSolver([p,q], box=[n,k], reusable=True, reflection=True)
+%o A219987     return T.number_of_solutions()
+%o A219987 # _Ralf Stephan_, May 21 2014
+%Y A219987 Columns (or rows) k=0-10 give: A000012, A059841, A052980, A165716, A165791, A219988, A219989, A219990, A219991, A219992, A219993.
+%Y A219987 Main diagonal gives: A219994.
+%Y A219987 Cf. A219866, A364457.
+%K A219987 nonn,tabl
+%O A219987 0,13
+%A A219987 _Alois P. Heinz_, Dec 02 2012

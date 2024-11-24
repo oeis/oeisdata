@@ -1,0 +1,73 @@
+%I A222266 #78 Mar 09 2024 05:59:11
+%S A222266 1,1,2,1,3,1,4,1,5,1,2,3,6,1,7,1,2,4,8,1,9,1,2,5,10,1,11,1,3,4,12,1,
+%T A222266 13,1,2,7,14,1,3,5,15,1,2,8,16,1,17,1,2,9,18,1,19,1,4,5,20,1,3,7,21,1,
+%U A222266 2,11,22,1,23,1,2,3,4,6,8,12,24,1,25,1,2,13,26,1,3,9,27,1,4,7,28,1,29,1,2,3,5,6,10,15,30,1,31,1,2,4,8,16,32,1,3,11,33,1,2,17,34,1,5,7,35
+%N A222266 Irregular triangle which lists the bi-unitary divisors of n in row n.
+%C A222266 The bi-unitary divisors of n are the divisors of n such that the largest common unitary divisor of d and n/d is 1, indicated by A165430.
+%C A222266 The first difference from the triangle A077609 is in row n=16.
+%C A222266 The concept of bi-unitary divisors was introduced by Suryanarayana (1972). - _Amiram Eldar_, Mar 09 2024
+%H A222266 Michael De Vlieger, <a href="/A222266/b222266.txt">Table of n, a(n) for n = 1..13171</a> (rows 1 <= n <= 2000).
+%H A222266 D. Suryanarayana, <a href="https://doi.org/10.1007/BFb0058797">The number of bi-unitary divisors of an integer</a>, in: A. A. Gioia and D. L. Goldsmith (eds.), The Theory of Arithmetic Functions, Lecture Notes in Mathematics, Vol 251, Springer, Berlin, Heidelberg, 1972.
+%e A222266 The table starts
+%e A222266   1;
+%e A222266   1, 2;
+%e A222266   1, 3;
+%e A222266   1, 4;
+%e A222266   1, 5;
+%e A222266   1, 2, 3, 6;
+%e A222266   1, 7;
+%e A222266   1, 2, 4, 8;
+%e A222266   1, 9;
+%e A222266   1, 2, 5, 10;
+%e A222266   1, 11;
+%e A222266   1, 3, 4, 12;
+%e A222266   1, 13;
+%e A222266   1, 2, 7, 14;
+%e A222266   1, 3, 5, 15;
+%e A222266   1, 2, 8, 16;
+%e A222266   1, 17;
+%p A222266 # Return set of unitary divisors of n.
+%p A222266 A077610_row := proc(n)
+%p A222266     local u,d ;
+%p A222266     u := {} ;
+%p A222266     for d in numtheory[divisors](n) do
+%p A222266         if igcd(n/d,d) = 1 then
+%p A222266             u := u union {d} ;
+%p A222266         end if;
+%p A222266     end do:
+%p A222266     u ;
+%p A222266 end proc:
+%p A222266 # true if d is a bi-unitary divisor of n.
+%p A222266 isbiudiv := proc(n,d)
+%p A222266     if n mod d = 0 then
+%p A222266         A077610_row(d) intersect A077610_row(n/d) ;
+%p A222266         if % = {1} then
+%p A222266             true;
+%p A222266         else
+%p A222266             false;
+%p A222266         end if;
+%p A222266     else
+%p A222266         false;
+%p A222266     end if;
+%p A222266 end proc:
+%p A222266 # Return set of bi-unitary divisors of n
+%p A222266 biudivs := proc(n)
+%p A222266     local u,d ;
+%p A222266     u := {} ;
+%p A222266     for d in numtheory[divisors](n) do
+%p A222266         if isbiudiv(n,d) then
+%p A222266             u := u union {d} ;
+%p A222266         end if;
+%p A222266     end do:
+%p A222266     u ;
+%p A222266 end proc:
+%p A222266 for n from 1 to 35 do
+%p A222266     print(op(biudivs(n))) ;
+%p A222266 end do:
+%t A222266 f[n_] := Select[Divisors[n], Function[d, CoprimeQ[d, n/d]]]; Table[Function[d, Union@ Flatten@ Select[Transpose@ {d, n/d}, Last@ Intersection[f@ #1, f@ #2] == 1 & @@ # &]]@ Select[Divisors@ n, # <= Floor@ Sqrt@ n &], {n, 35}] (* _Michael De Vlieger_, May 07 2017 *)
+%o A222266 (PARI) isbdiv(f, d) = {for (i=1, #f~, if(f[i, 2]%2 == 0 && valuation(d, f[i, 1]) == f[i, 2]/2, return(0))); 1;}
+%o A222266 row(n) = {my(d = divisors(n), f = factor(n), bdiv = []); for(i=1, #d, if(isbdiv(f, d[i]), bdiv = concat(bdiv, d[i]))); bdiv; } \\ _Amiram Eldar_, Mar 24 2023
+%Y A222266 Cf. A077609, A165430, A188999 (row sums), A286324 (row lengths).
+%K A222266 nonn,tabf
+%O A222266 1,3
+%A A222266 _R. J. Mathar_, May 05 2013

@@ -1,0 +1,34 @@
+%I A330634 #24 Jul 01 2024 13:10:42
+%S A330634 0,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,1,2,2,2,2,2,3,3,3,3,1,2,2,2,
+%T A330634 3,3,3,3,3,4,1,2,2,3,3,2,3,4,3,4,1,2,2,3,2,3,2,4,2,3,1,2,3,3,3,2,4,3,
+%U A330634 4,3,1,2,3,3,4,4,3,5,3,4,1,2,3,3,3,2,4,3,4,4,1,2,3,4,4,3,3,4,4,3,1,1
+%N A330634 The number of iterations of A330633, the concatenation of the product of adjacent digits, for starting value n before reaching 0, or -1 if this never happens.
+%C A330634 This sequence lists the number of iterations required of the sequence A330633, the concatenation of the product of adjacent digits, for starting value n until the resulting term equals zero. If the iterative cycle never reaches zero and instead diverges with larger and larger numbers with each iteration then a(n) = -1.
+%C A330634 For larger values of n most starting values lead to a divergent series. The first such term is a(166). See the examples below. This reaches 888 after three iterations which is guaranteed to diverge due to the iterative cycle 888 -> 6464 -> 242424 -> 88888, and the series of 8's expands forever. All starting values examined up to 10^8 either reach zero else eventually contain three or more adjacent 8's and will therefore diverge. Unlike similar iterative sequences A329624 and A329198 there appears to be no fixed points or other cyclic behavior.
+%C A330634 Up to n = 10^8 the largest number of iterative steps before reaching zero is 23. This is first seen for n = 3178 and for 18520 other starting values. Considering no larger number of steps was found, nor any during a brief test of random numbers larger than 10^8, it is possible this is the largest number of steps to reach zero for all starting values, with the exception of the repunits comprising k 1's which will take k steps to reach zero. A random number with a large number of digits will almost certainly diverge as it will result in 888, or similar divergent numbers, appearing within the iterative term at some step which, as shown above, will diverge.
+%C A330634 There are numbers other than repunits of k 1's which take k steps to reach 0, e.g. n = 691...16 with m 1's where m is odd or 491...16 where m is even has a(n) = m + 17. - _Robert Israel_, Jul 01 2024
+%H A330634 Robert Israel, <a href="/A330634/b330634.txt">Table of n, a(n) for n = 0..10000</a>
+%e A330634 a(1) = 1 as A330633(1) = 0, taking 1 iteration to reach 0.
+%e A330634 a(11) = 2 as A330633(11) = 1 and A330633(1) = 0, taking 2 iterations to reach 0.
+%e A330634 a(77) = 5 as A330633(77) = 49, A330633(49) = 36, A330633(36) = 18, A330633(18) = 8, A330633(8) = 0, taking 5 iterations to reach 0.
+%e A330634 a(166) = -1 as A330633(166) = 636, A330633(636) = 1818, A330633(1818) = 888, which is guaranteed to diverge.
+%p A330634 f:= proc(n) local L,i;
+%p A330634   L:= convert(n,base,10);
+%p A330634   if ormap(t -> L[t..t+2] = [8,8,8], [$1..nops(L)-2]) then return -1 fi;
+%p A330634   parse(cat(seq(L[i]*L[i+1],i=nops(L)-1 .. 1, -1)))
+%p A330634 end proc;
+%p A330634 for i from 1 to 9 do f(i):= 0 od:
+%p A330634 g:= proc(i) option remember; local v;
+%p A330634     v:= f(i);
+%p A330634     if v = -1 then -1
+%p A330634     else v:= procname(v);
+%p A330634          if v = -1 then -1 else 1 + v fi
+%p A330634     fi;
+%p A330634 end proc:
+%p A330634 g(0):= 0:
+%p A330634 map(g, [$0..200]); # _Robert Israel_, Jun 30 2024
+%t A330634 Array[If[#[[-1]] == 888, -1, Length@ # - 1] &@ NestWhileList[If[Or[# == 0, IntegerLength@ # == 1], 0, FromDigits[Join @@ IntegerDigits[Times @@ # & /@ Partition[IntegerDigits@ #, 2, 1]]]] &, #, And[# > 0, # != 888] &] &, 102, 0] (* _Michael De Vlieger_, Dec 23 2019 *)
+%Y A330634 Cf. A330633, A035931, A329624, A329198.
+%K A330634 nonn,base
+%O A330634 0,12
+%A A330634 _Scott R. Shannon_, Dec 22 2019

@@ -1,0 +1,63 @@
+%I A302403 #40 Feb 08 2020 11:45:40
+%S A302403 2,3,5,7,9,10,11,13,17,19,21,23,25,26,27,29,31,33,34,37,41,43,47,49,
+%T A302403 50,53,57,59,61,63,65,67,69,71,73,74,77,79,81,83,85,87,89,93,97,99,
+%U A302403 101,103,106,107,109,113,121,122,123,125,127,129,130,131,133,137,139,141,146,147,149,151,157,161,163,167
+%N A302403 Generalized chopsticks sequence (see Comments lines for definition).
+%C A302403 Consider a one-handed variant of the game of Chopsticks with 2 players. Each player has a hand of n fingers, starting with i fingers up (i must be > 0). If we simulate the game for any n, we can test whether one player wins all games for i < n.
+%C A302403 Prime numbers appear to be a subset of this sequence. a(n) is generally odd (but not always). Additionally, it appears that for all prime n, the game will always end in the same number of rounds, regardless of i.
+%e A302403 Using the framework listed in the Comments section, let n = 5 and i = 1 (a standard game of 1-handed Chopsticks). Each player has 1 hand with 5 fingers and starts the game with 1 finger up. Player 1 goes first and taps Player 2's hand. Player 2 adds the number from Player 1's hand to their own, unless the amount exceeds 5 (the number of total fingers on the hand), in which case Player 2 subtracts 5 from the result. For example, on the first turn, Player 1 taps Player 2's hand, and Player 2 adds an additional finger (now 2 fingers up). Player 2 goes next, and play proceeds similarly. Player 2 taps their 2 fingers on Player 1's single finger, and Player 1 ends up with 3 fingers up. On the next turn, Player 1 taps their 3 fingers to Player 2's 2 fingers, and Player 2 now has 5 fingers up. The game ends when either player gets exactly 5 fingers up. In this case, Player 1 wins since Player 2 got to 5 fingers first. Clearly, this is a deterministic procedure, and Player 1 will always win when starting with 1 finger up on a hand of 5 fingers. It can be demonstrated that Player 1 will also win when starting with 2, 3, or 4 fingers (given the 5-finger hand). Hence, 5 is in the sequence.
+%e A302403 Note that because i must be greater than 0 and i must be less than n, there are no valid values for i to take when n = 1.  Therefore, 1 should not be part of the sequence. - _Michael Schwalen_, Feb 08 2020
+%o A302403 (R)
+%o A302403 # Generalized Chopsticks Sequence
+%o A302403 # Alexander Robinson & Michael Schwalen
+%o A302403 # Code assistance from Angela Lin
+%o A302403 # April 7, 2018
+%o A302403 # This code simulates the Generalized Chopsticks Sequence (A302403).
+%o A302403 # Load library
+%o A302403 library(dplyr)
+%o A302403 # Create function
+%o A302403 chopsticks <- function(n) {
+%o A302403   # Initialize empty variables
+%o A302403   num_turns_p1_wins=c()
+%o A302403   num_turns_p2_wins=c()
+%o A302403   num_p1_wins=0
+%o A302403   num_p2_wins=0
+%o A302403   # Run loop to determine round winners
+%o A302403   for(j in 1:(n-1)){
+%o A302403     p1=j
+%o A302403     p2=j
+%o A302403     for(i in 1:(n-1)){
+%o A302403       p2=p1+p2
+%o A302403       p1=p2+p1
+%o A302403       i=i+1
+%o A302403       if(p2%%n==0){
+%o A302403         num_p1_wins=num_p1_wins+1
+%o A302403         num_turns_p1_wins=c(num_turns_p1_wins,i)
+%o A302403         break
+%o A302403       }
+%o A302403       if(p1%%n==0){
+%o A302403         num_p2_wins=num_p2_wins+1
+%o A302403         num_turns_p2_wins=c(num_turns_p2_wins,i)
+%o A302403         break
+%o A302403       }
+%o A302403       p2=p2%%n
+%o A302403       p1=p1%%n
+%o A302403     }
+%o A302403   }
+%o A302403   # Determine final winner
+%o A302403   winner <- ifelse(num_p2_wins == n-1,"P2",ifelse(num_p1_wins == n-1,"P1","Neither"))
+%o A302403   return(winner)
+%o A302403 }
+%o A302403 # Simulate n 2:1000
+%o A302403 simulation <- data.frame(n = 2:1000)
+%o A302403 simulation$winner <- lapply(simulation$n,chopsticks)
+%o A302403 # Create sequence
+%o A302403 sequence <- filter(simulation,winner != "Neither")
+%o A302403 sequence <- sequence$n
+%o A302403 sequence
+%o A302403 # Create list output
+%o A302403 paste0(paste0(as.character(sequence),", "), collapse = "")
+%K A302403 nonn
+%O A302403 1,1
+%A A302403 _Alexander Robinson_ and _Michael Schwalen_, Apr 07 2018
+%E A302403 Term 1 removed by _Michael Schwalen_, Feb 08 2020

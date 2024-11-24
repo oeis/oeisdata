@@ -1,0 +1,28 @@
+%I A284276 #33 Apr 13 2023 12:06:23
+%S A284276 1,4,41,916,41099,3528258,561658287
+%N A284276 Number of event structures with n labeled elements.
+%C A284276 Little is known about event structures enumeration. The entries were obtained by a dedicated algorithm recursively constructing all possible event structures. This algorithm has been formally verified to be correct by construction using the theorem prover Isabelle/HOL (see the Links section). The formal proof also formally certifies the correctness of other sequences already in the OEIS (quasi-orders, partial orders). Note that we count what are called "event structures" in the given References. Other sources, however, refer to the same objects as "prime event structures".
+%H A284276 Juliana Bowles and Marco B. Caminati, <a href="https://arxiv.org/abs/1705.07228">A Verified Algorithm Enumerating Event Structures</a>, arXiv:1705.07228 [cs.LO], 2017.
+%H A284276 Marco B. Caminati, <a href="https://bitbucket.org/caminati/oeises/src">Isabelle/HOL code</a>
+%H A284276 Marco B. Caminati and Juliana K. F. Bowles, <a href="https://eprints.lancs.ac.uk/id/eprint/185196/">Representation Theorems Obtained by Mining across Web Sources for Hints</a>, Lancaster Univ. (UK, 2022).
+%H A284276 M. Nielsen, G. Plotkin, and G. Winskel, <a href="https://doi.org/10.1016/0304-3975(81)90112-2">Petri nets, event structures and domains, part I</a>, Theoretical Computer Science 13, no. 1 (1981): 85-108.
+%H A284276 G. Winskel and M. Nielsen, <a href="https://www.irif.fr/~mellies/mpri/mpri-ens/articles/winskel-nielsen-models-for-concurrency.pdf">Models for concurrency</a>, DAIMI Report Series 21, no. 429 (1992) (revised version).
+%e A284276 An event structure is given by a poset and a conflict relation (denoted #) on it. The conflict relation is irreflexive and symmetric, and must propagate over the order: a<=b and a#c imply b#c.
+%e A284276 For n=2, (i.e., two elements a and b), there are three possible posets: a<=b, b<=a, and neither of the two. For the first two cases, only the empty conflict is possible. For the third case, you can have either the empty conflict relation, or a#b. Hence the total number of event structures is 4.
+%o A284276 (Isabelle/HOL)
+%o A284276 definition "ReducedRelation2 ReflPartialOrder == (let min = (List.find (%x. x : (snd`((set ReflPartialOrder)-{(x,x)}))) (map fst ReflPartialOrder)) in (min, filter (%(x,y). x ~= the min & y ~= the min) ReflPartialOrder))"
+%o A284276 definition "generateConflicts5 Or m c ==
+%o A284276 [c Int ({m}×Y) Int (Y×{m}). Y <- map (Image {z:Or. fst z ~= m & snd z ~= m})
+%o A284276 (map set (sublists (if (Or``{m})-{m}={} then (sorted_list_of_set (Domain Or)) else
+%o A284276 sorted_list_of_set (Inter {c``{M}|M. M ? next1 Or {m}}))))]"
+%o A284276 function conflictsFor2 where "conflictsFor2 Or=(let (M,or)=ReducedRelation2 Or in if M=None then [{}]
+%o A284276 else let m=the M in concat [remdups (generateConflicts5 (set Or) m c). c <- conflictsFor2 or])"
+%o A284276 value "map (%n. listsum (map (size o conflictsFor2 o adj2PairList) (allReflPartialOrders n))) [1..<7]
+%o A284276 (*Correctness theorem*)
+%o A284276 theorem assumes "N>0" shows "card (esOver {0..<N}) =
+%o A284276 listsum (map (size o remdups o conflictsFor2 o adj2PairList) (allReflPartialOrders N))"
+%Y A284276 Cf. A001035 (generating all the event structures entails generating all the posets), A000798 (to generate all the posets we preemptively generated all the quasi-orders).
+%K A284276 nonn,hard,more
+%O A284276 1,2
+%A A284276 _Marco B. Caminati_, Mar 24 2017
+%E A284276 a(7) from _Marco B. Caminati_, Aug 01 2017

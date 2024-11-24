@@ -1,0 +1,70 @@
+%I A253288 #26 Dec 11 2022 10:31:17
+%S A253288 1,4,9,2,25,12,49,16,3,20,121,6,169,28,45,8,289,18,361,10,63,44,529,
+%T A253288 36,5,52,81,14,841,60,961,64,99,68,175,24,1369,76,117,50,1681,84,1849,
+%U A253288 22,15,92,2209,48,7,40,153,26,2809,72,275,98,171,116,3481,30,3721,124,21,32
+%N A253288 Each term a(n) satisfies four properties: 1, divisible by all prime factors of n; 2, divisible by only the prime factors of n; 3, not equal to any of the terms a(1), a(2), ... a(n-1); 4, smallest number satisfying 1-3 if A005361(n) is even, or second smallest number satisfying 1-3 if A005361(n) is odd.
+%C A253288 This sequence is permutation of the positive integers.
+%C A253288 The prime p occurs at n = p^2.
+%C A253288 Multiples of a number x have density 1/x.
+%C A253288 Conjecture: this permutation of positive integers is self-inverse. Compare with A358971. The principal distinction between this sequence and A358971 is that fixed points aside from A358971(1) = 1 are explicitly ruled out in the latter. - _Michael De Vlieger_, Dec 10 2022
+%D A253288 Brad Klee, Posting to Sequence Fans Mailing List, Dec 21, 2014.
+%H A253288 Michael De Vlieger, <a href="/A253288/b253288.txt">Table of n, a(n) for n = 1..10000</a>
+%H A253288 Michael De Vlieger, <a href="/A253288/a253288.png">Log log scatterplot of a(n)</a>, n = 1..2^20.
+%H A253288 Michael De Vlieger, <a href="/A253288/a253288_1.png">Log log scatterplot of a(n) <= 12000</a>, n = 1..2^10 showing primes in red, other prime powers (in A246547) in gold, squarefree composites (in A120944) in green, numbers neither squarefree nor prime power (in A120706) in blue and magenta. The terms in magenta are products of composite prime powers (in A286708).
+%H A253288 Michael De Vlieger, <a href="/A253288/a253288_2.png">Log log scatterplot of a(n) <= 2^14</a>, n = 1..2^14, showing a(n) such that rad(n) = 6 in red, and A358971(n) such that rad(n) = 6 in blue for comparison. This is an example of a self-inverse relation among terms a(n) in A003586.
+%H A253288 Michael De Vlieger, <a href="/A253288/a253288_3.png">Log log scatterplot of a(n) <= 80000</a>, n = 1..2^14, showing a(n) in tiny black points if a(n) = A358971(n), else a(n) in red, and A358971(n) in blue.
+%H A253288 <a href="/index/Per#IntegerPermutation">Index entries for sequences that are permutations of the natural numbers</a>
+%p A253288 A253288div := proc(a,n)
+%p A253288     local npr,d,apr ;
+%p A253288     npr := numtheory[factorset](n) ;
+%p A253288     for d in npr do
+%p A253288         if modp(a,d) <> 0 then
+%p A253288             return false;
+%p A253288         end if;
+%p A253288     end do:
+%p A253288     apr := numtheory[factorset](a) ;
+%p A253288     if apr minus npr = {} then
+%p A253288         true;
+%p A253288     else
+%p A253288         false;
+%p A253288     end if;
+%p A253288 end proc:
+%p A253288 A253288 := proc(n)
+%p A253288     option remember;
+%p A253288     local a,i,prev,act,ev ;
+%p A253288     if n =1 then
+%p A253288         1;
+%p A253288     else
+%p A253288         act := 1 ;
+%p A253288         if type(A005361(n),'even') then
+%p A253288             ev := true;
+%p A253288         else
+%p A253288             ev := false;
+%p A253288         end if;
+%p A253288         for a from 1 do
+%p A253288             prev := false;
+%p A253288             for i from 1 to n-1 do
+%p A253288                 if procname(i) = a then
+%p A253288                     prev := true;
+%p A253288                     break;
+%p A253288                 end if;
+%p A253288             end do:
+%p A253288             if not prev then
+%p A253288                 if A253288div(a,n) then
+%p A253288                     if ev or act > 1 then
+%p A253288                         return a;
+%p A253288                     else
+%p A253288                         act := act+1 ;
+%p A253288                     end if;
+%p A253288                 end if;
+%p A253288             end if;
+%p A253288         end do:
+%p A253288     end if;
+%p A253288 end proc:
+%p A253288 seq(A253288(n),n=1..80) ; # _R. J. Mathar_, Jan 22 2015
+%t A253288 nn = 1000; c[_] = False; q[_] = 1; f[n_] := f[n] = Map[Times @@ # &, Transpose@ FactorInteger[n]]; a[1] = 1; c[1] = True; u = 2; Do[Which[PrimeQ[n], k = n^2, PrimeQ@ Sqrt[n], k = Sqrt[n], SquareFreeQ[n], k = First@ f[n]; m = q[k]; While[Nand[! c[k m], k m != n, Divisible[k, First@ f[m]]], m++]; While[Nor[c[q[k] k], Divisible[k, First@ f[q[k]]]], q[k]++]; k *= m, True, t = 0; Set[{k, s}, {First[#], 1 + Boole@ OddQ@ Last[#]} &[f[n]]]; m = q[k]; Until[t == s, If[m > q[k], m++]; While[Nand[! c[k m], Divisible[k, First@f[m]]], m++]; t++]; If[s == 1, While[Nor[c[q[k] k], Divisible[k, First@ f[q[k]]]], q[k]++]]; k *= m]; Set[{a[n], c[k]}, {k, True}]; If[k == u, While[c[u], u++]], {n, 2, nn}]; Array[a, nn] (* _Michael De Vlieger_, Dec 10 2022 *)
+%Y A253288 Cf. A005361 (Product of exponents of prime factorization of n), A358971.
+%K A253288 nonn
+%O A253288 1,2
+%A A253288 _N. J. A. Sloane_, Dec 29 2014
+%E A253288 Terms beyond 361 from _R. J. Mathar_, Jan 22 2015

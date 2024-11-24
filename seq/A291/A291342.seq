@@ -1,0 +1,22 @@
+%I A291342 #24 Aug 08 2018 09:58:02
+%S A291342 1,0,4,32,326,10564,810391,94548112,19807403830,9081700677832
+%N A291342 Number of labeled graphs on n vertices that are first-player-winning in the game of Col.
+%C A291342 The game of Col was studied by John Conway. It is played on a map. Here we slightly generalize the game so that players color the vertices of a graph.
+%D A291342 Elwyn R. Berlekamp, John H. Conway, and Richard K. Guy, Winning Ways for your Mathematical Plays (Vol. 1), Academic Press, New York, 1982, pages 37-39.
+%H A291342 Wikipedia, <a href="https://en.wikipedia.org/wiki/Col_(game)">The game of Col</a>
+%e A291342 For n=3, there are 8 labeled graphs on 3 vertices: one has 0 edges, three have 1 edge, three have 2 edges, and one has 3 edges. Among them, the graphs with 0 or 1 edge are first-player-winning. Hence, a(3)=4.
+%t A291342 We need to download the database of nonisomorphic simple graphs from http://users.cecs.anu.edu.au/~bdm/data/graphs.html
+%t A291342 Assume that we have saved the file of nonisomorphic simple graphs with 10 vertices as "/.../10vertices.txt." This pathway is important as it is needed in the first line of the Mathematica program. Now, the Mathematica program codes are as follows.
+%t A291342 rawdata = Import["/.../10vertices.txt", "Lines"];    length = Length[rawdata];
+%t A291342 rawdata2 =   Table[Delete[ToCharacterCode[rawdata[[i]]], 1], {i, length}] - 63;
+%t A291342 DectoBin[n_] :=   Block[{quotient, binrep, length}, length = 6;    quotient = n;    binrep = Table[0, {i, length}];    Do[binrep[[i]] = Mod[quotient, 2];     quotient = (quotient - binrep[[i]])/2, {i, length, 1, -1}];    binrep];
+%t A291342 rawdata3 =   Table[Delete[    Flatten[Table[      DectoBin[rawdata2[[i, j]]], {j, Length[rawdata2[[1]]]}]], {{-1}, {-2}, {-3}}], {i, length}];
+%t A291342 n = 10; edges =  Table[Complement[   rawdata3[[i]]*{1 <-> 2, 1 <-> 3, 2 <-> 3, 1 <-> 4, 2 <-> 4, 3 <-> 4, 1 <-> 5, 2 <-> 5, 3 <-> 5, 4 <-> 5, 1 <-> 6, 2 <-> 6, 3 <-> 6, 4 <-> 6, 5 <-> 6, 1 <-> 7, 2 <-> 7, 3 <-> 7, 4 <-> 7, 5 <-> 7, 6 <-> 7, 1 <-> 8, 2 <-> 8, 3 <-> 8, 4 <-> 8, 5 <-> 8, 6 <-> 8, 7 <-> 8, 1 <-> 9, 2 <-> 9, 3 <-> 9, 4 <-> 9, 5 <-> 9, 6 <-> 9, 7 <-> 9, 8 <-> 9, 1 <-> 10, 2 <-> 10, 3 <-> 10, 4 <-> 10, 5 <-> 10, 6 <-> 10, 7 <-> 10, 8 <-> 10, 9 <-> 10}, {0}], {i, length}];
+%t A291342 winning = Table[0, {i, length}]; Renew :=  Block[{}, Nocolor = Complement[Table[i, {i, n}], Alist, Blist];   Anonneighbor =    Complement[Nocolor,     Flatten[Select[graph, Length[Complement[#, Alist]] < 2 &]]];   Bnonneighbor =    Complement[Nocolor,     Flatten[Select[graph, Length[Complement[#, Blist]] < 2 &]]];  Anextmove =    Complement[Anonneighbor, Aforbidden[[Length[Alist] + 1]]];   Bnextmove =    Complement[Bnonneighbor, Bforbidden[[Length[Blist] + 1]]]];
+%t A291342 Do[graph = edges[[j]]; Alist = {}; Blist = {};    Aforbidden = Table[{}, {i, Ceiling[n/2] + 1}];    Bforbidden = Table[{}, {i, Floor[n/2] + 1}]; Renew;    While[Not[MemberQ[Aforbidden[[1]], n]] && Not[MemberQ[Bforbidden[[1]], n]] && Length[Union[Alist, Bforbidden[[1]]]] != n,   If[Anextmove != {} && Length[Alist] == Length[Blist],    AppendTo[Alist, Anextmove[[1]]]; Renew];    If[Bnextmove != {} && Length[Alist] - 1 == Length[Blist],    AppendTo[Blist, Bnextmove[[1]]]; Renew];    If[Anextmove == {} && Length[Alist] == Length[Blist],    AppendTo[Aforbidden[[Length[Alist]]], Alist[[-1]]];    Do[Aforbidden[[i]] = {}, {i, Length[Alist] + 1,      Length[Aforbidden]}];    Alist = Delete[Alist, -1];    Do[Bforbidden[[i]] = {}, {i, Length[Blist], Length[Bforbidden]}];    Blist = Delete[Blist, -1]; Renew];    If[Bnextmove == {} && Length[Alist] - 1 == Length[Blist],    AppendTo[Bforbidden[[Length[Blist]]], Blist[[-1]]];    Do[Bforbidden[[i]] = {}, {i, Length[Blist] + 1, Length[Bforbidden]}];    Blist = Delete[Blist, -1];    Do[Aforbidden[[i]] = {}, {i, Length[Alist], Length[Aforbidden]}];    Alist = Delete[Alist, -1]; Renew];    If[MemberQ[Bforbidden[[1]], n] ||     Length[Union[Alist, Bforbidden[[1]]]] == n, winning[[j]] = 1]],  {j, length}]
+%t A291342 vertex = Table[i, {i, 10}]; numberisomorphic =  Table[1, {i, length}]; Do[ numberisomorphic[[i]] =   Factorial[n]/   GroupOrder[GraphAutomorphismGroup[Graph[vertex, edges[[i]]]]], {i, 2, length - 1}]
+%t A291342 winning.numberisomorphic
+%Y A291342 A291341 gives the number of nonisomorphic graphs on n vertices that are first-player-winning in the game of Col.
+%K A291342 nonn,more
+%O A291342 1,3
+%A A291342 _Diego A. Manzano-Ruiz_, _Wing Hong Tony Wong_, Aug 22 2017

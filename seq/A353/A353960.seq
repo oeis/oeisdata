@@ -1,0 +1,36 @@
+%I A353960 #32 Jun 05 2022 01:11:57
+%S A353960 1,1,2,1,3,1,4,1,5,2,4,8,2,6,1,6,12,2,8,16,3,6,18,3,9,3,12,24,3,15,3,
+%T A353960 18,36,4,12,36,72,6,24,48,4,16,32,5,10,2,10,20,3,21,5,15,30,3,24,72,
+%U A353960 144,9,18,54,6,30,60,5,20,40,5,25,8,24,96,8,32,64,9,27,6,36,108,9
+%N A353960 a(1)=1. Thereafter, if a(n) has occurred k (>1) times in a(j), 1 <= j <= n then a(n+1) = k*a(n). If a(n) is a first occurrence, a(n+1) = A078709(a(n)).
+%C A353960 A nonprime term arises either following a multiple (>1) of a prior term, or following a novel term m such that A078709(m) is a nonprime number. A prime term arises either as a multiple of 1 (first occurrences of 2,3,5), or following a novel term m such that A078709(m) is a prime. Let C(m) be the cardinality of m in the sequence (starting 6,5,10,5,8,8,6,13,8,6,8,9,...).
+%C A353960 Conjecture: C(m) = A125057(m) + k, where k is the number of divisors d of m such that 1 < d <= C(m/d). The cardinality of m due to occurrences of novel terms is A125057(m), whereas the cardinality due to repeat terms is counted by k, and all of the latter terms occur prior to any of the former. (Note comments in A125057, A126888, A125056, concerning definitions of those sequences.)
+%F A353960 For p prime = 2,3,5, C(p) = A125057(p) + 1; for p > 5, C(p) = A125057(p).
+%e A353960 a(8)=1, the 5th occurrence of 1, so the next term a(9)=5.
+%e A353960 a(43)=32, a first occurrence, so a(44)=A078709(32)=5.
+%e A353960 a(33)=36 (consequence of two occurrences of 18), and 36 has not occurred before, so a(34)=A078709(36)=4.
+%e A353960 C(12)=9 because A125057(12)=6, and there are 3 occurrences of 12 which are consequent to repeat terms (2 terms 6, 4 terms 3, and 3 terms 4).
+%e A353960 Alternatively, 12 has 5 divisors >1, of which 3 (d=2,3,4) satisfy d <= C(12/d), therefore k=3 and C(12) = A125057(12) + 3 = 6 + 3 = 9.
+%t A353960 nn = 120; c[_] = 0; s = {1}; Table[(Set[a[i], #]; c[#]++) &@ s[[i]], {i, Length[s]}]; Do[If[c[#] == 1, Set[k, Floor[#/DivisorSigma[0, #]]], Set[k, c[#] #]] &@ a[i - 1]; a[i] = k; c[k]++, {i, Length[s] + 1, nn}]; Array[a, nn] (* _Michael De Vlieger_, May 14 2022 *)
+%o A353960 (PARI) f(n) = n\numdiv(n); \\ A078709
+%o A353960 lista(nn) = {my(v=vector(nn), k); v[1] = 1; for (n=2, nn, if ((k=#select(x->(x==v[n-1]), Vec(v, n-1))) > 1, v[n] = k*v[n-1], v[n] = f(v[n-1]));); v;} \\ _Michel Marcus_, May 16 2022
+%o A353960 (Python)
+%o A353960 from itertools import islice
+%o A353960 from sympy import divisor_count
+%o A353960 def A353960_gen(): # generator of terms
+%o A353960     adict, a = {}, 1
+%o A353960     yield a
+%o A353960     while True:
+%o A353960         if a in adict:
+%o A353960             adict[a] += 1
+%o A353960             a *= adict[a]
+%o A353960         else:
+%o A353960             adict[a] = 1
+%o A353960             a //= divisor_count(a)
+%o A353960         yield a
+%o A353960 A353960_list = list(islice(A353960_gen(),30)) # _Chai Wah Wu_, Jun 04 2022
+%Y A353960 Cf. A000005, A078709, A126888, A033950, A130290, A125056, A125057.
+%K A353960 nonn
+%O A353960 1,3
+%A A353960 _David James Sycamore_, May 12 2022
+%E A353960 More terms from _Michel Marcus_, May 16 2022

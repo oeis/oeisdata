@@ -1,0 +1,76 @@
+%I A267939 #31 Feb 04 2016 09:57:45
+%S A267939 351,621,886,920781,3524751,338752611,35247524751,920780120781,
+%T A267939 920879219781,3387524752611,3526124738751,338738752612611,
+%U A267939 352475247524751,33875247524752611,35247387526124751,35261247524738751,920780120780120781,920780219879120781,920879120780219781,920879219879219781
+%N A267939 Number x = concat(MSD(x),b), where MSD = A000030 stands for Most Significant Digit, such that MSD(x)*b is equal to the reverse of x.
+%C A267939 If we consider numbers x = concat(a,b), where a has two digits, such that a*b is equal to the reverse of x, the first terms are 425322, 44235301, 119910901, ...
+%C A267939 Terms of the form 3(5247)*51, i.e. 351, 3524751, 35247524751, ..., form an infinite subsequence. - _Robert Israel_, Jan 28 2016
+%C A267939 Other infinite sequences of terms include 92078(012078)*1 and 33875(2475)*2611. - _Robert Israel_, Jan 31 2016
+%H A267939 Robert Israel, <a href="/A267939/b267939.txt">Table of n, a(n) for n = 1..415</a>
+%e A267939 3*51 = 153;
+%e A267939 6*21 = 126;
+%e A267939 3*524751 = 1574253.
+%p A267939 T:=proc(w) local x, y, z; x:=w; y:=0;
+%p A267939 for z from 1 to ilog10(x)+1 do y:=10*y+(x mod 10); x:=trunc(x/10); od; y; end:
+%p A267939 P:=proc(q) local a,b,n; for n from 1 to q do a:=n mod 10; b:=trunc(n/10^ilog10(n));
+%p A267939 if (a=1 and b>1) or (a=6 and (b=2 or b=4 or b=6 or b=8)) or (b=5 and (a=3 or a=5 or a=7 or a=9)) then
+%p A267939 if T(n)=b*(n mod 10^ilog10(n)) then print(n); fi; fi; od; end: P(10^10);
+%p A267939 # alternative:
+%p A267939 N:= 20: # to get all terms with at most N digits.
+%p A267939 extend:= proc(d,psol,eqs)
+%p A267939   local peqs, cvars, bvars, ncs, res,T, cs, ceqs, sol, svals;
+%p A267939   peqs:= subs(psol, eqs);
+%p A267939   cvars,bvars:= selectremove(t -> op(0,t) = 'c',indets(peqs));
+%p A267939   ncs:= nops(cvars);
+%p A267939   res:= NULL;
+%p A267939   if ncs >= 1 then
+%p A267939     T:= combinat:-cartprod([[$0..d-1]$ncs]);
+%p A267939     while not T[finished] do
+%p A267939       cs:= T[nextvalue]();
+%p A267939       cs:= seq(cvars[i]=cs[i],i=1..ncs);
+%p A267939       ceqs:= subs(cs,peqs);
+%p A267939       sol:= solve(ceqs,bvars); svals:= map(rhs,sol);
+%p A267939       if indets(svals) <> {} then error("Oops: %1",svals) fi;
+%p A267939       if svals::set(nonnegint) and max(svals) <= 9 then
+%p A267939         res:= res, [op(psol), cs, op(sol)];
+%p A267939       fi
+%p A267939     od
+%p A267939   else
+%p A267939     sol:= solve(peqs,bvars);
+%p A267939     svals:= map(rhs,sol);
+%p A267939     if indets(svals) <> {} then error("Oops: %1",svals) fi;
+%p A267939     if svals::set(nonnegint) and max(svals) <= 9 then
+%p A267939         res:= [op(psol), op(sol)];
+%p A267939     fi
+%p A267939   fi;
+%p A267939   [res]
+%p A267939 end proc:
+%p A267939 G:= proc(d,n)
+%p A267939      local eqs, i, rs, b0s;
+%p A267939      eqs:= [d*b[0] - d - 10*c[0],
+%p A267939             seq(d*b[i]+c[i-1] - b[n-i] - 10*c[i], i=1..n-2),
+%p A267939             d*b[n-1] + c[n-2] - b[1] - 10*b[0]];
+%p A267939      b0s:= [msolve(eqs[1] mod 10,10)];
+%p A267939      rs:= select(t -> (map(rhs,t))::set(nonnegint),
+%p A267939          map(t -> t union solve(eval(eqs[1],t),{c[0]}),b0s));
+%p A267939      for i from 1 to floor(n/2) do
+%p A267939         rs:= map(s -> op(extend(d,s,{eqs[i+1],eqs[-i]})), rs);
+%p A267939      od;
+%p A267939      sort(map(s -> d*10^n + subs(s, add(10^i*b[i],i=0..n-1)), rs));
+%p A267939 end proc:
+%p A267939 A:= NULL;
+%p A267939 for n from 2 to N-1 do
+%p A267939   for d from 3 to 9 do
+%p A267939     res:= G(d,n);
+%p A267939     if res <> [] then
+%p A267939       A:= A, op(res);
+%p A267939     fi
+%p A267939   od
+%p A267939 od:
+%p A267939 A; # _Robert Israel_, Feb 01 2016
+%t A267939 Select[Range@ 4000000, First[#] FromDigits@ Rest@ # == FromDigits@ Reverse@ # &@ IntegerDigits@ # &] (* _Michael De Vlieger_, Jan 29 2016 *)
+%Y A267939 Cf. A000030, A004086.
+%K A267939 base,nonn
+%O A267939 1,1
+%A A267939 _Paolo P. Lava_, Jan 22 2016
+%E A267939 a(7) to a(20) from _Robert Israel_, Feb 01 2016

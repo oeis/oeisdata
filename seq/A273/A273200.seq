@@ -1,0 +1,43 @@
+%I A273200 #22 Feb 24 2020 15:41:27
+%S A273200 2,3,4,5,7,8,9,11,13,16,17,19,21,23,25,27,29,31,32,33,37,39,41,43,47,
+%T A273200 49,53,59,61,64,65,67,71,73,79,81,83,85,89,95,97,101,103,107,109,113,
+%U A273200 115,121,125,127,128,131,133,137,139,145,149,151,155,157,161,163,167,169
+%N A273200 Prime power-like integers.
+%C A273200 Let DTD(n) denote the difference table of the divisors of n. The DTDs of prime powers (in the sense of A246655) have only positive entries and the rows and columns of their DTD are nondecreasing.
+%C A273200 We define an integer n>0 and not the unity to be prime power-like if and only if DTD(n) has only positive entries and nondecreasing rows and columns (read from left to right and from top to bottom).
+%C A273200 This sequence lists the prime power-like integers and sequence A273201 lists the integers which are prime power-like but not prime powers. Thus we have the inclusions A000040 < A246655 < A273200 and the union A273200 = A273201 U A246655.
+%C A273200 Integers which have a positive but not monotone DTD are listed in A273199. Integers with a positive DTD are listed in A273130.
+%e A273200 125 is in this sequence because it is a prime power and has the DTD:
+%e A273200 [  1    5    25  125]
+%e A273200 [  4   20   100]
+%e A273200 [ 16   80]
+%e A273200 [ 64]
+%e A273200 161 is in this sequence because the DTD of 161 has only positive entries and nondecreasing rows and columns:
+%e A273200 [   1    7   23  161]
+%e A273200 [   6   16  138]
+%e A273200 [  10  122]
+%e A273200 [ 112]
+%t A273200 pplikeQ[n_] := Module[{T, DTD, DTD2}, If[n == 1, Return[False]]; T = Divisors[n]; DTD = Table[Differences[T, k], {k, 0, Length[T] - 1}]; If[AnyTrue[Flatten[DTD], NonPositive], Return[False]]; DTD2 = Transpose[PadRight[#, Length[T], Infinity]& /@ DTD]; AllTrue[DTD, OrderedQ] && AllTrue[DTD2, OrderedQ]];
+%t A273200 Select[Range[200], pplikeQ] (* _Jean-François Alcover_, Jun 28 2019 *)
+%o A273200 (Sage)
+%o A273200 def is_prime_power_like(n):
+%o A273200     if n == 1: return False
+%o A273200     D = divisors(n)
+%o A273200     T = matrix(ZZ, len(D))
+%o A273200     for m, d in enumerate(D):
+%o A273200         T[0, m] = d
+%o A273200         for k in range(m-1, -1, -1) :
+%o A273200             T[m-k, k] = T[m-k-1, k+1] - T[m-k-1, k]
+%o A273200             if T[m-k, k] <= 0: return False
+%o A273200     non_decreasing = lambda L: all(x<=y for x, y in zip(L, L[1:]))
+%o A273200     b = True
+%o A273200     for k in range(len(D)-1):
+%o A273200         b &= non_decreasing(T.row(k)[:len(D)-k])
+%o A273200         b &= non_decreasing(T.column(k)[:len(D)-k])
+%o A273200         if not b: return False
+%o A273200     return b
+%o A273200 [n for n in range(1, 170) if is_prime_power_like(n)]
+%Y A273200 Cf. A000040, A246655, A273102, A273130, A273199, A273201.
+%K A273200 nonn
+%O A273200 1,1
+%A A273200 _Peter Luschny_, May 17 2016

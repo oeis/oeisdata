@@ -1,0 +1,51 @@
+%I A333123 #66 Aug 13 2022 06:24:41
+%S A333123 1,1,1,1,1,2,2,1,2,2,2,3,3,5,5,1,1,5,5,3,10,5,5,4,3,7,5,9,9,12,12,1,
+%T A333123 17,2,21,9,9,14,16,4,4,28,28,9,21,14,14,5,28,7,7,12,12,14,16,14,28,23,
+%U A333123 23,21,21,33,42,1,33,47,47,3,61,56,56,14,14,23,28,28,103,42,42,5
+%N A333123 Consider the mapping k -> (k - (k/p)), where p is any of k's prime factors. a(n) is the number of different possible paths from n to 1.
+%C A333123 The iteration always terminates at 1, regardless of the prime factor chosen at each step.
+%C A333123 Although there may exist multiple paths to 1, their path lengths (A064097) are the same! See A064097 for a proof. Note that this behavior does not hold if we allow any divisor of k.
+%C A333123 First occurrence of k or 0 if no such value exists: 1, 6, 12, 24, 14, 96, 26, 85, 28, 21, 578, 30, 194, 38, 164, 39, 33, 104, 1538, 112, 35, 328, 58, 166, ..., .
+%C A333123 Records: 1, 2, 3, 5, 10, 12, 17, 21, 28, 33, 42, 47, 61, 103, 168, ..., .
+%C A333123 Record indices: 1, 6, 12, 14, 21, 30, 33, 35, 42, 62, 63, 66, 69, ..., .
+%C A333123 When viewed as a graded poset, the paths of the said graph are the chains of the corresponding poset. This poset is also a lattice (see Ewan Delanoy's answer to Peter Kagey's question at the Mathematics Stack Exchange link). - _Antti Karttunen_, May 09 2020
+%H A333123 Antti Karttunen, <a href="/A333123/b333123.txt">Table of n, a(n) for n = 1..20000</a>
+%H A333123 Peter Kagey, Mathematics Stack Exchange, <a href="https://math.stackexchange.com/q/3632156/121988">Does a graded poset on the positive integers generated from subtracting factors define a lattice?</a>
+%F A333123 a(n) = 1 iff n is a power of two (A000079) or a Fermat Prime (A019434).
+%F A333123 a(p) = a(p-1) if p is prime.
+%F A333123 a(n) = Sum_{p prime and dividing n} a(n - n/p) for any n > 1. - _Rémy Sigrist_, Mar 11 2020
+%e A333123 a(1): {1}, therefore a(1) = 1;
+%e A333123 a(6): {6, 4, 2, 1} or {6, 3, 2, 1}, therefore a(6) = 2;
+%e A333123 a(12): {12, 8, 4, 2, 1}, {12, 6, 4, 2, 1} or {12, 6, 3, 2, 1}, therefore a(12) = 3;
+%e A333123 a(14): {14, 12, 8, 4, 2, 1}, {14, 12, 6, 4, 2, 1}, {14, 12, 6, 3, 2, 1}, {14, 7, 6, 4, 2, 1} or {14, 7, 6, 3, 2, 1}, therefore a(14) = 5.
+%e A333123 From _Antti Karttunen_, Apr 05 2020: (Start)
+%e A333123 For n=15 we have five alternative paths from 15 to 1: {15, 10, 5, 4, 2, 1}, {15, 10, 8, 4, 2, 1}, {15, 12, 8, 4, 2, 1},  {15, 12, 6, 4, 2, 1},  {15, 12, 6, 3, 2, 1}, therefore a(15) = 5. These form a graph illustrated below:
+%e A333123         15
+%e A333123        / \
+%e A333123       /   \
+%e A333123     10     12
+%e A333123     / \   / \
+%e A333123    /   \ /   \
+%e A333123   5     8     6
+%e A333123    \_   |  __/|
+%e A333123      \__|_/   |
+%e A333123         4     3
+%e A333123          \   /
+%e A333123           \ /
+%e A333123            2
+%e A333123            |
+%e A333123            1
+%e A333123 (End)
+%t A333123 a[n_] := Sum[a[n - n/p], {p, First@# & /@ FactorInteger@n}]; a[1] = 1; (* after PARI coding by Rémy Sigrist *) Array[a, 70]
+%t A333123 (* view the various paths *)
+%t A333123 f[n_] := Block[{i, j, k, p, q, mtx = {{n}}}, Label[start]; If[mtx[[1, -1]] != 1, j = Length@ mtx;  While[j > 0, k = mtx[[j, -1]]; p = First@# & /@ FactorInteger@k; q = k - k/# & /@ p; pl = Length@p; If[pl > 1, Do[mtx = Insert[mtx, mtx[[j]], j], {pl - 1}]]; i = 1;  While[i < 1 + pl, mtx[[j + i - 1]] = Join[mtx[[j + i - 1]], {q[[i]]}]; i++]; j--]; Goto[start], mtx]]
+%o A333123 (PARI) for (n=1, #a=vector(80), print1 (a[n]=if (n==1, 1, vecsum(apply(p -> a[n-n/p], factor(n)[,1]~)))", ")) \\ _Rémy Sigrist_, Mar 11 2020
+%Y A333123 Cf. A064097, A332809 (size of the lattice), A332810.
+%Y A333123 Cf. A332904 (sum of distinct integers present in such a graph/lattice), A333000 (sum over all paths), A333001, A333785.
+%Y A333123 Cf. A332992 (max. outdegree), A332999 (max. indegree), A334144 (max. rank level).
+%Y A333123 Cf. A334230, A334231 (meet and join).
+%Y A333123 Partial sums of A332903.
+%Y A333123 Cf. also tables A334111, A334184.
+%K A333123 nonn,look
+%O A333123 1,6
+%A A333123 _Ali Sada_ and _Robert G. Wilson v_, Mar 09 2020

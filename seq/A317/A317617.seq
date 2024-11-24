@@ -1,0 +1,78 @@
+%I A317617 #125 May 23 2024 11:57:05
+%S A317617 1,5,5,14,15,16,34,34,34,34,63,64,65,66,67,111,111,111,111,111,111,
+%T A317617 172,173,174,175,176,177,178,260,260,260,260,260,260,260,260,365,366,
+%U A317617 367,368,369,370,371,372,373,505,505,505,505,505,505,505,505,505,505,666
+%N A317617 Triangle T read by rows: T(n, k) = (n^3 + n)/2 + (k - (n + 1)/2)*(n mod 2).
+%C A317617 T(n, k) is the sum of the terms of the k-th column of an n X n square matrix M formed by writing the numbers 1, ..., n^2 successively forward and backward along the rows in zig-zag pattern (proved). The n X n square matrix M is defined as M[i, j, n] = j + n*(i - 1) if i is odd and M[i, j, n] = n*i - j + 1 if i is even (see the examples below).
+%C A317617 The rows of even indices of the triangle T are made of all the same repeating number.
+%H A317617 Stefano Spezia, <a href="/A317617/a317617.txt">First 150 rows of the triangle, flattened</a>
+%F A317617 T(n, k) = A006003(n) + (k - (A000027(n) + 1)/2)*A000035(n).
+%F A317617 G.f.: x*(x*(5 - 7*y) + x^4*(1 - 2*y) - x^3*(- 3 + y) - 3*x^2*(- 1 + y) + y)/((-1 + x)^4*(1 + x)^2*(-1 + y)^2).
+%F A317617 E.g.f.: (1/4)*exp(-x + y)*(1 - x - 2*y + exp(2*x)*(-1 + 3*x + 6*x^2 + 2*x^3 + 2*y)). - _Stefano Spezia_, Jan 10 2019
+%e A317617 n\k|   1   2   3   4   5   6
+%e A317617 ---+------------------------
+%e A317617 1  |   1
+%e A317617 2  |   5   5
+%e A317617 3  |  14  15  16
+%e A317617 4  |  34  34  34  34
+%e A317617 5  |  63  64  65  66  67
+%e A317617 6  | 111 111 111 111 111 111
+%e A317617 ...
+%e A317617 For n = 1 the matrix M is
+%e A317617   1
+%e A317617 with column sum 1.
+%e A317617 For n = 2 the matrix M is
+%e A317617   1, 2
+%e A317617   4, 3
+%e A317617 with column sums 5, 5.
+%e A317617 For n = 3 the matrix M is
+%e A317617   1, 2, 3
+%e A317617   6, 5, 4
+%e A317617   7, 8, 9
+%e A317617 with column sums 14, 15, 16.
+%p A317617 a:=(n,k)->(n^3+n)/2+(k-(n+1)/2)*modp(n,2): seq(seq(a(n,k),k=1..n),n=1..11); # _Muniru A Asiru_, Aug 24 2018
+%t A317617 f[n_] := Table[SeriesCoefficient[(x*(x*(5 - 7*y) + x^4*(1 - 2*y) - x^3*(-3 + y) - 3*x^2*(-1 + y) + y))/((-1 + x)^4*(1 + x)^2*(-1 + y)^2), {x, 0, i}, {y, 0, j}], {i, n, n}, {j, 1, n}]; Flatten[Array[f, 11]]
+%t A317617 T[i_, j_, n_] := If[OddQ@ i, j + n*(i - 1), n*i - j + 1]; f[n_] := Plus @@@ Transpose[ Table[T[i, j, n], {i, n}, {j, n}]]; Array[f, 11] // Flatten  (* _Robert G. Wilson v_, Aug 01 2018 *)
+%t A317617 f[n_] := Table[SeriesCoefficient[1/4 E^(-x + y) (1 - x - 2 y + E^(2 x) (-1 + 3 x + 6 x^2 + 2 x^3 + 2 y)), {x, 0, i}, {y, 0, j}]*i!*j!, {i, n, n}, {j, 1, n}]; Flatten[Array[f, 11]] (* _Stefano Spezia_, Jan 10 2019 *)
+%o A317617 (R) # by formula
+%o A317617 for (n in 1:11){
+%o A317617    t <- c(n, "")
+%o A317617    for(j in 1:n){
+%o A317617       t <- c(t, (n^3+n)/2+(j-(n+1)/2)*(n%%2), "")
+%o A317617    }
+%o A317617    cat(t, "\n")
+%o A317617 } # yields sequence in triangular form
+%o A317617 (MATLAB and FreeMat)
+%o A317617 for(i=1:11);
+%o A317617    for(j=1:i);
+%o A317617       t=(i^3 + i)/2 + (j - (i + 1)/2)*mod(i,2);
+%o A317617       fprintf('%0.f\t', t);
+%o A317617    end
+%o A317617    fprintf('\n');
+%o A317617 end % yields sequence in triangular form
+%o A317617 (GAP)
+%o A317617 A317617 := function(n)
+%o A317617 local i, j, t;
+%o A317617 for i in [1 .. n] do
+%o A317617    for j in [1 .. i] do
+%o A317617       t := (i^3 + i)/2 + (j - (i + 1)/2)*(i mod 2);
+%o A317617       Print(t, "\t");
+%o A317617    od;
+%o A317617    Print("\n");
+%o A317617 od;
+%o A317617 end;
+%o A317617 A317617(11); # yields sequence in triangular form
+%o A317617 (Maxima) sjoin(v, j) := apply(sconcat, rest(join(makelist(j, length(v)), v)))$ display_triangle(n) := for i from 1 thru n do disp(sjoin(makelist((i^3+i)/2+(j-(i+1)/2)*mod(i, 2), j, 1, i), " ")); display_triangle(10);
+%o A317617 (Magma) [[(n^3 + n)/2 + (k - (n + 1)/2)*(n mod 2): k in [1..n]]: n in [1..11]];
+%o A317617 (PARI) M(i,j,n) = if (i % 2, j + n*(i-1), n*i - j + 1);
+%o A317617 T(n, k) = sum(i=1, n, M(i,k,n));
+%o A317617 tabl(nn) = for(n=1, nn, for(k=1, n, print1(T(n,k), ", ")); print); \\ _Michel Marcus_, Aug 09 2018
+%o A317617 (GAP) Flat(List([1..11],n->List([1..n],k->(n^3+n)/2+(k-(n+1)/2)*(n mod 2)))); # _Muniru A Asiru_, Aug 24 2018
+%Y A317617 Cf. A006003, A000027, A000035, A037270 (row sums).
+%Y A317617 A317614(n): the trace of the n X n square matrix M.
+%Y A317617 A074147(n): the elements of the antidiagonal of the n X n square matrix M.
+%Y A317617 A241016(n): the triangle of the row sums of the n X n square matrix M.
+%Y A317617 A246697(n): the right diagonal of the triangle T.
+%K A317617 nonn,tabl
+%O A317617 1,2
+%A A317617 _Stefano Spezia_, Aug 01 2018

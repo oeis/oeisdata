@@ -1,0 +1,59 @@
+%I A266240 #78 Jun 15 2017 03:10:21
+%S A266240 1,4,1,32,28,336,664,105,4096,14912,8112,54912,326496,396792,50050,
+%T A266240 786432,7048192,15663360,6722816,11824384,150820608,544475232,
+%U A266240 518329776,56581525,184549376,3208396800,17388675072,30117189632,11100235520,2966845440
+%N A266240 Triangle read by rows: T(n,g) is the number of rooted 2n-face triangulations in an orientable surface of genus g.
+%C A266240 Row n contains floor((n+3)/2) terms.
+%H A266240 Gheorghe Coserea, <a href="/A266240/b266240.txt">Rows n = 0..200, flattened</a>
+%H A266240 Edward A. Bender, Zhicheng Gao, L. Bruce Richmond, <a href="http://www.combinatorics.org/ojs/index.php/eljc/article/view/v15i1r51"> The map asymptotics constant tg</a>, The Electronic Journal of Combinatorics, Volume 15 (2008), Research Paper #R51.
+%H A266240 Zhicheng Gao, <a href="http://www.combinatorics.org/ojs/index.php/eljc/article/view/v17i1r155">A Formula for the Bivariate Map Asymptotics Constants in terms of the Univariate Map Asymptotics Constants</a>, The Electronic Journal of Combinatorics, Volume 17 (2010), Research Paper #R155.
+%H A266240 I. P. Goulden and D. M. Jackson, <a href="https://www.math.uwaterloo.ca/~ipgoulde/KPpapermar08.pdf">The KP hierarchy, branched covers, and triangulations</a>, Advances in Mathematics, Volume 219, Issue 3, 20 October 2008, Pages 932-951.
+%F A266240 T(n,g) = f(n,g)/(3*n+2) for all n >= 0 and 0 <= g <= (n+1)/2, where f(n,g) satisfies the quadratic recurrence equation f(n,g) = 4*(3*n+2)/(n+1)*(n*(3*n-2)*f(n-2,g-1) + Sum_{i=-1..n-1} Sum_{h=0..g} f(i,h)*f(n-2-i, g-h)) for n >= 1 and g >= 0 with the initial conditions f(-1,0)=1/2, f(0,0)=2 and f(n,g)=0 for g < 0 or g > (n+1)/2.
+%F A266240 For column g, as n goes to infinity we have T(n,g) ~ 3*6^((g-1)/2) * t(g) * n^(5*(g-1)/2) * (12*sqrt(3))^n, where t(g) = (A269418(g)/A269419(g)) / (2^(g-2) * gamma((5*g-1)/2)) and gamma is the Gamma function. - _Gheorghe Coserea_, Feb 26 2016
+%e A266240 Triangle starts:
+%e A266240 n\g    [0]          [1]          [2]          [3]          [4]
+%e A266240 [0]    1;
+%e A266240 [1]    4,           1;
+%e A266240 [2]    32,          28;
+%e A266240 [3]    336,         664,         105;
+%e A266240 [4]    4096,        14912,       8112;
+%e A266240 [5]    54912,       326496,      396792,      50050;
+%e A266240 [6]    786432,      7048192,     15663360,    6722816;
+%e A266240 [7]    11824384,    150820608,   544475232,   518329776,   56581525;
+%e A266240 [8]    184549376,   3208396800,  17388675072, 30117189632, 11100235520;
+%e A266240 [9]    ...
+%t A266240 T[n_ /; n >= 0, g_] /; 0 <= g <= (n+1)/2 := f[n, g]/(3n+2); T[_, _] = 0; f[n_ /; n >= 1, g_ /; g >= 0] := f[n, g] = 4*(3*n+2)/(n+1)*(n*(3*n-2)*f[n - 2, g-1] + Sum[f[i, h]*f[n-2-i, g-h], {i, -1, n-1}, {h, 0, g}]); f[-1, 0] = 1/2; f[0, 0] = 2; f[_, _] = 0; Table[Table[T[n, g], {g, 0, Floor[(n + 1)/2]}], {n, 0, 9}] // Flatten (* _Jean-François Alcover_, Feb 27 2016 *)
+%o A266240 (PARI)
+%o A266240 N = 10;
+%o A266240 m = matrix(N+2, N+2);
+%o A266240 mget(n,g) = {
+%o A266240   if (g < 0 || g > (n+1)/2, return(0));
+%o A266240   return(m[n+2,g+1]);
+%o A266240 }
+%o A266240 mset(n,g,v) = {
+%o A266240   m[n+2,g+1] = v;
+%o A266240 }
+%o A266240 Cubic() = {
+%o A266240   mset(-1,0,1/2);
+%o A266240   mset(0,0,2);
+%o A266240   for (n = 1, N,
+%o A266240   for (g = 0, (n+1)\2,
+%o A266240     my(t1 = n * (3*n-2) * mget(n-2, g-1),
+%o A266240        t2 = sum(i = -1, n-1, sum(h = 0, g,
+%o A266240                 mget(i,h) * mget(n-2-i, g-h))));
+%o A266240     mset(n, g, 4*(3*n+2)/(n+1) * (t1 + t2))));
+%o A266240   my(a = vector(N+1));
+%o A266240   for (n = 0, N,
+%o A266240     a[n+1] = vector(1 + (n+1)\2);
+%o A266240     for (g = 0, (n+1)\2,
+%o A266240          a[n+1][g+1] = mget(n, g));
+%o A266240     a[n+1] = a[n+1]/(3*n+2));
+%o A266240   return(a);
+%o A266240 }
+%o A266240 concat(Cubic())
+%Y A266240 Columns k=0-4 give: A002005, A269473, A269474, A269475, A269476.
+%Y A266240 Row sums give A062980.
+%Y A266240 Cf. A269418, A269419.
+%K A266240 nonn,tabf
+%O A266240 0,2
+%A A266240 _Gheorghe Coserea_, Dec 25 2015

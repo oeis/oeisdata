@@ -1,0 +1,51 @@
+%I A268815 #27 Feb 24 2019 01:54:31
+%S A268815 1,1,0,0,1,1,5,19,76,360,1792,9634,55286,336396,2162554,14629720,
+%T A268815 103818489,770678553,5969822993,48148947503,403545713463,
+%U A268815 3508356996105,31587389832791,294087418038113,2827471212909189,28037001032306431,286398141349873925,3010540174760962975
+%N A268815 Number of purely crossing + partitions of [n].
+%C A268815 For the definition of these special purely crossing partitions refer to Dykema link (see PC+(n) Definition 2.1 and Table 2).
+%C A268815 From _Gus Wiseman_, Feb 23 2019: (Start)
+%C A268815 a(n) is the number of topologically connected (A099947) set partitions of {1,...,n} with no successive elements in the same block. For example, the a(4) = 1 through a(7) = 19 set partitions are:
+%C A268815   {{13}{24}}  {{135}{24}}  {{135}{246}}    {{1357}{246}}
+%C A268815                            {{13}{25}{46}}  {{13}{246}{57}}
+%C A268815                            {{14}{25}{36}}  {{13}{257}{46}}
+%C A268815                            {{14}{26}{35}}  {{135}{26}{47}}
+%C A268815                            {{15}{24}{36}}  {{135}{27}{46}}
+%C A268815                                            {{136}{24}{57}}
+%C A268815                                            {{136}{25}{47}}
+%C A268815                                            {{137}{25}{46}}
+%C A268815                                            {{14}{257}{36}}
+%C A268815                                            {{14}{26}{357}}
+%C A268815                                            {{146}{25}{37}}
+%C A268815                                            {{146}{27}{35}}
+%C A268815                                            {{147}{25}{36}}
+%C A268815                                            {{147}{26}{35}}
+%C A268815                                            {{15}{246}{37}}
+%C A268815                                            {{15}{247}{36}}
+%C A268815                                            {{157}{24}{36}}
+%C A268815                                            {{16}{24}{357}}
+%C A268815                                            {{16}{247}{35}}
+%C A268815 (End)
+%H A268815 Kenneth J. Dykema, <a href="http://arxiv.org/abs/1602.03469">Generating functions for purely crossing partitions</a>, arXiv:1602.03469 [math.CO], 2016.
+%F A268815 G.f.: G(x) satisfies C(x) = G(x/1-x) where C(x) is the g.f. of A099947 (see B(x) in Dykema link p. 7).
+%F A268815 From _Paul D. Hanna_, Mar 07 2016: (Start)
+%F A268815 O.g.f. A(x) satisfies
+%F A268815 (1) A(x) = Sum_{n>=0} A000110(n)*x^n/((1+x)^n*A(x)^n), where A000110 are the Bell numbers.
+%F A268815 (2) A(x) = Sum_{n>=0} x^n / Product_{k=1..n} ((1+x)*A(x) - k*x).
+%F A268815 (3) A(x) = 1/(1 - x/((1+x)*A(x) - 1*x/(1 - x/((1+x)*A(x) - 2*x/(1 - x/((1+x)*A(x) - 3*x/(1 - x/((1+x)*A(x) - 4*x/(1 - x/((1+x)*A(x) - ... )))))))), a continued fraction. (End)
+%e A268815 G.f.: A(x) = 1 + x + x^4 + x^5 + 5*x^6 + 19*x^7 + 76*x^8 + 360*x^9 + 1792*x^10 +...
+%t A268815 n = 30; F = x*Sum[BellB[k] x^k, {k, 0, n}] + O[x]^n; B = ComposeSeries[1/( InverseSeries[F, w] /w)-1, x/(1+x) + O[x]^n]; CoefficientList[B, x] // Rest (* _Jean-François Alcover_, Feb 16 2016, adapted from K. J. Dykema's code *)
+%t A268815 sps[{}]:={{}};sps[set:{i_,___}]:=Join@@Function[s,Prepend[#,s]&/@sps[Complement[set,s]]]/@Cases[Subsets[set],{i,___}];
+%t A268815 intvQ[set_]:=Or[set=={},Sort[set]==Range[Min@@set,Max@@set]];
+%t A268815 Table[Length[Select[sps[Range[n]],And[!MatchQ[#,{___,{___,x_,y_,___},___}/;x+1==y],#=={}||And@@Not/@intvQ/@Union@@@Subsets[#,{1,Length[#]-1}]]&]],{n,0,10}] (* _Gus Wiseman_, Feb 23 2019 *)
+%o A268815 (PARI) lista(nn) = {c = x/serreverse(x*serlaplace(exp(exp(x+x*O(x^nn)) -1))); b = subst(c, x, x/(1+x) + O(x^nn)); Vec(b);}
+%o A268815 (PARI) {a(n) = my(A=1+x); for(i=1, n, A = sum(m=0, n, x^m/prod(k=1, m, (1+x)*A - k*x +x*O(x^n)) )); polcoeff(A, n)}
+%o A268815 for(n=0,25,print1(a(n),", ")) \\ _Paul D. Hanna_, Mar 07 2016
+%o A268815 (PARI) {Stirling2(n, k) = n!*polcoeff(((exp(x+x*O(x^n)) - 1)^k)/k!, n)}
+%o A268815 {Bell(n) = sum(k=0,n, Stirling2(n, k) )}
+%o A268815 {a(n) = my(A=1+x); for(i=1, n, A = sum(m=0, n, Bell(m)*x^m/((1+x)*A +x*O(x^n))^m) ); polcoeff(A, n)}
+%o A268815 for(n=0,25,print1(a(n),", ")) \\ _Paul D. Hanna_, Mar 07 2016
+%Y A268815 Cf. A000108, A000110, A005493, A016098, A099947, A268814, A306417, A324011, A324166, A324173, A324324, A324327.
+%K A268815 nonn
+%O A268815 0,7
+%A A268815 _Michel Marcus_, Feb 14 2016

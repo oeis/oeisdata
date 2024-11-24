@@ -1,0 +1,78 @@
+%I A320578 #25 Oct 18 2018 09:46:42
+%S A320578 1,1,1,3,2,1,10,10,3,1,43,54,18,4,1,223,351,113,27,5,1,1364,2613,833,
+%T A320578 186,37,6,1,9643,21965,6921,1461,274,48,7,1,77545,205780,64128,12727,
+%U A320578 2253,378,60,8,1,699954,2127068,655391,122345,20230,3230,499,73,9,1
+%N A320578 Triangle read by rows: T(n,k) is the number of permutation graphs on n vertices with domination number k, with 1 <= k <= n.
+%H A320578 Theresa Baren, Michael Cory, Mia Friedberg, Peter Gardner, James Hammer, Joshua Harrington, Daniel McGinnis, Riley Waechter, Tony W. H. Wong, <a href="https://arxiv.org/abs/1810.03409">On the Domination Number of Permutation Graphs and an Application to Strong Fixed Points</a>, arXiv:1810.03409 [math.CO], 2018.
+%F A320578 T(n,k) = A320579(n,k) + A320583(n,k).
+%F A320578 T(n,1) = A320583(n,1).
+%e A320578 Triangle begins:
+%e A320578     1;
+%e A320578     1,   1;
+%e A320578     3,   2,   1;
+%e A320578    10,  10,   3,   1;
+%e A320578    43,  54,  18,   4,   1;
+%e A320578   223, 351, 113,  27,   5,   1;
+%e A320578   ...
+%o A320578 (Python)
+%o A320578 import networkx as nx
+%o A320578 import math
+%o A320578 def permutation(lst):
+%o A320578     if len(lst) == 0:
+%o A320578         return []
+%o A320578     if len(lst) == 1:
+%o A320578         return [lst]
+%o A320578     l = []
+%o A320578     for i in range(len(lst)):
+%o A320578         m = lst[i]
+%o A320578         remLst = lst[:i] + lst[i + 1:]
+%o A320578         for p in permutation(remLst):
+%o A320578             l.append([m] + p)
+%o A320578     return l
+%o A320578 def generatePermsOfSizeN(n):
+%o A320578     lst = []
+%o A320578     for i in range(n):
+%o A320578         lst.append(i+1)
+%o A320578     return permutation(lst)
+%o A320578 def powersetHelper(A):
+%o A320578     if A == []:
+%o A320578         return [[]]
+%o A320578     a = A[0]
+%o A320578     incomplete_pset = powersetHelper(A[1:])
+%o A320578     rest = []
+%o A320578     for set in incomplete_pset:
+%o A320578         rest.append([a] + set)
+%o A320578     return rest + incomplete_pset
+%o A320578 def powerset(A):
+%o A320578     ps = powersetHelper(A)
+%o A320578     ps.sort(key = len)
+%o A320578     return ps
+%o A320578     print(ps)
+%o A320578 def countDomNumbersOnN(n):
+%o A320578     lst=[]
+%o A320578     perms = generatePermsOfSizeN(n)
+%o A320578     for i in range(n):
+%o A320578         lst.append(i+1)
+%o A320578     ps = powerset(lst)
+%o A320578     dic={}
+%o A320578     for perm in perms:
+%o A320578         tempGraph = nx.Graph()
+%o A320578         tempGraph.add_nodes_from(perm)
+%o A320578         for i in range(len(perm)):
+%o A320578             for k in range(i+1, len(perm)):
+%o A320578                 if perm[k] < perm[i]:
+%o A320578                     tempGraph.add_edge(perm[i], perm[k])
+%o A320578         for p in ps:
+%o A320578             if nx.is_dominating_set(tempGraph,p):
+%o A320578                 dom = len(p)
+%o A320578                 if dom in dic:
+%o A320578                     dic[dom] += 1
+%o A320578                     break
+%o A320578                 else:
+%o A320578                     dic[dom] = 1
+%o A320578                     break
+%o A320578     return dic
+%Y A320578 Cf. A320579, A320583
+%K A320578 nonn,hard,tabl
+%O A320578 1,4
+%A A320578 _James Hammer_, _Daniel A. McGinnis_, Oct 15 2018

@@ -1,0 +1,45 @@
+%I A326191 #14 Aug 24 2019 11:57:42
+%S A326191 0,1,1,2,1,2,1,3,2,2,1,3,1,2,2,4,1,3,1,3,3,2,1,4,2,2,3,3,1,3,1,5,3,2,
+%T A326191 2,4,1,2,2,4,1,4,1,3,4,2,1,5,2,3,3,3,1,4,3,4,4,2,1,4,1,2,4,6,2,4,1,3,
+%U A326191 4,3,1,5,1,2,3,3,2,3,1,5,4,2,1,5,3,2,3,4,1,5,3,3,5,2,2,6,1,3,4,4,1,4,1,4,4
+%N A326191 Length of the longest path to 1 when starting from x=n and on each iteration step one may always choose either transition x -> A032742(x) or x -> A302042(x).
+%H A326191 Antti Karttunen, <a href="/A326191/b326191.txt">Table of n, a(n) for n = 1..65537</a>
+%F A326191 a(1) = 0; for n > 1, a(n) = 1 + max(a(A032742(n)), a(A302042(n))).
+%F A326191 A326189(n) >= a(n) >= max(A001222(n), A253557(n)) >= min(A001222(n), A253557(n)) >= A326190(n).
+%e A326191 The directed acyclic graph whose unique root is 153 (illustrated below), spans the following seven numbers [1, 5, 17, 25, 51, 75, 153], as A032742(153) = 51, A302042(153) = 75, A032742(51) = 17, A302042(51) = 25, A032742(75) = 25, A302042(75) = 15, A032742(25) = A302042(25) = 5, and A032742(17) = A302042(17) = A032742(5) = A302042(5) = 1. The length of longest path(s) from 153 to 1 is 4 (there are actually two longest paths: 153 -> 51 -> 25 -> 5 -> 1 and 153 -> 75 -> 25 -> 5 -> 1), thus a(153) = 4.
+%e A326191 .
+%e A326191         153
+%e A326191        /  \
+%e A326191       /    \
+%e A326191      51    75
+%e A326191      / \  /  \
+%e A326191     /   17    \
+%e A326191     \    |    /
+%e A326191      \   1   /
+%e A326191       \     /
+%e A326191        \   /
+%e A326191         25
+%e A326191          |
+%e A326191          5
+%e A326191          |
+%e A326191          1
+%o A326191 (PARI)
+%o A326191 up_to = 65537;
+%o A326191 ordinal_transform(invec) = { my(om = Map(), outvec = vector(length(invec)), pt); for(i=1, length(invec), if(mapisdefined(om,invec[i]), pt = mapget(om, invec[i]), pt = 0); outvec[i] = (1+pt); mapput(om,invec[i],(1+pt))); outvec; };
+%o A326191 rgs_transform(invec) = { my(om = Map(), outvec = vector(length(invec)), u=1); for(i=1, length(invec), if(mapisdefined(om,invec[i]), my(pp = mapget(om, invec[i])); outvec[i] = outvec[pp] , mapput(om,invec[i],i); outvec[i] = u; u++ )); outvec; };
+%o A326191 A020639(n) = if(n>1, if(n>n=factor(n, 0)[1, 1], n, factor(n)[1, 1]), 1); \\ From A020639
+%o A326191 A032742(n) = (n/A020639(n));
+%o A326191 v078898 = ordinal_transform(vector(up_to,n,A020639(n)));
+%o A326191 A078898(n) = v078898[n];
+%o A326191 A302042(n) = if((1==n)||isprime(n),1,my(c = A078898(n), p = prime(-1+primepi(A020639(n))+primepi(A020639(c))), d = A078898(c), k=0); while(d, k++; if((1==k)||(A020639(k)>=p),d -= 1)); (k*p));
+%o A326191 A326191(n) = if(1==n,0,1+max(A326191(A032742(n)), A326191(A302042(n))));
+%o A326191 \\ Slightly faster:
+%o A326191 memo302042 = Map();
+%o A326191 A302042(n) = if((1==n)||isprime(n),1,my(v); if(mapisdefined(memo302042, n, &v), v, my(c = A078898(n), p = prime(-1+primepi(A020639(n))+primepi(A020639(c))), d = A078898(c), k=0); while(d, k++; if((1==k)||(A020639(k)>=p),d -= 1)); v=(k*p); mapput(memo302042,n,v); (v)));
+%o A326191 A326191list(up_to) = { my(v=vector(up_to)); v[1] = 0; for(n=2,up_to, v[n] = 1+max(v[A032742(n)], v[A302042(n)])); (v); };
+%o A326191 v326191 = A326191list(up_to);
+%o A326191 A326191(n) = v326191[n];
+%Y A326191 Cf. A001222, A032742, A253557, A302042, A323888, A326075, A326139, A326189, A326190.
+%K A326191 nonn
+%O A326191 1,4
+%A A326191 _Antti Karttunen_, Aug 23 2019

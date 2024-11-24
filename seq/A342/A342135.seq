@@ -1,0 +1,40 @@
+%I A342135 #19 May 30 2022 02:45:45
+%S A342135 1,10,100,101,2012
+%N A342135 Lexicographically earliest strictly increasing sequence whose concatenation is equal to that of the longest common substrings (see comment) of consecutive terms.
+%C A342135 The longest common substring (LCS) of two consecutive terms must always be nonempty and well-defined, i.e., unambiguous: there must be no other (i.e., distinct) common substring of the same length. (The same substring could possibly occur multiple times at different locations in either or both of the two consecutive terms.)
+%C A342135 The sequence is well defined, since A011557 = (1, 10, 100, 1000, ...) does satisfy the characteristic property (the sequence of LCS among consecutive terms is again A011557), so there is at least one (and therefore a unique minimal) such sequence.
+%H A342135 Eric Angelini, <a href="https://mailman.xmission.com/postorius/lists/math-fun.mailman.xmission.com/">Common patterns sequence</a>, math-fun mailing list, Feb 22, 2021.
+%e A342135 Seq. of terms = 1, 10, 100, 101, 2012, 10121?...: T = 1'10'100'1 01'2 012'10121
+%e A342135 Common substr. = 1,  10,  10,  01,   012,   ... : S = 1'10'10'01'01 2'...
+%e A342135 (=> concatenation of the next L.C.S. must give "012'10121'...")
+%e A342135 .
+%e A342135 After a(1) = 1, the next larger number sharing a digit with 1 is a(2) = 10.
+%e A342135 The concatenated terms so far give T = "110(...)", and the (concatenated) common substring(s) give S = "1(...)". Since S must equal T, the concatenation of the next longest common substrings (LCS) must yield "10(...)".
+%e A342135 So the next term a(3) must share a digit 1 with a(2), but it must also contain a digit 0 to produce the digit 0 subsequently required in S.
+%e A342135 The next larger number which satisfies both of these requirements is a(3) = 100. This gives S = "110100(...)" and T = "110(...)". Concatenation of subsequent longest common substrings (LCS) must therefore give "100(...)".
+%e A342135 As before it is impossible to have as LCS only one digit "1", because then there may be no '0' in the next term, but the next digit in T must be a '0'.
+%e A342135 So we must have LCS(a(3), a(4)) = "10" (or longer, but this would require a(4) >= 1000 and we will find a smaller solution).
+%e A342135 The next larger possible term, a(4) = 101, indeed satisfies the constraints, and we will see that it does not lead to contradictions.
+%e A342135 This gives T = "1'10'100'101(...)" and S = "1'10'10(...)", so concatenation of subsequent LCS must produce "01'01(...)". (We use a separator ' for better readability, but this is not to be considered an element of the string.)
+%e A342135 As before it is impossible to have the next LCS equal to "0", because then there may be no '1' in the next term, but the subsequent digit in S must be a '1'.
+%e A342135 So we look for a(5) with LCS(a(4), a(5)) = "01" (but no "10" in a(5) as to have a well-defined LCS). The subsequent LCS(a(5),a(6)) and following must then produce "01"+a(5)+"(...)".
+%e A342135 We find that 201 is not possible for a(5): This would require S to go on with "012(...)", so we'd again need LCS(a(5),a(6)) = "01" but no "20" in a(6), but this allows no acceptable a(7) such that LCS(a(6),a(7)) starts with the required '2'. Similarly, 301, ..., 901 are not possible.
+%e A342135 Also the next larger choice (with well-defined LCS) 1201 is not possible. (We'd need a(6) with "01", but no "12" nor "20", but then a(7) would need an LCS "12" with a(6): impossible.)
+%e A342135 The next larger possible choice is a(5) = 201x for some digit x > 0. We find that there can't be a solution with LCS(a(5), a(6)) of length <= 2, but it is possible for LCS = "012", whence x = 2 finally yields a solution. It gives T = "1'10'100'101'2012(...)" and S = "1'10'10'01(...)", so the next LCS must give "012012(...)", and for example a(6) = "10121" appears to give a valid solution.
+%o A342135 (PARI) /* get longest common substring of A and B, but return 0 if the LCS is ambiguous or empty or if a >= b: */
+%o A342135 LCS(a, b, A=digits(a), B=digits(b), s)={
+%o A342135   (#setintersect(Set(A), Set(B)) && a<b) || return;
+%o A342135   forstep( L=#A, 1, -1, for( i=0, #A-L, my(p=A[i+1..i+L]); for( j=0, #B-L,
+%o A342135      p==B[j+1..j+L] || next; #s && s!=p && return /* not unique! */;
+%o A342135      s=A[i+1..i+L]; next(2))); #s && return(s))}
+%o A342135 /* check(S): if the seq. S is consistent (compatible with concatenation of LCS which must be well defined), then show what the next "shared patterns" must be, starting with last term of S and the subsequent one. This helps to see whether the last term in S may be incorrect in spite of S being consistent so far. */
+%o A342135 {check(S, verbose=1, T=concat(apply(digits, S)), P=[LCS(S[i-1], S[i])| i<-[2..#S]]) = vecmin([#s | s<-P]) || print("BAD: P=",P," has an empty element!") || return; verbose && printf("Seq. of LCS = %d. ",P); #P && P=concat(P);
+%o A342135   if(#T < #P, print("P longer than S! Swapping; proceed with fingers crossed...");
+%o A342135     [T,P] = [P,T]);
+%o A342135   if( P==T[1..#P], T=T[#P+1..#T],
+%o A342135     !#T || !#P || error("S="S" incompatible with P="P));
+%o A342135   verbose && printf("P = %d, to be continued with %d.\n",P,T); [P,T] /* okay */}
+%Y A342135 Cf. A011557 (powers of 10).
+%K A342135 nonn,base,more,hard
+%O A342135 1,2
+%A A342135 _Eric Angelini_ and _M. F. Hasler_, Mar 01 2021

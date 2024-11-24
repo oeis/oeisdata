@@ -1,0 +1,56 @@
+%I A226230 #10 Jun 06 2013 19:08:50
+%S A226230 8,9,25,32,81,125,128,169,289,343,512,625,1681,2048,2197,3125,3721,
+%T A226230 4913,8192,32761,32768,50653,66049,78125,97969,131072,177241,357911,
+%U A226230 524288,707281,1030301,1419857,1442401,1953125,2097152,2476099,3031081,3463321,6355441,7645373
+%N A226230 Nontrivial prime powers (A025475) which are a sum of a smaller nontrivial prime power and a perfect square.
+%e A226230 81 = 32 + 7^2, so 81 is in the sequence.
+%e A226230 169 = 25 + 12^2, so 169 is in the sequence.
+%p A226230 for n from 1 do
+%p A226230     if isA025475(n) then
+%p A226230         for j from 1 do
+%p A226230             pj := n-j^2 ;
+%p A226230             if pj < 0 then
+%p A226230                 break;
+%p A226230             elif isA025475(pj) then
+%p A226230                 printf("%d,\n",n);
+%p A226230                 break ;
+%p A226230             end if;
+%p A226230         end do:
+%p A226230     end if:
+%p A226230 end do: # _R. J. Mathar_, Jun 06 2013
+%o A226230 (C)
+%o A226230 #include <stdio.h>
+%o A226230 #include <stdlib.h>
+%o A226230 #include <math.h>
+%o A226230 #define TOP (1ULL<<32)
+%o A226230 typedef unsigned long long U64;
+%o A226230 int compare64(const void *p1, const void *p2) {
+%o A226230   if (*(U64*)p1== *(U64*)p2) return 0;
+%o A226230   return (*(U64*)p1 < *(U64*)p2) ? -1 : 1;
+%o A226230 }
+%o A226230 int main() {
+%o A226230   U64 i, j, p, t, r, n=0, *pp = (U64*)malloc(TOP/2);
+%o A226230   unsigned char *c = (unsigned char *)malloc(TOP/8);
+%o A226230   memset(c, 0, TOP/8);
+%o A226230   for (pp[n++] = i = 1; i < TOP; i+=2)
+%o A226230     if ((c[i>>4] & (1<<((i>>1) & 7)))==0) {
+%o A226230       for (p=i+(i==1), j = p*p; ; j*=p) {
+%o A226230         pp[n++] = j;
+%o A226230         double k = ((double)j) * ((double)p);
+%o A226230         if (k >= ((double)(1ULL<<62)*4.0)) break;
+%o A226230       }
+%o A226230       if(i>1) for (j=i*i>>1; j<TOP; j+=i)  c[j>>3]|= 1<<(j&7);
+%o A226230     }
+%o A226230   qsort(pp, n, 8, compare64);
+%o A226230   for (i = 0; i < n; i++)
+%o A226230     for (p=pp[i], j=0; j < i; j++) {
+%o A226230       t = p - pp[j];
+%o A226230       r = sqrt(t);
+%o A226230       if (r*r==t) { printf("%llu, ", p); break; }
+%o A226230     }
+%o A226230   return 0;
+%o A226230 }
+%Y A226230 Cf. A025475, A226231, A226232.
+%K A226230 nonn
+%O A226230 1,1
+%A A226230 _Alex Ratushnyak_, May 31 2013

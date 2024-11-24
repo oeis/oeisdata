@@ -1,0 +1,45 @@
+%I A316971 #27 Oct 21 2024 20:24:11
+%S A316971 59,71,83,89,107,113,131,137,149,151,157,163,167,173,179,181,191,193,
+%T A316971 197,211,223,227,233,239,241,251,257,263,269,271,277,281,283,293,307,
+%U A316971 311,313,317,331,337,347,349,353,359,367,373,379,383,389,397,401,409,419
+%N A316971 Prime numbers of the form p1^3 + p2^2 + p3, with p1, p2 and p3 also prime and all different.
+%C A316971 Conjecture: the only primes not in the sequence are
+%C A316971 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 61, 67, 73, 79, 97, 101, 103, 109, 127, 139, 199, 229, 463. - _Robert Israel_, Aug 17 2018
+%H A316971 Robert Israel, <a href="/A316971/b316971.txt">Table of n, a(n) for n = 1..10000</a>
+%e A316971 59 belongs to this sequence as 59 = 3^3 + 5^2 + 7, with 3, 5 and 7 all different primes.
+%p A316971 N:= 500: # to get all terms <= N
+%p A316971 p1:= 2: Res:= {}:
+%p A316971 do
+%p A316971   p1:= nextprime(p1);
+%p A316971   if p1^3 + 3^2+5 > N then break fi;
+%p A316971   p2:= 2;
+%p A316971   do
+%p A316971     p2:= nextprime(p2);
+%p A316971     if p2 = p1 then next fi;
+%p A316971     if p1^3 + p2^2 + 3 > N then break fi;
+%p A316971     p3:= 2;
+%p A316971     do
+%p A316971       p3:= nextprime(p3);
+%p A316971       if p3=p1 or p3=p2 then next fi;
+%p A316971       v:= p1^3 + p2^2 + p3;
+%p A316971       if v > N then break fi;
+%p A316971       if isprime(v) then Res:= Res union {v} fi
+%p A316971 od od od:
+%p A316971 sort(convert(Res,list)); # _Robert Israel_, Aug 17 2018
+%t A316971 v[t_] := Prime@Range@PrimePi@t; up=500; Union@ Reap[Do[If[ PrimeQ[p = p1^3 + p2^2 + p3] && p1!=p2 && p2!=p3 && p3!=p1, Sow@p], {p1, v[up^(1/3)]}, {p2, v@Sqrt[up - p1^3]}, {p3, v[up - p1^3 - p2^2]}]][[2, 1]] (* _Giovanni Resta_, Jul 18 2018 *)
+%o A316971 (MiniZinc)
+%o A316971 %Model to get all primes less than 300 of this sequence
+%o A316971 include "globals.mzn";
+%o A316971 int: n = 3;
+%o A316971 int: max_val = 300;
+%o A316971 array[1..n+1] of var 2..max_val: x;
+%o A316971 % primes between 2..max_val
+%o A316971 set of int: prime = 2..max_val diff { i | i in 2..max_val, j in 2..ceil(sqrt(i)) where i mod j = 0} ;
+%o A316971 set of int: primes;primes = prime union {2};
+%o A316971 solve satisfy;
+%o A316971 constraint all_different(x) /\ x[1] in primes /\ x[2] in primes /\ x[3] in primes /\ x[4] in primes /\ pow(x[1],3)+pow(x[2],2)+pow(x[3],1) = x[4];
+%o A316971 output [ show(x[4]) ];
+%Y A316971 Cf. A000040.
+%K A316971 nonn
+%O A316971 1,1
+%A A316971 _Pierandrea Formusa_, Jul 17 2018

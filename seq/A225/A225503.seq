@@ -1,0 +1,60 @@
+%I A225503 #27 Apr 02 2019 08:06:31
+%S A225503 6,3,15,21,66,78,1326,190,1035,435,465,17205,861,903,9870,5565,
+%T A225503 1567335,16836,20100,2556,2628,49770,55278,4005,42195,413595,47895,
+%U A225503 10100265,5995,1437360,32131,8646,1352190,19559385,54397665,1642578,12246,52975,501501,134940,336324807802305
+%N A225503 Least triangular number t such that t = prime(n)*triangular(m) for some m>0, or 0 if no such t exists.
+%C A225503 Conjecture: a(n) > 0.
+%C A225503 a(n) = (x^2-1)/8 where x is the least odd solution > 1 of the Pell-like equation x^2 - prime(n)*y^2 = 1 - prime(n). - _Robert Israel_, Jan 08 2015
+%H A225503 Robert Israel, <a href="/A225503/b225503.txt">Table of n, a(n) for n = 1..1000</a> (n = 1..200 from Zak Seidov).
+%e A225503 See A225502.
+%p A225503 F:= proc(n) local p, S,x,y, z, cands, s;
+%p A225503       p:= ithprime(n);
+%p A225503       S:= {isolve(x^2 - p*y^2 = 1-p)};
+%p A225503       for z from 0 do
+%p A225503         cands:= select(s -> (subs(s,x) > 1 and subs(s,x)::odd), simplify(eval(S,_Z1=z)));
+%p A225503         if cands <> {} then
+%p A225503            x:= min(map(subs,cands, x));
+%p A225503            return((x^2-1)/8)
+%p A225503         fi
+%p A225503       od;
+%p A225503 end proc:
+%p A225503 map(F, [$1..100]); # _Robert Israel_, Jan 08 2015
+%t A225503 a[n_] := Module[{p, x0, sol, x, y}, p = Prime[n]; x0 = Which[n == 1, 7, n == 2, 5, True, sol = Table[Solve[x > 1 && y > 1 && x^2 - p y^2 == 1 - p, {x, y}, Integers] /. C[1] -> c, {c, 0, 1}] // Simplify; Select[x /. Flatten[sol, 1], OddQ] // Min]; (x0^2 - 1)/8];
+%t A225503 Array[a, 171] (* _Jean-François Alcover_, Apr 02 2019, after _Robert Israel_ *)
+%o A225503 (C)
+%o A225503 #include <stdio.h>
+%o A225503 #define TOP 300
+%o A225503 typedef unsigned long long U64;
+%o A225503 U64 isTriangular(U64 a) {
+%o A225503     U64 sr = 1ULL<<32, s, b, t;
+%o A225503     if (a < (sr/2)*(sr+1))  sr>>=1;
+%o A225503     while (a < sr*(sr+1)/2)  sr>>=1;
+%o A225503     for (b = sr>>1; b; b>>=1) {
+%o A225503         s = sr+b;
+%o A225503         if (s&1) t = s*((s+1)/2);
+%o A225503         else     t = (s/2)*(s+1);
+%o A225503         if (t >= s && a >= t)  sr = s;
+%o A225503     }
+%o A225503     return (sr*(sr+1)/2 == a);
+%o A225503 }
+%o A225503 int main() {
+%o A225503   U64 i, j, k, m, tm, p, pp = 1, primes[TOP];
+%o A225503   for (primes[0]=2, i = 3; pp < TOP; i+=2) {
+%o A225503     for (p = 1; p < pp; ++p) if (i%primes[p]==0) break;
+%o A225503     if (p==pp) {
+%o A225503         primes[pp++] = i;
+%o A225503         for (j=p=primes[pp-2], m=tm=1; ; j=k, m++, tm+=m) {
+%o A225503            if ((k = p*tm) < j) k=0;
+%o A225503            if (isTriangular(k)) break;
+%o A225503         }
+%o A225503         printf("%llu, ", k);
+%o A225503     }
+%o A225503   }
+%o A225503   return 0;
+%o A225503 }
+%o A225503 (PARI) a(n) = {p = prime(n); k = 1; while (! ((t=k*(k+1)/2) && ((t % p) == 0) && ispolygonal(t/p, 3)), k++); t;} \\ _Michel Marcus_, Jan 08 2015
+%Y A225503 Cf. A000217, A112456, A225502.
+%K A225503 nonn
+%O A225503 1,1
+%A A225503 _Alex Ratushnyak_, May 09 2013
+%E A225503 a(171) from _Giovanni Resta_, Jun 19 2013

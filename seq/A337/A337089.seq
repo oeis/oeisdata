@@ -1,0 +1,37 @@
+%I A337089 #12 Oct 31 2020 02:55:28
+%S A337089 0,1,0,1,1,3,4,10,17,38,73,158,324,700,1483,3224,6979,15300,33571,
+%T A337089 74219,164476,366302,817999,1833280,4119266,9281867,20962757,47453359,
+%U A337089 107637494,244630449,556964670,1270218355,2901393727,6637071449,15203568955,34872363374
+%N A337089 Number of rooted trees of n vertices in which all leaves are at even depths (distances down from the root).
+%C A337089 For n=0, there are no rooted trees at all, per A000081.
+%C A337089 For n>=1, by omitting the root vertex, a(n) is the number of rooted forests of n-1 vertices in which all leaves are at odd depths down from the forest roots.  This includes the empty forest (no vertices at all).
+%C A337089 For n>=1, a(n) is the number of rooted hypertrees of weight n-1.  Each vertex (leaf or not) at an even depth is a hypervertex.  The root is the hypertree root.  Each hyperedge is the set of vertices surrounding an odd depth vertex, so that the weight (total hyperedge cardinalities) is the number of edges in the tree (n-1).
+%C A337089 A337090 counts trees with all leaves at odd depths.  The forests interpretation here is those odd trees assembled to make odd forests so that this sequence is shift-up of the Euler transform of A337090.  In turn A337090 is shift-up of the Euler transform of the present sequence (except for treatment of the empty forest) so that it's convenient to calculate them together term by term.
+%H A337089 Kevin Ryde, <a href="/A337089/b337089.txt">Table of n, a(n) for n = 0..600</a>
+%F A337089 a(n) = (Sum_{k=1..n-1} a(k) * Sum_{d divides n-k} d*A337090(d)) / (n-1), for n>=2.
+%F A337089 G.f.: x * Product_{k>=1} 1/(1-x^k)^A337090(k).
+%F A337089 G.f.: x * exp(Sum_{k>=1} A337090(x^k)/k).
+%e A337089 For n=5 vertices there are a(5) = 3 rooted trees in which all leaves are at even depths.
+%e A337089     *        *       *      depth=0, root
+%e A337089     |       / \      |
+%e A337089     *      *   *     *
+%e A337089    /|\     |   |     |
+%e A337089   * * *    *   *     *      depth=2, even
+%e A337089                      |
+%e A337089                      *
+%e A337089                      |
+%e A337089                      *      depth=4, even
+%o A337089 (PARI) \\ Return a vector of vec[n]=a(n) for n=1..len inclusive (so a(0)=0 omitted).
+%o A337089 a_vector(len) = {
+%o A337089   my(evens=vector(len), ec=vector(len)); evens[1]=1;
+%o A337089   my(odds=vector(len),  oc=vector(len));
+%o A337089   for(n=1,len-1,
+%o A337089     ec[n] = sumdiv(n,d, d*evens[d]);
+%o A337089     oc[n] = sumdiv(n,d, d*odds[d]);
+%o A337089     evens[n+1] =          sum(k=1,n,   oc[k]*evens[n+1-k])  /n;
+%o A337089     odds[n+1]  = (ec[n] + sum(k=1,n-1, ec[k]* odds[n+1-k])) /n);
+%o A337089   evens; }  \\ or instead "odds" is A337090
+%Y A337089 Cf. A337090, A304867.
+%K A337089 nonn
+%O A337089 0,6
+%A A337089 _Kevin Ryde_, Aug 15 2020

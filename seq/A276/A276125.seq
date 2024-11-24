@@ -1,0 +1,68 @@
+%I A276125 #30 May 12 2023 12:00:00
+%S A276125 1,2,3,2,6,6,12,2,24,6,30,6,30,22,6,2,30,24,90,6,33,42,59,6,40,30,72,
+%T A276125 22,77,6,73,2,66,30,66,24,72,90,60,6,99,66,122,42,48,118,144,6,432,40,
+%U A276125 60,30,132,72,66,22,129,154,870,6,210,146,264,2,60,66,224,30
+%N A276125 a(n) = maximum eventual period of z := z^2 + c (mod n), for Gaussian integers z, c.
+%C A276125 Note that this is the maximum over all possible initial z.
+%C A276125 From _Robert Israel_, Aug 29 2016: (Start)
+%C A276125 If n is divisible by 4, then a(n) = a(n/2).
+%C A276125 In particular, a(n) = 2 if n > 1 is a power of 2.
+%C A276125 Are there any other n with a(n) = 2? (End)
+%e A276125 For n = 3, c = 2+i:
+%e A276125 z_0 = 0.
+%e A276125 z_1 = (z_0)^2 + 2+i = 2+ i (mod 3).
+%e A276125 z_2 = (z_1)^2 + 2+i = 2+2i (mod 3).
+%e A276125 z_3 = (z_2)^2 + 2+i = 2    (mod 3).
+%e A276125 z_4 = (z_3)^2 + 2+i =    i (mod 3).
+%e A276125 z_5 = (z_4)^2 + 2+i = 1+ i (mod 3).
+%e A276125 z_6 = (z_5)^2 + 2+i = 2    (mod 3) = z_3.
+%e A276125 So the eventual period is 3, which is the maximum possible over all c and z_0 when n = 3.
+%p A276125 f:= proc(N)
+%p A276125   local pmax,R,S,T,z,a,b,c,x,y,found,zpd,count;
+%p A276125   pmax:= 0;
+%p A276125   for a from 0 to N-1 do
+%p A276125     for b from 0 to N-1 do
+%p A276125       c:= a+b*I;
+%p A276125       S:= {}:
+%p A276125       for x from 0 to N-1 do
+%p A276125         for y from 0 to N-1 do
+%p A276125            z:= x+I*y;
+%p A276125            if not member(z,S) then
+%p A276125              T:= {z};
+%p A276125              R[z]:= 0;
+%p A276125              found:= false;
+%p A276125              for count from 1 do
+%p A276125                z:= expand(z^2 + c) mod N;
+%p A276125                if member(z,S) then break fi;
+%p A276125                if member(z,T) then found:= true; zpd:= count - R[z]; break fi;
+%p A276125                R[z]:= count;
+%p A276125                T:= T union {z};
+%p A276125              od;
+%p A276125              S:= S union T;
+%p A276125              if found and zpd > pmax then
+%p A276125                 pmax:= zpd fi;
+%p A276125            fi;
+%p A276125       od od;
+%p A276125   od od;
+%p A276125   pmax
+%p A276125 end proc:
+%p A276125 map(f, [$1..30]); # _Robert Israel_, Aug 29 2016
+%t A276125 f[n_] := Module[{pmax = 0, R, S, T, z, a, b, c, x, y, found, zpd, count},
+%t A276125  For[a = 0, a <= n - 1, a++,
+%t A276125    For[b = 0, b <= n - 1, b++, c = a + b*I; S = {};
+%t A276125      For[x = 0, x <= n - 1, x++,
+%t A276125        For[y = 0, y <= n - 1, y++, z = x + y*I;
+%t A276125          If[!MemberQ[S, z], T = {z}; R[z] = 0; found = False;
+%t A276125          For[count = 1, True, count++,
+%t A276125            z = Mod[Expand[z^2 + c], n];
+%t A276125            If[MemberQ[S, z], Break[] ];
+%t A276125            If [MemberQ[T, z], found = True; zpd = count -
+%t A276125            R[z]; Break[]]; R[z] = count;
+%t A276125            T = Union[T, {z}]]; S = Union[S, T];
+%t A276125            If [found && zpd > pmax, pmax = zpd]]]]]];
+%t A276125   pmax];
+%t A276125 Table[f[n], {n, 1, 20}] (* _Jean-François Alcover_, May 12 2023, after _Robert Israel_ *)
+%K A276125 nonn
+%O A276125 1,2
+%A A276125 _Luke Palmer_, Aug 21 2016
+%E A276125 More terms from _Robert Israel_, Aug 29 2016

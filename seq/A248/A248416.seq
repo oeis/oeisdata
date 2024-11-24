@@ -1,0 +1,57 @@
+%I A248416 #23 Jun 01 2022 18:08:48
+%S A248416 1,4,1,6,4,1,7,7,7,1,10,11,13,13,1,11,13,21,25,25,1,13,16,25,41,49,49,
+%T A248416 1,16,19,31,49,81,97,97,1,18,21,37,61,97,161,193,193,1,19,25,41,73,
+%U A248416 121,193,321,385,385,1,21,28,49,81,145,241,385,641,769,769,1,24,31,55,97,161,289,481,769,1281,1537,1537,1
+%N A248416 Rectangular array by antidiagonals:  for n >= 0, row n gives the positions in the Thue-Morse sequence A010059 at which the first 2^n terms occur.
+%C A248416 Each row contains contains its successor as a proper subsequence.
+%C A248416 Note that this supposes that the Thue-Morse sequence A010059 has offset 1, whereas the true offset is 0. So really the entries should all be reduced by 1. - _N. J. A. Sloane_, Jul 01 2016
+%C A248416 Apparently T(n,3) = A004119(n+1) for n>0. Apparently T(n,4) = A083575(n) for n>0. - _R. J. Mathar_, Nov 06 2018
+%e A248416 Northwest corner, n>=0, k>=1:
+%e A248416    1    4    6    7   10   11   13   16   18   19
+%e A248416    1    4    7   11   13   16   19   21   25   28
+%e A248416    1    7   13   21   25   31   37   41   49   55
+%e A248416    1   13   25   41   49   61   73   81   97  109
+%e A248416    1   25   49   81   97  121  145  161  193  217
+%e A248416    1   49   97  161  193  241  289  321  385  433
+%e A248416    1   97  193  321  385  481  577  641  769  865
+%e A248416 The Thue-Morse sequence A010059 begins with 1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1, 0, from which we see that the first 4 terms (=1,0,0,1) occur at positions 1, 7, 13, ..., as indicated for row n=2.
+%p A248416 A010060 := proc(n)
+%p A248416     local i;
+%p A248416     add(i, i=convert(n, base, 2)) mod 2 ;
+%p A248416 end proc:
+%p A248416 A010059 := proc(n)
+%p A248416     1-A010060(n) ;
+%p A248416 end proc:
+%p A248416 A248416Off0 := proc(n,k)
+%p A248416     option remember ;
+%p A248416     local strtN,binpat,src,thue ;
+%p A248416     if k = 1 then
+%p A248416         strtN := 0 ;
+%p A248416     else
+%p A248416         strtN := 1+procname(n,k-1) ;
+%p A248416     end if;
+%p A248416     binpat := [seq(A010059(i),i=0..n-1)] ;
+%p A248416     for src from strtN do
+%p A248416         thue := [seq(A010059(i),i=src..src+nops(binpat)-1)] ;
+%p A248416         if binpat=thue then
+%p A248416             return src ;
+%p A248416         end if;
+%p A248416     end do:
+%p A248416 end proc:
+%p A248416 A248416 := proc(n,k)
+%p A248416     1+A248416Off0(2^n,k) ;
+%p A248416 end proc:
+%p A248416 for d from 1 to 11 do
+%p A248416     for k from d to 1 by -1 do
+%p A248416         printf("%d,",A248416(d-k,k)) ;
+%p A248416 end do: # _R. J. Mathar_, Nov 06 2018
+%t A248416 z = 3000; u = Nest[Flatten[# /. {0 -> {0, 1}, 1 -> {1, 0}}] &, {0}, 20]; Length[u]
+%t A248416 t[p_, q_] := t[p, q] = Table[u[[k]], {k, p, q}];
+%t A248416 r[n_] := Select[Range[z], t[#, # + 2^(n - 1)] == t[1, 1 + 2^(n - 1)] &]
+%t A248416 TableForm[Table[r[n], {n, 0, 10}]]
+%Y A248416 Cf. A010059 (Thue-Morse), A026147 (row 0), A091855 (row 1?), A157971 (row 2?),
+%Y A248416 Column 1 is essentially A004119 (or A181565).
+%K A248416 nonn,tabl
+%O A248416 1,2
+%A A248416 _Clark Kimberling_, Oct 06 2014
+%E A248416 Definitions and examples clarified. - _R. J. Mathar_, Nov 06 2018

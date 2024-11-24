@@ -1,0 +1,25 @@
+%I A332861 #33 Nov 23 2020 07:03:38
+%S A332861 2,3,7,13,23,31,41,79,101,107,149,163,173,191,197,269,271,293,347,419,
+%T A332861 443,523,557,647,761,769,787,1013,1153,1373,1613,1619,1669,1693,1777,
+%U A332861 1783,1873,2153,2161,2207,2399,2447,2801,2939,2999,3011,3049,3253,3319,3413
+%N A332861 Primes p with the property that if q<p is the least part of a partition of p into primes, then p has at least one other prime partition with the same least part.
+%H A332861 Alois P. Heinz, <a href="/A332861/b332861.txt">Table of n, a(n) for n = 1..200</a>
+%e A332861 Prime 13 is a member, because the minimal primes in partitions of 13 into prime parts smaller than 13 occur at least twice: [2,2,2,2,2,3], [2,2,3,3,3], [2,2,2,2,5], [2,3,3,5], [2,2,2,7], [2,11], [3,3,7], [3,5,5]; 3 occurs twice, 2 occurs 6 times.
+%e A332861 Prime 11 is not a member, because 3 occurs only once as a minimal prime in partitions of 11 into smaller primes: [2,2,2,2,3], [2,3,3,3], [2,2,2,5], [2,2,7], [3,3,5].
+%p A332861 b:= proc(n, p, t) option remember; `if`(n=0, 1, `if`(p>n, 0, (q->
+%p A332861       add(b(n-p*j, q, 1), j=1..n/p)*t^p+b(n, q, t))(nextprime(p))))
+%p A332861     end:
+%p A332861 a:= proc(n) option remember; local p; p:= a(n-1); do
+%p A332861       p:= nextprime(p); if (f-> andmap(i-> coeff(f, x, i)
+%p A332861           <>1, [$2..p-1]))(b(p, 2, x)) then return p fi od
+%p A332861     end: a(1):=2:
+%p A332861 seq(a(n), n=1..33);  # _Alois P. Heinz_, Mar 13 2020
+%t A332861 b[n_, p_, t_] := b[n, p, t] = If[n == 0, 1, If[p > n, 0, With[{q = NextPrime[p]}, Sum[b[n - p j, q, 1], {j, 1, n/p}] t^p + b[n, q, t]]]];
+%t A332861 a[n_] := a[n] = Module[{p = a[n - 1]}, While[True, p = NextPrime[p]; If[AllTrue[Range[2, p-1], SeriesCoefficient[b[p, 2, x], {x, 0, #}] != 1&], Return [p]]]];
+%t A332861 a[1] = 2;
+%t A332861 Table[Print[n, " ", a[n]]; a[n], {n, 1, 33}] (* _Jean-François Alcover_, Nov 23 2020, after _Alois P. Heinz_ *)
+%Y A332861 Cf. A000607, A331634.
+%K A332861 nonn
+%O A332861 1,1
+%A A332861 _David James Sycamore_, Feb 27 2020
+%E A332861 a(13)-a(50) from _Alois P. Heinz_, Feb 28 2020

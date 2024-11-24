@@ -1,0 +1,42 @@
+%I A358820 #30 Dec 05 2022 10:12:19
+%S A358820 1,2,4,3,16,5,64,6,9,7,1024,8,4096,11,25,10,65536,12,262144,13,49,17,
+%T A358820 4194304,14,81,19,36,15,268435456,18,1073741824,21,121,23,625,20,
+%U A358820 68719476736,29,169,22,1099511627776,28,4398046511104,26,100,31,70368744177664,24
+%N A358820 a(n) is the least novel k such that d(k)|n, where d is the divisor counting function A000005.
+%C A358820 In other words, a(n) = Min{k_j; 1 <= j <= d(n), such that d(k_j) = m_j}, where m_j|n, and k_j has not appeared earlier.
+%C A358820 a(n) is composite iff n is odd, and prime p (the least that has not occurred earlier) iff 2|n, and if for any other m|n, and k such that d(k) = m; k > p.
+%C A358820 The primes appear in natural order, and records > 1 are 2^(prime(k)-1); k = 1,2,...
+%C A358820 Conjectured to be a permutation of the positive integers.
+%C A358820 For each n, there is some k <= n such that a(k*d(n)) = n, so (1) a((log 2 + o(1))*n log n/log log n) > n by Wigert's theorem and (2) this sequence is a permutation of the positive integers. - _Charles R Greathouse IV_, Dec 03 2022
+%H A358820 Michael De Vlieger, <a href="/A358820/b358820.txt">Table of n, a(n) for n = 1..1024</a>
+%H A358820 Michael De Vlieger, <a href="/A358820/a358820.png">Log log scatterplot of Log_10(a(n))</a>, n = 1..256.
+%H A358820 <a href="/index/Per#IntegerPermutation">Index entries for sequences that are permutations of the natural numbers</a>
+%F A358820 a(prime(k)) = 2^(prime(k) - 1) (see A061286).
+%F A358820 n log log n/log n << a(n) <= 2^(n-1), see comments. - _Charles R Greathouse IV_, Dec 03 2022
+%e A358820 a(1)=1 since d(1)=1 and 1 has no other divisors.
+%e A358820 a(2)=2 since 2 is the smallest number having just 2 divisors.
+%e A358820 a(5)=16 since 5 is prime and 16 is the smallest number having 5 divisors.
+%e A358820 a(15)=25 since 15 has divisors 25 is the least novel number having 3 divisors, 81 is the least having 5 divisors and 144 is the least having 15 divisors.
+%t A358820 kk = 2^32; nn = 60; c[_] = False; s = Union[Flatten@ Monitor[Table[a^2*b^3, {b, kk^(1/3)}, {a, Sqrt[kk/b^3]}], b]]^2; u = 1; v = 1; w = 1; Do[Which[PrimeQ[n], k = 2^(n - 1), CoprimeQ[n, 6], k = w; While[Nand[! c[#], Divisible[n, DivisorSigma[0, #]]] &[s[[k]]], k++]; If[k == w, While[c[s[[k]]], w++]]; k = s[[k]], OddQ[n], k = v; While[Nand[! c[#], Divisible[n, DivisorSigma[0, #]]] &[k^2], k++]; If[k == v, While[c[v^2], v++]]; k *= k, True, k = u; While[Nand[! c[k], Divisible[n, DivisorSigma[0, k]]], k++]]; Set[{a[n], c[k]}, {k, True}]; If[k == u, While[c[u], u++]], {n, nn}]; Array[a, nn] (* _Michael De Vlieger_, Dec 03 2022 *)
+%o A358820 (Python)
+%o A358820 from functools import lru_cache
+%o A358820 from itertools import count, islice
+%o A358820 from sympy import divisor_count, isprime
+%o A358820 @lru_cache(maxsize=None)
+%o A358820 def d(n): return divisor_count(n)
+%o A358820 def agen():
+%o A358820     mink, seen = 1, set()
+%o A358820     for n in count(1):
+%o A358820         k = mink if not isprime(n) else 2**(n-1)
+%o A358820         dk = d(k)
+%o A358820         while k in seen or n%dk != 0: k += 1; dk = d(k)
+%o A358820         while mink in seen: mink += 1
+%o A358820         yield k
+%o A358820         seen.add(k)
+%o A358820 print(list(islice(agen(), 22))) # _Michael S. Branicky_, Dec 02 2022
+%Y A358820 Cf. A000005, A005179, A061286, A128555 (inverse).
+%K A358820 nonn
+%O A358820 1,2
+%A A358820 _David James Sycamore_, Dec 02 2022
+%E A358820 a(26) and beyond from _Michael S. Branicky_, Dec 02 2022
+%E A358820 a(24) corrected by _Michael De Vlieger_, Dec 05 2022

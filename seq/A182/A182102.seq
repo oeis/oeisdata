@@ -1,0 +1,52 @@
+%I A182102 #45 Aug 11 2015 16:20:25
+%S A182102 0,-1,4,48,-1,7,343,16,0,8,2064,123,-1,3,10,12095,748,0,12,5,11,70560,
+%T A182102 4391,7,71,10,8,12,411319,25624,48,416,45,23,11,13,2397408,149379,287,
+%U A182102 2427,250,116,36,14,14,13973183,870676
+%N A182102 Table of triangular arguments such that if A002262(14*k) = "r" then the product A182431(k,i + 1) * A182431(k,i + 2) equals "r" + A000217(a(k,i)).
+%C A182102 It is noted that the difference between adjacent rows of the respective elements, depends on the difference between the elements of column 0 in the respective rows. It is apparent that the series of differences corresponding to a difference of d in column 0, i.e. A(k+1,0) - A(k,0) = d, is defined as follows: D(0) = d, D(1) = 4 - d, D(n) = 6*D(n-1) - D(n-2) -8*d + 4. The sequence of differences corresponding to a difference of 1 or 0 in column 0 form related series A182189 and A182190.
+%C A182102 The Mathematica program below first calculates an array containing only the first four nonnegative triangular arguments P of each row then changes at most 2 of the arguments to the corresponding negative value, N = -P -1 in order to obtain the relation a(k,i) -7*a(k,i+1) + 7*a(k,i+2) - a(k,i+3) = 0, then chooses the appropriate argument to continue this relationship with the remainder of the row. In this way, the sequence is finally determined. Thus in this table a few 0's have been changed to -1.
+%F A182102 a(k,0) = Floor[(Sqrt[1 + 112*k] - 1)/2]
+%F A182102 a(k,i) = A003056(A182431(k,i+1)*A182431(k,i+2) - A002262(14*k)) or
+%F A182102           -1 -   A003056(A182431(k,i+1)*A182431(k,i+2) - A002262(14*k)) .
+%F A182102 For i>2, a(k,i) = 7*a(k,i-1)-7*a(k,i-2)+a(k,i-3).
+%e A182102 The table begins as follows:
+%e A182102 0   -1  48  343 2064 12095  70560 ...
+%e A182102 4   -1  16  123  748  4391  25624 ...
+%e A182102 7    0  -1    0    7    48    287 ...
+%e A182102 8    3  12   71  416  2427  14148 ...
+%e A182102 10   5  10   45  250  1445   8410 ...
+%e A182102 11   8  23  116  659  3824  22271 ...
+%e A182102 12  11  36  187 1068  6203  36132 ...
+%e A182102 13  14  49  258 1477  8582  49993 ...
+%e A182102 14  17  62  329 1886 10961  63854 ...
+%e A182102 15  20  75  400 2295 13340  77715 ...
+%e A182102 16  23  88  471 2704 15719  91576 ...
+%e A182102 17  26 101  542 3113 18098 105437 ...
+%e A182102 17  30 129  710 4097 23838 138897 ...
+%e A182102 ...
+%e A182102 For n > 1, a(k,n) = 6*a(k,n-1) - a(k,n-2) + G_k where G_k is dependent on k.
+%t A182102 highTri = Compile[{{S1,_Integer}},Module[{xS0=0,xS1=S1},
+%t A182102 While[xS1-xS0*(xS0+1)/2>xS0,xS0++];
+%t A182102 xS0]];
+%t A182102 overTri = Compile[{{S2,_Integer}},Module[{xS0=0,xS2=S2},
+%t A182102 While[xS2-xS0*(xS0+1)/2>xS0,xS0++];
+%t A182102 xS2 - (xS0*(1+xS0)/2)]];
+%t A182102 tt = SparseArray[{{12,1} -> 1,{1,12} -> 1}];
+%t A182102 K1 = 0;
+%t A182102 m = 14;While[K1<12,J1=highTri[m*K1];X =2*(m+K1-(J1*2+1));
+%t A182102 K2 = 6 K1 - m + X; K3 = 6 K2 - K1 + X;K4 = 6 K3 - K2 + X;
+%t A182102 o = overTri[m*K1]; tt[[1,K1+1]] =highTri[m*K1];
+%t A182102 tt[[2,K1+1]] = highTri[K1*K2-o];tt[[3,K1+1]] = highTri[K2*K3-o];tt[[4,K1+1]] = highTri[K3*K4-o];
+%t A182102 K1++];k = 1;
+%t A182102 While[k<13,z = 1; xx = 99; While[z<5 && xx == 99,
+%t A182102 If[tt[[1,k]]+ 7 tt[[3,k]] - 7 tt[[2,k]] - tt[[4,k]] == 0,Break[]];
+%t A182102 If[z == 1,t = -tt[[z,k]]-1;tt[[z,k]] = t,s = -tt[[z-1,k]]-1;tt[[z-1,k]]=s;t =-tt[[z,k]]-1];tt[[z,k]] = t;
+%t A182102 w = 1;While[w<5 && xx == 99,If[tt[[1,k]]+ 7 tt[[3,k]] - 7 tt[[2,k]] - tt[[4,k]] == 0,xx =0;Break[]];If[w==z,w++];
+%t A182102 t=-tt[[w,k]] - 1;tt[[w,k]]=t;If[tt[[1,k]]+ 7 tt[[3,k]] - 7 tt[[2,k]] - tt[[4,k]] == 0,xx =0;Break[],
+%t A182102 t = -tt[[w,k]] - 1];tt[[w,k]] = t;w++];z++];cc = tt[[1,k]] -6 tt[[2,k]] + tt[[3,k]];p = 5;While[p < 14-k,
+%t A182102 tt[[p,k]] = 6 tt[[p-1,k]] - tt[[p-2,k]] + cc;p++]; k++];
+%t A182102 a=1;list2 = Reap[While[a<11, b=a; While[b>0, Sow[tt[[b, a+1-b]]]; b--]; a++]][[2, 1]];list2
+%Y A182102 Cf. A182189, A182190, A182431.
+%K A182102 tabl,sign
+%O A182102 0,3
+%A A182102 _Kenneth J Ramsey_, Apr 11 2012

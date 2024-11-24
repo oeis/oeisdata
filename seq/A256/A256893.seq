@@ -1,0 +1,77 @@
+%I A256893 #37 Jul 21 2022 13:47:59
+%S A256893 1,0,1,0,3,1,0,13,9,1,0,75,79,18,1,0,541,765,265,30,1,0,4683,8311,
+%T A256893 3870,665,45,1,0,47293,100989,59101,13650,1400,63,1,0,545835,1362439,
+%U A256893 960498,278901,38430,2618,84,1,0,7087261,20246445,16700545,5844510,1012431,92610,4494,108,1
+%N A256893 Exponential Riordan array [1, 1/(2-e^x)-1].
+%C A256893 This is also the matrix product of the Stirling set numbers and the unsigned Lah numbers.
+%C A256893 This is also the Bell transform of A000670(n+1). For the definition of the Bell transform see A264428. - _Peter Luschny_, Jan 29 2016
+%F A256893 Row sums are given by A075729.
+%F A256893 T(n,1) = A000670(n) for n>=1.
+%F A256893 T(n,k) = n!/k! * [x^n] (1/(2-exp(x))-1)^k. - _Alois P. Heinz_, Apr 17 2015
+%e A256893 Number triangle starts:
+%e A256893   1;
+%e A256893   0,    1;
+%e A256893   0,    3,     1;
+%e A256893   0,   13,     9,     1;
+%e A256893   0,   75,    79,    18,    1;
+%e A256893   0,  541,   765,   265,   30,   1;
+%e A256893   ...
+%p A256893 T:= (n, k)-> n!*coeff(series((1/(2-exp(x))-1)^k/k!, x, n+1), x, n):
+%p A256893 seq(seq(T(n, k), k=0..n), n=0..10);  # _Alois P. Heinz_, Apr 17 2015
+%p A256893 # The function BellMatrix is defined in A264428.
+%p A256893 BellMatrix(n -> polylog(-n-1, 1/2)/2, 9); # _Peter Luschny_, Jan 29 2016
+%t A256893 T[n_, k_] := n!*SeriesCoefficient[(1/(2 - Exp[x]) - 1)^k/k!, {x, 0, n}];
+%t A256893 Table[T[n, k], {n, 0, 10}, {k, 0, n}] // Flatten (* _Jean-François Alcover_, May 23 2016, after _Alois P. Heinz_ *)
+%t A256893 (* The function BellMatrix is defined in A264428. *)
+%t A256893 BellMatrix[PolyLog[-#-1, 1/2]/2&, 9] (* _Jean-François Alcover_, May 23 2016, after _Peter Luschny_ *)
+%t A256893 RiordanArray[d_, h_, n_] := RiordanArray[d, h, n, False];
+%t A256893 RiordanArray[d_Function|d_Symbol, h_Function|h_Symbol, n_, exp_:(True | False)] := Module[{M, td, th, k, m},
+%t A256893 M[_, _] = 0;
+%t A256893 td = PadRight[CoefficientList[d[x] + O[x]^n, x], n];
+%t A256893 th = PadRight[CoefficientList[h[x] + O[x]^n, x], n];
+%t A256893 For[k = 0, k <= n - 1, k++, M[k, 0] = td[[k + 1]]];
+%t A256893 For[k = 1, k <= n - 1, k++,
+%t A256893   For[m = k, m <= n - 1, m++,
+%t A256893     M[m, k] = Sum[M[j, k - 1]*th[[m - j + 1]], {j, k - 1, m - 1}]]];
+%t A256893 If[exp,
+%t A256893   u = 1;
+%t A256893   For[k = 1, k <= n - 1, k++,
+%t A256893     u *= k;
+%t A256893     For[m = 0, m <= k, m++,
+%t A256893       j = If[m == 0, u, j/m];
+%t A256893       M[k, m] *= j]]];
+%t A256893 Table[M[m, k], {m, 0, n - 1}, {k, 0, m}]];
+%t A256893 RiordanArray[1&, 1/(2 - Exp[#])-1&, 10, True] // Flatten (* _Jean-François Alcover_, Jul 16 2019, after Sage program *)
+%o A256893 (Sage)
+%o A256893 def riordan_array(d, h, n, exp=false):
+%o A256893     def taylor_list(f,n):
+%o A256893         t = SR(f).taylor(x,0,n-1).list()
+%o A256893         return t + [0]*(n-len(t))
+%o A256893     td = taylor_list(d,n)
+%o A256893     th = taylor_list(h,n)
+%o A256893     M = matrix(QQ,n,n)
+%o A256893     for k in (0..n-1): M[k,0] = td[k]
+%o A256893     for k in (1..n-1):
+%o A256893         for m in (k..n-1):
+%o A256893             M[m,k] = add(M[j,k-1]*th[m-j] for j in (k-1..m-1))
+%o A256893     if exp:
+%o A256893         u = 1
+%o A256893         for k in (1..n-1):
+%o A256893             u *= k
+%o A256893             for m in (0..k):
+%o A256893                 j = u if m==0 else j/m
+%o A256893                 M[k,m] *= j
+%o A256893     return M
+%o A256893 riordan_array(1, 1/(2-exp(x)) - 1, 8, exp=true)
+%o A256893 # As a matrix product:
+%o A256893 def Lah(n, k):
+%o A256893     if n == k: return 1
+%o A256893     if k<0 or  k>n: return 0
+%o A256893     return (k*n*gamma(n)^2)/(gamma(k+1)^2*gamma(n-k+1))
+%o A256893 matrix(ZZ, 8, stirling_number2)*matrix(ZZ, 8, Lah)
+%Y A256893 Cf. A088729 which is a variant based on an (1,1)-offset of the number triangles.
+%Y A256893 Cf. A131222 which is the matrix product of the unsigned Lah numbers and the Stirling cycle numbers.
+%Y A256893 Cf. A000670, A075729.
+%K A256893 nonn,tabl
+%O A256893 0,5
+%A A256893 _Peter Luschny_, Apr 17 2015

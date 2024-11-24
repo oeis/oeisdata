@@ -1,0 +1,60 @@
+%I A338264 #34 May 08 2021 08:33:50
+%S A338264 0,0,0,1,0,2,0,0,0,2,0,4,0,0,0,0,2,0,0,1,0,9,0,12,0,2,0,0,6,0,0,0,0,0,
+%T A338264 0,0,4,0,0,2,0,2,0,0,0,16,0,22,0,0,0,2,0,4,0,0,12,0,0,0,0,0,0,0
+%N A338264 Triangle read by rows: T(n,k) is the frequency of occurrence of binary words, under iterations of making the n-bit binary representation of k palindromic, by binary-subtracting its bit reversal, 0 <= k < 2^n.
+%C A338264 This sequence is a side result of the same process used for generating A338203.
+%C A338264 All operations are performed with n bits. In particular, the bit-reversal of k considers k to be an n-bit binary word and k is a palindrome if it is equal to its bit reversal in this sense. The subtraction is performed modulo 2^n.
+%C A338264 The sequence is divided into blocks of length 2^n, n = 1, 2, 3, ... .
+%C A338264 Sequence looks random if only a small amount of data is seen, but shows self-similarity and scale invariance if seen from a broader perspective.
+%C A338264 An example is provided in "links" section.
+%C A338264 T(n,0) is set to zero by definition.
+%C A338264 If for any number the operation of subtracting its binary reversed bitsequence is carried out, the result is either 0 or one of the numbers k in the set T(n,k) > 0. Numbers k with bigger values T(n,k) are more likely the result of such operation.
+%H A338264 Thomas Scheuerle, <a href="/A338264/b338264.txt">Table of n, a(n) for n = 1..16382. Max: T(13,2^13-1)</a>
+%H A338264 Thomas Scheuerle, <a href="/A338264/a338264.png">See here selfsimilarity in graph of first 131070 elements</a>
+%H A338264 Thomas Scheuerle, <a href="/A338264/a338264_1.png">Fast Walsh-Hadamard transform (MATLAB)plot(fwht(a(1:2^16),2^16,'hadamard'))</a>
+%e A338264 Triangle begins:
+%e A338264   0, 0;   Data starts with n=1
+%e A338264   0, 1, 0, 2;
+%e A338264   0, 0, 0, 2, 0, 4, 0, 0;
+%e A338264   0, 0, 2, 0, 0, 1, 0, 9, 0, 12, 0, 2, 0, 0, 6, 0;
+%e A338264   ...
+%e A338264 n=4 Four bit wordlength.
+%e A338264 For each row of n we let m iterate from 0 to 2^n-1.
+%e A338264 For this example let's take a snapshot at m=5 in binary : 0101
+%e A338264 0101 - 1010 = 1011 (2^4 + 5 - 10)=11 -> T((2^n-1)+11):=T((2^n-1)+11)+1
+%e A338264 (we increment counts for frequency)
+%e A338264 1011 - 1101 = 1110 (2^4 + 11 - 13)=14 -> T((2^n-1)+14):=T((2^n-1)+14)+1
+%e A338264 1110 - 0111 = 0111 (14 - 7)=7         -> T((2^n-1)+7):=T((2^n-1)+7)+1
+%e A338264 0111 - 1110 = 1001 (2^4 + 7 -14)=9    -> T((2^n-1)+9):=T((2^n-1)+9)+1
+%e A338264 Now 1001 is palindromic, we stop m=5 and proceed with m=6.
+%e A338264 If we did not stop we would reach zero. T(n,0) is zero by definition.
+%o A338264 (MATLAB)
+%o A338264 sequence = [];
+%o A338264 for numberofBits = 1:maxNumberofBits
+%o A338264     numbersPerWordlength = 2^numberofBits;
+%o A338264     frequency_list = zeros(1,numbersPerWordlength);
+%o A338264     for n = 1:numbersPerWordlength
+%o A338264         word = n-1;
+%o A338264         while word > 0
+%o A338264             word_reversed = 0;
+%o A338264             % reverse bit order
+%o A338264             for i = 1:numberofBits
+%o A338264                 word_reversed = bitset(word_reversed,numberofBits-i+1,bitget(word,i));
+%o A338264             end
+%o A338264             % binary subtraction with worlength of numbersPerWordlength
+%o A338264             if word >= word_reversed
+%o A338264               word = word-word_reversed;
+%o A338264             else
+%o A338264               word = numbersPerWordlength + word - word_reversed;
+%o A338264             end
+%o A338264             if word > 0 % if == 0 it was already a palindrome
+%o A338264               frequency_list(word+1) = frequency_list(word+1)+1;
+%o A338264             end
+%o A338264         end
+%o A338264     end
+%o A338264     sequence = [sequence frequency_list];
+%o A338264 end
+%Y A338264 Cf. A338203.
+%K A338264 nonn,base,tabf
+%O A338264 1,6
+%A A338264 _Thomas Scheuerle_, Oct 19 2020

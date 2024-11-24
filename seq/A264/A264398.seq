@@ -1,0 +1,37 @@
+%I A264398 #36 Aug 23 2022 10:19:48
+%S A264398 1,0,1,1,1,0,2,1,2,2,1,0,4,3,3,4,3,1,0,7,7,1,5,7,7,3,0,12,14,4,7,12,
+%T A264398 14,8,1,0,19,26,10,1,11,19,26,18,3,0,30,45,22,4,15,30,45,36,9,0,45,75,
+%U A264398 44,11,1,22,45,75,67,21,1,0,67,120,81,26,3,30,67,120,119,45,4
+%N A264398 Triangle read by rows: T(n,k) is the number of partitions of n having k parts with odd multiplicities.
+%C A264398 T(n,0) = A035363(n).
+%C A264398 Row sums give A000041. - _Omar E. Pol_, Nov 21 2015
+%H A264398 Alois P. Heinz, <a href="/A264398/b264398.txt">Rows n = 0..1000, flattened</a>
+%H A264398 P. Flajolet and R. Sedgewick, <a href="http://algo.inria.fr/flajolet/Publications/books.html">Analytic Combinatorics</a>, 2009; see page 30
+%F A264398 G.f.: G(t,x) = Product_{j>=1} (1 + tx^j)/(1 - x^(2j)).
+%F A264398 Sum_{k>0} k * T(n,k) = A209423(n). - _Alois P. Heinz_, Aug 05 2020
+%F A264398 G.f.: A(x,y)*B(x^2) where A(x),B(x) are the o.g.f.'s for A008289 and A000041. (See Flajolet, Sedgewick link.) - _Geoffrey Critzer_, Aug 07 2022
+%e A264398 T(6,1) = 4 because we have [6*], [4*,1,1],[2*,2,2], and [2*,1,1,1,1] (parts with odd multiplicities are marked).
+%e A264398 Triangle starts:
+%e A264398   1;
+%e A264398   0, 1;
+%e A264398   1, 1;
+%e A264398   0, 2, 1;
+%e A264398   2, 2, 1;
+%e A264398   0, 4, 3;
+%e A264398   3, 4, 3, 1;
+%e A264398   ...
+%p A264398 g := product((1+t*x^j)/(1-x^(2*j)), j = 1 .. 100): gser := simplify(series(g, x = 0, 30)): for n from 0 to 28 do P[n] := sort(coeff(gser, x, n)) end do: for n from 0 to 23 do seq(coeff(P[n], t, j), j = 0 .. degree(P[n])) end do; # yields sequence in triangular form
+%p A264398 # second Maple program:
+%p A264398 b:= proc(n,i) option remember; `if`(n=0, 1, `if`(i<1, 0,
+%p A264398       add(expand(`if`(j::odd, x, 1)*b(n-i*j, i-1)), j=0..n/i)))
+%p A264398     end:
+%p A264398 T:= n-> (p-> seq(coeff(p,x,i), i=0..degree(p)))(b(n$2)):
+%p A264398 seq(T(n), n=0..20);  # _Alois P. Heinz_, Nov 25 2015
+%t A264398 b[n_, i_] := b[n, i] = If[n==0, 1, If[i<1, 0, Sum[Expand[If[OddQ[j], x, 1]* b[n-i*j, i-1]], {j, 0, n/i}]]]; T[n_] := Function[p, Table[Coefficient[ p, x, i], {i, 0, Exponent[p, x]}]][b[n, n]]; Table[T[n], {n, 0, 20}] // Flatten (* _Jean-François Alcover_, Feb 18 2016, after _Alois P. Heinz_ *)
+%o A264398 (PARI)
+%o A264398 T(n) = { Vec(prod(k=1, n, (1 + y*x^k)/(1 - x^(2*k)) + O(x*x^n))) }
+%o A264398 { my(t=T(10)); for(n=1, #t, print(Vecrev(t[n]))); } \\ _Andrew Howroyd_, Dec 22 2017
+%Y A264398 Cf. A000041, A035363, A209423, A264399, A264400.
+%K A264398 nonn,look,tabf
+%O A264398 0,7
+%A A264398 _Emeric Deutsch_, Nov 21 2015

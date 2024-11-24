@@ -1,0 +1,64 @@
+%I A290110 #34 Mar 12 2018 22:44:13
+%S A290110 1,2,2,3,2,4,2,5,3,4,2,6,2,4,4,7,2,8,2,9,4,4,2,10,3,4,5,9,2,11,2,12,4,
+%T A290110 4,4,13,2,4,4,14,2,15,2,9,6,4,2,16,3,8,4,9,2,17,4,14,4,4,2,18,2,4,6,
+%U A290110 19,4,15,2,9,4,11,2,20,2,4,8,9,4,15,2,21,7,4,2,22,4,4,4,23,2,24,4,9,4,4,4,25,2,8,9,26,2,15,2,23,11
+%N A290110 a(n) = the discovery rank of the factorization pattern of the sequence of divisors of n.
+%C A290110 The definition for the factorization pattern of the sequence of divisors of a number n is the same as in sequence A191743. Let's use the abbreviation FPSD. One can generate a list of distinct FPSD by trying all integers, 1, 2, 3, ..., and ignoring duplicates. a(n) is the index of the FPSD of n in this list.
+%C A290110 From _Antti Karttunen_, Mar 07 & 08 2018: (Start)
+%C A290110 This is NOT restricted growth sequence transform of A297174, but instead A300250 is, from which this differs for the first time at n=858, where a(858) = 115, while A300250(858) = 75.
+%C A290110 This gives a finer partitioning of natural numbers than A300250, and indeed we have:
+%C A290110 For all i, j:
+%C A290110   a(i) = a(j) => A300250(i) = A300250(j) => A101296(i) = A101296(j).
+%C A290110 (End)
+%H A290110 Michael De Vlieger, <a href="/A290110/b290110.txt">Table of n, a(n) for n = 1..65537</a>
+%F A290110 A191743(n) = MIN(k such that a(k)=n).
+%F A290110 a(p) = 2, for p prime;
+%F A290110 a(p^2) = 3, for p prime;
+%F A290110 a(p*q) = 4, for p, q distinct primes.
+%e A290110 The divisors of 17 are {1, 17}. They follow the pattern {1, p} which is pattern number 2 in discovery order. a(17)=2.
+%e A290110 The divisors of 28 are {1, 2, 4, 7, 14, 28}. They follow the pattern {1, p, p^2, q, p*q, p^2*q}, which is pattern number 9 in discovery order. a(28)=9.
+%e A290110 From _Michael De Vlieger_ and _Antti Karttunen_, Mar 07 & 08 2018: (Start)
+%e A290110 Divisors of 462 = 2*3*7*11 (p=2, q=3, r=7, s=11) are 1, 2, 3, 6, 7, 11, 14, 21, 22, 33, 42, 66, 77, 154, 231, 462, thus the factorization patterns in the order of increasing divisors are: 1, p, q, pq, r, s, pr, qr, ps, qs, pqr, pqs, rs, prs, qrs and pqrs.
+%e A290110 Divisors of 546 = 2*3*7*13 (p=2, q=3, r=7, s=13) are 1, 2, 3, 6, 7, 13, 14, 21, 26, 39, 42, 78, 91, 182, 273, 546, thus the factorization patterns are 1, p, q, pq, r, s, pr, qr, ps, qs, pqr, pqs, rs, prs, qrs and pqrs, that is, identical with those of 462, thus a(546) = a(462).
+%e A290110 Divisors of 858 = 2*3*11*13 (p=2, q=3, r=11, s=13) are 1, 2, 3, 6, 11, 13, 22, 26, 33, 39, 66, 78, 143, 286, 429, 858, thus the factorization patterns are 1, p, q, pq, r, s, pr, ps, qr, qs, pqr, pqs, rs, prs, qrs and pqrs. At the 8th divisor (26), we see that pattern ps is different from pattern qr of the 8th divisor of 546 (21), thus a(858) is not equal to a(546).
+%e A290110 (End)
+%t A290110 FactorizationPattern[n_] := Module[
+%t A290110   {pn, fd, f1, f2, d},
+%t A290110   pn = First /@ FactorInteger[n];
+%t A290110   fd = FactorInteger[ReplacePart[Divisors[n], 1 -> {}]];
+%t A290110   f1 = (ReplacePart[#,
+%t A290110       1 -> FromCharacterCode[
+%t A290110         111 + First[Position[pn, First[#]]]]]) &;
+%t A290110   f2 = (f1 /@ #) &;
+%t A290110   fd = f2 /@ fd;
+%t A290110   f1 = (Power[First[#], Last[#]]) &;
+%t A290110   For[i = 1, i <= Length[fd], i++,
+%t A290110    d = fd[[i]];
+%t A290110    For[j = 1, j <= Length[d], j++,d[[j]] = f1[d[[j]]];];
+%t A290110    d = Product[x, {x, d}];
+%t A290110    fd[[i]] = d;
+%t A290110   ];
+%t A290110   fd
+%t A290110 ]
+%t A290110 ListFactorizationPatternIndices[n_] := Module[
+%t A290110   {mem, k, i, p, a},
+%t A290110   mem = Association[];
+%t A290110   a = {}; k = 0;
+%t A290110   For[i = 1, i \[LessSlantEqual] n, i++,
+%t A290110    p = FactorizationPattern[i];
+%t A290110    If[KeyExistsQ[mem, p],,
+%t A290110     k++;
+%t A290110     mem = Append[mem, p -> k]
+%t A290110    ];
+%t A290110    a = Append[a, mem[p]]
+%t A290110   ];
+%t A290110   a
+%t A290110 ]
+%t A290110 ListFactorizationPatternIndices[80]
+%t A290110 (* or *)
+%t A290110 f[n_] := If[n==1, 1, Block[{p = First /@ FactorInteger@n, z,x}, z= Table[p[[i]] -> x[i], {i, Length@p}]; Times @@ (((#[[1]] /. z)^#[[2]]) & /@ FactorInteger@ #) & /@ Divisors[n]]]; A = <||>; Table[k = f[n]; If[ KeyExistsQ[A, k], A[k], t = 1 + Length@A; A[k] = t], {n, 80}] (* _Giovanni Resta_, Jul 20 2017 *)
+%Y A290110 Cf. A191743, A300250.
+%K A290110 nonn
+%O A290110 1,2
+%A A290110 _Luc Rousseau_, Jul 19 2017
+%E A290110 More terms from _Michael De Vlieger_ and _Antti Karttunen_, Mar 07 2018

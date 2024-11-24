@@ -1,0 +1,49 @@
+%I A282691 #57 Sep 02 2024 14:47:39
+%S A282691 0,1,2,3,2,3,2,5,4,5,4,5,4,5,6,7,6,5,6,7,6,7,6,9,6,7,8,9,8,9,8
+%N A282691 a(n) = maximal number of real roots of any of the 2^(n+1) polynomials c_0 + c_1*x + c_2*x^2 + ... + c_n*x^n where the coefficients c_i are +1 or -1.
+%C A282691 The roots are counted with multiplicity.
+%C A282691 Since (+/-)P((+/-)x) has the same number of real roots as P(x), we need consider only the cases where the x^0 and x^1 coefficients are +1. - _Robert Israel_, Feb 23 2017
+%e A282691 a(1) = 1 from 1 + x.
+%e A282691 a(2) = 2 from 1 + x - x^2.
+%e A282691 a(3) = 3 from 1 + x - x^2 - x^3 = (1+x)*(1-x^2).
+%e A282691 a(5) = 3 from x^5 - x^4 + x^3 - x^2 - x + 1. - _Robert Israel_, Feb 26 2017
+%e A282691 a(7) = 5 from x^7 + x^6 - x^5 - x^4 - x^3 - x^2 + x + 1 = (x - 1)^2*(x + 1)^3*(x^2 + 1). - _Chai Wah Wu_ and _W. Edwin Clark_, Feb 23 2017
+%p A282691 # Maple program using _Robert Israel_'s suggestion (above) for the computation of a(n) using Sturm's Theorem and the squarefree factorization of the 1,-1 polynomials, from _W. Edwin Clark_, Feb 23 2017:
+%p A282691 numroots:=proc(p,x)
+%p A282691 local s:
+%p A282691 sturm(sturmseq(p,x),x,-infinity,infinity):
+%p A282691 end proc:
+%p A282691 a:=proc(n)
+%p A282691 local m,T,L,L1,p,P,s,k,q,u;
+%p A282691 m:=0;
+%p A282691 T:=combinat:-cartprod([seq([1,-1],i=1..n-1)]):
+%p A282691 while not T[finished] do
+%p A282691   L:=T[nextvalue]();
+%p A282691   L1:=[1,1,op(L)];
+%p A282691   p:=add(L1[i]*x^(i-1),i=1..n+1);
+%p A282691   q:=sqrfree(p,x);
+%p A282691   k:=0;
+%p A282691   for u in q[2] do k:=k+numroots(u[1],x)*u[2]; od;
+%p A282691   if k > m then m:=k;  fi;
+%p A282691 end do:
+%p A282691 return m;
+%p A282691 end proc:
+%t A282691 Do[Print[Max[CountRoots[Internal`FromCoefficientList[#, x], x] & /@  Tuples[{1, -1}, n]]], {n, 1, 23}] (* _Luca Petrone_, Feb 23 2017 *)
+%o A282691 (Sage)
+%o A282691 import itertools
+%o A282691 def a(n):
+%o A282691     if n==0: return 0
+%o A282691     R = ZZ['x']; ans = 0
+%o A282691     for c in itertools.product([-1,1], repeat=(n-1)):
+%o A282691         p = R([1,1]+list(c))
+%o A282691         num_roots = sum([f[0].number_of_real_roots()*f[1] for f in p.factor()])
+%o A282691         ans = max(ans, num_roots)
+%o A282691     return ans  # _Robin Visser_, Sep 02 2024
+%Y A282691 Cf. A282692, A282701.
+%K A282691 nonn,more
+%O A282691 0,3
+%A A282691 Oanh Nguyen and _N. J. A. Sloane_, Feb 23 2017
+%E A282691 a(7) corrected and a(15)-a(16) added by _Chai Wah Wu_, Feb 23 2017; a(7) also corrected by _W. Edwin Clark_, Feb 23 2017
+%E A282691 a(17)-a(22) added by _Luca Petrone_, Feb 23 2017
+%E A282691 a(23) added by _W. Edwin Clark_, Feb 24 2017
+%E A282691 a(24)-a(30) from _Robin Visser_, Sep 02 2024

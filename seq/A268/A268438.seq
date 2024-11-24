@@ -1,0 +1,42 @@
+%I A268438 #27 Mar 27 2020 08:49:47
+%S A268438 1,0,1,0,8,6,0,180,240,90,0,8064,14560,10080,2520,0,604800,1330560,
+%T A268438 1285200,604800,113400,0,68428800,173638080,209341440,139708800,
+%U A268438 49896000,7484400,0,10897286400,30858347520,43770767040,36970053120,18918900000,5448643200,681080400
+%N A268438 Triangle read by rows, T(n,k) = (-1)^k*(2*n)!*P[n,k](n/(n+1)) where P is the P-transform, for n>=0 and 0<=k<=n.
+%C A268438 The P-transform is defined in the link. Compare also the Sage and Maple implementations below.
+%H A268438 Peter Luschny, <a href="http://oeis.org/wiki/User:Peter_Luschny/P-Transform">The P-transform</a>.
+%F A268438 T(n,k) = ((2*n)!/FF(n+k,n))*Sum_{m=0..k}(-1)^(m+k)*C(n+k,n+m)*Stirling1(n+m,m) where FF denotes the falling factorial function.
+%F A268438 T(n,k) = ((2*n)!/FF(n+k,n))*A269940(n,k).
+%F A268438 T(n,1) = (2*n)!/(n+1) = A060593(n) for n>=1.
+%F A268438 T(n,n) = (2*n)!/2^n = A000680(n) for n>=0.
+%e A268438 Triangle starts:
+%e A268438 [1],
+%e A268438 [0, 1],
+%e A268438 [0, 8,        6],
+%e A268438 [0, 180,      240,       90],
+%e A268438 [0, 8064,     14560,     10080,     2520],
+%e A268438 [0, 604800,   1330560,   1285200,   604800,    113400],
+%e A268438 [0, 68428800, 173638080, 209341440, 139708800, 49896000, 7484400].
+%p A268438 A268438 := proc(n,k) local F,T;
+%p A268438   F := proc(n,k) option remember;
+%p A268438   `if`(n=0 and k=0, 1,`if`(n=k, (4*n-2)*F(n-1,k-1),
+%p A268438   F(n-1,k)*(n+k))) end;
+%p A268438   T := proc(n, k) option remember;
+%p A268438   `if`(k=0 and n=0, 1,`if`(k<=0 or k>n, 0,
+%p A268438   (4*n-2)*n*(n+k-1)*(T(n-1,k)+T(n-1,k-1)))) end:
+%p A268438 T(n,k)/F(n,k) end:
+%p A268438 for n from 0 to 6 do seq(A268438(n,k), k=0..n) od;
+%p A268438 # Alternatively, with the function PTrans defined in A269941:
+%p A268438 A268438_row := n -> PTrans(n, n->n/(n+1),(n,k)->(-1)^k*(2*n)!):
+%p A268438 seq(lprint(A268438_row(n)), n=0..8);
+%t A268438 T[n_, k_] := (2n)!/FactorialPower[n+k, n] Sum[(-1)^(m+k) Binomial[n+k, n+m] Abs[StirlingS1[n+m, m]], {m, 0, k}];
+%t A268438 Table[T[n, k], {n, 0, 7}, {k, 0, n}] (* _Jean-François Alcover_, Jun 15 2019 *)
+%o A268438 (Sage)
+%o A268438 A268438 = lambda n,k: (factorial(2*n)/falling_factorial(n+k,n))*sum((-1)^(m+k)* binomial(n+k,n+m)*stirling_number1(n+m,m) for m in (0..k))
+%o A268438 for n in (0..7): print([A268438(n,m) for m in (0..n)])
+%o A268438 (Sage) # uses[PtransMatrix from A269941]
+%o A268438 PtransMatrix(7, lambda n: n/(n+1), lambda n,k: (-1)^k*factorial(2*n))
+%Y A268438 Cf. A000680, A060593, A268437, A269940, A269941.
+%K A268438 nonn,tabl
+%O A268438 0,5
+%A A268438 _Peter Luschny_, Mar 07 2016

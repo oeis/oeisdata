@@ -1,0 +1,58 @@
+%I A212620 #27 Jun 19 2024 16:20:13
+%S A212620 1,2,1,3,2,1,3,2,1,4,3,2,1,4,3,2,1,4,3,3,1,4,3,3,1,5,4,3,2,1,5,4,3,2,
+%T A212620 1,5,4,3,2,1,5,4,4,3,1,5,4,4,3,1,5,4,4,3,1,6,5,4,3,2,1,5,4,6,4,1,5,4,
+%U A212620 4,3,1,6,5,5,5,3,1,5,4,6,4,1,6,5,5,4,3,1,6,5,5,4,3,1,6,5,4,3,2,1,6,5,5,5,3,1,6,5,7,7,4,1,7,6,5,4,3,2,1,6,5,5,5,3,1,7,6,6,7,6,3,1,6,5,6,6,4,1,6,5,5,4,3,1,7,6,6,6,5,3,1
+%N A212620 Irregular triangle read by rows: T(n,k) is the number of k-vertex subtrees of the rooted tree with Matula-Goebel number n (n>=1, k>=1).
+%C A212620 The Matula-Goebel number of a rooted tree can be defined in the following recursive manner: to the one-vertex tree there corresponds the number 1; to a tree T with root degree 1 there corresponds the t-th prime number, where t is the Matula-Goebel number of the tree obtained from T by deleting the edge emanating from the root; to a tree T with root degree m>=2 there corresponds the product of the Matula-Goebel numbers of the m branches of T.
+%C A212620 Number of entries in row n is A061775(n) (number of vertices).
+%C A212620 Sum of entries in row n is A184161(n) (number of subtrees).
+%C A212620 For the number of subtrees containing the root, see A206491.
+%D A212620 I. Gutman and Y-N. Yeh, Deducing properties of trees from their Matula numbers, Publ. Inst. Math., 53 (67), 1993, 17-22.
+%D A212620 D. W. Matula, A natural rooted tree enumeration by prime factorization, SIAM Review, 10, 1968, 273.
+%D A212620 R. E. Jamison, Alternating Whitney sums and matching in trees, part 1, Discrete Math., 67, 1987, 177-189.
+%D A212620 R. E. Jamison, Alternating Whitney sums and matching in trees, part 2, Discrete Math., 79, 1989/90, 177-189.
+%H A212620 Emeric Deutsch, <a href="http://arxiv.org/abs/1111.4288">Rooted tree statistics from Matula numbers</a>, arXiv:1111.4288 [math.CO], 2011.
+%H A212620 F. Goebel, <a href="http://dx.doi.org/10.1016/0095-8956(80)90049-0">On a 1-1-correspondence between rooted trees and natural numbers</a>, J. Combin. Theory, B 29 (1980), 141-143.
+%H A212620 I. Gutman and A. Ivic, <a href="http://dx.doi.org/10.1016/0012-365X(95)00182-V">On Matula numbers</a> Discrete Math., 150 (1996), 131-142.
+%H A212620 <a href="/index/Mat#matula">Index entries for sequences related to Matula-Goebel numbers</a>
+%F A212620 There exist recursion formulas for the generating polynomial G(n)=G(n,x) of the subtrees with respect to the number of vertices. One introduces also the generating polynomial R(n)=R(n,x) of the root subtrees (subtrees containing the root) with respect to the number of vertices. There is a Maple program for R(n) and one for G(n). From G(n) one extracts the entries of the triangle.
+%e A212620 T(7,2)=3 because the rooted tree with Matula-Goebel number 7 is Y, having 3 subtrees with 2 vertices.
+%e A212620 Row 3 is 3,2,1 because the rooted tree with Matula-Goebel number 3 is the path tree  a - b - c, having 3 subtrees with 1 node each (a, b, c), 2 subtrees with 2 nodes each (ab, bc), and 1 subtree with 3 nodes (abc).
+%e A212620 Triangle begins:
+%e A212620   1;
+%e A212620   2,1;
+%e A212620   3,2,1;
+%e A212620   3,2,1;
+%e A212620   4,3,2,1;
+%e A212620   4,3,2,1;
+%e A212620   4,3,3,1;
+%e A212620   4,3,3,1;
+%e A212620   5,4,3,2,1;
+%e A212620   5,4,3,2,1;
+%e A212620   5,4,3,2,1;
+%e A212620   5,4,4,3,1;
+%e A212620   ...
+%p A212620 with(numtheory):
+%p A212620 R := proc (n) local r, s:
+%p A212620   r := proc (n) options operator, arrow: op(1, factorset(n)) end proc:
+%p A212620   s := proc (n) options operator, arrow: n/r(n) end proc:
+%p A212620   if n = 1 then x elif bigomega(n) = 1 then sort(expand(x+x*R(pi(n)))) else sort(expand(R(r(n))*R(s(n))/x)) end if
+%p A212620 end proc:
+%p A212620 G := proc (n) local r, s:
+%p A212620   r := proc (n) options operator, arrow: op(1, factorset(n)) end proc:
+%p A212620   s := proc (n) options operator, arrow: n/r(n) end proc:
+%p A212620   if n = 1 then x elif bigomega(n) = 1 then sort(expand(R(n)+G(pi(n)))) else sort(G(r(n))+G(s(n))+R(n)-R(r(n))-R(s(n))) end if
+%p A212620 end proc:
+%p A212620 WH := proc (n) options operator, arrow: seq(coeff(G(n), x, k), k = 1 .. nops(G(n)))
+%p A212620 end proc:
+%p A212620 for n to 30 do WH(n) end do; # yields sequence in triangular form
+%t A212620 r[n_] := FactorInteger[n][[1, 1]];
+%t A212620 s[n_] := n/r[n];
+%t A212620 R[n_] := Which[n == 1, x, PrimeOmega[n] == 1, Expand[x + x*R[PrimePi[n]]], True, Expand[R[r[n]]* R[s[n]]/x]];
+%t A212620 G[n_] := Which[n == 1, x, PrimeOmega[n] == 1, Expand[R[n] + G[PrimePi[n]]], True, Expand[G[r[n]] + G[s[n]] + R[n] - R[r[n]] - R[s[n]]]];
+%t A212620 WH[n_] := Rest@CoefficientList[G[n], x];
+%t A212620 Table[WH[n], {n, 1, 30}] // Flatten (* _Jean-François Alcover_, Jun 19 2024, after Maple code *)
+%Y A212620 Cf. A061775, A184161, A206491, A212618, A212619, A212621, A212622, A212623, A212624, A212625, A212626, A212627, A212628, A212629, A212630, A212631, A212632.
+%K A212620 nonn,tabf
+%O A212620 1,2
+%A A212620 _Emeric Deutsch_, May 23 2012

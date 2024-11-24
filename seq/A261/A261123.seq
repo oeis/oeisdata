@@ -1,0 +1,21 @@
+%I A261123 #69 Aug 20 2015 22:53:00
+%S A261123 2,5,7,13,17,19,23,29,31,37,41,43,47,53,59,61,67,73,79,83,89,97,101,
+%T A261123 103,107,109,113,127,131,137,139,149,151,157,163,167,173,179,181,193,
+%U A261123 197,199,211,223,227,229,233,239,241,251,257,263,269,271,277,281,283
+%N A261123 a(1) = 2; thereafter, a(n) = smallest prime > a(n-1) and different from gpf(1+Product_{k=1..m}a(k)) for all m < n, where gpf is greatest prime factor.
+%C A261123 If gpf is replaced by spf, the two sequences diverge at a(40) (here 193, equal to 191 if spf is used instead). - _Giovanni Resta_, Aug 14 2015
+%C A261123 Among the first 1000 terms, a(n+1) is always the least prime > a(n) except for n = 1, 3, 17, 39, 151 and 422, where a(n+1) = nextprime(a(n)) + 2 except for n = 151 (nextprime = A151800). - _M. F. Hasler_, Aug 17 2015
+%C A261123 Primes not present in sequence: 3, 11, 71, 191, 911, 2969, 9103, 55871, 313583, ... - _Robert G. Wilson v_, Aug 17 2015
+%H A261123 Giovanni Resta, <a href="/A261123/b261123.txt">Table of n, a(n) for n = 1..10000</a>
+%t A261123 gpfQ[x_, p_] := Mod[x, p] == 0 && Block[{n = x / p^IntegerExponent[x, p], f = 2}, While[f < p && n > 1, n /= f^IntegerExponent[n, f]; f = NextPrime@f]; n == 1]; bad[v_, p_] := Catch[Do[If[gpfQ[e + 1, p], Throw@ True], {e, v}]; False]; L = {2}; pr = {2}; While[Length[L] < 100, p = NextPrime@ L[[-1]]; While[bad[pr, p], p = NextPrime@p]; AppendTo[L, p]; AppendTo[pr, p Last@ pr]];L (* _Giovanni Resta_, Aug 14 2015 *)
+%o A261123 (PARI) vecprod1(v,n)=prod(i=1, n, v[i]);
+%o A261123 gpf(n)=my(f=factor(n)[, 1]~);f[#f];
+%o A261123 is_ok(w,n)=my(x=1);for(i=1,#w,if(prime(n)==gpf(1+vecprod1(w,i)),x=0;break));x;
+%o A261123 get_next(v,p)=until(is_ok(v, p ),p++);p;
+%o A261123 first(m)={my(v=[],p=1);v=concat(v,prime(1));p++;for(i=2,m,p=get_next(v,p);v=concat(v,prime(p)););v;}
+%o A261123 (PARI) A261123(N,v=[2],f=[])={while(#v<N,f=setunion(f,factor(prod(i=1,#v,v[i])+1,0)[,1][-1..-1]~);forprime(p=v[#v]+1,,if(!setsearch(f,p),v=concat(v,p);break)));v} \\ _M. F. Hasler_, Aug 17 2015
+%Y A261123 Cf. A006530, A151800.
+%K A261123 nonn
+%O A261123 1,1
+%A A261123 _Anders Hellström_, Aug 09 2015
+%E A261123 a(51)-a(57) from _Giovanni Resta_, Aug 14 2015

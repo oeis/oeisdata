@@ -1,0 +1,56 @@
+%I A343020 #30 Sep 08 2022 08:46:26
+%S A343020 2,5,23,167,839,7559,128519,1081079,20540519,397837439,8031343319,
+%T A343020 188972783999,3212537327999,125568306863999,2888071057871999,
+%U A343020 190487121512687999,4381203794791823999,215961289494494543999,13283916764437951631999,540119185025730854543999,26465840066260811872655999,1356699703068812438127791999
+%N A343020 a(n) is the smallest prime p such that tau(p+1) = 2^n.
+%C A343020 tau(m) = the number of divisors of m (A000005).
+%C A343020 Sequences of primes p such that tau(p+1) = 2^n for 2 <= n <= 5:
+%C A343020 n = 2: 5, 7, 13, 37, 61, 73, 157, 193, 277, 313, 397, 421, ...
+%C A343020 n = 3: 23, 29, 41, 53, 101, 103, 109, 113, 127, 137, 151, ...
+%C A343020 n = 4: 167, 263, 269, 311, 383, 389, 439, 461, 509, 569, ...
+%C A343020 n = 5: 839, 1319, 1511, 1559, 1847, 1889, 2039, 2309, 2687, ...
+%C A343020 Conjecture: a(n) is also the smallest number m such that tau(m+1) = tau(m)^n.
+%H A343020 David A. Corneth, <a href="/A343020/b343020.txt">Table of n, a(n) for n = 1..31</a>
+%e A343020 a(4) = 167 because 167 is the smallest prime p such that tau(p+1) = 16 = 2^4.
+%t A343020 Do[p = 1; While[DivisorSigma[0, Prime[p] + 1] != 2^n, p++]; Print[n, " ", Prime[p]], {n, 1, 9}] (* _Vaclav Kotesovec_, Apr 03 2021 *)
+%o A343020 (Magma) Ax:=func<n|exists(r){m:m in[1..10^6] | IsPrime(m) and #Divisors(m + 1) eq 2 ^ n} select r else 0>; [Ax(n): n in [1..7]]
+%o A343020 (PARI) a(n) = my(t=2^n); forprime(p=2, oo, if(numdiv(p+1)==t, return(p))); \\ _Jinyuan Wang_, Apr 02 2021
+%o A343020 (Python)
+%o A343020 from sympy import isprime,nextprime
+%o A343020 primes=[2]
+%o A343020 def solve(v,k,i,j):
+%o A343020     global record,stack,primes
+%o A343020     if k==0:
+%o A343020         if isprime(v-1):
+%o A343020             record=v
+%o A343020         return True
+%o A343020     sizeok=False
+%o A343020     cnt=True
+%o A343020     while cnt:
+%o A343020         if i>=len(primes):
+%o A343020             primes.append(nextprime(primes[-1]))
+%o A343020         if j<len(stack) and stack[j]<primes[i]:
+%o A343020             f=stack[j] ; j+=1
+%o A343020         else:
+%o A343020             f=primes[i] ; i+=1
+%o A343020         if record==None or v * f**k < record:
+%o A343020             stack.append(f**2)
+%o A343020             ok=solve(v*f,k-1,i,j)
+%o A343020             stack.pop()
+%o A343020             sizeok|=ok
+%o A343020             cnt&=ok
+%o A343020         else:
+%o A343020             cnt=False
+%o A343020     return sizeok
+%o A343020 def a343020(n):
+%o A343020     global record,stack
+%o A343020     record,stack = None,[]
+%o A343020     solve(1,n,0,0)
+%o A343020     return record-1
+%o A343020 # _Bert Dobbelaere_, Apr 11 2021
+%Y A343020 Cf. A037992, A080371, A080372, A340799, A343018, A343019.
+%K A343020 nonn
+%O A343020 1,1
+%A A343020 _Jaroslav Krizek_, Apr 02 2021
+%E A343020 a(11) from _Jinyuan Wang_, Apr 02 2021
+%E A343020 More terms from _David A. Corneth_, Apr 09 2021

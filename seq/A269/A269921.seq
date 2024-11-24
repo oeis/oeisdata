@@ -1,0 +1,47 @@
+%I A269921 #30 Jun 13 2017 11:08:31
+%S A269921 1,10,10,70,167,70,420,1720,1720,420,2310,14065,24164,14065,2310,
+%T A269921 12012,100156,256116,256116,100156,12012,60060,649950,2278660,3392843,
+%U A269921 2278660,649950,60060,291720,3944928,17970784,36703824,36703824,17970784
+%N A269921 Triangle read by rows: T(n,f) is the number of rooted maps with n edges and f faces on an orientable surface of genus 1.
+%C A269921 Row n contains n-1 terms.
+%H A269921 Gheorghe Coserea, <a href="/A269921/b269921.txt">Rows n = 2..202, flattened</a>
+%H A269921 Sean R. Carrell, Guillaume Chapuy, <a href="http://arxiv.org/abs/1402.6300">Simple recurrence formulas to count maps on orientable surfaces</a>, arXiv:1402.6300 [math.CO], 2014.
+%e A269921 Triangle starts:
+%e A269921 n\f    [1]      [2]      [3]      [4]      [5]      [6]      [7]
+%e A269921 [2]    1;
+%e A269921 [3]    10,      10;
+%e A269921 [4]    70,      167,     70;
+%e A269921 [5]    420,     1720,    1720,    420;
+%e A269921 [6]    2310,    14065,   24164,   14065,   2310;
+%e A269921 [7]    12012,   100156,  256116,  256116,  100156,  12012;
+%e A269921 [8]    60060,   649950,  2278660, 3392843, 2278660, 649950,  60060;
+%e A269921 [9]    ...
+%t A269921 M = 9; G = 1; gMax[n_] := Min[Quotient[n, 2], G];
+%t A269921 Q = Array[0&, {M + 1, M + 1}];
+%t A269921 Qget[n_, g_] := If[g < 0 || g > n/2, 0, Q[[n + 1, g + 1]]];
+%t A269921 Qset[n_, g_, v_] := (Q[[n + 1, g + 1]] = v );
+%t A269921 Quadric[x_] := (Qset[0, 0, x]; For[n = 1, n <= Length[Q] - 1, n++, For[g = 0, g <= gMax[n], g++, t1 = (1 + x)*(2*n - 1)/3 * Qget[n - 1, g]; t2 = (2*n - 3)*(2*n - 2)*(2*n - 1)/12 * Qget[n - 2, g - 1]; t3 = 1/2 * Sum[ Sum[(2*k - 1) * (2*(n - k) - 1) * Qget[k - 1, i] * Qget[n - k - 1, g - i], {i, 0, g}], {k, 1, n-1}]; Qset[n, g, (t1 + t2 + t3) * 6/(n+1)]]]);
+%t A269921 Quadric[x];
+%t A269921 (List @@@ Table[Qget[n - 1 + 2*G, G] // Expand, {n, 1, M + 1 - 2*G}]) /. x -> 1 // Flatten (* _Jean-François Alcover_, Jun 13 2017, adapted from PARI *)
+%o A269921 (PARI)
+%o A269921 N = 9; G = 1; gmax(n) = min(n\2, G);
+%o A269921 Q = matrix(N + 1, N + 1);
+%o A269921 Qget(n, g) = { if (g < 0 || g > n/2, 0, Q[n+1, g+1]) };
+%o A269921 Qset(n, g, v) = { Q[n+1, g+1] = v };
+%o A269921 Quadric({x=1}) = {
+%o A269921   Qset(0, 0, x);
+%o A269921   for (n = 1, length(Q)-1, for (g = 0, gmax(n),
+%o A269921     my(t1 = (1+x)*(2*n-1)/3 * Qget(n-1, g),
+%o A269921        t2 = (2*n-3)*(2*n-2)*(2*n-1)/12 * Qget(n-2, g-1),
+%o A269921        t3 = 1/2 * sum(k = 1, n-1, sum(i = 0, g,
+%o A269921        (2*k-1) * (2*(n-k)-1) * Qget(k-1, i) * Qget(n-k-1, g-i))));
+%o A269921     Qset(n, g, (t1 + t2 + t3) * 6/(n+1))));
+%o A269921 };
+%o A269921 Quadric('x);
+%o A269921 concat(apply(p->Vecrev(p/'x), vector(N+1 - 2*G, n, Qget(n-1 + 2*G, G))))
+%Y A269921 Columns f=1-10 give: A002802 f=1, A006295 f=2, A006296 f=3, A288071 f=4, A288072 f=5, A287046 f=6, A287047 f=7, A287048 f=8, A288073 f=9, A288074 f=10.
+%Y A269921 Row sums give A006300 (column 1 of A269919).
+%Y A269921 Cf. A006297 (row maxima).
+%K A269921 nonn,tabl
+%O A269921 2,2
+%A A269921 _Gheorghe Coserea_, Mar 14 2016

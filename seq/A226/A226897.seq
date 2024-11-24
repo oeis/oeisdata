@@ -1,0 +1,31 @@
+%I A226897 #28 Feb 12 2023 13:31:16
+%S A226897 1,5,16,59,156,529,1351,3988,10236,27746,66763,176783,412450
+%N A226897 a(n) is the total number of parts in the set of partitions of an n X n square lattice into squares, considering only the list of parts.
+%C A226897 The sequence was derived from the documents in the Links section. The documents are first specified in the Links section of A034295.
+%H A226897 Jon E. Schoenfield, <a href="https://oeis.org/A034295/a034295.txt">Table of solutions for n <= 12</a>
+%H A226897 Alois P. Heinz, <a href="https://oeis.org/A034295/a034295_1.txt">More ways to divide an 11 X 11 square into sub-squares</a>
+%H A226897 Alois P. Heinz, <a href="https://oeis.org/A034295/a034295_2.txt">List of different ways to divide a 13 X 13 square into sub-squares</a>
+%e A226897 For n = 3, the partitions are:
+%e A226897 Square side 1 2 3 Total Parts
+%e A226897             9 0 0     9
+%e A226897             5 1 0     6
+%e A226897             0 0 1     1
+%e A226897 Total                16
+%e A226897 So a(3) = 16.
+%p A226897 b:= proc(n, l) option remember; local i, k, s, t;
+%p A226897       if max(l[])>n then {} elif n=0 or l=[] then {0}
+%p A226897     elif min(l[])>0 then t:=min(l[]); b(n-t, map(h->h-t, l))
+%p A226897     else for k do if l[k]=0 then break fi od; s:={};
+%p A226897          for i from k to nops(l) while l[i]=0 do s:=s union
+%p A226897              map(v->v+x^(1+i-k), b(n, [l[j]$j=1..k-1,
+%p A226897                  1+i-k$j=k..i, l[j]$j=i+1..nops(l)]))
+%p A226897          od; s
+%p A226897       fi
+%p A226897     end:
+%p A226897 a:= n-> add(coeff(add(j, j=b(n, [0$n])), x, i), i=1..n):
+%p A226897 seq(a(n), n=1..9);  # _Alois P. Heinz_, Jun 21 2013
+%t A226897 $RecursionLimit = 1000; b[n_, l_List] := b[n, l] = Module[{i, k, s, t}, Which [Max[l]>n, {}, n == 0 || l == {}, {0}, Min[l]>0, t = Min[l]; b[n-t, l-t], True, k = Position[l, 0, 1, 1][[1, 1]]; s = {}; For[i = k, i <= Length[l] && l[[i]]== 0, i++, s = s ~Union~ Map[Function[{v}, v+x^(1+i-k)], b[n, Join[l[[1 ;; k-1]], Array[1+i-k&, i-k+1], l[[i+1 ;; -1]] ]]]]; s]]; a[n_] := Sum[Coefficient[Sum[j, {j, b[n, Array[0&, n]]}], x, i], {i, 1, n}]; Table[a[n], {n, 1, 9}] (* _Jean-François Alcover_, May 29 2015, after _Alois P. Heinz_ *)
+%Y A226897 Cf. A034295, A045846, A226554.
+%K A226897 nonn,hard,more
+%O A226897 1,2
+%A A226897 _Christopher Hunt Gribble_, Jun 21 2013

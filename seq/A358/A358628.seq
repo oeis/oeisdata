@@ -1,0 +1,68 @@
+%I A358628 #71 Mar 21 2023 15:41:37
+%S A358628 1,1,1,1,8,1,1,23,27,1,1,46,176,64,1,1,77,640,800,125,1,1,116,1707,
+%T A358628 4850,2675,216,1,1,163,3761,19607,25235,7301,343,1,1,218,7282,61216,
+%U A358628 147952,101528,17248,512,1,1,281,12846,159854,635376,831600,338688,36576,729,1
+%N A358628 Square array A(i,j), i >= 0, j >= 0, read by antidiagonals: A(i,j) = Sum_{|X|=0..i} Sum_{|Y|=0..i} Product_{k=1..j} (1+X(k)+Y(k)), where X and Y are multi-indices of length j.
+%C A358628 Here X = (X(1),...,X(j)) and |X| = Sum_{k=1..j} X(j).
+%C A358628 For 0 <= n <= i, let f_{n}(t) = Sum_{k=0..n} c(n,k)*t^k denote a polynomial of degree n containing at most n+1 terms. Let T_1, ..., T_j be independent variables and define B(i,j) as the set of all multivariate polynomials of the form Prod_{k=1..j} f_{a_k}(T_k), where a = (a_1,...,a_j) denotes a j-tuple of nonnegative integers satisfying Sum_{k=1..j} a_k <= i. Set N = |B(i,j)| and let (g_n)_{n=1..N} denote an ordering of the elements of B(i,j). Let S(m,n) denote the (maximum) number of terms in the expansion of g_m*g_n. Then A(i,j) = Sum_{m=1..N} Sum_{n=1..N} S(m,n).
+%C A358628 A(i,j) <= (i+1)^(3*j) for all i >= 0, j >= 0.
+%C A358628 It is conjectured that A(i,j) = binomial(i+j,j)^2 * p_j(i) for some polynomial function p_j(i) of degree j.
+%H A358628 Thomas J. Radley, <a href="/A358628/b358628.txt">Antidiagonals n = 0..50, flattened</a>
+%F A358628 G.f. for column j (conjectured): Sum_{k=0..2*j} binomial(2*j,k)^2 * x^k / (1-x)^(3*j+1)
+%F A358628 G.f.: Integral_{t=0..Pi} (1-2*sqrt(x)*cos(t)+x)/((1-2*sqrt(x)*cos(t)+x)^2 - y(1-x)) dt / Pi.
+%F A358628 B(x,y,0):=1, B(x,y,z):=Sum_{a=0..x} Sum_{b=0..y} (1+a+b)*B(x-a,y-b,z-1); A(i,j) = B(i,i,j).
+%F A358628 A(n,1) = binomial(n+1,1)^2 * (n+1) = A000578(n+1).
+%F A358628 A(n,2) = binomial(n+2,2)^2 * (7*n^2 + 21*n + 18)/18.
+%F A358628 A(n,3) = binomial(n+3,3)^2 * (n+2)*(11*n^2 + 44*n + 60)/120.
+%e A358628 The square array A(i,j) (i >= 0, j >= 0) begins:
+%e A358628   1,   1,     1,      1,       1,        1,         1, ...
+%e A358628   1,   8,    23,     46,      77,      116,       163, ...
+%e A358628   1,  27,   176,    640,    1707,     3761,      7282, ...
+%e A358628   1,  64,   800,   4850,   19607,    61216,    159854, ...
+%e A358628   1, 125,  2675,  25235,  147952,   635376,   2191100, ...
+%e A358628   1, 216,  7301, 101528,  831600,  4783008,  21359228, ...
+%e A358628   1, 343, 17248, 338688, 3755808, 28261728, 160542734, ...
+%e A358628   ...
+%e A358628 Example computation of A(1,2): let f_0(t) = 1 and f_1(t) = 1+t. We have B(1,2) = {1,1+T_1,1+T_2} and N = 3. The table below gives the (maximum) number of terms in the expansions of pairwise-products of elements of B(1,2):
+%e A358628             1   1+T_1   1+T_2
+%e A358628       1     1       2       2
+%e A358628   1+T_1     2       3       4
+%e A358628   1+T_2     2       4       3
+%e A358628   The sum of these entries is A(1,2) = 23.
+%t A358628 A[i_,j_] :=(If[j>0,mults={}; Do[lst=FrobeniusSolve[ConstantArray[1,j],k];Do[AppendTo[mults,lst[[m]]],{m,1,Length[lst]}],{k,0,i}];a=0;Do[Do[a=a+Times @@ (1+x+y),{y,mults}],{x,mults}]; a,1]); Flatten[Table[A[i,j-i],{j,0,9},{i,0,j}]]
+%o A358628 (MATLAB)
+%o A358628 function A = EvaluateA(i,j)
+%o A358628 % Construct all multi-indices of length j and total degree <= i.
+%o A358628 v = zeros(1,j);
+%o A358628 N = nchoosek(i+j,j);
+%o A358628 W = zeros(N,j);
+%o A358628 count = 1;
+%o A358628 while ~isempty(v)
+%o A358628     v(j) = v(j)+1;
+%o A358628     for k = j:(-1):2
+%o A358628         if v(k) > i
+%o A358628             v(k) = 0;
+%o A358628             v(k-1) = v(k-1)+1;
+%o A358628         end
+%o A358628     end
+%o A358628     if sum(v) <= i
+%o A358628         count = count+1;
+%o A358628         W(count,1:j) = v;
+%o A358628     elseif v(1) > i
+%o A358628         break
+%o A358628     end
+%o A358628 end
+%o A358628 % Allocate outgoing value of A and loop over all pairs of multi-indices.
+%o A358628 A = 0;
+%o A358628 for count_X = 1:N
+%o A358628     vX = W(count_X,1:j);
+%o A358628     for count_Y = 1:N
+%o A358628         vY = W(count_Y,1:j);
+%o A358628         A = A + prod(1+vX+vY);
+%o A358628     end
+%o A358628 end
+%o A358628 end
+%Y A358628 A(0,n) = A(n,0) = A000012(n), A(1,n) = A033951(n), A(n,1) = A000578(n+1).
+%K A358628 easy,nonn,tabl
+%O A358628 0,5
+%A A358628 _Thomas J. Radley_, Nov 27 2022

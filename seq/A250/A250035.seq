@@ -1,0 +1,46 @@
+%I A250035 #35 Oct 03 2020 09:28:29
+%S A250035 1,0,0,8,24,0,216,4608,20736,0,1267200,30067200,194918400,0,
+%T A250035 27840153600,855119462400,7276643942400,0,1869882900480000,
+%U A250035 71740296069120000,754326563880960000,0,303064905515581440000,14020774294498836480000,175480402397791518720000,0
+%N A250035 Number of left-right-balanced permutations of {1, 2, ..., n}.
+%C A250035 A permutation of {1, 2, ..., n} is left-right-balanced if the sum of its left half is equal to the sum of its right half. For example, {1, 4, 2, 3} is a left-right-balanced permutation of {1, 2, 3, 4} because sum( {1, 4} ) is equal to sum( {2, 3} ). Similarly, {1, 5, 3, 2, 4} is a left-right-balanced permutation of {1, 2, 3, 4, 5} because sum( {1, 5} ) is equal to sum( {2, 4} ).
+%C A250035 From _Robert Israel_, Jan 14 2015: (Start)
+%C A250035 For even n, a(n) = (n/2)!^2*b(n) where b(n) is the number of subsets of {1,2,...,n} of size n/2 whose sum is n*(n+1)/4. This is 0 if n == 2 mod 4.
+%C A250035 For odd n, a(n) = (((n-1)/2)!)^2*Sum_{j=1..n} c(n,j), where c(n,j) is the number of subsets of {1,2,...,n} of size (n-1)/2 whose sum is n*(n+1)/4 - j/2 and which do not contain j.
+%C A250035 Here j must be odd if n == 1 mod 4 and even if n == 3 mod 4.
+%C A250035 (End)
+%H A250035 Robert Israel, <a href="/A250035/b250035.txt">Table of n, a(n) for n = 1..90</a>
+%H A250035 Robert C. Lyons, <a href="/A250035/a250035.py.txt">Python script, which calculates the terms via brute force.</a>
+%e A250035 For n = 3, a(3) = 0 because none of the permutations of {1, 2, 3} are left-right-balanced.
+%e A250035 For n = 4, a(4) = 8 because there are 8 left-right-balanced permutations of {1, 2, 3, 4}. One of them is {1, 4, 2, 3} because sum( {1, 4} ) is equal to sum( {2, 3} ).
+%p A250035 S:= proc(n,t,s) option remember;
+%p A250035       if t > n then 0
+%p A250035       elif s > t*(2*n-t+1)/2 then 0
+%p A250035       elif t = 0 then 1
+%p A250035       elif s < n then procname(n-1,t,s)
+%p A250035       else procname(n-1,t,s) + procname(n-1,t-1,s-n)
+%p A250035      fi
+%p A250035 end proc:
+%p A250035 Sx:= proc(n,t,s,j) option remember;
+%p A250035       if j>=n then S(n-1,t,s)
+%p A250035       elif t > n then 0
+%p A250035       elif s > t*(2*n-t+1)/2 then 0
+%p A250035       elif t = 0 then 1
+%p A250035       elif s < n then procname(n-1,t,s,j)
+%p A250035       else procname(n-1,t,s,j) + procname(n-1,t-1,s-n,j)
+%p A250035      fi
+%p A250035 end proc:
+%p A250035 A:= proc(n) if n::even then ((n/2)!)^2*S(n,n/2,n*(n+1)/4)
+%p A250035   else (((n-1)/2)!)^2*add(Sx(n,(n-1)/2,n*(n+1)/4 - j/2, j) , j=1..n)
+%p A250035   fi
+%p A250035 end proc:
+%p A250035 seq(A(n), n=1..50); # _Robert Israel_, May 17 2015
+%t A250035 S[n_, t_, s_] := S[n, t, s] = Which[t > n, 0, s > t(2n - t + 1)/2, 0, t == 0, 1, s < n, S[n-1, t, s], True, S[n-1, t, s] + S[n-1, t-1, s-n]];
+%t A250035 Sx[n_, t_, s_, j_] := Sx[n, t, s, j] = Which[j >= n, S[n-1, t, s], t > n, 0, s > t(2n - t + 1)/2, 0, t == 0, 1, s < n, Sx[n-1, t, s, j], True, Sx[n - 1, t, s, j] + Sx[n-1, t-1, s-n, j]];
+%t A250035 A[n_] := If[EvenQ[n], ((n/2)!)^2 S[n, n/2, n(n+1)/4], (((n-1)/2)!)^2 Sum[ Sx[n, (n-1)/2, n(n+1)/4 - j/2, j], {j, 1, n}]];
+%t A250035 Array[A, 30] (* _Jean-François Alcover_, Oct 03 2020, after _Robert Israel_ *)
+%Y A250035 Cf. A056876.
+%K A250035 nonn
+%O A250035 1,4
+%A A250035 _Robert C. Lyons_, Jan 14 2015
+%E A250035 a(13) to a(26) from _Robert Israel_, Jan 15 2015

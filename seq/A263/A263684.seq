@@ -1,0 +1,48 @@
+%I A263684 #21 Jul 30 2022 20:09:36
+%S A263684 0,1,5,16400,16401,16405,82000,82001,82005
+%N A263684 Numbers whose base-4 and base-5 representations have only 0's and 1's.
+%C A263684 Intersection of A000695 and A033042.
+%C A263684 These appear to be all the terms. There are no more below 10^500.
+%e A263684 16400 is 10000100 in base 4 and 1011100 in base 5.
+%p A263684 split:= proc(ab, B)
+%p A263684    local a,b,La, Lb, k, j, a1,  a2, b1, b2, x;
+%p A263684    global Res, count;
+%p A263684    a:= ab[1]; b:= ab[2];
+%p A263684    if b-a <= 1000 then
+%p A263684       for x from a to b-1 do
+%p A263684         if max(convert(x,base,4)) <= 1 and max(convert(x,base,5)) <= 1 then
+%p A263684            count:= count+1; Res[count]:= x
+%p A263684         fi
+%p A263684       od;
+%p A263684       return ({});
+%p A263684    fi;
+%p A263684    La:= convert(a,base,B);
+%p A263684    Lb:= convert(b,base,B);
+%p A263684    if nops(Lb) > nops(La) then La:= [op(La),0$(nops(Lb)-nops(La))] fi;
+%p A263684    k:= ListTools:-SelectLast(`>`,Lb-La,0,output=indices);
+%p A263684    if La[k] = 0 then
+%p A263684      a1:= a;
+%p A263684      b1:= 2 + add(B^i,i=1..k-2) + add(La[i]*B^(i-1),i=k+1..nops(La));
+%p A263684      a2:= B^(k-1) + add(La[i]*B^(i-1),i=k+1..nops(La));
+%p A263684      b2:= min(b, b1 + B^(k-1));
+%p A263684      return(select(t -> (t[1]<t[2]),{[a1,b1],[a2,b2]}));
+%p A263684    elif La[k] = 1 then
+%p A263684      a1:= a;
+%p A263684      b1:= 2 + add(B^i,i=1..k-2) + add(La[i]*B^(i-1),i=k..nops(La));
+%p A263684      return(select(t -> t[1]<t[2], [[a1,b1]]))
+%p A263684    else return ( {})
+%p A263684    fi;
+%p A263684 end proc:
+%p A263684 count:= 0: Res:= 'Res':
+%p A263684 Cands:= {[0,10^400]}:
+%p A263684 while nops(Cands) > 0 do
+%p A263684    Cands:= map(op@split, Cands, 5);
+%p A263684    Cands:= map(op@split, Cands, 4);
+%p A263684 od:
+%p A263684 sort(convert(Res,list));
+%t A263684 Select[Range[0,83000],Max[Join[IntegerDigits[#,4],IntegerDigits[#,5]]]<2&] (* _Harvey P. Dale_, Sep 04 2018 *)
+%o A263684 (PARI) isok(n) = (n==0) || ((vecmax(digits(n,4))<=1) && (vecmax(digits(n,5))<=1)); \\ _Michel Marcus_, Oct 24 2015
+%Y A263684 Cf. A000695, A033042, A146025, A258981.
+%K A263684 nonn,fini,full
+%O A263684 1,3
+%A A263684 _Robert Israel_, Oct 23 2015

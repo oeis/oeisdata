@@ -1,0 +1,70 @@
+%I A289386 #53 Dec 15 2023 15:10:32
+%S A289386 1,2,3,2,5,6,5,4,6,6,15,12,12,30,15,4,17,18,10,20,21,14,24,90,63,26,
+%T A289386 27,18,66,12,210,12,33,90,35,30,110,120,120,26,41,42,105,30,45,30,60,
+%U A289386 48,120,50,42,510,53,1680,120,1584,57,336,276,60
+%N A289386 Number of rounds of 'deal one, skip one' shuffling required to return a deck of n cards to its original order.
+%C A289386 Origin unknown. First encountered by this author as part of an employment-interview question at Apple Inc, in early 2016.
+%C A289386 While holding a deck of n cards:
+%C A289386 1. Deal the top card from the deck onto the table ('deal one').
+%C A289386 2. Move the next card from the top of the deck to the bottom of the deck ('skip one').
+%C A289386 3. Repeat steps 1 and 2 until all cards are on the table. This is a round.
+%C A289386 4. Pick up the deck from the table and repeat steps 1 through 3 until the deck is in its original order.
+%C A289386 From _Robert Israel_, Jul 06 2017: (Start)
+%C A289386 a(n) <= A000793(n).
+%C A289386 a(n) divides n!.
+%C A289386 Conjecture: a(n) < n for infinitely many n.
+%C A289386 Conjecture: the set of n for which the permutation is a single n-cycle, and thus a(n) = n, has nonzero density. (End)
+%C A289386 It appears that for n = 2^k and all m > n, a(n) <= a(m). - _Andrew Warren_, Jul 15 2017
+%C A289386 a(2^(k+1)) / a(2^k) = A020513(k+2) at least for 1 <= k <= 30, according to the values computed by _Andrew Warren_. - _Andrey Zabolotskiy_, Apr 02 2018
+%H A289386 Robert Israel, <a href="/A289386/b289386.txt">Table of n, a(n) for n = 1..4000</a>
+%H A289386 Andrew Warren, <a href="/A289386/a289386_1.c.txt">C program to generate a(n)</a>
+%e A289386 Cards are labeled 'A', 'B', 'C', etc. 'ABCD' is a deck with 'A' on top, 'D' on the bottom.
+%e A289386 For n = 4:
+%e A289386 Round 1:
+%e A289386 Hand: ABCD    Table: [empty] - initial state of Round 1
+%e A289386 Hand: BCD     Table: A       - Deal one
+%e A289386 Hand: CDB     Table: A       - Skip one
+%e A289386 Hand: DB      Table: CA      - Deal one
+%e A289386 Hand: BD      Table: CA      - Skip one
+%e A289386 Hand: D       Table: BCA     - Deal one
+%e A289386 Hand: D       Table: BCA     - Skip one
+%e A289386 Hand: [empty] Table: DBCA    - Deal one, end of Round 1
+%e A289386 Round 2:
+%e A289386 Hand: DBCA    Table: [empty] - Initial state of Round 2
+%e A289386 Hand: BCA     Table: D       - Deal one
+%e A289386 Hand: CAB     Table: D       - Skip one
+%e A289386 Hand: AB      Table: CD      - Deal one
+%e A289386 Hand: BA      Table: CD      - Skip one
+%e A289386 Hand: A       Table: BCD     - Deal one
+%e A289386 Hand: A       Table: BCD     - Skip one
+%e A289386 Hand [empty]  Table: ABCD    - Deal one, end of Round 2
+%e A289386 The deck of 4 cards is in its original order ('ABCD') after 2 rounds, so a(4) = 2.
+%p A289386 F:= proc(n)
+%p A289386 local deck, table, i;
+%p A289386 deck:= [$1..n];
+%p A289386 table:= NULL;
+%p A289386 for i from 1 to n-1 do
+%p A289386   table:= deck[1],table;
+%p A289386   deck:= deck[[$3..nops(deck),2]];
+%p A289386 od:
+%p A289386 ilcm(op(map(nops,convert([deck[1],table],'disjcyc'))));
+%p A289386 end proc:
+%p A289386 map(F, [$1..100]); # _Robert Israel_, Jul 06 2017
+%t A289386 P[n_, i_] := Module[{d = 2i - 1}, While[d < n, d *= 2]; 2n - d];
+%t A289386 Follow[s_, f_] := Module[{t = f[s], k = 1}, While[t > s, k++; t = f[t]]; If[s == t, k, 0]];
+%t A289386 CyclePoly[n_, x_] := Module[{q = 0}, For[i = 1, i <= n, i++, l = Follow[i, P[n, #]&]; If[l != 0, q += x^l]]; q];
+%t A289386 a[n_] := Module[{q = CyclePoly[n, x], m = 1}, For[i = 1, i <= Exponent[q, x], i++, If[Coefficient[q, x, i] != 0, m = LCM[m, i]]]; m];
+%t A289386 Array[a, 60] (* _Jean-François Alcover_, Apr 09 2020, after _Andrew Howroyd_ *)
+%o A289386 (C) // see link
+%o A289386 (PARI) deal(v)=my(deck=List(v),new=List(),cutoff=4000+#v,i=1); while(#deck>=i, listput(new,deck[i]); if(i++>#deck, break); listput(deck, deck[i]); if(#deck>cutoff, deck=List(deck[i+1..#deck]); i=0); i++); Vecrev(new)
+%o A289386 ordered(v)=for(i=1,#v, if(v[i]!=i, return(0))); 1
+%o A289386 a(n)=my(v=[1..n],t=1); while(!ordered(v=deal(v)), t++); t \\ _Charles R Greathouse IV_, Jul 06 2017
+%o A289386 (PARI) \\ alternative for larger n such as 2^n.
+%o A289386 P(n,i)=my(d=2*i-1); while(d<n, d*=2); 2*n-d;
+%o A289386 Follow(s, f)={my(t=f(s), k=1); while(t>s, k++; t=f(t)); if(s==t, k, 0)}
+%o A289386 CyclePoly(n, x)={my(q=0); for(i=1, n, my(l=Follow(i, j->P(n, j))); if(l, q+=x^l)); q}
+%o A289386 a(n)={my(q=CyclePoly(n, x), m=1); for(i=1, poldegree(q), if(polcoeff(q, i), m=lcm(m, i))); m} \\ Andrew Howroyd, Nov 11 2017
+%Y A289386 Cf. A000793, A051732 (variation with cards dealt face up), A020513, A051168.
+%K A289386 nonn,look
+%O A289386 1,2
+%A A289386 _Andrew Warren_, Jul 04 2017

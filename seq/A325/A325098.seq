@@ -1,0 +1,48 @@
+%I A325098 #20 May 11 2021 06:15:38
+%S A325098 1,1,2,2,4,4,7,7,13,15,23,27,42,50,72,88,125,153,211,258,349,430,569,
+%T A325098 698,914,1119,1444,1765,2252,2745,3470,4214,5276,6387,7934,9568,11800,
+%U A325098 14181,17379,20818,25351,30264,36668,43633,52589,62394,74872,88576,105818
+%N A325098 Number of binary carry-connected integer partitions of n.
+%C A325098 A binary carry of two positive integers is an overlap of the positions of 1's in their reversed binary expansion. An integer partition is binary carry-connected if the graph whose vertices are the parts and whose edges are binary carries is connected.
+%H A325098 Alois P. Heinz, <a href="/A325098/b325098.txt">Table of n, a(n) for n = 0..500</a>
+%e A325098 The a(1) = 1 through a(8) = 13 partitions:
+%e A325098   (1)  (2)   (3)    (4)     (5)      (6)       (7)        (8)
+%e A325098        (11)  (111)  (22)    (32)     (33)      (322)      (44)
+%e A325098                     (31)    (311)    (51)      (331)      (53)
+%e A325098                     (1111)  (11111)  (222)     (511)      (62)
+%e A325098                                      (321)     (3211)     (71)
+%e A325098                                      (3111)    (31111)    (332)
+%e A325098                                      (111111)  (1111111)  (2222)
+%e A325098                                                           (3221)
+%e A325098                                                           (3311)
+%e A325098                                                           (5111)
+%e A325098                                                           (32111)
+%e A325098                                                           (311111)
+%e A325098                                                           (11111111)
+%p A325098 h:= proc(n, s) local i, m; m:= n;
+%p A325098       for i in s do m:= Bits[Or](m, i) od; {m}
+%p A325098     end:
+%p A325098 g:= (n, s)-> (w-> `if`(w={}, s union {n}, s minus w union
+%p A325098               h(n, w)))(select(x-> Bits[And](n, x)>0, s)):
+%p A325098 b:= proc(n, i, s) option remember; `if`(n=0, `if`(nops(s)>1, 0, 1),
+%p A325098       `if`(i<1, 0, b(n, i-1, s)+ b(n-i, min(i, n-i), g(i, s))))
+%p A325098     end:
+%p A325098 a:= n-> b(n$2, {}):
+%p A325098 seq(a(n), n=0..50);  # _Alois P. Heinz_, Mar 29 2019
+%t A325098 binpos[n_]:=Join@@Position[Reverse[IntegerDigits[n,2]],1];
+%t A325098 csm[s_]:=With[{c=Select[Tuples[Range[Length[s]],2],And[OrderedQ[#],UnsameQ@@#,Length[Intersection@@s[[#]]]>0]&]},If[c=={},s,csm[Sort[Append[Delete[s,List/@c[[1]]],Union@@s[[c[[1]]]]]]]]];
+%t A325098 Table[Length[Select[IntegerPartitions[n],Length[csm[binpos/@#]]<=1&]],{n,0,20}]
+%t A325098 (* Second program: *)
+%t A325098 h[n_, s_] := Module[{i, m = n}, Do[m = BitOr[m, i], {i, s}]; {m}];
+%t A325098 g[n_, s_] := Function[w, If[w == {}, s ~Union~ {n}, (s ~Complement~ w) ~Union~
+%t A325098     h[n, w]]][Select[s, BitAnd[n, #] > 0&]];
+%t A325098 b[n_, i_, s_] := b[n, i, s] = If[n == 0, If[Length[s] > 1, 0, 1],
+%t A325098     If[i < 1, 0, b[n, i - 1, s] + b[n - i, Min[i, n - i], g[i, s]]]];
+%t A325098 a[n_] := b[n, n, {}];
+%t A325098 a /@ Range[0, 50] (* _Jean-François Alcover_, May 11 2021, after _Alois P. Heinz_ *)
+%Y A325098 Cf. A050315, A080572, A247935, A267610, A267700.
+%Y A325098 Cf. A325096, A325099, A325104, A325106, A325108, A325110, A325118, A325119.
+%K A325098 nonn
+%O A325098 0,3
+%A A325098 _Gus Wiseman_, Mar 28 2019
+%E A325098 a(21)-a(48) from _Alois P. Heinz_, Mar 29 2019

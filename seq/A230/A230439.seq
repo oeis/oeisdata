@@ -1,0 +1,71 @@
+%I A230439 #73 Sep 03 2024 01:30:50
+%S A230439 1,2,6,14,34,68,150,296,586,1140,2182,4130,7678,14368,26068,48248,
+%T A230439 86572,158146,281410,509442,901014,1618544,2852464,5089580,8948694,
+%U A230439 15884762,27882762,49291952,86435358,152316976,266907560,469232204,821844316
+%N A230439 Number of contractible "tight" meanders of width n.
+%C A230439 A tight meander of width n is a special kind of meander defined as follows.
+%C A230439 For any pair (S={s_1,...,s_k},T={t_1,...,t_l}) of subsets of {1,...,n-1} (k or l might be 0), the tight meander M(S,T) defined by (S,T) is the following subset of R^2:
+%C A230439 assuming S and T ordered so that 0=s_0<s_1<...<s_k<s_{k+1}=n and 0=t_0<t_1<...<t_l<t_{l+1}=n, let M(S,T) be the union of the set of points {(1,0),...,(n,0)},
+%C A230439 semicircles in the upper half-plane with endpoints (s_{i-1}+j,0) and (s_i+1-j,0), for i=1,...,k+1, and j positive integer with s_{i-1}+j<s_i+1-j,
+%C A230439 and semicircles in the lower half-plane with endpoints (t_{i-1}+j,0) and (t_i+1-j,0), for i=1,...,l+1, and j positive integer with t_{i-1}+j<t_i+1-j.
+%C A230439 The tight meander M(S,T) is called contractible if it is a contractible subspace of R^2, i.e., is either a single point or homeomorphic to an interval.
+%C A230439 Then, a(n) is the number of pairs (S,T) as above such that the tight meander M(S,T) is contractible.
+%C A230439 From _Roger Ford_, Jul 05 2023: (Start)
+%C A230439 The following is a definition for closed meanders that yield the same sequence as tight meanders. T(n,k) = the number of closed meanders with n top arches and with k exterior arches and k arches of length 1.
+%C A230439 e = exterior arch (arch with no covering arch), 1 = arch with length 1, e1 = arch that is exterior with a length of 1:
+%C A230439                  e              exterior     length 1
+%C A230439             ____________        arches       arches
+%C A230439            /   ______   \
+%C A230439  e1       /   /      \   \      top = 2       top = 2
+%C A230439  /\      /   /   /\1  \   \
+%C A230439 /  \    /   /   /  \   \   \
+%C A230439 \   \  /   /    \   \  /   /    bottom = 2    bottom = 2
+%C A230439  \   \/1  /      \   \/1  /     total = 4     total = 4
+%C A230439   \______/        \______/
+%C A230439       e               e        Example T(4,4).
+%C A230439 (End)
+%H A230439 Mamuka Jibladze, <a href="/A230439/b230439.txt">Table of n, a(n) for n = 1..100</a> (first 64 terms by Martin Plechsmid)
+%H A230439 Vincent Coll, Colton Magnant, and Hua Wang, <a href="http://arxiv.org/abs/1206.2705">The Signature of a Meander</a>, arXiv:1206.2705 [math.QA], 2012.
+%H A230439 Vladimir Dergachev and Alexandre Kirillov, <a href="http://www.heldermann-verlag.de/jlt/jlt10/DERGALAT2E.PDF">Index of Lie algebras of Seaweed Type</a>, J. Lie Theory, 10 (2000), 331-343
+%H A230439 Mathoverflow, <a href="http://mathoverflow.net/questions/146802/special-meanders">"Special" meanders</a>
+%H A230439 Dmitri I. Panyushev, <a href="https://www.mathnet.ru/eng/mmj18">Inductive Formulas for the Index of Seaweed Lie Algebras</a>, Moscow Math. J., 1 (2001), 221-241.
+%e A230439 For n=3 the a(3)=6 contractible tight meanders of width 3 correspond to the following pairs of subsets of {1,2}: ({},{1}), ({},{2}), ({1},{}), ({2},{}), ({1},{2}), ({2},{1}).
+%p A230439 # program based on the C code by Martin Plechsmid:
+%p A230439 proc()
+%p A230439 local n,a,b,d,r;
+%p A230439 option remember;
+%p A230439   if args[1]=1 then
+%p A230439    1
+%p A230439   elif nargs=1 then
+%p A230439    2*`+`(''procname(args,[i],[j])'$'j'=1..i-1'$'i'=2..args)
+%p A230439   else
+%p A230439    n:=args[1]; a:=args[2]; b:=args[3];
+%p A230439    if b=[] then
+%p A230439     `+`('procname(n,a,[k])'$'k'=1..n)
+%p A230439    elif a[1]=b[1] then
+%p A230439     0
+%p A230439    elif a[1]<b[1] then
+%p A230439     procname(n,b,a)
+%p A230439    else
+%p A230439     d:=a[1]-b[1];
+%p A230439     r:=irem(b[1],d);
+%p A230439     if r>0 then
+%p A230439      procname(n-b[1],[d-r,op(subsop(1=r,a))],subsop(1=NULL,b))
+%p A230439     else
+%p A230439      procname(n-b[1],subsop(1=d,a),subsop(1=NULL,b))
+%p A230439     fi
+%p A230439    fi
+%p A230439   fi
+%p A230439 end;
+%t A230439 (* program based on the C code by Martin Plechsmid: *)
+%t A230439 f[n_,a_,b_]:=Which[
+%t A230439 n==1, 1,
+%t A230439 b=={}, f[n,a,b]=Sum[f[n,a,{i}],{i,n}],
+%t A230439 a=={} || First[a]<First[b],f[n,b,a],
+%t A230439 First[a]==First[b], 0,
+%t A230439 True,
+%t A230439 f[n-First[b],Join[With[{d=First[a]-First[b]},With[{r=Mod[First[b],d]},If[r==0,{d},{d-r,r}]]],Rest[a]],Rest[b]]];Table[f[n,{},{}],{n,20}]
+%Y A230439 For various kinds of meandric numbers see A005315, A005316, A060066, A060089, A060206.
+%K A230439 nonn
+%O A230439 1,2
+%A A230439 _Mamuka Jibladze_, Nov 04 2013

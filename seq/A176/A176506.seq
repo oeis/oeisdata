@@ -1,0 +1,75 @@
+%I A176506 #24 Dec 21 2020 07:22:07
+%S A176506 0,1,0,2,3,1,2,4,0,5,3,6,1,7,4,8,0,5,2,6,9,10,3,7,11,1,12,4,13,8,2,9,
+%T A176506 14,5,15,10,6,16,3,0,17,11,12,4,18,13,19,1,7,20,8,21,14,5,22,0,15,23,
+%U A176506 16,9,2,24,17,25,6,10,26,3,18,27,11,7,28,19,1,29,12,20,2,21,4,30,8,31,13,22
+%N A176506 Difference between the prime indices of the two factors of the n-th semiprime.
+%C A176506 Are there no adjacent equal terms? I have verified this up to n = 10^6. - _Gus Wiseman_, Dec 04 2020
+%H A176506 Robert Israel, <a href="/A176506/b176506.txt">Table of n, a(n) for n = 1..10000</a>
+%F A176506 a(n) = A049084(A084127(n)) - A049084(A084126(n)). [corrected by _R. J. Mathar_, Apr 22 2010]
+%F A176506 a(n) = A338913(n) - A338912(n). - _Gus Wiseman_, Dec 04 2020
+%e A176506 From _Gus Wiseman_, Dec 04 2020: (Start)
+%e A176506 The sequence of semiprimes together with the corresponding differences begins:
+%e A176506    4: 1 - 1 = 0
+%e A176506    6: 2 - 1 = 1
+%e A176506    9: 2 - 2 = 0
+%e A176506   10: 3 - 1 = 2
+%e A176506   14: 4 - 1 = 3
+%e A176506   15: 3 - 2 = 1
+%e A176506   21: 4 - 2 = 2
+%e A176506   22: 5 - 1 = 4
+%e A176506   25: 3 - 3 = 0
+%e A176506   26: 6 - 1 = 5
+%e A176506   33: 5 - 2 = 3
+%e A176506 (End)
+%p A176506 isA001358 := proc(n) numtheory[bigomega](n) = 2 ; end proc:
+%p A176506 A001358 := proc(n) option remember ; if n = 1 then return 4 ; else for a from procname(n-1)+1 do if isA001358(a) then return a; end if; end do; end if; end proc:
+%p A176506 A084126 := proc(n) min(op(numtheory[factorset](A001358(n)))) ; end proc:
+%p A176506 A084127 := proc(n) max(op(numtheory[factorset](A001358(n)))) ; end proc:
+%p A176506 A176506 := proc(n) numtheory[pi](A084127(n)) - numtheory[pi](A084126(n)) ; end proc: seq(A176506(n),n=1..120) ; # _R. J. Mathar_, Apr 22 2010
+%p A176506 # Alternative:
+%p A176506 N:= 500: # to use the first N semiprimes
+%p A176506 Primes:= select(isprime, [2,seq(i,i=3..N/2,2)]):
+%p A176506 SP:= NULL:
+%p A176506 for i from 1 to nops(Primes) do
+%p A176506   for j from 1 to i do
+%p A176506     sp:= Primes[i]*Primes[j];
+%p A176506     if sp > N then break fi;
+%p A176506     SP:= SP, [sp, i-j]
+%p A176506 od od:
+%p A176506 SP:= sort([SP],(s,t) -> s[1]<t[1]):
+%p A176506 map(t -> t[2], SP); # _Robert Israel_, Jan 17 2019
+%t A176506 M = 500; (* to use the first M semiprimes *)
+%t A176506 primes = Select[Join[{2}, Range[3, M/2, 2]], PrimeQ];
+%t A176506 SP = {};
+%t A176506 For[i = 1, i <= Length[primes], i++,
+%t A176506   For[j = 1, j <= i, j++,
+%t A176506     sp = primes[[i]] primes[[j]];
+%t A176506     If[sp > M, Break []];
+%t A176506     AppendTo[SP, {sp, i - j}]
+%t A176506 ]];
+%t A176506 SortBy[SP, First][[All, 2]] (* _Jean-François Alcover_, Jul 18 2020, after _Robert Israel_ *)
+%t A176506 Table[If[!SquareFreeQ[n],0,-Subtract@@PrimePi/@First/@FactorInteger[n]],{n,Select[Range[100],PrimeOmega[#]==2&]}] (* _Gus Wiseman_, Dec 04 2020 *)
+%o A176506 (PARI) lista(nn) = {my(vsp = select(x->(bigomega(x)==2), [1..nn])); vector(#vsp, k, my(f=factor(vsp[k])[,1]); primepi(vecmax(f)) - primepi(vecmin(f)));} \\ _Michel Marcus_, Jul 18 2020
+%Y A176506 Cf. A109313.
+%Y A176506 Cf. A001358, A049084, A084126, A084127.
+%Y A176506 A087794 is product of the same indices.
+%Y A176506 A176504 is the sum of the same indices.
+%Y A176506 A115392 lists positions of first appearances.
+%Y A176506 A128301 lists positions of 0's.
+%Y A176506 A172348 lists positions of 1's.
+%Y A176506 A338898 has this sequence as row differences.
+%Y A176506 A338900 is the squarefree case.
+%Y A176506 A338912/A338913 give the two prime indices of semiprimes.
+%Y A176506 A006881 lists squarefree semiprimes.
+%Y A176506 A024697 is the sum of semiprimes of weight n.
+%Y A176506 A056239 gives sum of prime indices (Heinz weight).
+%Y A176506 A087112 groups semiprimes by greater factor.
+%Y A176506 A270650/A270652/A338899 give the prime indices of squarefree semiprimes.
+%Y A176506 A338904 groups semiprimes by weight.
+%Y A176506 A338907/A338906 list semiprimes of odd/even weight.
+%Y A176506 A339114/A339115 give the least/greatest semiprime of weight n.
+%Y A176506 Cf. A000040, A001222, A062198, A112141, A112798, A325699, A320655, A339005.
+%K A176506 nonn,look
+%O A176506 1,4
+%A A176506 _Juri-Stepan Gerasimov_, Apr 19 2010
+%E A176506 a(51) and a(69) corrected by _R. J. Mathar_, Apr 22 2010

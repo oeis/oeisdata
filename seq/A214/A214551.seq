@@ -1,0 +1,66 @@
+%I A214551 #83 Mar 28 2022 11:20:20
+%S A214551 1,1,1,2,3,4,3,2,3,2,2,5,7,9,14,3,4,9,4,2,11,15,17,28,43,60,22,65,25,
+%T A214551 47,112,137,184,37,174,179,216,65,244,115,36,70,37,73,143,180,253,36,
+%U A214551 6,259,295,301,80,75,376,57,44,105,54,49,22,38,87,109,147
+%N A214551 Reed Kelly's sequence: a(n) = (a(n-1) + a(n-3))/gcd(a(n-1), a(n-3)) with a(0) = a(1) = a(2) = 1.
+%C A214551 Like Narayana's Cows sequence A000930, except that the sums are divided by the greatest common divisor (gcd) of the prior terms.
+%C A214551 It is a strong conjecture that 8 and 10 are missing from this sequence, but it would be nice to have a proof! See A214321 for the conjectured values. [I have often referred to this as "Reed Kelly's sequence" in talks.] - _N. J. A. Sloane_, Feb 18 2017
+%H A214551 T. D. Noe and N. J. A. Sloane, <a href="/A214551/b214551.txt">Table of n, a(n) for n = 0..10000</a>
+%H A214551 Benoit Cloitre, <a href="/A214551/a214551.png">Graph of a(n)^(1/n) for n=1 up to 381817</a>
+%H A214551 N. J. A. Sloane, <a href="https://www.youtube.com/watch?v=9ogbsh8KuEM">Exciting Number Sequences</a> (video of talk), Mar 05 2021.
+%F A214551 It appears that, very roughly, a(n) ~ constant*exp(0.123...*n). - _N. J. A. Sloane_, Sep 07 2012. See next comment for more precise estimate.
+%F A214551 If a(n)^(1/n) converges the limit should be near 1.126 (see link). - _Benoit Cloitre_, Nov 08 2015
+%F A214551 _Robert G. Wilson v_ reports that at around 10^7 terms a(n)^(1/n) is about exp(1/8.4). - _N. J. A. Sloane_, May 05 2021
+%e A214551 a(14)=9, a(16)=3, therefore a(17)=(9+3)/gcd(9,3) = 12/3 = 4.
+%e A214551 a(24)=28, a(26)=60, therefore a(27)=(28+60)/gcd(28,60) = 88/4 = 22.
+%p A214551 a:= proc(n) a(n):= `if`(n<3, 1, (a(n-1)+a(n-3))/igcd(a(n-1), a(n-3))) end:
+%p A214551 seq(a(n), n=0..100); # _Alois P. Heinz_, Oct 18 2012
+%t A214551 t = {1, 1, 1}; Do[AppendTo[t, (t[[-1]] + t[[-3]])/GCD[t[[-1]], t[[-3]]]], {100}]
+%t A214551 f[l_List] := Append[l, (l[[-1]] + l[[-3]])/GCD[l[[-1]], l[[-3]]]]; Nest[f, {1, 1, 1}, 62] (* _Robert G. Wilson v_, Jul 23 2012 *)
+%t A214551 RecurrenceTable[{a[0]==a[1]==a[2]==1,a[n]==(a[n-1]+a[n-3])/GCD[ a[n-1], a[n-3]]},a,{n,70}] (* _Harvey P. Dale_, May 06 2014 *)
+%o A214551 (Perl)
+%o A214551 use bignum;
+%o A214551 my @seq = (1, 1, 1);
+%o A214551 print "1 1\n2 1\n3 1\n";
+%o A214551 for ( my $i = 3; $i < 400; $i++ )
+%o A214551 {
+%o A214551     my $next = ( $seq[$i-1] + $seq[$i-3] ) /
+%o A214551         gcd( $seq[$i-1], $seq[$i-3] );
+%o A214551     my $ind = $i+1;
+%o A214551     print "$ind $next\n";
+%o A214551     push( @seq, $next );
+%o A214551 }
+%o A214551 sub gcd {
+%o A214551     my ($x, $y) = @_;
+%o A214551     ($x, $y) = ($y, $x % $y) while $y;
+%o A214551     return $x;
+%o A214551 }
+%o A214551 (Haskell)
+%o A214551 a214551 n = a214551_list !! n
+%o A214551 a214551_list = 1 : 1 : 1 : zipWith f a214551_list (drop 2 a214551_list)
+%o A214551    where f u v = (u + v) `div` gcd u v
+%o A214551 -- _Reinhard Zumkeller_, Jul 23 2012
+%o A214551 (Sage)
+%o A214551 def A214551Rec():
+%o A214551     x, y, z = 1, 1, 1
+%o A214551     yield x
+%o A214551     while True:
+%o A214551         x, y, z =  y, z, (z + x)//gcd(z, x)
+%o A214551         yield x
+%o A214551 A214551 = A214551Rec();
+%o A214551 print([next(A214551) for _ in range(65)])  # _Peter Luschny_, Oct 18 2012
+%o A214551 (PARI) first(n)=my(v=vector(n+1)); for(i=1,min(n,3),v[i]=1); for(i=4,#v, v[i]=(v[i-1]+v[i-3])/gcd(v[n-1],v[i-3])); v \\ _Charles R Greathouse IV_, Jun 21 2017
+%o A214551 (Python)
+%o A214551 from math import gcd
+%o A214551 def aupton(nn):
+%o A214551     alst = [1, 1, 1]
+%o A214551     for n in range(3, nn+1):
+%o A214551         alst.append((alst[n-1] + alst[n-3])//gcd(alst[n-1], alst[n-3]))
+%o A214551     return alst
+%o A214551 print(aupton(64)) # _Michael S. Branicky_, Mar 28 2022
+%Y A214551 Similar to A000930. Cf. A341312, A341313, which are also similar.
+%Y A214551 Cf. also A214320, A214321, A214322, A214323 (gcd's), A219898 (records), A214324, A214325, A214330, A214331, A214809, A227836, A227837.
+%Y A214551 Starting with a(2) = 3 gives A214626. - _Reinhard Zumkeller_, Jul 23 2012
+%K A214551 nonn,nice
+%O A214551 0,4
+%A A214551 _Reed Kelly_, Jul 20 2012

@@ -1,0 +1,48 @@
+%I A342357 #26 Mar 11 2021 15:30:42
+%S A342357 1,2,11,125,1469,30970,1424807,25646168,943532049,66190291008,
+%T A342357 1883023236995,119209289551407,8338590851427689,366451025462807402,
+%U A342357 25231464507361789935,2996947275258886238380,211289282287835811874277,12680220578500976681544666,1815313698001596651227722787
+%N A342357 Number of fundamentally different rainbow graceful labelings of graphs with n edges.
+%C A342357 Rainbow graceful labelings are also known as rho-labelings, as originally introduced by Rosa in 1967.
+%C A342357 Equivalently, they are graceful labelings of the digraph obtained by replacing each edge by a pair of arcs in opposite directions.
+%C A342357 Consider vertices numbered 0 to 2n. For 1 <= k <= n, add an edge between v_k and (v_k+k) mod q, where q = 2n+1. (Thus (2n+1)^n possibilities.) Two such graphs are considered equivalent under the following operations: (i) rename each v to (v+1) mod q; (ii) rename each v to (av) mod q, where a is relatively prime to q. The number of equivalence classes is a(n).
+%D A342357 D. E. Knuth, The Art of Computer Programming, forthcoming exercise in Section 7.2.2.3.
+%D A342357 A. Rosa, On certain valuations of the vertices of a graph, Theory of Graphs (Internat. Symposium, Rome, July 1966), Dunod Paris (1967) 349-355.
+%H A342357 Peter Luschny, <a href="/A342357/b342357.txt">Table of n, a(n) for n = 1..100</a>
+%H A342357 R. Montgomery, A. Pokrovskiy, and B. Sudakov, <a href="https://arxiv.org/abs/2001.02665">A proof of Ringel's Conjecture</a>, arXiv:2001.02665 [math.CO], 2020.
+%e A342357 Each equivalence class has exactly one graph with v_1=0.
+%e A342357 For n=3 the eleven classes of graphs 0v_2v_3 are: {000,011,015,050,054,065}, {001,002,024,041,063,064}, {003,026,031,034,046,062}, {004,061}, {005,013,021,044,052,060}, {006,014,030,035,051,066}, {010,055}, {012,020,022,043,045,053}, {016,025,032,033,040,056}, {023,042}, {036}.
+%t A342357 sols[alf_,bet_,q_]:=Block[{d=GCD[alf,q]},If[Mod[bet,d]!=0,0,d]]
+%t A342357 (* that many solutions to alf x == bet (modulo q) for 0<=x<q *)
+%t A342357 f[l_,a_,b_,q_]:=Block[{r,s,ll,atos},
+%t A342357    s=1;ll=Mod[l*a,q];r=1;
+%t A342357    While[ll>l && q-ll>l, s++;ll=Mod[ll*a,q];r=Mod[r*a+1,q]];
+%t A342357    If[ll==l,sols[a^s-1,-r b,q], If[q-ll==l,sols[a^s-1,l-r b,q],1]]]
+%t A342357 f[a_,b_,q_]:=Product[f[l,a,b,q],{l,(q-1)/2}]
+%t A342357 x[q_]:=Sum[If[GCD[a,q]>1,0,Sum[f[a,b,q],{b,0,q-1}]],{a,q-1}]/(q EulerPhi[q])
+%t A342357 a[n_]:=x[2n+1]
+%o A342357 (SageMath) # This is a port of the Mathematica program.
+%o A342357 def sols(a, b, q):
+%o A342357     g = gcd(a, q)
+%o A342357     return 0 if mod(b, g) != 0 else g
+%o A342357 def F(k, a, b, q):
+%o A342357     s, r, m = 1, 1, mod(k*a, q)
+%o A342357     while m > k and q - m > k:
+%o A342357         s += 1
+%o A342357         m = mod(m*a, q)
+%o A342357         r = mod(r*a + 1, q)
+%o A342357     if m == k:   return sols(a^s - 1, -r*b, q)
+%o A342357     if m == q-k: return sols(a^s - 1, k - r*b, q)
+%o A342357     return 1
+%o A342357 def f(a, b, q):
+%o A342357     return prod(F(k, a, b, q) for k in (1..(q-1)//2))
+%o A342357 def a(n):
+%o A342357     q = 2*n + 1
+%o A342357     s = sum(0 if gcd(a, q) > 1 else sum(f(a, b, q)
+%o A342357         for b in (0..q-1)) for a in (1..q-1))
+%o A342357     return s // (q*euler_phi(q))
+%o A342357 print([a(n) for n in (1..19)]) # _Peter Luschny_, Mar 10 2021
+%Y A342357 Cf. A341884, A342225, A005193, A002618.
+%K A342357 nonn
+%O A342357 1,2
+%A A342357 _Don Knuth_, Mar 09 2021

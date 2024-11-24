@@ -1,0 +1,32 @@
+%I A217781 #50 Dec 04 2020 16:45:13
+%S A217781 1,1,1,2,1,1,4,3,1,1,9,6,3,1,1,20,16,7,4,1,1,48,37,18,9,4,1,1,115,96,
+%T A217781 44,28,10,5,1,1,286,239,117,71,32,13,5,1,1,719,622,299,202,89,45,14,6,
+%U A217781 1,1,1842,1607,793,542,264,130,52,17,6,1,1
+%N A217781 Triangular array read by rows: T(n,k) is the number of n-node connected graphs with exactly one cycle of length k (and no other cycles) for n >= 1 and 1 <= k <= n.
+%C A217781 Note that the structures counted in columns 1 and 2 are not simple graphs as we are allowing a self loop (column 1) and a double edge (column 2).
+%H A217781 Andrew Howroyd, <a href="/A217781/b217781.txt">Table of n, a(n) for n = 1..1275</a> (rows 1..50)
+%H A217781 Washington G. Bomfim, <a href="http://commons.wikimedia.org/wiki/File:The21.GIF">A picture of the twenty one unicycles with 3, 4, 5 and 6 vertices</a>.
+%F A217781 O.g.f. for column k is Z(D[k],A(x)). That is, we substitute for each variable s[i] in the cycle index of the dihedral group of order 2k the series A(x^i), where A(x) is the o.g.f. for A000081.
+%e A217781 Triangle begins:
+%e A217781     1;
+%e A217781     1,   1;
+%e A217781     2,   1,   1;
+%e A217781     4,   3,   1,   1;
+%e A217781     9,   6,   3,   1,   1;
+%e A217781    20,  16,   7,   4,   1,   1;
+%e A217781    48,  37,  18,   9,   4,   1,   1;
+%e A217781   115,  96,  44,  28,  10,   5,   1,   1;
+%e A217781   286, 239, 117,  71,  32,  13,   5,   1,   1;
+%e A217781   ...
+%t A217781 nn=15;f[list_]:=Select[list,#>0&];t[x_]:=Sum[a[n]x^n,{n,0,nn}];sol=SolveAlways[0==Series[t[x]-x Product[1/(1-x^i)^a[i],{i,1,nn}],{x,0,nn}],x];b=Table[a[n],{n,1,nn}]/.sol//Flatten;Map[f,Drop[Transpose[Table[Take[CoefficientList[CycleIndex[DihedralGroup[n],s]/.Table[s[j]->Table[Sum[b[[i]]x^(i*k),{i,1,nn}],{k,1,nn}][[j]],{j,1,n}],x],nn],{n,1,nn}]],1]]//Grid
+%o A217781 (PARI) \\ TreeGf is A000081 as g.f.
+%o A217781 TreeGf(N) = {my(A=vector(N, j, 1)); for (n=1, N-1, A[n+1] = 1/n * sum(k=1, n, sumdiv(k, d, d*A[d]) * A[n-k+1] ) ); x*Ser(A)}
+%o A217781 ColSeq(n,k)={my(t=TreeGf(max(0,n+1-k))); my(g(e)=subst(t + O(x*x^(n\e)), x, x^e) + O(x*x^n)); Vec(sumdiv(k, d, eulerphi(d)*g(d)^(k/d))/k + if(k%2, g(1)*g(2)^(k\2), (g(1)^2+g(2))*g(2)^(k/2-1)/2), -n)/2}
+%o A217781 M(n, m=n)={Mat(vector(m, k, ColSeq(n,k)~))}
+%o A217781 { my(T=M(12)); for(n=1, #T~, print(T[n,1..n])) } \\ _Andrew Howroyd_, Dec 03 2020
+%Y A217781 Cf. A068051 (row sums), A001429 (row sums for columns >= 3).
+%Y A217781 Cf. A000081 (column 1), A027852 (column 2), A000226 (column 3), A000368 (column 4).
+%Y A217781 Cf. A339428 (directed cycle).
+%K A217781 nonn,tabl
+%O A217781 1,4
+%A A217781 _Geoffrey Critzer_, Mar 24 2013

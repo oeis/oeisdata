@@ -1,0 +1,39 @@
+%I A299754 #43 Feb 25 2018 14:43:36
+%S A299754 1,3,10,25,126,127,1716,2241,18469,15231,352716,36973,5200300,1799995,
+%T A299754 30333601,24331777,1166803110,12247363,17672631900,723276561
+%N A299754 Number of distinct sums of n complex n-th roots of 1.
+%C A299754 a(n) == 1 (mod n).
+%C A299754 Also, a(n) equals the size of the set { f(x) mod Phi_n(x) }, where f(x) runs over the polynomials of degree at most n-1 with nonnegative integer coefficients such that f(1)=n (i.e. the coefficients sum to n), Phi_n(x) is the n-th cyclotomic polynomial. In particular, for prime n, Phi_n(x)=1+x+...+x^(n-1) and thus all f(x) mod Phi_n(x) are distinct, implying that a(n)=binomial(2*n-1,n). - _Max Alekseyev_, Feb 20 2018
+%F A299754 For prime p, a(p) = binomial(2*p-1,p). - Conjectured by _Robert Israel_, Feb 18 2018; proved by _Max Alekseyev_, Feb 20 2018
+%F A299754 a(n) = A299807(n,n). - _Max Alekseyev_, Feb 25 2018
+%e A299754 From _M. F. Hasler_, Feb 18 2018: (Start)
+%e A299754 For n=2, the n-th roots of unity are U[2] = {-1, 1}, and taking x, y in this set, we can get x + y = -2, 0 or 2.
+%e A299754 For n=3, the n-th roots of unity are U[3] = {1, w, w^2} where w = exp(2i*Pi/3) = -1/2 + i sqrt(3)/2, and taking x, y, z in this set, we can get x + y + z to be any of the 10 distinct values { 3, 2 + w, 2 + w^2, 1 + 2w, 1 + 2w^2, 0, w - 1, w^2 - 1, 3w, 3w^2 }. (End)
+%p A299754 nexti:= proc(i,N) local ip,j,k;
+%p A299754   ip:= i;
+%p A299754   for k from N to 1 by -1 while i[k]=N-1 do od;
+%p A299754   if k=0 then return NULL fi;
+%p A299754   ip[k]:= ip[k]+1;
+%p A299754   for j from k+1 to N do ip[j]:= ip[k] od;
+%p A299754   ip
+%p A299754 end proc:
+%p A299754 f:= proc(N) local S, i,P,z;
+%p A299754   S:= {}:
+%p A299754   i:= <(0$N)>:
+%p A299754   P:= numtheory:-cyclotomic(N,z);
+%p A299754   while i <> NULL do
+%p A299754     S:= S union {rem(add(z^i[k],k=1..N),P,z)};
+%p A299754     i:= nexti(i,N);
+%p A299754   od;
+%p A299754   nops(S);
+%p A299754 end proc:
+%p A299754 seq(f(N),N=1..10); # _Robert Israel_, Feb 18 2018
+%t A299754 a[n_] := (t = Table[Exp[2 k Pi I/n], {k, 0, n - 1}]; b[0] = 1; iter = Table[{b[j], b[j - 1], n}, {j, 1, n}]; msets = Table[Array[b, n], Evaluate[Sequence @@ iter]]; tot = Total /@ (t[[#]] & /@ Flatten[msets, n - 1]) // N; u = Union[tot, SameTest -> (Chop[Abs[#1 - #2]] == 0 &)]; u // Length); Table[an = a[n]; Print["a(", n, ") = ", an]; an, {n, 1, 10}] (* _Jean-François Alcover_, Feb 19 2018 *)
+%o A299754 (PARI) a(n,U=vector(n,k,bestappr(exp(2*Pi/n*k*I),5*2^n)),S=[])={forvec(i=vector(n,k,[1,n]),S=setunion(S,[vecsum(vecextract(U,i))]);#S} \\ Not very efficient for n > 8. - _M. F. Hasler_, Feb 18 2018
+%Y A299754 Cf. A103314, A107754, A107861, A108380, A107848, A107753, A108381.
+%K A299754 nonn
+%O A299754 1,2
+%A A299754 _David W. Wilson_, Feb 18 2018
+%E A299754 a(1) through a(11) from _Robert Israel_, Feb 18 2018
+%E A299754 a(12)-a(13) from _Chai Wah Wu_, Feb 20 2018
+%E A299754 a(14)-a(20) from _Max Alekseyev_, Feb 22 2018

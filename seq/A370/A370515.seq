@@ -1,0 +1,63 @@
+%I A370515 #52 Jun 11 2024 15:45:45
+%S A370515 1,48,45360,810810000,89828829090000,79747968403032930000,
+%T A370515 173804636288811640432320000,1295369604157875221186530038720000,
+%U A370515 17956463972251028473221305671408150080000,683175381189232829757128698827279802247046720000,68097448387645503294976802572499880245452170169824960000
+%N A370515 a(n) is the least integer k with exactly 10^n divisors.
+%C A370515 When a prospective a(n) = k has prime factorization k = Product p(i)^r(i), its number of divisors is tau(k) = A000005(k)= Product (r(i)+1) and here this is to be tau(k) = 10^n.
+%C A370515 Assigning exponents r(i) to primes p(i) in decreasing order minimizes k, but various ways to split 10^n into a product (r(i)+1) results in k of various size.
+%H A370515 Zhao Hui Du, <a href="https://www.zhihu.com/question/536022619/answer/2515898449">Chinese webpage (Zhihu): What is the minimum number with 100 million divisors?</a>
+%H A370515 StackExchange, <a href="https://math.stackexchange.com/questions/496494/smallest-number-with-specific-number-of-divisors">Smallest number with specific number of divisors</a>
+%H A370515 StackExchange, <a href="https://cs.stackexchange.com/questions/85222/find-the-first-integer-with-exactly-n-divisors">Find the first integer with exactly n divisors</a>
+%F A370515 a(n) = A005179(10^n) <= A037019(10^n).
+%e A370515 a(1) = 48 = 2^4 * 3, and 48 is the least integer which has exactly 10^1 divisors(1,2,3,4,6,8,12,16,24,48).
+%p A370515 # Construct list of ordered lists of factorizations of n with
+%p A370515 # minimum divisors mind.
+%p A370515 # Returns a list with A001055(n) entries if called with mind=2.
+%p A370515 # Example: print(ofact(10^3,2))
+%p A370515 ofact := proc(n,mind)
+%p A370515     local fcts,d,rec,r ;
+%p A370515     fcts := [] ;
+%p A370515     for d in numtheory[divisors](n) do
+%p A370515         if d >= mind then
+%p A370515             if d = n then
+%p A370515                 fcts := [op(fcts),[n]] ;
+%p A370515             else
+%p A370515                 # recursive call supposed one more factor given
+%p A370515                 rec := procname(n/d,max(d,mind)) ;
+%p A370515                 for r in rec do
+%p A370515                     fcts := [op(fcts),[d,op(r)]] ;
+%p A370515                 end do:
+%p A370515             end if;
+%p A370515         end if;
+%p A370515     end do:
+%p A370515     return fcts ;
+%p A370515 end proc:
+%p A370515 A005179 := proc(n)
+%p A370515     local Lexp,a,eList,cand,maxxrt ;
+%p A370515     if n = 1 then
+%p A370515         return 1;
+%p A370515     end if;
+%p A370515     Lexp := ofact(n,2) ;
+%p A370515     a := 0 ;
+%p A370515     for eList in Lexp do
+%p A370515         maxxrt := ListTools[Reverse](eList) ;
+%p A370515         try
+%p A370515             cand := mul( ithprime(i)^ ( op(i,maxxrt)-1),i=1..nops(maxxrt)) ;
+%p A370515         catch:
+%p A370515             # print("catch cand") ;
+%p A370515             cand := 0 ;
+%p A370515         end try ;
+%p A370515         if a =0 or ( cand < a and cand > 0) then
+%p A370515             a := cand ;
+%p A370515         end if;
+%p A370515     end do:
+%p A370515     a ;
+%p A370515 end proc:
+%p A370515 A370515 := proc(n)
+%p A370515     A005179(10^n) ;
+%p A370515 end proc:
+%p A370515 seq(A370515(n),n=0..10) ; # _R. J. Mathar_, Jun 06 2024
+%Y A370515 Cf. A005179, A011557, A037019.
+%K A370515 nonn
+%O A370515 0,2
+%A A370515 _Zhining Yang_, Feb 21 2024

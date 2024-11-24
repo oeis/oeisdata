@@ -1,0 +1,68 @@
+%I A274888 #38 Mar 28 2020 19:15:31
+%S A274888 1,1,1,1,1,2,2,1,1,1,2,1,1,1,2,4,5,6,5,4,2,1,1,1,2,3,3,3,3,2,1,1,1,2,
+%T A274888 4,7,10,13,16,17,17,16,13,10,7,4,2,1,1,1,2,3,5,5,7,7,8,7,7,5,5,3,2,1,
+%U A274888 1,1,2,4,7,12,17,24,31,39,45,51,54,56,54,51,45,39,31,24,17,12,7,4,2,1
+%N A274888 Triangle read by rows: the q-analog of the swinging factorial which is defined as q-multinomial([floor(n/2), n mod 2, floor(n/2)]).
+%C A274888 The q-swing_factorial(n) is a univariate polynomial over the integers with degree floor((n+1)/2)^2 + ((n+1) mod 2) and at least floor(n/2) irreducible factors.
+%C A274888 Evaluated at q=1 q-swing_factorial(n) gives the swinging factorial A056040(n).
+%C A274888 Combinatorial interpretation: The definition of an orbital system is given in A232500 and in the link 'Orbitals'. The number of orbitals over n sectors is counted by the swinging factorial.
+%C A274888 The major index of an orbital is the sum of the positions of steps which are immediately followed by a step with strictly smaller value. This statistic is an extension of the major index statistic given in A063746 which reappears in the even numbered rows here. This reflects the fact that the swinging factorial can be seen as an extension of the central binomial. As in the case of the central binomial also in the case of the swinging factorial the major index coincides with its q-analog.
+%H A274888 Peter Luschny, <a href="https://oeis.org/wiki/User:Peter_Luschny/Orbitals">Orbitals</a>
+%F A274888 q_swing_factorial(n) = q_factorial(n)/q_factorial(floor(n/2))^2.
+%F A274888 q_swing_factorial(n) = q_binomial(n-eta(n),floor((n-eta(n))/2))*q_int(n)^eta(n) with eta(n) = (1-(-1)^n)/2.
+%F A274888 Recurrence: q_swing_factorial(0,q) = 1 and for n>0 q_swing_factorial(n,q) = r*q_swing_factorial(n-1,q) with r = (1+q^(n/2))/[n/2;q] if n is even else r = [n;q]. Here [a;q] are the q_brackets.
+%F A274888 The generating polynomial for row n is P_n(p) = ((p^(floor(n/2)+1)-1)/(p-1))^((1-(-1)^n)/2)*Product_{i=0..floor(n/2)-1}((p^(n-i)-1)/(p^(i+1)-1)).
+%e A274888 The polynomials start:
+%e A274888 [0] 1
+%e A274888 [1] 1
+%e A274888 [2] q + 1
+%e A274888 [3] (q + 1) * (q^2 + q + 1)
+%e A274888 [4] (q^2 + 1) * (q^2 + q + 1)
+%e A274888 [5] (q^2 + 1) * (q^2 + q + 1) * (q^4 + q^3 + q^2 + q + 1)
+%e A274888 [6] (q + 1) * (q^2 - q + 1) * (q^2 + 1) * (q^4 + q^3 + q^2 + q + 1)
+%e A274888 The coefficients of the polynomials start:
+%e A274888 [n] [k=0,1,2,...] [row sum]
+%e A274888 [0] [1] [1]
+%e A274888 [1] [1] [1]
+%e A274888 [2] [1, 1] [2]
+%e A274888 [3] [1, 2, 2, 1] [6]
+%e A274888 [4] [1, 1, 2, 1, 1] [6]
+%e A274888 [5] [1, 2, 4, 5, 6, 5, 4, 2, 1] [30]
+%e A274888 [6] [1, 1, 2, 3, 3, 3, 3, 2, 1, 1] [20]
+%e A274888 [7] [1, 2, 4, 7, 10, 13, 16, 17, 17, 16, 13, 10, 7, 4, 2, 1] [140]
+%e A274888 [8] [1, 1, 2, 3, 5, 5, 7, 7, 8, 7, 7, 5, 5, 3, 2, 1, 1] [70]
+%e A274888 T(5, 4) = 6 because the 2 orbitals [-1,-1,1,1,0] and [-1,0,1,1,-1] have at position 4 and the 4 orbitals [0,-1,1,-1,1], [1,-1,0,-1,1], [1,-1,1,-1,0] and [1,0,1,-1,-1] at positions 1 and 3 a down step.
+%p A274888 QSwingFactorial_coeffs := proc(n) local P,a,b;
+%p A274888 a := mul((p^(n-i)-1)/(p^(i+1)-1),i=0..iquo(n,2)-1);
+%p A274888 b := ((p^(iquo(n,2)+1)-1)/(p-1))^((1-(-1)^n)/2);
+%p A274888 P := simplify(a*b); seq(coeff(P,p,j),j=0..degree(P)) end:
+%p A274888 for n from 0 to 9 do print(QSwingFactorial_coeffs(n)) od;
+%p A274888 # Alternatively (recursive):
+%p A274888 with(QDifferenceEquations):
+%p A274888 QSwingRec := proc(n,q) local r; if n = 0 then return 1 fi:
+%p A274888 if irem(n,2) = 0 then r := (1+q^(n/2))/QBrackets(n/2,q)
+%p A274888 else r := QBrackets(n,q) fi; r*QSwingRec(n-1,q) end:
+%p A274888 Trow := proc(n) expand(QSimplify(QSwingRec(n,q)));
+%p A274888 seq(coeff(%,q,j),j=0..degree(%)) end: seq(Trow(n),n=0..10);
+%t A274888 p[n_] := QFactorial[n, q] / QFactorial[Quotient[n, 2], q]^2
+%t A274888 Table[CoefficientList[p[n] // FunctionExpand, q], {n,0,9}] // Flatten
+%o A274888 (Sage)
+%o A274888 from sage.combinat.q_analogues import q_factorial
+%o A274888 def q_swing_factorial(n, q=None):
+%o A274888     return q_factorial(n)//q_factorial(n//2)^2
+%o A274888 for n in (0..8): print(q_swing_factorial(n).list())
+%o A274888 (Sage) # uses[unit_orbitals from A274709]
+%o A274888 # Brute force counting
+%o A274888 def orbital_major_index(n):
+%o A274888     S = [0]*(((n+1)//2)^2 + ((n+1) % 2))
+%o A274888     for u in unit_orbitals(n):
+%o A274888         L = [i+1 if u[i+1] < u[i] else 0 for i in (0..n-2)]
+%o A274888         # i+1 because u is 0-based whereas convention assumes 1-base.
+%o A274888         S[sum(L)] += 1
+%o A274888     return S
+%o A274888 for n in (0..9): print(orbital_major_index(n))
+%Y A274888 Cf. A056040 (row sums), A274887 (q-factorial), A063746 (q-central_binomial).
+%Y A274888 Other orbital statistics: A241477 (first zero crossing), A274706 (absolute integral), A274708 (peaks), A274709 (max. height), A274710 (number of turns), A274878 (span), A274879 (returns), A274880 (restarts), A274881 (ascent).
+%K A274888 nonn,tabf
+%O A274888 0,6
+%A A274888 _Peter Luschny_, Jul 19 2016

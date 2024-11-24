@@ -1,0 +1,33 @@
+%I A361555 #13 Feb 01 2024 09:15:32
+%S A361555 1,5,50,465,4925,59870,776155,10364135,142082065,1995371980,
+%T A361555 28549274995,414327073520,6084353526535,90258375062245,
+%U A361555 1350607531232830,20361436162127965,308964002231172075,4715119823819824535,72324133311820587435,1114404268419043050750
+%N A361555 Expansion of g.f. A(x) satisfying 5*x = Sum_{n=-oo..+oo} x^(n*(3*n+1)/2) * (A(x)^(3*n) - 1/A(x)^(3*n+1)).
+%H A361555 Paul D. Hanna, <a href="/A361555/b361555.txt">Table of n, a(n) for n = 0..300</a>
+%H A361555 Eric Weisstein's World of Mathematics, <a href="https://mathworld.wolfram.com/QuintupleProductIdentity.html">Quintuple Product Identity</a>.
+%F A361555 G.f. A(x) = Sum_{n>=0} a(n)*x^n satisfies the following.
+%F A361555 (1) 5*x = Sum_{n=-oo..+oo} x^(n*(3*n+1)/2) * (A(x)^(3*n) - 1/A(x)^(3*n+1)).
+%F A361555 (2) 5*x = Sum_{n=-oo..+oo} x^(n*(3*n-1)/2) * A(x)^(3*n) * (x^n - 1/A(x)).
+%F A361555 (3) 5*x = Product_{n>=1} (1 - x^n) * (1 - x^n*A(x)) * (1 - x^(n-1)/A(x)) * (1 - x^(2*n-1)*A(x)^2) * (1 - x^(2*n-1)/A(x)^2), by the Watson quintuple product identity.
+%F A361555 (4) a(n) = Sum_{k=0..n} A361550(n,k) * 5^k for n >= 0.
+%F A361555 From _Vaclav Kotesovec_, Feb 01 2024: (Start)
+%F A361555 Formula (3) can be rewritten as the functional equation 5*x = QPochhammer(x) * QPochhammer(y, x)/(1 - y) * QPochhammer(1/(x*y), x)/(1 - 1/(x*y)) * QPochhammer(y^2/x, x^2)/(1-y^2/x) * QPochhammer(1/(x*y^2), x^2)/(1-1/(x*y^2)).
+%F A361555 a(n) ~ c * d^n / n^(3/2), where d = 16.695183607901729043700484293708659594719464935528330676878595927048... and c = 0.5534958293134675625595273281664529583363592593727800077222126752653... (End)
+%e A361555 G.f.: A(x) = 1 + 5*x + 50*x^2 + 465*x^3 + 4925*x^4 + 59870*x^5 + 776155*x^6 + 10364135*x^7 + 142082065*x^8 + 1995371980*x^9 + ...
+%e A361555 where A = A(x) satisfies the doubly infinite sum
+%e A361555 5*x = ... + x^12*(1/A^9 - A^8) + x^5*(1/A^6 - A^5) + x*(1/A^3 - A^2) + (1 - 1/A) + x^2*(A^3 - 1/A^4) + x^7*(A^6 - 1/A^7) + x^15*(A^9 - 1/A^10) + ... + x^(n*(3*n+1)/2) * (A(x)^(3*n) - 1/A(x)^(3*n+1)) + ...
+%e A361555 also, by the Watson quintuple product identity,
+%e A361555 5*x = (1-x)*(1-x*A)*(1-1/A)*(1-x*A^2)*(1-x/A^2) * (1-x^2)*(1-x^2*A)*(1-x/A)*(1-x^3*A^2)*(1-x^3/A^2) * (1-x^3)*(1-x^3*A)*(1-x^2/A)*(1-x^5*A^2)*(1-x^5/A^2) * (1-x^4)*(1-x^4*A)*(1-x^3/A)*(1-x^7*A^2)*(1-x^7/A^2) * ...
+%t A361555 (* Calculation of constant d: *) 1/r /. FindRoot[{r^2 * s^3 * QPochhammer[r] * QPochhammer[1/(r*s^2), r^2] * QPochhammer[1/(r*s), r] * QPochhammer[s, r] *(QPochhammer[s^2/r, r^2]/ ((-1 + s)*(-1 + r*s)*(-r + s^2)*(-1 + r*s^2))) == 5, (3*r - 2*r*(1 + r)*s - s^2 + r^3*s^4 + 2*r*(1 + r)*s^5 - 3*r^2*s^6)*Log[r] + (-1 + s)*(-1 + r*s)*(r - s^2)*(-1 + r*s^2) * (QPolyGamma[0, Log[s]/Log[r], r] - QPolyGamma[0, -1/2 - Log[s]/Log[r], r^2] + QPolyGamma[0, -1/2 + Log[s]/Log[r], r^2] - QPolyGamma[0, -Log[r*s]/Log[r], r]) == 0}, {r, 1/16}, {s, 2}, WorkingPrecision -> 70] (* _Vaclav Kotesovec_, Feb 01 2024 *)
+%o A361555 (PARI) /* Using the doubly infinite series */
+%o A361555 {a(n) = my(A=[1]); for(i=1, n, A = concat(A, 0);
+%o A361555 A[#A] = polcoeff(4*x - sum(m=-#A, #A, x^(m*(3*m-1)/2) * Ser(A)^(3*m-1) * (x^m*Ser(A) - 1) ) , #A-1) ); A[n+1]}
+%o A361555 for(n=0, 30, print1(a(n), ", "))
+%o A361555 (PARI) /* Using the quintuple product */
+%o A361555 {a(n) = my(A=[1]); for(i=1, n, A = concat(A, 0);
+%o A361555 A[#A] = polcoeff(5*x - prod(m=1, #A, (1 - x^m) * (1 - x^m*Ser(A)) * (1 - x^(m-1)/Ser(A)) * (1 - x^(2*m-1)*Ser(A)^2) * (1 - x^(2*m-1)/Ser(A)^2) ), #A-1) ); A[n+1]}
+%o A361555 for(n=0, 30, print1(a(n), ", "))
+%Y A361555 Cf. A361550, A359920, A361552, A361553, A361554.
+%K A361555 nonn
+%O A361555 0,2
+%A A361555 _Paul D. Hanna_, Mar 19 2023

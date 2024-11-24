@@ -1,0 +1,48 @@
+%I A259363 #25 May 07 2024 04:51:25
+%S A259363 0,1,2,3,2,4,4,3,2,4,5,6,4,5,4,3,2,4,5,6,5,8,7,6,4,5,6,7,4,5,4,3,2,4,
+%T A259363 5,6,5,8,7,6,5,8,9,10,7,8,7,6,4,5,6,7,6,9,8,7,4,5,6,7,4,5,4,3,2,4,5,6,
+%U A259363 5,8,7,6,5,8,9,10,7,8,7,6,5,8,9,10,9,12,11,10,7,8,9,10,7,8,7,6,4,5,6,7,6,9,8,7,6,9,10,11,8,9,8,7,4,5,6,7,6,9,8,7,4,5,6,7,4,5,4,3,2,4,5,6,5,8,7,6,5,8,9
+%N A259363 Number of distinct elements in the Gram matrix of the first M rows of the Kronecker product (Sylvester) Hadamard matrix.
+%C A259363 Let H(2) = [1, 1; 1, -1]; let H(2^(n+1)) be the Kronecker product of H(2^n) and H(2). For M less than or equal to 2^n, let A(2^n,M) be the submatrix of H(2^n) consisting of its first M rows, and let G(2^n,M)=(A(2^n,M))'A(2^n,M). Then a(M) is the number of distinct elements of G(2^n,M), which depends only on M.
+%H A259363 Math Stackexchange, <a href="http://math.stackexchange.com/q/1319877/3736">Relation between number of unique values in Gramian Matrix (G) and the matrices that created it</a>
+%F A259363 Recurrence for M>0: let b be the base-2 representation of M. Map b to a word w on the alphabet {1,I,O} by splitting b into runs of 0's and 1's and letting O represent a string of one or more 0's, I a string of two or more 1's, and 1 an isolated 1. Then a(0)=0, a(n)=s(w), where s(1)=1, s(1O1)=4, s(uO)=s(u)+1, s(vI)=s(v1)+2, s(vIO1)=s(v1)+4, s(v1O1)=s(v1)+4, where u is a nonempty word and v is an arbitrary word.
+%F A259363 Closed form: s(1)=1, s(1O)=2, s(w)=4[(|w|+1)/2]+a(w)+b(w)+c(w), where |w| is the length of w, [x] is the greatest integer function, and a, b, c are defined by a(w)=0 if w ends in O, -1 if w ends in 1 or I; b(w)=1 if first letter of w is I, 0 if first letter of w is 1; c(w)=-1 if last non-O letter of w is I, -3 if last non-O letter of w is 1.
+%F A259363 Equivalently, for n > 1, a(n) = 4*A069010(n) - A000035(n) + A079944(n-2) + 4 - A099545(n-1) + A036987(n-1).
+%e A259363 H(4)=[1,1,1,1;1,-1,1,-1;1,1,-1,-1;1,-1,-1,1], A(4,3)=[1,1,1,1;1,-1,1,-1;1,1,-1,-1], G(4,3)=[3,1,1,-1;1,3,-1,1;1,-1,3,1;-1,1,1,3]. Since G(4,3) has 3 distinct elements, a(3)=3.
+%t A259363 mToWord[m_] := Module[{binary, sbin, lst, j},
+%t A259363   binary = IntegerDigits[m, 2];
+%t A259363   sbin = Split[binary];
+%t A259363   lst = {};
+%t A259363   For[j = 1, j <= Length[sbin], j++,
+%t A259363    If[sbin[[j, 1]] == 1 && Length[sbin[[j]]] > 1, AppendTo[lst, 11]];
+%t A259363    If[sbin[[j]] == {1}, AppendTo[lst, 1]];
+%t A259363    If[sbin[[j, 1]] == 0, AppendTo[lst, 0]]
+%t A259363    ];
+%t A259363   lst
+%t A259363   ]
+%t A259363 s[{1}]=1
+%t A259363 s[{1,0}]=2
+%t A259363 s[w_] := Module[{b, newW, a, c},
+%t A259363   If[w[[1]] == 11,
+%t A259363    b = 1,
+%t A259363    b = 0
+%t A259363    ];
+%t A259363   If[w[[-1]] != 0,
+%t A259363    newW = Append[w, 0];
+%t A259363    a = -1,
+%t A259363    newW = w;
+%t A259363    a = 0
+%t A259363    ];
+%t A259363   If[newW[[-2]] == 1,
+%t A259363    c = -3,
+%t A259363    If[newW[[-2]] == 11,
+%t A259363     c = -1
+%t A259363     ]
+%t A259363    ];
+%t A259363   a + b + c + 2 Length[newW]
+%t A259363   ]
+%t A259363 numberDistinctGramValues[m_]:=If[m==0,0,s[mToWord[m]]]
+%Y A259363 Cf. A000975, A240908, A240909, A240910.
+%K A259363 nonn,easy
+%O A259363 0,3
+%A A259363 _William P. Orrick_, Jun 24 2015

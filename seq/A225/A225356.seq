@@ -1,0 +1,40 @@
+%I A225356 #31 Mar 19 2022 03:26:25
+%S A225356 1,1,1,1,-22,1,1,-75,-75,1,1,-236,1446,-236,1,1,-721,9822,9822,-721,1,
+%T A225356 1,-2178,58479,-201244,58479,-2178,1,1,-6551,325061,-2160227,-2160227,
+%U A225356 325061,-6551,1,1,-19672,1736668,-19971304,49441990,-19971304,1736668,-19672,1
+%N A225356 Triangle T(n, k) = T(n, k-1) + (-1)^k*A060187(n+2,k+1) if k <= floor(n/2), otherwise T(n, n-k), with T(n, 0) = T(n, n) = 1, read by rows.
+%H A225356 G. C. Greubel, <a href="/A225356/b225356.txt">Rows n = 0..50 of the triangle, flattened</a>
+%F A225356 T(n, k) = T(n, k-1) + (-1)^k*A060187(n+2,k+1) if k <= floor(n/2), otherwise T(n, n-k), with T(n, 0) = T(n, n) = 1.
+%e A225356 The triangle begins:
+%e A225356   1;
+%e A225356   1,      1;
+%e A225356   1,    -22,       1;
+%e A225356   1,    -75,     -75,         1;
+%e A225356   1,   -236,    1446,      -236,        1;
+%e A225356   1,   -721,    9822,      9822,     -721,         1;
+%e A225356   1,  -2178,   58479,   -201244,    58479,     -2178,       1;
+%e A225356   1,  -6551,  325061,  -2160227, -2160227,    325061,   -6551,      1;
+%e A225356   1, -19672, 1736668, -19971304, 49441990, -19971304, 1736668, -19672, 1;
+%t A225356 (* First program *)
+%t A225356 q[x_, n_]= (1-x)^(n+1)*Sum[(2*m+1)^n*x^m, {m, 0, Infinity}];
+%t A225356 t[n_, m_]:= t[n, m]= Table[CoefficientList[q[x, k], x], {k,0,15}][[n+1, m+1]];
+%t A225356 p[x_, n_]:= p[x, n]= Sum[x^i*If[i==Floor[n/2] && Mod[n, 2]==0, 0, If[i <= Floor[n/2], (-1)^i*t[n, i], (-1)^(n-i+1)*t[n, i]]], {i,0,n}]/(1-x);
+%t A225356 Flatten[Table[CoefficientList[p[x, n], x], {n,10}]]
+%t A225356 (* Second Program *)
+%t A225356 A060187[n_, k_]:= Sum[(-1)^(k-i)*Binomial[n, k-i]*(2*i-1)^(n-1), {i,k}];
+%t A225356 T[n_, k_]:= T[n, k]= If[k==0 || k==n, 1, If[k<=Floor[n/2], T[n, k-1] +(-1)^k*A060187[n+2, k+1], T[n, n-k] ]];
+%t A225356 Table[T[n, k], {n,0,12}, {k,0,n}]//Flatten (* _G. C. Greubel_, Mar 18 2022 *)
+%o A225356 (Sage)
+%o A225356 def A060187(n,k): return sum( (-1)^(k-j)*(2*j-1)^(n-1)*binomial(n, k-j) for j in (1..k) )
+%o A225356 @CachedFunction
+%o A225356 def A225356(n,k):
+%o A225356     if (k==0 or k==n): return 1
+%o A225356     elif (k <= (n//2)): return A225356(n,k-1) + (-1)^k*A060187(n+2,k+1)
+%o A225356     else: return A225356(n,n-k)
+%o A225356 flatten([[A225356(n,k) for k in (0..n)] for n in (0..12)]) # _G. C. Greubel_, Mar 18 2022
+%Y A225356 Cf A007318, A060187, A159041.
+%K A225356 sign,tabl
+%O A225356 0,5
+%A A225356 _Roger L. Bagula_, May 07 2013
+%E A225356 Edited by _N. J. A. Sloane_, May 11 2013
+%E A225356 Edited by _G. C. Greubel_, Mar 18 2022

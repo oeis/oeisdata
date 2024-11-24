@@ -1,0 +1,46 @@
+%I A246660 #54 Apr 06 2020 09:57:24
+%S A246660 1,1,1,2,1,1,2,6,1,1,1,2,2,2,6,24,1,1,1,2,1,1,2,6,2,2,2,4,6,6,24,120,
+%T A246660 1,1,1,2,1,1,2,6,1,1,1,2,2,2,6,24,2,2,2,4,2,2,4,12,6,6,6,12,24,24,120,
+%U A246660 720,1,1,1,2,1,1,2,6,1,1,1,2,2,2,6,24,1,1,1
+%N A246660 Run Length Transform of factorials.
+%C A246660 For the definition of the Run Length Transform see A246595.
+%C A246660 Only Jordan-Polya numbers (A001013) are terms of this sequence.
+%H A246660 Antti Karttunen, <a href="/A246660/b246660.txt">Table of n, a(n) for n = 0..8192</a>
+%H A246660 <a href="/index/Ru#rlt">Index entries for sequences computed with run length transform</a>
+%F A246660 a(2^n-1) = n!.
+%F A246660 a(0) = 1, a(2n) = a(n), a(2n+1) = a(n) * A007814(2n+2). - _Antti Karttunen_, Sep 08 2014
+%F A246660 a(n) = A112624(A005940(1+n)). - _Antti Karttunen_, May 29 2017
+%F A246660 a(n) = A323505(n) / A323506(n). - _Antti Karttunen_, Jan 17 2019
+%t A246660 Table[Times @@ (Length[#]!&) /@ Select[Split[IntegerDigits[n, 2]], #[[1]] == 1&], {n, 0, 83}] (* _Jean-François Alcover_, Jul 11 2017 *)
+%o A246660 (Sage)
+%o A246660 def RLT(f, size):
+%o A246660     L = lambda n: [a for a in Integer(n).binary().split('0') if a != '']
+%o A246660     return [mul([f(len(d)) for d in L(n)]) for n in range(size)]
+%o A246660 A246660_list = lambda len: RLT(factorial, len)
+%o A246660 A246660_list(88)
+%o A246660 (PARI)
+%o A246660 A246660(n) = { my(i=0, p=1); while(n>0, if(n%2, i++; p = p * i, i = 0); n = n\2); p; };
+%o A246660 for(n=0, 8192, write("b246660.txt", n, " ", A246660(n)));
+%o A246660 \\ _Antti Karttunen_, Sep 08 2014
+%o A246660 (Scheme)
+%o A246660 ;; A stand-alone loop version, like the Pari-program above:
+%o A246660 (define (A246660 n) (let loop ((n n) (i 0) (p 1)) (cond ((zero? n) p) ((odd? n) (loop (/ (- n 1) 2) (+ i 1) (* p (+ 1 i)))) (else (loop (/ n 2) 0 p)))))
+%o A246660 ;; One based on given recurrence, utilizing memoizing definec-macro from my IntSeq-library:
+%o A246660 (definec (A246660 n) (cond ((zero? n) 1) ((even? n) (A246660 (/ n 2))) (else (* (A007814 (+ n 1)) (A246660 (/ (- n 1) 2))))))
+%o A246660 ;; Yet another implementation, using fold:
+%o A246660 (define (A246660 n) (fold-left (lambda (a r) (* a (A000142 r))) 1 (bisect (reverse (binexp->runcount1list n)) (- 1 (modulo n 2)))))
+%o A246660 (definec (A000142 n) (if (zero? n) 1 (* n (A000142 (- n 1)))))
+%o A246660 ;; Other functions are as in A227349 - _Antti Karttunen_, Sep 08 2014
+%o A246660 (Python)
+%o A246660 from operator import mul
+%o A246660 from functools import reduce
+%o A246660 from re import split
+%o A246660 from math import factorial
+%o A246660 def A246660(n):
+%o A246660     return reduce(mul,(factorial(len(d)) for d in split('0+',bin(n)[2:]) if d)) if n > 0 else 1 # _Chai Wah Wu_, Sep 09 2014
+%Y A246660 Cf. A000142, A001013, A007814, A112624, A323505, A323506.
+%Y A246660 Cf. A003714 (gives the positions of ones).
+%Y A246660 Run Length Transforms of other sequences: A001316, A071053, A227349, A246588, A246595, A246596, A246661, A246674.
+%K A246660 nonn,base
+%O A246660 0,4
+%A A246660 _Peter Luschny_, Sep 07 2014

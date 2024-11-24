@@ -1,0 +1,29 @@
+%I A186973 #25 Mar 31 2016 16:51:06
+%S A186973 1,2,4,4,12,4,28,16,32,12,116,16,248,48,72,112,728,64,1520,192,384,
+%T A186973 256,3872,256,3168,736,2752,832,15488,256,31232,7424,6272,4096,9600,
+%U A186973 1792,91648,9344,16000,5632,214272,3072,431616,37376,38912,43008,982528
+%N A186973 Number of subsets of {1, 2, ..., n} containing n and having pairwise coprime elements; also row sums of A186972.
+%H A186973 Alois P. Heinz, <a href="/A186973/b186973.txt">Table of n, a(n) for n = 1..220</a>
+%e A186973 a(6) = 4 because there are 4 subsets of {1,2,3,4,5,6} containing 6 and having pairwise coprime elements: {6}, {1,6}, {5,6}, {1,5,6}.
+%p A186973 with(numtheory):
+%p A186973 s:= proc(m, r) option remember; mul(`if`(i<r, i, 1), i=factorset(m)) end:
+%p A186973 g:= proc(n) option remember; `if`(n<4, n, pi(n)-nops(factorset(n))+2) end:
+%p A186973 h:= n-> mul(ilog[j](n), j={ithprime(i)$i=1..pi(n)} minus factorset(n)):
+%p A186973 b:= proc(t, n, k) option remember; local c, d, h;
+%p A186973       if k=0 or k>n then 0
+%p A186973     elif k=1 then 1
+%p A186973     elif k=2 and t=n then `if`(n<2, 0, phi(n))
+%p A186973     else c:= 0;
+%p A186973          d:= 2-irem(t, 2);
+%p A186973          for h from 1 to n-1 by d do
+%p A186973            if igcd(t, h)=1 then c:= c +b(s(t*h, h), h, k-1) fi
+%p A186973          end; c
+%p A186973       fi
+%p A186973     end:
+%p A186973 a:= n-> h(n) + add(b(s(n, n), n, k), k=1..g(n)-1):
+%p A186973 seq(a(n), n=1..50);
+%t A186973 s[m_, r_] := s[m, r] = Product[If[i<r, i, 1], {i, FactorInteger[m][[All, 1]]}]; a[n_] := a[n] = If[n<4, n, PrimePi[n]-Length[FactorInteger[n]]+2]; b[t_, n_, k_] := b[t, n, k] = Module[{c, d, h}, Which[k == 0 || k>n, 0, k == 1, 1, k == 2 && t == n, If[n<2, 0, EulerPhi[n]], True, c=0; d=2-Mod[t, 2]; For[h=1, h <= n-1, h=h+d, If[GCD[t, h] == 1, c=c+b[s[t*h, h], h, k-1]]]; c]]; t[n_, k_] := t[n, k] = b[s[n, n], n, k]; Table[Sum[t[n, k], {k, 1, a[n]}], {n, 1, 50}] (* _Jean-François Alcover_, Dec 04 2014, after _Alois P. Heinz_ *)
+%Y A186973 Cf. A186971, A186972, A186994. Rightmost elements in rows of triangle A186975.
+%K A186973 nonn
+%O A186973 1,2
+%A A186973 _Alois P. Heinz_, Mar 01 2011

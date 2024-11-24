@@ -1,0 +1,50 @@
+%I A243148 #57 Jul 25 2022 08:33:15
+%S A243148 1,0,1,0,0,1,0,0,0,1,0,1,0,0,1,0,0,1,0,0,1,0,0,0,1,0,0,1,0,0,0,0,1,0,
+%T A243148 0,1,0,0,1,0,0,1,0,0,1,0,1,0,1,0,0,1,0,0,1,0,0,1,0,1,0,0,1,0,0,1,0,0,
+%U A243148 0,1,0,1,0,0,1,0,0,1,0,0,0,1,1,0,1,0,0,1,0,0,1,0,0,1,0,1,1,0,1,0,0,1,0,0,1,0,0,0,1,0,1,1,0,1,0,0,1,0,0,1
+%N A243148 Triangle read by rows: T(n,k) = number of partitions of n into k nonzero squares; n >= 0, 0 <= k <= n.
+%H A243148 Alois P. Heinz, <a href="/A243148/b243148.txt">Rows n = 0..200, flattened</a>
+%F A243148 T(n,k) = [x^n y^k] 1/Product_{j>=1} (1-y*x^A000290(j)).
+%F A243148 Sum_{k=1..n} k * T(n,k) = A281541(n).
+%F A243148 Sum_{k=1..n} n * T(n,k) = A276559(n).
+%F A243148 Sum_{k=0..n} (-1)^k * T(n,k) = A292520(n).
+%e A243148 T(20,5) = 2 = #{ (16,1,1,1,1), (4,4,4,4,4) } since 20 = 4^2 + 4 * 1^2 = 5 * 2^2.
+%e A243148 Triangle T(n,k) begins:
+%e A243148   1;
+%e A243148   0, 1;
+%e A243148   0, 0, 1;
+%e A243148   0, 0, 0, 1;
+%e A243148   0, 1, 0, 0, 1;
+%e A243148   0, 0, 1, 0, 0, 1;
+%e A243148   0, 0, 0, 1, 0, 0, 1;
+%e A243148   0, 0, 0, 0, 1, 0, 0, 1;
+%e A243148   0, 0, 1, 0, 0, 1, 0, 0, 1;
+%e A243148   0, 1, 0, 1, 0, 0, 1, 0, 0, 1;
+%e A243148   0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1;
+%e A243148   0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1;
+%e A243148   0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 0, 0, 1;
+%e A243148   (...)
+%p A243148 b:= proc(n, i, t) option remember; `if`(n=0, `if`(t=0, 1, 0),
+%p A243148       `if`(i<1 or t<1, 0, b(n, i-1, t)+
+%p A243148       `if`(i^2>n, 0, b(n-i^2, i, t-1))))
+%p A243148     end:
+%p A243148 T:= (n, k)-> b(n, isqrt(n), k):
+%p A243148 seq(seq(T(n, k), k=0..n), n=0..14);
+%p A243148 # second Maple program:
+%p A243148 b:= proc(n, i) option remember; `if`(n=0, 1, `if`(i<1, 0,
+%p A243148       b(n, i-1)+(s-> `if`(s>n, 0, expand(x*b(n-s, i))))(i^2)))
+%p A243148     end:
+%p A243148 T:= n-> (p-> seq(coeff(p, x, i), i=0..n))(b(n, isqrt(n))):
+%p A243148 seq(T(n), n=0..14);  # _Alois P. Heinz_, Oct 30 2021
+%t A243148 b[n_, i_, k_, t_] := b[n, i, k, t] = If[n == 0, If[t == 0, 1, 0], If[i < 1 || t < 1, 0, b[n, i-1, k, t] + If[i^2 > n, 0, b[n-i^2, i, k, t-1]]]]; T[n_, k_] := b[n, Sqrt[n] // Floor, k, k]; Table[Table[T[n, k], {k, 0, n}], {n, 0, 14}] // Flatten (* _Jean-François Alcover_, Jun 06 2014, after _Alois P. Heinz_ *)
+%t A243148 T[n_, k_] := Count[PowersRepresentations[n, k, 2], r_ /; FreeQ[r, 0]]; T[0, 0] = 1; Table[T[n, k], {n, 0, 14}, {k, 0, n}] // Flatten (* _Jean-François Alcover_, Feb 19 2016 *)
+%o A243148 (PARI) T(n,k,L=n)=if(n>k*L^2, 0, k>n-3, k==n, k<2, issquare(n,&n) && n<=L*k, k>n-6, n-k==3, L=min(L,sqrtint(n-k+1)); sum(r=0,min(n\L^2,k-1),T(n-r*L^2,k-r,L-1), n==k*L^2)) \\ _M. F. Hasler_, Aug 03 2020
+%Y A243148 Columns k = 0..10 give: A000007, A010052 (for n>0), A025426, A025427, A025428, A025429, A025430, A025431, A025432, A025433, A025434.
+%Y A243148 Row sums give A001156.
+%Y A243148 T(2n,n) gives A111178.
+%Y A243148 T(n^2,n) gives A319435.
+%Y A243148 Cf. A000290, A276559, A281541, A292520, A341040.
+%Y A243148 T(n,k) = 1 for n in A025284, A025321, A025357, A294675, A295670, A295797 (for k = 2..7, respectively).
+%K A243148 nonn,tabl
+%O A243148 0,216
+%A A243148 _Alois P. Heinz_, May 30 2014

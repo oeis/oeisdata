@@ -1,0 +1,32 @@
+%I A318951 #17 Sep 13 2018 02:43:42
+%S A318951 1,1,1,1,2,1,1,4,3,1,1,6,14,5,1,1,9,44,53,7,1,1,12,129,458,198,11,1,1,
+%T A318951 16,316,3411,5929,782,15,1,1,20,714,19865,145168,96073,3111,22,1,1,25,
+%U A318951 1452,95214,2459994,9283247,1863594,12789,30,1,1,30,2775,383714,30170387,537001197,833593500,42430061,53836,42,1
+%N A318951 Array read by rows: T(n,k) is the number of nonisomorphic n X n matrices with nonnegative integer entries and row sums k under row and column permutations, (n >= 1, k >= 0).
+%H A318951 Andrew Howroyd, <a href="/A318951/b318951.txt">Table of n, a(n) for n = 1..1275</a>
+%e A318951 Array begins:
+%e A318951 ================================================================
+%e A318951 n\k| 0  1    2       3         4            5              6
+%e A318951 ---|------------------------------------------------------------
+%e A318951 1  | 1  1    1       1         1            1              1 ...
+%e A318951 2  | 1  2    4       6         9           12             16 ...
+%e A318951 3  | 1  3   14      44       129          316            714 ...
+%e A318951 4  | 1  5   53     458      3411        19865          95214 ...
+%e A318951 5  | 1  7  198    5929    145168      2459994       30170387 ...
+%e A318951 6  | 1 11  782   96073   9283247    537001197    19578605324 ...
+%e A318951 7  | 1 15 3111 1863594 833593500 189076534322 23361610029905 ...
+%e A318951 ...
+%t A318951 permcount[v_List] := Module[{m = 1, s = 0, k = 0, t}, For[i = 1, i <= Length[v], i++, t = v[[i]]; k = If[i > 1 && t == v[[i - 1]], k + 1, 1]; m *= t*k; s += t]; s!/m];
+%t A318951 K[q_List, t_, k_] := SeriesCoefficient[1/Product[g = GCD[t, q[[j]]]; (1 - x^(q[[j]]/g))^g, {j, 1, Length[q]}], {x, 0, k}];
+%t A318951 RowSumMats[n_, m_, k_] := Module[{s = 0}, Do[s += permcount[q]* SeriesCoefficient[Exp[Sum[K[q, t, k]/t*x^t, {t, 1, n}]], {x, 0, n}], {q, IntegerPartitions[m]}]; s/m!];
+%t A318951 Table[RowSumMats[n-k, n-k, k], {n, 1, 11}, {k, n-1, 0, -1}] // Flatten (* _Jean-François Alcover_, Sep 12 2018, after _Andrew Howroyd_ *)
+%o A318951 (PARI)
+%o A318951 permcount(v) = {my(m=1, s=0, k=0, t); for(i=1, #v, t=v[i]; k=if(i>1&&t==v[i-1], k+1, 1); m*=t*k; s+=t); s!/m}
+%o A318951 K(q, t, k)={polcoeff(1/prod(j=1, #q, my(g=gcd(t, q[j])); (1 - x^(q[j]/g) + O(x*x^k))^g), k)}
+%o A318951 RowSumMats(n, m, k)={my(s=0); forpart(q=m, s+=permcount(q)*polcoeff(exp(sum(t=1, n, K(q, t, k)/t*x^t) + O(x*x^n)), n)); s/m!}
+%o A318951 for(n=1, 8, for(k=0, 6, print1(RowSumMats(n, n, k), ", ")); print)
+%Y A318951 Rows 2..6 are A002620(n+2), A058389, A058390, A058391, A058392.
+%Y A318951 Cf. A304942, A306017.
+%K A318951 nonn,tabl
+%O A318951 1,5
+%A A318951 _Andrew Howroyd_, Sep 05 2018

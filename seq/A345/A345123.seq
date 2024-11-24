@@ -1,0 +1,55 @@
+%I A345123 #31 Nov 06 2021 09:48:27
+%S A345123 1,2,1,4,3,1,7,6,3,1,12,11,7,3,1,20,19,14,8,3,1,33,32,26,17,9,3,1,54,
+%T A345123 53,46,34,20,10,3,1,88,87,79,63,43,23,11,3,1,143,142,133,113,83,53,26,
+%U A345123 12,3,1,232,231,221,196,156,106,64,29,13,3,1,376,375,364,334,279,209,132,76,32,14,3,1
+%N A345123 Number T(n,k) of ordered subsequences of {1,...,n} containing at least k elements and such that the first differences contain only odd numbers; triangle T(n,k), n>=0, 0<=k<=n, read by rows.
+%C A345123 The sequence of column k satisfies a linear recurrence with constant coefficients of order 2k if k >= 2 and of order 3 for k in {0, 1}.
+%D A345123 Chu, Hung Viet, Various Sequences from Counting Subsets, Fib. Quart., 59:2 (May 2021), 150-157.
+%H A345123 Alois P. Heinz, <a href="/A345123/b345123.txt">Rows n = 0..140, flattened</a>
+%H A345123 Chu, Hung Viet, <a href="https://arxiv.org/abs/2005.10081">Various Sequences from Counting Subsets</a>, arXiv:2005.10081 [math.CO], 2021.
+%e A345123 T(0,0) = 1: [].
+%e A345123 T(1,1) = 1: [1].
+%e A345123 T(2,2) = 1: [1,2].
+%e A345123 T(3,1) = 6: [1], [2], [3], [1,2], [2,3], [1,2,3].
+%e A345123 T(4,0) = 12: [], [1], [2], [3], [4], [1,2], [1,4], [2,3], [3,4], [1,2,3], [2,3,4], [1,2,3,4].
+%e A345123 T(6,3) = 17: [1,2,3], [1,2,5], [1,4,5], [2,3,4], [2,3,6], [2,5,6], [3,4,5], [4,5,6], [1,2,3,4], [1,2,3,6], [1,2,5,6], [1,4,5,6], [2,3,4,5], [3,4,5,6], [1,2,3,4,5], [2,3,4,5,6], [1,2,3,4,5,6].
+%e A345123 Triangle T(n,k) begins:
+%e A345123     1;
+%e A345123     2,   1;
+%e A345123     4,   3,   1;
+%e A345123     7,   6,   3,   1;
+%e A345123    12,  11,   7,   3,   1;
+%e A345123    20,  19,  14,   8,   3,   1;
+%e A345123    33,  32,  26,  17,   9,   3,  1;
+%e A345123    54,  53,  46,  34,  20,  10,  3,  1;
+%e A345123    88,  87,  79,  63,  43,  23, 11,  3,  1;
+%e A345123   143, 142, 133, 113,  83,  53, 26, 12,  3, 1;
+%e A345123   232, 231, 221, 196, 156, 106, 64, 29, 13, 3, 1;
+%e A345123   ...
+%p A345123 b:= proc(n, l, t) option remember; `if`(n=0, `if`(t=0, 1, 0), `if`(0
+%p A345123       in [l, irem(1+l-n, 2)], b(n-1, n, max(0, t-1)), 0)+b(n-1, l, t))
+%p A345123     end:
+%p A345123 T:= (n, k)-> b(n, 0, k):
+%p A345123 seq(seq(T(n, k), k=0..n), n=0..10);
+%p A345123 # second Maple program:
+%p A345123 g:= proc(n, k) option remember; `if`(k>n, 0,
+%p A345123      `if`(k in [0, 1], n^k, g(n-1, k-1)+g(n-2, k)))
+%p A345123     end:
+%p A345123 T:= proc(n, k) option remember;
+%p A345123      `if`(k>n, 0, g(n, k)+T(n, k+1))
+%p A345123     end:
+%p A345123 seq(seq(T(n, k), k=0..n), n=0..10);
+%p A345123 # third Maple program:
+%p A345123 T:= proc(n, k) option remember; `if`(k>n, 0, binomial(iquo(n+k, 2), k)+
+%p A345123       `if`(k>0, binomial(iquo(n+k-1, 2), k), 0)+T(n, k+1))
+%p A345123     end:
+%p A345123 seq(seq(T(n, k), k=0..n), n=0..10);
+%t A345123 T[n_, k_] := T[n, k] = If[k > n, 0, Binomial[Quotient[n+k, 2], k] +
+%t A345123      If[k > 0, Binomial[Quotient[n+k-1, 2], k], 0] + T[n, k+1]];
+%t A345123 Table[Table[T[n, k], {k, 0, n}], {n, 0, 11}] // Flatten (* _Jean-François Alcover_, Nov 06 2021, after 3rd Maple program *)
+%Y A345123 Columns k=0-3 give: A000071(n+3), A001911, A001924(n-1), A344004.
+%Y A345123 T(2n,n) give A340766.
+%Y A345123 Cf. A073044, A105438.
+%K A345123 nonn,tabl
+%O A345123 0,2
+%A A345123 _Alois P. Heinz_, Jun 08 2021

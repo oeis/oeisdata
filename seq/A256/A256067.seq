@@ -1,0 +1,42 @@
+%I A256067 #41 Aug 14 2019 15:28:55
+%S A256067 1,1,1,1,1,1,1,1,2,1,1,1,2,1,1,1,1,1,3,2,2,1,2,1,3,2,2,1,3,1,0,0,1,0,
+%T A256067 1,1,4,2,4,1,5,1,1,0,1,0,1,0,0,1,1,4,3,4,1,7,1,1,1,2,0,2,0,1,1,0,0,0,
+%U A256067 0,1,1,5,3,6,2,9,1,2,1,3,0,4,0,1,1,0,0,0,0,1,1,0,0,0,0,0,0,0,0,1,1,5,3,6,2
+%N A256067 Irregular table T(n,k): the number of partitions of n where the least common multiple of all parts equals k.
+%H A256067 Alois P. Heinz, <a href="/A256067/b256067.txt">Rows n = 0..30, flattened</a>
+%e A256067 The 5 partitions of n=4 are 1+1+1+1 (lcm=1), 1+1+2 (lcm=2), 2+2 (lcm=2), 1+3 (lcm=3) and 4 (lcm=4). So k=1, 3 and 4 appear once, k=2 appears twice.
+%e A256067 The triangle starts:
+%e A256067   1 ;
+%e A256067   1 ;
+%e A256067   1  1;
+%e A256067   1  1  1;
+%e A256067   1  2  1  1;
+%e A256067   1  2  1  1  1  1;
+%e A256067   1  3  2  2  1  2;
+%e A256067   1  3  2  2  1  3  1  0  0  1  0  1;
+%e A256067   ...
+%p A256067 A256067 := proc(n,k)
+%p A256067         local a,p ;
+%p A256067         a := 0 ;
+%p A256067         for p in combinat[partition](n) do
+%p A256067                 ilcm(op(p)) ;
+%p A256067                 if % = k then
+%p A256067                         a := a+1 ;
+%p A256067                 end if;
+%p A256067         end do:
+%p A256067         a;
+%p A256067 end proc:
+%p A256067 # second Maple program:
+%p A256067 b:= proc(n, i) option remember; `if`(n=0 or i=1, x,
+%p A256067       b(n, i-1)+(p-> add(coeff(p, x, t)*x^ilcm(t, i),
+%p A256067       t=1..degree(p)))(add(b(n-i*j, i-1), j=1..n/i)))
+%p A256067     end:
+%p A256067 T:= n-> (p-> seq(coeff(p, x, i), i=1..degree(p)))(b(n$2)):
+%p A256067 seq(T(n), n=0..12);  # _Alois P. Heinz_, Mar 27 2015
+%t A256067 b[n_, i_] := b[n, i] = If[n == 0 || i == 1, x, b[n, i-1] + Function[{p}, Sum[ Coefficient[p, x, t]*x^LCM[t, i], {t, 1, Exponent[p, x]}]][Sum[b[n-i*j, i-1], {j, 1, n/i}]]]; T[n_] := Function[{p}, Table[Coefficient[p, x, i], {i, 1, Exponent[p, x]}]][b[n, n]]; Table[T[n], {n, 0, 12}] // Flatten (* _Jean-François Alcover_, Jun 22 2015, after _Alois P. Heinz_ *)
+%Y A256067 Cf. A000041 (row sums), A000793 (row lengths), A213952, A074761 (diagonal), A074752 (6th column), A008642 (4th column), A002266 (5th column), A002264 (3rd column), A132270 (7th column), A008643 (8th column), A008649 (9th column), A258470 (10th column).
+%Y A256067 Cf. A009490 (number of nonzero terms of rows), A074064 (last elements of rows), A168532 (the same for gcd), A181844 (Sum k*T(n,k)).
+%K A256067 nonn,tabf
+%O A256067 0,9
+%A A256067 _R. J. Mathar_, Mar 18 2015
+%E A256067 T(0,1)=1 prepended by _Alois P. Heinz_, Mar 27 2015

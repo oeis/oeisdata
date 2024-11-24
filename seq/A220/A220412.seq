@@ -1,0 +1,43 @@
+%I A220412 #17 Mar 20 2020 03:48:05
+%S A220412 1,0,1,0,1,5,0,4,21,35,0,18,101,210,175,0,48,286,671,770,385,0,33168,
+%T A220412 207974,531531,715715,525525,175175,0,8640,56568,154466,231231,205205,
+%U A220412 105105,25025,0,1562544,10615548,30582796,49534277,49689640,31481450,11911900
+%N A220412 Triangle read by rows, the coefficients of J. L. Fields generalized Bernoulli polynomials.
+%C A220412 The Fields polynomials are defined: F_{2*n}(x) = sum(k=0..n, x^k*T(n,k)/A220411(n)) and F_{2*n+1}(x) = 0. See A220002 for an application to the asymptotic expansion of the Catalan numbers.
+%D A220412 Y. L. Luke, The Special Functions and their Approximations, Vol. 1. Academic Press, 1969, page 34.
+%H A220412 J. L. Fields, <a href="http://dx.doi.org/10.1017/S0013091500013171">A note on the asymptotic expansion of a ratio of gamma functions</a>, Proc. Edinburgh Math. Soc. 15 (1) (1966), 43-45.
+%F A220412 See Y. L. Luke 2.8(3) for the generalized Bernoulli polynomials and 2.11(16) for the special case of Fields polynomials. The Maple and Sage programs give a recursive definition.
+%e A220412 The coefficients T(n,k):
+%e A220412 [0], [1]
+%e A220412 [1], [0,  1]
+%e A220412 [2], [0,  1,   5]
+%e A220412 [3], [0,  4,  21,  35]
+%e A220412 [4], [0, 18, 101, 210, 175]
+%e A220412 [5], [0, 48, 286, 671, 770, 385]
+%e A220412 The Fields polynomials:
+%e A220412 F_0 (x) =  1 / 1
+%e A220412 F_2 (x) =  x / (-6)
+%e A220412 F_4 (x) = (5*x^2+x) / 60
+%e A220412 F_6 (x) = (35*x^3+21*x^2+4*x) / (-504)
+%e A220412 F_8 (x) = (175*x^4+210*x^3+101*x^2+18*x) / 2160
+%e A220412 F_10(x) = (385*x^5+770*x^4+671*x^3+286*x^2+48*x) / (-3168)
+%p A220412 FieldsPoly := proc(n,x) local recP, P; recP := proc(n,x) option remember; local k; if n = 0 then return(1) fi; -2*x*add(binomial(n-1,2*k+1)* bernoulli(2*k+2)/(2*k+2)*recP(n-2*k-2,x), k=0..(n/2-1)) end:
+%p A220412 P := recP(n,x); (-1)^iquo(n,2)*denom(P); sort(expand(P*%)) end:
+%p A220412 with(PolynomialTools): A220412_row := n -> CoefficientList(FieldsPoly( 2*i,x),x): seq(A220412_row(i),i=0..8);
+%t A220412 F[0, _] = 1; F[n_, x_] := F[n, x] = -2*x*Sum[Binomial[n-1, 2*k+1]*BernoulliB[2*k+2]/(2*k+2)*F[n-2*k-2, x], {k, 0, n/2-1}]; t[n_, k_] := Coefficient[(-1)^Mod[n, 2]*F[2*n, x] // Together // Numerator, x, k]; Table[t[n, k], {n, 0, 8}, {k, 0, n}] // Flatten (* _Jean-François Alcover_, Jan 09 2014 *)
+%o A220412 (Sage)
+%o A220412 @CachedFunction
+%o A220412 def FieldsPoly(n):
+%o A220412     A = PolynomialRing(QQ, 'x')
+%o A220412     x = A.gen()
+%o A220412     if n == 0: return A(1)
+%o A220412     return -2*x*add(binomial(n-1,2*k+1)*bernoulli(2*k+2)/(2*k+2)*FieldsPoly(n-2*k-2) for k in (0..n-1))
+%o A220412 def FieldsCoeffs(n):
+%o A220412     P = FieldsPoly(n)
+%o A220412     d = (-1)^(n//2) * denominator(P)
+%o A220412     return list(d * P)
+%o A220412 A220412_row = lambda n: FieldsCoeffs(2*n)
+%Y A220412 Cf. A220411.
+%K A220412 nonn,tabl
+%O A220412 0,6
+%A A220412 _Peter Luschny_, Dec 30 2012

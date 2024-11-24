@@ -1,0 +1,46 @@
+%I A334082 #22 Aug 11 2023 13:47:47
+%S A334082 0,0,2,0,4,2,6,1,2,4,6,2,8,10,14,0,6,2,8,5,10,10,20,2,8,14,14,6,16,14,
+%T A334082 30,0,2,4,6,2,6,10,16,4,10,10,24,16,14,20,36,4,8,10,16,12,30,14,30,6,
+%U A334082 14,18,34,14,34,38,62,0,2,2,6,10,12,10,24,2,8,14,14
+%N A334082 a(n) is the number of binomial coefficients C(n,k), with 0<=k<=n, that are not practical.
+%H A334082 Paolo Leonetti and Carlo Sanna, <a href="https://arxiv.org/abs/1905.12023">Practical numbers among the binomial coefficients</a>, arXiv:1905.12023 [math.NT], 2019.
+%p A334082 A334082 := proc(n)
+%p A334082     local a,k ;
+%p A334082     a := 0 ;
+%p A334082     for k from 0 to n do
+%p A334082         if not isA005153(binomial(n,k)) then # reuses code of A005153
+%p A334082             a := a+1 ;
+%p A334082         end if;
+%p A334082     end do:
+%p A334082     a ;
+%p A334082 end proc:
+%p A334082 seq(A334082(n),n=1..100) ; # _R. J. Mathar_, Jul 07 2023
+%t A334082 PracticalQ[n_] := Module[{f, p, e, prod = 1, ok = True}, If[n < 1 || (n > 1 && OddQ[n]), False, If[n == 1, True, f = FactorInteger[n]; {p, e} = Transpose[f]; Do[If[p[[i]] > 1 + DivisorSigma[1, prod], ok = False; Break[]]; prod = prod*p[[i]]^e[[i]], {i, Length[p]}]; ok]]];
+%t A334082 a[n_] := Select[Table[Binomial[n, k], {k, 0, n}], !PracticalQ[#]&] // Length;
+%t A334082 Table[a[n], {n, 1, 100}] (* _Jean-François Alcover_, Aug 11 2023, after _T. D. Noe_ in A005153 *)
+%o A334082 (PARI) a(n) = sum(k=0, n, !is_A005153(binomial(n,k)));
+%o A334082 (Python)
+%o A334082 from math import comb
+%o A334082 from sympy import factorint
+%o A334082 def A334082(n):
+%o A334082     m = 0
+%o A334082     for k in range(1,n):
+%o A334082         c = comb(n,k)
+%o A334082         l = (~c & c-1).bit_length()
+%o A334082         if l>0:
+%o A334082             P = (1<<l+1)-1
+%o A334082             for p, e in factorint(c>>l).items():
+%o A334082                 if p > 1+P:
+%o A334082                     break
+%o A334082                 P *= (p**(e+1)-1)//(p-1)
+%o A334082             else:
+%o A334082                 continue
+%o A334082             m += 1
+%o A334082         else:
+%o A334082             m += 1
+%o A334082     return m # _Chai Wah Wu_, Jul 05 2023
+%Y A334082 Cf. A005153 (practical numbers), A007318 (binomial coefficients).
+%Y A334082 Cf. A334083, A334084.
+%K A334082 nonn
+%O A334082 1,3
+%A A334082 _Michel Marcus_, Apr 14 2020

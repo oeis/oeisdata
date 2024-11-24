@@ -1,0 +1,51 @@
+%I A339602 #64 Oct 31 2022 05:55:05
+%S A339602 0,1,2,1,4,1,6,3,6,1,8,1,10,5,16,5,22,9,32,9,42,29,62,3,62,29,42,9,36,
+%T A339602 1,38,25,54,3,54,25,38,1,40,5,46,25,62,7,58,17,44,29,60,19,38,11,44,7,
+%U A339602 44,11,34,27,58,13,50,31,46,3,46,31,50,13,58,27,34
+%N A339602 a(n) = (a(n-2) XOR A030101(a(n-1))) + 1, a(0) = 0, a(1) = 1.
+%C A339602 Is this sequence periodic? The related sequence A114375 was found to be nonperiodic, however the same argument does not hold here as the bitreversal operation used here maps different values onto the same. E.g. 111000 -> 111 111 -> 111. Every time this sequence develops a not yet seen value a(n) = 2^m, the space of combinations increases from (2^(m-1))^2 to (2^m)^2 reducing the probability to hit an already seen pair of values for [a(n-2),a(n-1)].
+%C A339602 This sequence contains some palindromic parts. Example a(55)..a(72): 11, 34, 27, 58, 13, 50, 31, 46, 3, 46, 31, 50, 13, 58, 27, 34, 11.
+%C A339602 a(n) <> a(n-1). a(2k) = 2m. a(2k+1) = 2m+1.
+%C A339602 a(n) = 2^k, k > 0 for each k will exist only once in this sequence, if it is never periodic. In this case the 2^k will be in increasing sequence ordered.
+%C A339602 Conjecture: Let p be an odd number, then a(n) = p will be more frequently found in this sequence than a(n) = p+1 (tested for n = 0..10^7 with primes > 2, but seems to be true for all odd too).
+%H A339602 Robert Israel, <a href="/A339602/b339602.txt">Table of n, a(n) for n = 0..10000</a>
+%H A339602 Thomas Scheuerle, <a href="/A339602/a339602.png">Interesting staircase pattern in this sequence</a>.
+%e A339602 a(5) = 1 binary: 1; a(6) = 6 binary: 110, binary bitreversed: 11;
+%e A339602 so a(7) = binary: (001 XOR 11)+1 = 11 decimal: 3.
+%p A339602 bitrev:= proc(n) local L,i;
+%p A339602   L:= convert(n,base,2);
+%p A339602   add(L[-i]*2^(i-1),i=1..nops(L))
+%p A339602 end proc:
+%p A339602 A:= Array(0..100):
+%p A339602 A[0]:= 0: A[1]:= 1:
+%p A339602 for n from 2 to 100 do
+%p A339602   A[n]:= Bits:-Xor(A[n-2],bitrev(A[n-1]))+1
+%p A339602 od:
+%p A339602 seq(A[i],i=0..100); # _Robert Israel_, Dec 25 2020
+%t A339602 f[n_] := FromDigits[Reverse @ IntegerDigits[n, 2], 2]; a[0] = 0; a[1] = 1; a[n_] := a[n] = BitXor[a[n - 2], f[a[n - 1]]] + 1; Array[a, 100, 0] (* _Amiram Eldar_, Dec 10 2020 *)
+%o A339602 (MATLAB)
+%o A339602 function a = calc_A339602(length)
+%o A339602     % a(0) = 0  not in output of program
+%o A339602     a(1) = 1; % part of definition
+%o A339602     an_2 = 0; % a(0)
+%o A339602     an_1 = a(1);
+%o A339602     for n = 2:length
+%o A339602         an_1_old = an_1;
+%o A339602         an_1 = bitxor(an_2,bitreverse(an_1))+1;
+%o A339602         an_2 = an_1_old;
+%o A339602         a(n) = an_1;
+%o A339602     end
+%o A339602 end
+%o A339602 function r = bitreverse(k) % A030101(k)
+%o A339602     r = 0;
+%o A339602     m = floor(log2(k))+1;
+%o A339602     for i = 1:m
+%o A339602         r = bitset(r,m-i+1,bitget(k,i));
+%o A339602     end
+%o A339602 end
+%o A339602 (PARI) f(n) = fromdigits(Vecrev(binary(n)), 2); \\ A030101
+%o A339602 lista(nn) = {my(x=0, y=1); print1(x, ", ", y, ", "); for (n=2, nn, z = bitxor(x, f(y)) +1; print1(z, ", "); x = y; y = z;);} \\ _Michel Marcus_, Dec 10 2020
+%Y A339602 Cf. A030101, A114375.
+%K A339602 nonn,base,look
+%O A339602 0,3
+%A A339602 _Thomas Scheuerle_, Dec 09 2020

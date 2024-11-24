@@ -1,0 +1,37 @@
+%I A343122 #42 Jun 11 2022 09:33:25
+%S A343122 1,1,2,2,2,2,2,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
+%T A343122 6,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,
+%U A343122 30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30,30
+%N A343122 Consider the longest arithmetic progressions of primes from among the first n primes; a(n) is the smallest constant difference of these arithmetic progressions.
+%C A343122 It seems that most terms are primorials (see comments in A338869 and A338238).
+%H A343122 Wikipedia, <a href="https://en.wikipedia.org/wiki/Primes_in_arithmetic_progression">Primes in arithmetic progression</a>
+%e A343122 For n=2, the first two primes are 2 and 3, the only subsequence of equidistant primes. The constant difference is 1, so a(2) = 1.
+%e A343122 For n=3, there are three sequences of equidistant primes: {2,3} with constant difference 1, {3,5} with difference 2, and {2,5} with difference 3, so a(3) = 1 because 1 is the smallest constant difference among the three longest sequences.
+%t A343122 nmax=100; (* Last n *)
+%t A343122 maxlen=11 ; (* Maximum exploratory length of sequences of equidistant primes *)
+%t A343122 (* a[n, p, s] returns the sequence of "s" equidistant primes with period "p" and last prime prime(n) if it exists, otherwise it returns {} *)
+%t A343122 a[n_,period_,seqlen_]:=Module[{tab,test},
+%t A343122 (* Building sequences of equidistant numbers ending with prime(n) *)
+%t A343122 tab=Table[Prime[n]-k*period,{k,0,seqlen-1}];
+%t A343122 (* Checking if all elements are primes and greater than 2 *)
+%t A343122 test=(And@@PrimeQ@tab)&&(And@@Map[(#>2&),tab]);
+%t A343122 Return[If[test,tab,{}]]];
+%t A343122 atab={}; aterms={}; (* For every n, exploring all sequences of equidistant primes among the first n primes with n > 3 *)
+%t A343122 Do[
+%t A343122 Do[Do[
+%t A343122 If[a[n,period,seqlen]!={},AppendTo[atab,{seqlen,period}]]
+%t A343122 ,{period,2,Ceiling[Prime[n]/(seqlen-1)],2}]
+%t A343122 ,{seqlen,2,maxlen}];
+%t A343122 (* "longmax" is the length of the longest sequences *)
+%t A343122 longmax=Sort[atab,#1[[1]]>#2[[1]]&][[1]][[1]];
+%t A343122 (* Selecting the elements corresponding to the longest sequences *)
+%t A343122 atab=Select[atab,#[[1]]==longmax&];
+%t A343122 (* Saving the pairs {n, corresponding minimum periods} *)
+%t A343122 AppendTo[aterms,{n,Min[Transpose[atab][[2]]]}]
+%t A343122 ,{n,4,nmax}];
+%t A343122 (* Prepending the first two terms corresponding to the simple cases of first primes {2,3} and {2,3,5} *)
+%t A343122 Join[{1,1},(Transpose[aterms][[2]])]
+%Y A343122 Cf. A338869, A338238, A002110 (Primorials), A343118, A033188.
+%K A343122 nonn
+%O A343122 2,3
+%A A343122 _Andres Cicuttin_, Apr 05 2021

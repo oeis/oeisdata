@@ -1,0 +1,36 @@
+%I A273719 #29 May 13 2017 21:01:43
+%S A273719 1,1,1,3,1,1,8,3,1,1,21,9,3,1,1,55,27,10,3,1,1,144,82,33,11,3,1,1,377,
+%T A273719 251,110,39,12,3,1,1,987,770,368,139,45,13,3,1,1,2584,2358,1229,495,
+%U A273719 169,51,14,3,1,1,6765,7191,4085,1755,632,200,57,15,3,1,1
+%N A273719 Triangle read by rows: T(n,k) is the number of bargraphs of semiperimeter n having k horizontal steps in the peaks (n>=2, k>=1).
+%C A273719 Number of entries in row n is n-1.
+%C A273719 Sum of entries in row n = A082582(n).
+%C A273719 T(n,1) = A088305(n-2) = F(2n-4) where F(n) are the Fibonacci numbers  A000045.
+%C A273719 Sum(k*T(n,k), k>=0) = A273720(n).
+%H A273719 Alois P. Heinz, <a href="/A273719/b273719.txt">Rows n = 2..150, flattened</a>
+%H A273719 A. Blecher, C. Brennan, and A. Knopfmacher, <a href="http://dx.doi.org/10.1080/0035919X.2015.1059905">Peaks in bargraphs</a>, Trans. Royal Soc. South Africa, 71, No. 1, 2016, 97-103.
+%H A273719 M. Bousquet-Mélou and A. Rechnitzer, <a href="http://dx.doi.org/10.1016/S0196-8858(02)00553-5">The site-perimeter of bargraphs</a>, Adv. in Appl. Math. 31 (2003), 86-112.
+%F A273719 G.f.: G(s,z), where s marks number of horizontal steps in the peaks and z marks semiperimeter, satisfies the equation given in the Maple  program.
+%F A273719 G.f.: G(w,z), where w marks number of horizontal steps in the peaks and z marks semiperimeter, satisfies eq. (7) of the Blecher et al. reference, where one has to set x = z and y = z.
+%F A273719 The trivariate g.f. G = G(t,s,z), where t marks number of peaks, s marks number of horizontal steps in the peaks, and z marks semiperimeter, satisfies z*(1-z)*(1-s*z)*G^2-(1-3*z-s*z+z^2+3*s*z^2-s*z^3+t*s*z^3-t*s*z^4)*G + t*s*z^2*(1-z)^2 = 0.
+%e A273719 Row 4 is 3,1,1 because the 5 (=A082582(4)) bargraphs of semiperimeter 4 correspond to the compositions [1,1,1],[1,2],[2,1],[2,2],[3] and the corresponding drawings show that they have 3,1,1,2,1 horizontal steps in their peaks.
+%e A273719 Triangle starts
+%e A273719 1;
+%e A273719 1,1;
+%e A273719 3,1,1;
+%e A273719 8,3,1,1;
+%e A273719 21,9,3,1,1
+%p A273719 eq := G = z^2*s+z*(G-z^2*s/(1-z*s)+z^2*s^2/(1-z*s))+z*G+z^2*G+z*G*(G-z^2*s/(1-z*s)+z^2/(1-z)): G := RootOf(eq, G): Gser := simplify(series(G, z = 0, 20)): for n from 2 to 16 do P[n] := sort(expand(coeff(Gser, z, n))) end do: for n from 2 to 16 do seq(coeff(P[n], s, j), j = 1 .. n-1) end do; # yields sequence in triangular form
+%p A273719 # second Maple program:
+%p A273719 b:= proc(n, y, t, h) option remember; expand(
+%p A273719       `if`(n=0, (1-t)*z^h, `if`(t<0, 0, b(n-1, y+1, 1, 0))+
+%p A273719       `if`(t>0 or y<2, 0, b(n, y-1, -1, 0)*z^h)+
+%p A273719       `if`(y<1, 0, b(n-1, y, 0, `if`(max(h, t)>0, h+1, 0)))))
+%p A273719     end:
+%p A273719 T:= n-> (p-> seq(coeff(p, z, i), i=1..n-1))(b(n, 0$3)):
+%p A273719 seq(T(n), n=2..16);  # _Alois P. Heinz_, Jun 06 2016
+%t A273719 b[n_, y_, t_, h_] := b[n, y, t, h] = Expand[If[n == 0, (1 - t)*z^h, If[t < 0, 0, b[n - 1, y + 1, 1, 0]] + If[t > 0 || y < 2, 0, b[n, y - 1, -1, 0]*z^h] + If[y < 1, 0, b[n - 1, y, 0, If[Max[h, t] > 0, h + 1, 0]]]]]; T[n_] := Function [p, Table[Coefficient[p, z, i], {i, 1, n - 1}]][b[n, 0, 0, 0]];  Table[T[n], {n, 2, 16}] // Flatten (* _Jean-François Alcover_, Nov 29 2016 after _Alois P. Heinz_ *)
+%Y A273719 Cf. A000045, A088305, A082582, A273720.
+%K A273719 nonn,tabl
+%O A273719 2,4
+%A A273719 _Emeric Deutsch_, Jun 01 2016

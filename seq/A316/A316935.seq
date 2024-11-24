@@ -1,0 +1,24 @@
+%I A316935 #52 Jan 01 2019 06:41:27
+%S A316935 1,20,54,946,8180,93504,878732,6841732,102829509,19305995230,
+%T A316935 1822646098871,35208071275344,8691465582891615,2131922062844429082,
+%U A316935 190058192685217102545,9285111636083665154512,565278857209893562444229,49237824030642874847017458,15301141018410914663693576388
+%N A316935 a(n)=1; for n > 1, a(n) is the smallest number > n such that the concatenation of all terms from a(1) through a(n) is divisible by the concatenation of the integers 1 through n.
+%H A316935 David A. Corneth, <a href="/A316935/b316935.txt">Table of n, a(n) for n = 1..369</a>
+%e A316935 Let I(n) be the concatenation of the integers 1 through n, and let T(n) be the concatenation of all terms from a(1) through a(n). Then a(n) is the least number which, when appended to T(n-1) -- with leading zeros disallowed -- forms a number T(n) that is strictly greater than I(n) and is a multiple of I(n).
+%e A316935 a(1)=1, so T(1)=1. I(2)=12, so a(2)=20 because a(2) is the least number which, when appended to T(1), creates a number T(2) that is greater than I(2)=12 and evenly divisible by it, and the least number greater than 12 that begins with a 1 and is divisible by 12 is 120.
+%e A316935 a(2) is not 08 because leading zeros are not allowed.
+%e A316935 a(3)=54 because at a(3), I(3)=123, and T(2)=120, which means that T(3) must be 12054, since the least number greater than 123 that is divisible by it but has leading digits 120 is 12054.
+%e A316935 From _David A. Corneth_, Dec 18 2018: (Start)
+%e A316935 Let concat(v) be the concatenation of the elements of vector v. To find a(n) for n >= 3, we find the concatenation of the first n-1 terms. For n = 3, that's 120. We also find the concatenation of the first n positive integers, in this case, 123.
+%e A316935 Concatenating 1 gives 1201. 1201 mod 123 = 94 < 123 - 8 so concatenating a 1-digit number without leading zeros doesn't work.
+%e A316935 We carry on and compute 12010 mod 123 = 79 >= 123 - 89 so concatenating a 2-digit number without leading zeros works and we stop to find a(3) = 10 + 123 - 79 = 54. (End)
+%t A316935 getRes[m_,k_,e_] := Module[{}, r = k-Mod[m*10^e,k]; If[r < 10^e && m*10^e+r != k, r += k*(1 + Floor[(10^(e - 1) - r)/k]); If[r>10^e, r=-1], r=-1]; r]; f[m_,k_] := Module[{e=1}, While[(r=getRes[m,k,e])<0, e++]; r]; t[n_] := FromDigits[ Flatten[IntegerDigits[ Range[n]]]]; a[1]=1; a[n_] := a[n] = f[FromDigits[ Flatten[IntegerDigits[Array[a, n-1]]]], t[n]]; Array[a, 20] (* _Amiram Eldar_, Dec 13 2018 *)
+%o A316935 (PARI) first(n) = {my(res = [1,20]); for(i = 3, n, res = concat(res, [nxt(i, res)])); res}
+%o A316935 nxt(n, v) = {my(div = concatnums([1..n]), start = concatnums(v)); start = 10*start+1; f = 1; subt = 8; c = start % div; while(c < div - subt, start *= 10; f*=10; subt = 10*subt + 9; c = start % div); f + div - c}
+%o A316935 concatnums(v) = {my(res = v[1]); for(i = 2, #v, res *= 10^#Str(v[i]); res += v[i]); res} \\ _David A. Corneth_, Dec 18 2018
+%Y A316935 Cf. A007908 (concatenation of the numbers from 1 to n).
+%K A316935 nonn,easy,base,nice
+%O A316935 1,2
+%A A316935 _Christopher Hohl_, Dec 12 2018
+%E A316935 a(8)-a(18) from _Jon E. Schoenfield_, Dec 13 2018
+%E A316935 a(19) from _David A. Corneth_, Dec 18 2018

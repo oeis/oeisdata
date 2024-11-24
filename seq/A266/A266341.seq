@@ -1,0 +1,36 @@
+%I A266341 #20 Jun 15 2023 20:06:21
+%S A266341 0,0,1,1,2,3,3,3,4,5,6,7,6,7,7,7,8,9,10,11,12,13,14,15,12,13,14,15,14,
+%T A266341 15,15,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,24,25,26,27,
+%U A266341 28,29,30,31,28,29,30,31,30,31,31,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50
+%N A266341 If A036987(n) = 1, a(n) = n - A053644(n), otherwise a(n) = n - A053644(n) + 2^(A063250(n)-1).
+%C A266341 Informally: In binary representation of n, move the most significant 1-bit to the position of the most significant 0-bit ("the leftmost free hole"), and remove it altogether if there are no such holes, i.e., if n is one of the terms of A000225. When the subsets of nonnegative integers are associated with the binary expansion of n in the usual way (bit-k is 1 if number k is present in the set, and 0 stands for an empty set) then a(n) corresponds to the set obtained by "squashing" the set which corresponds to n. See Kubo & Vakil paper, page 240, 8.1 Compression revisited.
+%H A266341 Antti Karttunen, <a href="/A266341/b266341.txt">Table of n, a(n) for n = 0..8191</a>
+%H A266341 T. Kubo and R. Vakil, <a href="http://dx.doi.org/10.1016/0012-365X(94)00303-Z">On Conway's recursive sequence</a>, Discr. Math. 152 (1996), 225-252.
+%F A266341 a(0) = 0; after which, for n = 2^k - 1 (when k >= 1) a(n) = 2^(k-1) - 1, otherwise a(n) = n - A053644(n) + 2^(A063250(n)-1).
+%F A266341 Equally: if A063250(n) = 0, a(n) = n - A053644(n), otherwise a(n) = n - A053644(n) + 2^(A063250(n)-1).
+%F A266341 Other identities. For all n >= 0:
+%F A266341 a(n) = A209862(-1+A004001(1+A209861(n))). [Not yet proved that the required permutations are just A209861 & A209862, although this has been checked empirically up to n=32769. See also Kubo & Vakil paper.]
+%e A266341 For n=13, "1101" in binary, we remove the most significant bit to get "101", where the most significant nonleading 0 is then filled with that 1, to get "111", which is 7's binary representation, thus a(13) = 7.
+%e A266341 For n=15, "1111" in binary, we remove the most significant bit to get "111" (= 7), and as there is no most significant nonleading 0 present, the result is just that, and a(15) = 7.
+%e A266341 For n=21, "10101" in binary, removing the most significant bit and moving it to the position of next zero results "1101", thus a(21) = 13.
+%o A266341 (define (A266341 n) (+ (- n (A053644 n)) (if (zero? (A063250 n)) 0 (A000079 (- (A063250 n) 1)))))
+%o A266341 (Python)
+%o A266341 from sympy import catalan
+%o A266341 def a063250(n):
+%o A266341     if n<2: return 0
+%o A266341     b=bin(n)[2:]
+%o A266341     s=0
+%o A266341     while b.count("0")!=0:
+%o A266341         N=int(b[-1] + b[:-1], 2)
+%o A266341         s+=1
+%o A266341         b=bin(N)[2:]
+%o A266341     return s
+%o A266341 def a053644(n): return 0 if n==0 else 2**(len(bin(n)[2:]) - 1)
+%o A266341 def a036987(n): return catalan(n)%2
+%o A266341 def a(n): return n - a053644(n) if a036987(n)==1 else n - a053644(n) + 2**(a063250(n) - 1) # _Indranil Ghosh_, May 25 2017
+%o A266341 (PARI) a(n) = my(s=bitnegimply(n>>1,n)); n - if(n,1<<logint(n,2)) + if(s,1<<logint(s,2)); \\ _Kevin Ryde_, Jun 15 2023
+%Y A266341 Cf. A000079, A000225, A036987, A053644, A063250.
+%Y A266341 Cf. also A004001, A209861, A209862.
+%K A266341 nonn,easy
+%O A266341 0,5
+%A A266341 _Antti Karttunen_, Jan 13 2016

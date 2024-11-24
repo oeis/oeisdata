@@ -1,0 +1,50 @@
+%I A237350 #84 Sep 08 2022 08:46:06
+%S A237350 1,6,24,60,180,420,840,2520,4620,9240,13860,27720,55440,55440,110880,
+%T A237350 166320,180180,360360,360360,720720,720720,1441440,1801800,2162160,
+%U A237350 3063060,4084080,6126120,6126120,6126120,12252240,12252240,18378360,24504480,24504480,30630600,36756720
+%N A237350 a(n) = the smallest number k such that Sum_{d|k} 1/tau(d) >= n.
+%C A237350 Are there numbers n > 1 such that Sum_{d|n} 1/tau(d) is an integer?
+%C A237350 Values of function F = Sum_{d|n} 1/tau(d) for some numbers according to their prime signature: F{} = 1; F{1} = 3/2; F{2} = 11/6; F{1, 1} = 9/4; F{3} = 25/12; F{2, 1} = 11/4; F{4} = 137/60; F{3, 1} = 25/8, ...
+%C A237350 All terms are of the form Product_{j=1..k} prime(j)^e(j) where e(j+1)<= e(j), and thus products of (not necessarily distinct) primorials. - _Robert Israel_, Dec 21 2015
+%C A237350 From _David A. Corneth_, Nov 05 2019: (Start)
+%C A237350 Instead of checking all divisors of A025487(n), one could use A318277 to see how often each prime signature occurs as a divisor.
+%C A237350 Knowing the lcm of the terms below some m drastically improves the possibility of finding terms. In hindsight, knowing the lcm of the terms below 10^25 yields having to consider 1056 terms of A025487 instead of 222124. Is there some way to accurately predict the lcm to improve computation? (End)
+%H A237350 David A. Corneth, <a href="/A237350/b237350.txt">Table of n, a(n) for n = 1..3338</a> (first 131 terms from Robert Israel, terms <= 10^25)
+%H A237350 David A. Corneth, <a href="/A237350/a237350.gp.txt">m, Sum_{d|a(m)} 1/tau(d) and the prime signature of a(m)</a>
+%e A237350 For n = 2; a(2) = 6 because 6 is the smallest number with Sum_{d|6} 1/tau(d) = 1/1 + 1/2 + 1/2 + 1/4 = 9/4 >= 2.
+%p A237350 N:= 10^9: # to get all entries <= N
+%p A237350 Primorials:= NULL:
+%p A237350 p:= 2: P:= p:
+%p A237350 while P <= N do
+%p A237350   Primorials:= Primorials, P;
+%p A237350   p:= nextprime(p);
+%p A237350   P:= P*p;
+%p A237350 od:
+%p A237350 Primorials:= [Primorials]:
+%p A237350 S:= {1}:
+%p A237350 for i from 1 to nops(Primorials) do
+%p A237350   S:= {seq(seq(s*Primorials[i]^j,
+%p A237350        j = 0 .. floor(log[Primorials[i]](N/s))),s=S)}
+%p A237350 od:
+%p A237350 A:= NULL:
+%p A237350 S:= sort(convert(S,list)):
+%p A237350 xmax:= 0:
+%p A237350 for s in S do
+%p A237350   x:= floor(add(1/numtheory:-tau(d),d=numtheory:-divisors(s)));
+%p A237350   if x > xmax then
+%p A237350      A:= A, s$(x-xmax);
+%p A237350      xmax:= x
+%p A237350   fi
+%p A237350 od:
+%p A237350 A; # _Robert Israel_, Dec 21 2015
+%t A237350 s[1] = 1; s[n_] := DivisorSum[n, 1/DivisorSigma[0, #] &]; n = 1; k = 1; seq = {}; Do[While[s[k] < n, k++]; AppendTo[seq, k]; n++, {j, 1, 20}]; seq (* _Amiram Eldar_, Jan 30 2019 *)
+%o A237350 (Magma) a:=1; S:=[a]; for n in [2..14] do k:=0; flag:= true; while flag do k+:=1; if &+[1/NumberOfDivisors(d): d in Divisors(k)] gt n then Append(~S, k); a:=k; flag:=false; end if; end while; end for; S;
+%o A237350 (PARI) a(n) = {my(k=1); while(sumdiv(k, d, 1/numdiv(d)) < n, k++); k;} \\ _Michel Marcus_, Dec 20 2015
+%Y A237350 Cf. A000005, A002110, A025487, A253139, A265390, A265391, A265392, A318277.
+%Y A237350 Cf. A265393 (a(n) = the smallest number k such that floor(Sum_{d|k} 1/tau(d)) = n).
+%K A237350 nonn
+%O A237350 1,2
+%A A237350 _Jaroslav Krizek_, Dec 13 2015
+%E A237350 a(24)-a(30) from _Michel Marcus_, Dec 20 2015
+%E A237350 a(31)-a(35) from _Robert Israel_, Dec 21 2015
+%E A237350 Missing a(31) = 12252240 inserted in data section by _Georg Fischer_, Nov 05 2019

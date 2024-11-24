@@ -1,0 +1,58 @@
+%I A374429 #10 Jul 26 2024 05:44:23
+%S A374429 2,0,-1,0,-1,2,0,-1,2,-1,0,-1,2,-2,2,0,-1,2,-3,4,-1,0,-1,2,-4,6,-3,2,
+%T A374429 0,-1,2,-5,8,-6,6,-1,0,-1,2,-6,10,-10,12,-4,2,0,-1,2,-7,12,-15,20,-10,
+%U A374429 8,-1,0,-1,2,-8,14,-21,30,-20,20,-5,2
+%N A374429 Triangle read by rows: T(n, k) = ((3*(-1)^k + 1)/2)*abs(qStirling2(n, k, -1)). Polynomials related to the Lucas and Fibonacci numbers.
+%C A374429 The idea behind the Fibonacci and Lucas sequences is simple: Put the '2' in the middle of a band and place a '1' to the left and a '-1' to the right. Now add the sum of the two immediate numbers with higher indexes on the left side and on the right side the sum of the two with lower indexes. Schematically, after a few steps, it looks like this:
+%C A374429    ..., 18, 11, 7, 4, 3, 1, <-- + [2] + --> -1, 1, 0, 1, 1, 2, 3, 5, ...
+%C A374429 This generates the Lucas sequence on the left (with a descending index) and the Fibonacci sequence on the right (with an ascending index). The fact that the first two terms (-1, 1) of the Fibonacci sequence were 'forgotten' in A000045 is from our point of view only a difference in the choice of the offset of the central term. Our choice is, in any case, consistent with Knuth's continuation of the Fibonacci numbers into the negative range (A039834).
+%C A374429 This construction is to be captured in a family of polynomials. The idea is that the two sequences are the values of the polynomials at the points x = -1 and x = 1. This continues from A374439. Here we choose signed coefficients and shift the powers up by one.
+%C A374429 This approach also reveals that another important sequence follows the same logic: the Pell numbers (A000129). These, and their dual counterpart A048654, are interpolated by the polynomials at the points x = 1/2 and x = -1/2 (up to the normalization factor 2^n). The table in the example section gives an overview.
+%C A374429 The formal representation is based on the qStirling2 numbers in the version defined in SageMath (see also A065941 and A333143).
+%e A374429 Triangle starts:
+%e A374429   [0] [2]
+%e A374429   [1] [0, -1]
+%e A374429   [2] [0, -1, 2]
+%e A374429   [3] [0, -1, 2, -1]
+%e A374429   [4] [0, -1, 2, -2,  2]
+%e A374429   [5] [0, -1, 2, -3,  4,  -1]
+%e A374429   [6] [0, -1, 2, -4,  6,  -3,  2]
+%e A374429   [7] [0, -1, 2, -5,  8,  -6,  6,  -1]
+%e A374429   [8] [0, -1, 2, -6, 10, -10, 12,  -4, 2]
+%e A374429   [9] [0, -1, 2, -7, 12, -15, 20, -10, 8, -1]
+%e A374429 .
+%e A374429 Table of interpolated sequences:
+%e A374429   |    | A039834 & A000045 | A000032 |   A000129  |   A048654  |
+%e A374429   |  n |      P(n, 1)      | P(n,-1) |-2^nP(n,1/2)|2^nP(n,-1/2)|
+%e A374429   |    |     Fibonacci     |  Lucas  |    Pell    |    Pell*   |
+%e A374429   |  1 |        -1         |    1    |       1    |       1    |
+%e A374429   |  2 |         1         |    3    |       0    |       4    |
+%e A374429   |  3 |         0         |    4    |       1    |       9    |
+%e A374429   |  4 |         1         |    7    |       2    |      22    |
+%e A374429   |  5 |         1         |   11    |       5    |      53    |
+%e A374429   |  6 |         2         |   18    |      12    |     128    |
+%e A374429   |  7 |         3         |   29    |      29    |     309    |
+%e A374429   |  8 |         5         |   47    |      70    |     746    |
+%e A374429   |  9 |         8         |   76    |     169    |    1801    |
+%e A374429   | 10 |        13         |  123    |     408    |    4348    |
+%o A374429 (SageMath)
+%o A374429 from sage.combinat.q_analogues import q_stirling_number2
+%o A374429 def T(n, k):
+%o A374429     return ((3*(-1)^k + 1)//2)*abs(q_stirling_number2(n, k, -1))
+%o A374429 for n in range(10): print([T(n, k) for k in range(n + 1)])
+%o A374429 def P(n, x):
+%o A374429     if n < 0: return P(-n, -x)
+%o A374429     return sum(T(n, k)*x^k for k in range(n + 1))
+%o A374429 # Lucas and Fibonacci combined
+%o A374429 print([P(n, 1) for n in range(-6, 9)])
+%o A374429 # Table of interpolated sequences
+%o A374429 print("|    | A039834 & A000045 | A000032 |   A000129  |   A048654  |")
+%o A374429 print("|  n |      P(n, 1)      | P(n,-1) |-2^nP(n,1/2)|2^nP(n,-1/2)|")
+%o A374429 f = "| {0:2d} | {1:9d}         | {2:4d}    | {3:7d}    | {4:7d}    |"
+%o A374429 for n in range(1, 11): print(f.format(n, P(n, 1), P(n, -1),
+%o A374429                        int(-2**n*P(n, 1/2)), int(2**n*P(n, -1/2))))
+%Y A374429 Cf. A000045 (Fibonacci), A039834 (negaFibonacci), A000204 (Lucas), A000129 (Pell), A048654 (dual Pell), A065941 (qStirling2).
+%Y A374429 Cf. A374439 (variant).
+%K A374429 sign,tabl
+%O A374429 0,1
+%A A374429 _Peter Luschny_, Jul 25 2024

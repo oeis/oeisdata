@@ -1,0 +1,41 @@
+%I A329900 #54 Jan 12 2020 12:47:47
+%S A329900 1,2,1,4,1,3,1,8,1,2,1,6,1,2,1,16,1,3,1,4,1,2,1,12,1,2,1,4,1,5,1,32,1,
+%T A329900 2,1,9,1,2,1,8,1,3,1,4,1,2,1,24,1,2,1,4,1,3,1,8,1,2,1,10,1,2,1,64,1,3,
+%U A329900 1,4,1,2,1,18,1,2,1,4,1,3,1,16,1,2,1,6,1,2,1,8,1,5,1,4,1,2,1,48,1,2,1,4,1,3,1,8,1
+%N A329900 Primorial deflation of n: starting from x = n, repeatedly divide x by the largest primorial A002110(k) that divides it, until x is an odd number. Then a(n) = Product prime(k_i), for primorial indices k_1 >= k_2 >= ..., encountered in the process.
+%C A329900 When applied to arbitrary n, the "primorial deflation" (term coined by _Matthew Vandermast_ in A181815)  induces the splitting of n to two factors A328478(n)*A328479(n) = n, where we call A328478(n) the non-deflatable component of n (which is essentially discarded), while A328479(n) is the deflatable component. Only if n is in A025487, then the entire n is deflatable, i.e., A328478(n) = 1 and A328479(n) = n.
+%C A329900 According to _Daniel Suteu_, also the ratio (A319626(n) / A319627(n)) can be viewed as a "primorial deflation". That definition coincides with this one when restricted to terms of A025487, as for all k in A025487, A319626(k) = a(k), and A319627(k) = 1. - _Antti Karttunen_, Dec 29 2019
+%H A329900 Antti Karttunen, <a href="/A329900/b329900.txt">Table of n, a(n) for n = 1..65537</a>
+%F A329900 For odd n, a(n) = 1, for even n, a(n) = A000040(A276084(n)) * a(A111701(n)).
+%F A329900 For even n, a(n) = A000040(A276084(n)) * a(n/A002110(A276084(n))).
+%F A329900 A108951(a(n)) = A328479(n), for n >= 1.
+%F A329900 a(A108951(n)) = n, for n >= 1.
+%F A329900 a(A328479(n)) = a(n),  for n >= 1.
+%F A329900 a(A328478(n)) = 1, for n >= 1.
+%F A329900 a(A002110(n)) = A000040(n), for n >= 1.
+%F A329900 a(A000142(n)) = A307035(n), for n >= 0.
+%F A329900 a(A283477(n)) = A019565(n), for n >= 0.
+%F A329900 a(A329886(n)) = A005940(1+n), for n >= 0.
+%F A329900 a(A329887(n)) = A163511(n), for n >= 0.
+%F A329900 a(A329602(n)) = A329888(n), for n >= 1.
+%F A329900 a(A025487(n)) = A181815(n), for n >= 1.
+%F A329900 a(A124859(n)) = A181819(n), for n >= 1.
+%F A329900 a(A181817(n)) = A025487(n), for n >= 1.
+%F A329900 a(A181821(n)) = A122111(n), for n >= 1.
+%F A329900 a(A002182(n)) = A329902(n), for n >= 1.
+%F A329900 a(A260633(n)) = A329889(n), for n >= 1.
+%F A329900 a(A033833(n)) = A330685(n), for n >= 1.
+%F A329900 a(A307866(1+n)) = A330686(n), for n >= 1.
+%F A329900 a(A330687(n)) = A330689(n), for n >= 1.
+%t A329900 Array[If[OddQ@ #, 1, Times @@ Prime@ # &@ Rest@ NestWhile[Append[#1, {#3, Drop[#, -LengthWhile[Reverse@ #, # == 0 &]] &[#2 - PadRight[ConstantArray[1, #3], Length@ #2]]}] & @@ {#1, #2, LengthWhile[#2, # > 0 &]} & @@ {#, #[[-1, -1]]} &, {{0, TakeWhile[If[# == 1, {0}, Function[f, ReplacePart[Table[0, {PrimePi[f[[-1, 1]]]}], #] &@ Map[PrimePi@ First@ # -> Last@ # &, f]]@ FactorInteger@ #], # > 0 &]}}, And[FreeQ[#[[-1, -1]], 0], Length[#[[-1, -1]] ] != 0] &][[All, 1]] ] &, 105] (* _Michael De Vlieger_, Dec 28 2019 *)
+%t A329900 Array[Times @@ Prime@(TakeWhile[Reap[FixedPointList[Block[{k = 1}, While[Mod[#, Prime@ k] == 0, k++]; Sow[k - 1]; #/Product[Prime@ i, {i, k - 1}]] &, #]][[-1, 1]], # > 0 &]) &, 105] (* _Michael De Vlieger_, Jan 11 2020 *)
+%o A329900 (PARI) A329900(n) = { my(m=1, pp=1); while(1, forprime(p=2, ,if(n%p, if(2==p, return(m), break), n /= p; pp = p)); m *= pp); (m); };
+%o A329900 (PARI)
+%o A329900 A111701(n) = forprime(p=2, , if(n%p, return(n), n /= p));
+%o A329900 A276084(n) = { for(i=1,oo,if(n%prime(i),return(i-1))); }
+%o A329900 A329900(n) = if(n%2,1,prime(A276084(n))*A329900(A111701(n)));
+%Y A329900 A left inverse of A108951. Coincides with A319626 on A025487.
+%Y A329900 Cf. A002110, A002182, A111701, A181815, A181817, A181819, A181821, A276084, A304886, A319626, A319627, A328478, A328479, A329889, A329902, A330685, A330686, A330689.
+%K A329900 nonn
+%O A329900 1,2
+%A A329900 _Antti Karttunen_, Dec 22 2019

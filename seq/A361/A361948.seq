@@ -1,0 +1,63 @@
+%I A361948 #30 Aug 15 2024 01:22:38
+%S A361948 1,1,1,1,1,1,1,1,1,1,1,1,3,1,1,1,1,10,15,1,1,1,1,35,280,105,1,1,1,1,
+%T A361948 126,5775,15400,945,1,1,1,1,462,126126,2627625,1401400,10395,1,1,1,1,
+%U A361948 1716,2858856,488864376,2546168625,190590400,135135,1,1
+%N A361948 Array read by ascending antidiagonals. A(n, k) = Product_{j=0..k-1} binomial((j + 1)*n - 1, n - 1) if n >= 1, and A(0, k) = 1 for all k.
+%C A361948 Row n gives the leading coefficients of the set partition polynomials of type n. The sequence of these polynomial sequences starts: A097805, A048993, A156289, A291451, A291452, ...
+%H A361948 Cyril Banderier, Philippe Marchal, and Michael Wallner, <a href="https://doi.org/10.48550/arXiv.1805.09017">Rectangular Young tableaux with local decreases and the density method for uniform random generation</a> (short version), arXiv:1805.09017 [cs.DM], 2018.
+%H A361948 Antoine Chambert-Loir, <a href="https://freedommathdance.blogspot.com/2024/08/combinatorics-of-partitions.html">Combinatorics of partitions</a>, blog post 2024.
+%H A361948 Alexander Karpov, <a href="https://doi.org/10.2478/ijcss-2018-0006">Generalized knockout tournament seedings</a>, International Journal of Computer Science in Sport, vol. 17(2), 2018.
+%F A361948 A(n, k) = (1/k!) * [x^k] P(n, k), where P(n, k) = k!*x^k if n = 0 and otherwise 1 if k = 0 and otherwise Sum_{j=1..k} binomial(n*k, n*j)*P(n, k-j)*x.
+%F A361948 A(n, k) = (n*k)!*[x^(n*k)] exp(x^n/n!) for n >= 1. - _Peter Luschny_, Aug 15 2024
+%e A361948 Array A(n, k) starts:
+%e A361948   [0] 1, 1,   1,       1,           1,                 1, ...
+%e A361948   [1] 1, 1,   1,       1,           1,                 1, ...
+%e A361948   [2] 1, 1,   3,      15,         105,               945, ...  A001147
+%e A361948   [3] 1, 1,  10,     280,       15400,           1401400, ...  A025035
+%e A361948   [4] 1, 1,  35,    5775,     2627625,        2546168625, ...  A025036
+%e A361948   [5] 1, 1, 126,  126126,   488864376,     5194672859376, ...  A025037
+%e A361948   [6] 1, 1, 462, 2858856, 96197645544, 11423951396577720, ...  A025038
+%e A361948 .
+%e A361948 Triangle A(n-k, k) starts:
+%e A361948   [0] 1;
+%e A361948   [1] 1, 1;
+%e A361948   [2] 1, 1,  1;
+%e A361948   [3] 1, 1,  1,   1;
+%e A361948   [4] 1, 1,  3,   1,   1;
+%e A361948   [5] 1, 1, 10,  15,   1, 1;
+%e A361948   [6] 1, 1, 35, 280, 105, 1, 1;
+%p A361948 A := (n, k) -> mul(binomial((j + 1)*n - 1, n - 1), j = 0..k-1):
+%p A361948 seq(seq(A(n-k, k), k = 0..n), n = 0..9);
+%p A361948 # Alternative, using recursion:
+%p A361948 A := proc(n, k) local P; P := proc(n, k) option remember;
+%p A361948 if n = 0 then return x^k*k! fi; if k = 0 then 1 else add(binomial(n*k, n*j)*
+%p A361948 P(n,k-j)*x, j=1..k) fi end: coeff(P(n, k), x, k) / k! end:
+%p A361948 seq(print(seq(A(n, k), k = 0..5)), n = 0..6);
+%p A361948 # Alternative, using exponential generating function:
+%p A361948 egf := n -> ifelse(n=0, 1, exp(x^n/n!)): ser := n -> series(egf(n), x, 8*n):
+%p A361948 row := n -> local k; seq((n*k)!*coeff(ser(n), x, n*k), k = 0..6):
+%p A361948 for n from 0 to 6 do [n], row(n) od;  # _Peter Luschny_, Aug 15 2024
+%t A361948 A[n_, k_] := Product[Binomial[n (j + 1) - 1, n - 1], {j, 0, k - 1}]; Table[A[n - k, k], {n, 0, 9}, {k, 0, n}] // Flatten (* _Michael De Vlieger_, Apr 13 2023 *)
+%o A361948 (SageMath)
+%o A361948 def Arow(n, size):
+%o A361948     if n == 0: return [1] * size
+%o A361948     return [prod(binomial((j + 1)*n - 1, n - 1) for j in range(k)) for k in range(size)]
+%o A361948 for n in range(7): print(Arow(n, 7))
+%o A361948 # Alternative, using exponential generating function:
+%o A361948 def SetPolyLeadCoeff(m, n):
+%o A361948     x, z = var("x, z")
+%o A361948     if m == 0: return 1
+%o A361948     w = exp(2 * pi * I / m)
+%o A361948     o = sum(exp(z * w ** k) for k in range(m)) / m
+%o A361948     t = exp(x * (o - 1)).taylor(z, 0, m*n)
+%o A361948     p = factorial(m*n) * t.coefficient(z, m*n)
+%o A361948     return p.leading_coefficient(x)
+%o A361948 for m in range(7):
+%o A361948     print([SetPolyLeadCoeff(m, k) for k in range(6)])
+%Y A361948 Cf. A060540 (subarray), A370407 (antidiagonal sums, row sums).
+%Y A361948 Cf. A001147 (row 2), A025035 (row 3), A025036 (row 4), A025037 (row 5), A025038 (row 6), A025039 (row 7), A025040 (row 8), A025041 (row 9).
+%Y A361948 Cf. A088218 (column 2), A060542 (column 3), A082368 (column 4), A322252 (column 5), A057599 (main diagonal).
+%Y A361948 Cf. A097805, A048993, A156289, A291451, A291452.
+%K A361948 nonn,tabl
+%O A361948 0,13
+%A A361948 _Peter Luschny_, Apr 13 2023

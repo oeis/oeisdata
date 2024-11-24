@@ -1,0 +1,37 @@
+%I A307035 #47 Dec 30 2019 19:49:39
+%S A307035 1,1,2,3,12,20,60,84,672,1512,5040,7920,47520,56160,157248,393120,
+%T A307035 6289920,8225280,37013760,41368320,275788800,579156480,1820206080,
+%U A307035 2203407360,26440888320,73446912000,173601792000,585906048000,3281073868800,4137006182400,20685030912000
+%N A307035 a(n) is the unique integer k such that A108951(k) = n!.
+%C A307035 For all n, n! = A108951(k) for some unique k. This sequence gives that k for each n. In some sense this sequence tells how to factor factorials into primorials.
+%C A307035 Represent n! as a product of primorials p#. Then replace each primorial with its base prime to calculate a(n).
+%H A307035 Alois P. Heinz, <a href="/A307035/b307035.txt">Table of n, a(n) for n = 0..1911</a> (terms n = 1..1000 from Vaclav Kotesovec)
+%F A307035 a(0) = 1, a(n) = a(n-1) * (A319626(n) / A319627(n)), for n > 0. - _Daniel Suteu_, Mar 21 2019
+%F A307035 a(n) = n! / Product_{k=1..n} A064989(k). - _Vaclav Kotesovec_, Mar 21 2019
+%F A307035 a(n) = A122111(A325508(n)) = A319626(A000142(n)) = A329900(A000142(n)). - _Antti Karttunen_, Nov 19 & Dec 29 2019
+%e A307035 Represent 7! as a product of primorials:
+%e A307035 7! = 2^4 * 3^2 * 5 * 7 = (2#)^2 * 3# * 7#
+%e A307035 Replace primorials by primes:
+%e A307035 2^2 * 3 * 7 = 84.
+%e A307035 So a(7) = 84.
+%p A307035 f:= proc(n) option remember; `if`(n<2, 0, f(n-1)+add(
+%p A307035       i[2]*x^numtheory[pi](i[1]), i=ifactors(n)[2]))
+%p A307035     end:
+%p A307035 a:= proc(n) local d, p, r; p, r:= f(n), 1;
+%p A307035       do d:= degree(p); if d<1 then break fi;
+%p A307035          p, r:= p-add(x^i, i=1..d), ithprime(d)*r
+%p A307035       od: r
+%p A307035     end:
+%p A307035 seq(a(n), n=0..35);  # _Alois P. Heinz_, Mar 21 2019
+%t A307035 q[n_] := Apply[Times, Table[Prime[i], {i, 1, PrimePi[n]}]]; Flatten[{1, 1, Table[val = 1; fak = n!; Do[If[PrimeQ[k], Do[If[Divisible[fak, q[k]], val = val*k; fak = fak/q[k]], {j, 1, n}]], {k, n, 2, -1}]; val, {n, 2, 30}]}] (* _Vaclav Kotesovec_, Mar 21 2019 *)
+%o A307035 (PARI)
+%o A307035 g(n) = my(f=factor(n)); prod(k=1, #f~, my(p=f[k, 1]); (p/if(p>2, precprime(p-1), 1))^f[k, 2]); \\ A319626/A319627
+%o A307035 a(n) = prod(k=1, n, g(k)); \\ _Daniel Suteu_, Mar 21 2019
+%o A307035 (PARI) A307035(n) = { my(m=1, pp=1); n=n!; while(1, forprime(p=2, ,if(n%p, if(2==p, return(m), break), n /= p; pp = p)); m *= pp); }; \\ _Antti Karttunen_, Dec 29 2019
+%Y A307035 Cf. A000142, A108951, A025487, A122111, A319626, A319627, A325508, A329900.
+%K A307035 nonn,easy
+%O A307035 0,3
+%A A307035 _Allan C. Wechsler_, Mar 20 2019
+%E A307035 a(12)-a(13) from _Michel Marcus_, Mar 21 2019
+%E A307035 a(14)-a(15) from _Vaclav Kotesovec_, Mar 21 2019
+%E A307035 a(0), a(16)-a(30) from _Alois P. Heinz_, Mar 21 2019

@@ -1,0 +1,67 @@
+%I A265509 #22 Aug 23 2016 12:42:10
+%S A265509 1,3,5,7,9,9,9,15,17,17,21,21,17,27,21,31,33,33,33,33,33,33,45,45,33,
+%T A265509 51,33,51,33,51,45,63,65,65,65,65,73,73,73,73,65,65,85,85,73,73,93,93,
+%U A265509 65,99,65,99,73,107,73,107,65,99,85,119,73,107,93,127,129,129,129,129,129,129,129,129,129,129,129,129,153
+%N A265509 a(n) = largest base-2 palindrome m <= 2n+1 such that every base-2 digit of m is <= the corresponding digit of 2n+1; m is written in base 10.
+%C A265509 A007088(a(n)) = A265510(n). - _Reinhard Zumkeller_, Dec 11 2015
+%H A265509 Reinhard Zumkeller, <a href="/A265509/b265509.txt">Table of n, a(n) for n = 0..8191</a>
+%p A265509 ispal := proc(n) # test for base-b palindrome
+%p A265509 local L, Ln, i;
+%p A265509 global b;
+%p A265509     L := convert(n, base, b);
+%p A265509     Ln := nops(L);
+%p A265509     for i to floor(1/2*Ln) do
+%p A265509         if L[i] <> L[Ln + 1 - i] then return false end if
+%p A265509     end do;
+%p A265509     return true
+%p A265509 end proc
+%p A265509 # find max pal <= n and in base-b shadow of n, write in base 10
+%p A265509 under10:=proc(n) global b;
+%p A265509 local t1,t2,i,m,sw1,L2;
+%p A265509 if n mod b = 0 then return(0); fi;
+%p A265509 t1:=convert(n,base,b);
+%p A265509 for m from n by -1 to 0 do
+%p A265509 if ispal(m) then
+%p A265509    t2:=convert(m,base,b);
+%p A265509    L2:=nops(t2);
+%p A265509    sw1:=1;
+%p A265509    for i from 1 to L2 do
+%p A265509       if t2[i] > t1[i] then sw1:=-1; break; fi;
+%p A265509                       od:
+%p A265509    if sw1=1 then return(m); fi;
+%p A265509 fi;
+%p A265509                        od;
+%p A265509 end proc;
+%p A265509 b:=2; [seq(under10(2*n+1),n=0..144)]; # Gives A265509
+%p A265509 # find max pal <= n and in base-b shadow of n, write in base b
+%p A265509 underb:=proc(n) global b;
+%p A265509 local t1,t2,i,m,mb,sw1,L2;
+%p A265509 if n mod b = 0 then return(0); fi;
+%p A265509 t1:=convert(n,base,b);
+%p A265509 for m from n by -1 to 0 do
+%p A265509 if ispal(m) then
+%p A265509    t2:=convert(m,base,b);
+%p A265509    L2:=nops(t2);
+%p A265509    sw1:=1;
+%p A265509    for i from 1 to L2 do
+%p A265509       if t2[i] > t1[i] then sw1:=-1; break; fi;
+%p A265509                       od:
+%p A265509    if sw1=1 then mb:=add(t2[i]*10^(i-1), i=1..L2); return(mb); fi;
+%p A265509 fi;
+%p A265509                        od;
+%p A265509 end proc;
+%p A265509 b:=2; [seq(underb(2*n+1),n=0..144)]; # Gives A265510
+%t A265509 A265509 = FromDigits[Min /@ Transpose[{#, Reverse@#}], 2] &@IntegerDigits[2 # + 1, 2] & (* _JungHwan Min_, Aug 22 2016 *)
+%o A265509 (Haskell)
+%o A265509 a265509 n = a265509_list !! n
+%o A265509 a265509_list = f (tail a030308_tabf) [[]] where
+%o A265509    f (bs:_:bss) pss = y : f bss pss' where
+%o A265509      y = foldr (\d v -> 2 * v + d) 0 ys
+%o A265509      (ys:_) = dropWhile (\ps -> not $ and $ zipWith (<=) ps bs) pss'
+%o A265509      pss' = if bs /= reverse bs then pss else bs : pss
+%o A265509 -- _Reinhard Zumkeller_, Dec 11 2015
+%Y A265509 Sequences related to palindromic floor and ceiling: A175298, A206913, A206914, A261423, A262038, and the large block of consecutive sequences beginning at A265509.
+%Y A265509 Cf. A007088, A030308.
+%K A265509 nonn,base,look
+%O A265509 0,2
+%A A265509 _N. J. A. Sloane_, Dec 09 2015

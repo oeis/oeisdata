@@ -1,0 +1,73 @@
+%I A365673 #38 Nov 27 2023 06:22:40
+%S A365673 1,1,1,1,1,1,1,1,2,1,1,1,3,4,1,1,1,4,15,8,1,1,1,5,34,105,16,1,1,1,6,
+%T A365673 61,496,945,32,1,1,1,7,96,1385,11056,10395,64,1,1,1,8,139,2976,50521,
+%U A365673 349504,135135,128,1,1,1,9,190,5473,151416,2702765,14873104,2027025,256,1
+%N A365673 Array A(n, k) read by ascending antidiagonals. Polygonal number weighted generalized Catalan sequences.
+%C A365673 Using polygonal numbers as weights, a recursion for triangles is defined, whose main diagonals represents a family of sequences, which include, among others, the powers of 2, the double factorial of odd numbers, the reduced tangent numbers, and the Euler numbers.
+%C A365673 Apart from the edge cases k = 0 and k = n the recursion is T(n, k) = w(n, k) * T(n, k - 1) + T(n - 1, k). T(n, 0) = 1 and T(n, n) = T(n, n-1) if n > 0.
+%C A365673 The weights w(n, k) identical to 1 yield the recursion of the Catalan triangle A009766 (with main diagonal the Catalan numbers). Here the polygonal numbers are used as weights in the form w(n, k) = p(s, n - k + 1), where the parameter s is the number of sides of the polygon and p(s, n) = ((s-2) * n^2 - (s-4) * n) / 2, see A317302.
+%H A365673 Wikipedia, <a href="https://en.wikipedia.org/wiki/Polygonal_number">Polygonal number</a>.
+%e A365673 Array A(n, k) starts:                            (polygon|diagonal|triangle)
+%e A365673 [0] 1, 1, 1,   1,     1,       1,         1, ...  A258837  A000012
+%e A365673 [1] 1, 1, 2,   4,     8,      16,        32, ...  A080956  A011782
+%e A365673 [2] 1, 1, 3,  15,   105,     945,     10395, ...  A001477  A001147  A001498
+%e A365673 [3] 1, 1, 4,  34,   496,   11056,    349504, ...  A000217  A002105  A365674
+%e A365673 [4] 1, 1, 5,  61,  1385,   50521,   2702765, ...  A000290  A000364  A060058
+%e A365673 [5] 1, 1, 6,  96,  2976,  151416,  11449296, ...  A000326  A126151  A366138
+%e A365673 [6] 1, 1, 7, 139,  5473,  357721,  34988647, ...  A000384  A126156  A365672
+%e A365673 [7] 1, 1, 8, 190,  9080,  725320,  87067520, ...  A000566  A366150  A366149
+%e A365673 [8] 1, 1, 9, 249, 14001, 1322001, 188106489, ...  A000567
+%e A365673            A054556                         A366137
+%p A365673 poly := (s, n) -> ((s - 2) * n^2 - (s - 4) * n) / 2:
+%p A365673 T := proc(s, n, k) option remember; if k = 0 then 1 else if k = n then T(s, n, k-1) else poly(s, n - k + 1) * T(s, n, k - 1) + T(s, n - 1, k) fi fi end:
+%p A365673 for n from 0 to 8 do A := (n, k) -> T(n, k, k): seq(A(n, k), k = 0..9) od;
+%p A365673 # Alternative, using continued fractions:
+%p A365673 A := proc(p, L) local CF, poly, k, m, P, ser;
+%p A365673    poly := (s, n) -> ((s - 2)*n^2 - (s - 4)*n)/2;
+%p A365673    CF := 1 + x;
+%p A365673    for k from 1 to L do
+%p A365673        m := L - k + 1;
+%p A365673        P := poly(p, m);
+%p A365673        CF := 1/(1 - P*x*CF)
+%p A365673    od;
+%p A365673    ser := series(CF, x, L);
+%p A365673    seq(coeff(ser, x, m), m = 0..L-1)
+%p A365673 end:
+%p A365673 for p from 0 to 8 do lprint(A(p, 8)) od;
+%t A365673 poly[s_, n_] := ((s - 2) * n^2 - (s - 4) * n) / 2;
+%t A365673 T[s_, n_, k_] := T[s, n, k] = If[k == 0, 1, If[k == n, T[s, n, k - 1], poly[s, n - k + 1] * T[s, n, k - 1] + T[s, n - 1, k]]];
+%t A365673 A[n_, k_] := T[n, k, k];
+%t A365673 Table[A[n - k, k], {n, 0, 10}, {k, 0, n}] // Flatten (* _Jean-François Alcover_, Nov 27 2023, from first Maple program *)
+%o A365673 (Python)
+%o A365673 from functools import cache
+%o A365673 @cache
+%o A365673 def T(s, n, k):
+%o A365673     if k == 0: return 1
+%o A365673     if k == n: return T(s, n, k - 1)
+%o A365673     p = (n - k + 1) * ((s - 2) * (n - k + 1) - (s - 4)) // 2
+%o A365673     return p * T(s, n, k - 1) + T(s, n - 1, k)
+%o A365673 def A(n, k): return T(n, k, k)
+%o A365673 for n in range(9): print([A(n, k) for k in range(9)])
+%o A365673 (PARI)
+%o A365673 A(p, n) = {
+%o A365673        my(CF = 1 + x,
+%o A365673            poly(s, n) = ((s - 2)*n^2 - (s - 4)*n)/2,
+%o A365673            m, P
+%o A365673        );
+%o A365673        for(k = 1, n,
+%o A365673            m = n - k + 1;
+%o A365673            P = poly(p, m);
+%o A365673            CF = 1/(1 - P*x*CF)
+%o A365673         );
+%o A365673         Vec(CF + O(x^(n)))
+%o A365673 }
+%o A365673 for(p = 0, 8, print(A(p, 8)))
+%o A365673 \\  _Michel Marcus_ and _Peter Luschny_, Oct 02 2023
+%Y A365673 Poly weights: A258837, A080956, A001477, A000217, A000290, A000326, A000384.
+%Y A365673 Rows: A000012, A011782, A001147, A002105, A000364, A126151, A126156, A366150.
+%Y A365673 Triangles: A001498, A365674, A060058, A366138, A365672, A366149.
+%Y A365673 Cf. A009766, A366137 (central diagonal), A317302 (table of polygonal numbers).
+%Y A365673 Cf. A112934, A303943, A305532, A305533.
+%K A365673 nonn,tabl
+%O A365673 0,9
+%A A365673 _Peter Luschny_, Sep 30 2023

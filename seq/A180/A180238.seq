@@ -1,0 +1,45 @@
+%I A180238 #22 Jan 16 2024 17:33:35
+%S A180238 1,3,9,27,75,189,447,951,1911,3621,6513,11103,18267,29013,44691,67251,
+%T A180238 98547,140865,197679,272799,370659,497403,658371,859863,1110453,
+%U A180238 1420527,1799373,2260161,2815401,3479235,4269279
+%N A180238 a(n) is the number of distinct billiard words with length n on an alphabet of 3 symbols.
+%C A180238 Computation: _Allan C. Wechsler_ for n <= 5 (manual), _Fred Lunnon_ for n <= 8 (Maple), _Michael Kleber_ for n <= 30 (Mathematica).
+%H A180238 N. Bedaride, <a href="http://dx.doi.org/10.1016/j.tcs.2007.05.037">Classification of rotations on the torus T^2</a>, Theoretical Computer Science, 385 (2007), 214-225.
+%H A180238 J.-P. Borel, <a href="http://dx.doi.org/10.1016/j.tcs.2007.03.020">A geometrical Characterization of factors of multidimensional Billiards words and some Applications</a>, Theoretical Computer Science, 380 (2007) 286-303.
+%H A180238 L. Vuillon, <a href="http://projecteuclid.org/euclid.bbms/1074791332">Balanced Words</a>, Bull. Belg. Math. Soc., 10 (2003), 787-805.
+%F A180238 Computation may be expedited by generating only words in which the symbols occur in increasing alphabetic order: this was done in the production version.
+%e A180238 For n = 5 there are a(5) = 189 words, permutations on the alphabet {1,2,3} of the 32 words
+%e A180238 11111, 11112, 11121, 11123, 11211, 11212, 11213, 11231, 12111, 12112, 12113, 12121, 12122, 12123, 12131, 12132, 12212, 12213, 12221, 12222, 12223, 12231, 12232, 12311, 12312, 12313, 12321, 12322, 12323, 12331, 12332, 12333.
+%t A180238 (* Number of ways to interleave N elements from 3 arithmetic seqs *)
+%t A180238 (* Program due to _Michael Kleber_, Aug 2010 *)
+%t A180238 (* Given a string like "ABCABA", produce a set of inequalities *)
+%t A180238 (* about the three arithmetic progressions giving successive A/B/Cs *)
+%t A180238 (* The N-th occurrence (1-indexed) of character X corresponds to the value *)
+%t A180238 (* BASE[X] + N * DELTA[X] *)
+%t A180238 (* In all functions, seq is eg {"A", "B", "C", "A", "B", "A"} *)
+%t A180238 (* The arithmetic-progression value of the i-th element of seq *)
+%t A180238 value[seq_, i_] := BASE[seq[[i]]] + DELTA[seq[[i]]] * numoccur[seq,i]
+%t A180238 numoccur[seq_, i_] := Count[Take[seq,If[i>0,i,Length[seq]+i+1]],seq[[i]]]
+%t A180238 (* First element of the seq is greater than anything that would precede it*)
+%t A180238 lowerbound[seq_] := (BASE[ # ] < value[seq,1])& /@ Union[seq]
+%t A180238 (* Each element of the seq is greater than the previous one *)
+%t A180238 upperbound[seq_] := (value[seq,-1] < value[Append[seq,# ],-1])& /@ Union[seq]
+%t A180238 (* Last element of the seq is less than anything that would follow it *)
+%t A180238 ordering[seq_] := Table[value[seq,i] < value[seq,i+1], {i,Length[seq]-1}]
+%t A180238 ineqs[seq_] := Join[ lowerbound[seq], ordering[seq], upperbound[seq] ]
+%t A180238 vars[seq_] := Join @@ ({BASE[ # ],DELTA[ # ]}& /@ Union[seq])
+%t A180238 witness[seq_] := FindInstance[ ineqs[seq], vars[seq] ]
+%t A180238 witness[s_String] := witness[Characters[s]]
+%t A180238 (* All obtainable length-n shuffles of three arithmetic seqs: *)
+%t A180238 names = {"A", "B", "C"}
+%t A180238 shuf[0] := {""}
+%t A180238 candidates[n_] := Flatten[Table[ob<>ch, {ob,shuf[n-1]}, {ch, names}]]
+%t A180238 shuf[n_] := shuf[n] = Select[ candidates[n], witness[ # ] != {}& ]
+%t A180238 (* Typical session *)
+%t A180238 In[18]:= Table[Length[shuf[i]],{i,0,12}]
+%t A180238 Out[18]= {1, 3, 9, 27, 75, 189, 447, 951, 1911, 3621, 6513, 11103, 18267}
+%t A180238 In[19]:= TimeUsed[]/60 Out[19]= 6.73642
+%Y A180238 See A005598 for 2 symbols, A180239 for 4 symbols.
+%K A180238 nonn,more
+%O A180238 0,2
+%A A180238 _Fred Lunnon_, Aug 18 2010

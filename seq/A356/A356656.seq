@@ -1,0 +1,46 @@
+%I A356656 #11 Aug 28 2022 16:57:36
+%S A356656 1,0,1,0,1,1,0,1,3,1,0,1,4,3,6,1,0,1,5,10,10,15,10,1,0,1,6,15,10,15,
+%T A356656 60,15,20,45,15,1,0,1,7,21,35,21,105,70,105,35,210,105,35,105,21,1,0,
+%U A356656 1,8,28,56,35,28,168,280,210,280,56,420,280,840,105,70,560,420,56,210,28,1
+%N A356656 Partition triangle read by rows. The coefficients of the incomplete Bell polynomials.
+%C A356656 We call a triangle a 'partition triangle' if the rows have length A000041 or A000041 + 1.
+%H A356656 E. T. Bell, <a href="http://www.jstor.org/stable/1968431">Exponential polynomials</a>, Ann. Math., 35 (1934), 258-277.
+%H A356656 Peter Luschny, <a href="https://oeis.org/wiki/User:Peter_Luschny/BellTransform">The Bell transform</a>.
+%F A356656 In row n the coefficients of IBell(n, k, Z_n) for k = 0..n are lined up. Z_n denotes the set of variables z[0], z[1], ... z[n] of the incomplete Bell polynomial IBell(n, k) of degree k.
+%e A356656 The triangle starts:
+%e A356656 [0] 1;
+%e A356656 [1] 0, 1;
+%e A356656 [2] 0, 1, 1;
+%e A356656 [3] 0, 1, 3,  1;
+%e A356656 [4] 0, 1, [4,  3],  6,  1;
+%e A356656 [5] 0, 1, [5, 10], [10, 15],  10,  1;
+%e A356656 [6] 0, 1, [6, 15, 10], [15,  60, 15], [20, 45],  15,   1;
+%e A356656 [7] 0, 1, [7, 21, 35], [21, 105, 70, 105], [35, 210, 105], [35, 105], 21, 1;
+%e A356656 Summing the bracketed terms reduces the triangle to A048993.
+%e A356656 The first few polynomials are:
+%e A356656 [0] 1;
+%e A356656 [1] 0, z[0];
+%e A356656 [2] 0, z[1], z[0]^2;
+%e A356656 [3] 0, z[2], 3*z[0]*z[1], z[0]^3;
+%e A356656 [4] 0, z[3], 4*z[0]*z[2]+3*z[1]^2, 6*z[0]^2*z[1], z[0]^4;
+%e A356656 [5] 0, z[4], 5*z[0]*z[3]+10*z[1]*z[2], 10*z[0]^2*z[2]+15*z[0]*z[1]^2, 10*z[0]^3* z[1], z[0]^5;
+%e A356656 It is noteworthy that the substitution z[n] -> n! for n >= 0 yields A132393. More examples are given in the authors blog post (see links).
+%p A356656 aRow := n -> seq(coeffs(IncompleteBellB(n, k, seq(z[i], i = 0..n))), k = 0..n):
+%p A356656 seq(aRow(n), n = 0..8);
+%o A356656 (SageMath)
+%o A356656 from functools import cache
+%o A356656 @cache
+%o A356656 def incomplete_bell_polynomial(n, k):
+%o A356656     Z = var(["z_" + str(i) for i in range(n - k + 1)])
+%o A356656     R = PolynomialRing(ZZ, Z, n - k + 1, order='lex')
+%o A356656     if k == 0: return R(k^n)
+%o A356656     return R(sum(binomial(n-1,j-1) * incomplete_bell_polynomial(n-j,k-1) * Z[j-1]
+%o A356656             for j in range(n - k + 2)).expand())
+%o A356656 def poly_row(n): return [incomplete_bell_polynomial(n, k) for k in range(n + 1)]
+%o A356656 def coeff_row(n): return flatten([[0] if (c := p.coefficients()) == [] else c for p in poly_row(n)])
+%o A356656 for n in range(8): print(coeff_row(n))
+%Y A356656 Variants: A036040, A080575, A178867. Row sums: A000110.
+%Y A356656 A048993 (reduced triangle), A052810 (length of rows), A132393 (factorial substituion).
+%K A356656 nonn,tabf
+%O A356656 0,9
+%A A356656 _Peter Luschny_, Aug 28 2022

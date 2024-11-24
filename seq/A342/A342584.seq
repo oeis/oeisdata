@@ -1,0 +1,29 @@
+%I A342584 #14 Apr 16 2021 09:57:11
+%S A342584 7,25,627,2454,136120,376847,2886750,21546984,278567575,2437795018,
+%T A342584 97974268952,4836489478578,4836489478578,147895359776636,
+%U A342584 308788493220129,4193528956200935,25999253094360135,650467164953053602,2161492060929047665,26769019461318409710
+%N A342584 Minimum k such that all partial sums of the Leibniz series 4/1 - 4/3 + 4/5 - ... with k or more terms give a value of Pi correct to n decimal digits.
+%C A342584 Let s(k) be the sum of the first k terms of the Leibniz series, and let eps(k) = |Pi-floor(Pi*10^(k-1))/10^(k-1)|. Then a(n) is either the minimum k such that |Pi-s(k)| < Min(eps(n), 1/10^(n-1)-eps(n)), or one less than the minimum such k.
+%C A342584 a(n) is the minimum k such that the k-th and k+1-th partial sums agree with Pi in the first n decimal digits.
+%C A342584 It is easy to calculate a(n) for large n because the partial sums of the Leibniz series can be expressed in terms of the digamma function, which can be computed efficiently using an asymptotic series.
+%H A342584 Ben Whitmore, <a href="/A342584/b342584.txt">Table of n, a(n) for n = 1..500</a>
+%e A342584 a(1) = 7 because the sum of the first 6 terms is approximately 2.9706, while the sum of the first 7 terms is approximately 3.2837, and all partial sums of more than 7 terms also have 3 as the first digit.
+%e A342584 a(20) = 26769019461318409710 because the sum of the first 26769019461318409709 terms is approximately 3.1415926535897932385000000000000000000007642, while the sum of the first 26769019461318409710 terms is approximately 3.14159265358979323842528, which agrees with Pi in the first 20 digits, as do all partial sums with more terms.
+%t A342584 a[n_]:=Module[{eps,num,check,pi},
+%t A342584 Block[{$MaxExtraPrecision=Infinity},
+%t A342584   pi[k_]:=If[EvenQ[k],
+%t A342584    Pi+PolyGamma[0,N[1/4,n+30]+k/2]-PolyGamma[0,3/4+k/2],
+%t A342584    pi[k+1]+4/(2k+1)
+%t A342584   ];
+%t A342584   eps=Min[#,10^-(n-1)-#]&[Abs[Pi-Floor[Pi 10^(n-1)]/10^(n-1)]];
+%t A342584   num=2Ceiling[k/2]/.FindRoot[PolyGamma[k/2+3/4]-PolyGamma[k/2+1/4]==eps,
+%t A342584    {k,10^(n-1)},WorkingPrecision->2n+30];
+%t A342584   check[a_]:=RealDigits[pi[a],10,n][[1,-1]]==RealDigits[Pi,10,n][[1,-1]];
+%t A342584   num-3+Position[check/@Range[num-3,num],False][[-1,1]]
+%t A342584 ]
+%t A342584 ];
+%t A342584 a/@Range[20]
+%Y A342584 Cf. A000796, A126809.
+%K A342584 nonn,base
+%O A342584 1,1
+%A A342584 _Ben Whitmore_, Mar 16 2021

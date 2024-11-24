@@ -1,0 +1,46 @@
+%I A179926 #60 Oct 26 2019 18:04:04
+%S A179926 1,1,1,1,1,2,1,1,1,2,1,3,1,2,2,1,1,3,1,3,2,2,1,4,1,2,1,3,1,18,1,1,2,2,
+%T A179926 2,8,1,2,2,4,1,18,1,3,3,2,1,5,1,3,2,3,1,4,2,4,2,2,1,106,1,2,3,1,2,18,
+%U A179926 1,3,2,18,1,17,1,2,3,3,2,18,1,5,1,2,1,106,2,2,2,4,1,106,2,3,2,2,2,6,1,3,3,8,1,18,1,4,18,2,1,17,1,18,2,5,1,18,2,3,3,2,2,572
+%N A179926 Number of permutations of the divisors of n of the form d_1=n, d_2, d_3, ..., d_tau(n) such that d_(i+1)/d_i is a prime or 1/prime for all i.
+%C A179926 In view of formulas given below, there are many common first terms with A001221. Note that, for n >= 1, a(n) is positive; it is function of exponents of prime power factorization of n only; moreover, it is invariant with respect to permutations of them.
+%C A179926 An equivalent multiset formulation of the problem: for a given finite multiset A, we should, beginning with A, to get all submultisets of A, if, by every step, we remove or join 1 element. How many ways are there to do this?
+%C A179926 Via Seqfan Discussion List (Aug 03 2010), _Alois P. Heinz_ proved that every subsequence of the form a(p), a(p*q), a(p*q*r), ..., where p, q, r, ... are distinct primes, coincides with A003043. - _Vladimir Shevelev_, Aug 09 2010
+%C A179926 The parity (odd or even) of bigomega(d_i) in a permutation of divisors of n alternates. - _David A. Corneth_, Nov 25 2017
+%C A179926 Equivalently, the number of Hamiltonian paths in a graph with vertices corresponding to the divisors of n and edges connecting divisors that differ by a prime with the path starting on the vertex associated with 1. - _Andrew Howroyd_, Oct 26 2019
+%H A179926 Alois P. Heinz, <a href="/A179926/b179926.txt">Table of n, a(n) for n = 1..1259</a> (first 719 terms from David A. Corneth)
+%H A179926 David A. Corneth, <a href="/A179926/a179926.png">The permutations of divisors for a(60) ordered by their last element.</a>
+%H A179926 V. Shevelev, <a href="http://arxiv.org/abs/1105.3154">Combinatorial minors of matrix functions and their applications</a>, arXiv:1105.3154 [math.CO], 2011-2014.
+%H A179926 V. Shevelev, <a href="https://www.math.bgu.ac.il/~shevelev/comb_meth2014.pdf">Combinatorial minors of matrix functions and their applications</a>, Zesz. Nauk. PS., Mat. Stosow., Zeszyt 4, pp. 5-16. (2014).
+%H A179926 <a href="/index/Eu#epf">Index entries for sequences computed from exponents in factorization of n</a>
+%F A179926 a(p^k)=1, a(p^k*q)=k+1, a(p^2*q^2)=8, a(p^2*q^3)=17, a(pqr)=18, a(p^2*q*r)=106, a(p^3*q*r)=572, etc. (here p,q,r are distinct primes, k >= 0).
+%e A179926 a(12)=3:
+%e A179926 [12, 6, 3, 1, 2, 4]
+%e A179926 [12, 4, 2, 6, 3, 1]
+%e A179926 [12, 4, 2, 1, 3, 6]
+%e A179926 a(45)=3:
+%e A179926 [45, 15, 5, 1, 3, 9]
+%e A179926 [45, 9, 3, 15, 5, 1]
+%e A179926 [45, 9, 3, 1, 5, 15]
+%p A179926 q:= (i, j)-> is(i/j, integer) and isprime(i/j):
+%p A179926 b:= proc(s, l) option remember; `if`(s={}, 1, add(
+%p A179926      `if`(q(l, j) or q(j, l), b(s minus{j}, j), 0), j=s))
+%p A179926     end:
+%p A179926 a:= n-> (s-> b(s minus {n}, n))(numtheory[divisors](n)):
+%p A179926 seq(a(n), n=1..100);  # _Alois P. Heinz_, Nov 26 2017
+%t A179926 q[i_, j_] := PrimeQ[i/j];
+%t A179926 b[s_, l_] := b[s, l] = If[s == {}, 1, Sum[If[q[l, j] || q[j, l], b[s  ~Complement~ {j}, j], 0], {j, s}]];
+%t A179926 a[n_] := Function[s, b[s ~Complement~ {n}, n]][Divisors[n]];
+%t A179926 Array[a, 120] (* _Jean-François Alcover_, Dec 13 2017, after _Alois P. Heinz_ *)
+%o A179926 (PARI) a(n) = {my(f = factor(n), l = List(), chain = List()); res = 0; forvec(x = vector(#f~, i, [0, f[i, 2]]), listput(l, x)); listput(chain, l[#l]); listpop(l, #l); iterate(chain, l); res}
+%o A179926 iterate(c, l) = {if(#l == 1, if(vecsum(abs(c[#c] - l[1])) == 1, res++), my(cc, cl);
+%o A179926 for(i = 1, #l, if(vecsum(abs(c[#c] - l[i])) == 1, cc = c; cl = l; listput(cc, l[i]); listpop(cl, i); iterate(cc, cl))))}
+%o A179926 first(n) = {my(res = vector(n), m = Map()); res[1] = 1; for(i = 2, n, cn = a046523(i); if(cn == i, mapput(m, i, a(i))); res[i] = mapget(m, cn)); res}
+%o A179926 a046523(n)=my(f=vecsort(factor(n)[, 2], , 4), p); prod(i=1, #f,(p=nextprime(p+1))^f[i]) \\ (a046523 from _Charles R Greathouse IV_), _David A. Corneth_, Nov 24 2017
+%Y A179926 Cf. A000005, A001221, A180026, A003043, A003042. - _Vladimir Shevelev_, Aug 09 2010
+%Y A179926 See A173675 for another version.
+%Y A179926 Cf. A119842, A295785.
+%K A179926 nonn
+%O A179926 1,6
+%A A179926 _Vladimir Shevelev_, Aug 02 2010
+%E A179926 Corrected by _D. S. McNeil_ and _Alois P. Heinz_ and extended by _Alois P. Heinz_ from a(46) via the Seqfan Discussion List (Aug 02 2010)

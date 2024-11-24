@@ -1,0 +1,52 @@
+%I A329719 #41 Dec 14 2019 08:08:04
+%S A329719 112,123,134,145,156,167,178,189,213,224,235,246,257,268,279,314,325,
+%T A329719 336,347,358,369,415,426,437,448,459,516,527,538,549,617,628,639,718,
+%U A329719 729,819,1123,1235,1347,1459,1910,2134,2246,2358,2810,2911,3145,3257,3369
+%N A329719 Numbers whose digits can be partitioned into at least 3 segments (not beginning with 0) where each segment is the sum of the previous two segments.
+%H A329719 Bi Cheng Wu, <a href="/A329719/b329719.txt">Table of n, a(n) for n = 1..4958 (a(n) < 1000000)</a>
+%e A329719 112 -> 1+1=2;
+%e A329719 1235 -> 1+2=3 and 2+3=5;
+%e A329719 224610 -> 2+2=4 and 2+4=6 and 4+6=10.
+%t A329719 part[n_] := part[n] = Select[Flatten[ Permutations /@ Reverse /@ IntegerPartitions[n, {3,n}], 1], 0 <= #[[3]] - Max[#[[1]], #[[2]]] <= 1 && AllTrue[Rest@ Rest@ Differences@ #, 0 <= # <= 1 &] &]; spl[x_, L_] := Map[ FromDigits@ Take[x, #] &, Transpose[{Most@ #, Rest[#]-1}& [ FoldList[ Plus, 1, L]]]]; sumQ[w_] := AllTrue[Range[3, Length@w], w[[#]] == w[[#-1]] + w[[#-2]] &]; ok[n_] := Block[{m = IntegerLength@ n}, AnyTrue[ spl[ IntegerDigits[n], #] & /@ part[m], sumQ[#] && Total[ IntegerLength /@ #] == m &]]; Select[ Range[100, 6000], ok] (* _Giovanni Resta_, Dec 03 2019 *)
+%o A329719 (Python)
+%o A329719 def isSegmentSum(digits,segment1=None,segment2=None):
+%o A329719     digits = str(digits)
+%o A329719     N = len(digits)
+%o A329719     if N == 0:
+%o A329719         return True
+%o A329719     else:
+%o A329719         if (segment1 is None) and (segment2 is None):
+%o A329719             for i in range(N):
+%o A329719                 try:
+%o A329719                     slice1 = digits[:i+1]
+%o A329719                     for j in range(N-(i+1)):
+%o A329719                         slice2 = digits[i+1:i+1+j+1]
+%o A329719                         slice3 = digits[i+1+j+1:]
+%o A329719                         if (isSegmentSum(slice3,slice1,slice2) and
+%o A329719                          len(slice3)>0 and not (slice1.startswith("0") or
+%o A329719                          slice2.startswith("0") or
+%o A329719                          (slice3.startswith("0")))):
+%o A329719                             return True
+%o A329719                 except:
+%o A329719                     return False
+%o A329719         else:
+%o A329719             sumOfDigits = str(int(segment1)+int(segment2))
+%o A329719             nS = len(sumOfDigits)
+%o A329719             try:
+%o A329719                 if digits[:nS] == sumOfDigits:
+%o A329719                     return isSegmentSum(digits[nS:],segment2,digits[:nS])
+%o A329719                 else:
+%o A329719                     return False
+%o A329719             except:
+%o A329719                 return False
+%o A329719     return False
+%o A329719 def findSegmentSum(lower,upper):
+%o A329719     for i in range(lower,upper+1):
+%o A329719         if isSegmentSum(i):
+%o A329719             print(str(i))
+%o A329719 findSegmentSum(1, 5200)
+%Y A329719 Shares subsequences with A108203, A308104, A214527.
+%Y A329719 Cf. A019523.
+%K A329719 nonn,base
+%O A329719 1,1
+%A A329719 _Bi Cheng Wu_, Nov 19 2019

@@ -1,0 +1,29 @@
+%I A298204 #15 May 10 2021 15:34:19
+%S A298204 1,1,1,2,3,5,9,16,29,55,104,200,389,763,1507,3002,6010,12102,24484,
+%T A298204 49751,101475,207723,426542,878451,1813945,3754918,7790326,16196629,
+%U A298204 33739335,70410401,147187513,308171861,646188276,1356847388,2852809425,6005542176
+%N A298204 Number of unlabeled rooted trees with n nodes in which all outdegrees are either 0, 1, or 3.
+%H A298204 Alois P. Heinz, <a href="/A298204/b298204.txt">Table of n, a(n) for n = 1..1000</a>
+%H A298204 Gus Wiseman, <a href="/A298204/a298204.png">Illustration of the first 8 terms.</a>
+%e A298204 The a(7) = 9 trees: ((((((o)))))), ((((ooo)))), (((oo(o)))), ((oo((o)))), ((o(o)(o))), (oo(((o)))), (oo(ooo)), (o(o)((o))), ((o)(o)(o)).
+%p A298204 b:= proc(n, i, v) option remember; `if`(n=0,
+%p A298204       `if`(v=0, 1, 0), `if`(i<1 or v<1 or n<v, 0,
+%p A298204       `if`(n=v, 1, add(binomial(a(i)+j-1, j)
+%p A298204        *b(n-i*j, i-1, v-j), j=0..min(n/i, v)))))
+%p A298204     end:
+%p A298204 a:= n-> `if`(n<2, n, add(b(n-1$2, j), j=[1, 3])):
+%p A298204 seq(a(n), n=1..40);  # _Alois P. Heinz_, Jan 30 2018
+%t A298204 multing[n_,k_]:=Binomial[n+k-1,k];
+%t A298204 a[n_]:=a[n]=If[n===1,1,Sum[Product[multing[a[x],Count[ptn,x]],{x,Union[ptn]}],{ptn,Select[IntegerPartitions[n-1],MemberQ[{1,3},Length[#]]&]}]];
+%t A298204 Table[a[n],{n,40}]
+%t A298204 (* Second program: *)
+%t A298204 b[n_, i_, v_] := b[n, i, v] = If[n == 0,
+%t A298204      If[v == 0, 1, 0], If[i < 1 || v < 1 || n < v, 0,
+%t A298204      If[n == v, 1, Sum[Binomial[a[i] + j - 1, j]*
+%t A298204      b[n - i*j, i - 1, v - j], {j, 0, Min[n/i, v]}]]]];
+%t A298204 a[n_] := If[n < 2, n, Sum[b[n - 1, n - 1, j], {j, {1, 3}}]];
+%t A298204 Array[a, 40] (* _Jean-François Alcover_, May 10 2021, after _Alois P. Heinz_ *)
+%Y A298204 Cf. A000081, A000598, A001190, A001399, A004111, A014591, A032305, A273873, A292050, A295461, A298118, A298205.
+%K A298204 nonn
+%O A298204 1,4
+%A A298204 _Gus Wiseman_, Jan 14 2018

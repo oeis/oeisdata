@@ -1,0 +1,54 @@
+%I A257493 #57 Jun 23 2023 04:09:03
+%S A257493 1,1,1,1,1,1,1,1,2,1,1,1,3,6,1,1,1,4,21,24,1,1,1,5,55,282,120,1,1,1,6,
+%T A257493 120,2008,6210,720,1,1,1,7,231,10147,153040,202410,5040,1,1,1,8,406,
+%U A257493 40176,2224955,20933840,9135630,40320,1,1,1,9,666,132724,22069251,1047649905,4662857360,545007960,362880,1
+%N A257493 Number A(n,k) of n X n nonnegative integer matrices with all row and column sums equal to k; square array A(n,k), n >= 0, k >= 0, read by antidiagonals.
+%C A257493 Also the number of ordered factorizations of m^k into n factors, where m is a product of exactly n distinct primes and each factor is a product of k primes (counted with multiplicity). A(2,2) = 3: (2*3)^2 = 36 = 4*9 = 6*6 = 9*4.
+%H A257493 Alois P. Heinz, <a href="/A257493/b257493.txt">Antidiagonals n = 0..20, flattened</a>
+%H A257493 E. Banaian, S. Butler, C. Cox, J. Davis, J. Landgraf and S. Ponce, <a href="https://arxiv.org/abs/1508.03673">A generalization of Eulerian numbers via rook placements</a>, arXiv:1508.03673 [math.CO], 2015.
+%H A257493 D. M. Jackson & G. H. J. van Rees, <a href="/A002817/a002817.pdf">The enumeration of generalized double stochastic nonnegative integer square matrices</a>, SIAM J. Comput., 4.4 (1975), 474-477. (Annotated scanned copy)
+%H A257493 Richard J. Mathar, <a href="https://arxiv.org/abs/1903.12477">2-regular Digraphs of the Lovelock Lagrangian</a>, arXiv:1903.12477 [math.GM], 2019.
+%H A257493 Dennis Pixton, <a href="http://people.math.binghamton.edu/dennis/Birkhoff/polynomials.html">Ehrhart polynomials for n = 1, ..., 9</a>
+%H A257493 M. L. Stein and P. R. Stein, <a href="/A001496/a001496.pdf">Enumeration of Stochastic Matrices with Integer Elements</a>, Report LA-4434, Los Alamos Scientific Laboratory of the University of California, Los Alamos, NM, Jun 1970. [Annotated scanned copy]
+%e A257493 Square array A(n,k) begins:
+%e A257493   1,   1,      1,        1,          1,           1,            1, ...
+%e A257493   1,   1,      1,        1,          1,           1,            1, ...
+%e A257493   1,   2,      3,        4,          5,           6,            7, ...
+%e A257493   1,   6,     21,       55,        120,         231,          406, ...
+%e A257493   1,  24,    282,     2008,      10147,       40176,       132724, ...
+%e A257493   1, 120,   6210,   153040,    2224955,    22069251,    164176640, ...
+%e A257493   1, 720, 202410, 20933840, 1047649905, 30767936616, 602351808741, ...
+%p A257493 with(numtheory):
+%p A257493 b:= proc(n, k) option remember; `if`(n=1, 1, add(
+%p A257493       `if`(bigomega(d)=k, b(n/d, k), 0), d=divisors(n)))
+%p A257493     end:
+%p A257493 A:= (n, k)-> b(mul(ithprime(i), i=1..n)^k, k):
+%p A257493 seq(seq(A(n, d-n), n=0..d), d=0..8);
+%t A257493 b[n_, k_] := b[n, k] = If[n==1, 1, Sum[If[PrimeOmega[d]==k, b[n/d, k], 0], {d, Divisors[n]}]]; A[n_, k_] := b[Product[Prime[i], {i, 1, n}]^k, k]; Table[A[n, d-n], {d, 0, 10}, {n, 0, d}] // Flatten (* _Jean-François Alcover_, Feb 20 2016, after _Alois P. Heinz_ *)
+%o A257493 (Sage)
+%o A257493 bigomega = sloane.A001222
+%o A257493 @cached_function
+%o A257493 def b(n, k):
+%o A257493     if n == 1:
+%o A257493         return 1
+%o A257493     return sum(b(n//d, k) if bigomega(d) == k else 0 for d in n.divisors())
+%o A257493 def A(n, k):
+%o A257493     return b(prod(nth_prime(i) for i in (1..n))^k, k)
+%o A257493 [A(n, d-n) for d in (0..10) for n in (0..d)] # _Freddy Barrera_, Dec 27 2018, translated from Maple
+%o A257493 (Sage)
+%o A257493 from sage.combinat.integer_matrices import IntegerMatrices
+%o A257493 [IntegerMatrices([d-n]*n, [d-n]*n).cardinality() for d in (0..10) for n in (0..d)] # _Freddy Barrera_, Dec 27 2018
+%o A257493 (PARI)
+%o A257493 T(n, k)={
+%o A257493   local(M=Map(Mat([n, 1])));
+%o A257493   my(acc(p, v)=my(z); mapput(M, p, if(mapisdefined(M, p, &z), z+v, v)));
+%o A257493   my(recurse(h, p, q, v, e) = if(!p, if(!e, acc(q, v)), my(i=poldegree(p), t=pollead(p)); self()(k, p-t*x^i, q+t*x^i, v, e); for(m=1, h-i, for(j=1, min(t, e\m), self()(if(j==t, k, i+m-1), p-j*x^i, q+j*x^(i+m), binomial(t, j)*v, e-j*m)))));
+%o A257493   for(r=1, n, my(src=Mat(M)); M=Map(); for(i=1, matsize(src)[1], recurse(k, src[i, 1], 0, src[i, 2], k))); vecsum(Mat(M)[, 2])
+%o A257493 } \\ _Andrew Howroyd_, Apr 04 2020
+%Y A257493 Columns k=0-9 give: A000012, A000142, A000681, A001500, A172806, A172862, A172894, A172919, A172944, A172958.
+%Y A257493 Rows n=0+1, 2-9 give: A000012, A000027(k+1), A002817(k+1), A001496, A003438, A003439, A008552, A160318, A160319.
+%Y A257493 Main diagonal gives A110058.
+%Y A257493 Cf. A257463 (unordered factorizations), A333733 (non-isomorphic matrices), A008300 (binary matrices).
+%K A257493 nonn,tabl
+%O A257493 0,9
+%A A257493 _Alois P. Heinz_, Apr 26 2015

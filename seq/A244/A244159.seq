@@ -1,0 +1,38 @@
+%I A244159 #27 Jul 05 2014 14:09:43
+%S A244159 0,1,10,11,12,100,101,110,111,112,121,122,123,211,1000,1001,1010,1011,
+%T A244159 1012,1100,1101,1110,1111,1112,1121,1122,1123,1211,1212,1221,1222,
+%U A244159 1223,1232,1233,1234,1322,2111,2112,2121,2122,2123,2211,10000
+%N A244159 Semigreedy Catalan Representation of nonnegative integers.
+%C A244159 Algorithm for constructing the sequence: Define a(0) as 0, and for larger values of n, find first the largest Catalan number which is less than or equal to n [which is A081290(n)], and the index k = A244160(n), of that Catalan number. Initialize a vector of k zeros, [0, 0,  ..., 0]. Set n_remaining = n - A000108(k) and add 1 to the leftmost element of vector, so that it will become [1, 0, ..., 0]. Then check whether the previous Catalan number, C(m) = A000108(m), where m = k-1, exceeds the n_remaining, and provided that C(m) <= n_remaining, then set n_remaining = n_remaining - C(m) and increment by one the m-th element of the vector (where the 1st element is the rightmost), otherwise just decrement m by one and keep on doing the same with lesser and lesser Catalan numbers, and whenever it is possible to subtract them from n_remaining (without going less than zero), do so and increment the corresponding m-th element of the vector, as long as either n_remaining becomes zero, or after subtracting C(1) = 1 from n_remaining, it still has not reached zero. In the latter case, find again the largest Catalan number which is less than or equal to n_remaining, and start the process again. However, after a finite number of such iterations, n_remaining will finally reach zero, and the result of a(n) is then the vector of numbers constructed, concatenated together and represented as a decimal number.
+%C A244159 This shares with "Greedy Catalan Base" (A014418) the property that a simple weighted sum of Sum_{k=1..} digit(k)*C(k) recovers the natural number n, which the given numeral string like A014418(n) or here, a(n), represents. (Here C(k) = the k-th Catalan number, A000108(k), and digit(1) = the digit in the rightmost, least significant digit position.)
+%C A244159 In this case, A244158(a(n)) = n holds for only up to 33603, after which comes the first representation containing a "digit" larger than nine, at a(33604), where the underlying string of numbers is [1,2,3,4,5,6,7,8,9,10] but the decimal system used here can no more unambiguously represent them.
+%C A244159 On the other hand, with the given Scheme-functions, we always get n back with: (CatBaseSumVec (A244159raw n)).
+%C A244159 For n >= 1, A014138(n) gives the positions of repunits: 1, 11, 111, 1111, ...
+%C A244159 The "rep-2's": 22222, 222222, 2222222, 22222222, 222222222, ..., etc., occur in positions 128, 392, 1250, 4110, 13834, ... i.e. 2*A014138(n) for n >= 5.
+%H A244159 Antti Karttunen, <a href="/A244159/b244159.txt">Table of n, a(n) for n = 0..33603</a>
+%F A244159 If A176137(n) = 1, a(n) = A007088(A244230(n)), otherwise a(n) = A007088(A244230(n)-1) + a(n-A197433(A244230(n)-1)).
+%F A244159 For all n, a(A197433(n)) = A007088(n).
+%F A244159 For all n >= 1, a(A000108(n)) = 10^(n-1).
+%F A244159 Each a(A014143(n)) has a "triangular" representation [1, 2, 3, ..., n, n+1].
+%e A244159 For n = 18, the largest Catalan number <= 18 is C(4) = 14.
+%e A244159 Thus we initialize a vector of four zeros [0, 0, 0, 0] and increment the first element to 1: [1, 0, 0, 0] and subtract 14 from 18 to get the remainder 4.
+%e A244159 We see that the next smaller Catalan number, C(3) = 5 is greater than 4, so we cannot subtract it without going negative, so the second leftmost element of the vector stays as zero.
+%e A244159 We next check C(2) = 2, which is less than 4, thus we increment the zero at that point to 1, and subtract 4 - 2 to get 2.
+%e A244159 We compare 2 to C(1) = 1, and as 1 <= 2, it is subtracted 2-1 = 1, and the corresponding element in the vector incremented, thus after the first round, the vector is now [1, 0, 1, 1], and n remaining is 1.
+%e A244159 So we start the second round because n has not yet reached the zero, and look for the largest Catalan number <= 1, which in this case is C(1) = 1, so we subtract it from remaining n, and increment the element in the position 1, after which n has reached zero, and the vector is now [1, 0, 1, 2], whose concatenation as decimal numbers thus yields a(18) = 1012.
+%o A244159 (MIT/GNU Scheme, two alternative implementations)
+%o A244159 ;; Version based on recurrence needs _Antti Karttunen_'s IntSeq-library for memoizing definec-macro:
+%o A244159 (definec (A244159 n) (if (not (zero? (A176137 n))) (A007088 (A244230 n)) (+ (A007088 (-1+ (A244230 n))) (A244159 (- n (A197433 (-1+ (A244230 n))))))))
+%o A244159 ;; The other version constructs a representation vector, used by some of the derived sequences:
+%o A244159 (define (A244159 n) (basevec-as-decimal (A244159raw n)))
+%o A244159 (define (A244159raw n) (if (zero? n) (make-vector 0) (let* ((maxsize (A244160 n)) (catbasevec (make-vector maxsize 0))) (let outer_loop ((n n)) (let inner_loop ((n n) (i (A244160 n))) (cond ((zero? n) (vector-reverse catbasevec)) ((zero? i) (outer_loop n)) ((<= (A000108 i) n) (begin (vector-set! catbasevec (- i 1) (+ 1 (vector-ref catbasevec (- i 1)))) (inner_loop (- n (A000108 i)) (- i 1)))) (else (inner_loop n (- i 1)))))))))
+%o A244159 (define (basevec-as-decimal vec) (basevec->n 10 vec))
+%o A244159 (define (basevec->n base bex) (let loop ((i 0) (n 0)) (cond ((= i (vector-length bex)) n) (else (loop (+ i 1) (+ (* n base) (vector-ref bex i)))))))
+%o A244159 ;; Not needed for computing, but for demonstrating that the system works, as (CatBaseSumVec (A244159raw n)) = n for all n:
+%o A244159 (define (CatBaseSumVec digits) (let ((size (vector-length digits))) (let loop ((i size) (s 0)) (if (zero? i) s (loop (- i 1) (+ s (* (vector-ref digits (- size i)) (A000108 i))))))))
+%Y A244159 Cf. A014418 (a classical greedy variant), A244231 (maximum "digit value"), A244232 (sum of digits), A244233 (product of digits), A244314 (positive terms which have at least one zero digit), A244316 (the one-based position of digit incremented last in the described process).
+%Y A244159 Cf. also A007088, A014138, A176137, A197433, A244230, A244158, A244160.
+%Y A244159 Differs from A239903 for the first time at n=10, where a(10) = 121, while A239903(10) = 120.
+%K A244159 nonn,base
+%O A244159 0,3
+%A A244159 _Antti Karttunen_, Jun 23 2014

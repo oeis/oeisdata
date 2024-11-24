@@ -1,0 +1,72 @@
+%I A306211 #96 Feb 16 2024 01:31:30
+%S A306211 1,1,2,2,1,2,2,1,2,2,1,2,1,2,2,1,2,1,2,1,1,1,2,2,1,2,1,2,1,1,1,2,1,1,
+%T A306211 1,1,3,2,2,1,2,1,2,1,1,1,2,1,1,1,1,3,2,1,1,1,1,3,1,4,1,2,2,1,2,1,2,1,
+%U A306211 1,1,2,1,1,1,1,3,2,1,1,1,1,3,1,4,1,2,1,1,1,1,3
+%N A306211 Concatenation of the current sequence with the lengths of the runs in the sequence, with a(1) = 1.
+%C A306211 Conjecture: All terms are less than or equal to 5. - _Peter Kagey_, Jan 29 2019
+%C A306211 Conjecture: Every number appears! (Based on the analogy with the somewhat similar sequence A090822, where the first 5 appeared at around 10^(10^23) steps). - _N. J. A. Sloane_, Jan 29 2019
+%C A306211 An alternative definition: Start with 1, extend the sequence by appending its RUNS transform, recompute the RUNS transform, append it, repeat. - _N. J. A. Sloane_, Jan 29 2019
+%C A306211 The first time we see 1, 2, 3, 4, 5 is at n=1, 3, 37, 60, 255. After 65 generations (10228800161220 terms) the largest term is 5. The relative frequencies of 1..5 are roughly 0.71, 6.7e-9, 0.23, 1.6e-8, 0.061. 2s and 4s appear to get rarer as n increases. - _Benjamin Chaffin_, Feb 07 2019
+%C A306211 If we record the successive RUNS transforms and concatenate them, we get 1; 2; 2, 1; 2, 2, 1; 2, 2, 1, 2, 1; ..., which is this sequence without the initial 1. - _A. D. Skovgaard_, Jan 30 2019 (Rephrased by _N. J. A. Sloane_, Jan 30 2019)
+%H A306211 Peter Kagey, <a href="/A306211/b306211.txt">Table of n, a(n) for n = 1..10029</a> (first 20 generations)
+%H A306211 N. J. A. Sloane, <a href="/A306211/a306211_1.txt">Table of n, a(n) for n = 1..236878</a> (first 27 generations)
+%H A306211 N. J. A. Sloane, <a href="/A306211/a306211.txt">Notes on A306211</a>, Feb 01 2019
+%e A306211 a(2) = 1, since there is a run of length 1 at a(1).
+%e A306211 a(3) = 2, since there is a run of length 2 at a(1..2).
+%e A306211 a(4..5) = 2, 1, since the runs are as follows:
+%e A306211 1, 1, 2  a(1..3)
+%e A306211 \__/  |
+%e A306211 2,    1  a(4..5)
+%e A306211 a(37) = 3, since a(20..22) = 1, 1, 1.
+%e A306211 Steps in construction:
+%e A306211 [1]  initial sequence
+%e A306211 [1]  its run length
+%e A306211 .
+%e A306211 [1, 1]  concatenation of above is new sequence
+%e A306211 [2]  its run length
+%e A306211 .
+%e A306211 [1, 1, 2] concatenation of above is new sequence
+%e A306211 [2, 1]  its run lengths
+%e A306211 .
+%e A306211 [1, 1, 2, 2, 1]
+%e A306211 [2, 2, 1]
+%e A306211 .
+%e A306211 [1, 1, 2, 2, 1, 2, 2, 1]
+%e A306211 [2, 2, 1, 2, 1]
+%e A306211 .
+%e A306211 [1, 1, 2, 2, 1, 2, 2, 1, 2, 2, 1, 2, 1]
+%e A306211 [2, 2, 1, 2, 1, 2, 1, 1, 1]
+%e A306211 .
+%e A306211 [1, 1, 2, 2, 1, 2, 2, 1, 2, 2, 1, 2, 1, 2, 2, 1, 2, 1, 2, 1, 1, 1]
+%e A306211 [2, 2, 1, 2, 1, 2, 1, 1, 1, 2, 1, 1, 1, 1, 3]
+%e A306211 .
+%e A306211 [1, 1, 2, 2, 1, 2, 2, 1, 2, 2, 1, 2, 1, 2, 2, 1, 2, 1, 2, 1, 1, 1, 2, 2, 1, 2, 1, 2, 1, 1, 1, 2, 1, 1, 1, 1, 3]
+%e A306211 From _N. J. A. Sloane_, Jan 31 2019: (Start)
+%e A306211 The first 9 generations, in compressed notation (see A323477) are:
+%e A306211 1
+%e A306211 11
+%e A306211 112
+%e A306211 11221
+%e A306211 11221221
+%e A306211 1122122122121
+%e A306211 1122122122121221212111
+%e A306211 1122122122121221212111221212111211113
+%e A306211 1122122122121221212111221212111211113221212111211113211113141
+%e A306211 ... (End)
+%t A306211 seq[n_] := seq[n] = If[n==1, {1}, Join[seq[n-1], Length /@ Split[seq[n-1]]]];
+%t A306211 seq[10] (* _Jean-François Alcover_, Jul 19 2022 *)
+%o A306211 (Haskell)
+%o A306211 group [] = []
+%o A306211 group (x:xs)= (x:ys):group zs where (ys,zs) = span (==x) xs
+%o A306211 a306211_next_gen xs = xs ++ (map length $ group xs)
+%o A306211 a306211_gen 1 = [1]
+%o A306211 a306211_gen n = a306211_next_gen $ a306211_gen (n-1)
+%o A306211 a306211 n = a306211_gen n !! (n-1)
+%o A306211 -- _Jean-François Antoniotti_, Jan 31 2021
+%Y A306211 Cf. A000002, A107946, A306215, A090822.
+%Y A306211 Positions of 3's, 4's, 5's: A323476, A306222, A306223.
+%Y A306211 Successive generations: A323477, A323478, A306215, A323475, A306333.
+%Y A306211 See also A323479, A323480, A323481, A323826 (RUNS transform), A323827, A323829 (where n first appears).
+%K A306211 nonn,nice
+%O A306211 1,3
+%A A306211 _A. D. Skovgaard_, Jan 29 2019

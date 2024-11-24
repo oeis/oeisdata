@@ -1,0 +1,46 @@
+%I A225433 #18 Mar 19 2022 03:25:58
+%S A225433 1,1,1,1,-38,1,1,-165,-165,1,1,-676,4806,-676,1,1,-2723,44452,44452,
+%T A225433 -2723,1,1,-10914,362895,-1346780,362895,-10914,1,1,-43681,2780367,
+%U A225433 -20297327,-20297327,2780367,-43681,1,1,-174752,20554588,-263879264,683233990,-263879264,20554588,-174752,1
+%N A225433 Triangle T(n, k) = T(n, k-1) + (-1)^k*A142458(n+2, k+1) if k <= floor(n/2), otherwise T(n, n-k), with T(n, 0) = T(n, n) = 1, read by rows.
+%H A225433 G. C. Greubel, <a href="/A225433/b225433.txt">Rows n = 0..50 of the triangle, flattened</a>
+%F A225433 From _G. C. Greubel_, Mar 19 2022: (Start)
+%F A225433 T(n, k) = T(n, k-1) + (-1)^k*A142458(n+2, k+1) if k <= floor(n/2), otherwise T(n, n-k), with T(n, 0) = T(n, n) = 1.
+%F A225433 T(n, n-k) = T(n, k). (End)
+%e A225433 The triangle begins:
+%e A225433   1;
+%e A225433   1,      1;
+%e A225433   1,    -38,       1;
+%e A225433   1,   -165,    -165,         1;
+%e A225433   1,   -676,    4806,      -676,         1;
+%e A225433   1,  -2723,   44452,     44452,     -2723,       1;
+%e A225433   1, -10914,  362895,  -1346780,    362895,  -10914,      1;
+%e A225433   1, -43681, 2780367, -20297327, -20297327, 2780367, -43681, 1;
+%p A225433 See Maple program in A159041.
+%t A225433 (* First program *)
+%t A225433 T[n_, k_, m_]:= T[n, k, m]= If[k==0 || k==n, 1, (m*(n+1) -m*(k+1) +1)*T[n-1, k- 1, m] + (m*(k+1) -(m-1))*T[n-1, k, m] ];
+%t A225433 p[x_, n_]:= p[x, n]= Sum[x^i*If[i==Floor[n/2] && Mod[n, 2]==0, 0, If[i<= Floor[n/2], (-1)^i*T[n,i,3], -(-1)^(n-i)*T[n,i,3]]], {i,0,n}]/(1-x);
+%t A225433 Flatten[Table[CoefficientList[p[x, n], x], {n,0,12}]]
+%t A225433 (* Second program *)
+%t A225433 T[n_, k_, m_]:= T[n, k, m]= If[k==1 || k==n, 1, (m*n-m*k+1)*T[n-1, k-1, m] + (m*k-m+1)*T[n-1, k, m]];
+%t A225433 A142458[n_, k_]:= T[n,k,3];
+%t A225433 A225433[n_, k_]:= A225433[n, k]= If[k==0 || k==n, 1, If[k<=Floor[n/2], A225433[n, k-1] +(-1)^k*A142458[n+2, k+1], A225433[n, n-k]]];
+%t A225433 Table[A225433[n, k], {n,0,12}, {k,0,n}]//Flatten (* _G. C. Greubel_, Mar 19 2022 *)
+%o A225433 (Sage)
+%o A225433 @CachedFunction
+%o A225433 def T(n, k, m):
+%o A225433     if (k==1 or k==n): return 1
+%o A225433     else: return (m*(n-k)+1)*T(n-1, k-1, m) + (m*k-m+1)*T(n-1, k, m)
+%o A225433 def A142458(n,k): return T(n,k,3)
+%o A225433 @CachedFunction
+%o A225433 def A225433(n,k):
+%o A225433     if (k==0 or k==n): return 1
+%o A225433     elif (k <= (n//2)): return A225433(n,k-1) + (-1)^k*A142458(n+2,k+1)
+%o A225433     else: return A225433(n,n-k)
+%o A225433 flatten([[A225433(n,k) for k in (0..n)] for n in (0..12)]) # _G. C. Greubel_, Mar 19 2022
+%Y A225433 Cf. A007318, A060187, A142458, A159041, A225356.
+%K A225433 sign,tabl
+%O A225433 0,5
+%A A225433 _Roger L. Bagula_, May 07 2013
+%E A225433 Edited by _N. J. A. Sloane_, May 11 2013
+%E A225433 Edited by _G. C. Greubel_, Mar 19 2022

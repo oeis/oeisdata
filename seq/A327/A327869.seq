@@ -1,0 +1,46 @@
+%I A327869 #31 Apr 28 2020 07:33:06
+%S A327869 1,1,1,1,0,1,4,3,3,1,5,4,0,4,1,16,5,10,10,5,1,82,66,75,60,15,6,1,169,
+%T A327869 112,126,35,140,21,7,1,541,456,196,336,280,224,28,8,1,2272,765,1548,
+%U A327869 1848,1386,630,336,36,9,1,17966,15070,15525,16080,14070,3780,1050,480,45,10,1
+%N A327869 Sum T(n,k) of multinomials M(n; lambda), where lambda ranges over all partitions of n into distinct parts incorporating k; triangle T(n,k), n>=0, 0<=k<=n, read by rows.
+%C A327869 Here we assume that every list of parts has at least one 0 because its addition does not change the value of the multinomial.
+%C A327869 Number T(n,k) of set partitions of [n] with distinct block sizes and one of the block sizes is k. T(5,3) = 10: 123|45, 124|35, 125|34, 12|345, 134|25, 135|24, 13|245, 145|23, 14|235, 15|234.
+%H A327869 Alois P. Heinz, <a href="/A327869/b327869.txt">Rows n = 0..140, flattened</a>
+%H A327869 Wikipedia, <a href="https://en.wikipedia.org/wiki/Multinomial_theorem#Multinomial_coefficients">Multinomial coefficients</a>
+%H A327869 Wikipedia, <a href="https://en.wikipedia.org/wiki/Partition_(number_theory)">Partition (number theory)</a>
+%H A327869 Wikipedia, <a href="https://en.wikipedia.org/wiki/Partition_of_a_set">Partition of a set</a>
+%e A327869 Triangle T(n,k) begins:
+%e A327869       1;
+%e A327869       1,     1;
+%e A327869       1,     0,     1;
+%e A327869       4,     3,     3,     1;
+%e A327869       5,     4,     0,     4,     1;
+%e A327869      16,     5,    10,    10,     5,    1;
+%e A327869      82,    66,    75,    60,    15,    6,    1;
+%e A327869     169,   112,   126,    35,   140,   21,    7,   1;
+%e A327869     541,   456,   196,   336,   280,  224,   28,   8,  1;
+%e A327869    2272,   765,  1548,  1848,  1386,  630,  336,  36,  9,  1;
+%e A327869   17966, 15070, 15525, 16080, 14070, 3780, 1050, 480, 45, 10, 1;
+%e A327869   ...
+%p A327869 with(combinat):
+%p A327869 T:= (n, k)-> add(multinomial(add(i, i=l), l[], 0),
+%p A327869              l=select(x-> nops(x)=nops({x[]}) and
+%p A327869              (k=0 or k in x), partition(n))):
+%p A327869 seq(seq(T(n, k), k=0..n), n=0..11);
+%p A327869 # second Maple program:
+%p A327869 b:= proc(n, i, k) option remember; `if`(i*(i+1)/2<n, 0,
+%p A327869      `if`(n=0, 1, `if`(i<2, 0, b(n, i-1, `if`(i=k, 0, k)))+
+%p A327869      `if`(i=k, 0, b(n-i, min(n-i, i-1), k)/i!)))
+%p A327869     end:
+%p A327869 T:= (n, k)-> n!*(b(n$2, 0)-`if`(k=0, 0, b(n$2, k))):
+%p A327869 seq(seq(T(n, k), k=0..n), n=0..11);
+%t A327869 b[n_, i_, k_] := b[n, i, k] = If[i(i+1)/2 < n, 0, If[n==0, 1, If[i<2, 0, b[n, i-1, If[i==k, 0, k]]] + If[i==k, 0, b[n-i, Min[n-i, i-1], k]/i!]]];
+%t A327869 T[n_, k_] := n! (b[n, n, 0] - If[k == 0, 0, b[n, n, k]]);
+%t A327869 Table[T[n, k], {n, 0, 11}, {k, 0, n}] // Flatten (* _Jean-François Alcover_, Apr 28 2020, from 2nd Maple program *)
+%Y A327869 Columns k=0-3 give: A007837, A327876, A327881, A328155.
+%Y A327869 Row sums give A327870.
+%Y A327869 T(2n,n) gives A328156.
+%Y A327869 Cf. A327801, A327884.
+%K A327869 nonn,tabl
+%O A327869 0,7
+%A A327869 _Alois P. Heinz_, Sep 28 2019

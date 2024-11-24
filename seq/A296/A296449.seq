@@ -1,0 +1,48 @@
+%I A296449 #23 Sep 07 2021 04:28:15
+%S A296449 1,2,4,3,7,17,4,10,26,68,5,13,35,95,259,6,16,44,122,340,950,7,19,53,
+%T A296449 149,421,1193,3387,8,22,62,176,502,1436,4116,11814,9,25,71,203,583,
+%U A296449 1679,4845,14001,40503,10,28,80,230,664,1922,5574,16188,47064,136946,11,31,89,257,745,2165,6303,18375,53625,156629,457795
+%N A296449 Triangle I(m,n) read by rows: number of perfect lattice paths on the m*n board.
+%H A296449 D. Yaqubi, M. Farrokhi D. G., and H. Ghasemian Zoeram, <a href="https://arxiv.org/abs/1612.08697">Lattice paths inside a table, I</a>, arXiv:1612.08697 [math.CO], 2016-2017, array I(m,n).
+%F A296449 I(m,n) = (n+2)*3^(n-2) + (m-n)*Sum_{i=0..n-1} A005773(i)*A005773(n-i) + 2*Sum_{k=0..n-3) (n-k-2)*3^(n-k-3)*A001006(k). [Yaqubi Corr. 2.10]
+%F A296449 I(m,n) = A188866(m-1,n) for m > 1. - _Pontus von Brömssen_, Sep 06 2021
+%e A296449 Triangle begins:
+%e A296449    1;
+%e A296449    2,  4;
+%e A296449    3,  7, 17;
+%e A296449    4, 10, 26,  68;
+%e A296449    5, 13, 35,  95, 259;
+%e A296449    6, 16, 44, 122, 340,  950;
+%e A296449    7, 19, 53, 149, 421, 1193, 3387;
+%e A296449    8, 22, 62, 176, 502, 1436, 4116, 11814;
+%e A296449    9, 25, 71, 203, 583, 1679, 4845, 14001, 40503;
+%e A296449   10, 28, 80, 230, 664, 1922, 5574, 16188, 47064, 136946;
+%p A296449 Inm := proc(n,m)
+%p A296449     if m >= n then
+%p A296449         (n+2)*3^(n-2)+(m-n)*add(A005773(i)*A005773(n-i),i=0..n-1)
+%p A296449             +2*add((n-k-2)*3^(n-k-3)*A001006(k),k=0..n-3) ;
+%p A296449     else
+%p A296449         0 ;
+%p A296449     end if;
+%p A296449 end proc:
+%p A296449 for m from 1 to 13 do
+%p A296449 for n from 1 to m do
+%p A296449     printf("%a,",Inm(n,m)) ;
+%p A296449 end do:
+%p A296449 printf("\n") ;
+%p A296449 end do:
+%p A296449 # Second program:
+%p A296449 A296449row := proc(n) local gf, ser;
+%p A296449 gf := n -> 1 + (x*(n - (3*n + 2)*x) + (2*x^2)*(1 +
+%p A296449 ChebyshevU(n - 1, (1 - x)/(2*x))) / ChebyshevU(n, (1 - x)/(2*x)))/(1 - 3*x)^2;
+%p A296449 ser := n -> series(expand(gf(n)), x, n + 1);
+%p A296449 seq(coeff(ser(n), x, k), k = 1..n) end:
+%p A296449 for n from 0 to 11 do A296449row(n) od; # _Peter Luschny_, Sep 07 2021
+%t A296449 (* b = A005773 *) b[0] = 1; b[n_] := Sum[k/n*Sum[Binomial[n, j] * Binomial[j, 2*j - n - k], {j, 0, n}], {k, 1, n}];
+%t A296449 (* c = A001006 *) c[0] = 1; c[n_] := c[n] = c[n-1] + Sum[c[k] * c[n-2-k], {k, 0, n-2}];
+%t A296449 Inm[n_, m_] := If[m >= n, (n + 2)*3^(n - 2) + (m - n)*Sum[b[i]*b[n - i], {i, 0, n - 1}] + 2*Sum[(n - k - 2)*3^(n - k - 3)*c[k], {k, 0, n-3}], 0];
+%t A296449 Table[Inm[n, m], {m, 1, 13}, {n, 1, m}] // Flatten (* _Jean-François Alcover_, Jan 23 2018, adapted from first Maple program. *)
+%Y A296449 Cf. A081113 (diagonal), A000079 (2nd row), A001333 (3rd row), A126358, A057960, A126360, A002714, A126362, A188866.
+%K A296449 nonn,tabl,easy
+%O A296449 1,2
+%A A296449 _R. J. Mathar_, Dec 13 2017

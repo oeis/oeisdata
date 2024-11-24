@@ -1,0 +1,62 @@
+%I A258981 #56 May 05 2022 09:49:22
+%S A258981 0,1,4,81,84,85,256,273,324,325,336,337,1089,1092,1093,20496,20497,
+%T A258981 20736,20737,20740,65620,65856,65857,81921,81984,81985,82000,86032,
+%U A258981 86277,86292,86293,86356,262468,262480,263169
+%N A258981 Numbers containing only 1's and 0's in their base-2, base-3, and base-4 representations.
+%C A258981 As a trend in the first 1000 numbers in the sequence, there tend to be clusters of these numbers, with very large gaps where a number with this property cannot be found.
+%C A258981 This sequence lists the numbers that are counted in A230360. - _Matthew Goers_, Jul 11 2015
+%C A258981 Note that a(27) = 82000 also contains no digit > 1 in base 5, see A146025. - _Matthew Goers_, Jul 11 2015
+%C A258981 Numbers that can be expressed both as a sum of distinct powers of 3 and as a sum of distinct powers of 4. - _Antti Karttunen_, Aug 18 2015
+%H A258981 Paul Tek, <a href="/A258981/b258981.txt">Table of n, a(n) for n = 1..10000</a>
+%H A258981 Paul Tek, <a href="/A258981/a258981.txt">PARI program for this sequence</a>
+%e A258981 81 is 10000 in base 3 and 1101 in base 4 so 81 is a term.
+%e A258981 273 is 101010 in base 3 and 10101 in base 4 so 273 is a term.
+%p A258981 N:= 20: # to get all terms < 2*4^(N-1)
+%p A258981 g:= proc(n)
+%p A258981 local L, j, m, a;
+%p A258981 L:= convert(n,base, 2);
+%p A258981 a:= add(4^(j-1)*L[j],j=1..nops(L));
+%p A258981 if has(convert(a,base,3),2) then NULL else a fi
+%p A258981 end proc:
+%p A258981 map(g, [$0..2^N]); # _Robert Israel_, Jul 14 2015
+%t A258981 ok3[n_] := 1 == Max@ IntegerDigits[n, 3]; to4[n_] := FromDigits[ IntegerDigits[n, 2], 4]; Select[to4/@ Range[2^20], ok3] (* _Giovanni Resta_, Jun 16 2015 *)
+%o A258981 (C#)
+%o A258981 //The syntax for the EssentialBasic base conversion is as follows:
+%o A258981 //string LongDecimalToBase(long initial_number, int base_to_convert_into)
+%o A258981 //string BaseToBase(long initial_number, int base_that_initial_number_is_in, int base_to_convert_into
+%o A258981 long i = 0; string base3 = ""; string base4 = ""; bool bad = false;
+%o A258981 while (true){
+%o A258981    base4 = EssentialBasic.Mathematics.BaseConversion.LongDecimalToBase(i++, 2);
+%o A258981    base3 = EssentialBasic.Mathematics.BaseConversion.BaseToBase(base4, 4, 3);
+%o A258981    for (int i_ = 0; i_ < base3.Length; i_++){
+%o A258981       if (base3.Substring(i_, 1) == "2"){
+%o A258981          bad = true;
+%o A258981          break;
+%o A258981       }
+%o A258981    }
+%o A258981    if (bad == false){
+%o A258981       Console.WriteLine(Convert.ToInt64(EssentialBasic.Mathematics.BaseConversion.BaseToBase(base4, 4, 2), 2));
+%o A258981    }
+%o A258981    bad = false;
+%o A258981 }
+%o A258981 (Sage) [0]+[n for n in [1..1000000] if max(n.digits(base=3))==1 and max(n.digits(base=4))==1] # _Tom Edgar_, Jul 11 2015
+%o A258981 (PARI) digitsb(m)=vecsort(concat(digits(m,3),digits(m,4)),,8)
+%o A258981 is_ok(n)={my(v=digitsb(n),r=0, i);for(i=2,9,r = r || vecsearch(v,i));!r}
+%o A258981 first(m)={ my(v=vector(m),i,k=0);for(i=1, m, while(!is_ok(k), k++); v[i] = k;k++); v;} /* _Anders Hellström_, Jul 19 2015 */
+%o A258981 (PARI) isok(n) = (n==0) || ((vecmax(digits(n,3)) < 2) && (vecmax(digits(n,4)) < 2)); \\ _Michel Marcus_, Aug 05 2015
+%o A258981 (PARI) print1(0);for(n=1,1e5,vecmax(digits(t=subst(Pol(binary(n)),'x,4),3))<2&&print1(","t)) \\ _M. F. Hasler_, Feb 01 2016
+%o A258981 (PARI) \\ See links too.
+%o A258981 (Python)
+%o A258981 def digits(n, b=10): # digits of n in base 2 <= b <= 62
+%o A258981     x, y = n, ''
+%o A258981     while x >= b:
+%o A258981         x, r = divmod(x,b)
+%o A258981         y += str(r) if r < 10 else (chr(r+87) if r < 36 else chr(r+29))
+%o A258981     y += str(x) if x < 10 else (chr(x+87) if x < 36 else chr(x+29))
+%o A258981     return y[::-1]
+%o A258981 A258981_list = [n for n in (int(format(d,'b'),4) for d in range(10**4)) if max(digits(n,3)) <= '1'] # _Chai Wah Wu_, Aug 13 2015
+%Y A258981 Intersection of A000695 and A005836.
+%Y A258981 Cf. A146025, A230360.
+%K A258981 nonn,base
+%O A258981 1,3
+%A A258981 _Phil Lane_, Jun 15 2015

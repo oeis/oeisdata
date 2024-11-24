@@ -1,0 +1,40 @@
+%I A259478 #47 May 02 2018 10:53:30
+%S A259478 1,2,2,3,4,3,5,8,7,5,7,12,13,12,7,11,20,23,25,19,11,15,28,35,42,39,30,
+%T A259478 15,22,42,54,70,70,66,45,22,30,58,78,105,114,119,99,67,30,42,82,112,
+%U A259478 158,178,202,186,155,97,42,56,110,154,223,262,313,314,292,226,139,56,77,152,215,319,383,479,503,511,442,336,195,77
+%N A259478 Partition containment triangle.
+%C A259478 T(n,k) counts pairs of partitions (lambda,mu) with Ferrers diagram of mu not extending beyond the diagram of lambda for all partitions lambda of size n and mu of size k <= n.
+%C A259478 First column and main diagonal both equal A000041 (partition numbers).
+%C A259478 This sequence counts (2,1)/(1) as different from (3,2,1)/(3,1) while their set-theoretic difference lambda - mu (their skew diagram) is the same.
+%D A259478 I. G. MacDonald: "Symmetric functions and Hall polynomials", Oxford University Press, 1979. Page 4.
+%H A259478 Alois P. Heinz, <a href="/A259478/b259478.txt">Rows n = 1..141, flattened</a>
+%H A259478 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/FerrersDiagram.html">Ferrers Diagram</a>
+%H A259478 Wikipedia, <a href="https://en.wikipedia.org/wiki/Ferrers_diagram">Ferrers diagram</a>
+%F A259478 Sum_{k=1..n} T(n,k) = A297388(n) - A000041(n). - _Alois P. Heinz_, Jan 10 2018
+%e A259478 T(3,2) = 4, the pairs of partitions are ((3)/(2)), ((2,1)/(2), ((2,1)/(1,1)), ((1,1,1)/(1,1))
+%e A259478 and the diagrams are:
+%e A259478 x x 0 ,  x x , x 0 , x
+%e A259478          0     x     x
+%e A259478                      0
+%e A259478 triangle begins:
+%e A259478 n=1;  1
+%e A259478 n=2;  2  2
+%e A259478 n=3;  3  4  3
+%e A259478 n=4;  5  8  7  5
+%e A259478 n=5;  7 12 13 12  7
+%e A259478 n=6; 11 20 23 25 19 11
+%p A259478 b:= proc(n, i, t) option remember; expand(`if`(n=0 or i=1,
+%p A259478       `if`(t=0, 1, add(x^j, j=0..n)), b(n, i-1, min(i-1, t))+
+%p A259478        add(b(n-i, min(i, n-i), min(j, n-i))*x^j, j=0..t)))
+%p A259478     end:
+%p A259478 T:= n-> (p-> seq(coeff(p, x, i), i=1..n))(b(n$3)):
+%p A259478 seq(T(n), n=1..15);  # _Alois P. Heinz_, Jul 05 2015, revised Jan 10 2018
+%t A259478 majorsweak[left_List,right_List]:=Block[{le1=Length[left],le2=Length[right]},If[le2>le1||Min[Sign[left-PadRight[right,le1]]]<0,False,True]];
+%t A259478 Table[Sum[ If[! majorsweak[\[Lambda], \[Mu]], 0, 1] , {\[Lambda], IntegerPartitions[n] }, {\[Mu], IntegerPartitions[m]}], {n, 7}, {m, n}]
+%t A259478 (* Second program: *)
+%t A259478 b[n_, m_, i_, j_, t_] := b[n, m, i, j, t] = If[m > n, 0, If[n == 0, 1, If[i < 1, 0, If[t && j > 0, b[n, m, i, j - 1, t], 0] + If[i > j, b[n, m, i - 1, j, False], 0] + If[i > n || j > m, 0, b[n - i, m - j, i, j, True]]]]]; T[n_, m_] :=  b[n, m, n, m, True]; Table[Table[T[n, m], {m, 1, n}], {n, 1, 14}] // Flatten (* _Jean-François Alcover_, Aug 27 2016, after _Alois P. Heinz_ *)
+%Y A259478 Columns k=1-10 give: A000041, 2*A000065, A303853, A303854, A303855, A303856, A303857, A303858, A303859, A303860.
+%Y A259478 Cf. A000070, A259479, A259480, A259481, A161492, A227309, A006958, A297388, A303851, A303852, A303861, A303862, A303863.
+%K A259478 nonn,tabl
+%O A259478 1,2
+%A A259478 _Wouter Meeussen_, Jun 28 2015

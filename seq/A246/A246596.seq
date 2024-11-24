@@ -1,0 +1,61 @@
+%I A246596 #38 Mar 15 2020 05:06:27
+%S A246596 1,1,1,2,1,1,2,5,1,1,1,2,2,2,5,14,1,1,1,2,1,1,2,5,2,2,2,4,5,5,14,42,1,
+%T A246596 1,1,2,1,1,2,5,1,1,1,2,2,2,5,14,2,2,2,4,2,2,4,10,5,5,5,10,14,14,42,
+%U A246596 132,1,1,1,2,1,1,2,5,1,1,1,2,2,2,5,14,1,1,1,2,1,1,2,5
+%N A246596 Run Length Transform of Catalan numbers A000108.
+%C A246596 The Run Length Transform of a sequence {S(n), n>=0} is defined to be the sequence {T(n), n>=0} given by T(n) = Product_i S(i), where i runs through the lengths of runs of 1's in the binary expansion of n. E.g. 19 is 10011 in binary, which has two runs of 1's, of lengths 1 and 2. So T(19) = S(1)*S(2). T(0)=1 (the empty product).
+%H A246596 Chai Wah Wu, <a href="/A246596/b246596.txt">Table of n, a(n) for n = 0..8192</a>
+%H A246596 <a href="/index/Ru#rlt">Index entries for sequences computed with run length transform</a>
+%F A246596 a(n) = A069739(A005940(1+n)). - _Antti Karttunen_, May 29 2017
+%e A246596 From _Omar E. Pol_, Feb 15 2015: (Start)
+%e A246596 Written as an irregular triangle in which row lengths are the terms of A011782:
+%e A246596 1;
+%e A246596 1;
+%e A246596 1,2;
+%e A246596 1,1,2,5;
+%e A246596 1,1,1,2,2,2,5,14;
+%e A246596 1,1,1,2,1,1,2,5,2,2,2,4,5,5,14,42;
+%e A246596 1,1,1,2,1,1,2,5,1,1,1,2,2,2,5,14,2,2,2,4,2,2,4,10,5,5,5,10,14,14,42,132;
+%e A246596 ...
+%e A246596 Right border gives the Catalan numbers. This is simply a restatement of the theorem that this sequence is the Run Length Transform of A000108.
+%e A246596 (End)
+%p A246596 Cat:=n->binomial(2*n,n)/(n+1);
+%p A246596 ans:=[];
+%p A246596 for n from 0 to 100 do lis:=[]; t1:=convert(n, base, 2); L1:=nops(t1); out1:=1; c:=0;
+%p A246596 for i from 1 to L1 do
+%p A246596 if out1 = 1 and t1[i] = 1 then out1:=0; c:=c+1;
+%p A246596 elif out1 = 0 and t1[i] = 1 then c:=c+1;
+%p A246596 elif out1 = 1 and t1[i] = 0 then c:=c;
+%p A246596 elif out1 = 0 and t1[i] = 0 then lis:=[c, op(lis)]; out1:=1; c:=0;
+%p A246596 fi;
+%p A246596 if i = L1 and c>0 then lis:=[c, op(lis)]; fi;
+%p A246596 od:
+%p A246596 a:=mul(Cat(i), i in lis);
+%p A246596 ans:=[op(ans), a];
+%p A246596 od:
+%p A246596 ans;
+%t A246596 f = CatalanNumber; Table[Times @@ (f[Length[#]]&) /@ Select[ Split[ IntegerDigits[n, 2]], #[[1]] == 1&], {n, 0, 87}] (* _Jean-François Alcover_, Jul 11 2017 *)
+%o A246596 (Python)
+%o A246596 from operator import mul
+%o A246596 from functools import reduce
+%o A246596 from gmpy2 import divexact
+%o A246596 from re import split
+%o A246596 def A246596(n):
+%o A246596     s, c = bin(n)[2:], [1, 1]
+%o A246596     for m in range(1, len(s)):
+%o A246596         c.append(divexact(c[-1]*(4*m+2),(m+2)))
+%o A246596     return reduce(mul,(c[len(d)] for d in split('0+',s))) if n > 0 else 1
+%o A246596 # _Chai Wah Wu_, Sep 07 2014
+%o A246596 (Sage) # uses[RLT from A246660]
+%o A246596 A246596_list = lambda len: RLT(lambda n: binomial(2*n, n)/(n+1), len)
+%o A246596 A246596_list(88) # _Peter Luschny_, Sep 07 2014
+%o A246596 (Scheme) ; using MIT/GNU Scheme
+%o A246596 (define (A246596 n) (fold-left (lambda (a r) (* a (A000108 r))) 1 (bisect (reverse (binexp->runcount1list n)) (- 1 (modulo n 2)))))
+%o A246596 (define A000108 (EIGEN-CONVOLUTION 1 *))
+%o A246596 ;; Note: EIGEN-CONVOLUTION can be found from my IntSeq-library and other functions are as in A227349. - _Antti Karttunen_, Sep 08 2014
+%Y A246596 Cf. A000108.
+%Y A246596 Cf. A003714 (gives the positions of ones).
+%Y A246596 Run Length Transforms of other sequences: A005940, A069739, A071053, A227349, A246588, A246595, A246660, A246661, A246674.
+%K A246596 nonn
+%O A246596 0,4
+%A A246596 _N. J. A. Sloane_, Sep 06 2014

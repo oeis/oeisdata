@@ -1,0 +1,49 @@
+%I A340488 #90 Jun 27 2021 14:01:35
+%S A340488 0,0,1,1,0,2,2,3,3,2,0,3,1,3,0,4,4,5,5,4,6,6,7,7,6,4,7,5,7,4,0,5,6,5,
+%T A340488 1,2,1,5,0,6,2,6,3,7,3,6,0,7,2,7,1,4,1,7,0,8,8,9,9,8,10,10,11,11,10,8,
+%U A340488 11,9,11,8,12,12,13,13,12,14,14
+%N A340488 a(n+1) = XOR(a(n),y) for n>=1, where y is the number of m < n such that a(m) = a(n); a(1)=0.
+%C A340488 It appears that the graph of the first n terms is similar to the graph of the first n/4 terms for sufficiently large values (n > 100).
+%C A340488 It appears that among the first 4^n terms, each integer value less than 2^n appears at least (3/4)*2^n times. This would imply that every positive integer appears an infinite number of times.
+%C A340488 Yet another variant of the Van Eck sequence A181391. - _N. J. A. Sloane_, Jan 10 2021
+%C A340488 It follows from the definition that when m appears for the first time, it is immediately followed by m, and then if m is even by m+1. A340494 gives a conjectured generating function for when a number appears for the first time. - _Rémy Sigrist_ and _N. J. A. Sloane_, Jan 10 2021
+%C A340488 Conjectures from _Rémy Sigrist_, Jan 10 2021 (Start)
+%C A340488 It appears that the positions of the 0's are given by A336190, and the "y" sequence appears to be A336033.
+%C A340488 For a fixed k > 0, let b(n) be the position of the k-th occurrence of n in A340488, Then the sequence { b(n) - A340494(n) } has period 2^m for some m,
+%C A340488 - for k = 2 we have period ( 1 ) (the second occurrence appear next to the first).
+%C A340488 - for k = 3 we have period ( 4, 10, 4, 4 ),
+%C A340488 - for k = 4 we have period (10, 32, 30, 6, 10, 14, 12, 6). (End)
+%C A340488 Theorem: Every number appears.
+%C A340488 Proof. (i) If there were only finitely many different numbers in the sequence then one number k (say) would appear infinitely often. As the number of k's reaches the next power of 2, 2^m say, we get a term >= 2^m. So the sequence is unbounded. Contradiction. So there are infinitely many different terms.
+%C A340488 (ii) To show that every number appears, consider a k-bit number n, n < 2^k. Let a(m) be the first term >= 2^k, where a(m) = a(m-1) XOR y, with a(m-1) < 2^k and y >= 2^k. Let a(m-1) = t. Since this is at least the 2^k-th copy of t, the sequence contains t XOR 0, t XOR 1, t XOR 2, ..., t XOR 2^k-1, and so contains every number from 0 to 2^k-1, and in particular contains n. QED
+%C A340488   - _Rémy Sigrist_ and _N. J. A. Sloane_, Jan 11 2021
+%C A340488 Conjecture: Let pi_i(n) denote the number of occurrences of i in the first n terms. Then pi_0(n) >= pi_i(n) for all i, and the first time pi_0(n) = m, pi_i(n) < m for i>0. - _N. J. A. Sloane_, Jan 13 2021
+%H A340488 Rémy Sigrist, <a href="/A340488/b340488.txt">Table of n, a(n) for n = 1..25000</a>
+%H A340488 Ian Hutchinson, <a href="/A340488/a340488.png">Graph of first 3500 terms</a>
+%H A340488 Rémy Sigrist, <a href="/A340488/a340488.gp.txt">PARI program for A340488</a>
+%e A340488 We start with a(1) = 0. 0 has not appeared before, so we set a(2) to bitxor(0,0), or 0. There has now been one previous appearance of 0, so we set a(3) to bitxor(0,1), or 1. There has been no previous appearance of 1, so we set a(4) to 1. There has now been one previous appearance of 1, so we set a(5) to bitxor(1,1), or 0.
+%p A340488 b:= proc(n) option remember; `if`(n<1, 0, b(n-1)+x^a(n)) end:
+%p A340488 a:= proc(n) option remember; `if`(n=1, 0, (t->
+%p A340488       Bits[Xor](t, coeff(b(n-2), x, t)))(a(n-1)))
+%p A340488     end:
+%p A340488 seq(a(n), n=1..100);  # _Alois P. Heinz_, Apr 14 2021
+%t A340488 b[n_] := b[n] = If[n < 1, 0, b[n-1] + x^a[n]];
+%t A340488 a[n_] := a[n] = If[n == 1, 0, With[{t = a[n-1]},
+%t A340488      BitXor[t, Coefficient[b[n - 2], x, t]]]];
+%t A340488 Array[a, 100] (* _Jean-François Alcover_, Jun 27 2021, after _Alois P. Heinz_ *)
+%o A340488 (Python)
+%o A340488 a340488 = [0]
+%o A340488 repeat = [0] # Running tally for occurrences of each value
+%o A340488 for n in range(3414):
+%o A340488     if(a340488[-1] >= len(repeat)):
+%o A340488         repeat.append(0)
+%o A340488     newValue = (a340488[-1] ^ repeat[a340488[-1]])
+%o A340488     repeat[a340488[-1]] += 1
+%o A340488     a340488.append(newValue)
+%o A340488 (PARI) See Links section.
+%Y A340488 Cf. A181391 (Van Eck), A340496 (partial sums), A340499 (first differences), A340500 (running maximum).
+%Y A340488 See A340494, A340495 for when n first appears.
+%Y A340488 Cf. also A336033, A336190.
+%K A340488 nonn,nice,look
+%O A340488 1,6
+%A A340488 _Ian Hutchinson_, Jan 09 2021

@@ -1,0 +1,45 @@
+%I A268187 #47 Feb 25 2020 18:19:04
+%S A268187 1,1,1,1,1,1,1,1,2,1,2,1,3,1,3,1,1,4,1,1,4,2,1,5,3,1,5,4,1,6,5,1,6,7,
+%T A268187 1,7,8,1,1,7,10,1,1,8,12,2,1,8,14,3,1,9,16,5,1,9,19,6,1,10,21,9,1,10,
+%U A268187 24,11,1,11,27,15,1,11,30,18,1,1,12,33,23,1
+%N A268187 Triangle read by rows: T(n,k) is the number of no-leg partitions of n having Durfee square of size k (n >= 1, 1 <= k <= floor(sqrt(n))). Also, number of no-arm partitions of n having Durfee square of size k.
+%C A268187 Given a partition P, the partition formed by the cells situated below the Durfee square of P is called the leg of P. Similarly, the partition formed by the cells situated to the right of the Durfee square of P is called the arm of P.
+%H A268187 Alois P. Heinz, <a href="/A268187/b268187.txt">Rows n = 1..1000, flattened</a>
+%H A268187 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/Rogers-RamanujanIdentities.html">Rogers-Ramanujan Identities</a>
+%F A268187 G.f.: G(t,x) = Sum_{k>=0} ( t^k*x^(k^2)/Product_{i=1..k} (1-x^i) ).
+%F A268187 Sum_{k>=0} T(n,k) = A003114(n).
+%F A268187 Sum_{k>=1} k * T(n,k) = A268188(n).
+%F A268187 Sum_{k>=0} k! * T(n,k) = A327710(n). - _Alois P. Heinz_, Feb 25 2020
+%e A268187 T(9,2) = 3 because we have [7,2], [6,3], and [5,4].
+%e A268187 Triangle begins:
+%e A268187   1;
+%e A268187   1;
+%e A268187   1;
+%e A268187   1, 1;
+%e A268187   1, 1;
+%e A268187   1, 2;
+%e A268187   1, 2;
+%e A268187   1, 3;
+%e A268187   1, 3, 1;
+%e A268187   1, 4, 1;
+%e A268187   1, 4, 2;
+%e A268187   1, 5, 3;
+%e A268187   1, 5, 4;
+%e A268187   1, 6, 5;
+%e A268187   1, 6, 7;
+%e A268187   1, 7, 8, 1;
+%e A268187   ...
+%p A268187 G := add(t^k*x^(k^2)/mul(1-x^i, i = 1 .. k), k = 0 .. 80): Gser := simplify(series(G, x = 0,40)): for n to 35 do P[n] := sort(coeff(Gser, x, n)) end do: for n to 35 do seq(coeff(P[n], t, j), j = 1 .. degree(P[n])) end do; # yields sequence in triangular form
+%p A268187 # second Maple program:
+%p A268187 b:= proc(n, i) option remember; `if`(n=0, 1,
+%p A268187       `if`(i<1, 0, b(n, i-1)+`if`(i>n, 0, b(n-i, i))))
+%p A268187     end:
+%p A268187 T:= (n, k)-> b(n-k^2, k):
+%p A268187 seq(seq(T(n, k), k=1..floor(sqrt(n))), n=1..30); # _Alois P. Heinz_, Jan 30 2016
+%t A268187 b[n_, i_] := b[n, i] = If[n==0, 1, If[i<1, 0, b[n, i-1] + If[i>n, 0, b[n-i, i]]]]; T[n_, k_] := b[n-k^2, k]; Table[T[n, k], {n, 1, 30}, {k, 1, Floor[Sqrt[n]]}] // Flatten (* _Jean-François Alcover_, Dec 10 2016 after _Alois P. Heinz_ *)
+%o A268187 (PARI) T(n, k) = polcoef(1/prod(j=1, k, 1-x^j+x*O(x^n)), n-k*k);
+%o A268187 tabf(nn) = for(n=1, nn, for(k=1, sqrtint(n), print1(T(n, k), ", ")); print) \\ _Seiichi Manyama_, Oct 14 2019
+%Y A268187 Cf. A003114, A115994, A268188, A327710, A328346.
+%K A268187 nonn,tabf,look
+%O A268187 1,9
+%A A268187 _Emeric Deutsch_, Jan 29 2016

@@ -1,0 +1,32 @@
+%I A257783 #23 Jun 01 2022 14:45:57
+%S A257783 1,0,1,0,1,2,0,1,3,6,0,1,7,12,24,0,1,12,35,60,120,0,1,25,87,210,360,
+%T A257783 720,0,1,44,232,609,1470,2520,5040,0,1,89,599,1961,4872,11760,20160,
+%U A257783 40320,0,1,160,1591,5952,17649,43848,105840,181440,362880,0,1,321,4202,19255,60465,176490,438480,1058400,1814400,3628800
+%N A257783 Number T(n,k) of words w of length n such that each letter of the k-ary alphabet is used at least once and for every prefix z of w we have #(z,a_i) = 0 or #(z,a_i) >= #(z,a_j) for all j>i and #(z,a_i) counts the occurrences of the i-th letter in z; triangle T(n,k), n>=0, 0<=k<=n, read by rows.
+%C A257783 Row n is the inverse binomial transform of the n-th row of array A213276.
+%H A257783 Alois P. Heinz, <a href="/A257783/b257783.txt">Rows n = 0..20, flattened</a>
+%F A257783 T(n,k) = Sum_{i=0..k} (-1)^i * C(k,i) * A213276(n,k-i).
+%e A257783 T(5,2) = 12: aaaab, aaaba, aaabb, aabaa, aabab, aabba, abaaa, abaab, ababa, baaaa, baaab, baaba.
+%e A257783 Triangle T(n,k) begins:
+%e A257783   1;
+%e A257783   0, 1;
+%e A257783   0, 1,  2;
+%e A257783   0, 1,  3,   6;
+%e A257783   0, 1,  7,  12,   24;
+%e A257783   0, 1, 12,  35,   60,  120;
+%e A257783   0, 1, 25,  87,  210,  360,   720;
+%e A257783   0, 1, 44, 232,  609, 1470,  2520,  5040;
+%e A257783   0, 1, 89, 599, 1961, 4872, 11760, 20160, 40320;
+%t A257783 g[l_, i_] := Module[{j}, If[l[[i]] < 1, Return[False], If[l[[i]] > 1, For[j = i + 1, j <= Length[l], j++, If[l[[i]] <= l[[j]], Return[False], If[l[[j]] > 0, Break[]]]]]]; True];
+%t A257783 b[l_] := b[l] = If[Complement[l, {0}] == {}, 1, Sum[If[g[l, i], b[ReplacePart[l, i -> l[[i]] - 1]], 0], {i, 1, Length[l]}]];
+%t A257783 h[n_, k_, m_, l_] := h[n, k, m, l] = If[n == 0 && k === 0, b[l], If[k == 0 || n > 0 && n < m, 0, Sum[h[n - j, k - 1, Max[m, j], Join[{j}, l]], {j, Max[1, m], n}] + h[n, k - 1, m, Join[{0}, l]]]];
+%t A257783 A[n_, k_] := h[n, k, 0, {}];
+%t A257783 T[n_, k_] := Sum[(-1)^i*Binomial[k, i]*A[n, k - i], {i, 0, k}];
+%t A257783 Table[T[n, k], {n, 0, 10}, {k, 0, n}] // Flatten (* _Jean-François Alcover_, Jun 01 2022, after _Alois P. Heinz_ in A213276 *)
+%Y A257783 Columns k=0-10 give: A000007, A057427, A321838, A321839, A321840, A321841, A321842, A321843, A321844, A321845, A321846.
+%Y A257783 Main diagonal gives A000142.
+%Y A257783 T(n+1,n) = A001710(n+1) (for n>0).
+%Y A257783 Cf. A213276.
+%K A257783 nonn,tabl
+%O A257783 0,6
+%A A257783 _Alois P. Heinz_, May 08 2015

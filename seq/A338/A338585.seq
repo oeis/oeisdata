@@ -1,0 +1,37 @@
+%I A338585 #31 Nov 16 2020 02:30:18
+%S A338585 1,1,0,0,1,2,3,4,9,16,29,52,92,173,307,554,1002,1792,3216,5738,10149,
+%T A338585 17942,31769,55684,97478,170356,295644,512468,886358,1523779,2614547,
+%U A338585 4476152,7627119,12966642,21988285,37142199,62591912,105215149,176266155,294591431
+%N A338585 Number of partitions of the n-th triangular number into exactly n positive triangular numbers.
+%H A338585 Vaclav Kotesovec, <a href="/A338585/b338585.txt">Table of n, a(n) for n = 0..300</a>
+%H A338585 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/TriangularNumber.html">Triangular Number</a>
+%H A338585 <a href="/index/Pol#polygonal_numbers">Index to sequences related to polygonal numbers</a>
+%H A338585 <a href="/index/Par#part">Index entries for sequences related to partitions</a>
+%F A338585 a(n) = [x^A000217(n) y^n] Product_{j>=1} 1 / (1 - y*x^A000217(j)).
+%F A338585 a(n) = A319797(A000217(n),n).
+%e A338585 The 5th triangular number is 15 and 15 = 1 + 1 + 1 + 6 + 6 = 3 + 3 + 3 + 3 + 3, so a(5) = 2.
+%p A338585 h:= proc(n) option remember; `if`(n<1, 0,
+%p A338585       `if`(issqr(8*n+1), n, h(n-1)))
+%p A338585     end:
+%p A338585 b:= proc(n, i, k) option remember; `if`(n=0, `if`(k=0, 1, 0),
+%p A338585       `if`(i*k<n or k>n, 0, b(n, h(i-1), k)+b(n-i, h(min(n-i, i)), k-1)))
+%p A338585     end:
+%p A338585 a:= n-> (t-> b(t, h(t), n))(n*(n+1)/2):
+%p A338585 seq(a(n), n=0..42);  # _Alois P. Heinz_, Nov 10 2020
+%t A338585 h[n_] := h[n] = If[n < 1, 0, If[IntegerQ@Sqrt[8n+1], n, h[n-1]]];
+%t A338585 b[n_, i_, k_] := b[n, i, k] = If[n == 0, If[k == 0, 1, 0], If[i k < n || k > n, 0, b[n, h[i-1], k] + b[n-i, h[Min[n-i, i]], k-1]]];
+%t A338585 a[n_] := b[#, h[#], n]&[n(n+1)/2];
+%t A338585 a /@ Range[0, 42](* _Jean-François Alcover_, Nov 15 2020, after _Alois P. Heinz_ *)
+%o A338585 (SageMath) # Returns a list of length n, slow.
+%o A338585 def GeneralizedEulerTransform(n, a):
+%o A338585     R.<x, y> = ZZ[[]]
+%o A338585     f = prod((1 - y*x^a(k) + O(x, y)^a(n)) for k in (1..n))
+%o A338585     coeffs = f.inverse().coefficients()
+%o A338585     coeff = lambda k: coeffs[x^a(k)*y^k] if x^a(k)*y^k in coeffs else 0
+%o A338585     return [coeff(k) for k in range(n)]
+%o A338585 def A338585List(n): return GeneralizedEulerTransform(n, lambda n: n*(n+1)/2)
+%o A338585 print(A338585List(12)) # _Peter Luschny_, Nov 12 2020
+%Y A338585 Cf. A000217, A007294, A072964, A106337, A196010, A288126, A298858, A307614, A319435, A319797, A319799, A331900, A338586.
+%K A338585 nonn
+%O A338585 0,6
+%A A338585 _Ilya Gutkovskiy_, Nov 08 2020

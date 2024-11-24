@@ -1,0 +1,41 @@
+%I A254317 #23 Nov 16 2017 15:52:25
+%S A254317 1,6,26,102,510,3210,22890,153690,1507290,15618090
+%N A254317 a(n) is the least number k such that the number of distinct digits in the prime factorization of k is n (counting terms of the form p^1 as p).
+%C A254317 Write k as product of primes raised to powers; then a(n) is the least number k such that the total number of distinct digits in the product representation of k (number of distinct digits in all the primes and number of distinct digits in all the exponents that are greater than 1) is equal to n. The first term a(1)= 1 by convention. The sequence is complete.
+%C A254317 Property: all exponents are equal to 1 (see the examples below).
+%e A254317 a(1)  =        1;
+%e A254317 a(2)  =        6 = 2*3            and A254315(6)        =  2;
+%e A254317 a(3)  =       26 = 2*13           and A254315(26)       =  3;
+%e A254317 a(4)  =      102 = 2*3*17         and A254315(102)      =  4;
+%e A254317 a(5)  =      510 = 2*3*5*17       and A254315(510)      =  5;
+%e A254317 a(6)  =     3210 = 2*3*5*107      and A254315(3210)     =  6;
+%e A254317 a(7)  =    22890 = 2*3*5*7*109    and A254315(22890)    =  7;
+%e A254317 a(8)  =   153690 = 2*3*5*47*109   and A254315(153690)   =  8;
+%e A254317 a(9)  =  1507290 = 2*3*5*47*1069  and A254315(1507290)  =  9;
+%e A254317 a(10) = 15618090 = 2*3*5*487*1069 and A254315(15618090) = 10.
+%p A254317 with(ListTools):
+%p A254317 for n from 2 to 10 do:
+%p A254317   ii:=0:
+%p A254317   for k from 2 to 10^9 while(ii=0)do:
+%p A254317     n0:=length(k):lst:={}:x0:=ifactors(k):
+%p A254317     y:=Flatten(x0[2]):z:=convert(y,set):
+%p A254317     z1:=z minus {1}:nn0:=nops(z1):
+%p A254317      for m from 1 to nn0 do :
+%p A254317       t1:=convert(z1[m],base,10):z2:=convert(t1,set):
+%p A254317       lst:=lst union z2:
+%p A254317      od:
+%p A254317      nn1:=nops(lst):
+%p A254317      if nn1=n then ii:=1:printf ( "%d %d \n",n,k):
+%p A254317      else
+%p A254317      fi:
+%p A254317   od :
+%p A254317 od:
+%t A254317 f[n_] := Block[{pf = FactorInteger@ n, i}, Length@ DeleteDuplicates@ Flatten@ IntegerDigits@ Rest@ Flatten@ Reap@ Do[If[Last[pf[[i]]] == 1, Sow@ First@ pf[[i]], Sow@ FromDigits@ Flatten[IntegerDigits /@ pf[[i]]]], {i, Length@ pf}]]; b = -1; Flatten@ Last@ Reap@ Do[a = f[n]; If[a > b, Sow[n]; b = a], {n, 10^6}] (* _Michael De Vlieger_, Jan 29 2015 *)
+%t A254317 With[{s = Array[CountDistinct@ Flatten@ IntegerDigits[FactorInteger[#] /. {p_, e_} /; e == 1 :> {p}] &, 10^6]}, Map[FirstPosition[s, #][[1]] &, Range@ Max@ s]] (* _Michael De Vlieger_, Nov 03 2017 *)
+%o A254317 (PARI) a(n)=for(k=1,10^5,s=[];F=factor(k);for(i=1,#F[,1],s=concat(s,digits(F[i,1]));if(F[i,2]>1,s=concat(s,digits(F[i,2]))));if(#vecsort(s,,8)==n,return(k)))
+%o A254317 print1(1,", ");for(n=2,7,print1(a(n),", ")) \\ _Derek Orr_, Jan 30 2015
+%Y A254317 Cf. A043537, A254315.
+%K A254317 nonn,base,fini,full
+%O A254317 1,2
+%A A254317 _Michel Lagneau_, Jan 28 2015
+%E A254317 a(10) corrected by _Giovanni Resta_, Nov 03 2017

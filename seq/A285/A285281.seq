@@ -1,0 +1,33 @@
+%I A285281 #8 Jun 16 2017 22:33:29
+%S A285281 1,4,1,16,5,1,64,23,6,1,256,101,30,7,1,1024,467,138,37,8,1,4096,2165,
+%T A285281 694,175,44,9,1,16384,10055,3526,925,212,51,10,1,65536,46709,18012,
+%U A285281 4977,1156,249,58,11,1,262144,216995,92140,27067,6428,1387,286,65,12,1
+%N A285281 Array read by antidiagonals: T(m,n) = number of m-ary words of length n with cyclically adjacent elements differing by 3 or less.
+%C A285281 All rows are linear recurrences with constant coefficients. See PARI script to obtain generating functions.
+%H A285281 Andrew Howroyd, <a href="/A285281/b285281.txt">Table of n, a(n) for n = 4..1278</a>
+%e A285281 Table starts (m>=4, n>=0):
+%e A285281 1  4 16  64  256  1024  4096  16384   65536 ...
+%e A285281 1  5 23 101  467  2165 10055  46709  216995 ...
+%e A285281 1  6 30 138  694  3526 18012  92140  471566 ...
+%e A285281 1  7 37 175  925  4977 27067 147777  808165 ...
+%e A285281 1  8 44 212 1156  6428 36338 206942 1183164 ...
+%e A285281 1  9 51 249 1387  7879 45663 267367 1575395 ...
+%e A285281 1 10 58 286 1618  9330 54994 328058 1973026 ...
+%e A285281 1 11 65 323 1849 10781 64325 388749 2371457 ...
+%e A285281 1 12 72 360 2080 12232 73656 449440 2770016 ...
+%t A285281 diff = 3; m0 = diff + 1; mmax = 13;
+%t A285281 TransferGf[m_, u_, t_, v_, z_] := Array[u, m].LinearSolve[IdentityMatrix[m] - z*Array[t, {m, m}], Array[v, m]]
+%t A285281 RowGf[d_, m_, z_] := 1 + z*Sum[TransferGf[m, Boole[# == k] &, Boole[Abs[#1 - #2] <= d] &, Boole[Abs[# - k] <= d] &, z], {k, 1, m}];
+%t A285281 row[m_] := row[m] = CoefficientList[RowGf[diff, m, x] + O[x]^mmax, x];
+%t A285281 T[m_ /; m >= m0, n_ /; n >= 0] := row[m][[n + 1]];
+%t A285281 Table[T[m - n , n], {m, m0, mmax}, {n, m - m0, 0, -1}] // Flatten (* _Jean-François Alcover_, Jun 16 2017, adapted from PARI *)
+%o A285281 (PARI)
+%o A285281 TransferGf(m,u,t,v,z)=vector(m,i,u(i))*matsolve(matid(m)-z*matrix(m,m,i,j,t(i,j)),vectorv(m,i,v(i)));
+%o A285281 RowGf(d,m,z)=1+z*sum(k=1,m,TransferGf(m, i->if(i==k,1,0), (i,j)->abs(i-j)<=d, j->if(abs(j-k)<=d,1,0), z));
+%o A285281 for(m=4, 12, print(RowGf(3,m,x)));
+%o A285281 for(m=4, 12, v=Vec(RowGf(3,m,x) + O(x^9)); for(n=1, length(v), print1( v[n], ", ") ); print(); );
+%Y A285281 Rows 5-32 are A124999, A125316-A125342.
+%Y A285281 Cf. A285267, A285280, A276562.
+%K A285281 nonn,tabl
+%O A285281 4,2
+%A A285281 _Andrew Howroyd_, Apr 15 2017

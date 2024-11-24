@@ -1,0 +1,66 @@
+%I A359065 #27 Apr 11 2023 12:06:20
+%S A359065 4,21,65,209,391,3149,9991,368131,57556589,14865154981
+%N A359065 Lexicographically earliest sequence of distinct positive composite integers such that no subsequence sums to a prime and in which all terms are coprime.
+%C A359065 The sequences A052349 and A068638 are composed of integers starting from one with the rule that no subsequence has a prime sum; these sequences start with one. Starting with a different number seems to result in straightforward geometric sequences, for example the sequence with no prime subsequence sums starting with four is 4, 6, 8, and so on. One way to avoid this is to enforce a coprime rule, requiring that the entries to the sequence are coprime. It is not clear whether the sequence is infinite.
+%t A359065 k = 4; K = {k}; f = {2}; q = Subsets[K]; While[Length@K < 10, k++; If[! PrimeQ[k] && ! IntersectingQ[FactorInteger[k][[All, 1]], f], s = k; z = 0; For[p = 1, p <= Length@q, p++, If[PrimeQ[Total[q[[p]]] + k], z = 1; Break[]]]; If[z == 0, AppendTo[K, k]; q = Subsets[K]; AppendTo[f, FactorInteger[k][[All, 1]]]; f = Flatten[f]]]]; Print[K] (* _Samuel Harkness_, Apr 11 2023 *)
+%o A359065 (Python)
+%o A359065 import sys
+%o A359065 import math
+%o A359065 from sympy.ntheory import primefactors
+%o A359065 from sympy.ntheory import primerange
+%o A359065 def intersection(lst1, lst2):
+%o A359065     lst3 = [value for value in lst1 if value in lst2]
+%o A359065     return len(lst3)
+%o A359065 n_primes=1000000
+%o A359065 factors=[primefactors(n) for n in range(0,n_primes)]
+%o A359065 primes=list(primerange(0, n_primes))
+%o A359065 sequence=[4]
+%o A359065 sums=[sequence[0]]
+%o A359065 prime_factors=[f for f in factors[sequence[0]]]
+%o A359065 big_n=8
+%o A359065 while len(sequence)<big_n:
+%o A359065     new_a=False
+%o A359065     a=sequence[-1]+1
+%o A359065     while intersection(factors[a],prime_factors)!=0:
+%o A359065         a+=1
+%o A359065     n=len(sequence)
+%o A359065     while not new_a:
+%o A359065         new_sum=[a+sum for sum in sums]
+%o A359065         prime_sum=False
+%o A359065         for sum in new_sum:
+%o A359065             if sum in primes:
+%o A359065                 prime_sum=True
+%o A359065         if not prime_sum and a not in primes:
+%o A359065             sequence.append(a)
+%o A359065             print(a,end=",")
+%o A359065             sys.stdout.flush()
+%o A359065             sums=sums+new_sum+[a]
+%o A359065             sums = list(dict.fromkeys(sums))
+%o A359065             prime_factors=prime_factors+factors[a]
+%o A359065             new_a=True
+%o A359065         else:
+%o A359065             a+=1
+%o A359065             while a in primes or intersection(factors[a],prime_factors)!=0:
+%o A359065                 a+=1
+%o A359065 print()
+%o A359065 (Python)
+%o A359065 from math import gcd
+%o A359065 from sympy import isprime
+%o A359065 from itertools import islice
+%o A359065 def agen(start=4): # generator of terms
+%o A359065     alst, k, sums = [start], start+1, {0} | {start}
+%o A359065     while True:
+%o A359065         yield alst[-1]
+%o A359065         while any(gcd(k, an) != 1 for an in alst) or \
+%o A359065               any(k+s not in sums and isprime(k+s) for s in sums):
+%o A359065             k += 1
+%o A359065         alst.append(k)
+%o A359065         sums.update([k + s for s in sums])
+%o A359065         k += 1
+%o A359065 print(list(islice(agen(), 8))) # _Michael S. Branicky_, Dec 16 2022
+%Y A359065 Cf. A052349, A068638.
+%K A359065 nonn,more
+%O A359065 1,1
+%A A359065 _Conor Houghton_, Dec 15 2022
+%E A359065 a(8)-a(9) from _Michael S. Branicky_, Dec 15 2022
+%E A359065 a(10) from _Rémy Sigrist_, Dec 16 2022

@@ -1,0 +1,44 @@
+%I A353031 #18 Sep 17 2022 14:11:25
+%S A353031 134999,999431,1383947,1903103,3013091,3626339,7282487,7493831,
+%T A353031 7842827,9336263,9366839,9386639,9562499,9942659,11230199,11370743,
+%U A353031 11394431,11650571,11769839,11884079,13182623,13413599,13449311,13611023,13683179,13881323,15123527,15788771,15925391,15934463,17505611
+%N A353031 Emirps p such that both p and its digit reversal can be written as q*r+q+r where q and r are emirps.
+%C A353031 Members of A352249 whose digit reversals are also in A352249.
+%H A353031 Robert Israel, <a href="/A353031/b353031.txt">Table of n, a(n) for n = 1..1000</a>
+%e A353031 a(6) = 3626339 is a term because 3626339 = 37*95429 + 37 + 95429, its digit reversal 9336263 = 97*95267 + 97 + 95267, and 3626339, 37, 95429, 97 and 95267 are all emirps.
+%p A353031 revdigs:= proc(n) local L, i; L:= convert(n, base, 10); add(L[-i]*10^(i-1), i=1..nops(L)) end proc:
+%p A353031 isemirp:= proc(p) local r;
+%p A353031    if not isprime(p) then return false fi;
+%p A353031    r:= revdigs(p);
+%p A353031    r <> p and isprime(r)
+%p A353031 end proc:
+%p A353031 filter:= proc(p) local q,t,flag;
+%p A353031   if not isprime(p) then return false fi;
+%p A353031   q:= revdigs(p);
+%p A353031   if q=p or not isprime(q) then return false fi;
+%p A353031   flag:= false;
+%p A353031 for t in select(`<`, numtheory:-divisors(p+1),floor(sqrt(p+1))) do
+%p A353031   if isemirp(t-1) and isemirp((p+1)/t-1) then flag:= true; break fi
+%p A353031 od;
+%p A353031 if not flag then return false fi;
+%p A353031 for t in select(`<`, numtheory:-divisors(q+1),floor(sqrt(q+1))) do
+%p A353031      if isemirp(t-1) and isemirp((q+1)/t-1) then return true fi
+%p A353031 od;
+%p A353031 false
+%p A353031 end proc:
+%p A353031 p:= 2: R:= NULL: count:= 0:
+%p A353031 while count < 40 do
+%p A353031   p:= nextprime(p);
+%p A353031 d:=  ilog10(p);
+%p A353031 p1:= floor(p/10^d);
+%p A353031   if p1=2 then p:= nextprime(3*10^d)
+%p A353031   elif member(p1,{4,5,6}) then p:= nextprime(7*10^d)
+%p A353031   elif p1=8 then p:= nextprime(9*10^d)
+%p A353031 fi;
+%p A353031   if filter(p) then R:= R, p; count:= count+1 fi;
+%p A353031 od:
+%p A353031 R;
+%Y A353031 Cf. A004086, A006567, A352249.
+%K A353031 nonn,base
+%O A353031 1,1
+%A A353031 _J. M. Bergot_ and _Robert Israel_, Apr 18 2022

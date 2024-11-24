@@ -1,0 +1,58 @@
+%I A327631 #39 Jan 07 2020 09:10:58
+%S A327631 1,1,2,1,5,3,1,11,21,12,1,19,61,74,30,1,34,205,461,432,144,1,53,474,
+%T A327631 1652,2671,2030,588,1,85,1246,6795,17487,23133,15262,3984,1,127,2723,
+%U A327631 20966,76264,148134,158452,88194,19980,1,191,6277,69812,360114,1002835,1606434,1483181,734272,151080
+%N A327631 Number T(n,k) of parts in all proper k-times partitions of n; triangle T(n,k), n >= 1, 0 <= k <= n-1, read by rows.
+%C A327631 In each step at least one part is replaced by the partition of itself into smaller parts. The parts are not resorted.
+%C A327631 T(n,k) is defined for all n>=0 and k>=0.  The triangle displays only positive terms.  All other terms are zero.
+%C A327631 Row n is the inverse binomial transform of the n-th row of array A327618.
+%H A327631 Alois P. Heinz, <a href="/A327631/b327631.txt">Rows n = 1..200, flattened</a>
+%H A327631 Wikipedia, <a href="https://en.wikipedia.org/wiki/Partition_(number_theory)">Partition (number theory)</a>
+%F A327631 T(n,k) = Sum_{i=0..k} (-1)^(k-i) * binomial(k,i) * A327618(n,i).
+%F A327631 T(n,n-1) = n * A327639(n,n-1) = n * A327643(n) for n >= 1.
+%e A327631 T(4,0) = 1:
+%e A327631   4    (1 part).
+%e A327631 T(4,1) = 11 = 2 + 2 + 3 + 4:
+%e A327631   4-> 31    (2 parts)
+%e A327631   4-> 22    (2 parts)
+%e A327631   4-> 211   (3 parts)
+%e A327631   4-> 1111  (4 parts)
+%e A327631 T(4,2) = 21 = 3 + 4 + 3 + 3 + 4 + 4:
+%e A327631   4-> 31 -> 211   (3 parts)
+%e A327631   4-> 31 -> 1111  (4 parts)
+%e A327631   4-> 22 -> 112   (3 parts)
+%e A327631   4-> 22 -> 211   (3 parts)
+%e A327631   4-> 22 -> 1111  (4 parts)
+%e A327631   4-> 211-> 1111  (4 parts)
+%e A327631 T(4,3) = 12 = 4 + 4 + 4:
+%e A327631   4-> 31 -> 211 -> 1111  (4 parts)
+%e A327631   4-> 22 -> 112 -> 1111  (4 parts)
+%e A327631   4-> 22 -> 211 -> 1111  (4 parts)
+%e A327631 Triangle T(n,k) begins:
+%e A327631   1;
+%e A327631   1,   2;
+%e A327631   1,   5,    3;
+%e A327631   1,  11,   21,    12;
+%e A327631   1,  19,   61,    74,    30;
+%e A327631   1,  34,  205,   461,   432,    144;
+%e A327631   1,  53,  474,  1652,  2671,   2030,    588;
+%e A327631   1,  85, 1246,  6795, 17487,  23133,  15262,  3984;
+%e A327631   1, 127, 2723, 20966, 76264, 148134, 158452, 88194, 19980;
+%e A327631   ...
+%p A327631 b:= proc(n, i, k) option remember; `if`(n=0, [1, 0],
+%p A327631      `if`(k=0, [1, 1], `if`(i<2, 0, b(n, i-1, k))+
+%p A327631          (h-> (f-> f +[0, f[1]*h[2]/h[1]])(h[1]*
+%p A327631         b(n-i, min(n-i, i), k)))(b(i$2, k-1))))
+%p A327631     end:
+%p A327631 T:= (n, k)-> add(b(n$2, i)[2]*(-1)^(k-i)*binomial(k, i), i=0..k):
+%p A327631 seq(seq(T(n, k), k=0..n-1), n=1..12);
+%t A327631 b[n_, i_, k_] := b[n, i, k] = If[n == 0, {1, 0}, If[k == 0, {1, 1}, If[i < 2, 0, b[n, i - 1, k]] + Function[h, Function[f, f + {0, f[[1]]*h[[2]]/ h[[1]]}][h[[1]]*b[n - i, Min[n - i, i], k]]][b[i, i, k - 1]]]];
+%t A327631 T[n_, k_] := Sum[b[n, n, i][[2]]*(-1)^(k - i)*Binomial[k, i], {i, 0, k}];
+%t A327631 Table[T[n, k], {n, 1, 12}, {k, 0, n - 1}] // Flatten (* _Jean-François Alcover_, Jan 07 2020, after _Alois P. Heinz_ *)
+%Y A327631 Columns k=0-2 give: A057427, -1+A006128(n), A328042.
+%Y A327631 Row sums give A327648.
+%Y A327631 T(n,floor(n/2)) gives A328041.
+%Y A327631 Cf. A327618, A327632, A327639, A327643.
+%K A327631 nonn,tabl
+%O A327631 1,3
+%A A327631 _Alois P. Heinz_, Sep 19 2019

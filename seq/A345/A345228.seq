@@ -1,0 +1,54 @@
+%I A345228 #78 Jan 20 2024 09:42:10
+%S A345228 0,0,0,0,0,1,0,0,0,1,0,0,0,1,2,0,3,0,0,2,2,0,2,3,1,0,2,3,0,1,2,10,0,2,
+%T A345228 1,3,0,0,1,7,3,2,1,3,4,0,7,0,4,2,17,1,3,5,4,0,6,7,1,1,4,10,3,0,4,5,0,
+%U A345228 5,6,22,0,7,7,24,4,1,2,5,0,4,5,19,7,2,4,17,3,4,2
+%N A345228 Square array T(m, n), read by ascending antidiagonals. Let f(k) = k/2 if k is even, otherwise ((2*n+1)*k + 2*T(m, n) + 1)/2, T(m, n) is the smallest integer greater than -1, where m = f^j(m) for j > 0 exists. f^j(m) means the j-th iterate of f(m).
+%C A345228 This sequence is an extension of A344583 ( row T(m, 1) ).
+%C A345228 From _Thomas Scheuerle_, Dec 11 2023: (Start)
+%C A345228 It was formerly stated that "T(m, n) >= T(1, n) if m > 0". This was wrong and did not consider an important condition which could lead to exceptions. It is interesting that this wrong statement seems to hold for a vast amount of data.
+%C A345228   Known exception: T(1, 90) = 37 but T(27, 90) = 0.
+%C A345228 Formerly it was stated that this is a theorem:
+%C A345228  "(T( (1 + 2*n)*m, n) - n)/T(m, n) = 1 + 2*n if T(m, n) > 0."
+%C A345228 This appears to be true in the majority of cases, but misses some yet unknown conditions. (End)
+%C A345228 The reason for the pattern in the row T(1, n) is that in this particular case a cycle is only possible if we eventually reach a power of 2 under iteration. If we look at the case 9x+1 ( Row 4 ) as an example, we can understand this by the binary representation of 9: 1001. If we multiply any number j by 9 it equals a sum of j and a left-shifted version of j. Example j = 5: 1001*101 = 1001 + 100100 = 101101. In the Collatz operation 9x+1, an interrupted sequence of ones starting at the least significant bit is required to get an uninterrupted sequence of zeros by addition of 1. But in the case 9x+1 starting with x = 1 it is not possible to reach any 2^t-1 (pattern of all ones) because of the large gap of zeros in the binary representation of 9 (1001). By each multiplication, we add a shifted copy of 1001... at the left to the bit pattern and thus add gaps that are only slowly filled up with ones by the addition of the constant. To prevent an escape into infinity, in the Collatz process either the factor needs to have a gap of zeros smaller than two zeros in sequence (compare 9 -> row 4 and 15 -> row 7), or the constant we are adding in this process needs to be big enough to fill this gap quickly, e.g., 9x+7.
+%C A345228 A surprising mystery are the many equal elements and correlations between different rows. For many values of m, we may observe T(m, n) = T(m, n+k) for some n and k, even if 1+2*n and 1+2*(n+k) are relatively prime.
+%C A345228 A343858 identifies each cycle by the smallest number it may reach. This information can be used to check if two entries with the same value in T(m, n) correspond to the same cycle.
+%C A345228 We find with growing n more similarity between T(m, n) and A025480(m - 1), the related sequence A343858(m, n) has in the same fashion similarity to A000265(m).
+%C A345228 A173732 is the compressed representation of the dynamics of row n = 1 (3x+1). But also A025480(3*n + 1) = A173732(n) and we see now A025480 connected to generalizations of the Collatz function. This suggests a special role for the original 3x+1 version in this set of functions.
+%H A345228 Thomas Scheuerle, <a href="/A345228/a345228.svg">T(1..100,1..20) as 3D surface</a>.
+%H A345228 Thomas Scheuerle, <a href="/A345228/a345228_1.svg">T(1..100,1..20) as 3D surface, viewpoint looking as profile, n left->right, m near->far. (Unexpected correlations)</a>.
+%H A345228 <a href="/index/3#3x1">Index entries for sequences related to 3x+1 (or Collatz) problem</a>
+%F A345228 T(1, n) = A035327(n) for n > 2.
+%e A345228 Twelve initial terms of rows 0-10 are listed below:
+%e A345228    n |m->
+%e A345228    0: 0, 0, 1, 1,  2,  2,  3,  3, 4,  4,  5,  5, ...
+%e A345228    1: 0, 0, 0, 1,  2,  2,  1,  3, 5,  4,  2,  3, ...
+%e A345228    2: 0, 0, 0, 0,  0,  2,  1,  3, 0,  1,  2,  3, ...
+%e A345228    3: 0, 0, 0, 1,  0,  2,  1,  3, 4,  4,  2,  5, ...
+%e A345228    4: 0, 3, 3, 10, 3, 17, 10, 24, 3, 31, 17, 23, ...
+%e A345228    5: 0, 2, 2, 7,  2,  4,  7, 17, 2, 21,  4, 27, ...
+%e A345228    6: 0, 1, 1, 4,  1,  7,  4, 10, 1, 13,  7,  4, ...
+%e A345228    7: 0, 0, 0, 1,  0,  2,  1,  3, 0,  4,  2,  5, ...
+%e A345228    8: 0, 7, 7, 22, 7, 37, 22, 52, 7, 67, 37, 82, ...
+%e A345228    9: 0, 6, 6, 19, 6, 32, 19, 14, 6, 58, 32, 71, ...
+%e A345228   10: 0, 5, 5, 16, 5, 27, 16, 38, 5, 49, 27, 35, ...
+%e A345228 We may see this sequence as a sequence of functions:
+%e A345228 in m=1: 0 -> f_n1_0(k) =  k/2; (3*k+1)/2.
+%e A345228         1 -> f_n1_1(k) =  k/2; (3*k+3)/2.
+%e A345228         2 -> f_n1_2(k) =  k/2; (3*k+5)/2.
+%e A345228 in m=2: 0 -> f_n2_0(k) =  k/2; (5*k+1)/2.
+%e A345228         1 -> f_n2_1(k) =  k/2; (5*k+3)/2.
+%e A345228         2 -> f_n2_2(k) =  k/2; (5*k+5)/2.
+%e A345228 T(1, 4) = 3 because: f_n4_3(1) = (9 + 7)/2 = 16, f_n4_3(18) = 16/2 = 8, f_n4_3(8) = 8/2 = 4, f_n4_3(4) = 4/2 = 2, f_n4_3(2) = 2/2 = 1.
+%e A345228 This shows that f_n4_3(f_n4_3(f_n4_3(f_n4_3(f_n4_3(1))))) = 1.
+%e A345228 T(1, 4) is not < 2 because no such loop which includes 1 exists for f_n4_0, f_n4_1 and f_n4_2.
+%o A345228 (PARI) \\ uses magic constant 10^5
+%o A345228 isperiodic(v, z) = for (k=1, #v, if (v[k] == z, return(1)));
+%o A345228 f(tmn, m, n) = if (m%2, ((2*n+1)*m+2*tmn+1)/2, m/2);
+%o A345228 isok(m, n, tmn) = {my(v=[m], y=m); for (i=1, oo, my(z=f(tmn, y, n)); if (z > 10^5, return (0)); if (z == m, return (1)); if (isperiodic(v, z), return(0)); v = concat(v, z); y = z; ); }
+%o A345228 T(m,n) = {my(tmn=0); while (!isok(m, n, tmn), tmn++); tmn; }
+%o A345228 matrix(15,15, n, k, T(k-1, n-1)) \\ _Michel Marcus_, Jun 17 2021
+%Y A345228 Cf. A344583, A035327, A343858, A025480, A173732.
+%K A345228 nonn,tabl
+%O A345228 0,15
+%A A345228 _Thomas Scheuerle_, Jun 11 2021

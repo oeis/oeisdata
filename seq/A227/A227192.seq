@@ -1,0 +1,55 @@
+%I A227192 #50 Apr 09 2022 06:43:05
+%S A227192 1,3,2,5,6,4,3,7,8,10,9,6,7,5,4,9,10,12,11,14,15,13,12,8,9,11,10,7,8,
+%T A227192 6,5,11,12,14,13,16,17,15,14,18,19,21,20,17,18,16,15,10,11,13,12,15,
+%U A227192 16,14,13,9,10,12,11,8,9,7,6,13,14,16,15,18,19,17,16
+%N A227192 Sum of the partial sums of the run lengths of binary expansion of n, when starting scanning from the least significant end; Row sums of A227188 and A227738.
+%C A227192 Equivalently, sum of bit-indices in binary expansion of n (counted from the right hand end, with the least significant bit having bit-index 0) of the positions where a bit differs from its immediate right-hand neighbor, counted up to the first leading zero.
+%C A227192 a(0) could be 0 or 1, depending on how the binary expansion of zero is conceived, thus its value is left unspecified here.
+%C A227192 From  _Jason Kimberley_, Feb 22 2022: (Start)
+%C A227192 Also, the total length of string movement required to display the binary expansion of n by the positions of the vanes of vertical blinds (starting with all 0).
+%C A227192 The transitions from 0000 to 1011 are:
+%C A227192   0001, 0011, 0111, 1111;
+%C A227192   1110, 1100, 1000;
+%C A227192 The transitions from 0000 to 1101 are:
+%C A227192   0001, 0011, 0111, 1111;
+%C A227192   1110, 1100;
+%C A227192   1101. (End)
+%H A227192 Antti Karttunen, <a href="/A227192/b227192.txt">Table of n, a(n) for n = 1..8192</a>
+%H A227192 <a href="/index/Bi#binary">Index entries for sequences related to binary expansion of n</a>
+%F A227192 a(n) = Sum_{i=0..A005811(n)-1} A227188(n,i). [Row sums of A227188]
+%F A227192 Equivalently, for n>=1, a(n) = Sum_{i=(A173318(n-1)+1)..A173318(n)} A227738(i). [Row sums of A227738]
+%F A227192 a(n) = A227183(n) + A000217(A005811(n)-1). [Alternative definition]
+%F A227192 a(n) = A029931(A003188(n)).
+%F A227192 Recurrence: a(2n) = a(n) + 2*A069010(n), a(2n+1) = a(2n) +1 or -1, according to if n is even or odd. - _Ralf Stephan_, Sep 04 2013
+%e A227192 For 11, whose binary expansion is "1011", the run lengths, when starting scanning from the right, are: [2,1,1]. Their partial sums are [2,2+1,2+1+1] = [2,3,4] which sum to total 9, thus a(11)=9. Equivalently, the zero-based positions (counted from the right) where bits change from one to zero or vice versa in "...01011" are 2, 3, 4 and 2+3+4 = 9.
+%e A227192 For 13, whose binary expansion is "1101", the run lengths similarly scanned are [1,1,2]. Their partial sums are [1,1+1,1+1+2] = [1,2,4] which sum to total 7, thus a(13)=7. Equivalently, the positions where bits change in "...01101" are 1, 2, 4 and  1+2+4 = 7.
+%t A227192 Table[Tr[FoldList[Plus,0,Length /@ Split[Reverse[IntegerDigits[n,2]]]] ],{n,71}] - _Wouter Meeussen_, Aug 22 2013
+%o A227192 (Scheme)
+%o A227192 (define (A227192 n) (let loop ((i (- (A005811 n) 1)) (s 0)) (cond ((< i 0) s) (else (loop (- i 1) (+ s (A227188bi n i))))))) ;; This version sums the nonzero terms of the n-th row of table A227188.
+%o A227192 (define (A227192v2 n) (+ (A227183 n) (A000217 (- (A005811 n) 1)))) ;; Another variant.
+%o A227192 (define (A227192v3 n) (add A227738 (+ 1 (A173318 (- n 1))) (A173318 n))) ;; This sums terms of table A227738.
+%o A227192 ;; With the help of this function that implements Sum_{i=lowlim..uplim} intfun(i)
+%o A227192 (define (add intfun lowlim uplim) (let sumloop ((i lowlim) (res 0)) (cond ((> i uplim) res) (else (sumloop (1+ i) (+ res (intfun i)))))))
+%o A227192 (Python)
+%o A227192 def A227192(n):
+%o A227192   '''Sum of the partial sums of the run lengths of binary expansion of n, starting from the least significant end.'''
+%o A227192   s = 0
+%o A227192   b = n%2
+%o A227192   i = 0
+%o A227192   while (n != 0):
+%o A227192     n >>= 1
+%o A227192     i += 1
+%o A227192     if((n%2) != b):
+%o A227192       b = n%2
+%o A227192       s += i
+%o A227192   return(s)
+%o A227192 (PARI) a(n)=local(b,s,t);b=binary(n);s=#b;t=b[#b];forstep(i=#b-1,1,-1,if(b[i]!=t,s=s+#b-i;t=!t));s /* _Ralf Stephan_, Sep 04 2013 */
+%o A227192 (Ruby)
+%o A227192 def a(n)
+%o A227192   k = n.to_s(2).scan(/((\d)\2*)/)
+%o A227192   k.each_index.map { |i| (i + 1) * k[i][0].size }.reduce(:+)
+%o A227192 end # _Peter Kagey_, Aug 06 2015
+%Y A227192 Cf. A005811, A227183. Row sums of A227188 and A227738.
+%K A227192 nonn,base,look
+%O A227192 1,2
+%A A227192 _Antti Karttunen_, Jul 06 2013

@@ -1,0 +1,47 @@
+%I A361444 #30 Mar 19 2023 13:35:18
+%S A361444 1,2,3,4,7,6,5,8,9,22,141,88,111,202,55,222,11,212,99,232,121,252,101,
+%T A361444 66,131,242,191,272,77,282,151,292,171,262,181,606,313,414,343,444,
+%U A361444 353,44,303,424,33,434,323,404,383,474,535,484,373,454,333,464,363
+%N A361444 Lexicographically earliest sequence of distinct positive base-10 palindromes such that a(n) + a(n+1) is prime.
+%H A361444 Michael De Vlieger, <a href="/A361444/b361444.txt">Table of n, a(n) for n = 1..10000</a>
+%H A361444 Michael De Vlieger, <a href="/A361444/a361444.png">Log log scatterplot of a(n)</a>, n = 1..10^4, with a color function showing number of decimal digits of a(n) where red = 1, orange = 2, ..., magenta = 8.
+%H A361444 Michael De Vlieger, <a href="/A361444/a361444_1.png">Log log scatterplot of a(n)</a>, n = 1..10^4, with a color function showing a(n) mod 10, where red = 1, orange = 2, ..., magenta = 9.
+%e A361444 a(10) = 22, the smallest unused positive palindrome which can be added to a(9) = 9 to get a prime; 9 + 22 = 31.
+%t A361444 nn = 60; kk = 5*10^4; c[_] = False; a[1] = j = 1; c[1] = True; u = 2;
+%t A361444 MapIndexed[Set[s[First[#2]], #1] &, Select[Range[kk], PalindromeQ]];
+%t A361444 Do[k = u; While[Or[c[k], CompositeQ[s[k] + j]], k++];
+%t A361444  Set[{a[n], c[k], j}, {k, True, s[k]}];
+%t A361444  If[k == u, While[c[u], u++]], {n, 2, nn}];
+%t A361444 Array[s @* a, nn] (* _Michael De Vlieger_, Mar 18 2023 *)
+%o A361444 (Python)
+%o A361444 from sympy import isprime
+%o A361444 from itertools import count, islice, product
+%o A361444 def pals(): # generator of palindromes
+%o A361444     digits = "0123456789"
+%o A361444     for d in count(1):
+%o A361444         for p in product(digits, repeat=d//2):
+%o A361444             if d > 1 and p[0] == "0": continue
+%o A361444             left = "".join(p); right = left[::-1]
+%o A361444             for mid in [[""], digits][d%2]:
+%o A361444                 yield int(left + mid + right)
+%o A361444 def agen(): # generator of terms of sequence
+%o A361444     pg, passed = pals(), []
+%o A361444     an = next(p for p in pg if p > 0) # start at 1
+%o A361444     while True:
+%o A361444         yield an
+%o A361444         for p in passed:
+%o A361444             if isprime(an+p):
+%o A361444                 passed.remove(p)
+%o A361444                 break
+%o A361444         else:
+%o A361444              while not isprime(an + (p:=next(pg))):
+%o A361444                  passed.append(p)
+%o A361444         an = p
+%o A361444 print(list(islice(agen(), 57))) # _Michael S. Branicky_, Mar 12 2023
+%o A361444 (PARI) nextpal(k) = my(d=digits(k)); while (d!=Vecrev(d), k++; d = digits(k)); k;
+%o A361444 lista(nn) = my(va = vector(nn)); va[1] = 1; for (n=2, nn, my(k=1); while(!isprime(va[n-1]+k) || #select(x->(x==k), va), k=nextpal(k+1)); va[n] = k;); va; \\ _Michel Marcus_, Mar 19 2023
+%Y A361444 Cf. A002113, A082979.
+%K A361444 base,nonn
+%O A361444 1,2
+%A A361444 _Jodi Spitz_, Mar 12 2023
+%E A361444 a(25) and beyond from _Michael S. Branicky_, Mar 12 2023

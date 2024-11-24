@@ -1,0 +1,49 @@
+%I A276150 #64 Jun 19 2024 16:17:42
+%S A276150 0,1,1,2,2,3,1,2,2,3,3,4,2,3,3,4,4,5,3,4,4,5,5,6,4,5,5,6,6,7,1,2,2,3,
+%T A276150 3,4,2,3,3,4,4,5,3,4,4,5,5,6,4,5,5,6,6,7,5,6,6,7,7,8,2,3,3,4,4,5,3,4,
+%U A276150 4,5,5,6,4,5,5,6,6,7,5,6,6,7,7,8,6,7,7,8,8,9,3,4,4,5,5,6,4,5,5,6,6,7,5,6,6,7,7,8,6,7,7,8,8,9,7,8,8,9,9,10,4
+%N A276150 Sum of digits when n is written in primorial base (A049345); minimal number of primorials (A002110) that add to n.
+%C A276150 The sum of digits of n in primorial base is odd if n is 1 or 2 (mod 4) and even if n is 0 or 3 (mod 4). Proof: primorials are 1 or 2 (mod 4) and a(n) can be constructed via the greedy algorithm. So if n = 4k + r where 0 <= r < 4, 4k needs an even number of primorials and r needs hammingweight(r) = A000120(r) primorials. Q.E.D. - _David A. Corneth_, Feb 27 2019
+%H A276150 Antti Karttunen, <a href="/A276150/b276150.txt">Table of n, a(n) for n = 0..30030</a>
+%H A276150 <a href="/index/Pri#primorialbase">Index entries for sequences related to primorial base</a>
+%F A276150 a(n) = 1 + a(A276151(n)) = 1 + a(n-A002110(A276084(n))), a(0) = 0.
+%F A276150 or for n >= 1: a(n) = 1 + a(n-A260188(n)).
+%F A276150 Other identities and observations. For all n >= 0:
+%F A276150 a(n) = A001222(A276086(n)) = A001222(A278226(n)).
+%F A276150 a(n) >= A371091(n) >= A267263(n).
+%F A276150 From _Antti Karttunen_, Feb 27 2019: (Start)
+%F A276150 a(n) = A000120(A277022(n)).
+%F A276150 a(A283477(n)) = A324342(n).
+%F A276150 (End)
+%F A276150 a(n) = A373606(n) + A373607(n). - _Antti Karttunen_, Jun 19 2024
+%e A276150 For n=24, which is "400" in primorial base (as 24 = 4*(3*2*1) + 0*(2*1) + 0*1, see A049345), the sum of digits is 4, thus a(24) = 4.
+%t A276150 nn = 120; b = MixedRadix[Reverse@ Prime@ NestWhileList[# + 1 &, 1, Times @@ Prime@ Range[# + 1] <= nn &]]; Table[Total@ IntegerDigits[n, b], {n, 0, nn}] (* Version 10.2, or *)
+%t A276150 nn = 120; f[n_] := Block[{a = {{0, n}}}, Do[AppendTo[a, {First@ #, Last@ #} &@ QuotientRemainder[a[[-1, -1]], Times @@ Prime@ Range[# - i]]], {i, 0, #}] &@ NestWhile[# + 1 &, 0, Times @@ Prime@ Range[# + 1] <= n &]; Rest[a][[All, 1]]]; Table[Total@ f@ n, {n, 0, 120}] (* _Michael De Vlieger_, Aug 26 2016 *)
+%o A276150 (Scheme, two versions)
+%o A276150 (definec (A276150 n) (if (zero? n) 0 (+ 1 (A276150 (- n (A002110 (A276084 n)))))))
+%o A276150 (define (A276150 n) (A001222 (A276086 n)))
+%o A276150 (Python)
+%o A276150 from sympy import prime, primefactors
+%o A276150 def Omega(n): return 0 if n==1 else Omega(n//primefactors(n)[0]) + 1
+%o A276150 def a276086(n):
+%o A276150     i=0
+%o A276150     m=pr=1
+%o A276150     while n>0:
+%o A276150         i+=1
+%o A276150         N=prime(i)*pr
+%o A276150         if n%N!=0:
+%o A276150             m*=(prime(i)**((n%N)/pr))
+%o A276150             n-=n%N
+%o A276150         pr=N
+%o A276150     return m
+%o A276150 def a(n): return Omega(a276086(n))
+%o A276150 print([a(n) for n in range(201)]) # _Indranil Ghosh_, Jun 23 2017
+%o A276150 (PARI) A276150(n) = { my(s=0, p=2, d); while(n, d = (n%p); s += d; n = (n-d)/p; p = nextprime(1+p)); (s); }; \\ _Antti Karttunen_, Feb 27 2019
+%Y A276150 Cf. A000120, A001222, A002110, A049345, A053589, A235168, A260188, A267263, A276084, A276086, A276151, A277022, A278226, A283477, A319713, A319715 (inverse Möbius transform), A321683, A324342, A324382, A324383, A324386, A324387, A371091, A373605, A373606, A373607.
+%Y A276150 Cf. A333426 [k such that a(k)|k], A339215 [numbers not of the form x+a(x) for any x], A358977 [k such that gcd(k, a(k)) = 1].
+%Y A276150 Cf. A338835, A366693.
+%Y A276150 Cf. A014601, A042963 (positions of even and odd terms), A343048 (positions of records).
+%Y A276150 Differs from analogous A034968 for the first time at n=24.
+%K A276150 nonn,look,base
+%O A276150 0,4
+%A A276150 _Antti Karttunen_, Aug 22 2016

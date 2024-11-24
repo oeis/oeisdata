@@ -1,0 +1,55 @@
+%I A343383 #61 Aug 27 2022 04:25:15
+%S A343383 0,1,1,1,1,1,1,1,1,1,2,1,2,6,4,5,3,3,5,4,6,2,1,2,6,4,5,3,3,5,4,6,2,1,
+%T A343383 2,6,4,5,3,3,5,4,6,2,1,2,6,4,5,3,3,5,4,6,2,1,2,6,4,5,3,3,5,4,6,2,1,2,
+%U A343383 6,4,5,3,3,5,4,6,2,1,2,6,4,5,3,3,5,4,6
+%N A343383 Length of the preperiodic part of 'Roll and Subtract' trajectory of n.
+%C A343383 'Roll and Subtract' is defined by x -> |x - roll(x)|, where roll(x) takes the first digit of a number and moves it to the back (rolls it around to the back).
+%C A343383 Differs from A151962 first at n=101. - _R. J. Mathar_, May 07 2021
+%H A343383 Jonathon Priestley, <a href="/A343383/b343383.txt">Table of n, a(n) for n = 0..9999</a>
+%e A343383 a(119) = 4 since |119 - 191| = 72 -> |72 - 27| = 45 -> |45 - 54| = 9 -> |9 - 9| = 0. The value a(0) maps to 0, so the sequence ends there after 4 values have been traversed.
+%e A343383 a(12737) = 1 since |12737 - 27371| = 14634 -> |14634 - 46341| = 31707 -> |31707 - 17073| = 14634. Since 14634 is already in the sequence, the sequence ends there.
+%t A343383 Array[Function[w, LengthWhile[w, # != Last[w] &]]@ NestWhileList[Abs[# - FromDigits@ RotateLeft@ IntegerDigits[#]] &, #, Unequal, All] &, 105, 0] (* _Michael De Vlieger_, Apr 13 2021 *)
+%o A343383 (Python)
+%o A343383 def roll(n):
+%o A343383     """ Moves first digit to the back """
+%o A343383     s = str(n)
+%o A343383     return int(s[1:] + s[0])
+%o A343383 def backtrack(past, length, offset, dct):
+%o A343383     """ Goes through every value passed and adds it and it's length to the dictionary """
+%o A343383     if length == 0:
+%o A343383         for elem in past:
+%o A343383             dct[elem] = 0
+%o A343383     i = 0
+%o A343383     while length > 0:
+%o A343383         n = past[i]
+%o A343383         dct[n] = length + offset
+%o A343383         i += 1
+%o A343383         length -= 1
+%o A343383     return dct
+%o A343383 def a(n, dct):
+%o A343383     past = []
+%o A343383     length = 0
+%o A343383     while (n not in dct):
+%o A343383         past.append(n)
+%o A343383         length += 1
+%o A343383         n = abs(n - roll(n))
+%o A343383         if n in past: # For duplicates
+%o A343383             length = past.index(n)
+%o A343383             dct = backtrack(past, length, 0, dct)
+%o A343383             return dct, length
+%o A343383     offset = dct[n]
+%o A343383     dct = backtrack(past, length, offset, dct)
+%o A343383     length += offset
+%o A343383     return dct, length
+%o A343383 dct = {}
+%o A343383 sequence = []
+%o A343383 i = 1
+%o A343383 while i < 1000:
+%o A343383     out = a(i, dct)
+%o A343383     dct = out[0]
+%o A343383     sequence.append(out[1])
+%o A343383     i += 1
+%Y A343383 Cf. A072137 (reverse and subtract).
+%K A343383 nonn,base
+%O A343383 0,11
+%A A343383 _Jonathon Priestley_, Apr 12 2021

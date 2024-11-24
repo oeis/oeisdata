@@ -1,0 +1,61 @@
+%I A284116 #97 Jan 11 2024 06:07:16
+%S A284116 4,7,6,7,22,23,24,25,30,31,34,421,422,423,422,423,424,2169,2170,2171,
+%T A284116 2170,2171,2172,2165,2166,2167,24566,24567,24568,24567,24568,24569,
+%U A284116 24568,24569,24570,253513,253514,342079,342080,342083,342084,342103,20858070
+%N A284116 a(n) = largest number of distinct words arising in Post's tag system {00, 1101} applied to a binary word w, over all starting words w of length n, or a(n) = -1 if there is a word w with an unbounded trajectory.
+%C A284116 Post's tag system {00, 1101} maps a word w over {0,1} to w', where if w begins with 0, w' is obtained by appending 00 to w and deleting the first three letters, or if w begins with 1, w' is obtained by appending 1101 to w and deleting the first three letters.
+%C A284116 The empty word is included in the count.
+%C A284116 It is an important open question to decide if there is any word whose orbit grows without limit. - _N. J. A. Sloane_, Jul 30 2017, based on an email from _Allan C. Wechsler_
+%C A284116 Comment from _Don Reble_, Aug 01, 2017: For n <= 57, all words reach the empty word or a cycle. - _N. J. A. Sloane_, Aug 01 2017
+%C A284116 From _David A. Corneth_, Aug 02 2017: (Start)
+%C A284116 A word w can be described by the pair (c, d) where c is the length of w and d is the number represented by the binary word w. Then 0 <= d < 2^c.
+%C A284116 Appending a word ww of m letters to w is the same as setting d to 2^m * w + ww. Preserving only the rightmost q digits of w is the same as setting w to w mod 2^q.
+%C A284116 Lastly, we're only really interested in the 1st, 4th, 7th, ... leftmost digits. The others could without loss of generality be set to 0. This can be done with bitand(x, y), with y in A033138.
+%C A284116 Therefore this problem can be formulated as follows: Let w = (c, d).
+%C A284116 Then if d < 2^(c - 1), w' = (c - 1, bitand(4*d, floor(2^(c + 1) / 7)))
+%C A284116 else (if (d >= 2^(c - 1)), w' = (c + 1, bitand(16*d + 13, floor(2^(c + 3) / 7))).
+%C A284116 To find a(n), it would be enough to check values d in A152111 with n binary digits and c = n.
+%C A284116 (End)
+%C A284116 a(110) >= 43913328040672, from w = (100)^k, k=110. - _N. J. A. Sloane_, Oct 23 2017, based on _Lars Blomberg_'s work on A291792.
+%D A284116 John Stillwell, Elements of Mathematics: From Euclid to Goedel, Princeton, 2016. See page 100, Post's tag system.
+%H A284116 Peter R. J. Asveld, <a href="http://doc.utwente.nl/66184/1/1988m20.pdf">On a Post's System of Tag</a>. Bulletin of the EATCS 36 (1988), 96-102.
+%H A284116 Liesbeth De Mol, <a href="http://www.clps.ugent.be/sites/default/files/publications/dissertation.pdf">Tracing unsolvability. A historical, mathematical and philosophical analysis with a special focus on tag systems</a>, Ph.D. Thesis, Universiteit Gent, 2007.
+%H A284116 Liesbeth De Mol, <a href="https://doi.org/10.1016/j.tcs.2007.10.020">Tag systems and Collatz-like functions</a> Theoret. Comput. Sci. 390 (2008), no. 1, 92-101.
+%H A284116 Liesbeth De Mol, <a href="https://doi.org/10.1016/j.tcs.2010.08.026">On the complex behavior of simple tag systems—an experimental approach</a>, Theoret. Comput. Sci. 412 (2011), no. 1-2, 97-112.
+%H A284116 Emil L. Post, <a href="http://www.jstor.org/stable/2371809">Formal Reductions of the General Combinatorial Decision Problem</a>, Amer. J. Math. 65, 197-215, 1943. See page 204.
+%H A284116 Don Reble, <a href="/A289670/a289670.txt">Python program for A289670.</a>
+%H A284116 Shigeru Watanabe, <a href="/A284116/a284116.pdf">Periodicity of Post's normal process of tag</a>, in Jerome Fox, ed., Proceedings of Symposium on Mathematical Theory of Automata, New York, April 1962, Polytechnic Press, Polytechnic Institute of Brooklyn, 1963, pp. 83-99. [Annotated scanned copy]
+%e A284116 Suppose n=1. Then w = 0 ->000 -> w' = empty word, and w = 1 -> 11101 -> w' = 01 -> 0100 -> w'' = 0 -> 000 -> w''' = empty word. So a(1) = 4 by choosing w = 1.
+%e A284116 For n = 5 the orbit of the word 10010 begins 10010, 101101, 1011101, ..., 0000110111011101, and the next word in the orbit has already appeared. The orbit consists of 22 distinct words.
+%e A284116 From _David A. Corneth_, Aug 02 2017: (Start)
+%e A284116 The 5-letter word w = 10100 can be described as (a, b) = (5, 20). This is equivalent to (5, bitand(20, floor(2^7 / 7))) = (5, bitand(20, 18)) = (5, 16).
+%e A284116 As 16 >= 2^(5-1), w' = (5 + 1, bitand(16*16 + 13, floor(2^(5 + 3) / 7))) = (6, bitand(279, 36)) = (6, 4). w'' = w = (5, 16) so 10100 ~ 10000 ends in a period. (End)
+%e A284116 Words w that achieve a(1) through a(7) are 1, 10, 100, 0001, 10010, 100000, 0001000. - _N. J. A. Sloane_, Aug 17 2017
+%t A284116 Table[nmax = 0;
+%t A284116  For[i = 0, i < 2^n, i++, lst = {};
+%t A284116   w = IntegerString[i, 2, n];
+%t A284116   While[! MemberQ[lst, w],
+%t A284116    AppendTo[lst, w];
+%t A284116    If[w == "", Break[]];
+%t A284116    If[StringTake[w, 1] == "0", w = StringDrop[w <> "00", 3],
+%t A284116     w = StringDrop[w <> "1101", 3]]];
+%t A284116 nmax = Max[nmax, Length[lst]]]; nmax, {n, 1, 12}] (* _Robert Price_, Sep 26 2019 *)
+%t A284116 (* Or, using the (c,d) procedure: *)
+%t A284116  Table[nmax = 0;
+%t A284116  For[i = 0, i < 2^n, i++,
+%t A284116   c = n; d = i; lst = {};
+%t A284116   While[! MemberQ[lst, {c, d}],
+%t A284116    AppendTo[lst, {c, d}];
+%t A284116    If[c == 0,  Break[]];
+%t A284116    If[ d < 2^(c - 1),
+%t A284116     d = BitAnd[4*d, 2^(c - 1) - 1]; c--,
+%t A284116     d = BitAnd[16*d + 13, 2^(c + 1) - 1]; c++]];
+%t A284116 nmax = Max[nmax, Length[lst]]]; nmax, {n, 1, 12}] (* _Robert Price_, Sep 26 2019 *)
+%Y A284116 Cf. A033138, A152111, A284119, A284121, A289670, A289671, A289672, A289673, A289674, A289675, A289676, A289677.
+%Y A284116 Cf. also A290436-A290441, A290741, A290742, A291792, A291793, A291794, A291795, A291796.
+%Y A284116 For the 3-shift tag systems {00,1101}, {00, 1011}, {00, 1110}, {00, 0111} see A284116, A291067, A291068, A291069 respectively (as well as the cross-referenced entries mentioned there).
+%K A284116 nonn
+%O A284116 1,1
+%A A284116 _Jeffrey Shallit_, Mar 20 2017
+%E A284116 a(19)-a(43) from _Lars Blomberg_, Apr 09 2017
+%E A284116 Edited by _N. J. A. Sloane_, Jul 29 2017 and Oct 23 2017 (adding escape clause in case an infinite trajectory exists)

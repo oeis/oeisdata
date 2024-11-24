@@ -1,0 +1,29 @@
+%I A304712 #11 May 10 2021 21:06:41
+%S A304712 1,1,2,3,5,7,10,14,19,25,32,43,54,70,86,105,130,162,196,240,286,339,
+%T A304712 405,485,573,674,790,922,1072,1252,1456,1685,1939,2226,2557,2923,3349,
+%U A304712 3822,4347,4931,5593,6335,7170,8092,9105,10233,11495,12903,14458,16169,18063
+%N A304712 Number of integer partitions of n whose parts are all equal or whose distinct parts are pairwise coprime.
+%C A304712 Two parts are coprime if they have no common divisor greater than 1.
+%H A304712 Alois P. Heinz, <a href="/A304712/b304712.txt">Table of n, a(n) for n = 0..500</a>
+%e A304712 The a(6) = 10 partitions whose parts are all equal or whose distinct parts are pairwise coprime are (6), (51), (411), (33), (321), (3111), (222), (2211), (21111), (111111).
+%p A304712 g:= proc(n, i, s) `if`(n=0, 1, `if`(i<1, 0,
+%p A304712       b(n, i, select(x-> x<=i, s))))
+%p A304712     end:
+%p A304712 b:= proc(n, i, s) option remember; g(n, i-1, s)+(f->
+%p A304712      `if`(f intersect s={}, add(g(n-i*j, i-1, s union f)
+%p A304712         , j=1..n/i), 0))(numtheory[factorset](i))
+%p A304712     end:
+%p A304712 a:= n-> g(n$2, {}):
+%p A304712 seq(a(n), n=0..60);  # _Alois P. Heinz_, May 17 2018
+%t A304712 Table[Select[IntegerPartitions[n],Or[SameQ@@#,CoprimeQ@@Union[#]]&]//Length,{n,20}]
+%t A304712 (* Second program: *)
+%t A304712 g[n_, i_, s_] := If[n == 0, 1, If[i < 1, 0, b[n, i, Select[s, # <= i &]]]];
+%t A304712 b[n_, i_, s_] := b[n, i, s] = g[n, i - 1, s] + Function[f,
+%t A304712      If[f ~Intersection~ s == {}, Sum[g[n - i*j, i - 1, s ~Union~ f],
+%t A304712      {j, 1, n/i}], 0]][FactorInteger[i][[All, 1]]];
+%t A304712 a[n_] := g[n, n, {}];
+%t A304712 a /@ Range[0, 60] (* _Jean-François Alcover_, May 10 2021, after _Alois P. Heinz_ *)
+%Y A304712 Cf. A000837, A007359, A018783, A051424, A056239, A078374, A101268, A289508, A289509, A298748, A300486, A302569, A302696, A302698, A302796, A302797, A304709, A304711.
+%K A304712 nonn
+%O A304712 0,3
+%A A304712 _Gus Wiseman_, May 17 2018

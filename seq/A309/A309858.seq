@@ -1,0 +1,43 @@
+%I A309858 #29 Aug 22 2019 18:35:17
+%S A309858 2,1,2,1,2,2,1,1,3,2,1,1,2,4,2,1,1,1,4,5,2,1,1,1,2,11,6,2,1,1,1,1,5,
+%T A309858 34,7,2,1,1,1,1,2,34,156,8,2,1,1,1,1,1,6,2136,1044,9,2,1,1,1,1,1,2,
+%U A309858 156,7013320,12346,10,2,1,1,1,1,1,1,7,7013320,1788782616656,274668,11,2
+%N A309858 Number A(n,k) of k-uniform hypergraphs on n unlabeled nodes; square array A(n,k), n>=0, k>=0, read by antidiagonals.
+%C A309858 See A000088 and A000665 for more references.
+%H A309858 Alois P. Heinz, <a href="/A309858/b309858.txt">Antidiagonals n = 0..20, flattened</a>
+%H A309858 Jianguo Qian, <a href="https://doi.org/10.1016/j.disc.2014.03.005">Enumeration of unlabeled uniform hypergraphs</a>, Discrete Math. 326 (2014), 66--74. MR3188989.
+%H A309858 Wikipedia, <a href="https://en.wikipedia.org/wiki/Hypergraph">Hypergraph</a>
+%F A309858 A(n,k) = A(n,n-k) for 0 <= k <= n.
+%F A309858 A(n,k) - A(n-1,k) = A301922(n,k) for n,k >= 1.
+%e A309858 Square array A(n,k) begins:
+%e A309858   2, 1,    1,       1,       1,    1, 1, 1, ...
+%e A309858   2, 2,    1,       1,       1,    1, 1, 1, ...
+%e A309858   2, 3,    2,       1,       1,    1, 1, 1, ...
+%e A309858   2, 4,    4,       2,       1,    1, 1, 1, ...
+%e A309858   2, 5,   11,       5,       2,    1, 1, 1, ...
+%e A309858   2, 6,   34,      34,       6,    2, 1, 1, ...
+%e A309858   2, 7,  156,    2136,     156,    7, 2, 1, ...
+%e A309858   2, 8, 1044, 7013320, 7013320, 1044, 8, 2, ...
+%p A309858 g:= (l, i, n)-> `if`(i=0, `if`(n=0, [[]], []), [seq(map(x->
+%p A309858      [x[], j], g(l, i-1, n-j))[], j=0..min(l[i], n))]):
+%p A309858 h:= (p, v)-> (q-> add((s-> add(`if`(andmap(i-> irem(k[i], p[i]
+%p A309858      /igcd(t, p[i]))=0, [$1..q]), mul((m-> binomial(m, k[i]*m
+%p A309858      /p[i]))(igcd(t, p[i])), i=1..q), 0), t=1..s)/s)(ilcm(seq(
+%p A309858     `if`(k[i]=0, 1, p[i]), i=1..q))), k=g(p, q, v)))(nops(p)):
+%p A309858 b:= (n, i, l, v)-> `if`(n=0 or i=1, 2^((p-> h(p, v))([l[], 1$n]))
+%p A309858      /n!, add(b(n-i*j, i-1, [l[], i$j], v)/j!/i^j, j=0..n/i)):
+%p A309858 A:= proc(n, k) option remember; `if`(k>n, 1,
+%p A309858      `if`(k>n-k, A(n, n-k), b(n$2, [], k)))
+%p A309858     end:
+%p A309858 seq(seq(A(n, d-n), n=0..d), d=0..12);
+%o A309858 (PARI)
+%o A309858 permcount(v)={my(m=1, s=0, k=0, t); for(i=1, #v, t=v[i]; k=if(i>1&&t==v[i-1], k+1, 1); m*=t*k; s+=t); s!/m}
+%o A309858 rep(typ)={my(L=List(), k=0); for(i=1, #typ, k+=typ[i]; listput(L, k); while(#L<k, listput(L, #L))); Vec(L)}
+%o A309858 can(v, f)={my(d=1, u=v); while(d>0, u=vecsort(apply(f, u)); d=lex(u, v)); !d}
+%o A309858 Q(n, k, perm)={my(t=0); forsubset([n, k], v, t += can(Vec(v), t->perm[t])); t}
+%o A309858 T(n, k)={my(s=0); forpart(p=n, s += permcount(p)*2^Q(n, k, rep(p))); s/n!} \\ _Andrew Howroyd_, Aug 22 2019
+%Y A309858 Columns k=0..10 give: A007395, A000027, A000088, A000665, A051240, A051249, A309860, A309861, A309862, A309863, A309864.
+%Y A309858 Cf. A301922, A309865 (the same as triangle).
+%K A309858 nonn,tabl
+%O A309858 0,1
+%A A309858 _Alois P. Heinz_, Aug 20 2019

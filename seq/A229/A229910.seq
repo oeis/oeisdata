@@ -1,0 +1,24 @@
+%I A229910 #40 Sep 20 2016 03:06:57
+%S A229910 0,0,0,0,2,0,4,2,4,4,2,4,8,6,10,8,14,4,4,12,8,6,20,24,16,16,12,26,8,
+%T A229910 16,14,12,24,14,32,10,20,18,40,48,44,4,30,16,32,18,14,18,56,8,60,40,
+%U A229910 12,40,64,64,72,20,40,32,36,80,22,44,24,72,22,36,86,32,84,88,40,24,28,94,104,28,76,28
+%N A229910 a(n) = |{0 < g < prime(n): both g and g + g^{-1} are primitive roots modulo prime(n)}|, where g^{-1} is the inverse of g modulo prime(n).
+%C A229910 Conjecture: a(n) > 0 for all n > 6. In other words, for any prime p > 13, there is a primitive root g modulo p such that g + g^{-1} is also a primitive root modulo p, where g^{-1} is the inverse of g modulo p.
+%C A229910 Note that a(n) is even for any n > 1. In fact, if g is a primitive root modulo a prime p > 3, then the inverse of g mod p is different from g since g^2 cannot be congruent to 1 modulo p.
+%C A229910 Conjecture: Let F be a finite field with |F| = q > 13. Then there is a primitive root g of F (i.e., a generator of the cyclic group F\{0}) such that g + g^{-1} is also a primitive root of F.  If q > 61, then there exists a primitive root g of F such that g - g^{-1} is also a primitive root of F.
+%C A229910 The author has proved this for any finite field F with |F| > 2^{66}.
+%H A229910 M. F. Hasler, <a href="/A229910/b229910.txt">Table of n, a(n) for n = 1..1000</a>
+%e A229910 a(5) = 2 since 2 and 6 are primitive roots modulo prime(5) = 11 with 2*6 == 1 (mod 11) and 2 + 6 = 8 also a primitive root modulo 11.
+%e A229910 This example recalls that there is no symmetry g -> -g (in Z/pZ) (nor a symmetry w.r.t. odd/even g), therefore one cannot (unfortunately) compute a(n) by taking twice the count of the g<prime(n)/2 which satisfy the condition. E.g., for p=19=prime(8), only g = 14 (= -5) and g = 15 (= -4) are in the set. - _M. F. Hasler_, Oct 06 2013
+%t A229910 gp[g_,p_]:=gp[g,p]=Mod[g,p]>0&&Length[Union[Table[Mod[g^k, p],{k,1,p-1}]]]==p-1
+%t A229910 a[n_]:=Sum[If[gp[g,Prime[n]]&&gp[g+PowerMod[g,-1,Prime[n]],Prime[n]],1,0],{g,1,Prime[n]-1}]
+%t A229910 Table[a[n],{n,1,80}]
+%o A229910 (PARI) A229910(n)=my(p=prime(n));sum(g=2,p-2,znorder(Mod(g,p))==p-1 & Mod(g,p)^-1+g & znorder(Mod(g,p)^-1+g)==p-1) \\ _M. F. Hasler_, Oct 06 2013
+%o A229910 (PARI) A229910(n)={my(p=prime(n),u=0,s=0,i); n=p-1; for(g=2,p-2, bittest(u,g)&next; znorder(Mod(g,p))<n&next; u+=1<<lift(i=Mod(g,p)^-1); i+g||next; znorder(i+g)<n||s++);s*2} \\ about 20% faster. - _M. F. Hasler_, Oct 06 2013
+%o A229910 (Perl) use ntheory ":all"; sub a229910 { my $p=nth_prime(shift); scalar(grep {is_primitive_root($_,$p) && is_primitive_root($_+invmod($_,$p),$p)} 2..$p-2); } # _Dana Jacobsen_, Sep 19 2016
+%Y A229910 Cf. A001918, A229899.
+%Y A229910 Cf. A010554.
+%K A229910 nonn
+%O A229910 1,5
+%A A229910 _Zhi-Wei Sun_, Oct 03 2013
+%E A229910 Values a(1..400) double checked and extended to n=1000 by _M. F. Hasler_, Oct 06 2013

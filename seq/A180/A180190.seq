@@ -1,0 +1,32 @@
+%I A180190 #17 Dec 08 2019 07:40:29
+%S A180190 1,1,1,1,3,2,1,13,6,4,1,67,30,14,8,1,411,178,80,34,16,1,2921,1236,530,
+%T A180190 234,86,32,1,23633,9828,4122,1744,702,226,64,1,214551,88028,36320,
+%U A180190 14990,6094,2154,614,128,1,2160343,876852,357332,145242,58468,21842,6750,1714,256
+%N A180190 Triangle read by rows: T(n,k) is the number of permutations p of [n] for which k is the smallest among the positive differences p(i+1) - p(i); k=0 for the reversal of the identity permutation (0<=k<=n-1).
+%C A180190 Terms obtained by counting with a time-consuming Maple program.
+%C A180190 Sum of entries in row n = n! = A000142(n).
+%C A180190 T(n,1) = A180191(n).
+%H A180190 Alois P. Heinz, <a href="/A180190/b180190.txt">Rows n = 1..18, flattened</a>
+%F A180190 Sum_{k=0..n-1} k * T(n,k) = A018927(n). - _Alois P. Heinz_, Feb 21 2019
+%e A180190 T(4,2) = 6 because we have 1324, 4132, 2413, 4213, 2431, and 3241.
+%e A180190 Triangle starts:
+%e A180190   1;
+%e A180190   1,  1;
+%e A180190   1,  3,  2;
+%e A180190   1, 13,  6,  4;
+%e A180190   1, 67, 30, 14,  8;
+%e A180190   ...
+%p A180190 with(combinat): minasc := proc (p) local j, b: for j to nops(p)-1 do if 0 < p[j+1]-p[j] then b[j] := p[j+1]-p[j] else b[j] := infinity end if end do: if min(seq(b[j], j = 1 .. nops(p)-1)) = infinity then 0 else min(seq(b[j], j = 1 .. nops(p)-1)) end if end proc; for n to 10 do P := permute(n): f[n] := sort(add(t^minasc(P[j]), j = 1 .. factorial(n))) end do: for n to 10 do seq(coeff(f[n], t, i), i = 0 .. n-1) end do; # yields sequence in triangular form
+%p A180190 # second Maple program:
+%p A180190 b:= proc(s, l, m) option remember; `if`(s={}, x^`if`(m=infinity, 0, m),
+%p A180190       add(b(s minus {j}, j, `if`(j<l, m, min(m, j-l))), j=s))
+%p A180190     end:
+%p A180190 T:= n-> (p-> seq(coeff(p, x, i), i=0..n-1))(b({$1..n}, infinity$2)):
+%p A180190 seq(T(n), n=1..10);  # _Alois P. Heinz_, Feb 21 2019
+%t A180190 b[s_List, l_, m_] := b[s, l, m] = If[s == {}, x^If[m == Infinity, 0, m], Sum[b[s ~Complement~ {j}, j, If[j < l, m, Min[m, j - l]]], {j, s}]];
+%t A180190 T[n_] := Function[p, Table[Coefficient[p, x, i], {i, 0, n - 1}]][b[ Range[n], Infinity, Infinity]];
+%t A180190 T /@ Range[10] // Flatten (* _Jean-François Alcover_, Dec 08 2019, after _Alois P. Heinz_ *)
+%Y A180190 Cf. A000142, A018927, A180191.
+%K A180190 nonn,tabl
+%O A180190 1,5
+%A A180190 _Emeric Deutsch_, Sep 07 2010

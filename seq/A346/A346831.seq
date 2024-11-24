@@ -1,0 +1,76 @@
+%I A346831 #27 Apr 15 2024 09:44:47
+%S A346831 1,0,1,-1,0,1,2,-1,-2,1,1,0,-6,0,1,4,9,-4,-10,0,1,-1,0,15,0,-15,0,1,
+%T A346831 14,-1,-46,19,34,-19,-2,1,1,0,-28,0,70,0,-28,0,1,40,81,-88,-196,56,
+%U A346831 150,-8,-36,0,1,-1,0,45,0,-210,0,210,0,-45,0,1
+%N A346831 Table read by rows, coefficients of the characteristic polynomials of the tangent matrices.
+%C A346831 The tangent matrix M(n, k) is an N X N matrix defined with h = floor((N+1)/2) as:
+%C A346831    M[n - k, k + 1] = if n < h then 1 otherwise -1,
+%C A346831    M[N - n + k + 1, N - k] = if n < N - h then -1 otherwise 1,
+%C A346831    for n in [1..N-1] and for k in [0..n-1], and 0 in the main antidiagonal.
+%C A346831 The name 'tangent matrix' derives from M(n, k) = signum(tan(Pi*(n + k)/(N + 1))) whenever the right side of this equation is defined.
+%F A346831 The rows with even index equal those of A135670.
+%F A346831 The determinants of tangent matrices with even dimension are A152011.
+%e A346831 Table starts:
+%e A346831 [0]  1;
+%e A346831 [1]  0,  1;
+%e A346831 [2] -1,  0,   1;
+%e A346831 [3]  2, -1,  -2,    1;
+%e A346831 [4]  1,  0,  -6,    0,   1;
+%e A346831 [5]  4,  9,  -4,  -10,   0,   1;
+%e A346831 [6] -1,  0,  15,    0, -15,   0,   1;
+%e A346831 [7] 14, -1, -46,   19,  34, -19,  -2,   1;
+%e A346831 [8]  1,  0, -28,    0,  70,   0, -28,   0, 1;
+%e A346831 [9] 40, 81, -88, -196,  56, 150,  -8, -36, 0, 1.
+%e A346831 .
+%e A346831 The first few tangent matrices:
+%e A346831 1       2          3              4                  5
+%e A346831 ---------------------------------------------------------------
+%e A346831 0;   -1  0;    1  -1  0;    1  -1  -1   0;   1   1  -1  -1   0;
+%e A346831       0  1;   -1   0  1;   -1  -1   0   1;   1  -1  -1   0   1;
+%e A346831                0   1  1;   -1   0   1   1;  -1  -1   0   1   1;
+%e A346831                             0   1   1  -1;  -1   0   1   1   1;
+%e A346831                                              0   1   1   1  -1;
+%p A346831 TangentMatrix := proc(N) local M, H, n, k;
+%p A346831    M := Matrix(N, N); H := iquo(N + 1, 2);
+%p A346831    for n from 1 to N - 1 do for k from 0 to n - 1 do
+%p A346831        M[n - k, k + 1] := `if`(n < H, 1, -1);
+%p A346831        M[N - n + k + 1, N - k] := `if`(n < N - H, -1, 1);
+%p A346831 od od; M end:
+%p A346831 A346831Row := proc(n) if n = 0 then return 1 fi;
+%p A346831    LinearAlgebra:-CharacteristicPolynomial(TangentMatrix(n), x);
+%p A346831    seq(coeff(%, x, k), k = 0..n) end:
+%p A346831 seq(A346831Row(n), n = 0..10);
+%t A346831 TangentMatrix[N_] := Module[{M, H, n, k},
+%t A346831    M = Array[0&, {N, N}]; H = Quotient[N + 1, 2];
+%t A346831    For[n = 1, n <= N - 1, n++, For[k = 0, k <= n - 1, k++,
+%t A346831       M[[n - k, k + 1]] = If[n < H, 1, -1];
+%t A346831       M[[N - n + k + 1, N - k]] = If[n < N - H, -1, 1]]]; M];
+%t A346831 A346831Row[n_] := Module[{c}, If[n == 0,  Return[{1}]];
+%t A346831 c = CharacteristicPolynomial[TangentMatrix[n], x];
+%t A346831 (-1)^n*CoefficientList[c, x]];
+%t A346831 Table[A346831Row[n], {n, 0, 10}] // Flatten (* _Jean-François Alcover_, Apr 15 2024, after _Peter Luschny_ *)
+%o A346831 (Julia)
+%o A346831 using AbstractAlgebra
+%o A346831 function TangentMatrix(N)
+%o A346831     M = zeros(ZZ, N, N)
+%o A346831     H = div(N + 1, 2)
+%o A346831     for n in 1:N - 1
+%o A346831         for k in 0:n - 1
+%o A346831             M[n - k, k + 1] = n < H ? 1 : -1
+%o A346831             M[N - n + k + 1, N - k] = n < N - H ? -1 : 1
+%o A346831         end
+%o A346831     end
+%o A346831 M end
+%o A346831 function A346831Row(n)
+%o A346831     n == 0 && return [ZZ(1)]
+%o A346831     R, x = PolynomialRing(ZZ, "x")
+%o A346831     S = MatrixSpace(ZZ, n, n)
+%o A346831     M = TangentMatrix(n)
+%o A346831     c = charpoly(R, S(M))
+%o A346831     collect(coefficients(c))
+%o A346831 end
+%o A346831 for n in 0:9 println(A346831Row(n)) end
+%Y A346831 Cf. A135670, A152011, A346837 (generalized tangent matrix).
+%K A346831 sign,tabl
+%O A346831 0,7
+%A A346831 _Peter Luschny_, Sep 11 2021

@@ -1,0 +1,67 @@
+%I A358622 #28 Nov 25 2022 08:16:22
+%S A358622 1,0,0,0,1,0,0,2,0,0,0,6,3,0,0,0,24,20,0,0,0,0,120,130,15,0,0,0,0,720,
+%T A358622 924,210,0,0,0,0,0,5040,7308,2380,105,0,0,0,0,0,40320,64224,26432,
+%U A358622 2520,0,0,0,0,0,0,362880,623376,303660,44100,945,0,0,0,0,0
+%N A358622 Regular triangle read by rows. T(n, k) = [[n, k]], where [[n, k]] are the second order Stirling cycle numbers (or second order reciprocal Stirling numbers). T(n, k) for 0 <= k <= n.
+%C A358622 [[n, k]] are the number of permutations of an n-set having at least two elements in each orbit. These permutations have no fixed points and therefore [[n, k]] is the number of k-orbit derangements of an n-set. This is the definition and notation (doubling the stacked delimiters of the Stirling cycle numbers) as given by Fekete (see link).
+%C A358622 The formal definition expresses the second order Stirling cycle numbers as a binomial sum over second order Eulerian numbers (see the first formula below). The terminology 'associated Stirling numbers of first kind' used elsewhere should be dropped in favor of the more systematic one used here.
+%C A358622 Also the Bell transform of the factorial numbers with 0! = 0. For the definition of the Bell transform see A264428.
+%D A358622 Ronald L. Graham, Donald E. Knuth, and Oren Patashnik, Concrete Mathematics, Addison-Wesley, Reading, 2nd ed. 1994, thirty-fourth printing 2022.
+%H A358622 Antal E. Fekete, <a href="http://www.jstor.org/stable/2974533">Apropos two notes on notation</a>, Amer. Math. Monthly, 101 (1994), 771-778.
+%F A358622 T(n, k) = Sum_{j=0..n-k} binomial(j, n - 2*k)*<<n - k, j>>, where <<n, k>> denote the second order Eulerian numbers (extending Knuth's notation).
+%F A358622 T(n, k) = [x^n] (-x)^n * hypergeom([-n, x], [], -1/x).
+%F A358622 T(n, k) = n!*[z^k][t^n] (exp(t)*(1 - t))^(-z). (Compare with (exp(t)/(1 - t))^z, which is the e.g.f. of the Sylvester polynomials A341101.)
+%F A358622 T(n, k) = [x^k] (-1)^n * n! * L(n, -x - n, -x), where L(n, a, x) is the n-th generalized Laguerre polynomial.
+%F A358622 T(n, k) = Sum_{j=0..k} binomial(n, k - j)*[n - k + j, j]*(-1)^(k - j), where [n, k] denotes the (signless) Stirling cycle numbers.
+%F A358622 T(n, k) = (n - 1) * (T(n-2, k-1) + T(n-1, k)) with suitable boundary conditions.
+%F A358622 T(n + k, k) = A269940(n, k), which might be called the Ward cycle numbers.
+%e A358622 Triangle T(n, k) starts:
+%e A358622 [0] 1;
+%e A358622 [1] 0,     0;
+%e A358622 [2] 0,     1,     0;
+%e A358622 [3] 0,     2,     0,     0;
+%e A358622 [4] 0,     6,     3,     0,    0;
+%e A358622 [5] 0,    24,    20,     0,    0,  0;
+%e A358622 [6] 0,   120,   130,    15,    0,  0,  0;
+%e A358622 [7] 0,   720,   924,   210,    0,  0,  0,  0;
+%e A358622 [8] 0,  5040,  7308,  2380,  105,  0,  0,  0,  0;
+%e A358622 [9] 0, 40320, 64224, 26432, 2520,  0,  0,  0,  0,  0;
+%p A358622 P := (n, x) -> (-x)^n*hypergeom([-n, x], [], 1/x):
+%p A358622 row := n -> seq(coeff(simplify(P(n, x)), x, k), k = 0..n):
+%p A358622 for n from 0 to 9 do row(n) od;
+%p A358622 # Alternative:
+%p A358622 T := (n, k) -> add(binomial(n, k - j)*abs(Stirling1(n - k + j, j))*(-1)^(k - j), j =  0..k): for n from 0 to 9 do seq(T(n, k), k = 0..n) od;
+%p A358622 # Using the e.g.f.:
+%p A358622 egf := (exp(t)*(1 - t))^(-z): ser := series(egf, t, 12):
+%p A358622 seq(print(seq(n!*coeff(coeff(ser, t, n), z, k), k=0..n)), n = 0..9);
+%p A358622 # Using second order Eulerian numbers:
+%p A358622 A358622 := proc(n, k) local j;
+%p A358622 add(binomial(j, n - 2*k)*combinat:-eulerian2(n - k, j), j = 0..n-k) end:
+%p A358622 seq(seq(A358622(n, k), k = 0..n), n = 0..12);
+%p A358622 # Using generalized Laguerre polynomials:
+%p A358622 P := (n, x) -> (-1)^n*n!*LaguerreL(n, -n - x, -x):
+%p A358622 row := n -> seq(coeff(simplify(P(n, x)), x, k), k = 0..n):
+%p A358622 seq(print(row(n)), n = 0..9);
+%o A358622 (Python) # recursion over rows
+%o A358622 from functools import cache
+%o A358622 @cache
+%o A358622 def StirlingCycleOrd2(n: int) -> list[int]:
+%o A358622     if n == 0: return [1]
+%o A358622     if n == 1: return [0, 0]
+%o A358622     rov: list[int] = StirlingCycleOrd2(n - 2)
+%o A358622     row: list[int] = StirlingCycleOrd2(n - 1) + [0]
+%o A358622     for k in range(1, n // 2 + 1):
+%o A358622         row[k] = (n - 1) * (rov[k - 1] + row[k])
+%o A358622     return row
+%o A358622 for n in range(9): print(StirlingCycleOrd2(n))
+%o A358622 # Alternative, using function BellMatrix from A264428.
+%o A358622 from math import factorial
+%o A358622 def f(k: int) -> int:
+%o A358622     return factorial(k) if k > 0 else 0
+%o A358622 print(BellMatrix(f, 9))
+%Y A358622 A008306 is an irregular subtriangle with more information.
+%Y A358622 Cf. A000166 (row sums), A024000 (alternating row sums).
+%Y A358622 Cf. A130534, A201637, A341101, A264428, A269940.
+%K A358622 nonn,tabl
+%O A358622 0,8
+%A A358622 _Peter Luschny_, Nov 23 2022

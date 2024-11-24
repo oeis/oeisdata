@@ -1,0 +1,53 @@
+%I A378022 #19 Nov 19 2024 14:22:05
+%S A378022 1,11,112,166,688,4468,22468,112468,124699,1678999,111367788889,
+%T A378022 11112222333445666777778899
+%N A378022 Let operator D(n) be the number formed by concatenation of the products of the decimal digits of n by their respective multiplicities. This sequence records the smallest number requiring n iterations of D to reach a stationary number; see Comment and Example.
+%C A378022 If n has no repeated digits D(n) = n, else if n has at least one repeated decimal digit D(n), the concatenation of the multiples of respective digits by their corresponding multiplicity in n, gives a different (smaller) number. For example D(112) = 22, and D(22) = 4. a(n) gives the smallest number k such that n iterations of D on k are required to reach a number D^n(k) which has no repeated digits, where for all j < n, D^j(k) has as least one digit repeat.
+%C A378022 This sequence was discussed on the Seqfans forum in December 2019, resulting in a proof (see links) showing that the sequence is infinite.
+%C A378022 Comment from David Seal, (Seqfans 21/12/2019): "a(12) has at least 152 digits.... and a very crude estimate suggests that a(13) has of the rough order of 10^16 digits or more.  a(12) is in practice the only unknown value of the sequence that has any hope of appearing in the OEIS, but I have no reasonable idea how to find it.." The arguments supporting these estimates were lost in the Seqfans crash of October 2024.
+%H A378022 David Seal, <a href="/A378022/a378022.txt">Proof that the sequence is infinite</a>, SeqFans, 2019.
+%e A378022 a(2) = 112 since this is the smallest number requiring two iterations of the D operator to reach a number with distinct digits: 112 --> 22 --> 4.
+%e A378022 a(10) = 111367788889->33614329->961429->186142->28642->4864->886->166->112->22->4 (10 iterations to become stationary; smallest number having this property).
+%t A378022 f[x_] := FromDigits /@ NestWhileList[
+%t A378022   Join @@ IntegerDigits[Map[Times @@ # &, Tally[#] ] ] &,
+%t A378022   DeleteCases[IntegerDigits[x], 0], CountDistinct[#] != Length[#] &];
+%t A378022 c[_] := 0; r = 0; nn = 10; a[0] = 1;
+%t A378022 s = Table[Map[Position[#, 1][[All, 1]] &,
+%t A378022     Permutations@ Join[ConstantArray[1, r], ConstantArray[0, 9 - r] ] ],
+%t A378022   {r, Min[9, nn]}];
+%t A378022 t = Union@ Flatten@ Table[
+%t A378022     w = Apply[Join, Permutations /@ IntegerPartitions[n, Min[9, n - 1]]];
+%t A378022     Reap[Do[Sow[Table[FromDigits[
+%t A378022       Flatten@ MapIndexed[ConstantArray[m[[First[#2]]], #1] &, w[[i]] ] ],
+%t A378022   {m, s[[Length[w[[i]] ] ]] }] ], {i, Length[w]} ] ][[-1, 1]], {n, 2, nn}];
+%t A378022 Print[Length[t]];
+%t A378022 u = Monitor[Reap[Do[
+%t A378022     If[c[#] == 0, Sow[{#, Set[c[#], t[[n]] ] } ];
+%t A378022       If[# > r, r = #]] &[-1 + Length@ f[t[[n]] ] ],
+%t A378022   {n, Length[t]}] ][[-1, 1]], n];
+%t A378022 Map[Set[a[#1], #2] & @@ # &, u];
+%t A378022 Array[a, r + 1, 0]
+%o A378022 (Python)
+%o A378022 def D(s):
+%o A378022    # D(s) returns the result of the contraction of s
+%o A378022    # eg. s='1244'
+%o A378022    contraction=False;
+%o A378022    mult=[0,0,0,0,0,0,0,0,0,0];
+%o A378022    for i in range(10):
+%o A378022       mult[i]=s.count(str(i));
+%o A378022       if mult[i]>1:contraction=True;
+%o A378022    if contraction==False:return '';
+%o A378022    r='';
+%o A378022    for i in range(len(s)):
+%o A378022       c=s[i];
+%o A378022       j=int(c);
+%o A378022       if mult[j]>1:
+%o A378022          r=r+str(j*mult[j]);
+%o A378022          mult[j]=0;
+%o A378022       elif mult[j]==1:r=r+c;
+%o A378022    return r;
+%o A378022 # Charles Kinniburgh and Trevor Marshall, Dec 21 2019.
+%Y A378022 Cf. A351868, A377948.
+%K A378022 nonn,base,more,new
+%O A378022 0,2
+%A A378022 _David James Sycamore_, Nov 14 2024

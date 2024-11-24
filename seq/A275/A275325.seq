@@ -1,0 +1,63 @@
+%I A275325 #14 Mar 27 2020 13:58:48
+%S A275325 1,0,1,0,2,0,6,0,4,2,0,20,10,0,10,8,2,0,70,56,14,0,28,28,12,2,0,252,
+%T A275325 252,108,18,0,84,96,54,16,2,0,924,1056,594,176,22,0,264,330,220,88,20,
+%U A275325 2,0,3432,4290,2860,1144,260,26,0,858,1144,858,416,130,24,2
+%N A275325 Triangle read by rows: number of orbitals over n sectors which have a Catalan decomposition into k parts.
+%C A275325 The definition of an orbital system is given in A232500.
+%C A275325 The Catalan decomposition of an orbital w is a list of orbitals which are alternately entirely above or below the main circle ('above' and 'below' in the weak sense) such that their concatenation equals w. If a zero is on the border of two orbitals then it is allocated to the first one. By convention T(0,0) = 1.
+%C A275325 The number of orbitals over n sectors is counted by the swinging factorial A056040.
+%H A275325 Peter Luschny, <a href="https://oeis.org/wiki/User:Peter_Luschny/Orbitals">Orbitals</a>
+%F A275325 T(n,1) = 2*floor((n+2)/2)*n!/floor((n+2)/2)!^2 = A241543(n+2) for n>=2.
+%F A275325 For odd n>1 T(n,1) = Sum_{k>=0} T(n+1,k).
+%F A275325 A056040(n) - T(n,1) = A232500(n) for n>=2.
+%F A275325 Main diagonal: T(n, floor(n/2)) = A266722(n) for n>1.
+%F A275325 A275326(n,k) = ceiling(T(n,k)/2).
+%e A275325 Table starts:
+%e A275325 [ n] [k=0,1,2,...] [row sum]
+%e A275325 [ 0] [1] 1
+%e A275325 [ 1] [0, 1] 1
+%e A275325 [ 2] [0, 2] 2
+%e A275325 [ 3] [0, 6] 6
+%e A275325 [ 4] [0, 4, 2] 6
+%e A275325 [ 5] [0, 20, 10] 30
+%e A275325 [ 6] [0, 10, 8, 2] 20
+%e A275325 [ 7] [0, 70, 56, 14] 140
+%e A275325 [ 8] [0, 28, 28, 12, 2] 70
+%e A275325 [ 9] [0, 252, 252, 108, 18] 630
+%e A275325 [10] [0, 84, 96, 54, 16, 2] 252
+%e A275325 [11] [0, 924, 1056, 594, 176,  22] 2772
+%e A275325 [12] [0, 264, 330, 220, 88, 20, 2] 924
+%e A275325 For example T(2*n, n) = 2 counts the Catalan decompositions
+%e A275325 [[-1, 1], [1, -1], [-1, 1], ..., [(-1)^n, (-1)^(n+1)]] and
+%e A275325 [[1, -1], [-1, 1], [1, -1], ..., [(-1)^(n+1), (-1)^n]].
+%o A275325 (Sage) # uses[unit_orbitals from A274709]
+%o A275325 # Brute force counting
+%o A275325 from itertools import accumulate
+%o A275325 def catalan_factors(P):
+%o A275325     def bisect(orb):
+%o A275325         i = 1
+%o A275325         A = list(accumulate(orb))
+%o A275325         if orb[1] > 0 if orb[0] == 0 else orb[0] > 0:
+%o A275325             while i < len(A) and A[i] >= 0: i += 1
+%o A275325         else:
+%o A275325             while i < len(A) and A[i] <= 0: i += 1
+%o A275325         return i
+%o A275325     R = []
+%o A275325     while P:
+%o A275325         i = bisect(P)
+%o A275325         R.append(P[:i])
+%o A275325         P = P[i:]
+%o A275325     return R
+%o A275325 def orbital_factors(n):
+%o A275325     if n == 0: return [1]
+%o A275325     if n == 1: return [0, 1]
+%o A275325     S = [0]*(n//2 + 1)
+%o A275325     for o in unit_orbitals(n):
+%o A275325         S[len(catalan_factors(o))] += 1
+%o A275325     return S
+%o A275325 for n in (0..9): print(orbital_factors(n))
+%Y A275325 Cf. A056040 (row sum), A241543, A232500, A266722, A275326.
+%Y A275325 Other orbital statistics: A241477 (first zero crossing), A274706 (absolute integral), A274709 (max. height), A274710 (number of turns), A274878 (span), A274879 (returns), A274880 (restarts), A274881 (ascent).
+%K A275325 nonn,tabf
+%O A275325 0,5
+%A A275325 _Peter Luschny_, Aug 15 2016

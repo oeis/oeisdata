@@ -1,0 +1,44 @@
+%I A273693 #25 Oct 18 2018 16:26:21
+%S A273693 1,1,1,1,1,0,1,1,1,0,1,1,1,1,0,1,1,1,2,1,0,1,1,1,2,3,1,0,1,1,1,2,6,8,
+%T A273693 1,0,1,1,1,2,6,12,20,1,0,1,1,1,2,6,24,40,80,1,0,1,1,1,2,6,24,60,180,
+%U A273693 210,1,0,1,1,1,2,6,24,120,240,630,896,1,0,1,1,1,2,6,24,120,360,1260,3360,3360,1,0
+%N A273693 Number A(n,k) of k-ary heaps on n elements; square array A(n,k), n>=0, k>=0, read by antidiagonals.
+%H A273693 Alois P. Heinz, <a href="/A273693/b273693.txt">Antidiagonals n = 0..140, flattened</a>
+%H A273693 Wikipedia, <a href="https://en.wikipedia.org/wiki/D-ary_heap">D-ary heap</a>
+%e A273693 A(4,2) = 3: 1234, 1243, 1324.
+%e A273693 A(5,2) = 8: 12345, 12354, 12435, 12453, 12534, 12543, 13245, 13254.
+%e A273693 A(5,3) = 12: 12345, 12354, 12435, 12453, 12534, 12543, 13245, 13254, 13425, 13524, 14235, 14325.
+%e A273693 A(6,3) = 40: 123456, 123465, 123546, 123564, 123645, 123654, 124356, 124365, 124536, 124563, 124635, 124653, 125346, 125364, 125436, 125463, 125634, 125643, 126345, 126354, 126435, 126453, 126534, 126543, 132456, 132465, 132546, 132564, 132645, 132654, 134256, 134265, 135246, 135264, 136245, 136254, 142356, 142365, 143256, 143265.
+%e A273693 (The examples use min-heaps.)
+%e A273693 Square array A(n,k) begins:
+%e A273693   1, 1,   1,   1,    1,    1,    1,    1, ...
+%e A273693   1, 1,   1,   1,    1,    1,    1,    1, ...
+%e A273693   0, 1,   1,   1,    1,    1,    1,    1, ...
+%e A273693   0, 1,   2,   2,    2,    2,    2,    2, ...
+%e A273693   0, 1,   3,   6,    6,    6,    6,    6, ...
+%e A273693   0, 1,   8,  12,   24,   24,   24,   24, ...
+%e A273693   0, 1,  20,  40,   60,  120,  120,  120, ...
+%e A273693   0, 1,  80, 180,  240,  360,  720,  720, ...
+%e A273693   0, 1, 210, 630, 1260, 1680, 2520, 5040, ...
+%p A273693 with(combinat):
+%p A273693 A:= proc(n, k) option remember; local h, i, x, y, z;
+%p A273693       if n<2 then 1 elif k<2 then k
+%p A273693     else h:= ilog[k]((k-1)*n+1);
+%p A273693          if k^h=(k-1)*n+1 then A((n-1)/k, k)^k*
+%p A273693             multinomial(n-1, ((n-1)/k)$k)
+%p A273693        else x, y:=(k^h-1)/(k-1), (k^(h-1)-1)/(k-1);
+%p A273693             for i from 0 do z:= (n-1)-(k-1-i)*y-i*x;
+%p A273693               if y<=z and z<=x then A(y, k)^(k-1-i)*
+%p A273693                  multinomial(n-1, y$(k-1-i), x$i, z)*
+%p A273693                  A(x, k)^i*A(z, k); break fi
+%p A273693             od
+%p A273693       fi fi
+%p A273693     end:
+%p A273693 seq(seq(A(n, d-n), n=0..d), d=0..14);
+%t A273693 multinomial[n_, k_] := n!/Times @@ (k!); A[n_, k_] := A[n, k] = Module[{h, i, x, y, z}, Which[n<2, 1, k<2, k, True, h = Floor @ Log[k, (k-1)*n+1]; If[k^h == (k-1)*n+1, A[(n-1)/k, k]^k*multinomial[n-1, Array[((n-1)/k)&, k]], {x, y} = {(k^h-1)/(k-1), (k^(h-1)-1)/(k-1)}; For[i = 0, True, i++, z = (n-1)-(k-1-i)*y-i*x; If[y<=z && z<=x, A[y, k]^(k-1-i)*multinomial[n-1, Join[Array[y&, k-1-i], Array[x&, i], {z}]]*A[x, k]^i*A[z, k] // Return]] ]]]; Table[A[n, d-n], {d, 0, 14}, {n, 0, d}] // Flatten (* _Jean-François Alcover_, Mar 13 2017, translated from Maple *)
+%Y A273693 Columns k=0-10 give: A019590(n+1), A000012, A056971, A178008, A178009, A178010, A178011, A273694, A273695, A273696, A273697.
+%Y A273693 Main diagonal gives: A000142(n-1) for n>0.
+%Y A273693 Cf. A273712.
+%K A273693 nonn,tabl
+%O A273693 0,19
+%A A273693 _Alois P. Heinz_, May 28 2016

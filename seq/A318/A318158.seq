@@ -1,0 +1,70 @@
+%I A318158 #24 Nov 11 2024 20:30:00
+%S A318158 79,97,103,109,127,131,137,139,149,151,157,163,167,173,179,181,191,
+%T A318158 193,197,199,211,223,227,229,233,239,241,251,257,263,269,271,277,281,
+%U A318158 283,293,307,311,313,317,331,337,347,349,353,359,367,373,379,383,389,397
+%N A318158 Prime numbers of the form p1^4 + p2^3 + p3^2 + p4, where p1, p2, p3 and p4 are distinct primes.
+%C A318158 Does this sequence contain every prime > 113? - _Robert Israel_, Aug 26 2018
+%C A318158 From _David A. Corneth_, Aug 26 2018: (Start)
+%C A318158 As the primes in the sum are distinct and has four terms, exactly one of (p1, p2, p3, p4) is 2.
+%C A318158 Contains all the primes in [120, 5 * 10^7]. (End)
+%H A318158 Robert Israel, <a href="/A318158/b318158.txt">Table of n, a(n) for n = 1..10000</a>
+%H A318158 David A. Corneth, <a href="/A318158/a318158.gp.txt">Statistic for computations using the PARI program below</a>
+%H A318158 David A. Corneth, <a href="/A318158/a318158_1.gp.txt">PARI program</a>
+%e A318158 227 belongs to this sequence as 227 = 3^4 + 5^3 + 2^2 + 17, with 2, 3, 5 and 17 all primes.
+%p A318158 N:= 1000: # to get all terms <= N
+%p A318158 V:= Vector(N):
+%p A318158 p1:= 1:
+%p A318158 do
+%p A318158   p1:= nextprime(p1);
+%p A318158   if p1^4 > N then break fi;
+%p A318158   p2:= 1:
+%p A318158   do
+%p A318158     p2:= nextprime(p2);
+%p A318158     if p1^4 + p2^3 > N then break fi;
+%p A318158     if p2 = p1 then next fi;
+%p A318158     p3:= 1;
+%p A318158     do
+%p A318158       p3:= nextprime(p3);
+%p A318158       if p1^4 + p2^3 + p3^2 > N then break fi;
+%p A318158       if p3 = p1 or p3 = p2 then next fi;
+%p A318158       if min(p1,p2,p3)>2 then
+%p A318158          p4:= 2;
+%p A318158          x:= p1^4+p2^3+p3^2+p4;
+%p A318158          if isprime(x) then V[x]:= 1 fi;
+%p A318158       else
+%p A318158          p4:= 2;
+%p A318158          do
+%p A318158             p4:= nextprime(p4);
+%p A318158             if p1^4 + p2^3 + p3^2 + p4 > N then break fi;
+%p A318158             if p4 = p1 or p4 = p2 or p4 = p3 then next fi;
+%p A318158             x:= p1^4+p2^3+p3^2+p4;
+%p A318158             if isprime(x) then V[x]:= 1 fi;
+%p A318158           od
+%p A318158        fi
+%p A318158 od od od:
+%p A318158 select(t -> V[t]=1, [$1..N]); # _Robert Israel_, Aug 26 2018
+%t A318158 v[t_] := Prime@Range@PrimePi@t; up = 400; Union@Reap[ Do[ If[PrimeQ[p = p1^4 + p2^3 + p3^2 + p4] && (s = {p1, p2, p3, p4}; Sort@s == Union@s), Sow@p], {p1, v[ up^(1/4)]}, {p2, v@Sqrt[up - p1^4]}, {p3, v[up - p1^4 - p2^3]}, {p4, v[up - p1^4 - p2^3 - p3^2]}]][[2, 1]] (* _Giovanni Resta_, Aug 19 2018 *)
+%o A318158 (MiniZinc)
+%o A318158 include "globals.mzn";
+%o A318158 int: n = 4;
+%o A318158 %to get all primes less than 250 of this sequence
+%o A318158 int: max_val = 250;
+%o A318158 array[1..n+1] of var 2..max_val: x;
+%o A318158 % primes between 2..max_valset of int:
+%o A318158 prime = 2..max_val diff { i | i in 2..max_val, j in 2..ceil(sqrt(i)) where i mod j = 0} ;
+%o A318158 set of int: primes;
+%o A318158 primes = prime union {2};
+%o A318158 solve satisfy;
+%o A318158 constraint all_different(x) /\
+%o A318158 x[1] in primes /\
+%o A318158 x[2] in primes /\
+%o A318158 x[3] in primes /\
+%o A318158 x[4] in primes /\
+%o A318158 x[5] in primes /\
+%o A318158 pow(x[4],4)+pow(x[3],3)+pow(x[2],2)+pow(x[1],1)= x[5] ;
+%o A318158 output [ show(x[5])]
+%Y A318158 Cf. A316971.
+%K A318158 nonn,changed
+%O A318158 1,1
+%A A318158 _Pierandrea Formusa_, Aug 19 2018
+%E A318158 More terms from _Giovanni Resta_, Aug 19 2018

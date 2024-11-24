@@ -1,0 +1,39 @@
+%I A326477 #21 Mar 06 2020 09:28:53
+%S A326477 1,0,1,0,4,3,0,46,60,15,0,1114,1848,840,105,0,46246,88770,54180,12600,
+%T A326477 945,0,2933074,6235548,4574130,1469160,207900,10395,0,263817646,
+%U A326477 605964450,505915410,199849650,39729690,3783780,135135
+%N A326477 Coefficients of polynomials related to ordered set partitions. Triangle read by rows, T_{m}(n, k) for m = 2 and 0 <= k <= n.
+%F A326477 For m >= 1 let P(m,0) = 1 and P(m, n) = Sum_{k=1..n} binomial(m*n, m*k)*P(m, n-k)*x for n > 0. Then T_{m}(n, k) = Sum_{k=0..n} ([x^k]P(m, n))*rf(x,k)/k! where rf(x,k) are the rising factorial powers. T(n, k) = T_{2}(n, k).
+%e A326477 Triangle starts:
+%e A326477 [0] [1]
+%e A326477 [1] [0, 1]
+%e A326477 [2] [0, 4, 3]
+%e A326477 [3] [0, 46, 60, 15]
+%e A326477 [4] [0, 1114, 1848, 840, 105]
+%e A326477 [5] [0, 46246, 88770, 54180, 12600, 945]
+%e A326477 [6] [0, 2933074, 6235548, 4574130, 1469160, 207900, 10395]
+%p A326477 CL := f -> PolynomialTools:-CoefficientList(f, x):
+%p A326477 FL := s -> ListTools:-Flatten(s, 1):
+%p A326477 StirPochConv := proc(m, n) local P, L; P := proc(m, n) option remember;
+%p A326477 `if`(n = 0, 1, add(binomial(m*n, m*k)*P(m, n-k)*x, k=1..n)) end:
+%p A326477 L := CL(P(m, n)); CL(expand(add(L[k+1]*pochhammer(x,k)/k!, k=0..n))) end:
+%p A326477 FL([seq(StirPochConv(2,n), n = 0..7)]);
+%t A326477 P[_, 0] = 1; P[m_, n_] := P[m, n] = Sum[Binomial[m*n, m*k]*P[m, n-k]*x, {k, 1, n}] // Expand;
+%t A326477 T[m_][n_] := CoefficientList[P[m, n], x].Table[Pochhammer[x, k]/k!, {k, 0, n}] // CoefficientList[#, x]&;
+%t A326477 Table[T[2][n], {n, 0, 7}] // Flatten (* _Jean-François Alcover_, Jul 21 2019 *)
+%o A326477 (Sage)
+%o A326477 def StirPochConv(m, n):
+%o A326477     z = var('z'); R = ZZ[x]
+%o A326477     F = [i/m for i in (1..m-1)]
+%o A326477     H = hypergeometric([], F, (z/m)^m)
+%o A326477     P = R(factorial(m*n)*taylor(exp(x*(H-1)), z, 0, m*n + 1).coefficient(z, m*n))
+%o A326477     L = P.list()
+%o A326477     S = sum(L[k]*rising_factorial(x,k) for k in (0..n))
+%o A326477     return expand(S).list()
+%o A326477 for n in (0..6): print(StirPochConv(2, n))
+%Y A326477 Row sums A094088. Alternating row sums A153881 starting at 0.
+%Y A326477 Main diagonal A001147. Associated set partitions A241171.
+%Y A326477 A129062 (m=1, associated with A131689), this sequence (m=2), A326587 (m=3, associated with A278073), A326585 (m=4, associated with A278074).
+%K A326477 nonn,tabl
+%O A326477 0,5
+%A A326477 _Peter Luschny_, Jul 08 2019

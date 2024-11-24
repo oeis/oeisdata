@@ -1,0 +1,48 @@
+%I A193536 #21 Dec 29 2018 21:08:11
+%S A193536 1,1,2,1,5,5,4,2,14,21,30,38,40,32,16,42,84,168,322,578,952,1408,1808,
+%T A193536 1920,1536,768,132,330,840,2112,5168,12172,27352,58126,115636,212762,
+%U A193536 356352,532224,687104,732160,585728,292864,429,1287,3960
+%N A193536 Triangle T(n,k), n>=0, 0<=k<=C(n,2), read by rows: T(n,k) = number of k-length saturated chains in the poset of Dyck paths of semilength n ordered by inclusion.
+%H A193536 Alois P. Heinz, <a href="/A193536/b193536.txt">Rows n = 0..13, flattened</a>
+%H A193536 J. Woodcock, <a href="http://garsia.math.yorku.ca/~zabrocki/papers/DPfinal.pdf">Properties of the poset of Dyck paths ordered by inclusion</a>
+%e A193536 Poset of Dyck paths of semilength n=3:
+%e A193536 .
+%e A193536 .      A       A:/\      B:
+%e A193536 .      |        /  \      /\/\
+%e A193536 .      B       /    \    /    \
+%e A193536 .     / \
+%e A193536 .    C   D     C:        D:        E:
+%e A193536 .     \ /         /\      /\
+%e A193536 .      E       /\/  \    /  \/\    /\/\/\
+%e A193536 .
+%e A193536 Saturated chains of length k=0: A, B, C, D, E (5); k=1: A-B, B-C, B-D, C-E, D-E (5); k=2: A-B-C, A-B-D, B-C-E, B-D-E (4), k=3: A-B-C-E, A-B-D-E (2) => [5,5,4,2].
+%e A193536 Triangle begins:
+%e A193536     1;
+%e A193536     1;
+%e A193536     2,   1;
+%e A193536     5,   5,   4,    2;
+%e A193536    14,  21,  30,   38,   40,    32,    16;
+%e A193536    42,  84, 168,  322,  578,   952,  1408,  1808,   1920,   1536,    768;
+%e A193536   132, 330, 840, 2112, 5168, 12172, 27352, 58126, 115636, 212762, 356352, ...
+%p A193536 d:= proc(x, y, l) option remember;
+%p A193536       `if`(x<=1, [[y, l[]]], [seq(d(x-1, i, [y, l[]])[], i=x-1..y)])
+%p A193536     end:
+%p A193536 T:= proc(n) option remember; local g, r, j;
+%p A193536       g:= proc(l) option remember; local r, i;
+%p A193536             r:= [1];
+%p A193536             for i to n-1 do if l[i]>i and (i=1 or l[i-1]<l[i]) then
+%p A193536               r:= zip((x, y)->x+y, r, [0, g(subsop(i=l[i]-1, l))[]], 0)
+%p A193536             fi od; r
+%p A193536           end;
+%p A193536       r:= [];
+%p A193536       for j in d(n, n, []) do
+%p A193536         r:= zip((x, y)->x+y, r, g(j), 0)
+%p A193536       od; r[]
+%p A193536     end:
+%p A193536 seq(T(n), n=0..7);
+%t A193536 zip = With[{m = Max[Length[#1], Length[#2]]}, PadRight[#1, m] + PadRight[#2, m]]&; d[x_, y_, l_] := d[x, y, l] = If[x <= 1, {Prepend[l, y]}, Flatten[t = Table [d[x-1, i, Prepend[l, y]], {i, x-1, y}], 1]];
+%t A193536 T[n_] := T[n] = Module[{g, r0}, g[l_] := g[l] = Module[{r, i}, r = {1}; For[i = 1, i <= n-1 , i++, If [l[[i]]>i && (i == 1 || l[[i-1]] < l[[i]]), r = zip[r, Join[{0}, g[ReplacePart[l, i -> l[[i]]-1]]]]]]; r]; r0 = {}; Do[r0 = zip[r0, g[j]], {j, d[n, n, {}]}]; r0]; Table[T[n], {n, 0, 7}] // Flatten (* _Jean-François Alcover_, Feb 13 2017, translated from Maple *)
+%Y A193536 Row sums give: A166860. Columns k=0,1 give: A000108, A002054(n-1). Last elements of rows give: A005118.  Row lengths give: A000124(n-1).
+%K A193536 nonn,tabf
+%O A193536 0,3
+%A A193536 _Alois P. Heinz_, Jul 29 2011

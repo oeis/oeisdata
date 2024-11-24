@@ -1,0 +1,103 @@
+%I A264428 #83 Feb 20 2023 16:30:55
+%S A264428 1,0,1,0,1,1,0,2,3,1,0,5,11,6,1,0,15,45,35,10,1,0,52,205,210,85,15,1,
+%T A264428 0,203,1029,1330,700,175,21,1,0,877,5635,8946,5845,1890,322,28,1,0,
+%U A264428 4140,33387,63917,50358,20055,4410,546,36,1,0,21147,212535,484140,450905,214515,57855,9240,870,45,1
+%N A264428 Triangle read by rows, Bell transform of Bell numbers.
+%C A264428 Consider the sequence S0 -> T0 -> S1 -> T1 -> S2 -> T2 -> ... Here Sn -> Tn indicates the Bell transform mapping a sequence Sn to a triangle Tn as defined in the link and Tn -> S{n+1} the operator associating a triangle with the sequence of its row sums. If
+%C A264428 S0 = A000012 = <1,1,1,...> then
+%C A264428 T0 = A048993 # Stirling subset numbers,
+%C A264428 S1 = A000110 # Bell numbers,
+%C A264428 T1 = A264428 # Bell transform of Bell numbers,
+%C A264428 S2 = A187761 # second-order Bell numbers,
+%C A264428 T2 = A264430 # Bell transform of second-order Bell numbers,
+%C A264428 S3 = A264432 # third-order Bell numbers.
+%C A264428 This construction is closely related to permutations trees and A179455. Sn is A179455_col(n+1) prepended by A179455_diag(k) = k! for k <= n. In other words, Sn 'converges' to n! for n -> oo.
+%C A264428 Given a sequence (s(n))n>=0 with s(0) = 0 and with e.g.f. B(x) = Sum_{n >= 1} s(n)*x^n/n!, then the Bell matrix associated with s(n) equals the exponential Riordan array [1, B(x)] belonging to the Lagrange subgroup of the exponential Riordan group. Omitting the first row and column from the Bell matrix produces the exponential Riordan array [d/dx(B(x)), B(x)] belonging to the Derivative subgroup of the exponential Riordan group. - _Peter Bala_, Jun 07 2016
+%H A264428 G. C. Greubel, <a href="/A264428/b264428.txt">Table of n, a(n) for n = 0..1325</a>
+%H A264428 Peter Luschny, <a href="https://oeis.org/wiki/User:Peter_Luschny/BellTransform">The Bell transform</a>
+%H A264428 Peter Luschny, <a href="http://www.oeis.org/wiki/User:Peter_Luschny/PermutationTrees">Permutation Trees</a>
+%F A264428 From _Peter Bala_, Jun 07 2016: (Start)
+%F A264428 E.g.f.: exp(t*B(x)), where B(x) = Integral_{u = 0..x} exp(exp(u) - 1) du =  x + x^2/2! + 2*x^3/3! + 5*x^4/4! + 15*x^5/5! + 52*x^6/6! + ....
+%F A264428 Row polynomial recurrence: R(n+1,t) = t*Sum_{k = 0 ..n} binomial(n,k)*Bell(k)* R(n-k,t) with R(0,t) = 1. (End)
+%e A264428 Triangle starts:
+%e A264428 [1]
+%e A264428 [0,   1]
+%e A264428 [0,   1,    1]
+%e A264428 [0,   2,    3,    1]
+%e A264428 [0,   5,   11,    6,    1]
+%e A264428 [0,  15,   45,   35,   10,    1]
+%e A264428 [0,  52,  205,  210,   85,   15,   1]
+%e A264428 [0, 203, 1029, 1330,  700,  175,  21,  1]
+%e A264428 [0, 877, 5635, 8946, 5845, 1890, 322, 28, 1]
+%p A264428 # Computes sequence in matrix form.
+%p A264428 BellMatrix := proc(f, len) local T, A; A := [seq(f(n), n=0..len-2)];
+%p A264428 T := proc(n, k) option remember; if k=0 then k^n else
+%p A264428 add(binomial(n-1,j-1)*T(n-j,k-1)*A[j], j=1..n-k+1) fi end;
+%p A264428 Matrix(len, (n,k)->T(n-1,k-1), shape=triangular[lower]) end:
+%p A264428 BellMatrix(n -> combinat:-bell(n), 9); # _Peter Luschny_, Jan 21 2016
+%p A264428 # Alternative, using the recurrence of _Peter Bala_:
+%p A264428 R := proc(n) option remember; if n = 0 then 1 else
+%p A264428 t*add(binomial(n-1,k)*combinat:-bell(k)*R(n-k-1,t),k=0..n-1) fi end:
+%p A264428 T_row := n-> seq(coeff(R(n), t, k), k=0..n):
+%p A264428 seq(print(T_row(n)),n=0..8); # _Peter Luschny_, Jun 09 2016
+%t A264428 BellMatrix[f_Function|f_Symbol, len_] := With[{t = Array[f, len, 0]}, Table[BellY[n, k, t], {n, 0, len-1}, {k, 0, len-1}]];
+%t A264428 rows = 11;
+%t A264428 M = BellMatrix[BellB, rows];
+%t A264428 Table[M[[n, k]], {n, 1, rows}, {k, 1, n}] // Flatten (* _Jean-François Alcover_, Jan 21 2016, updated Jul 14 2018 *)
+%t A264428 With[{r = 8}, Flatten[Table[BellY[n, k, BellB[Range[0, r]]], {n, 0, r}, {k, 0, n}]]] (* _Jan Mangaldan_, May 22 2016 *)
+%o A264428 (Sage)
+%o A264428 # The functions below are referenced in various other sequences.
+%o A264428 def bell_transform(n, a): # partition_based
+%o A264428     row = []
+%o A264428     fn = factorial(n)
+%o A264428     for k in (0..n):
+%o A264428         result = 0
+%o A264428         for p in Partitions(n, length=k):
+%o A264428             factorial_product = 1
+%o A264428             power_factorial_product = 1
+%o A264428             for part, count in p.to_exp_dict().items():
+%o A264428                 factorial_product *= factorial(count)
+%o A264428                 power_factorial_product *= factorial(part)**count
+%o A264428             coefficient = fn//(factorial_product*power_factorial_product)
+%o A264428             result += coefficient*prod([a[i-1] for i in p])
+%o A264428         row.append(result)
+%o A264428     return row
+%o A264428 def bell_matrix(generator, dim):
+%o A264428     G = [generator(k) for k in srange(dim)]
+%o A264428     row = lambda n: bell_transform(n, G)
+%o A264428     return matrix(ZZ, [row(n)+[0]*(dim-n-1) for n in srange(dim)])
+%o A264428 def inverse_bell_matrix(generator, dim):
+%o A264428     G = [generator(k) for k in srange(dim)]
+%o A264428     row = lambda n: bell_transform(n, G)
+%o A264428     M = matrix(ZZ, [row(n)+[0]*(dim-n-1) for n in srange(dim)]).inverse()
+%o A264428     return matrix(ZZ, dim, lambda n,k: (-1)^(n-k)*M[n,k])
+%o A264428 bell_numbers = [sum(bell_transform(n, [1]*10)) for n in range(11)]
+%o A264428 for n in range(11): print(bell_transform(n, bell_numbers))
+%o A264428 (PARI)
+%o A264428 bell_matrix(f, len) = { my( m = matrix(len, len) );  m[1, 1] = 1;
+%o A264428   for( n = 1, len-1, m[n+1, 2] = f(n-1) );
+%o A264428   for( n = 0, len-1, for( k = 1, n,
+%o A264428      m[n+1, k+1] = sum(j = 1, n-k+1, binomial(n-1,j-1)*m[n-j+1,k]*m[j+1,2]) ));
+%o A264428   return( m )
+%o A264428 }
+%o A264428 f(n) = polcoeff( sum( k=0, n, prod( i=1, k, x / (1 - i*x)), x^n * O(x)), n);
+%o A264428 bell_matrix(f, 9) \\ _Peter Luschny_, Jan 24 2016
+%o A264428 (Python)
+%o A264428 from functools import cache
+%o A264428 from math import comb as binomial
+%o A264428 def BellMatrix(f, size):
+%o A264428     A = [f(n) for n in range(size - 1)]
+%o A264428     @cache
+%o A264428     def T(n, k):
+%o A264428         if k == 0: return k ** n
+%o A264428         return sum(
+%o A264428             binomial(n - 1, j) * T(n - j - 1, k - 1) * A[j]
+%o A264428             for j in range(n - k + 1) )
+%o A264428     return [[T(n, k) for k in range(n + 1)] for n in range(size)]
+%o A264428 @cache
+%o A264428 def b(n, k=0): return n < 1 or k*b(n-1, k) + b(n-1, k+1)
+%o A264428 print(BellMatrix(b, 9))  # _Peter Luschny_, Jun 14 2022
+%Y A264428 Cf. A000012, A000110, A000217, A000914, A027801, A048993, A051836, A179455, A187761 (row sums), A264430, A264432, A265312.
+%K A264428 nonn,tabl
+%O A264428 0,8
+%A A264428 _Peter Luschny_, Nov 13 2015

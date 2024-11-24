@@ -1,0 +1,59 @@
+%I A354169 #220 Nov 29 2023 13:07:58
+%S A354169 0,1,2,4,8,3,16,32,64,12,128,256,512,17,1024,34,2048,4096,8192,68,
+%T A354169 16384,136,32768,65536,131072,768,262144,524288,1048576,1025,2097152,
+%U A354169 18,4194304,2080,8388608,16777216,33554432,12288,67108864,134217728,268435456,16388
+%N A354169 a(0) = 0, a(1) = 1, a(2) = 2; for k >= 2, given a(k), the sequence is extended by adjoining two terms: a(2*k-1) = smallest m >= 0 not among a(0) .. a(k) such that {m, a(k), a(k+1), ..., a(2*k-2)} are pairwise disjoint in binary, and a(2*k) = smallest m >= 0 not among a(0) .. a(k) such that {m, a(k), ..., a(2*k-1)} are pairwise disjoint in binary.
+%C A354169 The paper by De Vlieger et al. (2022) calls this the "binary two-up sequence".
+%C A354169 "Pairwise disjoint in binary" means no common 1-bits in their binary representations.
+%C A354169 This is a set-theory analog of A090252. It bears the same relation to A090252 as A252867 does to A098550, A353708 to A121216, A353712 to A347113, etc.
+%C A354169 A consequence of the definition, and also an equivalent definition, is that this is the lexicographically earliest infinite sequence of distinct nonnegative numbers with the property that the binary representation of a(n) is disjoint from (has no common 1's with) the binary representations of the following n terms.
+%C A354169 An equivalent definition is that a(n) is the smallest nonnegative number that is disjoint (in its binary representation) from each of the previous floor(n/2) terms.
+%C A354169 For the subsequence 0, 3, 12, 17, 34, ... of the terms that are not powers of 2 see A354680 and A354798.
+%C A354169 All terms are the sum of at most two powers of 2 (see De Vlieger et al., 2022). - _N. J. A. Sloane_, Aug 29 2022
+%H A354169 Rémy Sigrist, <a href="/A354169/b354169.txt">Table of n, a(n) for n = 0..4941</a>
+%H A354169 Michael De Vlieger, Thomas Scheuerle, Rémy Sigrist, N. J. A. Sloane, and Walter Trump, <a href="http://arxiv.org/abs/2209.04108">The Binary Two-Up Sequence</a>, arXiv:2209.04108 [math.CO], Sep 11 2022.
+%H A354169 Rémy Sigrist, <a href="/A354169/a354169.gp.txt">PARI program</a>
+%H A354169 N. J. A. Sloane, <a href="/A354169/a354169.pdf">Construction of terms a(0) through a(18)</a>
+%H A354169 N. J. A. Sloane, <a href="/A354169/a354169_1.pdf">Table showing first 190 terms</a> (pdf file of scan of large table)
+%H A354169 N. J. A. Sloane, <a href="/A354169/a354169_2.pdf">Left-hand portion of rows 97-135 of preceding table</a>, showing columns 67-96, rotated counter-clockwise by 90 degrees. The red line in this table should be aligned with the red line between rows 135 and 136 in the preceding table. [This portion of the table was too wide to fit through the scanner.]
+%H A354169 N. J. A. Sloane, <a href="https://njas.blog/2022/06/03/the-two-up-sequence-a090252/">Blog post about the Two-Up sequence</a>, June 13 2022. Mentions this sequence.
+%H A354169 N. J. A. Sloane, <a href="https://arxiv.org/abs/2301.03149">"A Handbook of Integer Sequences" Fifty Years Later</a>, arXiv:2301.03149 [math.NT], 2023, p. 16.
+%e A354169 After a(2) = 2 = 10_2, a(3) must equal ?0?_2, and the smallest such number we have not seen is a(3) = 100_2 = 4, and a(4) must equal ?00?_2, and the smallest such number we have not seen is a(4) = 1000_2 = 8.
+%t A354169 nn = 42; c[_] = r = 0; m = 1; Array[Set[{a[#], c[#]}, {#, #}] &, 2, 0]; Do[k = SelectFirst[Union@ Map[Total, Rest@ Subsets[2^Reverse[Length[#] - Position[#, 1][[All, 1]]] &@ IntegerDigits[2^(r + 2) - m - 1, 2]]], c[#] == 0 &]; Set[{a[n], c[k]}, {k, n}]; m += a[n]; If[And[IntegerQ[#], # > 0], m -= a[#]] &[n/2]; If[And[EvenQ[k], PrimePowerQ[k], k > 2^r], r++], {n, 2, nn}]; Table[a[n], {n, 0, nn}] (* _Michael De Vlieger_, Jul 13 2022 *)
+%o A354169 (PARI) See Links section.
+%o A354169 (Python)
+%o A354169 from itertools import count, islice
+%o A354169 from collections import deque
+%o A354169 from functools import reduce
+%o A354169 from operator import or_
+%o A354169 def A354169_gen(): # generator of terms
+%o A354169     aset, aqueue, b, f = {0,1,2}, deque([2]), 2, False
+%o A354169     yield from (0,1,2)
+%o A354169     while True:
+%o A354169         for k in count(1):
+%o A354169             m, j, j2, r, s = 0, 0, 1, b, k
+%o A354169             while r > 0:
+%o A354169                 r, q = divmod(r,2)
+%o A354169                 if not q:
+%o A354169                     s, y = divmod(s,2)
+%o A354169                     m += y*j2
+%o A354169                 j += 1
+%o A354169                 j2 *= 2
+%o A354169             if s > 0:
+%o A354169                 m += s*2**b.bit_length()
+%o A354169             if m not in aset:
+%o A354169                 yield m
+%o A354169                 aset.add(m)
+%o A354169                 aqueue.append(m)
+%o A354169                 if f: aqueue.popleft()
+%o A354169                 b = reduce(or_,aqueue)
+%o A354169                 f = not f
+%o A354169                 break
+%o A354169 A354169_list = list(islice(A354169_gen(),40)) # _Chai Wah Wu_, Jun 06 2022
+%Y A354169 A355889 is a more efficient way to present this sequence.
+%Y A354169 Cf. A000120, A090252, A098550, A121216, A252867, A347113, A353708, A353712, A354680, A354767, A354798, A355150.
+%Y A354169 See also A354773, A354774, A354775, A354780, A354781, A354783.
+%K A354169 nonn,base
+%O A354169 0,3
+%A A354169 _N. J. A. Sloane_, Jun 05 2022
+%E A354169 More terms from _Rémy Sigrist_, Jun 06 2022

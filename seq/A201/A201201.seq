@@ -1,0 +1,53 @@
+%I A201201 #18 Mar 25 2024 07:01:51
+%S A201201 1,-4,1,18,-10,1,-96,86,-18,1,600,-756,246,-28,1,-4320,7092,-3168,552,
+%T A201201 -40,1,35280,-71856,41112,-9720,1070,-54,1,-322560,787824,-552240,
+%U A201201 165720,-24600,1878,-70,1,3265920,-9329760,7768080,-2835360,531480,-54516,3066,-88
+%N A201201 Coefficient triangle for the monic associated Laguerre-Sonin(e) polynomials of order one for parameter alpha=1.
+%C A201201 See A199577 for general comments on associated Laguerre-Sonin(e) polynomials of order m, and the Ismail reference.
+%C A201201 The monic row polynomials are La_n(1;1,x) = sum(a(n,k)*x^k,k=0..n), with the three term recurrence
+%C A201201 La_n(1;1,x) = (x-2*(n+1))*La_{n-1}{1;1,x) - n*(n+1)*La_{n-2}{1;1,x), La_{-1}{1;1,x)=0, La_0(1;1,x)=1.
+%C A201201 In the Ismail reference the non-monic associated Laguerre polynomials of order 1 appear on p. 160 in Theorem 5.6.1, eq. 5.6.11. The connection is: La_n(1;1,x)= L_n^{(alpha=1)}(x;1)*(n+1)!*(-1)^n.
+%C A201201 The e.g.f. gLa(1;1,z,x) for La_n(1;1,x) can be obtained from the o.g.f. G(1;1,z,x) for the non-monic version L_n^{alpha=1}(x;1) by gLa(1;1,z,x)= (d/dz) (z*G(1;1,-z,x)).
+%C A201201 G(1;1,z,x) satisfies an ordinary first order inhomogeneous differential equation:
+%C A201201 (d/dz) G(1;1,z,x) = (3/(1-z)+(1-x)/(1-z)^2-1/(z*(1-z)^2  z)^2))* G(1;1,z,x) + 1/(z*(1-z)^2), with G(1;1,z=0,x)=1. The standard solution is:
+%C A201201   G(1;1,z,x) = (exp(-x*z/(1-z))-1+z-x*exp(-x/(1-z))* (Ei(1,-x/(1-z))-Ei(1,-x)))/(z*(1-z)^2), with the exponential integral Ei(1,y)=int(exp(-t)/t,t=y..infty).
+%D A201201 M. E. H. Ismail (two chapters by W. Van Assche), Classical and Quantum Orthogonal Polynomials in One Variable, Cambridge University Press, 2005.
+%F A201201 a(n,k)=[x^k] La_n(1;1,x), n>=0, k=0,...,n.
+%F A201201 a(n,k)= (-1)^(n-k)*((n+1)*(n+1)!/((k+1)*(k+1)!))*
+%F A201201 binomial(n,k)*hypergeom(-(n-k),k,1; -(n+1),k+2; 1), 0<=k<=n. [Ismail, p. 161, eq. (5.6.18)].
+%F A201201 The e.g.f. gLa(1;1,z,x) for La_n(1;1,x) is exp(-x/(1+z))*x*(x-2*(1+z))*(Ei(1,-x/(1+z)) - Ei(1,-x))/(1+z)^4 + exp(x*z/(1+z))*(-x+2*(1+z))/(1+z)^4 +(1+z+x)/(1+z)^3 -2/(1+z)^2, with the exponential integral Ei.
+%F A201201 The e.g.f. gLa(1;1,z,x) for the Euler-derivative
+%F A201201   x*(d/dx) La_n(1;1,x) is x*exp(-x/(1+z))*(2*(1+z)-x)*
+%F A201201 (Ei(1,-x/(1+z)) - Ei(1,-x))/(1+z)^4 + (1+z-x)*(1-exp(x*z/(1+z)))/(1+z)^3.
+%F A201201 From this follows La_n(1;1,x) = (n+1)*La_n(1,x) -
+%F A201201   x*(d/dx)La_n(1;0,x). For La_n(1;0,x) see A199577 where it is called La_n(1;x).
+%e A201201 The triangle begins:
+%e A201201 n\k     0      1       2      3      4    5   6 7 ...
+%e A201201 0:      1
+%e A201201 1:     -4      1
+%e A201201 2:     18    -10       1
+%e A201201 3:    -96     86     -18      1
+%e A201201 4:    600   -756     246    -28      1
+%e A201201 5:  -4320   7092   -3168    552    -40    1
+%e A201201 6:  35280 -71856   41112  -9720   1070  -54   1
+%e A201201 7:-322560 787824 -552240 165720 -24600 1878 -70 1
+%e A201201 ...
+%p A201201 La := proc(n,x)
+%p A201201     option remember;
+%p A201201     if n= -1 then
+%p A201201         0;
+%p A201201     elif n = 0 then
+%p A201201         1;
+%p A201201     else
+%p A201201         (x-2*n-2)*procname(n-1,x)-n*(n+1)*procname(n-2,x) ;
+%p A201201     end if;
+%p A201201 end proc:
+%p A201201 A201201 := proc(n,k)
+%p A201201     coeftayl( La(n,x),x=0,k) ;
+%p A201201 end proc:
+%p A201201 seq(seq(A201201(n,k),k=0..n),n=0..12) ; # _R. J. Mathar_, Dec 07 2011
+%t A201201 a[n_, k_] := (-1)^(n-k)*((n+1)*(n+1)!/((k+1)*(k+1)!))*Binomial[n, k]*HypergeometricPFQ[{-(n-k), k, 1}, {-(n+1), k+2}, 1]; Table[a[n, k], {n, 0, 8}, {k, 0, n}] // Flatten (* _Jean-François Alcover_, Jun 21 2013 *)
+%Y A201201 Cf. A199577 (alpha=0 case), A201202 (row sums), A201203 (alternating row sums).
+%K A201201 sign,easy,tabl
+%O A201201 0,2
+%A A201201 _Wolfdieter Lang_, Dec 06 2011

@@ -1,0 +1,44 @@
+%I A219946 #28 Nov 18 2018 15:38:38
+%S A219946 1,1,1,1,0,1,1,0,0,1,1,0,1,0,1,1,0,2,2,0,1,1,0,1,0,1,0,1,1,0,4,4,4,4,
+%T A219946 0,1,1,0,5,0,6,0,5,0,1,1,0,6,8,16,16,8,6,0,1,1,0,13,0,37,0,37,0,13,0,
+%U A219946 1,1,0,16,16,92,136,136,92,16,16,0,1,1,0,25,0,245,0,545,0,245,0,25,0,1
+%N A219946 Number A(n,k) of tilings of a k X n rectangle using right trominoes and 2 X 2 tiles; square array A(n,k), n>=0, k>=0, read by antidiagonals.
+%H A219946 Alois P. Heinz, <a href="/A219946/b219946.txt">Antidiagonals n = 0..35, flattened</a>
+%H A219946 Wikipedia, <a href="https://en.wikipedia.org/wiki/Tromino">Tromino</a>
+%e A219946 A(4,4) = 6, because there are 6 tilings of a 4 X 4 rectangle using right trominoes and 2 X 2 tiles:
+%e A219946   .___.___. .___.___. .___.___. .___.___. .___.___. .___.___.
+%e A219946   | . | . | | ._|_. | | ._| . | | ._|_. | | ._|_. | | . |_. |
+%e A219946   |___|___| |_| . |_| |_| |___| |_| ._|_| |_|_. |_| |___| |_|
+%e A219946   | . | . | | |___| | | |___| | | |_| . | | . |_| | | |___| |
+%e A219946   |___|___| |___|___| |___|___| |___|___| |___|___| |___|___|
+%e A219946 Square array A(n,k) begins:
+%e A219946   1,  1,  1,  1,   1,    1,     1,      1,       1,        1, ...
+%e A219946   1,  0,  0,  0,   0,    0,     0,      0,       0,        0, ...
+%e A219946   1,  0,  1,  2,   1,    4,     5,      6,      13,       16, ...
+%e A219946   1,  0,  2,  0,   4,    0,     8,      0,      16,        0, ...
+%e A219946   1,  0,  1,  4,   6,   16,    37,     92,     245,      560, ...
+%e A219946   1,  0,  4,  0,  16,    0,   136,      0,    1128,      384, ...
+%e A219946   1,  0,  5,  8,  37,  136,   545,   2376,   10534,    46824, ...
+%e A219946   1,  0,  6,  0,  92,    0,  2376,   5504,   71248,   253952, ...
+%e A219946   1,  0, 13, 16, 245, 1128, 10534,  71248,  652036,  5141408, ...
+%e A219946   1,  0, 16,  0, 560,  384, 46824, 253952, 5141408, 44013568, ...
+%p A219946 b:= proc(n, l) option remember; local k, t;
+%p A219946       if max(l[])>n then 0 elif n=0 or l=[] then 1
+%p A219946     elif min(l[])>0 then t:=min(l[]); b(n-t, map(h->h-t, l))
+%p A219946     else for k do if l[k]=0 then break fi od;
+%p A219946          `if`(k>1 and l[k-1]=1, b(n, subsop(k=2, k-1=2, l)), 0)+
+%p A219946          `if`(k<nops(l) and l[k+1]=1, b(n, subsop(k=2, k+1=2, l)), 0)+
+%p A219946          `if`(k<nops(l) and l[k+1]=0, b(n, subsop(k=2, k+1=2, l))+
+%p A219946             b(n, subsop(k=1, k+1=2, l))+b(n, subsop(k=2, k+1=1, l)), 0)+
+%p A219946          `if`(k+1<nops(l) and l[k+1]=0 and l[k+2]=0,
+%p A219946             b(n, subsop(k=2, k+1=2, k+2=2, l)), 0)
+%p A219946       fi
+%p A219946     end:
+%p A219946 A:= (n, k)-> `if`(n>=k, b(n, [0$k]), b(k, [0$n])):
+%p A219946 seq(seq(A(n, d-n), n=0..d), d=0..14);
+%t A219946 b[n_, l_] := b[n, l] = Module[{k, t}, If[Max[l] > n , 0 , If [n == 0 || l == {},1 , If[Min[l] > 0, t = Min[l]; b[n-t, l-t], For[k = 1, k <= Length[l], k++, If[l[[k]] == 0 , Break[]]]; If[k > 1 && l[[k-1]] == 1, b[n, ReplacePart[l, {k -> 2, k-1 -> 2}]], 0] + If[k < Length[l] && l[[k+1]] == 1, b[n, ReplacePart[l, {k -> 2, k+1 -> 2}]], 0] + If[k < Length[l] && l[[k+1]] == 0, b[n, ReplacePart[l, {k -> 2, k+1 -> 2}]] + b[n, ReplacePart[l, {k -> 1, k+1 -> 2}]] + b[n, ReplacePart[l, {k -> 2, k+1 -> 1}]], 0]+If[k+1 < Length[l] && l[[k+1]] == 0 && l[[k+2]] == 0, b[n, ReplacePart[l, {k -> 2, k+1 -> 2, k+2 -> 2}]], 0]]]]]; a[n_, _] := If[n >= k, b[n, Array[0&, k]], b[k, Array[0&, n]]]; Table[Table[a[n, d-n], {n, 0, d}], {d, 0, 14}] // Flatten (* _Jean-François Alcover_, Nov 26 2013, translated from _Alois P. Heinz_'s Maple program *)
+%Y A219946 Columns (or rows) k=0-10 give: A000012, A000007, A052947, A077957, A165799, A190759, A219947, A219948, A219949, A219950, A219951.
+%Y A219946 Main diagonal gives: A219952.
+%K A219946 nonn,tabl
+%O A219946 0,18
+%A A219946 _Alois P. Heinz_, Dec 01 2012

@@ -1,0 +1,38 @@
+%I A356937 #10 Jan 01 2023 19:29:49
+%S A356937 1,1,3,9,29,94,310,1026,3411,11360,37886,126442,422203,1410189,
+%T A356937 4711039,15740098,52593430,175742438,587266782,1962469721,6558071499,
+%U A356937 21915580437,73237274083,244744474601,817889464220,2733235019732,9133973730633,30524096110942,102006076541264
+%N A356937 Number of multisets of intervals whose multiset union is of size n and covers an initial interval of positive integers.
+%C A356937 An interval such as {3,4,5} is a set with all differences of adjacent elements equal to 1.
+%H A356937 Andrew Howroyd, <a href="/A356937/b356937.txt">Table of n, a(n) for n = 0..200</a>
+%H A356937 Gus Wiseman, <a href="https://docs.google.com/document/d/e/2PACX-1vR-C_picqWlu0KOguRGWaPjhS2HY7m43aGXGDcolDh4Qtyy-pu2lkq5mbHAbiMSyQoiIESG2mCGtc2j/pub">Counting and ranking classes of multiset partitions related to gapless multisets</a>
+%e A356937 The a(1) = 1 through a(3) = 9 set multipartitions (multisets of sets):
+%e A356937   {{1}}  {{1,2}}    {{1,2,3}}
+%e A356937          {{1},{1}}  {{1},{1,2}}
+%e A356937          {{1},{2}}  {{1},{2,3}}
+%e A356937                     {{2},{1,2}}
+%e A356937                     {{3},{1,2}}
+%e A356937                     {{1},{1},{1}}
+%e A356937                     {{1},{1},{2}}
+%e A356937                     {{1},{2},{2}}
+%e A356937                     {{1},{2},{3}}
+%t A356937 allnorm[n_]:=If[n<=0,{{}},Function[s,Array[Count[s,y_/;y<=#]+1&,n]]/@Subsets[Range[n-1]+1]];
+%t A356937 sps[{}]:={{}};sps[set:{i_,___}]:=Join@@Function[s,Prepend[#,s]&/@sps[Complement[set,s]]]/@Cases[Subsets[set],{i,___}];
+%t A356937 mps[set_]:=Union[Sort[Sort/@(#/.x_Integer:>set[[x]])]&/@sps[Range[Length[set]]]];
+%t A356937 chQ[y_]:=Or[Length[y]<=1,Union[Differences[y]]=={1}];
+%t A356937 Table[Length[Select[Join@@mps/@allnorm[n],And@@chQ/@#&]],{n,0,5}]
+%o A356937 (PARI)
+%o A356937 EulerT(v)={Vec(exp(x*Ser(dirmul(v,vector(#v,n,1/n))))-1, -#v)}
+%o A356937 R(n,k) = {EulerT(vector(n, j, max(0, 1+k-j)))}
+%o A356937 seq(n) = {my(A=1+O(y*y^n)); for(k = 1, n, A += x^k*(1 + y*Ser(R(n,k), y) - polcoef(1/(1 - x*A) + O(x^(k+2)), k+1))); Vec(subst(A,x,1))} \\ _Andrew Howroyd_, Jan 01 2023
+%Y A356937 A000041 counts integer partitions, strict A000009.
+%Y A356937 A000670 counts patterns, ranked by A333217, necklace A019536.
+%Y A356937 A011782 counts multisets covering an initial interval.
+%Y A356937 Cf. A055887, A063834, A270995, A304969, A349050, A349055.
+%Y A356937 Intervals are counted by A000012, A001227, ranked by A073485.
+%Y A356937 Other conditions: A034691, A116540, A255906, A356933, A356942.
+%Y A356937 Other types: A107742, A356936, A356938, A356939.
+%K A356937 nonn
+%O A356937 0,3
+%A A356937 _Gus Wiseman_, Sep 08 2022
+%E A356937 Terms a(10) and beyond from _Andrew Howroyd_, Jan 01 2023

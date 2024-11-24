@@ -1,0 +1,49 @@
+%I A257806 #45 Feb 24 2023 12:10:25
+%S A257806 0,-1,0,1,0,1,2,1,2,1,2,3,2,3,4,5,6,5,4,5,6,5,6,5,4,3,4,3,4,5,4,5,6,7,
+%T A257806 6,5,6,7,6,7,8,7,6,7,8,9,10,11,12,11,12,13,12,11,10,9,10,9,10,11,10,
+%U A257806 11,12,13,12,11,12,13,12,13,12,13,14,13,12,11,10,9,10,11,12,11,10,9,10,11,12,13,14,15,14,15,16,15,16,15,14
+%N A257806 a(n) = A257808(n) - A257807(n).
+%C A257806 Alternative description: Start with a(0) = 0, and then to obtain each a(n), look at each successive term in the infinite trunk of inverted binary beanstalk, from A233271(1) onward, subtracting one from a(n-1) if A233271(n) is odd, and adding one to a(n-1) if A233271(n) is even.
+%C A257806 In other words, starting from zero, iterate the map x -> {x + 1 + number of nonleading zeros in the binary representation of x}, and note each time whether the result is odd or even: With odd results go one step down, and even results go one step up.
+%C A257806 After the zeros at a(0), a(2) and a(4) and -1 at a(1), the terms stay strictly positive for a long time, although from the terms of A257805 it can be seen that the sequence must again fall to the negative side somewhere between n = 541110611 and n = 1051158027 (i.e., A218600(33) .. A218600(34)). Indeed the fourth zero occurs at n = 671605896, and the second negative term right after that as a(671605897) = -1.
+%C A257806 The maximum positive value reached prior to the slide into negative territory is 2614822 for a(278998626) and a(278998628). - _Hans Havermann_, May 23 2015
+%H A257806 Antti Karttunen, <a href="/A257806/b257806.txt">Table of n, a(n) for n = 0..8727</a>
+%H A257806 Hans Havermann, <a href="http://chesswanks.com/num/a257806.png">Graph of 2*10^9 terms</a>
+%H A257806 Hans Havermann, <a href="http://chesswanks.com/num/a257806zeros.png">Detail graph of the eventual crossover to negative terms and a listing of its associated zeros</a>
+%H A257806 Wikipedia, <a href="http://en.wikipedia.org/wiki/Blancmange_curve">Blancmange curve</a>
+%F A257806 a(n) = A257808(n) - A257807(n).
+%F A257806 a(0) = 0; and for n >= 1, a(n) = a(n-1) + (-1)^A233271(n).
+%F A257806 Other identities. For all n >= 0:
+%F A257806 a(A218600(n+1)) = -A257805(n).
+%e A257806 We consider 0 to have no nonleading zeros, so first we get to 0 -> 0+1+0 = 1, and 1 is odd, so we go one step down from the starting value a(0)=0, and thus a(1) = -1.
+%e A257806 1 has no nonleading zeros, so we get 1 -> 1+1+0 = 2, and 2 is even, so we go one step up, and thus a(2) = 0.
+%e A257806 2 has one nonleading zero in binary "10", so we get 2 -> 2+1+1 = 4, and 4 is also even, so we go one step up, and thus a(3) = 1.
+%e A257806 4 has two nonleading zeros in binary "100", so we get 4 -> 4+2+1 = 7, 7 is odd, so we go one step down, and thus a(4) = 0.
+%o A257806 (PARI)
+%o A257806 A070939 = n->#binary(n)+!n; \\ From _M. F. Hasler_
+%o A257806 A080791 = n->if(n<1,0,(A070939(n)-hammingweight(n)));
+%o A257806 A233272 = n->(n + A080791(n) + 1);
+%o A257806 A257806_write_bfile(up_to_n) = { my(n,a_n=0,b_n=0); for(n=0, up_to_n, write("b257806.txt", n, " ", a_n); b_n = A233272(b_n); a_n += ((-1)^b_n)); };
+%o A257806 A257806_write_bfile(8727);
+%o A257806 (Python)
+%o A257806 def A257806_print_upto(n):
+%o A257806   a = 0
+%o A257806   b = 0
+%o A257806   for n in range(n):
+%o A257806      print(b, end=", ")
+%o A257806      ta = a
+%o A257806      c0 = 0
+%o A257806      while ta>0:
+%o A257806          c0 += 1-(ta&1)
+%o A257806          ta >>= 1
+%o A257806      a += 1 + c0
+%o A257806      b += ((2*(1-(a&1))) - 1)
+%o A257806 # By _Antti Karttunen_ after _Alex Ratushnyak_'s Python-code for A216431.
+%o A257806 (Scheme, two alternatives, the latter using memoizing definec-macro)
+%o A257806 (define (A257806 n) (- (A257808 n) (A257807 n)))
+%o A257806 (definec (A257806 n) (if (zero? n) n (+  (expt -1 (A233271 n)) (A257806 (- n 1)))))
+%Y A257806 Cf. A218600, A233271, A233272, A257807, A257808, A257803, A257804, A257805.
+%Y A257806 Cf. also A218542, A218543, A218789 and A233270 (compare the scatter plots).
+%K A257806 sign,base,look
+%O A257806 0,7
+%A A257806 _Antti Karttunen_, May 12 2015

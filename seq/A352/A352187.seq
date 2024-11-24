@@ -1,0 +1,59 @@
+%I A352187 #42 Mar 14 2022 23:40:13
+%S A352187 1,2,4,6,3,9,12,8,10,5,15,18,14,7,21,24,16,20,25,30,22,11,33,27,36,26,
+%T A352187 13,39,42,28,32,34,17,51,45,35,49,56,38,19,57,48,40,55,77,63,54,44,
+%U A352187 121,66,46,23,69,60,50,52,91,105,72,58,29,87,75,65,104,62,31,93,78,64,68,85,95,76,74,37,111,81,84,70,115,207,96,80
+%N A352187 a(1)=1, a(2)=2; thereafter, a(n) is the smallest number m not yet in the sequence such that gcd(m,a(n-1)) > 1 and gcd(m,a(n-2))=1, except that the second condition is ignored if it would imply that no choice for m were possible.
+%C A352187 This is an intermediate sequence between the EKG sequence A064413 (which only involves the first condition) and the Enots Wolley sequence A336957 (which involves both conditions).
+%C A352187 By ignoring the second condition when necessary we guarantee that a(n) always exists (because it always exists for the EKG sequence), and so no backtracking is needed in this sequence.
+%C A352187 The second condition is ignored precisely when every prime that divides a(n-1) also divides a(n-2).
+%C A352187 Conjecture 1: Every positive number appears.
+%C A352187 Conjecture 2: The primes are the slowest numbers to appear. That is, when a prime p appears here, all numbers less than p have already appeared. To put this another way, the record high points in A352188 ("when does n appear") are exactly the primes (and 1).
+%C A352187 Conjecture 3: When a prime p first divides some term, that term is 2*p, which is followed by p then 3p. [It seems possible that we could see 2*a, 6*b, 3*p, p, 2*p. This does not happen in the first 10000 terms, but I can't prove it never happens. I can prove that every prime divides some term, and that the primes appear in increasing order. Conjecture 3 might be refuted by a more extensive calculation.]
+%H A352187 N. J. A. Sloane, <a href="/A352187/b352187.txt">Table of n, a(n) for n = 1..20000</a>
+%p A352187 # To produce the first 1000 terms:
+%p A352187 with(numtheory):
+%p A352187 omega := proc(n) nops(numtheory[factorset](n)) end proc:
+%p A352187 hit:=Array(1..100000,0);
+%p A352187 M:=100000;
+%p A352187 a:=[1,2]; K:=1; L:=2; hit[1]:=1; hit[2]:=2;
+%p A352187 for n from 3 to 1000 do
+%p A352187 sw1:=0;
+%p A352187 # find a[n]
+%p A352187 if factorset(L) subset factorset(K) then
+%p A352187 # use EKG rule
+%p A352187   for i from 1 to M do
+%p A352187     if hit[i]=0 and igcd(i,L)>1 then a:=[op(a),i]; K:=L; L:=i; hit[i]:=n; sw1:=1; break; fi;
+%p A352187   od:
+%p A352187   if sw1=0 then error("failed EKG, n, i =", n,i); fi;
+%p A352187 else
+%p A352187 # use Enots Wolley rule
+%p A352187   for i from 1 to M do
+%p A352187     if hit[i]=0 and igcd(i,L)>1 and igcd(i,K)=1 then a:=[op(a),i]; K:=L; L:=i; hit[i]:=n; sw1:=1; break; fi;
+%p A352187   od:
+%p A352187   if sw1=0 then error("failed WOLLEY, n, i =", n,i); fi;
+%p A352187 fi:
+%p A352187 od:
+%p A352187 a;
+%o A352187 (Python)
+%o A352187 from math import gcd
+%o A352187 from itertools import count, islice
+%o A352187 from sympy import primefactors
+%o A352187 def A352187_gen(): # generator of terms
+%o A352187     bset, blist, mmax = {1,2}, [1,2], 3
+%o A352187     yield from blist
+%o A352187     while True:
+%o A352187         for m in count(mmax):
+%o A352187             if gcd(m,blist[-1]) > 1 and m not in bset:
+%o A352187                 if all(blist[-2] % p == 0 for p in primefactors(blist[-1])) or gcd(m,blist[-2]) == 1:
+%o A352187                     yield m
+%o A352187                     blist = [blist[-1],m]
+%o A352187                     bset.add(m)
+%o A352187                     while mmax in bset:
+%o A352187                         mmax += 1
+%o A352187                     break
+%o A352187 A352187_list = list(islice(A352187_gen(),20)) # _Chai Wah Wu_, Mar 14 2022
+%Y A352187 Cf. A064413, A336957, A352188 (when n appears), A352189, A352190.
+%Y A352187 Records: A352191, A352192.
+%K A352187 nonn
+%O A352187 1,2
+%A A352187 _N. J. A. Sloane_, Mar 12 2022

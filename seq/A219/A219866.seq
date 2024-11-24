@@ -1,0 +1,39 @@
+%I A219866 #37 Jul 26 2023 19:41:31
+%S A219866 1,1,1,1,0,1,1,1,1,1,1,1,2,1,1,1,1,4,4,1,1,1,2,7,14,7,2,1,1,2,15,41,
+%T A219866 41,15,2,1,1,3,30,143,184,143,30,3,1,1,4,60,472,1069,1069,472,60,4,1,
+%U A219866 1,5,123,1562,5624,9612,5624,1562,123,5,1
+%N A219866 Number A(n,k) of tilings of a k X n rectangle using dominoes and straight (3 X 1) trominoes; square array A(n,k), n>=0, k>=0, read by antidiagonals.
+%H A219866 Alois P. Heinz, <a href="/A219866/b219866.txt">Antidiagonals n = 0..22, flattened</a>
+%e A219866 A(2,3) = A(3,2) = 4, because there are 4 tilings of a 3 X 2 rectangle using dominoes and straight (3 X 1) trominoes:
+%e A219866   .___.   .___.   .___.   .___.
+%e A219866   | | |   |___|   | | |   |___|
+%e A219866   | | |   |___|   |_|_|   | | |
+%e A219866   |_|_|   |___|   |___|   |_|_|
+%e A219866 Square array A(n,k) begins:
+%e A219866   1,  1,  1,    1,     1,      1,        1,         1, ...
+%e A219866   1,  0,  1,    1,     1,      2,        2,         3, ...
+%e A219866   1,  1,  2,    4,     7,     15,       30,        60, ...
+%e A219866   1,  1,  4,   14,    41,    143,      472,      1562, ...
+%e A219866   1,  1,  7,   41,   184,   1069,     5624,     29907, ...
+%e A219866   1,  2, 15,  143,  1069,   9612,    82634,    707903, ...
+%e A219866   1,  2, 30,  472,  5624,  82634,  1143834,  15859323, ...
+%e A219866   1,  3, 60, 1562, 29907, 707903, 15859323, 354859954, ...
+%p A219866 b:= proc(n, l) option remember; local k, t;
+%p A219866       if max(l[])>n then 0 elif n=0 or l=[] then 1
+%p A219866     elif min(l[])>0 then t:=min(l[]); b(n-t, map(h->h-t, l))
+%p A219866     else for k do if l[k]=0 then break fi od;
+%p A219866          b(n, subsop(k=3, l))+ b(n, subsop(k=2, l))+
+%p A219866          `if`(k<nops(l) and l[k+1]=0, b(n, subsop(k=1, k+1=1, l)), 0)+
+%p A219866          `if`(k+1<nops(l) and l[k+1]=0 and l[k+2]=0,
+%p A219866              b(n, subsop(k=1, k+1=1, k+2=1, l)), 0)
+%p A219866       fi
+%p A219866     end:
+%p A219866 A:= (n, k)-> `if`(n>=k, b(n, [0$k]), b(k, [0$n])):
+%p A219866 seq(seq(A(n, d-n), n=0..d), d=0..10);
+%t A219866 b[n_, l_] := b[n, l] = Module[{k, t}, If [Max[l] > n, 0, If[ n == 0 || l == {}, 1, If[Min[l] > 0, t = Min[l]; b[n-t, l-t], k = Position[l, 0, 1][[1, 1]]; b[n, ReplacePart[l, k -> 3]] + b[n, ReplacePart[l, k -> 2]] + If[k < Length[l] && l[[k+1]] == 0, b[n, ReplacePart[l, {k -> 1, k+1 -> 1}]], 0] + If[k+1 < Length[l] && l[[k+1]] == 0 && l[[k+2]] == 0, b[n, ReplacePart[l, {k -> 1, k+1 -> 1, k+2 -> 1}]], 0]]]]]; a[n_, k_] := If[n >= k, b[n, Array[0&, k]], b[k, Array[0&, n]]]; Table[Table[a[n, d-n], {n, 0, d}], {d, 0, 10}] // Flatten (* _Jean-François Alcover_, Dec 16 2013, translated from Maple *)
+%Y A219866 Columns (or rows) k=0-10 give: A000012, A000931(n+3), A129682, A219867, A219862, A219868, A219869, A219870, A219871, A219872, A219873.
+%Y A219866 Main diagonal gives: A219874.
+%Y A219866 Cf. A219987, A364457.
+%K A219866 nonn,tabl
+%O A219866 0,13
+%A A219866 _Alois P. Heinz_, Nov 30 2012

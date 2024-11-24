@@ -1,0 +1,40 @@
+%I A364722 #15 May 02 2024 14:29:19
+%S A364722 1,3,7,13,19,21,37,39,49,57,61,67,73,79,91,97,103,109,111,139,147,151,
+%T A364722 163,169,181,183,193,199,201,211,219,237,241,271,273,291,307,309,313,
+%U A364722 327,331,337,343,349,361,367,373,379,409,417,421,427,433,453,463,469,487,489,507,523,541,543,547
+%N A364722 Numbers k that divide 1 + 2^m + 4^m for some m.
+%C A364722 If k = 3*j+1 is prime and 2^j - 1 is not divisible by k, then k is a term, as 1 + 2^j + 4^j = (2^(k-1)-1)/(2^j - 1) == 0 (mod k). - _Robert Israel_, Aug 06 2023
+%H A364722 Robert Israel, <a href="/A364722/b364722.txt">Table of n, a(n) for n = 1..10000</a>
+%e A364722 a(4) = 13 is a term because 1 + 2^4 + 4^4 = 273 = 21 * 13 is divisible by 13.
+%p A364722 filter:= proc(n) local x, r;
+%p A364722   for r in map(t -> subs(t,x), [msolve(1+x+x^2, n)]) do
+%p A364722     try
+%p A364722       NumberTheory:-ModularLog(r,2,n);
+%p A364722     catch "no solutions exist": next
+%p A364722     end try;
+%p A364722     return true
+%p A364722   od;
+%p A364722   false
+%p A364722 end proc:
+%p A364722 select(filter, [seq(i,i=1..1000,2)]);
+%o A364722 (Python)
+%o A364722 from itertools import count, islice
+%o A364722 from sympy import sqrt_mod_iter, discrete_log
+%o A364722 def A364722_gen(startvalue=1): # generator of terms >= startvalue
+%o A364722     if startvalue <= 1:
+%o A364722         yield 1
+%o A364722     if startvalue <= 3:
+%o A364722         yield 3
+%o A364722     for k in count(max(startvalue,4)):
+%o A364722         for d in (r>>1 for r in sqrt_mod_iter(-3,k) if r&1):
+%o A364722             try:
+%o A364722                 discrete_log(k,d,2)
+%o A364722             except:
+%o A364722                 continue
+%o A364722             yield k
+%o A364722             break
+%o A364722 A364722_list = list(islice(A364722_gen(),20)) # _Chai Wah Wu_, May 02 2024
+%Y A364722 Subset of A034017. Cf. A364724.
+%K A364722 nonn
+%O A364722 1,2
+%A A364722 _Robert Israel_, Aug 04 2023

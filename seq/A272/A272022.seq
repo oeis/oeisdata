@@ -1,0 +1,41 @@
+%I A272022 #30 Dec 29 2023 10:56:56
+%S A272022 13,14,16,17,20,30,31,32,34,35,37,38,50,70,71,73,74,76,79,91,92,95,97,
+%T A272022 98,110,113,118,119,131,133,199,311,337,373,733,772,775,778,779,919,
+%U A272022 991,1118,3337,7771,77779
+%N A272022 Look at the set of numbers obtained by permuting the digits of n in all possible ways, then remove n itself from the set. If the remaining numbers are all primes, then n is in the sequence.
+%C A272022 If it exists, a(46) > 5*10^11. - _Lars Blomberg_, Mar 31 2018
+%e A272022 119 is in the sequence because every permutation of its digits excluding 119 (i.e., 191 and 911) is a prime.
+%e A272022 11 is not in the sequence, because when 11 is removed from the set, no numbers are left.
+%p A272022 lis := [];
+%p A272022 for n from 1 to 10000 do
+%p A272022   nn := convert(n, base, 10);
+%p A272022   pp := combinat[permute](nn);
+%p A272022   if nops(pp) = 1 then
+%p A272022     next
+%p A272022   end if;
+%p A272022   lOk := true;
+%p A272022   for p in pp do
+%p A272022     if p = nn then
+%p A272022       next: #exclude n
+%p A272022     end if;
+%p A272022     if `not`(isprime(convert(p, base, 10, 10^nops(p))[])) then
+%p A272022       lOk := false; break
+%p A272022     end if
+%p A272022   end do;
+%p A272022   if lOk then
+%p A272022     lis := [op(lis), n]
+%p A272022   end if
+%p A272022 end do:
+%p A272022 lis := lis;
+%t A272022 rnapQ[n_]:=Module[{p=Rest[FromDigits/@Permutations[IntegerDigits[ n]]]},If[ Length[p]==0, False, AllTrue[p,PrimeQ]]]; Select[Range[80000],rnapQ] (* The program uses the AllTrue function from Mathematica version 10 *) (* _Harvey P. Dale_, Jan 24 2019 *)
+%o A272022 (PARI) isok(n) = {v = []; d = digits(n); for (k=0, (#d)!-1, p = numtoperm(#d, k); dp = vector(#d, j, d[p[j]]); np = subst(Pol(dp), x, 10); v = Set(concat(v, np));); v = setminus(v, Set(n)); if (#v == 0, return (0)); for (k=1, #v, if (!isprime(v[k]), return (0));); return (1);} \\ _Michel Marcus_, Apr 18 2016
+%o A272022 (Python)
+%o A272022 from sympy import isprime
+%o A272022 from itertools import count, islice, permutations
+%o A272022 def agen(): yield from (k for k in count(1) if len(set(s:=str(k)))!=1 and all((t:=int("".join(m)))==k or isprime(t) for m in permutations(s)))
+%o A272022 print(list(islice(agen(), 45))) # _Michael S. Branicky_, Dec 29 2023
+%Y A272022 Cf. A095179, A111347.
+%Y A272022 Cf. A003459. - _Altug Alkan_, Apr 18 2016
+%K A272022 nonn,base,more
+%O A272022 1,1
+%A A272022 _César Eliud Lozada_, Apr 18 2016

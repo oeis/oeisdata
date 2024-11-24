@@ -1,0 +1,47 @@
+%I A319298 #50 Aug 24 2021 08:11:33
+%S A319298 1,3,1,7,7,1,21,25,13,1,66,101,71,21,1,258,366,396,166,31,1,1079,1555,
+%T A319298 1877,1247,337,43,1,4987,7099,9199,7855,3305,617,57,1,25195,34627,
+%U A319298 47371,47245,27085,7681,1045,73,1,136723,184033,253108,284968,203278,79756,16126,1666,91,1
+%N A319298 Number T(n,k) of entries in the k-th blocks of all set partitions of [n] when blocks are ordered by increasing lengths (and increasing smallest elements); triangle T(n,k), n>=1, 1<=k<=n, read by rows.
+%H A319298 Alois P. Heinz, <a href="/A319298/b319298.txt">Rows n = 1..141, flattened</a>
+%H A319298 Wikipedia, <a href="https://en.wikipedia.org/wiki/Partition_of_a_set">Partition of a set</a>
+%e A319298 The 5 set partitions of {1,2,3} are:
+%e A319298   1   |2  |3
+%e A319298   1   |23
+%e A319298   2   |13
+%e A319298   3   |12
+%e A319298   123
+%e A319298 so there are 7 elements in the first (smallest) blocks, 7 in the second blocks and only 1 in the third blocks.
+%e A319298 Triangle T(n,k) begins:
+%e A319298       1;
+%e A319298       3,     1;
+%e A319298       7,     7,     1;
+%e A319298      21,    25,    13,     1;
+%e A319298      66,   101,    71,    21,     1;
+%e A319298     258,   366,   396,   166,    31,    1;
+%e A319298    1079,  1555,  1877,  1247,   337,   43,    1;
+%e A319298    4987,  7099,  9199,  7855,  3305,  617,   57,  1;
+%e A319298   25195, 34627, 47371, 47245, 27085, 7681, 1045, 73, 1;
+%e A319298   ...
+%p A319298 b:= proc(n, l) option remember; `if`(n=0, add(l[i]*
+%p A319298       x^i, i=1..nops(l)), add(binomial(n-1, j-1)*
+%p A319298       b(n-j, sort([l[], j])), j=1..n))
+%p A319298     end:
+%p A319298 T:= n-> (p-> (seq(coeff(p, x, i), i=1..n)))(b(n, [])):
+%p A319298 seq(T(n), n=1..12);
+%p A319298 # second Maple program:
+%p A319298 b:= proc(n, i, t) option remember; `if`(n=0, [1, 0], `if`(i>n, 0,
+%p A319298       add((p-> p+`if`(t>0 and t-j<1, [0, p[1]*i], 0))(b(n-i*j, i+1,
+%p A319298       max(0, t-j))/j!*combinat[multinomial](n, i$j, n-i*j)), j=0..n/i)))
+%p A319298     end:
+%p A319298 T:= (n, k)-> b(n, 1, k)[2]:
+%p A319298 seq(seq(T(n, k), k=1..n), n=1..12);  # _Alois P. Heinz_, Mar 02 2020
+%t A319298 b[n_, l_] := b[n, l] = If[n == 0, Sum[l[[i]] x^i, {i, 1, Length[l]}], Sum[ Binomial[n-1, j-1] b[n-j, Sort[Append[l, j]]], {j, 1, n}]];
+%t A319298 T[n_] := Function[p, Table[Coefficient[p, x, i], {i, 1, n}]][b[n, {}]];
+%t A319298 Table[T[n], {n, 1, 12}] // Flatten (* _Jean-François Alcover_, Dec 28 2018, after _Alois P. Heinz_ *)
+%Y A319298 Column k=1-10 gives A097147, A332942, A332943, A332944, A332945, A332946, A332947, A332948, A332949, A332950.
+%Y A319298 Row sums give A070071.
+%Y A319298 Cf. A319375, A322383.
+%K A319298 nonn,tabl
+%O A319298 1,2
+%A A319298 _Alois P. Heinz_, Dec 07 2018

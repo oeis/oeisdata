@@ -1,0 +1,35 @@
+%I A217654 #24 Dec 07 2019 12:06:13
+%S A217654 1,0,1,2,0,1,13,2,0,1,202,13,2,0,1,9390,202,13,2,0,1,1531336,9390,202,
+%T A217654 13,2,0,1,880492496,1531336,9390,202,13,2,0,1,1792477159408,880492496,
+%U A217654 1531336,9390,202,13,2,0,1,13026163465206704,1792477159408,880492496,1531336,9390,202,13,2,0,1
+%N A217654 Triangular array read by rows.  T(n,k) is the number of unlabeled directed graphs of n nodes that have exactly k isolated nodes.
+%C A217654 Row sums give A000273.
+%C A217654 Column k = 0 is A053598.
+%H A217654 Alois P. Heinz, <a href="/A217654/b217654.txt">Rows n = 0..43, flattened</a>
+%F A217654 O.g.f.: A(x)*(1-x)/(1-y*x) where A(x) is o.g.f. for A000273.
+%e A217654 Triangle T(n,k) begins:
+%e A217654         1;
+%e A217654         0,    1;
+%e A217654         2,    0,   1;
+%e A217654        13,    2,   0,  1;
+%e A217654       202,   13,   2,  0, 1;
+%e A217654      9390,  202,  13,  2, 0, 1;
+%e A217654   1531336, 9390, 202, 13, 2, 0, 1;
+%e A217654   ...
+%p A217654 b:= proc(n, i, l) `if`(n=0 or i=1, 1/n!*2^((p-> add(p[j]-1+add(
+%p A217654       igcd(p[k], p[j]), k=1..j-1)*2, j=1..nops(p)))([l[], 1$n])),
+%p A217654       add(b(n-i*j, i-1, [l[], i$j])/j!/i^j, j=0..n/i))
+%p A217654     end:
+%p A217654 g:= proc(n) option remember; b(n$2, []) end:
+%p A217654 T:= (n, k)-> g(n-k)-`if`(k<n, g(n-k-1), 0):
+%p A217654 seq(seq(T(n, k), k=0..n), n=0..10);  # _Alois P. Heinz_, Sep 04 2019
+%t A217654 Needs["Combinatorica`"]; f[list_]:=Insert[Select[list,#>0&],0,-2]; nn=10; s=Sum[NumberOfDirectedGraphs[n]x^n, {n,0,nn}]; Drop[Flatten[Map[f, CoefficientList[Series[s (1-x)/(1-y x), {x,0,nn}], {x,y}]]], 1]
+%t A217654 (* Second program: *)
+%t A217654 b[n_, i_, l_List] := If[n==0 || i==1, 1/n!*2^(Function[p, Sum[p[[j]] - 1 + Sum[GCD[p[[k]], p[[j]]], {k, 1, j - 1}]*2, {j, 1, Length[p]}]][Join[l, Array[1&, n]]]), Sum[b[n - i*j, i - 1, Join[l, Array[i&, j]]]/j!/i^j, {j, 0, n/i}]];
+%t A217654 g[n_] := g[n] = b[n, n, {}];
+%t A217654 T[n_, k_] := g[n - k] - If[k < n, g[n - k - 1], 0];
+%t A217654 Table[Table[T[n, k], {k, 0, n}], {n, 0, 10}] // Flatten (* _Jean-François Alcover_, Dec 07 2019, after _Alois P. Heinz_ *)
+%Y A217654 Cf. A000273, A053598.
+%K A217654 nonn,tabl
+%O A217654 0,4
+%A A217654 _Geoffrey Critzer_, Oct 09 2012

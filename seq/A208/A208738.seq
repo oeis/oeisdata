@@ -1,0 +1,58 @@
+%I A208738 #40 Mar 04 2024 15:04:31
+%S A208738 1,1,2,4,9,20,45,98,211,445,927,1909,3901,7920,16011,32260,64852,
+%T A208738 130157,260932,522691,1046489,2094438,4190798,8384100,16771453,
+%U A208738 33547094,67099568,134205996,268420714,536852452,1073718799,2147455019,4294931825,8589890772
+%N A208738 Number of multisets occurring as the peak heights multiset of a Dyck n-path.
+%C A208738 We use the definition given by Callan and Deutsch (see reference).  A Dyck n-path is a lattice path of n upsteps U (changing by (1,1)) and n downsteps D (changing by (1,-1)) that starts at the origin and never goes below the x-axis.  A peak is an occurrence of U D and the peak height is the y-coordinate of the vertex between its U and D.
+%C A208738 Also the number of nonempty multisets S of positive integers satisfying max(S) + |S| - 1 <= n  <= sum(S).
+%H A208738 Vincenzo Librandi, <a href="/A208738/b208738.txt">Table of n, a(n) for n = 0..1000</a>
+%H A208738 David Callan and Emeric Deutsch, <a href="https://www.jstor.org/stable/10.4169/amer.math.monthly.119.02.161">Problems and Solutions: 11624</a>, The Amer. Math. Monthly 119 (2012), no. 2, 161-162.
+%H A208738 Manosij Ghosh Dastidar and Michael Wallner, <a href="https://arxiv.org/abs/2402.17849">Bijections and congruences involving lattice paths and integer compositions</a>, arXiv:2402.17849 [math.CO], 2024. See p. 14.
+%F A208738 a(n) = 2^n - A000070(n-1).
+%F A208738 a(n) = 2*a(n-1) + A058884(n+1).
+%F A208738 G.f.: 1/(1-2*x) - (x/(1-x)) * Product_{m>=1} 1/(1-x^m).
+%e A208738 For n=2 the possibilities are UDUD, UUDD giving us multisets of {1,1} and {2} respectively. There are two distinct multisets so a(2) = 2.
+%p A208738 a:= proc(n) a(n):= `if`(n=0, 1, a(n-1)+2^(n-1)-combinat[numbpart](n-1)) end:
+%p A208738 seq(a(n), n=0..33);  # _Alois P. Heinz_, Feb 14 2024
+%t A208738 Table[2^(n) -  Sum[PartitionsP[k], {k, 0, n - 1}], {n, 1, 40}]
+%o A208738 (Python)
+%o A208738 #Returns all possible peak heights multisets
+%o A208738 def peakheightsmultisets(n):
+%o A208738 .#Making all possible paths
+%o A208738 .allpaths=list()
+%o A208738 .combinst=itertools.combinations(range(2*n),n)
+%o A208738 .for tup in combinst:
+%o A208738 ..a=[]
+%o A208738 ..for i in range(2*n):
+%o A208738 ...if i in tup:
+%o A208738 ....a.append(1)
+%o A208738 ...else:
+%o A208738 ....a.append(-1)
+%o A208738 ..allpaths.append(tuple(a))
+%o A208738 .#Now we take Dyck paths and form multisets as we go
+%o A208738 .output=set()
+%o A208738 .for x in allpaths:
+%o A208738 ..include=True
+%o A208738 ..peaklist=[]
+%o A208738 ..total=0
+%o A208738 ..for unit in x:
+%o A208738 ...if unit==-1 and lastunit==1:
+%o A208738 ....peaklist.append(total)
+%o A208738 ...total+=unit
+%o A208738 ...if total < 0:
+%o A208738 ....include=False
+%o A208738 ....break
+%o A208738 ...lastunit=unit
+%o A208738 ..if include:
+%o A208738 ...output.add(tuple(sorted(peaklist)))
+%o A208738 .return output
+%o A208738 (Python)
+%o A208738 #Using peakheightsmultisets(n)
+%o A208738 def a(n):
+%o A208738 .return len(peakheightsmultisets(n))
+%Y A208738 Cf. A000041, A000070, A000108, A058884.
+%Y A208738 Partial differences give A208739.
+%K A208738 nonn
+%O A208738 0,3
+%A A208738 _David Nacin_, Mar 01 2012
+%E A208738 a(0)=1 prepended by _Alois P. Heinz_, Feb 14 2024

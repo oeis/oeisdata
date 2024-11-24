@@ -1,0 +1,32 @@
+%I A259666 #19 Nov 14 2020 03:40:32
+%S A259666 1,1,3,18,181,2788,62590,1989540,87979661,5349559222,443306080232,
+%T A259666 49679250634068,7473835936432840,1498682325685621140,
+%U A259666 397803907069442925517,138847938093177059278212,63325340852730727078521540,37513306417359729218973719474,28701720575221087513434901774347
+%N A259666 Number of n X n prime Tesler matrices.
+%C A259666 Number of n X n upper triangular matrices A of nonnegative integers such that a_{1,i} + a_{2,i} + ... + a_{i-1,i} - a_{i,i} - a_{i,i+1} - ... - a_{i,n} = -1, whose simple graph G with vertices 1,2,3..,n and edges (i,j) if a_{i,j} > 0 is connected.
+%H A259666 A. Garsia and J. Haglund, <a href="https://www.math.upenn.edu/~jhaglund/preprints/formulafinal.pdf">A polynomial expression for the character of diagonal harmonics</a>, Ann. Comb., to appear, 2015.
+%F A259666 E.g.f.: 1 + log( 1+ sum(n>=1, A008608(n) * x^n / n! ) ).
+%e A259666 Example: For n =3 the a(3) = 3 matrices are [[0,1,0],[0,1,1],[0,0,2]], [[0,1,0],[0,0,2],[0,0,3]], [[0,0,1],[0,0,1],[0,0,3]].
+%e A259666 E.g.f.: 1 + x+(1/2)*x^2+(3/6)*x^3+(18/24)*x^4+(181/120)*x^5+(2788/720)*x^6 + ...
+%p A259666 multcoeff:=proc(n, f, coeffv, k)
+%p A259666    local i, currcoeff;
+%p A259666    currcoeff:=f;
+%p A259666    for i from 1 to n do
+%p A259666       currcoeff:=`if`(coeffv[i]=0, coeff(series(currcoeff, x[i], k), x[i], 0), coeff(series(currcoeff, x[i], k), x[i]^coeffv[i]));
+%p A259666    end do;
+%p A259666    return currcoeff;
+%p A259666 end proc:
+%p A259666 F:=n->mul(mul((1-x[i]*x[j]^(-1))^(-1), j=i+1..n), i=1..n):
+%p A259666 b := n -> multcoeff(n+1, F(n+1), [seq(1, i=1..n), -n], n+2):
+%p A259666 sa := 1 + log(1+ add(b(n)*x^n/n!,n=1..7)):
+%p A259666 a := n -> n!*coeff(series(sa,x,n+1),x,n):
+%p A259666 seq(a(i),i=1..6);
+%t A259666 b[n_, i_, l_] := b[n, i, l] = Function[{m}, If[m == 0, 1, If[i == 0, b[l[[1]] + 1, m - 1, ReplacePart[l, 1 -> Sequence[]]], Sum[b[n - j, i - 1, ReplacePart[l, i -> l[[i]] + j]], {j, 0, n}]]]][Length[l]];
+%t A259666 c[n_] := b[1, n-1, Array[0&, n-1]];
+%t A259666 a[n_] := a[n] = SeriesCoefficient[1 + Log[1 + Sum[c[k] x^k/k!, {k, 1, n}]], {x, 0, n}] n!;
+%t A259666 Table[Print[n, " ", a[n]]; a[n], {n, 1, 19}] (* _Jean-François Alcover_, Nov 14 2020, after _Alois P. Heinz_ in A008608 *)
+%Y A259666 Cf. A008608, A259485.
+%K A259666 nonn
+%O A259666 1,3
+%A A259666 _Alejandro H. Morales_, Jul 02 2015
+%E A259666 a(15)-a(19) from _Alois P. Heinz_, Jul 05 2015

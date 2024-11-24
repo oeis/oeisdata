@@ -1,0 +1,51 @@
+%I A219180 #52 Sep 08 2021 18:53:33
+%S A219180 1,0,1,0,1,0,1,1,0,1,1,0,0,1,0,0,1,0,0,1,1,0,1,0,0,1,1,0,1,1,0,0,1,1,
+%T A219180 0,0,1,1,0,0,2,1,0,1,0,0,1,0,0,2,2,0,1,1,1,0,0,2,2,0,0,1,2,1,0,0,2,2,
+%U A219180 0,1,0,2,2,0,0,3,2,0,0,1,2,2,0,0,2,3,1
+%N A219180 Number T(n,k) of partitions of n into k distinct prime parts; triangle T(n,k), n>=0, read by rows.
+%C A219180 T(n,k) is defined for all n>=0 and k>=0.  The triangle contains only elements with 0 <= k <= A024936(n).  T(n,k) = 0 for k > A024936(n).  Three rows are empty because there are no partitions of n into distinct prime parts for n in {1,4,6}.
+%H A219180 Alois P. Heinz, <a href="/A219180/b219180.txt">Rows n = 0..1000, flattened</a>
+%F A219180 G.f. of column k: Sum_{0<i_1<i_2<...<i_k} x^(Sum_{j=1..k} prime(i_j)).
+%F A219180 T(n,k) = [x^n*y^k] Product_{i>=1} (1+x^prime(i)*y).
+%e A219180 T(0,0) = 1: [], the empty partition.
+%e A219180 T(2,1) = 1: [2].
+%e A219180 T(5,1) = 1: [5], T(5,2) = 1: [2,3].
+%e A219180 T(16,2) = 2: [5,11], [3,13].
+%e A219180 Triangle T(n,k) begins:
+%e A219180   1;
+%e A219180   ;
+%e A219180   0, 1;
+%e A219180   0, 1;
+%e A219180   ;
+%e A219180   0, 1, 1;
+%e A219180   ;
+%e A219180   0, 1, 1;
+%e A219180   0, 0, 1;
+%e A219180   0, 0, 1;
+%e A219180   0, 0, 1, 1;
+%e A219180   0, 1;
+%e A219180   0, 0, 1, 1;
+%e A219180   ...
+%p A219180 b:= proc(n, i) option remember;
+%p A219180       `if`(n=0, [1], `if`(i<1, [], zip((x, y)->x+y, b(n, i-1),
+%p A219180        [0, `if`(ithprime(i)>n, [], b(n-ithprime(i), i-1))[]], 0)))
+%p A219180     end:
+%p A219180 T:= proc(n) local l; l:= b(n, numtheory[pi](n));
+%p A219180        while nops(l)>0 and l[-1]=0 do l:= subsop(-1=NULL, l) od; l[]
+%p A219180     end:
+%p A219180 seq(T(n), n=0..50);
+%t A219180 nn=20;a=Table[Prime[n],{n,1,nn}];CoefficientList[Series[Product[1+y x^a[[i]],{i,1,nn}],{x,0,nn}],{x,y}]//Grid  (* _Geoffrey Critzer_, Nov 21 2012 *)
+%t A219180 zip[f_, x_List, y_List, z_] := With[{m = Max[Length[x], Length[y]]}, f[PadRight[x, m, z], PadRight[y, m, z]]]; b[n_, i_] := b[n, i] = If[n == 0, {1}, If[i<1, {}, zip[Plus, b[n, i-1], Join[{0}, If[Prime[i] > n, {}, b[n-Prime[i], i-1]]], 0]]]; T[n_] := Module[{l}, l = b[n, PrimePi[n]]; While[Length[l]>0 && l[[-1]] == 0, l = ReplacePart[l, -1 -> Sequence[]]]; l]; Table[T[n], {n, 0, 50}] // Flatten (* _Jean-François Alcover_, Jan 29 2014, after _Alois P. Heinz_ *)
+%o A219180 (PARI)
+%o A219180 T(n)={ Vec(prod(k=1, n, 1 + isprime(k)*y*x^k + O(x*x^n))) }
+%o A219180 { my(t=T(20)); for(n=1, #t, print(if(t[n]!=0, Vecrev(t[n]), []))) } \\ _Andrew Howroyd_, Dec 22 2017
+%Y A219180 Columns k=0-10 give: A000007, A010051, A117929, A125688, A219198, A219199, A219200, A219201, A219202, A219203, A219204.
+%Y A219180 Row lengths are 1 + A024936(n).
+%Y A219180 Row sums give: A000586.
+%Y A219180 Last elements of rows give: A219181.
+%Y A219180 Row maxima give: A219182.
+%Y A219180 Least n with T(n,k) > 0 is A007504(k).
+%Y A219180 Cf. A000040, A117278, A219107.
+%K A219180 nonn,look,tabf
+%O A219180 0,41
+%A A219180 _Alois P. Heinz_, Nov 13 2012

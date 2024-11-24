@@ -1,0 +1,42 @@
+%I A290818 #25 Oct 14 2017 15:43:05
+%S A290818 2,3,3,4,11,4,5,24,24,5,6,47,94,47,6,7,88,272,272,88,7,8,163,774,1185,
+%T A290818 774,163,8,9,304,2230,4280,4280,2230,304,9,10,575,6542,15781,20106,
+%U A290818 15781,6542,575,10,11,1104,19452,60604,88512,88512,60604,19452,1104,11
+%N A290818 Array read by antidiagonals: T(m,n) = number of irredundant sets in the lattice (rook) graph K_m X K_n.
+%H A290818 Andrew Howroyd, <a href="/A290818/b290818.txt">Table of n, a(n) for n = 1..1275</a>
+%H A290818 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/IrredundantSet.html">Irredundant Set</a>
+%H A290818 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/RookGraph.html">Rook Graph</a>
+%F A290818 T(m,n) = A290632(m, n) + Sum_{k=0..m-1} Sum_{r=2*k..n-1} binomial(m,k) * binomial(n,r) * k! * A008299(r,k) * c(m-k,n-r) where c(m,n) = Sum_{i=0..m-1} binomial(n,i) * (n^i - n!*stirling2(i, n)).
+%e A290818 Array begins:
+%e A290818 ===============================================================
+%e A290818 m\n| 1   2     3      4       5        6        7         8
+%e A290818 ---+-----------------------------------------------------------
+%e A290818 1  | 2   3     4      5       6        7        8         9 ...
+%e A290818 2  | 3  11    24     47      88      163      304       575 ...
+%e A290818 3  | 4  24    94    272     774     2230     6542     19452 ...
+%e A290818 4  | 5  47   272   1185    4280    15781    60604    240073 ...
+%e A290818 5  | 6  88   774   4280   20106    88512   400728   1879744 ...
+%e A290818 6  | 7 163  2230  15781   88512   453271  2326534  12363513 ...
+%e A290818 7  | 8 304  6542  60604  400728  2326534 13169346  76446456 ...
+%e A290818 8  | 9 575 19452 240073 1879744 12363513 76446456 476777153 ...
+%e A290818 ...
+%t A290818 s[n_, k_]:=Sum[(-1)^i*Binomial[n, i] StirlingS2[n - i, k - i], {i, 0, Min[n, k]}];
+%t A290818 c[m_, n_, x_]:=Sum[Binomial[m, i] (n^i - n!*StirlingS2[i, n])*x^i, {i, 0, m - 1}];
+%t A290818 p[m_, n_, x_]:=Sum[Sum[Binomial[m, k] Binomial[n, r]* k!*s[r, k]*x^r*c[m - k, n - r, x], {r, 2k, n - 1}], {k,0, m - 1}];
+%t A290818 b[m_, n_, x_]:=m^n*x^n + n^m*x^m - If[n<=m, n!*x^m*StirlingS2[m, n], m!*x^n*StirlingS2[n, m]];
+%t A290818 T[m_, n_]:= b[m, n, 1] + p[m, n, 1];
+%t A290818 Table[T[n, m -n + 1], {m, 10}, {n, m}]//Flatten
+%t A290818 (* _Indranil Ghosh_, Aug 12 2017, after PARI code *)
+%o A290818 (PARI) \\ See A. Howroyd note in A290586 for explanation.
+%o A290818 s(n,k)=sum(i=0, min(n, k), (-1)^i * binomial(n, i) * stirling(n-i, k-i, 2) );
+%o A290818 c(m,n,x)=sum(i=0, m-1, binomial(m, i) * (n^i - n!*stirling(i, n, 2))*x^i);
+%o A290818 p(m,n,x)={sum(k=0, m-1, sum(r=2*k, n-1, binomial(m, k) * binomial(n, r) * k! * s(r, k) * x^r * c(m-k, n-r, x) ))}
+%o A290818 b(m,n,x) = m^n*x^n + n^m*x^m - if(n<=m, n!*x^m*stirling(m, n, 2), m!*x^n*stirling(n, m, 2));
+%o A290818 T(m,n) = b(m,n,1) + p(m,n,1);
+%o A290818 for(m=1,10,for(n=1,m,print1(T(n,m-n+1),", ")));
+%Y A290818 Row 2 is A290707 for n > 1.
+%Y A290818 Main diagonal is A290586.
+%Y A290818 Cf. A287274, A290632.
+%K A290818 nonn,tabl
+%O A290818 1,1
+%A A290818 _Andrew Howroyd_, Aug 11 2017

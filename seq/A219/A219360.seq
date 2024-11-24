@@ -1,0 +1,36 @@
+%I A219360 #50 Jun 06 2021 03:33:03
+%S A219360 1,2,3,4,5,8,6,10,7,12,9,11,18,16,13,22,15,14,17,23,19,20,34,21,24,25,
+%T A219360 26,33,27,40,32,42,29,28,30,46,31,37,35,39,36,38,41,43,45,44,47,48,65,
+%U A219360 49,52,50,54,51,53,66,72,55,56,57,73,68,63,58,59,61,60,82
+%N A219360 Starting from a(1)=1, for any n the sum of the next a(n) numbers is a prime. No repetition of numbers is allowed. At any step the minimum integer not yet used and not leading to a contradiction is chosen.
+%C A219360 Permutation of natural numbers.
+%H A219360 Andrew Howroyd, <a href="/A219360/b219360.txt">Table of n, a(n) for n = 1..10000</a> (terms 1..133 from Paolo P. Lava)
+%H A219360 <a href="/index/Per#IntegerPermutation">Index entries for sequences that are permutations of the natural numbers</a>
+%e A219360 a(1)=1 -> next term is 2, prime.
+%e A219360 a(2)=2 -> the sum of the next two terms 3 + 4 = 7, prime.
+%e A219360 a(3)=3 -> 4 + 5 + 8 = 17, prime.
+%e A219360 a(4)=4 -> 5 + 8 + 6 + 10 = 29, prime.
+%e A219360 a(5)=5 -> 8 + 6 + 10 + 7 + 12 = 43, prime.
+%e A219360 a(6)=8 but we also have a(7)=6 that must be covered before a(6).
+%e A219360 Therefore the sequence became: 1, 2, 3, 4, 5, 8, 6, 10, 7, 12, 9, 11, 18, ... with 10 + 7 + 12 + 9 + 11 + 18 = 67, prime.
+%e A219360 Then coming back to a(6)=8:  1, 2, 3, 4, 5, 8, 6, 10, 7, 12, 9, 11, 18, 16, ... with 6 + 10 + 7 + 12 + 9 + 11 + 18 + 16 = 89.
+%e A219360 It could happen that two or more sums must be satisfied at the same step. If it is not possible we must change the most recent entries. For example, the sequence up to a(30) is: 1, 2, 3, 4, 5, 8, 6, 10, 7, 12, 9, 11, 18, 16, 13, 22, 14, 15, 17, 23, 19, 20, 34, 21, 24, 25, 26, 33, 27, 40.
+%e A219360 Now a(13)=18 and a(17)=14 must be satisfied in a(31) but 16 + 13 + 22 + 14 + 15 + 17 + 23 + 19 + 20 + 34 + 21 + 24 + 25 + 26 + 33 + 27 + 40 = 389 (odd) and 15 + 17 + 23 + 19 + 20 + 34 + 21 + 24 + 25 + 26 + 33 + 27 + 40 = 324 (even) and no integer a(31) can satisfy the system 389 + a(31) = p1 and 324 + a(31) = p2, with p1 and p2 both prime. Therefore we must change a(17)=14 into a new minimum value, in this case a(17)=15, and restart the sequence from that point.
+%o A219360 (PARI)
+%o A219360 PTest(t,u)={for(i=1, #u, if(!isprime(t-u[i]), return(0))); 1}
+%o A219360 XTest(u)={forprime(p=2, #u, if(#Set(u%p) >= p, return(0))); 1}
+%o A219360 seq(n)={
+%o A219360   my(v=vector(n), f=vector(2*n), M=Map(), p=1, t=0);
+%o A219360   for(k=1, #v, my(S, X);
+%o A219360      while(f[p], p++);
+%o A219360      if(mapisdefined(M, k, &S), mapdelete(M,k), S=[]);
+%o A219360      for(q=p, oo, if(!f[q] && PTest(t+q, S),
+%o A219360         X = if(mapisdefined(M, q+k, &X), concat(X,[t+q]), [t+q]);
+%o A219360         if(XTest(X), mapput(M, q+k, X); t += q; f[q]=1; v[k]=q; break);
+%o A219360   )));
+%o A219360   v
+%o A219360 } \\ _Andrew Howroyd_, Jun 05 2021
+%Y A219360 Cf. A000040, A171007.
+%K A219360 nonn
+%O A219360 1,2
+%A A219360 _Paolo P. Lava_, Nov 19 2012

@@ -1,0 +1,40 @@
+%I A276080 #30 May 08 2021 23:05:25
+%S A276080 0,1,2,7,28,139,822,5677,44888,400021,3966970,43328131,516782292,
+%T A276080 6682867087,93130824878,1391321096089,22181459914672,375880800693097,
+%U A276080 6746469047955378,127851581333528191,2551039715319388940,53457519928692619411,1173770856436282074982,26948387795024752862917,645694707721735535710728,16117771962578155161812989
+%N A276080 a(n) = A276075(A206296(n)).
+%F A276080 a(n) = A276075(A206296(n)).
+%F A276080 From _Peter Bala_, Dec 24 2017: (Start)
+%F A276080 a(n) = Sum_{k = 0..floor((n-1)/2)} (n-2*k)!*binomial(n-k-1,k).
+%F A276080 O.g.f.: Sum_{n >= 1} n!*x^n/(1 - x^2)^n = x + 2*x^2 + 7*x^3 + 28*x^4 + ....
+%F A276080 Cf. A001339(n) = A276075(A007188(n)) for n >= 1, with o.g.f. Sum_{n >= 0} n!*x^n/(1 - x)^n. (End)
+%p A276080 A276080 := proc (n) add((n-2*k)*factorial(n-k-1)/factorial(k), k = 0..floor((1/2)*n-1/2)) end proc:
+%p A276080 seq(A276080(n), n = 0..25); # _Peter Bala_, Dec 24 2017
+%t A276080 Map[If[# == 1, 0, Total[FactorInteger[#] /. {p_, e_} /; p > 1 :> e PrimePi[p]!]] &, Nest[Append[#, (Times @@ Map[#1^#2 & @@ # &, FactorInteger[#] /. {p_, e_} /; e > 0 :> {Prime[PrimePi@ p + 1], e}] - Boole[# == 1] &@ #[[-1]]) #[[-2]]] &, {1, 2}, 24]] (* _Michael De Vlieger_, Dec 24 2017 *)
+%o A276080 (Scheme)
+%o A276080 (define (A276080 n) (A276075 (A206296 n)))
+%o A276080 ;; A more practical standalone program, that uses memoization-macro definec:
+%o A276080 (define (A276080 n) (sum_factorials_times_elements_in (A206296as_index_lists n)))
+%o A276080 (definec (A206296as_index_lists n) (cond ((zero? n) (list)) ((= 1 n) (list 1)) (else (map + (cons 0 (A206296as_index_lists (- n 1))) (append (A206296as_index_lists (- n 2)) (list 0 0))))))
+%o A276080 (define (sum_factorials_times_elements_in nums) (let loop ((s 0) (nums nums) (i 2) (f 1)) (cond ((null? nums) s) (else (loop (+ s (* (car nums) f)) (cdr nums) (+ 1 i) (* i f))))))
+%o A276080 (Python)
+%o A276080 from sympy import factorint, factorial as f, prime, primepi
+%o A276080 from operator import mul
+%o A276080 from functools import reduce
+%o A276080 def a003961(n):
+%o A276080     F=factorint(n)
+%o A276080     return 1 if n==1 else reduce(mul, [prime(primepi(i) + 1)**F[i] for i in F])
+%o A276080 def a276075(n):
+%o A276080     F=factorint(n)
+%o A276080     return 0 if n==1 else sum([F[i]*f(primepi(i)) for i in F])
+%o A276080 l=[1, 2]
+%o A276080 L=[0, 1]
+%o A276080 for n in range(2, 11):
+%o A276080     l.append(a003961(l[n - 1])*l[n - 2])
+%o A276080     L.append(a276075(l[n]))
+%o A276080 print(L) # _Indranil Ghosh_, Jun 21 2017
+%Y A276080 Cf. A000045, A000142, A206296, A276075.
+%Y A276080 Cf. also A276081, A001338, A007188.
+%K A276080 nonn
+%O A276080 0,3
+%A A276080 _Antti Karttunen_, Aug 18 2016

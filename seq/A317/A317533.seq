@@ -1,0 +1,39 @@
+%I A317533 #25 Aug 31 2020 03:32:10
+%S A317533 1,2,2,3,4,3,5,14,9,5,7,28,33,16,7,11,69,104,74,29,11,15,134,294,263,
+%T A317533 142,47,15,22,285,801,948,599,263,77,22,30,536,2081,3058,2425,1214,
+%U A317533 453,118,30,42,1050,5212,9769,9276,5552,2322,761,181,42,56,1918,12645,29538,34172,23770,11545,4179,1223,267,56
+%N A317533 Regular triangle read rows: T(n,k) = number of non-isomorphic multiset partitions of size n and length k.
+%H A317533 Andrew Howroyd, <a href="/A317533/b317533.txt">Table of n, a(n) for n = 1..1275</a> (first 50 rows)
+%e A317533 Non-isomorphic representatives of the T(3,2) = 4 multiset partitions:
+%e A317533   {{1},{1,1}}
+%e A317533   {{1},{1,2}}
+%e A317533   {{1},{2,2}}
+%e A317533   {{1},{2,3}}
+%e A317533 Triangle begins:
+%e A317533     1
+%e A317533     2    2
+%e A317533     3    4    3
+%e A317533     5   14    9    5
+%e A317533     7   28   33   16    7
+%e A317533    11   69  104   74   29   11
+%e A317533    15  134  294  263  142   47   15
+%t A317533 permcount[v_List] := Module[{m = 1, s = 0, k = 0, t}, For[i = 1, i <= Length[v], i++, t = v[[i]]; k = If[i > 1 && t == v[[i - 1]], k + 1, 1]; m *= t*k; s += t]; s!/m];
+%t A317533 c[p_List, q_List, k_] := SeriesCoefficient[1/Product[(1 - x^LCM[p[[i]], q[[j]]])^GCD[p[[i]], q[[j]]], {j, 1, Length[q]}, {i, 1, Length[p]}], {x, 0, k}];
+%t A317533 M[m_, n_, k_] := Module[{s = 0}, Do[Do[s += permcount[p]*permcount[q]*c[p, q, k], {q, IntegerPartitions[n]}], {p, IntegerPartitions[m]}]; s/(m!*n!)];
+%t A317533 T[n_, k_] := M[k, n, n] - M[k - 1, n, n];
+%t A317533 Table[T[n, k], {n, 1, 11}, {k, 1, n}] // Flatten (* _Jean-François Alcover_, Feb 08 2020, after _Andrew Howroyd_ *)
+%o A317533 (PARI) \\ See A318795 for definition of M.
+%o A317533 T(n,k)={M(k, n, n) - M(k-1, n, n)}
+%o A317533 for(n=1, 10, for(k=1, n, print1(T(n,k),", "));print) \\ _Andrew Howroyd_, Dec 28 2019
+%o A317533 (PARI) \\ Faster version.
+%o A317533 permcount(v) = {my(m=1, s=0, k=0, t); for(i=1, #v, t=v[i]; k=if(i>1&&t==v[i-1], k+1, 1); m*=t*k; s+=t); s!/m}
+%o A317533 K(q, t, n)={1/prod(j=1, #q, (1-x^lcm(t, q[j]) + O(x*x^n))^gcd(t, q[j]))}
+%o A317533 G(m,n)={my(s=0); forpart(q=m, s+=permcount(q)*exp(sum(t=1, n, (K(q, t, n)-1)/t) + O(x*x^n))); s/m!}
+%o A317533 A(n,m=n)={my(p=sum(k=0, m, G(k,n)*y^k)*(1-y)); matrix(n, m, n, k, polcoef(polcoef(p, n, x), k, y))}
+%o A317533 { my(T=A(10)); for(n=1, #T, print(T[n,1..n])) } \\ _Andrew Howroyd_, Aug 30 2020
+%Y A317533 Row sums are A007716. First and last columns are both A000041.
+%Y A317533 Cf. A034691, A255397, A255903, A255906, A317532, A334550.
+%K A317533 nonn,tabl
+%O A317533 1,2
+%A A317533 _Gus Wiseman_, Jul 30 2018
+%E A317533 Terms a(29) and beyond from _Andrew Howroyd_, Dec 28 2019

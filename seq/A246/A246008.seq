@@ -1,0 +1,27 @@
+%I A246008 #69 Jul 11 2024 10:47:02
+%S A246008 0,1,2,3,4,5,6,7,8,9,11,33,252,15451,54533545,445335474533544,
+%T A246008 34533547453354645335474533543,
+%U A246008 245335474533546453354745335454533547453354645335474533542,14533547453354645335474533545453354745335464533547453354445335474533546453354745335454533547453354645335474533541
+%N A246008 Let pal(k) denote the k-th palindrome, A002113(k), and let a(0)=0 and a(1)=1. For n >= 2, if a(n-1) = pal(k), then a(n) = pal(k+i), where i = a(n-1)-a(n-2).
+%C A246008 If instead we set a(n) = pal(a(n-1)), the sequence would have to start at the twelfth palindrome 22, and go from there: 12, 22, 121, 2112, 1112111, 112111111211, 1211111121111211111121, 211111121111211111121121111112111121111112, ..., . This sequence is interesting in that only the digits 1 and 2 appear so far (tested out to seventeen terms).
+%H A246008 Hiroaki Yamanouchi, <a href="/A246008/b246008.txt">Table of n, a(n) for n = 0..21</a>
+%H A246008 Hiroaki Yamanouchi, <a href="/A246008/a246008.py.txt">Python source code</a>
+%e A246008 For n=11, we have a(10)=11=pal(11), a(10)-a(9)=11-9=2, so a(11) = pal(11+2) = pal(13) = 33.
+%e A246008 a(12) = 252 because it is the twenty-second palindrome after 13, the difference between 11 and 33.
+%t A246008 NextPalindrome[n_] := Block[{l = Floor[ Log[ 10, n] + 1], idn = IntegerDigits[ n]}, If[ Union[ idn] == {9}, Return[n + 2], If[l < 2, Return[n + 1], If[ FromDigits[ Reverse[ Take[ idn, Ceiling[l/2]]]] > FromDigits[ Take[ idn, -Ceiling[l/2]]], FromDigits[ Join[ Take[ idn, Ceiling[l/2]], Reverse[ Take[ idn, Floor[l/2]]]]], idfhn = FromDigits[ Take[ idn, Ceiling[l/2]]] + 1; idp = FromDigits[ Join[ IntegerDigits[ idfhn], Drop[ Reverse[ IntegerDigits[ idfhn]], Mod[l, 2]]]]]]]]; f[s_List] := Block[{a = s[[-1]], b = s[[-2]]}, Append[s, Nest[ NextPalindrome@# &, a, a - b]]]; s = {0, 1}, Nest[f, s, 14]
+%t A246008 nthPalindrome[n_] := Block[{q = n + 1 - 10^Floor[ Log10[n + 1 - 10^Floor[ Log10[ n/10]] ]], c = Sum[ Floor[ Floor[ n/(11*10^(k - 1) - 1)]/(Floor[ n/(11*10^(k - 1) - 1)] - 1/10)] - Floor[ Floor[ n/(2*10^k - 1)]/(Floor[ n/(2*10^k - 1)] - 1/10)], {k, Floor[ Log10[ n]] }]}, Mod[q, 10]*11^c*10^Floor[ Log10[ q]] + Sum[ Floor[ Mod[q, 10^(k + 1)]/10^k]*10^(Floor[ Log10[ q]] - k) (10^(2 k + c) + 1) , {k, Floor[ Log10[ q]] }]] (* after the work of Eric A. Schmidt, see A002113 *) s = {0}; f[s_List] := Block[{k = s[[-1]] + 1}, Append[s, nthPalindrome[ k]]]; Nest[f, s, 18] (* _Robert G. Wilson v_, Sep 22 2014 *)
+%o A246008 (Python)
+%o A246008 from itertools import islice
+%o A246008 def A246008_gen(): # generator of terms
+%o A246008     a, b, k = 0, 1, 2
+%o A246008     yield 0
+%o A246008     while True:
+%o A246008         yield b
+%o A246008         a, b = b, int((c:=k-x)*x+int(str(c)[-2::-1] or 0) if (k:=k+b-a)<(x:=10**(len(str(k>>1))-1))+(y:=10*x) else (c:=k-y)*y+int(str(c)[::-1] or 0))
+%o A246008 A246008_list = list(islice(A246008_gen(),22)) # _Chai Wah Wu_, Jul 10 2024
+%Y A246008 Cf. A002113, A007097.
+%K A246008 nonn,base
+%O A246008 0,3
+%A A246008 _Robert G. Wilson v_, Sep 20 2014
+%E A246008 a(16)-a(17) from _Hiroaki Yamanouchi_, Sep 21 2014
+%E A246008 Edited by _N. J. A. Sloane_, Oct 01 2014

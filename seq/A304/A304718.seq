@@ -1,0 +1,59 @@
+%I A304718 #23 Aug 29 2021 12:01:53
+%S A304718 1,1,1,2,2,2,3,5,5,3,5,9,14,9,5,7,18,28,28,18,7,11,29,63,62,63,29,11,
+%T A304718 15,51,109,150,150,109,51,15,22,79,206,293,380,293,206,79,22,30,126,
+%U A304718 342,590,787,787,590,342,126,30,42,189,584,1061,1675,1760,1675,1061,584,189,42
+%N A304718 Number T(n,k) of domino tilings of Ferrers-Young diagrams of partitions of 2n using exactly k horizontally oriented dominoes; triangle T(n,k), n>=0, 0<=k<=n, read by rows.
+%H A304718 Alois P. Heinz, <a href="/A304718/b304718.txt">Rows n = 0..25, flattened</a>
+%H A304718 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/FerrersDiagram.html">Ferrers Diagram</a>
+%H A304718 Wikipedia, <a href="https://en.wikipedia.org/wiki/Domino_(mathematics)">Domino</a>
+%H A304718 Wikipedia, <a href="https://en.wikipedia.org/wiki/Domino_tiling">Domino tiling</a>
+%H A304718 Wikipedia, <a href="https://en.wikipedia.org/wiki/Ferrers_diagram">Ferrers diagram</a>
+%H A304718 Wikipedia, <a href="https://en.wikipedia.org/wiki/Mutilated_chessboard_problem">Mutilated chessboard problem</a>
+%H A304718 Wikipedia, <a href="https://en.wikipedia.org/wiki/Partition_(number_theory)">Partition (number theory)</a>
+%H A304718 Wikipedia, <a href="https://en.wikipedia.org/wiki/Young_tableau#Diagrams">Young tableau, Diagrams</a>
+%H A304718 <a href="/index/Do#domino">Index entries for sequences related to dominoes</a>
+%F A304718 T(n,k) = T(n,n-k).
+%e A304718 :   T(2,0) = 2   :   T(2,1) = 2       :   T(2,2) = 2         :
+%e A304718 :   ._.  ._._.   :   .___.  ._.___.   :   .___.  .___.___.   :
+%e A304718 :   | |  | | |   :   |___|  | |___|   :   |___|  |___|___|   :
+%e A304718 :   |_|  |_|_|   :   | |    |_|       :   |___|              :
+%e A304718 :   | |          :   |_|              :                      :
+%e A304718 :   |_|          :                    :                      :
+%e A304718 :                :                    :                      :
+%e A304718 Triangle T(n,k) begins:
+%e A304718    1;
+%e A304718    1,   1;
+%e A304718    2,   2,   2;
+%e A304718    3,   5,   5,    3;
+%e A304718    5,   9,  14,    9,    5;
+%e A304718    7,  18,  28,   28,   18,    7;
+%e A304718   11,  29,  63,   62,   63,   29,   11;
+%e A304718   15,  51, 109,  150,  150,  109,   51,   15;
+%e A304718   22,  79, 206,  293,  380,  293,  206,   79,  22;
+%e A304718   30, 126, 342,  590,  787,  787,  590,  342, 126,  30;
+%e A304718   42, 189, 584, 1061, 1675, 1760, 1675, 1061, 584, 189, 42;
+%e A304718   ...
+%p A304718 h:= proc(l, f) option remember; local k; if min(l[])>0 then
+%p A304718      `if`(nops(f)=0, 1, h(map(u-> u-1, l[1..f[1]]), subsop(1=[][], f)))
+%p A304718     else for k from nops(l) while l[k]>0 by -1 do od; expand(
+%p A304718         `if`(nops(f)>0 and f[1]>=k, x*h(subsop(k=2, l), f), 0)+
+%p A304718         `if`(k>1 and l[k-1]=0, h(subsop(k=1, k-1=1, l), f), 0))
+%p A304718       fi
+%p A304718     end:
+%p A304718 g:= l-> `if`(add(`if`(l[i]::odd, (-1)^i, 0), i=1..nops(l))=0,
+%p A304718         `if`(l=[], 1, h([0$l[1]], subsop(1=[][], l))), 0):
+%p A304718 b:= (n, i, l)-> `if`(n=0 or i=1, g([l[], 1$n]), b(n, i-1, l)
+%p A304718                   +b(n-i, min(n-i, i), [l[], i])):
+%p A304718 T:= n-> (p-> seq(coeff(p, x, i), i=0..degree(p)))(b(2*n$2, [])):
+%p A304718 seq(T(n), n=0..12);
+%t A304718 h[l_, f_] := h[l, f] = Module[{k}, If[Min[l] > 0, If[Length[f] == 0, 1, h[l[[1 ;; f[[1]] ]] - 1, ReplacePart[f, 1 -> Nothing]]], For[k = Length[l], l[[k]] > 0, k--]; If[Length[f] > 0 && f[[1]] >= k, x*h[ReplacePart[l, k -> 2], f], 0] + If[k > 1 && l[[k - 1]] == 0, h[ReplacePart[l, {k -> 1, k - 1 -> 1}], f], 0]]];
+%t A304718 g[l_] := If[Sum[If[OddQ[l[[i]]], (-1)^i, 0], {i, 1, Length[l]}] == 0, If[l == {}, 1, h[Table[0, {l[[1]]}], ReplacePart[l, 1 -> Nothing]]], 0];
+%t A304718 b[n_, i_, l_] := If[n == 0 || i == 1, g[Join[l, Table[1, {n}]]], b[n, i - 1, l] + b[n - i, Min[n - i, i], Append[l, i]]];
+%t A304718 T[n_] := CoefficientList[b[2n, 2n, {}], x];
+%t A304718 Table[T[n], {n, 0, 12}] // Flatten (* _Jean-François Alcover_, Aug 29 2021, after _Alois P. Heinz_ *)
+%Y A304718 Row sums give A304662.
+%Y A304718 Main diagonal and column k=0 give A000041.
+%Y A304718 T(n,floor(n/2)) gives A304719.
+%K A304718 nonn,tabl
+%O A304718 0,4
+%A A304718 _Alois P. Heinz_, May 17 2018

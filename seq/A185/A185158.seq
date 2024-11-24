@@ -1,0 +1,60 @@
+%I A185158 #44 Jul 02 2018 16:11:48
+%S A185158 1,1,0,1,0,1,1,0,1,1,1,0,1,2,2,1,0,1,2,3,2,1,0,1,3,5,5,3,1,0,1,3,7,8,
+%T A185158 7,3,1,0,1,4,9,14,14,9,4,1,0,1,4,12,20,25,20,12,4,1,0,1,5,15,30,42,42,
+%U A185158 30,15,5,1,0,1,5,18,40,66,75,66,40,18,5,1,0,1,6,22,55,99,132,132,99,55,22,6,1,0,1,6,26,70,143,212,245,212,143,70,26,6,1
+%N A185158 Triangular array read by rows: T(n,k) (n>=1, 0<=k<=n-1, except 0<=k<=1 when n=1) = coefficient of x^k in expansion of (1/n)*Sum_{d|n} (mobius(d)*(1+x^d)^(n/d)).
+%C A185158 T(n,k) is the number of binary Lyndon words of length n containing k ones. - _Joerg Arndt_, Oct 21 2012
+%H A185158 G. C. Greubel, <a href="/A185158/b185158.txt">Table of n, a(n) for the first 50 rows, flattened</a>
+%H A185158 Joerg Arndt, <a href="http://www.jjj.de/fxt/#fxtbook">Matters Computational (The Fxtbook)</a>, section 18.3.1 "Binary necklaces with fixed density", p. 382.
+%H A185158 Romeo Meštrović, <a href="https://arxiv.org/abs/1804.00992">Different classes of binary necklaces and a combinatorial method for their enumerations</a>, arXiv:1804.00992 [math.CO], 2018.
+%H A185158 Pieter Moree, <a href="http://dx.doi.org/10.1016/j.disc.2005.03.004">The formal series Witt transform</a>, Discr. Math. no. 295 vol. 1-3 (2005) 143-160. See Example 1.
+%F A185158 T(n,k) =  1/n * sum( d divides gcd(n,k), mu(d) * C(n/d,k/d) ). - _Joerg Arndt_, Oct 21 2012
+%F A185158 The prime rows are given by (1+x)^p/p, rounding non-integer coefficients to 0, e.g., (1+x)^2/2 = .5 + x + .5 x^2 gives (0,1,0), row 2 below. - _Tom Copeland_, Oct 21 2014
+%e A185158 The first few polynomials are:
+%e A185158 1+x
+%e A185158 x
+%e A185158 x+x^2
+%e A185158 x+x^2+x^3
+%e A185158 x+2*x^2+2*x^3+x^4
+%e A185158 x+2*x^2+3*x^3+2*x^4+x^5
+%e A185158 x+3*x^2+5*x^3+5*x^4+3*x^5+x^6
+%e A185158 ...
+%e A185158 The triangle begins:
+%e A185158 [ 1]  1, 1,
+%e A185158 [ 2]  0, 1,
+%e A185158 [ 3]  0, 1, 1,
+%e A185158 [ 4]  0, 1, 1, 1,
+%e A185158 [ 5]  0, 1, 2, 2, 1,
+%e A185158 [ 6]  0, 1, 2, 3, 2, 1,
+%e A185158 [ 7]  0, 1, 3, 5, 5, 3, 1,
+%e A185158 [ 8]  0, 1, 3, 7, 8, 7, 3, 1,
+%e A185158 [ 9]  0, 1, 4, 9, 14, 14, 9, 4, 1,
+%e A185158 [10]  0, 1, 4, 12, 20, 25, 20, 12, 4, 1,
+%e A185158 [11]  0, 1, 5, 15, 30, 42, 42, 30, 15, 5, 1,
+%e A185158 [12]  0, 1, 5, 18, 40, 66, 75, 66, 40, 18, 5, 1,
+%e A185158 [13]  0, 1, 6, 22, 55, 99, 132, 132, 99, 55, 22, 6, 1,
+%e A185158 [14]  0, 1, 6, 26, 70, 143, 212, 245, 212, 143, 70, 26, 6, 1
+%e A185158 ...
+%p A185158 with(numtheory);
+%p A185158 W:=r->expand((1/r)*add(mobius(d)*(1+x^d)^(r/d), d in divisors(r)));
+%p A185158 for n from 1 to 14 do
+%p A185158 lprint(W(n));
+%p A185158 od:
+%p A185158 for n from 1 to 14 do
+%p A185158 lprint(seriestolist(series(W(n),x,50)));
+%p A185158 od:
+%t A185158 T[n_, k_] := DivisorSum[GCD[n, k], MoebiusMu[#] Binomial[n/#, k/#]&]/n; Table[T[n, k], {n, 1, 14}, {k, 0, Max[1, n-1]}] // Flatten (* _Jean-François Alcover_, Dec 02 2015 *)
+%o A185158 (PARI)
+%o A185158 p(n) = if(n<=0, n==0, 'a0 + 1/n * sumdiv(n, d, moebius(d)*(1+x^d)^(n/d) ));
+%o A185158 /* print triangle: */
+%o A185158 for (n=1,17, v=Vec( polrecip(Pol(p(n),x)) ); v[1]-='a0; print(v) );
+%o A185158 /* _Joerg Arndt_, Oct 21 2012 */
+%o A185158 (PARI)
+%o A185158 T(n,k) = 1/n * sumdiv(gcd(n,k), d, moebius(d) * binomial(n/d,k/d) );
+%o A185158 /* print triangle: */
+%o A185158 { for (n=1, 17, for (k=0, max(1,n-1), print1(T(n,k),", "); ); print(); ); }
+%o A185158 /* _Joerg Arndt_, Oct 21 2012 */
+%Y A185158 Two other versions of this triangle are in A051168 and A092964.
+%K A185158 nonn,tabf
+%O A185158 1,14
+%A A185158 _N. J. A. Sloane_, Jan 23 2012

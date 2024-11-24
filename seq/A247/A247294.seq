@@ -1,0 +1,35 @@
+%I A247294 #11 May 27 2015 05:17:42
+%S A247294 1,1,2,4,7,1,14,3,30,7,64,18,141,43,1,316,102,5,713,249,16,1626,608,
+%T A247294 49,3740,1489,143,1,8659,3669,400,7,20176,9058,1109,29,47274,22407,
+%U A247294 3046,105,111302,55560,8282,357,1,263201,138004,22385,1149,9
+%N A247294 Triangle read by rows: T(n,k) is the number of weighted lattice paths B(n) having a total of k uhd and uHd strings.
+%C A247294 B(n) is the set of lattice paths of weight n that start in (0,0), end on the horizontal axis and never go below this axis, whose steps are of the following four kinds: h = (1,0) of weight 1, H = (1,0) of weight 2, u = (1,1) of weight 2, and d = (1,-1) of weight 1. The weight of a path is the sum of the weights of its steps.
+%C A247294 Row n contains 1 + floor(n/4) entries.
+%C A247294 Sum of entries in row n is A004148(n+1) (the 2ndary structure numbers).
+%C A247294 T(n,0) = A247295(n).
+%C A247294 Sum(k*T(n,k), k=0..n) = A247296(n).
+%H A247294 Alois P. Heinz, <a href="/A247294/b247294.txt">Rows n = 0..300, flattened</a>
+%H A247294 M. Bona and A. Knopfmacher, <a href="http://dx.doi.org/10.1007/s00026-010-0060-7">On the probability that certain compositions have the same number of parts</a>, Ann. Comb., 14 (2010), 291-306.
+%F A247294 G.f. G = G(t,z) satisfies G = 1 + z*G + z^2*G + z^3*G*(G - z - z^2 + t*z + t*z^2).
+%e A247294 T(6,1)=7 because we have uhdhh, huhdh, hhuhd, Huhd, uhdH, uHdh, and huHd.
+%e A247294 Triangle starts:
+%e A247294 1;
+%e A247294 1;
+%e A247294 2;
+%e A247294 4;
+%e A247294 7,1;
+%e A247294 14,3;
+%e A247294 30,7;
+%p A247294 eq := G = 1+z*G+z^2*G+z^3*(G-z-z^2+t*z+t*z^2)*G: G := RootOf(eq, G): Gser := simplify(series(G, z = 0, 25)): for n from 0 to 22 do P[n] := sort(coeff(Gser, z, n)) end do: for n from 0 to 22 do seq(coeff(P[n], t, k), k = 0 .. floor((1/4)*n)) end do; # yields sequence in triangular form
+%p A247294 # second Maple program:
+%p A247294 b:= proc(n, y, t) option remember; `if`(y<0 or y>n, 0, `if`(n=0, 1,
+%p A247294       expand(b(n-1, y-1, 0)*`if`(t=2, x, 1)+b(n-1, y, `if`(t=1, 2, 0))
+%p A247294       +`if`(n>1, b(n-2, y, `if`(t=1, 2, 0))+b(n-2, y+1, 1), 0))))
+%p A247294     end:
+%p A247294 T:= n-> (p-> seq(coeff(p, x, i), i=0..degree(p)))(b(n, 0$2)):
+%p A247294 seq(T(n), n=0..20);  # _Alois P. Heinz_, Sep 16 2014
+%t A247294 b[n_, y_, t_] := b[n, y, t] = If[y<0 || y>n, 0, If[n == 0, 1, Expand[b[n-1, y-1, 0]*If[t == 2, x, 1] + b[n-1, y, If[t == 1, 2, 0]] + If[n>1, b[n-2, y, If[t == 1, 2, 0]] + b[n-2, y+1, 1], 0]]]]; T[n_] := Function[{p}, Table[Coefficient[p, x, i], {i, 0, Exponent[p, x]}]][b[n, 0, 0]]; Table[T[n], {n, 0, 20}] // Flatten (* _Jean-François Alcover_, May 27 2015, after _Alois P. Heinz_ *)
+%Y A247294 Cf. A004148, A247290, A247292, A247295, A247296.
+%K A247294 nonn,tabf
+%O A247294 0,3
+%A A247294 _Emeric Deutsch_, Sep 16 2014

@@ -1,0 +1,40 @@
+%I A269924 #39 Aug 10 2018 17:36:35
+%S A269924 225225,12317877,12317877,351683046,792534015,351683046,7034538511,
+%T A269924 26225260226,26225260226,7034538511,111159740692,600398249550,
+%U A269924 993494827480,600398249550,111159740692,1480593013900,10743797911132,25766235457300,25766235457300,10743797911132,1480593013900,17302190625720,160576594766588,517592962672296,750260619502310,517592962672296,160576594766588,17302190625720
+%N A269924 Triangle read by rows: T(n,f) is the number of rooted maps with n edges and f faces on an orientable surface of genus 4.
+%C A269924 Row n contains n-7 terms.
+%H A269924 Gheorghe Coserea, <a href="/A269924/b269924.txt">Rows n = 8..208, flattened</a>
+%H A269924 Sean R. Carrell, Guillaume Chapuy, <a href="http://arxiv.org/abs/1402.6300">Simple recurrence formulas to count maps on orientable surfaces</a>, arXiv:1402.6300 [math.CO], 2014.
+%e A269924 Triangle starts:
+%e A269924 n\f  [1]           [2]           [3]           [4]
+%e A269924 [8]  225225;
+%e A269924 [9]  12317877,     12317877;
+%e A269924 [10] 351683046,    792534015,    351683046;
+%e A269924 [11] 7034538511,   26225260226,  26225260226,  7034538511;
+%e A269924 [12] ...
+%t A269924 Q[0, 1, 0] = 1; Q[n_, f_, g_] /; n<0 || f<0 || g<0 = 0;
+%t A269924 Q[n_, f_, g_] := Q[n, f, g] = 6/(n+1)((2n-1)/3 Q[n-1, f, g] + (2n-1)/3 Q[n - 1, f-1, g] + (2n-3)(2n-2)(2n-1)/12 Q[n-2, f, g-1] + 1/2 Sum[l = n-k; Sum[v = f-u; Sum[j = g-i; Boole[l >= 1 && v >= 1 && j >= 0] (2k-1) (2l-1) Q[k-1, u, i] Q[l-1, v, j], {i, 0, g}], {u, 1, f}], {k, 1, n}]);
+%t A269924 Table[Q[n, f, 4], {n, 8, 14}, {f, 1, n-7}] // Flatten (* _Jean-François Alcover_, Aug 10 2018 *)
+%o A269924 (PARI)
+%o A269924 N = 14; G = 4; gmax(n) = min(n\2, G);
+%o A269924 Q = matrix(N + 1, N + 1);
+%o A269924 Qget(n, g) = { if (g < 0 || g > n/2, 0, Q[n+1, g+1]) };
+%o A269924 Qset(n, g, v) = { Q[n+1, g+1] = v };
+%o A269924 Quadric({x=1}) = {
+%o A269924   Qset(0, 0, x);
+%o A269924   for (n = 1, length(Q)-1, for (g = 0, gmax(n),
+%o A269924     my(t1 = (1+x)*(2*n-1)/3 * Qget(n-1, g),
+%o A269924        t2 = (2*n-3)*(2*n-2)*(2*n-1)/12 * Qget(n-2, g-1),
+%o A269924        t3 = 1/2 * sum(k = 1, n-1, sum(i = 0, g,
+%o A269924        (2*k-1) * (2*(n-k)-1) * Qget(k-1, i) * Qget(n-k-1, g-i))));
+%o A269924     Qset(n, g, (t1 + t2 + t3) * 6/(n+1))));
+%o A269924 };
+%o A269924 Quadric('x);
+%o A269924 concat(apply(p->Vecrev(p/'x), vector(N+1 - 2*G, n, Qget(n-1 + 2*G, G))))
+%Y A269924 Columns f=1-10 give: A288271 f=1, A288272 f=2, A288273 f=3, A288274 f=4, A288275 f=5, A288276 f=6, A288277 f=7, A288278 f=8, A288279 f=9, A288280 f=10.
+%Y A269924 Cf. A035309, A269921, A269922, A269923, A269925, A270406, A270407, A270408, A270409, A270410, A270412.
+%Y A269924 Row sums give A215402 (column 4 of A269919).
+%K A269924 nonn,tabl
+%O A269924 8,1
+%A A269924 _Gheorghe Coserea_, Mar 15 2016

@@ -1,0 +1,20 @@
+%I A339063 #10 Dec 03 2020 07:35:12
+%S A339063 1,4,13,43,141,467,1588,5544,19966,74344,286395,1141611,4707358,
+%T A339063 20063872,88312177,400980431,1875954361,9032585846,44709095467,
+%U A339063 227245218669,1184822316447,6330552351751,34630331194626,193785391735685,1108363501628097,6474568765976164
+%N A339063 Number of unlabeled simple graphs with n edges rooted at two noninterchangeable vertices.
+%e A339063 The a(1) = 4 cases correspond to a single edge which can be attached to zero, one or both of the roots.
+%t A339063 permcount[v_] := Module[{m = 1, s = 0, k = 0, t}, For[i = 1, i <= Length[v], i++, t = v[[i]]; k = If[i > 1 && t == v[[i - 1]], k + 1, 1]; m *= t*k; s += t]; s!/m];
+%t A339063 edges[v_, t_] := Product[With[{g = GCD[v[[i]], v[[j]]]}, t[v[[i]]*v[[j]]/ g]^g], {i, 2, Length[v]}, {j, 1, i-1}]*Product[With[{c = v[[i]]}, t[c]^Quotient[c-1, 2]*If[OddQ[c], 1, t[c/2]]], {i, 2, Length[v]}];
+%t A339063 G[n_, x_, r_] := Module[{s = 0}, Do[s += permcount[p]*edges[Join[r, p], 1+x^#&], {p, IntegerPartitions[n]}]; s/n!];
+%t A339063 seq[n_] := Module[{A = O[x]^n}, G[2n, x+A, {1, 1}]//CoefficientList[#, x]&];
+%t A339063 seq[15] (* _Jean-François Alcover_, Dec 03 2020, after _Andrew Howroyd_ *)
+%o A339063 (PARI)
+%o A339063 permcount(v) = {my(m=1, s=0, k=0, t); for(i=1, #v, t=v[i]; k=if(i>1&&t==v[i-1], k+1, 1); m*=t*k; s+=t); s!/m}
+%o A339063 edges(v, t) = {prod(i=2, #v, prod(j=1, i-1, my(g=gcd(v[i], v[j])); t(v[i]*v[j]/g)^g )) * prod(i=1, #v, my(c=v[i]); t(c)^((c-1)\2)*if(c%2, 1, t(c/2)))}
+%o A339063 G(n, x, r)={my(s=0); forpart(p=n, s+=permcount(p)*edges(concat(r, Vec(p)), i->1+x^i)); s/n!}
+%o A339063 seq(n)={my(A=O(x*x^n)); Vec((G(2*n, x+A, [1, 1])))}
+%Y A339063 Cf. A000664, A053419 (one root), A304070, A339040, A339064, A339065.
+%K A339063 nonn
+%O A339063 0,2
+%A A339063 _Andrew Howroyd_, Nov 22 2020

@@ -1,0 +1,65 @@
+%I A283657 #66 Apr 03 2023 10:36:13
+%S A283657 0,1,2,3,4,5,6,7,8,9,10,11,12,13,16,17,19,20,23,28,31,32,40,43,61,64,
+%T A283657 79,92,101,104,127,128,148,167,191,199,256,313,347,356,596,692,701,
+%U A283657 1004,1228,1268,1709,2617,3539,3824,5807,10501,10691,11279,12391,14479
+%N A283657 Numbers m such that 2^m + 1 has at most 2 distinct prime factors.
+%C A283657 Using comment in A283364, note that if a(n) is odd > 9, then it is prime.
+%C A283657 503 <= a(41) <= 596. - _Robert Israel_, Mar 13 2017
+%C A283657 Could (4^p + 1)/5^t be prime, where p is prime, 5^t is the highest power of 5 dividing 4^p + 1, other than for p=2, 3 and 5? - _Vladimir Shevelev_, Mar 14 2017
+%C A283657 In his message to seqfans from Mar 15 2017, _Jack Brennen_ beautifully proved that there are no more primes of such form. From his proof one can see also that there are no terms of the form 2*p > 10 in the sequence. - _Vladimir Shevelev_, Mar 15 2017
+%C A283657 Where A046799(n)=2. - _Robert G. Wilson v_, Mar 15 2017
+%C A283657 From _Giuseppe Coppoletta_, May 16 2017: (Start)
+%C A283657 The only terms that are not in A066263 are those m giving 2^m + 1 = prime (i.e. m = 0 and any number m such that 2^m + 1 is a Fermat prime) and the values of m giving 2^m + 1 = power of a prime, giving m = 3 as the only possible case (by Mihăilescu-Catalan's result, see links).
+%C A283657 For the relation with Fermat numbers and for other possible terms to check, see comments in A073936 and A066263.
+%C A283657 All terms after a(59) refer to probabilistic primality tests for 2^a(n) + 1  (see Caldwell's link for the list of the largest certified Wagstaff primes).
+%C A283657 After a(65), the values 267017, 269987, 374321, 986191, 4031399 and 4101572 are also terms, but there still remains the remote possibility of some gaps in between. In addition, 13347311 and 13372531 are also terms, but possibly much further along in the numbering (see comments in A000978).
+%C A283657 (End).
+%H A283657 Giuseppe Coppoletta, <a href="/A283657/b283657.txt">Table of n, a(n) for n = 1..65</a>
+%H A283657 Jack Brennen, <a href="http://list.seqfan.eu/oldermail/seqfan/2017-March/017363.html">Primes of the form (4^p+1)/5^t, Seqfan (Mar 15 2017)</a>.
+%H A283657 C. Caldwell's The Top Twenty <a href="https://t5k.org/top20/page.php?id=67">Wagstaff primes</a>.
+%H A283657 Mersennewiki, <a href="http://mersennewiki.org/index.php/2_Plus_Tables">Factorizations Of Cunningham Numbers C+(2,n) (tables)</a>.
+%H A283657 Samuel S. Wagstaff, <a href="http://www.cerias.purdue.edu/homes/ssw/cun/index.html">The Cunningham Project</a>.
+%H A283657 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/CatalansConjecture.html">Catalan's Conjecture</a>.
+%H A283657 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/ZsigmondyTheorem.html">Zsigmondy Theorem</a>.
+%e A283657 0 is a term as 2^0 + 1 = 2 is a prime.
+%e A283657 10 is a term as 2^10 + 1 = 5^2 * 41.
+%e A283657 14 is not a term as 2^14 + 1 = 5 * 29 * 113.
+%p A283657 # this uses A002587[i] for i<=500, e.g., from the b-file for that sequence
+%p A283657 count:= 0:
+%p A283657 for i from 0 to 500 do
+%p A283657   m:= 0;
+%p A283657   r:= (2^i+1);
+%p A283657   if i::odd then
+%p A283657     m:= 1;
+%p A283657     r:= r/3^padic:-ordp(r,3);
+%p A283657   elif i > 2 then
+%p A283657     q:= max(numtheory:-factorset(i));
+%p A283657     if q > 2 then
+%p A283657       m:= 1;
+%p A283657       r:= r/B[i/q]^padic:-ordp(r,A002587[i/q]);
+%p A283657     fi
+%p A283657   fi;
+%p A283657   if r mod B[i] = 0 then m:= m+1;
+%p A283657       j:= padic:-ordp(r, A002587[i]);
+%p A283657       r:= r/B[i]^j;
+%p A283657   fi;
+%p A283657   mmax:= m;
+%p A283657   if isprime(r) then m:= m+1; mmax:= m
+%p A283657   elif r > 1 then mmax:= m+2
+%p A283657   fi;
+%p A283657   if mmax <= 2 or (m <= 1 and m + nops(numtheory:-factorset(r)) <= 2) then
+%p A283657        count:= count+1;
+%p A283657      A[count]:= i;
+%p A283657   fi
+%p A283657 od:
+%p A283657 seq(A[i],i=1..count); # _Robert Israel_, Mar 13 2017
+%t A283657 Select[Range[0, 313], PrimeNu[2^# + 1]<3 &] (* _Indranil Ghosh_, Mar 13 2017 *)
+%o A283657 (PARI) for(n=0, 313, if(omega(2^n + 1)<3, print1(n,", "))) \\ _Indranil Ghosh_, Mar 13 2017
+%Y A283657 Cf. A002587, A046799, A283364, A073936, A000978, A127317, A092559, A019434, A066263.
+%Y A283657 Contains 4*A057182.
+%K A283657 nonn
+%O A283657 1,3
+%A A283657 _Vladimir Shevelev_, Mar 13 2017
+%E A283657 a(16)-a(38) from _Peter J. C. Moses_, Mar 13 2017
+%E A283657 a(39)-a(40) from _Robert Israel_, Mar 13 2017
+%E A283657 a(41)-a(65) from _Giuseppe Coppoletta_, May 08 2017

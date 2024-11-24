@@ -1,0 +1,48 @@
+%I A360570 #36 Mar 01 2023 14:29:04
+%S A360570 6,12,21,34,49,51,58,68,72,92,100,106,121,133,138,156,172,175,195,196,
+%T A360570 219,243,262,274,297,327,337,359,373,405,409,428,466,491,506,531,548,
+%U A360570 551,583,593,614,658,681,685,689,740,753,778,800,804,830,851,857,884
+%N A360570 Numbers m such that m concatenated with k produces a cube for some 0 <= k <= m.
+%C A360570 Numbers k such that A243092(k) <> A245631(k).
+%H A360570 Chai Wah Wu, <a href="/A360570/b360570.txt">Table of n, a(n) for n = 1..10000</a>
+%e A360570 64 = 4^3 is a cube and 4 <= 6, thus 6 is a term.
+%e A360570 343 = 7^3 is a cube and 3 <= 34, thus 34 is a term.
+%e A360570 1000 = 10^3 is a cube and 0 <= 100, thus 100 is a term.
+%e A360570 5359375 = 175^3 is a cube and 375 <= 5359, thus 5359 is a term.
+%p A360570 filter:= proc(n) local d,a,b,r,rmin,i;
+%p A360570   for d from 1 to ilog10(n)+1 do
+%p A360570     a:=ceil((10^d*n)^(1/3));
+%p A360570     b:= floor((10^d*(n+1))^(1/3));
+%p A360570  if d = 1 then rmin:= 0 else rmin:= 10^(d-1) fi;
+%p A360570     for i from a to b do
+%p A360570       r:= i^3 -10^d*n;
+%p A360570       if r >= min(10^d,n+1) then break fi;
+%p A360570       if r < rmin then next fi;
+%p A360570       return true
+%p A360570     od
+%p A360570   od;
+%p A360570   false
+%p A360570 end proc:
+%p A360570 select(filter, [$1..1000]); # _Robert Israel_, Feb 22 2023
+%o A360570 (Python)
+%o A360570 from itertools import count, islice
+%o A360570 from sympy import integer_nthroot
+%o A360570 def A360570_gen(startvalue=1): # generator of terms >= startvalue
+%o A360570     for n in count(max(startvalue,1)):
+%o A360570         if integer_nthroot(m:=10*n,3)[1]:
+%o A360570             yield n
+%o A360570         else:
+%o A360570             a = 1
+%o A360570             while (k:=(integer_nthroot(a*(m+1)-1,3)[0]+1)**3-m*a)>=10*a:
+%o A360570                 a *= 10
+%o A360570                 if a > n:
+%o A360570                     break
+%o A360570             else:
+%o A360570                 if k <= n:
+%o A360570                     yield n
+%o A360570 A360570_list = list(islice(A360570_gen(),20))
+%o A360570 (PARI) is(n) = { for (k=0, n, if (ispower(n*10^max(1,#digits(k))+k, 3), return (1))); return (0) } \\ _Rémy Sigrist_, Feb 20 2023
+%Y A360570 Cf. A243092, A245631.
+%K A360570 nonn,base
+%O A360570 1,1
+%A A360570 _Chai Wah Wu_, Feb 20 2023

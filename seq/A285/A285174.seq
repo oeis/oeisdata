@@ -1,0 +1,44 @@
+%I A285174 #19 Apr 21 2017 11:38:10
+%S A285174 1,0,0,0,1,0,1,0,2,0,7,0,7,4,38,0,52,44,192,34,445,328,1061,658,3431,
+%T A285174 2266,7293,7632,24322,17946,58812,70006,171467,166364,488958,581520,
+%U A285174 1290879,1599416,3972675,4807640,10523661,14798098,31868794,41478042,89608805,131175180,259840862,371465030
+%N A285174 a(n) is the number of Dyck paths of (2,3)-knight moves of size n.
+%C A285174 A Dyck path of (s,r)-knight moves of size n is a path in ZxZ which:
+%C A285174 (1) is made only of steps (s,-r),(s,r),(r,-s),(r,s);
+%C A285174 (2) starts at (0,0) and ends at (n,0);
+%C A285174 (3) never goes strictly below the x-axis.
+%H A285174 Gheorghe Coserea, <a href="/A285174/b285174.txt">Table of n, a(n) for n = 0..400</a>
+%H A285174 Gheorghe Coserea, <a href="/A285174/a285174.mzn.txt">MiniZinc model for generating solutions</a>
+%H A285174 J. Labelle and Y.-N. Yeh, <a href="http://dx.doi.org/10.1016/0166-218X(92)90286-J">Dyck paths of knight moves</a>, Discrete Applied Math., 24 (1989), 213-221.
+%F A285174 0 = x^16*y^8 - x^12*(2*x^3+1)*y^7 + x^11*(2*x^3+x+2)*y^6 - x^8*(2*x^5+2*x^3+x^2+1)*y^5 + x^4*(x^8+4*x^6+1)*y^4 - x^4*(2*x^5+2*x^3+x^2+1)*y^3 + x^3*(2*x^3 + x + 2)*y^2 - (2*x^3+1)*y + 1, where y(x) is the g.f. [Labelle and Yeh, 1989, Theorem 3.4]
+%F A285174 From _Vaclav Kotesovec_, Apr 21 2017: (Start)
+%F A285174 a(n) ~ sqrt((s*(-3 + (3 + 2*r + 6*r^3)*s - r*(2 + 3*r^2 + 7*r^3 + 9*r^5)*s^2 + 2*(r + 10*r^7 + 3*r^9)*s^3 - r^5*(4 + 5*r^2 + 11*r^3 + 13*r^5)*s^4 + r^8*(11 + 6*r + 14*r^3)*s^5 - 3*r^9*(2 + 5*r^3)*s^6 + 8*r^13*s^7)) / (r*(2 + r^3*(2 - 3*s) - 6*r^4*s - 6*r^6*s + 2*r^7*(12 - 5*s)*s^2 - 10*r^5*s^3 - 20*r^10*s^3 + 30*r^11*s^4 - 42*r^12*s^5 + 28*r^13*s^6 + 10*r^8*s^3*(-2 + 3*s) + r*(1 - 3*s + 6*s^2) + 3*r^9*s^2*(2 + 5*s^2 - 7*s^3)))) / (sqrt(2*Pi) * r^(n - 1/2) * n^(3/2)), where
+%F A285174 r = 0.56519771738363939643752801324703081609848397675955382755548381... and
+%F A285174 s = 1.35503954183039159917814688295718993182959905413029119006926443... are roots of the system of equations
+%F A285174 1 + r^3*(2 + r + 2*r^3)*s^2 + r^4*(1 + 4*r^6 + r^8)*s^4 + r^11*(2 + r + 2*r^3)*s^6 + r^16*s^8 = (1 + 2*r^3)*s*(1 + r^4*s^2 + r^6*s^2 + r^8*s^4 + r^10*s^4 + r^12*s^6) and
+%F A285174 2*r^3*s*(2 + r + 2*r^3 + 2*r*(1 + 4*r^6 + r^8)*s^2 + 3*r^8*(2 + r + 2*r^3)*s^4 + 4*r^13*s^6) = (1 + 2*r^3)*(1 + 3*r^4*s^2 + 3*r^6*s^2 + 5*r^8*s^4 + 5*r^10*s^4 + 7*r^12*s^6).
+%F A285174 a(n+1)/a(n) tends to 1/r = 1.769292354238631415240409464335033492670553045898857...
+%F A285174 (End)
+%e A285174 For n=10 the a(10)=7 solutions are:
+%e A285174 3 2 5 4
+%e A285174 3 4 5 2
+%e A285174 3 5 2 4
+%e A285174 3 5 4 2
+%e A285174 5 3 2 4
+%e A285174 5 3 4 2
+%e A285174 5 4 3 2
+%e A285174 where the steps are encoded as follows: 2 <-> (2,-3), 3 <-> (2,3), 4 <-> (3,-2), 5 <-> (3,2).
+%o A285174 (PARI)
+%o A285174 x='x; y = 'y;
+%o A285174 Fxy = x^16*y^8 - x^12*(2*x^3+1)*y^7 + x^11*(2*x^3+x+2)*y^6 - x^8*(2*x^5+2*x^3+x^2+1)*y^5 + x^4*(x^8+4*x^6+1)*y^4 - x^4*(2*x^5+2*x^3+x^2+1)*y^3 + x^3*(2*x^3 + x + 2)*y^2 - (2*x^3+1)*y + 1;
+%o A285174 seq(N) = {
+%o A285174   my(y0 = 1 + O('x^N), y1=0, n=1);
+%o A285174   while(n++,
+%o A285174     y1 = y0 - subst(Fxy, y, y0)/subst(deriv(Fxy, y), y, y0);
+%o A285174     if (y1 == y0, break()); y0 = y1); Vec(y0);
+%o A285174 };
+%o A285174 seq(48)
+%Y A285174 Cf. A005220.
+%K A285174 nonn,walk
+%O A285174 0,9
+%A A285174 _Gheorghe Coserea_, Apr 15 2017

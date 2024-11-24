@@ -1,0 +1,54 @@
+%I A213276 #29 Jun 01 2022 08:55:38
+%S A213276 1,1,0,1,1,0,1,2,1,0,1,3,4,1,0,1,4,9,5,1,0,1,5,16,18,9,1,0,1,6,25,46,
+%T A213276 36,14,1,0,1,7,36,95,118,74,27,1,0,1,8,49,171,315,276,165,46,1,0,1,9,
+%U A213276 64,280,711,895,712,367,91,1,0,1,10,81,428,1414,2506,2535,1805,869,162,1,0
+%N A213276 Number A(n,k) of n-length words w over a k-ary alphabet such that for every prefix z of w we have #(z,a_i) = 0 or #(z,a_i) >= #(z,a_j) for all j>i and #(z,a_i) counts the occurrences of the i-th letter in z; square array A(n,k), n>=0, k>=0, read by antidiagonals.
+%H A213276 Alois P. Heinz, <a href="/A213276/b213276.txt">Antidiagonals n = 0..24, flattened</a>
+%F A213276 T(n,k) = Sum_{i=0..k} C(k,i) * A257783(n,k-i).
+%e A213276 A(0,k) = 1: the empty word.
+%e A213276 A(n,1) = 1: (a)^n for alphabet {a}.
+%e A213276 A(1,k) = k: number of words = size of the alphabet.
+%e A213276 A(2,k) = k^2: all words with 2 letters from the alphabet.
+%e A213276 A(3,2) = 5: aaa, aab, aba, baa, bbb for alphabet {a,b}.
+%e A213276 A(3,3) = 18: aaa, aab, aac, aba, abc, aca, acb, baa, bac, bbb, bbc, bca, bcb, caa, cab, cba, cbb, ccc.
+%e A213276 A(4,2) = 9: aaaa, aaab, aaba, aabb, abaa, abab, baaa, baab, bbbb.
+%e A213276 A(5,2) = 14: aaaaa, aaaab, aaaba, aaabb, aabaa, aabab, aabba, abaaa, abaab, ababa, baaaa, baaab, baaba, bbbbb.
+%e A213276 Square array A(n,k) begins:
+%e A213276   1, 1,  1,   1,    1,    1,     1,     1, ...
+%e A213276   0, 1,  2,   3,    4,    5,     6,     7, ...
+%e A213276   0, 1,  4,   9,   16,   25,    36,    49, ...
+%e A213276   0, 1,  5,  18,   46,   95,   171,   280, ...
+%e A213276   0, 1,  9,  36,  118,  315,   711,  1414, ...
+%e A213276   0, 1, 14,  74,  276,  895,  2506,  6104, ...
+%e A213276   0, 1, 27, 165,  712, 2535,  8151, 23527, ...
+%e A213276   0, 1, 46, 367, 1805, 7280, 25781, 83916, ...
+%p A213276 A:= (n, k)-> h(n, k, 0, []):
+%p A213276 h:= proc(n, k, m, l) option remember;
+%p A213276       `if`(n=0 and k=0, b(l), `if`(k=0 or n>0 and n<m, 0,
+%p A213276        add(h(n-j, k-1, max(m, j), [j, l[]]), j=max(1,m)..n)
+%p A213276           +h(n, k-1, m, [0, l[]], [])))
+%p A213276     end:
+%p A213276 b:= proc(l) option remember;
+%p A213276       `if`({l[]} minus {0}={}, 1, add(`if`(g(l, i),
+%p A213276        b(subsop(i=l[i]-1, l)), 0), i=1..nops(l)))
+%p A213276     end:
+%p A213276 g:= proc(l, i) local j;
+%p A213276       if l[i]<1     then return false
+%p A213276     elif l[i]>1     then for j from i+1 to nops(l) do
+%p A213276       if l[i]<=l[j] then return false
+%p A213276     elif l[j]>0     then break
+%p A213276       fi od fi; true
+%p A213276     end:
+%p A213276 seq(seq(A(n, d-n), n=0..d), d=0..14);
+%t A213276 a[n_, k_] := h[n, k, 0, {}];
+%t A213276 h[n_, k_, m_, l_] := h[n, k, m, l] = If[n == 0 && k === 0, b[l], If[k == 0 || n > 0 && n < m, 0, Sum[h[n-j, k-1, Max[m, j], Join[{j}, l]], {j, Max[1, m], n}] + h[n, k-1, m, Join[{0}, l]]]];
+%t A213276 b[l_] := b[l] = If[Complement[l, {0}] == {}, 1, Sum[If[g[l, i], b[ReplacePart[l, i -> l[[i]]-1]], 0], {i, 1, Length[l]}]];
+%t A213276 g[l_, i_] := Module[{j}, If[l[[i]] < 1, Return[False], If[l[[i]] > 1, For[ j = i+1, j <= Length[l], j++, If[l[[i]] <= l[[j]], Return[False], If[l[[j]] > 0, Break[]]]]]]; True];
+%t A213276 Table[Table[a[n, d-n], {n, 0, d}], {d, 0, 14}] // Flatten (* _Jean-François Alcover_, Dec 11 2013, translated from Maple *)
+%Y A213276 Columns k=0-10 give: A000007, A000012, A213290, A213291, A213292, A213293, A213294, A213295, A213296, A213297, A213298.
+%Y A213276 Rows n=0-10 give: A000012, A001477, A000290, A081435(k-1), A213283, A213284, A213285, A213286, A213287, A213288, A213289.
+%Y A213276 Main diagonal gives A321704.
+%Y A213276 Cf. A182172, A213275, A257783.
+%K A213276 nonn,tabl
+%O A213276 0,8
+%A A213276 _Alois P. Heinz_, Jun 08 2012

@@ -1,0 +1,35 @@
+%I A276084 #29 Mar 10 2021 03:19:28
+%S A276084 0,1,0,1,0,2,0,1,0,1,0,2,0,1,0,1,0,2,0,1,0,1,0,2,0,1,0,1,0,3,0,1,0,1,
+%T A276084 0,2,0,1,0,1,0,2,0,1,0,1,0,2,0,1,0,1,0,2,0,1,0,1,0,3,0,1,0,1,0,2,0,1,
+%U A276084 0,1,0,2,0,1,0,1,0,2,0,1,0,1,0,2,0,1,0,1,0,3,0,1,0,1,0,2,0,1,0,1,0,2,0,1,0,1,0,2,0,1,0,1,0,2,0,1,0,1,0,3
+%N A276084 a(n) = Number of trailing zeros in primorial base representation of n (A049345); largest k such that A002110(k) divides n.
+%C A276084 Terms begin from a(1)=0 because for zero the count is ambiguous.
+%C A276084 From _Amiram Eldar_, Mar 10 2021: (Start)
+%C A276084 The asymptotic density of the occurrences of k is (prime(k+1)-1)/A002110(k+1).
+%C A276084 The asymptotic mean of this sequence is Sum_{k>=1} 1/A002110(k) = 0.705230... (A064648). (End)
+%H A276084 Antti Karttunen, <a href="/A276084/b276084.txt">Table of n, a(n) for n = 1..2310</a>
+%H A276084 <a href="/index/Pri#primorialbase">Index entries for sequences related to primorial base</a>
+%F A276084 a(n) = A257993(n)-1.
+%F A276084 Other identities. For all n >= 1:
+%F A276084 A053589(n) = A002110(a(n)).
+%F A276084 a(n) = A001221(A053589(n)) = A001221(A340346(n)). - _Peter Munn_, Jan 14 2021
+%e A276084 For n=24, which is "400" in primorial base (as 24 = 4*(3*2*1) + 0*(2*1) + 0*1, see A049345), there are two trailing zeros, thus a(24) = 2.
+%t A276084 Table[If[# == 0, 0, j = #; While[! Divisible[n, Times @@ Prime@ Range@ j], j--]; j] &@ If[OddQ@ n, 0, k = 1; While[Times @@ Prime@ Range[k + 1] <= n, k++]; k], {n, 120}] (* or *)
+%t A276084 nn = 120; b = MixedRadix[Reverse@ Prime@ Range@ PrimePi[nn + 1]]; Table[Length@ TakeWhile[Reverse@ IntegerDigits[n, b], # == 0 &], {n, nn}] (* Version 10.2, or *)
+%t A276084 f[n_] := Block[{a = {{0, n}}}, Do[AppendTo[a, {First@ #, Last@ #} &@ QuotientRemainder[a[[-1, -1]], Times @@ Prime@ Range[# - i]]], {i, 0, #}] &@ NestWhile[# + 1 &, 0, Times @@ Prime@ Range[# + 1] <= n &]; Rest[a][[All, 1]]]; Table[Length@ TakeWhile[Reverse@ f@ n, # == 0 &], {n, 120}] (* _Michael De Vlieger_, Aug 30 2016 *)
+%o A276084 (Scheme)
+%o A276084 (define (A276084 n) (let loop ((n n) (i 1)) (let* ((p (A000040 i)) (d (modulo n p))) (if (not (zero? d)) (- i 1) (loop (/ (- n d) p) (+ 1 i))))))
+%o A276084 (Python)
+%o A276084 from sympy import nextprime, primepi
+%o A276084 def a053669(n):
+%o A276084     p = 2
+%o A276084     while True:
+%o A276084         if n%p!=0: return p
+%o A276084         else: p=nextprime(p)
+%o A276084 def a(n): return primepi(a053669(n)) - 1 # _Indranil Ghosh_, May 12 2017
+%Y A276084 Cf. A000040, A001221, A002110, A049345, A053589, A064648, A340346.
+%Y A276084 One less than A257993.
+%Y A276084 Differs from the related A230403 for the first time at n=24.
+%K A276084 nonn,base
+%O A276084 1,6
+%A A276084 _Antti Karttunen_, Aug 22 2016

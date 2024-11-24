@@ -1,0 +1,72 @@
+%I A373226 #20 Jun 21 2024 15:34:53
+%S A373226 0,1,2,5,6,9,10,13,18,25,26,29,30,33,38,45,46,49,50,53,58,65,74,85,90,
+%T A373226 97,110,125,126,129,130,133,138,145,146,149,150,153,158,165,174,185,
+%U A373226 190,197,210,225,226,229,230,233
+%N A373226 Number of points in a diagonal Vicsek fractal subset of an n X n square.
+%H A373226 Wikipedia, <a href="https://en.wikipedia.org/wiki/Vicsek_fractal">Vicsek fractal</a>.
+%F A373226 Conjecture: a(n) = O(n^log_3(5)). This is motivated by the log_3(5) Hausdorff dimension of the diagonal Vicsek fractal.
+%F A373226 Conjecture: a(3n) = 5*a(n). This is motivated by the recursive construction of the diagonal Vicsek fractal.
+%F A373226 Conjecture: a(2n+1) = A151907(n)
+%e A373226 For n=3, a(3)=5 by counting x's in the following ASCII pattern:
+%e A373226   x.x
+%e A373226   .x.
+%e A373226   x.x
+%e A373226 For n=4, a(4)=6 by counting x's in the following ASCII pattern:
+%e A373226   x...
+%e A373226   .x.x
+%e A373226   ..x.
+%e A373226   .x.x
+%e A373226 For n=5, a(5)=9 by counting x's in the following ASCII pattern:
+%e A373226   x...x
+%e A373226   .x.x.
+%e A373226   ..x..
+%e A373226   .x.x.
+%e A373226   x...x
+%e A373226 Generally for odd n, one can construct a diagonal Vicsek fractal on a 3^k X 3^k matrix such that 3^k >= n: place an n X n square in the center and count the x's.
+%e A373226 For even n, there are 4 ways to most "centrally" place an n X n square; however, due to 4-fold symmetry of the diagonal Vicsek fractal they result in the same value. In our ASCII convention above we use the top-left selection.
+%o A373226 (Python)
+%o A373226 import copy
+%o A373226 def combine(matrix): #accepts a matrix of matrices and fuses them
+%o A373226     aggregate = []
+%o A373226     for row in matrix:
+%o A373226         for j in range(0,len(matrix[0][0])):
+%o A373226             agg_row = []
+%o A373226             for block in row:
+%o A373226                 agg_row += block[j]
+%o A373226             aggregate.append(agg_row)
+%o A373226     return aggregate
+%o A373226 def descend(seed, zero, source, bound): #general fractal constructor
+%o A373226     for i in range(0, bound):
+%o A373226         for q in range(0, len(source)):
+%o A373226             for r in range(0, len(source[q])):
+%o A373226                 if source[q][r] == 1:
+%o A373226                     source[q][r] = copy.deepcopy(seed)
+%o A373226                 if source[q][r] == 0:
+%o A373226                     source[q][r] = copy.deepcopy(zero)
+%o A373226         source = combine(source) #fuse it up
+%o A373226     return source
+%o A373226 def count(matrix, bound):
+%o A373226     counter = 0
+%o A373226     center_x, center_y = len(matrix)//2, len(matrix)//2
+%o A373226     shift_limit = bound//2
+%o A373226     if len(matrix)%2 == 1 and bound % 2 == 1:
+%o A373226         for i in range(-shift_limit, shift_limit+1):
+%o A373226             for j in range(-shift_limit, shift_limit+1):
+%o A373226                 if matrix[center_x+i][center_y+j] == 1:
+%o A373226                     counter += 1
+%o A373226     if len(matrix)%2 == 1 and bound % 2 == 0:
+%o A373226         for i in range(-shift_limit, shift_limit):
+%o A373226             for j in range(-shift_limit, shift_limit):
+%o A373226                 if matrix[center_x+i][center_y+j] == 1:
+%o A373226                     counter += 1
+%o A373226     return counter
+%o A373226 seed = [[1,0,1],[0,1,0],[1,0,1]]
+%o A373226 source = [[1]]
+%o A373226 zero = [[0,0,0],[0,0,0],[0,0,0]]
+%o A373226 #example with n=5
+%o A373226 n=5
+%o A373226 print(count(descend(seed,zero,source,2),5)) #this constructs a 3^2 X 3^2 matrix and counts the center 5 X 5 matrix
+%Y A373226 Cf. A151907 (conjectured to be only the odd terms).
+%K A373226 easy,nonn
+%O A373226 0,3
+%A A373226 _Sidharth Ghoshal_, May 28 2024

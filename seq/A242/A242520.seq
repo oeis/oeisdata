@@ -1,0 +1,39 @@
+%I A242520 #27 Oct 23 2018 03:03:10
+%S A242520 1,1,2,3,27,165,676,3584,19108,80754,386776,1807342,8218582,114618650,
+%T A242520 1410831012,12144300991,126350575684
+%N A242520 Number of cyclic arrangements of S={1,2,...,2n} such that the difference between any two neighbors is 3^k for some k=0,1,2,...
+%C A242520 a(n)=NPC(2n;S;P) is the count of all neighbor-property cycles for a specific set S of 2n elements and a specific pair-property P. For more details, see the link and A242519.
+%C A242520 In this particular instance of NPC(n;S;P), all the terms with odd cycle lengths are necessarily zero.
+%H A242520 S. Sykora, <a href="http://dx.doi.org/10.3247/SL5Math14.002">On Neighbor-Property Cycles</a>, <a href="http://ebyte.it/library/Library.html#math">Stan's Library</a>, Volume V, 2014.
+%e A242520 The two such cycles of length n=6 are:
+%e A242520 C_1={1,2,3,6,5,4}, C_2={1,2,5,6,3,4}.
+%e A242520 The first and last of the 27 such cycles of length n=10 are:
+%e A242520 C_1={1,2,3,4,5,6,7,8,9,10}, C_27={1,4,7,8,5,2,3,6,9,10}.
+%t A242520 A242520[n_] := Count[Map[lpf, Map[j1f, Permutations[Range[2, 2 n]]]], 0]/2;
+%t A242520 j1f[x_] := Join[{1}, x, {1}];
+%t A242520 lpf[x_] := Length[Select[Abs[Differences[x]], ! MemberQ[t, #] &]];
+%t A242520 t = Table[3^k, {k, 0, 10}];
+%t A242520 Join[{1}, Table[A242520[n], {n, 2, 5}]]
+%t A242520 (* OR, a less simple, but more efficient implementation. *)
+%t A242520 A242520[n_, perm_, remain_] := Module[{opt, lr, i, new},
+%t A242520    If[remain == {},
+%t A242520      If[MemberQ[t, Abs[First[perm] - Last[perm]]], ct++];
+%t A242520      Return[ct],
+%t A242520      opt = remain; lr = Length[remain];
+%t A242520      For[i = 1, i <= lr, i++,
+%t A242520       new = First[opt]; opt = Rest[opt];
+%t A242520       If[! MemberQ[t, Abs[Last[perm] - new]], Continue[]];
+%t A242520       A242520[n, Join[perm, {new}],
+%t A242520        Complement[Range[2, 2 n], perm, {new}]];
+%t A242520       ];
+%t A242520      Return[ct];
+%t A242520      ];
+%t A242520    ];
+%t A242520 t = Table[3^k, {k, 0, 10}];
+%t A242520 Join[{1}, Table[ct = 0; A242520[n, {1}, Range[2, 2 n]]/2, {n, 2, 8}]] (* _Robert Price_, Oct 22 2018 *)
+%o A242520 (C++) See the link.
+%Y A242520 Cf. A242519, A242521, A242522, A242523, A242524, A242525, A242526, A242527, A242528, A242529, A242530, A242531, A242532, A242533, A242534.
+%K A242520 nonn,hard,more
+%O A242520 1,3
+%A A242520 _Stanislav Sykora_, May 27 2014
+%E A242520 a(14)-a(17) from _Andrew Howroyd_, Apr 05 2016

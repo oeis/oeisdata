@@ -1,0 +1,57 @@
+%I A307689 #24 Aug 15 2023 18:57:17
+%S A307689 1,1,1,1,1,2,1,1,1,3,3,4,3,3,1,1,1,4,6,10,16,21,13,11,13,21,16,10,6,4,
+%T A307689 1,1,1,5,10,20,50,82,73,66,184,411,548,351,455,326,144,67,144,326,455,
+%U A307689 351,548,411,184,66,73,82,50,20,10,5,1,1
+%N A307689 The number of rooted binary trees on n leaves with minimal Colless index.
+%C A307689 a(n) is the number of maximally balanced binary rooted trees with n leaves according to the Colless imbalance index. It is bounded above by sequence A299037.
+%H A307689 Mareike Fischer, <a href="/A307689/b307689.txt">Table of n, a(n) for n = 1..512</a>
+%H A307689 Tomás M. Coronado and Francesc Rosselló, <a href="https://arxiv.org/abs/1903.11670">The minimum value of the Colless index</a> arXiv:1903.11670 [q-bio.PE], 2019.
+%H A307689 Mareike Fischer, Lina Herbst, and Kristina Wicke, <a href="https://arxiv.org/abs/1904.09771">Extremal properties of the Colless tree balance index for rooted binary trees</a>, arXiv:1904.09771 [math.CO], 2019.
+%H A307689 Tree Balance, <a href="https://treebalance.wordpress.com/colless-index/">Colless index</a>
+%F A307689 a(1)=1; a(n) = Sum_{(n_a,n_b): n_a+n_b=n, n_a > n_b, (n_a,n_b) in QB(n)}}  ( a(n_a)* a(n_b)) +f(n), where f(n)=0 if n is odd} and f(n)= binomial(a(n/2)+1,2) if n is even; and where QB(n)={(n_a,n_b): n_a+n_b=n and such that there exists a tree T on n leaves with minimal Colless index and with leaf partitioning (n_a,n_b)} }.
+%e A307689 There are 13 trees with minimal Colless index and 23 leaves, i.e. a(23)=13.
+%t A307689 (*QB[n] is just a support function -- the function that actually generates the sequence of the numbers of trees with minimal Colless index and n leaves is given by minCbasedonQB; see below*)
+%t A307689 QB[n_] := Module[{k, n0, bin, l, m = {}, i, length, qb = {}, j},
+%t A307689   If[OddQ[n], k = 0,
+%t A307689    k = FactorInteger[n][[1]][[2]];
+%t A307689    ];
+%t A307689   n0 = n/(2^k);
+%t A307689   bin = IntegerDigits[n0, 2];
+%t A307689   length = Length[bin];
+%t A307689   For[i = Length[bin], i >= 1, i--,
+%t A307689    If[bin[[i]] != 0, PrependTo[m, length - i]];
+%t A307689    ];
+%t A307689   l = Length[m];
+%t A307689   If[l == 1, Return[{{n/2, n/2}}],
+%t A307689    AppendTo[
+%t A307689     qb, {2^k*(Sum[2^(m[[i]] - 1), {i, 1, l - 1}] + 1),
+%t A307689      2^k*(Sum[2^(m[[i]] - 1), {i, 1, l - 1}])}];
+%t A307689    For[j = 2, j <= l - 1, j++,
+%t A307689     If[m[[j]] > m[[j + 1]] + 1,
+%t A307689      AppendTo[
+%t A307689       qb, {2^k*(Sum[2^(m[[i]] - 1), {i, 1, j - 1}] + 2^m[[j]]),
+%t A307689        n - 2^k*(Sum[2^(m[[i]] - 1), {i, 1, j - 1}] + 2^m[[j]])}]];
+%t A307689     If[m[[j]] < m[[j - 1]] - 1,
+%t A307689      AppendTo[
+%t A307689       qb, {n - 2^k*Sum[2^(m[[i]] - 1), {i, 1, j - 1}],
+%t A307689        2^k*Sum[2^(m[[i]] - 1), {i, 1, j - 1}]}]];
+%t A307689     ];
+%t A307689    If[k >= 1, AppendTo[qb, {n/2, n/2}]];
+%t A307689    Return[qb];
+%t A307689    ];
+%t A307689   ]
+%t A307689 minCbasedonQB[n_] := Module[{qb = QB[n], min = 0, i, na, nb},
+%t A307689   If[n == 1, Return[1],
+%t A307689    For[i = 1, i <= Length[qb], i++,
+%t A307689     na = qb[[i]][[1]]; nb = qb[[i]][[2]];
+%t A307689     If[na != nb, min = min + minCbasedonQB[na]*minCbasedonQB[nb],
+%t A307689      min = min + Binomial[minCbasedonQB[n/2] + 1, 2]];
+%t A307689     ];
+%t A307689    Return[min];
+%t A307689    ]
+%t A307689   ]
+%Y A307689 The sequence is bounded above by A299037.
+%Y A307689 The sequence of the number of trees with minimal Colless index is also linked to the values of the minimal Colless index as given by A296062.
+%K A307689 nonn,look
+%O A307689 1,6
+%A A307689 _Mareike Fischer_, Apr 22 2019

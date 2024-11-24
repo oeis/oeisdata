@@ -1,0 +1,46 @@
+%I A326616 #72 Feb 27 2021 15:06:13
+%S A326616 1,1,2,2,5,1,9,13,9,44,42,10,96,225,150,9,152,680,1098,576,3,155,1350,
+%T A326616 4155,5201,2266,124,2180,11730,26642,26904,9966,140,3751,30300,106281,
+%U A326616 182000,149832,47466,160,6050,69042,348061,896392,1229760,855240,237019
+%N A326616 Number T(n,k) of colored integer partitions of n using all colors of a k-set such that each block of part i with multiplicity j has a pattern of i*j distinct colors in increasing order; triangle T(n,k), n>=0, A185283(n)<=k<=n, read by rows.
+%C A326616 T(n,k) is defined for all n>=0 and k>=0.  The triangle displays only positive terms.  All other terms are zero.
+%H A326616 Alois P. Heinz, <a href="/A326616/b326616.txt">Rows n = 0..200, flattened</a>
+%H A326616 Wikipedia, <a href="https://en.wikipedia.org/wiki/Partition_(number_theory)">Partition (number theory)</a>
+%F A326616 Sum_{k=A185283(n)..n} k * T(n,k) = A326649(n).
+%F A326616 Sum_{n=k..A024916(k)} n * T(n,k) = A326651(k).
+%e A326616 T(3,2) = 2: 2a1b, 2b1a.
+%e A326616 T(3,3) = 5: 3abc, 2ab1c, 2ac1b, 2bc1a, 111abc
+%e A326616 Triangle T(n,k) begins:
+%e A326616   1;
+%e A326616      1;
+%e A326616         2;
+%e A326616         2,  5;
+%e A326616         1,  9,  13;
+%e A326616             9,  44,   42;
+%e A326616            10,  96,  225,   150;
+%e A326616             9, 152,  680,  1098,    576;
+%e A326616             3, 155, 1350,  4155,   5201,   2266;
+%e A326616                124, 2180, 11730,  26642,  26904,   9966;
+%e A326616                140, 3751, 30300, 106281, 182000, 149832, 47466;
+%e A326616                ...
+%p A326616 g:= proc(n) option remember; `if`(n=0, 0, numtheory[sigma](n)+g(n-1)) end:
+%p A326616 h:= proc(n) option remember; local k; for k from
+%p A326616       `if`(n=0, 0, h(n-1)) do if g(k)>=n then return k fi od
+%p A326616     end:
+%p A326616 b:= proc(n, i, k) option remember; `if`(n=0, 1, `if`(i<1, 0, add((t->
+%p A326616       b(n-t, min(n-t, i-1), k)*binomial(k, t))(i*j), j=0..n/i)))
+%p A326616     end:
+%p A326616 T:= (n, k)-> add(b(n$2, k-i)*(-1)^i*binomial(k, i), i=0..k):
+%p A326616 seq(seq(T(n, k), k=h(n)..n), n=0..12);
+%t A326616 g[n_] := g[n] = If[n == 0, 0, DivisorSigma[1, n] + g[n - 1]];
+%t A326616 h[n_] := h[n] = Module[{k}, For[k = If[n == 0, 0, h[n - 1]], True, k++,  If[g[k] >= n, Return[k]]]];
+%t A326616 b[n_, i_, k_] := b[n, i, k] = If[n == 0, 1, If[i < 1, 0, Sum[Function[t,   b[n - t, Min[n - t, i - 1], k]*Binomial[k, t]][i*j], {j, 0, n/i}]]];
+%t A326616 T[n_, k_] := Sum[b[n, n, k - i]*(-1)^i*Binomial[k, i], {i, 0, k}];
+%t A326616 Table[Table[T[n, k], {k, h[n], n}], {n, 0, 12}]  // Flatten (* _Jean-François Alcover_, Feb 27 2021, after _Alois P. Heinz_ *)
+%Y A326616 Main diagonal gives A178682.
+%Y A326616 Row sums give A326648.
+%Y A326616 Column sums give A326650.
+%Y A326616 Cf. A000203, A185283, A326617 (this triangle read by columns), A326649, A326651.
+%K A326616 nonn,tabf
+%O A326616 0,3
+%A A326616 _Alois P. Heinz_, Sep 12 2019

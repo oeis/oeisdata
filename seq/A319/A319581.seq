@@ -1,0 +1,53 @@
+%I A319581 #19 Dec 19 2018 18:56:05
+%S A319581 0,0,0,0,1,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,1,0,1,0,1,0,0,0,1,0,0,1,
+%T A319581 0,0,0,1,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,2,0,0,0,1,0,0,0,
+%U A319581 0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,1,0,0,1,0,0
+%N A319581 Square array T(n, k) = Sum_{p prime} [v_p(n) >= v_p(k) > 0] read by antidiagonals up, where [] is the Iverson bracket and v_p is the p-adic valuation, n >= 1, k >= 1.
+%C A319581 T(., k) is additive and k-periodic.
+%C A319581 T(n, .) is additive and n^2-periodic.
+%F A319581 T(n, k) = Sum_{p prime} [v_p(n) >= v_p(k) > 0].
+%F A319581 T(n, n) = omega(n) = A001221(n) = the number of distinct primes dividing n.
+%F A319581 a(n) = log_2(A319582(n)).
+%e A319581 T(60, 50) = T(2^2 * 3^1 * 5^1, 2^1 * 5^2)
+%e A319581   = T(2^2, 2^1) + T(3^1, 3^0) + T(5^1, 5^2)
+%e A319581   = [2 >= 1 > 0] + [1 >= 0 > 0] + [1 >= 2 > 0]
+%e A319581   = 1 + 0 + 0
+%e A319581   = 1.
+%e A319581 Array begins (zeros replaced by dots):
+%e A319581      k =                 1 1 1
+%e A319581    n   1 2 3 4 5 6 7 8 9 0 1 2
+%e A319581    =  ------------------------
+%e A319581    1 | . . . . . . . . . . . .
+%e A319581    2 | . 1 . . . 1 . . . 1 . .
+%e A319581    3 | . . 1 . . 1 . . . . . 1
+%e A319581    4 | . 1 . 1 . 1 . . . 1 . 1
+%e A319581    5 | . . . . 1 . . . . 1 . .
+%e A319581    6 | . 1 1 . . 2 . . . 1 . 1
+%e A319581    7 | . . . . . . 1 . . . . .
+%e A319581    8 | . 1 . 1 . 1 . 1 . 1 . 1
+%e A319581    9 | . . 1 . . 1 . . 1 . . 1
+%e A319581   10 | . 1 . . 1 1 . . . 2 . .
+%e A319581   11 | . . . . . . . . . . 1 .
+%e A319581   12 | . 1 1 1 . 2 . . . 1 . 2
+%t A319581 F[n_] := If[n == 1, {}, FactorInteger[n]]
+%t A319581 V[p_] := If[KeyExistsQ[#, p], #[p], 0] &
+%t A319581 PreT[n_, k_] :=
+%t A319581 Module[{fn = F[n], fk = F[k], p, an = <||>, ak = <||>, w},
+%t A319581   p = Union[First /@ fn, First /@ fk];
+%t A319581   (an[#[[1]]] = #[[2]]) & /@ fn;
+%t A319581   (ak[#[[1]]] = #[[2]]) & /@ fk;
+%t A319581   w = ({V[#][an], V[#][ak]}) & /@ p;
+%t A319581   Select[w, (#[[1]] >= #[[2]] > 0) &]
+%t A319581   ]
+%t A319581 T[n_, k_] := Length[PreT[n, k]]
+%t A319581 A004736[n_] := Binomial[Floor[3/2 + Sqrt[2*n]], 2] - n + 1
+%t A319581 A002260[n_] := n - Binomial[Floor[1/2 + Sqrt[2*n]], 2]
+%t A319581 a[n_] := T[A004736[n], A002260[n]]
+%t A319581 Table[a[n], {n, 1, 90}]
+%o A319581 (PARI) maxp(n) = if (n==1, 1, vecmax(factor(n)[,1]));
+%o A319581 T(n, k) = {pmax = max(maxp(n), maxp(k)); x = 0; forprime(p=2, pmax, if ((valuation(n, p) >= valuation(k, p)) && (valuation(k, p) > 0), x ++);); x;} \\ _Michel Marcus_, Oct 28 2018
+%Y A319581 Cf. A319582 (a multiplicative variant).
+%Y A319581 Cf. A001221.
+%K A319581 nonn,tabl
+%O A319581 1,61
+%A A319581 _Luc Rousseau_, Sep 23 2018

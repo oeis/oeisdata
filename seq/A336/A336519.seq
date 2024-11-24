@@ -1,0 +1,40 @@
+%I A336519 #22 Aug 22 2020 18:41:33
+%S A336519 3,2,53,7,58979,161923,2643383,1746893,6971,5,17,1499,11,
+%T A336519 1555077581737,297707,13,37,126541,2130276389911155737,1429,71971,383,
+%U A336519 61,1559,29,193,12073,698543,157,20289606809,23687,1249,59,2393,251,101,15827173,82351,661
+%N A336519 Primes in Pi (variant of A336520): a(n) is the smallest prime factor of A090897(n) that does not appear in earlier terms of a, or 1, if no such factor exists.
+%C A336519 Inspired by a comment of _Mario Cortés_ in A090897, who suggests that 1 might not appear in this sequence.
+%H A336519 Peter Luschny, <a href="/A336519/a336519.txt">Prime factorization for n = 1..100</a>.
+%e A336519 [ 1] 3,          {3}                  -> 3;
+%e A336519 [ 2] 14,         {2, 7}               -> 2;
+%e A336519 [ 3] 159,        {3, 53}              -> 53;
+%e A336519 [ 4] 2653,       {7, 379}             -> 7;
+%e A336519 [ 5] 58979,      {58979}              -> 58979;
+%e A336519 [ 6] 323846,     {2, 161923}          -> 161923;
+%e A336519 [ 7] 2643383,    {2643383}            -> 2643383;
+%e A336519 [ 8] 27950288,   {2, 1746893}         -> 1746893;
+%e A336519 [ 9] 419716939,  {6971, 60209}        -> 6971;
+%e A336519 [10] 9375105820, {2, 5, 1163, 403057} -> 5.
+%p A336519 aList := proc(len) local p, R, spl; R := [];
+%p A336519 spl := L -> [seq([seq(L[i], i=1 + n*(n+1)/2..(n+1)*(n+2)/2)], n=0..len)]:
+%p A336519 ListTools:-Reverse(convert(floor(Pi*10^((len+1)*(len+2)/2)), base, 10)):
+%p A336519 map(`@`(parse,cat,op), spl(%)); map(NumberTheory:-PrimeFactors, %);
+%p A336519 for p in % do ListTools:-SelectFirst(p -> evalb(not p in R), p);
+%p A336519 R := [op(R), `if`(%=NULL, 1, %)] od end: aList(30);
+%t A336519 Block[{nn = 38, s}, s = RealDigits[Pi, 10, (# + 1) (# + 2)/2 &@ nn][[1]]; Nest[Function[{a, n}, Append[a, SelectFirst[FactorInteger[FromDigits@ s[[1 + n (n + 1)/2 ;; (n + 1) (n + 2)/2 ]]][[All, 1]], FreeQ[a, #] &] /. k_ /; MissingQ@ k -> 1]] @@ {#, Length@ #} &, {}, nn + 1]] (* _Michael De Vlieger_, Aug 21 2020 *)
+%o A336519 (SageMath)
+%o A336519 def Select(item, Selected):
+%o A336519     return next((x for x in item if not (x in Selected)), 1)
+%o A336519 def PiPart(n):
+%o A336519     return floor(pi * 10^(n * (n + 1) // 2 - 1)) % 10^n
+%o A336519 def A336519List(len):
+%o A336519     prev = []
+%o A336519     for n in range(1, len + 1):
+%o A336519         p = prime_factors(PiPart(n))
+%o A336519         prev.append(Select(p, prev))
+%o A336519     return prev
+%o A336519 print(A336519List(39))
+%Y A336519 Cf. A090897, A336520.
+%K A336519 nonn,base
+%O A336519 1,1
+%A A336519 _Peter Luschny_, Aug 21 2020

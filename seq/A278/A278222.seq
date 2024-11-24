@@ -1,0 +1,42 @@
+%I A278222 #64 Apr 07 2022 09:36:04
+%S A278222 1,2,2,4,2,6,4,8,2,6,6,12,4,12,8,16,2,6,6,12,6,30,12,24,4,12,12,36,8,
+%T A278222 24,16,32,2,6,6,12,6,30,12,24,6,30,30,60,12,60,24,48,4,12,12,36,12,60,
+%U A278222 36,72,8,24,24,72,16,48,32,64,2,6,6,12,6,30,12,24,6,30,30,60,12,60,24,48,6,30,30,60,30,210,60,120,12,60,60,180,24,120,48,96,4,12,12
+%N A278222 The least number with the same prime signature as A005940(n+1).
+%C A278222 This sequence can be used for filtering certain base-2 related sequences, because it matches only with any such sequence b that can be computed as b(n) = f(A005940(n+1)), where f(n) is any function that depends only on the prime signature of n (some of these are listed under the index entry for "sequences computed from exponents in ...").
+%C A278222 Matching in this context means that the sequence a matches with the sequence b iff for all i, j: a(i) = a(j) => b(i) = b(j). In other words, iff the sequence b partitions the natural numbers to the same or coarser equivalence classes (as/than the sequence a) by the distinct values it obtains.
+%C A278222 Because the Doudna map n -> A005940(1+n) is an isomorphism from "unary-binary encoding of factorization" (see A156552) to the ordinary representation of the prime factorization of n, it follows that the equivalence classes of this sequence match with any such sequence b, where b(n) is computed from the lengths of 1-runs in the binary representation of n and the order of those 1-runs does not matter. Particularly, this holds for any sequence that is obtained as a "Run Length Transform", i.e., where b(n) = Product S(i), for some function S, where i runs through the lengths of runs of 1's in the binary expansion of n. See for example A227349.
+%C A278222 However, this sequence itself is not a run length transform of any sequence (which can be seen for example from the fact that A046523 is not multiplicative).
+%C A278222 Furthermore, this matches not only with sequences involving products of S(i), but with any sequence obtained with any commutative function applied cumulatively, like e.g., A000120 (binary weight, obtained in this case as Sum identity(i)), and A069010 (number of runs of 1's in binary representation of n, obtained as Sum signum(i)).
+%H A278222 Antti Karttunen, <a href="/A278222/b278222.txt">Table of n, a(n) for n = 0..65537</a>
+%H A278222 <a href="/index/Bi#binary">Index entries for sequences related to binary expansion of n</a>
+%F A278222 a(n) = A046523(A005940(1+n)).
+%F A278222 a(n) = A124859(A278159(n)).
+%F A278222 a(n) = A278219(A006068(n)).
+%t A278222 f[n_, i_, x_] := Which[n == 0, x, EvenQ@ n, f[n/2, i + 1, x], True, f[(n - 1)/2, i, x Prime@ i]]; Array[If[# == 1, 1, Times @@ MapIndexed[ Prime[First[#2]]^#1 &, Sort[FactorInteger[#][[All, -1]], Greater]]] &@ f[# - 1, 1, 1] &, 99] (* _Michael De Vlieger_, May 09 2017 *)
+%o A278222 (Scheme) (define (A278222 n) (A046523 (A005940 (+ 1 n))))
+%o A278222 (Python)
+%o A278222 from sympy import prime, factorint
+%o A278222 import math
+%o A278222 def A(n): return n - 2**int(math.floor(math.log(n, 2)))
+%o A278222 def b(n): return n + 1 if n<2 else prime(1 + (len(bin(n)[2:]) - bin(n)[2:].count("1"))) * b(A(n))
+%o A278222 def a005940(n): return b(n - 1)
+%o A278222 def P(n):
+%o A278222     f = factorint(n)
+%o A278222     return sorted([f[i] for i in f])
+%o A278222 def a046523(n):
+%o A278222     x=1
+%o A278222     while True:
+%o A278222         if P(n) == P(x): return x
+%o A278222         else: x+=1
+%o A278222 def a(n): return a046523(a005940(n + 1)) # _Indranil Ghosh_, May 05 2017
+%o A278222 (PARI) A046523(n)=factorback(primes(#n=vecsort(factor(n)[, 2], , 4)), n)
+%o A278222 a(n)=my(p=2, t=1); for(i=0,exponent(n), if(bittest(n,i), t*=p, p=nextprime(p+1))); A046523(t) \\ _Charles R Greathouse IV_, Nov 11 2021
+%Y A278222 Cf. A005940, A156552, A006068, A124859, A278159.
+%Y A278222 Similar sequences: A278217, A278219 (other base-2 related variants), A069877 (base-10 related), A278226 (primorial base), A278234-A278236 (factorial base), A278243 (Stern polynomials), A278233 (factorization in ring GF(2)[X]), A046523 (factorization in Z).
+%Y A278222 Cf. also A286622 (rgs-transform of this sequence) and A286162, A286252, A286163, A286240, A286242, A286379, A286464, A286374, A286375, A286376, A286243, A286553 (various other sequences involving this sequence).
+%Y A278222 Sequences that partition N into same or coarser equivalence classes: too many to list all here (over a hundred). At least every sequence listed under index-entry "Run Length Transforms" is included (e.g., A227349, A246660, A278159), and also sequences like A000120 and A069010, and their combinations like A136277.
+%K A278222 nonn,base
+%O A278222 0,2
+%A A278222 _Antti Karttunen_, Nov 15 2016
+%E A278222 Misleading part of the name removed by _Antti Karttunen_, Apr 07 2022

@@ -1,0 +1,48 @@
+%I A375784 #21 Sep 05 2024 14:13:43
+%S A375784 101,13,2,3,41,5,61,7,83,19,1003,115,22,33,445,55,166,77,818,299,
+%T A375784 10002,1113,222,333,4244,555,2666,777,8828,3999,100002,11011,22122,
+%U A375784 33332,4444,15555,6666,75777,38888,9999,1000004,1011112,222220,333330,444244,552555,666366,777770,88888,999996
+%N A375784 Array read by rows: T(n,k) is the first number with n prime factors (counted with multiplicity) and n occurrences of decimal digit k.
+%H A375784 Robert Israel, <a href="/A375784/b375784.txt">Table of n, a(n) for n = 1..150</a>
+%F A375784 If n - A046053(n) is odd and >= 1, then T(n,k) <= k * A002275(n) * 10^((n - A046053(n) - 1)/2) for k = 2, 3, 5 and 7.
+%F A375784 If n - A046053(n) is odd and >= 3, then T(n,8) <= 8 * A002275(n) * 10^((n - A046053(n) - 3)/2).
+%F A375784 If n - A046053(n) is even and >= 0, then T(n,1) <= A002275(n) * 10^((n - A046053(n))/2).
+%F A375784 If n - A046053(n) is even and >= 2, then T(n,k) <= k * A002275(n) * 10^((n - A046053(n) - 2)/2) for k = 4, 6 and 9.
+%e A375784 T(5,1) = 1011112 = 2^3 * 211 * 599 has 5 prime factors (counted with multiplicity) and 5 1's, and is the first such number.
+%e A375784 Array starts
+%e A375784     101      13      2      3     41      5     61      7    83     19
+%e A375784    1003     115     22     33    445     55    166     77   818    299
+%e A375784   10002    1113    222    333   4244    555   2666    777  8828   3999
+%e A375784  100002   11011  22122  33332   4444  15555   6666  75777 38888   9999
+%e A375784 1000004 1011112 222220 333330 444244 552555 666366 777770 88888 999996
+%p A375784 F:= proc(v, x) local d, y, z, L, S, SS, Cands, t, i, k;
+%p A375784    for d from v do
+%p A375784      Cands:= NULL;
+%p A375784      if x = 0 then SS:= combinat:-choose([$1..d-1], v)
+%p A375784      else SS:= combinat:-choose([$1..d], v)
+%p A375784      fi;
+%p A375784      for S in SS do
+%p A375784        for y from 9^(d-v+1) to 9^(d-v+1)+9^(d-v)-1 do
+%p A375784          L:= convert(y, base, 9)[1..d-v+1];
+%p A375784          L:= map(proc(s) if s < x then s else s+1 fi end proc, L);
+%p A375784          i:= 1;
+%p A375784          t:= 0:
+%p A375784          for k from 1 to d do
+%p A375784            if member(k, S) then t:= t + x*10^(k-1)
+%p A375784            else t:= t + L[i]*10^(k-1); i:= i+1;
+%p A375784            fi;
+%p A375784          od;
+%p A375784          Cands:= Cands, t
+%p A375784      od od;
+%p A375784      Cands:= sort([Cands]);
+%p A375784      for t in Cands do if numtheory:-bigomega(t)=v then return t fi od;
+%p A375784    od
+%p A375784 end proc:
+%p A375784 for i from 1 to 10 do
+%p A375784   seq(F(i, x), x=0..9)
+%p A375784 od;
+%t A375784 T[n_, k_]:=Module[{m=2}, While[PrimeOmega[m]!=n||Count[IntegerDigits[m], k]!=n, m++]; m]; Table[T[n, k], {n, 1, 5}, {k, 0, 9}]//Flatten (* _Stefano Spezia_, Aug 30 2024 *)
+%Y A375784 Cf. A001222, A002275, A046053, A375760.
+%K A375784 nonn,base,tabf
+%O A375784 1,1
+%A A375784 _Robert Israel_, Aug 28 2024

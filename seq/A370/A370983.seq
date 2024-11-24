@@ -1,0 +1,53 @@
+%I A370983 #13 Mar 09 2024 13:22:32
+%S A370983 1,0,1,0,2,3,0,3,12,20,0,4,30,120,210,0,5,60,420,1680,3024,0,6,105,
+%T A370983 1120,7560,30240,55440,0,7,168,2520,25200,166320,665280,1235520,0,8,
+%U A370983 252,5040,69300,665280,4324320,17297280,32432400
+%N A370983 Triangle read by rows: T(n, k) = (n + k - 1)! / (k!*(n - k)!) if k > 0 and T(n, 0) = 0^n.
+%C A370983 A signed version of Catalan's triangle (version A128899) can be generated as the scaled inverse of this triangle. The scaled inverse of T is the inverse I of T post-processed by I(n, k) -> I(n, k)/I(n, n).
+%F A370983 Assume n > 0 and k > 0 for the next four formulas:
+%F A370983 T(n, k) = ((-1)^k / n) * Product_{j=0..k-1} ((j - n)*(j + n)/(j + 1)).
+%F A370983 T(n, k) = binomial(n, k) * Pochhammer(n, k) / n.
+%F A370983 T(n, k) = A370706(n, k) / n.
+%F A370983 T(n, k) = A370707(n, k) / (n*k!).
+%e A370983 Triangle starts:
+%e A370983 [0] 1;
+%e A370983 [1] 0, 1;
+%e A370983 [2] 0, 2,   3;
+%e A370983 [3] 0, 3,  12,   20;
+%e A370983 [4] 0, 4,  30,  120,   210;
+%e A370983 [5] 0, 5,  60,  420,  1680,   3024;
+%e A370983 [6] 0, 6, 105, 1120,  7560,  30240,  55440;
+%e A370983 [7] 0, 7, 168, 2520, 25200, 166320, 665280, 1235520;
+%p A370983 T := (n, k) -> `if`(k = 0, k^n, (n + k - 1)! / (k!*(n - k)!)):
+%p A370983 seq(seq(T(n, k), k = 0..n), n = 0..9);
+%p A370983 A370983 := (n, k) -> local j; ifelse(n = 0, 1, ifelse(k = 0, 0,
+%p A370983 (-1)^k*mul((j - n) * (j + n) / (j + 1), j = 0..k - 1) / n)):
+%t A370983 T[n_, k_] := If[n == 0, 1, If[k == 0, 0, (n + k - 1)! / (k! * (n - k)!)]];
+%t A370983 Table[T[n, k], {n, 0, 8}, {k, 0, n}] // Flatten
+%o A370983 (SageMath)
+%o A370983 def A370983(n, k):
+%o A370983     if k  > n: return 0
+%o A370983     if n == 0: return 1
+%o A370983     if k == 0: return 0
+%o A370983     return binomial(n, k) * rising_factorial(n, k) // n
+%o A370983 for n in range(7): print([A370983(n, k) for k in range(n + 1)])
+%o A370983 (SageMath) # Added for the sake of reference only.
+%o A370983 # For example ScaledInv(A370983, 7) gives the first seven rows of A128899.
+%o A370983 def ScaledInv(T, dim): # We assume T(n, n) != 0 for all n.
+%o A370983     M = matrix(QQ, dim, T).inverse()
+%o A370983     for n in range(dim):
+%o A370983         c = M[n][n]
+%o A370983         M[n] = [M.row(n)[k] / c for k in range(dim)]
+%o A370983     return M
+%o A370983 (Python)
+%o A370983 from math import prod
+%o A370983 def T(n, k):
+%o A370983     if n == 0: return 1
+%o A370983     if k == 0: return 0
+%o A370983     return (-1)**k * prod((j - n) * (j + n) / (j + 1) for j in range(k)) / n
+%o A370983 for n in range(7): print([T(n, k) for k in range(n + 1)])
+%Y A370983 Cf. A006963 (main diagonal), A001813 (subdiagonal), A371028 (row sums).
+%Y A370983 Cf. A370706, A370707, A128899.
+%K A370983 nonn,tabl
+%O A370983 0,5
+%A A370983 _Peter Luschny_, Mar 07 2024

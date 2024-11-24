@@ -1,0 +1,36 @@
+%I A291592 #18 May 28 2021 23:01:38
+%S A291592 0,0,1,1,2,2,1,2,2,2,1,4,2,2,3,3,1,4,1,4,3,2,1,6,2,2,3,4,1,6,1,4,3,2,
+%T A291592 3,7,1,2,3,6,1,6,1,4,5,2,1,8,2,4,3,4,1,6,3,6,3,2,1,10,1,2,5,5,3,6,1,4,
+%U A291592 3,6,1,10
+%N A291592 Number of bases for which 2^n-1 is a repdigit with at least 3 digits.
+%e A291592 For n=3, 2^3-1 is 7; 7 is a repdigit with more than 3 digits only in base 2: 111_2. So a(3)=1.
+%e A291592 For n=5, 2^5-1 is 31; 31 is a repdigit with more than 3 digits only in base 2 and 5: 11111_2 and 111_5 So a(5)=2.
+%t A291592 Table[With[{m = 2^n - 1}, Count[Range[2, Floor@ Sqrt@ m], _?(And[Length@ Union@ # == 1, Length@ # >= 3] &@ IntegerDigits[m, #] &) ]], {n, 40}] (* _Michael De Vlieger_, Aug 27 2017 *)
+%o A291592 (PARI) nbr(n) = {nb = 0; fordiv(n, d, for (b=d+1, n, nd = 3; vd = [d, d, d]; while(fromdigits(vd, b) < n, nd ++; vd = vector(nd, k, d)); if ((x=fromdigits(vd, b)) == n, nb++); if ((x > n) && (nd == 3), break););); nb;}
+%o A291592 a(n) = nbr(2^n-1);
+%o A291592 (Python)
+%o A291592 from sympy.ntheory import count_digits
+%o A291592 def ok(n, b): return False if n <= b**2 else len(count_digits(n, b)) == 1
+%o A291592 def a(n): return sum(ok(2**n-1, b) for b in range(2, 2**n))
+%o A291592 print([a(n) for n in range(1, 21)]) # _Michael S. Branicky_, May 27 2021
+%o A291592 (Python) # Faster version suitable for extension
+%o A291592 def is_repdigit(n, b):
+%o A291592   if n < b: return True
+%o A291592   n, r = divmod(n, b)
+%o A291592   onlyd = r
+%o A291592   while n > b:
+%o A291592     n, r = divmod(n, b)
+%o A291592     if r != onlyd: return False
+%o A291592   return n == onlyd
+%o A291592 def a(n):
+%o A291592   c, target = 0, 2**n - 1
+%o A291592   for b in range(2, 2**n):
+%o A291592     if target < b**2: break # not 3 digits
+%o A291592     c += is_repdigit(target, b)
+%o A291592   return c
+%o A291592 print([a(n) for n in range(1, 41)]) # _Michael S. Branicky_, May 27 2021
+%Y A291592 Cf. A000225, A290969.
+%K A291592 nonn,more
+%O A291592 1,5
+%A A291592 _Michel Marcus_, Aug 27 2017
+%E A291592 a(63)-a(72) from _Michael S. Branicky_, May 28 2021

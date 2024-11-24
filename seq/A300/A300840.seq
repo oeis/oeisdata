@@ -1,0 +1,30 @@
+%I A300840 #20 Sep 07 2023 13:51:30
+%S A300840 1,1,2,3,4,2,5,3,7,4,9,6,11,5,8,13,16,7,17,12,10,9,19,6,23,11,14,15,
+%T A300840 25,8,29,13,18,16,20,21,31,17,22,12,37,10,41,27,28,19,43,26,47,23,32,
+%U A300840 33,49,14,36,15,34,25,53,24,59,29,35,39,44,18,61,48,38,20,67,21,71,31,46,51,45,22,73,52,79,37,81,30,64,41,50,27
+%N A300840 Fermi-Dirac factorization prime shift towards smaller terms: a(n) = A052330(floor(A052331(n)/2)).
+%C A300840 With n having a unique factorization as fdp(i) * fdp(j) * ... * fdp(k), with i, j, ..., k all distinct, a(n) = fdp(i-1) * fdp(j-1) * ... * fdp(k-1), where fdp(0) = 1 and fdp(n) = A050376(n) for n >= 1.
+%C A300840 Multiplicative because for coprime m and n the Fermi-Dirac factorizations of m and n are disjoint and their union is the Fermi-Dirac factorization of m * n. - _Andrew Howroyd_, Aug 02 2018
+%H A300840 Antti Karttunen, <a href="/A300840/b300840.txt">Table of n, a(n) for n = 1..65537</a>
+%F A300840 a(n) = A052330(floor(A052331(n)/2)).
+%F A300840 For all n >= 1, a(A300841(n)) = n.
+%F A300840 a(A059897(n,k)) = A059897(a(n), a(k)). - _Peter Munn_, Nov 30 2019
+%t A300840 fdPrimeQ[n_] := Module[{f = FactorInteger[n], e}, Length[f] == 1 && (2^IntegerExponent[(e = f[[1, 2]]), 2] == e)];
+%t A300840 prevFDPrime[n_] := Module[{k = n - 1}, While[! fdPrimeQ[k], k--]; k];
+%t A300840 fd[p_, e_] := Module[{b = IntegerDigits[e, 2]}, m = Length[b]; Table[If[b[[j]] > 0, p^(2^(m - j)), Nothing], {j, 1, m}]];
+%t A300840 a[n_] := Times @@ prevFDPrime /@ Flatten[fd @@@ FactorInteger[n]]; a[1] = 1; Array[a, 100] (* _Amiram Eldar_, Sep 07 2023 *)
+%o A300840 (PARI)
+%o A300840 up_to_e = 8192;
+%o A300840 v050376 = vector(up_to_e);
+%o A300840 A050376(n) = v050376[n];
+%o A300840 ispow2(n) = (n && !bitand(n,n-1));
+%o A300840 i = 0; for(n=1,oo,if(ispow2(isprimepower(n)), i++; v050376[i] = n); if(i == up_to_e,break));
+%o A300840 A052330(n) = { my(p=1,i=1); while(n>0, if(n%2, p *= A050376(i)); i++; n >>= 1); (p); };
+%o A300840 A052331(n) = { my(s=0,e); while(n > 1, fordiv(n, d, if(((n/d)>1)&&ispow2(isprimepower(n/d)), e = vecsearch(v050376, n/d); if(!e, print("v050376 too short!"); return(1/0)); s += 2^(e-1); n = d; break))); (s); };
+%o A300840 A300840(n) = A052330(A052331(n)>>1);
+%Y A300840 A left inverse of A300841.
+%Y A300840 Cf. A050376, A052330, A052331, A059897.
+%Y A300840 Cf. also A064989.
+%K A300840 nonn,mult
+%O A300840 1,3
+%A A300840 _Antti Karttunen_, Apr 13 2018

@@ -1,0 +1,51 @@
+%I A269945 #39 Feb 29 2024 10:47:22
+%S A269945 1,0,1,0,1,1,0,1,5,1,0,1,21,14,1,0,1,85,147,30,1,0,1,341,1408,627,55,
+%T A269945 1,0,1,1365,13013,11440,2002,91,1,0,1,5461,118482,196053,61490,5278,
+%U A269945 140,1,0,1,21845,1071799,3255330,1733303,251498,12138,204,1
+%N A269945 Triangle read by rows. Stirling set numbers of order 2, T(n, n) = 1, T(n, k) = 0 if k < 0 or k > n, otherwise T(n, k) = T(n-1, k-1) + k^2*T(n-1, k), for 0 <= k <= n.
+%C A269945 Also known as central factorial numbers T(2*n, 2*k) (cf. A036969).
+%C A269945 The analog for the Stirling cycle numbers is A269944.
+%H A269945 M. W. Coffey and M. C. Lettington, <a href="http://arxiv.org/abs/1510.05402">On Fibonacci Polynomial Expressions for Sums of mth Powers, their implications for Faulhaber's Formula and some Theorems of Fermat</a>, arXiv:1510.05402 [math.NT], 2015.
+%H A269945 Peter Luschny, <a href="http://oeis.org/wiki/User:Peter_Luschny/P-Transform">The P-transform</a>.
+%H A269945 Peter Luschny, <a href="https://github.com/PeterLuschny/PartitionTransform/blob/main/PartitionTransform.ipynb">The Partition Transform -- A SageMath Jupyter Notebook</a>.
+%F A269945 T(n, k) = (-1)^k*((2*n)! / (2*k)!)*P[n, k](s(n)) where P is the P-transform and s(n) = 1/(n*(4*n-2)). The P-transform is defined in the link. Compare also the Sage and Maple implementations below.
+%F A269945 T(n, 2) = (4^(n - 1) - 1)/3 for n >= 2 (cf. A002450).
+%F A269945 T(n, n-1) = n*(n - 1)*(2*n - 1)/6 for n >= 1 (cf. A000330).
+%F A269945 From _Fabián Pereyra_, Apr 25 2022: (Start)
+%F A269945 T(n, k) = (1/(2*k)!)*Sum_{j=0..2*k} (-1)^j*binomial(2*k, j)*(k - j)^(2*n).
+%F A269945 T(n, k) = Sum_{j=2*k..2*n} (-k)^(2*n - j)*binomial(2*n, j)*Stirling2(j, 2*k).
+%F A269945 T(n, k) = Sum_{j=0..2*n} (-1)^(j - k)*Stirling2(2*n - j, k)*Stirling2(j, k). (End)
+%F A269945 T(n, k) = (2*n)! [t^(2*(n-k+1))] [x^(2*n)] (1 + t^2*(cosh(2*sinh(t*x/2)/t))). - _Peter Luschny_, Feb 29 2024
+%e A269945 Triangle starts:
+%e A269945   [0] [1]
+%e A269945   [1] [0, 1]
+%e A269945   [2] [0, 1,   1]
+%e A269945   [3] [0, 1,   5,    1]
+%e A269945   [4] [0, 1,  21,   14,   1]
+%e A269945   [5] [0, 1,  85,  147,  30,  1]
+%e A269945   [6] [0, 1, 341, 1408, 627, 55, 1]
+%p A269945 T := proc(n, k) option remember;
+%p A269945     `if`(n=k, 1,
+%p A269945     `if`(k<0 or k>n, 0,
+%p A269945      T(n-1, k-1) + k^2*T(n-1, k))) end:
+%p A269945 for n from 0 to 9 do seq(T(n, k), k=0..n) od;
+%p A269945 # Alternatively with the P-transform (cf. A269941):
+%p A269945 A269945_row := n -> PTrans(n, n->`if`(n=1, 1, 1/(n*(4*n-2))), (n, k)->(-1)^k*(2*n)!/(2*k)!): seq(print(A269945_row(n)), n=0..8);
+%p A269945 # Using the exponential generating function:
+%p A269945 egf := 1 + t^2*(cosh(2*sinh(t*x/2)/t));
+%p A269945 ser := series(egf, x, 20): cx := n -> coeff(ser, x, 2*n):
+%p A269945 Trow := n -> local k; seq((2*n)!*coeff(cx(n), t, 2*(n-k+1)), k = 0..n):
+%p A269945 seq(print(Trow(n)), n = 0..9);  # _Peter Luschny_, Feb 29 2024
+%t A269945 T[n_, n_] = 1; T[n_ /; n >= 0, k_] /; 0 <= k < n := T[n, k] = T[n - 1, k - 1] + k^2*T[n - 1, k]; T[_, _] = 0; Table[T[n, k], {n, 0, 9}, {k, 0, n}] // Flatten
+%t A269945 (* _Jean-François Alcover_, Nov 27 2017 *)
+%o A269945 (Sage) # uses[PtransMatrix from A269941]
+%o A269945 stirset2 = lambda n: 1 if n == 1 else 1/(n*(4*n-2))
+%o A269945 norm = lambda n,k: (-1)^k*factorial(2*n)/factorial(2*k)
+%o A269945 M = PtransMatrix(7, stirset2, norm)
+%o A269945 for m in M: print(m)
+%Y A269945 Variants are: A008957, A036969.
+%Y A269945 Cf. A007318 (order 0), A048993 (order 1), A269948 (order 3).
+%Y A269945 Cf. A000330 (subdiagonal), A002450 (column 2), A135920 (row sums), A269941, A269944 (Stirling cycle).
+%K A269945 nonn,tabl
+%O A269945 0,9
+%A A269945 _Peter Luschny_, Mar 22 2016

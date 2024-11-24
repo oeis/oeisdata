@@ -1,0 +1,43 @@
+%I A348516 #50 Nov 11 2021 20:39:35
+%S A348516 1,0,7,0,16,1,7,1,22,0,16,1,16,6,2,1,8,6,7,1,4,1,66,9,22,3,2,0,15,1,
+%T A348516 16,2,32,1,6,9,16,2,11,6,19,13,2,13,1,1,10,22,8,2,1,6,1,159,7,1,20,1,
+%U A348516 3,6,4,2,15,1,11,3,66,6,1,9,1,6,22,2,4,3,1,2,2,2,6
+%N A348516 a(n) is the least positive integer k such that the base 3 representation of n^k contains equally many 1's and 2's, or 0 if no k with this property exists.
+%C A348516 a(3*n) = a(n) for any positive integer n because multiplication by 3 does not change the counts of the digits 1 and 2 in the base 3 representation. Hence a(n) reaches any of its values at infinitely many n.
+%C A348516 There are infinitely many n with a(n) = 1 that are not divisible by 3, e.g. the numbers of the form (3^m + 2)(3^(m-1) + 3^(m-2) + ... + 3 + 1), m = 1, 2, 3, ...
+%C A348516 Of course, a(n^a(n)) = 1 whenever a(n) > 0. More generally, if a(n) = p*q, where p and q are positive integers, then a(n^p) = q (hence any positive divisor of a nonzero term of the sequence is a term too). If a(n) = 0 then a(n^p) = 0 for any positive integer p.
+%C A348516 In the absence of a proof that a(n) = 0 only for the numbers n which are powers of 3, it would be desirable to have at least an algorithm whose application to any concrete n answers the question whether a(n) = 0.
+%C A348516 Except for the case when the number a(n) is 0, it is the least positive integer k such that n^k is a term of the sequence A039001.
+%C A348516 Problem: Are there positive integers not occurring in the sequence a(1),a(2),a(3),...?
+%H A348516 Alois P. Heinz, <a href="/A348516/b348516.txt">Table of n, a(n) for n = 0..19683</a>
+%e A348516 a(2) = 7 because the base 3 representations of 2^1, 2^2, 2^3, 2^4, 2^5, 2^6 and 2^7 are 2, 11, 22, 121, 1012, 2101 and 11202 respectively.
+%t A348516 Array[If[IntegerQ@ Log[3, #], 0, Block[{k = 1}, While[Unequal @@ Most@ DigitCount[#^k, 3], k++]; k]] &, 72] (* _Michael De Vlieger_, Oct 21 2021 *)
+%o A348516 (Python)
+%o A348516 h=[0,1,-1]
+%o A348516 def d(x):
+%o A348516     y,d=x,0
+%o A348516     while y>0: d,y=d+h[y%3],y//3
+%o A348516     return d
+%o A348516 def a(n):
+%o A348516     v,a,x=n,0,1
+%o A348516     while v%3==0: v=v//3
+%o A348516     if v>1:
+%o A348516         while d(x)!=0: a,x=a+1,v*x
+%o A348516     return a
+%o A348516 (Python)
+%o A348516 from gmpy2 import digits
+%o A348516 def A348516(n):
+%o A348516     k, s = 1, digits(n,3).rstrip('0')
+%o A348516     if s == '1' or s == '': return 1-len(s)
+%o A348516     m = int(s,3)
+%o A348516     mk = m
+%o A348516     while s.count('1') != s.count('2'): k += 1; mk *= m; s = digits(mk,3)
+%o A348516     return k # _Chai Wah Wu_, Nov 11 2021
+%o A348516 (PARI) isp3(n) = my(q); isprimepower(n,&q) && (q==3);
+%o A348516 isok(k, n) = my(d=digits(n^k, 3)); #select(x->(x==1), d) == #select(x->(x==2), d);
+%o A348516 a(n) = if ((n==1) || isp3(n), return (0)); my(k=1); while (!isok(k, n), k++); k; \\ _Michel Marcus_, Oct 22 2021
+%Y A348516 Cf. A039001.
+%K A348516 nonn,base
+%O A348516 0,3
+%A A348516 _Dimiter Skordev_, Oct 21 2021
+%E A348516 a(0) from _Michel Marcus_, Nov 11 2021

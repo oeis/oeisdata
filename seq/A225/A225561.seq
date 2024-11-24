@@ -1,0 +1,38 @@
+%I A225561 #29 Jul 06 2023 01:51:12
+%S A225561 1,3,1,7,1,12,1,15,1,3,1,28,1,3,1,31,1,39,1,42,1,3,1,60,1,3,1,56,1,72,
+%T A225561 1,63,1,3,1,91,1,3,1,90,1,96,1,7,1,3,1,124,1,3,1,7,1,120,1,120,1,3,1,
+%U A225561 168,1,3,1,127,1,144,1,7,1,3,1,195,1,3,1,7,1,168,1,186,1,3
+%N A225561 Largest number m such that 1, 2, ..., m can be represented as the sum of distinct divisors of n.
+%C A225561 n is called a practical number (A005153) if a(n) >= n.
+%H A225561 Paul Tek, <a href="/A225561/b225561.txt">Table of n, a(n) for n = 1..10000</a>
+%H A225561 Paul Pollack and Lola Thompson, <a href="http://publi.math.unideb.hu/load_jpg.php?p=1792">Practical pretenders</a>, Publicationes Mathematicae Debrecen, Vol. 82, No. 3-4 (2013), pp. 651-717, <a href="http://arxiv.org/abs/1201.3168">arXiv preprint</a>, arXiv:1201.3168 [math.NT], 2012.
+%H A225561 Reinhard Zumkeller, <a href="/A054225/a054225_1.lhs.txt">Haskell programs for A201376, A054225, A201377, A054242</a>
+%F A225561 a(n) = 1 if and only if n is odd. a(n) = 3 if and only if n in {2,10} mod 12. Otherwise a(n) >= 7.
+%F A225561 a(n) = A030057(n)-1.
+%F A225561 a(n) = A000203(A327832(n)). - _Amiram Eldar_, Sep 27 2019
+%t A225561 a[n_] := First[Complement[Range[DivisorSigma[1, n] + 1], Total /@ Subsets[Divisors[n]]]] - 1; Array[a, 100] (* _Jean-François Alcover_, Sep 27 2018 *)
+%t A225561 f[p_, e_] := (p^(e + 1) - 1)/(p - 1); g[n_] := If[(ind = Position[(fct = FactorInteger[n])[[;; , 1]]/(1 + FoldList[Times, 1, f @@@ Most@fct]), _?(# > 1 &)]) == {}, n, Times @@ (Power @@@ fct[[1 ;; ind[[1, 1]] - 1]])]; a[n_] := DivisorSigma[1, g[n]]; Array[a, 100] (* _Amiram Eldar_, Sep 27 2019 *)
+%o A225561 (PARI) a(n)=my(d=divisors(n),t,v=vector(2^#d-1,i,t=vecextract(d,i); sum(j=1,#t,t[j]))); v=vecsort(v,,8); for(i=1,#v,if(v[i]!=i,return(i-1)));v[#v]
+%o A225561 (Haskell) see Haskell link, 3.2.2
+%o A225561 a225561 n = length $ takeWhile (not . null) $
+%o A225561             map (ps [] $ a027750_row n) [1..] where
+%o A225561    ps qs _      0  = [qs]
+%o A225561    ps _  []     _  = []
+%o A225561    ps qs (k:ks) m  =
+%o A225561       if m == 0 then [] else ps (k:qs) ks (m - k) ++ ps qs ks m
+%o A225561 -- _Reinhard Zumkeller_, May 11 2013
+%o A225561 (Python)
+%o A225561 from sympy import divisors
+%o A225561 def A225561(n):
+%o A225561     c = {0}
+%o A225561     for d in divisors(n,generator=True):
+%o A225561         c |=  {a+d for a in c}
+%o A225561     k = 1
+%o A225561     while k in c:
+%o A225561         k += 1
+%o A225561     return k-1 # _Chai Wah Wu_, Jul 05 2023
+%Y A225561 Cf. A005153, A030057, A225574, A327832.
+%Y A225561 Cf. A033630, A201377, A027750.
+%K A225561 nonn,look
+%O A225561 1,2
+%A A225561 _Charles R Greathouse IV_, May 10 2013

@@ -1,0 +1,62 @@
+%I A350046 #51 Jan 10 2022 22:24:00
+%S A350046 2,3,4,5,6,7,8,9,12,13,15,32,35,162,163
+%N A350046 Numbers m such that, in the prime factorization of m! (with the primes in ascending order), no two successive exponents differ by a composite number.
+%C A350046 Is this sequence finite?
+%C A350046 After 163, there are no more terms through 10^10. - _Jon E. Schoenfield_, Dec 15 2021
+%C A350046 Sequence is the same as numbers m such that, in the prime factorization of m! (with the exponents in ascending order), no two successive exponents differ by a composite number. This is due to the fact that in the factorization of m! with the primes in ascending order, the corresponding exponents are in descending order. - _Chai Wah Wu_, Jan 10 2022
+%e A350046 15! = 2^11 * 3^6 * 5^3 * 7^2 * 11^1 * 13^1; the exponents are 11, 6, 3, 2, 1, 1, and no two successive/neighboring exponents differ by a composite number, so 15 is a term of the sequence.
+%t A350046 q[n_] := AllTrue[Differences @ Reverse[FactorInteger[n!][[;; , 2]]], !CompositeQ[#] &]; Select[Range[2, 200], q] (* _Amiram Eldar_, Dec 11 2021 *)
+%o A350046 (Python)
+%o A350046 import sympy
+%o A350046 def last_exponent(c,i):
+%o A350046     if sympy.nextprime(i//2)<=i:
+%o A350046         if c==1 or sympy.isprime(c-1):
+%o A350046             return(True)
+%o A350046         else: return(False)
+%o A350046     else:
+%o A350046         if c==1 or sympy.isprime(c):
+%o A350046             return(True)
+%o A350046         else: return(False)
+%o A350046 A350046_n=[2,3]
+%o A350046 for i in range(4,1001):
+%o A350046     p_expo=True
+%o A350046     x = list(sympy.primerange(2,i//2+1))
+%o A350046     prime_expo=[]
+%o A350046     for j in (x):
+%o A350046         c=i//j
+%o A350046         s=0
+%o A350046         while c!=0:
+%o A350046             s=s+c
+%o A350046             c=c//j
+%o A350046         prime_expo.append(s)
+%o A350046     c=prime_expo[0]
+%o A350046     l=len(prime_expo)
+%o A350046     for j in range(1,l):
+%o A350046         c=c-prime_expo[j]
+%o A350046         if c!=0:
+%o A350046             if c!=1 and not sympy.isprime(c):
+%o A350046                 p_expo=False
+%o A350046                 break
+%o A350046         c=prime_expo[j]
+%o A350046     prime_expo=last_exponent(c,i)
+%o A350046     if p_expo==True:
+%o A350046        A350046_n.append(i)
+%o A350046 print(A350046_n)
+%o A350046 (Python)
+%o A350046 from collections import Counter
+%o A350046 from itertools import count, islice
+%o A350046 from sympy import factorint, isprime
+%o A350046 def A350046_gen(): # generator of terms
+%o A350046     f = Counter()
+%o A350046     for m in count(2):
+%o A350046         f += Counter(factorint(m))
+%o A350046         e = sorted(f.items())
+%o A350046         if all(d <= 1 or isprime(d) for d in (abs(e[i+1][1]-e[i][1]) for i in range(len(e)-1))):
+%o A350046             yield m
+%o A350046 A350046_list = list(islice(A350046_gen(),15)) # _Chai Wah Wu_, Jan 10 2022
+%o A350046 (PARI) valp(n,p)=my(s); while(n\=p, s+=n); s
+%o A350046 is(n)=my(o=valp(n,2),e); forprime(p=3,, e=valp(n,p); if(o-e<4, return(1)); if(isprime(o-e), o=e, return(0))) \\ _Charles R Greathouse IV_, Dec 15 2021
+%Y A350046 Cf. A000142, A330706.
+%K A350046 nonn
+%O A350046 1,1
+%A A350046 _Devansh Singh_, Dec 11 2021

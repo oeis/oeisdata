@@ -1,0 +1,47 @@
+%I A242861 #48 Dec 04 2020 19:31:09
+%S A242861 1,1,1,4,2,1,12,44,56,18,1,24,224,1044,2593,3388,2150,552,36,1,40,686,
+%T A242861 6632,39979,157000,407620,695848,762180,510752,192672,35104,2180,1,60,
+%U A242861 1622,26172,281514,2135356,11785382,48145820,146702793,333518324,562203148
+%N A242861 Triangle T(n,k) by rows: number of ways k dominoes can be placed on an n X n chessboard, k>=0.
+%C A242861 Also, coefficients of the matching-generating polynomial of the n X n grid graph.
+%C A242861 In the n-th row there are floor(n^2/2)+1 values.
+%H A242861 Alois P. Heinz, <a href="/A242861/b242861.txt">Rows n = 0..14, flattened</a>
+%H A242861 Ralf Stephan, <a href="/A242856/a242856.pdf">Two dominoes on the 3x3 chessboard</a>, illustration of T(3,2)=44.
+%H A242861 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/GridGraph.html">Grid Graph</a>
+%H A242861 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/Matching-GeneratingPolynomial.html">Matching-Generating Polynomial</a>
+%H A242861 Wikipedia, <a href="https://en.wikipedia.org/wiki/Matching_polynomial">Matching polynomial</a>
+%H A242861 <a href="/index/Do#domino">Index entries for sequences related to dominoes</a>
+%H A242861 <a href="/index/Mat#matchings">Index entries for sequences related to matchings</a>
+%F A242861 T(n,1) = A046092(n-1), T(n,2) = A242856(n).
+%F A242861 T(n,floor(n^2/2)) = A137308(n), T(2n,2n^2) = A004003(n).
+%F A242861 sum(k>=0, T(n,k)) = A210662(n,n) = A028420(n).
+%F A242861 T(n,3) = A243206(n), T(n,4) = A243215(n), T(n,5) = A243217(n), T(n,floor(n^2/4)) = A243221(n). - _Alois P. Heinz_, Jun 01 2014
+%e A242861 Triangle starts:
+%e A242861   1
+%e A242861   1
+%e A242861   1  4   2
+%e A242861   1 12  44   56    18
+%e A242861   1 24 224 1044  2593   3388   2150    552     36
+%e A242861   1 40 686 6632 39979 157000 407620 695848 762180 510752 192672 35104 2180
+%e A242861   ...
+%p A242861 b:= proc(n, l) option remember; local k;
+%p A242861       if n=0 then 1
+%p A242861     elif min(l[])>0 then b(n-1, map(h->h-1, l))
+%p A242861     else for k while l[k]>0 do od; expand(`if`(n>1,
+%p A242861          x*b(n, subsop(k=2, l)), 0) +`if`(k<nops(l) and l[k+1]=0,
+%p A242861          x*b(n, subsop(k=1, k+1=1, l)), 0) +b(n, subsop(k=1, l)))
+%p A242861       fi
+%p A242861     end:
+%p A242861 T:= n-> (p-> seq(coeff(p, x, i), i=0..degree(p)))(b(n, [0$n])):
+%p A242861 seq(T(n), n=0..8); # _Alois P. Heinz_, Jun 01 2014
+%t A242861 b[n_, l_List] := b[n, l] =  Module[{k}, Which[n == 0, 1, Min[l]>0, b[n-1, l-1], True, For[k=1, l[[k]]>0, k++]; Expand[If[n>1, x*b[n, ReplacePart[l, k -> 2]], 0] + If[k<Length[l] && l[[k+1]] == 0, x*b[n, ReplacePart[l, {k -> 1, k + 1 -> 1}]], 0] + b[n, ReplacePart[l, k -> 1]]]]]; T[n_] := Function[{p}, Table[Coefficient[p, x, i], {i, 0, Exponent[p, x]}]][b[n, Array[0&, n]]]; Table[T[n], {n, 0, 8}] // Flatten (* _Jean-François Alcover_, Jun 16 2015, after _Alois P. Heinz_ *)
+%o A242861 (Sage)
+%o A242861 def T(n,k):
+%o A242861    G = Graph(graphs.Grid2dGraph(n,n))
+%o A242861    G.relabel()
+%o A242861    mu = G.matching_polynomial()
+%o A242861    return abs(mu[n^2-2*k])
+%Y A242861 Cf. A046741, A096713.
+%K A242861 nonn,tabf
+%O A242861 0,4
+%A A242861 _Ralf Stephan_, May 24 2014

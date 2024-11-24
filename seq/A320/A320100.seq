@@ -1,0 +1,36 @@
+%I A320100 #75 Feb 24 2019 11:48:45
+%S A320100 4,16,44,61,4,16,64,176,244,16,64,201,324,556,44,176,324,736,1004,61,
+%T A320100 244,556,1004,1561,4,16,64,176,244,16,64,256,704,976,64,256,804,1296,
+%U A320100 2224,176,704,1296,2944,4016,244,976,2224,4016,6244,16,64,201,324,556
+%N A320100 Automata sum similar to A102376 but using mod 5.
+%C A320100 The automata that generates this sequence operates on a grid of cells c(i,j). The cells in the automata have five possible values, [0-4]. The next generation in the CA is calculated by applying the following rule to each cell: c(i,j) = ( c(i+1,j-1) + c(i+1,j+1) + c(i-1,j-1) + c(i-1,j+1) ) mod 5.
+%C A320100 Start with a single cell with a value of 1, with all other cells set to 0. For each generation, the term in this sequence c(n) is the aggregate values of all cells in the grid for each discrete generation of the automaton (i.e., not cumulative over multiple generations).
+%C A320100 The cellular automaton that generates this sequence has been empirically observed to repeat the number of active cells (4 in this case) if the iteration number N is a power of the modulus + 1. The modulus in this case is 5.
+%C A320100 This has been observed to occur with any prime mod and any starting pattern of cells. I'm picking this particular implementation because it's the same as the one used in A102376.
+%C A320100 Counting the active (nonzero) cells instead of taking the sum also creates a different but related sequence. This sequence is the sum of each iteration, and cells in this automaton have values 0, 1, 2, 3 or 4. Only for mod 2 are both the sum and active cell counts the same.
+%H A320100 Georg Fischer, <a href="/A320100/b320100.txt">Table of n, a(n) for n = 1..100</a>
+%o A320100 (Python)
+%o A320100 # requires scipy library (try pip install scipy)
+%o A320100 # more info: https://www.scipy.org/scipylib/download.html)
+%o A320100 import numpy as np
+%o A320100 from scipy import signal
+%o A320100 frameSize = 301
+%o A320100 filter = [[0, 1, 0], [1, 0, 1], [0, 1, 0]] # this defines the CA neighborhood
+%o A320100 frame  = np.zeros((frameSize, frameSize))
+%o A320100 frame[int(frameSize/2), int(frameSize/2)] = 1
+%o A320100 mod = 5
+%o A320100 sequence = []
+%o A320100 for j in range(140):
+%o A320100     frame = signal.convolve2d(frame, filter, mode='same')
+%o A320100     frame = np.mod(frame, mod)
+%o A320100     # If you want to visualize the automaton you can use a tool
+%o A320100     # like opencv (pip install opencv-python) to save the frame
+%o A320100     # as an image each  iteration.
+%o A320100     # i:e:(with other imports) import cv2
+%o A320100     #     (inside loop)         cv2.imwrite('automatonFrame%s.png' % j, frame)
+%o A320100     sequence.append(int(np.sum(frame.reshape(1, -1))))
+%o A320100 print(sequence)
+%Y A320100 Cf. A102376 (mod 2), A320030 (mod 3).
+%K A320100 nonn
+%O A320100 1,1
+%A A320100 _Nathan M Epstein_, Dec 10 2018

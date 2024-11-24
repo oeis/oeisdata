@@ -1,0 +1,50 @@
+%I A322791 #17 Apr 20 2023 10:52:46
+%S A322791 1,2,3,2,4,5,6,7,2,8,3,9,10,11,6,12,13,14,15,2,4,16,17,6,18,19,10,20,
+%T A322791 21,22,23,6,24,5,25,26,3,27,14,28,29,30,31,2,32,33,34,35,6,12,18,36,
+%U A322791 37,38,39,10,40,41,42,43,22,44,15,45,46,47,6,12,48,7,49
+%N A322791 Irregular triangle read by rows in which the n-th row lists the exponential divisors (or e-divisors) of n.
+%H A322791 Xiaodong Cao and Wenguang Zhai, <a href="https://www.emis.de/journals/JIS/VOL13/Cao/cao4.html">Some arithmetic functions involving exponential divisors</a>, Journal of Integer Sequences, Vol. 13, No. 2 (2010), Article 10.3.7.
+%H A322791 E. G. Straus and M. V. Subbarao, <a href="https://www.doi.org/10.1215/S0012-7094-74-04152-0">On exponential divisors</a>, Duke Mathematical Journal, Vol. 41, No. 2 (1974), pp. 465-471, <a href="https://www.utdallas.edu/~m.vidyasagar/Straus-Subbarao-74.pdf">alternative link</a>.
+%H A322791 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/e-Divisor.html">e-Divisor</a>
+%e A322791 The table starts
+%e A322791   1
+%e A322791   2
+%e A322791   3
+%e A322791   2, 4
+%e A322791   5
+%e A322791   6
+%e A322791   7
+%e A322791   2, 8
+%e A322791   3, 9
+%e A322791   10
+%p A322791 A322791 := proc(n)
+%p A322791     local expundivs ,d,isue,p,ai,bi;
+%p A322791     expudvs := {} ;
+%p A322791     for d in numtheory[divisors](n) do
+%p A322791         isue := true ;
+%p A322791         for p in numtheory[factorset](n) do
+%p A322791             ai := padic[ordp](n,p) ;
+%p A322791             bi := padic[ordp](d,p) ;
+%p A322791             if bi > 0 then
+%p A322791                 if modp(ai,bi) <>0 then
+%p A322791                     isue := false;
+%p A322791                 end if;
+%p A322791             else
+%p A322791                 isue := false ;
+%p A322791             end if;
+%p A322791         end do;
+%p A322791         if isue then
+%p A322791             expudvs := expudvs union {d} ;
+%p A322791         end if;
+%p A322791     end do:
+%p A322791     sort(expudvs) ;
+%p A322791 end proc:
+%p A322791 seq(op(A322791(n)),n=1..40) ; # _R. J. Mathar_, Mar 06 2023
+%t A322791 divQ[n_, m_] := (n > 0 && m>0 && Divisible[n, m]); expDivQ[n_, d_] := Module[ {f=FactorInteger[n]}, And@@MapThread[divQ, {f[[;; , 2]], IntegerExponent[ d, f[[;; , 1]]]} ]]; expDivs[1]={1}; expDivs[n_] := Module[ {d=Rest[Divisors[n]]}, Select[ d, expDivQ[n, #]&] ]; Table[expDivs[n], {n, 1, 50}] // Flatten
+%o A322791 (PARI) isexpdiv(f, d) = { my(e); for (i=1, #f~, e = valuation(d, f[i, 1]); if(!e || (e && f[i, 2] % e), return(0))); 1; }
+%o A322791 row(n) = {my(d = divisors(n), f = factor(n), ediv = []); if(n == 1, return([1])); for(i=2, #d, if(isexpdiv(f, d[i]), ediv = concat(ediv, d[i]))); ediv; } \\ _Amiram Eldar_, Mar 27 2023
+%Y A322791 Cf. A049419 (row lengths), A051377 (row sums).
+%Y A322791 Cf. A027750 (all divisors), A077609 (infinitary), A077610 (unitary), A222266 (bi-unitary).
+%K A322791 nonn,tabf
+%O A322791 1,2
+%A A322791 _Amiram Eldar_, Dec 26 2018

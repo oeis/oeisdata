@@ -1,0 +1,39 @@
+%I A296073 #27 Jan 20 2020 21:43:23
+%S A296073 1,2,2,3,2,4,2,5,6,7,2,8,2,9,10,11,2,12,2,13,14,15,2,16,17,18,19,20,2,
+%T A296073 21,2,22,23,24,25,26,2,27,28,29,2,30,2,31,32,33,2,34,35,36,37,38,2,39,
+%U A296073 40,41,42,43,2,44,2,45,46,47,48,49,2,50,51,52,2,53,2,54,55,56,57,58,2,59,60,61,2,62,63,64,65,66,2,67,68,69,70,71,72,73,2,74,75,76,2,77,2,78,79,80,2,81,2,82,83,84,2,85,86,87,88,89,90,91,92,93,94,95,33
+%N A296073 Filter combining A296071(n) and A296072(n), related to the deficiencies of proper divisors of n.
+%C A296073 Construction: Pack the values of A296071(n) and A296072(n) to a single value with any injective N x N -> N packing function, like for example as f(n) = (1/2)*(2 + ((A296071(n)+A296072(n))^2) - A296071(n) - 3*A296072(n)) (the packing function here is the two-argument form of A000027). Then apply the restricted growth sequence transform to the sequence f(1), f(2), f(3), ... The transform assigns a unique increasing number for each newly encountered term of the sequence, and for any subsequent occurrences of the same term it gives the same number that term obtained for the first time.
+%C A296073 For all i, j: a(i) = a(j) => A296074(i) = A296074(j).
+%C A296073 Note that this is NOT restricted growth transform of A239968, which is A305800. Apart from 2's that occur at every prime, there are other duplicates also, first at a(125) = a(46) = 33.
+%H A296073 Antti Karttunen, <a href="/A296073/b296073.txt">Table of n, a(n) for n = 1..65536</a>
+%e A296073 To see that a(46) and a(125) have the same value (33), consider the proper divisors of 46 = 1, 2, 23 and of 125 = 1, 5, 25. Their deficiencies are 1, 1, 22 and 1, 4, 19 respectively. When we look at their balanced ternary representations [as here all elements are positive, it can be obtained as A007089(A117967(n)) with 2's standing for -1's]:
+%e A296073    1 =    1
+%e A296073    1 =    1
+%e A296073   22 = 1211 (as 22 = 1*(3^3) + -1*(3^2) + 1*(3^1) + 1*(3^0))
+%e A296073 and
+%e A296073    1 =    1
+%e A296073    4 =   11
+%e A296073   19 = 1201 (as 19 = 1*(3^3) + -1*(3^2) + 0*(3^1) + 1*(3^0)).
+%e A296073 we see that in each column there is an equal number of 1's and an equal number of 2's. Moreover, this then implies also that the sums of those two sequences of deficiencies {1, 1, 22} and {1, 4, 19} are equal, as A296074(n) is a function of (can be computed from) a(n).
+%o A296073 (PARI)
+%o A296073 up_to = 65536;
+%o A296073 rgs_transform(invec) = { my(om = Map(), outvec = vector(length(invec)), u=1); for(i=1, length(invec), if(mapisdefined(om,invec[i]), my(pp = mapget(om, invec[i])); outvec[i] = outvec[pp] , mapput(om,invec[i],i); outvec[i] = u; u++ )); outvec; };
+%o A296073 write_to_bfile(start_offset,vec,bfilename) = { for(n=1, length(vec), write(bfilename, (n+start_offset)-1, " ", vec[n])); }
+%o A296073 A019565(n) = {my(j,v); factorback(Mat(vector(if(n, #n=vecextract(binary(n), "-1..1")), j, [prime(j), n[j]])~))}; \\ This function from _M. F. Hasler_
+%o A296073 A117967(n) = if(n<=1,n,if(!(n%3),3*A117967(n/3),if(1==(n%3),1+3*A117967((n-1)/3),2+3*A117967((n+1)/3))));
+%o A296073 A117968(n) = if(1==n,2,if(!(n%3),3*A117968(n/3),if(1==(n%3),2+3*A117968((n-1)/3),1+3*A117968((n+1)/3))));
+%o A296073 A289813(n) = { my (d=digits(n, 3)); from digits(vector(#d, i, if (d[i]==1, 1, 0)), 2); } \\ From _Rémy Sigrist_
+%o A296073 A289814(n) = { my (d=digits(n, 3)); from digits(vector(#d, i, if (d[i]==2, 1, 0)), 2); } \\ From _Rémy Sigrist_
+%o A296073 A295882(n) = { my(x = (2*n)-sigma(n)); if(x >= 0,A117967(x),A117968(-x)); };
+%o A296073 A296071(n) = { my(m=1); fordiv(n,d,if(d < n,m *= A019565(A289813(A295882(d))))); m; };
+%o A296073 A296072(n) = { my(m=1); fordiv(n,d,if(d < n,m *= A019565(A289814(A295882(d))))); m; };
+%o A296073 Anotsubmitted3(n) = (1/2)*(2 + ((A296071(n)+A296072(n))^2) - A296071(n) - 3*A296072(n));
+%o A296073 write_to_bfile(1,rgs_transform(vector(up_to,n,Anotsubmitted3(n))),"b296073.txt");
+%Y A296073 Cf. A019565, A033879, A117967, A117968, A295882, A296071, A296072, A296074.
+%Y A296073 Cf. also A293226.
+%Y A296073 Differs from A305800 for the first time at n=125.
+%K A296073 nonn
+%O A296073 1,2
+%A A296073 _Antti Karttunen_, Dec 04 2017
+%E A296073 Data section extended up to a(125) by _Antti Karttunen_, Jun 14 2018

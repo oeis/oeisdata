@@ -1,0 +1,32 @@
+%I A290100 #53 Nov 23 2024 08:29:03
+%S A290100 1,2,12,3,8,23,381,5,73,12,187,47,39,786,537,8,109,124,2020,23,19,381,
+%T A290100 267,81,7768,60,6061,73,1238,1128,118945,12,1120,187,141,234,190,3999,
+%U A290100 18578,39,3394,28,2896,747,576,537,56496,128,533,606,9757,109,95,12337,8656,118,11306,2020,9309,2309,1789,258213,176262,19
+%N A290100 Start from the singleton set S = {n}, and unless 1 is already a member of S, generate on each iteration a new set where each odd number k is replaced by 3k+1, and each even number k is replaced by 3k+1 and k/2. a(n) is the size of the set after the first iteration which has produced 1 as a member.
+%C A290100 Records are {1, 2, 12, 23, 381, 786, 2020, 7768, 118945, 258213, 2124457, 40495936, 59752379, 65297014, 231177519} at positions {1, 2, 3, 6, 7, 14, 19, 25, 31, 62, 107, 127, 255, 295, 339}. - _Michael De Vlieger_, Aug 24 2017
+%H A290100 Michael De Vlieger, <a href="/A290100/b290100.txt">Table of n, a(n) for n = 1..450</a> (first 126 terms from Antti Karttunen)
+%H A290100 <a href="/index/3#3x1">Index entries for sequences related to 3x+1 (or Collatz) problem</a>
+%F A290100 a(n) >= A290102(n).
+%e A290100 For n=1, the initial set from which we start is {1}, and it already contains 1, so a(1) = 1 as the size of that set is 1.
+%e A290100 For n=2, the initial set is {2}, which will become set {1, 7} (because 2/2 = 1 and 3*2+1 = 7), and that set already contains 1, thus a(2) = 2.
+%e A290100 For n=3, the initial set is {3}, the next set is 3*3+1 = {10}, from which we get {5, 31} -> {16, 94} -> {8, 47, 49, 283} -> {4, 25, 142, 148, 850} -> {2, 13, 71, 74, 76, 425, 427, 445, 2551} and from that one we get these 12 numbers: {1, 7, 37, 38, 40, 214, 223, 229, 1276, 1282, 1336, 7654}, and because 1 is among these, a(3) = 12.
+%e A290100 For n = 12, the iteration proceeds as follows: {12} -> {6, 37} -> {3, 19, 112} -> {10, 56, 58, 337} -> {5, 28, 29, 31, 169, 175, 1012} -> {14, 16, 85, 88, 94, 506, 508, 526, 3037} -> {7, 8, 43, 44, 47, 49, 253, 254, 256, 263, 265, 283, 1519, 1525, 1579, 9112} -> {4, 22, 25, 127, 128, 130, 133, 142, 148, 760, 763, 769, 790, 796, 850, 4556, 4558, 4576, 4738, 27337} -> {2, 11, 13, 64, 65, 67, 71, 74, 76, 380, 382, 385, 391, 395, 398, 400, 425, 427, 445, 2278, 2279, 2281, 2288, 2290, 2308, 2369, 2371, 2389, 2551, 13669, 13675, 13729, 14215, 82012} -> {1, 7, 32, 34, 37, 38, 40, 190, 191, 193, 196, 199, 200, 202, 214, 223, 229, 1139, 1141, 1144, 1145, 1147, 1154, 1156, 1174, 1186, 1195, 1201, 1276, 1282, 1336, 6835, 6838, 6844, 6865, 6871, 6925, 7108, 7114, 7168, 7654, 41006, 41008, 41026, 41188, 42646, 246037}. As this last set contains 1 and has 47 members, a(12) = 47. Note how here in the 7th iteration the term 22 is a child of both 7 (as 3*7+1) and 44 (as 44/2), but as these are sets, not multisets, 22 occurs only once in {4, 22, 25, ...}.
+%t A290100 Table[Length@ Last@ NestWhileList[Union@ Flatten[# /. {k_ /; OddQ@ k :> 3 k + 1, k_ /; EvenQ@ k :> {k/2, 3 k + 1}}] &, {n}, FreeQ[#, 1] &], {n, 64}] (* _Michael De Vlieger_, Aug 20 2017 *)
+%o A290100 (PARI)
+%o A290100 allocatemem(2^31);
+%o A290100 A290100(n) = { my(S); S=[n]; while( S[1]!=1, S = vecsort( concat(apply(x->3*x+1, S), apply(x->x\2, select(x->x%2==0, S) )), , 8); ); length(S); } \\ After _Max Alekseyev_'s code for A127885
+%o A290100 for(n=1,126,write("b290100.txt", n, " ", A290100(n)));
+%o A290100 (Python)
+%o A290100 from sympy import flatten
+%o A290100 def a(n):
+%o A290100     if n==1: return 1
+%o A290100     L=[n]
+%o A290100     while not 1 in L:
+%o A290100         L=sorted(list(set(flatten([[3*k + 1, k/2] if k%2==0 else 3*k + 1 for k in L]))))
+%o A290100     return len(L)
+%o A290100 for i in range(1, 101): print(a(i)) # _Indranil Ghosh_, Aug 31 2017
+%Y A290100 Cf. A127885 (gives the number of iterations needed until 1 is present).
+%Y A290100 Cf. also A290101, A290102.
+%K A290100 nonn,changed
+%O A290100 1,2
+%A A290100 _Antti Karttunen_, Aug 18 2017

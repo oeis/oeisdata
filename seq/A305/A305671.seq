@@ -1,0 +1,88 @@
+%I A305671 #22 Aug 04 2018 14:44:22
+%S A305671 7,0,0,0,0,0,0,24,24,24,24,24,24,24,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+%T A305671 0,0,0,72,72,72,72,72,72,72,72,72,72,72,72,72,72,72,72,72,72,72,72,0,
+%U A305671 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+%N A305671 Most common value of sigma (A000203) among all composites (A073255) up to composite(n) = A002808(n) inclusive, or 0 if there is a tie.
+%e A305671 In the following table, column A lists the n-th composite and column B lists sigma(A(n)).
+%e A305671    n |  A |   B | a(n)
+%e A305671   ---------------------
+%e A305671    1 |  4 |   7 |  7
+%e A305671    2 |  6 |  12 |  0
+%e A305671    3 |  8 |  15 |  0
+%e A305671    4 |  9 |  13 |  0
+%e A305671    5 | 10 |  18 |  0
+%e A305671    6 | 12 |  28 |  0
+%e A305671    7 | 14 |  24 |  0
+%e A305671    8 | 15 |  24 | 24 <--- first time a value of sigma occurs twice
+%e A305671    9 | 16 |  31 | 24
+%e A305671   10 | 18 |  39 | 24
+%e A305671   11 | 20 |  42 | 24
+%e A305671   12 | 21 |  32 | 24
+%e A305671   13 | 22 |  36 | 24
+%e A305671   14 | 24 |  60 | 24
+%e A305671   15 | 25 |  31 |  0 <--- second time a value of sigma occurs twice
+%e A305671   16 | 26 |  42 |  0
+%e A305671   17 | 27 |  40 |  0
+%e A305671   18 | 28 |  56 |  0
+%e A305671   19 | 30 |  72 |  0
+%e A305671   20 | 32 |  63 |  0
+%e A305671   21 | 33 |  48 |  0
+%e A305671   22 | 34 |  54 |  0
+%e A305671   23 | 35 |  48 |  0
+%e A305671   24 | 36 |  91 |  0
+%e A305671   25 | 38 |  60 |  0
+%e A305671   26 | 39 |  56 |  0
+%e A305671   27 | 40 |  90 |  0
+%e A305671   28 | 42 |  96 |  0
+%e A305671   29 | 44 |  84 |  0
+%e A305671   30 | 45 |  78 |  0
+%e A305671   31 | 46 |  72 |  0
+%e A305671   32 | 48 | 124 |  0
+%e A305671   33 | 49 |  57 |  0
+%e A305671   34 | 50 |  93 |  0
+%e A305671   35 | 51 |  72 | 72 <--- first time a value of sigma occurs three times
+%e A305671   36 | 52 |  98 | 72
+%e A305671   37 | 54 | 120 | 72
+%e A305671   38 | 55 |  72 | 72 <--- fourth occurrence of the value 72
+%e A305671   39 | 56 | 120 | 72
+%e A305671   40 | 57 |  80 | 72
+%e A305671   41 | 58 |  90 | 72
+%e A305671   42 | 60 | 168 | 72
+%e A305671   43 | 62 |  96 | 72
+%e A305671   44 | 63 | 104 | 72
+%e A305671   45 | 64 | 127 | 72
+%e A305671   46 | 65 |  84 | 72
+%e A305671   47 | 66 | 144 | 72
+%e A305671   48 | 68 | 126 | 72
+%e A305671   49 | 69 |  96 | 72
+%e A305671   50 | 70 | 144 | 72
+%e A305671   51 | 72 | 195 | 72
+%e A305671   52 | 74 | 114 | 72
+%e A305671   53 | 75 | 124 | 72
+%e A305671   54 | 76 | 140 | 72
+%e A305671   55 | 77 |  96 |  0 <--- another value apart from 72 occurs four times
+%e A305671   56 | 78 | 168 |  0
+%p A305671 N:= 100: # to get a(1)..a(N)
+%p A305671 cmax:= 3*N: Counts:= Vector(cmax):
+%p A305671 i:= 0:
+%p A305671 for n from 4 do
+%p A305671   if isprime(n) then next fi;
+%p A305671   i:= i+1;
+%p A305671   if i > N then break fi;
+%p A305671   s:= numtheory:-sigma(n);
+%p A305671   if s > cmax then cmax:= s; Counts(s):= 1;
+%p A305671   else Counts[s]:= Counts[s]+1;
+%p A305671   fi;
+%p A305671   vmax:= max[index](Counts):
+%p A305671   if max(Counts[1..vmax-1]) = Counts[vmax] or max(Counts[vmax+1..-1])=Counts[vmax] then A[i]:= 0 else A[i]:= vmax fi
+%p A305671 od:
+%p A305671 seq(A[i],i=1..N); # _Robert Israel_, Jun 12 2018
+%t A305671 Block[{c = Select[Range@ 120, CompositeQ], s}, s = DivisorSigma[1, c]; Array[If[Length@ # == 1, #[[1, 1]], 0] &@ Last@ SplitBy[SortBy[Tally@ Take[s, #], Last], Last] &, Length@ s]] (* _Michael De Vlieger_, Jun 14 2018 *)
+%o A305671 (PARI) add_sigma(vec, val) = if(val > #vec, vec=concat(vec, vector(val-#vec))); vec[val]++; vec
+%o A305671 max_pos(vec) = if(#setintersect(vecsort(vec), vector(#vec, t, vecmax(vec))) > 1, return(0), for(k=1, #vec, if(vec[k]==vecmax(vec), return(k))))
+%o A305671 terms(n) = my(sig=[], i=0); forcomposite(c=1, , sig=add_sigma(sig, sigma(c)); print1(max_pos(sig), ", "); i++; if(i==n, break))
+%o A305671 terms(100) \\ Print initial 100 terms of the sequence
+%Y A305671 Cf. A000203, A002808, A073255, A305672, A305673, A305674, A305675, A305676.
+%K A305671 nonn,look
+%O A305671 1,1
+%A A305671 _Felix Fröhlich_, Jun 08 2018

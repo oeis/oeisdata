@@ -1,0 +1,54 @@
+%I A322275 #24 Sep 11 2022 12:04:44
+%S A322275 1,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97,101,103,
+%T A322275 107,109,113,127,131,137,139,149,151,157,67,167,173,179,181,191,193,
+%U A322275 197,199,211,223,83,229,233,239,241,251,257,263,269,271,277,281,283,1,293,307,311,313,317,683,331,337,107,349,353,239,1,103,277,331,47,389
+%N A322275 Smallest multiplication factors f, prime or 1, for all b (mod 120120), coprime to 120120 (= 4*13#), so that b*f is a square mod 8, and modulo all primes up to 13.
+%C A322275 See sequence A322269 for further explanations. This sequence is related to A322269(6).
+%C A322275 The sequence is periodic, repeating itself after phi(120120) terms. Its largest term is 3583, which is A322269(6). In order to satisfy the conditions, both f and b must be coprime to 120120. Otherwise, the product would be zero mod a prime <= 13.
+%C A322275 The b(n) corresponding to each a(n) is A008366(n).
+%C A322275 The first 32 terms are trivial: f=b, and then the product b*f naturally is a square modulo everything.
+%H A322275 Hans Ruegg, <a href="/A322275/b322275.txt">Table of n, a(n) for n = 1..23040</a>
+%e A322275 The 44th number coprime to 120120 is 227. a(44) is 83, because 83 is the smallest prime by which we can multiply 227, so that the product (227*83 = 18841) is a square mod 8, and modulo all primes up to 13.
+%o A322275 (PARI)
+%o A322275 QresCode(n, nPrimes) = {
+%o A322275   code = bitand(n,7)>>1;
+%o A322275   for (j=2, nPrimes,
+%o A322275     x = Mod(n,prime(j));
+%o A322275     if (issquare(x), code += (1<<j));
+%o A322275   );
+%o A322275   return (code);
+%o A322275 }
+%o A322275 QCodeArray(n) = {
+%o A322275   totalEntries = 1<<(n+1);
+%o A322275   f = vector(totalEntries);
+%o A322275   f[totalEntries-3] = 1;  \\ 1 always has the same code: ...111100
+%o A322275   counter = 1;
+%o A322275   forprime(p=prime(n+1), +oo,
+%o A322275     code = QresCode(p, n);
+%o A322275     if (f[code+1]==0,
+%o A322275       f[code+1]=p;
+%o A322275       counter += 1;
+%o A322275       if (counter==totalEntries, return(f));
+%o A322275     )
+%o A322275   )
+%o A322275 }
+%o A322275 sequence(n) = {
+%o A322275   f = QCodeArray(n);
+%o A322275   primorial = prod(i=1, n, prime(i));
+%o A322275   entries = eulerphi(4*primorial);
+%o A322275   a = vector(entries);
+%o A322275   i = 1;
+%o A322275   forstep (x=1, 4*primorial-1, 2,
+%o A322275     if (gcd(x,primorial)==1,
+%o A322275       a[i] = f[QresCode(x, n)+1];
+%o A322275       i += 1;
+%o A322275     );
+%o A322275   );
+%o A322275   return(a);
+%o A322275 }
+%o A322275 \\ sequence(6) returns this sequence.
+%o A322275 \\ Similarly, sequence(2) returns A322271, sequence(3) returns A322272, ... sequence(5) returns A322274.
+%Y A322275 Cf. A322269, A322271, A322272, A322273, A322274, A008366.
+%K A322275 nonn,fini,full
+%O A322275 1,2
+%A A322275 _Hans Ruegg_, Dec 01 2018

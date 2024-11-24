@@ -1,0 +1,43 @@
+%I A308925 #11 Oct 15 2021 14:43:40
+%S A308925 0,0,0,0,0,0,0,0,0,0,0,0,2,3,3,8,8,15,20,17,24,35,42,50,66,61,92,102,
+%T A308925 122,129,180,150,237,233,296,260,370,300,463,398,521,467,708,527,845,
+%U A308925 667,935,768,1158,839,1372,1039,1547,1233,1898,1294,2217,1612
+%N A308925 Sum of the largest parts in the partitions of n into 6 primes.
+%H A308925 Robert Israel, <a href="/A308925/b308925.txt">Table of n, a(n) for n = 0..2000</a>
+%H A308925 <a href="/index/Par#part">Index entries for sequences related to partitions</a>
+%F A308925 a(n) = Sum_{m=1..floor(n/6)} Sum_{l=m..floor((n-m)/5)} Sum_{k=l..floor((n-l-m)/4)} Sum_{j=k..floor((n-k-l-m)/3)} Sum_{i=j..floor((n-j-k-l-m)/2)} c(m) * c(l) * c(k) * c(j) * c(i) * c(n-i-j-k-l-m) * (n-i-j-k-l-m), where c = A010051.
+%F A308925 a(n) = A308919(n) - A308920(n) - A308921(n) - A308922(n) - A308923(n) - A308924(n).
+%p A308925 N:= proc(m,k,n) option remember;
+%p A308925      local q,t;
+%p A308925      if m = 1 then if k=n and isprime(k) then return 1
+%p A308925        else return 0
+%p A308925      fi fi;
+%p A308925      if m*k < n then return 0 fi;
+%p A308925      t:= 0;
+%p A308925      q:= ceil((n-k)/(m-1))-1;
+%p A308925      do
+%p A308925        q:= nextprime(q);
+%p A308925        if q > min(k, n-k) then return t fi;
+%p A308925        t:= t + procname(m-1,q,n-k)
+%p A308925      od;
+%p A308925 end proc:
+%p A308925 F:= proc(n) local p, q, t;
+%p A308925   p:= ceil(n/6)-1;
+%p A308925   t:= 0;
+%p A308925   do
+%p A308925     p:= nextprime(p);
+%p A308925     if p >= n then return t fi;
+%p A308925     q:= ceil((n-p)/5)-1;
+%p A308925     do
+%p A308925       q:= nextprime(q);
+%p A308925       if q > min(p,n-p) then break fi;
+%p A308925       t:= t + p*N(5,q,n-p);
+%p A308925     od
+%p A308925   od
+%p A308925 end proc:
+%p A308925 map(F, [$0..100]); # _Robert Israel_, Jul 02 2019
+%t A308925 Table[Sum[Sum[Sum[Sum[Sum[(n - i - j - k - l - m)*(PrimePi[i] - PrimePi[i - 1]) (PrimePi[j] - PrimePi[j - 1]) (PrimePi[k] - PrimePi[k - 1]) (PrimePi[l] - PrimePi[l - 1]) (PrimePi[m] - PrimePi[m - 1]) (PrimePi[n - i - j - k - l - m] - PrimePi[n - i - j - k - l - m - 1]), {i, j, Floor[(n - j - k - l - m)/2]}], {j, k, Floor[(n - k - l - m)/3]}], {k, l, Floor[(n - l - m)/4]}], {l, m, Floor[(n - m)/5]}], {m, Floor[n/6]}], {n, 0, 50}]
+%Y A308925 Cf. A010051, A259196, A308919, A308920, A308921, A308922, A308923, A308924.
+%K A308925 nonn
+%O A308925 0,13
+%A A308925 _Wesley Ivan Hurt_, Jun 30 2019

@@ -1,0 +1,68 @@
+%I A276128 #18 Sep 08 2016 03:08:40
+%S A276128 0,1,2,4,6,8,10,12,14,16,18,21,24,27,30,34,38,42,46,49,52,55,58,61,64,
+%T A276128 67,70,73,76,79,82,86,90,94,98,102,106,110,114,119,124,129,134,139,
+%U A276128 144,149,154,160,166,172,178,182,186,190,194,198,202,206,210,214,218,222,226,230,234,238,242,246,250,254,258,262,266,270,274,278,282,286,290
+%N A276128 a(n) is the minimum cost to determine a number among 1...n by multiple guesses, where the cost of each guess is the guessed value and the answer is whether the guess is low, high, or correct.
+%C A276128 Definition of a(n): For a positive integer n, let the single-player game G(n) be as follows: x is a number in {1, 2, ..., n}, but unknown to the player. The player can guess as many times as he wants to determine the value of x. For each guess, the player can propose a possible value c in {1, 2, ..., n}, but such guess will cost the player c dollars. After each guess, the player will get response to show whether c<x, c=x, or c>x.
+%C A276128 A guess strategy will consist a series of guesses to determine x. The cost of multiple guesses is defined to be the sum of the cost of each guess. The cost of guess strategy is defined to be the worse case of the cost of the guess series. The optimal guess strategy for the game G(n) is the guess strategy that has the minimum cost. a(n) is the cost of the optimal guess strategy.
+%H A276128 Robert Israel, <a href="/A276128/b276128.txt">Table of n, a(n) for n = 1..1000</a>
+%e A276128 For n = 3, the best strategy is to use only one guess with value 2. So the cost is 2.
+%e A276128 For n = 4, the best strategy is first make a guess with value 3. If the target value is less than 3, then make another guess 1. So the cost is 3+1=4.
+%p A276128 f:= proc(a,b) option remember;
+%p A276128 local t;
+%p A276128      if b-a <=0 then return 0
+%p A276128      elif b-a = 1 then return a
+%p A276128      else min(seq(t + max(procname(a,t-1), procname(t+1,b)), t=a..b))
+%p A276128      fi
+%p A276128 end proc:
+%p A276128 map2(f,1,[$1..100]); # _Robert Israel_, Sep 08 2016
+%t A276128 A276128[n_] := (
+%t A276128    (*Allocate Memory*)
+%t A276128    dp = Table[0, {first, 1, n + 1}, {last, 1, n + 1}];
+%t A276128    (*Buttom-up Dynamic Programming*)
+%t A276128    For[length = 2, length <= n, length++,
+%t A276128        For[first = 1, first <= n + 1 - length, first++,
+%t A276128            (*[First,Last) contains n elements in total*)
+%t A276128            last = first + length;
+%t A276128            dp[[first, last]] = Min[Table[mid + Max[dp[[first, mid]], dp[[mid + 1, last]]], {mid, first, last - 1}]];]];
+%t A276128    (*Achieve Results*)
+%t A276128    Table[dp[[1, idx + 1]], {idx, 1, n}]);
+%o A276128 (C++)
+%o A276128 // O(n^2) dynamic-programming:
+%o A276128 // Let k0[first,last] = max{k: dp[first,k] <= dp[k+1,last]}, then
+%o A276128 // max{dp[first,k],dp[k+1,last]} = dp[first, k] if k0[first,last]<k<=last
+%o A276128 //                            else dp[k+1, last]
+%o A276128 // So dp[first,last]
+%o A276128 //    = min{max{dp[first,k],dp[k+1,last]}+k : first<=k<last}}
+%o A276128 //    = min{f1[first,last], f2[first,last]}
+%o A276128 // where f1[first,last] = min{first<=k<=k0[first,last]: dp[k+1,last]+k}
+%o A276128 //       f2[first,last] = min{k0[first,last]<k<last: dp[first,last]+k}
+%o A276128 //                      = dp[first,k0] + k0 + 1
+%o A276128 int A276128(int n) {
+%o A276128     vector<vector<int>> dp(n + 1, vector<int>(n + 1));
+%o A276128     for (int last = 2; last <= n; ++last) { // for each last (included)
+%o A276128         int k0 = last - 1; // init k0
+%o A276128         deque<pair<int, int>> f1Cands; // candidates of f1
+%o A276128         for (int first = last - 1; first > 0; --first) { // for each first
+%o A276128             while (dp[first][k0 - 1] > dp[k0 + 1][last]) {
+%o A276128                 if ((!f1Cands.empty()) && (f1Cands.front().second == k0)) {
+%o A276128                      f1Cands.pop_front(); // out of range, remove
+%o A276128                 }
+%o A276128                 --k0; // update k0
+%o A276128             }
+%o A276128             int vn = first + dp[first + 1][last]; // new entry into the range
+%o A276128             while ((!f1Cands.empty()) && (vn < f1Cands.back().first)) {
+%o A276128                 f1Cands.pop_back();
+%o A276128             }
+%o A276128             f1Cands.emplace_back(vn, first);
+%o A276128             // update dp[first][last]
+%o A276128             int f1 = f1Cands.front().first;
+%o A276128             int f2 = dp[first][k0] + k0 + 1;
+%o A276128             dp[first][last] = min(f1, f2);
+%o A276128         }
+%o A276128     }
+%o A276128     return dp[1][n];
+%o A276128 }
+%K A276128 nice,nonn
+%O A276128 1,3
+%A A276128 _Zhiqing Xiao_, Aug 21 2016

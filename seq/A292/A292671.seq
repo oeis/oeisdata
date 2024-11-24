@@ -1,0 +1,44 @@
+%I A292671 #21 Apr 13 2023 21:54:50
+%S A292671 1,2,4,4,6,9,4,6,11,16,8,7,13,18,25,8,8,13,18,27,36,8,10,13,20,29,38,
+%T A292671 49,8,10,13,20,32,38,51,64,16,13,14,22,33,40,53,66,81,16,15,14,22,33,
+%U A292671 40,56,66,83,100,16,16,15,23,33,41,57,68,85,102
+%N A292671 Upper right triangle A(m,n) = least number of symbols required to fill a grid of size n X n row by row in the greedy way such that in no row or column or m X m square a symbol occurs more than once.
+%C A292671 Consider the symbols as positive integers. By the greedy way we mean to fill the grid row by row from left to right always with the least possible positive integer such that the three constraints (on rows, columns and rectangular blocks) are satisfied. In contrast to the sudoku case, the m X m rectangles have "floating" borders, so the constraint is actually equivalent to say that any element must be different from all neighbors in a Moore neighborhood of range m-1 (having up to (2m-1)^2 grid points). See A292673 for examples.
+%C A292671 One can consider the infinite square array A(m,n) defined in the same way, but the lower triangular part of it is uninteresting: for m>n one has A(m,n) = n^2, i.e., the columns continue below the diagonal indefinitely with the same value, n^2.
+%H A292671 Michael S. Branicky, <a href="/A292671/b292671.txt">Table of n, a(n) for n = 1..5050</a> (first 100 rows)
+%H A292671 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/MooreNeighborhood.html">Moore Neighborhood</a>.
+%e A292671 The infinite square array would look as follows: (but the sequence only lists the upper right triangle: 1; 2, 4; 4, 6, 9; 4, 6, 11, 16; ...):
+%e A292671    [1  2  4  4  8  8  8  8 16 ...]  m=1: A(1,n) = 2^ceil(log_2(n)) = A062383(n-1)
+%e A292671    [1\_4  6  6  7  8 10 10 13 ...]  m=2: A(2,n) = A292672(n)
+%e A292671    [1  4\_9 11 13 13 13 13 14 ...]  m=3: A(3,n) = A292673(n) : see here
+%e A292671    [1  4  9\16 18 18 20 20 22 ...]  m=4: A(4,n) = A292674(n) :  for examples
+%e A292671    [1  4  9 16\25 27 29 32 33 ...]  m=5: A(5,n) = A292675(n)
+%e A292671    [1  4  9 16 25\36 38 38 40 ...]  m=6: A(6,n) = A292676(n)
+%e A292671    [1  4  9 16 25 36\49 51 53 ...]  m=7: A(7,n) = A292677(n)
+%e A292671    [1  4  9 16 25 36 49\64 66 ...]  m=8: A(8,n) = A292678(n)
+%e A292671    [1  4  9 16 25 36 49 64\81 ...]  m=9: A(9,n) = A292679(n)
+%e A292671    [...   ...  ...  ...  ...  ...]
+%o A292671 (PARI) A(m, n, g=matrix(n, n))={my(ok(g, k, i, j, m)=if(m, ok(g[i, ], k)&&ok(g[, j], k)&&ok(concat(Vec(g[max(1, i-m+1)..i, max(1, j-m+1)..min(#g, j+m-1)])), k), !setsearch(Set(g), k))); for(i=1, n, for(j=1, n, for(k=1, n^2, ok(g, k, i, j, m)&&(g[i, j]=k)&&break))); vecmax(g)} \\ without "vecmax" the program returns the full n X n board.
+%o A292671 (Python)
+%o A292671 def A(m, n): # change m for A292672, ..., A292679
+%o A292671     mx, S, N, b = 0, {1}, range(1, n+1), m # b is block size
+%o A292671     g = [[0 for j in range(n+b)] for i in range(n+b)]
+%o A292671     row, col = {i:set() for i in N}, {j:set() for j in N}
+%o A292671     offsets = [(i, j) for i in range(-b+1, 1) for j in range(-b+1, 1)]
+%o A292671     offsets += [(i, j) for i in range(-b+1, 0) for j in range(1, b)]
+%o A292671     for i in N:
+%o A292671         for j in N:
+%o A292671             rect = set(g[i+o[0]][j+o[1]] for o in offsets)
+%o A292671             e = min(S - row[i] - col[j] - rect)
+%o A292671             g[i][j] = e
+%o A292671             if e > mx:
+%o A292671                 mx = e
+%o A292671                 S.add(mx+1)
+%o A292671             row[i].add(e)
+%o A292671             col[j].add(e)
+%o A292671     return mx
+%o A292671 print([A(m, n) for n in range(1, 12) for m in range(1, n+1)]) # _Michael S. Branicky_, Apr 13 2023
+%Y A292671 Cf. A292670, A292672, A292673, ..., A292679.
+%K A292671 nonn,tabl
+%O A292671 1,2
+%A A292671 _M. F. Hasler_, Sep 20 2017

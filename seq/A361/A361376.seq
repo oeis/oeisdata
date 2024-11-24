@@ -1,0 +1,50 @@
+%I A361376 #22 Jun 11 2023 12:28:54
+%S A361376 0,1,2,3,4,5,6,8,7,9,10,16,11,17,12,13,18,19,32,14,33,20,15,21,34,35,
+%T A361376 22,24,64,23,36,25,65,37,26,66,38,27,67,40,128,39,41,28,68,129,29,69,
+%U A361376 42,130,48,43,30,70,72,131,49,31,71,44,73,256,132,45,50,257,133,74,51,46,80,75,258,134,136
+%N A361376 Rewrite A129912(n), a product of distinct primorials P(i) = A002110(i) instead as a sum of powers 2^(i-1).
+%C A361376 Permutation of nonnegative numbers.
+%H A361376 Michael De Vlieger, <a href="/A361376/b361376.txt">Table of n, a(n) for n = 1..15303</a> (a(15303) = 2^29.)
+%H A361376 Michael De Vlieger, <a href="/A361376/a361376.png">Log log scatterplot of a(n)</a>, n = 1..10^6.
+%H A361376 Michael De Vlieger, <a href="/A361376/a361376_1.png">Plot terms S(n) = A272011(a(n)) at (x,y) = (n,S(n,k))</a> for n = 1..2^11.
+%F A361376 Let S(n) be the set of indices of primorials P(i), reverse sorted, such that A129912(n) = Product_{k=1..m} S(n,k), where m = | S(n) |. Then a(n) = Sum_{k=1..m} 2^(S(n,k)-1).
+%e A361376 a(1) = 0 by convention.
+%e A361376 a(8) = 8 comes before a(9) = 7, since we interpret 8 = 2^3 instead as P(4) = 210, while for a(9), 7 = 2^2 + 2^1 + 2^0 becomes P(3)*P(2)*P(1) = 30*6*2 = 360. Because 210 < 360, 8 appears before 7 in this sequence.
+%e A361376 Table relating a(n), n=1..19 with the set S(n) of indices of distinct primorial factors of A129912(n):
+%e A361376    n A129912(n)  S(n)   a(n)  A272011(a(n))
+%e A361376   -----------------------------------------
+%e A361376    1         1            0
+%e A361376    2         2   1        1   0
+%e A361376    3         6   2        2   1
+%e A361376    4        12   2,1      3   1,0
+%e A361376    5        30   3        4   2
+%e A361376    6        60   3,1      5   2,0
+%e A361376    7       180   3,2      6   2,1
+%e A361376    8       210   4        8   3
+%e A361376    9       360   3,2,1    7   2,1,0
+%e A361376   10       420   4,1      9   3,0
+%e A361376   11      1260   4,2     10   3,1
+%e A361376   12      2310   5       16   4
+%e A361376   13      2520   4,2,1   11   3,1,0
+%e A361376   14      4620   5,1     17   4,0
+%e A361376   15      6300   4,3     12   3,2
+%e A361376   16     12600   4,3,1   13   3,2,0
+%e A361376   17     13860   5,2     18   4,1
+%e A361376   18     27720   5,2,1   19   4,1,0
+%e A361376   19     30030   6       32   5
+%e A361376   ...
+%t A361376 a6939[n_] := Product[Prime[n + 1 - i]^i, {i, n}];
+%t A361376 g[m_] := Block[{f, j = 1},
+%t A361376   f[n_, i_, e_] :=
+%t A361376    If[n < m, Block[{p = Prime[i + 1]}, If[e == 1, Sow@ n];
+%t A361376      f[n p^e, i + 1, e];
+%t A361376      If[e > 1, f[n p^(e - 1), i + 1, e - 1]]]];
+%t A361376   Sort@ Reap[While[a6939[j] < m, f[2^j, 1, j]; j++]][[-1, 1]] ];
+%t A361376 Map[Total@
+%t A361376      Map[2^(# - 1) &,
+%t A361376       Table[LengthWhile[#1, # >= j &], {j, #2}] & @@ {#, Max[#]} ] &[
+%t A361376 FactorInteger[#][[All, -1]]] &, g[2^31]] (* _Michael De Vlieger_, Jun 08 2023, after _Giovanni Resta_ at A129929 *)
+%Y A361376 Cf. A002110, A129912, A272011, A283477.
+%K A361376 nonn
+%O A361376 1,3
+%A A361376 _Michael De Vlieger_, Jun 08 2023

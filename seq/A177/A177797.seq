@@ -1,0 +1,61 @@
+%I A177797 #39 Apr 16 2023 03:11:30
+%S A177797 0,0,1,5,31,239,2233,24725,318631,4707359,78691633,1471482725,
+%T A177797 30469552111,692488851599,17141242421353,459033875802485,
+%U A177797 13221994489388791,407574126219013439,13386292717807416673,466636446695213384645,17205919477720642772671,669019022588385113932079,27357684052927560953626393
+%N A177797 Number of decomposable fixed-point free involutions, also the number of disconnected chord diagrams with 2n nodes on an open string.
+%C A177797 Line up 2n distinguishable nodes sequentially on an open string. Connect each two nodes with only one chord, there will be a (2n-1)!! variety of chord diagrams. Amongst this variety, we can classify a diagram as disconnected when it is possible to find a node index 2s with all nodes <=2s in group A and the rest in group B where none of the chords connect nodes between group A and B.
+%C A177797 The subsequence of primes begins 5, 31, 239, 4707359, 78691633, 17141242421353, no more through a(22). - _Jonathan Vos Post_, Jan 31 2011
+%H A177797 Alois P. Heinz, <a href="/A177797/b177797.txt">Table of n, a(n) for n = 0..200</a>
+%H A177797 A. King, <a href="http://dx.doi.org/10.1016/j.disc.2006.01.005">Generating indecomposable permutations</a>, Discrete Math., 306 (2006), 508-518.
+%H A177797 F. Kuehnel, L. P. Pryadko, M. I. Dykman, <a href="http://dx.doi.org/10.1103/PhysRevB.63.165326">Single-electron magnetoconductivity of nondegenerate two-dimensional electron system in a quantizing magnetic field</a>, Phys. Rev. B Vol. 63, 16 (2001).
+%H A177797 Frank Kuehnel, Leonid P. Pryadko and M. I. Dykman, <a href="http://arxiv.org/abs/cond-mat/0008416">Single electron magneto-conductivity of a nondegenerate 2D electron system in a quantizing magnetic field</a> (See diagrams on page 6), arXiv:cond-mat/0008416 [cond-mat.str-el], 2000.
+%t A177797 (* derived from _Joerg Arndt_'s PARI code *)
+%t A177797 f[n_] := f[n] = (2n-1)!!
+%t A177797 s[n_] := s[n] = f[n] - Sum[f[k] s[n - k], {k, 1, n - 1}]
+%t A177797 Table[f[k] - s[k], {k, 0, 22}]
+%t A177797 (* original brute force method *)
+%t A177797 GenerateDiagramsOfOrder[n_Integer /; n >= 0] := Diagrams[Range[2 n]]
+%t A177797 Diagrams[pool_List] := Block[{n = Count[pool, _]}, If[n <= 2, {{pool}},
+%t A177797   Flatten[Map[
+%t A177797     Flatten[
+%t A177797       Outer[Join, {{{pool[[1]], pool[[#]]}}},
+%t A177797         Diagrams[
+%t A177797          Function[{poolset, droppos},
+%t A177797            Drop[poolset, {droppos}] // Rest][pool, #]], 1], 1] &,
+%t A177797      Range[2, n]], 1]]]
+%t A177797 SelectDisconnected[diagrams_List] := Select[diagrams, IsDisconnected]
+%t A177797 IsDisconnected[{{}}] = False;
+%t A177797 IsDisconnected[pairs_List] :=
+%t A177797   Block[{newPairs=Map[#~Append~(#[[2]] - #[[1]]) &, pairs],
+%t A177797          distanceList},
+%t A177797     distanceList = Fold[
+%t A177797       ReplacePart[#1, {#2[[1]] -> #2[[3]], #2[[2]] -> -#2[[3]]}] &,
+%t A177797       Range[2 Length[pairs]],
+%t A177797       newPairs];
+%t A177797     Return[Length[Select[Drop[Accumulate[distanceList], -1], #<1 &]] > 0]
+%t A177797   ]
+%t A177797 Map[Length[SelectDisconnected[GenerateDiagramsOfOrder[#]]]&, Range[0,7]]
+%o A177797 (PARI)
+%o A177797 f(n)=(2*n)!/n!/2^n;  \\ == (2n-1)!!
+%o A177797 s(n)=f(n) - sum(k=1, n-1, f(k)*s(n-k) )
+%o A177797 a(n)=f(n)-s(n)
+%o A177797 \\ _Joerg Arndt_
+%o A177797 (Python)
+%o A177797 from functools import cache
+%o A177797 def a(n):
+%o A177797     @cache
+%o A177797     def h(n):
+%o A177797         if n <= 1: return 1
+%o A177797         return h(n - 1) * (2 * n - 1)
+%o A177797     @cache
+%o A177797     def c(n):
+%o A177797         if n == 0: return 1
+%o A177797         return h(n) - sum(h(k) * c(n - k) for k in range(1, n))
+%o A177797     return h(n) - c(n)
+%o A177797 print([a(n) for n in range(19)])  # _Peter Luschny_, Apr 16 2023
+%Y A177797 Chord Diagrams: A054499, A007769.
+%Y A177797 Permutations: A001147, A000698, A003319. - _Joerg Arndt_
+%Y A177797 Cf. A000637. - _Jonathan Vos Post_
+%K A177797 nonn,easy
+%O A177797 0,4
+%A A177797 _Frank Kuehnel_, Dec 27 2010

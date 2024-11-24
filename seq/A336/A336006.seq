@@ -1,0 +1,54 @@
+%I A336006 #18 Jan 06 2022 12:34:40
+%S A336006 1,5,14,46,127,383,1407,3594,11786,31469,97005,451299,982740,3079892,
+%T A336006 7862861,24640077,110733519,244951247,1019792225,3344315159,
+%U A336006 13804668362,48164406730,185603360202,468032896683,1567544524459,4109410352788,12905503374996,58659088284918
+%N A336006 a(n) = the least k such that the mixed binary-ternary representation of k has n terms. See Comments.
+%C A336006 Suppose that B1 and B2 are increasing sequences of positive integers, and let B be the increasing sequence of numbers in the union of B1 and B2. Every positive integer n has a unique representation given by the greedy algorithm with B1 as base, and likewise for B2 and B. For many n, the number of terms in the B-representation of n is less than the number of terms in the B1-representation, as well as the B2-representation, but not for all n, as in the example 45 = 27 + 18 (ternary) and 45 = 32 + 9 + 4 (mixed).
+%H A336006 Michael S. Branicky, <a href="/A336006/b336006.txt">Table of n, a(n) for n = 1..2030</a>
+%H A336006 Michael S. Branicky, <a href="/A336006/a336006.txt">Proof of formula</a>
+%F A336006 a(n+1) = a(n) + t, where t is the least element in B such that the largest element of B in the interval (a(n), a(n) + t) is t; see link for proof. - _Michael S. Branicky_, Jan 06 2022
+%e A336006 1 = 1 (1 term);
+%e A336006 5 = 4 + 1 (2 terms);
+%e A336006 14 = 9 + 4 + 1 (3 terms);
+%e A336006 46 = 32 + 9 + 4 + 1 (4 terms);
+%e A336006 127 = 81 + 32 + 9 + 4 + 1 (5 terms).
+%t A336006 z = 20; zz = 100000;
+%t A336006 b1 = Sort[Table[2^k, {k, 0, z}], Greater];
+%t A336006 b2 = Sort[Union[Table[3^k, {k, 0, z}], Table[2*3^k, {k, 0, z}]],
+%t A336006    Greater]; b = Sort[Union[b1, b2], Greater];
+%t A336006 g1 = Map[{#, DeleteCases[b1  Reap[
+%t A336006          FoldList[(Sow[Quotient[#1, #2]]; Mod[#1, #2]) &, #, b1]][[2,
+%t A336006          1]], 0]} &, Range[zz]];
+%t A336006 m1 = Map[Length[#[[2]]] &, g1];
+%t A336006 g2 = Map[{#, DeleteCases[
+%t A336006       b2 Reap[FoldList[(Sow[Quotient[#1, #2]]; Mod[#1, #2]) &, #,
+%t A336006           b2]][[2, 1]], 0]} &, Range[zz]];
+%t A336006 m2 = Map[Length[#[[2]]] &, g2];
+%t A336006 g = Map[{#, DeleteCases[b Reap[FoldList[(Sow[Quotient[#1, #2]]; Mod[#1, #2]) &, #,
+%t A336006           b]][[2, 1]], 0]} &, Range[zz]];
+%t A336006 m = Map[Length[#[[2]]] &, g];
+%t A336006 (* _Peter J. C. Moses_, Jul 05 2020 *)
+%t A336006 Table[First[Flatten[Position[m, k]]], {k, 1, 11}]
+%o A336006 (Python)
+%o A336006 from itertools import count, takewhile, islice
+%o A336006 def big_greedy(k, B, start=0):
+%o A336006     idx = start
+%o A336006     while idx < len(B) and B[idx] <= k: idx += 1
+%o A336006     return B[idx - 1]
+%o A336006 def agen(limit=10**1001):
+%o A336006     an, idx, t = 1, 0, 2
+%o A336006     B1 = list(takewhile(lambda x: x <= limit, (2**i for i in count(0))))
+%o A336006     B21 = list(takewhile(lambda x: x <= limit, (3**i for i in count(0))))
+%o A336006     B22 = list(takewhile(lambda x: x <= limit, (2*3**i for i in count(0))))
+%o A336006     B = sorted(set(B1 + B21 + B22))
+%o A336006     while an <= limit:
+%o A336006         yield an
+%o A336006         while t != big_greedy(an+t, B, start=idx):
+%o A336006             idx, t = idx+1, B[idx+1]
+%o A336006         an += t
+%o A336006 print(list(islice(agen(), 28))) # _Michael S. Branicky_, Jan 06 2022
+%Y A336006 Cf. A336004, A336005.
+%K A336006 nonn,base
+%O A336006 1,2
+%A A336006 _Clark Kimberling_, Jul 06 2020
+%E A336006 a(12) and beyond from _Michael S. Branicky_, Jan 06 2022

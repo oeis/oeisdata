@@ -1,0 +1,54 @@
+%I A226167 #20 Nov 02 2014 12:18:35
+%S A226167 1,3,1,12,5,1,60,27,7,1,360,168,48,9,1,2520,1200,360,75,11,1,20160,
+%T A226167 9720,3000,660,108,13,1,181440,88200,27720,6300,1092,147,15,1,1814400,
+%U A226167 887040,282240,65520,11760,1680,192,17,1,19958400,9797760,3144960,740880,136080,20160,2448,243,19,1
+%N A226167 Array read by antidiagonals: a(i,j) is the number of ways of labeling a tableau of shape (i,1^j) with the integers 1, 2, ... i+j-2 (each label being used once) such that the first row is decreasing, and the first column has m-1 labels.
+%C A226167 For an arbitrary composition c, let F_c^p denote the linear transformation of NSym that is adjoint to multiplication by the fundamental quasi-symmetric function indexed by c. Then a(i,j) equals the coefficient of H_(1,1) in (F_(1)^p)^(i+j-2)(H_(i,1^j)) (see below SAGE program, and Corollary 2.7 in the below link).
+%C A226167 Let M(n) = [a(i,j)]_{n x n}. Then det(M(n))=A000178(n)=the n-th superfactorial.
+%C A226167 Let p_n(x) denote the polynomial such that a(x,n)=p_n(x). Then the coefficient of x in p_n(x) is |A009575(n)|. For example, p_4(x)=4x^3+18x^2+26x+12, and the coefficient of x in p_4(x) is |A009575(4)|=26.
+%C A226167 First row is A001710. Second row is A138772. Fourth row is A136659.
+%H A226167 Alois P. Heinz, <a href="/A226167/b226167.txt">Rows n = 1..141, flattened</a>
+%H A226167 C. Berg, N. Bergeron, F. Saliola, L. Serrano, and M. Zabrocki, <a href="http://arxiv.org/abs/1208.5191">A Lift of the Schur and Hall-Littlewood Bases to Non-Commutative Symmetric Functions</a>, 10-11.
+%F A226167 a(i,j) = (i+j-2)!/i!*(2*i+j-1)*j/2.
+%e A226167 There are a(3,2) = 7 ways of labeling the tableau of shape (3,1,1) with 1, 2 and 3 (with each label being used once) such that the first row is decreasing and the first column has 1 label:
+%e A226167 1    2    3    X    X    X    X
+%e A226167 X    X    X    1    2    3    X
+%e A226167 X32  X31  X21  X32  X31  X21  321
+%e A226167 The matrix [a(i,j)]_(6 x 6) is given below:
+%e A226167 [1  3  12   60   360   2520]
+%e A226167 [1  5  27  168  1200   9720]
+%e A226167 [1  7  48  360  3000  27720]
+%e A226167 [1  9  75  660  6300  65520]
+%e A226167 [1 11 108 1092 11760 136080]
+%e A226167 [1 13 147 1680 20160 257040]
+%p A226167 a:= (i, j)-> (i+j-2)!/i!*(2*i+j-1)*j/2:
+%p A226167 seq(seq(a(i, 1+d-i), i=1..d), d=1..12);  # _Alois P. Heinz_, Jan 21 2014
+%t A226167 a[n_,k_]:=(n+k-2)!/n!*(2*n+k-1)*k/2 ;
+%t A226167 Print[Array[a[#1,#2]&,{50,50}]//MatrixForm]
+%t A226167 (* A program which gives a list of tableaux *)
+%t A226167 a[i_, j_] :=  Module[{f, list1, el, emptylist, n},
+%t A226167   f[q_] := StringReplace[StringReplace[StringReplace[    StringReplace[ToString[q], ToString[i + j - 1] -> "X"], ", " -> ""], "{" -> ""], "}" -> ""]; list1 = Permutations[Join[Table[q, {q, 1, i + j - 2}], {i + j - 1, i + j - 1}]]; el[q_] := First[Take[list1, {q, q}]]; emptylist = {}; n = 1; While[n < 1 + Length[list1], If[Take[el[n], {j + 1, i + j}] == Sort[Take[el[n], {j + 1, i + j}], Greater] && Count[Take[el[n], {1, j + 1}], i + j - 1] == 2, emptylist = Append[emptylist, f[el[n]]], Null]; n++]; Print[emptylist]]
+%o A226167 (Sage)
+%o A226167 NSym = NonCommutativeSymmetricFunctions(QQ) ;
+%o A226167 QSym = QuasiSymmetricFunctions(QQ) ;
+%o A226167 F = QSym.Fundamental() ;
+%o A226167 H = NSym.complete() ;
+%o A226167 def a(n, m):
+%o A226167      expr = H([n]+[1 for q in range(m)]) ;
+%o A226167      w=1 ;
+%o A226167      while w<n+m-1:
+%o A226167          expr = expr.skew_by(F[1])
+%o A226167          w+=1
+%o A226167      return(expr.coefficients()[0])
+%o A226167 print(matrix([[a(j+1,i+1) for i in range(7)] for j in range (7)]))
+%o A226167 list1=[] ;
+%o A226167 n=0 ;
+%o A226167 while n<10:
+%o A226167      list1 = list1 + [a(i+1,n+1-i) for i in range(n+1)]
+%o A226167      n+=1
+%o A226167 print(list1)
+%Y A226167 Cf. A000178, A009575.
+%Y A226167 Main diagonal gives: A023999. - _Alois P. Heinz_, Jan 21 2014
+%K A226167 nonn,tabl
+%O A226167 1,2
+%A A226167 _John M. Campbell_, May 29 2013

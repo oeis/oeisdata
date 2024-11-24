@@ -1,0 +1,41 @@
+%I A292380 #30 May 15 2021 06:18:18
+%S A292380 0,0,0,1,0,0,0,3,2,0,0,1,0,0,0,7,0,4,0,1,0,0,0,3,4,0,6,1,0,0,0,15,0,0,
+%T A292380 0,9,0,0,0,3,0,0,0,1,2,0,0,7,8,8,0,1,0,12,0,3,0,0,0,1,0,0,2,31,0,0,0,
+%U A292380 1,0,0,0,19,0,0,8,1,0,0,0,7,14,0,0,1,0,0,0,3,0,4,0,1,0,0,0,15,0,16,2,17,0,0,0,3,0
+%N A292380 Base-2 expansion of a(n) encodes the steps where multiples of 4 are encountered when map x -> A252463(x) is iterated down to 1, starting from x=n.
+%H A292380 Antti Karttunen, <a href="/A292380/b292380.txt">Table of n, a(n) for n = 1..16384</a>
+%H A292380 <a href="/index/Bi#binary">Index entries for sequences related to binary expansion of n</a>
+%F A292380 a(n) = A048735(A156552(n)).
+%F A292380 a(n) = A292370(A292384(n)).
+%F A292380 Other identities. For n >= 1:
+%F A292380 a(n) AND A292382(n) = 0, where AND is a bitwise-AND (A004198).
+%F A292380 a(n) + A292382(n) = A156552(n).
+%F A292380 A000120(a(n)) + A000120(A292382(n)) = A001222(n).
+%F A292380 A000035(a(n)) = A121262(n).
+%e A292380 For n = 4, the starting value is a multiple of four, after which follows A252463(4) = 2, and A252463(2) = 1, the end point of iteration, and neither 2 nor 1 is a multiple of four, thus a(4) = 1*(2^0) + 0*(2^1) + 0*(2^2) = 1.
+%e A292380 For n = 8, the starting value is a multiple of four, after which follows A252463(8) = 4 (also a multiple), continuing as before as 4 -> 2 -> 1, thus a(8) = 1*(2^0) + 1*(2^1) + 0*(2^2) + 0*(2^3) = 3.
+%e A292380 For n = 9, the starting value is not a multiple of four, after which follows A252463(9) = 4 (which is), continuing as before as 4 -> 2 -> 1, thus a(9) = 0*(2^0) + 1*(2^1) + 0*(2^2) + 0*(2^3) = 2.
+%t A292380 Table[FromDigits[Reverse@ NestWhileList[Function[k, Which[k == 1, 1, EvenQ@ k, k/2, True, Times @@ Power[Which[# == 1, 1, # == 2, 1, True, NextPrime[#, -1]] & /@ First@ #, Last@ #] &@ Transpose@ FactorInteger@ k]], n, # > 1 &] /. k_ /; IntegerQ@ k :> If[Mod[k, 4] == 0, 1, 0], 2], {n, 105}] (* _Michael De Vlieger_, Sep 21 2017 *)
+%o A292380 (Scheme) (define (A292380 n) (A292370 (A292384 n)))
+%o A292380 (Python)
+%o A292380 from sympy.core.cache import cacheit
+%o A292380 from sympy.ntheory.factor_ import digits
+%o A292380 from sympy import factorint, prevprime
+%o A292380 from operator import mul
+%o A292380 from functools import reduce
+%o A292380 def a292370(n):
+%o A292380     k=digits(n, 4)[1:]
+%o A292380     return 0 if n==0 else int("".join(['1' if i==0 else '0' for i in k]), 2)
+%o A292380 def a064989(n):
+%o A292380     f=factorint(n)
+%o A292380     return 1 if n==1 else reduce(mul, [1 if i==2 else prevprime(i)**f[i] for i in f])
+%o A292380 def a252463(n): return 1 if n==1 else n//2 if n%2==0 else a064989(n)
+%o A292380 @cacheit
+%o A292380 def a292384(n): return 1 if n==1 else 4*a292384(a252463(n)) + n%4
+%o A292380 def a(n): return a292370(a292384(n))
+%o A292380 print([a(n) for n in range(1, 111)]) # _Indranil Ghosh_, Sep 21 2017
+%o A292380 (PARI) a(n) = my(m=factor(n),k=-1,ret=0); for(i=1,matsize(m)[1], ret += bitneg(0,m[i,2]-1) << (primepi(m[i,1])+k); k+=m[i,2]); ret; \\ _Kevin Ryde_, Dec 11 2020
+%Y A292380 Cf. A005940, A048735, A156552, A292370, A292381, A292382, A292383, A292384.
+%K A292380 nonn,base
+%O A292380 1,8
+%A A292380 _Antti Karttunen_, Sep 15 2017

@@ -1,0 +1,43 @@
+%I A237600 #43 Mar 13 2020 08:37:32
+%S A237600 2,3,5,7,11,13,37,41,43,47,53,59,61,83,89,113,127,179,181,191,211,223,
+%T A237600 593,599,601,607,659,661,691,701,757,761,853,857,859,863,947,953,977,
+%U A237600 983,991,1427,1429,1433,1439,1811,1823,2039,2879,2897,2903,2909,3061
+%N A237600 Right-truncatable primes in base 16.
+%C A237600 Numbers with these properties: (i) a(n) is a prime and (ii) its image under the function E(k) = k\16 = floor(k/16) is zero or has the same properties. [Corrected by _M. F. Hasler_, Nov 07 2018]
+%C A237600 The sequence has 414 nonzero members.
+%C A237600 Otherwise said, integers p > 0 such that floor(p/16^k) is prime or zero for all k >= 0. One might relax to p >= 0, i.e., include an initial term 0, corresponding to an empty string of digits. The recursive definition can also be used to produce all of the terms, starting with the primes < 16, and adding, for each term of the list, the primes made from appending a digit to that term, i.e., the primes between 16 x that term and 16 more. The sequence can also be seen as a table whose n-th row yields the terms with n digits in base 16: row lengths are A237601 and the last term of row n is A237602(n). - _M. F. Hasler_, Nov 07 2018
+%H A237600 Stanislav Sykora, <a href="/A237600/b237600.txt">Table of n, a(n) for n = 1..414</a>
+%H A237600 Stanislav Sykora, <a href="https://oeis.org/wiki/File:GeneticThreads.txt">PARI/GP scripts for genetic threads</a>
+%e A237600 a(414) = 16778492037124607, in hexadecimal notation 3B9BF319BD51FF, belongs to a(n) because each of its hexadecimal prefixes (including itself) is a prime. Being the largest of such numbers, it is also a member of A023107.
+%t A237600 Select[Range@ 3600, AllTrue[Most[DeleteDuplicates@ FixedPointList[f, #]], PrimeQ] &] (* _Michael De Vlieger_, Mar 07 2015, Version 10 *)
+%o A237600 (PARI) GT_Trunc1(nmax,prop,b=10) = { \\ See the link for details
+%o A237600   my (n=0,v=vector(nmax),g=1,lgs=1,lge,an,c);
+%o A237600   for (k=1,b-1,if (prop(k),v[n++]=k));
+%o A237600   lge=n; c=lge-lgs+1;
+%o A237600   while (c, g++;for (k=lgs,lge,for (m=0,b-1, an=b*v[k]+m;
+%o A237600     if (prop(an), v[n++]=an;if (n>=nmax,return (v)));););
+%o A237600     lgs=lge+1; lge=n; c=lge-lgs+1;);
+%o A237600   if (n, return (v[1..n]));
+%o A237600   print("No solution");}
+%o A237600 v = GT_Trunc1(1000000,isprime,16)
+%o A237600 (PARI) isok(n)={ while(n, if(!isprime(n),return(0));n\=16); 1} \\ _Joerg Arndt_, Mar 07 2015
+%o A237600 (PARI) my(A=primes([0,15]),i=1); until(#A<i+=1, A=concat(A, primes([A[i], A[i]+1]*16))); #A237600=A \\ _M. F. Hasler_, Nov 07 2018
+%o A237600 (Python)
+%o A237600 from gmpy2 import is_prime
+%o A237600 A237600_list = []
+%o A237600 for n in range(1,10**9):
+%o A237600     if is_prime(n):
+%o A237600         s = format(n,'x')
+%o A237600         for i in range(1,len(s)):
+%o A237600             if not is_prime(int(s[:-i],16)):
+%o A237600                 break
+%o A237600         else:
+%o A237600             A237600_list.append(n) # _Chai Wah Wu_, Apr 16 2015
+%o A237600 (Python)
+%o A237600 from sympy import primerange
+%o A237600 p = lambda x: list(primerange(x,x+16)); A237600 = p(0); i=0
+%o A237600 while i<len(A237600): A237600+=p(A237600[i]*16); i+=1 # _M. F. Hasler_, Mar 11 2020
+%Y A237600 Cf. A023107, A024770 (base 10), A237601, A237602, A254756.
+%K A237600 nonn,base,fini,full,easy,tabf
+%O A237600 1,1
+%A A237600 _Stanislav Sykora_, Feb 15 2014

@@ -1,0 +1,23 @@
+%I A237442 #36 Sep 15 2022 11:47:13
+%S A237442 1,1,1,1,2,1,2,1,1,2,2,1,2,2,2,1,2,1,2,2,2,2,3,1,2,2,1,2,2,2,2,1,2,2,
+%T A237442 2,1,2,2,2,2,2,2,2,2,2,3,3,1,2,2,2,2,3,1,2,2,2,2,2,2,3,2,2,1,2,2,2,2,
+%U A237442 3,2,3,1,2,2,2,2,3,2,3,2,1,2,2,2,2,2,2
+%N A237442 a(n) is the least number of 3-smooth numbers that add up to n.
+%C A237442 Any number can be written as the sum of several 3-smooth numbers. The 3-smooth numbers themselves are the sum of 1 3-smooth number.  Others will need more.  Any number n could be written as the sum of n ones (the smallest 3-smooth number), which takes the greatest number of 3-smooth numbers.  This sequence gives the minimum number of 3-smooth numbers that is needed to add up to n.
+%C A237442 The index of first appearance of n in this sequence: 1, 5, 23, 431, ... . The first four terms are also 2-1, 3*2-1, 3*2^3-1, 3^3*2^4-1 respectively.
+%C A237442 The smallest numbers which require 5 and 6 addends are 18431 and 3448733, respectively. - _Giovanni Resta_, Feb 09 2014
+%C A237442 From _Michael De Vlieger_, Sep 30 2016: (Start)
+%C A237442 Length of shortest partition of n such all elements are unique and in A003586.
+%C A237442 Also a "canonic" representation of n in a dual-base number system (i.e., base(2,3)), as defined by the reference as having the lowest number of terms. The greedy algorithm defined in A276380 does not always render the canonic representation. a(41) = {1,4,36}, but {9,32} is the shortest possible partition of 41 such that all terms are in A003586. (End)
+%D A237442 V. Dimitrov, G. Jullien, and R. Muscedere, Multiple Number Base System Theory and Applications, 2nd ed., CRC Press, 2012, pp. 35-39.
+%H A237442 Lei Zhou, <a href="/A237442/b237442.txt">Table of n, a(n) for n = 1..10000</a>
+%e A237442 n = 23, 23 is not 3-smooth. We have 23 = 1+22 = 2+21 = ... = 11+12.  None of the 11 pairs are both 3-smooth. However, we can find 23 = 1+4+18, a sum of three 3-smooth numbers. So a(23) = 3.
+%e A237442 a(7) = 2 since the shortest partition of 7 such that all the terms are in A003586 and none are repeated is {4,3}. - _Michael De Vlieger_, Sep 30 2016
+%t A237442 SplitN[m_, mt_, a_, s_, aa_, ss_] := Block[{i, j, f, g, a0, s0, a1 = aa, s1 = ss, a2, s2, found = 0}, i = mt + 1; While[i--; (found == 0) && (i >= (m/3)), a0 = a; If[f = FactorInteger[i]; f[[Length[f], 1]] <= 3, j = m - i; s0 = s; If[g = FactorInteger[j]; g[[Length[g], 1]] <= 3, If[i >= j, a0++; AppendTo[s0, i]; If[j > 0, a0++; AppendTo[s0, j]]; If[ar > a0, ar = a0; If[a1 > a0, a1 = a0; s1 = s0]; found = 1]], a0++; AppendTo[s0, i]; If[ar > a0, {a2, s2} = SplitN[j, Min[i, j], a0, s0, a1, s1]; If[a1 > a2, a1 = a2; s1 = s2]]]]]; {a1, s1}]; (*This finds the shortest 3-smooth train in decreasing order that sums to n*) Table[ar = n; {ac, sc} = SplitN[n, n, 0, {}, n, {}]; ac, {n, 1, 87}]
+%t A237442 a[n_] := Block[{p = Select[Range@n, FactorInteger[#][[-1, 1]] < 4 &], k = 1},
+%t A237442 While[{} == Quiet@ IntegerPartitions[n, {k}, p, 1], k++]; k]; Array[a, 100] (* faster, _Giovanni Resta_, Feb 09 2014 *)
+%o A237442 (PARI) A237442(n)={n+9>#M237442 && M237442=Vec(M237442,n+999); if(M237442[n], M237442[n], vecmax(factor(n)[,1]) < 5, M237442[n]=1, my(m=99, k=n\2); until(m==2||!k--, m=min(A237442(k)+A237442(n-k),m)); M237442[n]=m)} \\ _M. F. Hasler_, Sep 14 2022
+%Y A237442 Cf. A003586, A018899, A276380, A277071.
+%K A237442 nonn,easy
+%O A237442 1,5
+%A A237442 _Lei Zhou_, Feb 07 2014

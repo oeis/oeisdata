@@ -1,0 +1,44 @@
+%I A324989 #30 Jun 25 2022 02:21:04
+%S A324989 1,2,3,4,5,7,11,22,101,111,121,131,151,181,191,202,313,353,373,383,
+%T A324989 727,757,787,797,919,929,1001,1111,10001,10201,10301,10501,10601,
+%U A324989 11111,11311,11411,12421,12721,12821,13331,13831,13931,14341,14741,15451,15551,16061
+%N A324989 Palindromes whose product of divisors is palindromic.
+%C A324989 Numbers m such that m and A007955(m) = pod(m) are both in A002113.
+%C A324989 Of 48025 terms < 10^11, all but 30 are prime. - _Robert Israel_, Apr 23 2019
+%H A324989 Robert Israel, <a href="/A324989/b324989.txt">Table of n, a(n) for n = 1..10000</a>
+%e A324989 Product of divisors of palindrome number 22 with divisors 1, 2, 11 and 22 is 484 (palindrome number).
+%p A324989 revdigs:= proc(n)
+%p A324989 local L, nL, i;
+%p A324989 L:= convert(n, base, 10);
+%p A324989 nL:= nops(L);
+%p A324989 add(L[i]*10^(nL-i), i=1..nL);
+%p A324989 end:
+%p A324989 pals:= proc(d) local x, y;
+%p A324989   if d::even then [seq(x*10^(d/2)+revdigs(x), x=10^(d/2-1)..10^(d/2)-1)]
+%p A324989   else [seq(seq(x*10^((d+1)/2)+y*10^((d-1)/2)+revdigs(x), y=0..9), x=10^((d-1)/2-1)..10^((d-1)/2)-1)]
+%p A324989   fi
+%p A324989 end proc:
+%p A324989 pals(1):= [$1..9]:
+%p A324989 filter:= proc(n) local v;
+%p A324989   v:= convert(numtheory:-divisors(n),`*`);
+%p A324989   revdigs(v)=v
+%p A324989 end proc:
+%p A324989 seq(op(select(filter, pals(d))),d=1..5); # _Robert Israel_, Apr 23 2019
+%t A324989 Select[Range[10^5], And[PalindromeQ@ #, PalindromeQ[Times @@ Divisors@ #]] &] (* _Michael De Vlieger_, Mar 24 2019 *)
+%t A324989 Select[Range[17000],AllTrue[{#,Times@@Divisors[#]},PalindromeQ]&] (* _Harvey P. Dale_, Oct 13 2021 *)
+%o A324989 (Magma) [n: n in [1..100000] | Intseq(n, 10) eq Reverse(Intseq(n, 10)) and Intseq(&*[d: d in Divisors(n)], 10) eq Reverse(Intseq(&*[d: d in Divisors(n)], 10))]
+%o A324989 (PARI) ispal(n) = my(d=digits(n)); Vecrev(d) == d;
+%o A324989 isok(n) = ispal(n) && ispal(vecprod(divisors(n))); \\ _Michel Marcus_, Mar 23 2019
+%o A324989 (Python)
+%o A324989 from math import isqrt
+%o A324989 from itertools import chain, count, islice
+%o A324989 from sympy import divisor_count
+%o A324989 def A324989_gen(): # generator of terms
+%o A324989     return filter(lambda n:(s:=str(isqrt(n)**d if (d:=divisor_count(n)) & 1 else n**(d//2)))[:(t:=(len(s)+1)//2)]==s[:-t-1:-1],chain.from_iterable(chain((int((s:=str(d))+s[-2::-1]) for d in range(10**l,10**(l+1))), (int((s:=str(d))+s[::-1]) for d in range(10**l,10**(l+1)))) for l in count(0)))
+%o A324989 A324989_list = list(islice(A324989_gen(),20)) # _Chai Wah Wu_, Jun 24 2022
+%Y A324989 Cf. A007955, A002113, A069747.
+%Y A324989 Includes A002385.
+%Y A324989 Similar sequences for functions sigma(m) and tau(m): A028986, A324988.
+%K A324989 nonn,base
+%O A324989 1,2
+%A A324989 _Jaroslav Krizek_, Mar 23 2019

@@ -1,0 +1,48 @@
+%I A296689 #35 Jan 16 2024 12:10:36
+%S A296689 0,1,2,4,7,13,24,30,54,64,124,244,383,503,981,1021,1981,3901,6137,
+%T A296689 8057,13649,16369,32689,65329,98230,130870,229312,261952,491516,
+%U A296689 524156,1046388,1048564,2093044,4182004,8359924,16715764,25141220,33497060,58703812,67059652,125828996,134184836,259487492,268435204,536866564,1073729284
+%N A296689 Let phi be the one-to-one mapping between binary trees and natural numbers described in the Tychonievich link. Let a(n) = min({phi^{-1}(t)| size(t)=n}); i.e., a(n) is the rank -- starting from 0 -- of the first tree the size of which is n.
+%C A296689 Let v(n) = max({phi^{-1}(t)| size(t)=n}); v(n) is already known as A072639.
+%C A296689 The interleaving process used by Tychonievich is not specific to base 2, each base b>=3 giving birth to a new a(n)-like sequence and a new v(n)-like sequence.
+%C A296689 a(n) is the position of the first occurrence of n in A072644. - _Andrey Zabolotskiy_, Dec 20 2017
+%C A296689 The tree-enumeration scheme of Tychonievich is similar, but not the same as "Recursive binary interleaving of binary trees" mentioned at my OEIS Wiki notes about Alternative Catalan Orderings. On the other hand, it seems to be the same (possibly up to the reflection of binary trees) as the ranking/unranking scheme mentioned in the section "Binary tree encoding with bijection" and in sequences A072634 - A072637 that are permutations of nonnegative integers induced by cross-ranking binary trees between such a "dense" binary interleaving ranking system and the standard lexicographic ordering of them (A014486). - _Antti Karttunen_, Dec 20 2017
+%H A296689 Antti Karttunen, <a href="https://oeis.org/wiki/User:Antti_Karttunen/Catalania/Alternative_Catalan_Orderings">Alternative Catalan Orderings</a> (Notes in OEIS Wiki, 2012-, see the section "Binary tree encoding with bijection")
+%H A296689 Luther Tychonievich, <a href="https://www.cs.virginia.edu/~lat7h/blog/posts/434.html">Enumerating Trees</a>, 2013.
+%o A296689 (OCaml)
+%o A296689 let rec evenOdd=function(*Luther Tychonievich decomposition*)
+%o A296689 | n when n<=1 -> n,0
+%o A296689 | n -> let ev,od=evenOdd(n/2) in
+%o A296689         2*od+n mod 2,ev
+%o A296689 let rec cardImage=function
+%o A296689 | n when n<=1 -> n
+%o A296689 | n -> let ev,od=evenOdd(n-1) in 1+cardImage(ev)+cardImage(od)
+%o A296689 let checkCatalanBis n=(*why 2*n+1 ? empirical...*)
+%o A296689   let (first,last)=(Array.make (2*n+1) 0,Array.make (2*n+1) 0) in
+%o A296689     for i=0 to 1 lsl n do
+%o A296689     let cai=cardImage i in
+%o A296689       last.(cai)<-1+last.(cai);
+%o A296689       if first.(cai)=0 then first.(cai)<-i done;
+%o A296689   (first,last)
+%o A296689 (Python)
+%o A296689 def dei(n):
+%o A296689     n1 = n2 = 0
+%o A296689     bit = 1
+%o A296689     while n:
+%o A296689         if n&1:
+%o A296689             n1 += bit
+%o A296689         n >>= 1
+%o A296689         if n&1:
+%o A296689             n2 += bit
+%o A296689         n >>= 1
+%o A296689         bit <<= 1
+%o A296689     return (n1, n2)
+%o A296689 r = [0]
+%o A296689 for n in range(1, 100):
+%o A296689     r.append(1 + sum(r[x] for x in dei(n-1)))
+%o A296689 print([r.index(x) for x in range(max(r)+1)])
+%o A296689 # _Andrey Zabolotskiy_, Dec 20 2017
+%Y A296689 Cf. A014486, A059905, A059906, A072639, A072634, A072635, A072644.
+%K A296689 nonn
+%O A296689 0,3
+%A A296689 _Philippe Esperet_, Dec 18 2017

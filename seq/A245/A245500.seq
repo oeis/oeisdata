@@ -1,0 +1,32 @@
+%I A245500 #29 Jun 04 2020 18:28:31
+%S A245500 0,1,2,11,21,31,22,41,211,311,221,411,321,421,3111,2211,4111,3211,
+%T A245500 4211,3311,5211,4311,6211,4221,32111,4411,5221,42111,33111,52111,
+%U A245500 43111,62111,42211,53111,44111,52211,63111,421111,331111,521111,431111,621111,422111
+%N A245500 Concatenation of multiplicities of prime divisors of highly composite numbers A002182(n).
+%C A245500 For prime decomposition of A002182(n) = 2^a * 3^b * 5^c * ..., a(n) = "abc..." converted to a decimal number.
+%C A245500 In other words, each "place" read from left to right represents the n-th prime, starting with 2 at left and increasing to the right. A number in the "place" represents the multiplicity of the corresponding prime in A002182(n).
+%C A245500 This notation is corrupt when any multiplicity exceeds 9. The smallest instance of this is at n = 221.
+%C A245500 Similar to A054841 but multiplicities are in reverse order.
+%C A245500 Given that the exponents e(i) (a,b,c... in the above) of the prime factorization are (weakly) decreasing, their concatenation remains unambiguous way beyond n = 221 (first instance where e(1) >= 10) and even beyond n = 8869 (first instance where e(2) >= 10). Only when e2 >= 10 + e(3) for the first time, in principle the first digit of e(2) could be mistaken for the last digit of e(1); yet it is unlikely if not impossible that e(2) < 10 and e(1) > 100. So the first ambiguous decomposition would require concat(e(1),e(2),e(3)) = concat(a',b',c') with a' > b' >= e(3), thus e(2) significantly larger than 10 + e(3) and e(1) much larger than 100. - _M. F. Hasler_, Jan 03 2020
+%H A245500 M. F. Hasler, <a href="/A245500/b245500.txt">Table of n, a(n) for n = 1..5000</a> (first 220 terms from _Michael De Vlieger_), Jan 02 2020
+%H A245500 A. Flammenkamp, <a href="http://wwwhomes.uni-bielefeld.de/achim/highly.html">Highly composite numbers</a>.
+%H A245500 A. Flammenkamp, <a href="http://wwwhomes.uni-bielefeld.de/achim/highly.txt">List of the first 1200 highly composite numbers</a>.
+%H A245500 D. B. Siano and J. D. Siano, "Pwrs of primes" notation from <a href="http://wwwhomes.uni-bielefeld.de/achim/julianmanuscript3.pdf">An Algorithm for Generating Highly Composite Numbers</a>
+%e A245500 A002182(4)   = 12 = 2^2 * 3^1, thus a(4) = 21;
+%e A245500 A002182(17)  = 2520 = 2^3 * 3^2 * 5^1 * 7^1, thus a(17) = 3211;
+%e A245500 A002182(220) = 2^10 * 3^4 * 5^3 * 7^2 * 11 * ... * 53 (skipping no primes), thus a(220) cannot be represented using a single decimal place for the multiplicity 10.
+%t A245500 encodePrimeSignature[n_Integer] :=
+%t A245500   Catch[FromDigits[Reverse[IntegerDigits[Apply[Plus,
+%t A245500        Which[n == 0, Throw["undefined"],
+%t A245500           n == 1, 0,
+%t A245500           Max[Last /@ FactorInteger @ n ] > 9, Throw["overflow"],
+%t A245500           True, Power[10, PrimePi[Abs[#]] - 1]] & /@
+%t A245500        Flatten[ConstantArray @@@ FactorInteger[n]] ]]]]];
+%t A245500 lst = FoldList[Max, 1, Table[DivisorSigma[0, n], {n, 2, 100000000}]];
+%t A245500 Map[encodePrimeSignature, Flatten[Position[lst, #, 1, 1] & /@ Union[lst]]]
+%o A245500 (PARI) apply( A245500(n)=fromdigits(factor(A002182(n))[,2]~), [1..99]) \\ For n >= 8869, fromdigits must be replaced by (s->if(s,eval(concat([Str(e)|e<-s])))). - _M. F. Hasler_, Jan 03 2020
+%Y A245500 Cf. A002182, A054841.
+%K A245500 nonn,base
+%O A245500 1,3
+%A A245500 _Michael De Vlieger_, Jul 24 2014
+%E A245500 Offset corrected to 1 by _M. F. Hasler_, Jan 03 2020

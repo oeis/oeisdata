@@ -1,0 +1,41 @@
+%I A225622 #32 Oct 27 2023 22:05:12
+%S A225622 1,2,2,3,5,3,4,9,9,4,5,15,16,15,5,6,21,31,31,21,6,7,30,47,59,47,30,7,
+%T A225622 8,38,73,102,102,73,38,8,9,50,101,170,156,170,101,50,9,10,60,142,250,
+%U A225622 307,307,250,142,60,10,11,75,185,375,460,529,460,375,185,75,11
+%N A225622 A(n,k) is the total number of parts in the set of partitions of an n X k rectangle into integer-sided squares, considering only the list of parts; square array A(n,k), n>=1, k>=1, read by antidiagonals.
+%H A225622 Alois P. Heinz, <a href="/A225622/b225622.txt">Antidiagonals n = 1..23, flattened</a> (Antidiagonals n = 1..14 from Christopher Hunt Gribble)
+%H A225622 Christopher Hunt Gribble, <a href="/A225622/a225622.cpp.txt">C++ program</a>
+%F A225622 A(n,1) = A000027(n) = n.
+%F A225622 A(n,2) = A195014(n) = (n+1)(5n+3)/8 when n is odd
+%F A225622                       and 5n(n+2)/8 when n is even.
+%e A225622 The square array starts:
+%e A225622 1    2    3    4    5    6    7    8    9   10   11   12 ...
+%e A225622 2    5    9   15   21   30   38   50   60   75   87  105 ...
+%e A225622 3    9   16   31   47   73  101  142  185  244  305  386 ...
+%e A225622 4   15   31   59  102  170  250  375  523  726  962 ...
+%e A225622 5   21   47  102  156  307  460  711 1040 1517 ...
+%e A225622 6   30   73  170  307  529  907 1474 2204 ...
+%e A225622 7   38  101  250  460  907 1351 2484 ...
+%e A225622 8   50  142  375  711 1474 2484 ...
+%e A225622 9   60  185  523 1040 2204 ...
+%e A225622 ...
+%e A225622 A(3,2) = 9 because there are 9 parts overall in the 2 partitions of a 3 X 2 rectangle into squares with integer sides.  One partition comprises 6 1 X 1 squares and the other 2 1 X 1 squares and 1 2 X 2 square giving 9 parts in total.
+%p A225622 b:= proc(n, l) option remember; local i, k, s, t;
+%p A225622       if max(l[])>n then {} elif n=0 or l=[] then {0}
+%p A225622     elif min(l[])>0 then t:=min(l[]); b(n-t, map(h->h-t, l))
+%p A225622     else for k do if l[k]=0 then break fi od; s:={};
+%p A225622          for i from k to nops(l) while l[i]=0 do s:=s union
+%p A225622              map(v->v+x^(1+i-k), b(n, [l[j]$j=1..k-1,
+%p A225622                  1+i-k$j=k..i, l[j]$j=i+1..nops(l)]))
+%p A225622          od; s
+%p A225622       fi
+%p A225622     end:
+%p A225622 A:= (n, k)-> add(coeff(add(j, j=b(max(n, k),
+%p A225622             [0$min(n, k)])), x, i), i=1..n):
+%p A225622 seq(seq(A(n, 1+d-n), n=1..d), d=1..15); # _Alois P. Heinz_, Aug 04 2013
+%t A225622 $RecursionLimit = 1000; b[n_, l_List] := b[n, l] = Module[{i, k, s, t}, Which[ Max[l]>n, {}, n == 0 || l == {}, {0}, Min[l]>0, t = Min[l]; b[n-t, l-t], True, For[k = 1, True, k++, If[l[[k]] == 0, Break[]]]; s = {}; For[i = k, i <= Length[l] && l[[i]] == 0, i++, s = s ~Union~ Map[Function[{v}, v + x^(1+i-k) ], b[n, Join[l[[1 ;; k-1]], Array[1+i-k&, i-k+1], l[[i+1 ;; -1]]]]]]; s]];A[n_, k_] := Sum[Coefficient[Sum[j, {j, b[Max[n, k], Array[0&, Min[n, k]]]}], x, i], {i, 1, n}]; Table[Table[A[n, 1+d-n], {n, 1, d}], {d, 1, 15}] // Flatten (* _Jean-François Alcover_, Mar 06 2015, after _Alois P. Heinz_ *)
+%Y A225622 Diagonal = A226897.
+%Y A225622 Cf. A034295, A224697, A225542.
+%K A225622 nonn,tabl
+%O A225622 1,2
+%A A225622 _Christopher Hunt Gribble_, Aug 04 2013

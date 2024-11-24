@@ -1,0 +1,36 @@
+%I A273346 #24 Aug 19 2017 23:21:13
+%S A273346 1,0,2,0,0,4,1,0,0,0,7,4,2,0,0,0,0,12,9,9,4,1,0,0,0,0,0,21,18,22,18,
+%T A273346 12,4,2,0,0,0,0,0,0,37,37,47,45,46,29,20,9,4,1,0,0,0,0,0,0,0,65,76,
+%U A273346 103,100,116,100,89,60,43,24,12,4,2
+%N A273346 Triangle read by rows: T(n,k) is the number of bargraphs of semiperimeter n having area k (n>=2, k>=1).
+%C A273346 Number of entries in row n is floor(n^2/4) = A002620(n).
+%C A273346 Sum of entries in row n = A082582(n).
+%C A273346 Sum(k*T(n,k),k>=1) = A273347(n).
+%C A273346 Sum(T(n,k), n>=2) = 2^{n-1}.
+%C A273346 Sum(n*T(n,k), n>=2) = A273348(k) = (15k2^k+29*2^k-2(-1)^k-18)/36.
+%D A273346 A. Blecher, C. Brennan, and A. Knopfmacher, Combinatorial parameters in bargraphs (preprint).
+%H A273346 Alois P. Heinz, <a href="/A273346/b273346.txt">Rows n = 2..50, flattened</a>
+%H A273346 M. Bousquet-Mélou and A. Rechnitzer, <a href="http://dx.doi.org/10.1016/S0196-8858(02)00553-5">The site-perimeter of bargraphs</a>, Adv. in Appl. Math. 31 (2003), 86-112.
+%H A273346 M. Bousquet-Mélou and R. Brak, <a href="https://hal.archives-ouvertes.fr/hal-00342024">Exactly solved models of polyominoes and polygons</a>, Chapter 3 of Polygons, Polyominoes and Polycubes, Lecture Notes in Physics, Vol. 775, 43-78, Springer, Berlin, Heidelberg 2009.
+%H A273346 Emeric Deutsch, S Elizalde, <a href="http://arxiv.org/abs/1609.00088">Statistics on bargraphs viewed as cornerless Motzkin paths</a>, arXiv preprint arXiv:1609.00088, 2016
+%F A273346 G.f.: G(t,z), where t marks area and z marks semiperimeter, is given in the Maple program; it is obtained from eq. (2.14) of the Blecher et al reference by setting x=z, y=z, q=t.
+%e A273346 Row 4 is 0,0,4,1 because the 5 (=A082582(4)) bargraphs of semiperimeter 4 correspond to the compositions [1,1,1], [1,2], [2,1], [2,2], [3] and, clearly, the corresponding areas are 3,3,3,4,3.
+%e A273346 Triangle starts
+%e A273346   1;
+%e A273346   0,  2;
+%e A273346   0,  0,  4,  1;
+%e A273346   0,  0,  0,  7,  4,  2;
+%e A273346   0,  0,  0,  0, 12,  9,  9,  4,  1;
+%p A273346 p:= proc(z,q,n) options operator, arrow: product(1-z*q^(k-1), k = 1 .. n) end proc: G := z*(sum(z^(i+1)*(z-1)^i*t^binomial(i+2, 2)/(p(t, t, i)*p(z*t, t, i+1)), i = 0 .. 20))/(1-(sum(z^(i+1)*(z-1)^i*t^binomial(i+2, 2)/(p(t, t, i+1)*p(z*t, t, i)), i = 0 .. 20))): Gser := simplify(series(G,z=0,15)): for n from 2 to 14 do P[n] := sort(expand(coeff(Gser, z, n))) end do: for n from 2 to 14 do seq(coeff(P[n],t,j),j = 1 .. degree(P[n])) end do; # yields sequence in triangular form
+%p A273346 # second Maple program:
+%p A273346 b:= proc(n, y, t) option remember; expand(`if`(n=0, 1-t,
+%p A273346       `if`(t<0, 0, b(n-1, y+1, 1))+ `if`(t>0 or y<2, 0,
+%p A273346        b(n, y-1, -1))+ `if`(y<1, 0, b(n-1, y, 0)*z^y)))
+%p A273346     end:
+%p A273346 T:= n-> (p-> seq(coeff(p, z, i), i=1..degree(p)))(b(n, 0$2)):
+%p A273346 seq(T(n), n=2..14);  # _Alois P. Heinz_, Jun 04 2016
+%t A273346 b[n_, y_, t_] := b[n, y, t] = Expand[If[n == 0, 1-t, If[t<0, 0, b[n-1, y+1, 1]] + If[t>0 || y<2, 0, b[n, y-1, -1]] + If[y<1, 0, b[n-1, y, 0]*z^y]]]; T[n_] := Function [p, Table[Coefficient[p, z, i], {i, 1, Exponent[p, z]}]][b[n, 0, 0]]; Table[T[n], {n, 2, 14}] // Flatten (* _Jean-François Alcover_, Nov 28 2016, after _Alois P. Heinz_ *)
+%Y A273346 Cf. A002620, A082582, A273347, A273348.
+%K A273346 nonn,tabf
+%O A273346 2,3
+%A A273346 _Emeric Deutsch_, Jun 03 2016

@@ -1,0 +1,52 @@
+%I A295027 #26 Oct 25 2021 14:17:15
+%S A295027 1,0,1,0,1,2,0,2,6,6,0,2,34,36,24,0,9,150,330,240,120,0,-6,938,2790,
+%T A295027 3120,1800,720,0,118,5509,28014,38220,31080,15120,5040,0,-568,40584,
+%U A295027 294504,535416,504000,332640,141120,40320,0,4716,297648,3459324,7877520,8968680,6804000,3840480,1451520,362880
+%N A295027 T(n,k) is (1/n) times the n-th derivative of the difference between the k-th tetration of x (power tower of order k) and its predecessor at x=1; triangle T(n,k), n>=1, 1<=k<=n, read by rows.
+%C A295027 T(n,k) is defined for all n,k >= 1.  The triangle contains only the terms with k<=n.  T(n,k) = 0 for k>n.
+%H A295027 Alois P. Heinz, <a href="/A295027/b295027.txt">Rows n = 1..141, flattened</a>
+%H A295027 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/PowerTower.html">Power Tower</a>
+%H A295027 Wikipedia, <a href="https://en.wikipedia.org/wiki/Knuth%27s_up-arrow_notation">Knuth's up-arrow notation</a>
+%H A295027 Wikipedia, <a href="https://en.wikipedia.org/wiki/Tetration">Tetration</a>
+%F A295027 T(n,k) = (n-1)! * [x^n] ((x+1)^^k - (x+1)^^(k-1)).
+%F A295027 T(n,k) = 1/n * [(d/dx)^n (x^^k - x^^(k-1))]_{x=1}.
+%F A295027 T(n,k) = A295028(n,k) - A295028(n,k-1).
+%F A295027 T(n,k) = 1/n * A277536(n,k).
+%F A295027 T(n+1,n) = A001286(n).
+%e A295027 Triangle T(n,k) begins:
+%e A295027   1;
+%e A295027   0,    1;
+%e A295027   0,    1,     2;
+%e A295027   0,    2,     6,      6;
+%e A295027   0,    2,    34,     36,     24;
+%e A295027   0,    9,   150,    330,    240,    120;
+%e A295027   0,   -6,   938,   2790,   3120,   1800,    720;
+%e A295027   0,  118,  5509,  28014,  38220,  31080,  15120,   5040;
+%e A295027   0, -568, 40584, 294504, 535416, 504000, 332640, 141120, 40320;
+%e A295027   ...
+%p A295027 f:= proc(n) option remember; `if`(n<0, 0,
+%p A295027       `if`(n=0, 1, (x+1)^f(n-1)))
+%p A295027     end:
+%p A295027 T:= (n, k)-> (n-1)!*coeff(series(f(k)-f(k-1), x, n+1), x, n):
+%p A295027 seq(seq(T(n, k), k=1..n), n=1..12);
+%p A295027 # second Maple program:
+%p A295027 b:= proc(n, k) option remember; `if`(n=0, 1, `if`(k=0, 0,
+%p A295027       -add(binomial(n-1, j)*b(j, k)*add(binomial(n-j, i)*
+%p A295027       (-1)^i*b(n-j-i, k-1)*(i-1)!, i=1..n-j), j=0..n-1)))
+%p A295027     end:
+%p A295027 T:= (n, k)-> (b(n, min(k, n))-`if`(k=0, 0, b(n, min(k-1, n))))/n:
+%p A295027 seq(seq(T(n, k), k=1..n), n=1..12);
+%t A295027 f[n_] := f[n] = If[n < 0, 0, If[n == 0, 1, (x + 1)^f[n - 1]]];
+%t A295027 T[n_, k_] := (n - 1)!*SeriesCoefficient[f[k] - f[k - 1], {x, 0, n}];
+%t A295027 Table[T[n, k], {n, 1, 12}, {k, 1, n}] // Flatten
+%t A295027 (* second program: *)
+%t A295027 b[n_, k_] := b[n, k] = If[n == 0, 1, If[k == 0, 0, -Sum[Binomial[n - 1, j]*b[j, k]*Sum[Binomial[n - j, i]*(-1)^i*b[n - j - i, k - 1]*(i - 1)!, {i, 1, n - j}], {j, 0, n - 1}]]];
+%t A295027 T[n_, k_] := (b[n, Min[k, n]] - If[k == 0, 0, b[n, Min[k - 1, n]]])/n;
+%t A295027 Table[T[n, k], {n, 1, 12}, {k, 1, n}] // Flatten (* _Jean-François Alcover_, May 28 2018, from Maple *)
+%Y A295027 Column k=2 gives A005168 for n>1.
+%Y A295027 Row sums give A136461(n-1).
+%Y A295027 Main diagonal gives A104150 (for n>0).
+%Y A295027 Cf. A001286, A277536, A295028.
+%K A295027 sign,tabl
+%O A295027 1,6
+%A A295027 _Alois P. Heinz_, Nov 12 2017

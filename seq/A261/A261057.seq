@@ -1,0 +1,27 @@
+%I A261057 #24 Jan 31 2024 11:42:09
+%S A261057 0,0,1,1,5,13,40,123,388,1284,4332,14868,51094,178361,634422,2260717,
+%T A261057 8066841,29030051,105247340,383574146,1404657053,5171018981,
+%U A261057 19140750300,71124341227,263546155710,983417309702,3684399940711,13818092760075,51937827473594,195956606402526
+%N A261057 Number of solutions to c(1)*prime(1)+...+c(2n-1)*prime(2n-1) = -2, where c(i) = +-1 for i > 1, c(1) = 1.
+%C A261057 There cannot be a solution for an even number of terms on the l.h.s. because there would be an odd number of odd terms but the r.h.s. is even.
+%H A261057 Alois P. Heinz, <a href="/A261057/b261057.txt">Table of n, a(n) for n = 1..300</a>
+%F A261057 a(n) = A113041(n) - A022896(2n-1).
+%F A261057 a(n) = [x^4] Product_{k=2..2*n-1} (x^prime(k) + 1/x^prime(k)). - _Ilya Gutkovskiy_, Jan 31 2024
+%e A261057 a(1) = a(2) = 0 because prime(1) and prime(1) +- prime(2) +- prime(3) is always different from -2.
+%e A261057 a(3) = 1 because prime(1) - prime(2) - prime(3) - prime(4) + prime(5) = -2.
+%p A261057 s:= proc(n) option remember;
+%p A261057       `if`(n<2, 0, ithprime(n)+s(n-1))
+%p A261057     end:
+%p A261057 b:= proc(n, i) option remember; `if`(n>s(i), 0, `if`(i=1, 1,
+%p A261057       b(abs(n-ithprime(i)),i-1)+b(n+ithprime(i),i-1)))
+%p A261057     end:
+%p A261057 a:= n-> b(4, 2*n-1):
+%p A261057 seq(a(n), n=1..30);  # _Alois P. Heinz_, Aug 08 2015
+%t A261057 s[n_] := s[n] = If[n<2, 0, Prime[n]+s[n-1]]; b[n_, i_] := b[n, i] = If[n > s[i], 0, If[i == 1, 1, b[Abs[n-Prime[i]], i-1] + b[n+Prime[i], i-1]]]; a[n_] := b[4, 2*n-1];  Table[a[n], {n, 1, 30}] (* _Jean-François Alcover_, Nov 11 2015, after _Alois P. Heinz_ *)
+%o A261057 (PARI) A261057(n,rhs=-2,firstprime=1)={rhs-=prime(firstprime);my(p=vector(2*n-2+bittest(rhs,0),i,prime(i+firstprime)));sum(i=1,2^#p-1,sum(j=1,#p,(-1)^bittest(i,j-1)*p[j])==rhs)} \\ For illustrative purpose; too slow for n >> 10.
+%o A261057 (PARI) a(n, s=-2-prime(1), p=1)={if(n<=s, if(s==p, n==s, a(abs(n-p), s-p, precprime(p-1))+a(n+p, s-p, precprime(p-1))), if(s<=0, a(abs(s), max(sum(i=p+1, p+=2*n-2+bittest(s,0), prime(i)),1), prime(p))))} \\ _M. F. Hasler_, Aug 09 2015
+%Y A261057 Cf. A261059, A261060, A261045 (starting with prime(2) - prime(4)), A261061 - A261063 and A261044 (r.h.s. = -1), A022894 - A022904, A083309, A022920 (r.h.s. = 0, 1 or 2); A113040, A113041, A113042.
+%K A261057 nonn
+%O A261057 1,5
+%A A261057 _M. F. Hasler_, Aug 08 2015
+%E A261057 a(26)-a(30) from _Alois P. Heinz_, Jan 04 2019

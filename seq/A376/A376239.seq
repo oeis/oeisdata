@@ -1,0 +1,38 @@
+%I A376239 #18 Oct 31 2024 01:03:46
+%S A376239 1,2,1,3,3,2,4,4,4,1,5,5,5,5,2,6,6,6,6,6,3,7,7,7,7,7,7,3,8,8,8,8,8,8,
+%T A376239 8,1,9,9,9,9,9,9,9,9,2,10,10,10,10,10,10,10,10,10,4,11,11,11,11,11,11,
+%U A376239 11,11,11,11,4,12,12,12,12,12,12,12,12,12,12,12,4,13,13,13,13,13,13,13,13,13,13,13,13,1,14
+%N A376239 a(n) = index k of the column in which n is found, if the columns k = 1, 2, 3, ... are initially filled with numbers T(k-1)+1, ..., T(k) = k(k+1)/2, and when n is found in column k, then the top element of each subsequent column (k+1, k+2, ...) is moved to the top of the previous column (k, k+1, ...).
+%C A376239 Between indices that are triangular numbers, T(k-1) < n < T(k) := k(k+1)/2 = A000217(k), the number k occurs k-1 times (cf. Examples).
+%C A376239 In the sequence S[2] = a(T(k), k >= 1) = (1, 1, 2, 1, 2, 3, 3, 1, 2, 4, 4, 4, 1, 3, 5, 5, 5, 5, 3, 2, 6, 6, 6, 6, 6, 1, 2, 7, 7, ...), each number k appears again k-1 times in a row, but these runs are now separated by two smaller numbers.
+%C A376239 If we remove again the runs of k-1 consecutive k in that sequence S[2] = a o T, we get the sequence S[3] = (1, 1, 1, 2, 1, 2, 1, 3, 3, 2, 1, 2, 4, 4, 4, 3, ...) where again each k > 1 occurs k-1 times in a row, but these runs now separated by three other elements.
+%C A376239 Conjecture: Starting with S[1] = A376239, if S[r+1] = D(r) S[r] for all r >= 1, then each sequence S[r] has the property P(r). Here we denote by D(r) the operation of deleting the substring of k-1 copies of k starting at index (k-1)r + T(k-2) + 1, for all k > 1, and keeping only the intermediate chunks of length r. By property P(r) we mean that for each k > 1, the sequence contains k-1 consecutive terms equal to k, starting at index (k-1)r + T(k-2) + 1, each such run being preceded by r terms < k.
+%C A376239 For example, this sequence S[1] = A376239 has property P(1), S[2] = D(1) S[1] = A376239 o T has property P(2), and S[3] = D(2) S[2] has property P(3).
+%F A376239 a(n) = k for T(k-1) < n < T(k) := k(k+1)/2 = A000217(k).
+%e A376239 a(1) = 1 is the index of the first column, where n = 1 is found. Then we move the top element T(2) = 3 from col.2 to this col.1, and T(3) = 6 from col.3 to col.2, etc.
+%e A376239 Then a(2) = 2 is the index of the second column, where n = 2 is found. Then we move the top element T(4) = 10 from col.3 to this col.2, and T(5) = 15 from col.4 to col.3, etc.
+%e A376239 Then a(3) = 1 is the index of the first column, to which n = 2 had been moved in the first step. Now we move the top element T(4) = 10 from col.2 to this col.1, and T(5) = 15 from col.3 to col.2, etc.
+%e A376239 Then a(4) = a(5) = 3 is the column where n = 4 and n = 5 are found. (We see that the number 3 is repeated 2 times between n = T(2) = 3 and n = T(3) = 6.) Each time we move the top element of all subsequent columns to the column immediately before. And so on.
+%o A376239 (Python)
+%o A376239 def A376239(n):
+%o A376239     try: A=A376239; S=A.terms; C=A.cols
+%o A376239     except: A.terms=S=[]; A.cols=C=[]; A.M=1
+%o A376239     while n >= (nn := len(S)+1):
+%o A376239         try: i = next(i for i,c in enumerate(C) if c[0]==nn)
+%o A376239         except StopIteration: # need a new additional column
+%o A376239             i = len(C); A.M += 1
+%o A376239             C.append(list(range(nn, i+nn))+[A.M*(A.M-1)//2])
+%o A376239         S.append(i+1) ; C[i].pop(0)
+%o A376239         for c in range(i+1, len(C)):
+%o A376239             C[c-1].append(C[c].pop())
+%o A376239         C[-1].append(A.M*(A.M+1)//2)
+%o A376239         A.M += 1
+%o A376239     return S[n-1]
+%o A376239 print([A376239(n) for n in range(1,100)])
+%o A376239 print("a(T(k), k >= 1) =", [A376239(k*(k+1)//2) for k in range(1,50)])
+%o A376239 (PARI) /* This code uses the conjectured property. */
+%o A376239 apply( {A376239(n, r=1, k=0)=if(n<r+3, (n==r+1)+1, k=(sqrtint(8*n+1)-1)\2; while(n <= k*(r+(k-1)/2), k--); n <= k*(r+(k+1)/2), k+1, A376239(n-k*(k+1)/2,r+1))}, [1..99])
+%Y A376239 Cf. A000217 (triangular numbers n(n+1)/2).
+%K A376239 nonn
+%O A376239 1,2
+%A A376239 _Ali Sada_ and _M. F. Hasler_, Oct 28 2024

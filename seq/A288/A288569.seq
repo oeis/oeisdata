@@ -1,0 +1,34 @@
+%I A288569 #28 Aug 15 2023 10:08:38
+%S A288569 1,2,3,2,3,4,3,2,3,4,3,4,3,4,5,2,3,4,3,4,5,4,3,4,3,6,3,4,3,4,3,2,5,6,
+%T A288569 5,4,3
+%N A288569 Start with n and repeatedly apply the map x -> A087207(x) until we reach 0; a(n) is the number of steps needed, or -1 if 0 is never reached.
+%C A288569 There is a conjecture that 0 is always reached - see A087207.
+%H A288569 Robert Israel, <a href="/A288569/a288569.txt">Table of n, a(n) for n = 1..10000</a>.  If a(n) is not known, it is given in the form k + a(x). [A large file]
+%e A288569 10 -> 5 -> 4 -> 1 -> 0 reaches 0 in 4 steps, so a(10)=4.
+%e A288569 38 = 2*19 -> 129 = 3*43 -> 8194 = 2*17*241 -> 4503599627370561 = 3^2*37*71*190483425427 -> ..., and a(38) is presently unknown.
+%p A288569 f:= proc(n) local i; option remember;
+%p A288569   add(2^(numtheory:-pi(t)-1), t = numtheory:-factorset(n)) end proc:
+%p A288569 g:= proc(n) local t,count;
+%p A288569    t:= n;
+%p A288569    for count from 0 while t <> 0 do
+%p A288569       t:= f(t)
+%p A288569    od;
+%p A288569    count
+%p A288569 end proc:
+%p A288569 map(g, [$1..37]); # _Robert Israel_, Jun 25 2017
+%t A288569 f[n_] := Total[2^(PrimePi /@ FactorInteger[n][[All, 1]]-1)]; f[1] = 0;
+%t A288569 g[n_] := Module[{t, count}, t = n; For[count = 0, t != 0, count++, t = f[t]]; count];
+%t A288569 Table[g[n], {n, 1, 37}] (* _Jean-François Alcover_, Aug 15 2023, after _Robert Israel_ *)
+%o A288569 (Python)
+%o A288569 from sympy import factorint, primepi
+%o A288569 def f(n):
+%o A288569     return 0 if n < 2 else sum(1 << int(primepi(i-1)) for i in factorint(n))
+%o A288569 def a(n):
+%o A288569     fn, c = n, 0
+%o A288569     while not fn == 0: fn, c = f(fn), c+1
+%o A288569     return c
+%o A288569 print([a(n) for n in range(1, 38)]) # _Michael S. Branicky_, Jul 11 2022
+%Y A288569 Cf. A087207.
+%K A288569 nonn,more,hard
+%O A288569 1,2
+%A A288569 _N. J. A. Sloane_, Jun 25 2017

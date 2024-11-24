@@ -1,0 +1,50 @@
+%I A322272 #26 Sep 11 2022 12:05:30
+%S A322272 1,7,11,13,17,19,23,29,31,13,41,43,23,1,53,11,61,43,71,73,53,31,83,41,
+%T A322272 19,73,29,7,83,61,17,71
+%N A322272 Smallest multiplication factors f, prime or 1, for all a (mod 120), coprime to 120, so that b*f is a nonzero square mod 8, mod 3, and mod 5.
+%C A322272 See sequence A322269 for further explanations. This sequence is related to A322269(3).
+%C A322272 The sequence is periodic, repeating itself after phi(120) terms. Its largest term is 83, which is A322269(3). In order to satisfy the conditions, both f and b must be coprime to 120. Otherwise, the product would be zero mod a prime <= 5.
+%C A322272 The b(n) corresponding to each a(n) is A007775(n).
+%e A322272 The 10th number coprime to 120 is 37. a(10) is 13, because 13 is the smallest prime by which we can multiply 37, so that the product (37*13 = 481) is a square mod 8, mod 3 and mod 5.
+%o A322272 (PARI)
+%o A322272 QresCode(n, nPrimes) = {
+%o A322272   code = bitand(n,7)>>1;
+%o A322272   for (j=2, nPrimes,
+%o A322272     x = Mod(n,prime(j));
+%o A322272     if (issquare(x), code += (1<<j));
+%o A322272   );
+%o A322272   return (code);
+%o A322272 }
+%o A322272 QCodeArray(n) = {
+%o A322272   totalEntries = 1<<(n+1);
+%o A322272   f = vector(totalEntries);
+%o A322272   f[totalEntries-3] = 1;  \\ 1 always has the same code: ...111100
+%o A322272   counter = 1;
+%o A322272   forprime(p=prime(n+1), +oo,
+%o A322272     code = QresCode(p, n);
+%o A322272     if (f[code+1]==0,
+%o A322272       f[code+1]=p;
+%o A322272       counter += 1;
+%o A322272       if (counter==totalEntries, return(f));
+%o A322272     )
+%o A322272   )
+%o A322272 }
+%o A322272 sequence(n) = {
+%o A322272   f = QCodeArray(n);
+%o A322272   primorial = prod(i=1, n, prime(i));
+%o A322272   entries = eulerphi(4*primorial);
+%o A322272   a = vector(entries);
+%o A322272   i = 1;
+%o A322272   forstep (x=1, 4*primorial-1, 2,
+%o A322272     if (gcd(x,primorial)==1,
+%o A322272       a[i] = f[QresCode(x, n)+1];
+%o A322272       i += 1;
+%o A322272     );
+%o A322272   );
+%o A322272   return(a);
+%o A322272 }
+%o A322272 sequence(3)
+%Y A322272 Cf. A322269, A322271, A322273, A322274, A322275, A007775.
+%K A322272 nonn,fini,full
+%O A322272 1,2
+%A A322272 _Hans Ruegg_, Dec 01 2018

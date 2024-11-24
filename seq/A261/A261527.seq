@@ -1,0 +1,53 @@
+%I A261527 #17 Nov 16 2015 06:30:20
+%S A261527 1,1,1,1,1,1,1,2,1,1,1,1,1,1,2,4,1,1,1,2,1,1,1,1,2,20,1,1,1,4,1,1,1,2,
+%T A261527 2,1,2,24,2
+%N A261527 Irregular triangular array giving minimum number of reciprocal steps in the boomerang fractions process needed to return to 1 if a returning path exists, otherwise 0.
+%C A261527 The boomerang fractions process is defined as follows. Fix a rational number q, 0<q<1. Starting with 1, on the first step add q and on subsequent steps either add q or take the reciprocal.
+%C A261527 Let q(n) be the n-th rational number in the interval (0,1) in the canonical ordering, that is, q(n)=A038566(n+1)/A038567(n+1). Then a(n) is obtained by applying the sequence definition with q=q(n).
+%C A261527 The value of a(n) is 1 if and only if q(n) is the difference of two unit fractions.
+%C A261527 If q(m) = k q(n) for some positive integer k, then a(n) <= a(m).
+%C A261527 The first rational number in the canonical ordering for which it is not known whether a(n) is nonzero is q(40)=9/11. If a(40) is nonzero, then a(40) >= 55.
+%H A261527 W. P. Orrick, <a href="http://pages.iu.edu/~worrick/boomerang/">Boomerang fractions: some calculations</a>
+%e A261527 a(1) = 1 since q(1) = 1/2 and there is the returning path 1 --> 1+2*(1/2) = 2 --> 1/2 --> 1/2+1/2 = 1, which uses the reciprocal operation once.
+%e A261527 a(8) = 2 since q(8) = 3/5, which cannot be written as the difference of two unit fractions (ruling out a(8) = 1) and because there is the returning path 1 --> 1+15*(3/5) = 10 --> 1/10 --> 1/10+4*(3/5) = 5/2 --> 2/5 --> 2/5+3/5 = 1, which uses the reciprocal operation twice.
+%e A261527 Triangle starts:
+%e A261527 1;
+%e A261527 1, 1;
+%e A261527 1, 1;
+%e A261527 1, 1, 2, 1;
+%e A261527 1, 1;
+%e A261527 1, 1, 1, 2, 4, 1;
+%e A261527 1, 1, 2, 1;
+%e A261527 1, 1, 1, 2, 20, 1;
+%e A261527 1, 1, 4, 1;
+%e A261527 1, 1, 2, 2, 1, 2, 24, 2,
+%e A261527 ...
+%t A261527 (* In the following code, Alpha is the operation "add q" and Beta is the operation "take the reciprocal and add q". The set L(j) is defined to be the set of positive rational numbers r such that there is a path from r to 1 that uses Beta exactly j times. The program computes L(1), L(2), and so on, until an L(j) is found that contains 1, in which case it returns j, or until maxIterations is exceeded, in which case it returns 0. The function iterateUntilOne can generate the result for all q up to 6/11 rather quickly, but for q = 7/11, which corresponds to a(38) = 24, it requires considerable time; it is not capable of ruling out the existence of a returning path that uses Beta more than maxIterations times. *)
+%t A261527 applyBetaInverse[q_, x_] := 1/(x - q)
+%t A261527 applyAlphaPowerInverse[q_, x_] :=
+%t A261527 Table[x - q j, {j, 0, Ceiling[x/q] - 1}]
+%t A261527 iterateUntilOne[q_, maxIterations_] :=
+%t A261527 Module[{list, listOld, oneFound, it, betaInverseResult},
+%t A261527   listOld = Flatten[applyAlphaPowerInverse[q, #] & /@ {1}];
+%t A261527   oneFound = False;
+%t A261527   For[it = 1, ! oneFound && it <= maxIterations, it++,
+%t A261527    betaInverseResult =
+%t A261527     applyBetaInverse[q, #] & /@ Select[listOld, # > q &];
+%t A261527    list = Flatten[applyAlphaPowerInverse[q, #] & /@ betaInverseResult];
+%t A261527    oneFound = MemberQ[list, 1];
+%t A261527    Print["L(", it, ") : length ", Length[list],
+%t A261527     If[oneFound, ", contains 1", ", does not contain 1"]];
+%t A261527    listOld = list
+%t A261527    ];
+%t A261527   If[oneFound,
+%t A261527    it - 1,
+%t A261527    0
+%t A261527    ]
+%t A261527   ]
+%t A261527 iterateUntilOne[#, 20] & /@Flatten[Join[
+%t A261527   Table[Select[Range[1, d], CoprimeQ[d, #] &]/d, {d, 2, 10}],
+%t A261527   Range[1, 6]/11]]
+%Y A261527 Cf. A256174.
+%K A261527 nonn,tabf,more
+%O A261527 1,8
+%A A261527 _William P. Orrick_, Aug 21 2015

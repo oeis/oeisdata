@@ -1,0 +1,45 @@
+%I A280274 #15 Jun 27 2021 03:40:11
+%S A280274 0,1,1,1,1,2,1,1,1,3,1,2,1,3,2,1,1,4,1,2,2,4,1,2,1,4,1,2,1,4,1,1,3,5,
+%T A280274 2,3,1,5,3,2,1,5,1,3,2,5,1,3,1,5,3,3,1,5,2,2,3,5,1,3,1,5,2,1,2,6,1,3,
+%U A280274 3,6,1,2,1,6,3,3,2,6,1,2,1,6,1,4,2,6,4,2,1,6,2,3,4,6,2,4,1,6,2,3
+%N A280274 a(n) is the maximum value in row n of A279907.
+%C A280274 Consider integers 1 <= r <= n where all the prime divisors p of r also divide n. Call such r of n "regulars" of n, or "r regular to n".
+%C A280274 Consider rho = smallest power e of n such that r | n^e. a(n) is the largest value of rho found among regular 1 <= r <= n of n.
+%C A280274 For n=1, r=1 | n^0; since it is the only integer in the range 1 <= k <= n and since 1 is the empty product, a(1) = 0.
+%C A280274 a(p) = 1 for prime p, since all 1 <= k <= n must either divide or be coprime to p; if k is coprime to p it is nonregular and does not qualify. Thus only k=1 and k=p divide some power of n; 1 | p^0 and p | p^1 by definition. Thus the largest value of rho among r={1,p} is 1.
+%C A280274 a(p^x) = 1 for prime powers p^x with x >= 1, since the only regular 1 <= r <= p^x are divisors that are powers {1, p^1, p^2, ... p^(x-1), p^x}; since these r are all divisors d, d | n^1 by definition, thus the largest rho among these r is 1. Thus, a(n) = 1 for n with omega(n) = 1.
+%C A280274 a(4) = 1 since all regular 1 <= r <= 4 divide 4; all divisors d divide n^1 by definition, thus the largest rho among these r is 1.
+%C A280274 a(n) > 1 for composite n > 4, since there is at least one nondivisor regular ("semidivisor") 1 <= r <= n. (See A243822.) If r does not divide n, then it divides some power n^e with e > 1, since all the prime divisors p of r divide n. Another way to look at this is that the set of prime divisors p of semidivisor r is a subset of the set of prime divisors p of n, yet r does not itself divide n. The multiplicity of at least one prime divisor p of r exceeds that of the corresponding prime divisor p of n. The maximum possible multiplicity of any number m < n pertains to the largest power of 2 < n, thus the greatest possible value of rho = floor(log_2(n)).
+%C A280274 a(n) for n = 2 (mod 4) = floor(log_2(n)), since such n is an odd multiple of 2. Thus the largest power of 2^x less than n has multiplicity x for 2 while that in n is 1. Any other prime divisor q of n has multiplicity less than that of 2. Thus 2^x | n^x, and the largest rho among 1 <= r <= n = x = floor(log_2(n)).
+%C A280274 a(n) for squarefree n = floor(log_p(n)) = A280363(n), where p is the smallest distinct prime divisor of n.
+%C A280274 Consider the standard form prime decomposition of n = p_1^e_1 * p_2^3_2 * ... p_i^e_i. a(n) for all other n is the maximum value of ceiling(floor(log_p_i(n))/e_i), i.e., ceiling(A280363(n)/e_i).
+%C A280274 a(n) < n.
+%C A280274 a(n) is the longest terminating base-n expansion of 1/r for 1 <= r <= n. Example: in base 10, the longest terminating expansion of 1/r is 3 for r = 8. 1/8 = .125. a(10) = 3.
+%C A280274 Also maximum value in row n of A280269.
+%H A280274 Michael De Vlieger, <a href="/A280274/b280274.txt">Table of n, a(n) for n = 1..10000</a>
+%e A280274 Row n of A280269               a(n)
+%e A280274 1:  0                          0
+%e A280274 2:  0  1                       1
+%e A280274 3:  0  1                       1
+%e A280274 4:  0  1  1                    1
+%e A280274 5:  0  1                       1
+%e A280274 6:  0  1  1  2  1              2
+%e A280274 7:  0  1                       1
+%e A280274 8:  0  1  1  1                 1
+%e A280274 9:  0  1  1                    1
+%e A280274 10: 0  1  2  1  3  1           3
+%e A280274 11: 0  1                       1
+%e A280274 12: 0  1  1  1  1  2  2  1     2
+%e A280274 13: 0  1                       1
+%e A280274 14: 0  1  2  1  3  1           3
+%e A280274 15: 0  1  1  2  1              2
+%e A280274 16: 0  1  1  1  1              1
+%e A280274 ...
+%t A280274 Table[Function[f, Which[n == 1, 0, Length@ f == 1, 1, Max[f[[All, -1]]] == 1, Floor[Log[f[[1, 1]], n]], True, Max@ Map[With[{p = #1, e = #2}, Ceiling[Floor[Log[p, n]]/e]] & @@ # &, f]]][FactorInteger[n]], {n, 120}] (* most efficient, or *)
+%t A280274 Table[If[PrimeNu@ n == 1, 1, Max@Map[Function[k, SelectFirst[Range[0, #], PowerMod[n, #, k] == 0 &] /. m_ /; MissingQ@ m -> Nothing], Range@ n] &@ Floor@ Log2@ n], {n, 120}] (* Version 10.2, or *)
+%t A280274 Max@ DeleteCases[#, -1] & /@ Table[If[# == {}, -1, First@ #] &@ Select[Range[0, #], PowerMod[n, #, k] == 0 &] &@ Floor@ Log2@ n, {n, 120}, {k, n}] (* or *)
+%t A280274 Max@ DeleteCases[#, -1] & /@ Table[Boole[k == 1] + (Boole[#[[-1, 1]] == 1] (-1 + Length@#) /. 0 -> -1) &@ NestWhileList[Function[s, {#1/s, s}]@ GCD[#1, #2] & @@ # &, {k, n}, And[First@ # != 1, ! CoprimeQ @@ #] &], {n, 120}, {k, n}]
+%Y A280274 Cf.: A162306, A279907 (T(n,k) with values for all 1 <= k <= n), A280269, A007947, A280363.
+%K A280274 nonn,easy
+%O A280274 1,6
+%A A280274 _Michael De Vlieger_, Dec 30 2016

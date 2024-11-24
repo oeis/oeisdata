@@ -1,0 +1,31 @@
+%I A278966 #22 Jun 08 2020 05:22:57
+%S A278966 1,2,2,3,2,2,2,2,3,2,5,2,2,2,3,2,2,2,2,3,3,3,2,4,2,2,3,2,2,2,7,2,2,2,
+%T A278966 2,3,2,2,3,2,2,2,3,2,2,3,2,4,2,2,4,3,2,2,2,3,2,3,2,2,2,2,2,3,2,2,2,3,
+%U A278966 2,2,2,3,3,2,2,3,2,2,2,2,2,2,4,2,3,2,2,2,2,3,2,3,3,2,2,3,2,2,2,2
+%N A278966 Least Hamming weight of multiples of the n-th prime.
+%C A278966 Since all primes after the first are odd, a(n) > 1 for n > 1.
+%C A278966 a(n) = 2 if and only if A014664(n) is even, or equivalently prime(n) is not in A014663. - _Robert Israel_, Dec 08 2016
+%C A278966 If prime(n) = A000668(k), then a(n) = A000043(k). - _Robert Israel_, Dec 20 2016
+%H A278966 Robert Israel, <a href="/A278966/b278966.txt">Table of n, a(n) for n = 1..1000</a>
+%p A278966 f:= proc(n) local p, R, V, W, k,v,r;
+%p A278966     p:= ithprime(n);
+%p A278966     R:= {seq(2 &^ i mod p, i=0..numtheory:-order(2,p)-1)};
+%p A278966     Rm:= map(t -> p-t, R);
+%p A278966     V:= R;
+%p A278966     W:= V;
+%p A278966     for k from 2 do
+%p A278966       if nops(V intersect Rm) > 0 then return k fi;
+%p A278966       V:= {seq(seq(v+r mod p, v=V),r=R)} minus W;
+%p A278966     W:= W union V;
+%p A278966     od
+%p A278966 end proc:
+%p A278966 f(1):= 1:
+%p A278966 map(f, [$1..100]); # _Robert Israel_, Dec 20 2016
+%t A278966 a[n_] := Module[{p, R, V, W, k, v, r}, p = Prime[n]; R = Union @ Table[ PowerMod[2, i, p], {i, 0, MultiplicativeOrder[2, p]-1}]; Rm = p - R; V = R; W = V; For[k = 2, True, k++, If[Length[V ~Intersection~ Rm] > 0, Return[k]]; V = Union@ Flatten@ Table[Table[v + Mod[r, p], {v, V}], {r, R}] ~Complement~ W; {W, W ~Union~ V}]];
+%t A278966 a[1] = 1;
+%t A278966 Array[a, 100] (* _Jean-François Alcover_, Jun 08 2020, after _Robert Israel_ *)
+%o A278966 (PARI) a(n,p=prime(n))=my(o=znorder(Mod(2,p)), v1=Set(powers(Mod(2,p),o)), v=v1, s=1); while(!setsearch(v,Mod(0,p)), v=setbinop((x,y)->x+y,v,v1); s++); s
+%Y A278966 Cf. A014663, A014664, A278967, A278968, A086342.
+%K A278966 nonn
+%O A278966 1,2
+%A A278966 _Charles R Greathouse IV_, Dec 02 2016

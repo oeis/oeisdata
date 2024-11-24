@@ -1,0 +1,70 @@
+%I A323286 #85 May 11 2024 21:55:51
+%S A323286 2,1,4,6,2,8,10,3,12,14,4,16,18,5,20,12,21,22,6,11,14,22,24,16,23,26,
+%T A323286 7,12,18,24,28,25,30,110,8,13,26,32,112,27,34,114,9,14,28,36,116,29,
+%U A323286 38,118,10,40,11,22,41,42,11,12,21,24,42,44,13,26,43,46,12
+%N A323286 Choix de Bruxelles (version 1): irregular table read by rows in which row n lists all the legal numbers that can be reached by halving or doubling some substring of the decimal expansion of n.
+%C A323286 Take the decimal expansion of n, say n = d_1 d_2 ... d_k. We can choose to map it to any number that can be obtained by the following process. Take any substring d_i, d_{i+1}..., d_j that does not begin with 0. If the number represented by this substring is odd, replace it with twice the number. If it is even either halve it or double it.
+%C A323286 The substring may increase or decrease in length. We do not pad it with zeros if it decreases in length.
+%C A323286 For example, if n = 20129, then by acting on single-digit substrings we get 10129, 40129, 20229, 20119, 20149, 201218. Acting on 2-digit substrings we get in addition 2069 (halve the 12!), 20249, 20158. From 3-digit substrings we also get 40229, 20258; from 4-digit substrings we get 40249; and from 5-digit substrings we get 40258.
+%C A323286 _Eric Angelini_ asks what is the smallest number of steps needed to reach n if we start at 1 and repeatedly apply this process? We can reach 2 in 1 step, 4 in 2 steps, 13 in five steps, and so on.
+%C A323286 _Lars Blomberg_ has shown, by considering just the final digit of the numbers in the trajectory, that no number ending in 0 or 5 can be reached from 1. All other numbers can be reached (cf. A323454) - see proof below.
+%C A323286 Update, Jan 15 2019: Lorenzo Angelini has found that 3 can be reached from 1 in 11 steps: 1, 2, 4, 8, 16, 112, 56, 28, 14, 12, 6, 3. No shorter path is possible.
+%C A323286 From _N. J. A. Sloane_, Jan 16 2019: (Start)
+%C A323286 Theorem: If k > 1 does not end in 0 or 5 then it can be reached from 1.
+%C A323286 Proof: Suppose not, and let k be the smallest such number. Note that the allowed operations are invertible: if a -> b then also b -> a. So that means that
+%C A323286 *** all the descendants of k must be bigger than k ***
+%C A323286 (if there was a descendant < k, then it would also be unreachable from 1, which is a contradiction to k being the smallest).
+%C A323286 All digits of k must be odd (if there were an even digit > 0, halve it and get a smaller number; if there is a zero digit, say we see a0, then we halve a0 and get a smaller number).
+%C A323286 If all the digits of k are 1, do 111...1 -> 111...2 -> 55..56, a smaller number.
+%C A323286 If there is a digit 3, 7, or 9, we know we can get that single digit down to 1 (see A323454), again a contradiction.
+%C A323286 But all the digits can't be 5.  QED (End)
+%D A323286 Eric Angelini, Email to N. J. A. Sloane, Jan 14 2019.
+%H A323286 Rémy Sigrist, <a href="/A323286/b323286.txt">Rows n = 1..2000, flattened</a>
+%H A323286 Eric Angelini, Lars Blomberg, Charlie Neder, Remy Sigrist, and N. J. A. Sloane, <a href="http://arxiv.org/abs/1902.01444">"Choix de Bruxelles": A New Operation on Positive Integers</a>, arXiv:1902.01444 [math.NT], Feb 2019; Fib. Quart. 57:3 (2019), 195-200.
+%H A323286 Brady Haran and N. J. A. Sloane, <a href="https://www.youtube.com/watch?v=AeqK96UX3rA">The Brussels Choice</a>, Numberphile video (2020)
+%H A323286 Rémy Sigrist, <a href="/A323286/a323286.gp.txt">PARI program for A323286</a>
+%H A323286 N. J. A. Sloane, Coordination Sequences, Planing Numbers, and Other Recent Sequences (II), Experimental Mathematics Seminar, Rutgers University, Jan 31 2019, <a href="https://vimeo.com/314786942">Part I</a>, <a href="https://vimeo.com/314790822">Part 2</a>, <a href="https://oeis.org/A320487/a320487.pdf">Slides.</a> (Mentions this sequence)
+%e A323286 The triangle begins:
+%e A323286    2;
+%e A323286    1,   4;
+%e A323286    6;
+%e A323286    2,   8;
+%e A323286   10;
+%e A323286    3,  12;
+%e A323286   14;
+%e A323286    4,  16;
+%e A323286   18;
+%e A323286    5,  20;
+%e A323286   12,  21,  22;
+%e A323286    6,  11,  14,  22,  24;
+%e A323286   16,  23,  26;
+%e A323286    7,  12,  18,  24,  28;
+%e A323286   25,  30, 110;
+%e A323286    8,  13,  26,  32, 112;
+%e A323286   27,  34, 114;
+%e A323286    9,  14,  28,  36, 116;
+%e A323286   29,  38, 118;
+%e A323286   10,  40;
+%e A323286   11,  22,  41,  42;
+%e A323286   11,  12,  21,  24,  42,  44;
+%e A323286   ...
+%o A323286 (PARI) See Sigrist link.
+%o A323286 (Python)
+%o A323286 def cdb(n):
+%o A323286     s, out = str(n), set()
+%o A323286     for l in range(1, len(s)+1):
+%o A323286         for i in range(len(s)+1-l):
+%o A323286             if s[i] == '0': continue
+%o A323286             t = int(s[i:i+l])
+%o A323286             out.add(int(s[:i] + str(2*t) + s[i+l:]))
+%o A323286             if t&1 == 0: out.add(int(s[:i] + str(t//2) + s[i+l:]))
+%o A323286     return sorted(out)
+%o A323286 print([c for n in range(1, 25) for c in cdb(n)]) # _Michael S. Branicky_, Jul 24 2022
+%Y A323286 The number of terms in row n is given by A323287.
+%Y A323286 See A323460 for the (preferred) version 2 where n can also be mapped to itself.
+%Y A323286 See also A323288 (row maxima), A323289, A323452, A323453, A323454, A323455 (a binary analog).
+%Y A323286 For variants of the Choix de Bruxelles operation, see A337321 and A337357.
+%K A323286 nonn,base,look,tabf
+%O A323286 1,1
+%A A323286 _N. J. A. Sloane_, Jan 14 2019
+%E A323286 Data corrected by _Rémy Sigrist_, Jan 15 2019

@@ -1,0 +1,56 @@
+%I A341884 #37 Mar 10 2021 17:26:50
+%S A341884 1,2,6,22,342,1444,33184,399235,12502550,117906198,7740054144,
+%T A341884 74673569118,4724493959332,121637216075836,4503600768557056,
+%U A341884 89450720590507768,10119960926575526448,152232968281237988010,16384000020089600480000,552020693349464673399080,35271474934322858202723576
+%N A341884 Number of fundamentally different graceful labelings of digraphs with n arcs.
+%C A341884 Consider vertices numbered 0 to n. For 1 <= k <= n, add an arc from v_k to (v_k+k) mod q, where q = n+1. (Thus (n+1)^n possibilities.) Two such digraphs are considered equivalent under the following operations: (i) rename each v to (v+1) mod q; (ii) rename each v to (av) mod q, where a is relatively prime to q; (iii) form the converse digraph by reversing the direction of every arc. The number of equivalence classes is a(n).
+%D A341884 G. S. Bloom and D. F. Hsu, On graceful digraphs and a problem in network addressing, Congr. Numer., 35 (1982) 91-103.
+%D A341884 D. E. Knuth, The Art of Computer Programming, forthcoming exercise in Section 7.2.2.3
+%H A341884 Peter Luschny, <a href="/A341884/b341884.txt">Table of n, a(n) for n = 1..100</a>
+%e A341884 Each equivalence class has exactly one digraph with v_1=0.
+%e A341884 For n=3 the six classes of digraphs 0v_2v_3 are: {000,032}, {001,011,021,031}, {002,010,022,030}, {003,033}, {012,020}, {013,023}.
+%p A341884 # This is a port from the Mathematica program below.
+%p A341884 sols := proc(alf, bet, q)
+%p A341884 igcd(alf, q); `if`(modp(bet, %) <> 0, 0, %) end:
+%p A341884 F := proc(l, a, b, q) local s, r, ll;
+%p A341884    s := 1; r := 1; ll := modp(l*a, q);
+%p A341884    while ll > l do
+%p A341884       s := s + 1;
+%p A341884       ll := modp(ll*a,  q);
+%p A341884       r  := modp(r*a+1, q); od;
+%p A341884 `if`(ll <> l, 1, sols(a^s - 1, -r*b, q)) end:
+%p A341884 G := proc(l, a, b, q) local s, r, ll;
+%p A341884    s := 1; r := 1; ll := modp(-l*a, q);
+%p A341884    while ll > l do
+%p A341884       s := s + 1;
+%p A341884       ll := modp(-ll*a, q);
+%p A341884       r  := modp(r*a+1, q); od;
+%p A341884 `if`(ll <> l, 1, sols(a^s - 1, -r*b - l*irem(s, 2), q)) end:
+%p A341884 f := (a, b, q) -> mul(F(l, a, b, q), l = 1..q-1):
+%p A341884 g := (a, b, q) -> mul(G(l, a, b, q), l = 1..q-1):
+%p A341884 a := proc(n) local q; q := n + 1;
+%p A341884     add(`if`(igcd(a, q) > 1, 0, add(f(a, b, q) + g(a, b, q),
+%p A341884          b = 0..q-1)), a = 1..q-1);
+%p A341884 % / (2*q*numtheory:-phi(q)) end:
+%p A341884 seq(a(n), n=1..21); # _Peter Luschny_, Mar 10 2021
+%t A341884 sols[alf_,bet_,q_]:=Block[{d=GCD[alf,q]},If[Mod[bet,d]!=0,0,d]]
+%t A341884 (* that many solutions to alf x == bet (modulo q) for 0<=x<q *)
+%t A341884 f[l_,a_,b_,q_]:=Block[{r,s,ll,atos},
+%t A341884                        s=1;ll=Mod[l*a,q];r=1;
+%t A341884                        While[ll>l, s++;ll=Mod[ll*a,q];r=Mod[r*a+1,q]];
+%t A341884                        If[ll==l,sols[a^s-1,-r b,q],1]]
+%t A341884 g[l_,a_,b_,q_]:=Block[{r,s,ll,atos},
+%t A341884                        s=1;ll=Mod[-l*a,q];r=1;
+%t A341884                        While[ll>l, s++;ll=Mod[-ll*a,q];r=Mod[r*a+1,q]];
+%t A341884                        If[ll==l,sols[a^s-1,-r b-l Mod[s,2],q],1]]
+%t A341884 f[a_,b_,q_]:=Product[f[l,a,b,q],{l,q-1}]
+%t A341884 g[a_,b_,q_]:=Product[g[l,a,b,q],{l,q-1}]
+%t A341884 x[q_]:=Sum[If[GCD[a,q]>1,0,Sum[f[a,b,q]+g[a,b,q],{b,0,q-1}]],{a,q-1}]/
+%t A341884   (2q EulerPhi[q])
+%t A341884 a[n_]:=x[n+1]
+%Y A341884 Cf. A342357, A071118.
+%K A341884 nonn
+%O A341884 1,2
+%A A341884 _Don Knuth_, Feb 22 2021
+%E A341884 a(10) from _Don Knuth_, Mar 10 2021
+%E A341884 More terms from _Peter Luschny_, Mar 10 2021

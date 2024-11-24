@@ -1,0 +1,48 @@
+%I A193314 #35 Jul 10 2024 05:00:40
+%S A193314 1,2,5,14,384,1715,714,633555
+%N A193314 The smallest k such that the product k*(k+1) is divisible by the first n primes and no others.
+%C A193314 a(9)-a(21) do not exist.  It seems unlikely that a(n) exists for larger n. [_Charles R Greathouse IV_, Aug 18 2011]
+%C A193314 If a term beyond a(8) exists, it is larger than 2.29*10^25. - _Giovanni Resta_, Nov 30 2019
+%H A193314 Carlos Rivera, <a href="http://www.primepuzzles.net/puzzles/puzz_358.htm">Puzzle 358. Ruth-Aaron pairs revisited</a>, The Prime Puzzles & Problems Connection.
+%e A193314 n  smallest k   k*(k+1) prime factorization
+%e A193314 1  1            2
+%e A193314 2  2            2*3
+%e A193314 3  5            2*3*5
+%e A193314 4  14           2*3*5*7
+%e A193314 5  384          2^7*3*5*7*11
+%e A193314 6  1715         2^2*3*7^3*11*13
+%e A193314 7  714          2*3*5*7*11*13*17
+%e A193314 8  633555       2^2*3^3*5*7*11^3*13*17*19^2
+%t A193314 f[n_] := Block[{k = 1, p = Fold[ Times, 1, Prime@ Range@ n], tst = Prime@ Range@ n},While[ First@ Transpose@ FactorInteger[ k*p]!=tst || IntegerQ@ Sqrt[ 4k*p+1], k++]; Floor@ Sqrt[k*p]]; Array[f, 8]
+%t A193314 (* the search for a(9), I also used *) lst = {}; p = Prime@ Range@ 9; Do[ q = {a, b, c, d, e, f, g, h, i}; If[ IntegerQ[ Sqrt[4Times @@ (p^q) + 1]], r = Floor@ Sqrt@ Times @@ (p^q); Print@ r; AppendTo[lst, r]], {i, 9}, {h, 9}, {g, 9}, {f, 10}, {e, 11}, {d, 14}, {c, 16}, {b, 24}, {a, 8}]
+%o A193314 (PARI) a(n)={
+%o A193314   my(v=[Mod(0,1)],u,P=1,t,g,k);
+%o A193314   forprime(p=2,prime(n),
+%o A193314     P*=p;
+%o A193314     u=List();
+%o A193314     for(i=1,#v,
+%o A193314       listput(u,chinese(v[i],Mod(-1,p)));
+%o A193314       listput(u,chinese(v[i],Mod(0,p)))
+%o A193314     );
+%o A193314     v=0;v=Vec(u)
+%o A193314   );
+%o A193314   v=vecsort(lift(v));
+%o A193314   while(1,
+%o A193314     for(i=1,#v,
+%o A193314       t=(v[i]+k)*(v[i]+k+1)/P;
+%o A193314       if(!t,next);
+%o A193314       while((g=gcd(P,t))>1, t/=g);
+%o A193314         if (t==1, return(v[i]+k))
+%o A193314     );
+%o A193314     k += P
+%o A193314   )
+%o A193314 }; \\ _Charles R Greathouse IV_, Aug 18 2011
+%o A193314 (Haskell)
+%o A193314 a193314 n = head [k | k <- [1..], let kk' = a002378 k,
+%o A193314                       mod kk' (a002110 n) == 0, a006530 kk' == a000040 n]
+%o A193314 -- _Reinhard Zumkeller_, Jun 14 2015
+%Y A193314 Cf. A006145, A039945.
+%Y A193314 Cf. A002110, A002378, A006530, A118478.
+%K A193314 nonn
+%O A193314 1,2
+%A A193314 _Robert G. Wilson v_, Aug 17 2011

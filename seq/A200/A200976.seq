@@ -1,0 +1,37 @@
+%I A200976 #51 Jan 19 2021 21:54:49
+%S A200976 1,0,1,1,2,1,4,1,5,3,8,1,14,1,16,9,22,1,38,1,45,17,57,1,94,7,102,30,
+%T A200976 138,1,218,2,231,58,298,21,451,3,491,103,644,4,919,4,1005,203,1257,7,
+%U A200976 1784,20,1993,301,2441,10,3365,70,3737,496,4569,17,6252,23,6848
+%N A200976 Number of partitions of n such that each pair of parts (if any) has a common factor.
+%C A200976 a(n) is different from A018783(n) for n = 0, 31, 37, 41, 43, 46, 47, 49, 51, 52, 53, 55, 56, 57, 58, 59, 61, 62, ... .
+%C A200976 Every pair of (possibly equal) parts has a common factor > 1. These partitions are said to be (pairwise) intersecting. - _Gus Wiseman_, Nov 04 2019
+%H A200976 Fausto A. C. Cariboni, <a href="/A200976/b200976.txt">Table of n, a(n) for n = 0..350</a> (terms 0..250 from Alois P. Heinz)
+%H A200976 L. Naughton, G. Pfeiffer, <a href="https://cs.uwaterloo.ca/journals/JIS/VOL16/Naughton/naughton2.html">Integer Sequences Realized by the Subgroup Pattern of the Symmetric Group</a>, J. Int. Seq. 16 (2013) #13.5.8
+%F A200976 a(n > 0) = A328673(n) - 1. - _Gus Wiseman_, Nov 04 2019
+%e A200976 a(0) = 1: [];
+%e A200976 a(4) = 2: [2,2], [4];
+%e A200976 a(9) = 3: [3,3,3], [3,6], [9];
+%e A200976 a(31) = 2: [6,10,15], [31];
+%e A200976 a(41) = 4: [6,10,10,15], [6,15,20], [6,14,21], [41].
+%p A200976 b:= proc(n, j, s) local ok, i;
+%p A200976       if n=0 then 1
+%p A200976     elif j<2 then 0
+%p A200976     else ok:= true;
+%p A200976          for i in s while ok do ok:= evalb(igcd(i, j)<>1) od;
+%p A200976          `if`(ok, add(b(n-j*k, j-1, [s[], j]), k=1..n/j), 0) +b(n, j-1, s)
+%p A200976       fi
+%p A200976     end:
+%p A200976 a:= n-> b(n, n, []):
+%p A200976 seq(a(n), n=0..62);
+%t A200976 b[n_, j_, s_] := Module[{ok, i, is}, Which[n == 0, 1, j < 2, 0, True, ok = True; For[is = 1, is <= Length[s] && ok, is++, i = s[[is]]; ok = GCD[i, j] != 1]; If[ok, Sum[b[n-j*k, j-1, Append[s, j]], {k, 1, n/j}], 0] + b[n, j-1, s]]]; a[n_] := b[n, n, {}]; Table[a[n], {n, 0, 62}] (* _Jean-François Alcover_, Dec 26 2013, translated from Maple *)
+%t A200976 Table[Length[Select[IntegerPartitions[n],And[And@@(GCD[##]>1&)@@@Select[Tuples[Union[#],2],LessEqual@@#&]]&]],{n,0,20}] (* _Gus Wiseman_, Nov 04 2019 *)
+%Y A200976 Cf. A018783.
+%Y A200976 The version with only distinct parts compared is A328673.
+%Y A200976 The relatively prime case is A202425.
+%Y A200976 The strict case is A318717.
+%Y A200976 The version for non-isomorphic multiset partitions is A319752.
+%Y A200976 The version for set-systems is A305843.
+%Y A200976 Cf. A000837, A305148, A305854, A306006, A316476, A328672, A328867, A328868.
+%K A200976 nonn
+%O A200976 0,5
+%A A200976 _Alois P. Heinz_, Nov 29 2011

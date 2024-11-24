@@ -1,0 +1,47 @@
+%I A200544 #56 Apr 30 2023 15:37:07
+%S A200544 1,1,3,6,14,28,61,122,253,505,1017,2008,3976,7769,15169,29379,56751,
+%T A200544 108993,208725,397913,756385,1432578,2705744,5094749,9568504,17922756,
+%U A200544 33492061,62438472,116151352,215612548,399451325,738612472,1363261171,2511748010,4620024202
+%N A200544 Number of distinct bags of distinct sequences of 1s and 2s such that the sum of all terms is n.
+%C A200544 This is the number of distinct ways to build minimal Jenga towers out of n blocks. The number of distinct ways to build a single minimal Jenga tower out of n blocks is the Fibonacci number F(n+1) (A000045(n+1)).
+%C A200544 To calculate this, first create all partitions of n.
+%C A200544 An example partition, for n=4, is
+%C A200544 1 1 1 1
+%C A200544 1 1 2
+%C A200544 1 3
+%C A200544 2 2
+%C A200544 4
+%C A200544 Then each set of towers of the same size gets a configuration. For 2 2 2, for instance, there are two possibilities for each tower (a single level with two blocks or two levels with one block each) but the total possibilities is not 2*2*2=8, since the configuration "1/1,2,2" is the same as "2,1/1,2". Instead we want to choose three towers with repetition from two possibilities which is 3+2-1 choose 3, aka 4C3 = 4.
+%C A200544 Multiply all the sets of towers of the same size and sum over partitions for the result.
+%C A200544 For n=4, then, 1 1 2 becomes "1 with multiplicity 2" and "2 with multiplicity 1".
+%C A200544 There is f(1+1)=1 way to build a tower of size 1, and f(1+1)+2-1 choose 2 = 2C2 = 1 way to build 2 towers of size 1. f(2+1)=2 ways to build a tower of size 2. 1 1 2 has 1*2=2 ways to be built. Sum over each of the 5 partitions of n=4.
+%C A200544 Comment from _R. J. Mathar_, Aug 10 2020: (Start)
+%C A200544 This is apparently the limit of the row-reversed rows of the Multiset transform T(n,k) of the Fibonacci sequence in A337009, a(k) = lim(n->oo) T(n,n-k). - _R. J. Mathar_, Aug 10 2020
+%H A200544 Alois P. Heinz, <a href="/A200544/b200544.txt">Table of n, a(n) for n = 0..1000</a>
+%H A200544 W. S. Gray, K. Ebrahimi-Fard, <a href="http://arxiv.org/abs/1411.0222">Affine SISO Feedback Transformation Group and Its Faa di Bruno Hopf Algebra</a>, arXiv:1411.0222 [math.OC], 2014.
+%H A200544 Vaclav Kotesovec, <a href="http://arxiv.org/abs/1508.01796">Asymptotics of the Euler transform of Fibonacci numbers</a>, arXiv:1508.01796 [math.CO], Aug 07 2015
+%H A200544 Vaclav Kotesovec, <a href="/A034691/a034691_1.pdf">Asymptotics of sequence A034691</a>
+%H A200544 Guy P. Srinivasan, <a href="/A200544/a200544.cs.txt">C# code to generate sequence terms</a>
+%H A200544 Wikipedia, <a href="http://en.wikipedia.org/wiki/Jenga">Jenga</a>
+%F A200544 sum{m1*a1+m2*a2+...+mk*ak}(prod{k}(binomial(A000045[ak + 1]+mk-1,mk))).
+%F A200544 G.f.: Product_{s>=1}(sum{d>=0}(binomial(F(s+1)+d-1,d)*x^(d*s))). - _Guy P. Srinivasan_, Oct 21 2013
+%F A200544 Euler Transform of A000045 starting at index 2, i.e. EULER(1, 2, 3, 5, 8, 13, ...). - _Guy P. Srinivasan_, Nov 05 2013
+%F A200544 a(n) ~ phi^(n+1/4) / (2 * sqrt(Pi) * 5^(1/8) * n^(3/4)) * exp(phi/10 - 3/5 + 2*5^(-1/4)*sqrt(phi*n) + s), where s = Sum_{k>=2} (1+phi^k) / ((phi^(2*k) - phi^k - 1)*k) = 0.7902214013751085262994702391769374769675268259229550490716908... and phi = A001622 = (1+sqrt(5))/2 is the golden ratio. - _Vaclav Kotesovec_, Aug 06 2015
+%F A200544 a(n) = A337009(2*n,n). - _Alois P. Heinz_, Apr 30 2023
+%e A200544 For n = 4, a(4)=14 and the bags are: 1/1/1/1; 1/1/1,1; 1/1/2; 1/1,1,1; 1/1,2; 1/2,1; 1,1/1,1; 1,1/2; 2/1,1; 2/2; 1,1,1,1; 1,1,2; 1,2,1; 2,1,1.
+%p A200544 with(numtheory):with(combinat):
+%p A200544 a:= proc(n) option remember; `if`(n=0, 1, add(add(d*
+%p A200544       fibonacci(d+1), d=divisors(j))*a(n-j), j=1..n)/n)
+%p A200544     end:
+%p A200544 seq(a(n), n=0..40);  # _Alois P. Heinz_, Nov 05 2013
+%t A200544 CoefficientList[Series[Product[1/(1-x^k)^Fibonacci[k+1], {k, 1, 40}], {x, 0, 40}], x] (* _Vaclav Kotesovec_, Aug 05 2015 *)
+%o A200544 (SageMath) # uses[EulerTransform from A166861]
+%o A200544 a = BinaryRecurrenceSequence(1, 1, 1)
+%o A200544 b = EulerTransform(a)
+%o A200544 print([b(n) for n in range(35)]) # _Peter Luschny_, Nov 11 2020
+%Y A200544 Cf. A000045, A034691, A166861, A260787, A337009.
+%K A200544 nonn
+%O A200544 0,3
+%A A200544 _Guy P. Srinivasan_, Nov 18 2011
+%E A200544 Corrected terms from n=8 and onwards by _Guy P. Srinivasan_, Oct 18 2013
+%E A200544 C# program corrected and made much more efficient by _Guy P. Srinivasan_, Oct 18 2013

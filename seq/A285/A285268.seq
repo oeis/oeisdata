@@ -1,0 +1,48 @@
+%I A285268 #61 Jun 27 2022 08:13:32
+%S A285268 1,2,4,3,9,15,4,16,40,64,5,25,85,205,325,6,36,156,516,1236,1956,7,49,
+%T A285268 259,1099,3619,8659,13699,8,64,400,2080,8800,28960,69280,109600,9,81,
+%U A285268 585,3609,18729,79209,260649,623529,986409,10,100,820,5860,36100,187300,792100,2606500,6235300,9864100
+%N A285268 Triangle read by rows: T(m,n) = Sum_{i=1..n} P(m,i) where P(m,n) = m!/(m-n)! is the number of permutations of m items taken n at a time, for 1 <= n <= m.
+%C A285268 T(m, n) is the total number of ordered sets of size 1 to n that can be created from m distinct items. For example, for 4 items taken 1 to 3 at a time, there are P(4, 1) + P(4, 2) + P(4, 3) = 4 + 12 + 24 = 40 total sets: 1, 12, 123, 124, 13, 132, 134, 14, 142, 143, 2, 21, 213, 214, 23, 231, 234, 24, 241, 243, 3, 31, 312, 314, 32, 321, 324, 34, 341, 342, 4, 41, 412, 413, 42, 421, 423, 43, 431, 432.
+%C A285268 T(m, n) is the total number of tests in a software program that generates all P(m, n) possible solutions to a problem, allowing early-termination testing on each partial permutation, and not doing any such early termination. For example, from a deck of 52 cards, evaluate all possible 5-card deals as each card is dealt. T(52, 5) = 318507904 total evaluations.
+%C A285268 T(m, n) counts the numbers with <= n distinct nonzero digits in base m+1. - _M. F. Hasler_, Oct 10 2019
+%H A285268 Rick Nungester, <a href="/A285268/b285268.txt">Table of n, a(n) for n = 1..20100</a>
+%F A285268 T(m, n) = Sum_{k=1..n} m!/(m-k)! = m*(1 + (m-1)*(1 + (m-2)*(1 + ... + m-n+1)...)), cf. PARI code. - _M. F. Hasler_, Oct 10 2019
+%F A285268 T(n, k) = exp(1)*(Gamma(n+1, 1) - Gamma(n-k, 1)*(n-k)*n!/(n-k)!) - 1. - _Peter Luschny_, Oct 10 2019
+%F A285268 Sum-free and Gamma-free formula: T(m, n) = b(m) - m!*b(m-n)/(m-n)! where b(0)=0, b(j)=floor(j!*e-1) for j>0. - _Manfred Boergens_, Jun 22 2022
+%e A285268 Triangle begins:
+%e A285268   1;
+%e A285268   2,  4;
+%e A285268   3,  9,  15;
+%e A285268   4, 16,  40,   64;
+%e A285268   5, 25,  85,  205,   325;
+%e A285268   6, 36, 156,  516,  1236,  1956;
+%e A285268   7, 49, 259, 1099,  3619,  8659,  13699;
+%e A285268   8, 64, 400, 2080,  8800, 28960,  69280, 109600;
+%e A285268   9, 81, 585, 3609, 18729, 79209, 260649, 623529, 986409;
+%e A285268   ...
+%p A285268 SumPermuteTriangle := proc(M)
+%p A285268   local m;
+%p A285268   for m from 1 to M do print(seq(add(m!/(m-k)!, k=1..n), n=1..m)) od;
+%p A285268 end:
+%p A285268 SumPermuteTriangle(10);
+%p A285268 # second Maple program:
+%p A285268 T:= proc(n, k) option remember;
+%p A285268      `if`(k<1, 0, T(n-1, k-1)*n+n)
+%p A285268     end:
+%p A285268 seq(seq(T(n, k), k=1..n), n=1..10);  # _Alois P. Heinz_, Jun 26 2022
+%t A285268 Table[Sum[m!/(m - i)!, {i, n}], {m, 9}, {n, m}] // Flatten (* _Michael De Vlieger_, Apr 22 2017 *)
+%t A285268 (* Sum-free code *)
+%t A285268 b[j_] = If[j==0, 0, Floor[j! E - 1]]; T[m_,n_] = b[m] - m! b[m-n]/(m-n)!; Table[T[m, n],{m, 24},{n, m}]//Flatten
+%t A285268 (* _Manfred Boergens_, Jun 22 2022 *)
+%o A285268 (PARI) A285268(m,n,s=m-n+1)={for(k=m-n+2,m,s=(s+1)*k);s} \\ Much faster than sum(k=1,n,m!\(m-k)!), e.g., factor 6 for m=1..99, factor 57 for m=1..199.
+%o A285268 apply( A285268_row(m)=vector(m,n,A285268(m,n)), [1..9]) \\ _M. F. Hasler_, Oct 10 2019
+%o A285268 (PARI) T(n, k) = {exp(1)*(incgam(n+1, 1) - incgam(n-k, 1)*(n-k)*n!/(n-k)!) - 1;}
+%o A285268   apply(Trow(n) = vector(n, k, round(T(n, k))), [1..10]) \\ Adjust the realprecision if needed. _Peter Luschny_, Oct 10 2019
+%Y A285268 Mirror of triangle A121662.
+%Y A285268 Row sums give A030297.
+%Y A285268 Diagonals (1..4): A007526 (less the initial 0), A038156 (less the initial 0, 0), A224869 (less the initial -1, 0), A079750 (less the initial 0).
+%Y A285268 Columns (1..3): A000027, A000290 (less the initial 0, 1), A053698 (less the initial 1, 4).
+%K A285268 nonn,tabl
+%O A285268 1,2
+%A A285268 _Rick Nungester_, Apr 15 2017

@@ -1,0 +1,56 @@
+%I A261021 #52 Nov 15 2024 06:57:54
+%S A261021 0,101,102,110,120,201,202,204,210,220,240,303,306,330,360,402,404,
+%T A261021 408,420,440,480,505,550,603,606,630,660,707,770,804,808,840,880,909,
+%U A261021 990,1001,1002,1010,1020,1100,1200,2001,2002,2004,2010,2020,2040,2100,2200,2400
+%N A261021 a(1)=0; for n > 1, a(n) is the number k such that the set of the decimal digits is an additive group Z/mZ where m is the sum of the decimal digits.
+%C A261021 By convention, a(1)=0 because the trivial additive group is usually denoted by 0 where 0 is the identity element.
+%C A261021 Let d(1)d(2)..d(q) be the q decimal digits of a number k. The principle of the algorithm is to compute all the sums (d(i)+ d(j))/mZ for 1 <= i,j <= q, and also the additive inverse of each element such that if x is in the group, then there exists x' in the group where x+x' = 0.
+%C A261021 The sequence is infinite because the numbers 101, 1001, 10001, ... are in the sequence and generate the group {0,1}.
+%C A261021 Only terms of A009996 containing at least one 0 have to be checked. Terms that match the criterion and numbers containing at least one 0 formed by permutations of their digits form all terms of this sequence due to commutativity of addition. - _David A. Corneth_, Aug 13 2015
+%H A261021 David A. Corneth, <a href="/A261021/b261021.txt">Table of n, a(n) for n = 1..10000</a> (first 281 terms from Michel Lagneau)
+%H A261021 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/FiniteGroup.html">Finite Group</a>
+%H A261021 Wikipedia, <a href="http://en.wikipedia.org/wiki/Finite_group">Finite group</a>
+%F A261021 For d >= 3, there are (d - 1) * 17 terms having d digits. - _David A. Corneth_, Aug 13 2015
+%e A261021 408 is in the sequence because 4+0+8 = 12 and the elements {0, 4, 8} is an additive group, subgroup of (Z/12Z,+) with 6 elements {0, 2, 4, 6, 8, 10}. Each element has an inverse: 2+10 == 0 (mod 12), 4+8 == 0 (mod 12), 6+6 == 0 (mod 12), 8+4 == 0 (mod 12) and 10+2 == 0 (mod 12).
+%e A261021 The subsequence having the same property with Z/12Z is {408, 480, 606, 660, 804, 840, 4008, 4080, 4800, 6006, 6060, 6600, 8004, 8040, 8400, 40008, 40080, 40800, 48000, 60006, 60060, 60600, 66000, 80004, 80040, 80400, 84000, ...}.
+%p A261021 nn:=3000:
+%p A261021 for n from 1 to nn do:
+%p A261021 x:=convert(n,base,10):nn0:=length(n):
+%p A261021 lst1:={op(x),x[nn0]}:n0:=nops(lst1):
+%p A261021 s:=sum('x[i]', 'i'=1..nn0):lst:={}:
+%p A261021    if  lst1[1]=0 then
+%p A261021     for j from 1 to n0 do:
+%p A261021      for l from j to n0 do:
+%p A261021       p:=irem(lst1[j]+lst1[l],s):lst:=lst union {p}:
+%p A261021      od:
+%p A261021     od:
+%p A261021     if lst=lst1
+%p A261021      then
+%p A261021        n3:=nops(lst1):lst2:={}:
+%p A261021         for c from 1 to n3 do:
+%p A261021           for d from 1 to n3 do:
+%p A261021            if irem(lst1[c]+lst1[d], s)=0
+%p A261021             then
+%p A261021             lst2:=lst2 union {lst1[c]}:
+%p A261021             else
+%p A261021            fi:
+%p A261021           od:
+%p A261021          od:
+%p A261021            if lst2=lst
+%p A261021            then
+%p A261021            printf(`%d, `, n):
+%p A261021            else
+%p A261021            fi:
+%p A261021           fi:
+%p A261021          fi:
+%p A261021      od:
+%o A261021 (PARI) is(n) = {my(d = digits(n),s = Set(digits(n))); if(n==0,return(1));
+%o A261021 if(#s==2 || #s==3,return(s[1]==0 && (s[#s] / s[2] == 2^(#s-2)) && hammingweight(d)==2),return(0))}
+%o A261021 \\a(n) works for n > 1.
+%o A261021 a(n) = {my(qd = ((-1 + sqrt(1 + 8*(n + 15+1/2) / 17)) / 2)\1 + 2, v = vector(qd),i=1,h=2); n -= (binomial(qd-1,2)*17 -16); while(n-(qd-1)*h>0,
+%o A261021 n-=(qd-1)*h;i++; h=1 + (i%2 == 0) + (i < 5)); n--; v[1]=i;
+%o A261021 v[qd-n\h] = i*2^(n%h-(i%2==0)); sum(i=1,#v,10^(#v-i)*v[i])} \\ _David A. Corneth_, Aug 13 2015
+%Y A261021 Cf. A009996, A261020.
+%K A261021 nonn,base,changed
+%O A261021 1,2
+%A A261021 _Michel Lagneau_, Aug 07 2015

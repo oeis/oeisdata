@@ -1,0 +1,50 @@
+%I A180607 #26 Jan 12 2019 20:23:04
+%S A180607 1,1,8,182,13198,3031856,2198620478,5017961787334,35964266585527318
+%N A180607 Number of commutation classes of reduced words for the longest element of a Weyl group of type D_n.
+%C A180607 An implementation of the procedures below in Java with the additional feature of storing old values of classesRecurse(perm,-1,1) computed a(8)=5017961787334 in 63 seconds. The program runs in O((n^2)*(4^n)*n!).
+%H A180607 Matthew J. Samuel, <a href="http://arxiv.org/abs/1101.4655">Word posets, complexity, and Coxeter groups</a>, arXiv:1101.4655v1 [math.CO]
+%p A180607 # classes: Wrapper for computing number of commutation classes;
+%p A180607 #   pass a permutation of type D as a list
+%p A180607 # Returns number of commutation classes
+%p A180607 # Longest element is of the form [-1, -2, ..., -n] if n is even,
+%p A180607 #   or [1, -2, -3, ..., -n] if n is odd
+%p A180607 classes:=proc(perm) option remember:
+%p A180607     classesRecurse(Array(perm), -1, 1):
+%p A180607 end:
+%p A180607 # classesRecurse: Recursive procedure for computing number of commutation classes
+%p A180607 classesRecurse:=proc(perm, spot, negs) local swaps, i, sums, c, doneany:
+%p A180607     sums:=0:
+%p A180607     doneany:=0:
+%p A180607     for i from spot to ArrayNumElems(perm)-2 do
+%p A180607         if i=-1 and -perm[2]>perm[1] then
+%p A180607             swaps:=perm[1]:
+%p A180607             perm[1]:=-perm[2]:
+%p A180607             perm[2]:=-swaps:
+%p A180607             c:=classes(convert(perm, `list`)):
+%p A180607             sums:=sums+negs*c+classesRecurse(perm, i+1, -negs):
+%p A180607             swaps:=perm[1]:
+%p A180607             perm[1]:=-perm[2]:
+%p A180607             perm[2]:=-swaps:
+%p A180607             doneany:=1:
+%p A180607         elif i>-1 and perm[i+1]>perm[i+2] then
+%p A180607             if not (spot=0 and i=1) then
+%p A180607                 swaps:=perm[i+1]:
+%p A180607                 perm[i+1]:=perm[i+2]:
+%p A180607                 perm[i+2]:=swaps:
+%p A180607                 c:=classes(convert(perm, `list`)):
+%p A180607                 sums:=sums+negs*c+classesRecurse(perm, i+2, -negs):
+%p A180607                 swaps:=perm[i+1]:
+%p A180607                 perm[i+1]:=perm[i+2]:
+%p A180607                 perm[i+2]:=swaps:
+%p A180607                 doneany:=1:
+%p A180607             end:
+%p A180607         end:
+%p A180607     end:
+%p A180607     if spot=-1 and doneany=0 then RETURN(1):
+%p A180607     else RETURN(sums):
+%p A180607     end:
+%p A180607 end: # _Matthew J. Samuel_, Jan 24 2011, Jan 26 2011
+%K A180607 nonn,hard,more
+%O A180607 1,3
+%A A180607 _Matthew J. Samuel_, Jan 21 2011
+%E A180607 a(9)=35964266585527318 computed with a Java program by _Matthew J. Samuel_, Jan 30 2011

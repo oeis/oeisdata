@@ -1,0 +1,50 @@
+%I A339024 #18 Dec 28 2020 17:51:22
+%S A339024 1,2,3,4,5,8,6,9,10,11,7,12,16,13,14,15,17,18,19,24,20,21,25,26,27,32,
+%T A339024 22,28,29,33,23,34,35,30,36,37,31,40,38,48,39,64,41,49,50,51,65,42,52,
+%U A339024 53,66,43,67,54,68,44,55,45,69,56,57,70,58,71,72,46,73,59
+%N A339024 a(1) = 1, a(n) is the least m not already in the sequence whose binary expansion begins with the binary expansion of the binary weight of a(n-1).
+%C A339024 We define binary weight wt(n) = A000120(n) as the number of 1s in n_2, the number n expressed in binary. Let w = wt(a(n-1)) the binary weight of the previous term, where w_2 is w expressed in binary, and let interval I(j) = 2^j <= n <= (2^(j+1)-1).'
+%C A339024 Likely a permutation of the natural numbers.
+%C A339024 The plot (n, a(n)) is organized into streaky clouds that pertains to a "family" M(i) <= m < M(i+1) whose binary expansion begins with an odd "prefix" m/2^v, where v is the 2-adic valuation of m. There are thus 2^v numbers in this range.
+%C A339024 The numbers in this range accommodate the binary weights wt(a(n-1)) = w with 1 <= w <= ceiling(log_2 a(n-1)) such that w_2 appears in part or all of the binary expansion of the prefix m/2^v, and perhaps an additional bit in m after the prefix.
+%C A339024 Small values of w, for instance w = 1, may appear in any family, but large w require the entire prefix and potentially more (if even).
+%C A339024 The w that cannot be found in a particular family are found in a different family that has M(i+1) as its least member.
+%C A339024 The families M(i) belong in turn to classes according to odd prefixes. Thus, for example, we may find w = 1, 2, 4, and 9 in class 9, since "1", "10", "100", and "1001" can be found in numbers m that begin, "1001...".
+%C A339024 For w in interval I(j), we have values 1 <= k <= j - 1 distributed binomially.
+%C A339024 Permutation of the natural numbers. We can always find w in a number m in family M(i) that pertains to a class C of numbers that in binary start with the binary expansion of an odd number c.
+%C A339024 Numbers m that begin with numbers that are formed of left-trimmed bits of c exhaust the numbers in M(i) before moving to M(i+1) in the same class C.
+%C A339024 When we have recordsetting odd w, a new class C opens up based on the binary expansion of a larger odd number c.
+%C A339024 A permutation of the integers since n appears at or before index 2^n - 1, the first number with binary weight n. - _Michael S. Branicky_, Dec 16 2020
+%H A339024 Michael De Vlieger, <a href="/A339024/b339024.txt">Table of n, a(n) for n = 1..16384</a>
+%H A339024 Michael De Vlieger, <a href="/A339024/a339024.png">Plot (n, a(n)) for 1 <= n <= 2^10</a> color-coded to show wt(a(n-1)), with the first term in the family indicated.
+%H A339024 Michael De Vlieger, <a href="/A339024/a339024_1.png">Plot (n, a(n)/A007814(a(n))</a> for 1 <= n <= 2^11, color-coded to show wt(a(n-1)).
+%H A339024 Wikipedia, <a href="https://en.wikipedia.org/wiki/Hamming_weight">Hamming weight</a>
+%H A339024 Wolfram Research, <a href="http://functions.wolfram.com/NumberTheoryFunctions/DigitCount/31/01/ShowAll.html">Numbers in Pascal's triangle</a>
+%H A339024 <a href="/index/Bi#binary">Index entries for sequences related to binary expansion of n</a>
+%e A339024 Let wt(n) = A000120(n).
+%e A339024 a(2) = 2 since wt(a(1)) = wt(1) = 1, and we find "1" at the beginning of the binary expansion of the yet unused 2 = "10"_2.
+%e A339024 a(3) = 3 since wt(2) = 1, we find "1" as first bit of yet unused 3 = "11"_2.
+%e A339024 a(4) = 4 since wt(3) = 2 = "10"_2, we find "10" as first bits of yet unused 4 = "100"_2.
+%e A339024 a(5) = 5 since wt(4) = 1, and yet unused 5 = "101"_2 starts with 1.
+%e A339024 a(6) = 8 since wt(5) = 2 = "10"_2; we see that the yet unused 6 and 7 start with "11"_2, and it isn't until 8 that we have a number that when expressed in binary starts with "10"_2.
+%e A339024 a(7) = 6 since wt(8) = 1, we can now apply the yet unused 6 = "110"_2 because it starts with 1, etc.
+%t A339024 Nest[Append[#, Block[{k = 1, r = IntegerDigits[DigitCount[#[[-1]], 2, 1], 2]}, While[Nand[FreeQ[#, k], Take[IntegerDigits[k, 2], Length@ r] == r], k++]; k]] & @@ {#, Length@ #} &, {1}, 2^7]
+%o A339024 (Python)
+%o A339024 def aupto(n):
+%o A339024   alst, used = [1], {1}
+%o A339024   for i in range(2, n+1):
+%o A339024     binprev = bin(alst[-1])[2:]
+%o A339024     binwt = binprev.count("1")
+%o A339024     lsbs, extra = 0, 0
+%o A339024     while binwt + extra in used:
+%o A339024       lsbs += 1
+%o A339024       binwt *= 2
+%o A339024       for extra in range(2**lsbs):
+%o A339024         if binwt + extra not in used: break
+%o A339024     alst.append(binwt+extra); used.add(binwt+extra)
+%o A339024   return alst    # use alst[n-1] for a(n)
+%o A339024 print(aupto(68)) # _Michael S. Branicky_, Dec 16 2020
+%Y A339024 Cf. A000120, A338209, A339607.
+%K A339024 nonn,base,easy
+%O A339024 1,2
+%A A339024 _Michael De Vlieger_, Dec 16 2020

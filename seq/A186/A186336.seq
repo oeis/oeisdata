@@ -1,0 +1,58 @@
+%I A186336 #18 Mar 26 2019 17:19:52
+%S A186336 0,0,0,0,1,0,1,0,0,1,2,0,0,0,1,2,0,0,0,2,0,1,1,0,1,2,1,0,0,2,0,0,0,2,
+%T A186336 1,1,1,0,1,3,0,0,0,2,0,0,1,1,1,1,1,2,0,0,1,1,0,1,3,1,1,0,1,0,0,1,0,1,
+%U A186336 1,3,0,0,1,2,1,1,0,2,0,1,0,0,2,1,1,2,1,1,0,0,0,2,0,2,2,2,0,2,0,0,1,1,1,0,0,0,3,2,0,1,0,1,2,0,0,2,1,0,2,1,1
+%N A186336 Number of ways of representing n as the sum of one or more consecutive semiprimes.
+%H A186336 Alois P. Heinz, <a href="/A186336/b186336.txt">Table of n, a(n) for n = 0..10000</a>
+%e A186336 a(4)  = 1:  4 = A001358(1) is the first semiprime.
+%e A186336 a(10) = 2: 10 = A001358(1)+A001358(2) = 4+6 = A001358(4) = 10.
+%e A186336 a(39) = 3: 39 = 6+9+10+14 = 10+14+15 = 39.
+%p A186336 b:= proc(n) option remember; local k;
+%p A186336       if n=0 then 0
+%p A186336     else for k from b(n-1)+1
+%p A186336            while isprime(k) or 2<>add(i[2], i=ifactors(k)[2])
+%p A186336          do od; k
+%p A186336       fi
+%p A186336     end:
+%p A186336 pis:= proc(n) option remember; local k;
+%p A186336         if n<4 then 0
+%p A186336       elif n=4 then 1
+%p A186336       else k:= pis(n-1);
+%p A186336            k +`if`(b(k+1)=n, 1 ,0)
+%p A186336         fi
+%p A186336       end:
+%p A186336 ssp:= proc(i,j) option remember;
+%p A186336         b(j) + `if`(i=j, 0, ssp(i, j-1))
+%p A186336       end:
+%p A186336 a:= proc(n) option remember; local i, j, cnt, s;
+%p A186336       cnt:= 0;
+%p A186336       j:= pis(n);
+%p A186336       i:= j;
+%p A186336       while i>0 do
+%p A186336         s:= ssp(i,j);
+%p A186336         if s<n then i:= i-1
+%p A186336       elif s>n then j:= j-1
+%p A186336       else cnt:= cnt+1;
+%p A186336            i, j:= i-1, j-1
+%p A186336         fi
+%p A186336       od; cnt
+%p A186336     end:
+%p A186336 seq(a(n), n=0..200);
+%t A186336 nmax = 120;
+%t A186336 sp = Select[Range[nmax], PrimeOmega[#] == 2&];
+%t A186336 lsp = Length[sp]; Clear[a]; a[_] = 0;
+%t A186336 Do[n = Total[sp[[i ;; j]]]; a[n] = a[n]+1, {i, 1, lsp}, {j, i, lsp}];
+%t A186336 Table[a[n], {n, 0, nmax}] (* _Jean-François Alcover_, Mar 13 2019 *)
+%o A186336 (Haskell)
+%o A186336 a186336 n = f $ takeWhile (<= n) a001358_list where
+%o A186336    f []       = 0
+%o A186336    f (sp:sps) = g sp sps + f sps
+%o A186336    g spSum []                    = fromEnum (spSum == n)
+%o A186336    g spSum (sp:sps) | spSum < n  = g (sp + spSum) sps
+%o A186336                     | spSum == n = 1
+%o A186336                     | otherwise  = 0
+%o A186336 -- _Reinhard Zumkeller_, Feb 28 2011
+%Y A186336 Cf. A001358, A112020, A186337.
+%K A186336 nonn
+%O A186336 0,11
+%A A186336 _Alois P. Heinz_, Feb 18 2011

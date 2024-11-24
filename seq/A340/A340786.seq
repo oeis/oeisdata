@@ -1,0 +1,60 @@
+%I A340786 #15 Mar 16 2023 17:28:50
+%S A340786 1,1,1,3,1,2,1,3,2,2,1,4,1,2,2,6,1,3,1,4,2,2,1,6,2,2,2,4,1,4,1,7,2,2,
+%T A340786 2,7,1,2,2,6,1,4,1,4,3,2,1,10,2,3,2,4,1,4,2,6,2,2,1,8,1,2,3,12,2,4,1,
+%U A340786 4,2,4,1,10,1,2,3,4,2,4,1,10,3,2,1,8,2,2
+%N A340786 Number of factorizations of 4n into an even number of even factors > 1.
+%H A340786 Robert Israel, <a href="/A340786/b340786.txt">Table of n, a(n) for n = 1..10000</a>
+%e A340786 The a(n) factorizations for n = 6, 12, 24, 36, 60, 80, 500:
+%e A340786   4*6   6*8      2*48      2*72      4*60      4*80          40*50
+%e A340786   2*12  2*24     4*24      4*36      6*40      8*40          4*500
+%e A340786         4*12     6*16      6*24      8*30      10*32         8*250
+%e A340786         2*2*2*6  8*12      8*18      10*24     16*20         10*200
+%e A340786                  2*2*4*6   12*12     12*20     2*160         20*100
+%e A340786                  2*2*2*12  2*2*6*6   2*120     2*2*2*40      2*1000
+%e A340786                            2*2*2*18  2*2*2*30  2*2*4*20      2*2*10*50
+%e A340786                                      2*2*6*10  2*2*8*10      2*2*2*250
+%e A340786                                                2*4*4*10      2*10*10*10
+%e A340786                                                2*2*2*2*2*10
+%p A340786 g:= proc(n, m, p)
+%p A340786  option remember;
+%p A340786  local F,r,x,i;
+%p A340786  # number of factorizations of n into even factors > m with number of factors == p (mod 2)
+%p A340786  if n = 1 then if p = 0 then return 1 else return 0 fi fi;
+%p A340786  if m > n  or n::odd then return 0 fi;
+%p A340786  F:= sort(convert(select(t -> t > m and t::even, numtheory:-divisors(n)),list));
+%p A340786  r:= 0;
+%p A340786  for x in F do
+%p A340786    for i from 1 while n mod x^i = 0 do
+%p A340786      r:= r + procname(n/x^i, x, (p+i) mod 2)
+%p A340786  od od;
+%p A340786  r
+%p A340786 end proc:
+%p A340786 f:= n -> g(4*n, 1, 0):
+%p A340786 map(f, [$1..100]); # _Robert Israel_, Mar 16 2023
+%t A340786 facs[n_]:=If[n<=1,{{}},Join@@Table[Map[Prepend[#,d]&,Select[facs[n/d],Min@@#>=d&]],{d,Rest[Divisors[n]]}]];
+%t A340786 Table[Length[Select[facs[4n],EvenQ[Length[#]]&&Select[#,OddQ]=={}&]],{n,100}]
+%o A340786 (PARI)
+%o A340786 A340786aux(n, m=n, p=0) = if(1==n, (0==p), my(s=0); fordiv(n, d, if((d>1)&&(d<=m)&&!(d%2), s += A340786aux(n/d, d, 1-p))); (s));
+%o A340786 A340786(n) = A340786aux(4*n); \\ _Antti Karttunen_, Apr 14 2022
+%Y A340786 Note: A-numbers of Heinz-number sequences are in parentheses below.
+%Y A340786 Positions of ones are 1 and A000040, or A008578.
+%Y A340786 A version for partitions is A027187 (A028260).
+%Y A340786 Allowing odd length gives A108501 (bisection of A340785).
+%Y A340786 Allowing odd factors gives A339846.
+%Y A340786 An odd version is A340102.
+%Y A340786 - Factorizations -
+%Y A340786 A001055 counts factorizations, with strict case A045778.
+%Y A340786 A316439 counts factorizations by product and length.
+%Y A340786 A340101 counts factorizations into odd factors.
+%Y A340786 A340653 counts balanced factorizations.
+%Y A340786 A340831/A340832 count factorizations with odd maximum/minimum.
+%Y A340786 - Even -
+%Y A340786 A027187 counts partitions of even maximum (A244990).
+%Y A340786 A058696 counts partitions of even numbers (A300061).
+%Y A340786 A067661 counts strict partitions of even length (A030229).
+%Y A340786 A236913 counts partitions of even length and sum (A340784).
+%Y A340786 A340601 counts partitions of even rank (A340602).
+%Y A340786 Cf. A001147, A001222, A001749, A035363, A050320, A066207, A066208, A160786, A174725, A320655, A320656, A339890, A340851.
+%K A340786 nonn
+%O A340786 1,4
+%A A340786 _Gus Wiseman_, Jan 31 2021

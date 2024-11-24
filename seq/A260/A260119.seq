@@ -1,0 +1,52 @@
+%I A260119 #55 Mar 07 2020 14:55:56
+%S A260119 1,3,3,15,3,21,3,45,3,99,5,1365,3,3,3,765,3,399,3,1815,3,69,5,1365,3,
+%T A260119 3,3,435,3,35805,3,765,5,3,7,2878785,3,3,3,20295,3,903,5,1035,3,141,3,
+%U A260119 116025,3,99,3,795,3,399,5,435,3,177,3,85180095,3,3,3,765,3,32361,3,45,5,11715,3
+%N A260119 a(n) is the least positive integer k such that 2^n-1 and k^n-1 are relatively prime.
+%C A260119 Note that (2^n-1)^n-1 is always relatively prime to 2^n-1.
+%C A260119 a(72) > 10^8.
+%C A260119 According to the conjecture given in A086892, a(n) = 3 infinitely often.
+%C A260119 From _David A. Corneth_, Aug 17 2015: (Start)
+%C A260119 Conjecture 1: a(n) is never divisible by 2.
+%C A260119 Conjecture 2: a(n) is of the form q * m where q is the product of all odd primes that are one more than a divisor of n.
+%C A260119 (End)
+%C A260119 From _Robert Israel_, Sep 02 2015: (Start)
+%C A260119 Both conjectures are true.
+%C A260119 Since (2k)^n - 1 = (k^n)*(2^n - 1) + (k^n - 1), GCD((2k)^n - 1, 2^n-1) = GCD(k^n-1, 2^n-1).  Thus a(n) is always odd.
+%C A260119 If p is an odd prime such that p-1 divides n, then k^n - 1 is divisible by p for all k coprime to p (and in particular k=2).  Thus a(n) must be divisible by p, and thus by the product of all such p.
+%C A260119 (End)
+%H A260119 Robert Israel, <a href="/A260119/b260119.txt">Table of n, a(n) for n = 1..10000</a> [Terms 72 through 5000 were computed by _David A. Corneth_, Aug 17 2015]
+%e A260119 Since 2^5-1 = 31 and 3^5-1 = 242 are relatively prime, a(5) = 3.
+%e A260119 The divisors of 72 are 1, 2, 3, 4, 6, 8, 9, 12, 18, 24, 36, 72;
+%e A260119 Adding one to each divisor gives 3, 4, 5, 7, 9, 10, 13, 19, 25, 37, 73;
+%e A260119 The odd primes in this list are 3, 5, 7, 13, 19, 37, 73;
+%e A260119 The product of these primes is 3 * 5 * 7 * 13 * 19 * 37 * 73 = 70050435;
+%e A260119 Thus a(72) is of the form 70050435 * m.
+%p A260119 f:= proc(n) local P, Q, M, k, kn;
+%p A260119 P:= select(isprime, map(t -> t+1, numtheory:-divisors(n)) minus {2});
+%p A260119 M:= convert(P,`*`);
+%p A260119 Q:= 2^n - 1;
+%p A260119 for k from M by 2*M do
+%p A260119   kn:= k &^ n - 1 mod Q;
+%p A260119   if igcd(kn, Q) = 1 then
+%p A260119     return k
+%p A260119   fi
+%p A260119 od
+%p A260119 end proc:
+%p A260119 map(f, [$1..100]); # _Robert Israel_, Sep 02 2015
+%t A260119 Table[k = 1; While[! CoprimeQ[2^n - 1, k^n - 1], k++]; k, {n, 59}] (* _Michael De Vlieger_, Sep 01 2015 *)
+%o A260119 (Sage)
+%o A260119 def min_k(n):
+%o A260119     g,k=2,0
+%o A260119     while g!=1:
+%o A260119         k=k+1
+%o A260119         g=gcd(2^n-1,k^n-1)
+%o A260119     return k
+%o A260119 print([min_k(n) for n in [1..71]])
+%o A260119 (PARI) a(n) = {my(k=1, pt = 2^n-1); while (gcd(pt, k^n-1) != 1, k++); k;} \\ _Michel Marcus_, Jul 17 2015 && Jan 27 2016
+%o A260119 (PARI) conjecture_a(n) = {my(d=divisors(n)); v=select(x->isprime(x+1),select(y->y%2==0,d)); v+= vector(#v,i,1); p=prod(i=1,#v,v[i]); if(p==1&&n!=1,p=3);
+%o A260119 forstep(i=1, p, 2,if(gcd((p * i)^n-1, 2^n-1)==1, return(p*i))); for(i=1,n,if(gcd(p^n-1,2^n-1) == 1, return(p), p=nextprime(p+1))); forstep(i=1,100000,2,if(gcd((i)^n-1,2^n-1)==1,return(i)))} \\ _David A. Corneth_, Sep 01 2015
+%Y A260119 Cf. A086892.
+%K A260119 nonn
+%O A260119 1,2
+%A A260119 _Tom Edgar_, Jul 17 2015

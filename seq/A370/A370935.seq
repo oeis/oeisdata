@@ -1,0 +1,46 @@
+%I A370935 #60 May 10 2024 11:08:46
+%S A370935 1,0,9,8,189,72,160,128,384,1152,3456,6912,10240,46080,55296,32768,
+%T A370935 98304,294912,884736,4423680,3538944,13107200,27262976,73400320,
+%U A370935 41943040,254803968,226492416,1132462080,2038431744,1811939328,9059696640,2147483648,6442450944,19327352832,57982058496,289910292480
+%N A370935 a(n) is the first term of A351048 with n prime factors, counted with multiplicity, or 0 if there is no such term.
+%C A370935 a(n) is the first number k, if any, such that A001222(k) = n and A000005(k) divides A003415(k).
+%H A370935 Robert Israel, <a href="/A370935/b370935.txt">Table of n, a(n) for n = 0..1000</a>
+%F A370935 a(2^k - 1) = 2^(2^k - 1) for k >= 2.
+%e A370935 a(4) = 189 because 189 = 3^3 * 7 has 4 prime factors and A000005(189) = 8 divides A003415(189) = 216, and no smaller number works.
+%p A370935 children:= proc(r) local L, x, p, q, t, R;
+%p A370935   x:= r[1];
+%p A370935   L:= r[2];
+%p A370935   t:= L[-1];
+%p A370935   p:= t[1]; q:= nextprime(p);
+%p A370935   if t[2]=1 then t:= [q, 1];
+%p A370935   else t:= [p, t[2]-1], [q, 1]
+%p A370935   fi;
+%p A370935   R:= [x*q/p, [op(L[1..-2]), t]];
+%p A370935   if nops(L) >= 2 then
+%p A370935     p:= L[-2][1];
+%p A370935     q:= L[-1][1];
+%p A370935     if L[-2][2]=1 then t:= [q, L[-1][2]+1]
+%p A370935     else t:= [p, L[-2][2]-1], [q, L[-1][2]+1]
+%p A370935     fi;
+%p A370935     R:= R, [x*q/p, [op(L[1..-3]), t]]
+%p A370935   fi;
+%p A370935   [R]
+%p A370935 end proc:
+%p A370935 f:= proc(n)
+%p A370935 uses priqueue;
+%p A370935 local pq, t, x, V,F;
+%p A370935 initialize(pq);
+%p A370935 insert([-2^n, [[2,n]]],pq);
+%p A370935 do
+%p A370935   V:= extract(pq);
+%p A370935   x:= -V[1]; F:= V[2];
+%p A370935   if (x * add(t[2]/t[1], t=F)) mod mul(t[2]+1, t=F) = 0
+%p A370935      then return(x) fi;
+%p A370935   for t in children(V) do insert(t,pq) od;
+%p A370935 od;
+%p A370935 end proc:
+%p A370935 1, 0, seq(f(n),n=2..40);
+%Y A370935 Cf. A000005, A001222, A003415, A351048.
+%K A370935 nonn
+%O A370935 0,3
+%A A370935 _Robert Israel_, May 06 2024

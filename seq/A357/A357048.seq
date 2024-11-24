@@ -1,0 +1,40 @@
+%I A357048 #30 Dec 28 2022 01:56:06
+%S A357048 1,3,5,8,13,16,21,25,29,35,39,41,58,59,66,76,78,81,88,99,103,107,117,
+%T A357048 118,119,139,149,151,159,160,173,177,183,198,202,209,239,245,280,351,
+%U A357048 399,599,631,703,798,800,899,999,1198,1200,1399,1499,1600,1798,1998,2099,3999,5999,7998,8000,8999,9999,11998,12000,13999,14999,16000,17998
+%N A357048 Terms in the Fibostracci sequence A359128 that arise as the sum of the two previous terms.
+%C A357048 Terms in A359128 can arise in two ways, either as the sum of the two preceding terms (if those terms have no common digit), or as the smallest number not yet in the sequence. Here we list the values of those that arise by the first rule.
+%C A357048 The idea (cf. Angelini's blog post) is to consider the Fibonacci rule only if the two preceding terms don't share a digit, and otherwise extend the sequence with the least unused number instead of the sum.
+%C A357048 While the first case happens frequently among the initial terms, it becomes extremely rare as the terms grow larger and have more digits. More precisely, for n > 44 it appears to happen only(?) in one of the following cases:
+%C A357048 1) When the Fibostracci sequence has a term S(n-1) = x*10^y - 1, followed by S(n) = x*10^y, where x does not share a digit with 10*x - 1, i.e., neither has a digit of x-1 nor a 0 nor a 9. In that case, S(n+1) = S(n) + S(n-1) = 2*x*10^y - 1 is listed in this sequence.
+%C A357048 2) S(n-1) = x*10^y-2 and S(n) = x*10^y (because x*10^y-1 occurred earlier, often as an instance of case 1). Then S(n+1) = S(n) + S(n-1) = 2*x*10^y-2 is in this sequence. (Examples include 798, 1198, 1798, 1998, ...)
+%C A357048 3) S(n-1) = x*10^y-1 and S(n) = x*10^y+1, because x*10^y already occurred earlier, often as an earlier instance of this very same situation: then S(n+1) = S(n) + S(n-1) = 2*x*10^y. (Examples include 800, 1200, 1600, ...)
+%C A357048 It looks probable that the sequence will contain repetitions of (798, 800, 899, 999, 1198, 1200, 1399, 1499, 1600, 1798, 1998, 2099, 3999, 5999) with the second last digit duplicated each time once more. Is this pattern broken at some point?
+%H A357048 Michael De Vlieger, <a href="/A357048/b357048.txt">Table of n, a(n) for n = 1..140</a>
+%H A357048 Eric Angelini, <a href="https://cinquantesignes.blogspot.com/2022/09/fibostracci.html">Fibostracci</a>, personal blog "Cinquante Signes", blogspot.com, Sep. 30, 2022.
+%H A357048 Michael De Vlieger, <a href="/A357048/a357048.txt">Table of n, A359128(n)</a>, n = 1..10^9+26, arising from predecessors with nonintersecting decimal digit sets.
+%H A357048 Michael De Vlieger, <a href="/A357048/a357048.png">Log log scatterplot of A359128(n)</a>, n = 1..10^9+26, highlighting terms in this sequence in red.
+%e A357048 The Fibostracci sequence (A359128) starts (0, 1, 1, 2, 3, 5, 8, 13, 21, 4, 25, 29, 6, ...):
+%e A357048 Here the 2 is not given as the sum of 1 + 1, but as the least number not occurring earlier, since the two preceding terms share the digit 1. For the same reason, the 21 is not followed by the sum 12 + 21 (the two share the digit '1', and also '2') but the least "unused" number, 4. Then comes 29 = 4 + 25 (no common digit here), which is followed by 6 (since 25 and 29 share the '2'; and 5 already occurred earlier). Many of the initial terms are computed as sum of the two preceding terms, but very soon this becomes much less frequent, as the number of digits grows.
+%e A357048 In S, the terms (17, 18, 19, 20) are followed by 19 + 20 = 39, which therefore is listed in this sequence.
+%e A357048 The term S(68) = 49 follows S(67) = 48 with which it shares the digit 4 (as did the four preceding terms), therefore its successor is S(69) = 50, the least number not occurring earlier. Now, S(n) and S(n-1) don't share any digit, and therefore S(n+1) = 49 + 50 = 99 = a(33) is listed in this sequence.
+%e A357048 In the sequence S, the term 7999 shares the digits 7 and 9 with its predecessor, therefore it is followed by 8001, since 8000 already occurred earlier. Then the next term is 7999 + 8001 = 16000, listed in this sequence.
+%t A357048 nn = 10^6 + 50; c = {}; p = 0; q = 1; i = {0}; j = {1}; u = 2; a = {{p, p}, {q, q}}; Do[If[IntersectingQ[i, j], k = u, Print[{n, k = p + q}]]; AppendTo[c, k]; Set[{p, q, i, j}, {q, k, j, IntegerDigits[k]}]; If[k == u, While[! FreeQ[c, u], u++]; c = DeleteCases[c, _?(# <= u &)]], {n, 2, nn}] (* _Michael De Vlieger_, Dec 27 2022 *)
+%o A357048 (Python)
+%o A357048 def A357048_upto(N):
+%o A357048     a=0; b=1; used={1}; unused=2; S=set()
+%o A357048     sa=set(str(a))
+%o A357048     for k in range(N):
+%o A357048         sb=set(str(b))
+%o A357048         if sa & sb:
+%o A357048             a,sa,b = b,sb,unused
+%o A357048         else:
+%o A357048             a,sa,b = b,sb,a+b
+%o A357048             S |= {b}
+%o A357048         used |= {b}
+%o A357048         while unused in used: used -= {unused-1}; unused += 1
+%o A357048     return sorted(x for x in S if x < 2*unused+2)
+%Y A357048 Cf. A000045 (Fibonacci sequence), A359128.
+%K A357048 nonn,base
+%O A357048 1,2
+%A A357048 _M. F. Hasler_ and _Eric Angelini_, Dec 08 2022

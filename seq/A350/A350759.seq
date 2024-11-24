@@ -1,0 +1,39 @@
+%I A350759 #15 Mar 31 2022 19:40:55
+%S A350759 1,0,-1,1,1,-4,1,29,-167,1000,-7989,75857,-794639,9058180,-111944923,
+%T A350759 1492748581,-21369667087,326932765840,-5323818187817,91947960224097,
+%U A350759 -1678914212753599,32317295442288844,-654084630476955479,13886774070229667213
+%N A350759 a(n) = Sum_{k=0..n} (-1)^k*A345652(k)*Stirling1(n, k).
+%C A350759 Conjectures: For all p prime, (a(p) + a(p+1) - 2) == 0 (mod p),
+%C A350759 a(p+1) == 1 (mod ((p+1)*p)).
+%F A350759 a(0) = 1, a(n) = -Sum_{k=0..n-2} a(k)*A238363(n-1, k) for n > 0.
+%F A350759 a(0) = 1, a(n) = Sum_{k=0..n-2} (n-2-k)!*binomial(n-1, k)*(-1)^(n-1-k)*a(k) for n > 0.
+%F A350759 E.g.f.: exp(-1 + (1 + x)*(1 - log(1 + x))).
+%F A350759 E.g.f. y(x) satisfies y' + y*log(1 + x) = 0.
+%F A350759 a(n) = Sum_{k=0..n} binomial(n, k)*A176118(n-k). - _Mélika Tebni_, Mar 31 2022
+%F A350759 a(n) ~ -(-1)^n * n! * exp(-1) / n^2 * (1 - 2*log(n)/n). - _Vaclav Kotesovec_, Mar 31 2022
+%e A350759 a(9) = -Sum_{k=0..7} a(k)*A238363(8, k).
+%e A350759 a(9) = -(1*(-5040) + 0*(5760) - 1*(-3360) + 1*(1344) + 1*(-420) - 4*(112) + 1*(-28) + 29*(8)) = 1000.
+%e A350759 E.g.f.: 1 - x^2/2! + x^3/3! + x^4/4! - 4*x^5/5! + x^6/6! + 29*x^7/7! - 167*x^8/8! + 1000*x^9/9! + ...
+%p A350759 b := proc(n) option remember; `if`(n=0, 1, add((n-1)*binomial(n-2, k)*(-1)^(n-1-k)*b(k), k=0..n-2)) end:
+%p A350759 a := n-> add((-1)^k*b(k)*Stirling1(n, k), k=0..n):
+%p A350759 seq(a(n), n=0..23);
+%p A350759 # Second program:
+%p A350759 a := proc(n) option remember; `if`(n=0, 1, add((n-2-k)!*binomial(n-1, k)*(-1)^(n-1-k)*a(k), k=0..n-2)) end:
+%p A350759 seq(a(n), n=0..23);
+%p A350759 # Third program:
+%p A350759 a := series(exp(-1+(1+x)*(1-log(1+x))), x=0, 24):
+%p A350759 seq(n!*coeff(a, x, n), n=0..23);
+%p A350759 # Fourth program:
+%p A350759 A350759 := n-> add(binomial(n, k)*(n-k)!*coeftayl(x^(-x), x=1, n-k), k=0..n):
+%p A350759 seq(A350759 (n), n=0..23); # _Mélika Tebni_, Mar 31 2022
+%t A350759 CoefficientList[Series[Exp[-1+(1+x)*(1-Log[1+x])], {x, 0, 23}], x] * Range[0, 23]!
+%o A350759 (Python)
+%o A350759 from math import comb, factorial
+%o A350759 def a(n):
+%o A350759     return 1 if n == 0 else sum([factorial(n-2-k)*comb(n-1, k)*(-1)**(n-1-k)*a(k) for k in range(n-1)])
+%o A350759 print([a(n) for n in range(24)])
+%o A350759 (PARI) my(x='x+O('x^30)); Vec(serlaplace(exp(-1 + (1 + x)*(1 - log(1 + x))))) \\ _Michel Marcus_, Jan 14 2022
+%Y A350759 Cf. A048994, A176118, A238363, A345652.
+%K A350759 sign
+%O A350759 0,6
+%A A350759 _Mélika Tebni_, Jan 14 2022

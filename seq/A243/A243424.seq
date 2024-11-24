@@ -1,0 +1,58 @@
+%I A243424 #37 Nov 22 2018 15:24:59
+%S A243424 1,1,1,6,3,1,20,110,180,58,1,42,657,4890,18343,33792,27380,7416,280,1,
+%T A243424 72,2172,36028,362643,2307376,9382388,24121696,37965171,34431880,
+%U A243424 16172160,3219364,170985,1,110,5375,154434,2911226,38049764,355340561,2408715568
+%N A243424 Triangle T(n,k) read by rows of number of ways k domicules can be placed on an n X n square (n >= 0, 0 <= k <= floor(n^2/2)).
+%C A243424 A domicule is either a domino or it is formed by the union of two neighboring unit squares connected via their corners. In a tiling the connections of two domicules are allowed to cross each other.
+%C A243424 The n-th row gives the coefficients of the matching-generating polynomial of the n X n king graph. - _Eric W. Weisstein_, Jun 20 2017
+%H A243424 Alois P. Heinz, <a href="/A243424/b243424.txt">Rows n = 0..13, flattened</a>
+%H A243424 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/KingGraph.html">King Graph</a>
+%H A243424 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/Matching-GeneratingPolynomial.html">Matching-Generating Polynomial</a>
+%e A243424 T(2,1) = 6:
+%e A243424   +---+  +---+  +---+  +---+  +---+  +---+
+%e A243424   |o-o|  |   |  |o  |  |  o|  |o  |  |  o|
+%e A243424   |   |  |   |  ||  |  |  ||  | \ |  | / |
+%e A243424   |   |  |o-o|  |o  |  |  o|  |  o|  |o  |
+%e A243424   +---+  +---+  +---+  +---+  +---+  +---+
+%e A243424 T(2,2) = 3:
+%e A243424   +---+  +---+  +---+
+%e A243424   |o-o|  |o o|  |o o|
+%e A243424   |   |  || ||  | X |
+%e A243424   |o-o|  |o o|  |o o|
+%e A243424   +---+  +---+  +---+
+%e A243424 Triangle T(n,k) begins:
+%e A243424   1;
+%e A243424   1;
+%e A243424   1,  6,    3;
+%e A243424   1, 20,  110,   180,     58;
+%e A243424   1, 42,  657,  4890,  18343,   33792,   27380,     7416,      280;
+%e A243424   1, 72, 2172, 36028, 362643, 2307376, 9382388, 24121696, 37965171, ...
+%e A243424   ...
+%p A243424 b:= proc(n, l) option remember; local d, f, k;
+%p A243424       d:= nops(l)/2; f:=false;
+%p A243424       if n=0 then 1
+%p A243424     elif l[1..d]=[f$d] then b(n-1, [l[d+1..2*d][], true$d])
+%p A243424     else for k to d while not l[k] do od;
+%p A243424          expand(b(n, subsop(k=f, l))+
+%p A243424          `if`(k<d and n>1 and l[k+d+1],
+%p A243424                             x*b(n, subsop(k=f, k+d+1=f, l)), 0)+
+%p A243424          `if`(k>1 and n>1 and l[k+d-1],
+%p A243424                             x*b(n, subsop(k=f, k+d-1=f, l)), 0)+
+%p A243424          `if`(n>1 and l[k+d], x*b(n, subsop(k=f, k+d=f, l)), 0)+
+%p A243424          `if`(k<d and l[k+1], x*b(n, subsop(k=f, k+1=f, l)), 0))
+%p A243424       fi
+%p A243424     end:
+%p A243424 T:= n-> (p-> seq(coeff(p,x,i), i=0..degree(p)))(b(n, [true$(n*2)])):
+%p A243424 seq(T(n), n=0..7);
+%t A243424 b[n_, l_] := b[n, l] = Module[{d, f, k}, d = Length[l]/2; f = False; Which[ n == 0, 1, l[[1 ;; d]] == Table[f, d], b[n-1, Join[l[[d+1 ;; 2d]], Table[ True, d]]], True, For[k = 1, !l[[k]], k++]; Expand[b[n, ReplacePart[l, k -> f]] + If[k<d && n>1 && l[[k+d+1]], x*b[n, ReplacePart[l, {k -> f, k + d + 1 -> f}]], 0] + If[k>1 && n>1 && l[[k + d - 1]], x*b[n, ReplacePart[ l, {k -> f, k + d - 1 -> f}]], 0] + If[n>1 && l[[k + d]], x*b[n, ReplacePart[l, {k -> f, k+d -> f}]], 0] + If[k<d && l[[k+1]], x*b[n, ReplacePart[l, {k -> f, k+1 -> f}]], 0]]]];
+%t A243424 T[n_] := Function[p, Table[Coefficient[p, x, i], {i, 0, Exponent[p, x]}]][
+%t A243424   b[n, Table[True, 2n]]];
+%t A243424 Table[T[n], {n, 0, 7}] // Flatten (* _Jean-François Alcover_, Jun 09 2018, after _Alois P. Heinz_ *)
+%Y A243424 Columns k=0-5 give: A000012, A002943(n-1) for n>0, A243464, A243465, A243466, A243467.
+%Y A243424 Row sums give A220638.
+%Y A243424 T(n,floor(n^2/2)) gives A243510.
+%Y A243424 T(n,floor(n^2/4)) gives A243511.
+%Y A243424 Cf. A242861 (the same for dominoes), A239264.
+%K A243424 nonn,tabf
+%O A243424 0,4
+%A A243424 _Alois P. Heinz_, Jun 04 2014

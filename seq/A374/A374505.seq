@@ -1,0 +1,35 @@
+%I A374505 #38 Aug 03 2024 11:41:54
+%S A374505 0,0,1,4,8,14,21,29,40,52,65,81,97,116,135,156,180,203,229,258,286,
+%T A374505 317,350,383,419,455,495,536,575,620,664,711,761,808,860,916,966,1024,
+%U A374505 1079,1140,1200,1261,1326,1391,1458,1528,1595,1666,1741,1814,1892,1972
+%N A374505 Maximum number of unit squares aligned with unit-spaced horizontal lines that can be enclosed by a circle of diameter n.
+%C A374505 It is conjectured that this construction gives the maximal number of axis-parallel unit squares that can be packed into a circle of diameter n.
+%C A374505 From the Erich Friedman website the best known maximum number of unit squares enclosed by a circle of diameter n are for n >= 2: 1, 4, 8, 14, 21, 30, ... (this sequence has not been included in OEIS because the terms have not been proven optimal). The unit squares in this case are not required to be axis-parallel. However, the example of 30 axis-parallel squares enclosed in a circle of radius < 3.5 shows that if holes are allowed, better packings are possible than with the restricted case. - _Andrew Howroyd_, Jul 14 2024
+%H A374505 David Dewan, <a href="/A374505/b374505.txt">Table of n, a(n) for n = 0..2000</a>
+%H A374505 David Dewan, <a href="/A374505/a374505.pdf">Computing Maximal Unit Squares in a Circle</a>.
+%H A374505 Erich Friedman, <a href="https://erich-friedman.github.io/packing/squincir/">Squares in Circles</a>.
+%F A374505 a(2*n) <= A124484(n).
+%e A374505 For a circle with diameter = 4:
+%e A374505 With center of circle at y = 0 (on line between rows) it encloses 6 squares.
+%e A374505 With center of circle at y = 2 - sqrt(3) ~= 0.268 it encloses 8 squares (maximal).
+%e A374505 With center of circle at y = 1/2 (in middle of row) it encloses 7 squares.
+%e A374505 So a(4) = 8.
+%t A374505 a[n_] := (
+%t A374505   distances = N[Map[Sqrt[n^2 - #^2]/2 &, Range[n - 1]]];
+%t A374505   topDeltas1 = Flatten[Map[# - distances &, Range[n/2]]];
+%t A374505   topDeltas2 = Select[topDeltas1, 0 < # <= .5 &];
+%t A374505   topDeltas3 = Map[{#, 1} &, topDeltas2];
+%t A374505   btmDeltas1 = Flatten[Map[distances - # &, Range[n/2]]];
+%t A374505   btmDeltas2 = Select[btmDeltas1, 0 <= # < .5 &];
+%t A374505   btmDeltas3 = Map[{#, -1} &, btmDeltas2];
+%t A374505   allDeltas4 = Join[topDeltas3, btmDeltas3, {{0, 0}}];
+%t A374505   allDeltas5 = SortBy[allDeltas4, {First, -Last[#] &}] ;
+%t A374505   cumulativeChanges = Accumulate[allDeltas5[[All, 2]]];
+%t A374505   startSqrs = 2 Sum[Floor[2 Sqrt[(n/2)^2 - k^2]], {k, n/2}];
+%t A374505   Return[startSqrs + Max[cumulativeChanges]]  )
+%t A374505 Map[a[#] &, Range[0, 51]]      (* this sequence *)
+%t A374505 Map[a[#] &, Range[0, 102, 2]]  (* A124484, by radius *)
+%Y A374505 Cf. A124484, A256588 (unexpectedly similar).
+%K A374505 nonn
+%O A374505 0,4
+%A A374505 _David Dewan_, Jul 09 2024

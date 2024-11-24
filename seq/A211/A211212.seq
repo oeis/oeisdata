@@ -1,0 +1,36 @@
+%I A211212 #37 Nov 17 2020 15:35:54
+%S A211212 1,1,69,33661,60376809,288294050521,3019098162602349,
+%T A211212 60921822444067346581,2159058013333667522020689,
+%U A211212 125339574046311949415000577841,11289082167259099068433198467575829,1510335441937894173173702826484473600301
+%N A211212 4-alternating permutations of length 4n.
+%C A211212 a(n) = A181985(4,n).
+%H A211212 L. Carlitz, <a href="https://doi.org/10.1002/mana.19730580104">Permutations with prescribed pattern</a>, Math. Nachr. 58 (1973), 31-53.
+%H A211212 Peter Luschny, <a href="http://oeis.org/wiki/User:Peter_Luschny/SeidelTransform">An old operation on sequences: the Seidel transform</a>
+%F A211212 a(0) = 1; a(n) = Sum_{k=1..n} (-1)^(k+1) * binomial(4*n,4*k) * a(n-k). - _Ilya Gutkovskiy_, Jan 27 2020
+%F A211212 E.g.f.: 1/(cos(x/sqrt(2))*cosh(x/sqrt(2))) = 1 + 1*z^4/4! + 69*z^8/8! + 33661*z^12/12! + ... - _Michael Wallner_, Nov 17 2020
+%F A211212 a(n) ~ 2^(10*n + 9/2) * n^(4*n + 1/2) / (cosh(Pi/2) * Pi^(4*n + 1/2) * exp(4*n)). - _Vaclav Kotesovec_, Nov 17 2020
+%p A211212 A211212 := proc(n) local E, dim, i, k; dim := 4*(n-1);
+%p A211212 E := array(0..dim, 0..dim); E[0, 0] := 1;
+%p A211212 for i from 1 to dim do
+%p A211212    if i mod 4 = 0 then E[i, 0] := 0 ;
+%p A211212       for k from i-1 by -1 to 0 do E[k, i-k] := E[k+1, i-k-1] + E[k, i-k-1] od;
+%p A211212    else E[0, i] := 0;
+%p A211212       for k from 1 by 1 to i do E[k, i-k] := E[k-1, i-k+1] + E[k-1, i-k] od;
+%p A211212    fi od;
+%p A211212 E[0, dim] end:
+%p A211212 seq(A211212(i), i = 1..12);
+%p A211212 A211212_list := proc(size) local E, S;
+%p A211212 E := 2*exp(x*z)/(cosh(z)+cos(z));
+%p A211212 S := z -> series(E, z, 4*(size+1));
+%p A211212 seq((-1)^n*(4*n)!*subs(x=0, coeff(S(z), z, 4*n)), n=0..size-1) end:
+%p A211212 A211212_list(12); # _Peter Luschny_, Jun 06 2016
+%t A211212 A181985[n_, len_] := Module[{e, dim = n (len - 1)}, e[0, 0] = 1; For[i = 1, i <= dim, i++, If[Mod[i, n] == 0, e[i, 0] = 0; For[k = i - 1, k >= 0, k--, e[k, i - k] = e[k + 1, i - k - 1] + e[k, i - k - 1]], e[0, i] = 0; For[k = 1, k <= i, k++, e[k, i - k] = e[k - 1, i - k + 1] + e[k - 1, i - k]]]]; Table[e[0, n k], {k, 0, len - 1}]];
+%t A211212 a[n_] := A181985[4, n + 1] // Last;
+%t A211212 Table[a[n], {n, 0, 11}] (* _Jean-François Alcover_, Jun 29 2019 *)
+%o A211212 (Sage) # uses[A from A181936]
+%o A211212 A211212 = lambda n: A(4,4*n)*(-1)^n
+%o A211212 print([A211212(n) for n in (0..11)]) # _Peter Luschny_, Jan 24 2017
+%Y A211212 Cf. A000364, A002115, A181985.
+%K A211212 nonn
+%O A211212 0,3
+%A A211212 _Peter Luschny_, Apr 04 2012

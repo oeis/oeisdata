@@ -1,0 +1,60 @@
+%I A277130 #27 Aug 06 2024 09:37:24
+%S A277130 0,1,1,2,1,3,1,6,2,3,1,14,1,3,3,24,1,14,1,14,3,3,1,78,2,3,6,14,1,25,1,
+%T A277130 112,3,3,3,110,1,3,3,78,1,25,1,14,14,3,1,464,2,14,3,14,1,78,3,78,3,3,
+%U A277130 1,206,1,3,14,568,3,25,1,14,3,25,1,850,1,3,14,14
+%N A277130 Number of planar branching factorizations of n.
+%C A277130 A planar branching factorization of n is either the number n itself or a sequence of at least two planar branching factorizations, one of each factor in an ordered factorization of n. - _Gus Wiseman_, Sep 11 2018
+%H A277130 Daniel Mondot, <a href="/A277130/b277130.txt">Table of n, a(n) for n = 1..9999</a>
+%H A277130 A. Knopfmacher, M. E. Mays, <a href="https://citeseerx.ist.psu.edu/pdf/d7ed31ad7c11cad37442838d6614f658af539ef5">A survey of factorization counting functions</a>, International Journal of Number Theory, 1(4):563-581,(2005). See page 15.
+%F A277130 a(prime^n) = A118376(n). a(product of n distinct primes) = A319122(n). - _Gus Wiseman_, Sep 11 2018
+%e A277130 From _Gus Wiseman_, Sep 11 2018: (Start)
+%e A277130 The a(12) = 14 planar branching factorizations:
+%e A277130   12,
+%e A277130   (2*6), (3*4), (4*3), (6*2), (2*2*3), (2*3*2), (3*2*2),
+%e A277130   (2*(2*3)), (2*(3*2)), (3*(2*2)), ((2*2)*3), ((2*3)*2), ((3*2)*2).
+%e A277130 (End)
+%t A277130 ordfacs[n_]:=If[n<=1,{{}},Join@@Table[(Prepend[#1,d]&)/@ordfacs[n/d],{d,Rest[Divisors[n]]}]]
+%t A277130 otfs[n_]:=Prepend[Join@@Table[Tuples[otfs/@f],{f,Select[ordfacs[n],Length[#]>1&]}],n];
+%t A277130 Table[Length[otfs[n]],{n,20}] (* _Gus Wiseman_, Sep 11 2018 *)
+%o A277130 (C)
+%o A277130 #include <stdio.h>
+%o A277130 #include <string.h>
+%o A277130 #include <math.h>
+%o A277130 #define MAX 10000
+%o A277130 /* Number of planar branching factorizations of n. */
+%o A277130 #define lu unsigned long
+%o A277130 lu nbr[MAX]; /* number of branching */
+%o A277130 lu a, b, d, e; /* temporary variables */
+%o A277130 lu n; lu m, p; // factors of n
+%o A277130 lu x; // square root of n
+%o A277130 void main(unsigned argc, char *argv[])
+%o A277130 {
+%o A277130   memset(nbr, 0, MAX*sizeof(lu));
+%o A277130   for (b=0, n=1; n<MAX; ++n)
+%o A277130   {
+%o A277130     d=0;
+%o A277130     x=sqrt(n);
+%o A277130     for (p=2; p<=x;++p)
+%o A277130     {
+%o A277130       if ((n%p)==0)
+%o A277130       {
+%o A277130         m= n/p;
+%o A277130         if (m<p) break;
+%o A277130         a = nbr[p] * nbr[m];
+%o A277130         b += (m==p) ? a : 2*a;
+%o A277130         e = nbr[p] * (nbr[m]-1) + (nbr[p]-1) * nbr[m];
+%o A277130         d += (m==p) ? e : 2*e;
+%o A277130       }
+%o A277130     }
+%o A277130     nbr[n]=b+d/2;
+%o A277130     printf("%lu %lu\n", n, nbr[n]);
+%o A277130     b = 1;
+%o A277130   }
+%o A277130 } /* _Daniel Mondot_, May 19 2017 */
+%Y A277130 Cf. A277120.
+%Y A277130 Cf. A000108, A001055, A074206, A118376, A281113, A319122, A319123.
+%Y A277130 Cf. A277130, A281118, A281119, A292504, A292505, A295279, A295281, A319136, A319137, A319138.
+%K A277130 nonn
+%O A277130 1,4
+%A A277130 _Michel Marcus_, Oct 01 2016
+%E A277130 Terms a(65) and beyond from _Daniel Mondot_, May 19 2017

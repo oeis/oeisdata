@@ -1,0 +1,59 @@
+%I A347204 #55 Apr 22 2024 13:20:49
+%S A347204 1,2,3,5,4,7,10,15,5,9,13,20,17,27,37,52,6,11,16,25,21,34,47,67,26,43,
+%T A347204 60,87,77,114,151,203,7,13,19,30,25,41,57,82,31,52,73,107,94,141,188,
+%U A347204 255,37,63,89,132,115,175,235,322,141,218,295,409,372,523,674
+%N A347204 a(n) = a(f(n)/2) + a(floor((n+f(n))/2)) for n > 0 with a(0) = 1 where f(n) = A129760(n).
+%C A347204 Modulo 2 binomial transform of A243499(n).
+%H A347204 Antti Karttunen, <a href="/A347204/b347204.txt">Table of n, a(n) for n = 0..8191</a>
+%H A347204 Kevin Ryde, <a href="/A347204/a347204.gp.txt">PARI/GP Code</a>
+%F A347204 a(n) = a(n - 2^f(n)) + (1 + f(n))*a((n - 2^f(n))/2) for n > 0 with a(0) = 1 where f(n) = A007814(n).
+%F A347204 a(2n+1) = a(n) + a(2n) for n >= 0.
+%F A347204 a(2n) = a(n - 2^f(n)) + a(2n - 2^f(n)) for n > 0 with a(0) = 1 where f(n) = A007814(n).
+%F A347204 a(n) = 2*a(f(n)) + Sum_{k=0..floor(log_2(n))-1} a(f(n) - 2^k*T(n,k)) for n > 1 with a(0) = 1, a(1) = 2, and where f(n) = A053645(n), T(n,k) = floor(n/2^k) mod 2.
+%F A347204 Sum_{k=0..2^n - 1} a(k) = A035009(n+1) for n >= 0.
+%F A347204 a((4^n - 1)/3) = A002720(n) for n >= 0.
+%F A347204 a(2^n - 1) = A000110(n+1),
+%F A347204 a(2*(2^n - 1)) = A005493(n),
+%F A347204 a(2^2*(2^n - 1)) = A005494(n),
+%F A347204 a(2^3*(2^n - 1)) = A045379(n),
+%F A347204 a(2^4*(2^n - 1)) = A196834(n),
+%F A347204 a(2^m*(2^n-1)) = T(n,m+1) is the n-th (m+1)-Bell number for n >= 0, m >= 0 where T(n,m) = m*T(n-1,m) + Sum_{k=0..n-1} binomial(n-1,k)*T(k,m) with T(0,m) = 1.
+%F A347204 a(n) = Sum_{j=0..2^A000120(n)-1} A243499(A295989(n,j)) for n >= 0. Also A243499(n) = Sum_{j=0..2^f(n)-1} (-1)^(f(n)-f(j)) a(A295989(n,j)) for n >= 0 where f(n) = A000120(n). In other words, a(n) = Sum_{j=0..n} (binomial(n,j) mod 2)*A243499(j) and A243499(n) = Sum_{j=0..n} (-1)^(f(n)-f(j))*(binomial(n,j) mod 2)*a(j) for n >= 0 where f(n) = A000120(n).
+%F A347204 Generalization:
+%F A347204 b(n, x) = (1/x)*b((n - 2^f(n))/2, x) + (-1)^n*b(floor((2n - 2^f(n))/2), x) for n > 0 with b(0, x) = 1 where f(n) = A007814(n).
+%F A347204 Sum_{k=0..2^n - 1} b(k, x) = (1/x)^n for n >= 0.
+%F A347204 b((4^n - 1)/3, x) = (1/x)^n*n!*L_{n}(x) for n >= 0 where L_{n}(x) is the n-th Laguerre polynomial.
+%F A347204 b((8^n - 1)/7, x) = (1/x)^n*Sum_{k=0..n} (-x)^k*A265649(n, k) for n >= 0.
+%F A347204 b(2^n - 1, x) = (1/x)^n*Sum_{k=0..n} (-x)^k*A008277(n+1, k+1),
+%F A347204 b(2*(2^n - 1), x) = (1/x)^n*Sum_{k=0..n} (-x)^k*A143494(n+2, k+2),
+%F A347204 b(2^2*(2^n - 1), x) = (1/x)^n*Sum_{k=0..n} (-x)^k*A143495(n+3, k+3),
+%F A347204 b(2^m*(2^n - 1), x) = (1/x)^n*Sum_{k=0..n} (-x)^k*T(n+m+1, k+m+1, m+1) for n >= 0, m >= 0 where T(n,k,m) is m-Stirling numbers of the second kind.
+%t A347204 f[n_] := BitAnd[n, n - 1]; a[0] = 1; a[n_] := a[n] = a[f[n]/2] + a[Floor[(n + f[n])/2]]; Array[a, 100, 0] (* _Amiram Eldar_, Nov 19 2021 *)
+%o A347204 (PARI) f(n) = bitand(n, n-1); \\ A129760
+%o A347204 a(n) = if (n<=1, n+1, if (n%2, a(n\2)+a(n-1), a(f(n/2)) + a(n/2+f(n/2)))); \\ _Michel Marcus_, Oct 25 2021
+%o A347204 (PARI) \\ Also see links.
+%o A347204 (PARI)
+%o A347204 A129760(n) = bitand(n, n-1);
+%o A347204 memoA347204 = Map();
+%o A347204 A347204(n) = if (n<=1, n+1, my(v); if(mapisdefined(memoA347204,n,&v), v, v = if(n%2, A347204(n\2)+A347204(n-1), A347204(A129760(n/2)) + A347204(n/2+A129760(n/2))); mapput(memoA347204,n,v); (v))); \\ (Memoized version of _Michel Marcus_'s program given above) - _Antti Karttunen_, Nov 20 2021
+%o A347204 (MATLAB)
+%o A347204 function a = A347204(max_n)
+%o A347204     a(1) = 1;
+%o A347204     a(2) = 2;
+%o A347204     for nloop = 3:max_n
+%o A347204         n = nloop-1;
+%o A347204         s = 0;
+%o A347204         for k = 0:floor(log2(n))-1
+%o A347204             s = s + a(1+A053645(n)-2^k*(mod(floor(n/(2^k)),2)));
+%o A347204         end
+%o A347204         a(nloop) = 2*a(A053645(n)+1) + s;
+%o A347204     end
+%o A347204 end
+%o A347204 function a_n = A053645(n)
+%o A347204     a_n = n - 2^floor(log2(n));
+%o A347204 end % _Thomas Scheuerle_, Oct 25 2021
+%Y A347204 Cf. A000110, A000120, A002720, A005493, A005494, A007814, A008277, A035009, A045379, A053645, A129760, A143494, A143495, A196834, A265649, A295989.
+%Y A347204 Similar recurrences: A124758, A243499, A284005, A329369, A341392.
+%K A347204 nonn,base,look
+%O A347204 0,2
+%A A347204 _Mikhail Kurkov_, Aug 23 2021 [verification needed]

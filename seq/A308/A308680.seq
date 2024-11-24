@@ -1,0 +1,56 @@
+%I A308680 #52 Oct 19 2022 10:48:49
+%S A308680 1,0,1,0,1,1,0,2,2,1,0,2,5,3,1,0,3,8,9,4,1,0,4,14,19,14,5,1,0,5,22,39,
+%T A308680 36,20,6,1,0,6,34,72,85,60,27,7,1,0,8,50,128,180,160,92,35,8,1,0,10,
+%U A308680 73,216,360,381,273,133,44,9,1,0,12,104,354,680,845,720,434,184,54,10,1
+%N A308680 Number T(n,k) of colored integer partitions of n such that all colors from a k-set are used and parts differ by size or by color; triangle T(n,k), n>=0, 0<=k<=n, read by rows.
+%C A308680 For fixed k > 0, T(n,k) ~ exp(Pi*sqrt(k*n/3)) * k^(1/4) / (3^(1/4) * 2^((k+3)/2) * n^(3/4)). - _Vaclav Kotesovec_, Sep 16 2019
+%C A308680 T is the convolution triangle of A000009 (see A357368). - _Peter Luschny_, Oct 19 2022
+%H A308680 Alois P. Heinz, <a href="/A308680/b308680.txt">Rows n = 0..200, flattened</a>
+%H A308680 Wikipedia, <a href="https://en.wikipedia.org/wiki/Partition_(number_theory)">Partition (number theory)</a>
+%F A308680 T(n,k) = Sum_{i=0..k} (-1)^i * binomial(k,i) * A286335(n,k-i).
+%F A308680 Sum_{k=1..n} k * T(n,k) = A325915(n).
+%F A308680 G.f. of column k: (-1 + Product_{j>=1} (1 + x^j))^k. - _Alois P. Heinz_, Jan 29 2021
+%e A308680 T(4,1) = 2: 3a1a, 4a.
+%e A308680 T(4,2) = 5: 2a1a1b, 2b1a1b, 2a2b, 3a1b, 3b1a.
+%e A308680 T(4,3) = 3: 2a1b1c, 2b1a1c, 2c1a1b.
+%e A308680 T(4,4) = 1: 1a1b1c1d.
+%e A308680 Triangle T(n,k) begins:
+%e A308680   1;
+%e A308680   0,  1;
+%e A308680   0,  1,  1;
+%e A308680   0,  2,  2,   1;
+%e A308680   0,  2,  5,   3,   1;
+%e A308680   0,  3,  8,   9,   4,   1;
+%e A308680   0,  4, 14,  19,  14,   5,   1;
+%e A308680   0,  5, 22,  39,  36,  20,   6,   1;
+%e A308680   0,  6, 34,  72,  85,  60,  27,   7,  1;
+%e A308680   0,  8, 50, 128, 180, 160,  92,  35,  8, 1;
+%e A308680   0, 10, 73, 216, 360, 381, 273, 133, 44, 9, 1;
+%e A308680   ...
+%p A308680 b:= proc(n, i, k) option remember; `if`(n=0, 1, `if`(i<1, 0, add((t->
+%p A308680       b(t, min(t, i-1), k)*binomial(k, j))(n-i*j), j=0..min(k, n/i))))
+%p A308680     end:
+%p A308680 T:= (n, k)-> add(b(n$2, k-i)*(-1)^i*binomial(k, i), i=0..k):
+%p A308680 seq(seq(T(n, k), k=0..n), n=0..12);
+%p A308680 # second Maple program:
+%p A308680 b:= proc(n) option remember; `if`(n=0, 1, add(b(n-j)*add(
+%p A308680      `if`(d::odd, d, 0), d=numtheory[divisors](j)), j=1..n)/n)
+%p A308680     end:
+%p A308680 T:= proc(n, k) option remember;
+%p A308680       `if`(k=0, `if`(n=0, 1, 0), `if`(k=1, `if`(n=0, 0, b(n)),
+%p A308680           (q-> add(T(j, q)*T(n-j, k-q), j=0..n))(iquo(k, 2))))
+%p A308680     end:
+%p A308680 seq(seq(T(n, k), k=0..n), n=0..12);  # _Alois P. Heinz_, Jan 31 2021
+%p A308680 # Uses function PMatrix from A357368.
+%p A308680 PMatrix(10, A000009); # _Peter Luschny_, Oct 19 2022
+%t A308680 b[n_, i_, k_] := b[n, i, k] = If[n == 0, 1, If[i < 1, 0, Sum[Function[t,    b[t, Min[t, i - 1], k]*Binomial[k, j]][n - i*j], {j, 0, Min[k, n/i]}]]];
+%t A308680 T[n_, k_] := Sum[b[n, n, k - i]*(-1)^i*Binomial[k, i], {i, 0, k}];
+%t A308680 Table[Table[T[n, k], {k, 0, n}], {n, 0, 12}] // Flatten (* _Jean-François Alcover_, Dec 06 2019, from Maple *)
+%Y A308680 Columns k=0-10 give: A000007, A000009 (for n>0), A327380, A327381, A327382, A327383, A327384, A327385, A327386, A327387, A327388.
+%Y A308680 Main diagonal and lower diagonals give: A000012, A001477, A000096.
+%Y A308680 Row sums give A304969.
+%Y A308680 T(2n,n) gives A324595.
+%Y A308680 Cf. A060642, A286335, A325915.
+%K A308680 nonn,tabl
+%O A308680 0,8
+%A A308680 _Alois P. Heinz_, Aug 29 2019

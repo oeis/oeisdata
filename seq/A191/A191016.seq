@@ -1,0 +1,61 @@
+%I A191016 #15 Mar 31 2012 10:24:25
+%S A191016 1,1,2,8,38,238,1558,10966,106334,1050974,10295324,114643744,
+%T A191016 1426970188,19128627772,301484330492,4785515966492,75490216911932,
+%U A191016 1287754035291964,23735661951947896,462001846720538656,9472366452963142856,202869898263715663016,4536294970208910412232,107194755891965843670088,2634562640821884269137768
+%N A191016 Number of projective reflection products on a set with n elements.
+%C A191016 A projective reflection product is a product (usually nonassociative) satisfying (1) x*x=x, (2) x*(x*y)=y, and (3) x*(y*z)=(x*y)*(x*z) for all x,y,z.
+%F A191016 A projective reflection product on a set S is irreducible if S cannot be written as the disjoint union of two nonempty subsets X and Y such that x*y=y and y*x=x for all x in X and y in Y.
+%F A191016 Define i(0)=0 and let i(p) for p>1 be the number of irreducible projective reflection products on a set with p elements. Define c(p,1)=i(p) and recursively define c(p,q)=sum(k=0 to p) of binomial(p,k)*i(k)*c(p-k,q-1). Then a(n)=sum(k=1 to n) of c(n,k)/k!.
+%F A191016 This is a sequence of binomial type, also equal to the sum over all partitions of the set of the product of the numbers of irreducible products on the subsets in the partition.
+%e A191016 For n=1, the a(1)=1 product is simply x*x=x. For n=2, the a(2)=1 product on {x,y} is (x*x=x, y*y=y, x*y=y, y*x=x). For n=3, the a(3)=2 products are (x*y=y for all x,y) and (x*x=x, y*y=y, z*z=z, x*y=y*x=z, x*z=z*x=y, y*z=z*y=x).
+%p A191016 #the number of irreducible projective reflection products
+%p A191016 irredprod:=proc(n) local c, v:
+%p A191016     if n=1 then
+%p A191016         RETURN(1):
+%p A191016     elif n=0 or n=2 then
+%p A191016         RETURN(0):
+%p A191016     end:
+%p A191016     c:=0:
+%p A191016 #dihedral
+%p A191016     c:=c+(n!/(2*n)):
+%p A191016     if n=36 then #E6
+%p A191016         c:=c+(n!/((2^7*3^4*5)/2)*2):
+%p A191016     elif n=120 then #E8
+%p A191016         c:=c+(n!/((2^(14)*3^5*5^2*7)/2)):
+%p A191016     elif n=63 then #E7
+%p A191016         c:=c+(n!/(((2^(10)*3^4*5*7)/2))):
+%p A191016     elif n=24 then #F4
+%p A191016         c:=c+(n!/((1152/2)*2)):
+%p A191016     elif n=15 then #H3
+%p A191016         c:=c+(n!/(120/2)):
+%p A191016     elif n=60 then #H4
+%p A191016         c:=c+(n!/(14400/2)):
+%p A191016     elif n=12 then #D4
+%p A191016         c:=c+(n!/((2^(4-1)*4!/2)*6)):
+%p A191016     end:
+%p A191016     if n>4 and type(sqrt(n), 'integer') then #type B
+%p A191016         c:=c+(n!/((2^(sqrt(n))*(sqrt(n)!))/2)):
+%p A191016     elif n>3 and type(1/2+1/2*sqrt(1+8*n), 'integer') then #type A
+%p A191016         c:=c+(n!/(((1/2+(1/2)*sqrt(1+8*n))!/2)*2)):
+%p A191016     elif n>12 and type(1/2+1/2*sqrt(1+4*n), 'integer') then #type D
+%p A191016         v:=1/2+1/2*sqrt(1+4*n):
+%p A191016         c:=c+(n!/((2^(v-1)*v!/2)*2)):
+%p A191016     end:
+%p A191016     c:
+%p A191016 end:
+%p A191016 #convolve the sequences
+%p A191016 convol:=proc(n, k) local i: option remember:
+%p A191016     if k=1 then
+%p A191016         RETURN(irredprod(n)):
+%p A191016     end:
+%p A191016     add(binomial(n, i)*irredprod(i)*convol(n-i, k-1), i=0..n):
+%p A191016 end:
+%p A191016 #add the convolutions
+%p A191016 numprods:=proc(n) local k:
+%p A191016     add(convol(n, k)/k!, k=1..n):
+%p A191016 end:
+%p A191016 seq(numprods(n), n=1..30);
+%Y A191016 The sequence A191015 gives the number of isomorphism classes of such products.
+%K A191016 nonn
+%O A191016 1,3
+%A A191016 _Matthew J. Samuel_, May 24 2011

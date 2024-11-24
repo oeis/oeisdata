@@ -1,0 +1,54 @@
+%I A355776 #19 Aug 23 2022 06:16:08
+%S A355776 0,0,0,0,0,1,0,0,3,2,5,0,0,6,10,22,24,16,0,0,10,20,12,61,162,29,102,
+%T A355776 150,42,0,0,15,35,49,135,432,246,273,391,1389,461,388,698,99,0,0,21,
+%U A355776 56,90,52,260,982,1288,740,827,1150,4974,2745,5778,482,2057,8924,4148,1333,2764,219,0
+%N A355776 Partition triangle read by rows. A statistic of permutations whose Lehmer code is nonmonotonic, refining triangle A356116.
+%C A355776 We say a list L is weakly increasing if x <= y, and weakly decreasing, if x >= y, for all x, y in L if index(x) < index(y). We say a list L is nonmonotonic if it is not weakly increasing and not weakly decreasing.
+%C A355776 The ordering of the partitions is defined in A334439. See the comments in A356116 for the definition of the terms 'partition triangle' and 'reduced partition triangle'.
+%H A355776 Peter Luschny, <a href="https://github.com/PeterLuschny/PermutationsWithLehmer/blob/main/PermutationsWithLehmer.ipynb">Permutations with Lehmer</a>, a SageMath Jupyter Notebook.
+%e A355776 Table T(n, k) starts:
+%e A355776 [0]  0;
+%e A355776 [1]  0;
+%e A355776 [2]  0,  0;
+%e A355776 [3]  0,  1,  0;
+%e A355776 [4]  0, [3,  2],   5,  0;
+%e A355776 [5]  0, [6, 10], [22, 24],   16,  0;
+%e A355776 [6]  0, [10, 20, 12], [61,  162, 29], [102, 150],   42,   0;
+%e A355776 [7]  0, [15, 35, 49], [135, 432, 246, 273], [391, 1389, 461], [388, 698], 99, 0;
+%e A355776 Summing the bracketed terms reduces the triangle to A356116.
+%e A355776 .
+%e A355776 The permutations whose Lehmer code is nonmonotonic, in the case n = 4, k = 1 are: 1243, 1324, 1423, which map to the partition [3, 1] and 1342, 2143, which map to the partition [2, 2]. Thus A356116(4, 1) = 3 + 2 = 5.
+%e A355776 .
+%e A355776 The cardinality of the preimage of the partitions, i.e. the number of permutations whose Lehmer code is nonmonotonic, are the terms of the sequence. Here row 6:
+%e A355776 [6] => 0
+%e A355776 [5, 1] => 10
+%e A355776 [4, 2] => 20
+%e A355776 [3, 3] => 12
+%e A355776 [4, 1, 1] => 61
+%e A355776 [3, 2, 1] => 162
+%e A355776 [2, 2, 2] => 29
+%e A355776 [3, 1, 1, 1] => 102
+%e A355776 [2, 2, 1, 1] => 150
+%e A355776 [2, 1, 1, 1, 1] => 42
+%e A355776 [1, 1, 1, 1, 1, 1] => 0
+%o A355776 (SageMath)
+%o A355776 import collections
+%o A355776 def perm_lehmer_nonmono_stats(n):
+%o A355776     res = collections.defaultdict(int)
+%o A355776     for p in Permutations(n):
+%o A355776         l = p.to_lehmer_code()
+%o A355776         if all(x >= y for x, y in zip(l, l[1:])): continue
+%o A355776         c = [l.count(i) for i in range(len(p)) if i in l]
+%o A355776         res[Partition(reversed(sorted(c)))] += 1
+%o A355776     return sorted(res.items(), key=lambda x: len(x[0]))
+%o A355776 @cached_function
+%o A355776 def A355776_row(n):
+%o A355776     if n < 2: return [0]
+%o A355776     S = perm_lehmer_nonmono_stats(n)
+%o A355776     return [0] + [s[1] for s in S] + [0]
+%o A355776 def A355776(n, k): return A355776_row(n)[k] if n > 0 else 0
+%o A355776 for n in range(0, 8): print(A355776_row(n))
+%Y A355776 Cf. A000217 (column 1), A002662 (subdiagonal), A000041 (row lengths), A056986 (row sums), A356116 (reduced triangle), A355777 (Euler-Lehmer).
+%K A355776 nonn,tabf
+%O A355776 0,9
+%A A355776 _Peter Luschny_, Jul 27 2022

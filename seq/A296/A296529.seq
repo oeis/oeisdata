@@ -1,0 +1,53 @@
+%I A296529 #33 Nov 02 2021 21:27:35
+%S A296529 1,0,1,0,1,1,0,1,2,1,0,2,3,3,2,0,2,5,6,5,2,0,5,6,13,13,6,5,0,10,10,16,
+%T A296529 32,16,10,10,0,28,26,36,51,51,36,26,28,0,24,50,62,74,76,74,62,50,24,0,
+%U A296529 50,50,134,138,161,161,138,134,50,50,0,124,120,146,302,345,386,345,302,146,120,124
+%N A296529 Number T(n,k) of non-averaging permutations of [n] with first element k; triangle T(n,k), n >= 0, k = 0..n, read by rows.
+%C A296529 A non-averaging permutation avoids any 3-term arithmetic progression.
+%C A296529 T(0,0) = 1 by convention.
+%H A296529 Alois P. Heinz, <a href="/A296529/b296529.txt">Rows n = 0..99, flattened</a>
+%H A296529 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/NonaveragingSequence.html">Nonaveraging Sequence</a>
+%H A296529 Wikipedia, <a href="https://en.wikipedia.org/wiki/Arithmetic_progression">Arithmetic progression</a>
+%H A296529 <a href="/index/No#non_averaging">Index entries related to non-averaging sequences</a>
+%F A296529 T(n,k) = T(n,n+1-k) > 0 for k=1..n.
+%e A296529 T(5,1) = 2: 15324, 15342.
+%e A296529 T(5,2) = 5: 21453, 24153, 24315, 24351, 24513.
+%e A296529 T(5,3) = 6: 31254, 31524, 31542, 35124, 35142, 35412.
+%e A296529 T(5,4) = 5: 42153, 42315, 42351, 42513, 45213.
+%e A296529 T(5,5) = 2: 51324, 51342.
+%e A296529 Triangle T(n,k) begins:
+%e A296529   1;
+%e A296529   0,  1;
+%e A296529   0,  1,  1;
+%e A296529   0,  1,  2,   1;
+%e A296529   0,  2,  3,   3,   2;
+%e A296529   0,  2,  5,   6,   5,   2;
+%e A296529   0,  5,  6,  13,  13,   6,   5;
+%e A296529   0, 10, 10,  16,  32,  16,  10,  10;
+%e A296529   0, 28, 26,  36,  51,  51,  36,  26,  28;
+%e A296529   0, 24, 50,  62,  74,  76,  74,  62,  50, 24;
+%e A296529   0, 50, 50, 134, 138, 161, 161, 138, 134, 50, 50;
+%e A296529   ...
+%p A296529 b:= proc(s) option remember; local n, r, ok, i, j, k;
+%p A296529       if nops(s) = 1 then 1
+%p A296529     else n, r:= max(s), 0;
+%p A296529          for j in s minus {n} do ok, i, k:= true, j-1, j+1;
+%p A296529            while ok and i>=0 and k<n do ok, i, k:=
+%p A296529              not i in s xor k in s, i-1, k+1 od;
+%p A296529            r:= r+ `if`(ok, b(s minus {j}), 0)
+%p A296529          od; r
+%p A296529       fi
+%p A296529     end:
+%p A296529 T:= (n, k)-> `if`(k=0, 0^n, b({$0..n} minus {k-1})):
+%p A296529 seq(seq(T(n, k), k=0..n), n=0..14);
+%t A296529 b[s_List] := b[s] = Module[{n = Max[s], r = 0, ok, i, j, k}, If[Length[s] == 1, 1, Do[{ok, i, k} = {True, j-1, j+1}; While[ok && i >= 0 && k < n, {ok, i, k} = {FreeQ[s, i] ~Xor~ MemberQ[s, k], i-1, k+1}]; r = r + If[ok, b[s ~Complement~ {j}], 0], {j, s ~Complement~ {n}}]; r]];
+%t A296529 T[0, 0]=1; T[n_, k_] := If[k==0, 0^n, b[Range[0, n] ~Complement~ {k-1}]];
+%t A296529 Table[Table[T[n, k], {k, 0, n}], {n, 0, 14}] // Flatten (* _Jean-François Alcover_, Dec 18 2017, after _Alois P. Heinz_ *)
+%Y A296529 Columns k=0-1 give: A000007, A296530 (for n>0).
+%Y A296529 Row sums give A003407.
+%Y A296529 T(n,n) gives A296530.
+%Y A296529 T(n,ceiling(n/2)) gives A296531.
+%Y A296529 Cf. A292523.
+%K A296529 nonn,tabl,look
+%O A296529 0,9
+%A A296529 _Alois P. Heinz_, Dec 14 2017

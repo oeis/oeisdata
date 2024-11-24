@@ -1,0 +1,56 @@
+%I A246277 #76 Dec 29 2022 11:19:20
+%S A246277 0,1,1,2,1,3,1,4,2,5,1,6,1,7,3,8,1,9,1,10,5,11,1,12,2,13,4,14,1,15,1,
+%T A246277 16,7,17,3,18,1,19,11,20,1,21,1,22,6,23,1,24,2,25,13,26,1,27,5,28,17,
+%U A246277 29,1,30,1,31,10,32,7,33,1,34,19,35,1,36,1,37,9,38,3,39,1,40,8,41,1,42
+%N A246277 Column index of n in A246278: a(1) = 0, a(2n) = n, a(2n+1) = a(A064989(2n+1)).
+%C A246277 If n >= 2, n occurs in column a(n) of A246278.
+%C A246277 By convention, a(1) = 0 because 1 does not occur in A246278.
+%H A246277 Antti Karttunen, <a href="/A246277/b246277.txt">Table of n, a(n) for n = 1..10000</a>
+%H A246277 <a href="/index/Pri#prime_indices">Index entries for sequences computed from indices in prime factorization</a>
+%F A246277 a(1) = 0, a(2n) = n, a(2n+1) = a(A064989(2n+1)) = a(A064216(n+1)). [Cf. the formula for A252463.]
+%F A246277 Instead of the equation for a(2n+1) above, we may write a(A003961(n)) = a(n). - _Peter Munn_, May 21 2022
+%F A246277 Other identities. For all n >= 1, the following holds:
+%F A246277 For all w >= 0, a(p_{i} * p_{j} * ... * p_{k}) = a(p_{i+w} * p_{j+w} * ... * p_{k+w}).
+%F A246277 For all n >= 2, A001222(a(n)) = A001222(n)-1. [a(n) has one less prime factor than n. Thus each semiprime (A001358) is mapped to some prime (A000040), etc.]
+%F A246277 For all n >= 2, a(n) = A078898(A249817(n)).
+%F A246277 For semiprimes n = p_i * p_j, j >= i, a(n) = A000040(1+A243055(n)) = p_{1+j-i}.
+%F A246277 a(n) = floor(A348717(n)/2). - _Antti Karttunen_, Apr 30 2022
+%F A246277 If n has prime factorization Product_{i=1..k} prime(x_i), then a(n) = Product_{i=2..k} prime(x_i-x_1+1). The opposite version is A358195, prime indices A358172, even bisection A241916. - _Gus Wiseman_, Dec 29 2022
+%t A246277 a246277[n_Integer] := Module[{f, p, a064989, a},
+%t A246277   f[x_] := Transpose@FactorInteger[x];
+%t A246277   p[x_] := Which[
+%t A246277     x == 1, 1,
+%t A246277     x == 2, 1,
+%t A246277     True, NextPrime[x, -1]];
+%t A246277   a064989[x_] := Times @@ Power[p /@ First[f[x]], Last[f[x]]];
+%t A246277   a[1] = 0;
+%t A246277   a[x_] := If[EvenQ[x], x/2, NestWhile[a064989, x, OddQ]/2];
+%t A246277 a/@Range[n]]; a246277[84] (* _Michael De Vlieger_, Dec 19 2014 *)
+%o A246277 (PARI)
+%o A246277 A064989(n) = {my(f); f = factor(n); if((n>1 && f[1,1]==2), f[1,2] = 0); for (i=1, #f~, f[i,1] = precprime(f[i,1]-1)); factorback(f)};
+%o A246277 A246277(n) = { if(1==n, 0, while((n%2), n = A064989(n)); (n/2)); };
+%o A246277 (PARI) A246277(n) = if(1==n, 0, my(f = factor(n), k = primepi(f[1,1])-1); for (i=1, #f~, f[i,1] = prime(primepi(f[i,1])-k)); factorback(f)/2); \\ _Antti Karttunen_, Apr 30 2022
+%o A246277 (Scheme) ;; two different variants, the second one employing memoizing definec-macro)
+%o A246277 (define (A246277 n) (if (= 1 n) 0 (let loop ((n n)) (if (even? n) (/ n 2) (loop (A064989 n))))))
+%o A246277 (definec (A246277 n) (cond ((= 1 n) 0) ((even? n) (/ n 2)) (else (A246277 (A064989 n)))))
+%o A246277 (Python)
+%o A246277 from sympy import factorint, prevprime
+%o A246277 from operator import mul
+%o A246277 from functools import reduce
+%o A246277 def a064989(n):
+%o A246277     f=factorint(n)
+%o A246277     return 1 if n==1 else reduce(mul, [1 if i==2 else prevprime(i)**f[i] for i in f])
+%o A246277 def a(n): return 0 if n==1 else n//2 if n%2==0 else a(a064989(n))
+%o A246277 print([a(n) for n in range(1, 101)]) # _Indranil Ghosh_, Jun 15 2017
+%Y A246277 Terms of A348717 halved. A305897 is the restricted growth sequence transform.
+%Y A246277 Positions of terms 1 .. 8 in this sequence are given by the following sequences: A000040, A001248, A006094, A030078, A090076, A251720, A090090, A030514.
+%Y A246277 Cf. A078898 (has the same role with array A083221 as this sequence has with A246278).
+%Y A246277 Cf. A000040, A001222, A001358, A003961, A055396, A064989, A064216, A243055, A246272, A249810, A249820, A249735, A252463.
+%Y A246277 This sequence is also used in the definition of the following permutations: A246274, A246276, A246675, A246677, A246683, A249815, A249817 (A249818), A249823, A249825, A250244, A250245, A250247, A250249.
+%Y A246277 Also in the definition of arrays A249821, A251721, A251722.
+%Y A246277 Sum of prime indices of a(n) is A359358(n) + A001222(n) - 1, cf. A326844.
+%Y A246277 A112798 lists prime indices, length A001222, sum A056239.
+%Y A246277 Cf. A005940, A241916, A253565, A356958, A358195.
+%K A246277 nonn
+%O A246277 1,4
+%A A246277 _Antti Karttunen_, Aug 21 2014

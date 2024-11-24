@@ -1,0 +1,41 @@
+%I A318110 #48 Oct 23 2018 12:00:49
+%S A318110 0,1,1,3,3,1,26,26,11,2,367,367,167,42,5,7142,7142,3352,944,163,14,
+%T A318110 176766,176766,84308,25006,4965,638,42,5304356,5304356,2554329,779246,
+%U A318110 165474,24924,2510,132,186954535,186954535,90600599,28120586,6200455,1010814,121086,9908,429,7566084686,7566084686,3683084984,1156456088,261067596,44535120,5829880,574128,39203,1430
+%N A318110 Triangle T(n,k) read by rows: coefficients of polynomials P_n(t) defined in Formula section.
+%H A318110 Gheorghe Coserea, <a href="/A318110/b318110.txt">Rows n=0..100, flattened</a>
+%H A318110 Noam Zeilberger, <a href="http://arxiv.org/abs/1509.07596">Counting isomorphism classes of beta-normal linear lambda terms</a>, arXiv:1509.07596 [cs.LO], 2015.
+%F A318110 A(x,t) = Sum_{n>=0} P_n(t)*x^n, where P_n(t) = Sum_{k=0..n} T(n,k)*t^k, satisfies:
+%F A318110 A = x*t/(1-A) + deriv(A,t), with A(0,t) = 0, deriv(A,x)(0,t) = 1+t (deriv(A,v) represents the derivative of A with respect to variable v).
+%e A318110 A(x,t) = (1+t)*x + (3+3*t+t^2)*x^2 + (26+26*t+11*t^2+2*t^3)*x^3 + ...
+%e A318110 Triangle starts:
+%e A318110 n\k [0]       [1]       [2]      [3]      [4]     [5]     [6]    [7]  [8]
+%e A318110 [0] 0;
+%e A318110 [1] 1,        1;
+%e A318110 [2] 3,        3,        1;
+%e A318110 [3] 26,       26,       11,      2;
+%e A318110 [4] 367,      367,      167,     42,      5;
+%e A318110 [5] 7142,     7142,     3352,    944,     163,    14;
+%e A318110 [6] 176766,   176766,   84308,   25006,   4965,   638,    42;
+%e A318110 [7] 5304356,  5304356,  2554329, 779246,  165474, 24924,  2510,  132;
+%e A318110 [8] 186954535,186954535,90600599,28120586,6200455,1010814,121086,9908,429;
+%e A318110 [9] ...
+%t A318110 rows = 10; Clear[A]; A[x_, t_] = (1+t)x;
+%t A318110 Do[A[x_, t_] = Series[x t/(1-A[x, t]) + D[A[x, t], t], {x, 0, n}, {t, 0, n}] // Normal, {n, 2 rows}];
+%t A318110 CoefficientList[#, t]& /@ CoefficientList[A[x, t], x] /. {} -> {0} // Take[#, rows]& // Flatten (* _Jean-François Alcover_, Oct 23 2018 *)
+%o A318110 (PARI)
+%o A318110 seq(N) = {
+%o A318110   my(x='x+O('x^N), t='t, F0=(1+t)*x, F1=0, n=1);
+%o A318110   while(n++,
+%o A318110     F1 = F0^2; F1 = F1 - deriv(F1,'t)/2 + deriv(F0,'t) + x*t;
+%o A318110     if (F1 == F0, break()); F0 = F1);
+%o A318110   concat([[0]], apply(Vecrev, Vec(F0)));
+%o A318110 };
+%o A318110 concat(seq(10))
+%o A318110 \\ test: y=Ser(apply(p->Polrev(p,'t), seq(101)), 'x); y == x*'t/(1-y) + deriv(y,'t)
+%Y A318110 Column 0 gives A262301.
+%Y A318110 Main diagonal gives A000108(n-1) for n>0.
+%Y A318110 Second diagonal gives A032443(n-1) for n>0.
+%K A318110 nonn,tabl
+%O A318110 0,4
+%A A318110 _Gheorghe Coserea_, Sep 05 2018

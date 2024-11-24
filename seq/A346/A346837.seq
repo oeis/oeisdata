@@ -1,0 +1,55 @@
+%I A346837 #15 Apr 15 2024 09:43:53
+%S A346837 1,0,1,-1,0,-1,-2,-1,0,-1,1,0,6,0,1,-4,1,12,6,0,1,-1,0,-15,0,-15,0,-1,
+%T A346837 -14,-17,12,1,-30,-15,0,-1,1,0,28,0,70,0,28,0,1,-40,-63,72,156,40,6,
+%U A346837 56,28,0,1
+%N A346837 Table read by rows, coefficients of the determinant polynomials of the generalized tangent matrices.
+%C A346837 The generalized tangent matrix M(n, k) is an N X N matrix defined for n in [1..N-1] and for k in [0..n-1] with h = floor((N+1)/2) as:
+%C A346837    M[n - k, k + 1] = if n < h then 1 otherwise -1,
+%C A346837    M[N - n + k + 1, N - k] = if n < N - h then -1 otherwise 1,
+%C A346837 and the indeterminate x in the main antidiagonal.
+%C A346837 The tangent matrix M(n, k) as defined in A346831 is the special case which arises from setting x = 0. The determinant of a generalized tangent matrix M is a polynomial which we call the determinant polynomial of M.
+%e A346837 Table starts:
+%e A346837 [0]   1;
+%e A346837 [1]   0,   1;
+%e A346837 [2]  -1,   0,  -1;
+%e A346837 [3]  -2,  -1,   0,  -1;
+%e A346837 [4]   1,   0,   6,   0,   1;
+%e A346837 [5]  -4,   1,  12,   6,   0,   1;
+%e A346837 [6]  -1,   0, -15,   0, -15,   0, -1;
+%e A346837 [7] -14, -17,  12,   1, -30, -15,  0, -1;
+%e A346837 [8]   1,   0,  28,   0,  70,   0, 28,  0, 1;
+%e A346837 [9] -40, -63,  72, 156,  40,   6, 56, 28, 0, 1.
+%e A346837 .
+%e A346837 The first few generalized tangent matrices:
+%e A346837 1       2          3              4                  5
+%e A346837 ---------------------------------------------------------------
+%e A346837 x;   -1  x;    1  -1  x;    1  -1  -1   x;   1   1  -1  -1   x;
+%e A346837       x  1;   -1   x  1;   -1  -1   x   1;   1  -1  -1   x   1;
+%e A346837                x   1  1;   -1   x   1   1;  -1  -1   x   1   1;
+%e A346837                             x   1   1  -1;  -1   x   1   1   1;
+%e A346837                                              x   1   1   1  -1;
+%p A346837 GeneralizedTangentMatrix := proc(N) local M, H, n, k;
+%p A346837    M := Matrix(N, N); H := iquo(N + 1, 2);
+%p A346837    for n from 1 to N - 1 do for k from 0 to n - 1 do
+%p A346837        M[n - k, k + 1] := `if`(n < H, 1, -1);
+%p A346837        M[N - n + k + 1, N - k] := `if`(n < N - H, -1, 1);
+%p A346837 od od; for k from 1 to N do M[k, N-k+1] := x od;
+%p A346837 M end:
+%p A346837 A346837Row := proc(n) if n = 0 then return 1 fi;
+%p A346837    GeneralizedTangentMatrix(n):
+%p A346837    LinearAlgebra:-Determinant(%);
+%p A346837    seq(coeff(%, x, k), k = 0..n) end:
+%p A346837 seq(A346837Row(n), n = 0..9);
+%t A346837 GeneralizedTangentMatrix[N_] := Module[{M, H, n, k},
+%t A346837    M = Array[0&, {N, N}]; H = Quotient[N + 1, 2];
+%t A346837    For[n = 1, n <= N - 1, n++, For[k = 0, k <= n - 1, k++,
+%t A346837       M[[n - k, k + 1]] = If[n < H, 1, -1];
+%t A346837       M[[N - n + k + 1, N - k]] = If[n < N - H, -1, 1]]];
+%t A346837       For[k = 1, k <= N, k++, M[[k, N - k + 1]] = x]; M];
+%t A346837 A346837Row[n_] := If[n == 0, {1}, CoefficientList[ Det[
+%t A346837    GeneralizedTangentMatrix[n]], x]];
+%t A346837 Table[A346837Row[n], {n, 0, 9}] // Flatten (* _Jean-François Alcover_, Apr 15 2024, after _Peter Luschny_ *)
+%Y A346837 Cf. A011782 (row sums modulo sign), A347596 (alternating row sums), A346831.
+%K A346837 sign,tabl
+%O A346837 0,7
+%A A346837 _Peter Luschny_, Sep 11 2021

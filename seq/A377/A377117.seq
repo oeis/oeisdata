@@ -1,0 +1,45 @@
+%I A377117 #14 Oct 30 2024 01:04:58
+%S A377117 1,1,4,6,24,60,180,504,1440,4104,11664,33264,94608,269568,767232,
+%T A377117 2185056,6220800,17713728,50435136,143607168,408893184,1164253824,
+%U A377117 3315002112,9438882048,26875535616,76523304960,217886505984,620393043456,1766458865664,5029677296640
+%N A377117 a(n) = coefficient of the term that is independent of 2^(1/3) and 2^(2/3) in the expansion of (2^(1/3) + 2^(2/3))^n.
+%C A377117 Conjecture: every prime divides a(n) for infinitely many n, and if K(p) = (k(1), k(2),...) is the maximal subsequence of indices n such that p divides a(n), then the difference sequence of K(p) is eventually periodic; indeed, K(p) is purely periodic for the first 6 primes, with respective period lengths 1,5,3,17,2,13 and these periods:
+%C A377117 p = 2: (1)
+%C A377117 p = 3: (1, 2, 8, 9, 4)
+%C A377117 p = 5: (21, 9, 10)
+%C A377117 p = 7: (8, 42, 7, 19, 1, 2, 10, 31, 4, 11, 6, 34, 60, 23, 5, 9, 16)
+%C A377117 p = 11: (9, 21)
+%C A377117 p = 13: (15, 51, 45, 1, 2, 17, 41, 28, 54, 119, 13, 9, 25)
+%C A377117 See A377109 for a guide to related sequences.
+%H A377117 <a href="/index/Rec#order_03">Index entries for linear recurrences with constant coefficients</a>, signature (0,6,6).
+%F A377117 a(n) = 6*a(n-2) + 6*a(n-3) for n >= 5. [Corrected by _Georg Fischer_, Oct 29 2024]
+%F A377117 G.f.: (-1 - x + 2 x^2 + 6 x^3 + 6 x^4)/(-1 + 6 x^2 + 6 x^3).
+%e A377117 ((2^(1/3) + 2^(2/3)))^3 = 4 + 2 2^(1/3) + 2^(2/3), so a(3) = 4.
+%t A377117 (* Program 1 generates sequences A377117-A377119. *)
+%t A377117 tbl = Table[Expand[(2^(1/3) + 2^(2/3))^n], {n, 0, 24}];
+%t A377117 Take[tbl, 6]
+%t A377117 u = MapApply[{#1/#2, #2} /. {1, #} -> {{1}, {#}} &,
+%t A377117    Map[({#1, #1 /. _^_ -> 1} &), Map[(Apply[List, #1] &), tbl]]];
+%t A377117 {s1, s2, s3} = Transpose[(PadRight[#1, 3] &) /@ Last /@ u][[1 ;; 3]];
+%t A377117 s1  (* Peter J. C. Moses, Oct 16 2024 *)
+%t A377117 (* Program 2 generates (a(n)) for n>=1. *)
+%t A377117 LinearRecurrence[{0,6,6}, {1, 1, 4, 6, 24}, 15]
+%t A377117 (* Program 3 confirms the periodicity properties described in Comments. *)
+%t A377117 tbl = Table[Expand[(2^(1/3) + 2^(2/3))^n], {n, 0, 1000}];
+%t A377117 u = MapApply[{#1/#2, #2} /. {1, #} -> {{1}, {#}} &,
+%t A377117    Map[({#1, #1 /. _^_ -> 1} &), Map[(Apply[List, #1] &), tbl]]];
+%t A377117 v = {s1, s2, s3} = Transpose[(PadRight[#1, 3] &) /@ Last /@ u][[1 ;; 3]];
+%t A377117 Position[Partition[list, Length[#], 1], Flatten[{___, #, ___}]] &[seqtofind];
+%t A377117 period[seq_] := (If[Last[#1] == {} || Length[#1] == Length[seq] - 1, 0, Length[#1]] &)[NestWhileList[Rest, Rest[seq], #1 != Take[seq, Length[#1]] &, 1]];
+%t A377117 periodicityReport[seq_] := ({Take[seq, Length[seq] - Length[#1]], period[#1], Take[#1, period[#1]]} &)[Take[seq, -Length[NestWhile[Rest[#1] &, seq, period[#1] == 0 &, 1, Length[seq]]]]];
+%t A377117 seq = s1; Take[seq, 10]
+%t A377117 f[n_] := Flatten[Position[Mod[s1, Prime[n]], 0]];
+%t A377117 d[n_] := Differences[f[n]];
+%t A377117 Table[Take[f[n], 10], {n, 2, 4}]
+%t A377117 Table[Take[d[n], 10], {n, 2, 4}]
+%t A377117 Column[Table[{n, Prime[n], periodicityReport[d[Prime[n]]]}, {n, 1, 8}]]
+%t A377117 (* _Peter J. C. Moses_, Aug 7 2014, Oct 16 2024 *)
+%Y A377117 Cf. A377109, A377118, A377119.
+%K A377117 nonn,easy
+%O A377117 0,3
+%A A377117 _Clark Kimberling_, Oct 24 2024

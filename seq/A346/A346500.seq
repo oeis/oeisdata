@@ -1,0 +1,52 @@
+%I A346500 #35 Aug 18 2021 15:28:28
+%S A346500 1,1,1,2,2,2,5,4,4,5,15,11,9,11,15,52,36,26,26,36,52,203,135,92,66,92,
+%T A346500 135,203,877,566,371,249,249,371,566,877,4140,2610,1663,1075,712,1075,
+%U A346500 1663,2610,4140,21147,13082,8155,5133,3274,3274,5133,8155,13082,21147
+%N A346500 Number A(n,k) of partitions of the (n+k)-multiset {1,2,...,n,1,2,...,k}; square array A(n,k), n>=0, k>=0, read by antidiagonals.
+%C A346500 Also number A(n,k) of factorizations of Product_{i=1..n} prime(i) * Product_{i=1..k} prime(i); A(2,2) = 9: 2*2*3*3, 3*3*4, 6*6, 2*3*6, 4*9, 2*2*9, 3*12, 2*18, 36.
+%H A346500 Alois P. Heinz, <a href="/A346500/b346500.txt">Antidiagonals n = 0..140, flattened</a>
+%F A346500 A(n,k) = A001055(A002110(n)*A002110(k)).
+%F A346500 A(n,k) = A(k,n).
+%F A346500 A(n,k) = A322765(abs(n-k),min(n,k)).
+%e A346500 A(2,2) = 9: 1122, 11|22, 12|12, 1|122, 112|2, 11|2|2, 1|1|22, 1|12|2, 1|1|2|2.
+%e A346500 Square array A(n,k) begins:
+%e A346500     1,    1,    2,     5,    15,     52,     203,     877, ...
+%e A346500     1,    2,    4,    11,    36,    135,     566,    2610, ...
+%e A346500     2,    4,    9,    26,    92,    371,    1663,    8155, ...
+%e A346500     5,   11,   26,    66,   249,   1075,    5133,   26683, ...
+%e A346500    15,   36,   92,   249,   712,   3274,   16601,   91226, ...
+%e A346500    52,  135,  371,  1075,  3274,  10457,   56135,  325269, ...
+%e A346500   203,  566, 1663,  5133, 16601,  56135,  198091, 1207433, ...
+%e A346500   877, 2610, 8155, 26683, 91226, 325269, 1207433, 4659138, ...
+%e A346500   ...
+%p A346500 g:= proc(n, k) option remember; uses numtheory; `if`(n>k, 0, 1)+
+%p A346500      `if`(isprime(n), 0, add(`if`(d>k or max(factorset(n/d))>d, 0,
+%p A346500         g(n/d, d)), d=divisors(n) minus {1, n}))
+%p A346500     end:
+%p A346500 p:= proc(n) option remember; `if`(n=0, 1, p(n-1)*ithprime(n)) end:
+%p A346500 A:= (n, k)-> g(p(n)*p(k)$2):
+%p A346500 seq(seq(A(n, d-n), n=0..d), d=0..10);
+%p A346500 # second Maple program:
+%p A346500 b:= proc(n) option remember; `if`(n=0, 1,
+%p A346500       add(b(n-j)*binomial(n-1, j-1), j=1..n))
+%p A346500     end:
+%p A346500 A:= proc(n, k) option remember; `if`(n<k, A(k, n),
+%p A346500      `if`(k=0, b(n), (A(n+1, k-1)+add(A(n-k+j, j)
+%p A346500       *binomial(k-1, j), j=0..k-1)+A(n, k-1))/2))
+%p A346500     end:
+%p A346500 seq(seq(A(n, d-n), n=0..d), d=0..10);
+%t A346500 b[n_] := b[n] = If[n == 0, 1, Sum[b[n-j] Binomial[n-1, j-1], {j, 1, n}]];
+%t A346500 A[n_, k_] := A[n, k] = If[n < k, A[k, n],
+%t A346500      If[k == 0, b[n], (A[n + 1, k - 1] + Sum[A[n - k + j, j]*
+%t A346500      Binomial[k - 1, j], {j, 0, k - 1}] + A[n, k - 1])/2]];
+%t A346500 Table[Table[A[n, d - n], {n, 0, d}], {d, 0, 10}] // Flatten (* _Jean-François Alcover_, Aug 18 2021, after _Alois P. Heinz_'s second program *)
+%Y A346500 Columns (or rows) k=0-10 give: A000110, A035098, A322764, A322768, A346881, A346882, A346883, A346884, A346885, A346886, A346887.
+%Y A346500 Main diagonal gives A020555.
+%Y A346500 First upper (or lower) diagonal gives A322766.
+%Y A346500 Second upper (or lower) diagonal gives A322767.
+%Y A346500 Antidiagonal sums give A346490.
+%Y A346500 A(2n,n) gives A322769.
+%Y A346500 Cf. A001055, A002110, A322765, A346426, A346517.
+%K A346500 nonn,tabl
+%O A346500 0,4
+%A A346500 _Alois P. Heinz_, Jul 20 2021

@@ -1,0 +1,37 @@
+%I A332860 #46 Mar 10 2020 23:32:20
+%S A332860 3,3,3,17,37,83,271,557,1129,2531,2017,21467,28631,24533,73681,98251,
+%T A332860 196549,589763,524221,2621369,5242807,14155697,69205933,16777127,
+%U A332860 83885983,67108763,1543503769,1006632853,1342177171,3623878543,11811159937,54358179709,32212254583,225485782901,260919263083
+%N A332860 a(n) is the least prime p such that p+prime(n) has exactly n prime factors, counted with multiplicity.
+%H A332860 Robert Israel, <a href="/A332860/b332860.txt">Table of n, a(n) for n = 1..400</a>
+%F A332860 A001222(a(n)+A000040(n)) = n.
+%e A332860 a(4) = 17 because 17 is prime and 17 + prime(4) = 17 + 7 = 24 = 2^3*3 has 4 prime factors counted with multiplicity, and no smaller prime works.
+%p A332860 g:= proc(n, N, pmax)
+%p A332860 local Res, k, p;
+%p A332860 if n = 0 then return [[]] fi;
+%p A332860 Res:= NULL;
+%p A332860 p:=1;
+%p A332860 do
+%p A332860   p:= nextprime(p);
+%p A332860   if p >= pmax or 2^(n-1)*p > N then return [Res] fi;
+%p A332860   for k from 1 to n while 2^(n-k)*p^k <= N do
+%p A332860     Res:= Res, op(map(t -> [op(t),p$k], procname(n-k,N/p^k,p)));
+%p A332860   od;
+%p A332860 od;
+%p A332860 end proc:
+%p A332860 h:= (n,N) -> sort(map(convert,g(n,N,N/2^(n-1)+1),`*`)):
+%p A332860 f:= proc(n) local pn, N, lastN, R, r;
+%p A332860   pn:= ithprime(n);
+%p A332860   N:= 2^n-1;
+%p A332860   do
+%p A332860     lastN:= N;
+%p A332860     N:= 2*N;
+%p A332860     R:= select(`>`,h(n,N), lastN);
+%p A332860     for r in R do if r > pn and isprime(r-pn) then return r-pn fi od;
+%p A332860   od;
+%p A332860 end proc:
+%p A332860 map(f, [$1..50]);
+%Y A332860 Cf. A000040, A001222.
+%K A332860 nonn
+%O A332860 1,1
+%A A332860 _J. M. Bergot_ and _Robert Israel_, Mar 10 2020

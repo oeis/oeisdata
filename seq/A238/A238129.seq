@@ -1,0 +1,39 @@
+%I A238129 #17 Jan 07 2015 05:23:03
+%S A238129 1,1,0,1,1,0,1,3,0,0,1,8,1,0,0,1,19,5,1,0,0,1,47,21,6,1,0,0,1,114,78,
+%T A238129 31,7,1,0,0,1,286,292,133,43,8,1,0,0,1,723,1028,586,215,57,9,1,0,0,1,
+%U A238129 1869,3691,2453,1073,325,73,10,1,0,0,1,4870,13004,10357,5058,1836,467,91,11,1,0,0
+%N A238129 Triangle read by rows: T(n,k) gives the number of ballot sequences of length n having largest ascent k, n>=0, 0<=k<=n.
+%C A238129 Also number of standard Young tableaux with a pair of cells (v,v+1) such that v lies k rows below v+1, and no pair (u,u+1) with a larger such separation exists.
+%H A238129 Joerg Arndt and Alois P. Heinz, <a href="/A238129/b238129.txt">Table of n, a(n) for n = 0..35, flattened</a>
+%e A238129 Triangle starts:
+%e A238129 00: 1;
+%e A238129 01: 1,     0;
+%e A238129 02: 1,     1,     0;
+%e A238129 03: 1,     3,     0,     0;
+%e A238129 04: 1,     8,     1,     0,     0;
+%e A238129 05: 1,    19,     5,     1,     0,    0;
+%e A238129 06: 1,    47,    21,     6,     1,    0,    0;
+%e A238129 07: 1,   114,    78,    31,     7,    1,    0,   0;
+%e A238129 08: 1,   286,   292,   133,    43,    8,    1,   0,   0;
+%e A238129 09: 1,   723,  1028,   586,   215,   57,    9,   1,   0,  0;
+%e A238129 10: 1,  1869,  3691,  2453,  1073,  325,   73,  10,   1,  0, 0;
+%e A238129 11: 1,  4870, 13004, 10357,  5058, 1836,  467,  91,  11,  1, 0, 0;
+%e A238129 12: 1, 12943, 46452, 43462, 23953, 9631, 2941, 645, 111, 12, 1, 0, 0;
+%e A238129 ...
+%p A238129 b:= proc(n, v, l) option remember; local m; m:=nops(l);
+%p A238129       `if`(n<1, 1, expand(add(`if`(i=1 or l[i-1]>l[i],
+%p A238129        (p->`if`(v<i, add(coeff(p, x, h)*`if`(h<i-v,
+%p A238129        x^(i-v), x^h), h=0..max(i-v, degree(p))), p))
+%p A238129        (b(n-1, i, subsop(i=l[i]+1, l))), 0), i=1..m)+
+%p A238129        (p->add(coeff(p, x, h)*`if`(h<m+1-v, x^(m+1-v), x^h),
+%p A238129        h=0..max(m+1-v, degree(p))))(b(n-1, m+1, [l[], 1]))))
+%p A238129     end:
+%p A238129 T:= n->(p->seq(coeff(p, x, i), i=0..n))(b(n-1, 1, [1])):
+%p A238129 seq(T(n), n=0..14);
+%t A238129 b[n_, v_, l_List] := b[n, v, l] = Module[{m = Length[l]}, If[n<1, 1, Expand[Sum[If[i == 1 || l[[i-1]]>l[[i]], Function[{p}, If[v<i, Sum[Coefficient[p, x, h]*If[h<i-v, x^(i-v), x^h], {h, 0, Max[i-v, Exponent[p, x]]}], p]][b[n-1, i, ReplacePart[l, i -> l[[i]]+1]]], 0], {i, 1, m}] + Function[{p}, Sum[Coefficient[p, x, h]*If[h<m+1-v, x^(m+1-v), x^h], {h, 0, Max[m+1-v, Exponent[p, x]]}]][b[n-1, m+1, Append[l, 1]]]]]]; T[n_] := Function[{p}, Table[Coefficient[p, x, i], {i, 0, n}]][b[n-1, 1, {1}]]; Table[T[n], {n, 0, 14}] // Flatten (* _Jean-François Alcover_, Jan 07 2015, translated from Maple *)
+%Y A238129 Columns k=0-10 give: A000012, A244208, A244198, A244199, A244200, A244201, A244202, A244203, A244204, A244205, A244206.
+%Y A238129 Row sums are A000085.
+%Y A238129 Cf. A238128.
+%K A238129 nonn,tabl
+%O A238129 0,8
+%A A238129 _Joerg Arndt_ and _Alois P. Heinz_, Feb 21 2014

@@ -1,0 +1,40 @@
+%I A371811 #20 May 03 2024 12:13:01
+%S A371811 6,10,14,15,22,26,33,34,38,39,46,55,57,58,62,65,69,74,77,82,86,87,91,
+%T A371811 94,95,106,111,118,122,133,134,141,142,143,145,146,158,159,166,177,
+%U A371811 178,183,185,194,201,202,203,205,206,209,213,214,218,221,226
+%N A371811 Semiprimes q*p such that the congruence 2^x == q (mod p) is solvable, where q < p.
+%F A371811 Trivial bounds: n log n / log log n << a(n) << n log n. - _Charles R Greathouse IV_, Apr 10 2024
+%p A371811 filter:= proc(n) local F,p,q,x;
+%p A371811   F:= ifactors(n)[2];
+%p A371811   if F[..,2] <> [1,1] then return false fi;
+%p A371811   p:= max(F[..,1]); q:= min(F[..,1]);
+%p A371811   [msolve(2^x = q, p)] <> []
+%p A371811 end proc:
+%p A371811 select(filter, [$6 .. 1000]); # _Robert Israel_, Apr 10 2024
+%t A371811 okQ[n_] := Module[{f, p, q, s},
+%t A371811    f = FactorInteger[n];
+%t A371811    If[f[[All, 2]] != {1, 1}, False,
+%t A371811    {q, p} = f[[All, 1]];
+%t A371811    s = Solve[Mod[2^x, p] == q, x, Integers];
+%t A371811    s != {}]];
+%t A371811 Select[Range[6, 1000], okQ] (* _Jean-François Alcover_, May 03 2024 *)
+%o A371811 (PARI) list(lim)=my(v=List()); forprime(p=3,lim\2, forprime(q=2,min(p-1,lim\p), if(znlog(q, Mod(2, p)) != [], listput(v,p*q)))); Set(v) \\ _Charles R Greathouse IV_, Apr 10 2024
+%o A371811 (Python)
+%o A371811 from itertools import count, islice
+%o A371811 from sympy import factorint, discrete_log
+%o A371811 def A371811_gen(startvalue=1): # generator of terms >= startvalue
+%o A371811     for n in count(max(startvalue,1)):
+%o A371811         f = factorint(n)
+%o A371811         if len(f) == 2 and max(f.values())==1:
+%o A371811             q, p = sorted(f.keys())
+%o A371811             try:
+%o A371811                 discrete_log(p,q,2)
+%o A371811             except:
+%o A371811                 continue
+%o A371811             yield n
+%o A371811 A371811_list = list(islice(A371811_gen(),20)) # _Chai Wah Wu_, Apr 10 2024
+%Y A371811 Subsequence of A006881. Apart from the first term, A100484 is a subsequence.
+%Y A371811 Cf. A001915, A001916.
+%K A371811 nonn
+%O A371811 1,1
+%A A371811 _Juri-Stepan Gerasimov_, Apr 06 2024

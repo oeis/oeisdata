@@ -1,0 +1,67 @@
+%I A181187 #107 Feb 09 2021 21:46:36
+%S A181187 1,3,1,6,2,1,12,5,2,1,20,8,4,2,1,35,16,8,4,2,1,54,24,13,7,4,2,1,86,41,
+%T A181187 22,13,7,4,2,1,128,61,35,20,12,7,4,2,1,192,95,54,33,20,12,7,4,2,1,275,
+%U A181187 136,80,49,31,19,12,7,4,2,1,399,204,121,76,48,31,19,12,7,4,2,1,556,284
+%N A181187 Triangle read by rows: T(n,k) = sum of k-th largest elements in all partitions of n.
+%C A181187 For the connection with A066897 and A066898 see A206563. - _Omar E. Pol_, Feb 13 2012
+%C A181187 T(n,k) is also the total number of parts >= k in all partitions of n. - _Omar E. Pol_, Feb 14 2012
+%C A181187 The first differences of row n together with 1 give the row n of triangle A066633. - _Omar E. Pol_, Feb 26 2012
+%C A181187 We define the k-th rank of a partition as the k-th part minus the number of parts >= k. Since the first part of a partition is also the largest part of the same partition so the Dyson's rank of a partition is the case for k = 1. It appears that the sum of the k-th ranks of all partitions of n is equal to zero. - _Omar E. Pol_, Mar 04 2012
+%C A181187 T(n,k) is also the total number of divisors >= k of all positive integers in a sequence with n blocks where the m-th block consists of A000041(n-m) copies of m, with 1 <= m <= n. - _Omar E. Pol_, Feb 05 2021
+%H A181187 Alois P. Heinz, <a href="/A181187/b181187.txt">Rows n = 1..141, flattened</a>
+%F A181187 T(n,k) = Sum_{j=1..n} A207031(j,k). - _Omar E. Pol_, May 02 2012
+%e A181187 From _Omar E. Pol_, Feb 13 2012: (Start)
+%e A181187 Illustration of initial terms. First five rows of triangle as sums of columns from the partitions of the first five positive integers:
+%e A181187 .
+%e A181187 .                            5
+%e A181187 .                            3+2
+%e A181187 .                  4         4+1
+%e A181187 .                  2+2       2+2+1
+%e A181187 .          3       3+1       3+1+1
+%e A181187 .     2    2+1     2+1+1     2+1+1+1
+%e A181187 .  1  1+1  1+1+1   1+1+1+1   1+1+1+1+1
+%e A181187 . -------------------------------------
+%e A181187 .  1, 3,1, 6,2,1, 12,5,2,1, 20,8,4,2,1 --> This triangle
+%e A181187 .  |  |/|  |/|/|   |/|/|/|   |/|/|/|/|
+%e A181187 .  1, 2,1, 4,1,1,  7,3,1,1, 12,4,2,1,1 --> A066633
+%e A181187 .
+%e A181187 For more information see A207031 and A206563.
+%e A181187 ...
+%e A181187 Triangle begins:
+%e A181187     1;
+%e A181187     3,   1;
+%e A181187     6,   2,   1;
+%e A181187    12,   5,   2,  1;
+%e A181187    20,   8,   4,  2,  1;
+%e A181187    35,  16,   8,  4,  2,  1;
+%e A181187    54,  24,  13,  7,  4,  2,  1;
+%e A181187    86,  41,  22, 13,  7,  4,  2,  1;
+%e A181187   128,  61,  35, 20, 12,  7,  4,  2, 1;
+%e A181187   192,  95,  54, 33, 20, 12,  7,  4, 2, 1;
+%e A181187   275, 136,  80, 49, 31, 19, 12,  7, 4, 2, 1;
+%e A181187   399, 204, 121, 76, 48, 31, 19, 12, 7, 4, 2, 1;
+%e A181187 (End)
+%p A181187 p:= (f, g)-> zip((x, y)-> x+y, f, g, 0):
+%p A181187 b:= proc(n, i) option remember; local f, g;
+%p A181187       if n=0 or i=1 then [1, n]
+%p A181187     else f:= b(n, i-1); g:= `if`(i>n, [0], b(n-i, i));
+%p A181187          p(p(f, g), [0$i, g[1]])
+%p A181187       fi
+%p A181187     end:
+%p A181187 T:= proc(n) local j, l, r, t;
+%p A181187       l, r, t:= b(n, n), 1, 1;
+%p A181187       for j from n to 2 by -1 do t:= t+l[j]; r:=r, t od;
+%p A181187       seq([r][1+n-j], j=1..n)
+%p A181187     end:
+%p A181187 seq(T(n), n=1..14); # _Alois P. Heinz_, Apr 05 2012
+%t A181187 Table[Plus @@ (PadRight[ #,n]& /@ IntegerPartitions[n]),{n,16}]
+%t A181187 (* Second program: *)
+%t A181187 T[n_, n_] = 1; T[n_, k_] /; k<n := T[n, k] = T[n-k, k] + PartitionsP[n-k]; T[_, _] = 0; Table[Table[T[n, k], {k, n, 1, -1}] // Accumulate // Reverse, {n, 1, 16}] // Flatten (* _Jean-François Alcover_, Oct 10 2015, after _Omar E. Pol_ *)
+%Y A181187 Row sums are A066186. First column is A006128. Reverse of each row converges to A000070.
+%Y A181187 Columns 2-3: A096541, A207033. - _Omar E. Pol_, Feb 18 2012
+%Y A181187 T(2n,n) gives A216053(n+1).
+%Y A181187 Cf. A206283.
+%K A181187 easy,nonn,tabl
+%O A181187 1,2
+%A A181187 _Wouter Meeussen_, Oct 09 2010
+%E A181187 Better definition from _Omar E. Pol_, Feb 13 2012

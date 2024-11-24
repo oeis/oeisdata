@@ -1,0 +1,55 @@
+%I A331921 #61 Feb 12 2024 07:44:04
+%S A331921 0,1,2,2,3,2,3,2,3,3,4,2,3,3,2,2,3,3,4,2,2,4,5,3,3,3,4,2,3,2,3
+%N A331921 Number of iterations of the map G -> Aut(G) on the cyclic group of order n needed to reach stability; or -1 if the iteration never stabilizes.
+%C A331921 a(n) is the smallest m >= 0 such that Aut^{m+r}(Cn) is isomorphic to Aut^m(Cn) for some r > 0.
+%C A331921 This sequence shares the first 7 terms with A003434 but not beyond, because Aut(Cn) has order phi(n) (see A000010) but need not be cyclic. It also shares the first 14 terms with A185816 (not beyond).
+%C A331921 For n<32, G=Aut^{m+1}(Cn) is isomorphic to Aut^m(Cn) iff G is in {C1,S3,D8,D12,PGL(2,7)}. This is established by the GAP computation below.
+%C A331921 Question: What is a(32)? (we just know that a(32)>=8)
+%C A331921 Conjecture: a(n) != -1 for all n.
+%C A331921 Question: Is there n such that the sequence Aut^m(Cn) reaches a loop of length>1?
+%C A331921 From _Jianing Song_, Aug 13 2023: (Start)
+%C A331921 It can be checked that a(n) != -1 for the following numbers: 3^k and 2*3^k for all k >= 0; 2*3^k+1 and 2*(2*3^k+1) for all k >= 0 where 2*3^k+1 is a prime; divisors of 16, 20, 26, 30, 34, 46, 50, 58, 62, 74, 94, 118, 134, 146, 168, 172, 178, 196, 218, 258, 264, 294, 346, 394, 456, 458, 648, 686, 694 or 914.
+%C A331921 The sequences of iterations are listed as follows (D_{2n} = dihedral group of order 2*n, S_n = symmetric group over set of size n, A_n = alternating group over set of size n):
+%C A331921  - C_{3^k}, C_{2*3^k} -> C_{2*3^(k-1)} -> ... -> C_2 -> C_1, k >= 1;
+%C A331921  - C_{2*3^k+1} or C_{2*(2*3^k+1)} -> C_{2*3^k} -> ... -> C_2 -> C_1, k >= 0, 2*3^k+1 is prime;
+%C A331921  - C_47 or C_94 -> C_23 or C_46 -> C_11 or C_22 -> C_5 or C_10 -> C_4 -> C_2 -> C_1;
+%C A331921  - C_13 or C_26 -> C_8 or C_12 -> C_2 X C_2 -> S_3;
+%C A331921  - C_17, C_25, C_31, C_34, C_50 or C_62 -> C_15, C_16, C_20 or C_30 -> C_2 X C_4 -> D_8;
+%C A331921  - C_59 or C_118 -> C_29, C_37, C_43, C_49, C_58, C_74, C_86 or C_98 -> C_21, C_28, C_36 or C_42 -> C_2 X C_6 -> D_12;
+%C A331921  - C_24 -> C_2 X C_2 X C_2 -> PSL(2,7) -> PGL(2,7);
+%C A331921  - C_67 or C_134 -> C_33, C_44 or C_66 -> C_2 X C_10 -> C_4 X S_3 -> C_2 X D_12 -> S_3 X S_4;
+%C A331921  - C_109 or C_218 -> C_57, C_76, C_108 or C_114 -> C_2 X C_18 -> C_6 X S_3 -> C_2 X D_12 -> S_3 X S_4;
+%C A331921  - C_73 or C_146 -> C_56, C_72 or C_84 -> C_2 X C_2 X C_6 -> C_2 X PSL(2,7) -> PGL(2,7);
+%C A331921  - C_89 or C_178 -> C_88 or C_132 -> C_2 X C_2 X C_10 -> C_4 X PSL(2,7) -> C_2 X PGL(2,7);
+%C A331921  - C_347 or C_694 -> C_173, C_197, C_343, C_346, C_394 or C_686 -> C_129, C_147, C_172, C_196, C_258 or C_294 -> C_2 X C_42 -> C_6 X D_12 -> C_2 X D_12 X S_4 -> S_3 X S_4 X SmallGroup(96,227) -> S_3 X S_4 X SmallGroup(576,8654) -> S_3 X S_4 X SmallGroup(1152,157849);
+%C A331921  - C_229 or C_458 -> C_152, C_216 or C_228 -> C_2 X C_2 X C_18 -> C_6 X PSL(2,7) -> C_2 X PGL(2,7);
+%C A331921  - C_168 -> C_2 X C_2 X C_2 X C_6 -> C_2 X A_8 -> S_8;
+%C A331921  - C_264 -> C_2 X C_2 X C_2 X C_10 -> C_4 X A_8 -> C_2 X S_8;
+%C A331921  - C_457 or C_914 -> C_456 -> C_2 X C_2 X C_2 X C_18 -> C_6 X A_8 -> C_2 X S_8;
+%C A331921  - C_324 -> C_2 X C_54 -> C_18 X S_3 -> C_6 X D_12 -> C_2 X D_12 X S_4 -> S_3 X S_4 X SmallGroup(96,227) -> S_3 X S_4 X SmallGroup(576,8654) -> S_3 X S_4 X SmallGroup(1152,157849);
+%C A331921  - C_648 -> C_2 X C_2 X C_54 -> C_18 X PSL(2,7) -> C_6 X PGL(2,7) -> C_2 X C_2 X PGL(2,7) -> S_4 X PGL(2,7).
+%C A331921 The following two sequences are conjectured to be correct and to stabilize at the last term:
+%C A331921  - C_344, C_392, C_516 or C_588 -> C_2 X C_2 X C_42 -> C_2 X C_6 X PSL(2,7) - > D_12 X PGL(2,7) -> C_2 X D_12 X PGL(2,7) -> S_3 X PGL(2,7) X SmallGroup(96,227) -> S_3 X PGL(2,7) X SmallGroup(576,8654)? -> S_3 X PGL(2,7) X SmallGroup(1152,157849)?
+%C A331921  - C_1033 or C_2066 -> C_1032 or C_1176 -> C_2 X C_2 X C_2 X C_42 -> C_2 X C_6 X A_8 - > D_12 X S_8 -> C_2 X D_12 X S_8? -> S_3 X S_8 X SmallGroup(96,227)? -> S_3 X S_8 X SmallGroup(576,8654)? -> S_3 X S_8 X SmallGroup(1152,157849)? (End)
+%H A331921 G. Muller, <a href="https://mathoverflow.net/q/5635/34538">Does Aut(Aut(...Aut(G)...)) stabilize?</a>, MathOverflow (2009).
+%H A331921 S. Palcoux, <a href="https://mathoverflow.net/q/351593/34538">On the iterated automorphism groups of the cyclic groups</a>, MathOverflow (2020).
+%H A331921 Wikipedia, <a href="https://en.wikipedia.org/wiki/Multiplicative_group_of_integers_modulo_n">Multiplicative group of integers modulo n</a>.
+%e A331921 Aut(C1)=C1 so a(1)=0, Aut(C2)=C1 so a(2)=1.
+%e A331921 Aut(C8)=C2xC2, Aut(C2xC2)=S3, Aut(S3)=S3, so a(8)=2 (whereas A003434(8)=3).
+%e A331921 Aut(15)=C2xC4, Aut(C2xC4)=D8, Aut(D8)=D8, so a(15)=2 (whereas A185816(15)=3).
+%o A331921 (GAP)
+%o A331921 gap> LoadPackage("sonata");
+%o A331921 gap> L:=[];; SG:=[];; for n in [1..31] do a:=0; C:=CyclicGroup(n); A:=AutomorphismGroup(C); while Order(C)<>Order(A) or not IsIsomorphicGroup(A,C) do a:=a+1; C:=A; A:=AutomorphismGroup(A); od; Add(L,a); Add(SG,IdGroup(A)); od;
+%o A331921 gap> L;
+%o A331921 [ 0, 1, 2, 2, 3, 2, 3, 2, 3, 3, 4, 2, 3, 3, 2, 2, 3, 3, 4, 2, 2, 4, 5, 3, 3, 3, 4, 2, 3, 2, 3 ]
+%o A331921 gap> SG;
+%o A331921 [ [ 1, 1 ], [ 1, 1 ], [ 1, 1 ], [ 1, 1 ], [ 1, 1 ], [ 1, 1 ], [ 1, 1 ], [ 6, 1 ], [ 1, 1 ], [ 1, 1 ], [ 1, 1 ], [ 6, 1 ], [ 6, 1 ], [ 1, 1 ], [ 8, 3 ], [ 8, 3 ], [ 8, 3 ], [ 1, 1 ], [ 1, 1 ], [ 8, 3 ], [ 12, 4 ], [ 1, 1 ], [ 1, 1 ], [ 336, 208 ], [ 8, 3 ], [ 6, 1 ], [ 1, 1 ], [ 12, 4 ], [ 12, 4 ], [ 8, 3 ], [ 8, 3 ] ]
+%o A331921 gap> Set(SG);
+%o A331921 [ [ 1, 1 ], [ 6, 1 ], [ 8, 3 ], [ 12, 4 ], [ 336, 208 ] ]
+%o A331921 # It is the list of IdGroup for C1, S3, D8, D12 and PGL(2,7).
+%o A331921 # The above program works well for n<32. Beyond, it will work as long as there is no loop of length>1 and a(n) finite, which (for small n) is very likely (the opposite would be a breakthrough), otherwise it will just not end. Moreover, if Order(A) is too big then IdGroup(A) will not work, because the SmallGroup library of GAP is finite.
+%Y A331921 Cf. A000010, A003434, A185816, A117729, A179401.
+%K A331921 nonn,more
+%O A331921 1,3
+%A A331921 _Sébastien Palcoux_, Feb 01 2020
+%E A331921 Escape clause added by _Jianing Song_, Aug 13 2023

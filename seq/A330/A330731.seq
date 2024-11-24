@@ -1,0 +1,97 @@
+%I A330731 #28 Jan 18 2022 21:52:25
+%S A330731 0,1,0,0,1,1,0,1,1,1,0,0,0,1,0,1,0,0,0,0,1,1,1,1,0,1,0,1,1,0,0,1,0,0,
+%T A330731 0,1,1,0,0,0,0,0,1,0,0,1,0,1,1,1,1,1,0,0,1,1,1,0,1,1,0,1,0,0,1,1,1,1,
+%U A330731 1,1,0,1,1,1,1,0,0,0,0,1,0,1,1,0
+%N A330731 Binary sequence created by greedily remaining as normal as possible: starting with the empty sequence, repeatedly find the longest tail (or suffix) which is followed by one digit more frequently than the other, and append the digit which follows said tail less often. 0 is appended if no such inequality is found.
+%C A330731 a(n) is conjectured to be normal by virtue of its construction.
+%C A330731 The C code below takes O(n^2) time and O(n) space to generate the first n terms.
+%H A330731 Aresh Pourkavoos, <a href="/A330731/b330731.txt">Table of n, a(n) for n = 0..8191</a>
+%e A330731 The empty sequence has no tails followed by 0 or 1, so a(0)=0 by default.
+%e A330731 The sequence (0) contains (the empty sequence plus) 0 once and 1 zero times, so a(1)=1.
+%e A330731 The sequence (0, 1) does not contain 1 followed by any digit, and it contains (the empty sequence plus) 0 and 1 an equal number of times, so a(2)=0 by default.
+%e A330731 In (0, 1, 0), 0 is followed by 0 zero times and by 1 once, so a(3)=0.
+%o A330731 (C)
+%o A330731 #include <stdio.h>
+%o A330731 #define N_TERMS 8192
+%o A330731 // Stores generated terms
+%o A330731 int a[N_TERMS];
+%o A330731 // b[j-1] is the number of bits before (not including) a[n-j]
+%o A330731 // which match the tail of the first n entries
+%o A330731 int b[N_TERMS];
+%o A330731 // c induces a linked list structure on b
+%o A330731 // with an extra node to make it cyclic
+%o A330731 // Indices are offset by 1 since the extra node is in front
+%o A330731 int c[N_TERMS];
+%o A330731 int cEnd = 0;
+%o A330731 int main() {
+%o A330731   FILE *bfile = fopen("b330731.txt", "w+");
+%o A330731   for (int n = 0; n < N_TERMS; n++) {
+%o A330731     // Append new digit to list from previous loop
+%o A330731     // or (n = 0) initialize c
+%o A330731     c[n] = 0;
+%o A330731     c[cEnd] = n;
+%o A330731     cEnd = n;
+%o A330731     // Find new digit by iterating over b
+%o A330731     // using the indices given in c
+%o A330731     int newD = 0;
+%o A330731     int freq0 = 0;
+%o A330731     int freq1 = 0;
+%o A330731     int prevTail = -1;
+%o A330731     int j = c[0];
+%o A330731     while (j != 0) {
+%o A330731       int currTail = b[j-1];
+%o A330731       if (currTail != prevTail) {
+%o A330731         // All tails of a given length have been accumulated in freqs,
+%o A330731         // so they need to be compared to decide whether to continue
+%o A330731         if (freq1 != freq0) {
+%o A330731           break;
+%o A330731         }
+%o A330731         freq0 = 0;
+%o A330731         freq1 = 0;
+%o A330731       }
+%o A330731       // Use digit that comes after current tail to adjust freqs
+%o A330731       if (a[n-j] == 0) {
+%o A330731         freq0++;
+%o A330731       } else {
+%o A330731         freq1++;
+%o A330731       }
+%o A330731       prevTail = currTail;
+%o A330731       j = c[j];
+%o A330731     }
+%o A330731     // 0 is chosen by default (if freq1 == freq0)
+%o A330731     if (freq1 < freq0) {
+%o A330731       newD = 1;
+%o A330731     }
+%o A330731     // Update matching tail lengths
+%o A330731     j = 0;
+%o A330731     for (int numVisited = 0; numVisited < n; numVisited++) {
+%o A330731       int k = c[j];
+%o A330731       if (a[n-k] == newD) {
+%o A330731         // Matching tail grows by 1, position in list is unaffected
+%o A330731         b[k-1]++;
+%o A330731         j = k;
+%o A330731       } else {
+%o A330731         // Matching tail resets to 0, moved to back of list
+%o A330731         b[k-1] = 0;
+%o A330731         c[j] = c[k];
+%o A330731         if (cEnd == k) {
+%o A330731           cEnd = j;
+%o A330731         }
+%o A330731         c[k] = 0;
+%o A330731         c[cEnd] = k;
+%o A330731         cEnd = k;
+%o A330731       }
+%o A330731     }
+%o A330731     a[n] = newD;
+%o A330731     b[n] = 0;
+%o A330731     printf("%d", newD);
+%o A330731     fprintf(bfile, "%d %d\n", n, newD);
+%o A330731   }
+%o A330731   printf("\n");
+%o A330731   fclose(bfile);
+%o A330731   return 0;
+%o A330731 } // rewritten by _Aresh Pourkavoos_, Dec 21 2021
+%Y A330731 Could have similar applications to A099601, A166316: testing many different binary sequences efficiently, except the sequence length is unknown.
+%K A330731 nonn
+%O A330731 0
+%A A330731 _Aresh Pourkavoos_, Dec 28 2019

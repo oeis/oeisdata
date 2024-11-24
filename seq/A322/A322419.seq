@@ -1,0 +1,60 @@
+%I A322419 #49 Jul 29 2020 23:06:11
+%S A322419 1,2,4,8,12,20,32,52,84,136,220,356,564,904,1448,2320,3684,5872,9376,
+%T A322419 14960,23688,37652,59912,95316,150744,239080,379528,602424,951788,
+%U A322419 1507136,2388252,3784344,5973988,9447880,14950796,23658540,37321752,58965260,93206864,147333080,232286272
+%N A322419 Number of n-step self-avoiding walks on L-lattice.
+%C A322419 The L-lattice is an oriented square lattice in which each step must be followed by a step perpendicular to the preceding one.
+%H A322419 Sean A. Irvine, <a href="/A322419/b322419.txt">Table of n, a(n) for n = 0..50</a>
+%H A322419 Robert FERREOL, <a href="/A322419/a322419_1.gif">The a(4)=12 walks in L-lattice</a>
+%H A322419 Keh-Ying Lin and Yee-Mou Kao, <a href="https://doi.org/10.1088/0305-4470/32/40/303">Universal amplitude combinations for self-avoiding walks and polygons on directed lattices</a>, J. Phys. A: Math. Gen. 32 (1999), page 6929.
+%H A322419 A. Malakis, <a href="http://iopscience.iop.org/article/10.1088/0305-4470/8/12/007/meta">Self-avoiding walks on oriented square lattices</a>, Journal of Physics A: Mathematical and General, Volume 8, Number 12 (1975), page 1890.
+%H A322419 Wikipedia, <a href="https://en.wikipedia.org/wiki/Connective_constant">Connective constant</a>
+%F A322419 a(n) = 4*A189722(n) for n >= 2.
+%F A322419 It is proved that a(n)^(1/n) has a limit mu called the "connective constant" of the L-lattice; approximate value of mu: 1.5657. It is only conjectured that a(n + 1) ~ mu * a(n).
+%e A322419 a(1) = 2 because there are only two possible directions at each intersection; for the same reason a(2) = 2*2 and a(3) = 2*4 ; but a(4) = 12 (not 16) because four paths return to the starting point and are not self-avoiding. See the 12 paths under "links".
+%p A322419 walks:=proc(n)
+%p A322419     option remember;
+%p A322419     local i,father,End,X,walkN,dir,u,x,y;
+%p A322419     if n=1 then [[[0,0]]] else
+%p A322419          father:=walks(n-1):
+%p A322419          walkN:=NULL:
+%p A322419          for i to nops(father) do
+%p A322419             u:=father[i]:End:=u[n-1]:if n mod 2 = 0 then
+%p A322419             dir:=[[1,0], [-1, 0]] else dir := [[0,1], [0, -1]] fi:
+%p A322419             for X in dir do
+%p A322419              if not(member(End+X,u)) then walkN:=walkN,[op(u),End+X] fi;
+%p A322419              od od:
+%p A322419          [walkN] fi end:
+%p A322419 n:=5:L:=walks(n):N:=nops(L);
+%p A322419 # This program explicitly gives the a(n) walks.
+%t A322419 mo = {{1, 0}, {-1, 0}}; moo = {{0, 1}, {0, -1}}; a[0] = 1;
+%t A322419 a[tg_, p_: {{0, 0}}] := Module[{e, mv},
+%t A322419 If[Mod[tg, 2] == 0, mv = Complement[Last[p] + # & /@ mo, p],
+%t A322419 mv = Complement[Last[p] + # & /@ moo, p]];
+%t A322419 If[tg == 1, Length@mv, Sum[a[tg - 1, Append[p, e]], {e, mv}]]];
+%t A322419 a /@ Range[0, 20] (* after the program from _Giovanni Resta_ at A001411 *)
+%o A322419 (Python)
+%o A322419 def add(L, x):
+%o A322419     M = [y for y in L]
+%o A322419     M.append(x)
+%o A322419     return M
+%o A322419 plus = lambda L, M: [x + y for x, y in zip(L, M)]
+%o A322419 mo = [[1, 0], [-1, 0]]
+%o A322419 moo = [[0, 1], [0, -1]]
+%o A322419 def a(n, P=[[0, 0]]):
+%o A322419     if n == 0:
+%o A322419         return 1
+%o A322419     if n % 2 == 0:
+%o A322419         mv1 = [plus(P[-1], x) for x in mo]
+%o A322419     else:
+%o A322419         mv1 = [plus(P[-1], x) for x in moo]
+%o A322419     mv2 = [x for x in mv1 if x not in P]
+%o A322419     if n == 1:
+%o A322419         return len(mv2)
+%o A322419     else:
+%o A322419         return sum(a(n - 1, add(P, x)) for x in mv2)
+%o A322419 [a(n) for n in range(21)]
+%Y A322419 Cf. A001411 (square lattice), A117633 (Manhattan lattice), A189722, A004277 (coordination sequence), A151798.
+%K A322419 nonn,walk
+%O A322419 0,2
+%A A322419 _Robert FERREOL_, Dec 07 2018

@@ -1,0 +1,46 @@
+%I A175929 #50 Mar 22 2024 11:43:24
+%S A175929 1,1,1,1,1,2,0,2,1,1,3,1,4,2,2,2,4,1,3,1,1,4,3,6,7,6,4,10,6,10,6,10,6,
+%T A175929 10,4,6,7,6,3,4,1,1,5,6,9,16,12,14,24,20,21,23,28,24,34,20,32,42,29,
+%U A175929 29,42,32,20,34,24,28,23,21,20,24,14,12,16,9,6,5,1,1,6,10,14,29,26,35,46,55
+%N A175929 Triangle T(n,v) read by rows: the number of permutations of [n] with "entropy" equal to 2*v.
+%C A175929 Define the "entropy" (or variance) of a permutation pi to be Sum_{i=1..n} (pi(i)-i)^2 = A006331(n) - 2*Sum_i i*pi(i), as in A126972.
+%C A175929 This characteristic is obviously an even number, 2*v(pi).
+%C A175929 Row n of the triangle shows the statistics (frequency distribution) of v for the n! = A000142(n) possible permutations of [n].
+%C A175929 T(n,0)=1 arises the identity permutation where v=0.
+%C A175929 T(n,1)=n-1 arises from the n-1 different ways of creating an entropy of 2 by swapping a pair of adjacent entries in the identity permutation.
+%C A175929 The final 1 in each row arises from the permutation with maximal entropy, that is the permutation with integers reversed relative to the identity permutation.
+%C A175929 Row n has 1+A000292(n-1) entries. Row sums are sum_{v=0..A000292(n-1)} T(n,v) = n!.
+%C A175929 Removing zeros in A135298 creates a sequence which is similar in the initial terms, because contributions to A135298(n) stem from permutations of some unique [j] if n is not too large, which establishes a 1-to-1 correspondence between the term A006331(n)-2*sum_i i*pi(i) mentioned above and the defining formula in A135298.
+%C A175929 The rows of this triangle have a geometric interpretation. Let P_n be the n-dimensional permutohedron, the Voronoi cell of the lattice A_n* (Conway-Sloane, 1993, p. 474), which is a polytope with (n+1)! vertices. Start at any vertex, and count how many vertices there are at squared-distance v from the starting vertex: this is T(n+1,v). For example, in three dimensions the permutohedron is a truncated octahedron, the squared distances from a vertex to all the vertices are (when suitably scaled) 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, and the numbers of vertices at these distances are 1, 3, 1, 4, 2, 2, 2, 4, 1, 3, 1, which is row 4 of the array. See Chap. 21, Section 3.F, op. cit., for further details. - _N. J. A. Sloane_, Oct 13 2015
+%D A175929 J. H. Conway and N. J. A. Sloane, "Sphere Packings, Lattices and Groups", Springer-Verlag, 3rd. ed., 1993.
+%H A175929 Alois P. Heinz, <a href="/A175929/b175929.txt">Rows n = 0..20, flattened</a>
+%H A175929 FindStat - Combinatorial Statistic Finder, <a href="http://www.findstat.org/StatisticsDatabase/St000055">The rank of the permutation inside the alternating sign matrix lattice</a>.
+%F A175929 Sum_{k>=0} k * T(n,k) = A001754(n+1). - _Alois P. Heinz_, Mar 02 2024
+%e A175929 Triangle T(n,v) starts in row n=0 and column v=0 as follows:
+%e A175929   1;
+%e A175929   1;
+%e A175929   1, 1;
+%e A175929   1, 2, 0, 2, 1;
+%e A175929   1, 3, 1, 4, 2, 2, 2,  4, 1,  3, 1;
+%e A175929   1, 4, 3, 6, 7, 6, 4, 10, 6, 10, 6, 10, 6, 10, 4, 6, 7, 6, 3, 4, 1;
+%e A175929   ...
+%p A175929 with(combinat):
+%p A175929 T:= n-> (p-> seq(coeff(p, x, j), j=ldegree(p)..degree(p)))
+%p A175929         (add(x^add(i*l[i], i=1..n), l=permute(n))):
+%p A175929 seq(T(n), n=0..7);  # _Alois P. Heinz_, Aug 28 2014
+%p A175929 # second Maple program:
+%p A175929 b:= proc(s) option remember; (n-> `if`(n=0, 1, add(expand(
+%p A175929       x^((n-j)^2/2)*b(s minus {j})), j=s)))(nops(s))
+%p A175929     end:
+%p A175929 T:= n-> (p-> seq(coeff(p, x, i), i=0..degree(p)))(b({$1..n})):
+%p A175929 seq(T(n), n=0..7);  # _Alois P. Heinz_, Mar 02 2024
+%t A175929 b[s_] := b[s] = With[{n = Length[s]}, If[n == 0, 1, Sum[Expand[x^((n-j)^2/2)*b[s~Complement~{j}]], {j, s}]]];
+%t A175929 T[n_] := CoefficientList[b[Range[n]], x];
+%t A175929 Table[T[n], {n, 0, 7}] // Flatten (* _Jean-François Alcover_, Mar 22 2024, after _Alois P. Heinz_ *)
+%Y A175929 Row sums give A000142.
+%Y A175929 Cf. A000292, A001754, A006331, A126972, A135298.
+%K A175929 nonn,tabf
+%O A175929 0,6
+%A A175929 _Emeric Deutsch_ and _R. J. Mathar_, Oct 22 2010
+%E A175929 Row length term corrected by _R. J. Mathar_, Oct 23 2010
+%E A175929 T(0,0)=1 prepended by _Alois P. Heinz_, Nov 23 2023

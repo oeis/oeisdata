@@ -1,0 +1,47 @@
+%I A288814 #99 Apr 15 2024 05:10:52
+%S A288814 4,6,8,10,15,14,21,28,35,22,33,26,39,52,65,34,51,38,57,76,95,46,69,92,
+%T A288814 115,184,161,58,87,62,93,124,155,248,217,74,111,148,185,82,123,86,129,
+%U A288814 172,215,94,141,188,235,376,329,106,159,212,265,424,371,118,177,122,183,244,305,488,427,134,201,268,335,142
+%N A288814 a(n) is the smallest composite number whose prime divisors (with multiplicity) sum to n.
+%C A288814 Agrees with A056240(n) if n is composite (but not if n is prime).
+%C A288814 For n prime, let P_n = greatest prime < n such that A056240(n-P_n) = A288313(m) for some m; then a(n) = Min{q*a(n-q): q prime, n-1 > q >= P_n}.
+%C A288814 In most cases q is the greatest prime < p, but there are exceptions; e.g., p=211 is the smallest prime for which q (=197) is the second prime removed from 211, not the first. 541 is the next prime with this property (q=521). The same applies to p=16183, for which q=16139, the second prime removed from p. These examples all arise with q being the lesser of a prime pair.
+%C A288814 For p prime, a(p) = q*a(p-q) for some prime q < p as described above. Then a(p-q) = 2,4,8 or 3*r for some prime r.
+%C A288814 The subsequence of terms (4, 6, 8, 10, 14, 21, 22, 26, 34, ...), where for all m > n, a(m) > a(n) is the same as sequence A088686, and the sequence of its indices (4, 5, 6, 7, 9, 10, 13, 19, ...) is the same as A088685. - _David James Sycamore_, Jun 30 2017
+%C A288814 Records are in A088685. - _Robert G. Wilson v_, Feb 26 2018
+%C A288814 Number of terms less than 10^k, k=1,2,3,...: 3, 32, 246, 2046, 17053, 147488, ..., . - _Robert G. Wilson v_, Feb 26 2018
+%H A288814 David A. Corneth, <a href="/A288814/b288814.txt">Table of n, a(n) for n = 4..10003</a> (terms 4..1000 from Michel Marcus)
+%H A288814 David A. Corneth, <a href="/A288814/a288814.gp.txt">PARI program</a>
+%e A288814 a(5) = 6 = 2*3 is the smallest composite number whose prime divisors add to 5.
+%e A288814 a(7) = 10 = 2*5 is the smallest composite number whose prime divisors add to 7.
+%e A288814 12 = 2 * 2 * 3 is not in the sequence, since the sum of its prime divisors is 7, a value already obtained by the lesser 10. - _David A. Corneth_, Jun 22 2017
+%p A288814 N:= 100: # to get a(4)..a(N)
+%p A288814 V:= Array(4..N): count:= 0:
+%p A288814 for k from 4 while count < N-3 do
+%p A288814   if isprime(k) then next fi;
+%p A288814   s:= add(t[1]*t[2], t = ifactors(k)[2]);
+%p A288814 if s <= N and V[s]=0 then
+%p A288814     V[s]:= k; count:= count+1;
+%p A288814 fi
+%p A288814 od:
+%p A288814 convert(V,list); # _Robert Israel_, Feb 26 2018
+%p A288814 # alternative
+%p A288814 A288814 := proc(n)
+%p A288814     local k ;
+%p A288814     for k from 1 do
+%p A288814         if not isprime(k) and A001414(k) = n then
+%p A288814             return k ;
+%p A288814         end if;
+%p A288814     end do:
+%p A288814 end proc:
+%p A288814 seq(A288814(n),n=4..80) ; # _R. J. Mathar_, Apr 15 2024
+%t A288814 Function[s, Table[FirstPosition[s, _?(# == n &)][[1]], {n, 4, 73}]]@ Table[Boole[CompositeQ@ n] Total@ Flatten@ Map[ConstantArray[#1, #2] & @@ # &, FactorInteger[n]], {n, 10^3}] (* _Michael De Vlieger_, Jun 19 2017 *)
+%t A288814 f[n_] := If[ PrimeQ@ n, 0, spf = Plus @@ Flatten[ Table[#1, {#2}] & @@@ FactorInteger@ n]]; t[_] := 0; k = 1; While[k < 500, If[ t[f[k]] == 0, t[f[k]] = k]; k++]; t@# & /@ Range[4, 73] (* _Robert G. Wilson v_, Feb 26 2018 *)
+%o A288814 (PARI) isok(k, n) = my(f=factor(k)); sum(j=1, #f~, f[j,1]*f[j,2]) == n;
+%o A288814 a(n) = forcomposite(k=1,, if (isok(k, n), return(k))); \\ _Michel Marcus_, Jun 21 2017
+%o A288814 (PARI) lista(n) = {my(res = vector(n), s, todo); if(n < 4, return([]), todo = n-3); forcomposite(k=4, , f=factor(k); s = sum(j=1, #f~, f[j, 1]*f[j, 2]); if(s<=n, if(res[s]==0, res[s]=k; todo--; if(todo==0, return(vector(n-3, i, res[i+3]))))))} \\ _David A. Corneth_, Jun 21 2017
+%o A288814 (PARI) See PARI-link \\ _David A. Corneth_, Mar 23 2018
+%Y A288814 Cf. A046343, A056240, A088685, A288313.
+%K A288814 nonn
+%O A288814 4,1
+%A A288814 _David James Sycamore_, Jun 16 2017

@@ -1,0 +1,56 @@
+%I A360098 #24 Feb 18 2023 15:28:51
+%S A360098 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,3,1,1,1,1,1,1,15,1,1,1,1,1,7,1,105,
+%T A360098 1,1,1,1,1,1,71,1,945,1,1,1,1,1,10,1,1001,1,10395,1,1,1,1,1,3,280,1,
+%U A360098 18089,1,135135,1,1,1,1,1,7,15,15400,1,398959,1
+%N A360098 Square array read by antidiagonals upwards: T(n,k) is the number of ways of choosing nonnegative numbers for k n-sided dice, k >= 0, n >= 1, so that summing the faces can give any integer from 0 to n^k - 1.
+%C A360098 T(n,k) depends on n only through its prime signature. (See A118914.) For example, for fixed k, T(p*q^2,k) will be the same for any pair of distinct primes p and q. Hence we may define T(n,k) = R(s(n),k), where s(n) is the prime signature of n.
+%C A360098 Also the number of Krasner factorizations of (x^(n^k)-1) / (x-1) into k polynomials each having n nonzero terms all with coefficient +1. (Krasner and Ranulac, 1937)
+%H A360098 M. Krasner and B. Ranulac, <a href="https://gallica.bnf.fr/ark:/12148/bpt6k31562/f397.item">Sur une propriété des polynomes de la division du cercle</a>, Comptes Rendus Académie des Sciences Paris, 240:397-399, 1937.
+%H A360098 Matthew C. Lettington and Karl Michael Schmidt, <a href="https://arxiv.org/abs/1910.02455">Divisor Functions and the Number of Sum Systems</a>, arXiv:1910.02455 [math.NT], 2019.
+%F A360098 Use M to denote a (k-1)-element multiset of positive integers. Let U denote the (k-1)-element multiset whose elements all equal 1 and let N denote the (k-1)-element multiset whose elements all equal n. For i in M, let M_{i,j} denote the result of replacing i with j in M. Then T(1,k) = T(n,0) = 1, while for n > 1 and k > 0 we have T(n,k) = r(n,N) / (k-1)! where r(i,M) is given by the recurrence
+%F A360098    r(i,U) = 1 for i > 1,
+%F A360098    r(i,M) = Sum_{m in M} Sum_{d|i,d<i} r(m,M_{m,d}) for M != U.
+%e A360098 There are 3 ways to assign numbers to two 4-sided dice:
+%e A360098  {{0, 1, 2, 3}, {0, 4, 8, 12}},
+%e A360098  {{0, 1, 8, 9}, {0, 2, 4,  6}},
+%e A360098  {{0, 1, 4, 5}, {0, 2, 8, 10}}.
+%e A360098 The northwest corner of T(n,k) begins:
+%e A360098   1   1    1    1       1          1             1 ...     (s(1)  = {})
+%e A360098   1   1    1    1       1          1             1 ...     (s(2)  = {1})
+%e A360098   1   1    1    1       1          1             1 ...     (s(3)  = {1})
+%e A360098   1   1    3   15     105        945         10395 ...     (s(4)  = {2})
+%e A360098   1   1    1    1       1          1             1 ...     (s(5)  = {1})
+%e A360098   1   1    7   71    1001      18089        398959 ...     (s(6)  = {1,1})
+%e A360098   1   1    1    1       1          1             1 ...     (s(7)  = {1})
+%e A360098   1   1   10  280   15400    1401400     190590400 ...     (s(8)  = {3})
+%e A360098   1   1    3   15     105        945         10395 ...     (s(9)  = {2})
+%e A360098   1   1    7   71    1001      18089        398959 ...     (s(10) = {1,1})
+%e A360098   1   1    1    1       1          1             1 ...     (s(11) = {1})
+%e A360098   1   1   42  3660 614040  169200360   69444920160 ...     (s(12) = {1,2})
+%e A360098   1   1    1    1       1          1             1 ...     (s(13) = {1})
+%e A360098   1   1    7   71    1001      18089        398959 ...     (s(14) = {1,1})
+%e A360098   1   1    7   71    1001      18089        398959 ...     (s(15) = {1,1})
+%e A360098   1   1   35 5775 2627625 2546168625 4509264634875 ...     (s(16) = {4})
+%e A360098   ...
+%o A360098 (SageMath)
+%o A360098 @cached_function
+%o A360098 def r(i,M):
+%o A360098     kminus1 = len(M)
+%o A360098     u = tuple([1 for j in range(kminus1)])
+%o A360098     if i > 1 and M == u:
+%o A360098         return(1)
+%o A360098     elif M != u:
+%o A360098         divList = divisors(i)[:-1]
+%o A360098         return(sum(r(M[j],tuple(sorted(M[:j]+tuple([d])+M[j+1:]))) for d in divList for j in range(kminus1)))
+%o A360098 def T(n,k):
+%o A360098     if n == 1 or k == 0:
+%o A360098         return(1)
+%o A360098     else:
+%o A360098         return(r(n,tuple([n for j in range(k-1)]))) / factorial(k-1)
+%Y A360098 For rows of index n = p^j, p prime, or equivalently, for rows of signature {j} we have T(p^2,k) = R({2},k) = A001147(k), T(p^3,k) = R({3},k) = A025035(k), T(p^4,k) = R({4},k) = A025036(k), and, generally, T(p^j,k) = R({j},k) = the k-th element of the j-th column of the square array A060540.
+%Y A360098 For n = p * q, p and q distinct primes, we have T(p*q,k) = R({1,1},k) = |A002119(k)|.
+%Y A360098 Column correspondences are T(n,2) = A273013(n) and T(n,3) = A131514(n).
+%Y A360098 Cf. A118914.
+%K A360098 nonn,tabl
+%O A360098 1,18
+%A A360098 _William P. Orrick_, Jan 25 2023

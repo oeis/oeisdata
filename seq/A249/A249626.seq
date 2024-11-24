@@ -1,0 +1,34 @@
+%I A249626 #11 Apr 11 2016 08:46:38
+%S A249626 0,1,2,3,4,5,6,7,8,9,10,12,13,14,15,16,17,18,19,20,23,24,25,26,27,28,
+%T A249626 29,30,34,35,36,37,38,39,40,45,46,47,48,49,50,56,57,58,59,60,67,68,69,
+%U A249626 70,78,79,80,89,90,100,21,31,41,51,61,71,81,91,22,32,42
+%N A249626 a(0) = 0, a(n+1) = smallest number, not occurring earlier, containing the smallest of the least frequently occurring digits in all preceding terms.
+%C A249626 a(n) = A102823(n) for n <= 55;
+%C A249626 not all numbers occur: all repunits (A002275) greater than 1 are missing; idea of proof: for n > 1 the digit 1 will never again be the smallest of least frequently occurring digits;
+%C A249626 A249648 gives positions of terms containing a zero.
+%H A249626 Reinhard Zumkeller, <a href="/A249626/b249626.txt">Table of n, a(n) for n = 0..10000</a>
+%e A249626 n = 11: digits 0 and 1 occur twice in {a(k): k=0..10}, all other digits exactly once, where 2 is the smallest; therefore a(11) must contain digit 2, and 12 is the smallest unused number containing 2, hence a(11) = 12.
+%e A249626 n = 55: digits 0..9 occur exactly 10 times in {a(k): k=0..54}; therefore a(55) must contain digit 0, the smallest digit; a(55) = 100, as 100 is the smallest unused number containing 0;
+%e A249626 n = 56: least occurring digits in {a(k): k=0..10} are 2..9 and 2 is the smallest; therefore a(56) must contain digit 2, and 21 is the smallest unused number containing 2, hence a(56) = 21.
+%o A249626 (Haskell)
+%o A249626 import Data.List (delete, group, sortBy); import Data.Function (on)
+%o A249626 a249626 n = a249626_list !! n
+%o A249626 a249626_list = f (zip [0,0..] [0..9]) a031298_tabf where
+%o A249626    f acds@((_,dig):_) zss = g zss where
+%o A249626      g (ys:yss) = if dig `elem` ys
+%o A249626                      then y : f acds' (delete ys zss) else g yss
+%o A249626        where y = foldr (\d v -> 10 * v + d) 0 ys
+%o A249626              acds' = sortBy (compare `on` fst) $
+%o A249626                     addd (sortBy (compare `on` snd) acds)
+%o A249626                          (sortBy (compare `on` snd) $
+%o A249626                                  zip (map length gss) (map head gss))
+%o A249626              addd cds [] = cds
+%o A249626              addd []   _ = []
+%o A249626              addd ((c, d) : cds) yys'@((cy, dy) : yys)
+%o A249626                   | d == dy  = (c + cy, d) : addd cds yys
+%o A249626                   | otherwise = (c, d) : addd cds yys'
+%o A249626              gss = sortBy compare $ group ys
+%Y A249626 Cf. A031298, A002275, A011540, A249648, A102823.
+%K A249626 nonn,look,base
+%O A249626 0,3
+%A A249626 _Reinhard Zumkeller_, Nov 03 2014

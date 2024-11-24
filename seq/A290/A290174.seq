@@ -1,0 +1,29 @@
+%I A290174 #20 Aug 04 2017 03:56:45
+%S A290174 0,0,0,0,1,1,1,3,0,0,0,1,2,0,0,2,2,1,2,4,0,1,0,2,4,0,0,0,2,4,0,7,3,2,
+%T A290174 3,3,0,1,2,0,2,1,3,2,1,0,2,2,1,4,0,1,0,0,0,3,1,0,2,4,1,4,0,2,0,0,1,3,
+%U A290174 1,1,0,0,5,0,1,3,4,1,1,0,1,1,0,0,0,0,1
+%N A290174 Maximal number of zeros that can be inserted one-by-one between the digits of prime(n) such that the number resulting from each step remains prime.
+%H A290174 Robert Israel, <a href="/A290174/b290174.txt">Table of n, a(n) for n = 1..10000</a>
+%e A290174 For n = 1..4, a(n) = 0, because it is not possible to insert a 0 into the decimal expansions of 2, 3, 5, and 7 such that the resulting number is prime.
+%e A290174 For n = 9: prime(9) = 23 and 203 is composite, so a(9) = 0.
+%e A290174 For n = 32: prime(32) = 131 and the seven numbers 1301, 13001, 103001, 1003001, 10003001, 100030001, 1000030001 are all prime. It is not possible to insert a 0 into 1000030001 such that the resulting number is again prime and no other choice of insertions starting at 131 yields a longer sequence of primes, so a(32) = 7.
+%p A290174 f:= proc(n) local B,cands, T,m,count;
+%p A290174   B:= convert(ithprime(n),base,10);
+%p A290174   m:= nops(B)-1;
+%p A290174   T:= {[0$m]};
+%p A290174   for count from 0 do
+%p A290174     cands:= map(t -> seq(t + [0$k, 1$(m-k)],k=0..m-1), T);
+%p A290174     T:= select(t -> isprime(B[1]+add(10^(i+t[i])*B[i+1],i=1..m)), cands);
+%p A290174     if T = {} then return count fi
+%p A290174   od
+%p A290174 end proc:
+%p A290174 map(f, [$1..100]); # _Robert Israel_, Aug 04 2017
+%t A290174 ins[n_] := Block[{L={}, p=10, a, b, v}, While[p <= n, a = Floor[n/p]; b = Mod[n, p]; v = 10*p*a + b; If[b >= p/10 && PrimeQ[v], AppendTo[L, v]]; p *= 10]; L]; a[n_] := Block[{p = Prime@n, k=0, w}, w = {p}; While[w != {}, w = Flatten[ins /@ w]; k++]; k-1]; Array[a, 87] (* _Giovanni Resta_, Jul 24 2017 *)
+%o A290174 (PARI) insertzero(num, pos) = 10*(num-num%10^pos)+(num%10^pos)
+%o A290174 zeroprimevec_num(n) = my(w=[]); for(k=1, #Str(n)-1, my(x=insertzero(n, k)); if(ispseudoprime(x), w=concat(w, [x]))); vecsort(w, , 8)
+%o A290174 zeroprimevec_vec(v) = my(w=[]); for(k=1, #v, w=concat(w, zeroprimevec_num(v[k]))); vecsort(w, , 8)
+%o A290174 a(n) = my(i=0, p=prime(n), v=zeroprimevec_num(p)); while(1, if(#v==0, return(i), i++); v=zeroprimevec_vec(v))
+%Y A290174 Cf. A215417, A290175.
+%K A290174 nonn,base
+%O A290174 1,8
+%A A290174 _Felix Fröhlich_, Jul 23 2017

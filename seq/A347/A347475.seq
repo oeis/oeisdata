@@ -1,0 +1,47 @@
+%I A347475 #71 Sep 21 2022 18:32:35
+%S A347475 1,5,13,17,177,1777,3937,5537,5573,15173,55377,55733,79137,135173,
+%T A347475 195937,339173,377777,399377,791377,3397973,5199137,7913777,13535137,
+%U A347475 17397537,33993973,37735377,39993777,59591173,59919137,79971937,135157537,139713973,153177777
+%N A347475 Numbers k such that k and the k-th triangular number T(k) = k*(k+1)/2 have only odd digits.
+%C A347475 There is only 1 term with 3 digits and there are only 3 terms with 7 digits. It appears that this (7 digits) is the only length where no term starts with digit 1, and for any length L > 9, the smallest L-digit term (cf. A349247) starts with digits "119...".
+%C A347475 Can it be proved that the number of L-digit terms (cf. A355276) tends to infinity as L -> oo?
+%C A347475 Can it be proved (or disproved) that the sequence of initial digits of the smallest L-digit term A349247(L) converge, maybe to (1, 1, 9, 3, 1, 1, ...)?
+%C A347475 The sequence contains all numbers of the form 33(9{n}7){k}3{n}, where {x} means to repeat the preceding digit or parenthesized sequence of digits x times, for n >= 1 and k = 2, 3 or 4, and for k = 5 with only one initial '3'. - _M. F. Hasler_, Sep 10 2022
+%C A347475 The sequence also contains the infinite subsequence s(k) = 4*10^(1+2*k) - 10^(1+k) - 10^(2+2*k) + 34*10^(3+3*k) + (22*10^k-1)/3. - _Kebbaj Mohamed Reda_, Sep 11 2022
+%C A347475 In the notation of the earlier comment, the above s(k) = 339{k+1}39{k}73{k}. - _M. F. Hasler_, Sep 13 2022
+%H A347475 M. F. Hasler, <a href="/A347475/b347475.txt">Table of n, a(n) for n = 1..500</a>, Sep 08 2022.
+%H A347475 S. S. Gupta, <a href="http://www.shyamsundergupta.com/canyoufind.htm">Can You Find (CYF) no. 55</a>, Nov 11 2021, updated Sep 12 2022
+%H A347475 A. Zimmermann, <a href="http://azspcs.com/Contest/OddlyTriangular">Al Zimmermann's Programming Contests: Oddly Triangular</a>, Sep. 7-8, 2022
+%F A347475 Intersection of A014261 and A349243.
+%e A347475 The numbers k = 1, 5, 13, 17, 177, 1777, ... have only odd digits, and the associated triangular numbers T(k) = k*(k+1)/2 = 1, 15, 91, 153, 15753, 1579753, 7751953, ... also have only odd digits.
+%e A347475 The same is true for k = 119311115937719393371311137, the smallest 27-digit term.
+%e A347475 Any number of the form n = 339{k}79{k}73{k} yields T(n) = A000217(n) = 79{k}19{k}13{k-1}453{k+1}5{k}1{k} and therefore is in the sequence, where {k} means k times (the preceding digit), for any k >= 1.
+%t A347475 q[n_] := AllTrue[IntegerDigits[n], OddQ]; Select[Range[10^6], And @@ q /@ {#, #*(# + 1)/2} &] (* _Amiram Eldar_, Nov 20 2021 *)
+%o A347475 (PARI) apply( {A347475_row(n, t=10^n\9, L=List())=forvec(v=vector(n,i,[0,4]), is_A014261((1+n=t+fromdigits(v)*2)*n\2)&& listput(L,n));L}, [1..8]) \\ row(n) = terms with n digits. Use concat(%) to flatten the list.
+%o A347475 (PARI) A347475_first(n)=vector(n,i, n = next_A347475(n*(i>1)+1))
+%o A347475 A347475_next(n)={my(t, p, f(v)=for(i=1, #v, bittest(v[i], 0) || return(10^(#v-i)))); while(((p=f(digits(n))) && !n+=p*10\9+if(p>99,22)-n%p) || p=f(digits(t=n*(n+1)\2)), n=max(sqrtint((t+p*10\9-t%p)*2), n+2));n} \\ used in A349247
+%o A347475 A347475_prec(n)={my(t, p, f(v)=for(i=1, #v, bittest(v[i], 0) || return(10^(#v-i)))); while(((p=f(digits(n))) && !n-=n%p+if(p>99 && n\p%10, 23, 3)) || p=f(digits(t=n*(n+1)\2)), n=min(sqrtint((t-t%p-1)*2), n-2); if(n>p=n%100, n+=select(t->t<=p,[77,73,37,33,-23])[1]-p)); n} \\ used in A355277. - _M. F. Hasler_, Sep 13 2022
+%o A347475 (Python)
+%o A347475 from itertools import islice, count, product
+%o A347475 def A347345gen(): return filter(lambda k: set(str(k*(k+1)//2)) <= {'1','3','5','7','9'}, (int(''.join(d)) for l in count(1) for d in product('13579',repeat=l)))
+%o A347475 A347345_list = list(islice(A347345gen(),30)) # _Chai Wah Wu_, Dec 05 2021
+%o A347475 (Python)
+%o A347475 from math import isqrt
+%o A347475 def first_even(n):
+%o A347475     "Return 10^k corresponding to first even digit in n."
+%o A347475     for i,c in enumerate(n := str(n), 1):
+%o A347475         if c in "02468": return 10**(len(n)-i)
+%o A347475 def next_A347475(n):
+%o A347475     "Return the least term > n."
+%o A347475     if f := first_even(n := n+1): # next larger having only odd digits
+%o A347475         n += f*10//9 - n % f
+%o A347475     while f := first_even(t := n*(n+1)//2):
+%o A347475         if f := first_even(n := max(isqrt((t + 10*f//9 - t % f)*2), n+2)):
+%o A347475             n += 10*f//9 - n % f
+%o A347475     return n  #  _M. F. Hasler_, Sep 08 2022
+%o A347475 N=1 # Example of use of the above function:
+%o A347475 for n in range(30): print(N := next_A347475(N), end=", ")
+%Y A347475 Cf. A000217 (triangular numbers), A014261 (numbers with only odd digits), A117960 (triangular numbers with only odd digits), A349243 (indices of the former), A349247 (least k-digit term), A355277 (largest k-digit term), A355276 (number of k-digit terms).
+%K A347475 nonn,base
+%O A347475 1,2
+%A A347475 _M. F. Hasler_, Nov 20 2021

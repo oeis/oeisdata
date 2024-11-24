@@ -1,0 +1,46 @@
+%I A351426 #51 Jul 01 2022 09:38:31
+%S A351426 1,5,45,198,4820,37923,1021300,6546092,514236897,3166978245,
+%T A351426 543912789629,26110433895907,1064987485213631,39225481587293096
+%N A351426 a(n) is the smallest number that is (zeroless) pandigital in all bases 2 <= k <= n.
+%C A351426 Zeroless pandigital numbers may or may not contain the digit 0. In this sense, both 1023456789 and 123456789 are regarded as pandigital numbers in base 10.
+%C A351426 a(13) is the first element greater than n^(n-1), i.e., its base-n representation is not a permutation of the numbers from 1 to n-1.
+%C A351426 It is yet to be shown that this sequence has no end, i.e., there may be an n such that a(n) does not exist.
+%C A351426 There may be a number n such that a(n) = a(n-1).
+%C A351426 This sequence can be considered a version of A055085 where leading zeros are taken into account.
+%C A351426 A055085 uses a similar definition, requiring that the digit 0 appear in all representations in order to consider the number pandigital.
+%C A351426 A055085(n) is an upper bound for a(n), and there may exist a number n for which A055085(n) = a(n).
+%e A351426 For n = 2, 1 is the smallest base-2 pandigital number.
+%e A351426 For n = 3, 5 is the smallest base-3 pandigital number (12) that is also base-2 pandigital (101).
+%e A351426 For n = 4, 45 is the smallest base-4 pandigital number (231) that is also base-3 pandigital (1200) and base-2 pandigital (101101).
+%o A351426 (PARI) isok(i, n) = {for (b = 2, n, if (Set(digits(i, b))[1] && #Set(digits(i, b)) != b - 1, return (0)); if (Set(digits(i, b))[1] == 0 && #Set(digits(i, b)) != b, return(0)); ); return (1)}
+%o A351426 a(n) = {i = n^(n-2); while (! isok(i, n), i++); i; }
+%o A351426 (Python)
+%o A351426 from itertools import count, product
+%o A351426 from sympy.utilities.iterables import multiset_permutations
+%o A351426 from gmpy2 import digits, mpz
+%o A351426 def A351426(n): # assumes n <= 62
+%o A351426     if n == 2:
+%o A351426         return 1
+%o A351426     dlist = tuple(digits(d,n) for d in range(n))
+%o A351426     for l in count(n-2):
+%o A351426         for d in range(1,n):
+%o A351426             c = None
+%o A351426             for t in product(dlist,repeat=l-n+2):
+%o A351426                 for u in multiset_permutations(sorted(t+dlist[1:d]+dlist[d+1:])):
+%o A351426                     m = mpz(''.join((dlist[d],)+tuple(u)),n)
+%o A351426                     for b in range(n-1,1,-1):
+%o A351426                         if len(set(digits(m,b))|{'0'}) < b:
+%o A351426                             break
+%o A351426                     else:
+%o A351426                         if c != None:
+%o A351426                             c = min(m,c)
+%o A351426                         else:
+%o A351426                             c = m
+%o A351426             if c != None:
+%o A351426                 return int(c) # _Chai Wah Wu_, Mar 14 2022
+%Y A351426 Cf. A055085.
+%K A351426 base,more,nonn
+%O A351426 2,2
+%A A351426 _Fernando Solanet Mayou_, Feb 11 2022
+%E A351426 a(14) corrected by _Fernando Solanet Mayou_, Apr 08 2022
+%E A351426 a(15) from _Fernando Solanet Mayou_, Jun 28 2022

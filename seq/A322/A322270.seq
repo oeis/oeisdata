@@ -1,0 +1,44 @@
+%I A322270 #23 Sep 11 2022 12:07:07
+%S A322270 11,11,1,1011,110100,111,11011100,11111100,1011111100,11110111100,
+%T A322270 101111111100,1111101111100,11011111111100,11111111111100,
+%U A322270 11010011001011,10011010011001011,11011111111111100,1011111111111111100,11111011111111111100
+%N A322270 a(n) is a binary Boolean flag indicating whether A322269(n) is a square mod prime(x) for x = 1..n.
+%C A322270 A322269 contains the largest of the minimal prime numbers P required to multiply any odd number b with, so that the product b*P is a nonzero square modulo 8, and modulo the first n primes.
+%C A322270 When factoring a number b with the Quadratic Sieve, it can be practical to multiply b by a certain factor f, so that the product f*b is a square modulo several small primes. And it is desirable that f be prime, because the prime factors of f cannot be used in the factor base of the Quadratic Sieve.
+%C A322270 To find f for a given b and the first n primes, it must be checked whether b is a square or not, modulo each of these primes. Then f is the smallest prime (or 1) which satisfies the same conditions, modulo each of these primes.
+%C A322270 Calling p the last of the n primes, an f can be found for each of the possible residues of b (mod p#, the primorial of p), coprime to p#. (Actually we are using a period of 4*(p#), because instead of mod 2 we check for mod 8.) The largest of all these f is the n-th term in this sequence.
+%C A322270 8 was chosen instead of 2, because there is a unique quadratic residue (mod 8), i.e., 1, for all odd numbers.
+%C A322270 Sequences A322271 to A322275 are separate listings for the sequences of all f, corresponding to n=2 to 6, which illustrate the idea further.
+%C A322270 For finding the full sequences of all f, instead of checking all b mod 4*(p#), it is more practical to check all prime numbers (and also 1) in order, whether they are suitable as an f or not. Each prime receives a "code" of Boolean flags which indicate whether it is a square or not, modulo each of the first n primes. If it is the first prime with this specific "code", then every value of b mod 4*(p#) which has the same "code", is assigned this prime as its f. This process is repeated until all possible "codes" have an f assigned. (The flag for mod 8, instead of only signaling "is (not) a square", has four different values: 1, 3, 5, and 7.)
+%C A322270 This sequence enumerates these codes, corresponding to each term of A322269. The codes are constructed in the following way: The first two bits encode b mod 8 (00=1, 01=3, 10=5, 11=7). The following bits are set if f is a square mod 3, mod 5, etc. (all prime numbers in order, up to prime(n)).
+%e A322270 A322269(4) is 311. 311 mod 8 = 7, this is encoded as 11. 311 is not a square (mod 3), so the next bit is 0. 311 is a square (mod 5), so the next bit is 1. 311 is not a square (mod 7), so the next and last bit is 0. Together this gives the "code" 01011.
+%e A322270 (However it is given above as 1011, because numbers starting with zero are not admitted.)
+%o A322270 (PARI)
+%o A322270 QresCode(n, nPrimes) = {
+%o A322270   code = bitand(n,7)>>1;
+%o A322270   for (j=2, nPrimes,
+%o A322270     x = Mod(n,prime(j));
+%o A322270     if (issquare(x), code += (1<<j));
+%o A322270   );
+%o A322270   return (code);
+%o A322270 }
+%o A322270 a322270(n) = {
+%o A322270   totalEntries = 1<<(n+1);
+%o A322270   f = vector(totalEntries);
+%o A322270   f[totalEntries-3] = 1;  \\ 1 always has the same code: ...111100
+%o A322270   counter = 1;
+%o A322270   forprime(p=prime(n+1), +oo,
+%o A322270     code = QresCode(p, n);
+%o A322270     if (f[code+1]==0,
+%o A322270       f[code+1]=p;
+%o A322270       counter += 1;
+%o A322270       if (counter==totalEntries, return(code));
+%o A322270     )
+%o A322270   )
+%o A322270 }
+%o A322270 \\ This program is the same as for A322269, except that "code" is returned instead of "p".
+%Y A322270 This sequence is based on A322269.
+%Y A322270 Related sequences are A322271, A322272, A322273, A322274, A322275.
+%K A322270 nonn,base
+%O A322270 1,1
+%A A322270 _Hans Ruegg_, Dec 01 2018

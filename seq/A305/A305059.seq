@@ -1,0 +1,33 @@
+%I A305059 #15 Jan 10 2020 05:29:11
+%S A305059 1,1,1,3,1,1,6,4,1,1,15,8,4,1,1,33,24,9,5,1,1,83,55,28,12,5,1,1,196,
+%T A305059 147,71,40,13,6,1,1,491,365,198,106,47,16,6,1,1,1214,954,521,317,136,
+%U A305059 63,18,7,1,1,3068,2431,1418,868,428,190,73,21,7,1,1
+%N A305059 Triangle read by rows: T(n,k) is the number of connected unicyclic graphs on n unlabeled nodes with cycle length k and all nodes having degree at most 4.
+%C A305059 Equivalently, the number of monocyclic skeletons with n carbon atoms and a ring size of k.
+%H A305059 Andrew Howroyd, <a href="/A305059/b305059.txt">Table of n, a(n) for n = 3..1178</a> (rows n = 3..50)
+%H A305059 Camden A. Parks and James B. Hendrickson, <a href="https://doi.org/10.1021/ci00002a021">Enumeration of monocyclic and bicyclic carbon skeletons</a>, J. Chem. Inf. Comput. Sci., vol. 31, 334-339 (1991).
+%H A305059 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/UnicyclicGraph.html">Unicyclic Graph</a>
+%e A305059 Triangle begins:
+%e A305059      1;
+%e A305059      1,   1;
+%e A305059      3,   1,   1;
+%e A305059      6,   4,   1,   1;
+%e A305059     15,   8,   4,   1,   1;
+%e A305059     33,  24,   9,   5,   1,  1;
+%e A305059     83,  55,  28,  12,   5,  1,  1;
+%e A305059    196, 147,  71,  40,  13,  6,  1, 1;
+%e A305059    491, 365, 198, 106,  47, 16,  6, 1, 1;
+%e A305059   1214, 954, 521, 317, 136, 63, 18, 7, 1, 1;
+%e A305059   ...
+%t A305059 G[n_] := Module[{g}, Do[g[x_] = 1 + x*(g[x]^3/6 + g[x^2]*g[x]/2 + g[x^3]/3) + O[x]^n // Normal, {n}]; g[x]];
+%t A305059 T[n_, k_] := Module[{t = G[n], g}, t = x*((t^2 + (t /. x -> x^2))/2); g[e_] = (Normal[t + O[x]^Quotient[n, e]] /. x -> x^e) + O[x]^n // Normal; Coefficient[(Sum[EulerPhi[d]*g[d]^(k/d), {d, Divisors[k]}]/k + If[OddQ[ k], g[1]*g[2]^Quotient[k, 2], (g[1]^2 + g[2])*g[2]^(k/2-1)/2])/2, x, n]];
+%t A305059 Table[T[n, k], {n, 3, 13}, {k, 3, n}] // Flatten (* _Jean-François Alcover_, Jul 03 2018, after _Andrew Howroyd_ *)
+%o A305059 (PARI) \\ here G is A000598 as series
+%o A305059 G(n)={my(g=O(x)); for(n=1, n, g = 1 + x*(g^3/6 + subst(g, x, x^2)*g/2 + subst(g, x, x^3)/3) + O(x^n)); g}
+%o A305059 T(n,k)={my(t=G(n)); t=x*(t^2+subst(t, x, x^2))/2; my(g(e)=subst(t + O(x*x^(n\e)), x, x^e) + O(x*x^n)); polcoeff((sumdiv(k, d, eulerphi(d)*g(d)^(k/d))/k + if(k%2, g(1)*g(2)^(k\2), (g(1)^2+g(2))*g(2)^(k/2-1)/2))/2, n)}
+%Y A305059 Columns 3..10 are A063832, A116719, A120333, A120779, A120790, A120795, A121156, A121157.
+%Y A305059 Row sums are A036671.
+%Y A305059 Cf. A000598.
+%K A305059 nonn,tabl
+%O A305059 3,4
+%A A305059 _Andrew Howroyd_, May 24 2018

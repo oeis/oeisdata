@@ -1,0 +1,24 @@
+%I A305253 #20 Dec 06 2018 16:33:58
+%S A305253 0,1,1,2,1,1,1,2,2,1,1,1,1,1,1,3,1,1,1,1,1,1,1,2,2,1,2,1,1,1,1,2,1,1,
+%T A305253 1,2,1,1,1,2,1,1,1,1,1,1,1,2,2,1,1,1,1,2,1,2,1,1,1,2,1,1,1,4,1,1,1,1,
+%U A305253 1,1,1,2,1,1,1,1,1,1,1,2,3,1,1,2,1,1,1,2,1,2,1,1,1,1,1,4,1,1,1,2,1,1,1,2,1
+%N A305253 Number of connected factorizations of n into factors greater than 1 whose distinct factors are pairwise indivisible.
+%C A305253 Given a finite multiset S of positive integers greater than one, let G(S) be the simple labeled graph with vertex set S and edges between any two vertices with a common divisor greater than 1. For example, G({6,14,15,35}) is a 4-cycle. This sequence counts factorizations S whose distinct factors are pairwise indivisible and such that G(S) is a connected graph.
+%H A305253 Antti Karttunen, <a href="/A305253/b305253.txt">Table of n, a(n) for n = 1..20160</a>
+%H A305253 Antti Karttunen, <a href="/A305253/a305253.txt">Data supplement: n, a(n) computed for n = 1..100000</a>
+%H A305253 <a href="/index/Eu#epf">Index entries for sequences computed from exponents in factorization of n</a>
+%F A305253 a(n) <= A305193(n) <= A001055(n). - _Antti Karttunen_, Dec 06 2018
+%e A305253 The a(360) = 8 factorizations: (360), (4*90), (10*36), (12*30), (15*24), (18*20), (4*6*15), (6*6*10).
+%t A305253 zsm[s_]:=With[{c=Select[Tuples[Range[Length[s]],2],And[Less@@#,GCD@@s[[#]]]>1&]},If[c=={},s,zsm[Union[Append[Delete[s,List/@c[[1]]],LCM@@s[[c[[1]]]]]]]]];
+%t A305253 facs[n_]:=If[n<=1,{{}},Join@@Table[Map[Prepend[#,d]&,Select[facs[n/d],Min@@#>=d&]],{d,Rest[Divisors[n]]}]];
+%t A305253 sacs[n_]:=Select[facs[n],Function[f,Length[zsm[f]]==1&&Select[Tuples[Union[f],2],UnsameQ@@#&&Divisible@@#&]=={}]]
+%t A305253 Table[Length[sacs[n]],{n,500}]
+%o A305253 (PARI)
+%o A305253 is_connected(facs) = { my(siz=length(facs)); if(1==siz,1,my(m=matrix(siz,siz,i,j,(gcd(facs[i],facs[j])!=1))^siz); for(n=1,siz,if(0==vecmin(m[n,]),return(0))); (1)); };
+%o A305253 A305253aux(n, m, facs) = if(1==n, is_connected(Vec(facs)), my(s=0, newfacs); fordiv(n, d, if((d>1)&&(d<=m)&&factorback(apply(x -> (x==d)||(x%d),Vec(facs))), newfacs = List(facs); listput(newfacs,d); s += A305253aux(n/d, d, newfacs))); (s));
+%o A305253 A305253(n) = if(1==n,0,A305253aux(n, n, List([]))); \\ _Antti Karttunen_, Dec 06 2018
+%Y A305253 Cf. A001970, A048143, A281116, A285572, A286518, A286520, A303386, A304714, A304716, A305149, A305150, A305193.
+%K A305253 nonn
+%O A305253 1,4
+%A A305253 _Gus Wiseman_, May 28 2018
+%E A305253 Definition clarified by _Gus Wiseman_, more terms from _Antti Karttunen_, Dec 06 2018

@@ -1,0 +1,27 @@
+%I A340631 #33 Jun 28 2024 01:19:49
+%S A340631 7,23,7,13,9,15,11,17,13,19,15,21,17,23,19,25,21,27,23,29,25,31,27,33,
+%T A340631 29,35,31,37,33,39,35,41,37,43,39,45,41,47,43,49,45,51,47,53,49,55,51,
+%U A340631 57,53,59,55,61,57,63,59,65,61,67,63,69,65,71,67,73,69,75
+%N A340631 a(n) is the minimum number of pebbles such that any assignment of those pebbles on a complete graph with n vertices is a next-player winning game in the two-player impartial pebbling game.
+%C A340631 A move in an impartial two-player pebbling game consists of removing two pebbles from a vertex and adding one pebble to an adjacent vertex. The winning player is the one who makes the final allowable move. We start at n = 3 because we have shown a(2) does not exist.
+%D A340631 E. R. Berlekamp, J. H. Conway, and R. K. Guy, Winning Ways for Your Mathematical Plays, Vol. 1, CRC Press, 2001.
+%H A340631 Michael De Vlieger, <a href="/A340631/b340631.txt">Table of n, a(n) for n = 3..10000</a>
+%H A340631 Kayla Barker, Mia DeStefano, Eugene Fiorini, Michael Gohn, Joe Miller, Jacob Roeder, and Tony W. H. Wong, <a href="https://cs.uwaterloo.ca/journals/JIS/VOL27/Wong/wong43.html">Generalized Impartial Two-player Pebbling Games on K_3 and C_4</a>, J. Int. Seq. (2024) Vol. 27, Issue 5, Art. No. 24.5.8. See p. 3.
+%H A340631 Eugene Fiorini, Max Lind, Andrew Woldar, and Tony W. H. Wong, <a href="https://cs.uwaterloo.ca/journals/JIS/VOL24/Wong/wong31.html">Characterizing Winning Positions in the Impartial Two-Player Pebbling Game on Complete Graphs</a>, J. Int. Seq., Vol. 24 (2021), Article 21.6.4.
+%H A340631 <a href="/index/Rec#order_03">Index entries for linear recurrences with constant coefficients</a>, signature (1,1,-1).
+%F A340631 For n>2, a(2n-1)=2n+1, a(2n)=a(2n+5)=2n+7.
+%F A340631 G.f.: x^3*(12*x^4-10*x^3-23*x^2+16*x+7)/((x+1)*(x-1)^2).
+%F A340631 For n>=5, a(n) = 2*A084964(n+4) - 1 = 2*A084964(n+2) + 1. - _Hugo Pfoertner_, Jan 14 2021
+%e A340631 For n=3, a(3)=7 is the least number of pebbles for which every game in a next-player winning game regardless of assignment.
+%t A340631 (* Given n and m, list all possible assignments. *)
+%t A340631 alltuples[n_, m_] := IntegerPartitions[m + n, {n}] - 1;
+%t A340631 (* Given an assignment, list all resultant assignments after one pebbling move; only work for n>=3. *)
+%t A340631 pebblemoves[config_] := Block[{n, temp}, n = Length[config]; temp = Table[config, {i, n (n - 1)}] + Permutations[Join[{-2, 1}, Table[0, {i, n - 2}]]]; temp = Select[temp, Min[#] >= 0 &]; temp = ReverseSort[DeleteDuplicates[ReverseSort /@ temp]]];
+%t A340631 (* Given n and m, list all assignments that are P-games. *)
+%t A340631 Plist = {};plist[n_, m_] := Block[{index, tuples}, While[Length[Plist] < n, index = Length[Plist]; AppendTo[Plist, {{Join[{1}, Table[0, {i, index}]]}}]]; Do[AppendTo[Plist[[n]], {}]; tuples = alltuples[n, i]; Do[If[Not[IntersectingQ[pebblemoves[tuples[[j]]], Plist[[n, i - 1]]]], AppendTo[Plist[[n, i]], tuples[[j]]]], {j, Length[tuples]}], {i, Length[Plist[[n]]] + 1, m}]; Plist[[n, m]]];
+%t A340631 (* Given n, print out the minimum m such that there are no P-games with m pebbles *)
+%t A340631 Do[m = 1; While[plist[n, m] != {}, m++]; Print["n=", n, " m=", m], {n, 3, 20}]
+%Y A340631 Cf. A084964.
+%K A340631 nonn,easy
+%O A340631 3,1
+%A A340631 _Eugene Fiorini_, _Max C. Lind_, _Andrew Woldar_, _Wing Hong Tony Wong_, Jan 13 2021

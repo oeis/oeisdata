@@ -1,0 +1,50 @@
+%I A212846 #66 Oct 27 2024 04:15:45
+%S A212846 1,-1,-1,3,15,-21,-441,-477,19935,101979,-1150281,-14838957,60479055,
+%T A212846 2328851979,3529587879,-403992301437,-3333935426625,72778393505979,
+%U A212846 1413503392326039,-10851976875907917,-554279405351601105,-713848745428080021
+%N A212846 Polylogarithm li(-n,-1/2) multiplied by (3^(n+1))/2.
+%C A212846 Apart from sign, same as A087674: a(n) = A087674*(-1)^n
+%C A212846 Given integers n, p, q, 0<p<q, the value of li(-n,-p/q)=sum(k>=0, ((k^n)/(-p/q)^k) ) = s(n), multiplied by ((p+q)^(n+1))/q is an integer a(n). For this sequence set p=1 and q=2.
+%H A212846 Seiichi Manyama, <a href="/A212846/b212846.txt">Table of n, a(n) for n = 0..455</a> (terms 0..100 from Stanislav Sykora)
+%H A212846 OEIS-Wiki, <a href="http://oeis.org/wiki/Eulerian_polynomials">Eulerian polynomials</a>
+%H A212846 S. Sykora, <a href="http://dx.doi.org/10.3247/SL1Math06.002">Finite and Infinite Sums of the Power Series (k^p)(x^k)</a>, Stan's Library Vol. I, April 2006, updated March 2012. See Eq.(29).
+%H A212846 Eric W. Weisstein, <a href="http://mathworld.wolfram.com/Polylogarithm.html"> MathWorld: Polylogarithm</a>
+%F A212846 General recurrence: s(n+1)=(-p/(p+q))*SUM(C(n+1,i)*s(i)), where i=0,1,2,...,n, C(n,m) are binomial coefficients, and the starting value is s(0)=SUM((-p/q)^k)=q/(p+q). For this sequence set p=1 and q=2.
+%F A212846 From _Peter Bala_, Jun 24 2012: (Start)
+%F A212846 E.g.f.: A(x) = 3/(2+exp(3*x)).
+%F A212846 The compositional inverse (A(-x) - 1)^(-1) = x + x^2/2 + 3*x^3/3 + 5*x^4/4 + 11*x^5/5 + ... is the logarithmic generating function for A001045.
+%F A212846 (End)
+%F A212846 a(n+1) = -3*a(n) + 2*sum(k=0..n, binomial(n,k)*a(k)*a(n-k) ), with a(0) = 1. - _Peter Bala_, Mar 12 2013
+%F A212846 Let A(x) be the g.f. of A212846, B(x) the g.f. of A087674, then A(x) = B(-x).
+%F A212846 G.f.: 1/Q(0), where Q(k)= 1 + x*(k+1)/(1 - x*(2*k+2)/Q(k+1)); (continued fraction). - _Sergei N. Gladkovskii_, May 20 2013
+%F A212846 O.g.f.: Sum_{n>=0} n!*(-x)^n / Product_{k=0..n} (1-3*k*x). - _Paul D. Hanna_, May 30 2013
+%F A212846 For n>0, a(n) = -A179929(n)/2. - _Stanislav Sykora_, May 15 2014
+%F A212846 a(n) = Sum_{k=0..n} k! * (-1)^k * 3^(n-k) * Stirling2(n,k). - _Seiichi Manyama_, Mar 13 2022
+%F A212846 a(n) ~ n! * (log(2) * cos(n*arctan(Pi/log(2))) - Pi * sin(n*arctan(Pi/log(2)))) * 3^(n+1) / (Pi^2 + log(2)^2)^(1 + n/2). - _Vaclav Kotesovec_, May 17 2022
+%e A212846 a(5) = polylog(-5,-1/2)*3^6/2 = -21.
+%e A212846 E.g.f.: A(x) = 1 - x - x^2/2! + 3*x^3/3! + 15*x^4/4! - 21*x^5/5! + ...
+%e A212846 O.g.f.: G(x) = 1 - x - x^2 + 3*x^3 + 15*x^4 - 21*x^5 - 441*x^6 +...
+%e A212846 where G(x) = 1 - x/(1-3*x) + 2!*x^2/((1-3*x)*(1-6*x)) - 3!*x^3/((1-3*x)*(1-6*x)*(1-9*x)) + 4!*x^4/((1-3*x)*(1-6*x)*(1-9*x)*(1-12*x)) +...
+%p A212846 seq(add((-1)^(n-k)*combinat[eulerian1](n,k)*2^k,k=0..n),n=0..21); # _Peter Luschny_, Apr 21 2013
+%t A212846 f[n_] := PolyLog[-n, -1/2] 3^(n + 1)/2; Array[f, 21] (* _Robert G. Wilson v_, May 28 2012 *)
+%t A212846 a[ n_] := If[ n < 0, 0, n! 3/2 SeriesCoefficient[ 1 / (1 + Exp[3 x] / 2), {x, 0, n}]]; (* _Michael Somos_, Aug 27 2018 *)
+%o A212846 (PARI) /* for this sequence, run limnpq(nmax,1,2) */
+%o A212846 limnpq(nmax,p,q) = {
+%o A212846   f=vector(nmax+1);f[1]=q/(p+q);r=-p/(p+q);
+%o A212846   for (i=2,nmax+1,p1=i-1;bc=1;m=p1;s=0;
+%o A212846     for(j=1,i-1,p2=j-1;if (p2,bc=bc*m/p2;m=m-1;);
+%o A212846     s=s+bc*f[j];);f[i]=r*s;);
+%o A212846 fac=(p+q)/q;
+%o A212846 for(i=1,nmax+1,f[i]=f[i]*fac;fac=(p+q)*fac;
+%o A212846   write("outputfile",i-1," ",f[i]););}
+%o A212846 (PARI) x='x+O('x^66); Vec(serlaplace(3/(2+exp(3*x)))) \\ _Joerg Arndt_, Apr 21 2013
+%o A212846 (PARI) /* O.g.f.: */
+%o A212846 {a(n)=polcoeff(sum(m=0, n, m!*(-x)^m/prod(k=1, m, 1-3*k*x+x*O(x^n))), n)} \\ _Paul D. Hanna_, May 30 2013
+%o A212846 (PARI) a(n) = sum(k=0, n, k!*(-1)^k*3^(n-k)*stirling(n, k, 2)); \\ _Seiichi Manyama_, Mar 13 2022
+%Y A212846 Similar cases: A210246 (p=1,q=3), A212847 (p=2,q=3)
+%Y A212846 Cf. A210244 (similar).
+%Y A212846 Cf. A213127 through A213157.
+%Y A212846 Cf. A001045, A087674, A179929.
+%K A212846 sign
+%O A212846 0,4
+%A A212846 _Stanislav Sykora_, May 28 2012

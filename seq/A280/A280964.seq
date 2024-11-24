@@ -1,0 +1,29 @@
+%I A280964 #34 Jan 15 2017 13:19:02
+%S A280964 6,15,725,91,15851,30589,6977093777,703
+%N A280964 a(n) is the least term that is not a power of p, the n-th prime, in the sequence of numbers whose consecutive divisors have a ratio satisfying numerator - denominator = p-1.
+%C A280964 For primes 17 < p < 100, index n, prime p and known values: (11, 31, 1891), (12, 37, 270), (13, 41, 2893001), (14, 43, 6324702343), (16, 53, 8036549), (17, 59, 12319259), (22, 79, 12403), (23, 83, 48023219), (24, 89, 63439289), (25, 97, 18721).
+%C A280964 For some other primes, possible values were found, but they may not be the least.
+%C A280964 p=23, a(9)  <= 78317141783;
+%C A280964 p=29, a(10) <= 176994576151121533000319046029;
+%C A280964 p=47, a(15) <= 7654455761751330268890575447204341560894807321851181994954582195247;
+%C A280964 p=61, a(18) <= 9876832533549882665273701;
+%C A280964 p=67, a(19) <= 4483224940666198270986387212125921182677251147716597066996042973310060661858239362623427;
+%C A280964 p=71, a(20) <= 269277687648484922419868038102292093702042951;
+%C A280964 p=73, a(21) <= 151362235513.
+%e A280964 a(1) = 6 is the first non-(prime power) of 2 (the 1st prime) in A140110.
+%e A280964 a(2) = 15 is the first non-(prime power) of 3 (the 2nd prime) in A280963.
+%e A280964 For n=3, p=5, the sequence begins: 1, 5, 25, 125, 625, 725, ... so a(3)=725.
+%e A280964 For n=4, p=7, the sequence begins: 1, 7, 49, 91, 343, ... so a(4)=91.
+%t A280964 Table[Function[p, SelectFirst[Range[10^5], Function[n, And[! IntegerQ@ Log[p, n], Times @@ Boole@ Map[Abs[Numerator@ # - Denominator@ #] == p - 1 &[#2/#1] & @@ # &, Partition[Divisors@ n, 2, 1]] > 0]] ]]@ Prime@ n /. k_ /; MissingQ@ k -> Nothing, {n, 6}] (* _Michael De Vlieger_, Jan 13 2017, Version 10.2 *)
+%o A280964 (PARI) isok(n, plus) = {my(vd = divisors(n)); for (k=1, #vd - 1, r = vd[k+1]/vd[k]; if (numerator(r) != denominator(r) + plus, return(0));); return(1);}
+%o A280964 isokp(k) = (k!= 1) && !isprime(k) && ! isprimepower(k);
+%o A280964 findnp(n) = {k = 1; ok = 0; nb = 0; while (! ok, okk = isok(k, n); if (okk, ok = isokp(k); if (! ok, nb++);); if (!ok, k++);); k;}
+%o A280964 lista(nn) = for(n=1, nn, print1(findnp(prime(n)-1), ", "));
+%o A280964 (PARI) / * alternate program; does it give the least terms? */
+%o A280964 isokplus(n, plus) = {my(vd = divisors(n)); for (k=1, #vd - 1, r = vd[k+1]/vd[k]; if (numerator(r) != denominator(r) + plus, return(0));); return(1);}
+%o A280964 findqq(p) = {ok = 0; ip = 1; while (!ok, ik = 1; while (!ok, if (isprime(q= ik*p^ip+(p-1)) && isokplus(p^ip*q, p-1), return([p^ip, q])); ik++; if (ik > p, break);); ip ++;); return ([]);}
+%o A280964 listff(nn) = {for (n=1, nn, p = prime(n); v = findqq(p); pp = v[1]; q = v[2]; print1(pp*q, ", "););}
+%Y A280964 Cf. A140110, A280963.
+%K A280964 nonn,more
+%O A280964 1,1
+%A A280964 _Michel Marcus_, Jan 11 2017

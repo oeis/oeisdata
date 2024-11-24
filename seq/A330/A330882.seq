@@ -1,0 +1,41 @@
+%I A330882 #16 Jan 01 2021 03:21:11
+%S A330882 1,2,2,4,2,4,4,32,14,28,8,16,4,8,8,176,48,96,20,40,8,16,16,640,140,
+%T A330882 280,48,96,16,32,32,1992,376,752,112,224,32,64,64,5696,960,1920
+%N A330882 Number of length-n binary strings having the longest possible LB factorization.
+%C A330882 A border of a string w is a nonempty proper prefix of w that is also a suffix.  The LB ("longest border") factorization of a string w is as follows:  if w has no border, then the factorization is just (w).  Otherwise, write w = (x)(w')(x) where x is the longest border of length <= |w|/2, and continue with w'.   The length of the factorization is the number of factors.  For example, 0101101010 = (010)(1)(10)(1)(010), and so has length 5.
+%o A330882 (Python)
+%o A330882 from numba import njit
+%o A330882 @njit()  # comment out for digits > 64
+%o A330882 def LBfactors(w, digits):
+%o A330882   if digits <= 1: return digits
+%o A330882   if not (1 << (digits-1)) & w:  # if the 1st bit is not 1,
+%o A330882     w ^= ((1 << digits) - 1)     # then invert the string
+%o A330882   for i in range(digits//2, 0, -1):
+%o A330882     mask = (1 << i) - 1
+%o A330882     if (w >> (digits-i)) == (w & mask):
+%o A330882       digitsprime = digits - 2*i
+%o A330882       if digitsprime == 0:
+%o A330882         return 2
+%o A330882       else:
+%o A330882         middle_mask = ((1 << digitsprime) - 1)
+%o A330882         wprime = middle_mask & (w >> i)
+%o A330882         return 2 + LBfactors(wprime, digitsprime)
+%o A330882   return 1
+%o A330882 @njit()  # comment out for n > 64
+%o A330882 def a(n):
+%o A330882   if n <= 1: return 2**n
+%o A330882   maximum, maximum_count = -1, 0
+%o A330882   for i in range(2**(n-1)):  # only search 1st bit == 1 by symmetry
+%o A330882     LBfacsw = LBfactors((1<<(n-1))|i, n)
+%o A330882     if LBfacsw == maximum:
+%o A330882       maximum_count += 1
+%o A330882     elif LBfacsw > maximum:
+%o A330882       maximum = LBfacsw
+%o A330882       maximum_count = 1
+%o A330882   return 2*maximum_count     # symmetry
+%o A330882 print([a(n) for n in range(25)]) # _Michael S. Branicky_, Dec 31 2020
+%Y A330882 Cf. A330881, A330884.
+%K A330882 nonn,more
+%O A330882 0,2
+%A A330882 _Jeffrey Shallit_, Apr 30 2020
+%E A330882 a(28)-a(41) from _Michael S. Branicky_, Dec 31 2020

@@ -1,0 +1,32 @@
+%I A179239 #47 Sep 13 2022 09:12:05
+%S A179239 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,22,23,24,25,26,
+%T A179239 27,28,29,30,33,34,35,36,37,38,39,40,44,45,46,47,48,49,50,55,56,57,58,
+%U A179239 59,60,66,67,68,69,70,77,78,79,80,88,89,90,99,100,101,102,103
+%N A179239 Permutation classes of integers, each identified by its smallest member.
+%C A179239 Let the "permutation set" of a positive integer n be the set of all integers formed by permuting the digits of n. Two integers are "permutationally congruent" if they generate the same permutation set. A "permutation class" is a set of all permutationally congruent integers. This sequence lists each permutation class, identified by its smallest member.
+%C A179239 These are also the positive integers in order, omitting any d-digit number n if a previously listed d-digit number is a permutation of the digits of n.
+%C A179239 Range of A328447: smallest representative of the equivalence class of all numbers having the same digits up to permutation. Equivalently: Numbers with digits in nondecreasing order, except that the smallest nonzero digit must precede the zero digits. This sequence is useful when considering functions which depend only on the digits of n, e.g., the number of primes contained in n, cf. A039993, A039999, A075053 and the records therein, A072857 (primeval numbers) and A076497, resp. A239196 and A239197, etc. - _M. F. Hasler_, Oct 18 2019
+%H A179239 Aaron Dunigan AtLee and Michael De Vlieger, <a href="/A179239/b179239.txt">Table of n, a(n) for n = 0..10000</a> (first 2997 terms from Aaron Dunigan AtLee; prefix 0 by _Georg Fischer_, Oct 24 2019)
+%e A179239 The permutation set of 24 is {24, 42}, and this is the equivalence class modulo permutations of both of them, so 24 is listed, but 42 is not.
+%e A179239 The permutation set of 30 is {3, 30}, but 3 is not in the same permutation class as 30 since 30 cannot be obtained by permuting digits of 3. Therefore 30 is listed separately from 3.
+%e A179239 The numbers 89 and 98 are also permutationally congruent and form a permutation class, so only the smaller one is listed.
+%t A179239 maxTerm = 103; (*maxTerm is the greatest term you wish to see*) permutationSet[n_Integer] := FromDigits /@ Permutations[IntegerDigits[n]]; permutationCongruentQ[x_Integer, y_Integer] := Sort[permutationSet[x]] == Sort[permutationSet[y]]; DeleteDuplicates[Range[maxTerm], permutationCongruentQ]
+%t A179239 f[n_] := Block[{a = {0}, b = {DigitCount[0]}, i, w}, Do[w = DigitCount@ i; AppendTo[b, w]; If[! MemberQ[Most@ b, w], AppendTo[a, i]], {i, n}]; Rest@ a]; f@ 103 (* or faster: *)
+%t A179239 Select[Range@ 103, LessEqual @@ IntegerDigits@ # || And[Take[IntegerDigits@ #, Last@ DigitCount@ # + 1] == Reverse@ Take[Sort@ IntegerDigits@ #, Last@ DigitCount@ # + 1], LessEqual @@ DeleteCases[IntegerDigits@ #, d_ /; d == 0]] &] (* _Michael De Vlieger_, Jul 14 2015 *)
+%o A179239 (PARI) is(n) = {my(d=digits(n),i); for(i=2,#d, if(d[i]!=0, d=vecextract(d,concat([1],vector(#d-i+1,j,i-1+j))); break));d==vecsort(d)||n/10^valuation(n,10)<10}
+%o A179239 \\given an element n, in base b, find the next element from the sequence.
+%o A179239 nxt(n,{b=10}) = {my(d = digits(n)); i = #d; while(i>0&&d[i]==b-1,i--); if(i>1, if(d[i]>0, d[i]++, d[i]=d[1];);for(j=i+1,#d,d[j]=d[i]), if(i==1, d[i]++;for(j=2,#d,d[j]=0), return(10^(#d))));sum(j=1,#d,d[j]*10^(#d-j))} \\ _David A. Corneth_, Apr 23 2016
+%o A179239 (PARI) select( is_A179239(n)={n==A328447(n)}, [0..200]) \\ _M. F. Hasler_, Oct 18 2019
+%o A179239 (Python)
+%o A179239 from itertools import count, chain, islice
+%o A179239 from sympy.utilities.iterables import combinations_with_replacement
+%o A179239 def A179239_gen(): # generator of terms
+%o A179239     return chain((0,),(int(a+''.join(b)) for l in count(1) for a in '123456789' for b in combinations_with_replacement('0'+''.join(str(d) for d in range(int(a),10)),l-1)))
+%o A179239 A179239_list = list(islice(A179239_gen(),31)) # _Chai Wah Wu_, Sep 13 2022
+%Y A179239 A variant of A009994.
+%Y A179239 Cf. A047726, A035927 (Number of distinct n-digit numbers up to permutations of digits).
+%Y A179239 Cf. A004186, A328447: largest & smallest representative of the class of n.
+%K A179239 nonn,base
+%O A179239 0,3
+%A A179239 _Aaron Dunigan AtLee_, Jul 04 2010
+%E A179239 Prefixed with a(0) = 0 by _M. F. Hasler_, Oct 18 2019

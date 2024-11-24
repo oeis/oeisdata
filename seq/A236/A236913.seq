@@ -1,0 +1,72 @@
+%I A236913 #23 Feb 11 2021 22:59:47
+%S A236913 1,1,3,6,12,22,40,69,118,195,317,505,793,1224,1867,2811,4186,6168,
+%T A236913 9005,13026,18692,26613,37619,52815,73680,102162,140853,193144,263490,
+%U A236913 357699,483338,650196,870953,1161916,1544048,2044188,2696627,3545015,4644850,6066425
+%N A236913 Number of partitions of 2n of type EE (see Comments).
+%C A236913 The partitions of n are partitioned into four types:
+%C A236913 EO, even # of odd parts and odd  # of even parts, A236559;
+%C A236913 OE, odd  # of odd parts and even # of even parts, A160786;
+%C A236913 EE, even # of odd parts and even # of even parts, A236913;
+%C A236913 OO, odd  # of odd parts and odd  # of even parts, A236914.
+%C A236913 A236559 and A160786 are the bisections of A027193;
+%C A236913 A236913 and A236914 are the bisections of A027187.
+%H A236913 Alois P. Heinz, <a href="/A236913/b236913.txt">Table of n, a(n) for n = 0..1000</a>
+%e A236913 The partitions of 4 of type EE are [3,1], [2,2], [1,1,1,1], so that a(2) = 3.
+%e A236913 type/k . 1 .. 2 .. 3 .. 4 .. 5 .. 6 .. 7 .. 8 ... 9 ... 10 .. 11
+%e A236913 EO ..... 0 .. 1 .. 0 .. 2 .. 0 .. 5 .. 0 .. 10 .. 0 ... 20 .. 0
+%e A236913 OE ..... 1 .. 0 .. 2 .. 0 .. 4 .. 0 .. 8 .. 0 ... 16 .. 0 ... 29
+%e A236913 EE ..... 0 .. 1 .. 0 .. 3 .. 0 .. 6 .. 0 .. 12 .. 0 ... 22 .. 0
+%e A236913 OO ..... 0 .. 0 .. 1 .. 0 .. 3 .. 0 .. 7 .. 0 ... 14 .. 0 ... 27
+%e A236913 From _Gus Wiseman_, Feb 09 2021: (Start)
+%e A236913 This sequence counts even-length partitions of even numbers, which have Heinz numbers given by A340784. For example, the a(0) = 1 through a(4) = 12 partitions are:
+%e A236913   ()  (11)  (22)    (33)      (44)
+%e A236913             (31)    (42)      (53)
+%e A236913             (1111)  (51)      (62)
+%e A236913                     (2211)    (71)
+%e A236913                     (3111)    (2222)
+%e A236913                     (111111)  (3221)
+%e A236913                               (3311)
+%e A236913                               (4211)
+%e A236913                               (5111)
+%e A236913                               (221111)
+%e A236913                               (311111)
+%e A236913                               (11111111)
+%e A236913 (End)
+%p A236913 b:= proc(n, i) option remember; `if`(n=0, [1, 0$3],
+%p A236913       `if`(i<1, [0$4], b(n, i-1)+`if`(i>n, [0$4], (p->
+%p A236913       `if`(irem(i, 2)=0, [p[3], p[4], p[1], p[2]],
+%p A236913           [p[2], p[1], p[4], p[3]]))(b(n-i, i)))))
+%p A236913     end:
+%p A236913 a:= n-> b(2*n$2)[1]:
+%p A236913 seq(a(n), n=0..40);  # _Alois P. Heinz_, Feb 16 2014
+%t A236913 z = 25; m1 = Map[Length[Select[Map[{Count[#, True], Count[#, False]} &,  OddQ[IntegerPartitions[2 #]]], EvenQ[(*Odd*)First[#]] && OddQ[(*Even*)Last[#]] &]] &, Range[z]]; m2 = Map[Length[Select[Map[{Count[#, True], Count[#, False]} &,      OddQ[IntegerPartitions[2 # - 1]]], OddQ[(*Odd*)First[#]] && EvenQ[(*Even*)Last[#]] &]] &, Range[z]]; m3 = Map[Length[Select[Map[{Count[#, True], Count[#, False]} &,
+%t A236913 OddQ[IntegerPartitions[2 #]]], EvenQ[(*Odd*)First[#]] && EvenQ[(*Even*)Last[#]] &]] &, Range[z]] ; m4 = Map[Length[Select[Map[{Count[#, True], Count[#, False]} &,
+%t A236913 OddQ[IntegerPartitions[2 # - 1]]], OddQ[(*Odd*)First[#]] && OddQ[(*Even*)Last[#]] &]] &, Range[z]];
+%t A236913 m1 (* A236559, type EO*)
+%t A236913 m2 (* A160786, type OE*)
+%t A236913 m3 (* A236913, type EE*)
+%t A236913 m4 (* A236914, type OO*)
+%t A236913 (* _Peter J. C. Moses_, Feb 03 2014 *)
+%t A236913 b[n_, i_] := b[n, i] = If[n == 0, {1, 0, 0, 0}, If[i < 1, {0, 0, 0, 0}, b[n, i - 1] + If[i > n, {0, 0, 0, 0}, Function[p, If[Mod[i, 2] == 0, p[[{3, 4, 1, 2}]], p[[{2, 1, 4, 3}]]]][b[n - i, i]]]]]; a[n_] := b[2*n, 2*n][[1]]; Table[a[n], {n, 0, 40}] (* _Jean-François Alcover_, Oct 27 2015, after _Alois P. Heinz_ *)
+%t A236913 Table[Length[Select[IntegerPartitions[2n],EvenQ[Length[#]]&]],{n,0,15}] (* _Gus Wiseman_, Feb 09 2021 *)
+%Y A236913 Cf. A000041, A027193, A236559, A236914.
+%Y A236913 Note: A-numbers of ranking sequences are in parentheses below.
+%Y A236913 The ordered version is A000302.
+%Y A236913 The case of odd-length partitions of odd numbers is A160786 (A340931).
+%Y A236913 The Heinz numbers of these partitions are (A340784).
+%Y A236913 A027187 counts partitions of even length/maximum (A028260/A244990).
+%Y A236913 A034008 counts compositions of even length.
+%Y A236913 A035363 counts partitions into even parts (A066207).
+%Y A236913 A047993 counts balanced partitions (A106529).
+%Y A236913 A058695 counts partitions of odd numbers (A300063).
+%Y A236913 A058696 counts partitions of even numbers (A300061).
+%Y A236913 A067661 counts strict partitions of even length (A030229).
+%Y A236913 A072233 counts partitions by sum and length.
+%Y A236913 A339846 counts factorizations of even length.
+%Y A236913 A340601 counts partitions of even rank (A340602).
+%Y A236913 A340785 counts factorizations into even factors.
+%Y A236913 A340786 counts even-length factorizations into even factors.
+%K A236913 nonn,easy
+%O A236913 0,3
+%A A236913 _Clark Kimberling_, Feb 01 2014
+%E A236913 More terms from _Alois P. Heinz_, Feb 16 2014

@@ -1,0 +1,24 @@
+%I A292585 #17 Sep 23 2017 19:54:52
+%S A292585 1,2,2,2,3,2,3,2,3,3,3,2,4,3,2,2,5,3,5,3,4,3,5,2,6,4,2,3,7,2,7,2,4,5,
+%T A292585 2,3,8,5,3,3,9,4,9,3,3,5,9,2,10,6,4,4,11,2,4,3,7,7,11,2,12,7,3,2,5,4,
+%U A292585 12,5,7,2,12,3,13,8,3,5,3,3,13,3,3,9,13,4,4,9,5,3,14,3,4,5,8,9,4,2,15,10,3,6,16,4,16,4,3
+%N A292585 Restricted growth sequence transform of A278222(A292385(n)).
+%C A292585 Term a(n) essentially records the run lengths of numbers of form 4k+1 encountered when starting from that node in binary tree A005940 which contains n, and by then traversing towards the root by iterating the map n -> A252463(n). The actual run lengths can be read from the exponents of primes in the prime factorization of A278222(A292385(m)), where m = min_{k=1..n} for which a(k) = a(n). In compound filter A292584 this is combined with similar information about the run lengths of the numbers of the form 4k+3 (A292583).
+%H A292585 Antti Karttunen, <a href="/A292585/b292585.txt">Table of n, a(n) for n = 1..16384</a>
+%H A292585 <a href="/index/Pri#prime_indices">Index entries for sequences computed from indices in prime factorization</a>
+%e A292585 When traversing from the root of binary tree A005940 from the node which contains 5, one obtains path 5 -> 3 -> 2 -> 1. Of these numbers, 5 and 1 are of the form 4k+1, while others are not, thus there are two separate runs of length 1: [1, 1]. On the other hand, when traversing from 9 as 9 -> 4 -> 2 -> 1, again only two terms are of the form 4k+1: 9 and 1 and they are not next to each other, so we have the same two runs of one each: [1, 1]. Similarly for n = 7, and n = 10 as neither in path 7 -> 5 -> 3 -> 2 -> 1 nor in path 10 -> 5 -> 3 -> 2 -> 1 are any more 4k+1 terms (compared to the path beginning from 5). Thus a(5), a(7), a(9) and a(10) are all allotted the same value by the restricted growth sequence transform, which in this case is 3.  Note that 3 occurs in this sequence for the first time at n=5, with A292385(5) = 5 and A278222(5) = 6 = 2^1 * 3^1, where those run lengths 1 and 1 are the prime exponents of 6.
+%o A292585 (PARI)
+%o A292585 allocatemem(2^30);
+%o A292585 rgs_transform(invec) = { my(om = Map(), outvec = vector(length(invec)), u=1); for(i=1, length(invec), if(mapisdefined(om,invec[i]), my(pp = mapget(om, invec[i])); outvec[i] = outvec[pp] , mapput(om,invec[i],i); outvec[i] = u; u++ )); outvec; };
+%o A292585 write_to_bfile(start_offset,vec,bfilename) = { for(n=1, length(vec), write(bfilename, (n+start_offset)-1, " ", vec[n])); }
+%o A292585 A005940(n) = { my(p=2, t=1); n--; until(!n\=2, if((n%2), (t*=p), p=nextprime(p+1))); t }; \\ Modified from code of _M. F. Hasler_
+%o A292585 A046523(n) = { my(f=vecsort(factor(n)[, 2], , 4), p); prod(i=1, #f, (p=nextprime(p+1))^f[i]); };  \\ This function from _Charles R Greathouse IV_, Aug 17 2011
+%o A292585 A064989(n) = {my(f); f = factor(n); if((n>1 && f[1,1]==2), f[1,2] = 0); for (i=1, #f~, f[i,1] = precprime(f[i,1]-1)); factorback(f)};
+%o A292585 A278222(n) = A046523(A005940(1+n));
+%o A292585 A252463(n) = if(!(n%2),n/2,A064989(n));
+%o A292585 A292385(n) = if(n<=2,n-1,(if(1==(n%4),1,0)+(2*A292385(A252463(n)))));
+%o A292585 write_to_bfile(1,rgs_transform(vector(16384,n,A278222(A292385(n)))),"b292585_upto16384.txt");
+%Y A292585 Cf. A005940, A252463, A278222, A292375, A292385, A292583, A292584.
+%K A292585 nonn
+%O A292585 1,2
+%A A292585 _Antti Karttunen_, Sep 20 2017

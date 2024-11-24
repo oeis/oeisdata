@@ -1,0 +1,43 @@
+%I A225102 #11 Feb 21 2017 20:16:33
+%S A225102 12,13,17,20,24,25,29,31,33,34,35,36,40,41,43,48,52,53,57,58,59,65,68,
+%T A225102 72,73,74,76,80,81,85,89,90,91,96,97,106,108,113,125,129,130,132,133,
+%U A225102 134,136,137,141,144,145,146,148,150,152,153,155,157,160,170,173,174,177
+%N A225102 Numbers that can be represented as a sum of two distinct nontrivial prime powers (numbers of the form p^k where p is a prime number and k >= 2).
+%C A225102 Indices of positive terms in A225099.
+%C A225102 Nontrivial prime powers are A025475 except the first term A025475(1) = 1.
+%H A225102 Robert Israel, <a href="/A225102/b225102.txt">Table of n, a(n) for n = 1..10000</a>
+%p A225102 N:= 1000: # to get all terms <= N
+%p A225102 P:= select(isprime, [2,seq(i,i=3..floor(sqrt(N)),2)]):
+%p A225102 PP:= sort(map(p -> seq(p^t,t=2..floor(log[p](N))), P)):
+%p A225102 sort(convert(select(`<=`,{seq(seq(PP[i]+PP[j],j=1..i-1),i=1..nops(PP))},N),list)); # _Robert Israel_, Feb 21 2017
+%t A225102 nn = 177; p = Sort[Flatten[Table[Prime[n]^i, {n, PrimePi[Sqrt[nn]]}, {i, 2, Log[Prime[n], nn]}]]]; Select[Union[Flatten[Table[p[[i]] + p[[j]], {i, Length[p] - 1}, {j, i + 1, Length[p]}]]], # <= nn &] (* _T. D. Noe_, Apr 29 2013 *)
+%o A225102 (C)
+%o A225102 #include <stdio.h>
+%o A225102 #include <stdlib.h>
+%o A225102 #define TOP (1ULL<<17)
+%o A225102 unsigned long long *powers, pwFlat[TOP], primes[TOP] = {2};
+%o A225102 int main() {
+%o A225102   unsigned long long a, c, i, j, k, n, p, r, pp = 1, pfp = 0;
+%o A225102   powers = (unsigned long long*)malloc(TOP * TOP/8);
+%o A225102   memset(powers, 0, TOP * TOP/8);
+%o A225102   for (a = 3; a < TOP; a += 2) {
+%o A225102     for (p = 0; p < pp; ++p)  if (a % primes[p] == 0) break;
+%o A225102     if (p == pp)  primes[pp++] = a;
+%o A225102   }
+%o A225102   for (k = i = 0; i < pp; ++i)
+%o A225102     for (j = primes[i]*primes[i]; j < TOP*TOP; j *= primes[i])
+%o A225102       powers[j/64] |= 1ULL << (j & 63), ++k;
+%o A225102   if (k > TOP) exit(1);
+%o A225102   for (n = 0; n < TOP * TOP; ++n)
+%o A225102     if (powers[n/64] & (1ULL << (n & 63)))  pwFlat[pfp++] = n;
+%o A225102   for (n = 0; n < TOP * TOP; ++n) {
+%o A225102     for (c = i = 0; pwFlat[i] * 2 < n; ++i)
+%o A225102       r=n-pwFlat[i], c+= (powers[r/64] & (1ULL <<(r&63))) > 0;
+%o A225102     if (c)  printf("%llu, ", n);
+%o A225102   }
+%o A225102   return 0;
+%o A225102 }
+%Y A225102 Cf. A025475, A225099.
+%K A225102 nonn
+%O A225102 1,1
+%A A225102 _Alex Ratushnyak_, Apr 28 2013

@@ -1,0 +1,58 @@
+%I A174150 #46 Oct 12 2024 21:14:43
+%S A174150 1,1,1,1,6,1,1,12,12,1,1,30,60,30,1,1,60,300,300,60,1,1,105,1050,2625,
+%T A174150 1050,105,1,1,168,2940,14700,14700,2940,168,1,1,252,7056,61740,123480,
+%U A174150 61740,7056,252,1,1,360,15120,211680,740880,740880,211680,15120,360,1
+%N A174150 Triangle T(n, k) = round(c(n)/(c(k)*c(n-k))) where c(n) = ((n-1)! * n! * (n+1)!)/ 2^(n-1) if n >= 2, otherwise 1, read by rows.
+%C A174150 Based on the SL(2,p) number of prime modular form group transforms: f(p) = p*(p^2-1) if p = 2, otherwise f(p) = p*(p^2-1)/2.
+%D A174150 T. S. Blyth and E. F. Robertson, Essential Student Algebra: Groups, Volume 5, J. W. Arrowsmith, Bristol, 1986, page 14.
+%D A174150 Leonard Eugene Dickson, On Invariants and the Theory of Numbers, Dover, New York, 1966, page 34.
+%H A174150 G. C. Greubel, <a href="/A174150/b174150.txt">Rows n = 0..50 of the triangle, flattened</a>
+%H A174150 Leonard Eugene Dickson, <a href="https://archive.org/details/madisoncolloquiu00amer/page/34">On Invariants and the Theory of Numbers</a>, American Mathematical Society, Colloquium Lectures, 1913, p. 34.
+%F A174150 T(n, k) = round(c(n)/(c(k)*c(n-k))) for n >= 0 and k >= 0, where c(n) = 2^(2-n)* Product_{j=2..n} j*(j^2 - 1) for n >= 2 and otherwise 1.
+%F A174150 T(n, k) = (k/(2*(k+1)))*Product_{j=0..2} binomial(n+j-1,k) with T(n,0) = T(n,n) = 1, T(n,1) = T(n,n-1) = 3*binomial(n+1,3) + 3*[n=2]. - _G. C. Greubel_, Apr 15 2021
+%e A174150 Triangle T(n,m) (with rows n >= 0 and columns m >= 0) begins as follows:
+%e A174150   1;
+%e A174150   1,   1;
+%e A174150   1,   6,     1;
+%e A174150   1,  12,    12,      1;
+%e A174150   1,  30,    60,     30,       1;
+%e A174150   1,  60,   300,    300,      60,       1;
+%e A174150   1, 105,  1050,   2625,    1050,     105,       1;
+%e A174150   1, 168,  2940,  14700,   14700,    2940,     168,      1;
+%e A174150   1, 252,  7056,  61740,  123480,   61740,    7056,    252,     1;
+%e A174150   1, 360, 15120, 211680,  740880,  740880,  211680,  15120,   360,   1;
+%e A174150   1, 495, 29700, 623700, 3492720, 6112260, 3492720, 623700, 29700, 495, 1;
+%e A174150   ...
+%e A174150 Row sums are: 1, 2, 8, 26, 122, 722, 4937, 35618, 261578, 1936082, 14405492, ...
+%p A174150 g := n -> `if`(n < 2, 1, GAMMA(n)*GAMMA(n+1)*GAMMA(n+2)/2^(n-1)):
+%p A174150 T := (n, k) -> round(g(n)/(g(k)*g(n-k))):
+%p A174150 seq(seq(T(n, k), k=0..n), n=0..12); # _Peter Luschny_, Sep 02 2019
+%t A174150 (* First program *)
+%t A174150 c[n_]:= If[n<2, 1, 2^(2-n)*Product[i*(i^2 -1), {i,2,n}]];
+%t A174150 T[n_, k_]:= Round[c[n]/(c[k]*c[n-k])];
+%t A174150 Table[T[n, k], {n,0,10}, {k,0,n}]//Flatten
+%t A174150 (* Second program *)
+%t A174150 T[n_, k_]:= If[k==0 || k==n, 1, If[k==1 || k==n-1, 3*Binomial[n+1, 3] + 3*Boole[n==2], (k/(2*(k+1)))* Product[Binomial[n+j-1, k], {j,0,2}] ]]//Round;
+%t A174150 Table[T[n, k], {n, 0, 12}, {k, 0, n}]//Flatten (* _G. C. Greubel_, Apr 15 2021 *)
+%o A174150 (Magma)
+%o A174150 function t(n,k)
+%o A174150   if k eq 0 or k eq n then return 1;
+%o A174150   elif k eq 1 and n eq 2 then return 6;
+%o A174150   elif k eq 1 or k eq n-1 then return 3*Binomial(n+1,3);
+%o A174150   else return (k/(2*(k+1)))*(&*[Binomial(n+j-1,k): j in [0..2]]);
+%o A174150   end if; return t;
+%o A174150 end function;
+%o A174150 [Round(t(n,k)): k in [0..n], n in [0..12]]; // _G. C. Greubel_, Apr 15 2021
+%o A174150 (Sage)
+%o A174150 @CachedFunction
+%o A174150 def t(n, k):
+%o A174150     if (k==0 or k==n): return 1
+%o A174150     elif (k==1 and n==2): return 6
+%o A174150     elif (k==1 or k==n-1): return 3*binomial(n+1,3)
+%o A174150     else: return (k/(2*(k+1)))*product(binomial(n+j-1,k) for j in (0..2))
+%o A174150 flatten([[t(n, k) for k in (0..n)] for n in (0..12)]) # _G. C. Greubel_, Apr 15 2021
+%Y A174150 Cf. A174151.
+%K A174150 nonn,tabl,easy
+%O A174150 0,5
+%A A174150 _Roger L. Bagula_, Mar 10 2010
+%E A174150 Edited and renamed by _Peter Luschny_, Sep 02 2019

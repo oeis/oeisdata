@@ -1,0 +1,34 @@
+%I A209633 #35 Feb 13 2017 14:21:00
+%S A209633 1,2,7,15,33,59,111,182,307,481,757,1134,1713,2483,3611,5117,7238,
+%T A209633 10029,13888,18900,25682,34442,46057,60934,80428,105159,137137,177495,
+%U A209633 229069,293694,375582,477499,605526,764060,961603,1204898,1506142,1875150,2329185,2882939
+%N A209633 Number of ordered set partitions of the multiset [a,a,1,1,...,1] with two "a" and n "1".
+%C A209633 For [a,1,1,...1] one gets A093694, number of one-element transitions from the partitions of n to the partitions of n+1 for labeled parts.
+%H A209633 Alois P. Heinz, <a href="/A209633/b209633.txt">Table of n, a(n) for n = 0..1000</a>
+%H A209633 Thomas Wieder, <a href="/A209633/a209633.pdf">Multiselection (2nd approach)</a>
+%e A209633 For n=4 we have the multiset [a,a,1,1,1,1] with the following a(4) = 33 ordered set partitions:
+%e A209633 For [4] one gets [[1,1,1,1]], [[1,1,1,a]], [[1,1,a,a]].
+%e A209633 For [3,1] one gets [[1,1,1],[1]], [[1,1,1],[a]], [[1,1,a],[1]], [[1,1,a],[a]], [[1,a,a],[1]].
+%e A209633 For [2,2] one gets [[1,1],[1,1]], [[1,1],[1,a]], [[1,1],[a,a]], [[1,a],[1,1]], [[1,a],[1,a]], [[a,a],[1,1]].
+%e A209633 For [2,1,1] one gets [[1,1],[1],[1]], [[1,1],[1],[a]], [[1,1],[a],[1]], [[1,1],[a],[a]], [[1,a],[1],[1]], [[1,a],[1],[a]], [[1,a],[a],[1]], [[a,a],[1],[1]].
+%e A209633 For [1,1,1,1] one gets [[1],[1],[1],[1]], [[1],[1],[1],[a]], [[1],[1],[a],[1]], [[1],[1],[a],[a]], [[1],[a],[1],[1]], [[1],[a],[1],[a]], [[1],[a],[a],[1]], [[a],[1],[1],[1]], [[a],[1],[1],[a]], [[a],[1],[a],[1]], [[a],[a],[1],[1]].
+%p A209633 p:= (f, g)-> zip((x, y)-> x+y, f, g, 0):
+%p A209633 b:= proc(n,i) option remember; local f, g;
+%p A209633       if n=0 then [1, 0, [1]]
+%p A209633     elif i<1 then [0, 0, [0]]
+%p A209633     else f:= b(n, i-1); g:= `if`(i>n, [0, 0, [0]], b(n-i, i));
+%p A209633          [f[1]+g[1], f[2]+g[2] +`if`(i>1, g[1], 0), p(f[3], [0, g[3][]])]
+%p A209633       fi
+%p A209633     end:
+%p A209633 a:= proc(n) local l, ll;
+%p A209633       if n=0 then return 1 fi;
+%p A209633       l:= b(n, n); ll:= l[3];
+%p A209633       l[2] +add(ll[t+1] *(1+t* (1+(t-1)/2)), t=1..nops(ll)-1)
+%p A209633     end:
+%p A209633 seq(a(n), n=0..50);  # _Alois P. Heinz_, Mar 11 2012
+%t A209633 zip = With[{m = Max[Length[#1], Length[#2]]}, PadRight[#1, m] + PadRight[#2, m]]&; b[n_, i_] := b[n, i] = Module[{f, g}, Which[n == 0, {1, 0, {1}}, i<1, {0, 0, {0}}, True, f = b[n, i-1]; g = If[i>n, {0, 0, {0}}, b[n-i, i]]; {f[[1]] + g[[1]], f[[2]] + g[[2]] + If[i>1, g[[1]], 0], zip[f[[3]], Join[{0}, g[[3]]]]}]]; a[n_] := Module[{l, ll}, If[n == 0, Return[1]]; l = b[n, n]; ll = l[[3]]; l[[2]] + Sum[ll[[t+1]]*(1+t*(1+(t-1)/2)), {t, 1, Length[ll]-1}]]; Table[a[n], {n, 0, 50}] (* _Jean-François Alcover_, Feb 13 2017, after _Alois P. Heinz_ *)
+%Y A209633 Cf. A093694.
+%K A209633 nonn
+%O A209633 0,2
+%A A209633 _Thomas Wieder_, Mar 11 2012
+%E A209633 More terms from _Alois P. Heinz_, Mar 11 2012

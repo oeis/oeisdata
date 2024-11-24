@@ -1,0 +1,27 @@
+%I A305193 #13 Nov 09 2018 22:02:12
+%S A305193 0,1,1,2,1,1,1,3,2,1,1,2,1,1,1,5,1,2,1,2,1,1,1,4,2,1,3,2,1,1,1,7,1,1,
+%T A305193 1,5,1,1,1,4,1,1,1,2,2,1,1,7,2,2,1,2,1,4,1,4,1,1,1,3,1,1,2,11,1,1,1,2,
+%U A305193 1,1,1,10,1,1,2,2,1,1,1,7,5,1,1,3,1,1,1,4,1,3,1,2,1,1,1,12,1,2,2,5,1,1,1,4,1
+%N A305193 Number of connected factorizations of n.
+%C A305193 Given a finite multiset S of positive integers greater than one, let G(S) be the simple labeled graph with vertex set S and edges between any two vertices with a common divisor greater than 1. For example, G({6,14,15,35}) is a 4-cycle. This sequence counts factorizations S such that G(S) is a connected graph.
+%C A305193 a(n) depends only on prime signature of n (cf. A025487). - _Antti Karttunen_, Nov 07 2018
+%H A305193 Antti Karttunen, <a href="/A305193/b305193.txt">Table of n, a(n) for n = 1..20736</a>
+%H A305193 Antti Karttunen, <a href="/A305193/a305193.txt">Data supplement: n, a(n) computed for n = 1..100000</a>
+%H A305193 <a href="/index/Eu#epf">Index entries for sequences computed from exponents in factorization of n</a>
+%e A305193 The a(72) = 10 factorizations:
+%e A305193 (72),
+%e A305193 (2*2*18), (2*3*12), (2*6*6), (3*4*6),
+%e A305193 (2*36), (3*24), (4*18), (6*12),
+%e A305193 (2*2*3*6).
+%t A305193 zsm[s_]:=With[{c=Select[Tuples[Range[Length[s]],2],And[Less@@#,GCD@@s[[#]]]>1&]},If[c=={},s,zsm[Union[Append[Delete[s,List/@c[[1]]],LCM@@s[[c[[1]]]]]]]]];
+%t A305193 facs[n_]:=If[n<=1,{{}},Join@@Table[Map[Prepend[#,d]&,Select[facs[n/d],Min@@#>=d&]],{d,Rest[Divisors[n]]}]];
+%t A305193 Table[Length[Select[facs[n],Length[zsm[#]]==1&]],{n,100}]
+%o A305193 (PARI)
+%o A305193 is_connected(facs) = { my(siz=length(facs)); if(1==siz,1,my(m=matrix(siz,siz,i,j,(gcd(facs[i],facs[j])!=1))^siz); for(n=1,siz,if(0==vecmin(m[n,]),return(0))); (1)); };
+%o A305193 A305193aux(n, m, facs) = if(1==n, is_connected(Set(facs)), my(s=0, newfacs); fordiv(n, d, if((d>1)&&(d<=m), newfacs = List(facs); listput(newfacs,d); s += A305193aux(n/d, d, newfacs))); (s)); \\ _Antti Karttunen_, Nov 07 2018
+%o A305193 A305193(n) = if(1==n,0,A305193aux(n, n, List([]))); \\ _Antti Karttunen_, Nov 07 2018
+%Y A305193 Cf. A048143, A281116, A286518, A286520, A290103, A303837, A304118, A304714, A304716, A305078, A305079, A319786.
+%K A305193 nonn
+%O A305193 1,4
+%A A305193 _Gus Wiseman_, May 27 2018
+%E A305193 More terms from _Antti Karttunen_, Nov 07 2018

@@ -1,0 +1,65 @@
+%I A256033 #22 Nov 23 2017 02:42:28
+%S A256033 1,5,43,529,8451,167397,3984807,111319257,3583777723,131082199809,
+%T A256033 5385265586075,246172834737485,12422776100542887,687441750763500441,
+%U A256033 41475644663003037947,2714680813135603845921
+%N A256033 Number of idempotents of rank 1 in partition monoid P_n.
+%H A256033 I. Dolinka, J. East, A. Evangelou, D. FitzGerald, N. Ham, et al., <a href="http://arxiv.org/abs/1408.2021">Enumeration of idempotents in diagram semigroups and algebras</a>, arXiv preprint arXiv:1408.2021 [math.GR], 2014. See Table 3.
+%p A256033 e256033 := proc(n,r,s)
+%p A256033     option remember;
+%p A256033     local resu,m,a,b;
+%p A256033     if n <= 0 then
+%p A256033         return 0;
+%p A256033     end if;
+%p A256033     if s = 1 then
+%p A256033         combinat[stirling2](n,r) ;
+%p A256033     elif r= 1 then
+%p A256033         combinat[stirling2](n,s) ;
+%p A256033     else
+%p A256033         resu := s*procname(n-1,r-1,s)+r*procname(n-1,r,s-1)+r*s*procname(n-1,r,s) ;
+%p A256033         for m from 1 to n-2 do
+%p A256033         for a from 1 to r-1 do
+%p A256033         for b from 1 to s-1 do
+%p A256033             resu := resu + binomial(n-2,m) *(a*(s-b)+b*(r-a))
+%p A256033                 *procname(m,a,b)*procname(n-m-1,r-a,s-b);
+%p A256033         end do:
+%p A256033         end do:
+%p A256033         end do:
+%p A256033         resu ;
+%p A256033     end if;
+%p A256033 end proc:
+%p A256033 A256033 := proc(n)
+%p A256033     a := 0 ;
+%p A256033     for r from 1 to n do
+%p A256033     for s from 1 to n do
+%p A256033         a  := a+r*s*e256033(n,r,s) ;
+%p A256033     end do;
+%p A256033     end do;
+%p A256033 end proc:
+%p A256033 seq(A256033(n),n=1..16) ; # _R. J. Mathar_, Mar 23 2015
+%t A256033 f[n_, r_, s_] := f[n, r, s] = Module[{resu, m, a, b}, Which[n <= 0, 0, s == 1, StirlingS2[n, r], r == 1, StirlingS2[n, s], True, resu = s*f[n - 1, r - 1, s] + r*f[n - 1, r, s - 1] + r*s*f[n - 1, r, s]; Do[resu += Binomial[n - 2, m]*(b*(r - a) + a*(s - b))*f[m, a, b]*f[-m + n - 1, r - a, s - b], {m, n}, {a, r - 1}, {b, s - 1}]; resu]];
+%t A256033 a[n_] := Module[{b = 0}, Do[b += r*s*f[n, r, s], {r, n}, {s, n}]; b];
+%t A256033 Array[a, 16] (* _Jean-François Alcover_, Nov 23 2017, after _R. J. Mathar_ *)
+%o A256033 (Sage)
+%o A256033 @cached_function
+%o A256033 def F(n, r, s):
+%o A256033     if n <= 0: return 0
+%o A256033     if s == 1: return stirling_number2(n, r)
+%o A256033     if r == 1: return stirling_number2(n, s)
+%o A256033     ret = s*F(n-1,r-1,s)+r*F(n-1,r,s-1)+r*s*F(n-1,r,s)
+%o A256033     for m in (1..n-2):
+%o A256033         for a in (1..r-1):
+%o A256033             for b in (1..s-1):
+%o A256033                 ret += binomial(n-2,m)*(a*(s-b)+b*(r-a))*F(m,a,b)*F(n-m-1,r-a,s-b)
+%o A256033     return ret
+%o A256033 @cached_function
+%o A256033 def A256033(n):
+%o A256033     a = 0
+%o A256033     for r in (1..n):
+%o A256033         for s in (1..n):
+%o A256033             a += r*s*F(n, r, s)
+%o A256033     return a
+%o A256033 [A256033(n) for n in (1..9)] # _Peter Luschny_, Jan 17 2016
+%Y A256033 Cf. A060639, A256034.
+%K A256033 nonn
+%O A256033 1,2
+%A A256033 _N. J. A. Sloane_, Mar 14 2015

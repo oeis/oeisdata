@@ -1,0 +1,53 @@
+%I A232541 #40 Jan 15 2022 15:15:30
+%S A232541 4,6,8,9,95,159,195,249,326,762,973,995,998,1057,1086,1111,1189,1236,
+%T A232541 1255,1337,1338,1383,1389,1395,1419,1509,2139,2248,2623,2679,2737,
+%U A232541 2928,2949,3029,3065,3202,3344,3345,3419,3432,3437,3464,3706,3945,4344,4502
+%N A232541 Multiplicative Smith numbers: Composite numbers n such that the product of nonzero digits of n = product of nonzero digits of prime factors of n.
+%C A232541 They follow the same formula for Smith numbers, however, instead of addition, we have multiplication (only nonzero digits are included).
+%C A232541 Trivially, prime numbers satisfy this property but are not included in the sequence.
+%H A232541 T. D. Noe, <a href="/A232541/b232541.txt">Table of n, a(n) for n = 1..1000</a>
+%e A232541 1236 is a member of this sequence because 1236 = 2*2*3*103 and 1*2*3*6 = 2*2*3*1*3 (zeros are not included).
+%e A232541 998 is a member of this sequence because 998 = 2*499 and 9*9*8 = 2*4*9*9.
+%t A232541 f[n_] := Times @@ DeleteCases[IntegerDigits[n], 0]; pFactors[n_] := Module[{f = FactorInteger[n]}, Flatten[ConstantArray @@@ f]]; Select[Range[2, 10000], ! PrimeQ[#] && f[#] == Times @@ f /@ pFactors[#] &] (* _T. D. Noe_, Nov 28 2013 *)
+%t A232541 msnQ[n_]:=Times@@(Flatten[IntegerDigits/@Table[#[[1]],#[[2]]]&/@ FactorInteger[ n]]/.(0->1))==Times@@(IntegerDigits[n]/.(0->1)); Select[ Range[ 5000],CompositeQ[#]&&msnQ[#]&] (* _Harvey P. Dale_, Jan 15 2022 *)
+%o A232541 (Python)
+%o A232541 import sympy
+%o A232541 from sympy import isprime
+%o A232541 from sympy import factorint
+%o A232541 def DigitProd(x):
+%o A232541     prod = 1
+%o A232541     for i in str(x):
+%o A232541         if i != '0':
+%o A232541             prod *= int(i)
+%o A232541     return prod
+%o A232541 def f(x):
+%o A232541     lst = []
+%o A232541     for n in range(len(list(factorint(x)))):
+%o A232541         lst.append(str(list(factorint(x))[n])*list(factorint(x).values())[n])
+%o A232541     string = ''
+%o A232541     for i in lst:
+%o A232541         string += i
+%o A232541     prod = 1
+%o A232541     for a in string:
+%o A232541         if a != '0':
+%o A232541             prod *= int(a)
+%o A232541     if prod == DigitProd(x):
+%o A232541         return True
+%o A232541 x = 4
+%o A232541 while x < 10**3:
+%o A232541     if not isprime(x):
+%o A232541         if f(x):
+%o A232541             print(x)
+%o A232541     x += 1
+%o A232541 (Sage)
+%o A232541 def prodPrimeDig(x):
+%o A232541     F=factor(x)
+%o A232541     T=[item for sublist in [[y[0]]*y[1] for y in F] for item in sublist]
+%o A232541     return prod([prod(filter(lambda a: a!=0,h.digits(base=10))) for h in T])
+%o A232541 n=3345 #Change n for more digits
+%o A232541 [k for k in [1..n] if prod(filter(lambda a: a!=0,k.digits(base=10)))==prodPrimeDig(k) and not(is_prime(k))] # _Tom Edgar_, Nov 26 2013
+%Y A232541 Cf. A006753, A051801.
+%K A232541 nonn,base,easy
+%O A232541 1,1
+%A A232541 _Derek Orr_, Nov 25 2013
+%E A232541 Extended by _T. D. Noe_, Nov 28 2013

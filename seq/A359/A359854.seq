@@ -1,0 +1,27 @@
+%I A359854 #18 Jan 24 2023 12:34:17
+%S A359854 6,66,0,11310,303810,28962934,557221665,15529888374,1219300152070,
+%T A359854 23900058257790,1231931106828345,500402553453949510,
+%U A359854 14990069451769732194,610385355391371697410
+%N A359854 a(n) is the least n-gonal number that is the product of n distinct primes, or 0 if there are none.
+%e A359854 a(3) = 66 because 66 = 11*12/2 is the 11th triangular number and is the product of 3 distinct primes 2*3*11.
+%e A359854 a(4) = 0 because a 4-gonal number is a square, and thus not the product of distinct primes.
+%p A359854 f:= proc(s) local n,p,F;
+%p A359854   for n from 1 do
+%p A359854     p:= (s-2)*n*(n-1)/2 + n;
+%p A359854     F:= ifactors(p)[2];
+%p A359854     if nops(F) = s and andmap(t -> t[2]=1, F) then return p fi
+%p A359854    od
+%p A359854 end proc:
+%p A359854 f(2):= 0:
+%p A359854 map(f, [$2..11]);
+%t A359854 f[s_] := f[s] = Module[{n, p, F}, For[n = 1, True, n++, p = (s - 2)*n*(n-1)/2 + n; F = FactorInteger[p]; If[Length[F] == s && AllTrue[F, #[[2]] == 1&], Return[ p]]]];
+%t A359854 f[4] = 0;
+%t A359854 Table[Print[n, " ", f[n]]; f[n], {n, 2, 11}] (* _Jean-François Alcover_, Jan 24 2023, after Maple program *)
+%o A359854 (PARI)
+%o A359854 squarefree_omega_polygonals(A, B, n, k) = A=max(A, vecprod(primes(n))); (f(m, p, j) = my(list=List()); my(s=sqrtnint(B\m, j)); if(j==1, forprime(q=max(p, ceil(A/m)), s, if(ispolygonal(m*q, k), listput(list, m*q))), forprime(q=p, s, my(t=m*q); if(ceil(A/t) <= B\t, list=concat(list, f(t, q+1, j-1))))); list); vecsort(Vec(f(1, 2, n)));
+%o A359854 a(n, k=n) = if(n < 2, return()); if(n==2, return(6)); if(n==4, return(0)); my(x=vecprod(primes(n)), y=2*x); while(1, my(v=squarefree_omega_polygonals(x, y, n, k)); if(#v >= 1, return(v[1])); x=y+1; y=2*x); \\ _Daniel Suteu_, Jan 18 2023
+%Y A359854 Cf. A057145, A358863, A358862.
+%K A359854 nonn,more
+%O A359854 2,1
+%A A359854 _Robert Israel_, Jan 15 2023
+%E A359854 a(11)-a(15) from _Daniel Suteu_, Jan 18 2023

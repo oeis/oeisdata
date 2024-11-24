@@ -1,0 +1,61 @@
+%I A179455 #50 May 25 2020 11:51:15
+%S A179455 1,1,1,2,1,5,6,1,15,23,24,1,52,106,119,120,1,203,568,700,719,720,1,
+%T A179455 877,3459,4748,5013,5039,5040,1,4140,23544,36403,39812,40285,40319,
+%U A179455 40320,1,21147,176850,310851,354391,362057,362836,362879,362880
+%N A179455 Triangle read by rows: number of permutation trees of power n and height <= k + 1.
+%C A179455 Partial row sums of A179454. Special cases: A179455(n,1) = BellNumber(n) = A000110(n) for n > 1; A179455(n,n-1) = n! for n > 1 and A179455(n,n-2) = A033312(n) for n > 1. Column 3 is A187761(n) for n >= 3.
+%C A179455 See the interpretation of _Joerg Arndt_ in A187761: Maps such that f^[k](x) = f^[k-1](x) correspond to column k of A179455 (for n >= k). - _Peter Luschny_, Jan 08 2013
+%H A179455 Alois P. Heinz, <a href="/A179455/b179455.txt">Rows n = 0..141, flattened</a>
+%H A179455 Swapnil Garg, Alan Peng, <a href="https://arxiv.org/abs/2005.08889">Classical and consecutive pattern avoidance in rooted forests</a>, arXiv:2005.08889 [math.CO], May 2020.
+%H A179455 Peter Luschny, <a href="http://www.oeis.org/wiki/User:Peter_Luschny/PermutationTrees">Permutation Trees</a>.
+%e A179455 As a (0,0)-based triangle with an additional column [1,0,0,0,...] at the left hand side:
+%e A179455 1;
+%e A179455 0, 1;
+%e A179455 0, 1, 2;
+%e A179455 0, 1, 5, 6;
+%e A179455 0, 1, 15, 23, 24;
+%e A179455 0, 1, 52, 106, 119, 120;
+%e A179455 0, 1, 203, 568, 700, 719, 720;
+%e A179455 0, 1, 877, 3459, 4748, 5013, 5039, 5040;
+%e A179455 0, 1, 4140, 23544, 36403, 39812, 40285, 40319, 40320;
+%e A179455 0, 1, 21147, 176850, 310851, 354391, 362057, 362836, 362879, 362880;
+%t A179455 b[n_, t_, h_] := b[n, t, h] = If[n == 0 || h == 0, 1, Sum[Binomial[n - 1, j - 1]*b[j - 1, 0, h - 1]*b[n - j, t, h], {j, 1, n}]];
+%t A179455 T[0, 0] = 1; T[n_, k_] := b[n, 1, k];
+%t A179455 Table[T[n, k], {n, 0, 9}, {k, 0, If[n == 0, 0, n-1]}] // Flatten (* _Jean-François Alcover_, Jul 10 2019, after _Alois P. Heinz_ in A179454 *)
+%o A179455 (Sage)
+%o A179455 # Generating algorithm from Joerg Arndt.
+%o A179455 def A179455row(n):
+%o A179455     def generate(n, k):
+%o A179455         if n == 0 or k == 0: return 0
+%o A179455         for j in range(n-1, 0, -1):
+%o A179455             f = a[j] + 1
+%o A179455             while f <= j:
+%o A179455                 a[j] = f1 = fl = f
+%o A179455                 for i in range(k):
+%o A179455                     fl = f1
+%o A179455                     f1 = a[fl]
+%o A179455                 if f1 == fl: return j
+%o A179455                 f += 1
+%o A179455             a[j] = 0
+%o A179455         return 0
+%o A179455     count = [1 for j in range(n)] if n > 0 else [1]
+%o A179455     for k in range(n):
+%o A179455         a = [0 for j in range(n)]
+%o A179455         while generate(n, k) != 0:
+%o A179455             count[k] += 1
+%o A179455     return count
+%o A179455 for n in range(9): A179455row(n) # _Peter Luschny_, Jan 08 2013
+%o A179455 (Sage) # uses[bell_transform from A264428]
+%o A179455 # Adds the column (1,0,0,0,..) to the left hand side and starts at n=0.
+%o A179455 def A179455_matrix(dim):
+%o A179455     b = [1]+[0]*(dim-1); L = [b]
+%o A179455     for k in range(dim):
+%o A179455         b = [sum(bell_transform(n, b)) for n in range(dim)]
+%o A179455         L.append(b)
+%o A179455     return matrix(ZZ, dim, lambda n, k: L[k][n] if k<=n else 0)
+%o A179455 print(A179455_matrix(10)) # _Peter Luschny_, Dec 06 2015
+%Y A179455 Row sums are A264151.
+%Y A179455 Cf. A000110, A179454, A179456, A187761, A264428.
+%K A179455 nonn,tabf,look,nice
+%O A179455 0,4
+%A A179455 _Peter Luschny_, Aug 11 2010

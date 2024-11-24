@@ -1,0 +1,46 @@
+%I A343730 #25 Sep 26 2021 14:13:07
+%S A343730 2,1,0,1,4,1,0,3,0,5,0,5,0,3,0,1,2,11,2,1,0,3,0,17,0,3,0,1,2,19,2,1,0,
+%T A343730 3,0,13,0,3,0,1,2,7,2,1,0,7,0,1,2,3,4,9,4,3,2,1,0,3,0,37,0,3,0,1,2,3,
+%U A343730 4,9,4,3,2,1,0,7,0,1,2,7,2,1,0,3,0,25,0
+%N A343730 a(n) is the length of the longest run of consecutive integers centered at n/2 with primality symmetric about n/2, or 0 if no such run exists.
+%C A343730 Consider the infinite string S of binary digits whose n-th digit is 1 iff n is prime, i.e.,
+%C A343730 .
+%C A343730 S = 01101010001010001010001000001010000010001010001000...
+%C A343730 .
+%C A343730 The 37-digit substring centered at the 30th digit, i.e.,
+%C A343730                0100010100010000010100000100010100010
+%C A343730 (corresponding to n = 12, ..., 48) is palindromic; equivalently, 30-k and 30+k are both prime or both nonprime for each k in the interval [0, 18]. However, the 39-digit substring with the same center is not palindromic; it starts with a 1 and ends with a 0, since 30 - 19 = 11 is prime while 30 + 19 = 49 is not.
+%C A343730 a(n) is the length of the longest palindromic substring in S that is centered at digit position n/2.
+%C A343730 a(n) is odd when n is even and vice versa.
+%C A343730 For even n, the consecutive integer "run" of length 1 consisting only of the integer n/2 always has primality symmetric about its center, so a(n) >= 1 for n even.
+%C A343730 For odd n, the run of length 2 consisting of the integers j1 = (n-1)/2 and j2 = (n+1)/2 has primality symmetric about its center iff j1 and j2 are both prime (which occurs only at n = 5) or both nonprime (which occurs for all values of n in A166685 except for A166685(2)=5). For all odd n not in A166685, j1 and j2 are, in some order, a prime and a nonprime, so no run with primality symmetric about the center exists, so a(n) = 0.
+%C A343730 The even values > 4 tend to make their first appearance in the sequence much later than nearby odd values. E.g., the first 5, 7, 9, 11, and 13 appear at n = 10, 42, 52, 18, and 36, but the first 6, 8, 10, 12, and 14 do not appear until n = 185, 235, 237, 239, and 1061, respectively.
+%C A343730 For n >= 7, a(n) <= n - 5 since the only occurrence of 11 in S is in digits 2 and 3. - _Michael S. Branicky_, Sep 23 2021
+%H A343730 Michel Marcus, <a href="/A343730/b343730.txt">Table of n, a(n) for n = 1..10000</a>
+%e A343730 For n=1, the shortest run of consecutive integers centered at 1/2 is {0, 1}; both are nonprime, so its primality is symmetric about its center. The next longer run of consecutive integers centered at 1/2 is {-1, 0, 1, 2}; 2 is prime, but -1 is not, so this run's primality is not symmetric about its center, and the same will be true of any longer run centered at 1/2 (e.g., {-2, -1, 0, 1, 2, 3}). So the longest run with primality symmetric about 1/2 is {0, 1}, whose length is 2, so a(1)=2.
+%e A343730 For n=2, the "run" of length 1 centered at 2/2 = 1 is simply {1} (and, like every run of length 1, has primality symmetric about its center). The run of length 3 centered at 1 is {0, 1, 2}; 2 is prime, but 0 is not, so a(2)=1.
+%e A343730 For n=3, the shortest run of consecutive integers centered at 3/2 is {1, 2}, whose primality is not symmetric about the center (2 is prime while 1 is not), and the same will be true of any longer run centered at 3/2, so no run with primality symmetric about 3/2 exists, so a(3)=0.
+%e A343730 For n=5, the run {2, 3} has symmetric primality (both 2 and 3 are prime), and so does {1, 2, 3, 4} (both 1 and 4 are nonprime), but {0, 1, 2, 3, 4, 5} does not (5 is prime, 0 is not), so a(5)=4.
+%e A343730 For n=18, the run of length 11 centered at 18/2 = 9 is
+%e A343730                  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14
+%e A343730   with primality 0,  1,  0,  1,  0,  0,  0,  1,  0,  1,  0,
+%e A343730   which is symmetric, but the run of length 13 is not (since 3 is prime while 15 is not), so a(18)=11.
+%t A343730 Table[s=If[OddQ@n,{Floor[n/2],Ceiling[n/2]},{n/2-1,n/2+1}];k=0;While[SameQ@@PrimeQ@s,k++;s=s+{-1,+1}];If[OddQ@n,2k,2k+1],{n,85}] (* _Giorgos Kalogeropoulos_, Sep 23 2021 *)
+%o A343730 (PARI) a(n) = {my (nb = 0, fL, fR); fL = n\2; if (n%2, fR = fL+1, fL--; fR = fL+2); for (i=0, oo, if (isprime(fL-i) != isprime(fR+i), break, nb++);); if (n%2, 2*nb, 2*nb+1);} \\ _Michel Marcus_, Sep 23 2021
+%o A343730 (Python)
+%o A343730 from sympy import isprime
+%o A343730 def ispal(s):
+%o A343730     return s == s[::-1]
+%o A343730 def primestr(a, b):
+%o A343730     return "".join('1' if isprime(k) else '0' for k in range(a, b+1))
+%o A343730 def a(n):
+%o A343730     fl, cg = n//2, (n+1)//2
+%o A343730     start, end, r = fl, cg, n%2-1
+%o A343730     while ispal(primestr(start, end)):
+%o A343730         start, end, r = start-1, end+1, r+2
+%o A343730     return r
+%o A343730 print([a(n) for n in range(1, 86)]) # _Michael S. Branicky_, Sep 23 2021
+%Y A343730 Cf. A000040, A166685.
+%K A343730 nonn
+%O A343730 1,1
+%A A343730 _Jon E. Schoenfield_, Apr 28 2021

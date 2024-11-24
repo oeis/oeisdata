@@ -1,0 +1,29 @@
+%I A184172 #33 Mar 31 2023 18:05:50
+%S A184172 0,0,1,1,0,1,0,1,0,0,1,1,1,1,1,1,1,1,2,2,2,2,2,3,2,2,3,3,3,4,3,5,3,4,
+%T A184172 4,5,5,6,6,7,5,7,7,8,8,8,9,11,9,10,11,12,12,14,13,16,14,16,15,19,17,
+%U A184172 20,20,22,20,23,24,27,26,28,27,33,30,34,34,37,36,41,40,46,43,47,46,55,50,56
+%N A184172 Number of partitions of n into an odd number of distinct primes.
+%H A184172 Seiichi Manyama, <a href="/A184172/b184172.txt">Table of n, a(n) for n = 0..10000</a> (terms 0..2000 from Alois P. Heinz)
+%F A184172 G.f.: (1/2)*[Product_{k>=1} (1+z^prime(k)) - Product_{k>=1} (1-z^prime(k))].
+%F A184172 a(n) = Sum_{k>=0} A219180(n,2*k+1). - _Alois P. Heinz_, Nov 15 2012
+%F A184172 a(n) + A184171(n) = A000586(n). - _R. J. Mathar_, Mar 31 2023
+%e A184172 a(33) = 4 because we have [23,7,3], [19,11,3], [17,13,3], and [17,11,5].
+%p A184172 g := 1/2*(Product(1+z^ithprime(k), k = 1 .. 120)-Product(1-z^ithprime(k), k = 1 .. 120)): gser := series(g, z = 0, 110): seq(coeff(gser, z, n), n = 0 .. 85);
+%p A184172 # second Maple program
+%p A184172 with(numtheory):
+%p A184172 b:= proc(n, i) option remember;
+%p A184172       `if`(n=0, [1], `if`(i<1, [], zip((x, y)->x+y, b(n, i-1),
+%p A184172        [0, `if`(ithprime(i)>n, [], b(n-ithprime(i), i-1))[]], 0)))
+%p A184172     end:
+%p A184172 a:= proc(n) local l; l:= b(n, pi(n));
+%p A184172       add(l[2*i], i=1..iquo(nops(l), 2))
+%p A184172     end:
+%p A184172 seq(a(n), n=0..100);  # _Alois P. Heinz_, Nov 15 2012
+%t A184172 b[n_, i_] := b[n, i] = If[n == 0, {1}, If[i<1, {}, Plus @@ PadRight[{b[n, i-1], Join[{0}, If[Prime[i]>n, {}, b[n-Prime[i], i-1]]]}]]]; a[n_] := Module[{l}, l = b[n, PrimePi[n]]; Sum[l[[2*i]], {i, 1, Quotient[Length[l], 2]}]]; Table[a[n], {n, 0, 100}] (* _Jean-François Alcover_, Jan 30 2014, after _Alois P. Heinz_ *)
+%o A184172 (PARI)
+%o A184172 parts(n, pred, y)={prod(k=1, n, 1 + if(pred(k), y*x^k + O(x*x^n), 0))}
+%o A184172 {my(n=80); (Vec(parts(n, isprime, 1)) - Vec(parts(n, isprime, -1)))/2} \\ _Andrew Howroyd_, Dec 28 2017
+%Y A184172 Cf. A000586, A184171, A184199.
+%K A184172 nonn
+%O A184172 0,19
+%A A184172 _Emeric Deutsch_ (suggested by _R. J. Mathar_), Jan 09 2011

@@ -1,0 +1,55 @@
+%I A331536 #57 Aug 06 2024 11:15:06
+%S A331536 1,3,6,11,25,69,282,1730,15885,210105,3986987,106053474
+%N A331536 Number of theorems in the MIU formal system which can be proved in n steps or fewer starting with the axiom 'mi'.
+%C A331536 The MIU system was invented by Douglas Hofstadter and is found in his book Gödel, Escher, Bach.
+%C A331536 In the MIU system words begin with the letter 'm' with the remaining letters being either 'u' or 'i'. Essentially, words can be represented by binary strings. It is given that 'mi' is a word. Thereafter, at each step words may be transformed by one of the following rules.
+%C A331536    1) Append a 'u' to a word ending in 'i'.
+%C A331536    2) Append a word to itself, excluding the initial 'm'.
+%C A331536    3) Replace an occurrence of 'iii' by 'u'.
+%C A331536    4) Remove an occurrence of 'uu'.
+%H A331536 Sean A. Irvine, <a href="https://github.com/archmageirvine/joeis/blob/master/src/irvine/oeis/a331/A331536.java">Java program</a> (github)
+%H A331536 A. Matos, <a href="https://citeseerx.ist.psu.edu/pdf/2732f13f008cd209e9dee35b56c53415ab29398a">On the number of lines of theorems in the formal system MIU</a>, Universidade do Porto, 2000, 1-10.
+%H A331536 Wikipedia, <a href="https://en.wikipedia.org/wiki/G%C3%B6del,_Escher,_Bach">Gödel, Escher, Bach</a>
+%H A331536 Wikipedia, <a href="https://en.wikipedia.org/wiki/MU_puzzle">MU Puzzle</a>
+%H A331536 <a href="/index/Go#GEB">Index entries for sequences from "Goedel, Escher, Bach"</a>
+%e A331536 The a(2) = 3 words that can be reached in at most one step are mi, miu, mii.
+%e A331536 The a(3) = 6 words that can be reached in at most two steps are mi, miu, mii, miiii, miiu, miuiu.
+%t A331536 MIURules = {StartOfString ~~ x : ___ ~~ "I" ~~ EndOfString :> x <> "IU", StartOfString ~~ "M" ~~ x : ___ ~~ EndOfString :> "M" <> x <> x, "III" :> "U", "UU" :> ""}; (*The rules of the MIU formal system*)
+%t A331536 MIUNext[s_String, rule_Integer] :=StringReplaceList[s, MIURules[[rule]]]
+%t A331536 g[x_]:=DeleteDuplicates[Flatten[Join[{x},Table[Table[MIUNext[x[[j]],n], {n, 1, 4}],{j, 1,Length[x]}]]]]
+%t A331536 a[n_Integer]:=Nest[g, "MI", n] // Length (*a[n] gives the number of theorems that can be proved in  n steps or fewer.  A331536[n]=a[n]. Remove //Length if you wish to see the theorems being counted.*)
+%t A331536 (* _Brian Tenneson_, Sep 21 2023 *)
+%o A331536 (Python)
+%o A331536 def occurrence_swaps(w, s, t):
+%o A331536   out, oi = [], w.find(s)
+%o A331536   while oi != -1:
+%o A331536     out.append(w[:oi] + t + w[oi+len(s):])
+%o A331536     oi = w.find(s, oi+1)
+%o A331536   return out
+%o A331536 def moves(w): # moves for word w in miu system
+%o A331536   nxt = [w + w] # Rule 2 ('m' not stored; else use nxt = [w + w[1:]])
+%o A331536   if w[-1] == 'i': nxt.append(w + 'u')       # Rule 1
+%o A331536   nxt.extend(occurrence_swaps(w, 'iii', 'u')) # Rule 3
+%o A331536   nxt.extend(occurrence_swaps(w, 'uu', ''))   # Rule 4
+%o A331536   return nxt
+%o A331536 def alst(maxd=float('inf'), v=False):
+%o A331536   alst, d = [], 0
+%o A331536   reached, frontier = {'i'}, {'i'} # don't store 'm's (else use 'mi' twice)
+%o A331536   alst.append(len(reached))
+%o A331536   if v: print(len(reached), end=", ")
+%o A331536   while len(frontier) > 0 and d < maxd:
+%o A331536     reach1 = set(m for p in frontier for m in moves(p) if m not in reached)
+%o A331536     if v: print(len(reached)+len(reach1), end=", ")
+%o A331536     alst.append(len(reached)+len(reach1))
+%o A331536     reached |= reach1
+%o A331536     frontier = reach1
+%o A331536     d += 1
+%o A331536   return alst
+%o A331536 alst(maxd=10, v=True) # _Michael S. Branicky_, Dec 29 2020
+%Y A331536 Cf. A368946, A368953, A369148, A369173 (all MIU strings).
+%K A331536 nonn,more
+%O A331536 1,2
+%A A331536 _Brian Tenneson_, Jan 19 2020
+%E A331536 a(11) from _Rémy Sigrist_, Feb 26 2020
+%E A331536 a(12) from _Sean A. Irvine_, Mar 20 2020
+%E A331536 Name edited by _Brian Tenneson_, Aug 19 2023

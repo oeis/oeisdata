@@ -1,0 +1,40 @@
+%I A173779 #11 Sep 08 2022 08:45:50
+%S A173779 1,1,1,1,1,1,1,128,128,1,1,128,16384,128,1,1,8256,1056768,1056768,
+%T A173779 8256,1,1,16384,135266304,135266304,135266304,16384,1,1,536576,
+%U A173779 8791261184,567036346368,567036346368,8791261184,536576,1,1,1576960,846158888960,108308337786880,6985887787253760,108308337786880,846158888960,1576960,1
+%N A173779 Triangle T(n, k, q) = round( c(n,q)/(c(k,q)*c(n-k,q)) ), where c(n,q) = Product_{j=0..n} v(j, q)((1)), v(n, q) = M*v(n-1, q), v(0, q) = {1, 1, 1}, M = {{0, 1, 0}, {0, 0, 1}, {q^3, q^3, 0}}, and q = 4, read by rows.
+%H A173779 G. C. Greubel, <a href="/A173779/b173779.txt">Rows n = 0..50 of the triangle, flattened</a>
+%F A173779 T(n, k, q) = round( c(n,q)/(c(k,q)*c(n-k,q)) ), where c(n,q) = Product_{j=0..n} v(j, q)((1)), v(n, q) = M*v(n-1, q), v(0, q) = {1, 1, 1}, M = {{0, 1, 0}, {0, 0, 1}, {q^3, q^3, 0}}, and q = 4.
+%F A173779 T(n, k, q) = round( (1/f(k,q))*Product_{j=0..n-k} f(j+k,q)/f(j,q) ), where f(n, q) = 6*q*f(n-2, q) + 8*q^3*f(n-3, q), and f(0,q) = f(1,q) = f(2,q) = 1, and q = 4. - _G. C. Greubel_, Jul 06 2021
+%e A173779 Triangle begins as:
+%e A173779   1;
+%e A173779   1,      1;
+%e A173779   1,      1,          1;
+%e A173779   1,    128,        128,            1;
+%e A173779   1,    128,      16384,          128,            1;
+%e A173779   1,   8256,    1056768,      1056768,         8256,          1;
+%e A173779   1,  16384,  135266304,    135266304,    135266304,      16384,      1;
+%e A173779   1, 536576, 8791261184, 567036346368, 567036346368, 8791261184, 536576, 1;
+%t A173779 f[n_, q_]:= f[n, q] = If[n<3, 1, q^3*f[n-2, q] + q^3*f[n-3, q]];
+%t A173779 c[n_, q_]:= Product[f[j, q], {j, 0, n}];
+%t A173779 T[n_, k_, q_]:= Round[c[n, q]/(c[k, q]*c[n-k, q])];
+%t A173779 Table[T[n, k, 4], {n,0,12}, {k,0,n}]//Flatten (* _G. C. Greubel_, Jul 06 2021 *)
+%o A173779 (Magma)
+%o A173779 function f(n,k)
+%o A173779   if n lt 3 then return 1;
+%o A173779   else return k^3*f(n-2,k) + k^3*f(n-3,k);
+%o A173779   end if; return f;
+%o A173779 end function;
+%o A173779 T:= func< n,k,q | Round( (&*[f(j+k, q)/f(j,q): j in [0..n-k]])/f(k,q) ) >;
+%o A173779 [T(n,k,4): k in [0..n], n in [0..12]]; // _G. C. Greubel_, Jul 06 2021
+%o A173779 (Sage)
+%o A173779 @CachedFunction
+%o A173779 def f(n,q): return 1 if (n<3) else q^3*f(n-2, q) + q^3*f(n-3, q)
+%o A173779 def T(n,k,q): return round(product( f(j+k,q)/f(j,q) for j in (0..n-k))/f(k,q))
+%o A173779 flatten([[T(n,k,4) for k in (0..n)] for n in (0..12)]) # _G. C. Greubel_, Jul 06 2021
+%Y A173779 Cf. A173778 (q=2), this sequence (q=4).
+%Y A173779 Cf. A173747, A173749, A173779.
+%K A173779 nonn,tabl,less
+%O A173779 0,8
+%A A173779 _Roger L. Bagula_, Feb 24 2010
+%E A173779 Definition corrected and edited by _G. C. Greubel_, Jul 06 2021

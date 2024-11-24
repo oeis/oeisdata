@@ -1,0 +1,42 @@
+%I A275811 #26 Apr 09 2021 14:58:26
+%S A275811 0,1,1,1,1,2,1,1,1,1,1,2,1,1,2,2,1,2,1,2,1,2,2,3,1,1,1,1,1,2,1,1,1,1,
+%T A275811 1,2,1,1,2,2,1,2,1,2,1,2,2,3,1,1,1,1,1,2,2,2,2,2,2,2,1,1,2,2,1,2,1,2,
+%U A275811 1,2,2,3,1,1,2,2,1,2,1,1,2,2,1,2,2,2,3,3,2,2,1,2,2,2,2,3,1,2,1,2,2,3,1,2,1,2,2,3,1,2,2,2,2,3,2,3,2,3,3,4,1
+%N A275811 Number of nonzero digits on a maximally occupied slope of factorial base representation of n: a(n) = A051903(A275734(n)). See comments for the definition.
+%C A275811 Digit slopes are called "maximal", "sub-maximal", "sub-sub-maximal", etc. For digit-positions we employ one-based indexing, thus we say that the least significant digit of factorial base expansion of n is in position 1, etc. The maximal digit slope is occupied when there is at least one digit-position k that contains digit k (maximal digit allowed in that position), so that A260736(n) > 0, and n is thus a term of A273670. The sub-maximal digit slope is occupied when there is at least one nonzero digit k in a digit-position k+1. The sub-sub-maximal slope is occupied when there is at least one nonzero digit k in a digit-position k+2, etc. This sequence gives the number of nonzero digits on a slope (of possibly several) for which there exists no other slopes with more nonzero digits. See the examples.
+%C A275811 In other words: a(n) gives the number of occurrences of a most common element in the multiset [(i_x - d_x) | where d_x ranges over each nonzero digit present in factorial base representation of n and i_x is that digit's position from the right].
+%C A275811 Involution A225901 maps this metric to another metric A264990 which gives the maximal number of equal nonzero digits occurring in factorial base representation (A007623) of n. See also A060502.
+%H A275811 Antti Karttunen, <a href="/A275811/b275811.txt">Table of n, a(n) for n = 0..40320</a>
+%H A275811 <a href="/index/Fa#facbase">Index entries for sequences related to factorial base representation</a>
+%F A275811 a(n) = A051903(A275734(n)).
+%F A275811 a(n) = A264990(A225901(n)).
+%e A275811 For n=23 ("321" in factorial base representation, A007623), all three nonzero digits are maximal for their positions (they all occur on "maximal slope"), thus the "maximal slope" is also the "maximally occupied slope" (as there are no other occupied slopes present), and a(23) = 3.
+%e A275811 For n=29 ("1021"), there are three nonzero digits, where both 2 and the rightmost 1 are on the "maximal slope", while the most significant 1 is on the "sub-sub-sub-maximal", thus here the "maximal slope" is also the "maximally occupied slope" (with 2 nonzero digits present), and a(29) = 2.
+%e A275811 For n=37 ("1201"), there are three nonzero digits, where the rightmost 1 is on the maximal slope, 2 is on the sub-maximal, and the most significant 1 is on the "sub-sub-sub-maximal", thus there are three occupied slopes in total, all with just one nonzero digit present, and a(37) = 1.
+%e A275811 For n=55 ("2101"), the least significant 1 is on the maximal slope, and the digits "21" at the beginning are together on the sub-sub-maximal slope (as they are both two less than the maximal digit values 4 and 3 allowed in those positions), thus here the sub-sub-maximal slope is the "maximally occupied slope" with its two occupiers, and a(55) = 2.
+%o A275811 (Scheme, two versions)
+%o A275811 (define (A275811 n) (A051903 (A275734 n)))
+%o A275811 (define (A275811 n) (A264990 (A225901 n)))
+%o A275811 (Python)
+%o A275811 from sympy import prime, factorint
+%o A275811 from operator import mul
+%o A275811 from functools import reduce
+%o A275811 from sympy import factorial as f
+%o A275811 def a051903(n): return 0 if n==1 else max(factorint(n).values())
+%o A275811 def a007623(n, p=2): return n if n<p else a007623(n//p, p+1)*10 + n%p
+%o A275811 def a275732(n):
+%o A275811     x=str(a007623(n))[::-1]
+%o A275811     return 1 if n==0 or x.count("1")==0 else reduce(mul, [prime(i + 1) for i in range(len(x)) if x[i]=='1'])
+%o A275811 def a257684(n):
+%o A275811     x=str(a007623(n))[:-1]
+%o A275811     y="".join([str(int(i) - 1) if int(i)>0 else '0' for i in x])[::-1]
+%o A275811     return 0 if n==1 else sum([int(y[i])*f(i + 1) for i in range(len(y))])
+%o A275811 def a275734(n): return 1 if n==0 else a275732(n)*a275734(a257684(n))
+%o A275811 def a(n): return 0 if n==0 else a051903(a275734(n))
+%o A275811 print([a(n) for n in range(201)]) # _Indranil Ghosh_, Jun 20 2017
+%Y A275811 Cf. A051903, A060502, A225901, A264990, A275734.
+%Y A275811 Cf. A275804 (gives the indices of 0 and 1's), A275805 (gives the indices of terms > 1).
+%K A275811 nonn,base
+%O A275811 0,6
+%A A275811 _Antti Karttunen_, Aug 10 2016
+%E A275811 Signs in comment corrected and clarification added by _Antti Karttunen_, Aug 16 2016

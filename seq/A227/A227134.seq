@@ -1,0 +1,87 @@
+%I A227134 #44 Mar 06 2020 09:19:56
+%S A227134 1,1,2,2,4,4,7,8,11,14,19,22,30,36,46,55,70,83,104,123,151,179,218,
+%T A227134 256,309,363,433,507,602,701,828,961,1127,1306,1525,1759,2046,2355,
+%U A227134 2725,3129,3609,4131,4750,5424,6214,7081,8090,9195,10478,11886,13506,15290,17335,19583,22154,24981,28197,31741,35757,40176,45176
+%N A227134 Partitions with parts repeated at most twice and repetition only allowed if first part has an odd index (first index = 1).
+%H A227134 Alois P. Heinz, <a href="/A227134/b227134.txt">Table of n, a(n) for n = 0..10000</a>
+%F A227134 Conjecture: A227134(n) + A227135(n) = A182372(n) for n >= 0, see comment in A182372.
+%F A227134 G.f.: 1/(1-x) + Sum_{n>=2} x^A002620(n+1) / Product_{k=1..n} (1-x^k), where A002620(n) = floor(n/2)*ceiling(n/2) forms the quarter-squares. - _Paul D. Hanna_, Jul 06 2013
+%F A227134 a(n) ~ c * exp(Pi*sqrt(2*n/5)) / n^(3/4), where c = 1 / (2^(1/4)*sqrt(5*(1 + sqrt(5)))) = 0.2090492823352... - _Vaclav Kotesovec_, May 28 2018, updated Mar 06 2020
+%e A227134 G.f.: 1 + x + 2*x^2 + 2*x^3 + 4*x^4 + 4*x^5 + 7*x^6 + 8*x^7 + 11*x^8 + ...
+%e A227134 G.f.: 1/(1-x) + x^2/((1-x)*(1-x^2)) + x^4/((1-x)*(1-x^2)*(1-x^3)) + x^6/((1-x)*(1-x^2)*(1-x^3)*(1-x^4)) + x^9/((1-x)*(1-x^2)*(1-x^3)*(1-x^4)*(1-x^5)) + x^12/((1-x)*(1-x^2)*(1-x^3)*(1-x^4)*(1-x^5)*(1-x^6))) + ...
+%e A227134 There are a(13)=36 such partitions, displayed here as partitions into two sorts of parts (format P:S for sort:part) where the first sort is 0 and sorts oscillate:
+%e A227134 01:  [ 1:0  1:1  2:0  2:1  3:0  4:1  ]
+%e A227134 02:  [ 1:0  1:1  2:0  2:1  7:0  ]
+%e A227134 03:  [ 1:0  1:1  2:0  3:1  6:0  ]
+%e A227134 04:  [ 1:0  1:1  2:0  4:1  5:0  ]
+%e A227134 05:  [ 1:0  1:1  2:0  9:1  ]
+%e A227134 06:  [ 1:0  1:1  3:0  3:1  5:0  ]
+%e A227134 07:  [ 1:0  1:1  3:0  8:1  ]
+%e A227134 08:  [ 1:0  1:1  4:0  7:1  ]
+%e A227134 09:  [ 1:0  1:1  5:0  6:1  ]
+%e A227134 10:  [ 1:0  1:1 11:0  ]
+%e A227134 11:  [ 1:0  2:1  3:0  3:1  4:0  ]
+%e A227134 12:  [ 1:0  2:1  3:0  7:1  ]
+%e A227134 13:  [ 1:0  2:1  4:0  6:1  ]
+%e A227134 14:  [ 1:0  2:1  5:0  5:1  ]
+%e A227134 15:  [ 1:0  2:1 10:0  ]
+%e A227134 16:  [ 1:0  3:1  4:0  5:1  ]
+%e A227134 17:  [ 1:0  3:1  9:0  ]
+%e A227134 18:  [ 1:0  4:1  8:0  ]
+%e A227134 19:  [ 1:0  5:1  7:0  ]
+%e A227134 20:  [ 1:0 12:1  ]
+%e A227134 21:  [ 2:0  2:1  3:0  6:1  ]
+%e A227134 22:  [ 2:0  2:1  4:0  5:1  ]
+%e A227134 23:  [ 2:0  2:1  9:0  ]
+%e A227134 24:  [ 2:0  3:1  4:0  4:1  ]
+%e A227134 25:  [ 2:0  3:1  8:0  ]
+%e A227134 26:  [ 2:0  4:1  7:0  ]
+%e A227134 27:  [ 2:0  5:1  6:0  ]
+%e A227134 28:  [ 2:0 11:1  ]
+%e A227134 29:  [ 3:0  3:1  7:0  ]
+%e A227134 30:  [ 3:0  4:1  6:0  ]
+%e A227134 31:  [ 3:0 10:1  ]
+%e A227134 32:  [ 4:0  4:1  5:0  ]
+%e A227134 33:  [ 4:0  9:1  ]
+%e A227134 34:  [ 5:0  8:1  ]
+%e A227134 35:  [ 6:0  7:1  ]
+%e A227134 36:  [13:0  ]
+%p A227134 ## Computes A227134 and A227135 in order n^2 time and order n^2 memory:
+%p A227134 a34:=proc(n) # n-th term of A227134
+%p A227134   return oddMin(n,1):
+%p A227134 end proc:
+%p A227134 a35:=proc(n) # n-th term of A227135
+%p A227134   return evenMin(n,1):
+%p A227134 end proc:
+%p A227134 # oddMin(n,m) finds number of partitions of n (as in A227134) but with the
+%p A227134 #  minimum part AT LEAST m
+%p A227134 oddMin:=proc(n, m) option remember:
+%p A227134   if(n=0) then return 1: fi:  ## Start base cases
+%p A227134   if((n<0) or (m>n)) then return 0: fi:
+%p A227134   if(n=m) then return 1: fi:  ## End base cases
+%p A227134   return oddMin(n, m+1) + evenMin(n-m, m+1) + oddMin(n-2*m, m+1): ## How many times is the element m in the partition
+%p A227134 end proc:
+%p A227134 # evenMin(n,m) finds number of partitions of n (as in A227135) but with the
+%p A227134 #  minimum part AT LEAST m
+%p A227134 evenMin:=proc(n, m) option remember:
+%p A227134   if(n=0) then return 1: fi:   ## Start base cases
+%p A227134   if((n<0) or (m>n)) then return 0: fi:
+%p A227134   if(n=m) then return 1: fi:   ## End base cases
+%p A227134   return evenMin(n, m+1) + oddMin(n-m, m+1): ## Is the element m in the partition
+%p A227134 end proc:
+%p A227134 ## _Patrick Devlin_, Jul 02 2013
+%p A227134 # second Maple program:
+%p A227134 b:= proc(n, i, t) option remember; `if`(n=0, t,
+%p A227134       `if`(i*(i+1)<n, 0, add(b(n-i*j, i-1,
+%p A227134       irem(t+j, 2)), j=0..min(t+1, n/i))))
+%p A227134     end:
+%p A227134 a:= n-> add(b(n$2, t), t=0..1):
+%p A227134 seq(a(n), n=0..60);  # _Alois P. Heinz_, Feb 15 2017
+%t A227134 nMax = 60; 1/(1-x) + Sum[x^Floor[(n+1)^2/4]/Product[1-x^k, {k, 1, n}], {n, 2, Ceiling @ Sqrt[4*nMax]}] + O[x]^(nMax+1) // CoefficientList[#, x]& (* _Jean-François Alcover_, Feb 15 2017, after _Paul D. Hanna_ *)
+%o A227134 (PARI) {A002620(n)=floor(n/2)*ceil(n/2)}
+%o A227134 {a(n)=polcoeff(1/(1-x+x*O(x^n)) + sum(m=2,sqrtint(4*n), x^A002620(m+1)/prod(k=1,m,1-x^k+x*O(x^n))),n)}
+%o A227134 for(n=0,60,print1(a(n),", ")) \\ _Paul D. Hanna_, Jul 06 2013
+%Y A227134 Cf. A227135 (parts may repeat after even index).
+%K A227134 nonn
+%O A227134 0,3
+%A A227134 _Joerg Arndt_, Jul 02 2013

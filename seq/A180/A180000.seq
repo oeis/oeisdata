@@ -1,0 +1,51 @@
+%I A180000 #22 May 08 2020 16:58:54
+%S A180000 1,1,1,1,2,2,3,3,12,4,10,10,30,30,105,7,56,56,252,252,1260,60,330,330,
+%T A180000 1980,396,2574,286,2002,2002,15015,15015,240240,7280,61880,1768,15912,
+%U A180000 15912,151164,3876,38760,38760,406980,406980,4476780,99484,1144066
+%N A180000 a(n) = lcm{1,2,...,n} / swinging_factorial(n) = A003418(n) / A056040(n).
+%C A180000 Characterization: Let e_{p}(m) denote the exponent of the prime p in the prime factorization of m and [.] denote the Iverson bracket, then
+%C A180000 e_{p}(a(n)) = Sum_{k>=1} [floor(n/p^k) is even].
+%C A180000 This implies, among other things, that no prime > floor(n/2) can divide a(n). The prime exponents e_{2}(a(2n)) give Guy Steele's sequence GS(5,3) A080100.
+%C A180000 Asymptotics: log a(n) ~ n(1 - log 2). It is conjectured that log a(n) ~ n(1 - log 2) + O(n^{1/2+eps}) for all eps > 0.
+%C A180000 Bounds: A056040(floor(n/3)) <= a(n) <= A056040(floor(n/2)) if n >= 285.
+%H A180000 Peter Luschny, <a href="/A180000/b180000.txt">Table of n, a(n) for n = 0..1000</a>
+%H A180000 Peter Luschny, <a href="/A180000/a180000.pdf">Die schwingende Fakultät und Orbitalsysteme</a>, August 2011.
+%F A180000 a(n) = 2^(-n)*Product_{1<=k<=n} A014963(k)*(k/2)^((-1)^k).
+%p A180000 a := proc(n) local A014963, k;
+%p A180000 A014963 := proc(n) if n < 2 then 1 else numtheory[factorset](n);
+%p A180000 if 1 < nops(%) then 1 else op(%) fi fi end;
+%p A180000 mul(A014963(k)*(k/2)^((-1)^k), k=1..n)/2^n end;
+%p A180000 # Also:
+%p A180000 A180000 := proc(n) local lcm, sf;
+%p A180000 lcm := ilcm(seq(i,i=1..n));
+%p A180000 sf := n!/iquo(n,2)!^2;
+%p A180000 lcm/sf end;
+%t A180000 a[0] = 1; a[n_] := LCM @@ Range[n] / (n! / Floor[n/2]!^2); Table[a[n], {n, 0, 46}] (* _Jean-François Alcover_, Jul 23 2013 *)
+%o A180000 (PARI) L=1; X(n)={ ispower(n, , &n);if(isprime(n),n,1); }
+%o A180000 Y(n)={ a=X(n); b=if(bitand(1,n),a,a*(n/2)^2); L=(b*L)/n; }
+%o A180000 A180000_list(n)={ L=1; vector(n,m,Y(m)); }  \\ for n>0
+%o A180000 (Sage)
+%o A180000 def Exp(m,n) :
+%o A180000     s = 0; p = m; q = n//p
+%o A180000     while q > 0 :
+%o A180000         if is_even(q) :
+%o A180000             s = s + 1
+%o A180000         p = p * m
+%o A180000         q = n//p
+%o A180000     return s
+%o A180000 def A180000(n) :
+%o A180000     A = [1,1,1,1,2,2,3,3,12]
+%o A180000     if n < 9 : return A[n]
+%o A180000     R = []; r = isqrt(n)
+%o A180000     P = Primes(); p = P.first()
+%o A180000     while p <= n//2 :
+%o A180000         if p <= r : R.append(p^Exp(p,n))
+%o A180000         elif p <= n//3 :
+%o A180000             if is_even(n//p) : R.append(p)
+%o A180000         else : R.append(p)
+%o A180000         p = P.next(p)
+%o A180000     return mul(x for x in R)
+%Y A180000 Cf. A003418, A014963, A056040.
+%K A180000 nonn
+%O A180000 0,5
+%A A180000 _Peter Luschny_, Aug 17 2010

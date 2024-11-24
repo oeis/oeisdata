@@ -1,0 +1,28 @@
+%I A284082 #24 Apr 27 2017 23:03:54
+%S A284082 1,1,1,2,1,1,1,3,2,2,1,1,1,3,2,4,1,1,1,1,0,5,1,1,2,6,3,1,1,2,1,5,0,4,
+%T A284082 2,2,1,9,0,1,1,3,1,8,5,11,1,2,2,2,8,4,1,5,0,1,0,14,1,2,1,5,0,6,2,5,1,
+%U A284082 0,7,9,1,0,1,18,10,2,0,0,1,0,4,10,1,2,8
+%N A284082 Smallest positive m such that n divides sigma_m(n) - j where j is some divisor of n, or 0 if no such m exists.
+%C A284082 If p is a prime, we have a(p) = 1. In general, if n = p^q with p prime, then a(n) <= q. For every prime power p^q < 10^13 it actually holds a(p^q) = q. Is this true for every prime power? - _Giovanni Resta_, Mar 20 2017
+%C A284082 Yes, this is true: sigma[m](p^q) == 1/(1-p^m) (mod p^q); this is never divisible by p, and == 1 (mod p^q) iff m >= q. - _Robert Israel_, Apr 27 2017
+%C A284082 First occurrence of k: 21, 1, 4, 8, 16, 22, 26, 69, 44, 38, 75, 46, 148, 316, 58, 186, ..., . - _Robert G. Wilson v_, Apr 14 2017
+%H A284082 Robert Israel, <a href="/A284082/b284082.txt">Table of n, a(n) for n = 1..10000</a>
+%p A284082 f:= proc(n) local m,mm,F,S,P,D,M0,M1;
+%p A284082       F:= ifactors(n)[2];
+%p A284082       if nops(F) = 1 then return F[1][2] fi;
+%p A284082       P:= map(t -> t[1]^t[2], F);
+%p A284082       S:= mul(add(t[1]^(i*m),i=0..t[2]),t=F);
+%p A284082       D:= subs(n=0,numtheory:-divisors(n));
+%p A284082       for mm from 1 to ilcm(op(map(numtheory:-phi, P)))+max(seq(t[2],t=F)) do
+%p A284082         if member(subs(m=mm,S) mod n, D) then return mm fi;
+%p A284082       od;
+%p A284082       0
+%p A284082 end proc:
+%p A284082 map(f, [$1..100]); # _Robert Israel_, Apr 27 2017
+%t A284082 a[n_] := Block[{ds, d=Divisors[n], m=0}, While[m <= 2*n, m++; ds = DivisorSigma[m, n]; If[ Select[d, Mod[ds-#, n] == 0 &, 1] != {}, Break[]]]; If[m > 2*n, 0, m]]; Array[a, 85] (* assuming that sigma(m,n) mod n has a period <= 2*n, _Giovanni Resta_, Mar 20 2017 *)
+%Y A284082 Integers n such that n divides sigma_k(n) - i, where i is some divisor of n; A205523 (k = 1), A283970 (k = 2).
+%Y A284082 Cf. A033950.
+%K A284082 nonn
+%O A284082 1,4
+%A A284082 _Juri-Stepan Gerasimov_, Mar 19 2017
+%E A284082 a(56) from _Giovanni Resta_, Mar 20 2017

@@ -1,0 +1,29 @@
+%I A327892 #25 Oct 20 2019 16:05:55
+%S A327892 2,2,4,2,2,4,2,2,4,4,6,2,2,2,6,2,6,4,4,2,4,2,6,4,2,6,2,4,2,6,4,6,4,8,
+%T A327892 2,6,2,6,4,2,6,2,2,8,4,10,12,4,2,2,4,0,2,4,4,14,6,4,6,2,2,2,4,4,6,4,2,
+%U A327892 2,10,14,6,2,4,2,6,2,6,6,8,6,4,2,6,4,4,6,6,2,2,10,10,6,2,4,2,4,0,2,12,4
+%N A327892 a(n) is the smallest positive integer k such that for every prime divisor p_i of 2*n+1, p_i + k is also prime, or 0 if no such k exists.
+%C A327892 Conjecture: Every case where there is no solution (a(n)=0) can be proved by a congruency argument: If p is the smallest prime divisor of m=2*n+1 and the factor set P of m contains every residue class (mod p), then there is no k such that for every prime factor q of m, q+k is prime (one such number will be congruent to 0 (mod p), and hence composite (see example)). Furthermore, any other odd number divisible by all the primes which divide m will also be a zero term, irrespective of what its other prime factors may be. It is generally true that where there is a nonzero solution there are infinitely many solutions (i.e., numbers r>k such that p_i+r are all prime). However, there are some (rare?) exceptions: n=40672-> 2*n+1=81345, whose factor set P=[3,5,11,17,29], in which every residue class (mod 5) is present, but not all (mod 3). Since all the factors are the lesser of twin primes, k=2 is a (unique) solution. Similarly, for n=276459319, 2*n+1=552918639; P =[3,7,13,19,37,43,67] contains every residue class (mod 7), but not all (mod 3), and in this case k=4 is a (unique) solution.
+%C A327892 The subsequence of numbers m=2*n+1 such that a(m)=0 starts: 105,195,231,285,315,... all having smallest prime factor 3, with factor sets containing every residue class (mod 3). The first zero term with 5 as least prime divisor is 95095 (P=[5,7,11,13,19]).
+%C A327892 If 2*n+1 is prime, a(n) is the following prime gap. The sequence of smallest odd numbers having k=2*n starts: 3,7,23,69,93,95,113,....
+%C A327892 If P is the set of prime factors of m=2*n+1 and there is no prime p <= |P| such that P contains all residue classes (mod p), then according to Dickson's conjecture there are infinitely many k such that all members of P+k are prime. - _Robert Israel_, Oct 17 2019
+%e A327892 For n = 46; 2*n+1 = 93 = 3*31. 3+10=13 and 31+10=41; both prime, so a(46)=10.
+%e A327892 For n = 52 we have a(n) = 0 as 2*n + 1 = 105 with prime divisors 3, 5 and 7. As they are 0, 2 and 1 (mod 3), we have all classes of mod 3. Adding any k > 0 to each prime divisor will always give a multiple of 3 larger than 3 hence a composite. - _David A. Corneth_, Sep 29 2019
+%p A327892 f:= proc(n) local P,k,i, p, kmax;
+%p A327892   P:= numtheory:-factorset(2*n+1);
+%p A327892   for p in select(isprime, [seq(i,i=3..nops(P),2)]) do
+%p A327892     if P mod p = {$0..p-1} then
+%p A327892       kmax:= p - min(P); break
+%p A327892     fi
+%p A327892   od;
+%p A327892   for k from 2 by 2 do
+%p A327892     if assigned(kmax) and k > kmax then return 0 fi;
+%p A327892     if andmap(isprime, map(`+`,P,k)) then return k fi;
+%p A327892   od;
+%p A327892 end proc:
+%p A327892 map(f, [$1..100]); # _Robert Israel_, Oct 17 2019
+%o A327892 (PARI) isok(f, k) = {my(v = vector(#f, i, f[i]+k)); #select(x->isprime(x), v) == #f;}
+%o A327892 a(n) = {my(f = factor(2*n+1)[,1]); my(vm = Set(f % 3)); if (#vm == 3, return (0)); my(k=1); while (!isok(f, k), k++); k;} \\ _Michel Marcus_, Oct 17 2019
+%K A327892 nonn
+%O A327892 1,1
+%A A327892 _David James Sycamore_, Sep 29 2019

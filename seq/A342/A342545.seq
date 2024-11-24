@@ -1,0 +1,61 @@
+%I A342545 #29 Apr 09 2021 09:22:35
+%S A342545 2,24,16,280,216,3430,4096,19683,100000,4348377,2985984,154457888,
+%T A342545 105413504,4442343750,4294967296,313909084845,198359290368,
+%U A342545 8712567840033,10240000000000,500396429346030,584318301411328,38112390316557080,36520347436056576,298023223876953125
+%N A342545 a(n)^2 is the least square that has exactly n 0's in base n.
+%H A342545 Chai Wah Wu, <a href="/A342545/b342545.txt">Table of n, a(n) for n = 2..702</a>
+%F A342545 a(2*n) = A062971(n) = 2*A193678(n).
+%e A342545    n    a(n)         a(n)^2   in base n
+%e A342545    2       2              4   100
+%e A342545    3      24            576   210100
+%e A342545    4      16            256   10000
+%e A342545    5     280          78400   10002100
+%e A342545    6     216          46656   1000000
+%e A342545    7    3430       11764900   202000000
+%e A342545    8    4096       16777216   100000000
+%e A342545    9   19683      387420489   1000000000
+%e A342545   10  100000    10000000000   10000000000
+%e A342545   11 4348377 18908382534129   6030000000000
+%e A342545   12 2985984  8916100448256   1000000000000
+%o A342545 (PARI) for(b=2,12,for(k=1,oo,my(s=k^2,v=digits(s,b));if(sum(k=1,#v,v[k]==0)==b,print1(k,", ");break)))
+%o A342545 (Python)
+%o A342545 from numba import njit
+%o A342545 @njit # works with 64 bits through a(14)
+%o A342545 def digits0(n, b):
+%o A342545   count0 = 0
+%o A342545   while n >= b:
+%o A342545     n, r = divmod(n, b)
+%o A342545     count0 += (r==0)
+%o A342545   return count0 + (n==0)
+%o A342545 from sympy import integer_nthroot
+%o A342545 def a(n):
+%o A342545   an = integer_nthroot(n**n, 2)[0]
+%o A342545   while digits0(an*an, n) != n: an += 1
+%o A342545   return an
+%o A342545 print([a(n) for n in range(2, 13)]) # _Michael S. Branicky_, Apr 07 2021
+%o A342545 (Python)
+%o A342545 from itertools import product
+%o A342545 from functools import reduce
+%o A342545 from sympy.utilities.iterables import multiset_permutations
+%o A342545 from sympy import integer_nthroot
+%o A342545 def A342545(n):
+%o A342545     for a in range(1,n):
+%o A342545         p, q = integer_nthroot(a*n**n,2)
+%o A342545         if q: return p
+%o A342545     l = 1
+%o A342545     while True:
+%o A342545         cmax = n**(l+n+1)
+%o A342545         for a in range(1,n):
+%o A342545             c = cmax
+%o A342545             for b in product(range(1,n),repeat=l):
+%o A342545                 for d in multiset_permutations((0,)*n+b):
+%o A342545                     p, q = integer_nthroot(reduce(lambda c, y: c*n+y, [a]+d),2)
+%o A342545                     if q: c = min(c,p)
+%o A342545             if c < cmax:
+%o A342545                 return c
+%o A342545         l += 1 # _Chai Wah Wu_, Apr 07 2021
+%Y A342545 Cf. A000290, A062971, A193678, A342260, A342546.
+%K A342545 nonn,base
+%O A342545 2,1
+%A A342545 _Hugo Pfoertner_, Apr 07 2021
+%E A342545 More terms from _Chai Wah Wu_, Apr 07 2021

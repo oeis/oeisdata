@@ -1,0 +1,69 @@
+%I A337135 #22 Jun 24 2021 20:20:53
+%S A337135 1,1,1,2,1,2,1,2,2,2,1,3,1,2,2,4,1,3,1,4,2,2,1,5,2,2,2,4,1,4,1,4,2,2,
+%T A337135 2,7,1,2,2,5,1,5,1,4,3,2,1,7,2,3,2,4,1,5,2,5,2,2,1,8,1,2,3,6,2,5,1,4,
+%U A337135 2,4,1,9,1,2,3,4,2,5,1,7,4,2,1,8,2,2,2,6,1,8,2,4,2,2,2
+%N A337135 a(1) = 1; for n > 1, a(n) = Sum_{d|n, d <= sqrt(n)} a(d).
+%C A337135 From _Gus Wiseman_, Mar 05 2021: (Start)
+%C A337135 This sequence counts all of the following essentially equivalent things:
+%C A337135 1. Chains of distinct inferior divisors from n to 1, where a divisor d|n is inferior if d <= n/d. Inferior divisors are counted by A038548 and listed by A161906.
+%C A337135 2. Chains of divisors from n to 1 whose first-quotients (in analogy with first-differences) are term-wise greater than or equal to their decapitation (maximum element removed). For example, the divisor chain q = 60/4/2/1 has first-quotients (15,2,2), which are >= (4,2,1), so q is counted under a(60).
+%C A337135 3. Chains of divisors from n to 1 such that x >= y^2 for all adjacent x, y.
+%C A337135 4. Factorizations of n where each factor is greater than or equal to the product of all previous factors.
+%C A337135 (End)
+%H A337135 Alois P. Heinz, <a href="/A337135/b337135.txt">Table of n, a(n) for n = 1..65536</a>
+%F A337135 G.f.: Sum_{k>=1} a(k) * x^(k^2) / (1 - x^k).
+%F A337135 a(2^n) = A018819(n). - _Gus Wiseman_, Mar 08 2021
+%e A337135 From _Gus Wiseman_, Mar 05 2021: (Start)
+%e A337135 The a(n) chains for n = 1, 2, 4, 12, 16, 24, 36, 60:
+%e A337135   1  2/1  4/1    12/1    16/1      24/1      36/1      60/1
+%e A337135           4/2/1  12/2/1  16/2/1    24/2/1    36/2/1    60/2/1
+%e A337135                  12/3/1  16/4/1    24/3/1    36/3/1    60/3/1
+%e A337135                          16/4/2/1  24/4/1    36/4/1    60/4/1
+%e A337135                                    24/4/2/1  36/6/1    60/5/1
+%e A337135                                              36/4/2/1  60/6/1
+%e A337135                                              36/6/2/1  60/4/2/1
+%e A337135                                                        60/6/2/1
+%e A337135 The a(n) factorizations for n = 2, 4, 12, 16, 24, 36, 60:
+%e A337135     2  4    12   16     24     36     60
+%e A337135        2*2  2*6  2*8    3*8    4*9    2*30
+%e A337135             3*4  4*4    4*6    6*6    3*20
+%e A337135                  2*2*4  2*12   2*18   4*15
+%e A337135                         2*2*6  3*12   5*12
+%e A337135                                2*2*9  6*10
+%e A337135                                2*3*6  2*2*15
+%e A337135                                       2*3*10
+%e A337135 (End)
+%p A337135 a:= proc(n) option remember; `if`(n=1, 1, add(
+%p A337135       `if`(d<=n/d, a(d), 0), d=numtheory[divisors](n)))
+%p A337135     end:
+%p A337135 seq(a(n), n=1..128);  # _Alois P. Heinz_, Jun 24 2021
+%t A337135 a[1] = 1; a[n_] := a[n] = DivisorSum[n, a[#] &, # <= Sqrt[n] &]; Table[a[n], {n, 95}]
+%t A337135 (* second program *)
+%t A337135 asc[n_]:=Prepend[#,n]&/@Prepend[Join@@Table[asc[d],{d,Select[Divisors[n],#<n&&#<=n/#&]}],{}];Table[Length[Select[asc[n],MemberQ[#,1]&]],{n,100}] (* _Gus Wiseman_, Mar 05 2021 *)
+%Y A337135 Cf. A002033, A008578 (positions of 1's), A068108.
+%Y A337135 The restriction to powers of 2 is A018819.
+%Y A337135 Not requiring inferiority gives A074206 (ordered factorizations).
+%Y A337135 The strictly inferior version is A342083.
+%Y A337135 The strictly superior version is A342084.
+%Y A337135 The weakly superior version is A342085.
+%Y A337135 The additive version is A000929, or A342098 forbidding equality.
+%Y A337135 A000005 counts divisors, with sum A000203.
+%Y A337135 A001055 counts factorizations.
+%Y A337135 A003238 counts chains of divisors summing to n-1, with strict case A122651.
+%Y A337135 A038548 counts inferior (or superior) divisors.
+%Y A337135 A056924 counts strictly inferior (or strictly superior) divisors.
+%Y A337135 A067824 counts strict chains of divisors starting with n.
+%Y A337135 A167865 counts strict chains of divisors > 1 summing to n.
+%Y A337135 A207375 lists central divisors.
+%Y A337135 A253249 counts strict chains of divisors.
+%Y A337135 A334996 counts ordered factorizations by product and length.
+%Y A337135 A334997 counts chains of divisors of n by length.
+%Y A337135 A342086 counts strict factorizations of divisors.
+%Y A337135 - Inferior: A033676, A066839, A072499, A161906.
+%Y A337135 - Superior: A033677, A070038, A161908.
+%Y A337135 - Strictly Inferior: A060775, A070039, A333806, A341674.
+%Y A337135 - Strictly Superior: A048098, A064052, A140271, A238535, A341673.
+%Y A337135 Cf. A001248, A006530, A020639, A040039, A045690, A337105, A342087, A342094, A342095, A342096, A342097.
+%K A337135 nonn
+%O A337135 1,4
+%A A337135 _Ilya Gutkovskiy_, Nov 21 2020

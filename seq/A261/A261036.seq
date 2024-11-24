@@ -1,0 +1,63 @@
+%I A261036 #27 Jul 13 2017 20:45:47
+%S A261036 1,1,1,1,1,1,1,2,1,1,2,2,1,3,2,2,1,3,4,2,1,4,5,4,2,1,4,6,5,4,1,5,8,8,
+%T A261036 5,4,1,5,10,10,8,5,1,6,11,14,10,8,5,1,6,14,16,16,10,8,1,7,16,22,20,16,
+%U A261036 10,8,1,7,18,26,27,20,16,10,1,8,21,32,34,31
+%N A261036 Table read by rows: number of complete partitions of n with largest part = k.
+%C A261036 See A126796 for definition of complete partitions;
+%C A261036 A126796(n) = sum of n-th row;
+%C A261036 also T(n,floor((n+1)/2) = A126796(floor(n/2)).
+%H A261036 Reinhard Zumkeller, <a href="/A261036/b261036.txt">Rows n = 1..200 of triangle, flattened</a>
+%H A261036 SeungKyung Park, <a href="http://www.fq.math.ca/Scanned/36-4/park.pdf">Complete Partitions</a>, Fibonacci Quarterly, Vol. 36 (1998), pp. 354-360.
+%F A261036 According to the Park link, Theorem 3.7, p. 357f:
+%F A261036 Let D_k(n) be the number of complete partitions of a positive integer n with largest part exactly k.
+%F A261036 D_0(n) = 0 for all n, D_k(0) = 0 for all k, D_1(n)=1 for n>0, and for k>1:
+%F A261036 D_k(n) = D_(k-1)(n-1) + D_k(n-k) if n >= 3*k-1, D_(k-1)(n-1) if 2*k-1 <= n <= 3*k-2, 0 if 1 <= n <= 2*k-2.
+%F A261036 In the following, T(n,k) = D_k(n).
+%e A261036 T(8,2) = #{1+1+1+1+1+1+2, 1+1+1+1+2+2, 1+1+2+2+2} = 3;
+%e A261036 T(8,3) = #{1+1+1+1+1+3, 1+1+1+2+3, 1+1+3+3, 1+2+2+3} = 4;
+%e A261036 T(8,4) = #{1+1+1+1+4, 1+1+2+4} = 2;
+%e A261036 T(9,2) = #{+11+1+1+1+1+1+2, 1+1+1+1+1+2+2, 1+1+1+2+2+2, 1+2+2+2+2} = 4;
+%e A261036 T(9,3) = #{1+1+1+1+1+1+3, 1+1+1+1+2+3, 1+1+1+3+3, 1+1+2+2+3, 3,3,2,1} = 5;
+%e A261036 T(9,4) = #{1+1+1+1+1+4, 1+1+1+2+4, 1+1+3+4, 1+2+2+4} = 4;
+%e A261036 T(9,5) = #{1+1+1+1+5, 1+1+2+2+5} = 2.
+%e A261036 . -----------------------------------------------
+%e A261036 .   n |  T(n,k), k = 1 .. [(n+1)/2]  | A126796(n)
+%e A261036 . ----+------------------------------+-----------
+%e A261036 .   1 |  1                           |         1
+%e A261036 .   2 |  1                           |         1
+%e A261036 .   3 |  1 1                         |         2
+%e A261036 .   4 |  1 1                         |         2
+%e A261036 .   5 |  1 2  1                      |         4
+%e A261036 .   6 |  1 2  2                      |         5
+%e A261036 .   7 |  1 3  2  2                   |         8
+%e A261036 .   8 |  1 3  4  2                   |        10
+%e A261036 .   9 |  1 4  5  4  2                |        16
+%e A261036 .  10 |  1 4  6  5  4                |        20
+%e A261036 .  11 |  1 5  8  8  5  4             |        31
+%e A261036 .  12 |  1 5 10 10  8  5             |        39
+%e A261036 .  13 |  1 6 11 14 10  8  5          |        55
+%e A261036 .  14 |  1 6 14 16 16 10  8          |        71
+%e A261036 .  15 |  1 7 16 22 20 16 10  8       |       100
+%e A261036 .  16 |  1 7 18 26 27 20 16 10       |       125
+%e A261036 .  17 |  1 8 21 32 34 31 20 16 10    |       173
+%e A261036 .  18 |  1 8 24 37 42 39 31 20 16    |       218
+%e A261036 .  19 |  1 9 26 46 53 50 39 31 20 16 |       291
+%e A261036 .  20 |  1 9 30 52 66 63 55 39 31 20 |       366
+%t A261036 d[k_, n_] := d[k, n] = Which[n == 0 || k == 0, 0, k == 1, 1, n >= 3 k - 1, d[k - 1, n - 1] + d[k, n - k], 2 k - 1 <= n <= 3 k - 2, d[k - 1, n - 1], True, 0]; Table[d[k, n], {n, 17}, {k, Floor[(n + 1)/2]}] // Flatten (* _Michael De Vlieger_, Jul 13 2017 *)
+%o A261036 (Haskell)
+%o A261036 import Data.MemoCombinators (memo2, integral, Memo)
+%o A261036 a261036 n k = a261036_tabf !! (n-1) !! (k-1)
+%o A261036 a261036_row n = a261036_tabf !! (n-1)
+%o A261036 a261036_tabf = zipWith (map . flip dMemo) [1..] a122197_tabf where
+%o A261036    dMemo = memo2 integral integral d
+%o A261036    d 0 _ = 0
+%o A261036    d _ 0 = 0
+%o A261036    d 1 _ = 1
+%o A261036    d k n | n <= 2 * k - 2 = 0
+%o A261036          | n <= 3 * k - 2 = dMemo (k - 1) (n - 1)
+%o A261036          | otherwise      = dMemo (k - 1) (n - 1) + dMemo k (n - k)
+%Y A261036 Cf. A008619 (row lengths), A126796 (row sums).
+%Y A261036 Cf. A122197.
+%K A261036 nonn,tabf,look
+%O A261036 1,8
+%A A261036 _Reinhard Zumkeller_, Aug 08 2015

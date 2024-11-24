@@ -1,0 +1,41 @@
+%I A246070 #17 Jan 01 2021 12:15:01
+%S A246070 1,1,4,1,2,256,1,3,16,46656,1,2,50,216,16777216,1,3,36,1626,4096,
+%T A246070 10000000000,1,2,56,1440,83736,100000,8916100448256,1,3,16,2688,84624,
+%U A246070 6026120,2985984,11112006825558016,1,2,70,720,215760,7675200,571350096,105413504,18446744073709551616
+%N A246070 Number A(n,k) of endofunctions f on [2n] satisfying f^k(i) = i for all i in [n]; square array A(n,k), n>=0, k>=0, read by antidiagonals.
+%H A246070 Alois P. Heinz, <a href="/A246070/b246070.txt">Antidiagonals n = 0..70, flattened</a>
+%e A246070 Square array A(n,k) begins:
+%e A246070 0 :            1,      1,       1,       1,        1,        1, ...
+%e A246070 1 :            4,      2,       3,       2,        3,        2, ...
+%e A246070 2 :          256,     16,      50,      36,       56,       16, ...
+%e A246070 3 :        46656,    216,    1626,    1440,     2688,      720, ...
+%e A246070 4 :     16777216,   4096,   83736,   84624,   215760,    94816, ...
+%e A246070 5 :  10000000000, 100000, 6026120, 7675200, 24899120, 11218000, ...
+%p A246070 with(numtheory): with(combinat): M:=multinomial:
+%p A246070 b:= proc(n, k, p) local l, g; l, g:= sort([divisors(p)[]]),
+%p A246070       proc(k, m, i, t) option remember; local d, j; d:= l[i];
+%p A246070         `if`(i=1, n^m, add(M(k, k-(d-t)*j, (d-t)$j)/j!*
+%p A246070          (d-1)!^j *M(m, m-t*j, t$j) *g(k-(d-t)*j, m-t*j,
+%p A246070         `if`(d-t=1, [i-1, 0], [i, t+1])[]), j=0..min(k/(d-t),
+%p A246070         `if`(t=0, [][], m/t))))
+%p A246070       end; g(k, n-k, nops(l), 0)
+%p A246070     end:
+%p A246070 A:= (n, k)-> `if`(k=0, (2*n)^(2*n), b(2*n, n, k)):
+%p A246070 seq(seq(A(n, d-n), n=0..d), d=0..10);
+%t A246070 multinomial[n_, k_List] := n!/Times @@ (k!); M = multinomial;
+%t A246070 b[n_, k0_, p_] := Module[{l, g}, l = Divisors[p];
+%t A246070 g[k_, m_, i_, t_] := g[k, m, i, t] = Module[{d, j}, d = l[[i]];
+%t A246070     If[i == 1, If[m == 0, 1, n^m], Sum[M[k, Join[{k - (d - t)*j},
+%t A246070     Table[d - t, {j}]]]/j!*If[j == 0, 1, (d - 1)!^j]*M[m, Join[{m - t*j},
+%t A246070     Array[t&, j]]]*g[k - (d - t)*j, m - t*j, Sequence @@
+%t A246070     If[d - t == 1, {i - 1, 0}, {i, t + 1}]], {j, 0, Min[k/(d - t),
+%t A246070     If[t == 0, {}, m/t]]}]]];
+%t A246070 g[k0, n - k0, Length[l], 0]];
+%t A246070 A[n_, k_] := If[k == 0, If[n == 0, 1, (2n)^(2n)], b[2*n, n, k]];
+%t A246070 Table[A[n, d - n], {d, 0, 10}, {n, 0, d}] // Flatten (* _Jean-François Alcover_, May 27 2016, after _Alois P. Heinz_, updated Jan 01 2021 *)
+%Y A246070 Columns k=0-3 give: A085534, A062971, A245141, A245959.
+%Y A246070 Main diagonal gives A246071.
+%Y A246070 Cf. A246072 (the same for permutations).
+%K A246070 nonn,tabl
+%O A246070 0,3
+%A A246070 _Alois P. Heinz_, Aug 12 2014

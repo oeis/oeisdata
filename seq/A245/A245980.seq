@@ -1,0 +1,35 @@
+%I A245980 #17 May 10 2022 05:31:56
+%S A245980 1,1,1,1,1,16,1,1,6,729,1,1,10,87,65536,1,1,6,213,2200,9765625,1,1,10,
+%T A245980 141,8056,84245,2176782336,1,1,6,213,6184,465945,4492656,678223072849,
+%U A245980 1,1,10,87,9592,387545,37823616,315937195,281474976710656
+%N A245980 Number A(n,k) of pairs of endofunctions f, g on [n] satisfying g^k(f(i)) = f(i) for all i in [n]; square array A(n,k), n>=0, k>=0, read by antidiagonals.
+%H A245980 Alois P. Heinz, <a href="/A245980/b245980.txt">Antidiagonals n = 0..80, flattened</a>
+%e A245980 Square array A(n,k) begins:
+%e A245980 0 :        1,     1,      1,      1,      1,      1, ...
+%e A245980 1 :        1,     1,      1,      1,      1,      1, ...
+%e A245980 2 :       16,     6,     10,      6,     10,      6, ...
+%e A245980 3 :      729,    87,    213,    141,    213,     87, ...
+%e A245980 4 :    65536,  2200,   8056,   6184,   9592,   2200, ...
+%e A245980 5 :  9765625, 84245, 465945, 387545, 682545, 159245, ...
+%p A245980 with(numtheory): with(combinat): M:=multinomial:
+%p A245980 b:= proc(n, k, p) local l, g; l, g:= sort([divisors(p)[]]),
+%p A245980       proc(k, m, i, t) option remember; local d, j; d:= l[i];
+%p A245980         `if`(i=1, n^m, add(M(k, k-(d-t)*j, (d-t)$j)/j!*
+%p A245980          (d-1)!^j *M(m, m-t*j, t$j) *g(k-(d-t)*j, m-t*j,
+%p A245980         `if`(d-t=1, [i-1, 0], [i, t+1])[]), j=0..min(k/(d-t),
+%p A245980         `if`(t=0, [][], m/t))))
+%p A245980       end; g(k, n-k, nops(l), 0)
+%p A245980     end:
+%p A245980 A:= (n, k)-> `if`(k=0, n^(2*n), add(b(n, j, k)*
+%p A245980              stirling2(n, j)*binomial(n, j)*j!, j=0..n)):
+%p A245980 seq(seq(A(n, d-n), n=0..d), d=0..12);
+%t A245980 multinomial[n_, k_List] := n!/Times @@ (k!); M = multinomial;
+%t A245980 b[n_, k0_, p_] := Module[{l, g}, l = Sort[Divisors[p]]; g[k_, m_, i_, t_] := g[k, m, i, t] = Module[{d, j}, d = l[[i]]; If[i == 1, n^m, Sum[M[k, Join[{k - (d-t)*j}, Array[(d - t)&, j]]]/ j!*(d-1)!^j * M[m, Join[{m - t*j}, Array[t&, j]]]*If[d-t == 1, g[k - (d - t)*j, m - t*j, i-1, 0], g[k - (d-t)*j, m - t*j, i, t+1]], {j, 0, Min[k/(d-t), If[t == 0, Infinity, m/t]]}]]]; g[k0, n-k0, Length[l], 0]];
+%t A245980 A[n_, k_] := If[k == 0, n^(2*n), Sum[b[n, j, k]*StirlingS2[n, j]* Binomial[n, j]*j!, {j, 0, n}]]; A[0, _] = 1; A[1, _] = 1;
+%t A245980 Table[Table[A[n, d - n], {n, 0, d}], {d, 0, 12}] // Flatten (* _Jean-François Alcover_, Jan 27 2015, after _Alois P. Heinz_ *)
+%Y A245980 Columns k=0-10 give: A062206, A239750, A239771, A241015, A245981, A245982, A245983, A245984, A245985, A245986, A245987.
+%Y A245980 Main diagonal gives A245988.
+%Y A245980 Cf. A245910.
+%K A245980 nonn,tabl
+%O A245980 0,6
+%A A245980 _Alois P. Heinz_, Aug 08 2014

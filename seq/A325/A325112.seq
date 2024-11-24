@@ -1,0 +1,47 @@
+%I A325112 #42 Sep 17 2024 12:34:04
+%S A325112 1,2,4,5,7,8,10,11,14,17,20,22,25,28,40,41,44,47,50,52,55,58,70,71,74,
+%T A325112 77,80,82,85,88,100,101,104,107,110,140,170,200,202,205,208,220,250,
+%U A325112 280,400,401,404,407,410,440,470,500,502,505,508,520,550,580,700
+%N A325112 Integers k such that no nonzero subsequence of the decimal representation of k is divisible by 3.
+%C A325112 Integers whose decimal representation contains either just one nonzero digit, which is congruent to 1 or 2 (mod 3), or just two nonzero digits, which are either both == 1 (mod 3) or both == 2 (mod 3). - _Robert Israel_, Dec 25 2019
+%H A325112 Robert Israel, <a href="/A325112/b325112.txt">Table of n, a(n) for n = 1..10000</a>
+%H A325112 Chai Wah Wu, <a href="https://arxiv.org/abs/2409.05844">Algorithms for complementary sequences</a>, arXiv:2409.05844 [math.NT], 2024.
+%e A325112 From _David A. Corneth_, Sep 09 2024: (Start) 404 is in the sequence as its nonzero digits are (4,4). The nonzero subsequences of digits are (), (4), (4,4) with respective sums 0, 4, 8. None of these subsequences have a sum that is divisible by 3.
+%e A325112 4160 is not in the sequence as one of its nonzero subsequences is (6) which sums to 6. As 6 is divisible by 3, 4160 is not in the sequence. (End)
+%p A325112 F:= proc(d) local i,j,k, g;
+%p A325112    g:= [1,2,4,5,7,8];
+%p A325112    op(sort([seq(i*10^(d-1),i=g), seq(seq(seq(i*10^(d-1) + j*10^k, j = select(t -> (t-i) mod 3 = 0, g)),k=0..d-2),i=g)]));
+%p A325112 end proc:
+%p A325112 seq(F(d),d=1..4); # _Robert Israel_, Dec 25 2019
+%t A325112 With[{k = 3}, Select[Range@ 700, NoneTrue[DeleteCases[FromDigits /@ Rest@ Subsequences[IntegerDigits@ #], 0], Mod[#, k] == 0 &] &]] (* _Michael De Vlieger_, Mar 31 2019 *)
+%o A325112 (Python)
+%o A325112 from itertools import combinations
+%o A325112 def A325112(n):
+%o A325112     def bisection(f,kmin=0,kmax=1):
+%o A325112         while f(kmax) > kmax: kmax <<= 1
+%o A325112         while kmax-kmin > 1:
+%o A325112             kmid = kmax+kmin>>1
+%o A325112             if f(kmid) <= kmid:
+%o A325112                 kmax = kmid
+%o A325112             else:
+%o A325112                 kmin = kmid
+%o A325112         return kmax
+%o A325112     def f(x):
+%o A325112         c, l = 0, len(str(x))
+%o A325112         for i in range(l):
+%o A325112             k = 10**i
+%o A325112             for j in (1,2,4,5,7,8):
+%o A325112                 if j*k<=x:
+%o A325112                     c += 1
+%o A325112         for a in combinations((10**i for i in range(l)),2):
+%o A325112             for b in ((1, 1), (1, 4), (1, 7), (2, 2), (2, 5), (2, 8), (4, 1), (4, 4), (4, 7), (5, 2), (5, 5), (5, 8), (7, 1), (7, 4), (7, 7), (8, 2), (8, 5), (8, 8)):
+%o A325112                 if a[0]*b[0]+a[1]*b[1] <= x:
+%o A325112                     c += 1
+%o A325112         return n+x-c
+%o A325112     return bisection(f,n,n) # _Chai Wah Wu_, Sep 10 2024
+%Y A325112 Cf. A014261 (for 2), A325113 (for 4), A261189 (for 5), A325114 (for 7).
+%Y A325112 A261188 is a subsequence.
+%Y A325112 A376045 is the complement.
+%K A325112 nonn,base
+%O A325112 1,2
+%A A325112 _Jonathan Kal-El Peréz_, Mar 27 2019

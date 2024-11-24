@@ -1,0 +1,70 @@
+%I A192273 #25 May 28 2020 13:20:19
+%S A192273 7,10,17,22,23,31,32,33,35,37,38,39,42,45,49,50,52,53,55,58,63,67,68,
+%T A192273 70,72,73,77,78,82,83,87,88,93,94,95,98,103,105,115,116,117,123,126,
+%U A192273 127,128,130,137,142,143,148,149,157,158,160,162,163,165,171,175
+%N A192273 Zumkeller numbers using anti-divisors (or anti-Zumkeller numbers)
+%C A192273 Numbers n whose anti-divisors can be partitioned into two disjoint sets whose sums are both sigma*(n)/2, where sigma*(n) is the sum of the anti-divisors of n.
+%H A192273 Chai Wah Wu, <a href="/A192273/b192273.txt">Table of n, a(n) for n = 1..10000</a>
+%e A192273 7 -> anti-divisors: 2,3,5; sigma*(7)/2 = 5; 2+3 = 5.
+%e A192273 77-> anti-divisors: 2,3,5,9,14,17,22,31,51; sigma*(77)/2=77; 2+3+5+14+22+31=9+17+51=77.
+%e A192273 143->anti-divisors: 2,3,5,7,15,19,22,26,41,57,95;  sigma*(143)/2=146; 2+5+15+19+22+26+57=3+7+41+95=146.
+%p A192273 with(combstruct);
+%p A192273 P:=proc(i)
+%p A192273 local S,R,Stop,Comb,a,b,c,d,k,m,n,s;
+%p A192273 for n from 3 to i do
+%p A192273   a:={};
+%p A192273   for k from 2 to n-1 do if abs((n mod k)- k/2) < 1 then a:=a union {k}; fi; od;
+%p A192273   b:=nops(a); c:=op(a); s:=0;
+%p A192273   if b>1 then for k from 1 to b do s:=s+c[k]; od;
+%p A192273   else s:=c;
+%p A192273   fi;
+%p A192273   if (modp(s,2)=0 and 2*n<=s) then
+%p A192273       S:=1/2*s-n; R:=select(m->m<=S,[c]); Stop:=false; Comb:=iterstructs(Combination(R));
+%p A192273      while not (finished(Comb) or Stop) do Stop:=add(d,d=nextstruct(Comb))=S; od;
+%p A192273      if Stop then print(n); fi;
+%p A192273   fi;
+%p A192273 od;
+%p A192273 end:
+%p A192273 P(3000);
+%o A192273 (Python)
+%o A192273 from sympy import divisors
+%o A192273 from sympy.combinatorics.subsets import Subset
+%o A192273 def antidivisors(n):
+%o A192273     return [2*d for d in divisors(n) if n > 2*d and n % (2*d)] + \
+%o A192273            [d for d in divisors(2*n-1) if n > d >=2 and n % d] + \
+%o A192273            [d for d in divisors(2*n+1) if n > d >=2 and n % d]
+%o A192273 for n in range(3,10**3):
+%o A192273     d = antidivisors(n)
+%o A192273     s = sum(d)
+%o A192273     if not s % 2 and max(d) <= s//2:
+%o A192273         for x in range(1,2**len(d)):
+%o A192273             if sum(Subset.unrank_binary(x,d).subset) == s//2:
+%o A192273                 print(n,end=', ')
+%o A192273                 break
+%o A192273 # _Chai Wah Wu_, Aug 13 2014
+%o A192273 (Python)
+%o A192273 from sympy import divisors
+%o A192273 import numpy as np
+%o A192273 A192273 = []
+%o A192273 for n in range(3,10**3):
+%o A192273     d = [2*x for x in divisors(n) if n > 2*x and n % (2*x)] + \
+%o A192273         [x for x in divisors(2*n-1) if n > x >=2 and n % x] + \
+%o A192273         [x for x in divisors(2*n+1) if n > x >=2 and n % x]
+%o A192273     s, dmax = sum(d), max(d)
+%o A192273     if not s % 2 and 2*dmax <= s:
+%o A192273         d.remove(dmax)
+%o A192273         s2, ld = int(s/2-dmax), len(d)
+%o A192273         z = np.zeros((ld+1,s2+1),dtype=int)
+%o A192273         for i in range(1,ld+1):
+%o A192273             y = min(d[i-1],s2+1)
+%o A192273             z[i,range(y)] = z[i-1,range(y)]
+%o A192273             z[i,range(y,s2+1)] = np.maximum(z[i-1,range(y,s2+1)],z[i-1,range(0,s2+1-y)]+y)
+%o A192273             if z[i,s2] == s2:
+%o A192273                 A192273.append(n)
+%o A192273                 break
+%o A192273 # _Chai Wah Wu_, Aug 19 2014
+%Y A192273 Cf. A083207, A066272, A192274.
+%K A192273 nonn
+%O A192273 1,1
+%A A192273 _Paolo P. Lava_, Jun 28 2011
+%E A192273 Added missing terms from _Chai Wah Wu_, Aug 13 2014

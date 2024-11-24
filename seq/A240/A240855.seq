@@ -1,0 +1,30 @@
+%I A240855 #28 Mar 14 2024 15:22:10
+%S A240855 0,1,0,1,0,1,2,1,2,3,4,3,5,6,8,9,10,12,16,18,22,25,29,34,41,48,55,64,
+%T A240855 74,84,98,114,130,150,170,195,222,252,287,328,371,420,475,536,604,682,
+%U A240855 766,862,970,1088,1218,1365,1526,1704,1904,2124,2366,2637,2934
+%N A240855 Number of partitions p of n into distinct parts including the number of parts.
+%H A240855 Alois P. Heinz, <a href="/A240855/b240855.txt">Table of n, a(n) for n = 0..4000</a> (first 101 terms from John Tyler Rascoe)
+%F A240855 a(n) = A000009(n) - A240861(n).
+%F A240855 G.f.: Sum_{i>0} Sum_{j=1..i} q^((i*(i+1)/2) + j*(j-1)) * [j-1,i-j]_q, where [N,M]_q = Product_{j=1..N+M}(1-q^j) / (Product_{j=1..M}(1-q^j) * (Product_{j=1..N}(1-q^j))^2). - _John Tyler Rascoe_, Mar 13 2024
+%e A240855 a(10) counts these 4 partitions:  82, 631, 532, 4321.
+%p A240855 h:= (p, i)-> add(coeff(p, x, j)*x^j, j=i+1..degree(p)):
+%p A240855 b:= proc(n, i, p) option remember; `if`(i*(i+1)/2<n, [0$2],
+%p A240855      `if`(n=0, [x^p, 0], (g-> [h(g[1], i), g[2]])(b(n, i-1, p)+
+%p A240855      (f-> f+[0, coeff(f[1], x, i)])(b(n-i, min(n-i, i-1), p+1)))))
+%p A240855     end:
+%p A240855 a:= n-> b(n$2, 0)[2]:
+%p A240855 seq(a(n), n=0..58);  # _Alois P. Heinz_, Mar 14 2024
+%t A240855 z = 40;
+%t A240855 f[n_] := f[n] = Select[IntegerPartitions[n], Max[Length /@ Split@#] == 1 &];
+%t A240855 Table[Count[f[n], p_ /; MemberQ[p, Length[p]]], {n, 0, z}] (* this sequence *)
+%t A240855 Table[Count[f[n], p_ /; !MemberQ[p, Length[p]]], {n, 0, z}] (* A240861 *)
+%o A240855 (PARI)
+%o A240855 p_q(k) = {prod(j=1,k, 1-q^j);}
+%o A240855 mGB_q(N,M) = {p_q(N+M)/(p_q(M)*(p_q(N)^2));}
+%o A240855 A_q(N) = {my(q='q+O('q^N), g=sum(i=1, N, sum(j=1, i, q^((i*(i+1)/2)+(j*(j-1))) * mGB_q(j-1,i-j))));
+%o A240855 concat([0], Vec(g)) }
+%o A240855 A_q(50) \\ _John Tyler Rascoe_, Mar 13 2024
+%Y A240855 Cf. A000009, A008967, A240861.
+%K A240855 nonn
+%O A240855 0,7
+%A A240855 _Clark Kimberling_, Apr 14 2014

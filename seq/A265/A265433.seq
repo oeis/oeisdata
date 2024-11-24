@@ -1,0 +1,38 @@
+%I A265433 #21 Dec 13 2015 22:38:26
+%S A265433 0,1,1,0,1,0,2,1,0,1,2,0,5,1,0,4,3,0,8,2,0,2,2,0,10,1,0,5,4,0,8,1,0,4,
+%T A265433 2,0,17,0,0,7,4,0,13,3,0,0,3,0,17,4,0,12,1,0,13,1,0,6,2,0,18,1,0,11,0,
+%U A265433 0,24,2,0,5,1,0,25,1,0,10,2,0,23,2,0,9,1
+%N A265433 Number of primes with digit sum n whose digit product is maximal among all numbers with digit sum n.
+%C A265433 If n == 0 mod 3, then a(n) = 0.
+%C A265433 If n == 1 mod 3, then primes with maximal digit product (if they exist) have digits 3 and either two digits 2 or a single digit 4.
+%C A265433 If n == 2 mod 3, then primes with maximal digit product (if they exist) have digits 3 and a single digit 2 (see comment in A137269).
+%C A265433 If n == 0 mod 3 or a(n) > 0, then a(n) = A137269(n). Terms a(n) coincide with A137269 except for n = 4, 38, 46, 65, 94, 107, 116, 128, 131, 140, 143, 149, 152, 170, 188, 227, ..., 767 (and most likely other n > 767). For these values of n, a(n) = 0 and A137269(n) > 0.
+%C A265433 Conjecture: For n > 4, if n <> 0 mod 3 and a(n) = 0, then A137269(n) > 0 due to primes with only digits 2, 3, or 4.
+%H A265433 Chai Wah Wu, <a href="/A265433/b265433.txt">Table of n, a(n) for n = 1..2001</a>
+%e A265433 See examples in A137269. a(4) = 0 since the maximal digit product is 4 corresponding to the numbers 22 and 4, neither of which is prime.
+%t A265433 f[n_] := Block[{g, a265437 = {1, 4, 38, 46, 65, 94, 107, 116, 128, 131, 140, 143, 149, 152, 170, 188, 227, 230, 248, 272, 293, 302, 317, 335, 344, 359, 371, 382, 404, 488, 530, 533, 551, 584, 626, 647, 722, 767, 803, 815, 866, 875, 893, 914, 920}},
+%t A265433   g[k_] := Length@ MaximalBy[k, Times @@ IntegerDigits@ # &];
+%t A265433   Which[MemberQ[a265437, n], 0,
+%t A265433    1 < n <= 3, 1,
+%t A265433    Mod[n, 3] == 0, 0,
+%t A265433    Mod[n, 3] == 1, g@ Select[FromDigits /@ Apply[Join, Map[Permutations, {Join[Table[3, {Floor[n/3] - 1}], {2, 2}], Join[Table[3, {Floor[n/3] - 1}], {4}]}]] /. x_ /; EvenQ@ x -> Nothing, PrimeQ],
+%t A265433    Mod[n, 3] == 2, g@ Select[FromDigits /@ Permutations@ Join[Table[3, {Floor[n/3]}], {2}] /. x_ /; EvenQ@ x -> Nothing, PrimeQ],
+%t A265433 True, -1]] (* _Michael De Vlieger_, Dec 11 2015, Version 10, reliant on values of A265437 *)
+%o A265433 (Python)
+%o A265433 from __future__ import division
+%o A265433 from sympy.utilities.iterables import multiset_permutations
+%o A265433 from sympy import isprime
+%o A265433 def A265433(n):
+%o A265433     if n == 1:
+%o A265433         return 0
+%o A265433     if n == 3:
+%o A265433         return 1
+%o A265433     if (n % 3) == 0:
+%o A265433         return 0
+%o A265433     else:
+%o A265433         pmaxlist = ['3'*(n//3) + '2'] if (n % 3 == 2) else ['3'*(n//3 -1) + '22','3'*(n//3 -1) + '4']
+%o A265433         return sum(1 for p in pmaxlist for k in multiset_permutations(p) if isprime(int(''.join(k)))) # _Chai Wah Wu_, Dec 11 2015
+%Y A265433 Cf. A137269, A265437.
+%K A265433 nonn,base
+%O A265433 1,7
+%A A265433 _Chai Wah Wu_, Dec 08 2015

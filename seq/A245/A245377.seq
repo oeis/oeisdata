@@ -1,0 +1,65 @@
+%I A245377 #32 Feb 19 2024 21:49:04
+%S A245377 1,1,0,0,1,4,17,80,422,2480,16095,114432,884969,7398464,66502048,
+%T A245377 639653632,6556170841,71340409600,821408397105,9977630263296,
+%U A245377 127518757153174,1710576547456000,24030971882538671,352843606806499328
+%N A245377 Number of 2-alternating permutations of 1,2,...,n, that is, a(n) is the number of down/up permutations (A000111) of 1,2,...,n such that any two consecutive terms differ by at least two.
+%e A245377 For n=5 there are the four permutations 31425, 31524, 52413, 42513.
+%p A245377 b:= proc(n, s, t) option remember; `if`(s={}, 1, add(
+%p A245377      `if`(t*(n-j)>=2, b(j, s minus{j}, -t), 0), j=s))
+%p A245377     end:
+%p A245377 a:= n->`if`(n=0, 1, add(b(j, {$1..j-1, $j+1..n}, 1), j=1..n)):
+%p A245377 seq(a(n), n=0..16);  # _Alois P. Heinz_, Oct 27 2014
+%t A245377 b[n_, s_, t_] := b[n, s, t] = If[s == {}, 1, Sum[If[t*(n - j) >= 2, b[j, s ~Complement~ {j}, -t], 0], {j, s}]]; a[n_] := a[n] = If[n == 0, 1, Sum[b[j, DeleteCases[Range[n], j], 1], {j, 1, n}]]; Table[Print[a[n]]; a[n], {n, 0, 16}] (* _Jean-François Alcover_, Oct 24 2016, after _Alois P. Heinz_ *)
+%o A245377 (C++) #include <iostream>
+%o A245377 #include <algorithm>
+%o A245377 #include <vector>
+%o A245377 using namespace std;
+%o A245377 bool isA245377(const vector<int> per)
+%o A245377 {
+%o A245377     bool good=true;
+%o A245377     for(int i=0 ; i < per.size() -1 && good ;i++)
+%o A245377     {
+%o A245377         if( abs(per[i]-per[i+1]) < 2 )
+%o A245377             good = false;
+%o A245377         else
+%o A245377         {
+%o A245377             if ( i %2 )
+%o A245377             {
+%o A245377                 if ( per[i+1] > per[i])
+%o A245377                     good = false;
+%o A245377             }
+%o A245377             else
+%o A245377             {
+%o A245377                 if ( per[i+1] < per[i])
+%o A245377                     good = false;
+%o A245377             }
+%o A245377         }
+%o A245377     }
+%o A245377     return good ;
+%o A245377 }
+%o A245377 int A245377(const int n)
+%o A245377 {
+%o A245377     vector<int> per(n) ;
+%o A245377     for(int i=0 ; i < n ; i++)
+%o A245377         per[i] = i+1 ;
+%o A245377     int a= isA245377(per) ? 1 : 0 ;
+%o A245377     while( next_permutation(per.begin(),per.end()) )
+%o A245377     {
+%o A245377         if ( isA245377(per) )
+%o A245377             a++ ;
+%o A245377     }
+%o A245377     return a;
+%o A245377 }
+%o A245377 int main(int argc, char *argv[])
+%o A245377 {
+%o A245377     for (int n=1 ; ; n++)
+%o A245377         cout << A245377(n) << endl ;
+%o A245377 } // _R. J. Mathar_, Oct 25 2014
+%Y A245377 Cf. A002464.
+%K A245377 nonn,more
+%O A245377 0,6
+%A A245377 _Richard Stanley_, Jul 19 2014
+%E A245377 a(11)-a(15) from _R. J. Mathar_, Oct 27 2014
+%E A245377 a(16)-a(21) from _Alois P. Heinz_, Oct 27 2014
+%E A245377 a(22) from _Alois P. Heinz_, Feb 18 2024
+%E A245377 a(23) from _Max Alekseyev_, Feb 19 2024

@@ -1,0 +1,20 @@
+%I A373704 #17 Jun 16 2024 02:18:23
+%S A373704 2526,173,5,1,17,11,89,1049,111539,213341,54848527
+%N A373704 a(n) is the least start of a run of exactly n successive squarefree numbers that are pairwise coprime, or -1 if no such run exists.
+%C A373704 Equivalently, a(n) is the least start of a run of exactly n successive squarefree numbers whose product is also a squarefree number.
+%C A373704 A run of exactly n successive squarefree numbers is composed of n successive squarefree numbers such that the squarefree number that precedes the start of the run (if it does not start with 1) and the squarefree number that follows the endpoint of the run are both not coprime to one of the members of the run.
+%C A373704 a(12) > 10^11, if it exists.
+%e A373704 a(1) = 2526 because 2526 is squarefree, it is preceded by the squarefree number 2522 and gcd(2522, 2526) = 2 > 1, it is followed by the squarefree number 2530 and gcd(2526, 2530) = 2 > 1, and 2526 is the least number with this property.
+%e A373704 a(2) = 173 because 173 and 174 are successive squarefree numbers that are coprime. 170, the squarefree number that precedes 173, and 177, the squarefree number that follows 174, are both not coprime to 174.
+%e A373704 a(2) does not equal 170 because although 170 and 173 are two successive squarefree numbers that are coprime, they are a part of a longer run of 3 successive squarefree numbers that are pairwise coprime: 167, 170 and 173.
+%e A373704 a(3) = 5 because 5, 6 and 7 are 3 successive squarefree numbers that are pairwise coprime: gcd(5, 6) = gcd(6, 7) = gcd(5, 7) = 1. They are not a part of a longer run since the squarefree number that precedes 5 is 3 and gcd(3, 6) = 3 > 1, and the squarefree number that follows 7 is 10 and gcd(5, 10) = 5 > 1. (5, 6, 7) is the run with the least start, 5, that has this property.
+%t A373704 pairCoprimeQ[s_] := Module[{ans = True}, Do[Do[If[! CoprimeQ[s[[i]], s[[j]]], ans = False; Break[]], {j, 1, i - 1}], {i, 1, Length[s]}]; ans];
+%t A373704 seq[nmax_, kmax_] := Module[{v = Table[0, {nmax}], s = {}, len = 0, init = 0, c = 0}, Do[If[SquareFreeQ[k], len = Length[s];
+%t A373704 AppendTo[s, k]; While[!pairCoprimeQ[s], s = Drop[s, 1]]; If[Length[s] <= len, If[len <= nmax && v[[len]] == 0, c++; v[[len]] = init]]; init = s[[1]]; If[c == nmax || k > kmax, Break[]]], {k, 1, kmax}]; v]; seq[10, 250000]
+%o A373704 (PARI) iscoprime(s) = {for(i = 1, #s, for(j = 1, i-1, if(gcd(s[i], s[j]) > 1, return(0)))); 1;}
+%o A373704 seq(nmax, kmax) = {my(v = vector(nmax), s = List(), len = 0, init = 0, c = 0); forsquarefree(k = 1, kmax, len = #s; listput(s, k[1]); while(!iscoprime(s), listpop(s, 1)); if(#s <= len, if(len <= nmax && v[len] == 0, c++; v[len] = init)); init = s[1]; if(c == nmax || k[1] > kmax, break)); v;}
+%Y A373704 Cf. A005117, A373705.
+%Y A373704 Sequences related to successive squarefree numbers: A077395, A109473, A109505, A373551, A373552.
+%K A373704 nonn,hard,more
+%O A373704 1,1
+%A A373704 _Amiram Eldar_, Jun 14 2024

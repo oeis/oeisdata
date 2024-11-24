@@ -1,0 +1,66 @@
+%I A353618 #26 May 15 2022 07:29:54
+%S A353618 3,10,8,35,48,27,119,132,64,112,195,125,279,280,125,20,357,343,253,
+%T A353618 504,343,539,510,216,552,665,343,91,792,729,923,840,343,533,840,512,
+%U A353618 476,1035,729,1455,1288,512,224,1485,1331,1504,1575,729,17,1740,1728,799
+%N A353618 Three-column array giving list of primitive triples for integer-sided triangles whose angle B = 3*C.
+%C A353618 This sequence is inspired by the 1st problem proposed during the 46th Czech and Slovak Mathematical Olympiad 1997 (see link).
+%C A353618 The triples (a, b, c) are displayed in increasing order of side b, and if sides b coincide then in increasing order of the side c.
+%C A353618 If in triangle ABC, B = 3*C, then the corresponding metric relations between sides are c*a^2= (b-c)^2 * (b+c). <===> a/(b-c) = sqrt(1+b/c).
+%C A353618 This metric relation is equivalent to a = m(m^2-2k^2), b = k(m^2-k^2), c = k^3, gcd(k,m) = 1 and sqrt(2) * k < m < 2*k; hence every c is a cube number and always c < b.
+%C A353618 When A <> 3*Pi/7 and A <> Pi/5, table below shows there exist these 3 possible configurations: c < b < a; c < a < b and a < c < b:
+%C A353618    ----------------------------------------------------------------------------
+%C A353618    | A | Pi  |   decr.   |  3*Pi/7 |   decr.   |  Pi/5   |   decr.   |    0   |
+%C A353618    ---------------------------------------------------------------------------
+%C A353618    | B |  0  |   incr.   |  3*Pi/7 |   incr.   | 3*Pi/5  |   incr.   | 3*Pi/4 |
+%C A353618    ----------------------------------------------------------------------------
+%C A353618    | C |  0  |   incr.   |  Pi/7   |   incr.   |  Pi/5   |   incr.   |   Pi/4 |
+%C A353618    ----------------------------------------------------------------------------
+%C A353618    | < | No  | c < b < a | c < b=a | c < a < b | c=a < b | a < c < b |   No   |
+%C A353618    ----------------------------------------------------------------------------
+%C A353618 where 'No' means there is no such corresponding triangle.
+%C A353618 If (A,B,C) = (3*Pi/7,3*Pi/7,Pi/7) then a = b with c = 2*a*cos(Pi/7), so isosceles ABC is not an integer-sided triangle.
+%C A353618 If (A,B,C) = (Pi/5,3*Pi/5,Pi/5) then a = c with b = a*(1+sqrt(5))/2, so ABC is not an integer-sided triangle.
+%H A353618 The IMO Compendium, <a href="https://imomath.com/othercomp/Czs/CzsMO97.pdf">Problem 1</a>, 46th Czech and Slovak Mathematical Olympiad 1997.
+%H A353618 Mathematical Reflections, <a href="https://www.awesomemath.org/wp-pdf-files/math-reflections/mr-2019-01/mr_6_2018_solutions_2.pdf">Solution to problem O467</a>, Issue 5, 2018, p. 26.
+%H A353618 <a href="/index/O#Olympiads">Index to sequences related to Olympiads</a>.
+%e A353618 The table begins:
+%e A353618     3,  10,   8;
+%e A353618    35,  48,  27;
+%e A353618   119, 132,  64;
+%e A353618   112, 195, 125;
+%e A353618   279, 280, 125;
+%e A353618    20, 357, 343;
+%e A353618   253, 504, 343,
+%e A353618   539, 510, 216;
+%e A353618 ................
+%e A353618 The smallest such triangle is (3,10,8), it is of type a < c < b with 3/(10-8) = sqrt(1+10/8) = 3/2.
+%e A353618 The 2nd triple (35, 48, 27) is of type c < a < b with 35/(48-27) = sqrt(1+48/27) = 5/3.
+%e A353618 The 8th triple (539, 510, 216) is the first of type c < b < a with  539/(510-216) = sqrt(1+510/216) = 11/6.
+%p A353618 for b from 1 to 2500 do
+%p A353618 for q from 2 to floor((b-1)^(1/3)) do
+%p A353618 a := (b-q^3) * sqrt(1+b/q^3);
+%p A353618 if a= floor(a) and q^3 < b and igcd(a,b,q)=1 and (b-q^3) < a and a < b+q^3 then print(a,b,q^3); end if;
+%p A353618 end do;
+%p A353618 end do;
+%o A353618 (PARI) lista(nn) = {for (b = 1, nn, for (q = 2, sqrtnint(b-1, 3), if (issquare(z=1+b/q^3), a = (b-q^3) * sqrtint(numerator(z))/sqrtint(denominator(z)); if ((q^3 < b) && (gcd([a, b, q]) == 1) && ((b-q^3) < a) && (a < b+q^3), print1([a, b, q^3], ", ")););););} \\ _Michel Marcus_, May 11 2022
+%o A353618 (Python)
+%o A353618 from math import gcd
+%o A353618 from itertools import count, islice
+%o A353618 from sympy import integer_nthroot
+%o A353618 def A353618_gen(): # generator of terms
+%o A353618     for b in count(1):
+%o A353618         q, c = 2, 8
+%o A353618         while c < b:
+%o A353618             d = (b-c)**2*(b+c)
+%o A353618             s, t = divmod(d,c)
+%o A353618             if t == 0:
+%o A353618                 a, r = integer_nthroot(s,2)
+%o A353618                 if r and b-c < a < b+c and gcd(a,b,q) == 1:
+%o A353618                     yield from (a, b, c)
+%o A353618             c += q*(3*q+3)+1
+%o A353618             q += 1
+%o A353618 A353618_list = list(islice(A353618_gen(),30)) # _Chai Wah Wu_, May 14 2022
+%Y A353618 Cf. A335893 (A < B < C are in arithmetic progression), A343063 (B = 2*C).
+%K A353618 nonn,tabf
+%O A353618 1,1
+%A A353618 _Bernard Schott_, Apr 30 2022

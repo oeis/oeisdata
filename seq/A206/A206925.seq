@@ -1,0 +1,61 @@
+%I A206925 #42 Jan 31 2023 11:53:25
+%S A206925 1,2,3,4,4,4,6,7,6,6,6,6,6,7,10,11,9,8,8,8,9,8,9,9,8,8,9,9,9,11,15,16,
+%T A206925 13,11,11,11,10,10,11,11,10,12,11,10,11,11,13,13,11,10,11,10,11,11,12,
+%U A206925 12,11,11,12,13,13,16,21,22,18,15,15,14,13,13,14,14
+%N A206925 Number of contiguous palindromic bit patterns in the binary representation of n.
+%C A206925 The number of contiguous palindromic bit patterns in the binary representation of n is a measure for the grade of symmetry in an abstract arrangement of two kinds of elements (where the number of elements is the number of binary digits, of course).
+%C A206925 The minimum value for a(n) is 2*floor(log_2(n)) and will be taken infinitely often (see A206926 and A206927). This means: For a given number of places m there are at least 2*(m-1) palindromic substrings in the binary representation. This lower bound indicates to a certain extent the minimal possible symmetry.
+%H A206925 Reinhard Zumkeller, <a href="/A206925/b206925.txt">Table of n, a(n) for n = 1..10000</a>
+%H A206925 <a href="/index/Bi#binary">Index entries for sequences related to binary expansion of n</a>
+%H A206925 <a href="/index/Pac#palindromes">Index entries for sequences related to palindromes</a>
+%F A206925 a(n) <= (m+1)*(m+2)/2, where m = floor(log_2(n)); equality holds if n + 1 is a power of 2.
+%F A206925 a(n) >= 2*floor(log_2(n)).
+%F A206925 This estimation cannot be improved in general, since equality holds for A206926(n): a(A206926(n)) = 2*floor(log_2(A206926(n))).
+%F A206925 Asymptotic behavior:
+%F A206925 a(n) = O(log(n)^2).
+%F A206925 lim sup a(n)/log_2(n)^2 = 1/2, for n --> infinity.
+%F A206925 lim inf a(n)/log_2(n) = 2, for n --> infinity.
+%e A206925 a(1) = 1, since 1 = 1_2 is the only palindromic bit pattern;
+%e A206925 a(4) = 4, since 4 = 100_2 and there are the following palindromic bit patterns: 1, 0, 0, 00;
+%e A206925 a(5) = 4, since 5 = 101_2 and there are the following palindromic bit patterns: 1, 0, 1, 101;
+%e A206925 a(8) = 7, since 8 = 1000_2 and there are the following palindromic bit patterns: 1, 0, 0, 0, 00, 00, 000.
+%o A206925 (PARI) a(n)=n=binary(n);sum(k=0,#n-1,sum(i=1,#n-k,prod(j=0, k\2,n[i+j]==n[i+k-j]))) \\ _Charles R Greathouse IV_, Mar 21 2012
+%o A206925 (Haskell)
+%o A206925 import Data.Map (fromList, (!), insert)
+%o A206925 import Data.List (inits, tails)
+%o A206925 a206925 n = a206925_list !! (n-1)
+%o A206925 a206925_list = 1 : f [0, 1] (fromList [(Bin [0], 1), (Bin [1], 1)]) where
+%o A206925    f bs'@(b:bs) m = y : f (succ bs') (insert (Bin bs') y m) where
+%o A206925      y = m ! (Bin bs) +
+%o A206925          length (filter (\ds -> ds == reverse ds) $ tail $ inits bs')
+%o A206925      succ [] = [1]; succ (0:ds) = 1 : ds; succ (1:ds) = 0 : succ ds
+%o A206925 -- _Reinhard Zumkeller_, Dec 17 2012
+%o A206925 (Smalltalk)
+%o A206925 A206925
+%o A206925 "Answers the number of symmetric bit patterns of n as a binary."
+%o A206925 | m p q n numSym |
+%o A206925 n := self.
+%o A206925 n < 2 ifTrue: [^1].
+%o A206925 m := n integerFloorLog: 2.
+%o A206925 p := n printStringRadix: 2.
+%o A206925 numSym := 0.
+%o A206925 1 to: m + 1
+%o A206925   do:
+%o A206925    [:k |
+%o A206925    1 to: k
+%o A206925     do:
+%o A206925      [:j |
+%o A206925      q := p copyFrom: j to: k.
+%o A206925      q = q reverse ifTrue: [numSym := numSym + 1]]].
+%o A206925 ^numSym // _Hieronymus Fischer_, Feb 16 2013
+%o A206925 (Python)
+%o A206925 def A206925(n):
+%o A206925     s = bin(n)[2:]
+%o A206925     k = len(s)
+%o A206925     return sum(1 for i in range(k) for j in range(i+1,k+1) if s[i:j] == s[j-1:i-1-k:-1]) # _Chai Wah Wu_, Jan 31 2023
+%Y A206925 Cf. A006995, A206923, A206924, A206925, A206926, A070939.
+%Y A206925 Cf. A215244, A030308.
+%K A206925 nonn,base
+%O A206925 1,2
+%A A206925 _Hieronymus Fischer_, Mar 12 2012
+%E A206925 Comments and formulas added by _Hieronymus Fischer_, Jan 23 2013

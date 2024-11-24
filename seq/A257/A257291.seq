@@ -1,0 +1,49 @@
+%I A257291 #47 Jul 05 2022 02:31:19
+%S A257291 4,4,5,5,6,8,9,9,10,11,11,12,13,13,14,16,17,17,19,20,21,21,21,22,23,
+%T A257291 23,24,24,24,25,26,27,28,28,29,29,31,32,33,35,36,36,37,38,38,38,39,40,
+%U A257291 41,40,41,41,42,43,44,44,44,45,46,46,47,47,48,48,49,49,49,51,52,52,54,55,55,56,56,57,58,58
+%N A257291 Number of states in minimal DFA accepting base-2 representation of first n prime numbers.
+%C A257291 By "DFA" we mean deterministic finite automaton, which must be "complete" (that is, a transition must exist for every state).  So the minimal DFA for n = 1 corresponds to a DFA that accepts the string "10" and no other.  Four states are required since a "dead state" is also needed.
+%H A257291 Kevin Ryde, <a href="/A257291/b257291.txt">Table of n, a(n) for n = 1..10000</a>
+%H A257291 Kevin Ryde, <a href="/A257291/a257291.pl.txt">Perl and Perl+Foma code to generate the b-file</a>
+%e A257291 From _Kevin Ryde_, Jun 02 2020: (Start)
+%e A257291 For n=3, the minimum DFA comprises a(3) = 5 states:
+%e A257291                             +------------------------+
+%e A257291      start                1 |                        v
+%e A257291   +-----------+  1   +--------+  0   +=====+  1   +=====+
+%e A257291   | 10,11,101 | ---> | 0,1,01 | ---> | e,1 | ---> |  e  |
+%e A257291   +-----------+      +--------+      +=====+      +=====+
+%e A257291         | 0                             | 0          | 0,1
+%e A257291         |                               |            v
+%e A257291         |                               |        +------+
+%e A257291         +-------------------------------+------> | dead |
+%e A257291                                                  +------+
+%e A257291                                                    ^ | 0,1
+%e A257291                                                    +-+
+%e A257291 Each state is a set of bit strings wanted.  The start state is primes 2,3,5 in binary.  Each "1" transition takes strings starting 1 and removes that 1.  Each 0 transition similarly.  "e" is the empty string.  Each state containing "e" is accepting because it's the end of one of the original primes.  "Dead" is the set of no strings and is a non-accepting sink.  Input strings too long or not a prefix of one of the desired primes end up at dead.
+%e A257291 (End)
+%o A257291 (PARI) a(n) = {
+%o A257291   my(m=Map(),q=List([apply(p->Vecsmall(binary(p)),primes(n))]));
+%o A257291   while(#q, my(s=q[#q]);listpop(q);
+%o A257291     if(!mapisdefined(m,s), mapput(m,s,1);
+%o A257291       for(i=0,1, listput(q,apply(v->v[^1],
+%o A257291                              select(v->#v&&v[1]==i, s))))));
+%o A257291   #m; }  \\ _Kevin Ryde_, Jun 02 2020
+%o A257291 (Python)
+%o A257291 from sympy import prime, primerange
+%o A257291 def a(n):
+%o A257291     m = dict()
+%o A257291     q = [tuple(bin(p)[2:] for p in primerange(1, prime(n)+1))]
+%o A257291     while len(q) > 0:
+%o A257291         s = q.pop()
+%o A257291         if s not in m:
+%o A257291             m[s] = 1
+%o A257291             for i in "01":
+%o A257291                 q.append(tuple(v[1:] for v in s if len(v) and v[0]==i))
+%o A257291     return len(m)
+%o A257291 print([a(n) for n in range(1, 80)]) # _Michael S. Branicky_, Jul 04 2022 after _Kevin Ryde_
+%Y A257291 Cf. A257371.
+%K A257291 nonn
+%O A257291 1,1
+%A A257291 _Jeffrey Shallit_, Apr 21 2015
+%E A257291 a(26)-a(78) from _Kevin Ryde_, Jun 02 2020

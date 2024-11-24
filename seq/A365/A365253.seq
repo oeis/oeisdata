@@ -1,0 +1,48 @@
+%I A365253 #21 Aug 31 2023 12:01:42
+%S A365253 1,2,4,8,14,26,48,86,156,282,506,910,1638,2936,5276,9482,17012,30542,
+%T A365253 54838,98440,176726,317268,569516,1022368,1835320,3294596,5914262,
+%U A365253 10616932,19058674,34212776,61416376,110250050,197912878,355278872,637770308,1144878550
+%N A365253 Number of (3+)-free binary strings of length n.
+%C A365253 A string is (3+)-free if it contains no block of the form xxxa, where a is the first letter of x.
+%H A365253 G. Badkobeh and M. Crochemore, <a href="http://dx.doi.org/10.1016/j.ipl.2015.01.004">Infinite binary words containing repetitions of odd period</a>, Info. Proc. Letters 115 (2015) 543-547.
+%H A365253 A. Shur, <a href="https://doi.org/10.1016/j.cosrev.2012.09.001">Growth properties of power-free languages</a>, Computer Sci. Rev. 6 (2012), 187-208.
+%F A365253 It is known that lim a(n)^(1/n) exists, and is between 1.7951246 and 1.7951264 (Shur, table A.1).
+%o A365253 (Python)
+%o A365253 from itertools import product
+%o A365253 def f(s): # (3+)-free
+%o A365253     for l in range(1, (len(s)-1)//3 + 1):
+%o A365253       for i in range(len(s) - 3*l):
+%o A365253           if s[i:i+l] == s[i+l:i+2*l] == s[i+2*l:i+3*l] and s[i]==s[i+3*l]:
+%o A365253              return False
+%o A365253     return True
+%o A365253 def a(n):
+%o A365253     if n == 0: return 1
+%o A365253     return 2*sum(1 for w in product("01", repeat=n-1) if f("0"+"".join(w)))
+%o A365253 print([a(n) for n in range(16)]) # _Michael S. Branicky_, Aug 29 2023
+%o A365253 (Python) # faster, but > memory, for initial segment of sequence
+%o A365253 from itertools import islice
+%o A365253 def incf(s): # incrementally (3+)-free
+%o A365253     for l in range(1, (len(s)-1)//3 + 1):
+%o A365253         if s[-3*l-1:-2*l-1]==s[-2*l-1:-l-1]==s[-l-1:-1] and s[-3*l-1]==s[-1]:
+%o A365253             return False
+%o A365253     return True
+%o A365253 def agen():
+%o A365253     yield 1
+%o A365253     F = set("0")
+%o A365253     while True:
+%o A365253         yield 2*len(F)
+%o A365253         Fnew = set(c+i for c in F for i in "01" if incf(c+i))
+%o A365253         F = Fnew
+%o A365253 print(list(islice(agen(),21))) # _Michael S. Branicky_, Aug 29 2023
+%o A365253 (Python)
+%o A365253 from re import compile
+%o A365253 def A365253(n):
+%o A365253     if n == 0: return 1
+%o A365253     r = compile(r'(.)(.*)\1\2\1\2\1')
+%o A365253     return 2*sum(not r.search(format(k,f'0{n}b')) for k in range(2**(n-1))) # _Pontus von Brömssen_, Aug 29 2023
+%Y A365253 Cf. A028445.
+%K A365253 nonn
+%O A365253 0,2
+%A A365253 _Jeffrey Shallit_, Aug 29 2023
+%E A365253 a(29)-a(33) from _Michael S. Branicky_, Aug 29 2023
+%E A365253 a(34)-a(35) from _Michael S. Branicky_, Aug 31 2023

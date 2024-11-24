@@ -1,0 +1,72 @@
+%I A286708 #30 Sep 10 2024 20:21:43
+%S A286708 36,72,100,108,144,196,200,216,225,288,324,392,400,432,441,484,500,
+%T A286708 576,648,675,676,784,800,864,900,968,972,1000,1089,1125,1152,1156,
+%U A286708 1225,1296,1323,1352,1372,1444,1521,1568,1600,1728,1764,1800,1936,1944,2000,2025,2116,2304,2312,2500,2592,2601,2700,2704,2744
+%N A286708 Powerful numbers (A001694) that are not prime powers (A000961).
+%C A286708 If a prime p divides a(n) then p^2 must also divide a(n) and number of distinct primes dividing a(n) > 1.
+%C A286708 Intersection of A001694 and A024619.
+%H A286708 Michael De Vlieger, <a href="/A286708/b286708.txt">Table of n, a(n) for n = 1..10000</a> (first 5997 terms from Robert Israel)
+%H A286708 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/PrimePower.html">Prime Power</a>.
+%H A286708 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/PowerfulNumber.html">Powerful Number</a>.
+%H A286708 <a href="/index/Pow#powerful">Index entries for sequences related to powerful numbers</a>
+%F A286708 Sum_{n>=1} 1/a(n) = zeta(2)*zeta(3)/zeta(6) - Sum_{p prime} 1/(p*(p-1)) - 1 = A082695 - A136141 - 1 = 0.17043976777096407719... - _Amiram Eldar_, Feb 12 2021
+%e A286708 -------------------------------
+%e A286708 | n | a(n) | prime            |
+%e A286708 |   |      | factorization    |
+%e A286708 |------------------------------
+%e A286708 | 1 | 36   | {{2, 2}, {3, 2}} |
+%e A286708 | 2 | 72   | {{2, 3}, {3, 2}} |
+%e A286708 | 3 | 100  | {{2, 2}, {5, 2}} |
+%e A286708 | 4 | 108  | {{2, 2}, {3, 3}} |
+%e A286708 | 5 | 144  | {{2, 4}, {3, 2}} |
+%e A286708 | 6 | 196  | {{2, 2}, {7, 2}} |
+%e A286708 | 7 | 200  | {{2, 3}, {5, 2}} |
+%e A286708 | 8 | 216  | {{2, 3}, {3, 3}} |
+%e A286708 | 9 | 225  | {{3, 2}, {5, 2}} |
+%e A286708 -------------------------------
+%e A286708 a(n) = p_1^e_1*p_2^e_2*... : {{p_1, e_1}, {p_2, e_2}, ...}.
+%p A286708 N:= 10000:
+%p A286708 S:= {1}: P:= {1}:
+%p A286708 p:= 1:
+%p A286708 do
+%p A286708   p:= nextprime(p);
+%p A286708   if p^2 > N then break fi;
+%p A286708   S:= map(s -> (s, seq(s*p^k, k = 2 .. floor(log[p](N/s)))), S);
+%p A286708   P:= P union {seq(p^k, k=2..floor(log[p](N)))}:
+%p A286708 od:
+%p A286708 sort(convert(S minus P, list)); # _Robert Israel_, May 14 2017
+%t A286708 Select[Range@2750, Min@FactorInteger[#][[All, 2]] > 1 && ! PrimePowerQ[#] &]
+%t A286708 (* Second program *)
+%t A286708 nn = 2^25; Select[Rest@ Union@ Flatten@ Table[a^2*b^3, {b, nn^(1/3)}, {a, Sqrt[nn/b^3]}], ! PrimePowerQ[#] &] (* _Michael De Vlieger_, Jun 22 2022 *)
+%o A286708 (Python)
+%o A286708 from sympy import primefactors, factorint
+%o A286708 print([n for n in range(4,2745) if len(primefactors(n)) > 1 and min(list(factorint(n).values())) > 1]) # _Karl-Heinz Hofmann_, Feb 07 2023
+%o A286708 (Python)
+%o A286708 from math import isqrt
+%o A286708 from sympy import integer_nthroot, primepi, mobius
+%o A286708 def A286708(n):
+%o A286708     def squarefreepi(n): return int(sum(mobius(k)*(n//k**2) for k in range(1, isqrt(n)+1)))
+%o A286708     def bisection(f,kmin=0,kmax=1):
+%o A286708         while f(kmax) > kmax: kmax <<= 1
+%o A286708         while kmax-kmin > 1:
+%o A286708             kmid = kmax+kmin>>1
+%o A286708             if f(kmid) <= kmid:
+%o A286708                 kmax = kmid
+%o A286708             else:
+%o A286708                 kmin = kmid
+%o A286708         return kmax
+%o A286708     def f(x):
+%o A286708         c, l = n+x, 0
+%o A286708         j = isqrt(x)
+%o A286708         while j>1:
+%o A286708             k2 = integer_nthroot(x//j**2,3)[0]+1
+%o A286708             w = squarefreepi(k2-1)
+%o A286708             c -= j*(w-l)
+%o A286708             l, j = w, isqrt(x//k2**3)
+%o A286708         c -= squarefreepi(integer_nthroot(x,3)[0])-l
+%o A286708         return c+1+sum(primepi(integer_nthroot(x, k)[0]) for k in range(2, x.bit_length()))
+%o A286708     return bisection(f,n,n) # _Chai Wah Wu_, Sep 10 2024
+%Y A286708 Cf. A000961, A001221, A001694, A024619, A082695, A136141, A131605.
+%K A286708 nonn
+%O A286708 1,1
+%A A286708 _Ilya Gutkovskiy_, May 13 2017

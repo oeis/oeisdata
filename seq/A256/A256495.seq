@@ -1,0 +1,42 @@
+%I A256495 #40 Jul 26 2020 19:25:33
+%S A256495 0,1,2,11,101,111,1001,1111,10001,10101,11011,100001,101101,110011,
+%T A256495 1000001,1001001,1010101,1100011,10000001,10011001,10100101,11000011,
+%U A256495 100000001,100010001,100101001,101000101,110000011,1000000001,1000110001,1001001001,1010000101
+%N A256495 Palindromes i such that 2*i^2 is a palindrome.
+%C A256495 Subsequence of palindromes of A256437.
+%C A256495 The sequence contains all positive integers of the form: m*10^(i + NumberOfDigit(m)) + m where i is any nonnegative integer and m is any term of A000533.
+%C A256495 Also contains 1 + 10^i and 1 + 10^i + 10^(2*i) for all i >= 1.  Are there any members with more than four 1's, or any members other than 2 with digits other than 0's and 1's? - _Robert Israel_, Apr 13 2015
+%H A256495 Lars Blomberg, <a href="/A256495/b256495.txt">Table of n, a(n) for n = 1..91</a>
+%e A256495 Palindrome 11 is in the sequence because 2*11^2 = 242, a palindrome.
+%p A256495 dmax:= 11: # to get all terms with at most dmax digits
+%p A256495 revdigs:= proc(n)
+%p A256495   local L,i;
+%p A256495   L:= convert(n,base,10);
+%p A256495   add(10^(i-1)*L[-i],i=1..nops(L));
+%p A256495 end proc:
+%p A256495 filter:= proc(n) local L;
+%p A256495   L:= convert(2*n^2,base,10);
+%p A256495   L = ListTools:-Reverse(L)
+%p A256495 end proc:
+%p A256495 A:= {}:
+%p A256495 for d from 1 to dmax do
+%p A256495   if d::even then
+%p A256495      A:= A union select(filter, {seq(10^(d/2)*x + revdigs(x), x=10^(d/2-1)..10^(d/2)-1)})
+%p A256495   else
+%p A256495      m:= (d-1)/2;
+%p A256495      A:= A union select(filter, {seq(seq(10^(m+1)*x + y*10^m + revdigs(x), y=0..9),x=10^(m-1)..10^m-1)})
+%p A256495   fi
+%p A256495 od:
+%p A256495 A;  # if using Maple 11 or earlier, uncomment the next line
+%p A256495 # sort(convert(A,list)); # _Robert Israel_, Apr 13 2015
+%t A256495 palQ[n_] := Block[{d = IntegerDigits@ n}, d == Reverse@ d]; Select[
+%t A256495 Range@ 10000000, palQ@ # && palQ[#^2 + FromDigits[Reverse@ IntegerDigits@ #]^2] &] (* _Michael De Vlieger_, Mar 31 2015 *)
+%t A256495 Select[Range[0,10101*10^5],AllTrue[{#,2#^2},PalindromeQ]&] (* Requires Mathematica version 10 or later *) (* _Harvey P. Dale_, Jul 26 2020 *)
+%o A256495 (PARI) ispal(n) = my(d = digits(n)); Vecrev(d) == d;
+%o A256495 lista(nn) = {for (n=0, nn, if (ispal(n) && ispal(2*n^2), print1(n, ", ")););} \\ _Michel Marcus_, Mar 31 2015
+%Y A256495 Cf. A256437.
+%K A256495 nonn,base
+%O A256495 1,3
+%A A256495 _Bui Quang Tuan_, Mar 31 2015
+%E A256495 a(19)-a(22) from _Michel Marcus_, Mar 31 2015
+%E A256495 a(23)-a(31) from _Lars Blomberg_, Apr 13 2015

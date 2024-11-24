@@ -1,0 +1,61 @@
+%I A174725 #41 Nov 24 2024 09:28:49
+%S A174725 1,0,0,1,0,2,0,2,1,2,0,4,0,2,2,4,0,4,0,4,2,2,0,10,1,2,2,4,0,6,0,8,2,2,
+%T A174725 2,13,0,2,2,10,0,6,0,4,4,2,0,24,1,4,2,4,0,10,2,10,2,2,0,22,0,2,4,16,2,
+%U A174725 6,0,4,2,6,0,38,0,2,4,4,2
+%N A174725 a(n) = (A074206(n) + A008683(n))/2.
+%C A174725 From _Mats Granvik_, May 25 2017: (Start)
+%C A174725 A074206(n) = A002033(n-1) = a(n) + A174726(n).
+%C A174725 A008683(n) = a(n) - A174726(n).
+%C A174725 Let m = size of matrix a matrix T, and let T be defined as follows:
+%C A174725 T(n,k) = if m = 1 then 1 else if mod(n, k) = 0 then if and(n = k, n = m) then 0 else 1 else if and(n = 1, k = m) then 1 else 0
+%C A174725 a(n) is then the number of permutation matrices with a positive contribution in the determinant of matrix T. The determinant of T is equal to the Möbius function A008683, see Mathematica program below for how to compute the determinant.
+%C A174725 A174726 is the number of permutation matrices with a negative contribution in the determinant of matrix T.
+%C A174725 (End)
+%C A174725 From _Gus Wiseman_, Jan 04 2021: (Start)
+%C A174725 Also the number of ordered factorizations of n into an even number of factors > 1. The non-ordered case is A339846. For example, the a(n) factorizations for n = 12, 24, 30, 32, 36 are:
+%C A174725   (2*6)  (3*8)      (5*6)   (4*8)      (4*9)
+%C A174725   (3*4)  (4*6)      (6*5)   (8*4)      (6*6)
+%C A174725   (4*3)  (6*4)      (10*3)  (16*2)     (9*4)
+%C A174725   (6*2)  (8*3)      (15*2)  (2*16)     (12*3)
+%C A174725          (12*2)     (2*15)  (2*2*2*4)  (18*2)
+%C A174725          (2*12)     (3*10)  (2*2*4*2)  (2*18)
+%C A174725          (2*2*2*3)          (2*4*2*2)  (3*12)
+%C A174725          (2*2*3*2)          (4*2*2*2)  (2*2*3*3)
+%C A174725          (2*3*2*2)                     (2*3*2*3)
+%C A174725          (3*2*2*2)                     (2*3*3*2)
+%C A174725                                        (3*2*2*3)
+%C A174725                                        (3*2*3*2)
+%C A174725                                        (3*3*2*2)
+%C A174725 (End)
+%H A174725 Mats Granvik, <a href="/A174725/b174725.txt">Table of n, a(n) for n = 1..10000</a>
+%F A174725 a(n) = (Mobius transform of a(n)) + (Mobius transform of A174726). - _Mats Granvik_, Apr 04 2010
+%F A174725 From _Mats Granvik_, May 25 2017: (Start)
+%F A174725 This sequence is the Moebius transform of A074206.
+%F A174725 a(n) = (A074206(n) + A008683(n))/2.
+%F A174725 (End)
+%F A174725 G.f. A(x) satisfies: A(x) = x + Sum_{i>=2} Sum_{j>=2} A(x^(i*j)). - _Ilya Gutkovskiy_, May 11 2019
+%t A174725 (* From _Mats Granvik_, May 25 2017: (Start) *)
+%t A174725 Clear[t, nn]; nn = 77; t[1, 1] = 1; t[n_, k_] := t[n, k] = If[k == 1, Sum[t[n, k + i], {i, 1, n - 1}], If[Mod[n, k] == 0, t[n/k, 1], 0], 0]; Monitor[Table[Sum[If[Mod[n, k] == 0, MoebiusMu[k]*t[n/k, 1], 0], {k, 1, 77}], {n, 1, nn}], n]
+%t A174725 (* The Möbius function as a determinant *) Table[Det[Table[Table[If[m == 1, 1, If[Mod[n, k] == 0, If[And[n == k, n == m], 0, 1], If[And[n == 1, k == m], 1, 0]]], {k, 1, m}], {n, 1, m}]], {m, 1, 42}]
+%t A174725 (* (End) *)
+%t A174725 ordfacs[n_]:=If[n<=1,{{}},Join@@Table[(Prepend[#1,d]&)/@ordfacs[n/d],{d,Rest[Divisors[n]]}]];
+%t A174725 Table[Length[Select[ordfacs[n],EvenQ@*Length]],{n,100}] (* _Gus Wiseman_, Jan 04 2021 *)
+%Y A174725 Cf. A008683, A051731.
+%Y A174725 The odd version is A174726.
+%Y A174725 The unordered version is A339846.
+%Y A174725 A001055 counts factorizations, with strict case A045778.
+%Y A174725 A058696 counts partitions of even numbers, ranked by A300061.
+%Y A174725 A074206 counts ordered factorizations, with strict case A254578.
+%Y A174725 A251683 counts ordered factorizations by product and length.
+%Y A174725 Other cases of even length:
+%Y A174725 - A024430 counts set partitions of even length.
+%Y A174725 - A027187 counts partitions of even length.
+%Y A174725 - A034008 counts compositions of even length.
+%Y A174725 - A052841 counts ordered set partitions of even length.
+%Y A174725 - A067661 counts strict partitions of even length.
+%Y A174725 - A332305 counts strict compositions of even length
+%Y A174725 Cf. A002033, A027193, A028260, A050320, A058695, A236913, A316439, A320655, A320656, A339890, A378216 (Dirichlet inverse).
+%K A174725 nonn,changed
+%O A174725 1,6
+%A A174725 _Mats Granvik_, Mar 28 2010
+%E A174725 References to A002033(n-1) changed to A074206(n) by _Antti Karttunen_, Nov 23 2024

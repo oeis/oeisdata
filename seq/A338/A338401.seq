@@ -1,0 +1,90 @@
+%I A338401 #22 Oct 31 2020 03:47:32
+%S A338401 2,10,10,206,3326,43118,150806,11591578,436494606,1008712015454,
+%T A338401 382034633808890,13187511533010430,2111825680430510462,
+%U A338401 171204772756285452656378,89579048665281690355286,1013412795315891086553473628734,20023655015717377508089133638478,24678955315461926144059519221489609194
+%N A338401 a(n) is the numerator of the resistance R(n) = a(n)/A338402(n) of a triangular network of 3*n*(n+1)/2 one Ohm resistors in a hexagonal lattice arrangement.
+%C A338401 The resistance is measured between two corners of the triangular region.
+%H A338401 Hugo Pfoertner, <a href="/A338401/b338401.txt">Table of n, a(n) for n = 1..50</a>
+%H A338401 Hugo Pfoertner, <a href="https://oeis.org/plot2a?graph=1&amp;name1=A338401&amp;name2=A338402&amp;tform1=untransformed&amp;tform2=untransformed&amp;shift=0&amp;radiop1=ratio&amp;drawpoints=true&amp;drawlines=true">Graph of R(n)</a>, bounded or unbounded for n->oo?
+%e A338401 R(1) = a(1)/A338402(1) = 2/3,
+%e A338401 R(2) = a(2)/A338402(2) = 10/9,
+%e A338401 R(4) = a(4)/A338402(4) = 206/123.
+%e A338401 a(3) = 10: The following network of A045943(3) = 18 one Ohm resistors has a resistance of R(3) = 10/7 Ohm, i.e., the current I driven by the voltage of 1 Volt is 7/10 = A338402(3)/a(3) Ampere.
+%e A338401 .
+%e A338401                        O
+%e A338401                     __/ \_
+%e A338401                    / /   \ \
+%e A338401                   /1/     \1\
+%e A338401                  /_/       \_\
+%e A338401                  /   _____   \
+%e A338401                 O---|__1__|---O
+%e A338401              __/ \_        __/ \_
+%e A338401             / /   \ \     / /   \ \
+%e A338401            /1/     \1\   /1/     \1\
+%e A338401           /_/       \_\ /_/       \_\
+%e A338401           /   _____   \ /   _____   \
+%e A338401          O---|__1__|---O---|__1__|---O
+%e A338401       __/ \__       __/ \__       __/ \_
+%e A338401      / /   \ \     / /   \ \     / /   \ \
+%e A338401     /1/     \1\   /1/     \1\   /1/     \1\
+%e A338401    /_/       \_\ /_/       \_\ /_/       \_\
+%e A338401    /   _____   \ /   _____   \ /   _____   \
+%e A338401   O---|__1__|---O---|__1__|---O---|__1__|---O
+%e A338401   |                                         |
+%e A338401   |                 V = 1 Volt              |
+%e A338401   |                     |                   |
+%e A338401    -------------------| |-- I=1/R Ampere ---
+%e A338401                         |
+%e A338401 .
+%e A338401 With a numbering of the resistors as shown in the following diagram,
+%e A338401 .
+%e A338401               O
+%e A338401              / \
+%e A338401            15  18
+%e A338401            /     \
+%e A338401           O--14---O
+%e A338401          / \     / \
+%e A338401         7   9  13  17
+%e A338401        /     \ /     \
+%e A338401       O-- 6---O--12---O
+%e A338401      / \     / \     / \
+%e A338401     2   3   5   8  11  16
+%e A338401    /     \ /     \ /     \
+%e A338401   O---1---O---4---O--10---O
+%e A338401   |______1 Volt__I=I19____|
+%e A338401 .
+%e A338401 the currents in Amperes through the 18 resistors, and the current I=I19 through the voltage source of 1 Volt, are [11/30, 1/3, 1/30, 4/15, 2/15, 1/6, 2/15, 2/15, 1/30, 11/30, 1/30, 1/6, 1/30, 1/15, 1/30, 1/3, 2/15, 1/30, 7/10].
+%o A338401 (PARI) a33840_1_2(n)={my(md=3*n*(n+1)/2+1,
+%o A338401 T1=matrix(n,n),T2=matrix(n,n),T3=matrix(n,n),
+%o A338401 M=matrix(md,md,i,j,0),U=vector(md),
+%o A338401 valid(i,j)=i>0&&i<=n&&j>0&&j<=n&&i>=j,k=0,neq=1);
+%o A338401 \\ List of edges
+%o A338401 for(i=1,n,for(j=1,i,T1[i,j]=k++;T2[i,j]=k++;T3[i,j]=k++));
+%o A338401 \\ In- and outflow of current at all nodes
+%o A338401 \\ lower left triangle with inflow of current from source of voltage
+%o A338401 M[1,1]=-1;M[1,2]=-1;M[1,md]=1;
+%o A338401 \\ loops over lower left corners of triangles
+%o A338401 for(i=2,n+1,for(j=1,i,
+%o A338401 \\ exclude node at top of triangle
+%o A338401 if(j<n+1,neq++;
+%o A338401 if(valid(i-1,j),M[neq,T1[i-1,j]]=1;M[neq,T3[i-1,j]]=1);
+%o A338401 if(valid(i-1,j-1),M[neq,T2[i-1,j-1]]=1; M[neq,T3[i-1,j-1]]=-1);
+%o A338401 if ( valid(i,j),M[neq,T1[i,j]]=-1;M[neq,T2[i,j]]=-1);
+%o A338401 \\ lower right corner with current through voltage source
+%o A338401 if ( i == n+1 && j == 1, M[neq,md] = -1)
+%o A338401 )));
+%o A338401 \\ sum of voltages around triangles with vertex above base
+%o A338401 for( i = 1, n, for( j = 1, i,
+%o A338401 neq++; M[neq,T1[i,j]] = 1; M[neq,T2[i,j]] = -1; M[neq,T3[i,j]] = -1 ));
+%o A338401 \\ sum of voltages around triangles with vertex below base
+%o A338401 for( i = 1, n-1, for( j = 1, i, neq ++;
+%o A338401 M[neq,T3[i,j]] = 1; M[neq,T2[i+1,j]] = 1; M[neq,T1[i+1,j+1]] = -1 ));
+%o A338401 \\ External voltage applied to lower corners of triangle
+%o A338401 neq = neq++; for ( i = 1, n, M[neq,T1[i,1]] = 1);
+%o A338401 \\ Right side of equations; driving voltage 1 Volt
+%o A338401 U[neq]=1;1/matsolve(M,U~)[neq]};
+%o A338401 for(n=1,10,print1(numerator(a33840_1_2(n)),", "))
+%Y A338401 Cf. A000217, A045943, A048211, A174283, A338402.
+%K A338401 nonn,frac
+%O A338401 1,1
+%A A338401 _Hugo Pfoertner_, Oct 24 2020

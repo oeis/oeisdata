@@ -1,0 +1,55 @@
+%I A183307 #9 Oct 23 2019 22:14:35
+%S A183307 5,14,93,572,4212,29400,206755,1447110,10149621,71244598,500184679,
+%T A183307 3512112015,24658885220,173129289198,1215525172167,8534122345666,
+%U A183307 59917715208287,420680331462689,2953583636803146,20737016295243029
+%N A183307 Half the number of nX6 binary arrays with no element equal to a strict majority of its horizontal and vertical neighbors
+%C A183307 Column 6 of A183312
+%H A183307 R. H. Hardin, <a href="/A183307/b183307.txt">Table of n, a(n) for n = 1..200</a>
+%H A183307 Robert Israel, <a href="/A183307/a183307.txt">Linear recurrence of order 93</a>
+%H A183307 Robert Israel, <a href="/A183307/a183307.pdf">Maple-assisted derivation of recurrence</a>
+%F A183307 Linear recurrence of order 93 for n >= 95: see links. - _Robert Israel_, Oct 23 2019
+%e A183307 Some solutions with a(1,1)=0 for 6X4
+%e A183307 ..0..0..1..0....0..1..0..1....0..1..0..1....0..1..0..0....0..1..0..1
+%e A183307 ..1..1..0..1....1..0..1..0....0..1..0..0....1..0..1..1....1..1..0..1
+%e A183307 ..0..1..0..0....1..0..0..1....1..0..1..1....0..0..1..0....0..0..1..0
+%e A183307 ..1..0..1..1....0..1..1..0....0..1..1..0....1..1..0..1....1..1..0..1
+%e A183307 ..0..1..0..0....1..0..0..1....1..0..0..1....0..1..0..0....0..0..1..0
+%e A183307 ..1..0..1..1....1..0..1..0....0..1..1..0....1..0..1..1....1..0..1..0
+%p A183307 Allowed:= proc(a)
+%p A183307   if nops({a[1],a[2],a[7]})=1 or nops({a[1],a[2],a[3],a[8]})=1
+%p A183307   or nops({a[2],a[3],a[4],a[9]})=1 or nops({a[3],a[4],a[5],a[10]})=1
+%p A183307   or nops({a[4],a[5],a[6],a[11]})=1 or nops({a[5],a[6],a[12]})=1
+%p A183307   or nops({a[1],a[7],a[8]})=1 or nops({a[2],a[7],a[8],a[9]})=1
+%p A183307   or nops({a[3],a[8],a[9],a[10]})=1 or nops({a[4],a[9],a[10],a[11]})=1
+%p A183307   or nops({a[5],a[10],a[11],a[12]})=1 or nops({a[6],a[11],a[12]})=1
+%p A183307   then false else true fi
+%p A183307 end proc:
+%p A183307 Configs:= select(Allowed,[seq(convert(n,base,2)[1..12],n=2^12..2^13-1)]):
+%p A183307 Compatible:= proc(i,j) local Xi,Xj,k;
+%p A183307  Xi:= map(t -> 2*t-1,Configs[i]); Xj:= map(t -> 2*t-1,Configs[j]);
+%p A183307  if Xi[7..12] <> Xj[1..6] then return 0 fi;
+%p A183307  if Xi[7] = signum(Xi[1]+Xi[8]+Xj[7]) then return 0 fi;
+%p A183307  for k from 8 to 11 do if Xi[k] = signum(Xi[k-6]+Xi[k-1]+Xi[k+1]+Xj[k]) then return 0 fi od;
+%p A183307  if Xi[12] = signum(Xi[6]+Xi[11]+Xj[12]) then return 0 fi;
+%p A183307  1
+%p A183307 end proc:
+%p A183307 T:= Matrix(722,722,Compatible):
+%p A183307 uok:= proc(i) local a,k;
+%p A183307    a:= map(t -> 2*t-1, Configs[i]);
+%p A183307    for k from 2 to 5 do if a[k] = signum(a[k-1]+a[k+1]+a[k+6]) then return 0 fi od;
+%p A183307    1
+%p A183307 end proc:
+%p A183307 u:= Vector(722, uok):
+%p A183307 vok:= proc(i) local a,k;
+%p A183307     a:= map(t -> 2*t-1, Configs[i]);
+%p A183307     for k from 8 to 11 do if a[k] = signum(a[k-1]+a[k+1]+a[k-6]) then return 0 fi od;
+%p A183307     1
+%p A183307 end proc:
+%p A183307 v:= Vector(722,vok):
+%p A183307 Tv[0]:= v:
+%p A183307 for nn from 1 to 50 do Tv[nn]:= T . Tv[nn-1] od:
+%p A183307 A:= [10, seq(u^%T . Tv[n],n=0..50)]/2:
+%p A183307 A[1..50]; # _Robert Israel_, Oct 23 2019
+%K A183307 nonn
+%O A183307 1,1
+%A A183307 _R. H. Hardin_ Jan 03 2011

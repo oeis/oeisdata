@@ -1,0 +1,54 @@
+%I A306297 #44 Apr 18 2021 09:04:48
+%S A306297 1,1,1,1,2,1,1,6,1,1,7,7,1,1,19,11,1,1,47,15,1,1,111,15,1,1,112,126,
+%T A306297 16,1,1,324,166,20,1,1,776,222,24,1,1,1736,286,24,1,1,3708,358,28,1,1,
+%U A306297 7740,422,28,1,1,15868,486,28,1,1,32252,486,28,1,1,32253,32738,514,29,1
+%N A306297 Number T(n,k) of subsets of [n] with k binary carry-connected components; triangle T(n,k), n >= 0, 0 <= k <= A029837(n+1), read by rows.
+%C A306297 Two integers are binary carry-connected if their bitwise AND is not zero.
+%C A306297 T(n,k) is defined for all n,k >= 0.  The triangle contains only the positive terms. T(n,k) = 0 if k > A029837(n+1).
+%H A306297 Alois P. Heinz, <a href="/A306297/b306297.txt">Rows n = 0..1023</a>
+%H A306297 Wikipedia, <a href="https://en.wikipedia.org/wiki/Bitwise operation">Bitwise operation</a>
+%H A306297 Wikipedia, <a href="https://en.wikipedia.org/wiki/Partition_of_a_set">Partition of a set</a>
+%F A306297 T(n,0) + T(n,1) = A325105(n).
+%F A306297 T(n,A029837(n+1)) = 1.
+%e A306297 T(4,0) = 1: {}.
+%e A306297 T(4,1) = 7: 1, 2, 3, 13, 23, 123, 4.
+%e A306297 T(4,2) = 7: 1|2, 1|4, 2|4, 3|4, 13|4, 23|4, 123|4.
+%e A306297 T(4,3) = 1: 1|2|4.
+%e A306297 (The connected components are shown as blocks of a set partition.)
+%e A306297 Triangle T(n,k) begins:
+%e A306297   1;
+%e A306297   1,    1;
+%e A306297   1,    2,   1;
+%e A306297   1,    6,   1;
+%e A306297   1,    7,   7,  1;
+%e A306297   1,   19,  11,  1;
+%e A306297   1,   47,  15,  1;
+%e A306297   1,  111,  15,  1;
+%e A306297   1,  112, 126, 16, 1;
+%e A306297   1,  324, 166, 20, 1;
+%e A306297   1,  776, 222, 24, 1;
+%e A306297   1, 1736, 286, 24, 1;
+%e A306297   1, 3708, 358, 28, 1;
+%e A306297   ...
+%p A306297 h:= proc(n, s) local i, m; m:= n;
+%p A306297       for i in s do m:= Bits[Or](m, i) od; {m}
+%p A306297     end:
+%p A306297 g:= (n, s)-> (w-> `if`(w={}, s union {n}, s minus w union
+%p A306297               h(n, w)))(select(x-> Bits[And](n, x)>0, s)):
+%p A306297 b:= proc(n, s) option remember; `if`(n=0, x^nops(s),
+%p A306297       b(n-1, s)+b(n-1, g(n, s)))
+%p A306297     end:
+%p A306297 T:= n-> (p-> seq(coeff(p, x, i), i=0..degree(p)))(b(n, {})):
+%p A306297 seq(T(n), n=0..23);
+%t A306297 h[n_, s_List] := Module[{i, m = n}, For[i = 1, i <= Length[s], i++, m = BitOr[m, s[[i]]]]; m];
+%t A306297 g[n_, s_List] := Function[w, If[w == {}, s ~Union~ {n}, s ~Complement~ w  ~Union~ {h[n, w]}]][Select[s, BitAnd[n, #] > 0&]];
+%t A306297 b[n_, s_List] := b[n, s] = If[n == 0, x^Length[s], b[n - 1, s] + b[n - 1, g[n, s]]];
+%t A306297 T[n_] := CoefficientList[b[n, {}], x];
+%t A306297 T /@ Range[0, 23] // Flatten (* _Jean-François Alcover_, Apr 18 2021, after _Alois P. Heinz_ *)
+%Y A306297 Columns k=0-1 give: A000007, -1 + A325105.
+%Y A306297 Row sums give A000079.
+%Y A306297 Number of terms in row n gives A070941.
+%Y A306297 Cf. A029837, A325105.
+%K A306297 nonn,look,tabf
+%O A306297 0,5
+%A A306297 _Alois P. Heinz_, Mar 31 2019

@@ -1,0 +1,61 @@
+%I A238396 #39 Jul 19 2018 21:21:19
+%S A238396 1,2,0,9,1,0,54,20,0,0,378,307,21,0,0,2916,4280,966,0,0,0,24057,56914,
+%T A238396 27954,1485,0,0,0,208494,736568,650076,113256,0,0,0,0,1876446,9370183,
+%U A238396 13271982,5008230,225225,0,0,0,0,17399772,117822512,248371380,167808024,24635754,0,0,0,0,0,165297834,1469283166,4366441128,4721384790,1495900107,59520825,0
+%N A238396 Triangle T(n,k) read by rows: T(n,k) is the number of rooted genus-k maps with n edges, n>=0, 0<=k<=n.
+%D A238396 David M. Jackson  and Terry I. Visentin, An Atlas of the Smaller Maps in Orientable and Nonorientable Surfaces, Chapman & Hall/CRC, circa 2000. See page 227.
+%H A238396 Joerg Arndt, <a href="/A238396/b238396.txt">Table of n, a(n) for n = 0..1325</a> (rows 0..50, flattened)
+%H A238396 Sean R. Carrell, Guillaume Chapuy, <a href="http://arxiv.org/abs/1402.6300">Simple recurrence formulas to count maps on orientable surfaces</a>, arXiv:1402.6300 [math.CO], (19-March-2014).
+%F A238396 From _Gheorghe Coserea_, Mar 11 2016: (Start)
+%F A238396 (n+1)/6 * T(n, g) = (4*n-2)/3 * T(n-1, g) + (2*n-3)*(2*n-2)*(2*n-1)/12 * T(n-2, g-1) + 1/2 * Sum_{k=1..n-1} Sum_{i=0..g} (2*k-1) * (2*(n-k)-1) * T(k-1, i) * T(n-k-1, g-i) for all n >= 1 and 0 <= g <= n/2, with the initial conditions T(0,0) = 1 and T(n,g) = 0 for g < 0 or g > n/2.
+%F A238396 For column g, as n goes to infinity we have T(n,g) ~ t(g) * n^(5*(g-1)/2) * 12^n, where t(g) = (A269418(g)/A269419(g)) / (2^(g-2) * gamma((5*g-1)/2)) and gamma is the Gamma function.
+%F A238396 (End)
+%e A238396 Triangle starts:
+%e A238396 00: 1,
+%e A238396 01: 2, 0,
+%e A238396 02: 9, 1, 0,
+%e A238396 03: 54, 20, 0, 0,
+%e A238396 04: 378, 307, 21, 0, 0,
+%e A238396 05: 2916, 4280, 966, 0, 0, 0,
+%e A238396 06: 24057, 56914, 27954, 1485, 0, 0, 0,
+%e A238396 07: 208494, 736568, 650076, 113256, 0, 0, 0, 0,
+%e A238396 08: 1876446, 9370183, 13271982, 5008230, 225225, 0, 0, 0, 0,
+%e A238396 09: 17399772, 117822512, 248371380, 167808024, 24635754, 0, ...,
+%e A238396 10: 165297834, 1469283166, 4366441128, 4721384790, 1495900107, 59520825, 0, ...,
+%e A238396 11: 1602117468, 18210135416, 73231116024, 117593590752, 66519597474, 8608033980, 0, ...,
+%e A238396 12: 15792300756, 224636864830, 1183803697278, 2675326679856, 2416610807964, 672868675017, 24325703325, 0, ...,
+%e A238396 ...
+%t A238396 T[0, 0] = 1; T[n_, g_] /; g < 0 || g > n/2 = 0; T[n_, g_] := T[n, g] = ((4n - 2)/3 T[n-1, g] + (2n-3)(2n-2)(2n-1)/12 T[n-2, g-1] + 1/2 Sum[(2k-1)(2(n - k)-1) T[k-1, i] T[n-k-1, g-i] , {k, 1, n-1}, {i, 0, g}])/((n+1)/6);
+%t A238396 Table[T[n, g], {n, 0, 10}, {g, 0, n}] // Flatten (* _Jean-François Alcover_, Jul 19 2018, after _Gheorghe Coserea_ *)
+%o A238396 (PARI) N=20;
+%o A238396 MEM=matrix(N+1,N+1, r,c, -1);  \\ for memoization
+%o A238396 Q(n,g)=
+%o A238396 {
+%o A238396     if (n<0,  return( (g<=0) ) ); \\ not given in paper
+%o A238396     if (g<0,  return( 0 ) ); \\ not given in paper
+%o A238396     if (n<=0, return( g==0 ) );  \\ as in paper
+%o A238396     my( m = MEM[n+1,g+1] );
+%o A238396     if ( m != -1,  return(m) );  \\ memoized value
+%o A238396     my( t=0 );
+%o A238396     t += (4*n-2)/3 * Q(n-1, g);
+%o A238396     t += (2*n-3)*(2*n-2)*(2*n-1)/12 * Q(n-2, g-1);
+%o A238396     my(l, j);
+%o A238396     t += 1/2*
+%o A238396         sum(k=1, n-1, l=n-k;  \\ l+k == n, both >= 1
+%o A238396             sum(i=0, g, j=g-i;  \\ i+j == g, both >= 0
+%o A238396                 (2*k-1)*(2*l-1) * Q(k-1, i) * Q(l-1, j)
+%o A238396             );
+%o A238396         );
+%o A238396     t *= 6/(n+1);
+%o A238396     MEM[n+1, g+1] = t;  \\ memoize
+%o A238396     return(t);
+%o A238396 }
+%o A238396 for (n=0, N, for (g=0, n, print1(Q(n, g),", "); );  print(); ); /* print triangle */
+%Y A238396 Columns k for 0<=k<=10 are: A000168, A006300, A006301, A104742, A215402, A238355, A238356, A238357, A238358, A238359, A238360.
+%Y A238396 Sum of row n is A000698(n+1).
+%Y A238396 See A267180 for nonorientable analog.
+%Y A238396 Cf. A269418, A269419.
+%Y A238396 The triangle without the zeros is A269919.
+%K A238396 nonn,tabl
+%O A238396 0,2
+%A A238396 _Joerg Arndt_, Feb 26 2014

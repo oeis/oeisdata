@@ -1,0 +1,32 @@
+%I A247286 #15 May 27 2015 09:56:58
+%S A247286 1,1,1,1,1,2,1,1,4,3,1,1,8,7,4,1,1,16,17,11,5,1,1,32,41,30,16,6,1,1,
+%T A247286 64,98,82,48,22,7,1,1,128,232,220,144,72,29,8,1,1,256,544,581,423,233,
+%U A247286 103,37,9,1,1,512,1264,1512,1216,738,356,142,46,10,1
+%N A247286 Triangle read by rows: T(n,k) is the number of Motzkin paths of length n having k weak peaks.
+%C A247286 A weak peak of a Motzkin path is a vertex on the top of a hump. A hump is an upstep followed by 0 or more flatsteps followed by a downstep. For example, the Motzkin path u*duu*h*h*dd, where u=(1,1), h=(1,0), d(1,-1), has 4 weak peaks (shown by the stars).
+%C A247286 Row n (n>=1) contains n entries.
+%C A247286 Sum of entries in row n is the Motzkin number A001006(n).
+%C A247286 Sum(k*T(n,k), 0<=k<=n) = A247287(n).
+%H A247286 Alois P. Heinz, <a href="/A247286/b247286.txt">Rows n = 0..141, flattened</a>
+%F A247286 The g.f. G(t,z) satisfies G = 1 + z*G + z^2*(G - 1/(1-z) + t/(1-t*z))*G.
+%e A247286 Row 3 is 1,2,1 because the Motzkin paths hhh, hu*d, u*dh, and u*h*d have 0, 1, 1, and 2 weak peaks (shown by the stars).
+%e A247286 Triangle starts:
+%e A247286 1;
+%e A247286 1;
+%e A247286 1,1;
+%e A247286 1,2,1;
+%e A247286 1,4,3,1;
+%e A247286 1,8,7,4,1;
+%p A247286 eq := G = 1+z*G+z^2*(G-1/(1-z)+t/(1-t*z))*G: G := RootOf(eq, G): Gser := simplify(series(G, z = 0, 16)): for n from 0 to 14 do P[n] := sort(expand(coeff(Gser, z, n))) end do: 1; for n to 14 do seq(coeff(P[n], t, k), k = 0 .. n-1) end do; # yields sequence in triangular form
+%p A247286 # second Maple program:
+%p A247286 b:= proc(x, y, t, c) option remember; `if`(y<0 or y>x, 0,
+%p A247286       `if`(x=0, 1, expand(b(x-1, y-1, false, 0)*z^c+b(x-1, y, t,
+%p A247286       `if`(t, c+1, 0))+ b(x-1, y+1, true, 1))))
+%p A247286     end:
+%p A247286 T:= n-> (p-> seq(coeff(p, z, i), i=0..degree(p)))(b(n, 0, false, 0)):
+%p A247286 seq(T(n), n=0..14);  # _Alois P. Heinz_, Sep 14 2014
+%t A247286 b[x_, y_, t_, c_] := b[x, y, t, c] = If[y<0 || y>x, 0, If[x == 0, 1, Expand[b[x-1, y-1, False, 0]*z^c + b[x-1, y, t, If[t, c+1, 0]] + b[x-1, y+1, True, 1]]]]; T[n_] := Function[{p}, Table[Coefficient[p, z, i], {i, 0, Exponent[p, z]}]][b[n, 0, False, 0]]; Table[T[n], {n, 0, 14}] // Flatten (* _Jean-François Alcover_, May 27 2015, after _Alois P. Heinz_ *)
+%Y A247286 Cf. A001006, A247287.
+%K A247286 nonn,tabf
+%O A247286 0,6
+%A A247286 _Emeric Deutsch_, Sep 14 2014

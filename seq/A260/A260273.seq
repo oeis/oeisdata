@@ -1,0 +1,54 @@
+%I A260273 #54 Aug 10 2016 00:29:45
+%S A260273 1,3,5,8,11,15,17,20,23,27,31,33,36,39,44,51,56,61,65,68,71,76,81,84,
+%T A260273 87,91,95,99,104,111,115,120,125,129,132,135,140,145,148,151,157,165,
+%U A260273 168,171,175,179,186,190,194,199,204,209,216,223,227,232,241,246
+%N A260273 Successively add the smallest nonzero binary number that is not a substring.
+%C A260273 a(n) is at least Omega(n), at most O(n*log(n)).
+%C A260273 The empirical approximation n*(log(n)/2 + exp(1)) is startlingly close to tight, compared with many increasing upper bounds.
+%C A260273 A261644(n) = A062383(a(n)) - a(n). - _Reinhard Zumkeller_, Aug 30 2015
+%H A260273 Alex Meiburg, <a href="/A260273/b260273.txt">Table of n, a(n) for n = 1..20000</a>
+%F A260273 a(n+1) = a(n) + A261461(a(n)). - _Reinhard Zumkeller_, Aug 30 2015
+%e A260273 Begin with a(1)=1, in binary, "1". This contains the string "1" but not "10", so we add 2. Thus a(2)=1+2=3. This also contains "1" but not "10", so we move to a(3)=3+2=5. This contains "1" and "10" but not "11", so we add 3. Thus a(4)=5+3=8. (See A261018 for the successive numbers that are added. - _N. J. A. Sloane_, Aug 17 2015)
+%t A260273 sublistQ[L1_, L2_] := Module[{l1 = Length[L1], l2 = Length[L2], k}, If[l2 <= l1, For[k = 1, k <= l1 - l2 + 1, k++, If[L1[[k ;; k + l2 - 1]] == L2, Return[True]]]]; False];
+%t A260273 a[1] = 1; a[n_] := a[n] = Module[{bb = IntegerDigits[a[n-1], 2], k}, For[k = 1, sublistQ[bb, IntegerDigits[k, 2]], k++]; a[n-1] + k]; Table[a[n], {n, 1, 60}] (* _Jean-François Alcover_, Apr 01 2016 *)
+%t A260273 NestList[Function[k, k + FromDigits[#, 2] &@ SelectFirst[IntegerDigits[Range[2^8], 2], Length@ SequencePosition[IntegerDigits[k, 2], #] == 0 &]], 1, 64] (* _Michael De Vlieger_, Apr 01 2016, Version 10.1 *)
+%o A260273 (Java)
+%o A260273 public static void main(String[] args) {
+%o A260273    int a=1;
+%o A260273    for(int iter=0;iter<100;iter++){
+%o A260273        System.out.print(a+", ");
+%o A260273        int inc;
+%o A260273        for(inc=1; contains(a,inc); inc++);
+%o A260273        a+=inc;
+%o A260273    }
+%o A260273 }
+%o A260273 static boolean contains(int a,int test){
+%o A260273    int mask=(Integer.highestOneBit(test)<<1)-1;
+%o A260273    while(a >= test){
+%o A260273        if((a & mask) == test) return true;
+%o A260273        a >>= 1;
+%o A260273    }
+%o A260273    return false;
+%o A260273 }
+%o A260273 (Haskell)
+%o A260273 a260273 n = a260273_list !! (n-1)
+%o A260273 a260273_list = iterate (\x -> x + a261461 x) 1
+%o A260273 -- _Reinhard Zumkeller_, Aug 30 2015, Aug 17 2015
+%o A260273 (Python)
+%o A260273 A260273_list, a = [1], 1
+%o A260273 for i in range(10**3):
+%o A260273     b, s = 1, format(a,'b')
+%o A260273     while format(b,'b') in s:
+%o A260273         b += 1
+%o A260273     a += b
+%o A260273     s = format(a,'b')
+%o A260273     A260273_list.append(a) # _Chai Wah Wu_, Aug 26 2015
+%Y A260273 See A261922 and A261461 for the smallest missing number function; also A261923, A262279, A261281.
+%Y A260273 Cf. A030308, A261015, A261016, A261017, A261019.
+%Y A260273 See also A261396 (when a(n) just passes a power of 2), A261416 (the limiting behavior just past a power of 2).
+%Y A260273 First differences are A261018.
+%Y A260273 A262288 is the decimal analog.
+%Y A260273 Cf. A261644, A062383.
+%K A260273 nonn,base,easy,nice
+%O A260273 1,2
+%A A260273 _Alex Meiburg_, Jul 22 2015

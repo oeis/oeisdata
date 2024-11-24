@@ -1,0 +1,61 @@
+%I A335503 #13 Jul 11 2020 08:53:44
+%S A335503 0,1,1,1,1,0,12,1,2,1,28,1,0,1,2,64,1,2,1,2,4,60,4,2,1,4,0,2,54,1,2,1,
+%T A335503 62,16,2,48,2,1,0,1,0,0,0,0,0,80,40,4,1,20,2000,60,72,4,1,40,20,5,1,
+%U A335503 85,240,5,5,20,1,320,1260,128,2,1,272,4,2,48,68,1,20,1440
+%N A335503 Triangle read by rows, 0 <= k < n, n >= 1: T(n,k) is the eventual period of the sequence x(j) (or 0 if x(j) never enters a cycle) defined as follows: x(0) = 1 and for j > 1 x(j) is obtained from 3*x(j-1) by deleting all occurrences of the digit k in base n.
+%C A335503 T(1,0) = 0 is defined in order to make the triangle of numbers regular.
+%C A335503 T(n,k) = 1 whenever k is a power of 3 and k>1.
+%H A335503 Pontus von Brömssen, <a href="/A335503/b335503.txt">Rows n = 1..32, flattened</a>
+%e A335503 Triangle begins:
+%e A335503    n\k   0    1    2    3    4    5    6    7    8    9   10   11
+%e A335503   ---------------------------------------------------------------
+%e A335503    1:    0
+%e A335503    2:    1    1
+%e A335503    3:    1    1    0
+%e A335503    4:   12    1    2    1
+%e A335503    5:   28    1    0    1    2
+%e A335503    6:   64    1    2    1    2    4
+%e A335503    7:   60    4    2    1    4    0    2
+%e A335503    8:   54    1    2    1   62   16    2   48
+%e A335503    9:    2    1    0    1    0    0    0    0    0
+%e A335503   10:   80   40    4    1   20 2000   60   72    4    1
+%e A335503   11:   40   20    5    1   85  240    5    5   20    1  320
+%e A335503   12: 1260  128    2    1  272    4    2   48   68    1   20 1440
+%e A335503 T(10,0) = 80, because A243845 eventually enters a cycle of length 80.
+%o A335503 (Python)
+%o A335503 from sympy.ntheory.factor_ import digits
+%o A335503 from functools import reduce
+%o A335503 def drop(x,n,k):
+%o A335503   # Drop all digits k from x in base n.
+%o A335503   return reduce(lambda x,j:n*x+j if j!=k else x,digits(x, n)[1:],0)
+%o A335503 def cycle_length(n,k,m):
+%o A335503   # Brent's algorithm for finding cycle length.
+%o A335503   # Note: The function may hang if the sequence never enters a cycle.
+%o A335503   if (m,n,k)==(5,10,7):
+%o A335503     return 0 # A little cheating; see A335506.
+%o A335503   p=1
+%o A335503   length=0
+%o A335503   tortoise=hare=1
+%o A335503   nz=0
+%o A335503   while True:
+%o A335503     hare=drop(m*hare,n,k)
+%o A335503     while hare and hare%n==0:
+%o A335503       hare//=n
+%o A335503       nz+=1 # Keep track of the number of trailing zeros.
+%o A335503     length+=1
+%o A335503     if tortoise==hare:
+%o A335503       break
+%o A335503     if p==length:
+%o A335503       tortoise=hare
+%o A335503       nz=0
+%o A335503       p*=2
+%o A335503       length=0
+%o A335503   return length if not nz else 0
+%o A335503 def A335503(n,k):
+%o A335503   return cycle_length(n,k,3) if n>1 else 0
+%Y A335503 Cf. A243845.
+%Y A335503 Cf. A335502, A335504, A335505, A335506.
+%Y A335503 Cf. A243846, A306569, A306773.
+%K A335503 nonn,base,tabl
+%O A335503 1,7
+%A A335503 _Pontus von Brömssen_, Jun 13 2020

@@ -1,0 +1,46 @@
+%I A329814 #28 Dec 05 2019 17:42:36
+%S A329814 1,1,2,2,2,2,6,2,3,2,10,2,12,7,14,2,2,2,18,2,20,11,22,2,5,5,3,3,28,3,
+%T A329814 30,2,2,2,34,6,6,19,38,2,40,6,42,22,44,23,46,2,7,5,50,26,52,3,54,7,56,
+%U A329814 29,58,30,60,31,62,2,2,2,66,2,68,35,70,2,72,37,74
+%N A329814 The smallest base b where the sum of the digits for the number n in the base b is the smallest, with 1 < b < n and a(1) = a(2) = 1.
+%C A329814 The smallest sum of digits corresponding to a(n) is equal to 2-A075802(n), i.e., it is 1 when n is 1 or a perfect power and 2 otherwise. - _Giovanni Resta_, Nov 22 2019
+%C A329814 a(n)=n-1 if and only if n is in A088905 but not in A001597. a(n)<= n/2 if n is even. - _Robert Israel_, Dec 05 2019
+%H A329814 Robert Israel, <a href="/A329814/b329814.txt">Table of n, a(n) for n = 1..10000</a>
+%e A329814 For n = 5:
+%e A329814   n in base 2 = [1, 0, 1] -> digitSum(5, 2) = 2.
+%e A329814   n in base 3 = [1, 2] -> digitSum(5, 3) = 3.
+%e A329814   n in base 4 = [1, 1] -> digitSum(5, 4) = 2.
+%e A329814   Base 2 has the smallest sum of the digits for n = 5 ->
+%e A329814     therefore a(5) = 2.
+%e A329814 For n = 7:
+%e A329814   n in base 2 = [1, 1, 1] -> digitSum(7, 2) = 3.
+%e A329814   n in base 3 = [2, 1] -> digitSum(7, 3) = 3.
+%e A329814   n in base 4 = [1, 3] -> digitSum(7, 4) = 4.
+%e A329814   n in base 5 = [1, 2] -> digitSum(7, 5) = 3.
+%e A329814   n in base 6 = [1, 1] -> digitSum(7, 6) = 2.
+%e A329814   Base 6 has the smallest sum of the digits for n = 7 ->
+%e A329814     therefore a(7) = 6.
+%p A329814 f:= proc(n) local F, t,d,bmin,s,r,b;
+%p A329814    F:= ifactors(n)[2];
+%p A329814    d:= igcd(seq(t[2],t=F));
+%p A329814    if d > 1 then return mul(t[1]^(t[2]/d),t=F) fi;
+%p A329814    F:= ifactors(n-1)[2];
+%p A329814    d:= igcd(seq(t[2],t=F));
+%p A329814    if d=1 then bmin:= n-1 else bmin:= mul(t[1]^(t[2]/d),t=F) fi;
+%p A329814    for s in numtheory:-divisors(n) do
+%p A329814      r:= n/s-1;
+%p A329814      F:= ifactors(s)[2];
+%p A329814      d:= igcd(seq(t[2],t=F));
+%p A329814      b:= mul(t[1]^(t[2]/d),t=F);
+%p A329814      if b < bmin and r = b^padic:-ordp(r,b) then bmin:= b fi
+%p A329814    od;
+%p A329814    bmin;
+%p A329814 end proc:
+%p A329814 map(f, [$1..100]); # _Robert Israel_, Dec 05 2019
+%t A329814 a[n_] := Block[{b=1, r=n, t}, Do[t = Plus @@ IntegerDigits[n, i]; If[t < r, r=t; b=i], {i, 2, n-1}]; b]; Array[a, 75] (* _Giovanni Resta_, Nov 22 2019 *)
+%o A329814 (PARI) a(n)={my(best_b=1, best_dig_sum=n); if(n>1, for(b=2, n-1, dig_sum=sumdigits(n, b); if(best_dig_sum>dig_sum, best_dig_sum=dig_sum; best_b=b))); best_b};
+%Y A329814 Cf. A001597, A075802, A088905.
+%K A329814 nonn,base,look
+%O A329814 1,3
+%A A329814 _Haris Ziko_, Nov 21 2019
+%E A329814 More terms from _Giovanni Resta_, Nov 22 2019

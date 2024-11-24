@@ -1,0 +1,61 @@
+%I A309180 #37 Jul 19 2019 14:45:11
+%S A309180 61,91,205,253,325,415,433,577,637,739,901,919,991,1063,1171,1225,
+%T A309180 1333,1387,1549,1663,1711,1837,1873,1891,2035,2125,2197,2287,2359,
+%U A309180 2449,2521,2683,2791,2845,3007,3169,3187,3277,3331,3349,3439,3493
+%N A309180 Unsuspected numbers to check in the Collatz conjecture.
+%C A309180 The sequence is constructed using the following steps:
+%C A309180 Start at 1, and color it blue. Go through the Collatz algorithm, highlight each number that is not in 'blue' in 'red' until you reach an already 'red' number or lower number that is 'blue'. Color the next uncolored number 'blue' and repeat.
+%C A309180 So starting at 1, 1 becomes blue, then 4 becomes red, 2 becomes red and move to next number. Next uncolored number is 3, so 3 becomes blue. Then 10 becomes red, 5 becomes red, 16 red, 8 red, and 4 is already red so done. Next uncolored number is 6, so 6 becomes blue, etc.
+%C A309180 For any number k the expected colors are:
+%C A309180 red if k (mod 18) is equal to 2, 4, 5, 8, 10, 11, 13, 14, 16, or 17.
+%C A309180 blue if k (mod 18) is equal to 0, 1, 3, 6, 7, 9, 12, or 15
+%C A309180 The list here are the numbers that do not fit this pattern.
+%C A309180 Observation:
+%C A309180 For up to at least 180000 only numbers of the format k (mod 18) = 1 and k (mod 18) = 7 were not fitting the pattern, they were all red instead of blue.
+%H A309180 P. Stikker, <a href="https://drive.google.com/open?id=1th5iu3VVbLiFYEth3GWV9Vcit_tRu9Z5">C# code to visualize grid</a>.
+%H A309180 P. Stikker, <a href="https://drive.google.com/open?id=1gTrBZ1O-B1KQiJKnocSMBWbYqAgQjZRi">Excel VBA code to visualize grid</a>.
+%o A309180 (C#) // Unsuspected numbers to check in Collatz conjecture
+%o A309180 using System;
+%o A309180 namespace Collatz {
+%o A309180     class Program {
+%o A309180         static void Main() {
+%o A309180             Console.Write("Enter until which number to check:");
+%o A309180             int nMax = int.Parse(Console.ReadLine());
+%o A309180             int[] values = new int[nMax + 1], colors = new int[nMax + 1];
+%o A309180             for (int i = 1; i < nMax + 1; i++) {
+%o A309180                 values[i] = i; colors[i] = 0;
+%o A309180             }
+%o A309180             for (int i = 1; i < nMax + 1; i++) {
+%o A309180                 if (colors[i] == 0) {
+%o A309180                     var myNum = i;
+%o A309180                     do {
+%o A309180                         myNum = (myNum % 2 == 0 ? myNum / 2 : myNum * 3 + 1);
+%o A309180                         if (myNum > i) {
+%o A309180                             if (myNum <= nMax) colors[myNum] = 1;
+%o A309180                         }
+%o A309180                         else myNum = 0;
+%o A309180                     } while (myNum != 0);
+%o A309180                 }
+%o A309180             }
+%o A309180             for (int i = 1; i < nMax+1; i++) {
+%o A309180                 if (i % 18 == 0 || i % 18 == 1 || i % 18 == 3  || i % 18 == 6  ||
+%o A309180                     i % 18 == 7 || i % 18 == 9 || i % 18 == 12 || i % 18 == 15) {
+%o A309180                     if (colors[i]==1) Console.WriteLine(i);
+%o A309180                 }
+%o A309180                 else {
+%o A309180                     if (colors[i] == 0) Console.WriteLine(i);
+%o A309180                 }
+%o A309180             }
+%o A309180             Console.ReadKey();
+%o A309180         }
+%o A309180     }
+%o A309180 }
+%o A309180 (PARI) isokb(k) = (k==0) || (k==1) || (k==3) || (k==6) || (k==7) || (k==9) || (k==12) || (k==15);
+%o A309180 isokr(k) = (k==2) || (k==4) || (k==5) || (k==8) || (k==10) || (k==11) || (k==13) || (k==14) || (k==16) || (k==17);
+%o A309180 f(n) = if(n%2, 3*n+1, n/2);
+%o A309180 nocolor(n, vred, vblue) = !vecsearch(vred, n) && !vecsearch(vblue, n);
+%o A309180 chk(nn) = {vblue = []; vred = []; for (n=1, nn, if (nocolor(n, vred, vblue), ok = 1; vblue = vecsort(concat(vblue, n),,8); ntodo = n; while (1, m = f(ntodo); if (vecsearch(vred, m), break); if ((m<n) && vecsearch(vblue,m), break); if (!vecsearch(vblue, m), vred = vecsort(concat(vred, m),,8)); ntodo = m;););); vb = select(x->(!isokb(x%18)), vblue); vr = select(x->(!isokr(x%18)), vred); select(x->x<=nn, vecsort(concat(vr, vb)));} \\ _Michel Marcus_, Jul 17 2019
+%Y A309180 Cf. A014682 (the Collatz function). So far the numbers are all of the form 6n + 1, so this would be a subset of A016921.
+%K A309180 nonn
+%O A309180 1,1
+%A A309180 _Peter Stikker_, Jul 15 2019

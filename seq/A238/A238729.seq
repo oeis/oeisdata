@@ -1,0 +1,31 @@
+%I A238729 #16 Mar 06 2014 12:44:55
+%S A238729 2,3,2,5,4,7,2,3,4,11,4,13,4,6,2,17,5,19,4,6,4,23,4,5,4,3,4,29,8,31,2,
+%T A238729 6,4,10,5,37,4,6,4,41,8,43,4,6,4,47,4,7,6,6,4,53,5,10,4,6,4,59,8,61,4,
+%U A238729 6,2,10,8,67,4,6,8,71,5,73,4,8,4,14,8,79,4,3
+%N A238729 Maximum flow of a number.
+%C A238729 F(n) is the maximal flow in a network whose nodes are the divisors of n, with an edge from a to b if and only if b/a is a prime factor of n, in which case the capacity of the edge is b/a.  The source of the network is 1 and the sink is n.
+%H A238729 Alois P. Heinz, <a href="/A238729/b238729.txt">Table of n, a(n) for n = 2..10000</a>
+%H A238729 Wikipedia, <a href="http://en.wikipedia.org/wiki/Maximum_flow_problem">Maximum flow problem</a>
+%H A238729 Wikipedia, <a href="http://en.wikipedia.org/wiki/Max-flow_min-cut_theorem">Max-flow min-cut theorem</a>
+%F A238729 a(n) = min_{S:P([m])\{}} Product_{i:[m]\S} (e_i+1) * Sum_{i:S} p_i, where n = Product_{i=1..m} p_i^e_i and P([m]) is the powerset of {1,...,m}.
+%p A238729 with(combinat):
+%p A238729 a:= proc(n) local S, s, f, l, m;
+%p A238729       f:= infinity; l:= ifactors(n)[2]; m:= nops(l);
+%p A238729       S:= subsets({$1..m}):
+%p A238729       while not S[finished] do s:= S[nextvalue]();
+%p A238729         if s={} then next fi:
+%p A238729         f:= min(f, mul(1+l[i][2], i=({$1..m} minus s))*add(l[i][1], i=s))
+%p A238729       od; f
+%p A238729     end:
+%p A238729 seq(a(n), n=2..100);  # _Alois P. Heinz_, Mar 04 2014
+%t A238729 F[n_] := F[n] = Module[{v, e, flowgraph, flow},
+%t A238729    v = Divisors[n];
+%t A238729    e = Apply[DirectedEdge,
+%t A238729      Select[Subsets[v, {2}], PrimeQ[Last[#]/First[#]] &], {1}];
+%t A238729    flowgraph =
+%t A238729     Graph[e, EdgeCapacity -> Map[Rule[#, (Divide @@ Reverse[#])] &, e]];
+%t A238729    flow = FindMaximumFlow[flowgraph, 1, n, "OptimumFlowData"];
+%t A238729    flow["FlowValue"]]
+%K A238729 nonn
+%O A238729 2,1
+%A A238729 _Ken Levasseur_, Mar 03 2014

@@ -1,0 +1,66 @@
+%I A350691 #53 Jan 25 2022 07:46:15
+%S A350691 1,1152,131081,131110,131111,11011112,111151110,111151111,1111511111,
+%T A350691 111711111181,1111416111111,11151111111171,1131141411111111,
+%U A350691 10111111111115011,117111183111111111,1011411111118111111,11111111181111141121,111112811111101111111
+%N A350691 Smallest number with exactly n 1's in its digits both in decimal and binary representation.
+%H A350691 Scott R. Shannon, <a href="/A350691/b350691.txt">Table of n, a(n) for n = 1..45</a> (terms 1..25 from Michael S. Branicky, terms 26..35 from Chai Wah Wu)
+%e A350691 a(2) = 1152 which in binary is 10010000000. Both representations contain exactly 2 1's. And there is no smaller number satisfying this constraint.
+%t A350691 Join[{1},Table[t=0;While[!IntegerQ[k=Min@Flatten[Select[FromDigits/@Select[Permutations[#],First@#!=0&],Count[IntegerDigits[#,2],1]==n&]&/@(Join[Table[1,n],#]&/@Tuples[Join[{0},Range[2,9]],++t])]]];k,{n,2,12}]] (* _Giorgos Kalogeropoulos_, Jan 13 2022 *)
+%o A350691 (Python)
+%o A350691 numbers = [0,2,3,4,5,6,7,8,9]
+%o A350691 terms = []
+%o A350691 for ones in range(1,13):
+%o A350691   if ones == 3: # needs more than 2 digits differing from "1"
+%o A350691     terms.append(131081)
+%o A350691   else:
+%o A350691     x = 1
+%o A350691     min_solution = 999999999999999999
+%o A350691     for i in range(ones+1):
+%o A350691       x += 10 ** (i + 1)
+%o A350691     for i in range(ones+2):
+%o A350691       for j in numbers:
+%o A350691         candidatej = x + (j - 1) * 10**i
+%o A350691         for k in range(i+1,ones+2):
+%o A350691           for l in numbers:
+%o A350691             candidate = candidatej + (l - 1) * 10 ** k
+%o A350691             if bin(candidate)[2:].count('1') == ones:
+%o A350691               if candidate < min_solution:
+%o A350691                 min_solution = candidate
+%o A350691     terms.append(min_solution)
+%o A350691 (Python)
+%o A350691 from itertools import count
+%o A350691 def A350691_helper(n,m): # generator in order of numbers with n decimal digits and m 1's. Leading zeros are allowed.
+%o A350691     if n >= m:
+%o A350691         if n == 1:
+%o A350691             if m == 1:
+%o A350691                 yield 1
+%o A350691             else:
+%o A350691                 yield 0
+%o A350691                 yield from range(2,10)
+%o A350691         elif n == m:
+%o A350691             yield (10**m-1)//9
+%o A350691         else:
+%o A350691             for b in A350691_helper(n-1,m):
+%o A350691                 yield b
+%o A350691             r = 10**(n-1)
+%o A350691             for b in A350691_helper(n-1,m-1):
+%o A350691                 yield r+b
+%o A350691             for a in range(2,10):
+%o A350691                 k = a*r
+%o A350691                 for b in A350691_helper(n-1,m):
+%o A350691                     yield k+b
+%o A350691 def A350691(n):
+%o A350691     for l in count(n):
+%o A350691         r = 10**(l-1)
+%o A350691         for a in range(1,10):
+%o A350691             n2 = n-1 if a == 1 else n
+%o A350691             k = a*r
+%o A350691             for s in A350691_helper(l-1,n2):
+%o A350691                 m = k+s
+%o A350691                 if bin(m)[2:].count('1') == n:
+%o A350691                     return m # _Chai Wah Wu_, Jan 13 2022
+%Y A350691 Cf. A000120, A268643, A350692.
+%K A350691 nonn,base
+%O A350691 1,2
+%A A350691 _Ruediger Jehn_, Jan 12 2022
+%E A350691 a(13)-a(18) from _Michael S. Branicky_, Jan 12 2022

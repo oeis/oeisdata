@@ -1,0 +1,31 @@
+%I A337414 #14 Aug 28 2020 03:11:59
+%S A337414 1,2,1,3,6,1,4,18,70,1,5,40,1407,8200,1,6,75,12480,9080559,12804908,1,
+%T A337414 7,126,69050,1503323520,4906480368591,304899216832,1,8,196,281946,
+%U A337414 81461669375,48226825456539776,187380251418565888983,103685962258536432,1
+%N A337414 Array read by descending antidiagonals: T(n,k) is the number of achiral colorings of the edges of a regular n-dimensional orthoplex (cross polytope) using k or fewer colors.
+%C A337414 An achiral arrangement is identical to its reflection. For n=1, the figure is a line segment with one edge. For n=2, the figure is a square with 4 edges. For n=3, the figure is an octahedron with 12 edges. The number of edges is 2n*(n-1) for n>1.
+%C A337414 Also the number of achiral colorings of the regular (n-2)-dimensional orthotopes (hypercubes) in a regular n-dimensional orthotope.
+%H A337414 K. Balasubramanian, <a href="https://doi.org/10.33187/jmsm.471940">Computational enumeration of colorings of hyperplanes of hypercubes for all irreducible representations and applications</a>, J. Math. Sci. & Mod. 1 (2018), 158-180.
+%F A337414 The algorithm used in the Mathematica program below assigns each permutation of the axes to a partition of n and then considers separate conjugacy classes for axis reversals. It uses the formulas in Balasubramanian's paper. If the value of m is increased, one can enumerate colorings of higher-dimensional elements beginning with T(m,1).
+%F A337414 T(n,k) = 2*A337412(n,k) - A337411(n,k) = A337411(n,k) - 2*A337413(n,k) = A337412(n,k) - A337413(n,k).
+%e A337414 Table begins with T(1,1):
+%e A337414 1  2    3     4     5      6      7       8       9       10 ...
+%e A337414 1  6   18    40    75    126    196     288     405      550 ...
+%e A337414 1 70 1407 12480 69050 281946 931490 2632512 6598935 15041950 ...
+%e A337414 For T(2,2)=6, the arrangements are AAAA, AAAB, AABB, ABAB, ABBB, and BBBB.
+%t A337414 m=1; (* dimension of color element, here an edge *)
+%t A337414 Fi1[p1_] := Module[{g, h}, Coefficient[Product[g = GCD[k1, p1]; h = GCD[2 k1, p1]; (1 + 2 x^(k1/g))^(r1[[k1]] g) If[Divisible[k1, h], 1, (1+2x^(2 k1/h))^(r2[[k1]] h/2)], {k1, Flatten[Position[cs, n1_ /; n1 > 0]]}], x, m+1]];
+%t A337414 FiSum[] := (Do[Fi2[k2] = Fi1[k2], {k2, Divisors[per]}];DivisorSum[per, DivisorSum[d1 = #, MoebiusMu[d1/#] Fi2[#] &]/# &]);
+%t A337414 CCPol[r_List] := (r1 = r; r2 = cs - r1; If[EvenQ[Sum[If[EvenQ[j3], r1[[j3]], r2[[j3]]], {j3,n}]],0,(per = LCM @@ Table[If[cs[[j2]] == r1[[j2]], If[0 == cs[[j2]],1,j2], 2j2], {j2,n}]; Times @@ Binomial[cs, r1] 2^(n-Total[cs]) b^FiSum[])]);
+%t A337414 PartPol[p_List] := (cs = Count[p, #]&/@ Range[n]; Total[CCPol[#]&/@ Tuples[Range[0,cs]]]);
+%t A337414 pc[p_List] := Module[{ci, mb}, mb = DeleteDuplicates[p]; ci = Count[p, #]&/@ mb; n!/(Times@@(ci!) Times@@(mb^ci))] (*partition count*)
+%t A337414 row[m]=b;
+%t A337414 row[n_Integer] := row[n] = Factor[(Total[(PartPol[#] pc[#])&/@ IntegerPartitions[n]])/(n! 2^(n-1))]
+%t A337414 array[n_, k_] := row[n] /. b -> k
+%t A337414 Table[array[n,d+m-n], {d,8}, {n,m,d+m-1}] // Flatten
+%Y A337414 Cf. A337411 (oriented), A337412 (unoriented), A337413 (chiral).
+%Y A337414 Rows 1-4 are A000027, A002411, A331351, A331357.
+%Y A337414 Cf. A327086 (simplex edges), A337410 (orthotope edges), A325007 (orthoplex vertices).
+%K A337414 nonn,tabl
+%O A337414 1,2
+%A A337414 _Robert A. Russell_, Aug 26 2020

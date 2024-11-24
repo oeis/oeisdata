@@ -1,0 +1,41 @@
+%I A182002 #34 Jul 27 2023 09:39:22
+%S A182002 2,2,1,10,13,22,38,91,195,443,634,1121,3448,6793,17692
+%N A182002 Smallest positive integer that cannot be computed using exactly n n's, the four basic arithmetic operations (+, -, *, /), and the parentheses.
+%e A182002 a(2) = 2 because two 2's can produce 0 = 2-2, 1 = 2/2, 4 = 2+2 = 2*2, so the smallest positive integer that cannot be computed is 2.
+%e A182002 a(3) = 1 because no expression with three 3's gives 1.
+%p A182002 f:= proc(n,b) option remember;
+%p A182002       `if`(n=1, {b}, {seq(seq(seq([k+m, k-m, k*m,
+%p A182002       `if`(m=0, NULL, k/m)][], m=f(n-i, b)), k=f(i, b)), i=1..n-1)})
+%p A182002     end:
+%p A182002 a:= proc(n) local i, l;
+%p A182002       l:= sort([infinity, select(x-> is(x, integer) and x>0, f(n, n))[]]);
+%p A182002       for i do if l[i]<>i then return i fi od
+%p A182002     end:
+%p A182002 seq(a(n), n=1..8); # _Alois P. Heinz_, Apr 13 2012
+%o A182002 (Python)
+%o A182002 from fractions import Fraction
+%o A182002 from functools import lru_cache
+%o A182002 def a(n):
+%o A182002     @lru_cache()
+%o A182002     def f(m):
+%o A182002         if m == 1: return {Fraction(n, 1)}
+%o A182002         out = set()
+%o A182002         for j in range(1, m//2+1):
+%o A182002             for x in f(j):
+%o A182002                 for y in f(m-j):
+%o A182002                     out.update([x + y, x - y, y - x, x * y])
+%o A182002                     if y: out.add(Fraction(x, y))
+%o A182002                     if x: out.add(Fraction(y, x))
+%o A182002         return out
+%o A182002     k, s = 1, f(n)
+%o A182002     while k in s: k += 1
+%o A182002     return k
+%o A182002 print([a(n) for n in range(1, 10)]) # _Michael S. Branicky_, Jul 29 2022
+%Y A182002 Cf. A005245, A005520, A003313, A076142, A076091, A061373, A005421, A064097, A025280, A003037, A117618.
+%Y A182002 Cf. A171826, A171827, A171828, A171829, A258068, A258069, A258070, A258071.
+%K A182002 nonn,more
+%O A182002 1,1
+%A A182002 _Ali Dasdan_, Apr 05 2012
+%E A182002 a(11)-a(12) from _Alois P. Heinz_, Apr 22 2012
+%E A182002 a(13)-a(14) from _Michael S. Branicky_, Jul 29 2022
+%E A182002 a(15) from _Michael S. Branicky_, Jul 27 2023

@@ -1,0 +1,53 @@
+%I A345704 #15 Feb 14 2023 19:43:04
+%S A345704 282,840,1596,1794,1920,2496,2928,3108,3522,3540,3594,4008,4188,4602,
+%T A345704 4620,4998,5268,5862,6060,6708,6888,7086,7788,7968,8382,8400,9048,
+%U A345704 9840,10362,10542,10920,11100,11568,12126,12162,12180,13422,14106,14322,14394,14880,15348
+%N A345704 Zumkeller numbers k (A083207) such that the next Zumkeller number is k + 12.
+%C A345704 Frank Buss and _T. D. Noe_ conjectured (see A083207) and _Robert Gerbicz_ proved that the largest possible gap between Zumkeller numbers is 12 (SeqFan post, 2010). A proof was also published by Mahanta et al. (2020).
+%H A345704 Robert Israel, <a href="/A345704/b345704.txt">Table of n, a(n) for n = 1..648</a>
+%H A345704 Robert Gerbicz, <a href="http://list.seqfan.eu/oldermail/seqfan/2010-July/005225.html">A083207 On an observation of Frank Buss</a>, posts to the SeqFan list, July 2010.
+%H A345704 Pankaj Jyoti Mahanta, Manjil P. Saikia and Daniel Yaqubi, <a href="https://doi.org/10.1016/j.jnt.2020.05.003">Some properties of Zumkeller numbers and k-layered numbers</a>, Journal of Number Theory, Vol. 217 (2020), pp. 218-236.
+%e A345704 282 is a term since it is a Zumkeller number, and the next Zumkeller number is 282 + 12 = 294.
+%p A345704 iszum:= proc(n) local D,s,P,d;
+%p A345704    D:= numtheory:-divisors(n);
+%p A345704    s:= convert(D,`+`);
+%p A345704    if s::odd then return false fi;
+%p A345704    P:= mul(1+x^d,d=D);
+%p A345704    coeff(P,x,s/2) > 0
+%p A345704 end proc:
+%p A345704 last:= 6: R:= NULL: count:= 0:
+%p A345704 for i from 7 while count < 60 do
+%p A345704   if iszum(i) then
+%p A345704      if i-last = 12 then R:= R, last; count:= count+1 fi;
+%p A345704      last:= i;
+%p A345704   fi
+%p A345704 od:
+%p A345704 R; # _Robert Israel_, Feb 13 2023
+%t A345704 zumQ[n_] := Module[{d = Divisors[n], sum, x}, sum = Plus @@ d;  EvenQ[sum] && CoefficientList[Product[1 + x^i, {i, d}], x][[1 + sum/2]] > 0]; z = Select[Range[5000], zumQ]; z[[Position[Differences[z], 12] // Flatten]]
+%o A345704 (Python)
+%o A345704 from itertools import count, islice
+%o A345704 from sympy import divisors
+%o A345704 def A345704_gen(startvalue=1): # generator of terms >= startvalue
+%o A345704     m = -20
+%o A345704     for n in count(max(startvalue,1)):
+%o A345704         d = divisors(n)
+%o A345704         s = sum(d)
+%o A345704         if s&1^1 and n<<1<=s:
+%o A345704             d = d[:-1]
+%o A345704             s2, ld = (s>>1)-n, len(d)
+%o A345704             z = [[0 for _ in range(s2+1)] for _ in range(ld+1)]
+%o A345704             for i in range(1, ld+1):
+%o A345704                 y = min(d[i-1], s2+1)
+%o A345704                 z[i][:y] = z[i-1][:y]
+%o A345704                 for j in range(y,s2+1):
+%o A345704                     z[i][j] = max(z[i-1][j],z[i-1][j-y]+y)
+%o A345704                 if z[i][s2] == s2:
+%o A345704                     if m == n-12:
+%o A345704                         yield m
+%o A345704                     m = n
+%o A345704                     break
+%o A345704 A345704_list = list(islice(A345704_gen(),10)) # _Chai Wah Wu_, Feb 13 2023
+%Y A345704 Cf. A083207, A179529, A328327.
+%K A345704 nonn
+%O A345704 1,1
+%A A345704 _Amiram Eldar_, Jun 24 2021

@@ -1,0 +1,71 @@
+%I A298048 #52 Jan 28 2022 20:30:42
+%S A298048 4,16,70,243,638,1450,2819,4951,7629,10677,13267,15182,15923,15796,
+%T A298048 14369,12547,10291,7939,5703,3911,2559,1595,920,561,321,167,72,37,11,
+%U A298048 6,3
+%N A298048 a(1) = number of 1-digit primes (that is, 4: 2,3,5,7); then a(n) = number of distinct n-digit prime numbers obtained by left- or right-concatenating a digit to the a(n-1) primes obtained in the previous iteration.
+%C A298048 A137812 lists the primes counted here. - _Jon E. Schoenfield_, Jan 28 2022
+%e A298048 2-digit primes:
+%e A298048 -------------------
+%e A298048 23   2->23 or 3->23
+%e A298048 29   2->29
+%e A298048 13   3->13
+%e A298048 43   3->43
+%e A298048 53   3->53 or 5->53
+%e A298048 73   3->73 or 7->73
+%e A298048 83   3->83
+%e A298048 31   3->31
+%e A298048 37   3->37 or 7->37
+%e A298048 59   5->59
+%e A298048 17   7->17
+%e A298048 47   7->47
+%e A298048 67   7->67
+%e A298048 97   7->97
+%e A298048 71   7->71
+%e A298048 79   7->79
+%e A298048 -------------------
+%e A298048 a(2) = 16.
+%e A298048 ===================
+%e A298048 3-digit primes:
+%e A298048 [223, 233, 523, 823, 239, 229, 293, 829, 929, 113, 131, 313, 613, 137, 139, 311, 331, 431, 631, 317, 433, 443, 643, 743, 439, 353, 653, 853, 953, 173, 373, 733, 673, 773, 739, 337, 937, 379, 283, 383, 683, 883, 983, 839, 359, 593, 659, 859, 599, 617, 179, 271, 571, 971, 719, 347, 547, 647, 947, 479, 167, 367, 467, 677, 967, 197, 397, 797, 977, 997]
+%e A298048 In the case of 223, 2->23 (adding the rightmost digit)->223 (adding the leftmost digit) and 2, 23 and 223 are prime.
+%e A298048 In the case of 233, 2->23 (adding the rightmost digit)->233 (adding the rightmost digit) and 2, 23 and 233 are prime.
+%e A298048 In the case of 523, 2->23 (adding the rightmost digit)->523 (adding the leftmost digit) and 2, 23 and 523 are prime.
+%e A298048 a(3) = 70.
+%t A298048 Block[{b = 10, t}, t = Select[Range[b], CoprimeQ[#, b] &]; TakeWhile[Length /@ Fold[Function[{a, n}, Append[a, Union[Join @@ {Join @@ Map[Function[k, Select[Map[Prepend[k, #] &, Range[b - 1]], PrimeQ@ FromDigits[#, b] &]], Last[a]], Join @@ Map[Function[k, Select[Map[Append[k, #] &, t], PrimeQ@ FromDigits[#, b] &]], Last[a]]}] ] ] @@ {#1, #2} &, {IntegerDigits[Prime@ Range@ PrimePi@ b, b]}, Range[2, 40]], # > 0 &]] (* _Michael De Vlieger_, Jan 21 2018 *)
+%o A298048 (Ruby)
+%o A298048 require 'prime'
+%o A298048 def A298048(n)
+%o A298048   ary = [2, 3, 5, 7]
+%o A298048   a_ary = [4]
+%o A298048   (n - 1).times{|i|
+%o A298048     ary1 = []
+%o A298048     ary.each{|a|
+%o A298048       (1..9).each{|d|
+%o A298048         j = d * 10 ** (i + 1) + a
+%o A298048         ary1 << j if j.prime?
+%o A298048         j = a * 10 + d
+%o A298048         ary1 << j if j.prime?
+%o A298048       }
+%o A298048     }
+%o A298048     ary = ary1.uniq
+%o A298048     a_ary << ary.size
+%o A298048   }
+%o A298048   a_ary
+%o A298048 end
+%o A298048 p A298048(10)
+%o A298048 (Python)
+%o A298048 from sympy import isprime
+%o A298048 def alst():
+%o A298048   primes, alst = [2, 3, 5, 7], []
+%o A298048   while len(primes) > 0:
+%o A298048     alst.append(len(primes))
+%o A298048     candidates = set(int(d+str(p)) for p in primes for d in "123456789")
+%o A298048     candidates |= set(int(str(p)+d) for p in primes for d in "1379")
+%o A298048     primes = [c for c in candidates if isprime(c)]
+%o A298048   return alst
+%o A298048 print(alst()) # _Michael S. Branicky_, Apr 11 2021
+%Y A298048 Cf. A050986, A050987, A137812, A297960, A297961.
+%K A298048 nonn,fini,full,base
+%O A298048 1,1
+%A A298048 _Seiichi Manyama_, Jan 11 2018
+%E A298048 a(16)-a(31) from _Michael De Vlieger_, Jan 21 2018

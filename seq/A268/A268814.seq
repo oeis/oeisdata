@@ -1,0 +1,46 @@
+%I A268814 #31 Feb 24 2019 01:54:21
+%S A268814 1,0,0,0,1,0,5,14,62,298,1494,8140,47146,289250,1873304,12756416,
+%T A268814 91062073,679616480,5290206513,42858740990,360686972473,3147670023632,
+%U A268814 28439719809159,265647698228954,2561823514680235,25475177517626196,260922963832247729,2749617210928715246
+%N A268814 Number of purely crossing partitions of [n].
+%C A268814 For the definition of a purely crossing partition refer to Dykema link (see PC(n) Definition 1.2 and Table 2).
+%C A268814 From _Gus Wiseman_, Feb 23 2019: (Start)
+%C A268814 For n >= 1, a set partition of {1,...,n} is purely crossing if it is topologically connected (A099947), has no successive elements in the same block (A000110(n - 1)), and the first and last vertices belong to different blocks (A005493(n - 2)). For example, the a(4) = 1, a(6) = 5, and a(7) = 14 purely crossing set partitions are:
+%C A268814   {{13}{24}}  {{135}{246}}    {{13}{246}{57}}
+%C A268814               {{13}{25}{46}}  {{13}{257}{46}}
+%C A268814               {{14}{25}{36}}  {{135}{26}{47}}
+%C A268814               {{14}{26}{35}}  {{135}{27}{46}}
+%C A268814               {{15}{24}{36}}  {{136}{24}{57}}
+%C A268814                               {{136}{25}{47}}
+%C A268814                               {{14}{257}{36}}
+%C A268814                               {{14}{26}{357}}
+%C A268814                               {{146}{25}{37}}
+%C A268814                               {{146}{27}{35}}
+%C A268814                               {{15}{246}{37}}
+%C A268814                               {{15}{247}{36}}
+%C A268814                               {{16}{24}{357}}
+%C A268814                               {{16}{247}{35}}
+%C A268814 (End)
+%H A268814 Kenneth J. Dykema, <a href="http://arxiv.org/abs/1602.03469">Generating functions for purely crossing partitions</a>, arXiv:1602.03469 [math.CO], 2016.
+%F A268814 G.f.: G(x) satisfies B(x) = x + (1 + x)*G(x) where B(x) is the g.f. of A268815 (see A(x) in Dykema link p. 7).
+%F A268814 From _Paul D. Hanna_, Mar 07 2016: (Start)
+%F A268814 O.g.f. A(x) satisfies:
+%F A268814 (1) A(x) = Sum_{n>=0} A000110(n)*x^n / ((1+x)^(2*n+1) * A(x)^n), where A000110 are the Bell numbers.
+%F A268814 (2) A(x) = 1/(1+x) * Sum_{n>=0} x^n / Product_{k=1..n} ((1+x)^2*A(x) - k*x).
+%F A268814 (3) A(x) = 1/(1+x - x/((1+x)*A(x) - 1*x/(1+x - x/((1+x)*A(x) - 2*x/(1+x - x/((1+x)*A(x) - 3*x/(1+x - x/((1+x)*A(x) - 4*x/(1+x - x/((1+x)*A(x) -...)))))))))), a continued fraction. (End)
+%e A268814 G.f.: A(x) = 1 + x^4 + 5*x^6 + 14*x^7 + 62*x^8 + 298*x^9 + 1494*x^10 + 8140*x^11 + 47146*x^12 +...
+%t A268814 n = 30; F = x*Sum[BellB[k] x^k, {k, 0, n}] + O[x]^n; B = ComposeSeries[1/( InverseSeries[F, w]/w)-1, x/(1+x) + O[x]^n]; A = (B-x)/(1+x); Join[{1}, CoefficientList[A, x] // Rest] (* _Jean-François Alcover_, Feb 23 2016, adapted from K. J. Dykema's code *)
+%t A268814 intvQ[set_]:=Or[set=={},Sort[set]==Range[Min@@set,Max@@set]];
+%t A268814 sps[{}]:={{}};sps[set:{i_,___}]:=Join@@Function[s,Prepend[#,s]&/@sps[Complement[set,s]]]/@Cases[Subsets[set],{i,___}];
+%t A268814 Table[Length[Select[sps[Range[n]],And[!MatchQ[#,{___,{___,x_,y_,___},___}/;x+1==y],#=={}||And@@Not/@intvQ/@Union@@@Subsets[#,{1,Length[#]-1}],#=={}||Position[#,1][[1,1]]!=Position[#,n][[1,1]]]&]],{n,0,10}] (* _Gus Wiseman_, Feb 23 2019 *)
+%o A268814 (PARI) lista(nn) = {c = x/serreverse(x*serlaplace(exp(exp(x+x*O(x^nn)) -1))); b = subst(c, x, x/(1+x)+ O(x^nn)); vb = Vec(b-1); va = vector(#vb); va[1] = 0; va[2] = 0; for (k=3, #va, va[k] = vb[k] - va[k-1]; ); concat(1, va); }
+%o A268814 (PARI) {a(n) = my(A=1+x^3); for(i=1, n, A = sum(m=0, n, x^m/prod(k=1, m, (1+x)^2*A - k*x +x*O(x^n)) )/(1+x) ); polcoeff( A, n)}
+%o A268814 for(n=0,35,print1(a(n),", ")) \\ _Paul D. Hanna_, Mar 07 2016
+%o A268814 (PARI) {Stirling2(n, k) = n!*polcoeff(((exp(x+x*O(x^n)) - 1)^k)/k!, n)}
+%o A268814 {Bell(n) = sum(k=0,n, Stirling2(n, k) )}
+%o A268814 {a(n) = my(A=1+x); for(i=1, n, A = sum(m=0, n, Bell(m)*x^m/((1+x +x*O(x^n))^(2*m+1)*A^m)) ); polcoeff(A, n)}
+%o A268814 for(n=0,25,print1(a(n),", ")) \\ _Paul D. Hanna_, Mar 07 2016
+%Y A268814 Cf. A000108 (non-crossing partitions), A000110, A000699, A001263, A002662, A005493, A016098, A054726, A099947, A268815, A306417, A324011, A324166, A324172, A324173, A324324.
+%K A268814 nonn
+%O A268814 0,7
+%A A268814 _Michel Marcus_, Feb 14 2016

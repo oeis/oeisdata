@@ -1,0 +1,78 @@
+%I A257993 #58 Dec 03 2022 19:40:45
+%S A257993 1,2,1,2,1,3,1,2,1,2,1,3,1,2,1,2,1,3,1,2,1,2,1,3,1,2,1,2,1,4,1,2,1,2,
+%T A257993 1,3,1,2,1,2,1,3,1,2,1,2,1,3,1,2,1,2,1,3,1,2,1,2,1,4,1,2,1,2,1,3,1,2,
+%U A257993 1,2,1,3,1,2,1,2,1,3,1,2,1,2,1,3,1,2,1,2,1,4,1,2,1,2,1,3
+%N A257993 Least gap in the partition having Heinz number n; index of the least prime not dividing n.
+%C A257993 The "least gap" of a partition is the least positive integer that is not a part of the partition. For example, the least gap of the partition [7,4,2,2,1] is 3.
+%C A257993 We define the Heinz number of a partition p = [p_1, p_2, ..., p_r] as Product(p_j-th prime, j=1...r) (concept used by _Alois P. Heinz_ in A215366 as an "encoding" of a partition). For example, for the partition [1, 1, 2, 4, 10] we get 2*2*3*7*29 = 2436.
+%C A257993 In the Maple program the subprogram B yields the partition with Heinz number n.
+%C A257993 Sum of least gaps of all partitions of m = A022567(m).
+%C A257993 From _Antti Karttunen_, Aug 22 2016: (Start)
+%C A257993 Index of the least prime not dividing n. (After a formula given by Heinz.)
+%C A257993 Least k such that A002110(k) does not divide n.
+%C A257993 One more than the number of trailing zeros in primorial base representation of n, A049345.
+%C A257993 (End)
+%C A257993 The least gap is also called the mex (minimal excludant) of the partition. - _Gus Wiseman_, Apr 20 2021
+%D A257993 G. E. Andrews and K. Eriksson, Integer Partitions, Cambridge Univ. Press, 2004, Cambridge.
+%D A257993 Miklós Bóna, A Walk Through Combinatorics, World Scientific Publishing Co., 2002.
+%H A257993 Alois P. Heinz, <a href="/A257993/b257993.txt">Table of n, a(n) for n = 1..20000</a>
+%H A257993 George E. Andrews and David Newman, <a href="https://doi.org/10.1007/s00026-019-00427-w">Partitions and the Minimal Excludant</a>, Annals of Combinatorics, Volume 23, May 2019, Pages 249-254.
+%H A257993 P. J. Grabner and A. Knopfmacher, <a href="https://www.math.tugraz.at/fosp/pdfs/tugraz_0087.pdf">Analysis of some new partition statistics</a>, Ramanujan J., 12, 2006, 439-454.
+%H A257993 Brian Hopkins, James A. Sellers, and Dennis Stanton, <a href="https://arxiv.org/abs/2009.10873">Dyson's Crank and the Mex of Integer Partitions</a>, arXiv:2009.10873 [math.CO], 2020.
+%H A257993 Wikipedia, <a href="https://en.wikipedia.org/wiki/Mex_(mathematics)">Mex (mathematics)</a>.
+%H A257993 <a href="/index/Pri#primorialbase">Index entries for sequences related to primorial base</a>.
+%F A257993 a(n) = A000720(A053669(n)). - _Alois P. Heinz_, May 18 2015
+%F A257993 From _Antti Karttunen_, Aug 22-30 2016: (Start)
+%F A257993 a(n) = 1 + A276084(n).
+%F A257993 a(n) = A055396(A276086(n)).
+%F A257993 A276152(n) = A002110(a(n)).
+%F A257993 (End)
+%F A257993 Asymptotic mean: Limit_{m->oo} (1/m) * Sum_{k=1..m} a(k) = 1 + Sum_{k>=1} 1/A002110(k) = 1.705230... (1 + A064648). - _Amiram Eldar_, Jul 23 2022
+%F A257993 a(n) << log n/log log n. - _Charles R Greathouse IV_, Dec 03 2022
+%e A257993 a(18) = 3 because the partition having Heinz number 18 = 2*3*3 is [1,2,2], having least gap equal to 3.
+%p A257993 with(numtheory): a := proc (n) local B, q: B := proc (n) local nn, j, m: nn := op(2, ifactors(n)): for j to nops(nn) do m[j] := op(j, nn) end do: [seq(seq(pi(op(1, m[i])), q = 1 .. op(2, m[i])), i = 1 .. nops(nn))] end proc: for q while member(q, B(n)) = true do  end do: q end proc: seq(a(n), n = 1 .. 150);
+%p A257993 # second Maple program:
+%p A257993 a:= n-> `if`(n=1, 1, (s-> min({$1..(max(s)+1)} minus s))(
+%p A257993         {map(x-> numtheory[pi](x[1]), ifactors(n)[2])[]})):
+%p A257993 seq(a(n), n=1..100);  # _Alois P. Heinz_, May 09 2016
+%p A257993 # faster:
+%p A257993 A257993 := proc(n) local p, c; c := 1; p := 2;
+%p A257993 while n mod p = 0 do p := nextprime(p); c := c + 1 od: c end:
+%p A257993 seq(A257993(n), n=1..100); # _Peter Luschny_, Jun 04 2017
+%t A257993 A053669[n_] := For[p = 2, True, p = NextPrime[p], If[CoprimeQ[p, n], Return[p]]]; a[n_] := PrimePi[A053669[n]]; Array[a, 100] (* _Jean-François Alcover_, Nov 28 2016 *)
+%t A257993 Table[k = 1; While[! CoprimeQ[Prime@ k, n], k++]; k, {n, 100}] (* _Michael De Vlieger_, Jun 22 2017 *)
+%o A257993 (Scheme)
+%o A257993 (define (A257993 n) (let loop ((n n) (i 1)) (let* ((p (A000040 i)) (d (modulo n p))) (if (not (zero? d)) i (loop (/ (- n d) p) (+ 1 i))))))
+%o A257993 ;; _Antti Karttunen_, Aug 22 2016
+%o A257993 (Python)
+%o A257993 from sympy import nextprime, primepi
+%o A257993 def a053669(n):
+%o A257993     p = 2
+%o A257993     while True:
+%o A257993         if n%p!=0: return p
+%o A257993         else: p=nextprime(p)
+%o A257993 def a(n): return primepi(a053669(n)) # _Indranil Ghosh_, May 12 2017
+%o A257993 (PARI) a(n) = forprime(p=2,, if (n % p, return(primepi(p)))); \\ _Michel Marcus_, Jun 22 2017
+%Y A257993 Cf. A215366, A002110, A022567, A049345, A053669, A055396, A064648, A276086, A276094, A276152.
+%Y A257993 Positions of 1's are A005408.
+%Y A257993 Positions of 2's are A047235.
+%Y A257993 The number of gaps is A079067.
+%Y A257993 The version for crank is A257989.
+%Y A257993 The triangle counting partitions by this statistic is A264401.
+%Y A257993 One more than A276084.
+%Y A257993 The version for greatest difference is A286469 or A286470.
+%Y A257993 A maximal instead of minimal version is A339662.
+%Y A257993 Positions of even terms are A342050.
+%Y A257993 Positions of odd terms are A342051.
+%Y A257993 A000070 counts partitions with a selected part.
+%Y A257993 A006128 counts partitions with a selected position.
+%Y A257993 A056239 adds up prime indices, row sums of A112798.
+%Y A257993 A073491 lists numbers with gap-free prime indices.
+%Y A257993 A238709 counts partitions by sum and least difference.
+%Y A257993 A333214 lists positions of adjacent unequal prime gaps.
+%Y A257993 A339737 counts partitions by sum and greatest gap.
+%Y A257993 Cf. A001223, A001511, A005117, A026794, A029707, A072233, A079068, A098743, A124010, A279945, A325351, A325352.
+%K A257993 nonn
+%O A257993 1,2
+%A A257993 _Emeric Deutsch_, May 18 2015
+%E A257993 A simpler description added to the name by _Antti Karttunen_, Aug 22 2016

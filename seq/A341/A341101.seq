@@ -1,0 +1,54 @@
+%I A341101 #28 Dec 13 2022 08:12:58
+%S A341101 1,0,2,0,1,4,0,2,6,8,0,6,19,24,16,0,24,80,110,80,32,0,120,418,615,500,
+%T A341101 240,64,0,720,2604,4046,3570,1960,672,128,0,5040,18828,30604,28777,
+%U A341101 17360,6944,1792,256,0,40320,154944,261656,259056,167874,74592,22848,4608,512
+%N A341101 T(n, k) = Sum_{j=0..k} binomial(n, k - j)*Stirling1(n - k + j, j)*(-1)^(n-k). Triangle read by rows, T(n, k) for 0 <= k <= n.
+%H A341101 Özmen, N., Erkuş-Duman, E. (2019). <a href="https://doi.org/10.1007/978-3-030-04459-6_5">On the Generalized Sylvester Polynomials</a>. In: Lindahl, K., Lindström, T., Rodino, L., Toft, J., Wahlberg, P. (eds) Analysis, Probability, Applications, and Computation. Trends in Mathematics. Birkhäuser, Cham. See page 48.
+%F A341101 Sum_{k=0..n-1} T(n, k) = Sum_{k=0..n} binomial(n, k)*(k! - 1) = A097204(n).
+%F A341101 E.g.f. for row polynomials:  P(x, z) := Sum_{k>=0} T(n, k) * x^n * z^k/k! = e^(x*z) / (1 - z)^x = 1 + (2*x) * z + (x + 4*x^2) * z^2/2! + ... - _Michael Somos_, Nov 23 2022
+%F A341101 From _Peter Luschny_, Nov 24 2022: (Start)
+%F A341101 T(n, k) = [x^k] (x^n)*hypergeom([-n, x], [], -1/x).
+%F A341101 T(n, k) = [x^k] (-1)^n * n! * L(n, -x - n, x), where L(n, a, x) is the n-th generalized Laguerre polynomial. (End)
+%e A341101 Triangle starts:
+%e A341101 n\k  0     1     2     3     4     5     6     7     8 ...
+%e A341101 0:   1
+%e A341101 1:   0     2
+%e A341101 2:   0     1     4
+%e A341101 3:   0     2     6     8
+%e A341101 4:   0     6    19    24    16
+%e A341101 5:   0    24    80   110    80    32
+%e A341101 6:   0   120   418   615   500   240    64
+%e A341101 7:   0   720  2604  4046  3570  1960   672   128
+%e A341101 8:   0  5040 18828 30604 28777 17360  6944  1792   256
+%p A341101 T := (n, k) -> add(binomial(n, k - j)*Stirling1(n - k + j, j)*(-1)^(n-k), j=0..k):
+%p A341101 seq(print(seq(T(n,k), k = 0..n)), n = 0..9);
+%p A341101 # Alternative:
+%p A341101 SP := (n, x) -> (x^n)*hypergeom([-n, x], [], -1/x):
+%p A341101 row := n -> seq(coeff(simplify(SP(n, x)), x, k), k = 0..n):
+%p A341101 for n from 0 to 8 do row(n) od; # _Peter Luschny_, Nov 23 2022
+%t A341101 T[ n_, k_] := If[ n<0, 0, n! * Coefficient[ SeriesCoefficient[ E^(x * z) / (1 - z)^x, {z, 0, n}], x, k]]; (* _Michael Somos_, Nov 23 2022 *)
+%o A341101 (PARI) T(n, k) = sum(j=0, k, binomial(n, k-j)*stirling(n-k+j, j, 1)*(-1)^(n-k)); \\ _Michel Marcus_, Feb 11 2021
+%o A341101 (PARI) {T(n, k) = if( n<0, 0, n! * polcoeff( polcoeff( exp(x*y) / (1 - x + x * O(x^n))^y, n), k))}; /* _Michael Somos_, Nov 23 2022 */
+%o A341101 (Python)
+%o A341101 from math import factorial
+%o A341101 from sympy import Symbol, Poly
+%o A341101 x = Symbol("x")
+%o A341101 def Coeffs(p) -> list[int]:
+%o A341101     return list(reversed(Poly(p, x).all_coeffs()))
+%o A341101 def L(n, m, x):
+%o A341101     if n == 0:
+%o A341101         return 1
+%o A341101     if n == 1:
+%o A341101         return 1 - m - 2*x
+%o A341101     return ((2 * (n  - x) - m - 1) * L(n - 1, m, x) / n
+%o A341101           - (n  - x - m - 1) * L(n - 2, m, x) / n)
+%o A341101 def Sylvester(n):
+%o A341101     return (-1)**n * factorial(n) * L(n, n, x)
+%o A341101 for n in range(7):
+%o A341101     print(Coeffs(Sylvester(n))) # _Peter Luschny_, Dec 13 2022
+%Y A341101 Alternating row sums: (-1)^n*(n+1) = A181983(n+1).
+%Y A341101 Cf. A000522 (row sums), A097204 (row sums - 2^n), A002627 (row sums - n!).
+%Y A341101 Cf. A000166, A340264.
+%K A341101 nonn,tabl
+%O A341101 0,3
+%A A341101 _Peter Luschny_, Feb 09 2021

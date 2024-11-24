@@ -1,0 +1,51 @@
+%I A262347 #51 May 30 2020 09:21:04
+%S A262347 1,1,1,3,2,1,4,10,25,4,24,7,25,6,1,4,14,43,97,220,2,18,62,232,2,33,2,
+%T A262347 12,36,106,1,11,2,4,14,40,2,4,86,307,20,1,4,14,41,99,266,674,1505,
+%U A262347 3510,7726,14,50,156,2,8,26,56,2,4,6,14,48,2,4,8,16,28,108,319,1046,4,26,82,1,2
+%N A262347 Number of subsets of [1..n] of maximal size that are free of 3-term arithmetic progressions.
+%C A262347 The sequence A003002 gives the size of the largest subset of the integers up to n that avoids three-term arithmetic progressions. This sequence gives the number of distinct subsets of [1..n] that have that size and are free of three-term arithmetic progressions.
+%H A262347 Fausto A. C. Cariboni, <a href="/A262347/b262347.txt">Table of n, a(n) for n = 0..140</a>
+%H A262347 Fausto A. C. Cariboni, <a href="/A262347/a262347.txt">All sets that yield a(n) for n = 4..130.</a>, Feb 19 2018.
+%H A262347 Janusz Dybizbanski, <a href="http://www.combinatorics.org/ojs/index.php/eljc/article/view/v19i2p15">Sequences containing no 3-term arithmetic progressions</a>, The Electronic Journal of Combinatorics, 19, no. 2 (2012).
+%H A262347 <a href="http://oeis.org/wiki/Index_to_OEIS:_Section_No#non_averaging">Index entries related to non-averaging sequences</a>
+%e A262347 The largest subset of [1,6] that doesn't have any 3 terms in arithmetic progression has size 4. There are 4 such subsets with this property: {1,2,4,5}, {1,2,5,6}, {1,3,4,6} and {2,3,5,6}, so a(6)=4.
+%p A262347 G:= proc(n, cons, t)
+%p A262347 option remember;
+%p A262347 local consn, consr;
+%p A262347    if n < t or member({},cons) then return {} fi;
+%p A262347    if t = 0 then return {{}} fi;
+%p A262347    consn, consr:= selectremove(has,cons,n);
+%p A262347    consn:= subs(n=NULL,consn);
+%p A262347    procname(n-1,consr,t) union
+%p A262347       map(`union`,procname(n-1,consr union   consn,t-1),{n});
+%p A262347 end proc:
+%p A262347 F:= proc(n)
+%p A262347 local m,cons,R;
+%p A262347    m:= A003002(n-1);
+%p A262347    cons:= {seq(seq({i,i+j,i+2*j},i=1..n-2*j),j=1..(n-1)/2)};
+%p A262347    R:= G(n,cons,m+1);
+%p A262347    if R = {} then
+%p A262347       A003002(n):= m;
+%p A262347       G(n,cons,m);
+%p A262347    else
+%p A262347       A003002(n):= m+1;
+%p A262347       R
+%p A262347    fi
+%p A262347 end proc:
+%p A262347 A003002(1):= 1:
+%p A262347 a[1]:= 1:
+%p A262347 for n from 2 to 40 do
+%p A262347   a[n]:= nops(F(n))
+%p A262347 od:
+%p A262347 seq(a[i],i=1..40); # _Robert Israel_, Sep 20 2015
+%t A262347 A003002 = Cases[Import["https://oeis.org/A003002/b003002.txt", "Table"], {_, _}][[All, 2]];
+%t A262347 a[n_] := a[n] = Count[Subsets[Range[n], {A003002[[n+1]]}], s_ /; !MatchQ[s, {___, n1_, ___, n2_, ___, n3_, ___} /; n2 - n1 == n3 - n2]];
+%t A262347 Table[Print[n, " ", a[n]]; a[n], {n, 0, 25}] (* _Jean-François Alcover_, May 30 2020 *)
+%Y A262347 Cf. A003002, A065825.
+%Y A262347 Last elements of rows of A334187.
+%K A262347 nonn
+%O A262347 0,4
+%A A262347 _Nathan McNew_, Sep 18 2015
+%E A262347 a(25) to a(44) from _Robert Israel_, Sep 20 2015
+%E A262347 a(45) to a(75) from _Fausto A. C. Cariboni_, Jan 15 2018
+%E A262347 a(0)=1 prepended by _Alois P. Heinz_, May 16 2020

@@ -1,0 +1,116 @@
+%I A239929 #71 Oct 04 2018 18:18:41
+%S A239929 3,5,7,10,11,13,14,17,19,22,23,26,29,31,34,37,38,41,43,44,46,47,52,53,
+%T A239929 58,59,61,62,67,68,71,73,74,76,78,79,82,83,86,89,92,94,97,101,102,103,
+%U A239929 106,107,109,113,114,116,118,122,124,127,131,134,136,137,138
+%N A239929 Numbers n with the property that the symmetric representation of sigma(n) has two parts.
+%C A239929 All odd primes are in the sequence because the parts of the symmetric representation of sigma(prime(i)) are [m, m], where m = (1 + prime(i))/2, for i >= 2.
+%C A239929 There are no odd composite numbers in this sequence.
+%C A239929 First differs from A173708 at a(13).
+%C A239929 Since sigma(p*q) >= 1 + p + q + p*q for odd p and q, the symmetric representation of sigma(p*q) has more parts than the two extremal ones of size (p*q + 1)/2; therefore, the above comments are true. - _Hartmut F. W. Hoft_, Jul 16 2014
+%C A239929 From _Hartmut F. W. Hoft_, Sep 16 2015: (Start)
+%C A239929 The following two statements are equivalent:
+%C A239929   (1) The symmetric representation of sigma(n) has two parts, and
+%C A239929   (2) n = q * p where q is in A174973, p is prime, and 2 * q < p.
+%C A239929 For a proof see the link and also the link in A071561.
+%C A239929 This characterization allows for much faster computation of numbers in the sequence - function a239929F[] in the Mathematica section - than computations based on Dyck paths. The function a239929Stalk[] gives rise to the associated irregular triangle whose columns are indexed by A174973 and whose rows are indexed by A065091, the odd primes. (End)
+%C A239929 From _Hartmut F. W. Hoft_, Dec 06 2016: (Start)
+%C A239929 For the respective columns of the irregular triangle with fixed m: k = 2^m * p, m >= 1, 2^(m+1) < p and p prime:
+%C A239929 (a) each number k is representable as the sum of 2^(m+1) but no fewer consecutive positive integers [since 2^(m+1) < p].
+%C A239929 (b) each number k has 2^m as largest divisor <= sqrt(k) [since 2^m < sqrt(k) < p].
+%C A239929 (c) each number k is of the form 2^m * p with p prime [by definition].
+%C A239929 m = 1: (a) A100484 even semiprimes (except 4 and 6)
+%C A239929        (b) A161344 (except 4, 6 and 8)
+%C A239929        (c) A001747 (except 2, 4 and 6)
+%C A239929 m = 2: (a) A270298
+%C A239929        (b) A161424 (except 16, 20, 24, 28 and 32)
+%C A239929        (c) A001749 (except 8, 12, 20 and 28)
+%C A239929 m = 3: (a) A270301
+%C A239929        (b) A162528 (except 64, 72, 80, 88, 96, 104, 112 and 128)
+%C A239929        (c) sequence not in OEIS
+%C A239929 b(i,j) = A174973(j) * {1,5) mod 6 * A174973(j), for all i,j >= 1; see A091999 for j=2. (End)
+%H A239929 Hartmut F. W. Hoft, <a href="/A239929/a239929.pdf">Proof of Characterization Theorem</a>
+%F A239929 Entries b(i, j) in the irregular triangle with rows indexed by i>=1 and columns indexed by j>=1 (alternate indexing of the example):
+%F A239929 b(i,j) = A000040(i+1) * A174973(j) where A000040(i+1) > 2 * A174973(j). - _Hartmut F. W. Hoft_, Dec 06 2016
+%e A239929 From _Hartmut F. W. Hoft_, Sep 16 2015: (Start)
+%e A239929 a(23) = 52 = 2^2 * 13 = q * p with q = 4 in A174973 and 8 < 13 = p.
+%e A239929 a(59) = 136 = 2^3 * 17 = q * p with q = 8 in A174973 and 16 < 17 = p.
+%e A239929 The first six columns of the irregular triangle through prime 37:
+%e A239929    1    2    4    6    8   12 ...
+%e A239929   -------------------------------
+%e A239929    3
+%e A239929    5   10
+%e A239929    7   14
+%e A239929   11   22   44
+%e A239929   13   26   52   78
+%e A239929   17   34   68  102  136
+%e A239929   19   38   76  114  152
+%e A239929   23   46   92  138  184
+%e A239929   29   58  116  174  232  348
+%e A239929   31   62  124  186  248  372
+%e A239929   37   74  148  222  296  444
+%e A239929   ...
+%e A239929 (End)
+%p A239929 isA174973 := proc(n)
+%p A239929     option remember;
+%p A239929     local k,dvs;
+%p A239929     dvs := sort(convert(numtheory[divisors](n),list)) ;
+%p A239929     for k from 2 to nops(dvs) do
+%p A239929         if op(k,dvs) > 2*op(k-1,dvs) then
+%p A239929             return false;
+%p A239929         end if;
+%p A239929     end do:
+%p A239929     true ;
+%p A239929 end proc:
+%p A239929 A174973 := proc(n)
+%p A239929     if n = 1 then
+%p A239929         1;
+%p A239929     else
+%p A239929         for a from procname(n-1)+1 do
+%p A239929             if isA174973(a) then
+%p A239929                 return a;
+%p A239929             end if;
+%p A239929         end do:
+%p A239929     end if;
+%p A239929 end proc:
+%p A239929 isA239929 := proc(n)
+%p A239929     local i,p,j,a73;
+%p A239929     for i from 1 do
+%p A239929         p := ithprime(i+1) ;
+%p A239929         if p > n then
+%p A239929             return false;
+%p A239929         end if;
+%p A239929         for j from 1 do
+%p A239929             a73 := A174973(j) ;
+%p A239929             if a73 > n then
+%p A239929                 break;
+%p A239929             end if;
+%p A239929             if p > 2*a73 and n = p*a73 then
+%p A239929                 return true;
+%p A239929             end if;
+%p A239929         end do:
+%p A239929     end do:
+%p A239929 end proc:
+%p A239929 for n from 1 to 200 do
+%p A239929     if isA239929(n) then
+%p A239929         printf("%d,",n) ;
+%p A239929     end if;
+%p A239929 end do: # _R. J. Mathar_, Oct 04 2018
+%t A239929 (* sequence of numbers k for m <= k <= n having exactly two parts *)
+%t A239929 (* Function a237270[] is defined in A237270 *)
+%t A239929 a239929[m_, n_]:=Select[Range[m, n], Length[a237270[#]]==2&]
+%t A239929 a239929[1, 260] (* data *)
+%t A239929 (* _Hartmut F. W. Hoft_, Jul 07 2014 *)
+%t A239929 (* test for membership in A174973 *)
+%t A239929 a174973Q[n_]:=Module[{d=Divisors[n]}, Select[Rest[d] - 2 Most[d], #>0&]=={}]
+%t A239929 a174973[n_]:=Select[Range[n], a174973Q]
+%t A239929 (* compute numbers satisfying the condition *)
+%t A239929 a239929Stalk[start_, bound_]:=Module[{p=NextPrime[2 start], list={}}, While[start p<=bound, AppendTo[list, start p]; p=NextPrime[p]]; list]
+%t A239929 a239929F[n_]:=Sort[Flatten[Map[a239929Stalk[#, n]&, a174973[n]]]]
+%t A239929 a239929F[138] (* data *)(* _Hartmut F. W. Hoft_, Sep 16 2015 *)
+%Y A239929 Column 2 of A240062.
+%Y A239929 Cf. A000203, A006254, A065091, A071561, A174973, A196020, A236104, A235791, A237591, A237593, A237270, A237271, A238443, A239660, A239663, A239665, A239931-A239934, A244050, A245062, A262626.
+%Y A239929 Cf. A000040, A001747, A001749, A091999, A100484, A161344, A161424, A162528, A270298, A270301. - _Hartmut F. W. Hoft_, Dec 06 2016
+%K A239929 nonn
+%O A239929 1,1
+%A A239929 _Omar E. Pol_, Apr 06 2014
+%E A239929 Extended beyond a(56) by _Michel Marcus_, Apr 07 2014

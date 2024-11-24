@@ -1,0 +1,36 @@
+%I A259254 #47 Oct 27 2023 21:47:54
+%S A259254 1,0,0,0,1,1,2,2,3,7,7,12,19,19,25,44,72,72,119,147,152,234,292,435,
+%T A259254 777,920,946,1135,1161,1377,3703,4294,5944,5944,10742,10742,14488,
+%U A259254 18958,22092,28662,37687,37687,63068,63068,72400,72400,132756,233796,265315,265315
+%N A259254 Number of partitions of prime(n) into n primes.
+%C A259254 a(n) = number of partitions of A000040(n) into n primes.
+%C A259254 If n > 1 and prime(n) - prime(n-1) = 2 (twin primes), then the number of partitions of prime(n) into n primes that don't contain 2 is equal to a(n) - a(n-1); every partition of primes in a(n) that does contain a 2 matches a partition of primes in a(n-1) with an added partition for 2. Further, if n is even, then a(n) = a(n-1).
+%H A259254 Alois P. Heinz, <a href="/A259254/b259254.txt">Table of n, a(n) for n = 1..600</a> (first 100 terms from Doug Bell)
+%F A259254 a(n) = A117278(A000040(n),n). - _Robert Israel_, Jun 22 2015
+%e A259254 a(9) = 3 because 23 is the ninth prime number (A000040(9) = 23), and 23 can be partitioned into nine primes in three ways: [2,2,2,2,2,2,2,2,7], [2,2,2,2,2,2,3,3,5] and [2,2,2,2,3,3,3,3,3].
+%p A259254 N:= 100:  # to get a(1) to a(N)
+%p A259254 Primes:= [seq(ithprime(i),i=1..N)]:
+%p A259254 W:= proc(n,m,j) option remember;
+%p A259254   if n < 0 then return 0 fi;
+%p A259254   if n=0 then if m=0 then return 1 else return 0 fi fi;
+%p A259254   add(W(n-Primes[i],m-1,i),i=1..j)
+%p A259254 end proc:
+%p A259254 seq(W(Primes[n],n,n), n = 1 .. N); # _Robert Israel_, Jun 22 2015
+%t A259254 f[n_] := Length@ IntegerPartitions[ Prime@n, {n}, Prime@ Range@ n]; Array[f, 50] (* _Giovanni Resta_, Jun 23 2015 *)
+%o A259254 (PARI) a(n) = {nb = 0; forpart(p=prime(n), ok=1; for (k=1, n, if (!isprime(p[k]), ok=0; break));nb += ok,[2,prime(n)],[n,n]); nb;} \\ _Michel Marcus_, Jun 23 2015
+%o A259254 (Perl) use ntheory ":all"; use List::MoreUtils qw/all/; sub a259254 { my($n,$sum)=(shift,0); forpart { $sum++ if all { is_prime($_) } @_; } nth_prime($n),{n=>$n,amin=>2}; $sum; } say a259254($_) for 1..60; # _Dana Jacobsen_, Dec 15 2015
+%o A259254 (Perl) use ntheory ":all";
+%o A259254 use Memoize;  memoize 'W';
+%o A259254 sub W {
+%o A259254   my($n, $m, $j) = @_;
+%o A259254   return 0 if $n < 0;
+%o A259254   return ($m == 0) ? 1 : 0  if $n == 0;
+%o A259254   vecsum( map { W($n-nth_prime($_), $m-1, $_) } 1 .. $j );
+%o A259254 }
+%o A259254 sub A259254 { my $n = shift; W(nth_prime($n), $n, $n); }
+%o A259254 print "$_ ", A259254($_),"\n" for 1..60; # _Dana Jacobsen_, Dec 15 2015
+%Y A259254 Subsequence of A117278.
+%Y A259254 Cf. A000040.
+%K A259254 nonn
+%O A259254 1,7
+%A A259254 _Doug Bell_, Jun 22 2015

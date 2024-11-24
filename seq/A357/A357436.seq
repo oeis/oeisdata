@@ -1,0 +1,45 @@
+%I A357436 #34 Jun 12 2023 12:33:19
+%S A357436 2,23,223,2203,22003,220013,2200103,22000103,223000103,2230001003,
+%T A357436 22300010023,223000100023,2230001000203,22301001000203,
+%U A357436 223010001000203,2230010001000203,22300010001000203,222300010001000203,2223000100010001203,22203000100010001203,222030001000010001203,2220300010200010001203
+%N A357436 Start with a(1)=2; to get a(n+1) insert in a(n) the smallest possible digit at the rightmost possible position such that the new number is a prime.
+%C A357436 Extending a number by inserting a prepending "0" is obviously not allowed. Smallness of digit has precedence over rightmostness of position. If no prime extension exists, the sequence terminates.
+%C A357436 Sequence construction very similar to A356557 (the difference arises from the order of the conditions).
+%C A357436 Length of a(n) is n.
+%C A357436 Is the sequence infinite?
+%C A357436 Sequence terminates if and only if it contains a term of A125001.
+%H A357436 Michael S. Branicky, <a href="/A357436/b357436.txt">Table of n, a(n) for n = 1..1000</a>
+%e A357436 a(2) = 23 because the numbers 20, 21, 12, 22 obtained from a(1) = 2 are composite and 23 is a prime.
+%e A357436 For n=6, starting from a(5)=22003 and appending a digit "0" from right to left gives 220030, 220003, 202003, which are not primes. Inserting a digit "1" from right to left gives 220031 which also is not prime, and 220013 which is prime, so a(6) = 220013.
+%p A357436 f:= proc(n) local x, y,z, j;
+%p A357436       for x from 0 to 9 do
+%p A357436         for j from 0 to length(n)-`if`(x=0,1,0) do
+%p A357436            y:= n mod 10^j;
+%p A357436            z:= y + x*10^j + 10*(n-y);
+%p A357436            if isprime(z) then return z fi;
+%p A357436       od od;
+%p A357436       FAIL
+%p A357436 end proc:
+%p A357436 R:= 2: x:= 2:
+%p A357436 for count from 2 to 30 while x <> FAIL do
+%p A357436     x:= f(x); R:= R, x;
+%p A357436 od:
+%p A357436 R; # _Robert Israel_, Sep 29 2022
+%t A357436 a[1]=2; a[n_] := a[n] = Catch@ Block[{p, d = IntegerDigits[a[n-1]]}, Do[p = FromDigits@ Insert[d, c, -i]; If[p > a[n - 1] && PrimeQ[p], Throw@p], {c, 0, 9}, {i, 1 + Length@ d}]]; Array[a, 22] (* _Giovanni Resta_, Oct 13 2022 *)
+%o A357436 (Python)
+%o A357436 from sympy import isprime
+%o A357436 from itertools import islice
+%o A357436 def anext(an):
+%o A357436     s = str(an)
+%o A357436     for c in "0123456789":
+%o A357436         for k in range(len(s)+1):
+%o A357436             w = s + c if k == 0 else s[:-k] + c + s[-k:]
+%o A357436             if w[0] != "0" and isprime(int(w)): return int(w)
+%o A357436 def agen(an=2):
+%o A357436     while an != None: yield an; an = anext(an)
+%o A357436 print(list(islice(agen(), 22))) # _Michael S. Branicky_, Sep 29 2022
+%Y A357436 Cf. A356557, A125001, A332603.
+%K A357436 nonn,base
+%O A357436 1,1
+%A A357436 _Bartlomiej Pawlik_, Sep 28 2022
+%E A357436 More terms from _Robert Israel_, Sep 29 2022

@@ -1,0 +1,45 @@
+%I A296096 #36 Dec 27 2023 23:44:26
+%S A296096 34,39,46,51,55,74,82,87,91,95,106,111,118,119,123,134,142,155,158,
+%T A296096 178,183,187,194,203,215,226,247,262,267,287,291,299,314,326,327,335,
+%U A296096 358,371,391,395,407,411,422,446,447,478,502,527,538,543,551,586,591,611,614
+%N A296096 Numbers k with the property that k is the product of two distinct primes whose difference is also the product of two distinct primes.
+%C A296096 The number of times this process can be repeated would be called the order of the number. For example, 82 is the smallest number of this type of order 2.
+%H A296096 Robert Israel, <a href="/A296096/b296096.txt">Table of n, a(n) for n = 1..10000</a>
+%e A296096 51 is a number of this type since 51=3*17 and 17-3=14 are also the product of two distinct primes.
+%p A296096 N:= 10^4: # to get all terms <= N
+%p A296096 P:= select(isprime, [2,seq(i,i=3..N,2)]):
+%p A296096 P2:= {}:
+%p A296096 for i from 1 to nops(P) while P[i]^2 <= N do
+%p A296096   for j from i+1 while P[i]*P[j] <= N do od:
+%p A296096   P2:= P2 union {seq(P[i]*P[k],k=i+1..j-1)};
+%p A296096 od:
+%p A296096 P3:= {}:
+%p A296096 for i from 1 to nops(P) while P[i]^2 <= N do
+%p A296096   for j from i+1 while P[i]*P[j] <= N do od:
+%p A296096   Q:= map(`-`,convert(P[i+1..j-1],set),P[i]) intersect P2;
+%p A296096   P3:= P3 union map(t -> (t+P[i])*P[i], Q);
+%p A296096 od:
+%p A296096 sort(convert(P3,list)); # _Robert Israel_, Jan 05 2018
+%t A296096 Select[Range[6, 614], And[AllTrue[#, PrimeQ], Length@ # == 2, FactorInteger[First@ Differences@ #][[All, -1]] == {1, 1}] &@ Most@ Rest@ Divisors@ # &] (* _Michael De Vlieger_, Dec 13 2017 *)
+%o A296096 (Sage)
+%o A296096 for n in range(1,100):
+%o A296096     L=list(factor(n))
+%o A296096     itsemiprime=false
+%o A296096     degree=-1
+%o A296096     if len(L)==2 and L[0][1]==1 and L[1][1]==1:
+%o A296096         itsemiprime=true
+%o A296096     while len(L)==2:
+%o A296096         if L[0][1]==1 and L[1][1]==1:
+%o A296096             L=list(factor(L[1][0]-L[0][0]))
+%o A296096             temp=len(L)
+%o A296096             degree=degree+1
+%o A296096         else:
+%o A296096             break
+%o A296096     if itsemiprime:
+%o A296096         n, degree
+%o A296096 (PARI) isok1(n) = (bigomega(n)==2) && issquarefree(n);
+%o A296096 isok(n) = isok1(n) && (f=factor(n)) && isok1(f[2,1]-f[1,1]); \\ _Michel Marcus_, Dec 21 2017
+%Y A296096 Cf. A006881.
+%K A296096 nonn
+%O A296096 1,1
+%A A296096 _Carl Lienert_ and Pamela K. M. Smith, Dec 04 2017

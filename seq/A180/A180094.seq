@@ -1,0 +1,38 @@
+%I A180094 #44 Sep 08 2022 08:45:54
+%S A180094 0,0,1,2,1,2,2,3,1,2,2,3,2,3,3,2,1,2,2,3,2,3,3,2,2,3,3,2,3,2,2,3,1,2,
+%T A180094 2,3,2,3,3,2,2,3,3,2,3,2,2,3,2,3,3,2,3,2,2,3,3,2,2,3,2,3,3,3,1,2,2,3,
+%U A180094 2,3,3,2,2,3,3,2,3,2,2,3,2,3,3,2,3,2,2,3,3,2,2,3,2,3,3,3,2,3,3,2,3
+%N A180094 Number of steps to reach 0 or 1, starting with n and applying the map k -> (number of 1's in binary expansion of k) repeatedly.
+%C A180094 The number of 1's in binary expansion of n is called the binary weight (or Hamming weight) of n, A000120(n).
+%C A180094 a(n)=0 for n=0 and n=1;  a(n)=1 for powers of 2.
+%C A180094 Records appear for n = 2, 3, 7, 127=2^7-1, 2^127-1, ... (terms of A007013).
+%C A180094 It appears that the indices of the even terms for n>0 are sequence A075311.
+%H A180094 Reinhard Zumkeller, <a href="/A180094/b180094.txt">Table of n, a(n) for n = 0..10000</a>
+%p A180094 a:= n-> `if`(n<2, 0, 1 + a(add(i, i=convert(n, base, 2)))):
+%p A180094 seq(a(n), n=0..100);  # _Alois P. Heinz_, Jan 15 2011
+%t A180094 Table[Length[NestWhileList[DigitCount[#,2,1]&,n,#>1&]]-1,{n,0,100}] (* _Harvey P. Dale_, Jul 27 2012 *)
+%o A180094 (PARI)
+%o A180094 bitcount(x)=
+%o A180094 { /* Return Hamming weight of x, i.e. A000120(x) */
+%o A180094     local(p);  p = 0;
+%o A180094     while ( x, p+=bitand(x, 1); x>>=1; );
+%o A180094     return( p );
+%o A180094 }
+%o A180094 X(n)=
+%o A180094 { /* Return how many iterations of bitcount() are needed to reach 0 or 1 */
+%o A180094     if ( n<=1, return(0) );
+%o A180094     return( 1+X(bitcount(n)) );
+%o A180094 }
+%o A180094 { for (n=0, 100, print1(X(n),", ") ); } /* print terms of sequence */
+%o A180094 (Magma)
+%o A180094 Countbits:=func< n | &+Intseq(n, 2) >;
+%o A180094 StepsTo01:=function(n); s:=0; k:=n; while k gt 1 do k:=Countbits(k); s+:=1; end while; return s; end function;
+%o A180094 [ StepsTo01(n): n in [0..105] ]; // _Klaus Brockhaus_, Jan 15 2011
+%o A180094 (Haskell)
+%o A180094 a180094 n = snd $ until ((< 2) . fst) (\(x, c) -> (a000120 x, c+1)) (n,0)
+%o A180094 -- _Reinhard Zumkeller_, Apr 22 2011
+%Y A180094 Cf. A000120, A072086.
+%Y A180094 One less than A078627.
+%K A180094 nonn
+%O A180094 0,4
+%A A180094 _Joerg Arndt_, Jan 15 2011

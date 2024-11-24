@@ -1,0 +1,87 @@
+%I A338203 #69 Oct 31 2022 05:54:50
+%S A338203 0,0,0,0,1,2,0,0,1,0,1,2,0,2,0,0,1,3,2,4,4,0,1,2,0,5,3,1,4,2,0,0,1,3,
+%T A338203 2,0,1,3,2,4,4,0,1,4,4,0,1,2,0,5,3,2,0,5,3,1,4,2,0,1,4,2,0,0,1,3,2,2,
+%U A338203 5,6,3,3,3,5,6,0,1,3,2,4,4,0,1,6,6,2,5,1,1
+%N A338203 Triangle read by rows: T(n,k) is the number of iterations needed to make the n-bit binary representation of k palindromic by binary-subtracting its bit reversal, 0 <= k < 2^n.
+%C A338203 All operations are performed with n bits. In particular, the bit-reversal of k considers k as an n-bit binary word and k is a palindrome if it is equal to its bit reversal in this sense. The subtraction is performed modulo 2^n.
+%C A338203 The sequence is divided into blocks of length 2^n, n = 1, 2, 3, ...
+%C A338203 There are interesting structures visible if you write each block of the sequence in a new line. Then it becomes visible that each block contains its previous block interrupted by new parts.
+%C A338203 Left part of table (k from 0 to ...):
+%C A338203   n=1 0,                                                          ...
+%C A338203   n=2 0,1,                                                        ...
+%C A338203   n=3 0,1,                                                        ...
+%C A338203   n=4 0,1,                        3,2,4,4,                        ...
+%C A338203   n=5 0,1,3,2,                0,1,3,2,4,4,0,1,                4,4,...
+%C A338203   n=6 0,1,3,2,2,5,6,3,3,3,5,6,0,1,3,2,4,4,0,1,6,6,2,5,1,1,3,3,4,4,...
+%C A338203 Right part of table (k continued to last element):
+%C A338203   n=1                                                                   0,
+%C A338203   n=2                                                                 2,0,
+%C A338203   n=3 0,1,2,0,                                                        2,0,
+%C A338203   n=4 0,1,2,0,                        5,3,1,4,                        2,0,
+%C A338203   n=5 0,1,2,0,5,3,                2,0,5,3,1,4,2,0,                1,4,2,0,
+%C A338203   n=6 0,1,2,0,5,3,4,2,2,6,4,3,7,5,2,0,5,3,1,4,2,0,4,6,4,2,5,1,4,3,1,4,2,0,
+%C A338203 There is no formal proof known to the writer that this algorithm never gets stuck in a loop, yet no loop found by computation up to 32 bits.
+%C A338203 Maximum values for each block are given by A338205.
+%C A338203 For all even n the sequence T(n+1,0..(n+1)^k-1) contains only copied values of the sequence for T(n,0..n^k-1):
+%C A338203 n = 2m, T(n+1,0..2^(n+1)) = {T(n,0..2^m-1),T(n,0..2^m-1),T(n,2^m..2*2^m-1),T(n,2^m..2*2^m-1),...,T(n,2^n-2^m..2^n-1),T(n,2^n-2^m..2^n-1) }.
+%C A338203 This happens because removing the middle bit in any bitsequence k, taken from a row with odd n, does not change its number of iterations.
+%C A338203 For all odd n some parts of sequence T(n+1,0..(n+1)^k-1) are already contained in sequence T(n,0..n^k-1):
+%C A338203 n = 2m, m > 0, [k/(2^m)] + [k/(2^(m+1))] is even (inner pair of bits is equal, e.g., ...00...), T(n,k) = T(n-1,[k/(2^m)]*2^(m-1) + k mod (2^(m-1)) ).
+%C A338203 _Kevin Ryde_ suggested to me:
+%C A338203 "Should be approaching an argument for why no cycles, as it must be hard to avoid 2-equal-bits middle for very long ..."
+%C A338203 To verify this, a calculation for all even k up to 20. This is the maximum number of iterations until middle bits become equal for row k: 2, 3, 6, 9, 11, 13, 16, 18, 23, 26, ...
+%C A338203 It appears to be well behaved. Probably < 2^(k-2) for all n > 2.
+%H A338203 Thomas Scheuerle, <a href="/A338203/a338203.txt">Shows values for up to 2^8 formated to visualize patterns</a>
+%e A338203 Triangle begins:
+%e A338203   0;
+%e A338203   0, 0;
+%e A338203   0, 1, 2, 0;
+%e A338203   0, 1, 0, 1, 2, 0, 2, 0;
+%e A338203   0, 1, 3, 2, 4, 4, 0, 1, 2, 0, 5, 3, 1, 4, 2, 0;
+%e A338203   ...
+%e A338203 n=4: Four-bit wordlength. k=5 in binary: 0101
+%e A338203   0101 - 1010 = 1011 (2^4 + 5 - 10)   Iteration 1
+%e A338203   1011 - 1101 = 1110 (2^4 + 11 - 13)  Iteration 2
+%e A338203   1110 - 0111 = 0111 (14 - 7)         Iteration 3
+%e A338203   0111 - 1110 = 1001 (2^4 + 7 - 14)   Iteration 4
+%e A338203 a((2^n -1)+k) = 4.
+%e A338203 a(1+2+4+8 +5) = 4.
+%e A338203 Below is an example in which two equal inner bits lead to same number of iterations as in the case of a one-bit-smaller word (one of the inner bits removed):
+%e A338203   1110 - 0111 = 0111 (14 - 7)         Iteration 1
+%e A338203   0111 - 1110 = 1001 (2^4 + 7 - 14)   Iteration 2
+%e A338203    110 -  011 = 011 (6 - 3)           Iteration 1
+%e A338203    011 -  110 = 101 (2^3 + 3 - 6)     Iteration 2
+%o A338203 (MATLAB)
+%o A338203 sequence = [];
+%o A338203 for numberofBits = 1:maxNumberofBits
+%o A338203     numbersPerWordlength = 2^numberofBits;
+%o A338203     for n = 1:numbersPerWordlength
+%o A338203         iterations = 0;
+%o A338203         word = n-1;
+%o A338203         while word > 0
+%o A338203             word_reversed = 0;
+%o A338203             % reverse bit order
+%o A338203             for i = 1:numberofBits
+%o A338203                 word_reversed = bitset(word_reversed,numberofBits-i+1,bitget(word,i));
+%o A338203             end
+%o A338203             % binary subtraction with worlength of numbersPerWordlength
+%o A338203             if word >= word_reversed
+%o A338203               word = word-word_reversed;
+%o A338203             else
+%o A338203               word = numbersPerWordlength + word - word_reversed;
+%o A338203             end
+%o A338203             if word > 0 % if == 0 it was already a palindrome
+%o A338203               iterations = iterations+1;
+%o A338203             end
+%o A338203         end
+%o A338203         iterations_list(n) = iterations;
+%o A338203     end
+%o A338203     sequence = [sequence iterations_list];
+%o A338203 end
+%o A338203 (PARI)
+%o A338203 bitrev(w, b)={my(r=0); for(i=1, w, r=(r<<1) + bitand(b, 1); b>>=1); r}
+%o A338203 T(n, b) = {my(t=0, r=bitrev(n, b)); while(r<>b, t++; b-=r; if(b<0, b+=2^n); r=bitrev(n, b)); t} \\ _Andrew Howroyd_, Oct 17 2020
+%Y A338203 Cf. A338205 (max row values).
+%K A338203 nonn,tabf,base
+%O A338203 0,6
+%A A338203 _Thomas Scheuerle_, Oct 16 2020

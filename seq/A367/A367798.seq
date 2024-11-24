@@ -1,0 +1,80 @@
+%I A367798 #23 Dec 30 2023 23:34:20
+%S A367798 2,11,307,35419,347651,3091643,3417569,30001253,34158919,35515619,
+%T A367798 305524927,312123463,313513517,327371987,337660679,348898811,
+%U A367798 352023571,3013005397,3051026827,3147298717,3149171717,3171167353,3175236553,3226951193,3248169343,3306563683,3350101739,3366748421,3403341569
+%N A367798 Primes p such that p^2 is the sum of a prime and its reverse.
+%C A367798 Primes p such that p^2 = A056964(q) for some term q of A367796.
+%C A367798 Do all terms except for 2 and 11 start with 3?
+%C A367798 From _Ivan N. Ianakiev_, Dec 16 2023: (Start)
+%C A367798 To prove that for all n > 2 the first digit of a(n) is 3 is easy if the number of digits of q is odd. Sketch of a proof: Let p^2 = q + rev(q). We observe that:
+%C A367798 a) the last digit of q must be 1, 3, 7, or 9;
+%C A367798 b) the last digit of rev(q) cannot be zero, since the first digit of q cannot be zero;
+%C A367798 c) the last digit of rev(q) cannot be odd, since the last digit of p^2 cannot be even (if it were, that would imply that p is even).
+%C A367798 The rest is just a matter of bookkeeping.
+%C A367798 To prove that for n > 2 the number of digits of q cannot be even is probably much more difficult. (End)
+%e A367798 a(1) = 2 is a term because 2^2 = 4 = 2 + 2 with 2 prime.
+%e A367798 a(2) = 11 is a term because 11^2 = 121 = 29 + 92 with 11 and 29 prime.
+%e A367798 a(3) = 307 is a term because 307^2 = 94249 = 20147 + 74102 with 307 and 20147 prime.
+%e A367798 a(4) = 35419 is a term because 35419^2 = 1254505561 = 261104399 + 993401162 with 35419 and 261104399 prime.
+%e A367798 a(5) = 347651 is a term because 347651^2 = 120861217801 = 20870609999 + 99990607802 with 347651 and 20870609999 prime.
+%e A367798 a(6) = 3091643 is a term because 3091643^2 = 9558256439449 = 2059108419947 + 7499148019502 with 3091643 and 2059108419947 prime.
+%e A367798 a(7) = 3417569 is a term because 3417569^2 = 11679777869761 = 2080783998959 + 9598993870802 with 3417569 and 2080783998959 prime.
+%e A367798 a(8) = 30001253 is a term because 30001253^2 = 900075181570009 = 200000140570007 + 700075041000002 with 30001253 and 200000140570007 prime.
+%e A367798 a(9) = 34158919 is a term because 34158919^2 = 1166831747248561 = 206841324099959 + 959990423148602 with 34158919 and 206841324099959 prime.
+%e A367798 a(10) = 35515619 is a term because 35515619^2 = 1261359192953161 = 261359249999999 + 999999942953162 with 35515619 and 261359249999999 prime.
+%p A367798 f:= proc(n) local y,c,d,dp,i,delta,m;
+%p A367798  y:= convert(n^2,base,10);
+%p A367798  d:= nops(y);
+%p A367798  if d::even then
+%p A367798     if y[-1] <> 1 then return false fi;
+%p A367798     dp:= d-1;
+%p A367798     y:= y[1..-2];
+%p A367798     c[dp]:= 1;
+%p A367798  else
+%p A367798     dp:= d;
+%p A367798     c[dp]:= 0;
+%p A367798  fi;
+%p A367798  c[0]:= 0;
+%p A367798  for i from 1 to floor(dp/2) do
+%p A367798     delta:= y[i] - y[dp+1-i] - c[i-1] - 10*c[dp+1-i];
+%p A367798     if delta = 0 then c[dp-i]:= 0; c[i]:= 0;
+%p A367798     elif delta = -1 then c[dp-i]:= 1; c[i]:= 0;
+%p A367798     elif delta = -10 then c[dp-i]:= 0 ; c[i]:= 1;
+%p A367798     elif delta = -11 then c[dp-i]:= 1; c[i]:= 1;
+%p A367798     else return false
+%p A367798     fi;
+%p A367798     if y[i] + 10*c[i] - c[i-1] < 0  or (i=1 and y[i]+10*c[i]-c[i-1]=1) then return false fi;
+%p A367798   od;
+%p A367798   m:= (dp+1)/2;
+%p A367798   delta:= y[m] + 10*c[m] - c[m-1];
+%p A367798   if not member(delta, [seq(i,i=0..18,2)]) then return false fi;
+%p A367798   [seq(y[i]+ 10*c[i]-c[i-1],i=1..m)]
+%p A367798 end proc:
+%p A367798 g:= proc(L) local T,d,t,p, x, i; uses combinat;
+%p A367798   d:= nops(L);
+%p A367798   T:= cartprod([select(t -> t[1]::odd, [seq([L[1]-x,x],x=max(1,L[1]-9)..min(L[1],9))]),
+%p A367798     seq([seq([L[i]-x,x],x=max(0,L[i]-9)..min(9, L[i]))],i=2..d-1)]);
+%p A367798   while not T[finished] do
+%p A367798     t:= T[nextvalue]();
+%p A367798     p:= add(t[i][1]*10^(i-1),i=1..d-1) + L[-1]/2 * 10^(d-1) +
+%p A367798       add(t[i][2]*10^(2*d-i-1),i=1..d-1);
+%p A367798     if isprime(p) then return p fi;
+%p A367798   od;
+%p A367798 -1
+%p A367798 end proc:
+%p A367798 p:= 11: R:= 2, 11:
+%p A367798 while p < 10^8 do
+%p A367798   p:= nextprime(p);
+%p A367798 d:= 1+ilog10(p^2);
+%p A367798   if d::even and p^2 >= 2*10^(d-1) then p:= nextprime(floor(10^(d/2)));  fi;
+%p A367798   v:= f(p);
+%p A367798   if v = false then next fi;
+%p A367798   q:= g(v);
+%p A367798   if q = -1 then next fi;
+%p A367798   R:= R, p;
+%p A367798 od:
+%p A367798 R;
+%Y A367798 Cf. A056964, A367796, A367900, A367871.
+%K A367798 nonn,base
+%O A367798 1,1
+%A A367798 _Robert Israel_, Nov 30 2023

@@ -1,0 +1,30 @@
+%I A327089 #8 Jun 09 2021 02:31:51
+%S A327089 0,0,0,1,0,1,18,62,75,30,0,6,387,6320,41350,135792,246540,252000,
+%T A327089 136080,30240,0,28,17070,1347200,34546670,418081188,2854567996,
+%U A327089 12121240320,33824042280,63815598000,82021428720,70832361600,39351312000,12713500800,1816214400
+%N A327089 Triangle read by rows: T(n,k) is the number of chiral pairs of colorings of the edges of a regular n-dimensional simplex using exactly k colors. Row n has (n+1)*n/2 columns.
+%C A327089 An n-dimensional simplex has n+1 vertices and (n+1)*n/2 edges. For n=1, the figure is a line segment with one edge. For n-2, the figure is a triangle with three edges. For n=3, the figure is a tetrahedron with six edges. The Schläfli symbol, {3,...,3}, of the regular n-dimensional simplex consists of n-1 threes. The chiral colorings of its edges come in pairs, each the reflection of the other.
+%C A327089 T(n,k) is also the number of chiral pairs of colorings of (n-2)-dimensional regular simplices in an n-dimensional simplex using exactly k colors. Thus, T(2,k) is also the number of chiral pairs of colorings of the vertices (0-dimensional simplices) of an equilateral triangle.
+%H A327089 Robert A. Russell, <a href="/A327089/b327089.txt">Table of n, a(n) for n = 1..220</a> First 10 rows.
+%H A327089 E. M. Palmer and R. W. Robinson, <a href="https://projecteuclid.org/euclid.acta/1485889789">Enumeration under two representations of the wreath product</a>, Acta Math., 131 (1973), 123-143.
+%F A327089 The algorithm used in the Mathematica program below assigns each permutation of the vertices to a partition of n+1. It then determines the number of permutations for each partition and the cycle index for each partition.
+%F A327089 A327085(n,k) = Sum_{j=1..(n+1)*n/2} T(n,j) * binomial(k,j).
+%F A327089 A(n,k) = A327087(n,k) - A327088(n,k) = (A327087(n,k) - A327090(n,k)) / 2 = A327088(n,k) - A327090(n,k).
+%e A327089 Triangle begins with T(1,1):
+%e A327089 0
+%e A327089 0 0   1
+%e A327089 0 1  18   62    75     30
+%e A327089 0 6 387 6320 41350 135792 246540 252000 136080 30240
+%e A327089 For T(2,3)=2, the chiral pair is ABC-ACB.
+%t A327089 CycleX[{2}] = {{1,1}}; (* cycle index for permutation with given cycle structure *)
+%t A327089 CycleX[{n_Integer}] := CycleX[n] = If[EvenQ[n], {{n/2,1}, {n,(n-2)/2}}, {{n,(n-1)/2}}]
+%t A327089 compress[x : {{_, _} ...}] := (s = Sort[x]; For[i = Length[s], i > 1, i -= 1, If[s[[i, 1]] == s[[i-1,1]], s[[i-1,2]] += s[[i,2]]; s = Delete[s,i], Null]]; s)
+%t A327089 CycleX[p_List] := CycleX[p] = compress[Join[CycleX[Drop[p, -1]], If[Last[p] > 1, CycleX[{Last[p]}], ## &[]], If[# == Last[p], {#, Last[p]}, {LCM[#, Last[p]], GCD[#, Last[p]]}] & /@ Drop[p, -1]]]
+%t A327089 pc[p_List] := Module[{ci, mb}, mb = DeleteDuplicates[p]; ci = Count[p, #] & /@ mb; Total[p]!/(Times @@ (ci!) Times @@ (mb^ci))] (* partition count *)
+%t A327089 row[n_Integer] := row[n] = Factor[Total[If[EvenQ[Total[1-Mod[#,2]]], 1, -1] pc[#] j^Total[CycleX[#]][[2]] & /@ IntegerPartitions[n+1]]/(n+1)!]
+%t A327089 array[n_, k_] := row[n] /. j -> k
+%t A327089 Table[LinearSolve[Table[Binomial[i,j], {i,1,(n+1)n/2}, {j,1,(n+1)n/2}], Table[array[n,k], {k,1,(n+1)n/2}]], {n,1,6}] // Flatten
+%Y A327089 Cf. A327087 (oriented), A327088 (unoriented), A327090 (achiral), A327085 (exactly k colors).
+%K A327089 nonn,tabf
+%O A327089 1,7
+%A A327089 _Robert A. Russell_, Aug 19 2019

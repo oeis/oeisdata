@@ -1,0 +1,48 @@
+%I A340263 #30 Apr 09 2021 10:37:12
+%S A340263 1,1,-1,1,1,-3,6,-3,1,1,-7,28,-49,70,-49,28,-7,1,1,-15,120,-525,1820,
+%T A340263 -4095,8008,-10725,12870,-10725,8008,-4095,1820,-525,120,-15,1
+%N A340263 T(n, k) = [x^k] ((1-x)^(2^n) + 2^(-n)*((2^n-1)*(x-1)^(2^n) + (x+1)^(2^n)))/2. Irregular triangle read by rows, for n >= 0 and 0 <= k <= 2^n.
+%C A340263 Conjecture: for n >= 1 the polynomials are irreducible.
+%H A340263 Peter Luschny, <a href="/A340263/b340263.txt">Table of n, a(n) for n = 0..1031</a>
+%F A340263 Let p_n(x) = b(n) - (2^n-1)*a(n-1), b(n) = Sum_{k=0..2^n} binomial(2^n, 2*k)* x^(2*k), and a(n) = x*Product_{k=0..n} b(k). Then T(n, k) = [x^k] p_n(x).
+%e A340263 Polynomials begin:
+%e A340263 [0] 1;
+%e A340263 [1] x^2 - x + 1;
+%e A340263 [2] x^4 - 3*x^3 + 6*x^2 - 3*x + 1;
+%e A340263 [3] x^8 - 7*x^7 + 28*x^6 - 49*x^5 + 70*x^4 - 49*x^3 + 28*x^2 - 7*x + 1;
+%e A340263 Triangle begins:
+%e A340263 [0] [1]
+%e A340263 [1] [1, -1, 1]
+%e A340263 [2] [1, -3, 6, -3, 1]
+%e A340263 [3] [1, -7, 28, -49, 70, -49, 28, -7, 1]
+%e A340263 [4] [1, -15, 120, -525, 1820, -4095, 8008, -10725, 12870, -10725, 8008, -4095, 1820, -525, 120, -15, 1]
+%p A340263 A340263_row := proc(n) local a, b;
+%p A340263 if n = 0 then return [1] fi;
+%p A340263 b := n -> add(binomial(2^n, 2*k)*x^(2*k), k = 0..2^n);
+%p A340263 a := n -> x*mul(b(k), k = 0..n);
+%p A340263 expand(b(n) - (2^n-1)*a(n-1));
+%p A340263 [seq(coeff(%, x, j), j = 0..2^n)] end:
+%p A340263 for n from 0 to 5 do A340263_row(n) od;
+%p A340263 # Alternatively:
+%p A340263 CoeffList := p -> [op(PolynomialTools:-CoefficientList(p, x))]:
+%p A340263 Tpoly := n -> ((1-x)^(2^n) + 2^(-n)*((2^n-1)*(x-1)^(2^n) + (x + 1)^(2^n)))/2:
+%p A340263 seq(print(CoeffList(Tpoly(n))), n=0..5); # _Peter Luschny_, Feb 03 2021
+%o A340263 (SageMath)
+%o A340263 def A340263():
+%o A340263     a, b, c = 1, 1, 1
+%o A340263     yield [1]
+%o A340263     while True:
+%o A340263         c *= 2
+%o A340263         a *= b
+%o A340263         b = sum(binomial(c, 2 * k) * x ^ (2 * k) for k in range(c + 1))
+%o A340263         yield ((b - (c - 1) * x * a)).list()
+%o A340263 A340263_row = A340263()
+%o A340263 for _ in range(6):
+%o A340263     print(next(A340263_row))
+%Y A340263 Row sums are 2^(2^n - n - 1) = A016031(n-1).
+%Y A340263 Central terms of the rows are A037293(n) for n >= 2.
+%Y A340263 Cf. A340312.
+%K A340263 sign,tabf,look
+%O A340263 0,6
+%A A340263 _Peter Luschny_, Jan 06 2021
+%E A340263 Shorter name by _Peter Luschny_, Feb 03 2021

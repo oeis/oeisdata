@@ -1,0 +1,39 @@
+%I A327083 #22 Jun 09 2021 02:31:27
+%S A327083 1,2,1,3,4,1,4,11,12,1,5,24,87,40,1,6,45,416,1197,184,1,7,76,1475,
+%T A327083 18592,42660,1296,1,8,119,4236,166885,3017600,4223313,17072,1,9,176,
+%U A327083 10437,1019880,85025050,1748176768,1139277096,424992
+%N A327083 Array read by descending antidiagonals: A(n,k) is the number of oriented colorings of the edges of a regular n-dimensional simplex using up to k colors.
+%C A327083 An n-dimensional simplex has n+1 vertices and (n+1)*n/2 edges. For n=1, the figure is a line segment with one edge. For n-2, the figure is a triangle with three edges. For n=3, the figure is a tetrahedron with six edges. The Schläfli symbol, {3,...,3}, of the regular n-dimensional simplex consists of n-1 threes. Two oriented colorings are the same if one is a rotation of the other; chiral pairs are counted as two.
+%C A327083 A(n,k) is also the number of oriented colorings of (n-2)-dimensional regular simplices in an n-dimensional simplex using up to k colors. Thus, A(2,k) is also the number of oriented colorings of the vertices (0-dimensional simplices) of an equilateral triangle.
+%H A327083 Robert A. Russell, <a href="/A327083/b327083.txt">Table of n, a(n) for n = 1..325</a> First 25 antidiagonals.
+%H A327083 Harald Fripertinger, <a href="http://www.mathe2.uni-bayreuth.de/frib/html/book/hyl00_42.html">The cycle type of the induced action on 2-subsets</a>
+%H A327083 E. M. Palmer and R. W. Robinson, <a href="https://projecteuclid.org/euclid.acta/1485889789">Enumeration under two representations of the wreath product</a>, Acta Math., 131 (1973), 123-143.
+%F A327083 The algorithm used in the Mathematica program below assigns each permutation of the vertices to a partition of n+1. It then determines the number of permutations for each partition and the cycle index for each partition.
+%F A327083 A(n,k) = Sum_{j=1..(n+1)*n/2} A327087(n,j) * binomial(k,j).
+%F A327083 A(n,k) = A327084(n,k) + A327085(n,k) = 2*A327084(n,k) - A327086(n,k) = 2*A327085(n,k) + A327086(n,k).
+%e A327083 Array begins with A(1,1):
+%e A327083   1  2    3     4      5       6       7        8        9        10 ...
+%e A327083   1  4   11    24     45      76     119      176      249       340 ...
+%e A327083   1 12   87   416   1475    4236   10437    22912    45981     85900 ...
+%e A327083   1 40 1197 18592 166885 1019880 4738153 17962624 58248153 166920040 ...
+%e A327083   ...
+%e A327083 For A(2,3) = 11, the nine achiral colorings are AAA, AAB, AAC, ABB, ACC, BBB, BBC, BCC, and CCC. The chiral pair is ABC-ACB.
+%t A327083 CycleX[{2}] = {{1,1}}; (* cycle index for permutation with given cycle structure *)
+%t A327083 CycleX[{n_Integer}] := CycleX[n] = If[EvenQ[n], {{n/2,1}, {n,(n-2)/2}}, {{n,(n-1)/2}}]
+%t A327083 compress[x : {{_, _} ...}] := (s = Sort[x]; For[i=Length[s], i>1, i-=1, If[s[[i,1]] == s[[i-1,1]], s[[i-1,2]]+=s[[i,2]]; s=Delete[s,i], Null]]; s)
+%t A327083 CycleX[p_List] := CycleX[p] = compress[Join[CycleX[Drop[p,-1]], If[Last[p] > 1, CycleX[{Last[p]}], ## &[]], If[# == Last[p], {#, Last[p]}, {LCM[#, Last[p]], GCD[#, Last[p]]}] & /@ Drop[p,-1]]]
+%t A327083 pc[p_List] := Module[{ci, mb}, mb = DeleteDuplicates[p]; ci = Count[p, #] & /@ mb; Total[p]!/(Times @@ (ci!) Times @@ (mb^ci))] (*partition count*)
+%t A327083 row[n_Integer] := row[n] = Factor[Total[If[EvenQ[Total[1-Mod[#,2]]], pc[#] j^Total[CycleX[#]][[2]], 0] & /@ IntegerPartitions[n+1]]/((n+1)!/2)]
+%t A327083 array[n_, k_] := row[n] /. j -> k
+%t A327083 Table[array[n,d-n+1], {d,1,10}, {n,1,d}] // Flatten
+%t A327083 (* Using Fripertinger's exponent per Andrew Howroyd's code in A063841: *)
+%t A327083 pc[p_] := Module[{ci, mb}, mb = DeleteDuplicates[p]; ci = Count[p, #] &/@ mb; Total[p]!/(Times @@ (ci!) Times @@ (mb^ci))]
+%t A327083 ex[v_] := Sum[GCD[v[[i]], v[[j]]], {i,2,Length[v]}, {j,i-1}] + Total[Quotient[v,2]]
+%t A327083 array[n_,k_] := Total[If[EvenQ[Total[1-Mod[#,2]]], pc[#]k^ex[#], 0] &/@ IntegerPartitions[n+1]]/((n+1)!/2)
+%t A327083 Table[array[n,d-n+1], {d,10}, {n,d}] // Flatten
+%Y A327083 Cf. A327084 (unoriented), A327085 (chiral), A327086 (achiral), A327087 (exactly k colors), A324999 (vertices, facets), A337883 (faces, peaks), A337407 (orthotope edges, orthoplex ridges), A337411 (orthoplex edges, orthotope ridges).
+%Y A327083 Rows 1-4 are A000027, A006527, A046023, A331350.
+%Y A327083 Column 2 is A218144(n+1).
+%K A327083 nonn,tabl
+%O A327083 1,2
+%A A327083 _Robert A. Russell_, Aug 19 2019

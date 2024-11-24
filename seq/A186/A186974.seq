@@ -1,0 +1,43 @@
+%I A186974 #34 Sep 02 2019 22:30:00
+%S A186974 1,2,1,3,3,1,4,5,2,5,9,7,2,6,11,8,2,7,17,19,10,2,8,21,25,14,3,9,27,37,
+%T A186974 24,6,10,31,42,26,6,11,41,73,68,32,6,12,45,79,72,33,6,13,57,124,151,
+%U A186974 105,39,6,14,63,138,167,114,41,6,15,71,159,192,128,44,6
+%N A186974 Irregular triangle T(n,k), n>=1, 1<=k<=A036234(n), read by rows: T(n,k) is the number of k-element subsets of {1, 2, ..., n} having pairwise coprime elements.
+%C A186974 T(n,k) = 0 for k > A036234(n). The triangle contains all positive values of T.
+%H A186974 Alois P. Heinz, <a href="/A186974/b186974.txt">Rows n = 1..220, flattened</a>
+%F A186974 T(n,k) = Sum_{i=1..n} A186972(i,k).
+%e A186974 T(5,3) = 7 because there are 7 3-element subsets of {1,2,3,4,5} having pairwise coprime elements: {1,2,3}, {1,2,5}, {1,3,4}, {1,3,5}, {1,4,5}, {2,3,5}, {3,4,5}.
+%e A186974 Irregular Triangle T(n,k) begins:
+%e A186974   1;
+%e A186974   2,  1;
+%e A186974   3,  3,  1;
+%e A186974   4,  5,  2;
+%e A186974   5,  9,  7,  2;
+%e A186974   6, 11,  8,  2;
+%e A186974   7, 17, 19, 10, 2;
+%p A186974 with(numtheory):
+%p A186974 s:= proc(m, r) option remember; mul(`if`(i<r, i, 1), i=factorset(m)) end:
+%p A186974 a:= n-> pi(n) +1:
+%p A186974 b:= proc(t, n, k) option remember; local c, d, h;
+%p A186974       if k=0 or k>n then 0
+%p A186974     elif k=1 then 1
+%p A186974     elif k=2 and t=n then `if`(n<2, 0, phi(n))
+%p A186974     else c:= 0;
+%p A186974          d:= 2-irem(t, 2);
+%p A186974          for h from 1 to n-1 by d do
+%p A186974            if igcd(t, h)=1 then c:= c +b(s(t*h, h), h, k-1) fi
+%p A186974          od; c
+%p A186974       fi
+%p A186974     end:
+%p A186974 T:= proc(n, k) option remember;
+%p A186974        b(s(n, n), n, k) +`if`(n<2, 0, T(n-1, k))
+%p A186974     end:
+%p A186974 seq(seq(T(n, k), k=1..a(n)), n=1..20);
+%t A186974 s[m_, r_] := s[m, r] = Product[If[i < r, i, 1], {i, FactorInteger[m][[All, 1]]}]; a[n_] := PrimePi[n]+1; b[t_, n_, k_] := b[t, n, k] = Module[{c, d, h}, Which[k == 0 || k > n, 0, k == 1, 1, k == 2 && t == n, If[n < 2, 0, EulerPhi[n]], True, c = 0; d = 2-Mod[t, 2]; For[h = 1, h <= n-1, h = h+d, If[ GCD[t, h] == 1, c = c + b[s[t*h, h], h, k-1]]]; c]]; t[n_, k_] := t[n, k] = b[s[n, n], n, k] + If[n < 2, 0, t[n-1, k]]; Table[Table[t[n, k], { k, 1, a[n]}], {n, 1, 20}] // Flatten (* _Jean-François Alcover_, Dec 17 2013, translated from Maple *)
+%Y A186974 Columns k=1-10 give: A000027, A015614, A015617, A015623, A015698, A186982, A186983, A186984, A186985, A186986.
+%Y A186974 Row sums give A187106.
+%Y A186974 Rightmost terms of rows give A319187.
+%Y A186974 Cf. A036234, A186972.
+%K A186974 nonn,tabf
+%O A186974 1,2
+%A A186974 _Alois P. Heinz_, Mar 02 2011

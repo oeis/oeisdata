@@ -1,0 +1,65 @@
+%I A238014 #41 Nov 14 2017 08:20:06
+%S A238014 1,1,2,2,4,6,12,20,48,84,216,408,1104,2280,6288,14128,40256,96240,
+%T A238014 287904,714016,2246592,5750112,18900672,49973568,169592576,466175808,
+%U A238014 1618212224,4637091200,16393123072,48926588544,176264622336,545058738944,2008508679168
+%N A238014 Number of chess tableaux with n cells.
+%C A238014 A standard Young tableau (SYT) with cell(i,j) + i + j == 1 mod 2 for all cells is called a chess tableau. In other words, the odd numbered cells appear in the first, third, fifth, etc., skew diagonal, and the even numbered cells appear in the second, fourth, sixth, etc., skew diagonal. The definition appears first in the article by Jonas Sjöstrand.
+%C A238014 All terms for n>=2 are even, as the conjugate of each chess tableau is a different chess tableau for n>=2.
+%C A238014 Number of ballot sequences (with least element and first index either both 0 or both 1) with index of first occurrence of each element e of same parity as e, and identical elements separated by an even number of different elements, see example. [_Joerg Arndt_, Feb 28 2014]
+%H A238014 Alois P. Heinz, <a href="/A238014/b238014.txt">Table of n, a(n) for n = 0..58</a>
+%H A238014 T. Y. Chow, H. Eriksson and C. K. Fan, <a href="http://www.combinatorics.org/Volume_11/Abstracts/v11i2a3.html">Chess tableaux</a>, Elect. J. Combin., 11 (2) (2005), #A3.
+%H A238014 Jonas Sjöstrand, <a href="https://arxiv.org/abs/math/0309231v3">On the sign-imbalance of partition shapes</a>, arXiv:math/0309231v3 [math.CO], 2005.
+%H A238014 Wikipedia, <a href="https://en.wikipedia.org/wiki/Young_tableau">Young tableau</a>
+%F A238014 a(n) = Sum_{lambda : partitions(n)} chess(lambda), where chess(lambda) is the number of chess tableaux of shape lambda.
+%e A238014 a(5) = 6:
+%e A238014 [1]  [1 4]  [1 2 3]  [1 4 5]  [1 2 3]  [1 2 3 4 5]
+%e A238014 [2]  [2 5]  [4]      [2]      [4 5]
+%e A238014 [3]  [3]    [5]      [3]
+%e A238014 [4]
+%e A238014 [5]
+%e A238014 Note how the tableaux become partial chessboards when reduced modulo 2:
+%e A238014 [1]  [1 0]  [1 0 1]  [1 0 1]  [1 0 1]  [1 0 1 0 1]
+%e A238014 [0]  [0 1]  [0]      [0]      [0 1]
+%e A238014 [1]  [1]    [1]      [1]
+%e A238014 [0]
+%e A238014 [1]
+%e A238014 From _Joerg Arndt_, Feb 28 2014: (Start)
+%e A238014 The a(7) = 20 ballot sequences are (dots for zeros):
+%e A238014 01:    [ . . . . . . . ]
+%e A238014 02:    [ . . . . . 1 1 ]
+%e A238014 03:    [ . . . . . 1 2 ]
+%e A238014 04:    [ . . . 1 1 . . ]
+%e A238014 05:    [ . . . 1 1 . 2 ]
+%e A238014 06:    [ . . . 1 1 1 2 ]
+%e A238014 07:    [ . . . 1 2 . . ]
+%e A238014 08:    [ . . . 1 2 . 1 ]
+%e A238014 09:    [ . . . 1 2 3 1 ]
+%e A238014 10:    [ . . . 1 2 3 4 ]
+%e A238014 11:    [ . 1 2 . . . . ]
+%e A238014 12:    [ . 1 2 . . . 1 ]
+%e A238014 13:    [ . 1 2 . . 3 1 ]
+%e A238014 14:    [ . 1 2 . . 3 4 ]
+%e A238014 15:    [ . 1 2 . 1 2 . ]
+%e A238014 16:    [ . 1 2 . 1 3 . ]
+%e A238014 17:    [ . 1 2 . 1 3 4 ]
+%e A238014 18:    [ . 1 2 3 4 . . ]
+%e A238014 19:    [ . 1 2 3 4 . 1 ]
+%e A238014 20:    [ . 1 2 3 4 5 6 ]
+%e A238014 (End)
+%p A238014 b:= proc() option remember; local s; s:= add(i, i=args); `if`(s=0, 1,
+%p A238014       `if`(args[nargs]=0, b(subsop(nargs=NULL, [args])[]),
+%p A238014       add(`if`(irem(s+i-args[i], 2)=1 and args[i]>`if`(i=nargs, 0,
+%p A238014       args[i+1]), b(subsop(i=args[i]-1, [args])[]), 0), i=1..nargs)))
+%p A238014     end:
+%p A238014 g:= (n, i, l)-> `if`(n=0 or i=1, b(l[], 1$n), `if`(i<1, 0,
+%p A238014                  add(g(n-i*j, i-1, [l[], i$j]), j=0..n/i))):
+%p A238014 a:= n-> g(n, n, []):
+%p A238014 seq(a(n), n=0..32);
+%t A238014 b[args_] := b[args] = Module[{nargs = Length[args], s = Total[args]}, If[s == 0, 1, If[Last[args] == 0, b[Most[args]], Sum[If[Mod[s + i - args[[i]], 2] == 1 && args[[i]] > If[i == nargs, 0, args[[i + 1]]], b[Append[ ReplacePart[ args, i -> args[[i]] - 1], 0]], 0], {i, 1, nargs}]]]];
+%t A238014 g[n_, i_, l_] := g[n, i, l] = If[n == 0 || i == 1, b[Join[l, Table[1, n]]], If[i < 1, 0, Sum[g[n - i*j, i - 1, Join[l, Table[i, j]]], {j, 0, n/i}]]];
+%t A238014 a[n_] := g[n, n, {}];
+%t A238014 Table[a[n], {n, 0, 32}] (* _Jean-François Alcover_, Nov 14 2017, after _Alois P. Heinz_ *)
+%Y A238014 Cf. A108774, A214020, A237770, A238020.
+%K A238014 nonn
+%O A238014 0,3
+%A A238014 _Alois P. Heinz_, Feb 17 2014

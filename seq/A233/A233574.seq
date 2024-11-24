@@ -1,0 +1,40 @@
+%I A233574 #9 Jul 17 2014 22:20:29
+%S A233574 0,1,2,2,4,3,4,6,8,6,6,8,8,7,12,8,10,9,10,13,12,13,16,20,16,18,26,18,
+%T A233574 18,20,18,18,20,20,18,26,20,24,26,21,24,21,26,43,32,24,28,26,28,43,30,
+%U A233574 27,28,27,28,54,30,39,40,32,32,43,32,39,40,39,40,43,36
+%N A233574 a(n) is the smallest term of either A233010 or A233572 such that |n-a(n)|<a(n) is a term of one of the two sequences.
+%C A233574 It is conjectured that a(n) exists for all n >= 0.
+%H A233574 Lei Zhou, <a href="/A233574/b233574.txt">Table of n, a(n) for n = 0..10000</a>
+%e A233574 a(19)=13 since 19=13+6=A233010(9)+A233572(3) and 13>6. There is no number in A233010 or A233572 smaller than 13 that satisfies the same condition.
+%t A233574 BTDigits[m_Integer, g_] :=
+%t A233574 (*This is to determine digits of a number in balanced ternary notation.*)
+%t A233574 Module[{n = m, d, sign, t = g},
+%t A233574   If[n != 0, If[n > 0, sign = 1, sign = -1; n = -n];
+%t A233574    d = Ceiling[Log[3, n]]; If[3^d - n <= ((3^d - 1)/2), d++];
+%t A233574    While[Length[t] < d, PrependTo[t, 0]];
+%t A233574    t[[Length[t] + 1 - d]] = sign;
+%t A233574    t = BTDigits[sign*(n - 3^(d - 1)), t]]; t];
+%t A233574 BTpaleQ[n_Integer] :=
+%t A233574 (*This is to query if a number is an element of sequence A233010.*)
+%t A233574 Module[{t, trim = n/3^IntegerExponent[n, 3]},
+%t A233574   t = BTDigits[trim, {0}]; t == Reverse[t]];
+%t A233574 BTrteQ[n_Integer] :=
+%t A233574 (*This is to query if a number is an element of sequence A233572.*)
+%t A233574 Module[{t, trim = n/3^IntegerExponent[n, 3]},
+%t A233574   t = BTDigits[trim, {0}]; DeleteDuplicates[t + Reverse[t]] == {0}];
+%t A233574 sa = Select[Range[0, 30000], BTpaleQ[#] &];
+%t A233574 (*This is to generate a limited list of A233010.*)
+%t A233574 sb = Select[Range[0, 30000], BTrteQ[#] &];
+%t A233574 (*This is to generate a limited list of A233572.*)
+%t A233574 range = 68; Table[i1 = 0; i2 = 0;
+%t A233574 While[If[sa[[i1 + 1]] < sb[[i2 + 1]], i1++; nh = sa[[i1]]; isa = 1,
+%t A233574    i2++; nh = sb[[i2]]; isa = 0]; (2*nh) < n];
+%t A233574 While[If[isa == 0, chk = MemberQ[sa, Abs[n - nh]],
+%t A233574    chk = MemberQ[sb, Abs[n - nh]]]; ! chk,
+%t A233574   If[sa[[i1 + 1]] < sb[[i2 + 1]], i1++; nh = sa[[i1]]; isa = 1, i2++;
+%t A233574    nh = sb[[i2]]; isa = 0]];
+%t A233574 If[isa == 0, m = sb[[i2]], m = sa[[i1]]]; m, {n, 0, range}]
+%Y A233574 Cf. A002113, A061917, A006995, A057890, A134027, A233010, A233571, A233572, A233573
+%K A233574 nonn,base,easy
+%O A233574 0,3
+%A A233574 _Lei Zhou_, Dec 13 2013

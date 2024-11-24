@@ -1,0 +1,34 @@
+%I A376411 #34 Nov 14 2024 08:22:08
+%S A376411 0,1,2,4,6,13,3,7,11,21,32,64,18,36,54,108,162,325,90,180,271,541,812,
+%T A376411 1624,450,902,1354,2707,4061,8122,5,10,15,30,45,91,25,50,75,151,227,
+%U A376411 454,126,253,378,758,1137,2274,632,1264,1895,3790,5685,11370,3158,6317,9475,18952,28428,56856,35,70,106,212,318,637
+%N A376411 a(n) is the number of terms less than A276086(n) in the range of A276086, where A276086 is the primorial base exp-function.
+%C A376411 Number of terms of A048103 that are less than A276086(n).
+%C A376411 Permutation of nonnegative integers.
+%C A376411 Troughs are at primorials, A002110, and the local maxima occur just before, at A057588.
+%H A376411 Antti Karttunen, <a href="/A376411/b376411.txt">Table of n, a(n) for n = 0..419</a>
+%H A376411 <a href="/index/Pri#primorialbase">Index entries for sequences related to primorial base</a>
+%H A376411 <a href="/index/Per#IntegerPermutation">Index entries for sequences that are permutations of the natural numbers</a>
+%F A376411 a(n) = A377982(A276086(n))-1 = Sum_{i=1 .. A276086(n)-1} A359550(i).
+%F A376411 For all n >= 1, a(A376413(n)) = n-1, and for all n >= 0, A376413(1+a(n)) = n.
+%F A376411 a(i)/a(j) ~ A276086(i)/A276086(j), and particularly, a(2*n+1) ~ 2*a(2*n).
+%o A376411 (PARI)
+%o A376411 up_to = (2*210)-1; \\ Must be one of the terms of A343048.
+%o A376411 A276085(n) = { my(f = factor(n), pr=1, i=1, s=0); for(k=1, #f~, while(i <= primepi(f[k, 1])-1, pr *= prime(i); i++); s += f[k, 2]*pr); (s); };
+%o A376411 A276086(n) = { my(m=1, p=2); while(n, m *= (p^(n%p)); n = n\p; p = nextprime(1+p)); (m); };
+%o A376411 A359550(n) = { my(pp); forprime(p=2, , pp = p^p; if(!(n%pp), return(0)); if(pp > n, return(1))); };
+%o A376411 A376411list(up_to) = { my(size=up_to, v=vector(size), m=A276086(size), s=1, j); for(i=2,m,if(!(m%i), j=A276085(i); v[j] = s; print1("i=",i," v[",j,"]=",s", ");); s += A359550(i)); (v); };
+%o A376411 v376411 = A376411list(up_to);
+%o A376411 A376411(n) = if(!n,n,v376411[n]);
+%o A376411 (PARI)
+%o A376411 \\ For incremental computing, less efficient than above:
+%o A376411 A276086(n) = { my(m=1, p=2); while(n, m *= (p^(n%p)); n = n\p; p = nextprime(1+p)); (m); };
+%o A376411 A359550(n) = { my(pp); forprime(p=2, , pp = p^p; if(!(n%pp), return(0)); if(pp > n, return(1))); };
+%o A376411 memoA376411 = Map(); \\ We use k=A276086(n) as our key. kvs will be a list of key-value-pairs sorted into descending order by the key. We search the largest key in it < k, and continue summing from that:
+%o A376411 A376411(n) = if(n<=2,n,my(v, k=A276086(n)); if(mapisdefined(memoA376411,k,&v), v, my(kvs = vecsort(Mat(memoA376411)~,(x,y) -> sign(y[1]-x[1])), ss=si=0); for(i=1, #kvs, if(kvs[1,i]<k, si=kvs[1,i]; ss=kvs[2,i]; break)); v = ss + sum(i=si,k-1,A359550(i)); mapput(memoA376411,k,v); (v)));
+%Y A376411 Cf. A048103, A057588, A276086, A343048, A359550, A377982.
+%Y A376411 Cf. A376413 (inverse permutation, but note the different offsets and ranges).
+%Y A376411 Cf. also A064273 (analogous permutation for base-2).
+%K A376411 nonn,new
+%O A376411 0,3
+%A A376411 _Antti Karttunen_, Nov 13 2024

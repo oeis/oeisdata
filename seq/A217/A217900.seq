@@ -1,0 +1,46 @@
+%I A217900 #47 Jan 28 2017 07:05:29
+%S A217900 1,1,4,38,576,12052,322848,10564304,408903680,18288706544,
+%T A217900 928575662400,52780935007968,3321208845997056,229232635832433664,
+%U A217900 17221699990084108288,1399139700462119135232,122235936429355565580288,11428226675376971405577984,1138551595285580854471388160
+%N A217900 O.g.f.: Sum_{n>=0} n^n * (n+1)^(n-1) * exp(-n*(n+1)*x) * x^n / n!.
+%C A217900 Compare the g.f. to the LambertW identity:
+%C A217900 1 = Sum_{n>=0} (n+1)^(n-1) * exp(-(n+1)*x) * x^n/n!.
+%C A217900 More generally, if we define a(n) for fixed integers m, t, and s>=0, by:
+%C A217900 (0) Sum_{n>=0} m * n^(s*n) * (n*t+m)^(n-1) * exp(-n^s*(n*t+m)*x) * x^n/n! = Sum_{n>=0} a(n)*x^n
+%C A217900 then the coefficients a(n) are integral and may be expressed by:
+%C A217900 (1) a(n) = 1/n! * Sum_{k=0..n} m*(-1)^(n-k)*binomial(n,k) * k^(s*n) * (k*t+m)^(n-1).
+%C A217900 (2) a(n) = 1/n! * [x^n] Sum_{k>=0} m*k^(s*k)*(k*t+m)^(k-1)*x^k / (1 + k^s*(k*t+m)*x)^(k+1).
+%C A217900 (3) a(n) = 1/t^((s-1)*n) * [x^(s*n)] 1 + m*x*(1+m*x)^(n-1) / Product_{k=1..n} (1-k*t*x).
+%C A217900 (4) a(n) = 1/t^((s-1)*n) * [x^(s*n)] 1 + m*x*(1-m*x)^(s*n) / Product_{k=1..n} (1-(k*t+m)*x).
+%H A217900 G. C. Greubel, <a href="/A217900/b217900.txt">Table of n, a(n) for n = 0..345</a>
+%F A217900 a(n) = 1/n! * Sum_{k=0..n} (-1)^(n-k)*binomial(n,k) * k^n * (k+1)^(n-1).
+%F A217900 a(n) = 1/n! * [x^n] Sum_{k>=0} k^k*(k+1)^(k-1)*x^k / (1 + k*(k+1)*x)^(k+1).
+%F A217900 a(n) = [x^n] 1 + x*(1+x)^(n-1) / Product_{k=1..n} (1-k*x).
+%F A217900 a(n) = [x^n] 1 + x*(1-x)^(n-1) / Product_{k=1..n} (1-(k+1)*x).
+%F A217900 a(n) = A078739(n,n) for n>=1.
+%F A217900 a(n) = Sum_{k=0..n-1} binomial(n-1,k) * Stirling2(2*n-k-1,n) for n>0, where Stirling2(n,k) = A008277(n,k). - _Paul D. Hanna_, Nov 13 2012
+%F A217900 a(n) ~ 2^(2*n-1) * n^(n-3/2) / (sqrt(Pi*(1-c)) * exp(n) * (2-c)^(n-1) * c^(n+1/2)), where c = -LambertW(-2*exp(-2)) = 0.4063757399599599... = 2*A106533. - _Vaclav Kotesovec_, May 09 2014
+%e A217900 O.g.f.: A(x) = 1 + x + 4*x^2 + 38*x^3 + 576*x^4 + 12052*x^5 + 322848*x^6 +...
+%e A217900 where
+%e A217900 A(x) = 1 + 1^1*2^0*x*exp(-1*2*x) + 2^2*3^1*exp(-2*3*x)*x^2/2! + 3^3*4^2*exp(-3*4*x)*x^3/3! + 4^4*5^3*exp(-4*5*x)*x^4/4! + 5^5*6^4*exp(-5*6*x)*x^5/5! +...
+%e A217900 simplifies to a power series in x with integer coefficients.
+%t A217900 a[n_] := 1/n!*Sum[(-1)^(n-k)*Binomial[n, k]*k^n*(k+1)^(n-1), {k, 0, n}]; a[0]=1; Table[a[n], {n, 0, 18}] (* _Jean-François Alcover_, Mar 06 2013 *)
+%o A217900 (PARI) {a(n)=polcoeff(sum(m=0,n,m^m*(m+1)^(m-1)*x^m*exp(-m*(m+1)*x+x*O(x^n))/m!),n)}
+%o A217900 (PARI) {a(n)=(1/n!)*polcoeff(sum(k=0, n, k^k*(k+1)^(k-1)*x^k/(1+k*(k+1)*x +x*O(x^n))^(k+1)), n)}
+%o A217900 (PARI) {a(n)=1/n!*sum(k=0,n, (-1)^(n-k)*binomial(n,k)*k^n*(k+1)^(n-1))}
+%o A217900 (PARI) {a(n)=polcoeff(1+x*(1+x)^(n-1)/prod(k=0, n, 1-k*x +x*O(x^n)), n)}
+%o A217900 (PARI) {a(n)=polcoeff(1+x*(1-x)^n/prod(k=0, n, 1-(k+1)*x +x*O(x^n)), n)}
+%o A217900 for(n=0,30,print1(a(n),", "))
+%o A217900 (PARI) {Stirling2(n, k)=n!*polcoeff(((exp(x+x*O(x^n))-1)^k)/k!, n)}
+%o A217900 {a(n)=if(n==0,1,sum(k=0,n-1, binomial(n-1,k) * Stirling2(2*n-k-1,n)))} \\ _Paul D. Hanna_, Nov 13 2012
+%o A217900 /* PARI Programs for the General Case (START) ...................... */
+%o A217900 (PARI) {a(n,m=1,t=1,s=1)=polcoeff(sum(k=0, n, m*k^(s*k)*(t*k+m)^(k-1)*exp(-k^s*(t*k+m)*x+x*O(x^n))*x^k/k!), n)}
+%o A217900 (PARI) {a(n,m=1,t=1,s=1)=(1/n!)*polcoeff(sum(k=0, n, m*k^(s*k)*(t*k+m)^(k-1)*x^k/(1+k^s*(t*k+m)*x +x*O(x^n))^(k+1)), n)}
+%o A217900 (PARI) {a(n,m=1,t=1,s=1)=1/n!*sum(k=0, n, m*(-1)^(n-k)*binomial(n, k)*k^(s*n)*(t*k+m)^(n-1))}
+%o A217900 (PARI) {a(n,m=1,t=1,s=1)=(1/t^((s-1)*n))*polcoeff(1+m*x*(1+m*x)^(n-1)/prod(k=0, n, 1-t*k*x +x*O(x^(s*n))), s*n)}
+%o A217900 (PARI) {a(n,m=1,t=1,s=1)=(1/t^((s-1)*n))*polcoeff(1+m*x*(1-m*x)^(s*n)/prod(k=0, n, 1-(t*k+m)*x +x*O(x^(s*n))), s*n)}
+%o A217900 /* (END) ........................................................... */
+%Y A217900 Cf. A078739, A217899, A217901, A217902, A217903, A217904, A217905, A217910, A217913, A218300.
+%K A217900 nonn
+%O A217900 0,3
+%A A217900 _Paul D. Hanna_, Oct 14 2012

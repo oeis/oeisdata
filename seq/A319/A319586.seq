@@ -1,0 +1,34 @@
+%I A319586 #29 Jul 13 2021 03:09:44
+%S A319586 2,0,8,7,95,94,975,971,9810,9805,98288,98272
+%N A319586 Number of n-digit base-10 palindromes (A002113) that cannot be written as the sum of two positive base-10 palindromes.
+%e A319586 a(1) = 2, because 0 and 1 are not sums of two positive 1-digit integers, all of which are palindromes. a(3) = 8, because the 8 3-digit palindromes 111, 131, 141, 151, 161, 171, 181, and 191 (A213879(2) ... A213879(9)) cannot be written as sum of two nonzero palindromes.
+%o A319586 (PARI) \\ calculates a(2)...a(8) using _M. F. Hasler_'s functions in A002113
+%o A319586 A002113(n)={my(L=logint(n,10));(n-=L=10^max(L-(n<11*10^(L-1)), 0))*L+fromdigits(Vecrev(digits(if(n<L,n,n\10))))}
+%o A319586 is_A002113(n)={Vecrev(n=digits(n))==n}
+%o A319586 inv_A002113(P)={P\(P=10^(logint(P+!P, 10)\/2))+P}
+%o A319586 for(i=1,8,j=0;for(m=inv_A002113(10^i+1),inv_A002113(2*(10^i+1)),P=A002113(m);issum=0;for(k=2,m,PP=A002113(k);if(PP>P/2,break);if(is_A002113(P-PP),issum=1;break));if(issum==0,j++));print1(j,", ",))
+%o A319586 (Python)
+%o A319586 from sympy import isprime
+%o A319586 from itertools import product
+%o A319586 def pals(d, base=10): # all d-digit palindromes
+%o A319586     digits = "".join(str(i) for i in range(base))
+%o A319586     for p in product(digits, repeat=d//2):
+%o A319586         if d > 1 and p[0] == "0": continue
+%o A319586         left = "".join(p); right = left[::-1]
+%o A319586         for mid in [[""], digits][d%2]: yield int(left + mid + right)
+%o A319586 def a(n):
+%o A319586     palslst = [p for d in range(1, n+1) for p in pals(d)][1:]
+%o A319586     palsset = set(palslst)
+%o A319586     cs = ctot = 0
+%o A319586     for p in pals(n):
+%o A319586         ctot += 1
+%o A319586         for p1 in palslst:
+%o A319586             if p - p1 in palsset: cs += 1; break
+%o A319586             if p1 > p//2: break
+%o A319586     return ctot - cs
+%o A319586 print([a(n) for n in range(1, 8)]) # _Michael S. Branicky_, Jul 12 2021
+%Y A319586 Cf. A002113, A035137, A213879, A319477.
+%K A319586 nonn,base,hard,more
+%O A319586 1,1
+%A A319586 _Hugo Pfoertner_, Sep 23 2018
+%E A319586 a(12) from _Giovanni Resta_, Oct 01 2018

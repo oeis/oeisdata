@@ -1,0 +1,57 @@
+%I A373354 #15 Oct 08 2024 07:27:15
+%S A373354 1,1,1,1,1,1,1,2,3,1,1,2,1,3,1,1,2,2,3,3,1,1,2,0,1,0,3,1,1,1,1,1,1,1,
+%T A373354 1,1,1,2,2,3,1,2,3,3,1,1,2,0,3,2,3,2,0,3,1,1,2,2,1,0,1,0,1,3,3,1,1,2,
+%U A373354 2,1,0,2,3,0,1,3,3,1,1,2,3,3,2,0,1,0,3,2,2,3,1
+%N A373354 Triangle read by rows: T(n, k) = [n - k + 1 | k] where [n | k] is defined below.
+%H A373354 Carl Friedrich Gauss, <a href="http://gdz.sub.uni-goettingen.de/dms/load/img/?PID=PPN373456743%7CLOG_0008">Vierter Abschnitt. Von den Congruenzen zweiten Grades. Quadratische Reste und Nichtreste. Art. 97</a>, in "Untersuchungen über die höhere Arithmetik", Hrsg. H. Maser, Verlag von Julius Springer, Berlin, 1889.
+%F A373354 Let two positive numbers n, k be given. We write (n R k) if two integers x and y exist, such that x^2 = n + k*y, and (n N k) otherwise. If the condition is satisfied n is called a quadratic residue modulo k. We distinguish four cases:
+%F A373354   [n | k] := 0 if (n N k) and (k N n);
+%F A373354   [n | k] := 1 if (n R k) and (k R n);
+%F A373354   [n | k] := 2 if (n R k) and (k N n);
+%F A373354   [n | k] := 3 if (n N k) and (k R n).
+%F A373354 We set T(n, k) = [n - k + 1 | k].
+%F A373354 Exchanging 2 <-> 3 reverses the rows.
+%F A373354 All terms of row n are 1 <==> n = 1, 2 or n is of the form k*(k-2), k >= 3.
+%e A373354 Triangle starts:
+%e A373354   [ 1] 1;
+%e A373354   [ 2] 1, 1;
+%e A373354   [ 3] 1, 1, 1;
+%e A373354   [ 4] 1, 2, 3, 1;
+%e A373354   [ 5] 1, 2, 1, 3, 1;
+%e A373354   [ 6] 1, 2, 2, 3, 3, 1;
+%e A373354   [ 7] 1, 2, 0, 1, 0, 3, 1;
+%e A373354   [ 8] 1, 1, 1, 1, 1, 1, 1, 1;
+%e A373354   [ 9] 1, 2, 2, 3, 1, 2, 3, 3, 1;
+%e A373354   [10] 1, 2, 0, 3, 2, 3, 2, 0, 3, 1;
+%e A373354   [11] 1, 2, 2, 1, 0, 1, 0, 1, 3, 3, 1;
+%e A373354   [12] 1, 2, 2, 1, 0, 2, 3, 0, 1, 3, 3, 1;
+%p A373354 QRS := proc(n, k) local QR, p, q, a, b;
+%p A373354    QR := (a, n) -> NumberTheory:-QuadraticResidue(a, n);
+%p A373354    a := QR(n, k); b := QR(k, n);
+%p A373354    if a = -1 and b = -1 then return 0 fi;
+%p A373354    if a =  1 and b =  1 then return 1 fi;
+%p A373354    if a =  1 and b = -1 then return 2 fi;
+%p A373354    if a = -1 and b =  1 then return 3 fi;
+%p A373354 end: for n from 1 to 12 do lprint([n], seq(QRS(n-k+1, k), k = 1..n)) od;
+%t A373354 QR[n_, k_] := Module[{x, y}, If[Reduce[x^2 == n + k*y, {x, y}, Integers] =!= False, 1, -1]];
+%t A373354 QRS[n_, k_] := With[{a = QR[n, k], b = QR[k, n]}, Which[
+%t A373354    a == -1 && b == -1, 0,
+%t A373354    a == 1 && b == 1, 1,
+%t A373354    a == 1 && b == -1, 2,
+%t A373354    a == -1 && b == 1, 3]];
+%t A373354 Table[QRS[n - k + 1, k], {n, 1, 13}, {k, 1, n}] // Flatten (* _Jean-François Alcover_, Oct 08 2024 *)
+%o A373354 (Python)
+%o A373354 from sympy.ntheory import is_quad_residue
+%o A373354 def QR(n, k): return is_quad_residue(n, k)
+%o A373354 def QRS(n, k):
+%o A373354     a = QR(n, k); b = QR(k, n)
+%o A373354     if not a and not b: return 0
+%o A373354     if a and b: return 1
+%o A373354     if a and not b: return 2
+%o A373354     if not a and b: return 3
+%o A373354 def T(n, k): return QRS(n - k + 1, k)
+%o A373354 for n in range(1, 13): print([n], [T(n, k) for k in range(1, n + 1)])
+%Y A373354 Cf. A373223, A373355 (restricted to primes).
+%K A373354 nonn,tabl
+%O A373354 1,8
+%A A373354 _Peter Luschny_, Jun 02 2024

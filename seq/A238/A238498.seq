@@ -1,0 +1,47 @@
+%I A238498 #32 Jul 02 2019 08:38:55
+%S A238498 1,1,1,1,3,1,1,4,4,1,1,6,8,6,1,1,6,12,12,6,1,1,12,24,36,24,12,1,1,8,
+%T A238498 32,48,48,32,8,1,1,12,32,96,96,96,32,12,1,1,12,48,96,192,192,96,48,12,
+%U A238498 1,1,18,72,216,288,576,288,216,72,18,1,1,12,72,216,432,576,576,432,216,72,12,1
+%N A238498 Triangle read by rows: T(n,k) = A175836(n)/(A175836(k)* A175836(n-k)).
+%C A238498 We assume that A175836(0)=1 since it would be the empty product.
+%C A238498 These are the generalized binomial coefficients associated with the Dedekind psi function A001615.
+%C A238498 Another name might be the psi-nomial coefficients.
+%H A238498 Reinhard Zumkeller, <a href="/A238498/b238498.txt">Rows n = 0..125 of triangle, flattened</a>
+%H A238498 Tom Edgar, <a href="http://www.emis.de/journals/INTEGERS/papers/o62/o62.Abstract.html">Totienomial Coefficients</a>, INTEGERS, 14 (2014), #A62.
+%H A238498 Tom Edgar and Michael Z. Spivey, <a href="https://cs.uwaterloo.ca/journals/JIS/VOL19/Edgar/edgar3.html">Multiplicative functions, generalized binomial coefficients, and generalized Catalan numbers</a>, Journal of Integer Sequences, Vol. 19 (2016), Article 16.1.6.
+%H A238498 Donald E. Knuth and Herbert S. Wilf, <a href="http://www.math.upenn.edu/~wilf/website/dm36.pdf">The power of a prime that divides a generalized binomial coefficient</a>, J. Reine Angew. Math., 396:212-219, 1989.
+%F A238498 T(n,k) = A175836(n)/(A175836(k)*A175836(n-k)).
+%F A238498 T(n,k) = prod_{i=1..n} A001615(i)/(prod_{i=1..k} A001615(i)*prod_{i=1..n-k} A001615(i)).
+%F A238498 T(n,k) = A001615(n)/n*(k/A001615(k)*T(n-1,k-1)+(n-k)/A001615(n-k)*T(n-1,k)).
+%F A238498 T(n,k) = A238688(n,k)/A238453(n,k).
+%e A238498 The first five terms in the Dedekind psi function are 1,3,4,6,6 and so T(4,2) = 6*4*3*1/((3*1)*(3*1))=8 and T(5,3) = 6*6*4*3*1/((4*3*1)*(3*1))=12.
+%e A238498 The triangle begins
+%e A238498 1
+%e A238498 1  1
+%e A238498 1  3  1
+%e A238498 1  4  4  1
+%e A238498 1  6  8  6  1
+%e A238498 1  6  12 12 6 1
+%p A238498 A175836 := proc(n) option remember; local p;
+%p A238498 `if`(n<2,1,n*mul(1+1/p,p=factorset(n))*A175836(n-1)) end:
+%p A238498 A238498 := (n,k) -> A175836(n)/(A175836(k)*A175836(n-k)):
+%p A238498 seq(seq(A238498(n,k),k=0..n),n=0..10); # _Peter Luschny_, Feb 28 2014
+%t A238498 DedekindPsi[n_] := Sum[MoebiusMu[n/d] d^2 , {d, Divisors[n]}]/EulerPhi[n];
+%t A238498 (* b = A175836 *) b[n_] := Times @@ DedekindPsi /@ Range[n];
+%t A238498 T[n_, k_] := b[n]/(b[k] b[n-k]);
+%t A238498 Table[T[n, k], {n, 0, 11}, {k, 0, n}] (* _Jean-François Alcover_, Jul 02 2019 *)
+%o A238498 (Sage)
+%o A238498 q=100 #change q for more rows
+%o A238498 P=[0]+[i*prod([(1+1/x) for x in prime_divisors(i)]) for i in [1..q]]
+%o A238498 [[prod(P[1:n+1])/(prod(P[1:k+1])*prod(P[1:(n-k)+1])) for k in [0..n]] for n in [0..len(P)-1]] #generates the triangle up to q rows.
+%o A238498 (Haskell)
+%o A238498 a238498 n k = a238498_tabl !! n !! k
+%o A238498 a238498_row n = a238498_tabl !! n
+%o A238498 a238498_tabl = [1] : f [1] a001615_list where
+%o A238498    f xs (z:zs) = (map (div y) $ zipWith (*) ys $ reverse ys) : f ys zs
+%o A238498      where ys = y : xs; y = head xs * z
+%o A238498 -- _Reinhard Zumkeller_, Mar 01 2014
+%Y A238498 Cf. A001615, A175836, A238453.
+%K A238498 nonn,tabl
+%O A238498 0,5
+%A A238498 _Tom Edgar_, Feb 27 2014

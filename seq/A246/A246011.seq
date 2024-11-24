@@ -1,0 +1,46 @@
+%I A246011 #20 Oct 25 2024 09:20:28
+%S A246011 1,3,3,4,3,9,4,7,3,9,9,12,4,12,7,11,3,9,9,12,9,27,12,21,4,12,12,16,7,
+%T A246011 21,11,18,3,9,9,12,9,27,12,21,9,27,27,36,12,36,21,33,4,12,12,16,12,36,
+%U A246011 16,28,7,21,21,28,11,33,18,29,3,9,9,12,9,27,12,21,9,27,27,36,12,36,21,33,9,27,27,36,27
+%N A246011 a(n) = Product_{i in row n of A245562} Lucas(i+1), where Lucas = A000204.
+%C A246011 This is the Run Length Transform of S(n) = Lucas(n+1) = 1,3,4,7,11,... (cf. A000204).
+%C A246011 The Run Length Transform of a sequence {S(n), n>=0} is defined to be the sequence {T(n), n>=0} given by T(n) = Product_i S(i), where i runs through the lengths of runs of 1's in the binary expansion of n. E.g. 19 is 10011 in binary, which has two runs of 1's, of lengths 1 and 2. So T(19) = S(1)*S(2). T(0)=1 (the empty product).
+%H A246011 Alois P. Heinz, <a href="/A246011/b246011.txt">Table of n, a(n) for n = 0..8191</a>
+%e A246011 From _Omar E. Pol_, Feb 15 2015: (Start)
+%e A246011 Written as an irregular triangle in which row lengths are the terms of A011782:
+%e A246011 1;
+%e A246011 3;
+%e A246011 3,4;
+%e A246011 3,9,4,7;
+%e A246011 3,9,9,12,4,12,7,11;
+%e A246011 3,9,9,12,9,27,12,21,4,12,12,16,7,21,11,18;
+%e A246011 3,9,9,12,9,27,12,21,9,27,27,36,12,36,21,33,4,12,12,16,12,36,16,28,7,21,21,28,11,33,18,29;
+%e A246011 ...
+%e A246011 Right border gives the Lucas numbers (beginning with 1). This is simply a restatement of the theorem that this sequence is the Run Length Transform of A000204.
+%e A246011 (End)
+%p A246011 A000204 := proc(n) option remember; if n <=2 then 2*n-1; else A000204(n-1)+A000204(n-2); fi; end;
+%p A246011 ans:=[];
+%p A246011 for n from 0 to 100 do lis:=[]; t1:=convert(n,base,2); L1:=nops(t1);
+%p A246011 out1:=1; c:=0;
+%p A246011 for i from 1 to L1 do
+%p A246011    if out1 = 1 and t1[i] = 1 then out1:=0; c:=c+1;
+%p A246011    elif out1 = 0 and t1[i] = 1 then c:=c+1;
+%p A246011    elif out1 = 1 and t1[i] = 0 then c:=c;
+%p A246011    elif out1 = 0 and t1[i] = 0 then lis:=[c,op(lis)]; out1:=1; c:=0;
+%p A246011    fi;
+%p A246011    if i = L1 and c>0 then lis:=[c,op(lis)]; fi;
+%p A246011                    od:
+%p A246011 a:=mul(A000204(i+1), i in lis);
+%p A246011 ans:=[op(ans),a];
+%p A246011 od:
+%p A246011 ans;
+%o A246011 (Python)
+%o A246011 from math import prod
+%o A246011 from re import split
+%o A246011 from sympy import lucas
+%o A246011 def run_length_transform(f): return lambda n: prod(f(len(d)) for d in split('0+', bin(n)[2:]) if d != '') if n > 0 else 1
+%o A246011 def A246011(n): return run_length_transform(lambda n:lucas(n+1))(n) # _Chai Wah Wu_, Oct 24 2024
+%Y A246011 Cf. A245562-A245565, A000204, A001045, A071053.
+%K A246011 nonn,base
+%O A246011 0,2
+%A A246011 _N. J. A. Sloane_, Aug 10 2014; revised Sep 05 2014

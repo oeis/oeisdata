@@ -1,0 +1,43 @@
+%I A305191 #41 May 22 2020 09:26:37
+%S A305191 1,2,2,1,4,4,4,8,4,0,9,4,4,4,4,2,8,8,2,8,8,1,8,8,8,8,8,8,8,16,16,0,8,
+%T A305191 16,0,0,9,12,12,0,12,12,0,12,12,18,8,8,8,8,18,8,8,8,8,1,12,12,12,12,
+%U A305191 12,12,12,12,12,12,4,32,16,0,16,32,4,0,16,8,16,0,25,12,12,12,12,12,12,12,12,12,12
+%N A305191 Table read by rows: T(n,k) is the number of pairs (x,y) mod n such that x^2 + y^2 == k (mod n), for k from 0 to n-1.
+%H A305191 Jianing Song, <a href="/A305191/b305191.txt">Table of n, a(n) for n = 1..5050</a> (first 100 rows)
+%F A305191 T(n,k) is multiplicative with respect to n, that is, if gcd(n,m)=1 then T(n*m,k) = T(n,k mod n)*T(m,k mod m).
+%F A305191 T(n,0) = A086933(n). Let n = p^e and k = r*p^b (0 <= b < e, gcd(r,p) = 1, 0 < k < n). For p == 1 (mod 4), T(n,k) = (b+1)*(p-1)*p^(e-1). For p == 3 (mod 4), T(n,k) = (p+1)*p^(e-1) if b even; 0 if b odd. For p = 2, T(n,k) = 2^e if k = 2^(e-1); 2^(e+1) if b <= e-2 and r == 1 (mod 4); 0 if r == 3 (mod 4). [Corrected by _Jianing Song_, Apr 20 2019]
+%F A305191 If p is an odd prime then T(p,k) = p - (-1)^(p-1)/2 if k > 0, otherwise p + (p-1)*(-1)^(p-1)/2.
+%e A305191 Table begins:
+%e A305191   1;
+%e A305191   2,  2;
+%e A305191   1,  4,  4;
+%e A305191   4,  8,  4,  0;
+%e A305191   9,  4,  4,  4,  4;
+%e A305191   2,  8,  8,  2,  8,  8;
+%e A305191   1,  8,  8,  8,  8,  8,  8;
+%e A305191   8, 16, 16,  0,  8, 16,  0,  0;
+%e A305191   9, 12, 12,  0, 12, 12,  0, 12, 12;
+%e A305191 E.g., for n = 4:
+%e A305191 4 pairs satisfy x^2 + y^2 = 4k: (0, 0), (0, 2), (2, 0), (2, 2)
+%e A305191 8 pairs satisfy x^2 + y^2 = 4k+1: (0, 1), (0, 3), (1, 0), (1, 2), (2, 1), (2, 3), (3, 0), (3, 2)
+%e A305191 4 pairs satisfy x^2 + y^2 = 4k+2: (1, 1), (1, 3), (3, 1), (3, 3)
+%e A305191 0 pairs satisfy x^2 + y^2 = 4k+3
+%o A305191 (Python) [[len([(x, y) for x in range(n) for y in range(n) if (pow(x,2,n)+pow(y,2,n))%n==d]) for d in range(n)] for n in range(1,10)]
+%o A305191 (PARI) row(n) = {v = vector(n); for (x=0, n-1, for (y=0, n-1, k = (x^2 + y^2) % n; v[k+1]++;);); v;} \\ _Michel Marcus_, Jun 08 2018
+%o A305191 (PARI) T(n,k)=
+%o A305191 {
+%o A305191     my(r=1, f=factor(n));
+%o A305191     for(j=1, #f[, 1], my(p=f[j, 1], e=f[j, 2], b=valuation(k,p));
+%o A305191         if(p==2, r*=if(b>=e-1, 2^e, if((k/2^b)%4==1, 2^(e+1), 0)));
+%o A305191         if(p%4==1, r*=if(b>=e, ((p-1)*e+p)*p^(e-1), (b+1)*(p-1)*p^(e-1)));
+%o A305191         if(p%4==3, r*=if(b>=e, p^(e-(e%2)), if(b%2, 0, (p+1)*p^(e-1))));
+%o A305191     );
+%o A305191     return(r);
+%o A305191 }
+%o A305191 tabl(nn) = for(n=1, nn, for(k=0, n-1, print1(T(n, k), ", ")); print()) \\ _Jianing Song_, Apr 20 2019
+%Y A305191 Cf. A155918 (number of nonzeros in row n).
+%Y A305191 Cf. A086933 (1st column), A060968 (2nd column), A086932 (right diagonal).
+%K A305191 nonn,tabl
+%O A305191 1,2
+%A A305191 _Jack Zhang_, May 27 2018
+%E A305191 Offset corrected by _Jianing Song_, Apr 20 2019

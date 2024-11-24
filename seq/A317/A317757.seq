@@ -1,0 +1,29 @@
+%I A317757 #18 May 30 2023 16:12:52
+%S A317757 1,0,1,4,17,56,205,690,2446,8506,30429,109449,402486,1501424,5714194,
+%T A317757 22132604,87383864,351373406,1439320606,6003166059,25488902820,
+%U A317757 110125079184,483987225922,2162799298162,9823464989574,45332196378784,212459227340403,1010898241558627,4881398739414159
+%N A317757 Number of non-isomorphic multiset partitions of size n such that the blocks have empty intersection.
+%H A317757 Andrew Howroyd, <a href="/A317757/b317757.txt">Table of n, a(n) for n = 0..50</a>
+%e A317757 Non-isomorphic representatives of the a(4) = 17 multiset partitions:
+%e A317757   {1}{234},{2}{111},{2}{113},{11}{22},{11}{23},{12}{34},
+%e A317757   {1}{1}{22},{1}{1}{23},{1}{2}{11},{1}{2}{12},{1}{2}{13},{1}{2}{34},{2}{3}{11},
+%e A317757   {1}{1}{1}{2},{1}{1}{2}{2},{1}{1}{2}{3},{1}{2}{3}{4}.
+%t A317757 sps[{}]:={{}};sps[set:{i_,___}]:=Join@@Function[s,Prepend[#,s]&/@sps[Complement[set,s]]]/@Cases[Subsets[set],{i,___}];
+%t A317757 mps[set_]:=Union[Sort[Sort/@(#/.x_Integer:>set[[x]])]&/@sps[Range[Length[set]]]];
+%t A317757 strnorm[n_]:=Flatten[MapIndexed[Table[#2,{#1}]&,#]]&/@IntegerPartitions[n];
+%t A317757 sysnorm[m_]:=If[Union@@m!=Range[Max@@Flatten[m]],sysnorm[m/.Rule@@@Table[{(Union@@m)[[i]],i},{i,Length[Union@@m]}]],First[Sort[sysnorm[m,1]]]];sysnorm[m_,aft_]:=If[Length[Union@@m]<=aft,{m},With[{mx=Table[Count[m,i,{2}],{i,Select[Union@@m,#>=aft&]}]},Union@@(sysnorm[#,aft+1]&/@Union[Table[Map[Sort,m/.{par+aft-1->aft,aft->par+aft-1},{0,1}],{par,First/@Position[mx,Max[mx]]}]])]];
+%t A317757 Table[Length[Union[sysnorm/@Join@@Table[Select[mps[m],Intersection@@#=={}&],{m,strnorm[n]}]]],{n,6}]
+%o A317757 (PARI)
+%o A317757 EulerT(v)={Vec(exp(x*Ser(dirmul(v, vector(#v, n, 1/n))))-1, -#v)}
+%o A317757 permcount(v) = {my(m=1, s=0, k=0, t); for(i=1, #v, t=v[i]; k=if(i>1&&t==v[i-1], k+1, 1); m*=t*k; s+=t); s!/m}
+%o A317757 K(q, t, k)={EulerT(Vec(sum(j=1, #q, gcd(t, q[j])*x^lcm(t, q[j])) + O(x*x^k), -k))}
+%o A317757 R(q, n)={vector(n, t, x*Ser(K(q, t, n)/t))}
+%o A317757 a(n)={my(s=0); forpart(q=n, my(f=prod(i=1, #q, 1 - x^q[i]), u=R(q,n)); s+=permcount(q)*sum(k=0, n, my(c=polcoef(f,k)); if(c, c*polcoef(exp(sum(t=1, n\(k+1), x^(t*k)*u[t], O(x*x^n) ))/if(k,1-x^k,1), n))) ); s/n!} \\ _Andrew Howroyd_, May 30 2023
+%Y A317757 Cf. A007716, A035310, A255906, A281116, A317073, A317533.
+%Y A317757 Cf. A317748, A317751, A317752, A317755.
+%Y A317757 Cf. A319077, A319748, A319755, A319778, A319781, A319790.
+%K A317757 nonn
+%O A317757 0,4
+%A A317757 _Gus Wiseman_, Aug 06 2018
+%E A317757 a(8)-a(10) from _Gus Wiseman_, Sep 27 2018
+%E A317757 a(0)=1 prepended and terms a(11) and beyond from _Andrew Howroyd_, May 30 2023

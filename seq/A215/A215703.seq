@@ -1,0 +1,50 @@
+%I A215703 #67 Nov 08 2019 05:57:59
+%S A215703 1,1,1,1,1,0,1,1,2,0,1,1,4,3,0,1,1,2,12,8,0,1,1,6,9,52,10,0,1,1,4,27,
+%T A215703 32,240,54,0,1,1,2,18,156,180,1188,-42,0,1,1,2,15,100,1110,954,6804,
+%U A215703 944,0,1,1,8,9,80,650,8322,6524,38960,-5112,0,1,1,6,48,56,590,4908,70098,45016,253296,47160,0
+%N A215703 A(n,k) is the n-th derivative of f_k at x=1, and f_k is the k-th of all functions that are representable as x^x^...^x with m>=1 x's and parentheses inserted in all possible ways; square array A(n,k), n>=0, k>=1, read by antidiagonals.
+%C A215703 A000081(m) distinct functions are representable as x^x^...^x with m>=1 x's and parentheses inserted in all possible ways.  Some functions are representable in more than one way, the number of valid parenthesizations is A000108(m-1).  The f_k are ordered, such that the number m of x's in f_k is a nondecreasing function of k.  The exact ordering is defined by the algorithm below.
+%C A215703 The list of functions f_1, f_2, ... begins:
+%C A215703   | f_k : m : function (tree)  : representation(s)        : sequence |
+%C A215703   +-----+---+------------------+--------------------------+----------+
+%C A215703   | f_1 | 1 | x -> x           | x                        | A019590  |
+%C A215703   | f_2 | 2 | x -> x^x         | x^x                      | A005727  |
+%C A215703   | f_3 | 3 | x -> x^(x*x)     | (x^x)^x                  | A215524  |
+%C A215703   | f_4 | 3 | x -> x^(x^x)     | x^(x^x)                  | A179230  |
+%C A215703   | f_5 | 4 | x -> x^(x*x*x)   | ((x^x)^x)^x              | A215704  |
+%C A215703   | f_6 | 4 | x -> x^(x^x*x)   | (x^x)^(x^x), (x^(x^x))^x | A215522  |
+%C A215703   | f_7 | 4 | x -> x^(x^(x*x)) | x^((x^x)^x)              | A215705  |
+%C A215703   | f_8 | 4 | x -> x^(x^(x^x)) | x^(x^(x^x))              | A179405  |
+%H A215703 Alois P. Heinz, <a href="/A215703/b215703.txt">Antidiagonals n = 0..140, flattened</a>
+%e A215703 Square array A(n,k) begins:
+%e A215703   1,   1,    1,    1,     1,     1,     1,     1, ...
+%e A215703   1,   1,    1,    1,     1,     1,     1,     1, ...
+%e A215703   0,   2,    4,    2,     6,     4,     2,     2, ...
+%e A215703   0,   3,   12,    9,    27,    18,    15,     9, ...
+%e A215703   0,   8,   52,   32,   156,   100,    80,    56, ...
+%e A215703   0,  10,  240,  180,  1110,   650,   590,   360, ...
+%e A215703   0,  54, 1188,  954,  8322,  4908,  5034,  2934, ...
+%e A215703   0, -42, 6804, 6524, 70098, 41090, 47110, 26054, ...
+%p A215703 T:= proc(n) T(n):=`if`(n=1, [x], map(h-> x^h, g(n-1$2))) end:
+%p A215703 g:= proc(n, i) option remember; `if`(i=1, [x^n], [seq(seq(
+%p A215703       seq(mul(T(i)[w[t]-t+1], t=1..j)*v, v=g(n-i*j, i-1)), w=
+%p A215703       combinat[choose]([$1..nops(T(i))+j-1], j)), j=0..n/i)])
+%p A215703     end:
+%p A215703 f:= proc() local i, l; i, l:= 0, []; proc(n) while n>
+%p A215703       nops(l) do i:= i+1; l:= [l[], T(i)[]] od; l[n] end
+%p A215703     end():
+%p A215703 A:= (n, k)-> n!*coeff(series(subs(x=x+1, f(k)), x, n+1), x, n):
+%p A215703 seq(seq(A(n, 1+d-n), n=0..d), d=0..12);
+%t A215703 T[n_] := If[n == 1, {x}, Map[x^#&, g[n - 1, n - 1]]];
+%t A215703 g[n_, i_] := g[n, i] = If[i == 1, {x^n}, Flatten @ Table[ Table[ Table[ Product[T[i][[w[[t]] - t + 1]], {t, 1, j}]*v, {v, g[n - i*j, i - 1]}], {w, Subsets[ Range[ Length[T[i]] + j - 1], {j}]}], {j, 0, n/i}]];
+%t A215703 f[n_] := Module[{i = 0, l = {}}, While[n > Length[l], i++; l = Join[l, T[i]]]; l[[n]]];
+%t A215703 A[n_, k_] := n! * SeriesCoefficient[f[k] /. x -> x+1, {x, 0, n}];
+%t A215703 Table[Table[A[n, 1+d-n], {n, 0, d}], {d, 0, 12}] // Flatten (* _Jean-François Alcover_, Nov 08 2019, after _Alois P. Heinz_ *)
+%Y A215703 Columns k=1-17, 37 give: A019590, A005727, A215524, A179230, A215704, A215522, A215705, A179405, A215706, A215707, A215708, A215709, A215691, A215710, A215643, A215629, A179505, A211205.
+%Y A215703 Rows n=0+1, 2-10 give: A000012, A215841, A215842, A215834, A215835, A215836, A215837, A215838, A215839, A215840.
+%Y A215703 Number of distinct values taken for m x's by derivatives n=1-10: A000012, A028310, A199085, A199205, A199296, A199883, A215796, A215971, A216062, A216403.
+%Y A215703 Main diagonal gives A306739.
+%Y A215703 Cf. A000081, A000108, A033917, A211192, A214569, A214570, A214571, A216041, A216281, A216349, A216350, A216351, A216368, A222379, A222380, A277537, A306679, A306710, A306726.
+%K A215703 sign,tabl
+%O A215703 0,9
+%A A215703 _Alois P. Heinz_, Aug 21 2012

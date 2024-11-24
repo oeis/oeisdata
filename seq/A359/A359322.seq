@@ -1,0 +1,34 @@
+%I A359322 #13 Jan 06 2023 10:42:19
+%S A359322 3,7,7,1627,83,7,23,7,19,17,73,281,179,257,5,43,73,43,19,67,911,193,7,
+%T A359322 1613,139,383,7,719,113,967,31,19,211,769,149,173,13,13,59,137,23,47,
+%U A359322 89,607,61,127,61,317,1049,1277,547,281,317,4157,199,107,373,149,229,367,1489,643,563,587,263
+%N A359322 a(n) is the first prime p such that the average of the squares of n consecutive primes starting with p is prime.
+%C A359322 Suggested in an email by _J. M. Bergot_.
+%H A359322 Robert Israel, <a href="/A359322/b359322.txt">Table of n, a(n) for n = 2..10000</a>
+%e A359322 a(3) = 7 because 7, 11, 13 are 3 consecutive primes and (7^2 + 11^2 + 13^2)/3 = 113 is prime, and 7 is the least prime that works.
+%p A359322 f:= proc(n) local P,s,i;
+%p A359322    P:= <seq(ithprime(i),i=1..n)>;
+%p A359322    s:= add(P[i]^2,i=1..n)/n;
+%p A359322    do
+%p A359322      if s::integer and isprime(s) then return P[1] fi;
+%p A359322      s:= s - P[1]^2/n;
+%p A359322      P[1..-2] := P[2..-1]; P[n]:= nextprime(P[n]);
+%p A359322      s:= s + P[n]^2/n;
+%p A359322    od
+%p A359322 end proc:
+%p A359322 map(f, [$2..70]);
+%o A359322 (Python)
+%o A359322 from sympy import prime, isprime, nextprime, primerange
+%o A359322 def a(n):
+%o A359322     plst = list(primerange(2, prime(n)+1))
+%o A359322     powsum = sum(p**2 for p in plst)
+%o A359322     while True:
+%o A359322         q, r = divmod(powsum, n)
+%o A359322         if r == 0 and isprime(q): return plst[0]
+%o A359322         powsum -= plst[0]**2
+%o A359322         plst = plst[1:] + [nextprime(plst[-1])]
+%o A359322         powsum += plst[-1]**2
+%o A359322 print([a(n) for n in range(2, 67)]) # _Michael S. Branicky_, Dec 29 2022
+%K A359322 nonn
+%O A359322 2,1
+%A A359322 _Robert Israel_, Dec 25 2022

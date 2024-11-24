@@ -1,0 +1,30 @@
+%I A309352 #26 Nov 14 2020 09:58:30
+%S A309352 1,1,1,1,1,2,4,6,13,26,56,122,278,634,1494,3540,8542,20774,51116,
+%T A309352 126648,316452,795510,2012476,5117613,13079677,33576706,86555074,
+%U A309352 223965633,581573118,1515084771,3959038337,10374543765,27258298145
+%N A309352 Number of free trees of n vertices whose automorphisms are a 2-group.
+%C A309352 A 2-group is a group with order some power 2^k.  In free tree automorphisms, this means at a given vertex an adjacent subtree can appear there twice, but not three or more times.
+%C A309352 Free trees are counted from rooted trees in the usual way by rooting at a centroid.  This is in the generating function of A000055 (all free) from A000081 (all rooted).  From all rooted trees, subtract the unbalanced where root not centroid, and allow bicentroidals with same halves.  a(n) follows this way from A248869 rooted 2-groups.  With root as centroid, the free automorphisms are all and only the rooted automorphisms, except swap halves of a bi-centroidal.  Such a swap can be part of a 2-group, so same halves allowed.
+%H A309352 Kevin Ryde, <a href="/A309352/b309352.txt">Table of n, a(n) for n = 0..2213</a>
+%F A309352 a(n) = A248869(n) - (Sum_{i=1..floor(n/2)} A248869(i)*A248869(n-i)) + (binomial(A248869(n/2)+1,2) if n even), for n>=1.
+%F A309352 G.f.: g(x) = 1 + T(x) - T^2(x)/2 + T(x^2)/2, where T(x) = x + x^2 + 2*x^3 + 3*x^4 + ... is the g.f. for A248869.
+%e A309352 a(4)=1 is path-4 having automorphism group S2 (reverse the path), and excludes star-4 which is S3 order 6 (permute the leaves).  a(5)=2 excludes star-5 which is S4 on the leaves.
+%p A309352 h:= proc(n, m, t) option remember; `if`(m=0, binomial(n+t, t),
+%p A309352       `if`(n=0, 0, add(h(n-1, m-j, t+1), j=1..min(2, m))))
+%p A309352     end:
+%p A309352 b:= proc(n, i) option remember; `if`(n=0, 1, `if`(i<1, 0,
+%p A309352       add(b(n-i*j, i-1)*h(g(i), j, 0), j=0..n/i)))
+%p A309352     end:
+%p A309352 g:= n-> `if`(n<2, n, b(n-1$2)):
+%p A309352 a:= n-> `if`(n=0, 1, g(n)-add(g(j)*g(n-j), j=0..n/2)+
+%p A309352         `if`(n::even, (t-> t*(t+1)/2)(g(n/2)), 0)):
+%p A309352 seq(a(n), n=0..35);  # _Alois P. Heinz_, Aug 01 2019
+%t A309352 h[n_, m_, t_] := h[n, m, t] = If[m == 0, Binomial[n + t, t], If[n == 0, 0, Sum[h[n-1, m-j, t+1], {j, 1, Min[2, m]}]]];
+%t A309352 b[n_, i_] := b[n, i] = If[n==0, 1, If[i<1, 0, Sum[b[n - i j, i-1] h[g[i], j, 0], {j, 0, n/i}]]];
+%t A309352 g[n_] := If[n < 2, n, b[n-1, n-1]];
+%t A309352 a[n_] := If[n == 0, 1, g[n] - Sum[g[j] g[n-j], {j, 0, n/2}] + If[EvenQ[n], #(#+1)/2&[g[n/2]], 0]];
+%t A309352 a /@ Range[0, 35] (* _Jean-François Alcover_, Nov 14 2020, after _Alois P. Heinz_ *)
+%Y A309352 Cf. A000055, A000220, A248869.
+%K A309352 nonn
+%O A309352 0,6
+%A A309352 _Kevin Ryde_, Jul 24 2019

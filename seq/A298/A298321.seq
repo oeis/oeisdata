@@ -1,0 +1,34 @@
+%I A298321 #43 Nov 07 2020 08:54:13
+%S A298321 1,1,1,1,2,3,3,4,3,8,6,9,8,9,12,13,11,13,12,16,18,19,18,19,21,22,22,
+%T A298321 24,24,27,25,26,29,28,31,33,32,34,32,37,35,36,37,38,42,42,41,42,43,46,
+%U A298321 48,48,45,48,50,53,54,54,51,56,56,55,58,59,60,62,62,62
+%N A298321 The Nekrasov-Okounkov sequence.
+%C A298321 a(n) is the degree in terms of z of the coefficient of x^n's highest degree irreducible factor in Product_{m>=1} (1-x^m)^(z-1). This can be calculated by reducing the polynomial in the Nekrasov-Okounkov formula.
+%H A298321 Vincent Delecroix, <a href="/A298321/b298321.txt">Table of n, a(n) for n = 1..506</a>
+%H A298321 Vincent Delecroix, <a href="/A298321/a298321.py.txt">SageMath script to generate the sequence</a>
+%H A298321 Guo-Niu Han, <a href="http://dx.doi.org/10.5802/aif.2515">The Nekrasov-Okounkov hook length formula: refinement, elementary proof, extension and applications</a>, Annales de l'institut Fourier, 60 no. 1 (2010), pp. 1-29.
+%H A298321 Nikita A. Nekrasov and Andrei Okounkov, <a href="https://arxiv.org/abs/hep-th/0306238">Seiberg-Witten Theory and Random Partitions</a>, arXiv:hep-th/0306238, 2003.
+%e A298321 For n = 5, a(n) = 2 because the coefficient of x^5 is Product_{m>=1} (1-x^m)^(z-1). This can be factorized as -(z-7)*(z-4)*(z-1)*(z^2 -23*z + 30)/120.
+%t A298321 (* This naive program is not suitable to compute a large number of terms *) a[n_] := a[n] = SeriesCoefficient[Product[(1-x^m)^(z-1), {m, 1, n}], {x, 0, n}] // Factor // Last // Exponent[#, z]&;
+%t A298321 Table[Print[n, " ", a[n]]; a[n], {n, 1, 50}] (* _Jean-François Alcover_, Feb 18 2019 *)
+%o A298321 (Julia)
+%o A298321 using Nemo
+%o A298321 function A298321(len)
+%o A298321     R, z = PolynomialRing(ZZ, 'z')
+%o A298321     Q = [R(1)]; S = [1, 1, 1, 1]
+%o A298321     for n in 1:len-4
+%o A298321         p = z*sum(sigma(ZZ(k), 1)*risingfac(n-k+1, k-1)*Q[n-k+1] for k in 1:n)
+%o A298321         push!(Q, p)
+%o A298321         for (f, m) in factor(p)
+%o A298321             deg = degree(f)
+%o A298321             deg > 1 && push!(S, deg)
+%o A298321         end
+%o A298321     end
+%o A298321 S end
+%o A298321 A298321(72) |> println # _Peter Luschny_, Oct 27 2018, after _Vincent Delecroix_
+%o A298321 (PARI) {a(n) = vecmax(apply(x->poldegree(x), factor(polcoef(prod(k=1, n, (1-x^k+x*O(x^n))^(z-1)), n))[, 1]))} \\ _Seiichi Manyama_, Nov 07 2020
+%Y A298321 Cf. A210590, A234937.
+%K A298321 nonn
+%O A298321 1,5
+%A A298321 _Kenta Suzuki_, Jan 17 2018
+%E A298321 More terms from _Vincent Delecroix_, Oct 05 2018

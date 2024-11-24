@@ -1,0 +1,44 @@
+%I A270408 #17 Oct 18 2018 06:23:12
+%S A270408 5,93,1030,420,8885,14065,65954,256116,66066,442610,3392843,3288327,
+%T A270408 2762412,36703824,85421118,17454580,16322085,344468530,1558792200,
+%U A270408 1171704435,92400330,2908358552,22555934280,40121261136,7034538511,505403910,22620890127,276221817810,945068384880,600398249550
+%N A270408 Triangle read by rows: T(n,g) is the number of rooted maps with n edges and 4 faces on an orientable surface of genus g.
+%C A270408 Row n contains floor((n-1)/2) terms.
+%H A270408 Gheorghe Coserea, <a href="/A270408/b270408.txt">Rows n = 3..103, flattened</a>
+%H A270408 Sean R. Carrell, Guillaume Chapuy, <a href="http://arxiv.org/abs/1402.6300">Simple recurrence formulas to count maps on orientable surfaces</a>, arXiv:1402.6300 [math.CO], 2014.
+%e A270408 Triangle starts:
+%e A270408 n\g    [0]          [1]          [2]          [3]          [4]
+%e A270408 [3]    5;
+%e A270408 [4]    93;
+%e A270408 [5]    1030,        420;
+%e A270408 [6]    8885,        14065;
+%e A270408 [7]    65954,       256116,      66066;
+%e A270408 [8]    442610,      3392843,     3288327;
+%e A270408 [9]    2762412,     36703824,    85421118,    17454580;
+%e A270408 [10]   16322085,    344468530,   1558792200,  1171704435;
+%e A270408 [11]   92400330,    2908358552,  22555934280, 40121261136, 7034538511;
+%e A270408 [12]   ...
+%t A270408 Q[0, 1, 0] = 1; Q[n_, f_, g_] /; n < 0 || f < 0 || g < 0 = 0;
+%t A270408 Q[n_, f_, g_] := Q[n, f, g] = 6/(n+1) ((2n-1)/3 Q[n-1, f, g] + (2n-1)/3 Q[n - 1, f-1, g] + (2n-3) (2n-2) (2n-1)/12 Q[n-2, f, g-1] + 1/2 Sum[l = n-k; Sum[v = f-u; Sum[j = g-i; Boole[l >= 1 && v >= 1 && j >= 0] (2k-1) (2l-1) Q[k - 1, u, i] Q[l - 1, v, j], {i, 0, g}], {u, 1, f}], {k, 1, n}]);
+%t A270408 T[n_, g_] := Q[n, 4, g];
+%t A270408 Table[T[n, g], {n, 3, 12}, {g, 0, Quotient[n-1, 2]-1}] // Flatten (* _Jean-François Alcover_, Oct 18 2018 *)
+%o A270408 (PARI)
+%o A270408 N = 11; F = 4; gmax(n) = n\2;
+%o A270408 Q = matrix(N + 1, N + 1);
+%o A270408 Qget(n, g) = { if (g < 0 || g > n/2, 0, Q[n+1, g+1]) };
+%o A270408 Qset(n, g, v) = { Q[n+1, g+1] = v };
+%o A270408 Quadric({x=1}) = {
+%o A270408   Qset(0, 0, x);
+%o A270408   for (n = 1, length(Q)-1, for (g = 0, gmax(n),
+%o A270408     my(t1 = (1+x)*(2*n-1)/3 * Qget(n-1, g),
+%o A270408        t2 = (2*n-3)*(2*n-2)*(2*n-1)/12 * Qget(n-2, g-1),
+%o A270408        t3 = 1/2 * sum(k = 1, n-1, sum(i = 0, g,
+%o A270408        (2*k-1) * (2*(n-k)-1) * Qget(k-1, i) * Qget(n-k-1, g-i))));
+%o A270408     Qset(n, g, (t1 + t2 + t3) * 6/(n+1))));
+%o A270408 };
+%o A270408 Quadric('x + O('x^(F+1)));
+%o A270408 concat(vector(N+2-F, n, vector(1 + gmax(n-1), g, polcoeff(Qget(n+F-2, g-1), F))))
+%Y A270408 Cf. A000365 (column 0).
+%K A270408 nonn,tabf
+%O A270408 3,1
+%A A270408 _Gheorghe Coserea_, Mar 17 2016

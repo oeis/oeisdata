@@ -1,0 +1,37 @@
+%I A306893 #21 Feb 12 2024 10:41:24
+%S A306893 1,1,2,5,28,572,87210,379629720,336691526641470,
+%T A306893 1730145467127958158326862,10298346936926006723717705424338819472320,
+%U A306893 408365746142143027393604600897014805299276160859821396471640832240,124021818977464152348319837503281224966237629433185201999567260096859939574786766596034209404972486842291250
+%N A306893 Number of distinct binary strings in the n-th Fibonacci shuffle set.
+%C A306893 The sequence of Fibonacci shuffle sets is defined as follows:  X_1 = {0}, X_2 = {01}, and X_{n+2} is the shuffle of X_{n+1} and X_n.  Here the shuffle of two sets of strings X and Y is the union, over all x in X and y in Y, of s(x,y), the shuffle set of x and y.  And s(x,y) is the set of all strings z that arise from shuffling x and y.  More precisely, s(x,y) consists of all strings z such that if each letter of z is marked with either a ' or a ", then the primed letters spell out x (in order) and the double-primed letters spell out y.  For example, s(ab,c) = { abc, acb, cab }.
+%C A306893 Elements of X_n represent incomplete Dyck words with A000045(n) opening parentheses denoted by 0s, and A000045(n-1) closing parentheses denoted by 1s. - _Max Alekseyev_, Feb 12 2024
+%F A306893 a(n) = binomial(F(n+1),F(n)) * (F(n-2)+1) / (F(n)+1), where F = A000045 are Fibonacci numbers. - _Max Alekseyev_, Feb 12 2024
+%e A306893 X_3 = {010, 001} and X_4 = {01010, 00110, 00101, 01001, 00011}, so a(3) = 2 and a(4) = 5.
+%o A306893 (Python)
+%o A306893 from itertools import combinations
+%o A306893 def s(x, y):
+%o A306893     lxy, setxy = len(x) + len(y), set()
+%o A306893     setlxy, sxy = set(range(lxy)), [0 for i in range(lxy)]
+%o A306893     for xinds in combinations(range(lxy), len(x)):
+%o A306893         yinds = sorted(setlxy-set(xinds))
+%o A306893         for i, c in enumerate(x): sxy[xinds[i]] = c
+%o A306893         for i, c in enumerate(y): sxy[yinds[i]] = c
+%o A306893         setxy.add("".join(sxy))
+%o A306893     return setxy
+%o A306893 def aupto(n):
+%o A306893     Xnm2, Xnm1, alst = {'0'}, {'01'}, [1, 1]
+%o A306893     while len(alst) < n:
+%o A306893         Xn = set()
+%o A306893         for i, x in enumerate(Xnm2, start=1):
+%o A306893             for y in Xnm1:
+%o A306893                 Xn |= s(x, y)
+%o A306893         Xnm2, Xnm1 = Xnm1, Xn
+%o A306893         alst.append(len(Xn))
+%o A306893     return alst[:n]
+%o A306893 print(aupto(6)) # _Michael S. Branicky_, Jun 07 2022
+%o A306893 (PARI) { a306893(n) = binomial(fibonacci(n+1),fibonacci(n)) * (fibonacci(n-2)+1) \ (fibonacci(n)+1); } \\ _Max Alekseyev_, Feb 12 2024
+%Y A306893 Cf. A000045.
+%K A306893 nonn
+%O A306893 1,3
+%A A306893 _Jeffrey Shallit_, Mar 15 2019
+%E A306893 Terms a(8) onward from _Max Alekseyev_, Feb 12 2024

@@ -1,0 +1,39 @@
+%I A323708 #35 May 03 2019 23:12:10
+%S A323708 1,10,100,101,102,20,120,200,201,202,203,30,103,130,230,300,301,302,
+%T A323708 303,304,40,104,140,204,240,340,400,401,402,403,404,405,50,105,150,
+%U A323708 205,250,305,350,450,500,501,502,503,504,505,506,60,106,160,206,260,306,360
+%N A323708 a(n) is the smallest positive number not yet in the sequence that contains both the smallest and largest digits from a(n-1); a(1)=1.
+%C A323708 All terms starting with a(2)=10 must contain the digit 0.
+%C A323708 From a(110)=809 onwards all terms must contain the digits 0 and 9.
+%C A323708 Note that A011540 can also be defined as the sequence where a(n) is the smallest number not yet in the sequence that contains the smallest digit from a(n-1). See crossrefs.
+%e A323708 a(2)=10 since 10 is the smallest positive number not yet in the sequence that contains the smallest and largest digit (i.e., 1) from a(1)=1.
+%e A323708 a(6)=20 since 20 is the smallest positive number not yet in the sequence that contains the smallest and largest digits from a(5)=102.
+%p A323708 N:= 1000: # for terms before the first term > N
+%p A323708 A[1]:= 1:
+%p A323708 S:= [$2..N]:
+%p A323708 dmin:= 1: dmax:= 1:
+%p A323708 found:= true:
+%p A323708 for n from 2 while found do
+%p A323708     found := false;
+%p A323708     for i from 1 to nops(S) do
+%p A323708       L:= convert(convert(S[i],base,10),set);
+%p A323708       if {dmin,dmax} subset L then
+%p A323708          A[n]:= S[i];
+%p A323708          dmax:= max(L);
+%p A323708          dmin:= min(L);
+%p A323708          found:= true;
+%p A323708          S:= subsop(i=NULL, S);
+%p A323708          break
+%p A323708       fi
+%p A323708     od;
+%p A323708 od:
+%p A323708 convert(A,list); # _Robert Israel_, Mar 28 2019
+%t A323708 Nest[Append[#, Block[{k = 2, d}, While[Nand[FreeQ[#[[All, 1]], k], SubsetQ[Set[d, IntegerDigits[k]], #[[-1, -1]] ]], k++]; {k, {Min@ d, Max@ d}}]] &, {{1, {1, 1}}}, 53][[All, 1]] (* _Michael De Vlieger_, Jan 27 2019 *)
+%o A323708 (PARI) getFirstTerms(n)={my(Z=List(),A=List([1]),dd=[0,1],c,m=1);for(k=2,+oo,forvec(y=vector(k,u,[u==1,9]),listput(Z,y);for(i=1,#Z,if(m==n,return(Vec(A)));c=2;for(q=1,2,for(j=1,#Z[i],if(Z[i][j]==dd[q],c--;break)));if(!c,dd[1]=vecmin(Z[i]);dd[2]=vecmax(Z[i]);listput(A,fromdigits(Z[i]));listpop(Z,i);m++;break)),0))} \\ _R. J. Cano_, Feb 04 2019
+%o A323708 (PARI) isok(k, vas, dm, dM) = {if (vecsearch(vas, k), return (0)); my(dk = Set(digits(k))); vecsearch(dk, dm) && vecsearch(dk, dM);}
+%o A323708 nexta(va, vas, i) = {my(k=1, d=digits(va[i]), dm = vecmin(d), dM = vecmax(d)); while (!isok(k, vas, dm, dM), k++); k;}
+%o A323708 lista(nn) = {my(va = vector(nn)); va[1] = 1; my(vas = vecsort(va,,8)); for (n=2, nn, va[n] = nexta(va, vas, n-1); vas = vecsort(va,,8);); va;} \\ _Michel Marcus_, Feb 05 2019
+%Y A323708 Cf. A107353, A011540 (smallest digit only), A286890 (largest digit only), A303605.
+%K A323708 nonn,base
+%O A323708 1,2
+%A A323708 _Enrique Navarrete_, Jan 24 2019

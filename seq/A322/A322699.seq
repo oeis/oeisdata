@@ -1,0 +1,51 @@
+%I A322699 #66 Jan 07 2019 04:30:41
+%S A322699 0,0,0,0,1,0,0,8,2,0,0,49,24,3,0,0,288,242,48,4,0,0,1681,2400,675,80,
+%T A322699 5,0,0,9800,23762,9408,1444,120,6,0,0,57121,235224,131043,25920,2645,
+%U A322699 168,7,0,0,332928,2328482,1825200,465124,58080,4374,224,8,0
+%N A322699 Square array A(n,k), n >= 0, k >= 0, read by antidiagonals, where A(n,k) is 1/2 * (-1 + Sum_{j=0..k} binomial(2*k,2*j)*(n+1)^(k-j)*n^j).
+%H A322699 Seiichi Manyama, <a href="/A322699/b322699.txt">Antidiagonals n = 0..139, flattened</a>
+%H A322699 Wikipedia, <a href="https://en.wikipedia.org/wiki/Chebyshev_polynomials">Chebyshev polynomials</a>.
+%H A322699 <a href="/index/Ch#Cheby">Index entries for sequences related to Chebyshev polynomials.</a>
+%F A322699 sqrt(A(n,k)+1) + sqrt(A(n,k)) = (sqrt(n+1) + sqrt(n))^k.
+%F A322699 sqrt(A(n,k)+1) - sqrt(A(n,k)) = (sqrt(n+1) - sqrt(n))^k.
+%F A322699 A(n,0) = 0, A(n,1) = n and A(n,k) = (4*n+2) * A(n,k-1) - A(n,k-2) + 2*n for k > 1.
+%F A322699 A(n,k) = (T_{k}(2*n+1) - 1)/2 where T_{k}(x) is a Chebyshev polynomial of the first kind.
+%F A322699 T_1(x) = x. So A(n,1) = (2*n+1-1)/2 = n.
+%e A322699 Square array begins:
+%e A322699    0, 0,   0,    0,      0,       0,        0, ...
+%e A322699    0, 1,   8,   49,    288,    1681,     9800, ...
+%e A322699    0, 2,  24,  242,   2400,   23762,   235224, ...
+%e A322699    0, 3,  48,  675,   9408,  131043,  1825200, ...
+%e A322699    0, 4,  80, 1444,  25920,  465124,  8346320, ...
+%e A322699    0, 5, 120, 2645,  58080, 1275125, 27994680, ...
+%e A322699    0, 6, 168, 4374, 113568, 2948406, 76545000, ...
+%t A322699 Unprotect[Power]; 0^0 := 1; Protect[Power]; Table[(-1 + Sum[Binomial[2 k, 2 j] (# + 1)^(k - j)*#^j, {j, 0, k}])/2 &[n - k], {n, 0, 9}, {k, n, 0, -1}] // Flatten (* _Michael De Vlieger_, Jan 01 2019 *)
+%t A322699 nmax = 9; row[n_] := LinearRecurrence[{4n+3, -4n-3, 1}, {0, n, 4n(n+1)}, nmax+1]; T = Array[row, nmax+1, 0]; A[n_, k_] := T[[n+1, k+1]];
+%t A322699 Table[A[n-k, k], {n, 0, nmax}, {k, n, 0, -1}] // Flatten (* _Jean-François Alcover_, Jan 06 2019 *)
+%o A322699 (Ruby)
+%o A322699 def ncr(n, r)
+%o A322699   return 1 if r == 0
+%o A322699   (n - r + 1..n).inject(:*) / (1..r).inject(:*)
+%o A322699 end
+%o A322699 def A(k, n)
+%o A322699   (0..n).map{|i| (0..k).inject(-1){|s, j| s + ncr(2 * k, 2 * j) * (i + 1) ** (k - j) * i ** j} / 2}
+%o A322699 end
+%o A322699 def A322699(n)
+%o A322699   a = []
+%o A322699   (0..n).each{|i| a << A(i, n - i)}
+%o A322699   ary = []
+%o A322699   (0..n).each{|i|
+%o A322699     (0..i).each{|j|
+%o A322699       ary << a[i - j][j]
+%o A322699     }
+%o A322699   }
+%o A322699   ary
+%o A322699 end
+%o A322699 p A322699(10)
+%Y A322699 Columns 0-5 give A000004, A001477, A033996, A322675, A322677, A322745.
+%Y A322699 Rows 0-9 give A000004, A001108, A132596, A007654(n+1), A132584, A322707, A322708, A322709, A132592, A132593.
+%Y A322699 Main diagonal gives A322746.
+%Y A322699 Cf. A173175 (A(n,2*n)), A322790.
+%K A322699 nonn,tabl
+%O A322699 0,8
+%A A322699 _Seiichi Manyama_, Dec 23 2018

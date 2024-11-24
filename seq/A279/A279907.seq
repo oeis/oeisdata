@@ -1,0 +1,49 @@
+%I A279907 #32 Jun 27 2021 03:39:59
+%S A279907 0,0,1,0,-1,1,0,1,-1,1,0,-1,-1,-1,1,0,1,1,2,-1,1,0,-1,-1,-1,-1,-1,1,0,
+%T A279907 1,-1,1,-1,-1,-1,1,0,-1,1,-1,-1,-1,-1,-1,1,0,1,-1,2,1,-1,-1,3,-1,1,0,
+%U A279907 -1,-1,-1,-1,-1,-1,-1,-1,-1,1,0,1,1,1,-1,1,-1,2,2,-1,-1,1,0,-1,-1,-1,-1,-1,-1
+%N A279907 Triangle read by rows: T(n,k) is the smallest power of n that is divisible by k, or -1 if no such power exists.
+%C A279907 T(n,1) = 0 since 1 | n^0.
+%C A279907 T(n,p) = 1 for prime divisors p of n since p | n^1.
+%C A279907 T(n,d) = 1 for divisors d > 1 of n since d | n^1.
+%C A279907 Row n for prime p have maximum value 1, since all k < p are coprime to p, and k | p^1 only when k = p.
+%C A279907 Values greater than 1 pertain only to composite k of composite n > 4, but not in all cases. T(n,k) = 1 for squarefree kernels k of composite n.
+%C A279907 T(n,k) = -1 for numbers k > 1 coprime to n and for numbers that are products of at least one prime q coprime to n and one prime p | n.
+%C A279907 T(n,k) is nonnegative for all numbers k for which n^k (mod k) = 0, i.e., all the prime divisors p of k also divide n.
+%C A279907 The largest possible value s in row n of T = floor(log_2(n)), since the largest possible multiplicity of any number m <= n pertains to perfect powers of 2, as 2 is the smallest prime. This number s first appears at T(2^s + 2, 2^s) for s > 1.
+%C A279907 If T(n,k) is positive, 1/k terminates T(n,k) digits after the radix point in base n. If T(n,k) is negative, 1/k is recurrent in base n.
+%C A279907 From _Robert Israel_, Dec 28 2016: (Start)
+%C A279907 T(a*b,c*d) = max(T(a,c),T(b,d)) if GCD(a,b)=1, GCD(b,d)=1,T(a,c)>=0 and T(b,d)>=0.
+%C A279907 T(n,a*b) = max(T(n,a),T(n,b)) if GCD(a,b)=1 and T(n,a)>=0 and T(n,b)>=0. (End)
+%H A279907 Michael De Vlieger, <a href="/A279907/b279907.txt">Table of n, a(n) for n = 1..11325</a> (rows 1 <= n <= 150)
+%e A279907 The triangle T(n,k) begins (with -1 shown as "." for clarity):
+%e A279907 n\k 1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 ...
+%e A279907 1:  0
+%e A279907 2:  0  1
+%e A279907 3:  0  .  1
+%e A279907 4:  0  1  .  1
+%e A279907 5:  0  .  .  .  1
+%e A279907 6:  0  1  1  2  .  1
+%e A279907 7:  0  .  .  .  .  .  1
+%e A279907 8:  0  1  .  1  .  .  .  1
+%e A279907 9:  0  .  1  .  .  .  .  .  1
+%e A279907 10: 0  1  .  2  1  .  .  3  .  1
+%e A279907 11: 0  .  .  .  .  .  .  .  .  .  1
+%e A279907 12: 0  1  1  1  .  1  .  2  2  .  .  1
+%e A279907 13: 0  .  .  .  .  .  .  .  .  .  .  .  1
+%e A279907 14: 0  1  .  2  .  .  1  3  .  .  .  .  .  1
+%e A279907 15: 0  .  1  .  1  .  .  .  2  .  .  .  .  .  1
+%e A279907 ...
+%p A279907 f:= proc(n,k) local Fk,Fn,i;
+%p A279907    if k = 1 then return 0 fi;
+%p A279907    Fk:= ifactors(k)[2];
+%p A279907    Fn:= map(t -> padic:-ordp(n,t[1]),Fk);
+%p A279907    if min(Fn) = 0 then -1 else max(seq(ceil(Fk[i,2]/Fn[i]),i=1..nops(Fk))) fi
+%p A279907 end proc:
+%p A279907 seq(seq(f(n,k),k=1..n),n=1..20); # _Robert Israel_, Dec 28 2016
+%t A279907 Table[Boole[k == 1] + (Boole[#[[-1, 1]] == 1] (-1 + Length@ #) /. 0 -> -1) &@ NestWhileList[Function[s, {#1/s, s}]@ GCD[#1, #2] & @@ # &, {k, n}, And[First@ # != 1, ! CoprimeQ @@ #] &], {n, 16}, {k, n}] // Flatten (* or *)
+%t A279907 Table[SelectFirst[Range[0, Floor@ Log2@ n], PowerMod[n, #, k] == 0 &] /. k_ /; MissingQ@ k -> -1, {n, 12}, {k, n}] // TableForm (* Version 10.2 *)
+%Y A279907 Cf.: A010846 (number of nonnegative k in row n), A162306 (k with nonnegative values in a(n)), A051731 (k with values 0 or 1), A000005 (number of k in row n with values 0 or 1), A272618 (k with values > 1), A243822 (number of k in row n with values > 1), A007947.
+%K A279907 tabl,sign,easy
+%O A279907 1,19
+%A A279907 _Michael De Vlieger_, Dec 26 2016

@@ -1,0 +1,35 @@
+%I A294068 #20 May 07 2018 03:08:04
+%S A294068 1,0,0,1,0,0,0,1,1,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,2,0,0,
+%T A294068 0,2,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,0,0,0,0,
+%U A294068 0,0,0,1,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2
+%N A294068 Number of factorizations of n using perfect powers (elements of A001597) other than 1.
+%H A294068 Robert Israel, <a href="/A294068/b294068.txt">Table of n, a(n) for n = 1..10000</a>
+%e A294068 The a(1152) = 7 factorizations are (4*4*8*9), (4*8*36), (4*9*32), (8*9*16), (8*144), (9*128), (32*36).
+%p A294068 ispp:= proc(n) local F;
+%p A294068   F:= ifactors(n)[2];
+%p A294068   igcd(op(map(t -> t[2],F)))>1
+%p A294068 end proc:
+%p A294068 f:= proc(n) local F, np, Q;
+%p A294068   F:= map(t -> t[2], ifactors(n)[2]);
+%p A294068   np:= mul(ithprime(i)^F[i],i=1..nops(F));
+%p A294068   Q:= select(ispp, numtheory:-divisors(np));
+%p A294068   G(Q,np)
+%p A294068 end proc:
+%p A294068 G:= proc(Q,n) option remember; local q,t,k;
+%p A294068     if not numtheory:-factorset(n) subset `union`(seq(numtheory:-factorset(q),q=Q)) then return 0 fi;
+%p A294068     q:= Q[1]; t:= 0;
+%p A294068     for k from 0 while n mod q^k = 0 do
+%p A294068       t:= t + procname(Q[2..-1],n/q^k)
+%p A294068     od;
+%p A294068     t
+%p A294068 end proc:
+%p A294068 G({},1):= 1:
+%p A294068 map(f, [$1..200]); # _Robert Israel_, May 06 2018
+%t A294068 ppQ[n_]:=And[n>1,GCD@@FactorInteger[n][[All,2]]>1];
+%t A294068 facsp[n_]:=If[n<=1,{{}},Join@@Table[Map[Prepend[#,d]&,Select[facsp[n/d],Min@@#>=d&]],{d,Select[Divisors[n],ppQ]}]];
+%t A294068 Table[Length[facsp[n]],{n,100}]
+%Y A294068 Positions of zeros are A052485.
+%Y A294068 Cf. A000961, A001055, A001222, A001597, A001694, A007716, A007916, A045778, A052409, A052410, A052486, A091050, A203025, A303707, A303710.
+%K A294068 nonn
+%O A294068 1,16
+%A A294068 _Gus Wiseman_, May 05 2018

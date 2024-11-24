@@ -1,0 +1,62 @@
+%I A369355 #43 Feb 24 2024 20:58:43
+%S A369355 7,38,88,348,636,1032,3828,3900,10632,16428,16428,16428,44652,533868,
+%T A369355 533868,533868,533868,1182432,5218548,7741068,7741068,7741068,
+%U A369355 33764268,43777068,67398582,70249668,180911982,180911982,180911982,387668532,387668532,387668532
+%N A369355 The smallest number such that n or more positive numbers k exist such that a(n) - k = sopfr(a(n) + k), where sopfr(m) is the sum of the primes dividing m, with repetition.
+%C A369355 From _David A. Corneth_, Feb 13 2024, Feb 15 2024: (Start)
+%C A369355 k may not be 0. Else a(1) = 2, a(2) = 7.
+%C A369355 The essence of the program I put is rewriting a(n) - k = sopfr(a(n) + k) as
+%C A369355 a(n) + k - 2k = sopfr(a(n) + k) so
+%C A369355 a(n) + k - sopfr(a(n) + k) = 2*k.
+%C A369355 If you like, substitute m = a(n) + k.
+%C A369355 To then search 1 <= m <= 2*precprime(u) and keep track of frequencies values m - sopfr(m) where that outcome is even as the outcome equals 2*k.
+%C A369355 Then find frequencies of a(n) via m - k = a(n). (End)
+%H A369355 Chai Wah Wu, <a href="/A369355/b369355.txt">Table of n, a(n) for n = 1..36</a>
+%e A369355 a(1) = 7 as 7 is the smallest number to have one number (k = 1) such that 7 - 1 = 6 = sopfr(7 + 1) = sopfr(8) = 6.
+%e A369355 a(2) = 38 as 38 is the smallest number to have two numbers (k = 25, 26) such that 38 - 25 = 13 = sopfr(38 + 25) = sopfr(63) = 13, and 38 - 26 = 12 = sopfr(38 + 26) = sopfr(64) = 12.
+%e A369355 a(3) = 88 as 88 is the smallest number to have three numbers (k = 65, 68, 74) such that 88 - 65 = 23 = sopfr(88 + 65) = sopfr(153) = 23, 88 - 68 = 20 = sopfr(88 + 68) = sopfr(156) = 20, and 88 - 74 = 14 = sopfr(88 + 74) = sopfr(162) = 14.
+%o A369355 (Python)
+%o A369355 from sympy import factorint
+%o A369355 from functools import cache
+%o A369355 from itertools import count, islice
+%o A369355 @cache
+%o A369355 def sopfr(n): return sum(p*e for p, e in factorint(n).items())
+%o A369355 def f(n): return sum(1 for k in range(1, n-1) if n - k == sopfr(n + k))
+%o A369355 def agen(): # generator of terms
+%o A369355     adict, n = dict(), 1
+%o A369355     for m in count(2):
+%o A369355         v = f(m)
+%o A369355         if v not in adict: adict[v] = m
+%o A369355         for i in range(n, v+1): yield m; n += 1
+%o A369355 print(list(islice(agen(), 12))) # _Michael S. Branicky_, Feb 11 2024
+%o A369355 (PARI)
+%o A369355 sopf(n) = {
+%o A369355 	my(f = factor(n));
+%o A369355 	sum(i = 1, #f~, f[i,1]*f[i,2])
+%o A369355 }
+%o A369355 upto(n) = {
+%o A369355 	my(v = vector(n), res = [], u = 2*precprime(n));
+%o A369355 	for(i = 2, u,
+%o A369355 		c = i-sopf(i);
+%o A369355 		if(c%2 == 0 && 1 <= i - c/2 && i - c/2 <= n && c > 0,
+%o A369355 			v[i - c/2]++
+%o A369355 		);
+%o A369355 	);
+%o A369355 	for(i = 1, #v,
+%o A369355 		if(v[i] > #res,
+%o A369355 			res = concat(res, vector(v[i] - #res));
+%o A369355 		);
+%o A369355 		if(v[i] > 0 && res[v[i]] == 0,
+%o A369355 			res[v[i]] = i
+%o A369355 		);	
+%o A369355 	);
+%o A369355 	res
+%o A369355 } \\ _David A. Corneth_, Feb 13 2024
+%Y A369355 Cf. A001414, A369354, A369356, A369357, A369812, A369981, A369348, A369349.
+%K A369355 nonn
+%O A369355 1,1
+%A A369355 _Scott R. Shannon_, Jan 25 2024
+%E A369355 a(18) from _Michael S. Branicky_, Feb 13 2024
+%E A369355 a(19)-a(24), a(26) from _Chai Wah Wu_, Feb 13 2024
+%E A369355 a(25) from _David A. Corneth_, Feb 13 2024
+%E A369355 a(27)-a(32) from _Chai Wah Wu_, Feb 14 2024

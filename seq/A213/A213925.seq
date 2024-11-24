@@ -1,0 +1,51 @@
+%I A213925 #21 Feb 05 2019 07:52:05
+%S A213925 1,2,3,4,5,2,3,7,2,4,9,2,5,11,3,4,13,2,7,3,5,16,17,2,9,19,4,5,3,7,2,
+%T A213925 11,23,2,3,4,25,2,13,3,9,4,7,29,2,3,5,31,2,16,3,11,2,17,5,7,4,9,37,2,
+%U A213925 19,3,13,2,4,5,41,2,3,7,43,4,11,5,9,2,23,47,3,16,49,2,25
+%N A213925 Triangle read by rows: n-th row contains Fermi-Dirac representation of n.
+%C A213925 Unique factorization of n into distinct prime powers of form p^(2^k), cf. A050376:  Product_{k=1..A064547(n)} T(n,k) = n.
+%H A213925 Alois P. Heinz, <a href="/A213925/b213925.txt">Rows n = 1..8000, flattened</a> (first 1000 rows from Reinhard Zumkeller)
+%H A213925 OEIS Wiki, <a href="/wiki/%22Fermi-Dirac_representation%22_of_n">"Fermi-Dirac representation" of n</a>
+%e A213925 First rows:
+%e A213925 .     1:    1
+%e A213925 .     2:    2
+%e A213925 .     3:    3
+%e A213925 .     4:    4
+%e A213925 .     5:    5
+%e A213925 .     6:    2  3
+%e A213925 .     7:    7
+%e A213925 .     8:    2  4                   8 = 2^2^0 * 2^2^1
+%e A213925 .     9:    9
+%e A213925 .    10:    2  5
+%e A213925 .......
+%e A213925 .   990:    2   5  9  11
+%e A213925 .   991:  991
+%e A213925 .   992:    2  16 31             992 = 2^2^0 * 2^2^2 * 31^2^0
+%e A213925 .   993:    3 331
+%e A213925 .   994:    2   7 71
+%e A213925 .   995:    5 199
+%e A213925 .   996:    3   4 83
+%e A213925 .   997:  997
+%e A213925 .   998:    2 499
+%e A213925 .   999:    3   9 37             999 = 3^2^0 * 3^2^1 * 37^2^0
+%e A213925 .  1000:    2   4  5  25        1000 = 2^2^0 * 2^2^1 * 5^2^0 * 5^2^1 .
+%p A213925 T:= n-> `if`(n=1, [1], sort([seq((l-> seq(`if`(l[j]=1, i[1]^(2^(j-1)), [][]),
+%p A213925              j=1..nops(l)))(convert(i[2], base, 2)), i=ifactors(n)[2])]))[]:
+%p A213925 seq(T(n), n=1..60);  # _Alois P. Heinz_, Feb 20 2018
+%t A213925 nmax = 50; FDPrimes = Reap[k = 1; While[lim = nmax^(1/k); lim > 2, Sow[Prime[Range[PrimePi[lim]]]^k]; k = 2 k]][[2, 1]] // Flatten // Union;
+%t A213925 f[1] = 1; f[n_] := Reap[m = n; Do[If[m == 1, Break[], If[Divisible[m, p], m = m/p; Sow[p]]], {p, Reverse[FDPrimes]}]][[2, 1]] // Reverse;
+%t A213925 Array[f, nmax] // Flatten (* _Jean-François Alcover_, Feb 05 2019 *)
+%o A213925 (Haskell)
+%o A213925 a213925 n k = a213925_row n !! (k-1)
+%o A213925 a213925_row 1 = [1]
+%o A213925 a213925_row n = reverse $ fd n (reverse $ takeWhile (<= n) a050376_list)
+%o A213925    where fd 1 _      = []
+%o A213925          fd x (q:qs) = if m == 0 then q : fd x' qs else fd x qs
+%o A213925                        where (x',m) = divMod x q
+%o A213925 a213925_tabf = map a213925_row [1..]
+%Y A213925 Cf. A050376.
+%Y A213925 For n > 1: A064547 (row lengths), A181894 (row sums), A223490, A223491.
+%K A213925 nonn,tabf
+%O A213925 1,2
+%A A213925 _Reinhard Zumkeller_, Mar 20 2013
+%E A213925 Example corrected (row 992) by _Reinhard Zumkeller_, Mar 11 2015

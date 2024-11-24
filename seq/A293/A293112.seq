@@ -1,0 +1,39 @@
+%I A293112 #24 Sep 20 2018 12:13:24
+%S A293112 1,1,0,1,1,0,1,1,1,0,1,1,2,2,0,1,1,2,5,2,0,1,1,2,6,10,3,0,1,1,2,6,14,
+%T A293112 23,4,0,1,1,2,6,15,39,51,5,0,1,1,2,6,15,44,104,111,6,0,1,1,2,6,15,45,
+%U A293112 129,284,243,8,0,1,1,2,6,15,45,135,386,775,530,10,0
+%N A293112 Number A(n,k) of sets of nonempty words with a total of n letters over k-ary alphabet such that within each prefix of a word every letter of the alphabet is at least as frequent as the subsequent alphabet letter; square array A(n,k), n>=0, k>=0, read by antidiagonals.
+%H A293112 Alois P. Heinz, <a href="/A293112/b293112.txt">Antidiagonals n = 0..80, flattened</a>
+%F A293112 G.f. of column k: Product_{j>=1} (1+x^j)^A182172(j,k).
+%F A293112 A(n,k) = Sum_{j=0..k} A293113(n,j).
+%e A293112 Square array A(n,k) begins:
+%e A293112   1, 1,   1,   1,   1,   1,   1,   1, ...
+%e A293112   0, 1,   1,   1,   1,   1,   1,   1, ...
+%e A293112   0, 1,   2,   2,   2,   2,   2,   2, ...
+%e A293112   0, 2,   5,   6,   6,   6,   6,   6, ...
+%e A293112   0, 2,  10,  14,  15,  15,  15,  15, ...
+%e A293112   0, 3,  23,  39,  44,  45,  45,  45, ...
+%e A293112   0, 4,  51, 104, 129, 135, 136, 136, ...
+%e A293112   0, 5, 111, 284, 386, 422, 429, 430, ...
+%p A293112 h:= l-> (n-> add(i, i=l)!/mul(mul(1+l[i]-j+add(`if`(l[k]
+%p A293112     <j, 0, 1), k=i+1..n), j=1..l[i]), i=1..n))(nops(l)):
+%p A293112 g:= proc(n, i, l) option remember;
+%p A293112       `if`(n=0, h(l), `if`(i<1, 0, `if`(i=1, h([l[], 1$n]),
+%p A293112         g(n, i-1, l) +`if`(i>n, 0, g(n-i, i, [l[], i])))))
+%p A293112     end:
+%p A293112 b:= proc(n, i, k) option remember; `if`(n=0, 1, `if`(i<1, 0,
+%p A293112       add(b(n-i*j, i-1, k)*binomial(g(i, k, []), j), j=0..n/i)))
+%p A293112     end:
+%p A293112 A:= (n, k)-> b(n$2, k):
+%p A293112 seq(seq(A(n, d-n), n=0..d), d=0..14);
+%t A293112 h[l_] := Function[n, Total[l]!/Product[Product[1 + l[[i]] - j + Sum[If[ l[[k]]<j, 0, 1], {k, i+1, n}], {j, 1, l[[i]]}], {i, 1, n}]][Length[l]];
+%t A293112 g[n_, i_, l_] := g[n, i, l] = If[n == 0, h[l], If[i < 1, 0, If[i == 1, h[Join[l, Table[1, n]]], g[n, i - 1, l] + If[i > n, 0, g[n - i, i, Append[l, i]]]]]];
+%t A293112 b[n_, i_, k_] := b[n, i, k] = If[n == 0, 1, If[i < 1, 0, Sum[b[n - i*j, i - 1, k]*Binomial[g[i, k, {}], j], {j, 0, n/i}]]];
+%t A293112 A[n_, k_] := b[n, n, k];
+%t A293112 Table[A[n, d-n], {d, 0, 14}, {n, 0, d}] // Flatten (* _Jean-François Alcover_, Jun 03 2018, from Maple *)
+%Y A293112 Columns k=0-10 give: A000007, A000009, A293741, A293742, A293743, A293744, A293745, A293746, A293747, A293748, A293749.
+%Y A293112 Main diagonal gives A293114.
+%Y A293112 Cf. A182172, A293108, A293113.
+%K A293112 nonn,tabl
+%O A293112 0,13
+%A A293112 _Alois P. Heinz_, Sep 30 2017

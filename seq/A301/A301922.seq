@@ -1,0 +1,45 @@
+%I A301922 #15 Aug 21 2019 05:32:28
+%S A301922 1,1,1,1,2,1,1,7,3,1,1,23,29,4,1,1,122,2102,150,5,1,1,888,7011184,
+%T A301922 7013164,1037,6,1,1,11302,1788775603336,29281354507753848,
+%U A301922 1788782615612,12338,7,1,1,262322,53304526022885280592,234431745534048893449761040648512,234431745534048922729326772799024,53304527811667884902,274659,8,1
+%N A301922 Regular triangle where T(n,k) is the number of unlabeled k-uniform hypergraphs spanning n vertices.
+%H A301922 Andrew Howroyd, <a href="/A301922/b301922.txt">Table of n, a(n) for n = 1..91</a>
+%F A301922 T(n,k) = A309858(n,k) - A309858(n-1,k). - _Alois P. Heinz_, Aug 21 2019
+%e A301922 Triangle begins:
+%e A301922    1
+%e A301922    1   1
+%e A301922    1   2   1
+%e A301922    1   7   3   1
+%e A301922    1  23  29   4   1
+%e A301922 The T(4,2) = 7 hypergraphs:
+%e A301922   {{1,2},{3,4}}
+%e A301922   {{1,3},{2,4},{3,4}}
+%e A301922   {{1,4},{2,4},{3,4}}
+%e A301922   {{1,2},{1,3},{2,4},{3,4}}
+%e A301922   {{1,4},{2,3},{2,4},{3,4}}
+%e A301922   {{1,3},{1,4},{2,3},{2,4},{3,4}}
+%e A301922   {{1,2},{1,3},{1,4},{2,3},{2,4},{3,4}}
+%p A301922 g:= (l, i, n)-> `if`(i=0, `if`(n=0, [[]], []), [seq(map(x->
+%p A301922      [x[], j], g(l, i-1, n-j))[], j=0..min(l[i], n))]):
+%p A301922 h:= (p, v)-> (q-> add((s-> add(`if`(andmap(i-> irem(k[i], p[i]
+%p A301922      /igcd(t, p[i]))=0, [$1..q]), mul((m-> binomial(m, k[i]*m
+%p A301922      /p[i]))(igcd(t, p[i])), i=1..q), 0), t=1..s)/s)(ilcm(seq(
+%p A301922     `if`(k[i]=0, 1, p[i]), i=1..q))), k=g(p, q, v)))(nops(p)):
+%p A301922 b:= (n, i, l, v)-> `if`(n=0 or i=1, 2^((p-> h(p, v))([l[], 1$n]))
+%p A301922      /n!, add(b(n-i*j, i-1, [l[], i$j], v)/j!/i^j, j=0..n/i)):
+%p A301922 A:= proc(n, k) A(n, k):= `if`(k>n-k, A(n, n-k), b(n$2, [], k)) end:
+%p A301922 T:= (n, k)-> A(n, k)-A(n-1, k):
+%p A301922 seq(seq(T(n, k), k=1..n), n=1..9);  # _Alois P. Heinz_, Aug 21 2019
+%o A301922 (PARI)
+%o A301922 permcount(v)={my(m=1,s=0,k=0,t); for(i=1,#v,t=v[i]; k=if(i>1&&t==v[i-1],k+1,1); m*=t*k;s+=t); s!/m}
+%o A301922 rep(typ)={my(L=List(), k=0); for(i=1, #typ, k+=typ[i]; listput(L,k); while(#L<k, listput(L,#L))); Vec(L)}
+%o A301922 can(v,f)={my(d=1,u=v); while(d>0, u=vecsort(apply(f, u)); d=lex(u,v)); !d}
+%o A301922 Q(n,k,perm)={my(t=0); forsubset([n,k], v, t += can(Vec(v), t->perm[t])); t}
+%o A301922 U(n,k)={my(s=0); forpart(p=n, s += permcount(p)*2^Q(n,k,rep(p))); s/n!}
+%o A301922 for(n=1, 10, for(k=1, n, print1(U(n,k)-U(n-1,k), ", ")); print) \\ _Andrew Howroyd_, Aug 10 2019
+%Y A301922 Row sums are A301481. Second column is A002494.
+%Y A301922 Cf. A003465, A055621, A298422, A298426, A299471, A301481, A301920, A306017-A306021, A309858.
+%K A301922 nonn,tabl
+%O A301922 1,5
+%A A301922 _Gus Wiseman_, Jun 19 2018
+%E A301922 Terms a(16) and beyond from _Andrew Howroyd_, Aug 09 2019

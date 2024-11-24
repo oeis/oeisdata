@@ -1,0 +1,60 @@
+%I A299500 #14 Feb 15 2018 20:36:16
+%S A299500 1,1,1,2,2,1,3,7,3,1,5,16,15,4,1,8,38,46,26,5,1,13,82,141,100,40,6,1,
+%T A299500 21,173,381,375,185,57,7,1,34,352,983,1216,820,308,77,8,1,55,701,2400,
+%U A299500 3704,3101,1575,476,100,9,1,89,1368,5646,10536,10885,6804,2758,696,126,10,1
+%N A299500 Triangle read by rows, T(n,k) = [x^k] Sum_{k=0..n} p_{n,k}(x) where p_{n,k}(x) = x^(n-k)*binomial(n,k)*hypergeom([-k, k-n, k-n], [1, -n], 1/x), for 0 <= k <= n.
+%F A299500 Let P_{n}(x) = Sum_{k=0..n} p_{n,k}(x) then
+%F A299500 2^n*P_{n}(1/2) = A299502(n).
+%F A299500 P_{n}(-1) = A182883(n). P_{n}(0) = A000045(n+1).
+%F A299500 P_{n}(1) = A108626(n).  P_{n}(2) = A299501(n).
+%F A299500 The general case: for fixed k the sequence P_{n}(k) with n >= 0 has the generating function ogf(k, x) = (1-2*(k+1)*x + (k^2+2*k-1)*x^2 - 2*(k-1)*x^3 + x^4)^(-1/2).  The example section shows the start of this square array of sequences.
+%F A299500 These sequences can be computed by the recurrence P(n,k) = ((2-n)*P(n-4,k)-(3-2*n)*(k-1)*P(n-3,k)+(k^2+2*k-1)*(1-n)*P(n-2,k)+(2*n-1)*(k+1)*P(n-1,k))/n with initial values 1, k+1, (k+1)^2+1 and (k+1)^3+4*k+2.
+%F A299500 The partial polynomials p_{n,k}(x) reduce for x = 1 to A108625 (seen as a triangle).
+%e A299500 The partial polynomials p_{n,k}(x) start:
+%e A299500 [0] 1
+%e A299500 [1] x,   1
+%e A299500 [2] x^2, 2*x+1,        1
+%e A299500 [3] x^3, 3*x^2+4*x,    3*x+2,             1
+%e A299500 [4] x^4, 4*x^3+9*x^2,  6*x^2+12*x+1,      4*x+3,         1
+%e A299500 [5] x^5, 5*x^4+16*x^3, 10*x^3+36*x^2+9*x, 10*x^2+24*x+3, 5*x+4, 1
+%e A299500 .
+%e A299500 The polynomials P_{n}(x) start:
+%e A299500 [0]  1
+%e A299500 [1]  1 +    x
+%e A299500 [2]  2 +  2*x +    x^2
+%e A299500 [3]  3 +  7*x +  3*x^2 +    x^3
+%e A299500 [4]  5 + 16*x + 15*x^2 +  4*x^3 +   x^4
+%e A299500 [5]  8 + 38*x + 46*x^2 + 26*x^3 + 5*x^4 + x^5
+%e A299500 .
+%e A299500 The triangle starts:
+%e A299500 [0]  1
+%e A299500 [1]  1,   1
+%e A299500 [2]  2,   2,    1
+%e A299500 [3]  3,   7,    3,    1
+%e A299500 [4]  5,  16,   15,    4,    1
+%e A299500 [5]  8,  38,   46,   26,    5,    1
+%e A299500 [6] 13,  82,  141,  100,   40,    6,   1
+%e A299500 [7] 21, 173,  381,  375,  185,   57,   7,   1
+%e A299500 [8] 34, 352,  983, 1216,  820,  308,  77,   8, 1
+%e A299500 [9] 55, 701, 2400, 3704, 3101, 1575, 476, 100, 9, 1'
+%e A299500 .
+%e A299500 The square array P_{n}(k) near k=0:
+%e A299500 ......  [k=-2] 1, -1,  2, -7,  17,  -44,  125,  -345,    958,   -2707, ...
+%e A299500 A182883 [k=-1] 1,  0,  1, -2,   1,   -6,    7,   -12,     31,     -40, ...
+%e A299500 A000045 [k=0]  1,  1,  2,  3,   5,    8,   13,    21,     34,      55, ...
+%e A299500 A108626 [k=1]  1,  2,  5, 14,  41,  124,  383,  1200,   3799,   12122, ...
+%e A299500 A299501 [k=2]  1,  3, 10, 37, 145,  588, 2437, 10251,  43582,  186785, ...
+%e A299500 ......  [k=3]  1,  4, 17, 78, 377, 1886, 9655, 50220, 264223, 1402108, ...
+%p A299500 CoeffList := p -> op(PolynomialTools:-CoefficientList(p,x)):
+%p A299500 PrintPoly := p -> print(sort(expand(p),x,ascending)):
+%p A299500 T := (n,k) -> x^(n-k)*binomial(n, k)*hypergeom([-k,k-n,k-n], [1,-n], 1/x):
+%p A299500 P := [seq(add(simplify(T(n,k)),k=0..n), n=0..10)]:
+%p A299500 seq(CoeffList(p), p in P); # seq(PrintPoly(p), p in P);
+%p A299500 R := proc(n,k) option remember; # Recurrence
+%p A299500 if n < 4 then return [1,k+1,(k+1)^2+1,(k+1)^3+4*k+2][n+1] fi; ((2-n)*R(n-4,k)-
+%p A299500 (3-2*n)*(k-1)*R(n-3,k)+(k^2+2*k-1)*(1-n)*R(n-2,k)+(2*n-1)*(k+1)*R(n-1,k))/n end:
+%p A299500 for k from -2 to 3 do lprint(seq(R(n,k), n=0..9)) od;
+%Y A299500 Cf. A000045, A108625, A108626, A182883, A299499, A299501, A299502.
+%K A299500 nonn,tabl
+%O A299500 0,4
+%A A299500 _Peter Luschny_, Feb 11 2018

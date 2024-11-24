@@ -1,0 +1,83 @@
+%I A236185 #33 Dec 12 2020 21:12:34
+%S A236185 4,2,4,2,4,6,2,6,4,2,4,2,4,6,2,6,4,2,4,2,4,6,2,6,4,2,4,2,4,6,2,6,4,2,
+%T A236185 4,2,4,6,2,6,4,2,4,2,4,6,2,6,4,2,4,2,4,6,2,6,4,2,4,2,4,6,2,6,4,2,4,2,
+%U A236185 4,6,2,6,4,2,4,2,4,6,2,6,4,2,4,2,4,6,2
+%N A236185 Differences between terms of compacting Eratosthenes sieve for prime(4) = 7.
+%C A236185 P(x) is a function which represents a prime number at a ordinal x.
+%C A236185 This pattern, dp(x) is a sequence of the differences between consecutive prime numbers as described by p(x).
+%C A236185 For P(4), dp(4)is the relative offsets of the next 7 primes: 7, +4 = 11, +2 = 13, +4 = 17, +2 = 19, +4 = 23, +6 = 29, +2 = 31
+%C A236185 The Eratosthenes sieve can be expressed as follows. Start with S1 = [2, 3, 4, 5, ...] the list of numbers bigger than 1. Removing all multiples of the first element 2 yields the list S2 = [3, 5, 7, 9, ...]. Removing all multiples of the first element 3 yields S3 = [5, 7, 11, 13, 17, 19, ...], Removing all multiples of the first element 5 yields S4 = [7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 49, ...], and so on. The list of first differences of S4 is [4, 2, 4, 2, 4, 6, 2, 6, 4, 2, 4, 2, ...] which is this sequence. - _Michael Somos_, Mar 12 2014
+%H A236185 Christopher J. Hanson, <a href="http://www.codeproject.com/Articles/716180/The-structure-of-prime-numbers-and-twin-prime-gaps">The structure of prime numbers and twin prime gaps</a>
+%F A236185 a(n + 8) = a(n). - _Michael Somos_, Mar 10 2014
+%F A236185 a(n) = 4*((n+2) mod 2) + 2*((n+1) mod 2) + 4*(f(8,n+2)+f(8,n)) - 2*f(8,n+1), where f(x,n)= floor(n/x)-floor((n-1)/x). - _Gary Detlefs_, Nov 16 2020
+%o A236185 (PARI) {a(n) = my(A); if( n<1, 0, A = vector( n*28 + 48, k, k+1); for( i = 1, 3, A = select( k -> k%prime(i), A) ); polcoeff( (1 - x) * Ser( select( k -> k>7 && (k%7) == 0, A) / 7), n)) }; /* _Michael Somos_, Mar 10 2014 */
+%o A236185 (C#)
+%o A236185 // dp(4) = GeneratePrimeDifferencialPattern( 4 );
+%o A236185 static void GeneratePrimeDifferencialPattern( int ordinal )
+%o A236185 {
+%o A236185     // Contract
+%o A236185     if( ordinal < 1 )
+%o A236185         throw new ArgumentOutOfRangeException( "ordinal" );
+%o A236185     // Local data
+%o A236185     int size = 1 << 18;
+%o A236185     int[] numberLine = Enumerable.Range( 2, size ).ToArray();
+%o A236185     int pointer = 0;
+%o A236185     // Apply sieve: for each integer greater than 1
+%o A236185     while( pointer < numberLine.Length )
+%o A236185     {
+%o A236185         // Locals
+%o A236185         int x = numberLine[pointer];
+%o A236185         int index = pointer;
+%o A236185         List<int> pattern = new List<int>();
+%o A236185         int skips = 0;
+%o A236185         int count = 0;
+%o A236185         bool counting = true;
+%o A236185         // Find all products
+%o A236185         for( int n = x + x; n < size; n += x )
+%o A236185         {
+%o A236185             // Fast forward through number-line
+%o A236185             while( numberLine[++index] < n )
+%o A236185                 skips++;
+%o A236185             // If the number was not already removed
+%o A236185             if( numberLine[index] == n )
+%o A236185             {
+%o A236185                 // Add skip count to pattern
+%o A236185                 pattern.Add( numberLine[index] );
+%o A236185                 // Mark as not prime
+%o A236185                 numberLine[index] = 0;
+%o A236185                 // Reset skips
+%o A236185                 if( counting )
+%o A236185                 {
+%o A236185                     count++;
+%o A236185                     if( skips <= 2 )
+%o A236185                         counting = false;
+%o A236185                 }
+%o A236185                 skips = 0;
+%o A236185             }
+%o A236185             // Otherwise we've skipped again
+%o A236185             else skips++;
+%o A236185         }
+%o A236185         // Reduce number-line
+%o A236185         numberLine = numberLine.Where( n => n > 0 ).ToArray();
+%o A236185         // If we have a pattern we want
+%o A236185         if( pattern.Any() && pointer == ordinal - 1 )
+%o A236185         {
+%o A236185             // Report pattern
+%o A236185             int prime = numberLine[ordinal-1];
+%o A236185             var d = pattern.Take( count ).ToArray();
+%o A236185             List<int> dp = new List<int>();
+%o A236185             for( int y = 1; y < count; y++ )
+%o A236185                 dp.Add( ( d[y] - d[y - 1] ) / prime );
+%o A236185             System.Console.WriteLine( "Pattern P({0}) = {1} :: dp({0}) = {2}", pointer + 1, numberLine[pointer], String.Join( ", ", dp ) );
+%o A236185             return;
+%o A236185         }
+%o A236185         // Move number-line pointer forward
+%o A236185         pointer++;
+%o A236185     }
+%o A236185 }
+%Y A236185 Cf. A236175-A236180, A236185-A236190.
+%Y A236185 Cf. A007775
+%K A236185 nonn
+%O A236185 1,1
+%A A236185 _Christopher J. Hanson_, Jan 21 2014
+%E A236185 Edited by _Michael Somos_, Mar 12 2014. (Added code and comments, refined description.)

@@ -1,0 +1,48 @@
+%I A217099 #16 Dec 29 2018 03:27:32
+%S A217099 0,1,3,5,9,17,21,27,45,51,73,93,99,107,153,165,297,313,325,403,717,
+%T A217099 843,1241,1421,1619,1675,2409,2661,4841,4953,5349,5709,13011,13515,
+%U A217099 21349,22861,26067,27083,38505,39513,76905,78937,85349,108235,183117,208083,307817,366413,415955,432843,632409
+%N A217099 Binary palindromes (cf. A006995) such that the number of contiguous palindromic bit patterns is minimal (for a given number of places).
+%C A217099 For a given number of places m a binary palindrome has at least 2*(m-1) + floor((m-3)/2) palindromic substrings. To a certain extent, this number indicates the minimal possible grade of symmetry.
+%C A217099 a(n) is the least binary palindrome > a(n-1) which have the same number of palindromic substrings than a(n-1). If such a palindrome doesn't exist, a(n) is the least binary palindrome with one additional digit which meets the minimal possible number of palindromic substrings for such increased number of digits.
+%C A217099 b_left(n) := floor(a(n)/2^log_2(a(n))) is a term of A206926, if n > 3. More precise, the bit pattern of b_left(n) is contained in the concatenation of the bit patterns of 37 or of 41, provided n > 16.
+%C A217099 b_right(n) := a(n) mod (2^(1+log_2(a(n))) is a term of A206926, if n > 6. More precise, the bit pattern of b_right(n) is contained in the concatenation of the bit patterns of 37 or of 41, provided n > 16.
+%C A217099 Provided n > 16: The bit pattern of b_left(n) is contained in the continued concatenation of the bit pattern of 37 (or 41, respectively) if and only if the bit pattern of b_ right(n) is contained in the continued concatenation of the bit pattern of 41 (or 37, respectively).
+%H A217099 Hieronymus Fischer, <a href="/A217099/b217099.txt">Table of n, a(n) for n = 1..1000</a>
+%F A217099 a(n) = min(p > a(n-1) | p is binary palindrome and A206925(p) = A206925(a(n-1))), if this minimum exists, else a(n) = min(p > 2*2^floor(log(a(n-1))) | p is binary palindrome and A206925(p) = min(A206925(q) | q is binary palindrome and q > 2*2^floor(log(a(n-1))))).
+%F A217099 a(n) = A006995(j), where j := j(n) = min(k > A206915(a(n-1)) | A206924(k) = A206925(a(n-1)), if this minimum exists, else j(n) = min(k > A206915(2*2^floor(log(a(n-1)))) | A206924(k) = min(a206925(A006995(i)) | i > A206915(2*2^floor(log(a(n-1)))))).
+%F A217099 With k := k(n) = floor((n - 5)/6) - 1, j := j(n) = (n - 5) mod 6 + 1, d = 2k+7+floor(j/5),
+%F A217099 c = 2*(d-1) + floor((d-3)/2), f(i) = A206926(6k + 4 + i)*2^floor(d/2) + Reversal(floor((A206926(6k + 4 + i))/(2 - floor(j/5)))), for i=0..5, we have
+%F A217099 a(n) = b(j - 4*floor(j/5)), where b(m) = f(min(m-1<=i<=5 | A206925(f(i)) = c and f(i) <> b(l) for 1<=l<m)), m = 1..4-2*floor(j/5).
+%F A217099 With m = 1+floor(log_2(a(n)), n > 3:
+%F A217099 A206924(k) = 2(m-1) + floor((m-3)/2), where k is that uniquely determined number for which A006995(k) = a(n).
+%F A217099 A206924(A206915(a(n))) = 2(m-1) + floor((m-3)/2).
+%F A217099 A206924(A206915(a(n))) = 3*floor(log_2(A206915(a(n)))) + 2*floor(log_2(A206915(a(n))/3)) - 2, n > 3.
+%e A217099 a(1) = 0, since 0 is a binary palindrome with 1 palindromic substring (=0) which is the minimum for binary palindromes with 1 place.
+%e A217099 a(2) = 1, since 1 is a binary palindrome with 1 palindromic substring (=1) which is the minimum for binary palindromes with 1 place.
+%e A217099 a(8) = 27, since 27=11011_2 is a binary palindrome with 9 palindromic substrings which is the minimum for binary palindromes with 5 places.
+%e A217099 a(9) = 45, since 45=101101_2 is a binary palindrome with 11 palindromic substrings which is the minimum for binary palindromes with 6 places.
+%o A217099 (Smalltalk)
+%o A217099 "Calculates a(n) - not optimized.
+%o A217099 If the complete array 'answer' is answered instead of a separate term, the next 2 (if d is even) or 4 (if d is odd) terms are calculated simultaneously"
+%o A217099 | n min d B k j p q answer |
+%o A217099 answer := OrderedCollection new.
+%o A217099 n := self.
+%o A217099 B := #(0 1 3 5 9 17 21 27 45 51 73 93 99 107 153 165).
+%o A217099 n <= 16 ifTrue: [^s := B at: n].
+%o A217099 k := (n - 5) // 6 - 1.
+%o A217099 j := (n - 5) \\ 6 + 1.
+%o A217099 d := 2 * k + 7 + (j // 5).
+%o A217099 min := (d - 1) * 2 + ((d - 3) // 2).
+%o A217099 0 to: 5
+%o A217099   do:
+%o A217099    [:i |
+%o A217099    p := (6 * k + 4 + i) A206926.
+%o A217099    s := p * (2 raisedToInteger: d // 2).
+%o A217099    q := p // (2 - (j // 5)) reverse: 2.
+%o A217099    s A206925 = min ifTrue: [answer add: (s + q)]].
+%o A217099 ^answer at: j - (j // 5 * 4) [by _Hieronymus Fischer_]
+%Y A217099 Cf. A006995, A206923, A206924, A206925, A206926, A070939.
+%K A217099 nonn,base
+%O A217099 1,3
+%A A217099 _Hieronymus Fischer_, Jan 23 2013

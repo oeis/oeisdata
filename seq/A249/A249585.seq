@@ -1,0 +1,42 @@
+%I A249585 #15 Jan 02 2023 12:30:51
+%S A249585 1,10,20,11,30,2,12,13,21,14,3,22,15,4,23,16,5,24,17,6,25,18,7,26,19,
+%T A249585 8,27,31,28,37,29,38,32,41,33,42,34,35,40,36,45,39,48,43,52,44,53,46,
+%U A249585 50,47,56,49,58,54,63,51,60,55,64,57,61,59,68,65,74,62,71,66,75,67,69,78,70,76,85,72,81,73,82,77,86,79,80,87,96,83,92,84,93,88
+%N A249585 Lexicographically earliest permutation of the positive integers such that a(n+1) has at least one digit which increased by 1 is a digit of a(n).
+%H A249585 Robert Israel, <a href="/A249585/b249585.txt">Table of n, a(n) for n = 1..10000</a>
+%H A249585 E. Angelini, <a href="http://list.seqfan.eu/oldermail/seqfan/2014-November/013903.html">Downgrade one of the digits of a(n-1)</a>, Nov 01 2014.
+%p A249585 N:= 200: # to get the first N terms
+%p A249585   S:= {}:
+%p A249585   m:= 2:
+%p A249585 a[1]:= 1:
+%p A249585 xnext:= proc(x)
+%p A249585     local j, Sc;
+%p A249585     Sc:= select(`>`,S,x);
+%p A249585     if Sc <> {} then min(Sc)
+%p A249585     elif x < m then m
+%p A249585     else x+1
+%p A249585     fi
+%p A249585 end proc:
+%p A249585 for n from 2 to N do
+%p A249585   adigs:= convert(convert(a[n-1],base,10),set);
+%p A249585   bdigs:= {$0..8} intersect map(`-`,adigs,1);
+%p A249585   c:= 0;
+%p A249585   do
+%p A249585     c:= xnext(c);
+%p A249585     if convert(convert(c,base,10),set) intersect bdigs <> {} then
+%p A249585        if member(c,S) then S:= S minus {c}
+%p A249585        else
+%p A249585          S:= S union {$m .. c-1};
+%p A249585          m:= c + 1;
+%p A249585        fi;
+%p A249585        a[n]:= c;
+%p A249585        break
+%p A249585     fi
+%p A249585   od;
+%p A249585 od:
+%p A249585 seq(a[n],n=1..N); # _Robert Israel_, Nov 03 2014
+%o A249585 (PARI) A249585(n,show=0,a=1,u=[])={for(i=2,n, show&&print1(a","); u=setunion(u,Set(a)); D=Set(apply(d->d-1,digits(a))); while(setsearch(u,1+m=vecmin(u)),u=setminus(u,Set(m))); for(m=m+1,9e9,!setsearch(u,m)&&#setintersect(D,Set(digits(m))) &&(a=m)&&break));a} /* Using a more natural and simpler until() loop is 10x slower! */
+%Y A249585 Cf. A249591, A067581.
+%K A249585 nonn,base
+%O A249585 1,2
+%A A249585 _Eric Angelini_ and _M. F. Hasler_, Nov 01 2014

@@ -1,0 +1,53 @@
+%I A242415 #23 Dec 17 2019 04:58:01
+%S A242415 1,2,3,4,5,6,7,8,9,15,11,12,13,35,10,16,17,18,19,45,21,77,23,24,25,
+%T A242415 143,27,175,29,30,31,32,55,221,14,36,37,323,91,135,41,105,43,539,20,
+%U A242415 437,47,48,49,75,187,1573,53,54,33,875,247,667,59,60,61,899,63,64,65
+%N A242415 Reverse the deltas of indices of distinct primes in the prime factorization of n.
+%C A242415 This self-inverse permutation (involution) of natural numbers preserves both the total number of prime divisors and the (index of) largest prime factor of n, i.e., for all n it holds that A001222(a(n)) = A001222(n) and A006530(a(n)) = A006530(n) [equally: A061395(a(n)) = A061395(n)]. It also preserves the exponent of the largest prime: A053585(a(n)) = A053585(n).
+%C A242415 From the above it follows, that this fixes prime powers (A000961), among other numbers.
+%C A242415 Considered as a function on partitions encoded by the indices of primes in the prime factorization of n (as in table A112798), this implements an operation which reverses the order of horizontal line segments of the "steps" in Young (or Ferrers) diagram of a partition, but keeps the order of vertical line segments intact. Please see the last example in the example section and compare also to the comments given in A242419.
+%H A242415 Antti Karttunen, <a href="/A242415/b242415.txt">Table of n, a(n) for n = 1..8192</a>
+%H A242415 Wikipedia, <a href="http://en.wikipedia.org/wiki/Young_diagram">Young diagram</a>
+%H A242415 <a href="/index/Per#IntegerPermutation">Index entries for sequences that are permutations of the natural numbers</a>
+%F A242415 If n = p_a^e_a * p_b^e_b * ... * p_h^e_h * p_i^e_i * p_j^e_j * p_k^e_k, where p_a < ... < p_k are distinct primes (sorted into ascending order) in the prime factorization of n, and e_a .. e_k are their nonzero exponents, then a(n) = p_{k-j}^e_a * p_{k-i}^e_b  * p_{k-h}^e_c * ... * p_{k-a}^e_j * p_k^e_k.
+%F A242415 As a recurrence: a(1) = 1, and for n>1, a(n) = (A000040(A241919(n))^A067029(n)) * A242378(A241919(n), a(A051119(A225891(n)))).
+%F A242415 By composing/conjugating related permutations:
+%F A242415 a(n) = A069799(A242419(n)) = A242419(A069799(n)).
+%F A242415 a(n) = A122111(A069799(A122111(n))) = A153212(A069799(A153212(n))).
+%e A242415 For n = 10 = 2*5 = p_1 * p_3, we get p_(3-1) * p_3 = 3 * 5 = 15, thus a(10) = 15.
+%e A242415 For n = 20 = 2*2*5 = p_1^2 * p_3^1, we get p_(3-1)^2 * p_3^1 = 3^2 * 5 = 45, thus a(20) = 45.
+%e A242415 For n = 84 = 2*2*3*7 = p_1^2 * p_2 * p_4, when we reverse the deltas of indices, but keep the exponents same, we get p_(4-2)^2 * p_(4-1) * p_4 = p_2^2 * p_3 * p_4 = 3^2 * 5 * 7 = 315, thus a(84) = 315.
+%e A242415 For n = 2200, we see that it encodes the partition (1,1,1,3,3,5) in A112798 as 2200 = p_1 * p_1 * p_1 * p_3 * p_3 * p_5 = 2^3 * 5^2 * 11. This in turn corresponds to the following Young diagram in French notation:
+%e A242415    _
+%e A242415   | |
+%e A242415   | |
+%e A242415   | |_ _
+%e A242415   |     |
+%e A242415   |     |_ _
+%e A242415   |_ _ _ _ _|
+%e A242415 Reversing the order of horizontal line segment lengths (1,2,2) to (2,2,1), but keeping the order of vertical line segment lengths as (3,2,1), we get a new Young diagram
+%e A242415    _ _
+%e A242415   |   |
+%e A242415   |   |
+%e A242415   |   |_ _
+%e A242415   |       |
+%e A242415   |       |_
+%e A242415   |_ _ _ _ _|
+%e A242415 which represents the partition (2,2,2,4,4,5), encoded in A112798 by p_2^3 * p_4^2 * p_5^1 = 3^3 * 7^2 * 11 = 14553, thus a(2200) = 14553.
+%o A242415 (MIT/GNU Scheme, with Aubrey Jaffer's SLIB Scheme library)
+%o A242415 (require 'factor)
+%o A242415 (define (A242415 n) (if (<= n 1) n (let* ((pfs (ifactor n))) (apply * (map expt (map A000040 (revdeltas (map A049084 (uniq pfs)))) (multiplicities pfs))))))
+%o A242415 (define (ifactor n) (cond ((< n 2) (list)) (else (sort (factor n) <))))
+%o A242415 (define (uniq lista) (let loop ((lista lista) (z (list))) (cond ((null? lista) (reverse! z)) ((and (pair? z) (equal? (car z) (car lista))) (loop (cdr lista) z)) (else (loop (cdr lista) (cons (car lista) z))))))
+%o A242415 (define (multiplicities lista) (let loop ((mults (list)) (lista lista) (prev #f)) (cond ((not (pair? lista)) (reverse! mults)) ((equal? (car lista) prev) (set-car! mults (+ 1 (car mults))) (loop mults (cdr lista) prev)) (else (loop (cons 1 mults) (cdr lista) (car lista))))))
+%o A242415 (define (revdeltas ints) (partsums (reverse (diff1 ints)))) ;; Maybe possible with just one fold?
+%o A242415 (define (diff1 ints) (reverse (fold-left (lambda (xs x) (cons (- x (apply + xs)) xs)) '() ints))) ;; Take the first elem of ints followed by its first differences
+%o A242415 (define (partsums a) (cdr (reverse! (fold-left (lambda (psums n) (cons (+ n (car psums)) psums)) (list 0) a)))) ;; Partial sums from left to right.
+%o A242415 ;; Alternative implementation based on the recurrence, and utilizing memoizing definec-macro from _Antti Karttunen_'s IntSeq-library:
+%o A242415 (definec (A242415 n) (cond ((<= n 1) n) (else (* (expt (A000040 (A241919 n)) (A067029 n)) (A242378bi (A241919 n) (A242415 (A051119 (A225891 n))))))))
+%Y A242415 Fixed points: A242413.
+%Y A242415 Cf. A112798, A122111, A153212, A000040, A241919, A067029, A242378, A051119, A225891.
+%Y A242415 {A000027, A069799, A242415, A242419} form a 4-group.
+%K A242415 nonn
+%O A242415 1,2
+%A A242415 _Antti Karttunen_, May 24 2014

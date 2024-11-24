@@ -1,0 +1,40 @@
+%I A193691 #23 May 15 2019 16:22:22
+%S A193691 1,1,1,2,1,2,2,4,5,1,2,2,4,5,2,4,4,8,10,5,10,13,14,1,2,2,4,5,2,4,4,8,
+%T A193691 10,5,10,13,14,2,4,4,8,10,4,8,8,16,20,10,20,26,28,5,10,10,20,25,13,26,
+%U A193691 34,37,14,28,37,41,42,1,2,2,4,5,2,4,4,8,10,5,10,13,14,2,4,4,8,10,4
+%N A193691 Triangle T(n,k), n>=0, 1<=k<=C(n), read by rows: T(n,k) = number of elements <= k-th path in the poset of Dyck paths of semilength n ordered by inclusion.
+%H A193691 Alois P. Heinz, <a href="/A193691/b193691.txt">Rows n = 0..9, flattened</a>
+%e A193691 Dyck paths of semilength n=3 listed in lexicographic order:
+%e A193691 .                                               /\
+%e A193691 .                  /\      /\        /\/\      /  \
+%e A193691 .     /\/\/\    /\/  \    /  \/\    /    \    /    \
+%e A193691 .     101010    101100    110010    110100    111000
+%e A193691 . k = (1)       (2)       (3)       (4)       (5)
+%e A193691 .
+%e A193691 We have (1) <= (1); (1),(2) <= (2); (1),(3) <= (3); (1),(2),(3),(4) <= (4); and (1),(2),(3),(4),(5) <= (5), thus row 3 = [1, 2, 2, 4, 5].
+%e A193691 Triangle begins:
+%e A193691   1;
+%e A193691   1;
+%e A193691   1, 2;
+%e A193691   1, 2, 2, 4, 5;
+%e A193691   1, 2, 2, 4, 5, 2, 4, 4, 8, 10, 5, 10, 13, 14;
+%e A193691   1, 2, 2, 4, 5, 2, 4, 4, 8, 10, 5, 10, 13, 14, 2, 4, 4, 8, ...
+%p A193691 d:= proc(n, l) local m; m:= nops(l);
+%p A193691       `if`(n=m, [l], [seq(d(n, [l[], j])[],
+%p A193691                      j=`if`(m=0, 1, max(m+1, l[-1]))..n)])
+%p A193691     end:
+%p A193691 le:= proc(x, y) local i;
+%p A193691        for i to nops(x) do if x[i]>y[i] then return false fi od; true
+%p A193691      end:
+%p A193691 T:= proc(n) option remember; local l;
+%p A193691       l:= d(n, []);
+%p A193691       seq(add(`if`(le(l[i], l[j]), 1, 0), i=1..j), j=1..nops(l))
+%p A193691     end:
+%p A193691 seq(T(n), n=0..6);
+%t A193691 d[n_, l_] := d[n, l] = Module[{m}, m = Length[l]; If[n == m, {l}, Flatten[#, 1]& @ Table[d[n, Append[l, j]], {j, If[m == 0, 1, Max[m+1, Last[l]]], n}]]]; le[x_, y_] := Module[{i}, For[i = 1, i <= Length[x], i++, If[x[[i]] > y[[i]], Return[False]]]; True]; T[n_] := T[n] = Module[{l}, l = d[n, {}]; Table[Sum[If[le[l[[i]], l[[j]]], 1, 0], {i, 1, j}], {j, 1, Length[l]}]]; Table[T[n], {n, 0, 6}] // Flatten (* _Jean-François Alcover_, Feb 01 2017, after _Alois P. Heinz_ *)
+%Y A193691 Row sums give A005700.
+%Y A193691 Lengths and last elements of rows give A000108.
+%Y A193691 Cf. A193692, A193693, A193694.
+%K A193691 nonn,look,tabf
+%O A193691 0,4
+%A A193691 _Alois P. Heinz_, Aug 02 2011

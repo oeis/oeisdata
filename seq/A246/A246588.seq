@@ -1,0 +1,43 @@
+%I A246588 #42 Apr 06 2020 05:38:06
+%S A246588 1,1,1,1,1,1,1,2,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,2,1,1,1,1,2,2,1,2,1,1,
+%T A246588 1,1,1,1,1,2,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,2,2,2,2,2,1,1,2,2,1,1,1,1,
+%U A246588 1,1,1,2,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,2,1,1,1,1,2,2,1,2,1,1,1,1,1
+%N A246588 Run Length Transform of S(n) = wt(n) = 0,1,1,2,1,2,2,3,1,... (cf. A000120).
+%C A246588 The Run Length Transform of a sequence {S(n), n>=0} is defined to be the sequence {T(n), n>=0} given by T(n) = Product_i S(i), where i runs through the lengths of runs of 1's in the binary expansion of n. E.g. 19 is 10011 in binary, which has two runs of 1's, of lengths 1 and 2. So T(19) = S(1)*S(2). T(0)=1 (the empty product).
+%H A246588 Reinhard Zumkeller, <a href="/A246588/b246588.txt">Table of n, a(n) for n = 0..10000</a>
+%p A246588 A000120 := proc(n) local w, m, i; w := 0; m :=n; while m > 0 do i := m mod 2; w := w+i; m := (m-i)/2; od; w; end: wt := A000120;
+%p A246588 ans:=[];
+%p A246588 for n from 0 to 100 do lis:=[]; t1:=convert(n, base, 2); L1:=nops(t1); out1:=1; c:=0;
+%p A246588 for i from 1 to L1 do
+%p A246588    if out1 = 1 and t1[i] = 1 then out1:=0; c:=c+1;
+%p A246588    elif out1 = 0 and t1[i] = 1 then c:=c+1;
+%p A246588    elif out1 = 1 and t1[i] = 0 then c:=c;
+%p A246588    elif out1 = 0 and t1[i] = 0 then lis:=[c, op(lis)]; out1:=1; c:=0;
+%p A246588    fi;
+%p A246588    if i = L1 and c>0 then lis:=[c, op(lis)]; fi;
+%p A246588                    od:
+%p A246588 a:=mul(wt(i), i in lis);
+%p A246588 ans:=[op(ans), a];
+%p A246588 od:
+%p A246588 ans;
+%t A246588 f[n_] := DigitCount[n, 2, 1]; Table[Times @@ (f[Length[#]]&)  /@ Select[ Split[ IntegerDigits[n, 2]], #[[1]] == 1&], {n, 0, 100}] (* _Jean-François Alcover_, Jul 11 2017 *)
+%o A246588 (Haskell)
+%o A246588 import Data.List (group)
+%o A246588 a246588 = product . map (a000120 . length) .
+%o A246588           filter ((== 1) . head) . group . a030308_row
+%o A246588 -- _Reinhard Zumkeller_, Feb 13 2015, Sep 05 2014
+%o A246588 (Python)
+%o A246588 from operator import mul
+%o A246588 from functools import reduce
+%o A246588 from re import split
+%o A246588 def A246588(n):
+%o A246588     return reduce(mul,(bin(len(d)).count('1') for d in split('0+',bin(n)[2:]) if d)) if n > 0 else 1 # _Chai Wah Wu_, Sep 07 2014
+%o A246588 (Sage) # uses[RLT from A246660]
+%o A246588 A246588_list = lambda len: RLT(lambda n: sum(Integer(n).digits(2)), len)
+%o A246588 A246588_list(88) # _Peter Luschny_, Sep 07 2014
+%Y A246588 Cf. A000120.
+%Y A246588 Cf. A167489, A030308.
+%Y A246588 Run Length Transforms of other sequences: A071053, A227349, A246595, A246596, A246660, A246661, A246674.
+%K A246588 nonn
+%O A246588 0,8
+%A A246588 _N. J. A. Sloane_, Sep 05 2014

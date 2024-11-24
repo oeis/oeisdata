@@ -1,0 +1,45 @@
+%I A353030 #24 Jan 15 2023 09:52:06
+%S A353030 13,1439,100799,3548879,14061599,38342303,120355199,12555446399
+%N A353030 a(n) is the first emirp p such that there are exactly n unordered pairs (q,r) of emirps with p = q*r + q + r.
+%C A353030 a(n) is the first prime p such that the digit-reversal rev(p) of p is a prime and there are exactly n pairs (q,r) of primes such that q < r, rev(q) and rev(r) are primes, and p = q*r + q + r.
+%C A353030 From _David A. Corneth_, Jan 14 2023: (Start)
+%C A353030 a(8) <= 121347071999, a(9) <= 195271876799, a(10) <= 10175362797599, a(11) <= 17482966300799.
+%C A353030 For n >= 2, n == 3 (mod 4) and (n + 1)/4 has at least 2*n divisors. (End)
+%H A353030 David A. Corneth, <a href="/A353030/a353030.gp.txt">Upper bounds on a(0)..a(30).</a>
+%e A353030 a(3) = 3548879 because 3548879 = 17*197159 + 17 + 197159 = 359*9857 + 359 + 9857 = 953*3719 + 953 + 3719 and 3548879, 17, 197159, 359, 9857, 953, 3719 are emirps.
+%p A353030 revdigs:= proc(n) local L, i; L:= convert(n, base, 10); add(L[-i]*10^(i-1), i=1..nops(L)) end proc:
+%p A353030 isemirp:= proc(p) local r;
+%p A353030    if not isprime(p) then return false fi;
+%p A353030    r:= revdigs(p);
+%p A353030    r <> p and isprime(r)
+%p A353030 end proc:
+%p A353030 g:= proc(n) local p,q, t,count;
+%p A353030   count:= 0;
+%p A353030   for t in select(`<`,numtheory:-divisors(n+1),floor(sqrt(n+1))) do
+%p A353030     if isemirp(t-1) and isemirp((n+1)/t-1) then
+%p A353030        count:= count+1;
+%p A353030     fi
+%p A353030   od;
+%p A353030   count
+%p A353030 end proc:
+%p A353030 V:= Array(0..6): vcount:= 0:
+%p A353030 p:= 2:
+%p A353030 while vcount < 7 do
+%p A353030   p:= nextprime(p);
+%p A353030   d:= ilog10(p);
+%p A353030   p1:= floor(p/10^d);
+%p A353030   if p1=2 then p:= nextprime(3*10^d)
+%p A353030   elif member(p1,{4,5,6}) then p:= nextprime(7*10^d)
+%p A353030   elif p1=8 then p:= nextprime(9*10^d)
+%p A353030   fi;
+%p A353030   if isemirp(p) then
+%p A353030     v:= g(p);
+%p A353030     if V[v] = 0 then vcount:= vcount+1; V[v]:= p; fi;
+%p A353030   fi
+%p A353030 od:
+%p A353030 convert(V,list);
+%Y A353030 Cf. A006567, A352249.
+%K A353030 nonn,base,more
+%O A353030 0,1
+%A A353030 _J. M. Bergot_ and _Robert Israel_, Apr 18 2022
+%E A353030 a(7) from _David A. Corneth_, Jan 14 2023

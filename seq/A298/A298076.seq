@@ -1,0 +1,44 @@
+%I A298076 #89 Oct 15 2018 07:22:48
+%S A298076 2,2,2,4,2,6,2,16,8,10,2,1260,2,28,24,16,2,162,2,2080,6,22,2,207480,7,
+%T A298076 52,27,420,2,43890,2,256,21,102,370,5988060,2,190,12,7412680,2,2016,2,
+%U A298076 507496,495,46,2,1486179696,68,5050,476,66300,2,3292758,274,72682120
+%N A298076 Least k > 1 such that all divisors of (k^n-1)/(k-1) are == 1 (mod n).
+%C A298076 a(n) is the smallest k > 1 such that Phi_m(k) has all its divisors == 1 (mod n) for all m > 1 dividing n, where Phi_m(x) are the cyclotomic polynomials.
+%C A298076 If n is a prime, then a(n) = 2.
+%C A298076 It seems that if n is a composite, then a(n) > 2. We have a(91) = 3.
+%C A298076 If n is even, a(n) is divisible by n.
+%C A298076 The generalized Bunyakovsky conjecture (Schinzel's hypothesis H) implies that there exist k divisible by n such that Phi_m(k) is prime for all m > 1 dividing n, and thus that a(n) always exists.
+%C A298076 If n is composite, n is a weak Fermat pseudoprime to base a(n).
+%C A298076 a(n) >= A239452(n), with equality for primes and 1, 4, 9, 16, 21, 25, 39, 91, ... Are there infinitely many such numbers?
+%C A298076 a(n) = n for n = 2, 4, 6, 10, 16, 22, 27, 46, ...
+%C A298076 Problem: Are there infinitely many composite numbers n such that the number (n^n-1)/(n-1) has all divisors d == 1 (mod n)?
+%C A298076 Conjecture (T. Ordowski, 2018): Let b be an integer with |b| > 1. Then the number (b^n-1)/(b-1) has all divisors d == 1 (mod n) for a composite n if and only if the number n is a weak Fermat pseudoprime to base |b| such that, for each prime divisor p of n, the number (b^p-1)/(b-1) has all prime divisors q == 1 (mod n).
+%C A298076 Also: least k > 1 such that all prime factors of (k^n-1)/(k-1) are == 1 (mod n). - _M. F. Hasler_, Oct 14 2018
+%H A298076 Krzysztof Ziemak, <a href="/A298076/a298076.txt">PARI code for a(48)=1486179696</a>
+%F A298076 a(n)^n == a(n) mod n.
+%e A298076 a(10) = 10, because (10^10 - 1)/9 = 1111111111 = 11*41*271*9091 and all the prime factors p == 1 (mod 10), so all divisors d == 1 (mod 10).
+%p A298076 g:= t -> convert(select(type,map(s -> s[1], ifactors(t,easy)[2]),integer),set):
+%p A298076 F:= proc(n) local b,C,B,k,bb,Cb, easyf, c; uses numtheory;
+%p A298076    if isprime(n) then return 2 fi;
+%p A298076    C:= {seq(unapply(cyclotomic(m,t),t), m=divisors(n) minus {1})};
+%p A298076    B:= select(t -> C(t) mod n = {1}, [$0..n-1]);
+%p A298076    for k from 0 do
+%p A298076      for bb in B do
+%p A298076        b:= k*n+bb;
+%p A298076        if b < 2 then next fi;
+%p A298076        Cb:= remove(isprime,C(b));
+%p A298076        if Cb = {} then return b fi;
+%p A298076        easyf:= map(g, Cb) mod n;
+%p A298076        if not(`union`(op(easyf)) subset {1}) then next fi;
+%p A298076        if andmap(c -> factorset(c) mod n = {1}, Cb) then return b fi
+%p A298076      od
+%p A298076    od
+%p A298076 end proc:
+%p A298076 2, seq(F(n),n=2..30);
+%t A298076 {2}~Join~Table[Block[{k = 2}, While[Union@ Mod[Divisors[(k^n - 1)/(k - 1)], n] != {1}, k++]; k], {n, 2, 19}] (* _Michael De Vlieger_, Jan 11 2018 *)
+%o A298076 (PARI) A298076(n,f=if(bittest(n,0),1,n))={forstep(k=max(f,2),oo,f, fordiv(n,m,m>1&& Set(factor(polcyclo(m,k))[,1]%n)!=[1]&& next(2));return(k))} \\ Becomes slow for multiples of 5 and 12 beyond n = 34. - _M. F. Hasler_, Oct 14 2018
+%Y A298076 Cf. A239452, A292559, A298310.
+%K A298076 nonn,hard,more
+%O A298076 1,1
+%A A298076 _Robert Israel_ and _Thomas Ordowski_, Jan 11 2018
+%E A298076 a(48)-a(56) from _Krzysztof Ziemak_, Jan 15 2018

@@ -1,0 +1,61 @@
+%I A347601 #17 Sep 16 2021 03:47:53
+%S A347601 1,0,0,2,7,16,102,1042,8109,63280,642220,7500626,89458803,1135216800,
+%T A347601 15935870034,241410428162,3858227881945,65327424977824,
+%U A347601 1176448390679256,22388999178300514,447692501190569823,9395318712874789744,206713705368363820990,4755693997171333347506
+%N A347601 a(n) is the number of positive Euler permutations of order n.
+%C A347601 Let M be the tangent matrix of dimension n X n. The definition of the tangent matrix is given in A346831. An Euler permutation of order n is a permutation sigma of {1,...,n} if P = Product_{k=1..n} M(k, sigma(k)) does not vanish. We say sigma is a positive Euler permutation of order n (or sigma in EP(n)) if P = 1 and a negative Euler permutation of order n (or sigma in EN(n)) if P = -1.
+%C A347601 a(n) = card(EP(n)), the number of positive Euler permutations of order n. A table of positive Euler permutations is given in A347766. Related sequences are A347599 (Genocchi permutations) and A347600 (Seidel permutations).
+%F A347601 Let |S| denote the cardinality of a set S. Following identities hold for n >= 0:
+%F A347601 a(n)  + A347602(n)  = |EP(n) | + |EN(n) | = A000166(n) (rencontres numbers),
+%F A347601 a(2n) - A347602(2n) = |EP(2n)| - |EN(2n)| = A122045(n) (Euler numbers),
+%F A347601 a(n)  - A347602(n)  = |EP(n) | - |EN(n) | = A347598(n).
+%e A347601 Illustrating the decomposition of the rencontres numbers and the Euler numbers:
+%e A347601 The third column is the sum of the first two columns and the fourth column is the difference between the first two. The fourth column is the sum of the last two.
+%e A347601 [n]  A347601     A347602      A000166       A347598      A122045   A347597
+%e A347601 --------------------------------------------------------------------------
+%e A347601 [ 0] 1,           0,           1,            1,          1,          [0]
+%e A347601 [ 1] 0,           0,           0,            0,          0,          0,
+%e A347601 [ 2] 0,           1,           1,           -1,         -1,          [0]
+%e A347601 [ 3] 2,           0,           2,            2,          0,          2,
+%e A347601 [ 4] 7,           2,           9,            5,          5,          [0]
+%e A347601 [ 5] 16,          28,          44,          -12,         0,         -12,
+%e A347601 [ 6] 102,         163,         265,         -61,        -61,         [0]
+%e A347601 [ 7] 1042,        812,         1854,         230,        0,          230,
+%e A347601 [ 8] 8109,        6724,        14833,        1385,       1385,       [0]
+%e A347601 [ 9] 63280,       70216,       133496,      -6936,       0,         -6936,
+%e A347601 [10] 642220,      692741,      1334961,     -50521,     -50521,      [0].
+%p A347601 # Uses function TangentMatrix from A346831.
+%p A347601 EulerPermutations := proc(n, sgn) local M, P, N, s, p, m;
+%p A347601    M := TangentMatrix(n); P := 0; N := 0;
+%p A347601    for p in Iterator:-Permute(n) do
+%p A347601       m := mul(M[k, p(k)], k = 1..n);
+%p A347601       if m =  0 then next fi;
+%p A347601       if m =  1 then P := P + 1 fi;
+%p A347601       if m = -1 then N := N + 1 fi; od;
+%p A347601    if sgn = 'pos' then P else N fi end:
+%p A347601 A347601 := n -> `if`(n = 0, 1, EulerPermutations(n, 'pos')):
+%p A347601 seq(A347601(n), n = 0..8);
+%o A347601 (Julia)
+%o A347601 using Combinatorics
+%o A347601 function TangentMatrix(N)
+%o A347601     M = zeros(Int, N, N)
+%o A347601     H = div(N + 1, 2)
+%o A347601     for n in 1:N - 1
+%o A347601         for k in 0:n - 1
+%o A347601             M[n - k, k + 1] = n < H ? 1 : -1
+%o A347601             M[N - n + k + 1, N - k] = n < N - H ? -1 : 1
+%o A347601         end
+%o A347601     end
+%o A347601 M end
+%o A347601 function EulerPermutations(n, sgn)
+%o A347601     M = TangentMatrix(n)
+%o A347601     S = 0
+%o A347601     for p in permutations(1:n)
+%o A347601         sgn == prod(M[k, p[k]] for k in 1:n) && (S += 1)
+%o A347601     end
+%o A347601 S end
+%o A347601 PositiveEulerPermutations(n) = EulerPermutations(n, 1)
+%Y A347601 Cf. A000166, A122045, A346831, A347597, A347598, A347602 (neg. perm.), A347766 (table), A347599, A347600, A346719 (bisection even indices).
+%K A347601 nonn
+%O A347601 0,4
+%A A347601 _Peter Luschny_, Sep 10 2021

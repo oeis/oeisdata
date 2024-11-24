@@ -1,0 +1,52 @@
+%I A183534 #31 Oct 04 2018 19:52:06
+%S A183534 1,1,2,1,2,3,1,2,3,4,1,2,3,6,6,1,2,3,4,9,8,1,2,3,4,10,10,11,1,2,3,4,5,
+%T A183534 16,11,13,1,2,3,4,5,15,17,12,16,1,2,3,4,5,6,25,18,28,18,1,2,3,4,5,6,
+%U A183534 21,26,19,29,26,1,2,3,4,5,6,7,36,27,22,30,28,1,2,3,4,5,6,7,28,37,28,64,53,36
+%N A183534 Square array of generalized Ulam numbers U(n,k), n>=1, k>=2, read by antidiagonals: U(n,k) = n if n<=k; for n>k, U(n,k) = least number > U(n-1,k) which is a unique sum of k distinct terms U(i,k) with i<n.
+%C A183534 The columns are Ulam-type sequences - see A002858 for further information.  Some of these sequences - but not all - seem to have quite simple generating functions.
+%C A183534 U(k+1,k)   = k*(k+1)/2.
+%C A183534 U(k+2+j,k) = k^2+j for k>=3 and 0<=j<k.
+%C A183534 U(2*k+2,k) = k*(3*k-1)/2 for k>=3.
+%H A183534 Alois P. Heinz, <a href="/A183534/b183534.txt">Antidiagonals n = 1..87</a>
+%H A183534 <a href="/index/U#Ulam_num">Index entries for Ulam numbers</a>
+%e A183534 Square array U(n,k) begins:
+%e A183534   1,  1,  1,  1,  1,  1,  ...
+%e A183534   2,  2,  2,  2,  2,  2,  ...
+%e A183534   3,  3,  3,  3,  3,  3,  ...
+%e A183534   4,  6,  4,  4,  4,  4,  ...
+%e A183534   6,  9, 10,  5,  5,  5,  ...
+%e A183534   8, 10, 16, 15,  6,  6,  ...
+%p A183534 b:= proc(n,i,k,h) option remember;
+%p A183534       local t;
+%p A183534       if n<0 or h<0 then 0
+%p A183534     elif n=0 then `if`(h=0, 1, 0)
+%p A183534     elif i=0 or h=0 then 0
+%p A183534     elif h=1 then t:= v(n, k);
+%p A183534                   `if`(t>0 and t<=i, 1, 0)
+%p A183534              else t:= b(n -U(i, k), i-1, k, h-1);
+%p A183534                   t+ `if`(t>1, 0, b(n, i-1, k, h))
+%p A183534       fi
+%p A183534     end:
+%p A183534 v:= proc() 0 end:
+%p A183534 U:= proc(n,k) option remember;
+%p A183534       local m;
+%p A183534       if n<=k then v(n,k):= n
+%p A183534               else for m from U(n-1, k)+1
+%p A183534                      while b(m, n-1, k, k)<>1 do od;
+%p A183534                    v(m,k):= n; m
+%p A183534       fi
+%p A183534     end:
+%p A183534 seq(seq(U(n, 2+d-n), n=1..d), d=1..12);
+%t A183534 b[n_, i_, k_, h_] := b[n, i, k, h] = Module[{t}, Which[n < 0 || h < 0, 0, n == 0, If[h == 0, 1, 0], i == 0 || h == 0, 0, h == 1, t = v[n, k]; If[t > 0 && t <= i, 1, 0], True, t = b[n-U[i, k], i-1, k, h-1]; t+If[t > 1, 0, b[n, i-1, k, h]] ] ]; v[_, _] = 0; U[n_, k_] := U[n, k] = Module[{m}, If[n <= k, v[n, k] = n, For[m = U[n-1, k]+1, b[m, n-1, k, k] != 1, m++]; v[m, k] = n; m] ]; Table[Table[U[n, 2+d-n], {n, 1, d}], {d, 1, 12}] // Flatten (* _Jean-François Alcover_, Dec 23 2013, translated from Maple *)
+%o A183534 (PARI)
+%o A183534 Ulam(N,k=2,v=0)={ my( a=vector(k,i,i), c );
+%o A183534 for( n=k,N-1, for( t=1+a[n],9e9, c=0;
+%o A183534   forvec(v=vector(k,i,[i,n]),sum(j=1,k,a[v[j]])==t & c++>1 & next(2),2);
+%o A183534   c|next; v&print1(t","); a=concat(a,t); break;
+%o A183534 )); a}
+%o A183534 /* _M. F. Hasler_ */
+%Y A183534 Columns k=2-10 give: A002858, A007086, A183527, A183528, A183529, A183530, A183531, A183532, A183533.
+%Y A183534 Cf. A135737.
+%K A183534 nonn,tabl,look
+%O A183534 1,3
+%A A183534 _Jonathan Vos Post_ and _Alois P. Heinz_, Jan 05 2011

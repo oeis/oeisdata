@@ -1,0 +1,61 @@
+%I A367338 #75 May 04 2024 09:59:39
+%S A367338 12,24,36,48,61,73,85,97,100,11,23,35,47,59,72,84,96,-1,110,22,34,46,
+%T A367338 58,71,83,95,-1,109,120,33,45,57,69,82,94,-1,108,119,130,44,56,68,81,
+%U A367338 93,-1,107,118,129,140,55,67,79,92,-1,106,117,128,139,150,66,78,91,-1,105,116
+%N A367338 Comma-successor to n: second term of commas sequence if initial term is n, or -1 if there is no second term.
+%C A367338 Construct the commas sequence as in A121805, but take the first term to be n. Then a(n), the comma-successor to n, is the second term, or -1 if no second term exists.
+%C A367338 More generally, we define a comma-child of n to be any number m with the property that m-n = 10*x+y, where x is the least significant digit of n and y is the most significant digit of m.
+%C A367338 A positive number can have 0, 1, or 2 comma-children. In accordance with the Law of Primogeniture, the first-born child (i.e. the smallest), if there is one, is the comma-successor.
+%C A367338 Comment from _N. J. A. Sloane_, Nov 19 2023: (Start)
+%C A367338 The following is a proof of a slight modification of a conjecture made by Ivan N. Ianakiev in A367341.
+%C A367338 The Comma-Successor Theorem.
+%C A367338 Let D(b) denote the set of numbers k which have no comma-successor in base b ("comma-successor" is the base-b generalization of the rule that defines A121805). If a commas sequence reaches a number in D(b) it will end there.
+%C A367338 Then D(b) consists precisely of the numbers which when written in base b have the form
+%C A367338   cc...cxy = (b^i-1)*b^2/(b-1) + b*x + y,
+%C A367338    with i >= 0 copies of c = b-1, where x and y are in the range [1..b-2] and satisfy x+y = b-1.  .... (*)
+%C A367338 For b = 10 the numbers D(10) are listed in A367341.
+%C A367338 For an outline of the proof, see the attached text-file.
+%C A367338 Note that in base b = 2, no values of x satisfying (*) exist, and the theorem asserts that D(2) is empty. In fact it is easy to check directly that every commas sequence in base 2 is infinite.  If the initial term is 0 or 1 mod 4 then the sequence will merge with A042948, and if the initial term is 2 or 3 mod 4 then the sequence will merge with A042964.
+%C A367338 (End)
+%H A367338 Michael S. Branicky, <a href="/A367338/b367338.txt">Table of n, a(n) for n = 1..10000</a>
+%H A367338 Eric Angelini, Michael S. Branicky, Giovanni Resta, N. J. A. Sloane, and David W. Wilson, The Comma Sequence: A Simple Sequence With Bizarre Properties, <a href="http://arxiv.org/abs/2401.14346">arXiv:2401.14346</a>, <a href="https://www.youtube.com/watch?v=_EHAdf6izPI">Youtube</a>
+%e A367338 a(1) = A121803(2) = 12,
+%e A367338 a(2) = A139284(2) = 24,
+%e A367338 a(3) = 36, since the full commas sequence starting with 3 is [3, 36] (which also implies a(36) = -1),
+%e A367338 a(4) = A366492(2) = 48, and so on.
+%e A367338 60 is the first number that is a comma-child (a member of A367312) but is missing from the present sequence (it is a comma-child but not a comma-successor, since it loses out to 59).
+%p A367338 Ldigit:=proc(n) local v; v:=convert(n, base, 10); v[-1]; end;
+%p A367338 A367338 := proc(n) local f,i,d;
+%p A367338 f := (n mod 10);
+%p A367338 d:=10*f;
+%p A367338 for i from 1 to 9 do
+%p A367338 d := d+1;
+%p A367338 if Ldigit(n+d) = i then return(n+d); fi;
+%p A367338 od:
+%p A367338 return(-1);
+%p A367338 end;
+%p A367338 for n from 1 to 50 do lprint(n, A367338(n)); od: # _N. J. A. Sloane_, Dec 06 2023
+%t A367338 a[n_] := a[n] = Module[{l = n, y = 1, d}, While[y < 10, l = l + 10*(Mod[l, 10]); y = 1; While[y < 10, d = IntegerDigits[l + y][[1]]; If[d == y, l = l + y; Break[];]; y++;]; If[y < 10, Return[l]];]; Return[-1];];
+%t A367338 Table[a[n], {n, 1, 65}] (* _Robert P. P. McKone_, Dec 18 2023 *)
+%o A367338 (Python)
+%o A367338 from itertools import islice
+%o A367338 def a(n):
+%o A367338     an, y = n, 1
+%o A367338     while y < 10:
+%o A367338         an, y = an + 10*(an%10), 1
+%o A367338         while y < 10:
+%o A367338             if str(an+y)[0] == str(y):
+%o A367338                 an += y
+%o A367338                 break
+%o A367338             y += 1
+%o A367338         if y < 10:
+%o A367338             return an
+%o A367338     return -1
+%o A367338 print([a(n) for n in range(1, 66)]) # _Michael S. Branicky_, Nov 15 2023
+%Y A367338 A367346 lists those n for which there is more than one choice for the second term.
+%Y A367338 A367612 lists the numbers that are comma-children of some number k.
+%Y A367338 Cf. A121805, A139284, A366492, A367337.
+%Y A367338 See also A042948, A042964, A367339, A367340, A367341.
+%K A367338 sign,base
+%O A367338 1,1
+%A A367338 _N. J. A. Sloane_, Nov 15 2023

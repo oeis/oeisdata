@@ -1,0 +1,50 @@
+%I A373285 #28 Jun 22 2024 15:47:59
+%S A373285 528,1056,1275,1584,2112,2275,2565,3168,3213,3825,3850,3861,4224,4590,
+%T A373285 4752,5152,5808,6336,6375,6688,7072,7695,7700,8448,9065,9180,9504,
+%U A373285 9639,10304,10878,11328,11375,11475,11583,11616,12672,12825,13376,13770,14144,14256,15400,15925,16709,16896
+%N A373285 Numbers k that are composite and not a powers of a prime k such that sopf^{h+1}(k) divides sopf^{h}(k), with sopf^{0}(k)=k, for h=0..A321944(k)-1, where sopf^{h} is the h-th iteration of sopf and sopf = A008472.
+%e A373285 For k = 11475 = 3^3 * 5^2 * 17, sopf(k)=25 divides k and sopf(sopf(k))=5 divides sopf(k).
+%p A373285 f := proc (n)
+%p A373285     add(d, d = numtheory[factorset](n))
+%p A373285 end proc:
+%p A373285 h := proc (n)
+%p A373285     option remember;
+%p A373285     if isprime(n) then
+%p A373285         1
+%p A373285     else
+%p A373285         1+h(convert(numtheory[factorset](n), `+`))    end if:
+%p A373285 end proc:
+%p A373285 checkDivisibility := proc (n)
+%p A373285     local k, fk, fk1, result:
+%p A373285     result := true:
+%p A373285     fk := n;
+%p A373285     for k from 0 to h(n)-1 do
+%p A373285         fk1 := f(fk);
+%p A373285         if fk1 = 0 or `mod`(fk, fk1) <> 0 then
+%p A373285             result := false:
+%p A373285             break:
+%p A373285         end if:
+%p A373285         fk := fk1:
+%p A373285     end do:
+%p A373285     return result:
+%p A373285 end proc:
+%p A373285 g := proc (n)
+%p A373285     nops(numtheory[factorset](n)):
+%p A373285 end proc:
+%p A373285 findNumbers := proc (upper_limit)
+%p A373285     local n, results:
+%p A373285     results := []:
+%p A373285     for n from 2 to upper_limit do
+%p A373285         if checkDivisibility(n) and 2 <= g(n) then
+%p A373285             results := [op(results), n]:
+%p A373285         end if:
+%p A373285     end do:
+%p A373285     return results:
+%p A373285 end proc:
+%p A373285 upper_limit := 10000:
+%p A373285 numbers := findNumbers(upper_limit);
+%t A373285 s[n_] := DivisorSum[n, # &, PrimeQ[#] &]; q[n_] := !PrimePowerQ[n] && AllTrue[Ratios@ Reverse@ FixedPointList[s, n], IntegerQ]; Select[Range[2, 17000], q] (* _Amiram Eldar_, May 30 2024 *)
+%Y A373285 Cf. A008472 (sopf), A321944.
+%K A373285 nonn
+%O A373285 1,1
+%A A373285 _Rafik Khalfi_, May 30 2024

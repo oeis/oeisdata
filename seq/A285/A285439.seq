@@ -1,0 +1,37 @@
+%I A285439 #35 Jan 30 2024 21:22:38
+%S A285439 1,4,2,21,12,3,132,76,28,4,960,545,235,55,5,7920,4422,2064,612,96,6,
+%T A285439 73080,40194,19607,6692,1386,154,7,745920,405072,202792,75944,18736,
+%U A285439 2816,232,8,8346240,4484808,2280834,911637,254061,46422,5256,333,9
+%N A285439 Sum T(n,k) of the entries in the k-th cycles of all permutations of [n]; triangle T(n,k), n>=1, 1<=k<=n, read by rows.
+%C A285439 Each cycle is written with the smallest element first and cycles are arranged in increasing order of their first elements.
+%H A285439 Alois P. Heinz, <a href="/A285439/b285439.txt">Rows n = 1..23, flattened</a>
+%H A285439 Wikipedia, <a href="https://en.wikipedia.org/wiki/Permutation">Permutation</a>
+%F A285439 Sum_{k=1..n} k * T(n,k) = n^2 * n! = A002775(n).
+%e A285439 T(3,1) = 21 because the sum of the entries in the first cycles of all permutations of [3] ((123), (132), (12)(3), (13)(2), (1)(23), (1)(2)(3)) is 6+6+3+4+1+1 = 21.
+%e A285439 Triangle T(n,k) begins:
+%e A285439        1;
+%e A285439        4,      2;
+%e A285439       21,     12,      3;
+%e A285439      132,     76,     28,     4;
+%e A285439      960,    545,    235,    55,     5;
+%e A285439     7920,   4422,   2064,   612,    96,    6;
+%e A285439    73080,  40194,  19607,  6692,  1386,  154,   7;
+%e A285439   745920, 405072, 202792, 75944, 18736, 2816, 232, 8;
+%e A285439   ...
+%p A285439 T:= proc(h) option remember; local b; b:=
+%p A285439       proc(n, l) option remember; `if`(n=0, [mul((i-1)!, i=l), 0],
+%p A285439         (p-> p+[0, (h-n+1)*p[1]*x^(nops(l)+1)])(b(n-1, [l[], 1]))+
+%p A285439          add((p-> p+[0, (h-n+1)*p[1]*x^j])(
+%p A285439          b(n-1, subsop(j=l[j]+1, l))), j=1..nops(l)))
+%p A285439       end: (p-> seq(coeff(p, x, i), i=1..n))(b(h, [])[2])
+%p A285439     end:
+%p A285439 seq(T(n), n=1..10);
+%t A285439 T[h_] := T[h] = Module[{b}, b[n_, l_] := b[n, l] = If[n == 0, {Product[(i - 1)!, {i, l}], 0}, # + {0, (h - n + 1)*#[[1]]*x^(Length[l] + 1)}&[b[n - 1, Append[l, 1]]] + Sum[# + {0, (h-n+1)*#[[1]]*x^j}&[b[n - 1, ReplacePart[ l, j -> l[[j]] + 1]]], {j, 1, Length[l]}]]; Table[Coefficient[#, x, i], {i, 1, n}]&[b[h, {}][[2]]]];
+%t A285439 Table[T[n], {n, 1, 10}] // Flatten (* _Jean-François Alcover_, May 25 2018, translated from Maple *)
+%Y A285439 Columns k=1-2 give: A284816, A285489.
+%Y A285439 Row sums give A000142 * A000217 = A180119.
+%Y A285439 Main diagonal and first lower diagonal give: A000027, A006000 (for n>0).
+%Y A285439 Cf. A000290, A002775, A185105, A285362, A285382, A285793.
+%K A285439 nonn,tabl
+%O A285439 1,2
+%A A285439 _Alois P. Heinz_, Apr 19 2017

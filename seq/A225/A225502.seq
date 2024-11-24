@@ -1,0 +1,51 @@
+%I A225502 #13 Mar 16 2018 11:43:44
+%S A225502 2,1,2,2,3,3,12,4,9,5,5,30,6,6,20,14,230,23,24,8,8,35,36,9,29,90,30,
+%T A225502 434,10,159,22,11,140,530,854,147,12,25,77,39,1938509,13,41,69,182,70,
+%U A225502 14,104,105,60,30,15,15,47,240,65274,6314,16,17009,33,50,68,17,264,371
+%N A225502 Least m > 0 such that prime(n)*triangular(m) is a triangular number, or 0 if no such m exists.
+%C A225502 Conjecture: a(n) > 0.
+%e A225502 n    prime(n)    m     tri(m)   prime(n)*tri(m)
+%e A225502 1      2         2       3              6
+%e A225502 2      3         1       1              3
+%e A225502 3      5         2       3             15
+%e A225502 4      7         2       3             21
+%e A225502 5     11         3       6             66
+%e A225502 6     13         3       6             78
+%e A225502 7     17        12      78           1326
+%e A225502 8     19         4      10            190
+%t A225502 lm[n_]:=Module[{m=1,p=Prime[n]},While[!OddQ[Sqrt[8(p (m(m+1))/2)+1]], m++];m]; Array[lm,68] (* _Harvey P. Dale_, Mar 16 2018 *)
+%o A225502 (C)
+%o A225502 #include <stdio.h>
+%o A225502 #define TOP 300
+%o A225502 typedef unsigned long long U64;
+%o A225502 U64 isTriangular(U64 a) {
+%o A225502     U64 sr = 1ULL<<32, s, b, t;
+%o A225502     if (a < (sr/2)*(sr+1))  sr>>=1;
+%o A225502     while (a < sr*(sr+1)/2)  sr>>=1;
+%o A225502     for (b = sr>>1; b; b>>=1) {
+%o A225502         s = sr+b;
+%o A225502         if (s&1) t = s*((s+1)/2);
+%o A225502         else     t = (s/2)*(s+1);
+%o A225502         if (t >= s && a >= t)  sr = s;
+%o A225502     }
+%o A225502     return (sr*(sr+1)/2 == a);
+%o A225502 }
+%o A225502 int main() {
+%o A225502   U64 i, j, k, m, tm, p, pp = 1, primes[TOP];
+%o A225502   for (primes[0]=2, i = 3; pp < TOP; i+=2) {
+%o A225502     for (p = 1; p < pp; ++p) if (i%primes[p]==0) break;
+%o A225502     if (p==pp) {
+%o A225502         primes[pp++] = i;
+%o A225502         for (j=p=primes[pp-2], m=tm=1; ; j=k, m++, tm+=m) {
+%o A225502            if ((k = p*tm) < j) { m=0; break; }
+%o A225502            if (isTriangular(k)) break;
+%o A225502         }
+%o A225502         printf("%llu, ", m);
+%o A225502     }
+%o A225502   }
+%o A225502   return 0;
+%o A225502 }
+%Y A225502 Cf. A000217, A112456, A225503.
+%K A225502 nonn
+%O A225502 1,1
+%A A225502 _Alex Ratushnyak_, May 09 2013

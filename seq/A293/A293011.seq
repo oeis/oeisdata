@@ -1,0 +1,47 @@
+%I A293011 #32 Nov 23 2019 00:50:43
+%S A293011 1,2,6,4,32,48,16,8,288,64,128,8196,256,2048,16896,278528,2097664,
+%T A293011 589824,4096,8192,8388609,16384,536870944,268435488,65536,32768,
+%U A293011 268959744,17179869440,524288,4294967298,1048576,8589934594,8589934596
+%N A293011 a(n) is the smallest positive k such that f(k) = n*g(k) where f = A007953 and g = A000120, or 0 if no such k exists.
+%C A293011 Conjecture: a(n) > 0 for all n >= 1.
+%C A293011 Numbers n such that a(n) is not a power of 2 are 3, 6, 9, 12, 15, 16, 17, 18, ...
+%C A293011 a(21) = 8388609 = 2^23 + 1 is the second odd term of this sequence after a(1) = 1.
+%C A293011 Smallest n such that a(n + 1) = a(n) + 2 is 32 and a(32) = 2*(2^32 + 1).
+%C A293011 For n <= 170, A000120(a(n)) <= 2. - _Robert Israel_, Nov 22 2019
+%H A293011 Robert Israel, <a href="/A293011/b293011.txt">Table of n, a(n) for n = 1..170</a>
+%H A293011 Robert Israel, <a href="/A293011/a293011.png">Color-coded logarithmic plot</a>
+%e A293011 a(9) = 288 = 2^8 + 2^5 because A007953(288) = 2 + 8 + 8 = 18, 18 / 2 = 9 and 288 is the least number with this property.
+%p A293011 # This code returns a(n) if A000120(a(n)) <= 3 and it can prove that no
+%p A293011 # smaller number with A000120 >= 4 can have A007953 large enough. If it
+%p A293011 # can't prove that, it returns FAIL.
+%p A293011 sdd:= n -> convert(convert(n,base,10),`+`):
+%p A293011 g:= proc(n) local found, k1, k2, k3, x, y, m,bd;
+%p A293011   found:= false;
+%p A293011   for k1 from 1 while not found do
+%p A293011     for k2 from 0 to k1-1 do
+%p A293011       x:= 2^k1 + 2^k2;
+%p A293011       if sdd(x) = 2*n then found:= true; break fi
+%p A293011   od od;
+%p A293011   for k1 from 0 to ilog2(x) do
+%p A293011     if sdd(2^k1) = n then x:= 2^k1; break fi
+%p A293011   od;
+%p A293011   m:= ilog10(x);
+%p A293011   bd:= floor(x/10^m)+9*m;
+%p A293011   if bd <= 3*n then return x fi;
+%p A293011   found:= false;
+%p A293011   for k1 from 2 to ilog2(x) while not found do
+%p A293011     for k2 from 1 to k1-1 while not found do
+%p A293011       for k3 from 0 to k2-1 do
+%p A293011          y:= 2^k1 + 2^k2 + 2^k3;
+%p A293011          if y > x or sdd(y) = 3*n then found:= true; break fi;
+%p A293011   od od od;
+%p A293011   if found then x:= min(x,y) fi;
+%p A293011   bd:= floor(x/10^m)+9*m;
+%p A293011   if bd <= 4*n then x else FAIL fi;
+%p A293011 end proc:
+%p A293011 map(g, [$1..50]); # _Robert Israel_, Nov 22 2019
+%o A293011 (PARI) a(n) = {my(k=1); while ((hammingweight(k))*n != sumdigits(k), k++); k; }
+%Y A293011 Cf. A000120, A001370, A007953.
+%K A293011 nonn,base,look
+%O A293011 1,2
+%A A293011 _Altug Alkan_, Sep 28 2017

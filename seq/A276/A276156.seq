@@ -1,0 +1,42 @@
+%I A276156 #35 Feb 12 2022 14:16:15
+%S A276156 0,1,2,3,6,7,8,9,30,31,32,33,36,37,38,39,210,211,212,213,216,217,218,
+%T A276156 219,240,241,242,243,246,247,248,249,2310,2311,2312,2313,2316,2317,
+%U A276156 2318,2319,2340,2341,2342,2343,2346,2347,2348,2349,2520,2521,2522,2523,2526,2527,2528,2529,2550,2551,2552,2553,2556,2557,2558,2559,30030,30031
+%N A276156 Numbers obtained by reinterpreting base-2 representation of n in primorial base: a(0) = 0, a(2n) = A276154(a(n)), a(2n+1) = 1 + A276154(a(n)).
+%C A276156 Numbers that are sums of distinct primorial numbers, A002110.
+%C A276156 Numbers with no digits larger than one in primorial base, A049345.
+%H A276156 Antti Karttunen, <a href="/A276156/b276156.txt">Table of n, a(n) for n = 0..8191</a>
+%H A276156 <a href="/index/Pri#primorialbase">Index entries for sequences related to primorial base</a>
+%F A276156 a(0) = 0, a(2n) = A276154(a(n)), a(2n+1) = 1+A276154(a(n)).
+%F A276156 Other identities. For all n >= 0:
+%F A276156 a(n) = A276085(A019565(n)).
+%F A276156 A049345(a(n)) = A007088(n).
+%F A276156 A257993(a(n)) = A001511(n).
+%F A276156 A276084(a(n)) = A007814(n).
+%F A276156 A051903(a(n)) = A351073(n).
+%t A276156 nn = 65; b = MixedRadix[Reverse@ Prime@ Range[IntegerLength[nn, 2] - 1]]; Table[FromDigits[IntegerDigits[n, 2], b], {n, 0, 65}] (* Version 10.2, or *)
+%t A276156 Table[Total[Times @@@ Transpose@ {Map[Times @@ # &, Prime@ Range@ Range[0, Length@ # - 1]], Reverse@ #}] &@ IntegerDigits[n, 2], {n, 0, 65}] (* _Michael De Vlieger_, Aug 26 2016 *)
+%o A276156 (Scheme, two versions)
+%o A276156 ;; Almost standalone, requiring only A000040:
+%o A276156 (define (A276156 n) (let loop ((n n) (s 0) (pr 1) (i 1)) (cond ((zero? n) s) ((even? n) (loop (/ n 2) s (* (A000040 i) pr) (+ 1 i))) (else (loop (/ (- n 1) 2) (+ s pr) (* (A000040 i) pr) (+ 1 i))))))
+%o A276156 ;; One using memoization-macro, implementing the given recurrence:
+%o A276156 (definec (A276156 n) (cond ((zero? n) n) ((even? n) (A276154 (A276156 (/ n 2)))) (else (+ 1 (A276154 (A276156 (/ (- n 1) 2)))))))
+%o A276156 (Python)
+%o A276156 from sympy import prime, primorial, primepi, factorint
+%o A276156 from operator import mul
+%o A276156 def a002110(n): return 1 if n<1 else primorial(n)
+%o A276156 def a276085(n):
+%o A276156     f=factorint(n)
+%o A276156     return sum([f[i]*a002110(primepi(i) - 1) for i in f])
+%o A276156 def a019565(n): return reduce(mul, (prime(i+1) for i, v in enumerate(bin(n)[:1:-1]) if v == '1')) # after _Chai Wah Wu_
+%o A276156 def a(n): return 0 if n==0 else a276085(a019565(n))
+%o A276156 print([a(n) for n in range(101)]) # _Indranil Ghosh_, Jun 23 2017
+%o A276156 (PARI) A276156(n) = { my(s=0, p=1, r=1); while(n, if(n%2, s += r); n>>=1; p = nextprime(1+p); r *= p); (s); }; \\ _Antti Karttunen_, Feb 03 2022
+%Y A276156 Cf. A000040, A001511, A002110, A007088, A007814, A019565, A049345, A257993, A276084, A276085, A276154, A351073, A328461, A328473, A328474, A328571, A328831, A328836.
+%Y A276156 Subsequences: A328233, A328832, A328462 (odd bisection).
+%Y A276156 Fixed points of A328841, positions of zeros in A328842 and in A329032, positions of ones in A328581 and in A328582.
+%Y A276156 Cf. also table A328464 (and its rows).
+%Y A276156 Cf. also A059590, A283985, A290249, A342921.
+%K A276156 nonn,base
+%O A276156 0,3
+%A A276156 _Antti Karttunen_, Aug 24 2016

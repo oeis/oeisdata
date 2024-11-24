@@ -1,0 +1,45 @@
+%I A320122 #30 Mar 21 2023 15:35:14
+%S A320122 12,30,390,1170,1200,1560,2340,2760,3120,3900,4680,6120,6240,7680,
+%T A320122 7800,8460,10020,10140,10950,11580,15090,15480,17160,17580,18360,
+%U A320122 19140,20280,20700,20940,21480,23040,23280,24060,24210,24960,26550,28740,29250,29520,29670,30060,31080,32400
+%N A320122 Numbers that are not Keith numbers in any base.
+%C A320122 A number N >= 2 is a Keith number in a base b <= N if the Fibonacci sequence u(i) whose initial terms are the t digits of N in the base b, and later terms are given by rule that u(i) = sum of t previous terms, contains N itself. Here a(n) is the n-th number N that is not a Keith number in any base b <= N.
+%H A320122 Arie Bos, <a href="https://www.researchgate.net/publication/280932154_Inventory_of_n-step_Fibonacci_sequences">Inventory of n-step Fibonacci sequences</a>, 2015.
+%e A320122 a(1) = 12 because 12 is not a Keith number in any base from 2 to 12, while all previous numbers are in some base.
+%e A320122 For example, with b = 2, the sequence is : 1, 1, 0, 0, 2, 3, 5, 10, 20, ...; it doesn't contain 12. See A251703.
+%p A320122 fibo:=proc(n, b) local L,m,M,k:
+%p A320122 L:=convert(n,base,b):m:=nops(L):M:=seq(L[m+1-k],k=1..m):
+%p A320122 while M[m]<n do M:=M,add(M[q],q=1..m): M:=seq(M[q],q=2..m+1) od:
+%p A320122 if M[m]=n then true else false fi end:
+%p A320122 test:=proc(n) local b:
+%p A320122 for b from 2 to n do if fibo(n, b) then return(true) fi od:
+%p A320122 return(false) end:
+%p A320122 L:=NULL:for n from 2 to 1200 do if not(test(n)) then  L:=L,n fi od:L;
+%o A320122 (Python)
+%o A320122 def digits(n, b):
+%o A320122     r = []
+%o A320122     m = n
+%o A320122     while m > 0:
+%o A320122         r = [m % b] + r
+%o A320122         m = m // b
+%o A320122     return r
+%o A320122 def fibo(n, b):
+%o A320122     L = digits(n, b)
+%o A320122     m = len(L) - 1
+%o A320122     while L[m] < n:
+%o A320122         L.append(sum(k for k in L))
+%o A320122         L.pop(0)
+%o A320122     return L[m] == n
+%o A320122 def test(n):
+%o A320122     for b in range(2, n + 1):
+%o A320122         if fibo(n, b):
+%o A320122             return True
+%o A320122     return False
+%o A320122 print([n for n in range(2, 2001) if not test(n)])
+%o A320122 (PARI) iskb(n, b) = if(n<b, return(0)); my(v=digits(n, b), t=#v); while(v[#v]<n, v=concat(v, sum(i=0, t-1, v[#v-i]))); v[#v]==n; \\ after A007629
+%o A320122 isok(n) = if (n<=2, 0, for(b=2, n-1, if (iskb(n, b), return(0))); return (1)); \\ _Michel Marcus_, Oct 08 2018
+%Y A320122 Cf. A007629 (Keith numbers in base 10).
+%K A320122 nonn,base
+%O A320122 1,1
+%A A320122 _Robert FERREOL_, Oct 06 2018
+%E A320122 More terms from _Michel Marcus_, Oct 08 2018

@@ -1,0 +1,71 @@
+%I A340271 #28 Sep 26 2021 18:58:21
+%S A340271 25,26,28,34,35,36,38,43,46,52,53,62,63,64,82,83,236,239,246,254,296,
+%T A340271 326,329,362,392,426,462,524,542,926,962
+%N A340271 Positive integers with no digit equal to 0 or 1 such that when one iterates x -> A340270(x) starting with n, one eventually enters a cycle containing an integer greater than 9.
+%C A340271 This was suggested by postings by Eric Angelini and Allan Wechsler to Math-Fun Mailing List, Dec. 29, 2020. It is an open question whether or not this sequence is complete. In fact, it is open whether or not the sequence of iterates of x -> A340270(x) starting with n always enters a cycle. There are no counterexamples up to 10^8.
+%C A340271 As Allan Wechsler pointed out, if x contains 0 then A340270(x) = 1 and if x contains a digit 1 then A340270(x) is x with the 1 deleted.
+%C A340271 From _M. F. Hasler_, Jan 03 2021: (Start)
+%C A340271 The trajectory of all these integers ends in one of 3 cycles:
+%C A340271   C(25) = (25) (also for n = 52, for n = 35 and 53 via 125, and for n = 38 and 83 via 512, and for n = 239, 329 and 392 via 1521 and 152);
+%C A340271   C(26) = (26, 36, 216) (also for n = 62 and 63, for n = 246 and 426 and 462 via 2116 and 216);
+%C A340271   C(926) = (926, 9216): also for 296 and 962, for 28, 34, 43 and 82 via 64 and 1296, also for 46, 236, 326 and 362 via 1296, and for 254, 524 and 54 via 2916. (End)
+%e A340271 Iterating the function x->A340270(x) starting with 34 we get 34 --> 4^3 = 64 --> 6^4 = 1296 --> 296^1 = 296 --> 96^2 = 9216 --> 926^1 = 926 --> 96^2 = 9216. So 34 is in this sequence.
+%p A340271 leastdigit:=proc(n) min(convert(n,base,10)); end:
+%p A340271 locationdigit:=proc(n,d) local L,i;
+%p A340271   L:=convert(n,base,10);
+%p A340271   for i from 1 to nops(L) do
+%p A340271    if d = L[i] then return (nops(L)+1-i); fi;
+%p A340271   od:
+%p A340271 end:
+%p A340271 cutout:=proc(X,i) [seq(X[j],j=1..i-1),seq(X[j],j=i+1..nops(X))]; end:
+%p A340271 ToNum:=proc(X) add(X[i]*10^(nops(X)-i),i=1..nops(X)); end:
+%p A340271 removeleastdigit:=proc(n) local i,X;
+%p A340271   i:=locationdigit(n,leastdigit(n));
+%p A340271   X:=ListTools:-Reverse(convert(n,base,10));
+%p A340271   ToNum(cutout(X,i));
+%p A340271 end proc:
+%p A340271 h:=proc(n) removeleastdigit(n)^leastdigit(n); end:
+%p A340271 F:=proc(N) local i,L;
+%p A340271   if h(N) = N then return [N]; fi;
+%p A340271   L:=[N];
+%p A340271   for i from 1 do
+%p A340271    L:=[op(L),h(L[-1])];
+%p A340271    if nops(L) > nops(convert(L,set)) then return L; fi;
+%p A340271   od:
+%p A340271   fail;
+%p A340271 end proc:
+%p A340271 G:=proc(X) if X[-1] < 10 then return "S"; else return "L"; fi; end proc:
+%p A340271 L:=NULL:
+%p A340271 for n from 1 to 1000 do
+%p A340271   sss:=convert(n,base,10):
+%p A340271   if has(0,sss) or has(1,sss) then next; fi;
+%p A340271   u:=F(n);
+%p A340271   if u = fail then print(n,u); break; fi;
+%p A340271   if G(u) = "L" then L:=L,n; fi;
+%p A340271 od:
+%p A340271 L;
+%o A340271 (Python)
+%o A340271 def ok(n):
+%o A340271   strn = str(n)
+%o A340271   if "0" in strn or "1" in strn: return False
+%o A340271   iterates = {n}
+%o A340271   n = A340270(n)
+%o A340271   while n not in iterates:
+%o A340271     iterates.add(n)
+%o A340271     n = A340270(n)
+%o A340271   repeated = n
+%o A340271   if n > 9: return True
+%o A340271   n = A340270(n)
+%o A340271   while n != repeated:
+%o A340271     n = A340270(n)
+%o A340271     if n > 9: return True
+%o A340271   return False
+%o A340271 print([n for n in range(1, 1001) if ok(n)]) # _Michael S. Branicky_, Jan 02 2021
+%o A340271 (PARI) [n | n<-[1..9999], vecmin(digits(n))>1 && orbit(n)[1]>9] \\ with:
+%o A340271 orbit(n, U=[n], m)={ while(n>9, my( m=vecmin(n=digits(n)));
+%o A340271   forstep( i=#n,1,-1, if( n[i]==m, n=fromdigits(n[^i])^m; break)); setsearch(U,n) && break; U=setunion(U,[n])); U} \\ _M. F. Hasler_, Jan 03 2021
+%Y A340271 Cf. A340270; A054054 (smallest digit of n).
+%Y A340271 Subset of A274126 (numbers with all digits larger than 1).
+%K A340271 base,nonn,more
+%O A340271 1,1
+%A A340271 _W. Edwin Clark_, Jan 02 2021

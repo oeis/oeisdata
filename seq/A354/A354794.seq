@@ -1,0 +1,55 @@
+%I A354794 #32 Jun 19 2022 16:21:12
+%S A354794 1,0,1,0,1,1,0,4,3,1,0,27,19,6,1,0,256,175,55,10,1,0,3125,2101,660,
+%T A354794 125,15,1,0,46656,31031,9751,1890,245,21,1,0,823543,543607,170898,
+%U A354794 33621,4550,434,28,1,0,16777216,11012415,3463615,688506,95781,9702,714,36,1
+%N A354794 Triangle read by rows. The Bell transform of the sequence {m^m | m >= 0}.
+%C A354794 For the definition of the Bell transform see A264428. The Bell transform of {(-m)^m | m >= 0} is A039621. The numbers A039621(n, k) are known as the Lehmer-Comtet numbers of 2nd kind. We think it is more natural to use Bell_{n, k}({m^m}) as the basis for the definition (and let the triangle start at (0, 0)).
+%D A354794 Louis Comtet, Advanced Combinatorics. Reidel, Dordrecht, 1974, p. 139-140.
+%H A354794 D. H. Lehmer, <a href="http://dx.doi.org/10.1216/RMJ-1985-15-2-461">Numbers Associated with Stirling Numbers and x^x</a>, Rocky Mountain J. Math., 15(2) 1985, pp. 461-475.
+%H A354794 Peter Luschny, <a href="https://oeis.org/wiki/User:Peter_Luschny/BellTransform">The Bell transform</a>
+%H A354794 Wikipedia, <a href="https://en.wikipedia.org/wiki/Bell_polynomials">Bell polynomials</a>.
+%F A354794 T(n, k) = Bell_{n, k}(A000312), where Bell_{n, k} is the partial Bell polynomial evaluated over the powers m^m (with 0^0 = 1). See the Mathematica program.
+%F A354794 T(n, k) = Sum_{j=0..k-1} (-1)^j*(n-j-1)^(n - 1)/(j! * (k-1-j)!) for 0 <= k < n and T(n, n) = 1.
+%F A354794 T(n, k) = r(k-1, n-k, n-k) for n,k >= 1 and T(0, 0) = 1, where r(n, k, m) = m*r(n, k-1, m) + r(n-1, k, m+1) and r(n, 0, m) = 1. (see _Vladimir Kruchinin_'s formula in A039621).
+%F A354794 Sum_{k=1..n} binomial(k + x - 1, k-1)*(k-1)!*T(n, k) = (n + x)^(n - 1) for n >= 1.
+%F A354794 Sum_{k=1..n} (-1)^(k+j)*Stirling1(k, j)*T(n, k) = n^(n-j)*binomial(n-1, j-1) for n >= 1, which are, up to sign, the coefficients of the Abel polynomials (A137452).
+%F A354794 From _Werner Schulte_, Jun 14 2022 and Jun 19 2022: (Start)
+%F A354794 E.g.f. of column k >= 0: (Sum_{i>0} (i-1)^(i-1) * t^i / i!)^k / k!.
+%F A354794 Conjecture: T(n, k) = Sum_{i=0..n-k} A048994(n-k, i) * A048993(n+i-1, n-1) for 0 < k <= n and T(n, 0) = 0^n for n >= 0; proved by Mike Earnest, see link at A354797. (End)
+%e A354794 Triangle T(n, k) begins:
+%e A354794 [0] 1;
+%e A354794 [1] 0,        1;
+%e A354794 [2] 0,        1,        1;
+%e A354794 [3] 0,        4,        3,       1;
+%e A354794 [4] 0,       27,       19,       6,      1;
+%e A354794 [5] 0,      256,      175,      55,     10,     1;
+%e A354794 [6] 0,     3125,     2101,     660,    125,    15,    1;
+%e A354794 [7] 0,    46656,    31031,    9751,   1890,   245,   21,   1;
+%e A354794 [8] 0,   823543,   543607,  170898,  33621,  4550,  434,  28,  1;
+%e A354794 [9] 0, 16777216, 11012415, 3463615, 688506, 95781, 9702, 714, 36, 1;
+%p A354794 T := (n, k) -> if n = k then 1 else
+%p A354794 add((-1)^j*(n-j-1)^(n-1)/(j!*(k-1-j)!), j = 0.. k-1) fi:
+%p A354794 seq(seq(T(n, k), k = 0..n), n = 0..9);
+%p A354794 # Alternatively, using the function BellMatrix from A264428:
+%p A354794 BellMatrix(n -> n^n, 9);
+%p A354794 # Or by recursion:
+%p A354794 R := proc(n, k, m) option remember;
+%p A354794    if k < 0 or n < 0 then 0 elif k = 0 then 1 else
+%p A354794    m*R(n, k-1, m) + R(n-1, k, m+1) fi end:
+%p A354794 A039621 := (n, k) -> ifelse(n = 0, 1, R(k-1, n-k, n-k)):
+%t A354794 Unprotect[Power]; Power[0, 0] = 1; pow[n_] := n^n;
+%t A354794 R = Range[0, 9]; T[n_, k_] := BellY[n, k, pow[R]];
+%t A354794 Table[T[n, k], {n, R}, {k, 0, n}] // Flatten
+%o A354794 (Python)
+%o A354794 from functools import cache
+%o A354794 @cache
+%o A354794 def t(n, k, m):
+%o A354794     if k < 0 or n < 0: return 0
+%o A354794     if k == 0: return n ** k
+%o A354794     return m * t(n, k - 1, m) + t(n - 1, k, m + 1)
+%o A354794 def A354794(n, k): return t(k - 1, n - k, n - k) if n != k else 1
+%o A354794 for n in range(9): print([A354794(n, k) for k in range(n + 1)])
+%Y A354794 Cf. A264428, A039621 (signed variant), A195979 (row sums), A000312 (column 1), A045531 (column 2), A281596 (column 3), A281595 (column 4), A000217 (diagonal 1), A215862 (diagonal 2), A354795 (matrix inverse), A137452 (Abel).
+%K A354794 nonn,tabl
+%O A354794 0,8
+%A A354794 _Peter Luschny_, Jun 09 2022

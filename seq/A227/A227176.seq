@@ -1,0 +1,50 @@
+%I A227176 #42 Jul 18 2013 02:37:16
+%S A227176 1,1,5,43,525,8321,162463,3774513,101808185,3129525793,108063152091,
+%T A227176 4143297446729,174723134310277,8039591465487297,400924930695585143,
+%U A227176 21543513647508536161,1241094846565489688817,76314967969651411780673,4989260143610128556354611
+%N A227176 E.g.f.: LambertW(LambertW(-x)) / LambertW(-x).
+%H A227176 Vincenzo Librandi, <a href="/A227176/b227176.txt">Table of n, a(n) for n = 0..100</a>
+%F A227176 a(n) = Sum_{k=0..n} binomial(n,k) * k*(k+1)^(k-1) * n^(n-k-1) for n>0 with a(0)=1.
+%F A227176 E.g.f. A(x) satisfies:
+%F A227176 (1) A(x) = W(x*W(x)), where W(x) = LambertW(-x)/(-x) = Sum_{n>=0} (n+1)^(n-1)*x^n/n!.
+%F A227176 (2) A(x) = exp( T(T(x)) ), where T(x) = -LambertW(-x) is Euler's tree function (A000169).
+%F A227176 (3) A(x) = exp( -A(x)*LambertW(-x) ).
+%F A227176 (4) A(x) = ( LambertW(-x)/(-x) )^A(x).
+%F A227176 (5) A(x) = ( Sum_{n>=0} (n+1)^(n-1)*x^n/n! )^A(x).
+%F A227176 (6) A(x) = Sum_{n>=0} A(x)*(n + A(x))^(n-1) * x^n/n!.
+%F A227176 (7) A(x)^m = Sum_{n>=0} m*A(x)*(n + m*A(x))^(n-1) * x^n/n!.
+%F A227176 (8) A(x/exp(x)) = exp(T(x)) = LambertW(-x)/(-x).
+%F A227176 (9) log(A(x)) = A(x) * Sum_{n>=1} n^(n-1) * x^n/n!, and equals the e.g.f. of A207833.
+%F A227176 (10) A(x) = 1 + Sum_{n>=1} (n+1)^(n-1)*x^n/n! * Sum_{k>=0} n*(k+n)^(k-1)*x^k/k!.
+%F A227176 a(n) ~ n! * (-exp((1+exp(-1))*n)/(sqrt(2*Pi*(1-exp(-1)))*n^(3/2) *LambertW(-exp(-1-exp(-1))))). - _Vaclav Kotesovec_, Jul 05 2013
+%e A227176 E.g.f.: A(x) = 1 + x + 5*x^2/2! + 43*x^3/3! + 525*x^4/4! + 8321*x^5/5! +...
+%e A227176 Define W(x) = LambertW(-x)/(-x), where W(x) = exp(x*W(x)) and begins:
+%e A227176 W(x) = 1 + x + 3*x^2/2! + 4^2*x^3/3! + 5^3*x^4/4! + 6^4*x^5/5! +...
+%e A227176 then
+%e A227176 (1) A(x) = W(x*W(x)),
+%e A227176 (4) A(x) = W(x)^A(x),
+%e A227176 (3) A(x) = exp( x*A(x)*W(x) ),
+%e A227176 (8) A(x/exp(x)) = W(x).
+%e A227176 The e.g.f. also satisfies:
+%e A227176 (6) A(x) = 1 + A(x)*x + A(x)*(2 + A(x))*x^2/2! + A(x)*(3 + A(x))^2*x^3/3! + A(x)*(4 + A(x))^3*x^4/4! + A(x)*(5 + A(x))^4*x^5/5! +...
+%e A227176 and, for all real m,
+%e A227176 (7) A(x)^m = 1 + m*A(x)*(1+m*A(x))^0*x^1/1! + m*A(x)*(2+m*A(x))^1*x^2/2! + m*A(x)*(3+m*A(x))^2*x^3/3! + m*A(x)*(4+m*A(x))^3*x^4/4! + m*A(x)*(5+m*A(x))^4*x^5/5! +...
+%t A227176 CoefficientList[Series[LambertW[LambertW[-x]]/LambertW[-x], {x, 0, 20}], x]* Range[0, 20]! (* _Vaclav Kotesovec_, Jul 05 2013 *)
+%o A227176 (PARI) {a(n) = if(n==0,1,sum(k=0,n,binomial(n,k)*k*(k+1)^(k-1)*n^(n-k-1)))}
+%o A227176 for(n=0,20,print1(a(n),", "))
+%o A227176 (PARI) /* E.g.f.: A(x) = W(x*W(x)) */
+%o A227176 {a(n)=local(W=sum(k=0,n,(k+1)^(k-1)*x^k/k!)+x*O(x^n));n!*polcoeff(subst(W,x,x*W), n)}
+%o A227176 (PARI) /* E.g.f.: A(x) = exp(T(T(x)) ) */
+%o A227176 {a(n)=local(T=sum(k=1,n,k^(k-1)*x^k/k!)+x*O(x^n));n!*polcoeff(exp(subst(T,x,T)), n)}
+%o A227176 (PARI) /* E.g.f.: A(x) = exp( -A(x)*LambertW(-x) ) */
+%o A227176 {a(n)=local(A=1+x,LambertW=sum(k=1,n,-k^(k-1)*(-x)^k/k!)+x*O(x^n));
+%o A227176 for(i=1,n,A=exp(-A*subst(LambertW,x,-x) +x*O(x^n)));n!*polcoeff(A, n)}
+%o A227176 (PARI) /* E.g.f.: A(x) = ( LambertW(-x)/(-x) )^A(x) */
+%o A227176 {a(n)=local(A=1+x,W=sum(k=0,n,(k+1)^(k-1)*x^k/k!)+x*O(x^n));
+%o A227176 for(i=1,n,A=W^A);n!*polcoeff(A, n)}
+%o A227176 (PARI) /* E.g.f.: A(x) = Sum_{n>=0} A(x)*(n + A(x))^(n-1) * x^n/n!. */
+%o A227176 {a(n)=local(A=1+x);for(i=1,n,A=sum(k=0, n, A*(k+A)^(k-1)*x^k/k!)+x*O(x^n)); n!*polcoeff(A, n)}
+%Y A227176 Cf. A207833, A195203, A000169.
+%K A227176 nonn
+%O A227176 0,3
+%A A227176 _Paul D. Hanna_, Jul 04 2013

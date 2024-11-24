@@ -1,0 +1,52 @@
+%I A298398 #49 Apr 29 2022 18:24:10
+%S A298398 3,3,5,3,9,5,15,3,199,3,45,13,25,13,181,3,35,71,39,9,545,21,45,5,101,
+%T A298398 5,1405,13,59,107,61,3,5369,13,7069,305,221,39,131,3,165,169,85,43
+%N A298398 a(n) is the smallest odd b > 1 such that (b^(2n) + 1)/2 has all prime divisors p == 1 (mod 2n).
+%C A298398 Conjecture: a(n) exists for every n. This is implied by the generalized Bunyakovsky conjecture (Schinzel's hypothesis H).
+%C A298398 The number (a(n)^(2n) + 1)/2 has all divisors d == 1 (mod 2n).
+%C A298398 Thus, here is the congruence a(n)^(2n) == 1 (mod 2n).
+%C A298398 If n is a power of 2, then a(n) = 3.
+%C A298398 From _Kevin P. Thompson_, Mar 13 2022: (Start)
+%C A298398 Additional terms: a(47) = 95, a(48) = 19, a(50) = 851, a(51) = 6425, a(52) = 47, a(56) = 29, a(57) = 571.
+%C A298398 a(45) >= 2746511 (a C169 + C276 remain to be factored to verify b=2746511).
+%C A298398 a(46) >= 275 (a C182 remains to be factored to verify b=275).
+%C A298398 a(49) >= 979 (a C234 remains to be factored to verify b=979).
+%C A298398 a(53) >= 425 (a C195 remains to be factored to verify b=425).
+%C A298398 a(54) >= 1457 (a C164 remains to be factored to verify b=1457).
+%C A298398 a(55) >= 10361 (a C307 remains to be factored to verify b=10361).
+%C A298398 (End)
+%H A298398 Kevin P. Thompson, <a href="/A298398/a298398.txt">Factorizations to support known terms of a(n) for n = 1..57</a>
+%F A298398 a(n) = min{b > 1: b is odd and for all prime p, if p | (b^(2n) + 1)/2 then p == 1 (mod 2n)}. - _Kevin P. Thompson_, Mar 14 2022
+%e A298398 a(5) = 9 since (9^10 + 1)/2 = 41 * 42521761, 41 = 1 (mod 5*2) and 42521761 = 1 (mod 5*2), so all divisors d == 1 (mod 10).
+%p A298398 g:= proc(t)
+%p A298398    convert(select(type,map(s -> s[1], ifactors(t,easy)[2]),integer),set);
+%p A298398 end proc:
+%p A298398 F:= proc(n) local s,t,b,C,B,k,bb,Cb, easyf; uses numtheory;
+%p A298398   t:= 2^padic:-ordp(n,2);
+%p A298398   s:= n/t;
+%p A298398   C:= unapply({seq(numtheory:-cyclotomic(m,-b^(2*t)),m=numtheory:-divisors(s) minus {1}), (b^(2*t)+1)/2},b);
+%p A298398    B:= select(t -> C(t) mod (2*n) = {1}, [seq(b,b=1..2*n-1,2)]);
+%p A298398    for k from 0 do
+%p A298398      for bb in B do
+%p A298398        b:= k*2*n+bb;
+%p A298398        if b < 2 then next fi;
+%p A298398        Cb:= remove(isprime,C(b));
+%p A298398        if Cb = {} then return b fi;
+%p A298398        easyf:= map(g, Cb) mod (2*n);
+%p A298398        if not (`union`(op(easyf)) subset {1}) then next fi;
+%p A298398        if andmap(c -> factorset(c) mod (2*n) = {1}, Cb) then return b fi;
+%p A298398      od
+%p A298398    od
+%p A298398 end proc:
+%p A298398 map(F, [$1..26]); # _Robert Israel_, Jan 18 2018
+%t A298398 Array[Block[{b = 3}, While[Union@ Mod[FactorInteger[(b^(2 #) + 1)/2][[All, 1]], 2 #] != {1}, b += 2]; b] &, 20] (* _Michael De Vlieger_, Jan 20 2018 *)
+%t A298398 f[n_] := Block[{b = 3}, Label[init]; While[ PowerMod[b, 2n, 2n] != 1, b += 2]; d = First@# & /@ FactorInteger[(b^(2n) +1)/2]; If[ Union@ Mod[d, 2n] != {1}, b += 2; Goto[init]]; b]; Array[f, 30] (* _Robert G. Wilson v_, Jan 22 2018 *)
+%o A298398 (PARI) isok(b, n) = {pf = factor((b^(2*n) + 1)/2)[, 1]; for (j=1, #pf, if (lift(Mod(pf[j], 2*n)) != 1, return (0));); return(1);}
+%o A298398 a(n) = {my(b = 3); while (!isok(b, n), b += 2); b;} \\ _Michel Marcus_, Jan 19 2018
+%Y A298398 Cf. A298299.
+%K A298398 nonn,hard,more
+%O A298398 1,1
+%A A298398 _Thomas Ordowski_, Jan 18 2018
+%E A298398 a(9)-a(30) from _Robert Israel_, Jan 18 2018
+%E A298398 a(20) corrected by _Michel Marcus_, Jan 19 2018
+%E A298398 a(31)-a(44) from _Kevin P. Thompson_, Mar 13 2022

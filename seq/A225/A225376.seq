@@ -1,0 +1,37 @@
+%I A225376 #34 Mar 05 2023 03:08:25
+%S A225376 1,5,11,20,36,60,94,140,199,272,360,465,588,730,893,1078,1286,1519,
+%T A225376 1778,2064,2378,2721,3094,3498,3934,4403,4907,5448,6027,6645,7303,
+%U A225376 8002,8743,9527,10355,11228
+%N A225376 Construct sequences P,Q,R by the rules: Q = first differences of P, R = second differences of P, P starts with 1,5,11, Q starts with 4,6, R starts with 2; at each stage the smallest number not yet present in P,Q,R is appended to R; every number appears exactly once in the union of P,Q,R. Sequence gives P.
+%C A225376 P can be extended for 10^6 terms, but it is not known if P,Q,R can be extended to infinity.
+%C A225376 A probabilistic argument suggests that P, Q, R are infinite. - _N. J. A. Sloane_, May 19 2013
+%C A225376 Martin Gardner (see reference) states that no such triple P,Q,R of sequences exists if it is required that P(1)<Q(1)<R(1).
+%D A225376 M. Gardner, Weird Numbers from Titan, Isaac Asimov's Science Fiction Magazine, Vol. 4, No. 5, May 1980, pp. 42ff.
+%H A225376 Christopher Carl Heckman, <a href="/A225376/b225376.txt">Table of n, a(n) for n = 1..10002</a>
+%e A225376 The initial terms of P, Q, R are:
+%e A225376 1     5    11    20    36    60    94   140   199   272   360
+%e A225376    4     6     9    16    24    34    46    59    73    88
+%e A225376       2     3     7     8    10    12    13    14    15
+%p A225376 Hofstadter2 := proc (N) local h, dh, ddh, S, lbmex, i:
+%p A225376     h := 1, 5, 11: dh := 4, 6: ddh := 2:
+%p A225376     lbmex := 3: S := {h,dh,ddh}:
+%p A225376     for i from 4 to N do:
+%p A225376        while lbmex in S do: S := S minus {lbmex}: lbmex := lbmex + 1: od:
+%p A225376        ddh := ddh, lbmex:
+%p A225376        dh := dh, dh[-1] + lbmex:
+%p A225376        h := h, h[-1] + dh[-1]:
+%p A225376        S := S union {h[-1], dh[-1], ddh[-1]}:
+%p A225376        lbmex := lbmex + 1:
+%p A225376     od:
+%p A225376     if {h} intersect {dh} <> {} then: return NULL:
+%p A225376     elif {h} intersect {ddh} <> {} then: return NULL:
+%p A225376     elif {ddh} intersect {dh} <> {} then: return NULL:
+%p A225376     else: return [h]: fi:
+%p A225376 end proc: # _Christopher Carl Heckman_, May 12 2013
+%t A225376 Hofstadter2[N_] := Module[{P, Q, R, S, k, i}, P = {1, 5, 11}; Q = {4, 6}; R = {2}; k = 3; S = Join[P, Q, R]; For[i = 4, i <= N, i++, While[MemberQ[S, k], S = S~Complement~{k}; k++]; AppendTo[R, k]; AppendTo[Q, Q[[-1]] + k]; AppendTo[P, P[[-1]] + Q[[-1]]]; S = S~Union~{P[[-1]], Q[[-1]], R[[-1]]}; k++]; Which[P~Intersection~Q != {}, Return@Nothing, {P}~Intersection~R != {}, Return@Nothing, R~Intersection~Q != {}, Return@Nothing, True, Return@P]];
+%t A225376 Hofstadter2[36] (* _Jean-François Alcover_, Mar 05 2023, after _Christopher Carl Heckman_'s Maple code *)
+%Y A225376 Cf. A225377, A225378, A005228, A030124, A037257.
+%K A225376 nonn
+%O A225376 1,2
+%A A225376 _N. J. A. Sloane_, May 12 2013, based on email from _Christopher Carl Heckman_, May 06 2013
+%E A225376 Corrected and edited by _Christopher Carl Heckman_, May 12 2013

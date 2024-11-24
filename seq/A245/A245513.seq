@@ -1,0 +1,33 @@
+%I A245513 #26 Feb 03 2018 12:26:49
+%S A245513 6,7,3,4,3,3,2,6,3,2,2,3,3,6,3,2,2,4,3,3,2,1,3,2,1,4,2,5,2,2,2,3,1,3,
+%T A245513 3,1,2,3,3,2,2,3,2,5,2,1,2,3,1,2,2,1,3,3,1,3,2,2,2,3,2,6,1,2,3,1,2,5,
+%U A245513 2,4,2,2,3,3,1,3,2,1,2,3,2,1,3,2,1,2,2,1,3,2,1,1,1,2,2
+%N A245513 Smallest m such that neither of the two odd numbers that bracket n^m is a prime.
+%C A245513 The locution "the two odd numbers which bracket n^m" indicates the pair (n^m-1,n^m+1) for even n and (n^m-2,n^m+2) for odd n.
+%C A245513 The initial records in this sequence are a(2)=6, a(3)=7, a(2055)=8. No higher value was found up to 5500000. It is not clear whether a(n) is bounded.
+%C A245513 Heuristically, Prob(a(n) > m) ~ (2/log n)^m/m! as n -> infinity for fixed m.  The sum over n diverges, so we should expect infinitely many a(n) > m. - _Robert Israel_, Aug 12 2014
+%C A245513 a(215539779) = 9 is a record and there is no higher value up to 4*10^9. a(n) <= 3 for all even n > 2, since n-1 divides n^3-1 and n+1 divides n^3+1. - _Jens Kruse Andersen_, Aug 14 2014
+%H A245513 Stanislav Sykora, <a href="/A245513/b245513.txt">Table of n, a(n) for n = 2..10000</a>
+%e A245513 a(4)=3 because 4^1 and 4^2 are bracketed by the odd numbers (3,5) and (15,17) and each pair contains a prime, but 4^3 is bracketed by (63,65) which are both nonprimes.
+%e A245513 a(5)=4 because 5^1, 5^2, and 5^3 are bracketed by odd pairs (3,7), (23,27) and (123,127) which all contain at least one prime. But 5^4 is bracketed by odd numbers (623,627) which are both composites.
+%p A245513 f:= proc(n) local m,nm;
+%p A245513   for m from 1 do
+%p A245513     nm:= n^m;
+%p A245513     if n::odd then if not isprime(nm+2) and not isprime(nm-2) then return(m) fi
+%p A245513     elif not isprime(nm+1) and not isprime(nm-1) then return(m)
+%p A245513     fi
+%p A245513   od
+%p A245513 end proc:
+%p A245513 seq(f(n), n=2..1000); # _Robert Israel_, Aug 12 2014
+%t A245513 a245513Q[n_Integer] := Module[{i},
+%t A245513   Catch[For[i = 0, i <= 20, i++,
+%t A245513     If[EvenQ[n],
+%t A245513      If[! PrimeQ[n^i + 1] && ! PrimeQ[n^i - 1], Throw[i]],
+%t A245513      If[! PrimeQ[n^i + 2] && ! PrimeQ[n^i - 2], Throw[i]]
+%t A245513      ]]]]; a245513[n_Integer] := a245513Q /@ Range[2, n]; a245513[120] (* _Michael De Vlieger_, Aug 12 2014 *)
+%o A245513 (PARI) avector(nmax)={my(n, k, d=2, v=vector(nmax));for(n=2, #v+1, d=3-d; k=1;while(1, if((!isprime(n^k-d))&&(!isprime(n^k+d)), v[n-1]=k; break, k++)););return(v);}
+%o A245513 a=avector(10000)  \\ For nmax=6000000 runs out of 1GB memory
+%Y A245513 Cf. A245509, A245510, A245511, A245512, A245514.
+%K A245513 nonn
+%O A245513 2,1
+%A A245513 _Stanislav Sykora_, Jul 24 2014

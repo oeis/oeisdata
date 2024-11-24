@@ -1,0 +1,40 @@
+%I A246538 #20 Feb 24 2020 17:00:44
+%S A246538 1,3,15,87,559,3807,26919,195399,1445967,10859967,82527687,633165255,
+%T A246538 4896345487,38117454303,298435452135,2348094847047,18554434810831,
+%U A246538 147171478237695,1171272947140359,9349653181797063,74834845484454927,600441007306747167,4828337830880795943,38904633251921442375
+%N A246538 G.f.: Sum_{n>=0} 2^n * x^n / (1-x)^(2*n+1) * [Sum_{k=0..n} C(n,k)^2 * x^k]^2.
+%C A246538 a(n) == 1 (mod 3) iff n = 4*A005836(k) for k>=0, and a(n) == 0 (mod 3) otherwise, where A005836 gives numbers n whose base 3 representation contains no 2.
+%F A246538 G.f.: Sum_{n>=0} x^n / (1-2*x)^(2*n+1) * [Sum_{k=0..n} C(n,k)^2 * 2^k * x^k]^2.
+%F A246538 G.f.: Sum_{n>=0} x^n * Sum_{k=0..n} C(n,k)^2 * 2^k * Sum_{j=0..k} C(k,j)^2 * x^j.
+%F A246538 G.f.: Sum_{n>=0} x^n * Sum_{k=0..n} C(n,k)^2 * 2^(n-k) * Sum_{j=0..k} C(k,j)^2 * 2^j * x^j.
+%F A246538 a(n) = Sum_{k=0..[n/2]} 2^k * Sum_{j=0..n-2*k} C(n-k, k+j)^2 * C(k+j, j)^2 * 2^j.
+%F A246538 D-finite with recurrence: (n-4)*(n-1)^2*a(n) = 3*(n-4)*(3*n^2 - 9*n + 7)*a(n-1) - (n-2)*(n^2 - 6*n + 6)*a(n-2) - 3*(n-3)*(11*n^2 - 66*n + 92)*a(n-3) - 2*(n-4)*(n^2 - 6*n + 6)*a(n-4) + 12*(n-2)*(3*n^2 - 27*n + 61)*a(n-5) - 8*(n-5)^2*(n-2)*a(n-6). - _Vaclav Kotesovec_, Nov 05 2014, for offset 1.
+%F A246538 a(n) ~ ((3 + 4*sqrt(2) + sqrt(33+24*sqrt(2))))^n / (Pi *n * 2^(n+5/2)). - _Vaclav Kotesovec_, Nov 05 2014
+%e A246538 G.f.: A(x) = 1 + 3*x + 15*x^2 + 87*x^3 + 559*x^4 + 3807*x^5 + 26919*x^6 +...
+%e A246538 where
+%e A246538 A(x) = 1/(1-x) + 2*x/(1-x)^3*(1+x)^2
+%e A246538 + 2^2*x^2/(1-x)^5*(1 + 2^2*x + x^2)^2
+%e A246538 + 2^3*x^3/(1-x)^7*(1 + 3^2*x + 3^2*x^2 + x^3)^2
+%e A246538 + 2^4*x^4/(1-x)^9*(1 + 4^2*x + 6^2*x^2 + 4^2*x^3 + x^4)^2
+%e A246538 + 2^5*x^5/(1-x)^11*(1 + 5^2*x + 10^2*x^2 + 10^2*x^3 + 5^2*x^4 + x^5)^2
+%e A246538 + 2^6*x^6/(1-x)^13*(1 + 6^2*x + 15^2*x^2 + 20^2*x^3 + 15^2*x^4 + 6^2*x^5 + x^6)^2 +...
+%t A246538 Table[Sum[2^k * Sum[Binomial[n-k, k+j]^2 * Binomial[k+j, j]^2 * 2^j,{j,0,n-2*k}],{k,0,Floor[n/2]}],{n,0,20}] (* _Vaclav Kotesovec_, Nov 05 2014 *)
+%o A246538 (PARI) /* By definition: */
+%o A246538 {a(n)=local(A=1); A=sum(m=0, n, 2^m*x^m/(1-x)^(2*m+1) * sum(k=0, m, binomial(m, k)^2 * x^k)^2 +x*O(x^n)); polcoeff(A, n)}
+%o A246538 for(n=0, 25, print1(a(n), ", "))
+%o A246538 (PARI) /* By a binomial identity: */
+%o A246538 {a(n)=local(A=1); A=sum(m=0, n, x^m/(1-2*x)^(2*m+1) * sum(k=0, m, binomial(m, k)^2 * 2^k * x^k)^2 +x*O(x^n)); polcoeff(A, n)}
+%o A246538 for(n=0, 25, print1(a(n), ", "))
+%o A246538 (PARI) /* By a binomial identity: */
+%o A246538 {a(n)=polcoeff(sum(m=0, n, x^m*sum(k=0, m, binomial(m, k)^2 * 2^k * sum(j=0, k, binomial(k, j)^2 * x^j)+x*O(x^n))), n)}
+%o A246538 for(n=0, 25, print1(a(n), ", "))
+%o A246538 (PARI) /* By a binomial identity: */
+%o A246538 {a(n)=polcoeff(sum(m=0, n, x^m*sum(k=0, m, binomial(m, k)^2 * 2^(m-k) * sum(j=0, k, binomial(k, j)^2 * 2^j * x^j)+x*O(x^n))), n)}
+%o A246538 for(n=0, 25, print1(a(n), ", "))
+%o A246538 (PARI) /* By a formula for a(n): */
+%o A246538 {a(n)=sum(k=0, n\2, sum(j=0, n-2*k, 2^k * binomial(n-k, k+j)^2 * binomial(k+j, j)^2 * 2^j))}
+%o A246538 for(n=0, 25, print1(a(n), ", "))
+%Y A246538 Cf. A246539, A246540, A246056, A246423, A243948, A245929, A227845, A245925, A005836.
+%K A246538 nonn
+%O A246538 0,2
+%A A246538 _Paul D. Hanna_, Aug 28 2014

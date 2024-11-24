@@ -1,0 +1,35 @@
+%I A217038 #85 Sep 13 2024 08:03:39
+%S A217038 0,1,1,1,2,2,2,2,3,4,4,4,4,4,4,4,5,5,5,5,5,5,5,5,5,6,6,7,7,7,7,7,8,8,
+%T A217038 8,8,9,9,9,9,9,9,9,9,9,9,9,9,9,10,10,10,10,10,10,10,10,10,10,10,10,10,
+%U A217038 10,10,11,11,11,11,11,11,11,11,12,12,12,12,12
+%N A217038 Number of powerful numbers < n.
+%C A217038 Powerful numbers are given by A001694.
+%H A217038 Charles R Greathouse IV, <a href="/A217038/b217038.txt">Table of n, a(n) for n = 1..10000</a>
+%H A217038 Paul Erdős and George Szekeres, <a href="http://pub.acta.hu/acta/showCustomerArticle.action?id=5508&amp;dataObjectType=article">Über die Anzahl der Abelschen Gruppen gegebener Ordnung und über ein verwandtes zahlentheoretisches Problem</a>, Acta Sci. Math. (Szeged), Vol. 7, No. 2 (1935), pp. 95-102.
+%H A217038 Solomon W. Golomb, <a href="http://www.jstor.org/stable/2317020">Powerful numbers</a>, Amer. Math. Monthly, Vol. 77, No. 8 (1970), pp. 848-852.
+%F A217038 a(n) = (zeta(3/2)/zeta(3)) * sqrt(n) + O(n^(1/3)) (Erdős and Szekeres, 1935; Golomb, 1970). - _Amiram Eldar_, Apr 06 2023
+%e A217038 a(10)=4 since there are exactly 4 powerful numbers (1,4,8,9) less than 10.
+%t A217038 PowQ[n_] := Cases[FactorInteger[n], {p_, 1} -> p] == {}; Q[n_] := Length[Join[{1}, Select[Range[n - 1], PowQ[#] &]]] ; Join[{0}, Table[Q[n], {n, 2, 100}]]
+%o A217038 (PARI) g(n,fe=factor(n)[,2])=prod(i=1,#fe, (fe[i]+2)\2 - (fe[i]+2)\3)
+%o A217038 a(n)=my(v=List(),t); n--; for(m=2,sqrtnint(n,6), for(y=1,sqrtnint(n\m^6,3), t=(m^2*y)^3; for(x=1,sqrtint(n\t), listput(v,t*x^2)))); v=Set(v); sum(y=1,sqrtnint(n,3), sqrtint(n\y^3))-sum(i=1,#v, g(v[i])-1) \\ _Charles R Greathouse IV_, Jul 31 2017
+%o A217038 (PARI) first(n)=my(v=vector(n),s=1); if(n>1, v[2]=1); forfactored(k=2,n-1, if(vecmin(k[2][,2])>1, s++); v[k[1]+1]=s); v \\ _Charles R Greathouse IV_, Jul 31 2017
+%o A217038 (PARI) a(n)=my(s); n--; forsquarefree(k=1,sqrtnint(n,3), s+=sqrtint(n\k[1]^3)); s \\ _Charles R Greathouse IV_, Dec 12 2022
+%o A217038 (Python)
+%o A217038 from math import isqrt
+%o A217038 from sympy import mobius, integer_nthroot
+%o A217038 def A217038(n):
+%o A217038     def squarefreepi(n): return int(sum(mobius(k)*(n//k**2) for k in range(1, isqrt(n)+1)))
+%o A217038     c, l = 0, 0
+%o A217038     j = isqrt(n-1)
+%o A217038     while j>1:
+%o A217038         k2 = integer_nthroot((n-1)//j**2,3)[0]+1
+%o A217038         w = squarefreepi(k2-1)
+%o A217038         c += j*(w-l)
+%o A217038         l, j = w, isqrt((n-1)//k2**3)
+%o A217038     c += squarefreepi(integer_nthroot(n-1,3)[0])-l
+%o A217038     return c # _Chai Wah Wu_, Sep 12 2024
+%Y A217038 Cf. A001597, A001694, A076411, A090699.
+%Y A217038 Partial sums of A112526.
+%K A217038 nonn
+%O A217038 1,5
+%A A217038 _Jayanta Basu_, Apr 07 2013

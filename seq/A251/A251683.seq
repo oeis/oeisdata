@@ -1,0 +1,85 @@
+%I A251683 #49 Nov 17 2020 04:44:34
+%S A251683 1,1,1,1,1,1,1,2,1,1,2,1,1,1,1,2,1,1,4,3,1,1,2,1,2,1,3,3,1,1,1,4,3,1,
+%T A251683 1,4,3,1,2,1,2,1,1,6,9,4,1,1,1,2,1,2,1,1,4,3,1,1,6,6,1,1,4,6,4,1,1,2,
+%U A251683 1,2,1,2,1,7,12,6,1,1,2,1,2,1,6,9,4
+%N A251683 Irregular triangular array: T(n,k) is the number of ordered factorizations of n with exactly k factors, n >= 1, 1 <= k <= A086436(n).
+%C A251683 Row sums = A074206.
+%C A251683 Row lengths give A086436.
+%C A251683 T(n,2) = A070824(n).
+%C A251683 T(n,3) = A200221(n).
+%C A251683 Sum_{k>=1} k*T(n,k) = A254577.
+%C A251683 For all n > 1,  Sum_{k=1..A086436(n)} (-1)^k*T(n,k) = A008683(n). - _Geoffrey Critzer_, May 25 2018
+%C A251683 From _Gus Wiseman_, Aug 21 2020: (Start)
+%C A251683 Also the number of strict length k + 1 chains of divisors from n to 1. For example, row n = 24 counts the following chains:
+%C A251683   24/1  24/2/1   24/4/2/1   24/8/4/2/1
+%C A251683         24/3/1   24/6/2/1   24/12/4/2/1
+%C A251683         24/4/1   24/6/3/1   24/12/6/2/1
+%C A251683         24/6/1   24/8/2/1   24/12/6/3/1
+%C A251683         24/8/1   24/8/4/1
+%C A251683         24/12/1  24/12/2/1
+%C A251683                  24/12/3/1
+%C A251683                  24/12/4/1
+%C A251683                  24/12/6/1
+%C A251683 (End)
+%H A251683 Alois P. Heinz, <a href="/A251683/b251683.txt">Rows n = 1..4000, flattened</a>
+%H A251683 Jeffery Kline, <a href="https://doi.org/10.1016/j.laa.2019.09.022">On the eigenstructure of sparse matrices related to the prime number theorem</a>, Linear Algebra and its Applications (2020) Vol. 584, 409-430.
+%H A251683 Arnold Knopfmacher and Michael Mays, <a href="https://www.researchgate.net/publication/255662882_Ordered_and_Unordered_Factorizations_of_Integers">Ordered and Unordered Factorizations of Integers</a>, The Mathematica Journal, Vol 10 (1).
+%H A251683 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/OrderedFactorization.html">Ordered Factorization</a>
+%F A251683 Dirichlet g.f.: 1/(1 - y*(zeta(x)-1)).
+%e A251683 Triangle T(n,k) begins:
+%e A251683   1;
+%e A251683   1;
+%e A251683   1;
+%e A251683   1, 1;
+%e A251683   1;
+%e A251683   1, 2;
+%e A251683   1;
+%e A251683   1, 2, 1;
+%e A251683   1, 1;
+%e A251683   1, 2;
+%e A251683   1;
+%e A251683   1, 4, 3;
+%e A251683   1;
+%e A251683   1, 2;
+%e A251683   1, 2;
+%e A251683   ...
+%e A251683 There are 8 ordered factorizations of the integer 12: 12, 6*2, 4*3, 3*4, 2*6, 3*2*2, 2*3*2, 2*2*3.  So T(12,1)=1, T(12,2)=4, and T(12,3)=3.
+%p A251683 with(numtheory):
+%p A251683 b:= proc(n) option remember; expand(x*(1+
+%p A251683       add(b(n/d), d=divisors(n) minus {1, n})))
+%p A251683     end:
+%p A251683 T:= n-> (p-> seq(coeff(p, x, i), i=1..degree(p)))(b(n)):
+%p A251683 seq(T(n), n=1..100);  # _Alois P. Heinz_, Dec 07 2014
+%t A251683 f[1] = {{}};
+%t A251683 f[n_] := f[n] =
+%t A251683   Level[Table[
+%t A251683     Map[Prepend[#, d] &, f[n/d]], {d, Rest[Divisors[n]]}], {2}];
+%t A251683 Prepend[Map[Select[#, # > 0 &] &,
+%t A251683   Drop[Transpose[
+%t A251683     Table[Map[Count[#, k] &,
+%t A251683       Map[Length, Table[f[n], {n, 1, 40}], {2}]], {k, 1, 10}]],
+%t A251683    1]],{1}] // Grid
+%t A251683 (* Second program: *)
+%t A251683 b[n_] := b[n] = x(1+Sum[b[n/d], {d, Divisors[n]~Complement~{1, n}}]);
+%t A251683 T[n_] := CoefficientList[b[n]/x, x];
+%t A251683 Array[T, 100] // Flatten (* _Jean-François Alcover_, Nov 17 2020, after _Alois P. Heinz_ *)
+%Y A251683 Cf. A008683, A070824, A200221, A254577.
+%Y A251683 A008480 gives rows ends.
+%Y A251683 A086436 gives row lengths.
+%Y A251683 A124433 is the same except for signs and zeros.
+%Y A251683 A334996 is the same except for zeros.
+%Y A251683 A337107 is the restriction to factorial numbers (but with zeros).
+%Y A251683 A000005 counts divisors.
+%Y A251683 A001055 counts factorizations.
+%Y A251683 A001222 counts prime factors with multiplicity.
+%Y A251683 A074206 counts strict chains of divisors from n to 1.
+%Y A251683 A067824 counts strict chains of divisors starting with n.
+%Y A251683 A122651 counts strict chains of divisors summing to n.
+%Y A251683 A167865 counts strict chains of divisors > 1 summing to n.
+%Y A251683 A253249 counts strict nonempty chains of divisors of n.
+%Y A251683 A337071 counts strict chains of divisors starting with n!.
+%Y A251683 A337256 counts strict chains of divisors of n.
+%Y A251683 Cf. A001221, A002033, A124010, A167865, A337070, A337105.
+%K A251683 nonn,tabf
+%O A251683 1,8
+%A A251683 _Geoffrey Critzer_, Dec 06 2014

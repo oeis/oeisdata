@@ -1,0 +1,48 @@
+%I A358916 #26 Dec 11 2022 14:13:56
+%S A358916 1,4,9,2,25,3,49,16,27,5,121,6,169,7,45,8,289,12,361,10,63,11,529,18,
+%T A358916 125,13,81,14,841,15,961,64,99,17,175,24,1369,19,117,20,1681,21,1849,
+%U A358916 22,75,23,2209,32,343,40,153,26,2809,36,275,28,171,29,3481,30,3721
+%N A358916 a(1) = 1. Thereafter a(n) is the least novel k != n such that A007947(k)|n.
+%C A358916 In other words, a(1) = 1, then for n > 1, a(n) is the least number k, not occurring earlier, whose squarefree kernel (rad(k)) is a divisor of n.
+%C A358916 A permutation of the positive integers. - _Robert Israel_, Dec 11 2022
+%C A358916 From _Michael De Vlieger_, Dec 06 2022, corrected by _Robert Israel_, Dec 11 2022: (Start)
+%C A358916 Some consequences of definition:
+%C A358916 Prime n = p implies a(p) = p^2, comprising maxima.
+%C A358916 n = 2p implies a(2p) = p, n = 4p implies a(4p) = 2p.
+%C A358916 n = 2^e with e >= 1 implies a(2^e) = 2^(e+1) if e is odd, 2^(e-1) if e is even.
+%C A358916 n = p^e with e >= 1 and p an odd prime implies a(n) = p^(e+1).
+%C A358916 Composite squarefree 2n implies a(2n) = n, comprising minima.
+%C A358916 gcd(n, n +/- 1) = 1 implies gcd(a(n), a(n +/- 1)) = 1.
+%C A358916 Let K = rad(n); a(n) is an element of R_K, the list of K-regular numbers, 1 and those whose prime divisors are restricted to p | K. For example, if K = 6, then a(n) != n is in A003586, and if K = 10, then a(n) != n is in A003592. (End)
+%H A358916 Robert Israel, <a href="/A358916/b358916.txt">Table of n, a(n) for n = 1..10000</a>
+%H A358916 Michael De Vlieger, <a href="/A358916/a358916.png">Annotated log log scatterplot of a(n)</a>, n = 1..2^12, highlighting and labeling primes in red, composite prime powers in gold and labeling in orange, composite squarefree in green, numbers that are products of composite prime powers in large light blue and labeling in blue, and all other numbers in dark blue. The first 36 terms are simply labeled in black.
+%F A358916 For n = p^k, where p is prime and k >= 1, a(n) = p^(k+1). In particular, a(p) = p^2 (records).
+%e A358916 a(5) = 25 because rad(25) = 5  and there is no smaller number not equal to 5 which has this property.
+%p A358916 N:= 100: # for a(1)..a(N)
+%p A358916 R:= map(NumberTheory:-Radical, [$1..N^2]):
+%p A358916 A[1]:= 1:
+%p A358916 Agenda:= [$2..N^2]:
+%p A358916 for n from 2 to N do
+%p A358916   if isprime(R[n]) then
+%p A358916     if R[n] = 2 and padic:-ordp(n,2)::even then A[n]:= n/2
+%p A358916     else A[n]:= R[n]*n
+%p A358916     fi;
+%p A358916     if A[n] <= N then Agenda:= subs(A[n]=NULL,Agenda) fi;
+%p A358916     next
+%p A358916   fi;
+%p A358916   found:= false;
+%p A358916   for j from 1 to nops(Agenda) do
+%p A358916     x:= Agenda[j];
+%p A358916     if x <> n  and n mod R[x] = 0 then
+%p A358916       A[n]:= x; Agenda:= subsop(j=NULL,Agenda); found:= true; break
+%p A358916     fi
+%p A358916   od;
+%p A358916   if not found then break fi;
+%p A358916 od:
+%p A358916 convert(A,list); # _Robert Israel_, Dec 11 2022
+%t A358916 nn = 120; c[_] = False; f[n_] := f[n] = Times @@ FactorInteger[n][[All, 1]]; a[1] = 1; c[1] = True; u = 2; Do[Which[PrimeQ[n], k = n^2, PrimePowerQ[n], Set[{p, k}, {f[n], 1}]; While[Nand[! c[p^k], p^k != n], k++]; k = p^k, True, k = u; While[Nand[! c[k], k != n, Divisible[n, f[k]]], k++]]; Set[{a[n], c[k]}, {k, True}]; If[k == u, While[c[u], u++]], {n, 2, nn}]; Array[a, nn] (* _Michael De Vlieger_, Dec 06 2022 *)
+%Y A358916 Cf. A000005, A000040, A001248, A005117, A007947, A032741, A358820, A358971.
+%K A358916 nonn
+%O A358916 1,2
+%A A358916 _David James Sycamore_, Dec 05 2022
+%E A358916 More terms from _Michael De Vlieger_, Dec 07 2022

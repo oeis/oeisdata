@@ -1,0 +1,48 @@
+%I A288265 #18 Aug 15 2017 10:53:51
+%S A288265 1,1,3,1,16,15,6,1,125,222,205,120,45,10,1296,3660,5700,6165,4935,
+%T A288265 2937,1125,195,16807,68295,156555,258125,330456,334530,254275,131985,
+%U A288265 40950,5712,262144,1436568,4483360,10230360,18528216,27261192,31761744,27958920,17666320,7513632,1922760,223440,4782969,33779340,136368414,405918324,970196283,1910996136,3058785990,3866563764,3754432899,2724326136,1425385584,507370500,109907280,10929600
+%N A288265 Triangle read by rows: T(n,k) is the number of labeled connected planar graphs on n vertices and k edges.
+%C A288265 Row n >= 3 contains 3*n-5 terms.
+%H A288265 Gheorghe Coserea, <a href="/A288265/b288265.txt">Rows n = 1..126, flattened</a>
+%H A288265 E. A. Bender, Z. Gao and N. C. Wormald, <a href="http://www.combinatorics.org/ojs/index.php/eljc/article/view/v9i1r43">The number of labeled 2-connected planar graphs</a>, Electron. J. Combin., 9 (2002), #R43.
+%H A288265 M. Bodirsky, C. Groepl and M. Kang, <a href="http://dx.doi.org/10.1016/j.tcs.2007.02.045">Generating Labeled Planar Graphs Uniformly At Random</a>, Theoretical Computer Science, Volume 379, Issue 3, 15 June 2007, Pages 377-386.
+%H A288265 Omer Gimenez, Marc Noy, <a href="http://dx.doi.org/10.1090/S0894-0347-08-00624-3">Asymptotic enumeration and limit laws of planar graphs</a>, J. Amer. Math. Soc. 22 (2009), 309-329.
+%F A288265 A096332(n) = Sum_{k=n-1..3*n-6} T(n,k) for n >= 3.
+%F A288265 A000272(n) = T(n,n-1), A007816(n-3) = T(n, 3*n-6).
+%e A288265 A(x;t) = x + t*x^2/2! + (3*t^2 + t^3)*x^3/3! + (16*t^3 + 15*t^4 + 6*t^5 + t^6)*x^4/4! + ...
+%e A288265 Triangle starts:
+%e A288265 n\k [0] [1] [2] [3] [4]  [5]   [6]   [7]   [8]   [9]   [10]  [11]  [12]
+%e A288265 [1] 1;
+%e A288265 [2] 0   1;
+%e A288265 [3] 0,  0,  3,  1;
+%e A288265 [4] 0,  0,  0,  16, 15,  6,    1;
+%e A288265 [5] 0,  0,  0,  0,  125, 222,  205,  120,  45,   10;
+%e A288265 [6] 0,  0,  0,  0,  0,   1296, 3660, 5700, 6165, 4935, 2937, 1125, 195;
+%e A288265 [7] ...
+%o A288265 (PARI)
+%o A288265 Q(n,k) = { \\ c-nets with n-edges, k-vertices
+%o A288265   if (k < 2+(n+2)\3 || k > 2*n\3, return(0));
+%o A288265   sum(i=2, k, sum(j=k, n, (-1)^((i+j+1-k)%2)*binomial(i+j-k,i)*i*(i-1)/2*
+%o A288265   (binomial(2*n-2*k+2,k-i)*binomial(2*k-2, n-j) -
+%o A288265   4*binomial(2*n-2*k+1, k-i-1)*binomial(2*k-3, n-j-1))));
+%o A288265 };
+%o A288265 A100960_ser(N) = {
+%o A288265 my(x='x+O('x^(3*N+1)), t='t+O('t^(N+4)),
+%o A288265    q=t*x*Ser(vector(3*N+1, n, Polrev(vector(min(N+3, 2*n\3), k, Q(n,k)),'t))),
+%o A288265    d=serreverse((1+x)/exp(q/(2*t^2*x) + t*x^2/(1+t*x))-1),
+%o A288265    g2=intformal(t^2/2*((1+d)/(1+x)-1)));
+%o A288265    serlaplace(Ser(vector(N, n, subst(polcoeff(g2, n,'t),'x,'t)))*'x);
+%o A288265 };
+%o A288265 A288265_ser(N) = {
+%o A288265   my(x='x+O('x^(N+3)), b = t*x^2/2 + serconvol(A100960_ser(N), exp(x)),
+%o A288265      g1=intformal(serreverse(x/exp(b'))/x)); serlaplace(g1);
+%o A288265 };
+%o A288265 A288265_seq(N) = {
+%o A288265   my(v=Vec(A288265_ser(N))); vector(#v, n, Vecrev(v[n]/t^(n-1)));
+%o A288265 };
+%o A288265 concat(A288265_seq(9))
+%Y A288265 Cf. A000272, A007816, A096332, A100960, A266390, A267411, A288266, A290326.
+%K A288265 nonn,tabf
+%O A288265 1,3
+%A A288265 _Gheorghe Coserea_, Aug 14 2017

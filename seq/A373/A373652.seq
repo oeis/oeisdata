@@ -1,0 +1,51 @@
+%I A373652 #124 Jul 16 2024 15:30:36
+%S A373652 9,15,49,77,169,221,247,323,529,961,1147,1271,1517,1680,1849,2021,
+%T A373652 2209,2279,2520,2688,2880,3360,3481,3599,3721,3953,4032,4087,4320,
+%U A373652 4480,4536,4757,5040,5184,5329,5670,5760,5767,6048,6059,6241,6480,6497,6557,6720,7200
+%N A373652 Composite numbers k for which g = gcd(f(i*c), k) = 1 or k for all i in the range 1 <= i <= c, where f(x) = Product_{j=1..c} x+j and c = floor(k^(1/4)).
+%C A373652 These conditions for k are inspired by the Pollard-Strassen factorization algorithm.
+%C A373652 f(i*c) is the product of successive blocks of consecutive integers c*i+1 to c*(i+1) inclusive and can be calculated efficiently mod k by a multi-point polynomial evaluation.
+%C A373652 The conditions here are that no g by itself reveals a factor of k (so that the Pollard-Strassen algorithm must examine individual c*i+j terms in some g = k block to find a factor).
+%H A373652 Mathematics Stack Exchange, <a href="https://math.stackexchange.com/questions/185524/pollard-strassen-algorithm">Pollard-Strassen algorithm</a>.
+%H A373652 Programming Praxis, <a href="https://programmingpraxis.com/2018/01/27/strassens-factoring-algorithm">Strassen's factoring algorithm</a>.
+%e A373652 For k = 49:
+%e A373652  i | c |  c*i+1 | c*(i+1) | g
+%e A373652 -------------------------------------
+%e A373652  1 | 2 | 3      | 4       | 1
+%e A373652  2 | 2 | 5      | 6       | 1
+%e A373652 Result: 1
+%e A373652 For k = 323:
+%e A373652  i | c | c*i+1 | c*(i+1) | g
+%e A373652 -------------------------------------
+%e A373652  1 | 4 | 5     | 8       | 1
+%e A373652  2 | 4 | 9     | 12      | 1
+%e A373652  3 | 4 | 13    | 16      | 1
+%e A373652  4 | 4 | 17    | 20      | 323
+%e A373652 Result: 323
+%o A373652 (Python)
+%o A373652 from sympy import integer_nthroot, gcd, isprime
+%o A373652 def s(k):
+%o A373652   c = integer_nthroot(k, 4)[0]
+%o A373652   f = [1]*c
+%o A373652   for i in range(1, c+1):
+%o A373652     for j in range(c*i+1, c*(i+1)+1):
+%o A373652       f[i-1] = (f[i-1] * j) % k
+%o A373652     f[i-1] = gcd(f[i-1], k)
+%o A373652   return f
+%o A373652 isok = lambda k: not isprime(k) and not any(k > x > 1 for x in s(k))
+%o A373652 print([k for k in range(4, 7200) if isok(k)])
+%o A373652 (Python)
+%o A373652 from itertools import count, islice
+%o A373652 from math import gcd, prod
+%o A373652 from sympy import isprime
+%o A373652 def A373652_gen(): # generator of terms
+%o A373652     for c in count(1):
+%o A373652         g = [prod(i*c+j for j in range(1,c+1)) for i in range(1,c+1)]
+%o A373652         yield from filter(lambda k: not (k==1 or isprime(k) or any(1<gcd(d,k)<k for d in g)), range(c**4,(c+1)**4))
+%o A373652 A373652_list = list(islice(A373652_gen(),20)) # _Chai Wah Wu_, Jul 16 2024
+%o A373652 (PARI) s(n) = my(c=sqrtnint(n, 4), vf = vector(c, k, 1)); for (i=1, #vf, vf[i] = prod(j=c*i+1, c*(i+1), j % n); vf[i] = gcd(vf[i], n);); vf;
+%o A373652 isok(n) = if ((n>1) && !isprime(n), my(x=Set(s(n)), y=Set([1,n])); setunion(x, y) == y); \\ _Michel Marcus_, Jun 18 2024
+%Y A373652 Cf. A002808, A255270.
+%K A373652 nonn
+%O A373652 1,1
+%A A373652 _Darío Clavijo_, Jun 12 2024

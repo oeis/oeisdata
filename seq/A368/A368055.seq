@@ -1,0 +1,45 @@
+%I A368055 #26 Apr 05 2024 10:41:59
+%S A368055 5,11,7,29,5,19,11,23,5,53,29,11,5,103,7,191,5,29,23,47,5,11,53,19,5,
+%T A368055 59,7,311,5,23,103,11,5,149,191,53,5,83,7,173,5,11,47,283,5,29,11,103,
+%U A368055 5,107,7,11,5,191,59,709,5,367,311,19,5,11,7,269,5,47,11,569,5,293,149,11
+%N A368055 Smallest prime number p such that x^n + y^n + z^n mod p does not take all values on Z/pZ.
+%C A368055 If there exists some prime p > 3 such that p-1 divides n, then x^n (mod p) is either 0 or 1 for all integers x, therefore giving an upper bound of a(n) <= p.
+%H A368055 Chai Wah Wu, <a href="/A368055/b368055.txt">Table of n, a(n) for n = 4..5226</a> (terms 4..500 from Robert Israel)
+%F A368055 a(n+k*(a(n)-1)) <= a(n). - _Robert Israel_, Jan 26 2024
+%e A368055 For n = 4, x^4 + y^4 + z^4 attains all values on Z/2Z and Z/3Z, but x^4 + y^4 + z^4  == 4 (mod 5) has no solution, so a(4) = 5.
+%e A368055 For n = 5, x^5 + y^5 + z^5 attains all values on Z/2Z, Z/3Z, Z/5Z, and Z/7Z, but x^5 + y^5 + z^5 == 4 (mod 11) has no solution, so a(5) = 11.
+%p A368055 f:= proc(n) local p,s,t,T,S,S2,S3;
+%p A368055   p:= 2;
+%p A368055   do
+%p A368055     p:= nextprime(p);
+%p A368055     T:= {$0..p-1}:
+%p A368055     S:= {seq(s^n mod p,s=0..p-1)};
+%p A368055     if S = T then next fi;
+%p A368055     S2:= {seq(seq(s+t mod p, s=S),t=S)};
+%p A368055     if S2 = T then next fi;
+%p A368055     S3:= {seq(seq(s+t mod p, s=S),t=S2)}:
+%p A368055     if S3 <> T then return p fi
+%p A368055   od
+%p A368055 end proc:
+%p A368055 map(f, [$4..100]); # _Robert Israel_, Jan 26 2024
+%o A368055 (SageMath)
+%o A368055 def a(n):
+%o A368055     for p in Primes():
+%o A368055         all_values = set()
+%o A368055         for x in range(p):
+%o A368055             for y in range(p):
+%o A368055                 for z in range(p): all_values.add((x^n+y^n+z^n)%p)
+%o A368055         if len(all_values) < p: return p
+%o A368055 (Python)
+%o A368055 from itertools import combinations_with_replacement
+%o A368055 from sympy import nextprime
+%o A368055 def A368055(n):
+%o A368055     p = 1
+%o A368055     while (p:=nextprime(p)):
+%o A368055         pset = set(q:=tuple(pow(x,n,p) for x in range(p)))
+%o A368055         if not all(any((k-a[0]-a[1])%p in pset for a in combinations_with_replacement(q,2)) for k in range(p)):
+%o A368055             return p # _Chai Wah Wu_, Apr 04 2024
+%Y A368055 Cf. A367689.
+%K A368055 nonn
+%O A368055 4,1
+%A A368055 _Robin Visser_, Dec 09 2023

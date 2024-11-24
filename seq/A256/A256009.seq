@@ -1,0 +1,78 @@
+%I A256009 #28 Dec 17 2017 07:15:17
+%S A256009 1,1,2,1,2,4,1,2,4,8,1,2,5,8,16,1,2,6,10,16,32,1,2,7,12,22,32,64,1,2,
+%T A256009 8,14,29,44,64,128,1,2,9,16,37,58,93,128,256
+%N A256009 Triangle read by rows: Largest cardinality of a set of Hamming diameter <= k in {0,1}^n, k <= n.
+%C A256009 Size of largest clique in graph with vertices {0,1}^n, edges joining points with distance <= k.
+%C A256009 By considering balls of radius k, a(n,2*k) >= A008949(n,k).
+%C A256009 By considering Cartesian products, a(n1 + n2, k1 + k2) >= a(n1,k1)*a(n2,k2).
+%C A256009 a(n,0) = 1.
+%C A256009 a(n,1) = 2 for n >= 1.
+%C A256009 a(n,n) = 2^n.
+%C A256009 a(n,2) = n + 1 for n >= 2.
+%C A256009 a(n,n-1) = 2^(n-1).
+%C A256009 a(n,3) >= 2n for n >= 4, and this appears to be an equality. - _Robert Israel_, Apr 20 2016
+%H A256009 MathOverflow question, <a href="http://mathoverflow.net/questions/205877/isoperimetric-inequality-on-the-hamming-cube/205904">Isoperimetric inequality on the Hamming cube</a>
+%e A256009 Triangle begins
+%e A256009   1
+%e A256009   1   2
+%e A256009   1   2   4
+%e A256009   1   2   4   8
+%e A256009   1   2   5   8    16
+%e A256009   1   2   6  10    16    32
+%e A256009   1   2   7  12    22    32    64
+%e A256009   1   2   8  14    29    44    64   128
+%e A256009   1   2   9  16    37    58    93   128   256
+%e A256009 a(4,2) = 5: a suitable set of diameter <= 2 is {0000, 0001, 0010, 0100, 1000}.
+%p A256009 clist:= proc(c,n) local V;
+%p A256009    V:= Vector(n);
+%p A256009    V[convert(c,list)]:= 1;
+%p A256009    convert(V,list);
+%p A256009 end proc:
+%p A256009 f:= proc(n,k)
+%p A256009 uses GraphTheory, combinat;
+%p A256009   local Verts, dist, E, G, V0, G0, vk, Vk, G1;
+%p A256009   if k = 0 then return 1
+%p A256009   elif k >= n then return 2^n
+%p A256009   fi;
+%p A256009 Verts:= map(clist, convert(powerset(n),list), n);
+%p A256009   dist:= Matrix(2^n,2^n,shape=symmetric,(i,j) -> convert(abs~(Verts[i]-Verts[j]),`+`));
+%p A256009   E:= select(e -> dist[e[1],e[2]]<=k, {seq(seq({i,j},j=i+1..2^n),i=1..2^n)});
+%p A256009 G:= Graph(2^n,E);
+%p A256009 V0:= Neighborhood(G,1,'open');
+%p A256009 G0:= InducedSubgraph(G,V0);
+%p A256009 vk:= select(j -> dist[1,j] = k, V0);
+%p A256009 Vk:= Neighborhood(G0,vk[1],'open');
+%p A256009 G1:= InducedSubgraph(G0, Vk);
+%p A256009 CliqueNumber(G1)+2;
+%p A256009 end proc:
+%p A256009 seq(seq(f(n,k), k=0..n),n=0..6);
+%o A256009 (MATLAB with CPLEX API)
+%o A256009 function s = A256009( n,k )
+%o A256009   if k == 0
+%o A256009     s = 1;
+%o A256009     return;
+%o A256009   elseif k >= n
+%o A256009     s = 2^n;
+%o A256009     return;
+%o A256009   end
+%o A256009   cplex = Cplex('problem');
+%o A256009 H = dec2bin(0:2^n-1) - '0';
+%o A256009 cplex.Model.sense = 'maximize';
+%o A256009 cplex.Param.mip.display.Cur = 0;
+%o A256009 obj = ones(2^n,1);
+%o A256009 ctype = char('B'*ones(1,2^n));
+%o A256009 cplex.addCols(obj,[],zeros(2^n,1),[],ctype);
+%o A256009 R = sum(H,2) * ones(1,2^n);
+%o A256009 D = R + R' - 2*H*H';
+%o A256009 [ros,cols] = find(triu(D) > k);
+%o A256009 ncons = numel(ros);
+%o A256009 for i=1:ncons
+%o A256009     cplex.addSOSs('1',[ros(i),cols(i)]',[1,2]');
+%o A256009 end
+%o A256009 cplex.solve();
+%o A256009 s = cplex.Solution.objval;
+%o A256009 end
+%Y A256009 Cf. A008949.
+%K A256009 nonn,tabl,more
+%O A256009 0,3
+%A A256009 _Robert Israel_, May 06 2015

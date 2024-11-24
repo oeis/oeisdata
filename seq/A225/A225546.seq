@@ -1,0 +1,82 @@
+%I A225546 #101 Mar 17 2023 13:19:22
+%S A225546 1,2,4,3,16,8,256,6,9,32,65536,12,4294967296,512,64,5,
+%T A225546 18446744073709551616,18,340282366920938463463374607431768211456,48,
+%U A225546 1024,131072,115792089237316195423570985008687907853269984665640564039457584007913129639936,24,81,8589934592,36,768
+%N A225546 Tek's flip: Write n as the product of distinct factors of the form prime(i)^(2^(j-1)) with i and j integers, and replace each such factor with prime(j)^(2^(i-1)).
+%C A225546 This is a multiplicative self-inverse permutation of the integers.
+%C A225546 A225547 gives the fixed points.
+%C A225546 From _Antti Karttunen_ and _Peter Munn_, Feb 02 2020: (Start)
+%C A225546 This sequence operates on the Fermi-Dirac factors of a number. As arranged in array form, in A329050, this sequence reflects these factors about the main diagonal of the array, substituting A329050[j,i] for A329050[i,j], and this results in many relationships including significant homomorphisms.
+%C A225546 This sequence provides a relationship between the operations of squaring and prime shift (A003961) because each successive column of the A329050 array is the square of the previous column, and each successive row is the prime shift of the previous row.
+%C A225546 A329050 gives examples of how significant sets of numbers can be formed by choosing their factors in relation to rows and/or columns. This sequence therefore maps equivalent derived sets by exchanging rows and columns. Thus odd numbers are exchanged for squares, squarefree numbers for powers of 2 etc.
+%C A225546 Alternative construction: For n > 1, form a vector v of length A299090(n), where each element v[i] for i=1..A299090(n) is a product of those distinct prime factors p(i) of n whose exponent e(i) has the bit (i-1) "on", or 1 (as an empty product) if no such exponents are present. a(n) is then Product_{i=1..A299090(n)} A000040(i)^A048675(v[i]). Note that because each element of vector v is squarefree, it means that each exponent A048675(v[i]) present in the product is a "submask" (not all necessarily proper) of the binary string A087207(n).
+%C A225546 This permutation effects the following mappings:
+%C A225546 A000035(a(n)) = A010052(n), A010052(a(n)) = A000035(n). [Odd numbers <-> Squares]
+%C A225546 A008966(a(n)) = A209229(n), A209229(a(n)) = A008966(n). [Squarefree numbers <-> Powers of 2]
+%C A225546 (End)
+%C A225546 From _Antti Karttunen_, Jul 08 2020: (Start)
+%C A225546 Moreover, we see also that this sequence maps between A016825 (Numbers of the form 4k+2) and A001105 (2*squares) as well as between A008586 (Multiples of 4) and A028983 (Numbers with even sum of the divisors).
+%C A225546 (End)
+%H A225546 Paul Tek, <a href="/A225546/b225546.txt">Table of n, a(n) for n = 1..40</a>
+%H A225546 <a href="/index/Per#IntegerPermutation">Index entries for sequences that are permutations of the natural numbers</a>
+%F A225546 Multiplicative, with a(prime(i)^j) = A019565(j)^A000079(i-1).
+%F A225546 a(prime(i)) = 2^(2^(i-1)).
+%F A225546 From _Antti Karttunen_ and _Peter Munn_, Feb 06 2020: (Start)
+%F A225546 a(A329050(n,k)) = A329050(k,n).
+%F A225546 a(A329332(n,k)) = A329332(k,n).
+%F A225546 Equivalently, a(A019565(n)^k) = A019565(k)^n. If n = 1, this gives a(2^k) = A019565(k).
+%F A225546 a(A059897(n,k)) = A059897(a(n), a(k)).
+%F A225546 The previous formula implies a(n*k) = a(n) * a(k) if A059895(n,k) = 1.
+%F A225546 a(A000040(n)) = A001146(n-1); a(A001146(n)) = A000040(n+1).
+%F A225546 a(A000290(a(n))) = A003961(n); a(A003961(a(n))) = A000290(n) = n^2.
+%F A225546 a(A000265(a(n))) = A008833(n); a(A008833(a(n))) = A000265(n).
+%F A225546 a(A006519(a(n))) = A007913(n); a(A007913(a(n))) = A006519(n).
+%F A225546 A007814(a(n)) = A248663(n); A248663(a(n)) = A007814(n).
+%F A225546 A048675(a(n)) = A048675(n) and A048675(a(2^k * n)) = A048675(2^k * a(n)) = k + A048675(a(n)).
+%F A225546 (End)
+%F A225546 From _Antti Karttunen_ and _Peter Munn_, Jul 08 2020: (Start)
+%F A225546 For all n >= 1, a(2n) = A334747(a(n)).
+%F A225546 In particular, for n = A003159(m), m >= 1, a(2n) = 2*a(n). [Note that A003159 includes all odd numbers]
+%F A225546 (End)
+%e A225546   7744  = prime(1)^2^(2-1)*prime(1)^2^(3-1)*prime(5)^2^(2-1).
+%e A225546 a(7744) = prime(2)^2^(1-1)*prime(3)^2^(1-1)*prime(2)^2^(5-1) = 645700815.
+%t A225546 Array[If[# == 1, 1, Times @@ Flatten@ Map[Function[{p, e}, Map[Prime[Log2@ # + 1]^(2^(PrimePi@ p - 1)) &, DeleteCases[NumberExpand[e, 2], 0]]] @@ # &, FactorInteger[#]]] &, 28] (* _Michael De Vlieger_, Jan 21 2020 *)
+%o A225546 (PARI)
+%o A225546 A019565(n) = factorback(vecextract(primes(logint(n+!n, 2)+1), n));
+%o A225546 a(n) = {my(f=factor(n)); for (i=1, #f~, my(p=f[i,1]); f[i,1] = A019565(f[i,2]); f[i,2] = 2^(primepi(p)-1);); factorback(f);} \\ _Michel Marcus_, Nov 29 2019
+%o A225546 (PARI)
+%o A225546 A048675(n) = { my(f = factor(n)); sum(k=1, #f~, f[k, 2]*2^primepi(f[k, 1]))/2; };
+%o A225546 A225546(n) = if(1==n,1,my(f=factor(n),u=#binary(vecmax(f[, 2])),prods=vector(u,x,1),m=1,e); for(i=1,u,for(k=1,#f~, if(bitand(f[k,2],m),prods[i] *= f[k,1])); m<<=1); prod(i=1,u,prime(i)^A048675(prods[i]))); \\ _Antti Karttunen_, Feb 02 2020
+%o A225546 (Python)
+%o A225546 from math import prod
+%o A225546 from sympy import prime, primepi, factorint
+%o A225546 def A225546(n): return prod(prod(prime(i) for i, v in enumerate(bin(e)[:1:-1],1) if v == '1')**(1<<primepi(p)-1) for p, e in factorint(n).items()) # _Chai Wah Wu_, Mar 17 2023
+%Y A225546 Cf. A225547 (fixed points) and the subsequences listed there.
+%Y A225546 Transposes A329050, A329332.
+%Y A225546 An automorphism of positive integers under the binary operations A059895, A059896, A059897, A306697, A329329.
+%Y A225546 An automorphism of A059897 subgroups: A000379, A003159, A016754, A122132.
+%Y A225546 Permutes lists where membership is determined by number of Fermi-Dirac factors: A000028, A050376, A176525, A268388.
+%Y A225546 Also permutes: A036554, A059404, A066427, A066428, A072774, A331593.
+%Y A225546 Sequences f that satisfy f(a(n)) = f(n): A048675, A064179, A064547, A097248, A302777, A331592.
+%Y A225546 Pairs of sequences (f,g) that satisfy a(f(n)) = g(a(n)): (A000265,A008833), (A000290,A003961), (A005843,A334747), (A006519,A007913), (A008586,A334748).
+%Y A225546 Pairs of sequences (f,g) that satisfy a(f(n)) = g(n), possibly with offset change: (A000040,A001146), (A000079,A019565).
+%Y A225546 Pairs of sequences (f,g) that satisfy f(a(n)) = g(n), possibly with offset change: (A000035, A010052), (A008966, A209229), (A007814, A248663), (A061395, A299090), (A087207, A267116), (A225569, A227291).
+%Y A225546 Cf. A331287 [= gcd(a(n),n)].
+%Y A225546 Cf. A331288 [= min(a(n),n)], see also A331301.
+%Y A225546 Cf. A331309 [= A000005(a(n)), number of divisors].
+%Y A225546 Cf. A331590 [= a(a(n)*a(n))].
+%Y A225546 Cf. A331591 [= A001221(a(n)), number of distinct prime factors], see also A331593.
+%Y A225546 Cf. A331740 [= A001222(a(n)), number of prime factors with multiplicity].
+%Y A225546 Cf. A331733 [= A000203(a(n)), sum of divisors].
+%Y A225546 Cf. A331734 [= A033879(a(n)), deficiency].
+%Y A225546 Cf. A331735 [= A009194(a(n))].
+%Y A225546 Cf. A331736 [= A000265(a(n)) = a(A008833(n)), largest odd divisor].
+%Y A225546 Cf. A335914 [= A038040(a(n))].
+%Y A225546 A self-inverse isomorphism between pairs of A059897 subgroups: (A000079,A005117), (A000244,A062503), (A000290\{0},A005408), (A000302,A056911), (A000351,A113849 U {1}), (A000400,A062838), (A001651,A252895), (A003586,A046100), (A007310,A000583), (A011557,A113850 U {1}), (A028982,A042968), (A053165,A065331), (A262675,A268390).
+%Y A225546 A bijection between pairs of sets: (A001248,A011764), (A007283,A133466), (A016825, A001105), (A008586, A028983).
+%Y A225546 Cf. also A336321, A336322 (compositions with another involution, A122111).
+%K A225546 nonn,mult
+%O A225546 1,2
+%A A225546 _Paul Tek_, May 10 2013
+%E A225546 Name edited by _Peter Munn_, Feb 14 2020
+%E A225546 "Tek's flip" prepended to the name by _Antti Karttunen_, Jul 08 2020

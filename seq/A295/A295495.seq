@@ -1,0 +1,23 @@
+%I A295495 #14 Sep 26 2019 06:31:40
+%S A295495 1,1,2,5,11,36,114,410,1458,5488,20786,80770,317378,1265139,5094139,
+%T A295495 20718347,84961256,351086326,1460591637,6113826319,25733864299,
+%U A295495 108867782794,462707558813,1974991841442,8463121111860,36397780088126,157066702354947,679917566925030
+%N A295495 Number of dissections of an n-gon by nonintersecting diagonals into polygons with a prime number of sides counted up to rotations.
+%H A295495 Andrew Howroyd, <a href="/A295495/b295495.txt">Table of n, a(n) for n = 3..200</a>
+%H A295495 E. Krasko, A. Omelchenko, <a href="http://www.combinatorics.org/ojs/index.php/eljc/article/view/v22i1p17">Brown's Theorem and its Application for Enumeration of Dissections and Planar Trees</a>, The Electronic Journal of Combinatorics, 22 (2015), #P1.17.
+%t A295495 DissectionsModCyclic[v_] :=
+%t A295495 Module[{n = Length[v], q, vars, u, p}, q = Table[0, {n}]; q[[1]] = InverseSeries[x - Sum[x^i v[[i]], {i, 3, Length[v]}]/x + O[x]^(n+1)]; For[i = 2, i <= n, i++, q[[i]] = q[[i-1]] q[[1]]]; vars = Variables[q[[1]]]; u[m_, r_] := Normal[(q[[r]] + O[x]^(Quotient[n, m] + 1))] /. Thread[vars -> vars^m]; p = O[x]^n + x u[1, 1] - x^2 + (u[2, 1] - u[1, 2])/2 + Sum[v[[i]] Sum[EulerPhi[d] u[d, i/d]/i, {d, Divisors[i]}], {i, 3, Length[v]}]; Drop[CoefficientList[p, x], 3]];
+%t A295495 DissectionsModCyclic[Boole[PrimeQ[#]]& /@ Range[1, 31]] (* _Jean-François Alcover_, Sep 26 2019, after _Andrew Howroyd_ *)
+%o A295495 (PARI) \\ number of dissections into parts defined by set.
+%o A295495 DissectionsModCyclic(v)={my(n=#v);
+%o A295495 my(q=vector(n)); q[1]=serreverse(x-sum(i=3, #v, x^i*v[i])/x + O(x*x^n));
+%o A295495 for(i=2, n, q[i]=q[i-1]*q[1]);
+%o A295495 my(vars=variables(q[1]));
+%o A295495 my(u(m, r)=substvec(q[r]+O(x^(n\m+1)), vars, apply(t->t^m, vars)));
+%o A295495 my(p=O(x*x^n) + x*u(1,1) - x^2 + (u(2,1)-u(1,2))/2 + sum(i=3, #v, my(c=v[i]); if(c,c*sumdiv(i, d, eulerphi(d)*u(d,i/d))/i)));
+%o A295495 vector(n, i, polcoeff(p, i))}
+%o A295495 DissectionsModCyclic(apply(i->isprime(i), [1..30]))
+%Y A295495 Cf. A003455, A295224, A295419.
+%K A295495 nonn
+%O A295495 3,3
+%A A295495 _Andrew Howroyd_, Nov 22 2017

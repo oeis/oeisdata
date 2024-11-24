@@ -1,0 +1,59 @@
+%I A355057 #22 Jul 05 2022 22:08:37
+%S A355057 1,1,2,6,15,30,70,210,462,6006,51051,102102,277134,6374082,10623470,
+%T A355057 223092870,588153930,18232771830,51893273670,2127624220470,
+%U A355057 5381637734130,252936973504110,6702829797858915,13405659595717830,41628100849860630,2539314151841498430,7397132529277408470
+%N A355057 a(n) = product of prohibited prime factors of A090252(n).
+%C A355057 Let s(n) = A090252(n) and let K(n) = A007947(n) = squarefree kernel of n.
+%C A355057 Prime p | s(n) implies p does not divide s(n+j), 1 <= j <= n.
+%C A355057 Therefore a(n) is the product of primes p that cannot divide s(n).
+%C A355057 a(n) = product of distinct primes that divide a(j) for floor((n+1)/2) <= j <= n-1. - _N. J. A. Sloane_, Jun 17 2022
+%H A355057 N. J. A. Sloane, <a href="/A355057/b355057.txt">Table of n, a(n) for n = 1..500</a>
+%H A355057 Michael De Vlieger, <a href="/A355057/a355057.png">Annotated chart of prime factors of a(n)</a>, n = 1..64, plotting prime p | a(n) at (n, pi(p)) in black, and prime q | s(n) at (n, pi(q)) in red.
+%H A355057 Michael De Vlieger, <a href="/A355057/a355057_1.png">Plot of prime p | a(n)</a>, n = 1..2^12, plotting p | a(n) at (n, pi(p)) in black.
+%F A355057 a(n) = a(n-1) * K(s(n-1)) / K(s((n-1)/2)), where the last operation is only carried out iff (n-1)/2 is an integer.
+%e A355057 a(1) = 1;
+%e A355057 a(2) = 1 since s(1) = 1, and (2-1)/2 is not an integer;
+%e A355057 a(3) = a(2) * K(s(2)) / K(s((3-1)/2)) = 1 * 2 / 1 = 2;
+%e A355057 a(4) = a(3) * K(s(3)) = 2 * 3 = 6;
+%e A355057 a(5) = a(4) * K(s(4)) / K(s((5-1)/2)) = 6 * 5 / 2 = 15;
+%e A355057 a(6) = a(5) * K(s(5)) = 15 * 2 = 30;
+%e A355057 a(7) = a(6) * K(s(6)) / K(s((7-1)/2)) = 30 * 7 / 3 = 70;
+%e A355057 etc.
+%p A355057 # To get first M terms, from _N. J. A. Sloane_, Jun 18 2022
+%p A355057 with(numtheory);
+%p A355057 M:=20; ans:=[1,1,2];
+%p A355057 for i from 4 to M do
+%p A355057 S:={}; j1:=floor((i+1)/2); j2:=i-1;
+%p A355057   for j from j1 to j2 do S:={op(S), op(factorset(b252[j]))} od:
+%p A355057 t2 := product(S[k], k = 1..nops(S));
+%p A355057 ans:=[op(ans),t2];
+%p A355057 od:
+%p A355057 ans;
+%t A355057 Block[{s = Import["https://oeis.org/A090252/b090252.txt", "Data"][[1 ;; 120, -1]], m = 1}, Reap[Do[m *= Times @@ FactorInteger[s[[If[# == 0, 1, #] &[i - 1]]]][[All, 1]]; If[IntegerQ[#] && # > 0, m /= Times @@ FactorInteger[s[[#]]][[All, 1]]] &[(i - 1)/2]; Sow[m], {i, Length[s]}] ][[-1, -1]] ]
+%o A355057 (Python)
+%o A355057 from math import prod, lcm, gcd
+%o A355057 from itertools import count, islice
+%o A355057 from collections import deque
+%o A355057 from sympy import primefactors
+%o A355057 def A355057_gen(): # generator of terms
+%o A355057     aset, aqueue, c, b, f = {1}, deque([1]), 2, 1, True
+%o A355057     yield 1
+%o A355057     while True:
+%o A355057         for m in count(c):
+%o A355057             if m not in aset and gcd(m,b) == 1:
+%o A355057                 yield prod(primefactors(b))
+%o A355057                 aset.add(m)
+%o A355057                 aqueue.append(m)
+%o A355057                 if f: aqueue.popleft()
+%o A355057                 b = lcm(*aqueue)
+%o A355057                 f = not f
+%o A355057                 while c in aset:
+%o A355057                     c += 1
+%o A355057                 break
+%o A355057 A355057_list = list(islice(A355057_gen(),20)) # _Chai Wah Wu_, Jun 18 2022
+%Y A355057 See A354758 for another version.
+%Y A355057 A354765 is a binary encoding.
+%Y A355057 Cf. A007947, A090252, A354764.
+%K A355057 nonn
+%O A355057 1,3
+%A A355057 _Michael De Vlieger_, Jun 16 2022

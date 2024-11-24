@@ -1,0 +1,49 @@
+%I A214089 #91 May 31 2022 11:20:58
+%S A214089 3,5,11,29,419,1429,1429,315589,1729001,57762431,1724478911,
+%T A214089 6188402219,349152569039,1430083494841,390499187164241,
+%U A214089 1010518715554349,18628320726623609,522124211958421799,522124211958421799,5936798290039408015951,311263131154464891496249
+%N A214089 Least prime p such that the first n primes divide p^2-1.
+%C A214089 (a(n)^2 - 1) / A002110(n) is congruent to 0 (mod 4). (a(n)^2 - 1) / (4*A002110(n)) = A215085(n). [_J. Stauduhar_, Aug 03 2012]
+%C A214089 a(n) == +1 or -1 (mod prime(i)) for every i=1,2,...,n. The system of congruences x == +1 or -1 (mod prime(i)), i=1,2,...,n, has 2^(n-1) solutions modulo A002110(n) so that a(n) represents the smallest prime in the corresponding residue classes, allowing efficient computation (see PARI program). - _Max Alekseyev_, Aug 22 2012
+%H A214089 Max Alekseyev, <a href="/A214089/b214089.txt">Table of n, a(n) for n = 1..32</a>
+%e A214089 a(5) = 419: 419^2-1 = 175560 = 2^3*3*5*7*11*19 contains the first 5 primes.
+%e A214089 a(7) = 1429:  1428=2^2*3*7*17, 1430=2*5*11*13 contains the first 7 primes.
+%e A214089 a(8) = 315589: 315589^2-1 = 2^3*3*5*7*11*13*17^2*19*151 contains the first 8 primes.
+%p A214089 A214089 := proc(n)
+%p A214089      local m,k,p;
+%p A214089    m:= 2*mul(ithprime(j),j=1..n);
+%p A214089    for k from 1 do
+%p A214089      p:= sqrt(m*k+1);
+%p A214089      if type(p,integer) and isprime(p) then return(p)
+%p A214089      end if
+%p A214089    end do
+%p A214089 end proc;
+%p A214089 # _Robert Israel_, Aug 19 2012
+%t A214089 f[n_] := Block[{k = 1, p = Times @@ Prime@Range@n}, While[! IntegerQ@Sqrt[4 k*p + 1], k++]; Block[{j = k}, While[! PrimeQ[Sqrt[4 j*p + 1]], j++]; Sqrt[4 j*p + 1]]]; Array[f, 10] (* _J. Stauduhar_, Aug 18 2012 *)
+%o A214089 (PARI) A214089(n) = {
+%o A214089         local(a,k=4,p) ;
+%o A214089         a=prod(j=1,n,prime(j)) ;
+%o A214089         while(1,
+%o A214089                 if( issquare(k*a+1, &p),
+%o A214089                         if(isprime(p),
+%o A214089                                 return(p);
+%o A214089                         ) ;
+%o A214089                 ) ;
+%o A214089                 k+=4;
+%o A214089         ) ;
+%o A214089 } ;
+%o A214089 (PARI) { a(n) = local(B,q); B=prod(i=1,n,prime(i))^2; forvec(v=vector(n-1,i,[0,1]), q=chinese(concat(vector(n-1,i,Mod((-1)^v[i],prime(i+1))),[Mod(1,2)])); forstep(s=lift(q),B-1,q.mod,if(ispseudoprime(s),B=s;break)) ); B } /* _Max Alekseyev_, Aug 22 2012 */
+%o A214089 (Python)
+%o A214089 from itertools import product
+%o A214089 from sympy import sieve, prime, isprime
+%o A214089 from sympy.ntheory.modular import crt
+%o A214089 def A214089(n): return 3 if n == 1 else int(min(filter(isprime,(crt(tuple(sieve.primerange(prime(n)+1)), t)[0] for t in product((1,-1),repeat=n))))) # _Chai Wah Wu_, May 31 2022
+%Y A214089 Cf. A073917, A103783.
+%K A214089 nonn,hard
+%O A214089 1,1
+%A A214089 _Robin Garcia_, Jul 02 2012
+%E A214089 a(15)-a(16) from _Donovan Johnson_, Jul 25 2012
+%E A214089 a(17) from _Charles R Greathouse IV_, Aug 08 2012
+%E A214089 a(18) from _Charles R Greathouse IV_, Aug 16 2012
+%E A214089 a(19) from _J. Stauduhar_, Aug 18 2012
+%E A214089 a(20)-a(32) from _Max Alekseyev_, Aug 22 2012

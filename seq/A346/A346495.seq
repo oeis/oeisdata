@@ -1,0 +1,33 @@
+%I A346495 #53 Aug 03 2024 11:35:49
+%S A346495 1,1,2863311531,1,3435973837,2863311531,4908534053,1,954437177,
+%T A346495 3435973837,3123612579,2863311531,1321528399,4908534053,2290649225,1,
+%U A346495 4042322161,954437177,7233629131,3435973837,6544712071,3123612579,2987803337,2863311531,1374389535
+%N A346495 Smallest a(n) so that division by n can be performed by floor(x/n) = floor(x*a(n)/2^A346496(n)) for any 0 <= x < 2^32.
+%C A346495 This sequence is used for division by multiplication with an approximation of the inverse of the divisor on computers if they support multiplying two 32-bit numbers for a 64-bit result. This is usually much faster than a division instruction because integer division is a very slow operation on most computers.
+%C A346495 If x and n are unsigned 32-bit quantities, x/n is replaced by (in C notation) ((uint64_t) a(n) * (uint64_t) x) >> b where b is A346496(n).
+%C A346495 If n = 2^k, then m=1 and b=k (where the multiplication does not have to be performed).
+%C A346495 All a(n) are smaller than 2^33. Those a(n) larger than 2^32, such as a(7), cannot be used directly if the arithmetic is restricted to 32-bit. In this case, the following sequence can be used, in C code again, where all quantities (also intermediate) are unsigned 32-bit integers:
+%C A346495     m = a(n) - 2^32;  /* Precomputed constant */
+%C A346495     mb = b - 33;      /* Precomputed constant, b is A346496(n) */
+%C A346495     q = ((uint64_t) m * (uint64_t) x) >> 32;
+%C A346495     t = (x - q)/2 + q;
+%C A346495     res = t >> mb; [Corrected by _Baard Nossum_, Jul 15 2024]
+%D A346495 Henry S. Warren, Hacker's Delight, 2nd edition, Addison-Wesley, 2013, pp. 230-234, "Unsigned Division by Divisors >= 1"
+%F A346495 If n is a power of two, a(n) = 1.
+%F A346495 Otherwise, let n_c = 2^32 - (2^32 mod n) - 1 and search for the lowest b so that 2^b > n_c * (n-1- ((2^b-1) mod n)). Then, a(n) = (2^b + n - 1 - ((2^b - 1) mod n))/n, where b is  A346496(n).
+%e A346495 For n=3, m = a(3) = 2863311531 = (2^33 + 1)/3 = AAAAAAAB in base 16, b = A346496(3) = 33, so for 0 <= x < 2^32, x/3 = floor (x*2863311531 / 2^33). For x=11111, a(n)*x = 31814254420941, and floor(31814254420941/2^33) = 3703 = floor(11111/3).
+%e A346495 For n=7, on a system where 64-bit arithmetic is not available:
+%e A346495   m = 4908534053 - 2^32 = 61356675, so for x=12345, m*x = 757448152875, q=(m*x)>>32 = 1763, x-q = 10582, (x-q)/2 + q = 7054, res = 7054/4 = 1763 = floor(12345/7).
+%o A346495 (PARI) for(n=1,25,my(k,j=ispower(n,,&k),n_c=2^32-2^32%n-1,b=1);if(j&&k==2,print1(1,", "),while(b<=n_c*(n-1-(b-1)%n),b+=b);print1((b+n-1-((b-1)%n))/n,", "))) \\ _Hugo Pfoertner_, Aug 24 2021
+%o A346495 (Python)
+%o A346495 def power2(n): return n == 2**(n.bit_length()-1)
+%o A346495 def a(n):
+%o A346495     if power2(n): return 1
+%o A346495     n_c, b = 2**32 - (2**32%n) - 1, 1
+%o A346495     while 2**b <= n_c * (n - 1 - ((2**b - 1)%n)): b += 1
+%o A346495     return (2**b + n - 1 - ((2**b - 1)%n))//n
+%o A346495 print([a(n) for n in range(1, 26)]) # _Michael S. Branicky_, Aug 24 2021
+%Y A346495 A346496 gives the corresponding values for b.
+%K A346495 nonn,easy,fini
+%O A346495 1,3
+%A A346495 _Thomas König_, Jul 20 2021

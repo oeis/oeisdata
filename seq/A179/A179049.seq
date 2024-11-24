@@ -1,0 +1,55 @@
+%I A179049 #64 Aug 06 2022 07:18:24
+%S A179049 1,1,0,2,0,2,1,3,1,3,3,4,4,4,6,6,8,6,12,8,14,10,19,13,23,16,29,21,35,
+%T A179049 26,43,34,50,43,61,54,72,67,85,84,100,103,119,126,138,155,163,186,191,
+%U A179049 224,224,268,263,319,308,378,360,447,422,523,494,614,576,716,674,833,787,964,917,1118
+%N A179049 Odd-even partitions: number of partitions into distinct parts where all differences between consecutive parts are odd and the minimal part is odd.
+%C A179049 Parts are odd, even, odd, even, ...  [_Joerg Arndt_, Oct 27 2012]
+%H A179049 Alois P. Heinz, <a href="/A179049/b179049.txt">Table of n, a(n) for n = 0..10000</a>
+%H A179049 G. E. Andrews, <a href="https://doi.org/10.1016/0001-8708(84)90017-3">Ramanujan’s “lost” notebook. IV. Stacks and alternating parity in partitions</a>, Adv. in Math. 53 (1984), no. 1, 55-74.
+%H A179049 Min-Joo Jang, <a href="https://arxiv.org/abs/1703.01837">Asymptotic behavior of odd-even partitions</a>, arXiv:1703.01837v1 [math.NT], 2017.
+%F A179049 G.f.: Sum_{n>=0} x^(n*(n+1)/2) / Product_{k=1..n} (1 - x^(2*k)).
+%F A179049 a(n) ~ (1/(2*sqrt(5)*n^(3/4)))*exp(Pi*sqrt(n/5)) [Jang 2017]. - _Peter Bala_, Mar 28 2017
+%e A179049 From _Joerg Arndt_, Oct 27 2012:  (Start)
+%e A179049 The a(20) = 14 such partitions of 20 are:
+%e A179049 [ 1]  1 2 3 14
+%e A179049 [ 2]  1 2 5 12
+%e A179049 [ 3]  1 2 7 10
+%e A179049 [ 4]  1 2 17
+%e A179049 [ 5]  1 4 5 10
+%e A179049 [ 6]  1 4 7 8
+%e A179049 [ 7]  1 4 15
+%e A179049 [ 8]  1 6 13
+%e A179049 [ 9]  1 8 11
+%e A179049 [10]  3 4 5 8
+%e A179049 [11]  3 4 13
+%e A179049 [12]  3 6 11
+%e A179049 [13]  3 8 9
+%e A179049 [14]  5 6 9
+%e A179049 (End)
+%p A179049 b:= proc(n, i) option remember; `if`(n=0, 1,
+%p A179049       `if`(i>n, 0, b(n, i+2)+b(n-i, i+1)))
+%p A179049     end:
+%p A179049 a:= n-> b(n, 1):
+%p A179049 seq(a(n), n=0..100);  # _Alois P. Heinz_, Nov 08 2012; revised Feb 24 2020
+%t A179049 b[n_, i_, t_] := b[n, i, t] = If[n==0, Mod[t, 2], If[i<1, 0, b[n, i-1, t] + If[i <= n && Mod[i, 2] != t, b[n-i, i-1, Mod[i, 2]], 0]]]; a[n_] := If[n==0, 1, Sum[b[n-i, i-1, Mod[i, 2]], {i, 1, n}]]; Table[a[n], {n, 0, 100}] (* _Jean-François Alcover_, Mar 24 2015, after _Alois P. Heinz_ *)
+%o A179049 (Sage)
+%o A179049 odd_diffs = lambda x: all(abs(d) % 2 for d in differences(x))
+%o A179049 satisfies = lambda p: not p or (min(p) % 2 and odd_diffs(p))
+%o A179049 def A179049(n):
+%o A179049     return len([1 for p in Partitions(n,max_slope=-1) if satisfies(p)])
+%o A179049 # _D. S. McNeil_, Jan 04 2011; adapted by _F. Chapoton_, Feb 24 2020
+%o A179049 (Sage) # Alternative, after _Alois P. Heinz_:
+%o A179049 def A179049(n):
+%o A179049     @cached_function
+%o A179049     def h(n, k):
+%o A179049         if n == 0: return 1
+%o A179049         if k  > n: return 0
+%o A179049         return h(n, k+2) + h(n-k, k+1)
+%o A179049     return h(n, 1)
+%o A179049 [A179049(n) for n in range(70)] # _Peter Luschny_, Feb 25 2020
+%o A179049 (PARI) N=99; x='x+O('x^N); Vec(sum(n=0,N, x^(n*(n+1)/2)/prod(k=1,n,1-x^(2*k))))
+%Y A179049 Cf. A000009.
+%Y A179049 Cf. A218355 (parts are even, odd, even, odd, ...).
+%K A179049 nonn,easy
+%O A179049 0,4
+%A A179049 _Joerg Arndt_, Jan 04 2011

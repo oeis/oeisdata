@@ -1,0 +1,54 @@
+%I A268555 #73 Nov 01 2024 02:55:06
+%S A268555 1,6,78,1260,22470,424116,8305836,166929048,3419932230,71109813060,
+%T A268555 1496053026468,31777397077608,680354749147164,14664155597771400,
+%U A268555 317877850826299800,6924815555276838960,151505459922479997510,3327336781596164286180
+%N A268555 Diagonal of the rational function of six variables 1/((1 - w - u v - u v w) * (1 - z - x y)).
+%C A268555 Also diagonal of rational function R(x,y,z) = 1 /(1 - x - y - z - x*y + x*z).
+%C A268555 Annihilating differential operator: x*(16*x^2-24*x+1)*(d/dx)^2 + (48*x^2-48*x+1)*(d/dx) + 12*x-6.
+%H A268555 Vaclav Kotesovec, <a href="/A268555/b268555.txt">Table of n, a(n) for n = 0..200</a>
+%H A268555 A. Bostan, S. Boukraa, J.-M. Maillard, J.-A. Weil, <a href="http://arxiv.org/abs/1507.03227">Diagonals of rational functions and selected differential Galois groups</a>, arXiv preprint arXiv:1507.03227 [math-ph], 2015.
+%H A268555 Jacques-Arthur Weil, <a href="http://www.unilim.fr/pages_perso/jacques-arthur.weil/diagonals/">Supplementary Material for the Paper "Diagonals of rational functions and selected differential Galois groups"</a>
+%F A268555 D-finite with recurrence: n^2*a(n) -6*(2*n-1)^2*a(n-1) +4*(2*n-1)*(2*n-3)*a(n-2)=0. - _R. J. Mathar_, Mar 10 2016
+%F A268555 a(n) ~ sqrt(4+3*sqrt(2)) * 2^(2*n-3/2) * (1+sqrt(2))^(2*n) / (Pi*n). - _Vaclav Kotesovec_, Jul 01 2016
+%F A268555 G.f.: hypergeom([1/12, 5/12],[1],6912*x^4*(1-24*x+16*x^2)/(1-24*x+48*x^2)^3)/(1-24*x+48*x^2)^(1/4).
+%F A268555 0 = x*(16*x^2-24*x+1)*y'' + (48*x^2-48*x+1)*y' + (12*x-6)*y, where y is g.f.
+%F A268555 a(n) = A000984(n)*A001850(n) = C(2*n,n)*Sum_{k = 0..n} C(n,k)*C(n+k,k). - _Peter Bala_, Mar 19 2018
+%F A268555 a(n) = [(x*y)^n] (1 + x + y + 2*x*y)^(2*n), so the sequence is the diagonal of the three variable rational function 1/(1 - u*(1 + x + y + 2*x*y)^2). - _Peter Bala_, Oct 30 2024
+%e A268555 G.f. = 1 + 6*x + 78*x^2 + 1260*x^3 + 22470*x^4 + 424116*x^5 + 8305836*x^6 + ...
+%p A268555 A268555 := proc(n)
+%p A268555     1/(1-w-u*v-u*v*w)/(1-z-x*y) ;
+%p A268555     coeftayl(%,x=0,n) ;
+%p A268555     coeftayl(%,y=0,n) ;
+%p A268555     coeftayl(%,z=0,n) ;
+%p A268555     coeftayl(%,u=0,n) ;
+%p A268555     coeftayl(%,v=0,n) ;
+%p A268555     coeftayl(%,w=0,n) ;
+%p A268555 end proc:
+%p A268555 seq(A268555(n),n=0..40) ; # _R. J. Mathar_, Mar 10 2016
+%p A268555 seq(binomial(2*n,n)*add(binomial(n,k)*binomial(n+k,k), k = 0..n), n = 0..20); # _Peter Bala_, Mar 19 2018
+%t A268555 sc = SeriesCoefficient;
+%t A268555 a[n_] := 1/(1-w-u*v-u*v*w)/(1-z-x*y) // sc[#, {x, 0, n}]& // sc[#, {y, 0, n}]& // sc[#, {z, 0, n}]& // sc[#, {u, 0, n}]& // sc[#, {v, 0, n}]& // sc[#, {w, 0, n}]&;
+%t A268555 Table[a[n], {n, 0, 40}] (* _Jean-François Alcover_, Nov 14 2017 *)
+%t A268555 a[n_] := Product[Hypergeometric2F1[-n, -n, 1, i], {i, 1, 2}];
+%t A268555 Table[a[n], {n, 0, 17}]  (* _Peter Luschny_, Mar 19 2018 *)
+%o A268555 (PARI) \\ system("wget http://www.jjj.de/pari/hypergeom.gpi");
+%o A268555 read("hypergeom.gpi");
+%o A268555 N = 18; x = 'x + O('x^N);
+%o A268555 Vec(hypergeom_sym([1/12, 5/12],[1],6912*x^4*(1-24*x+16*x^2)/(1-24*x+48*x^2)^3, N)/(1-24*x+48*x^2)^(1/4)) \\ _Gheorghe Coserea_, Jul 05 2016
+%o A268555 (PARI) {a(n) = if( n<1, n==0, my(A = vector(n+1)); A[1] = 1; A[2] = 6; for(k=2, n, A[k+1] = (6*(2*k-1)^2*A[k] - 4*(2*k-1)*(2*k-3)*A[k-1]) / k^2); A[n+1])}; /* _Michael Somos_, Jan 22 2017 */
+%o A268555 (PARI)
+%o A268555 diag(expr, N=22, var=variables(expr)) = {
+%o A268555   my(a = vector(N));
+%o A268555   for (k = 1, #var, expr = taylor(expr, var[#var - k + 1], N));
+%o A268555   for (n = 1, N, a[n] = expr;
+%o A268555     for (k = 1, #var, a[n] = polcoeff(a[n], n-1)));
+%o A268555   return(a);
+%o A268555 };
+%o A268555 diag(1/(1 - x - y - z - x*y + x*z), 18)
+%o A268555 \\ test: diag(1/(1-x-y-z-x*y+x*z)) == diag(1/((1-w-u*v-u*v*w)*(1-z-x*y)))
+%o A268555 \\ _Gheorghe Coserea_, Jun 15 2018
+%o A268555 (GAP) List([0..20],n->Binomial(2*n,n)*Sum([0..n],k->Binomial(n,k)*Binomial(n+k,k))); # _Muniru A Asiru_, Mar 19 2018
+%Y A268555 Cf. A268545-A268555. Cf. A000984, A001850.
+%K A268555 nonn,easy
+%O A268555 0,2
+%A A268555 _N. J. A. Sloane_, Feb 29 2016

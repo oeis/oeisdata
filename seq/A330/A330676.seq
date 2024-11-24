@@ -1,0 +1,40 @@
+%I A330676 #14 Dec 30 2020 14:34:36
+%S A330676 1,1,2,8,70,1012,21944,665708,26917492,1399033348,90878863352,
+%T A330676 7214384973908,687197223963640,77354805301801012,10158257981179981304,
+%U A330676 1539156284259756811748,266517060496258245459352,52301515332984084095078308,11546416513975694879642736152
+%N A330676 Number of balanced reduced multisystems of weight n and maximum depth whose atoms cover an initial interval of positive integers.
+%C A330676 A balanced reduced multisystem is either a finite multiset, or a multiset partition with at least two parts, not all of which are singletons, of a balanced reduced multisystem. The weight of an atom is 1, while the weight of a multiset is the sum of weights of its elements.
+%C A330676 A finite multiset is normal if it covers an initial interval of positive integers.
+%H A330676 Andrew Howroyd, <a href="/A330676/b330676.txt">Table of n, a(n) for n = 0..200</a>
+%e A330676 The a(0) = 1 through a(3) = 8 multisystems:
+%e A330676   {}  {1}  {1,1}  {{1},{1,1}}
+%e A330676            {1,2}  {{1},{1,2}}
+%e A330676                   {{1},{2,2}}
+%e A330676                   {{1},{2,3}}
+%e A330676                   {{2},{1,1}}
+%e A330676                   {{2},{1,2}}
+%e A330676                   {{2},{1,3}}
+%e A330676                   {{3},{1,2}}
+%t A330676 allnorm[n_]:=If[n<=0,{{}},Function[s,Array[Count[s,y_/;y<=#]+1&,n]]/@Subsets[Range[n-1]+1]];
+%t A330676 sps[{}]:={{}};sps[set:{i_,___}]:=Join@@Function[s,Prepend[#,s]&/@sps[Complement[set,s]]]/@Cases[Subsets[set],{i,___}];
+%t A330676 mps[set_]:=Union[Sort[Sort/@(#/.x_Integer:>set[[x]])]&/@sps[Range[Length[set]]]];
+%t A330676 totm[m_]:=Prepend[Join@@Table[totm[p],{p,Select[mps[m],1<Length[#]<Length[m]&]}],m];
+%t A330676 Table[Sum[Length[Select[totm[m],Depth[#]==If[n<=1,2,n]&]],{m,allnorm[n]}],{n,5}]
+%o A330676 (PARI) EulerT(v)={Vec(exp(x*Ser(dirmul(v, vector(#v, n, 1/n))))-1, -#v)}
+%o A330676 R(n, k)={my(v=vector(n), u=vector(n)); v[1]=k; for(n=1, #v, for(i=n, #v, u[i] += v[i]*(-1)^(i-n)*binomial(i-1, n-1)); v=EulerT(v)); u}
+%o A330676 seq(n)={concat([1], sum(k=1, n, R(n, k)*sum(r=k, n, binomial(r, k)*(-1)^(r-k))))} \\ _Andrew Howroyd_, Dec 30 2020
+%Y A330676 Row sums of A330778.
+%Y A330676 The case with all atoms equal is A000111.
+%Y A330676 The case with all atoms different is A006472.
+%Y A330676 The version allowing all depths is A330655.
+%Y A330676 The unlabeled version is A330663.
+%Y A330676 The version where the atoms are the prime indices of n is A330665.
+%Y A330676 The strongly normal version is A330675.
+%Y A330676 The version where the degrees are the prime indices of n is A330728.
+%Y A330676 Multiset partitions of normal multisets are A255906.
+%Y A330676 Series-reduced rooted trees with normal leaves are A316651.
+%Y A330676 Cf. A000669, A001055, A005121, A005804, A318812, A330469, A330474, A330654, A330664, A330677, A330679.
+%K A330676 nonn
+%O A330676 0,3
+%A A330676 _Gus Wiseman_, Dec 30 2019
+%E A330676 Terms a(8) and beyond from _Andrew Howroyd_, Dec 30 2019

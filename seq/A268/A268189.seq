@@ -1,0 +1,38 @@
+%I A268189 #19 Nov 16 2024 21:31:50
+%S A268189 1,2,0,2,0,1,3,0,1,1,2,0,1,2,2,4,0,1,1,3,2,2,0,1,2,3,3,4,4,0,1,1,3,3,
+%T A268189 6,4,3,0,1,2,2,4,5,6,7,4,0,1,1,4,2,7,5,10,8,2,0,1,2,2,4,5,7,9,12,12,6,
+%U A268189 0,1,1,3,2,7,5,11,10,17,14,2,0,1,2,3,4,4,8,8,13,15,20,21
+%N A268189 Triangle read by rows: T(n,k) is the number of partitions of n for which the sum of the parts larger than the smallest part is k (n>=1, 0<=k<=n-1).
+%C A268189 Sum of entries in row n is A000041(n).
+%C A268189 T(n,0) = A000005(n) = number of divisors of n.
+%C A268189 Sum_{k>0} k*T(n,k) = A213359(n).
+%H A268189 Alois P. Heinz, <a href="/A268189/b268189.txt">Rows n = 1..200, flattened</a>
+%F A268189 G.f.: G(t,x) = Sum_{i>0} x^i/((1-x^i)*Product_{j>i} (1-t^j*x^j)).
+%e A268189 T(5,3) = 2 because in the partitions [1,1,3] and [2,3] of 5 the sum of the parts larger than the smallest part is 3.
+%e A268189 Triangle starts:
+%e A268189   1;
+%e A268189   2, 0;
+%e A268189   2, 0, 1;
+%e A268189   3, 0, 1, 1;
+%e A268189   2, 0, 1, 2, 2;
+%e A268189   4, 0, 1, 1, 3, 2;
+%e A268189   2, 0, 1, 2, 3, 3, 4;
+%e A268189   4, 0, 1, 1, 3, 3, 6, 4;
+%e A268189   3, 0, 1, 2, 2, 4, 5, 6,  7;
+%e A268189   4, 0, 1, 1, 4, 2, 7, 5, 10,  8;
+%e A268189   2, 0, 1, 2, 2, 4, 5, 7,  9, 12, 12;
+%e A268189   6, 0, 1, 1, 3, 2, 7, 5, 11, 10, 17, 14;
+%p A268189 g := add(x^i/((1-x^i)*mul(1-t^j*x^j, j = i+1 .. 100)), i = 1 .. 100); gser := simplify(series(g, x = 0, 30)); for n to 18 do P[n] := sort(coeff(gser, x, n)) end do; for n to 18 do seq(coeff(P[n], t, j), j = 0 .. n-1) end do
+%p A268189 # second Maple program:
+%p A268189 b:= proc(n, i) option remember; expand(`if`(irem(n, i)=0, 1, 0)
+%p A268189        +`if`(i>1, add(b(n-i*j, i-1)*x^(i*j), j=0..(n-1)/i), 0))
+%p A268189     end:
+%p A268189 T:= n-> (p-> seq(coeff(p, x, i), i=0..n-1))(b(n$2)):
+%p A268189 seq(T(n), n=1..14);  # _Alois P. Heinz_, Feb 04 2016
+%t A268189 b[n_, i_] := b[n, i] = Expand[If[Mod[n, i] == 0, 1, 0] + If[i > 1, Sum[b[n - i*j, i - 1]*x^(i*j), {j, 0, (n - 1)/i}], 0]];
+%t A268189 T[n_] := Function[p, Table[Coefficient[p, x, i], {i, 0, n - 1}]][b[n, n]];
+%t A268189 Table[T[n], {n, 1, 14}] // Flatten (* _Jean-François Alcover_, Jul 21 2016, after _Alois P. Heinz_ *)
+%Y A268189 Cf. A000005, A000041, A213359, A264402.
+%K A268189 nonn,tabl,changed
+%O A268189 1,2
+%A A268189 _Emeric Deutsch_, Feb 01 2016

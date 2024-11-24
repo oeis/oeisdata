@@ -1,0 +1,61 @@
+%I A345410 #25 May 27 2024 07:14:16
+%S A345410 44,1090,10450,5104,88888,10780,289982,299992,482174,478874,868868,
+%T A345410 499994,1073270,1087790,1071070,1069970,10904990,10794980,1091090,
+%U A345410 10892990,1100000,29955992,1101100,26688662,31022002,27599572,46400354,44688644,29821792,45289244,30122092,26988962
+%N A345410 a(n) is the least number that is the sum of an emirp and its reversal in exactly n ways.
+%C A345410 Interchanging an emirp and its reversal is not counted as a different way.
+%C A345410 a(n) is the least number k such that there are exactly n unordered pairs of distinct primes (p,p') such that p' is the digit reversal of p and p+p' = k.
+%C A345410 Are terms not divisible by 3? _Amiram Eldar_ finds proof they are; A056964(n) = n + reverse(n) is divisible by 3 if and only if n is divisible by 3. But emirps are primes (other than 3) so they are not divisible by 3. - _David A. Corneth_, Jun 19 2021
+%H A345410 David A. Corneth, <a href="/A345410/b345410.txt">Table of n, a(n) for n = 1..423</a>
+%H A345410 David A. Corneth, <a href="/A345410/a345410.gp.txt">A few examples</a>
+%e A345410 a(3) = 10450 because 10450 = 1229+9221 = 1409+9041 = 3407+7043.
+%p A345410 revdigs:= proc(n) local L,i; L:= convert(n,base,10); add(L[-i]*10^(i-1),i=1..nops(L)) end proc:
+%p A345410 isemirp1:= proc(n) local r;
+%p A345410 if not isprime(n) then return false fi;
+%p A345410 r:= revdigs(n);
+%p A345410 r > n and isprime(r)
+%p A345410 end proc:
+%p A345410 E:= select(isemirp1, [seq(seq(seq(i*10^d+j,j=1..10^d-1,2),i=[1,3,7,9]),d=1..5)]):
+%p A345410 V:= sort(map(t -> t+revdigs(t),E)):
+%p A345410 N:= nops(V):
+%p A345410 W:= Vector(16):
+%p A345410 i:= 1:
+%p A345410 while i < N do
+%p A345410 for j from 1 to N-i while V[i+j]=V[i] do od:
+%p A345410 if j <= 16 and W[j] = 0 then W[j]:= V[i] fi;
+%p A345410   i:= i+j;
+%p A345410 od:
+%p A345410 convert(W,list);
+%o A345410 (Python)
+%o A345410 from itertools import product
+%o A345410 from collections import Counter
+%o A345410 from sympy import isprime, nextprime
+%o A345410 def epgen(start=1, end=float('inf')): # generates unique emirp/prime pairs
+%o A345410     digits = 2
+%o A345410     while True:
+%o A345410       for first in "1379":
+%o A345410         for last in "1379":
+%o A345410           if last < first: continue
+%o A345410           for mid in product("0123456789", repeat=digits-2):
+%o A345410             strp = first + "".join(mid) + last
+%o A345410             revstrp = strp[::-1]
+%o A345410             if strp >= revstrp: continue
+%o A345410             p = int(strp)
+%o A345410             if p > end: return
+%o A345410             revp = int(strp[::-1])
+%o A345410             if isprime(p) and isprime(revp): yield (p, revp)
+%o A345410       digits += 1
+%o A345410 def aupto(lim):
+%o A345410     alst = []
+%o A345410     c = Counter(sum(ep) for ep in epgen(1, lim) if sum(ep) <= lim)
+%o A345410     r = set(c.values())
+%o A345410     for i in range(1, max(r)+1):
+%o A345410         if i in r: alst.append(min(s for s in c if c[s] == i))
+%o A345410         else: break
+%o A345410     return alst
+%o A345410 print(aupto(11*10**5)) # _Michael S. Branicky_, Jun 19 2021
+%Y A345410 Cf. A006567, A345408, A345409.
+%K A345410 nonn,base
+%O A345410 1,1
+%A A345410 _J. M. Bergot_ and _Robert Israel_, Jun 18 2021
+%E A345410 More terms from _David A. Corneth_, Jun 18 2021

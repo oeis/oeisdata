@@ -1,0 +1,27 @@
+%I A218452 #26 Mar 16 2020 15:39:35
+%S A218452 1,1,1,1,1,1,1,1,1,1,1,3,5,7,9,9,13,11,17,19,33
+%N A218452 Number of ways to factor (1 + x + x^2+ ... + x^(n - 1))^2 as the product of two monic polynomials of degree n - 1 with positive coefficients (counting order).
+%C A218452 a(n) is the number of ways one can divide the unit square in n possibly irregular lines * n possibly irregular columns (parallel to the sides) so that each of the diagonals of the n X n irregular checkerboard thus constructed has the same area as it would in a regular checkerboard. Alternatively, this is the number of ways to construct a pair of n-sided dice (probability distribution on the n sides, labeled 0 through n-1), no face having probability 0, so that the sum of the two dice follows the expected probability distribution for the sum of two fair n-sided dice. Note that a(n) is always odd because there is always the obvious factorization of (1+x+...+x^(n-1))^2 as 1+x+...+x^(n-1) times itself, and each other factorization counts twice.
+%e A218452 For n=12 we have a(n)=3 because apart from the obvious factorization of (1+x+...+x^11)^2 as (1+x+...+x^11) times itself, there exist the factorizations p*q and q*p where p = (1-sqrt(3)*x+x^2) * (1-x+x^2) * (1+x^2) * (1+x+x^2)^2 * (1+x) and q = (1-sqrt(3)*x+x^2) * (1-x+x^2) * (1+x^2) * (1+sqrt(3)*x+x^2)^2 * (1+x), both of which have positive coefficients, and those are the only two possible.
+%o A218452 (Sage)
+%o A218452 R.<x> = AA['x']
+%o A218452 def has_positive_coefficients(pol):
+%o A218452     return not any(c <= 0 for c in pol.coeffs())
+%o A218452 def trydie(m):
+%o A218452     results = []
+%o A218452     tmp = list(factor(sum([x^i for i in range(m)])))
+%o A218452     facs = [f for (f,_) in tmp]
+%o A218452     n = len(facs)
+%o A218452     for i in range((3^n+1)//2):
+%o A218452         exps = [(i//(3^k))%3 for k in range(n)]
+%o A218452         coexps = [2-v for v in exps]
+%o A218452         pol = R(prod([facs[k]^exps[k] for k in range(n)]))
+%o A218452         copol = R(prod([facs[k]^coexps[k] for k in range(n)]))
+%o A218452         if pol.degree()<m and copol.degree()<m and has_positive_coefficients(pol) and has_positive_coefficients(copol):
+%o A218452             pol /= pol.subs({x:1})
+%o A218452             copol /= copol.subs({x:1})
+%o A218452             results += [(pol.coeffs(),copol.coeffs())]
+%o A218452     return 2*len(results)-1
+%K A218452 nonn
+%O A218452 1,12
+%A A218452 _David A. Madore_, Oct 28 2012

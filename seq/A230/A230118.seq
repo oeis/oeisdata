@@ -1,0 +1,58 @@
+%I A230118 #10 Oct 13 2013 10:20:10
+%S A230118 1,2,4,7,12,18,29,42,61,87,122,167,229,306,409,538,705,915,1182,1509,
+%T A230118 1927,2438,3075,3854,4814,5985,7416,9144,11253,13784,16845,20512,
+%U A230118 24922,30179,36470,43939,52841,63378,75864,90605,108022,128496,152603,180865,214044,252826,298192,351108,412832,484632,568157
+%N A230118 Numbers of quasi-espalier polycubes of a given volume (number of atomic cells).
+%C A230118 A pyramid polycube is obtained by gluing together horizontal plateaux (parallelepipeds of height 1) in such a way that (0,0,0) belongs to the first plateau and each cell with coordinate (0,b,c) belonging to the first plateau is such that b , c >= 0. If the cell with coordinates (a,b,c) belongs to the (a+1)-st plateau (a>0), then the cell with coordinates (a-1, b, c) belongs to the a-th plateau.
+%C A230118 An espalier polycube is a special pyramid such that each plateau contains the cell with coordinate (a,0,0).
+%C A230118 Quasi espaliers are espaliers from which all the cells with coordinates (a,0,0) have been removed.
+%C A230118 If E(x,h) denotes the generating function of espalier polycubes, x^(-h) E(x,h) converges when h tends to infinity towards a series which is the generating function of quasi-espalier polycubes.
+%p A230118 calcRecEsp:=proc(i, j, k, l) option remember;
+%p A230118 ## Compute the number n_{i, j, k, l}
+%p A230118 if (l<0) then 0
+%p A230118 elif (i*j*k>l) then 0
+%p A230118 elif k=1 then
+%p A230118 if (i*j=l) then
+%p A230118 1
+%p A230118 else 0;
+%p A230118 fi;
+%p A230118 else
+%p A230118 s:=0; a:=0; b:=0;
+%p A230118 while ((i+a)*j*(k-1)<=l-i*j) do
+%p A230118 b:=0;
+%p A230118 while ((i+a)*(j+b)*(k-1)<=l-i*j) do
+%p A230118 s:=s+calcRecEsp(i+a, j+b, k-1, l-i*j);
+%p A230118 b:=b+1;
+%p A230118 od;
+%p A230118 a:=a+1;
+%p A230118 od;
+%p A230118 s;
+%p A230118 fi;
+%p A230118 end;
+%p A230118 compteEsp:=proc(l) ### compute \sum_{v}n_{h, v}t^v
+%p A230118 s:=0;
+%p A230118 for k to l do
+%p A230118 i:=1:
+%p A230118 while (i*k<=l) do
+%p A230118 j:=1;
+%p A230118 while (i*k*j<=l) do
+%p A230118 s:=s+t^k*calcRecEsp(i, j, k, l);
+%p A230118 j:=j+1;
+%p A230118 od:
+%p A230118 i:=i+1;
+%p A230118 od;
+%p A230118 od;
+%p A230118 s;
+%p A230118 end;
+%p A230118 enum = [seq(op(convert(compteEsp(ii), list)), ii=2..200)];
+%p A230118 serie_quasi_Esp:=proc(l)global enum;local ii;
+%p A230118 map(coeff,enum,t^l);
+%p A230118 select(x->x>0,%);
+%p A230118 sum(t^(ii-1)*%[ii],ii=1..nops(%));
+%p A230118 end;
+%p A230118 serie_quasi_Esp(100):
+%p A230118 [1, seq(coeff(%, t^ii)-1, ii=1..50)];
+%Y A230118 Cf. A227925, A229915.
+%K A230118 nonn
+%O A230118 1,2
+%A A230118 _Matthieu Deneufchâtel_, Oct 10 2013

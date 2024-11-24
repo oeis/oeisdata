@@ -1,0 +1,55 @@
+%I A238208 #36 Mar 19 2021 08:48:30
+%S A238208 0,1,0,0,0,0,1,1,2,2,3,3,4,4,5,6,7,8,10,12,14,17,20,24,28,33,38,45,52,
+%T A238208 60,69,80,91,105,120,137,156,178,202,230,261,295,334,378,426,481,542,
+%U A238208 609,685,769,862,966,1082,1209,1351,1508,1681,1873,2086,2319,2578
+%N A238208 The total number of 1's in all partitions of n into an odd number of distinct parts.
+%C A238208 The g.f. for "number of k's" is (1/2)*(x^k/(1+x^k))*(Product_{n>=1} 1 + x^n) + (1/2)*(x^k/(1-x^k))*(Product_{n>=1} 1 - x^n).
+%C A238208 Or: the number of partitions of n-1 into an even number of distinct parts >=2. - _R. J. Mathar_, May 11 2016
+%H A238208 Alois P. Heinz, <a href="/A238208/b238208.txt">Table of n, a(n) for n = 0..10000</a> (first 1001 terms from Andrew Howroyd)
+%F A238208 a(n) = Sum_{j=1..round(n/2)} A067661(n-(2*j-1)) - Sum_{j=1..floor(n/2)} A067659(n-2*j).
+%F A238208 G.f.: (1/2)*(x/(1+x))*(Product_{n>=1} 1 + x^n) + (1/2)*(x/(1-x))*(Product_{n>=1} 1 - x^n).
+%F A238208 a(n) ~ exp(Pi*sqrt(n/3)) / (16 * 3^(1/4) * n^(3/4)). - _Vaclav Kotesovec_, May 17 2020
+%F A238208 From _Peter Bala_, Feb 02 2021: (Start)
+%F A238208 a(n+1) = d(n) - ( d(n-1) + d(n-3) ) + ( d(n-4) + d(n-6) + d(n-8) ) - ( d(n-9) + d(n-11) + d(n-13) + d(n-15) ) + ( d(n-16) + d(n-18) + d(n-20) + d(n-22) + d(n-24) ) - ( d(n-25) + d(n-27) + d(n-29) + d(n-31) + d(n-33) + d(n-35) ) + ..., where d(n) = A000009(n) is the number of partitions of n into distinct parts, with the convention that d(n) = 0 for n < 0.
+%F A238208 G.f.: x/(1 - x^2)*Sum_{n >= 0} (-1)^n*x^((n^2+n+1-(-1)^n)/2)/Product_{k = 1..n} 1 - x^k.
+%F A238208 Alternative g.f.: ( Product_{k >= 1} 1 + x^k ) * x*Sum_{n >= 0} (-1)^n*x^(n^2)*(1 - x^(2*n+2))/(1 - x^2).
+%F A238208 Faster converging g.f. (conjecture): Sum_{n >= 0} x^((n+1)*(2*n+1))/ Product_{k = 1..2*n} 1 - x^k. (End)
+%e A238208 a(10) = 3 because the partitions in question are: 7+2+1, 6+3+1, 5+4+1.
+%p A238208 A238208 := proc(n)
+%p A238208     local a,L,Lset;
+%p A238208     a := 0 ;
+%p A238208     L := combinat[firstpart](n) ;
+%p A238208     while true do
+%p A238208         # check that parts are distinct
+%p A238208         Lset := convert(L,set) ;
+%p A238208         if nops(L) = nops(Lset) then
+%p A238208             # check that number is odd
+%p A238208             if type(nops(L),'odd') then
+%p A238208                 if 1 in Lset then
+%p A238208                     a := a+1 ;
+%p A238208                 end if;
+%p A238208             end if;
+%p A238208         end if;
+%p A238208         L := combinat[nextpart](L) ;
+%p A238208         if L = FAIL then
+%p A238208             return a;
+%p A238208         end if;
+%p A238208     end do:
+%p A238208     a ;
+%p A238208 end proc: # _R. J. Mathar_, May 11 2016
+%p A238208 # second Maple program:
+%p A238208 b:= proc(n, i, t) option remember; `if`(n=0, t,
+%p A238208      `if`(i>n, 0, b(n, i+1, t)+b(n-i, i+1, 1-t)))
+%p A238208     end:
+%p A238208 a:= n-> b(n-1, 2, 1):
+%p A238208 seq(a(n), n=0..100);  # _Alois P. Heinz_, May 01 2020
+%t A238208 b[n_, i_, t_] := b[n, i, t] = If[n == 0, t, If[i > n, 0, b[n, i+1, t] + b[n-i, i+1, 1-t]]];
+%t A238208 a[n_] := b[n-1, 2, 1];
+%t A238208 a /@ Range[0, 100] (* _Jean-François Alcover_, May 17 2020, after _Alois P. Heinz_ *)
+%o A238208 (PARI) seq(n)={my(A=O(x^n)); Vec(x*(eta(x^2 + A)/(eta(x + A)*(1+x)) + eta(x + A)/(1-x))/2, -(n+1))} \\ _Andrew Howroyd_, May 01 2020
+%Y A238208 Column k=1 of A238450.
+%Y A238208 Cf. A067659, A067661, A133280.
+%K A238208 nonn,easy
+%O A238208 0,9
+%A A238208 _Mircea Merca_, Feb 20 2014
+%E A238208 a(51)-a(60) from _R. J. Mathar_, May 11 2016

@@ -1,0 +1,101 @@
+%I A376838 #23 Oct 29 2024 08:27:44
+%S A376838 1,6,9,6,5,6,9,6,1,1,1,6,9,6,5,6,9,6,1,6,1,6,9,6,5,6,9,6,1,1,1,6,9,6,
+%T A376838 5,6,9,6,1,6,1,6,9,6,5,6,9,6,1,5,1,6,9,6,5,6,9,6,1,6,1,6,9,6,5,6,9,6,
+%U A376838 1,1,1,6,9,6,5,6,9,6,1,6,1,6,9,6,5,6,9
+%N A376838 Phase shift (original name "sfasamento") of the tetration base 10*n at height 2.
+%C A376838 Let m^^b be m^m^...^m b-times (integer tetration).
+%C A376838 For any n, the phase shift of n*10 at height b is defined as the congruence class modulo 10 of the difference between the least significant non-stable digit of (n*10)^^b and the corresponding digit of (n*10)^^(b+1), so the phase shift of n*10 at height 1 is trivially A065881(n).
+%C A376838 Thus, assume b = 2 and, for any given tetration base n*10, this sequence represents the congruence classes modulo 10 of the differences between the rightmost non-stable digit of (n*10)^(n*10) and the zero of (n*10)^((n*10)^(n*10)) which occupies the same decimal position (counting from right to the left) as the rightmost nonzero digit of (n*10)^(n*10).
+%D A376838 Marco Ripà, La strana coda della serie n^n^...^n, Trento, UNI Service, Nov 2011. ISBN 978-88-6178-789-6.
+%H A376838 Marco Ripà, <a href="https://doi.org/10.7546/nntdm.2021.27.4.43-61">The congruence speed formula</a>, Notes on Number Theory and Discrete Mathematics, 2021, 27(4), 43—61.
+%H A376838 Marco Ripà, <a href="https://arxiv.org/abs/2402.07929">Congruence speed of tetration bases ending with 0</a>, arXiv:2402.07929 [math.NT], 2024.
+%H A376838 Wikipedia, <a href="https://en.wikipedia.org/wiki/Graham&#39;s_number">Graham's Number</a>.
+%H A376838 Wikipedia, <a href="https://en.wikipedia.org/wiki/Tetration">Tetration</a>.
+%F A376838 a(n) equals the least significant nonzero digit of n^(n*10).
+%F A376838 Let h indicate the least significant digit of n, then
+%F A376838 a(n) = 1  if  h = 1,9 or (h = 3,7 and n == (0 mod 10));
+%F A376838 a(n) = 6  if  h = 2,4,6,8;
+%F A376838 a(n) = 9  if (h = 3,7 and n is not congruent to 0 modulo 10);
+%F A376838 a(n) = 5  if  h = 5.
+%e A376838 a(2) = 6 since 20^20 == 0 (mod 10^20) and 20^20 == 6 (mod 10^21), and trivially 6 - 0 = 6.
+%o A376838 (Python)
+%o A376838 # Function to calculate the p-adic valuation
+%o A376838 def p_adic_valuation(n, p):
+%o A376838     count = 0
+%o A376838     while n % p == 0 and n != 0:
+%o A376838         n //= p
+%o A376838         count += 1
+%o A376838     return count
+%o A376838 # Function to calculate tetration (tower of powers)
+%o A376838 def tetration(base, height, last_digits=50000):
+%o A376838     results = [base]
+%o A376838     for n in range(1, height):
+%o A376838         result = pow(base, results[-1], 10**last_digits)  # Only the last last_digits digits
+%o A376838         results.append(result)
+%o A376838     return results
+%o A376838 # Function to find the first non-zero difference and compute modulo 10
+%o A376838 def find_difference_mod_10(tetrations):
+%o A376838     differences = []
+%o A376838     for n in range(len(tetrations) - 1):
+%o A376838         string_n = str(tetrations[n]).zfill(50000)  # Pad with zeros if needed
+%o A376838         string_n_plus_1 = str(tetrations[n+1]).zfill(50000)
+%o A376838         # Find the first difference starting from the rightmost digit
+%o A376838         for i in range(49999, -1, -1):  # From right to left
+%o A376838             if string_n[i] != string_n_plus_1[i]:
+%o A376838                 difference = (int(string_n[i]) - int(string_n_plus_1[i])) % 10
+%o A376838                 differences.append(difference)
+%o A376838                 break
+%o A376838     return differences
+%o A376838 # Function to determine the first hyperexponent based on modulo 5 congruences
+%o A376838 def calculate_initial_exponent(a):
+%o A376838     mod_5 = a % 5
+%o A376838     if mod_5 == 1:
+%o A376838         valuation = p_adic_valuation(a - 1, 5)
+%o A376838         initial_exponent = valuation + 2
+%o A376838     elif mod_5 in [2, 3]:
+%o A376838         valuation = p_adic_valuation(a**2 + 1, 5)
+%o A376838         initial_exponent = valuation + 2
+%o A376838     elif mod_5 == 4:
+%o A376838         valuation = p_adic_valuation(a + 1, 5)
+%o A376838         initial_exponent = valuation + 2
+%o A376838     else:
+%o A376838         valuation = p_adic_valuation(a**2 - 1, 2)
+%o A376838         initial_exponent = valuation + 1
+%o A376838     return initial_exponent
+%o A376838 # Main logic
+%o A376838 try:
+%o A376838     # Ask for the maximum value of n*10
+%o A376838     n = int(input("Write the maximum value of n*10: "))
+%o A376838     # Validate the input
+%o A376838     if n <= 1 or n > 1000:
+%o A376838         raise ValueError("Please enter a positive integer between 1 and 1000.")
+%o A376838     # Initialize an empty list to store the second digits of the sfasamenti
+%o A376838     sfasamenti_second_digits = []
+%o A376838     # Loop through bases 10, 20, ..., n*10
+%o A376838     for a in range(10, (n * 10) + 1, 10):
+%o A376838         # Calculate the initial exponent based on modulo 5 congruence
+%o A376838         initial_exponent = calculate_initial_exponent(a)
+%o A376838         # Generate tetrations for 30 iterations and the last 500 digits
+%o A376838         tetrations = tetration(a, 3, last_digits=50000)
+%o A376838         # Find the modulo 10 differences for the 4 required iterations
+%o A376838         mod_10_differences = find_difference_mod_10(tetrations[initial_exponent-1:initial_exponent+4])
+%o A376838         # Optimization of the output
+%o A376838         if mod_10_differences[:2] == mod_10_differences[2:]:
+%o A376838             mod_10_differences = mod_10_differences[:2]
+%o A376838         if len(set(mod_10_differences)) == 1:
+%o A376838             mod_10_differences = [mod_10_differences[0]]
+%o A376838         # Append the second digit of the sfasamenti (if it exists) to the list
+%o A376838         if len(mod_10_differences) > 1:
+%o A376838             sfasamenti_second_digits.append(mod_10_differences[1])
+%o A376838         else:
+%o A376838             sfasamenti_second_digits.append(mod_10_differences[0])
+%o A376838     # Convert the list of second digits into a string
+%o A376838     result_str = ', '.join(map(str, sfasamenti_second_digits))
+%o A376838     # Print the final output
+%o A376838     print(f"The values of the sfasamenti at height 2 of 10 to {n * 10} are: {result_str}")
+%o A376838 except Exception as e:
+%o A376838     print(f"ERROR!\n{e}")
+%Y A376838 Cf. A065881, A317905, A371671, A373387.
+%K A376838 nonn,base
+%O A376838 1,2
+%A A376838 _Marco Ripà_, Oct 06 2024

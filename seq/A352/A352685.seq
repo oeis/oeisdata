@@ -1,0 +1,45 @@
+%I A352685 #15 Mar 07 2024 08:03:39
+%S A352685 1,1,0,1,1,1,1,2,2,1,1,3,3,2,1,1,4,4,3,3,2,1,5,5,4,5,5,2,1,6,6,5,7,8,
+%T A352685 5,3,1,7,7,6,9,11,8,7,4,1,8,8,7,11,14,11,11,10,6,1,9,9,8,13,17,14,15,
+%U A352685 16,15,6,1,10,10,9,15,20,17,19,22,24,15,8,1,11,11,10,17,23,20,23,28,33,24,20,11,1,12,12,11,19,26,23,27,34,42,33,32,27,15
+%N A352685 Array of Aitken-Bell triangles of order m (read by rows) read by ascending antidiagonals.
+%C A352685 An Aitken-Bell triangle of order m is defined by T(0, 0) = 1, T(1, 0) = m, T(n, 0) = T(n-1, n-1) and T(n, k) = T(n, k-1) + T(n-1, k-1), for n >= 0 and 0 <= k <= n. The case m = 1 is Aitken's array A011971 with the first column the Bell numbers A000110, case m = 0 is the triangle A046934 with the first column A032347 and case m = 2 is the triangle A046937 with the first column A038561.
+%F A352685 Given a list T let PS(T) denote the list of partial sums of T. Given two list S and T let [S, T] denote the concatenation of the lists. Further let P[end] denote the last element of the list P. The Aitken-Bell triangle T of order m with n rows can be computed by the following procedure:
+%F A352685      A = [m], P = [1], T = [];
+%F A352685      Repeat n times: T = [T, P], P = PS([A, P]), A = [P[end]];
+%F A352685      Return T.
+%e A352685 Array starts:
+%e A352685 [0] 1, 0,  1,  1,  1,  2,  2,  3,  4,  6,  6,   8,  11,  15, ... A046934
+%e A352685 [1] 1, 1,  2,  2,  3,  5,  5,  7, 10, 15, 15,  20,  27,  37, ... A011971
+%e A352685 [2] 1, 2,  3,  3,  5,  8,  8, 11, 16, 24, 24,  32,  43,  59, ... A046937
+%e A352685 [3] 1, 3,  4,  4,  7, 11, 11, 15, 22, 33, 33,  44,  59,  81, ...
+%e A352685 [4] 1, 4,  5,  5,  9, 14, 14, 19, 28, 42, 42,  56,  75, 103, ...
+%e A352685 [5] 1, 5,  6,  6, 11, 17, 17, 23, 34, 51, 51,  68,  91, 125, ...
+%e A352685 [6] 1, 6,  7,  7, 13, 20, 20, 27, 40, 60, 60,  80, 107, 147, ...
+%e A352685 [7] 1, 7,  8,  8, 15, 23, 23, 31, 46, 69, 69,  92, 123, 169, ...
+%e A352685 [8] 1, 8,  9,  9, 17, 26, 26, 35, 52, 78, 78, 104, 139, 191, ...
+%e A352685 [9] 1, 9, 10, 10, 19, 29, 29, 39, 58, 87, 87, 116, 155, 213, ...
+%p A352685 alias(PS = ListTools:-PartialSums):
+%p A352685 BellTriangle := proc(m, len) local a, k, P, T; a := m; P := [1]; T := [];
+%p A352685 for n from 1 to len  do T := [op(T), P]; P := PS([a, op(P)]); a := P[-1] od;
+%p A352685 ListTools:-Flatten(T) end:
+%p A352685 for n from 0 to 9 do print(BellTriangle(n, 5)) od; # Prints array by rows.
+%t A352685 nmax = 13;
+%t A352685 row[m_] := row[m] = Module[{T}, T[0, 0] = 1; T[1, 0] = m; T[n_, 0] := T[n, 0] = T[n-1, n-1]; T[n_, k_] := T[n, k] = T[n, k-1] + T[n-1, k-1]; Table[T[n, k], {n, 0, nmax}, {k, 0, n}] // Flatten];
+%t A352685 A[n_, k_] := row[n][[k+1]];
+%t A352685 Table[A[n-k, k], {n, 0, nmax}, {k, 0, n}] // Flatten (* _Jean-François Alcover_, Mar 07 2024 *)
+%o A352685 (Julia)
+%o A352685 function BellTriangle(m, len)
+%o A352685     a = m; P = [1]; T = []
+%o A352685     for n in 1:len
+%o A352685         T = vcat(T, P)
+%o A352685         P = cumsum(vcat(a, P))
+%o A352685         a = P[end]
+%o A352685     end
+%o A352685 T end
+%o A352685 for n in 0:9 BellTriangle(n, 4) |> println end
+%Y A352685 The main diagonals of the triangles are in A352682.
+%Y A352685 Cf. A000110, A046934, A011971, A046937, A032347, A038561.
+%K A352685 nonn,tabl
+%O A352685 0,8
+%A A352685 _Peter Luschny_, Mar 29 2022

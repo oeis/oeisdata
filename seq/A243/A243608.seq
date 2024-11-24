@@ -1,0 +1,51 @@
+%I A243608 #29 Jan 15 2019 19:21:01
+%S A243608 1,1,1,1,1,4,1,1,9,20,11,1,1,16,87,196,176,46,2,1,25,244,1195,3145,
+%T A243608 4431,3161,1007,111,2,1,36,545,4544,22969,73098,147502,185744,140288,
+%U A243608 59140,12313,1046,26,1,49,1056,13215,106819,587149,2251309,6082000,11562155
+%N A243608 Number T(n,k) of ways k L-tiles can be placed on an n X n square; triangle T(n,k), n>=0, 0<=k<=A229093(n), read by rows.
+%C A243608 An L-tile is a 2 X 2 square with the upper right 1 X 1 subsquare removed and no rotations are allowed.
+%H A243608 Alois P. Heinz, <a href="/A243608/b243608.txt">Rows n = 0..21, flattened</a>
+%e A243608 T(3,1) = 4:
+%e A243608   ._____.   ._____.   ._____.   ._____.
+%e A243608   | |_|_|   |_|_|_|   |_| |_|   |_|_|_|
+%e A243608   |___|_|   | |_|_|   |_|___|   |_| |_|
+%e A243608   |_|_|_|   |___|_|   |_|_|_|   |_|___|
+%e A243608 T(4,4) = 1:
+%e A243608   ._______.
+%e A243608   | |_| |_|
+%e A243608   |___|___|
+%e A243608   | |_| |_|
+%e A243608   |___|___|
+%e A243608 T(5,6) = 2:
+%e A243608   ._________.   ._________.
+%e A243608   | |_|_| |_|   |_| |_| |_|
+%e A243608   |___| |___|   | |___|___|
+%e A243608   |_| |___|_|   |___|_| |_|
+%e A243608   | |___| |_|   | |_| |___|
+%e A243608   |___|_|___|   |___|___|_| .
+%e A243608 Triangle T(n,k) begins:
+%e A243608   1;
+%e A243608   1;
+%e A243608   1,  1;
+%e A243608   1,  4,   1;
+%e A243608   1,  9,  20,   11,    1;
+%e A243608   1, 16,  87,  196,  176,   46,    2;
+%e A243608   1, 25, 244, 1195, 3145, 4431, 3161, 1007, 111, 2;
+%p A243608 b:= proc(n, l) option remember; local k;
+%p A243608       if n<2 then 1
+%p A243608     elif min(l[])>0 then b(n-1, map(h->h-1, l))
+%p A243608     else for k while l[k]>0 do od; expand(
+%p A243608          b(n, subsop(k=1, l))+ `if`(n>1 and k<nops(l)
+%p A243608          and l[k+1]=0, x*b(n, subsop(k=2, k+1=1, l)), 0))
+%p A243608       fi
+%p A243608     end:
+%p A243608 T:= n-> (p-> seq(coeff(p, x, i), i=0..degree(p)))(b(n, [0$n])):
+%p A243608 seq(T(n), n=0..10);
+%t A243608 b[n_, l_] := b[n, l] = Module[{k}, Which[n<2, 1, Min[l]>0, b[n-1, l-1], True, For[k = 1, l[[k]] > 0, k++]; Expand[b[n, ReplacePart[l, k -> 1]] + If[n>1 && k<Length[l] && l[[k+1]]==0, x*b[n, ReplacePart[l, {k -> 2, k+1 -> 1}]], 0]]]];
+%t A243608 T[n_] := Function[p, Table[Coefficient[p, x, i], {i, 0, Exponent[p, x]}]][ b[n, Table[0, {n}]]];
+%t A243608 Table[T[n], {n, 0, 10}] // Flatten (* _Jean-François Alcover_, Apr 12 2017, translated from Maple *)
+%Y A243608 Columns k=0-6 give: A000012, A000290(n-1) for n>0, A243645, A243646, A243647, A243648, A243649.
+%Y A243608 Row sums give main diagonal of A226444 or A066864(n-1) for n>0.
+%K A243608 nonn,tabf
+%O A243608 0,6
+%A A243608 _Alois P. Heinz_, Jun 07 2014

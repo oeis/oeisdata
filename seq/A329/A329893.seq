@@ -1,0 +1,41 @@
+%I A329893 #31 Apr 24 2024 10:10:33
+%S A329893 1,2,0,6,0,0,-6,24,0,0,0,0,-18,0,-48,120,0,0,0,0,0,0,0,0,18,-72,0,0,
+%T A329893 -192,48,-360,720,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,54,0,144,-360,0,0,0,
+%U A329893 0,384,-960,144,0,-1800,720,-2880,5040,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-54,216
+%N A329893 a(n) = Product_{k=0..floor(log_2(n))} (1 + A004718(floor(n/(2^k)))), where A004718 is Per Nørgård's "infinity sequence".
+%C A329893 The composer Per Nørgård's name is also written in the OEIS as Per Noergaard.
+%C A329893 From _Mikhail Kurkov_, May 22 2019 (comments originally given in A325803): (Start)
+%C A329893 Number of positive terms on the interval 2^m <= n < 2^(m+1) for m > 0 equals f(m-1,2,1) (and f(m-1,4,3) for negative) with f(m,g,h) = binomial(m, floor(m/2) + floor((m+g)/4) - floor((m+h)/4)), so total number of nonzero terms equals binomial(m, floor(m/2)) = A001405(m).
+%C A329893 Sum_{n=0..2^m-1} a(n) = 3^m, m >= 0.
+%C A329893 More generally, if we define a(n,k) = (-1)^(n+1)*a(floor(n/k),k) + n mod k, a(0,k) = 0, so Sum_{n=0..k^m-1} Product_{i=0..floor(log_k(n))} (1 + a(floor(n/(k^i)),k)) = binomial(k+1, 2)^m for any k = 2p, p > 0.
+%C A329893 (End) [verification needed]
+%H A329893 Antti Karttunen, <a href="/A329893/b329893.txt">Table of n, a(n) for n = 0..16383</a>
+%H A329893 Antti Karttunen, <a href="/A329893/a329893.txt">Data supplement: n, a(n) computed for n = 0..65537</a>
+%H A329893 Will Sawin, <a href="https://mathoverflow.net/questions/331432/voyage-into-the-golden-screen-sequence-defined-by-recurrence-relation/333031#333031">Voyage into the golden screen (sequence defined by recurrence relation)</a>, Answer to question 333031 on Mathoverflow, June 1, 2019.
+%F A329893 a(0) = 1; for n > 1, a(n) = (1+A004718(n)) * a(floor(n/2)).
+%F A329893 a(n) = Product_{k=0..floor(log_2(n))} (1 + A004718(floor(n/(2^k)))).
+%F A329893 a(A325804(n)) = A325803(n).
+%t A329893 f[n_?EvenQ] := f[n] = -f[n/2]; f[0] = 0; f[n_] := f[n] = f[(n - 1)/2] + 1; Table[Product[1 + f[Floor[n/(2^k)]], {k, 0, Floor[Log2[n]]}], {n, 0, 120}]  (* _Michael De Vlieger_, Apr 22 2024, after _Jean-François Alcover_ at A004718 *)
+%o A329893 (PARI)
+%o A329893 up_to = 65537;
+%o A329893 A004718list(up_to) = { my(v=vector(up_to)); v[1]=1; v[2]=-1; for(n=3, up_to, v[n] = if(n%2, 1+v[n>>1], -v[n/2])); (v); }; \\ After code in A004718.
+%o A329893 v004718 = A004718list(up_to);
+%o A329893 A004718(n) = if(!n,n,v004718[n]);
+%o A329893 A329893(n) = { my(m=1); while(n, m *= 1+A004718(n); n >>= 1); (m); };
+%o A329893 (Python)
+%o A329893 from math import prod
+%o A329893 def A329893(n):
+%o A329893     c, s = [0]*(m:=n.bit_length()), bin(n)[2:]
+%o A329893     for i in range(m):
+%o A329893         if s[i]=='1':
+%o A329893             for j in range(m-i):
+%o A329893                 c[j] = c[j]+1
+%o A329893         else:
+%o A329893             for j in range(m-i):
+%o A329893                 c[j] = -c[j]
+%o A329893     return prod(1+d for d in c) # _Chai Wah Wu_, Mar 03 2023
+%Y A329893 Cf. A001405, A004718, A325803 (nonzero terms), A325804 (their positions).
+%Y A329893 Cf. also A284005, A293233.
+%K A329893 sign
+%O A329893 0,2
+%A A329893 _Antti Karttunen_ (after _Mikhail Kurkov_'s A325803), Dec 10 2019 [verification needed]

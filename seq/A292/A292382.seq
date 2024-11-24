@@ -1,0 +1,42 @@
+%I A292382 #29 May 15 2021 06:18:22
+%S A292382 0,1,2,2,4,5,8,4,4,9,16,10,32,17,10,8,64,9,128,18,18,33,256,20,8,65,8,
+%T A292382 34,512,21,1024,16,34,129,20,18,2048,257,66,36,4096,37,8192,66,20,513,
+%U A292382 16384,40,16,17,130,130,32768,17,36,68,258,1025,65536,42,131072,2049,36,32,68,69,262144,258,514,41,524288,36,1048576,4097,18,514,40
+%N A292382 Base-2 expansion of a(n) encodes the steps where numbers of the form 4k+2 are encountered when map x -> A252463(x) is iterated down to 1, starting from x=n.
+%H A292382 Antti Karttunen, <a href="/A292382/b292382.txt">Table of n, a(n) for n = 1..2048</a>
+%H A292382 <a href="/index/Bi#binary">Index entries for sequences related to binary expansion of n</a>
+%F A292382 a(n) = A292272(A156552(n)).
+%F A292382 a(1) = 0; for n > 1, a(n) = 2*a(A252463(n)) + [n == 2 (mod 4)], where the last part of the formula is Iverson bracket, giving 1 only if n is of the form 4k+2, and 0 otherwise.
+%F A292382 a(n) = A292372(A292384(n)).
+%F A292382 Other identities. For n >= 1:
+%F A292382 a(n) AND A292380(n) = 0, where AND is a bitwise-AND (A004198).
+%F A292382 a(n) + A292380(n) = A156552(n).
+%F A292382 A000120(a(n)) + A000120(A292380(n)) = A001222(n).
+%t A292382 Table[FromDigits[Reverse@ NestWhileList[Function[k, Which[k == 1, 1, EvenQ@ k, k/2, True, Times @@ Power[Which[# == 1, 1, # == 2, 1, True, NextPrime[#, -1]] & /@ First@ #, Last@ #] &@ Transpose@ FactorInteger@ k]], n, # > 1 &] /. k_ /; IntegerQ@ k :> If[Mod[k, 4] == 2, 1, 0], 2], {n, 77}] (* _Michael De Vlieger_, Sep 21 2017 *)
+%o A292382 (PARI)
+%o A292382 A064989(n) = {my(f); f = factor(n); if((n>1 && f[1,1]==2), f[1,2] = 0); for (i=1, #f~, f[i,1] = precprime(f[i,1]-1)); factorback(f)};
+%o A292382 A252463(n) = if(!(n%2),n/2,A064989(n));
+%o A292382 A292382(n) = if(1==n,0,(if(2==(n%4),1,0)+(2*A292382(A252463(n)))));
+%o A292382 (PARI) a(n) = my(m=factor(n),k=-2); sum(i=1,matsize(m)[1], 1 << (primepi(m[i,1]) + (k+=m[i,2]))); \\ _Kevin Ryde_, Dec 11 2020
+%o A292382 (Scheme) (define (A292382 n) (A292372 (A292384 n)))
+%o A292382 (Python)
+%o A292382 from sympy.core.cache import cacheit
+%o A292382 from sympy.ntheory.factor_ import digits
+%o A292382 from sympy import factorint, prevprime
+%o A292382 from operator import mul
+%o A292382 from functools import reduce
+%o A292382 def a292372(n):
+%o A292382     k=digits(n, 4)[1:]
+%o A292382     return 0 if n==0 else int("".join(['1' if i==2 else '0' for i in k]), 2)
+%o A292382 def a064989(n):
+%o A292382     f=factorint(n)
+%o A292382     return 1 if n==1 else reduce(mul, [1 if i==2 else prevprime(i)**f[i] for i in f])
+%o A292382 def a252463(n): return 1 if n==1 else n//2 if n%2==0 else a064989(n)
+%o A292382 @cacheit
+%o A292382 def a292384(n): return 1 if n==1 else 4*a292384(a252463(n)) + n%4
+%o A292382 def a(n): return a292372(a292384(n))
+%o A292382 print([a(n) for n in range(1, 111)]) # _Indranil Ghosh_, Sep 21 2017
+%Y A292382 Cf. A005940, A156552, A292272, A292372, A292380, A292381, A292383, A292384.
+%K A292382 nonn,base
+%O A292382 1,3
+%A A292382 _Antti Karttunen_, Sep 15 2017

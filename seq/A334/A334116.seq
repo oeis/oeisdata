@@ -1,0 +1,95 @@
+%I A334116 #26 Sep 30 2021 11:56:20
+%S A334116 1,5,8,4,10,12,32,15,9,17,40,20,74,33,24,16,26,39,1880,30,112,660,96,
+%T A334116 35,25,37,104,299,338,42,77600,75,60,78,48,36,50,84,68,87,130,56,
+%U A334116 288968,468,350,3242817,192,63,49,65,200,2726,1042,1628,180,72,308,425,5880,95
+%N A334116 a(n) is the least number k greater than n such that the square roots of both k and n have continuous fractions with the same period p and, if p > 1, the same periodic terms except for the last term.
+%C A334116 Note that a(n)=n if n is a square. The square root of a squarefree integer n has a continued fraction of the form [e(0);[e(1),...,e(p)]] with e(p)=2e(0) and e(i)=e(p-i) for 0 < i < p, see reference. The symmetric part [e(1),...,e(p-1)] of the continued fraction [m;[e(1),...,e(p-1), 2m]] will be called the pattern of n. 2 has the empty pattern (sqrt(2)=[1,[2]]), 3 has the pattern [1] (sqrt(3)=[1,[1,2]]) and so on. In this sense, the description of the sequence can be simplified as "Least number greater than n with the same pattern".
+%C A334116 It can be can proved (see link) that integers with the same pattern are terms of a quadratic sequence.
+%C A334116 An ambiguity has to be fixed: sqrt(2)=[1,[2]] = [1,[2,2]] = [1,[2,2,2]] and so on. We define that the shortest pattern is correct, here it is empty. Comment on the third subsequence (2),6,12,... below: The second term 6 has the pattern [2], but the first term 2 in brackets has the "wrong" pattern, after fixing the ambiguity.
+%D A334116 Kenneth H. Rosen, Elementary number theory and its applications, Addison-Wesley, 3rd ed. 1993, page 428.
+%H A334116 Chai Wah Wu, <a href="/A334116/b334116.txt">Table of n, a(n) for n = 1..138</a>
+%H A334116 Gerhard Kirchner, <a href="/A334116/a334116.pdf">Continued fractions with the same pattern</a>
+%e A334116 1) p=1: f(1)=2, f(2)=a(2)=5, f(3)=a(5)=10, f(4)=a(10)=17,..
+%e A334116 sqrt(2)=[1,[2]], sqrt(5)=[2,[4]], sqrt(10)=[3,[6]], sqrt(17)=[4,[8]],..
+%e A334116 2) p=2: f(1)=3, f(2)=a(3)=8, f(3)=a(8)=15, f(4)=a(15)=24,..
+%e A334116 sqrt(3)=[1,[1,2]], sqrt(8)=[2,[1,4]], sqrt(15)=[3,[1,6]], sqrt(24)=[4,[1,8]],..
+%e A334116 3) p=3: f(1)=41, f(2)=a(41)=130, f(3)=a(130)=269,..
+%e A334116 sqrt(41)=[6,[2,2,12]], sqrt(130)=[11,[2,2,121]], sqrt(269)=[16,[2,2,256]],..
+%e A334116 4) p=4: f(1)=33, f(2)=a(33)=60, f(3)=a(60)=95,..
+%e A334116 sqrt(33)=[5,[1,2,1,10]], sqrt(60)=[7,[1,2,1,49]], sqrt(95)=[9,[1,2,1,81]],..
+%e A334116 Several subsequences f(k) with f(k+1)=a(f(k)).
+%e A334116 k>1 if first term in brackets, k>0 otherwise.
+%e A334116 First terms  Period  Formula           Example
+%e A334116 1) 2,5,10,17   1  A002522(k)=k^2+1           1
+%e A334116 2) 3,8,15,24   2  A005563(k)=(k+1)^2-1       2
+%e A334116 3)(2),6,12     2  A002378(k)=k*(k+1)
+%e A334116 4) 7,32,75     4  A013656(k)=k*(9*k-2)
+%e A334116 5) 11,40,87    2  A147296(k)=k*(9*k+2)
+%e A334116 6) 13,74,185   5  A154357(k)=25*k^2-14*k+2
+%e A334116 7) (3),14,33   4  A033991(k)=k*(4*k-1)       4
+%e A334116 8) (5),18,39   2  A007742(k)=k*(4*k+1)
+%e A334116 9) 21,112,275  6  A157265(k)=36*k^2-17*k+2
+%e A334116 10)23,96,219   4  A154376(k)=25*k^2-2*k
+%e A334116 11)27,104,231  2  A154377(k)=25*k^2+2*k
+%e A334116 12)28,299,858  4  A156711(k)=144*k^2-161*k+45
+%e A334116 13)29,338,985  5  A156640(k)=169*k^2+140*k+29
+%e A334116 14)(8),34,78   4  A154516(k)=9*k^2-k
+%e A334116 15)(10),38,84  2  A154517(k)=9*k^2+k
+%e A334116 16)(2),41,130  3  A154355(k)=25*k^2-36*k+13  3
+%e A334116 17)47,192,435  4  A157362(k)=49*k^2-2*k
+%o A334116 (Maxima)
+%o A334116 block([nmax: 100],
+%o A334116 /*saves the first nmax terms in the current directory*/
+%o A334116 algebraic: true, local(coeff), showtime: true,
+%o A334116 fl: openw(sconcat("terms",nmax, ".txt")),
+%o A334116 coeff(w,m):=
+%o A334116   block(a: m, p: 0, s: w, vv:[],
+%o A334116    while a<2*m do
+%o A334116     (p: p+1, s: ratsimp(1/(s-floor(s))), a: floor(s),
+%o A334116      if a<2*m then vv: append(vv, [a])),
+%o A334116    j: floor((p-1)/2),
+%o A334116    if mod(p,2)=0 then v: [1,0,vv[j+1]] else v: [0,1,1],
+%o A334116    for i from j thru 1 step(-1) do
+%o A334116     (h: vv[i], u: [v[1]+h*v[3], v[3], 2*h*v[1]+v[2]+h^2*v[3]], v: u),
+%o A334116    return(v)),
+%o A334116    for n from 1 thru nmax do
+%o A334116     (w: sqrt(n), m: floor(w),
+%o A334116      if w=m then  b: n else
+%o A334116       (v: coeff(w,m),  x: v[1], y: v[2], z: v[3], q: mod(z,2),
+%o A334116        if q=0 then (z: z/2, y: y/2) else x: 2*x,
+%o A334116        fr: (x*m+y)/z, m: m+z, fr: fr+x, b: m^2+fr),
+%o A334116       printf( fl, "~d, ", b)),
+%o A334116       close(fl));
+%o A334116 (Python)
+%o A334116 from sympy import floor, S, sqrt
+%o A334116 def coeff(w,m):
+%o A334116     a, p, s, vv = m, 0, w, []
+%o A334116     while a < 2*m:
+%o A334116         p += 1
+%o A334116         s = S.One/(s-floor(s))
+%o A334116         a = floor(s)
+%o A334116         if a < 2*m:
+%o A334116             vv.append(a)
+%o A334116     j = (p-1)//2
+%o A334116     v = [0,1,1] if p % 2 else [1, 0, vv[j]]
+%o A334116     for i in range(j-1,-1,-1):
+%o A334116         h = vv[i]
+%o A334116         v = [v[0]+h*v[2], v[2], 2*h*v[0]+v[1]+h**2*v[2]]
+%o A334116     return v
+%o A334116 def A334116(n):
+%o A334116     w = sqrt(n)
+%o A334116     m = floor(w)
+%o A334116     if w == m:
+%o A334116         return n
+%o A334116     else:
+%o A334116         x, y, z = coeff(w,m)
+%o A334116         if z % 2:
+%o A334116             x *= 2
+%o A334116         else:
+%o A334116             z //= 2
+%o A334116             y //= 2
+%o A334116         return (m+z)**2+x+(x*m+y)//z # _Chai Wah Wu_, Sep 30 2021, after Maxima code
+%Y A334116 Cf. A002522, A005563, A002378, A013656, A147296, A154357, A033991, A007742, A157265, A154376, A154377, A156711, A156640, A154516, A154517, A154355, A157362.
+%K A334116 nonn
+%O A334116 1,2
+%A A334116 _Gerhard Kirchner_, Apr 14 2020

@@ -1,0 +1,36 @@
+%I A290308 #23 Feb 20 2018 21:11:11
+%S A290308 0,1,10,2,100,101,1000,3,20,1001,10000,102,100000,10001,1010,4,
+%T A290308 1000000,201,10000000,1002,10010,100001,100000000,103,200,1000001,30,
+%U A290308 10002,1000000000,10101,10000000000,5,100010,10000001,10100,202,100000000000,100000001
+%N A290308 Decimal encoding of the prime factorization of n: for n > 0 with prime factorization Product_{i=1..k} prime(i)^e_i, let E_n = (e_k, ..., e_1), replace each nonzero e_i with A052382(e_i) and each zero e_i with "" in E_n to obtain F_n, concatenate the elements of F_n with a "0" inserted after every element except for the last, and interpret in decimal base.
+%C A290308 This sequence is an analog of A156552 for the decimal base.
+%C A290308 This sequence establishes a bijection between the positive numbers and the nonnegative numbers; see A290389 for the inverse sequence.
+%C A290308 The number of runs of consecutive nonzero digits in the decimal representation of a(n) corresponds to the number of distinct prime factors of n.
+%C A290308 a(A003961(n)) = 10 * a(n) for any n > 0.
+%C A290308 a(n) = 0 mod 10 iff n is odd.
+%C A290308 a(prime(n)^k) = A052382(k) * 10^(n-1) for any n > 0 and k > 0 (where prime(n) is the n-th prime).
+%C A290308 a(prime(n)#) = Sum_{k=1..n} 100^(k-1) for any n > 0 (where prime#(n) = A002110(n)).
+%H A290308 Rémy Sigrist, <a href="/A290308/b290308.txt">Table of n, a(n) for n = 1..5000</a>
+%H A290308 <a href="/index/Per#IntegerPermutation">Index entries for sequences that are permutations of the natural numbers</a>
+%e A290308 For n = 5120 = 5^1 * 3^0 * 2^10:
+%e A290308 - E_5120 = (1, 0, 10),
+%e A290308 - F_5120 = ("1", "", "11"),
+%e A290308 - a(5120) = 10011.
+%e A290308 For n = 5040 = 7^1 * 5^1 * 3^2 * 2^4:
+%e A290308 - E_5040 = (1, 1, 2, 4),
+%e A290308 - F_5040 = ("1", "1", "2", "4"),
+%e A290308 - a(5040) = 1010204.
+%t A290308 f[n_] := Function[m, Sum[(1 + Mod[Floor[(8 n + 1 - 9^m)/(8*9^j)], 9]) 10^j, {j, 0, m - 1}]]@ Floor@ Log[9, 8 n + 1]; Table[If[n == 1, 0, With[{s = FactorInteger[n] /. {p_, e_} /; p > 0 :> If[p > 1, PrimePi@ p -> f@ e]}, Function[t, FromDigits@ Flatten@ Reverse@ Riffle[#, ConstantArray[0, Length@ #]] &[ReplacePart[t, s] /. 0 -> {}]]@ConstantArray[0, Max[s[[All, 1]] ]]]], {n, 38}] (* _Michael De Vlieger_, Jul 31 2017 *)
+%o A290308 (PARI) a(n) = {
+%o A290308            my (f = factor(n), v = 0, nz = 0);
+%o A290308            for (i=1, #f~,
+%o A290308                    my (x = A052382(f[i,2]));
+%o A290308                    v += x * 10^(nz + prime pi(f[i,1]) - 1);
+%o A290308                    nz += #digits(x);
+%o A290308            );
+%o A290308            return (v)
+%o A290308        }
+%Y A290308 Cf. A002110, A003961, A052382, A156552, A290389 (inverse).
+%K A290308 nonn,base
+%O A290308 1,3
+%A A290308 _Rémy Sigrist_, Jul 27 2017

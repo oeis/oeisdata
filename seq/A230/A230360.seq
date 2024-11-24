@@ -1,0 +1,66 @@
+%I A230360 #45 Jun 11 2019 22:33:10
+%S A230360 2,1,0,3,6,3,0,5,12,11,0,5,12,0,0,5,0,0,0,48,14,0,61,188,83,0,81,232,
+%T A230360 268,0,0,650,0,0,622,299,0,0,0,501,0,0,2655,602,0,6429,8990,7856,0,
+%U A230360 26187,17898,3744,0,40300,16395,0,0,0,0,0,0,124876,173552,0,0
+%N A230360 a(n) is the number of base-4 n-digit numbers requiring only binary digits in bases 3 and 4.
+%C A230360 0 is included to mesh with the earlier A146025 ({0, 1, 82000}: the values in decimal with top base 4 here replaced by 5, conjectured complete).  It appears unlikely, empirically, that this sequence has a last positive term, and a heuristic approximation of terms is likely not difficult.
+%C A230360 The numbers here are the counts of members of A000695 also occurring in A005836 and being n digits in length in base-4.
+%H A230360 Stuart A. Burrell, Han Yu, <a href="https://arxiv.org/abs/1905.00832">Digit expansions of numbers in different bases</a>, arXiv:1905.00832 [math.NT], 2019.
+%e A230360 The first 8 values are 0, 1, 4, 81, 84, 85, 256 and 273--0, 1, 11, 10000, 10010, 10011, 10000111 and 10001010 in base 3, and 0, 1, 10, 1101, 1110, 1111, 10000 and 10101 in base 4; and, from the base-4 listing, a(1)=2, a(2)=1, a(3)=0, a(4)=3, and a(5) is at least 2.
+%t A230360 MapAt[# + 1 &, Array[Count[FromDigits[#, 4] & /@ IntegerDigits[Range[2^(# - 1), 2^# - 1], 2], _?(DigitCount[#, 3][[2]] == 0 &)] &, 20], 1] (* _Michael De Vlieger_, Jun 11 2019 *)
+%o A230360 (PARI)
+%o A230360 {
+%o A230360 \\ This program finds the number of d-digit base B>b\\
+%o A230360 \\ numbers not requiring digits beyond those of base b\\
+%o A230360 \\ for bases b+1 through B. It runs a check in reverse\\
+%o A230360 \\ down to base b+1, maintaining additions not yet done\\
+%o A230360 \\ in vector S, where the digits in each base are kept\\
+%o A230360 \\ in matrix N.  The value itself is kept as n, at each\\
+%o A230360 \\ new base checked for n, the value in S is transfered\\
+%o A230360 \\ to variable t; with the check being done of whether\\
+%o A230360 \\ the criterion is satisfied for n in the base under\\
+%o A230360 \\ consideration.  A flag f is used to see if n passed\\
+%o A230360 \\ for all bases or there was a break.  If pass, then\\
+%o A230360 \\ count variable c is incremented (as is n) for the\\
+%o A230360 \\ next run through bases.  At each addition, a check\\
+%o A230360 \\ of whether the base is B and the number of digits\\
+%o A230360 \\ changes is done, and if so a new term is output.\\
+%o A230360 \\ pos and POS are variables for the digit-positions\\
+%o A230360 \\ under consideration in additions essentially mimic-\\
+%o A230360 \\ king hand addition.  Flag g identifies whether or\\
+%o A230360 \\ not a large addition is warranted by virtue of an\\
+%o A230360 \\ addition resulting in a digit larger than b-1, the\\
+%o A230360 \\ leftmost of these being the point from which this\\
+%o A230360 \\ addition is made using variable s calculated four\\
+%o A230360 \\ lines above the bottom one of the program.  This \\
+%o A230360 \\ program is readily modified  to store a smaller #\\
+%o A230360 \\ of digits (D), change the b and B values, and print\\
+%o A230360 \\ specific n values as desired.\\
+%o A230360 b=2;B=4;d=1;c=1;D=10000;
+%o A230360 N=matrix(B-b,D);n=1;S=vector(B-b,x,1);
+%o A230360 while(1,
+%o A230360   f=1;forstep(i=B,b+1,-1,
+%o A230360     t=S[i-b];if(t,
+%o A230360       S[i-b]=0;pos=0;ca=0;
+%o A230360       while(t,
+%o A230360         pos++;N[i-b,pos]+=t%i+ca;
+%o A230360         if(N[i-b,pos]>=i,ca=1;N[i-b,pos]-=i,ca=0);
+%o A230360         t\=i);
+%o A230360       if(ca,pos++;N[i-b,pos]++;if(i==B,if(pos==d+1,
+%o A230360             print1(c",");d++;c=0)));
+%o A230360       POS=pos;g=1;
+%o A230360       while(POS,
+%o A230360         if(N[i-b,POS]>=b,g=0;break(),POS--));
+%o A230360       if(g==0,
+%o A230360         f=0;POS++;while(N[i-b,POS]==b-1,POS++);
+%o A230360         N[i-b,POS]++;for(j=1,POS-1,N[i-b,j]=0);
+%o A230360         s=i^(POS-1)-n%(i^(POS-1));
+%o A230360         for(j=1,B-b,if(j!=i-b,S[j]+=s));
+%o A230360         if(i==B,if(POS==d+1,print1(c",");d++;c=0));
+%o A230360         n+=s;break())));
+%o A230360   if(f,c++;n++;S=vector(B-b,x,1)))
+%o A230360 }
+%Y A230360 Cf. A146025, A005836, A000695
+%K A230360 nonn,base,uned
+%O A230360 1,1
+%A A230360 _James G. Merickel_, Oct 16 2013

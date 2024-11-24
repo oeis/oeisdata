@@ -1,0 +1,41 @@
+%I A246522 #24 Nov 22 2023 08:16:44
+%S A246522 1,1,0,1,1,0,1,1,3,0,1,1,4,16,0,1,1,3,25,125,0,1,1,4,18,218,1296,0,1,
+%T A246522 1,3,25,157,2451,16807,0,1,1,4,16,224,1776,33832,262144,0,1,1,3,27,
+%U A246522 125,2601,24687,554527,4782969,0,1,1,4,16,250,1320,37072,407464,10535100,100000000,0
+%N A246522 Number A(n,k) of endofunctions on [n] whose cycle lengths are divisors of k; square array A(n,k), n>=0, k>=0, read by antidiagonals.
+%H A246522 Alois P. Heinz, <a href="/A246522/b246522.txt">Antidiagonals n = 0..140, flattened</a>
+%F A246522 E.g.f. of column k: exp(Sum_{d|k} (-LambertW(-x))^d/d).
+%e A246522 Square array A(n,k) begins:
+%e A246522   1,     1,     1,     1,     1,     1,     1, ...
+%e A246522   0,     1,     1,     1,     1,     1,     1, ...
+%e A246522   0,     3,     4,     3,     4,     3,     4, ...
+%e A246522   0,    16,    25,    18,    25,    16,    27, ...
+%e A246522   0,   125,   218,   157,   224,   125,   250, ...
+%e A246522   0,  1296,  2451,  1776,  2601,  1320,  2951, ...
+%e A246522   0, 16807, 33832, 24687, 37072, 17671, 42552, ...
+%p A246522 with(numtheory):
+%p A246522 egf:= k-> exp(add((-LambertW(-x))^d/d, d=divisors(k))):
+%p A246522 A:= (n, k)-> n!*coeff(series(egf(k), x, n+1), x, n):
+%p A246522 seq(seq(A(n, d-n), n=0..d), d=0..12);
+%p A246522 # second Maple program:
+%p A246522 with(combinat):
+%p A246522 b:= proc(n, i, k) option remember; `if`(n=0, 1, `if`(i<1, 0,
+%p A246522       add(multinomial(n, n-i*j, i$j)/j!*b(n-i*j, i-1, k)*
+%p A246522       (i-1)!^j, j=0..`if`(irem(k, i)=0, n/i, 0))))
+%p A246522     end:
+%p A246522 A:=(n, k)->add(b(j, min(k, j), k)*n^(n-j)*binomial(n-1, j-1), j=0..n):
+%p A246522 seq(seq(A(n, d-n), n=0..d), d=0..12);
+%t A246522 egf[k_] := Exp[Sum[(-ProductLog[-x])^d/d, {d, Divisors[k]}]];
+%t A246522 A[1, 0] = 0; A[0, _] = 1; A[1, _] = 1; A[_, 0] = 0;
+%t A246522 A[n_, k_] := n!*SeriesCoefficient[egf[k], {x, 0, n}];
+%t A246522 Table[Table[A[n, d-n], {n, 0, d}], {d, 0, 10}] // Flatten (* _Jean-François Alcover_, Dec 04 2014, translated from first Maple program *)
+%t A246522 multinomial[n_, k_List] := n!/Times @@ (k!);
+%t A246522 Unprotect[Power]; 0^0 = 1; Protect[Power];
+%t A246522 b[n_, i_, k_] := b[n, i, k] = If[n == 0, 1, If[i < 1, 0, Sum[multinomial[n, Join[{n - i*j}, Table[i, {j}]]]/j!*b[n - i*j, i-1, k]*(i-1)!^j, {j, 0, If[Mod[k, i] == 0, n/i, 0]}]]];
+%t A246522 A[n_, k_] := Sum[b[j, Min[k, j], k]*n^(n-j)*Binomial[n-1, j-1], {j, 0, n}];
+%t A246522 Table[Table[A[n, d-n], {n, 0, d}], {d, 0, 12}] // Flatten (* _Jean-François Alcover_, Nov 22 2023, from 2nd Maple program *)
+%Y A246522 Columns k=0-10 give: A000007, A000272(n+1), A209319, A246523, A246524, A246525, A246526, A246527, A246528, A246529, A246530.
+%Y A246522 Main diagonal gives A246531.
+%K A246522 nonn,tabl
+%O A246522 0,9
+%A A246522 _Alois P. Heinz_, Aug 28 2014

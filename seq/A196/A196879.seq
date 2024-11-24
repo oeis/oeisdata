@@ -1,0 +1,41 @@
+%I A196879 #20 Oct 04 2018 19:49:40
+%S A196879 1,1,1,1,1,1,1,1,1,1,1,1,4,1,1,1,1,3,10,1,1,1,1,6,23,36,1,1,1,1,9,72,
+%T A196879 132,94,1,1,1,1,16,335,1086,729,284,1,1,1,1,36,2220,15265,15076,3987,
+%U A196879 692,1,1,1,1,85,19166,374160,642457,182832,18687,1828,1,1
+%N A196879 Square array A(n,k), n>=0, k>=0, read by antidiagonals: A(n,k) is the number of partitions of n^k into powers of k.
+%H A196879 Alois P. Heinz, <a href="/A196879/b196879.txt">Antidiagonals n = 0..44, flattened</a>
+%F A196879 For k>1: A(n,k) = [x^(n^k)] 1/Product_{j>=0}(1-x^(k^j)).
+%e A196879 A(2,3) = 3, because the number of partitions of 2^3=8 into powers of 3 is 3: [1,1,3,3], [1,1,1,1,1,3], [1,1,1,1,1,1,1,1].
+%e A196879 Square array A(n,k) begins:
+%e A196879   1,  1,  1,   1,     1,      1,  ...
+%e A196879   1,  1,  1,   1,     1,      1,  ...
+%e A196879   1,  1,  4,   3,     6,      9,  ...
+%e A196879   1,  1, 10,  23,    72,    335,  ...
+%e A196879   1,  1, 36, 132,  1086,  15265,  ...
+%e A196879   1,  1, 94, 729, 15076, 642457,  ...
+%p A196879 b:= proc(n, j, k) local nn, r;
+%p A196879       if n<0 then 0
+%p A196879     elif j=0 then 1
+%p A196879     elif j=1 then n+1
+%p A196879     elif n<j then b(n, j, k):= b(n-1, j, k) +b(k*n, j-1, k)
+%p A196879              else nn:= 1 +floor(n);
+%p A196879                   r:= n-nn;
+%p A196879                   (nn-j) *binomial(nn, j) *add(binomial(j, h)
+%p A196879                   /(nn-j+h) *b(j-h+r, j, k) *(-1)^h, h=0..j-1)
+%p A196879       fi
+%p A196879     end:
+%p A196879 A:= proc(n, k) local s, t;
+%p A196879       if k<2 then return 1 fi;
+%p A196879       s:= floor(n^k/k);
+%p A196879       t:= ilog[k](k*s+1);
+%p A196879       b(s/k^(t-1), t, k)
+%p A196879     end:
+%p A196879 seq(seq(A(n, d-n), n=0..d), d=0..15);
+%t A196879 a[_, 0] = a[_, 1] = a[0, _] = a[1, _] = 1; a[n_, k_] := SeriesCoefficient[ 1/Product[ (1 - x^(k^j)), {j, 0, n}], {x, 0, n^k}]; Table[a[n - k, k], {n, 0, 10}, {k, n, 0, -1}] // Flatten (* _Jean-François Alcover_, Dec 09 2013 *)
+%Y A196879 Columns k=0+1, 2-10 give: A000012, A196880, A196881, A196882, A196883, A196884, A196885, A196886, A196887, A196888.
+%Y A196879 Rows n=0+1, 2-10 give: A000012, A196889, A196890, A196891, A196892, A196893, A196894, A196895, A196896, A196897.
+%Y A196879 Main diagonal gives: A145514.
+%Y A196879 Cf. A145515.
+%K A196879 nonn,tabl
+%O A196879 0,13
+%A A196879 _Alois P. Heinz_, Oct 07 2011

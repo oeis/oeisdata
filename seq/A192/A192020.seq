@@ -1,0 +1,37 @@
+%I A192020 #34 Apr 07 2020 23:12:53
+%S A192020 1,3,2,1,7,8,8,4,1,15,22,31,28,17,6,1,31,52,90,112,104,68,30,8,1,63,
+%T A192020 114,225,344,418,388,270,136,47,10,1,127,240,516,908,1331,1568,1464,
+%U A192020 1064,589,240,68,12,1,255,494,1123,2180,3663,5138,5931,5560,4181,2482,1137,388,93,14,1
+%N A192020 Triangle read by rows: T(n,k) is the number of unordered pairs of nodes at distance k in the binomial tree of order n (1 <= k <= 2n-1; entries in row n are the coefficients of the corresponding Wiener polynomial).
+%C A192020 The binomial trees b(k) of order k are ordered trees defined as follows:
+%C A192020 1. b(0) consists of a single node.
+%C A192020 2. For k >= 1, b(k) is obtained from two copies of b(k-1) by linking them in such a way that the root of one is the leftmost child of the root of the other. See the Iyer & Reddy references.
+%C A192020 Row n contains 2n-1 entries.
+%C A192020 _Kevin Ryde_, Sep 14 2019: (Start)
+%C A192020 In the formulas below, the generating function for number of vertices at depth is r(n,t) = (t+1)^n = Sum_{i=0..n} binomial(n,i)*t^i.  The w(n,t) recurrence applied repeatedly is a sum of those, and from which the rational function for w(n,t).
+%C A192020 T(n,k) as sum over j follows from which binomials are put at which indices in the g.f.  Or the direct interpretation is to number vertices v=0 to 2^n-1 inclusive with parent(v) = A129760(v) in the usual way, then suppose a pair of vertices u,v have their highest differing bit at position j, where j=1 as the least significant bit.  One of u or v has a 1-bit at j.  To be distance k apart requires k-1 further 1-bits among the bits below j in u and v, hence binomial(2(j-1),k-1).  The bits above j are the same in u and v and can be any 2^(n-j) (those bits and 0's below are the common ancestor of u,v).
+%C A192020 (End)
+%D A192020 K. Viswanathan Iyer and K. R. Udaya Kumar Reddy, Wiener index of Binomial trees and Fibonacci trees, Int'l. J. Math. Engin. with Comp., Accepted for publication, Sept. 2009.
+%D A192020 T. H. Cormen, C. E. Leiserson and R. L. Rivest: Introduction to Algorithms. MIT Press / McGraw-Hill (1990).
+%H A192020 B. E. Sagan, Y-N. Yeh and P. Zhang, <a href="http://dx.doi.org/10.1002/(SICI)1097-461X(1996)60:5&lt;959::AID-QUA2&gt;3.0.CO;2-W">The Wiener Polynomial of a Graph</a>, Internat. J. of Quantum Chem., 60, 1996, 959-969.
+%H A192020 K. Viswanathan Iyer and K. R. Udaya Kumar Reddy, <a href="http://arxiv.org/abs/0910.4432">Wiener index of binomial trees and Fibonacci trees</a>, arXiv:0910.4432 [cs.DM], 2009.
+%F A192020 T(n,1) = A000225(n) = 2^n - 1.
+%F A192020 T(n,2) = A005803(n+1) = 2^(n+1) - 2*n - 2.
+%F A192020 Sum_{k>=1} k*T(n,k) = A192021(n) (the Wiener indices).
+%F A192020 The Wiener polynomial w(n,t) of the binomial tree of order n satisfies the recurrence relation w(n,t) = 2*w(n-1,t) + t*(r(n-1,t))^2, w(0,t)=0, where r(n,t) is the generating polynomial of the nodes of the binomial tree b(n) with respect to the level of the nodes (for example, r(1,t) = 1 + t for the one-edge tree b(1)= | ; see the Maple program).
+%F A192020 T(n,k) = Sum_{j=1..n} 2^(n-j)*binomial(2*j-2, k-1).
+%F A192020 w(n,t) = Sum_{i=0..n-1} 2^(n-1-i)*t*(t+1)^(2i) = t * ((t+1)^(2n) - 2^n)/((t+1)^2 - 2). - _Kevin Ryde_, Sep 13 2019
+%e A192020 T(2,1)=3, T(2,2)=2, T(2,3)=1 because the binomial tree b(2) is basically the path tree A-B-R-C and we have 3 (AB, BR, RC), 2 (AR, BC), and 1 (AC) pairs of nodes at distances 1, 2, and 3, respectively.
+%e A192020 Triangle starts:
+%e A192020    1;
+%e A192020    3,   2,   1;
+%e A192020    7,   8,   8,   4,   1;
+%e A192020   15,  22,  31,  28,  17,   6,   1;
+%e A192020   31,  52,  90, 112, 104,  68,  30,   8,   1;
+%p A192020 G := 1/(1-z-t*z): Gser := simplify(series(G, z = 0, 11)): for n from 0 to 8 do r[n] := sort(coeff(Gser, z, n)) end do: w[0] := 0: for n to 8 do w[n] := sort(expand(2*w[n-1]+t*r[n-1]^2)) end do: for n to 8 do seq(coeff(w[n], t, k), k = 1 .. 2*n-1) end do; # yields sequence in triangular form
+%t A192020 max = 8; g = 1/(1 - z - t*z); r = CoefficientList[ Series[g, {z, 0, max}], z]; w[0] = 0; w[n_] := w[n] = 2 w[n-1] + t*r[[n]]^2; Flatten[ Table[ Drop[ CoefficientList[ w[n], t], 1], {n, 1, max}]] (* _Jean-François Alcover_, Oct 06 2011, after Maple *)
+%o A192020 (PARI) a(n) = my(s=sqrtint(n),r=n-s^2); sum(i=0,s, 2^(s-i)*binomial(2*i,r)); \\ _Kevin Ryde_, Sep 13 2019
+%Y A192020 Cf. A000225, A005803, A192021.
+%K A192020 nonn,tabf
+%O A192020 0,2
+%A A192020 _Emeric Deutsch_, Jun 22 2011

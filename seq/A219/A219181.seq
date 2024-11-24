@@ -1,0 +1,25 @@
+%I A219181 #15 Feb 12 2017 21:19:56
+%S A219181 1,0,1,1,0,1,0,1,1,1,1,1,1,1,1,1,1,1,2,1,2,1,2,2,2,2,1,2,1,3,1,3,2,4,
+%T A219181 2,4,2,5,2,1,4,1,4,1,4,1,6,2,6,1,6,2,8,4,10,2,1,5,1,6,1,5,2,6,2,10,1,
+%U A219181 9,1,11,4,15,3,14,3,1,6,1,6,1,5,1,10,1,11
+%N A219181 Number of partitions of n into the maximal possible number of distinct prime parts or 0 if there are no such partitions.
+%C A219181 a(n) is the last element of row n of triangle A219180 or 0 if the row is empty. a(n) = 0 iff n in {1,4,6}.
+%H A219181 Alois P. Heinz, <a href="/A219181/b219181.txt">Table of n, a(n) for n = 0..3500</a>
+%F A219181 a(n) = A219180(n,A024936(n)) if A024936(n) >= 0, a(n) = 0 else.
+%e A219181 a(18) = 2 because there are 2 partitions of 18 into 3 distinct prime parts ([2,3,13], [2,5,11]) but no partitions of 18 into more than 3 distinct prime parts.
+%p A219181 with(numtheory):
+%p A219181 b:= proc(n, i) option remember;
+%p A219181       `if`(n=0, [1], `if`(i<1, [], zip((x, y)->x+y, b(n, i-1),
+%p A219181        [0, `if`(ithprime(i)>n, [], b(n-ithprime(i), i-1))[]], 0)))
+%p A219181     end:
+%p A219181 a:= proc(n) local l; l:=b(n,pi(n));
+%p A219181        while nops(l)>0 and l[-1]=0 do
+%p A219181           l:= subsop(-1=NULL, l)
+%p A219181        od;
+%p A219181        `if`(nops(l)=0, 0, l[-1])
+%p A219181     end:
+%p A219181 seq(a(n), n=0..100);
+%t A219181 zip = With[{m = Max[Length[#1], Length[#2]]}, PadRight[#1, m] + PadRight[#2, m]]&; b[n_, i_] := b[n, i] = If[n == 0, {1}, If[i<1, {}, zip[b[n, i-1], Join[{0}, If[Prime[i]>n, {}, b[n-Prime[i], i-1]]]]]]; a[n_] := (l = b[n, PrimePi[n]]; While[Length[l]>0 && l[[-1]] == 0, l = ReplacePart[l, -1 -> Nothing]]; If[Length[l] == 0, 0, l[[-1]]]);  Table[a[n], {n, 0, 100}] (* _Jean-François Alcover_, Feb 12 2017, translated from Maple *)
+%K A219181 nonn,look
+%O A219181 0,19
+%A A219181 _Alois P. Heinz_, Nov 13 2012

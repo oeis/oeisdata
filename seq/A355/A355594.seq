@@ -1,0 +1,39 @@
+%I A355594 #54 Jan 26 2023 10:14:31
+%S A355594 1,2,4,6,16,12,24,48,36,96,72,144,210,180,420,360,504,864,630,1080,
+%T A355594 1512,2160,1260,3150,1890,2520,5040,6300,3780,10080,12600,9450,7560,
+%U A355594 32760,15120,18900,22680,30240,88830,37800,45360,75600,105840,90720,151200,162540,254520
+%N A355594 a(n) is the smallest integer that has exactly n alternating divisors.
+%C A355594 This sequence first differs from A005179 at index 7 where A005179(7) = 64.
+%H A355594 David A. Corneth, <a href="/A355594/b355594.txt">Table of n, a(n) for n = 1..147</a> (first 107 terms from Robert Israel)
+%H A355594 David A. Corneth, <a href="/A355594/a355594.gp.txt">Some upper bounds on a(n)</a>
+%F A355594 a(n) >= A005179(n). - _David A. Corneth_, Jan 25 2023
+%e A355594 16 has 5 divisors: {1, 2, 4, 8, 16} all of which are alternating integers; no positive integer smaller than 16 has five alternating divisors, hence a(5) = 16.
+%e A355594 96 has 12 divisors: {1, 2, 3, 4, 6, 8, 12, 16, 24, 32, 48, 96}, only 24 and 48 are not alternating; no positive integer smaller than 96 has ten alternating divisors, hence a(10) = 96.
+%p A355594 isalt:= proc(n) local L; option remember;
+%p A355594    L:= convert(n,base,10) mod 2;
+%p A355594    L:= L[2..-1]-L[1..-2];
+%p A355594    not member(0,L)
+%p A355594 end proc:
+%p A355594 N:= 50: # for a(1)..a(N)
+%p A355594 V:= Vector(N): count:= 0:
+%p A355594 for n from 1 while count < N do
+%p A355594   w:= nops(select(isalt,numtheory:-divisors(n)));
+%p A355594   if w <= N and V[w] = 0 then V[w]:= n; count:= count+1 fi
+%p A355594 od:
+%p A355594 convert(V,list); # _Robert Israel_, Jan 24 2023
+%t A355594 q[n_] := ! MemberQ[Differences[Mod[IntegerDigits[n], 2]], 0]; f[n_] := DivisorSum[n, 1 &, q[#] &]; seq[len_, nmax_] := Module[{s = Table[0, {len}], c = 0, n = 1, i}, While[c < len && n < nmax, i = f[n]; If[i <= len && s[[i]] == 0, c++; s[[i]] = n]; n++]; s]; seq[50, 10^6] (* _Amiram Eldar_, Jul 08 2022 *)
+%o A355594 (PARI) is(n, d=digits(n))=for(i=2, #d, if((d[i]-d[i-1])%2==0, return(0))); 1; \\ A030141
+%o A355594 a(n) = my(k=1); while (sumdiv(k, d, is(d)) != n, k++); k; \\ _Michel Marcus_, Jul 11 2022
+%o A355594 (Python)
+%o A355594 from itertools import count
+%o A355594 from sympy import divisors
+%o A355594 def A355594(n):
+%o A355594     for m in count(1):
+%o A355594         if sum(1 for k in divisors(m,generator=True) if all(int(a)+int(b)&1 for a, b in zip(str(k),str(k)[1:]))) == n:
+%o A355594             return m # _Chai Wah Wu_, Jul 12 2022
+%Y A355594 Cf. A005179, A030141 (alternating numbers), A355593, A355595, A355596.
+%Y A355594 Similar, but with undulating divisors: A355303.
+%K A355594 nonn,base
+%O A355594 1,2
+%A A355594 _Bernard Schott_, Jul 08 2022
+%E A355594 More terms from _David A. Corneth_, Jul 08 2022

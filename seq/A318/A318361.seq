@@ -1,0 +1,38 @@
+%I A318361 #12 Dec 18 2018 05:10:04
+%S A318361 1,1,0,2,0,1,0,5,1,0,0,4,0,0,0,15,0,5,0,1,0,0,0,16,0,0,8,0,0,2,0,52,0,
+%T A318361 0,0,23,0,0,0,7,0,0,0,0,5,0,0,68,0,1,0,0,0,40,0,1,0,0,0,14,0,0,1,203,
+%U A318361 0,0,0,0,0,0,0,111,0,0,4,0,0,0,0,41,80,0,0
+%N A318361 Number of strict set multipartitions (sets of sets) of a multiset whose multiplicities are the prime indices of n.
+%H A318361 Andrew Howroyd, <a href="/A318361/b318361.txt">Table of n, a(n) for n = 1..500</a>
+%F A318361 a(n) = A050326(A181821(n)).
+%F A318361 a(prime(n)^k) = A188445(n, k). - _Andrew Howroyd_, Dec 17 2018
+%e A318361 The a(24) = 16 sets of sets with multiset union {1,1,2,3,4}:
+%e A318361   {{1},{1,2,3,4}}
+%e A318361   {{1,2},{1,3,4}}
+%e A318361   {{1,3},{1,2,4}}
+%e A318361   {{1,4},{1,2,3}}
+%e A318361   {{1},{2},{1,3,4}}
+%e A318361   {{1},{3},{1,2,4}}
+%e A318361   {{1},{4},{1,2,3}}
+%e A318361   {{1},{1,2},{3,4}}
+%e A318361   {{1},{1,3},{2,4}}
+%e A318361   {{1},{1,4},{2,3}}
+%e A318361   {{2},{1,3},{1,4}}
+%e A318361   {{3},{1,2},{1,4}}
+%e A318361   {{4},{1,2},{1,3}}
+%e A318361   {{1},{2},{3},{1,4}}
+%e A318361   {{1},{2},{4},{1,3}}
+%e A318361   {{1},{3},{4},{1,2}}
+%t A318361 nrmptn[n_]:=Join@@MapIndexed[Table[#2[[1]],{#1}]&,If[n==1,{},Flatten[Cases[FactorInteger[n]//Reverse,{p_,k_}:>Table[PrimePi[p],{k}]]]]];
+%t A318361 sqfacs[n_]:=If[n<=1,{{}},Join@@Table[Map[Prepend[#,d]&,Select[sqfacs[n/d],Min@@#>d&]],{d,Select[Rest[Divisors[n]],SquareFreeQ]}]];
+%t A318361 Table[Length[sqfacs[Times@@Prime/@nrmptn[n]]],{n,90}]
+%o A318361 (PARI)
+%o A318361 permcount(v) = {my(m=1, s=0, k=0, t); for(i=1, #v, t=v[i]; k=if(i>1&&t==v[i-1], k+1, 1); m*=t*k; s+=t); s!/m}
+%o A318361 sig(n)={my(f=factor(n)); concat(vector(#f~, i, vector(f[i, 2], j, primepi(f[i, 1]))))}
+%o A318361 count(sig)={my(r=0, A=O(x*x^vecmax(sig))); for(n=1, vecsum(sig)+1, my(s=0); forpart(p=n, my(q=prod(i=1, #p, 1 + x^p[i] + A)); s+=prod(i=1, #sig, polcoef(q, sig[i]))*(-1)^#p*permcount(p)); r+=(-1)^n*s/n!); r/2}
+%o A318361 a(n)={if(n==1, 1, my(s=sig(n)); if(#s==1, s[1]==1, count(sig(n))))} \\ _Andrew Howroyd_, Dec 18 2018
+%Y A318361 Cf. A007716, A045778, A049311, A050326, A116540, A292432, A292444, A293511.
+%Y A318361 Cf. A318283, A318284, A318286, A318287, A318360, A318361, A318370, A318371.
+%K A318361 nonn
+%O A318361 1,4
+%A A318361 _Gus Wiseman_, Aug 24 2018

@@ -1,0 +1,80 @@
+%I A215244 #61 Oct 27 2019 11:13:15
+%S A215244 1,1,1,2,2,2,2,4,4,3,3,3,4,3,4,8,8,5,4,5,5,5,4,6,8,5,5,6,8,6,8,16,16,
+%T A215244 9,7,9,8,6,6,10,10,6,8,8,7,7,7,12,16,9,7,10,8,8,8,11,16,10,10,11,16,
+%U A215244 12,16,32,32,17,13,17,13,11,11,18,15,11,10,10,12,9,11,20,20,11,10,11,13,13,10,16,14,9,10,12,13,11,13,24,32,17,13,18,14,11,12,19,16,10,13
+%N A215244 a(n) is the number of ways of writing the binary expansion of n as a product (or concatenation) of palindromes.
+%C A215244 "Product" is used here is the usual sense of combinatorics on words.
+%C A215244 The sequence may be arranged into a triangle in which row k contains the 2^k terms [a(2^k), ..., a(2^(k+1)-1)]: (1), (1), (1,2), (2,2,2,4), ... The row sums of this triangle appear to be A063782. - _R. J. Mathar_, Aug 09 2012. I have a proof that A063782 does indeed give the row sums. - _N. J. A. Sloane_, Aug 10 2012
+%C A215244 a(A220654(n)) = n and a(m) < n for m < A220654(n). - _Reinhard Zumkeller_, Dec 17 2012
+%H A215244 N. J. A. Sloane, <a href="/A215244/b215244.txt">Table of n, a(n) for n = 0..10000</a>
+%H A215244 <a href="/index/Bi#binary">Index entries for sequences related to binary expansion of n</a>
+%H A215244 <a href="/index/Pac#palindromes">Index entries for sequences related to palindromes</a>
+%e A215244 a(4)=2 since 4 = 100, and 100 can be written as either 1.0.0 or 1.00.
+%e A215244 a(5)=2 from 1.0.1, 101.
+%e A215244 a(10)=3 from 1.0.1.0, 1.010, 101.1
+%e A215244 Written as a triangle, the sequence is:
+%e A215244 1,
+%e A215244 1,
+%e A215244 1, 2,
+%e A215244 2, 2, 2, 4,
+%e A215244 4, 3, 3, 3, 4, 3, 4, 8,
+%e A215244 8, 5, 4, 5, 5, 5, 4, 6, 8, 5, 5, 6, 8, 6, 8, 16,
+%e A215244 16, 9, 7, 9, 8, 6, 6, 10, 10, 6, 8, 8, 7, 7, 7, 12, 16, 9, 7, 10, 8, 8, 8, 11, 16, 10, 10, 11, 16, 12, 16, 32,
+%e A215244 ...
+%p A215244 isPal := proc(L)
+%p A215244     local d ;
+%p A215244     for d from 1 to nops(L)/2 do
+%p A215244         if op(d,L) <> op(-d,L) then
+%p A215244             return false;
+%p A215244         end if;
+%p A215244     end do:
+%p A215244     return true;
+%p A215244 end proc:
+%p A215244 A215244L := proc(L)
+%p A215244     local a,c;
+%p A215244     a := 0 ;
+%p A215244     if isPal(L) then
+%p A215244         a := 1;
+%p A215244     end if;
+%p A215244     for c from 1 to nops(L)-1 do
+%p A215244         if isPal( [op(1..c,L)] ) then
+%p A215244             a := a+procname([op(c+1..nops(L),L)]) ;
+%p A215244         end if;
+%p A215244     end do:
+%p A215244     return a;
+%p A215244 end proc:
+%p A215244 A215244 := proc(n)
+%p A215244     if n = 1 then
+%p A215244         1;
+%p A215244     else
+%p A215244         convert(n,base,2) ;
+%p A215244         A215244L(%) ;
+%p A215244     end if;
+%p A215244 end proc: # _R. J. Mathar_, Aug 07 2012
+%p A215244 # Caution: the last procedure applies A215244L to the reverse of the binary expansion of n, which is perfectly OK but might cause a problem if the procedure was used in a different problem. - _N. J. A. Sloane_, Aug 11 2012
+%t A215244 palQ[L_] := SameQ[L, Reverse[L]];
+%t A215244 b[L_] := b[L] = Module[{a = palQ[L] // Boole, c}, For[c = 1, c < Length[L], c++, If[palQ[L[[;;c]]], a = a + b[L[[c+1;;]]]]]; a];
+%t A215244 a[n_] := If[n == 1, 1, b[IntegerDigits[n, 2]]];
+%t A215244 a /@ Range[0, 106] (* _Jean-François Alcover_, Oct 27 2019 *)
+%o A215244 (Haskell)
+%o A215244 import Data.Map (Map, singleton, (!), insert)
+%o A215244 import Data.List (inits, tails)
+%o A215244 newtype Bin = Bin [Int] deriving (Eq, Show, Read)
+%o A215244 instance Ord Bin where
+%o A215244    Bin us <= Bin vs | length us == length vs = us <= vs
+%o A215244                     | otherwise              = length us <= length vs
+%o A215244 a215244 n = a215244_list !! n
+%o A215244 a215244_list = 1 : f [1] (singleton (Bin [0]) 1) where
+%o A215244    f bs m | last bs == 1 = y : f (succ bs) (insert (Bin bs) y m)
+%o A215244           | otherwise    = f (succ bs) (insert (Bin bs) y m) where
+%o A215244      y = fromEnum (pal bs) +
+%o A215244          sum (zipWith (\us vs -> if pal us then m ! Bin vs else 0)
+%o A215244                       (init $ drop 1 $ inits bs) (drop 1 $ tails bs))
+%o A215244      pal ds = reverse ds == ds
+%o A215244      succ [] = [0]; succ (0:ds) = 1 : ds; succ (1:ds) = 0 : succ ds
+%o A215244 -- _Reinhard Zumkeller_, Dec 17 2012
+%Y A215244 Cf. A050430, A215245, A215246, A215250, A215253, A215254, A063782.
+%Y A215244 Cf. A206925, A030308.
+%K A215244 nonn,base,look
+%O A215244 0,4
+%A A215244 _N. J. A. Sloane_, Aug 07 2012

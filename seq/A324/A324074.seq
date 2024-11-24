@@ -1,0 +1,32 @@
+%I A324074 #13 Apr 23 2021 05:06:48
+%S A324074 0,0,1,6,48,360,2880,25200,262080,2903040,34473600,439084800,
+%T A324074 5987520000,87178291200,1351263513600,22230464256000,397533007872000,
+%U A324074 7469435990016000,147254595231744000,3041127510220800000,65688354220769280000,1481637322979573760000
+%N A324074 Total number of distorted ancestor-successor pairs in all defective (binary) heaps on n elements.
+%H A324074 Alois P. Heinz, <a href="/A324074/b324074.txt">Table of n, a(n) for n = 0..100</a>
+%H A324074 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/Heap.html">Heap</a>
+%H A324074 Wikipedia, <a href="https://en.wikipedia.org/wiki/Binary_heap">Binary heap</a>
+%F A324074 a(n) = Sum_{k=0..A061168(n)} k * A306393(n,k).
+%p A324074 b:= proc(u, o) option remember; local n, g, l; n:= u+o;
+%p A324074       if n=0 then 1
+%p A324074     else g:= 2^ilog2(n); l:= min(g-1, n-g/2); expand(
+%p A324074          add(x^(n-j)*add(binomial(j-1, i)*binomial(n-j, l-i)*
+%p A324074          b(i, l-i)*b(j-1-i, n-l-j+i), i=0..min(j-1, l)), j=1..u)+
+%p A324074          add(x^(j-1)*add(binomial(j-1, i)*binomial(n-j, l-i)*
+%p A324074          b(l-i, i)*b(n-l-j+i, j-1-i), i=0..min(j-1, l)), j=1..o))
+%p A324074       fi
+%p A324074     end:
+%p A324074 a:= n-> (p-> add(coeff(p, x, i)*i, i=0..degree(p)))(b(n, 0)):
+%p A324074 seq(a(n), n=0..25);
+%t A324074 b[u_, o_] := b[u, o] = Module[{n, g, l}, n = u + o; If[n == 0, 1,
+%t A324074      g = 2^(Length[IntegerDigits[n, 2]]-1); l = Min[g-1, n-g/2]; Expand[
+%t A324074      Sum[x^(n - j)*Sum[Binomial[j - 1, i]*Binomial[n - j, l - i]*
+%t A324074      b[i, l-i]*b[j-1-i, n-l-j+i], {i, 0, Min[j - 1, l]}], {j, 1, u}] +
+%t A324074      Sum[x^(j - 1)*Sum[Binomial[j - 1, i]*Binomial[n - j, l - i]*
+%t A324074      b[l-i, i]*b[n-l-j+i, j-1-i], {i, 0, Min[j - 1, l]}], {j, 1,o}]]]];
+%t A324074 a[n_] := With[{p=b[n, 0]}, CoefficientList[p, x].Range[0, Exponent[p, x]]];
+%t A324074 a /@ Range[0, 25] (* _Jean-François Alcover_, Apr 23 2021, after _Alois P. Heinz_ *)
+%Y A324074 Cf. A000523, A061168, A306393.
+%K A324074 nonn
+%O A324074 0,4
+%A A324074 _Alois P. Heinz_, Feb 14 2019

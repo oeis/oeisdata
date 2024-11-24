@@ -1,0 +1,77 @@
+%I A297622 #25 Jun 03 2018 02:07:28
+%S A297622 1,1,1,1,2,2,1,3,7,7,1,4,16,42,42,1,5,30,149,429,429,1,6,50,406,2394,
+%T A297622 7436,7436,1,7,77,938,9698,65910,218348,218348,1,8,112,1932,31920,
+%U A297622 403572,3096496,10850216,10850216,1,9,156,3654,90576,1931325,29020904,247587252,911835460,911835460
+%N A297622 Triangle read by rows: a(n,k) is the number of k X n matrices which are the first k rows of an alternating sign matrix of size n.
+%C A297622 Comments: An alternating sign matrix of size n is an n X n matrix of 0's, 1's and -1's such that (a) the sum of each row and column is 1; (b) the nonzero entries in each row and column alternate in sign.  If k < n, we relax the condition on the columns slightly, and require that
+%C A297622 (a) If a column is not all zeros, the first nonzero entry is 1;
+%C A297622 (b) The nonzero entries in each column alternate in sign.
+%C A297622 The second reference gives a sequence of partially ordered sets Phi_n such that the alternating sign matrices of size n are in bijection with the maximal chains of Phi_n.  This sequence gives the number of saturated chains in Phi_n which begin at the root vertex and end at any vertex of height k.
+%D A297622 D. M. Bressoud, Proofs and Confirmations, Camb. Univ. Press, 1999
+%H A297622 Robert G. Wilson v, <a href="/A297622/b297622.txt">Table of n, a(n) for n = 0..104</a>
+%H A297622 P. Terwilliger, <a href="https://arxiv.org/abs/1710.04733">A Poset Phi_n whose maximal chains are in bijection with the n by n alternating sign matrices</a>, arXiv:1710.04733 [math.CO], 2017.
+%F A297622 a(n,0) = 1;
+%F A297622 a(n,1) = n;
+%F A297622 a(n,n-1) = a(n,n) = A005130(n) = Product_{k=0..n-1} (3k+1)!/(n+k)!.
+%e A297622 a(3,3)=7 because there are seven alternating sign matrices of size 3.  Six of these are the permutation matrices, and the seventh is the matrix ((0,1,0),(1,-1,1),(0,1,0)).
+%e A297622 a(n,0)=1 because there is only one possible n X 0 matrix: the empty matrix.
+%e A297622 a(4,4)=42 because there are 42 4 X 4 alternating sign matrices.  If we look only at the first two rows in each of the 42 4 X 4 alternating sign matrices, we get 16 distinct 2 X 4 matrices, and so a(4,2)=16.  The 16 2 X 4 matrices are
+%e A297622   {{0,  0,  0,  1}, {0,  0,  1,  0}},
+%e A297622   {{0,  0,  0,  1}, {0,  1,  0,  0}},
+%e A297622   {{0,  0,  0,  1}, {1,  0,  0,  0}},
+%e A297622   {{0,  0,  1,  0}, {0,  0,  0,  1}},
+%e A297622   {{0,  0,  1,  0}, {0,  1,  0,  0}},
+%e A297622   {{0,  0,  1,  0}, {1,  0,  0,  0}},
+%e A297622   {{0,  1,  0,  0}, {0,  0,  0,  1}},
+%e A297622   {{0,  1,  0,  0}, {0,  0,  1,  0}},
+%e A297622   {{0,  1,  0,  0}, {1,  0,  0,  0}},
+%e A297622   {{1,  0,  0,  0}, {0,  0,  0,  1}},
+%e A297622   {{1,  0,  0,  0}, {0,  0,  1,  0}},
+%e A297622   {{1,  0,  0,  0}, {0,  1,  0,  0}},
+%e A297622   {{0,  0,  1,  0}, {0,  1, -1,  1}},
+%e A297622   {{0,  0,  1,  0}, {1,  0, -1,  1}},
+%e A297622   {{0,  1,  0,  0}, {1, -1,  0,  1}},
+%e A297622   {{0,  1,  0,  0}, {1, -1,  1,  0}}.
+%e A297622 Triangle begins:
+%e A297622 =============================================================================================
+%e A297622 n\k|  0  1   2    3      4       5         6          7           8            9           10
+%e A297622 ---|-----------------------------------------------------------------------------------------
+%e A297622 _0 |  1
+%e A297622 _1 |  1  1
+%e A297622 _2 |  1  2   2
+%e A297622 _3 |  1  3   7    7
+%e A297622 _4 |  1  4  16   42     42
+%e A297622 _5 |  1  5  30  149    429     429
+%e A297622 _6 |  1  6  50  406   2394    7436      7436
+%e A297622 _7 |  1  7  77  938   9698   65910    218348     218348
+%e A297622 _8 |  1  8 112 1932  31920  403572   3096496   10850216    10850216
+%e A297622 _9 |  1  9 156 3654  90576 1931325  29020904  247587252   911835460    911835460
+%e A297622 10 |  1 10 210 6468 229680 7722110 205140540 3586953760 33631201864 129534272700 129534272700
+%e A297622   ...
+%t A297622 (* First we compute the Hasse diagram for Terwilliger's poset as a directed graph object. *)
+%t A297622 ToAlternatingSignList[list_] :=
+%t A297622 Module[{s = 1},
+%t A297622   Table[If[list[[k]] == 0, 0, (s = -s); -s], {k, 1, Length[list]}]]
+%t A297622 AllAlternatingSignRows[n_] :=
+%t A297622 AllAlternatingSignRows[
+%t A297622    n] = (ToAlternatingSignList /@
+%t A297622     Select[Table[IntegerDigits[q, 2, n], {q, 0, 2^n - 1}],
+%t A297622      OddQ[Total[#]] &])
+%t A297622 output[vertex_] :=
+%t A297622 Select[Table[
+%t A297622    vertex + li, {li, AllAlternatingSignRows[Length[vertex]]}],
+%t A297622   And[Min[#] >= 0, Max[#] <= 1] &]
+%t A297622 elist[vertex_] := ((vertex \[DirectedEdge] #) & /@ output[vertex])
+%t A297622 ASMPoset[n_] :=
+%t A297622 ASMPoset[n] =
+%t A297622   Graph[Flatten[
+%t A297622     Table[elist[IntegerDigits[k, 2, n]], {k, 0, 2^n - 1}]]]
+%t A297622 (*Now we compute the number of paths of length k starting at the root vertex.*)
+%t A297622 ASMPosetAdjacencyMatrix[n_] := Normal[AdjacencyMatrix[ASMPoset[n]]]
+%t A297622 Table[Total /@
+%t A297622   First /@ NestList[ASMPosetAdjacencyMatrix[n].# &,
+%t A297622     IdentityMatrix[2^n], n], {n, 1, 10}]
+%Y A297622 Cf. A005130.
+%K A297622 nonn,tabl
+%O A297622 0,5
+%A A297622 _Ben Branman_, Jan 01 2018

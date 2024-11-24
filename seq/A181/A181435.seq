@@ -1,0 +1,60 @@
+%I A181435 #16 Oct 06 2017 07:43:56
+%S A181435 1,-4,-1,0,-1,1,-1,0,0,1,-1,0,-1,1,1,0,-1,0,-1,0,1,1,-1,0,0,1,0,0,-1,
+%T A181435 -1,-1,0,1,1,1,0,-1,1,1,0,-1,-1,-1,0,0,1,-1,0,0,0,1,0,-1,0,1,0,1,1,-1,
+%U A181435 0,-1,1,0,0,1,-1,-1,0,1,-1,-1,0,-1,1,0,0,1
+%N A181435 First column in matrix inverse of a mixed convolution of A052906.
+%C A181435 It appears that except for the second term, the sequence is identical to the Möbius function.
+%H A181435 R. J. Mathar, <a href="/A181435/b181435.txt">Table of n, a(n) for n = 1..1091</a>
+%F A181435 From _Mats Granvik_, Sep 16 2017: (Start)
+%F A181435 a(n) as the matrix inverse of a mixed convolution: Let c = 3 and let the sequence b be defined by the recurrence: b(1) = 1, b(2) = c, b(3) = c^2; for n >= 4, b(n) = c*b(n-1) + b(n-2), so b(n) = A052906(n-1), and let the lower triangular matrix A be: If n >= k then A(n,k) = b(n - k + 1) else A(n,k) = 0, and let B be the lower triangular matrix A051731. Then the matrix inverse (A.B)^-1 will have a(n) as its first column.
+%F A181435 The matrix product T = A.B can be defined as follows: Let c = 3 and the sequence b be defined by the recurrence b(0) = 1, b(1) = 1; for b >= 2, b(n) = c*b(n - 1) + b(n - 2); and let T be the lower triangular matrix defined by the recurrence: T(n, 1) = If n >= 1 then T(n, 1) = b(n) else T(n, 1) = 0; for k >= 2, T(n, k) = If n >= k then (Sum_{i=1..k-1} T(n - i, k - 1) - T(n - i, k)) else 0. (Then the matrix inverse of T will have a(n) as its first column.)
+%F A181435 (End)
+%p A181435 b := proc(n)
+%p A181435     option remember;
+%p A181435     local c;
+%p A181435     c := 3;
+%p A181435     if n <= 3 then
+%p A181435         op(n,[1,c,c^2]) ;
+%p A181435     else
+%p A181435         c*procname(n-1)+procname(n-2) ;
+%p A181435     end if;
+%p A181435 end proc:
+%p A181435 A := proc(n,k)
+%p A181435     if n >= k then
+%p A181435         b(n-k+1) ;
+%p A181435     else
+%p A181435         0 ;
+%p A181435     end if;
+%p A181435 end proc:
+%p A181435 B := proc(n,k)
+%p A181435     if modp(n,k) = 0 then
+%p A181435         1;
+%p A181435     else
+%p A181435         0;
+%p A181435     end if;
+%p A181435 end proc:
+%p A181435 AB := proc(n,k)
+%p A181435     option remember;
+%p A181435     add( A(n,j)*B(j,k),j=1..n) ;
+%p A181435 end proc:
+%p A181435 ABinv := proc(n,k)
+%p A181435     option remember;
+%p A181435     if k > n then
+%p A181435         0;
+%p A181435     elif k = n then
+%p A181435         1;
+%p A181435     else
+%p A181435         -add( AB(n,j)*procname(j,k),j=k..n-1) ;
+%p A181435     end if;
+%p A181435 end proc:
+%p A181435 A181435 := proc(n)
+%p A181435     ABinv(n,1) ;
+%p A181435 end proc:
+%p A181435 for n from 1 do
+%p A181435     printf("%d %d\n",n,ABinv(n,1)) ;
+%p A181435 end do: # _R. J. Mathar_, Oct 06 2017
+%t A181435 Clear[t, n, k, nn, b, A, c]; nn = 77; c = 3; b[0] = 1; b[1] = 1; b[n_] := b[n] = c*b[n - 1] + b[n - 2]; t[n_, 1] = If[n >= 1, b[n], 0]; t[n_, k_] := t[n, k] = If[n >= k, Sum[t[n - i, k - 1], {i, 1, k - 1}] - Sum[t[n - i, k], {i, 1, k - 1}], 0]; MatrixForm[A = Table[Table[t[n, k], {k, 1, nn}], {n, 1, nn}]]; Inverse[A][[All, 1]] (* _Mats Granvik_, Sep 16 2017 *)
+%Y A181435 Cf. A003688, A006190, A013946, A008683, A178536, A181434.
+%K A181435 sign
+%O A181435 1,2
+%A A181435 _Mats Granvik_, Oct 20 2010

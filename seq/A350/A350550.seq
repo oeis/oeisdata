@@ -1,0 +1,45 @@
+%I A350550 #13 Jan 11 2022 21:02:45
+%S A350550 5,3,0,5,3,5,2,0,13,7,5,2911343369048029930623841,11,3,2
+%N A350550 a(n) is the least prime q such that there exists a prime p with p^2 + n = (n+1)*q^2, or 0 if there is no such q.
+%C A350550 a(16) > 10^1000 if it is not 0.
+%C A350550 If it is not 0, then a(16) = A199772(k) where k is the smallest index such that both q = A199772(k) and p = A199773(k) are prime. If such an index exists, a(16) > 10^10000. - _Jon E. Schoenfield_, Jan 11 2022
+%H A350550 Robert Israel, <a href="/A350550/a350550.txt">Table of n, a(n) for n = 1..179</a> with conjectured 0 values as -1.
+%F A350550 A350544(n)^2 + n = (n+1)*a(n)^2 if a(n) > 0.
+%e A350550 a(3) = 0 as the only positive integer solution of p^2 + 3 = 4*q^2 is p=1, q=1, and 1 is not prime.
+%e A350550 a(4) = 5 as 11^2 + 4 = 125 = (4+1)*5^2 with 11 and 5 prime.
+%p A350550 # Returned values of -1 indicate that either a(n) = 0 or a(n) > 10^1000.
+%p A350550 f:= proc(n) local m, x, y, S, cf, i, c, a, b, A, M, Sp;
+%p A350550   m:= n+1;
+%p A350550   if issqr(m) then
+%p A350550     S:= [isolve(x^2+n=m*y^2)];
+%p A350550     S:= map(t -> subs(t, [x, y]), S);
+%p A350550     S:= select(t -> andmap(isprime, t), S);
+%p A350550     if S = [] then return 0
+%p A350550     else return min(map(t -> t[2], S))
+%p A350550     fi;
+%p A350550   fi;
+%p A350550   cf:= NumberTheory:-ContinuedFraction(sqrt(m));
+%p A350550   for i from 1 do
+%p A350550     c:= Convergent(cf, i);
+%p A350550     if numer(c)^2 - m*denom(c)^2 = 1 then break fi
+%p A350550   od;
+%p A350550   a:= numer(c); b:= denom(c);
+%p A350550   A:= <<a, b>|<m*b, a>>;
+%p A350550   M:= floor(sqrt(n)*(1+sqrt(a+b*sqrt(m)))/(2*sqrt(m)));
+%p A350550   S:= select(t -> issqr(m*t^2-m+1), [$0..M]);
+%p A350550   S:= select(t -> igcd(t[1], t[2])=1, map(t -> <sqrt(m*t^2-m+1), t>, S));
+%p A350550   S:= map(t -> (t, <-t[1], t[2]>), S);
+%p A350550   if nops(S) = 0 then return 0 fi;
+%p A350550   for i from 0 do
+%p A350550     Sp:= select(t -> isprime(t[1]) and isprime(t[2]), S);
+%p A350550     if nops(Sp)>0 then return min(map(t -> t[2], Sp)) fi;
+%p A350550     S:= map(t -> A.t, S);
+%p A350550     if min(map(t -> t[2], S))>10^1000 then break fi;
+%p A350550   od;
+%p A350550   -1
+%p A350550 end proc:
+%p A350550 map(f, [$1..20]);
+%Y A350550 Cf. A199772, A199773, A350544.
+%K A350550 nonn,hard,more
+%O A350550 1,1
+%A A350550 _J. M. Bergot_ and _Robert Israel_, Jan 04 2022

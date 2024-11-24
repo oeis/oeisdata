@@ -1,0 +1,41 @@
+%I A266964 #69 Sep 08 2022 08:46:15
+%S A266964 1,-1,-4,-5,-3,23,44,104,70,-93,-465,-1155,-1882,-1904,804,6195,18755,
+%T A266964 33296,47327,35198,-28493,-176199,-453792,-805453,-1126396,-1028297,
+%U A266964 -18994,2946491,8248080,16444480,25436984,30736635,22263981,-16098311,-102681575
+%N A266964 Expansion of Product_{k>=1} (1 - k*x^k)^k.
+%H A266964 Seiichi Manyama, <a href="/A266964/b266964.txt">Table of n, a(n) for n = 0..10000</a> (terms 0..5000 from Vaclav Kotesovec)
+%F A266964 a(0) = 1 and a(n) = -(1/n) * Sum_{k=1..n} (Sum_{d|k} d^(2+k/d)) * a(n-k) for n > 0. - _Seiichi Manyama_, Nov 02 2017
+%F A266964 From _Seiichi Manyama_, Nov 14 2017: (Start)
+%F A266964 A generalized Euler transform.
+%F A266964 Suppose given two sequences f(n) and g(n), n>0, we define a new sequence a(n), n>=0, by Product_{n>0} (1 - g(n)*x^n)^(-f(n)) = a(0) + a(1)*x + a(2)*x^2 + ...
+%F A266964 Since Product_{n>0} (1 - g(n)*x^n)^(-f(n)) = exp(Sum_{n>0} (Sum_{d|n} d*f(d)*g(d)^(n/d))*x^n/n), we see that a(n) is given explicitly by a(n) = (1/n) * Sum_{k=1..n} b(k)*a(n-k) where b(n) = Sum_{d|n} d*f(d)*g(d)^(n/d).
+%F A266964 Examples:
+%F A266964 1. If we set g(n) = 1, we get the usual Euler transform.
+%F A266964 2. If we set f(n) = -h(n) and g(n) = -1, we get the weighout transform (cf. A026007).
+%F A266964 3. If we set f(n) = -n and g(n) = n, we get this sequence.
+%F A266964 (End)
+%p A266964 seq(coeff(series(mul((1-k*x^k)^k,k=1..n),x,n+1), x, n), n = 0 .. 35); # _Muniru A Asiru_, Oct 31 2018
+%t A266964 nmax = 40; CoefficientList[Series[Product[(1-k*x^k)^k, {k, 1, nmax}], {x, 0, nmax}], x]
+%t A266964 (* More efficient program: *) nmax = 40; s = 1-x; Do[s*=Sum[Binomial[k, j]*(-1)^j*k^j*x^(j*k), {j, 0, nmax/k}]; s = Expand[s]; s = Take[s, Min[nmax + 1, Exponent[s, x] + 1, Length[s]]];, {k, 2, nmax}]; Take[CoefficientList[s, x], nmax]
+%o A266964 (PARI) N=66; x='x+O('x^N); Vec(prod(k=1, N, (1-k*x^k)^k)) \\ _Seiichi Manyama_, Nov 18 2017
+%o A266964 (Ruby)
+%o A266964 def s(f_ary, g_ary, n)
+%o A266964   s = 0
+%o A266964   (1..n).each{|i| s += i * f_ary[i] * g_ary[i] ** (n / i) if n % i == 0}
+%o A266964   s
+%o A266964 end
+%o A266964 def A(f_ary, g_ary, n)
+%o A266964   ary = [1]
+%o A266964   a = [0] + (1..n).map{|i| s(f_ary, g_ary, i)}
+%o A266964   (1..n).each{|i| ary << (1..i).inject(0){|s, j| s + a[j] * ary[-j]} / i}
+%o A266964   ary
+%o A266964 end
+%o A266964 def A266964(n)
+%o A266964   A((0..n).map{|i| -i}, (0..n).to_a, n)
+%o A266964 end
+%o A266964 p A266964(50) # _Seiichi Manyama_, Nov 18 2017
+%o A266964 (Magma) m:=50; R<q>:=PowerSeriesRing(Rationals(), m); Coefficients(R! ( (&*[(1-k*q^k)^k: k in [1..m]]) )); // _G. C. Greubel_, Oct 30 2018
+%Y A266964 Cf. A022661, A026007, A266891, A266941, A266971, A296601.
+%K A266964 sign
+%O A266964 0,3
+%A A266964 _Vaclav Kotesovec_, Jan 07 2016

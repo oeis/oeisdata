@@ -1,0 +1,75 @@
+%I A374191 #12 Aug 05 2024 08:24:19
+%S A374191 0,0,1,0,2,1,1,2,0,3,0,3,1,2,4,1,2,4,3,0,5,1,2,0,5,3,6,4,2,1,3,6,4,5,
+%T A374191 0,7,1,2,4,3,6,8,5,0,7,3,1,2,4,5,0,7,8,6,9,1,2,4,3,9,5,10,8,7,0,6,6,1,
+%U A374191 2,4,3,9,5,10,8,7,0,11,1,2,4,3,6,8,5,10,12,9,7,0,11
+%N A374191 Triangle read by rows: T(n) is a permutation of [0, 1, 2, ..., n] subject to an extended Sigrist condition (A280864).
+%C A374191 In a series of submissions (A280864, A280866, A375029, A375030) _Rémy Sigrist_ studies sequences whose terms are locally connected via their prime factors, i.e., where neighbors influence each other in their divisibility.
+%C A374191 Sigrist chooses IN = {1, 2,...} as domain. The triangle discussed here is based on Sigrist's idea but chooses IN = {0, 1, 2,...} as the domain. We recall that all numbers divide 0, but 0 only divides 0. Neither 0 nor 1 have prime factors.
+%C A374191 For a row of the triangle T(n) = [T(n, k) | k=0..n] and for a term t in this row, let 't be its predecessor and t' its successor. The terms of a row are subject to the following two conditions:
+%C A374191 (1) For all k in 1..n-1 and t = T(n, k), t has no prime factor, or it is not the case that there is a prime factor of t such that (p | 't) <=> (p | t'). Expressed more succinctly (in pseudo-Python):
+%C A374191   all(not any((p | 't) <=> (p | t') for p in primefactors(t)) for k = 1..n-1).
+%C A374191 (2) If t = T(n, n), then t has no prime factor or for all prime factors of t, (p | t) => (p | t').
+%C A374191 The row itself must also satisfy two conditions:
+%C A374191 (3) T(n) is a permutation of {0, 1, 2, ..., n}.
+%C A374191 (4) T(n) is the lexicographically earliest list among all lists whose terms satisfy conditions (1) and (2).
+%C A374191 From _Peter Luschny_, Aug 05 2024: (Start)
+%C A374191 On StackExchange (see link), user Bubbler found by exhaustive analysis for n < 29 that only n <= 14 and n = 16 have a solution. Bubbler also states that "since the 4th Ramanujan prime is 29, there are at least four primes that are greater than n/2 (i.e., prime factors that appear only once) when n >= 29 but there are only 3 positions that such primes can go (both sides of 0 and the first element), which proves that there is no solution when n >= 29."
+%C A374191 We set all terms of row 15 equal to 0 by convention to make the sequence finite and full. (End)
+%H A374191 User Bubbler, Comments and solution to challenge: <a href="https://codegolf.stackexchange.com/q/274665/123995">Lexicographically earliest permutation of the initial segment of nonnegative integers subject to divisibility constraints</a>, code golf, StackExchange.
+%e A374191 Triangle starts:
+%e A374191   [ 0] (0)
+%e A374191   [ 1] (0, 1)
+%e A374191   [ 2] (0, 2, 1)
+%e A374191   [ 3] (1, 2, 0, 3)
+%e A374191   [ 4] (0, 3, 1, 2, 4)
+%e A374191   [ 5] (1, 2, 4, 3, 0, 5)
+%e A374191   [ 6] (1, 2, 0, 5, 3, 6,  4)
+%e A374191   [ 7] (2, 1, 3, 6, 4, 5,  0,  7)
+%e A374191   [ 8] (1, 2, 4, 3, 6, 8,  5,  0,  7)
+%e A374191   [ 9] (3, 1, 2, 4, 5, 0,  7,  8,  6,  9)
+%e A374191   [10] (1, 2, 4, 3, 9, 5, 10,  8,  7,  0,  6)
+%e A374191   [11] (6, 1, 2, 4, 3, 9,  5, 10,  8,  7,  0, 11)
+%e A374191   [12] (1, 2, 4, 3, 6, 8,  5, 10, 12,  9,  7,  0, 11)
+%e A374191   [13] (7, 1, 2, 4, 3, 6,  8,  5, 10, 12,  9, 11,  0, 13)
+%e A374191   [14] (2, 1, 3, 6, 4, 5, 10,  8,  7, 14, 12,  9, 11,  0, 13)         (*)
+%e A374191   [15] (0, 0, 0, 0, 0, 0,  0,  0,  0,  0,  0,  0,  0,  0,  0, 0)
+%e A374191   [16](11, 1, 2, 4, 3, 6,  8,  5, 10, 12,  9,  7, 14, 16, 13, 0, 15)  (*)
+%e A374191   (*) Found by Bubbler (see link).
+%e A374191 .
+%e A374191 The terms of T(11, k) alongside their prime factors are:
+%e A374191     k   T(11,k)   prime factors
+%e A374191   --  -------  ---------------
+%e A374191    0     6      2  3
+%e A374191    1     1
+%e A374191    2     2      2
+%e A374191    3     4      2
+%e A374191    4     3         3
+%e A374191    5     9         3
+%e A374191    6     5            5
+%e A374191    7    10      2     5
+%e A374191    8     8      2
+%e A374191    9     7              7
+%e A374191   10     0
+%e A374191   11    11                11
+%o A374191 (Python)
+%o A374191 from sympy import primefactors
+%o A374191 from itertools import permutations
+%o A374191 def test(a: int, b: int, p: int) -> bool:
+%o A374191     return (a % p == 0) == (b % p == 0)
+%o A374191 def isSolution(S: tuple[int,...]) -> bool:
+%o A374191     if len(S) == 1: return True
+%o A374191     if not all(test(S[-2], S[-1], p)
+%o A374191            for p in primefactors(S[-1])):
+%o A374191         return False
+%o A374191     return all(not any(test(S[i-1], S[i+1], p)
+%o A374191            for p in primefactors(S[i]))
+%o A374191            for i in range(1, len(S) - 1))
+%o A374191 def Trow(r: int) -> tuple[int,...] | None:
+%o A374191     C = list(range(r + 1))
+%o A374191     for P in permutations(C):
+%o A374191         if isSolution(P): return P
+%o A374191 for n in range(9): print(Trow(n))
+%Y A374191 Cf. A280864, A280866, A375029, A375030.
+%K A374191 nonn,tabl,fini,full
+%O A374191 0,5
+%A A374191 _Peter Luschny_, Jul 31 2024

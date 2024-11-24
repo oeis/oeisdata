@@ -1,0 +1,24 @@
+%I A278832 #24 Dec 30 2022 02:11:49
+%S A278832 0,0,3,3,10,10,15,15,24,24
+%N A278832 Maximal material difference at the end of the n-th ply of a chess game.
+%C A278832 This sequence uses values of 1, 3, 3, 5 and 9 for a pawn, knight, bishop, rook and queen. The terms give the maximum possible difference of White's material minus Black's material at the n-th ply, i.e., after n half-moves.
+%C A278832 I conjecture that, unless Black is forced to capture a white piece in all of the maximizing positions, every other term will be equal to the preceding one, a(2n) = a(2n-1).
+%C A278832 The sequence is bounded from above by the theoretical maximum of 8 + 4*3 + 2* 5 + 9 = 39, the total value of all of one player's material, plus 8*8 = 64 more points in case all pawns of the "winning side" can be promoted to queens.
+%C A278832 Several variants of this sequence are possible. For example, every other term could give the best possible value for Black, in signed or in absolute value.
+%C A278832 From _Michael S. Branicky_, Dec 29 2022: (Start)
+%C A278832 a(7) = 15 can be achieved with 1. e4 h5 2. Qxh5 e6 3. QxR Qh4 4. QxQ;
+%C A278832 a(9) = 24, with 1. d4 e5 2. dxe5 Nf6 3. exf6 Be7 4. fxe7 f6 5. exd8=Q+.
+%C A278832 Continuing the latter, ... Kf7 6. QxR f5 7. QxB Na6 8. QxR Nb8 9. QxN we see that a(11) >= 29, a(13) >= 32, a(15) >= 37, and a(17) >= 40. (End)
+%H A278832 <a href="/index/Ch#chess">OEIS index to sequences related to chess</a>.
+%e A278832 In the first two half-moves no material can be captured. At its second move, i.e., ply 3, White has a few possibilities of capturing a black knight, e.g., 1. d3 Nh6 2. Bxh6; which yields a material difference of +3 for White. With 5 plies available, White should instead aim to capture a black pawn and Black's queen, as in 1. d3 g5 2. Bxg5 e5 3. Bxd8. This would yield an advantage of 1 + 9 = 10 for White.
+%o A278832 (PARI) /* For illustrative purpose only: yields correct values at least up to n = 6, but too slow for larger n; en-passant, castling and illegal moves (when king in check) are not handled correctly */ {A278832(n,B=concat([B=digits(211107889e8\9*10^32),-B[9..16],-B[1..8],1]),M=concat(vector(64,F,if( B[F]*B[65]>0,Vec(moveGen[abs(B[F])](B,F-1)),[]))))=vecmax(apply(if(n>1,m-> A278832(n-1,makeMove(B,m))-VALUE[VAL_OFFSET+B[m%64+1]], m->-VALUE[B[m%64+1]+VAL_OFFSET]),M))};
+%o A278832    makeMove(B,m)={B[m%64+1]=B[m\64+1];B[m\64+1]=0;B[65]*=-1;B};
+%o A278832    VALUE=[0,-9,-3,-3,-5,-1,0,1,5,3,3,9,0]; VAL_OFFSET=7;
+%o A278832    KING=setunion(ROOK=[-8,-1,1,8], BISHOP=[-9,-7,7,9]);
+%o A278832    moveGen=[pawn(B,F,s8=B[65]<<3,L=List(),F8=F%8,F65=F*65)={F8>0 && B[F+s8]*s8<0 && listput(L,s8-1+F65); F8<7 && B[F+s8+2]*s8<0 && listput(L,s8+1+F65); B[1+F+s8]==0 && listput(L,s8+F65) && F\8==6^(s8<0) && listput(L,s8<<1+F65); L},\
+%o A278832    rook(B,F,d=ROOK,L=List(),T)={ for(i=1,#d,T=F; while(T%8*2!=(d[i]+9)%8*7 && T\8*2!=(d[i]+9)\8*7 && B[1+T+=d[i]]*B[65]<=0,listput(L,T+64*F); B[1+T] && break));L}, knight(B,F)=king(B,F,[-17,-15,-10,-6,6,10,15,17]), bishop(B,F)=rook(B,F,BISHOP), queen(B,F)=rook(B,F,KING), king(B,F,d=KING,L=List(),T)={for(i=1,#d,(T=F+d[i])>=0 && T<64 && (d[i]+2)%8 + F%8 > 1 && (d[i]+2)%8 + F%8<10 && B[1+T]*B[65]<=0 && listput(L,T+64*F));L}]
+%Y A278832 Cf. A278830, A278831 (maximal / minimal number of possible moves at the n-th ply).
+%K A278832 nonn,hard,more,fini
+%O A278832 1,3
+%A A278832 _M. F. Hasler_, Nov 29 2016
+%E A278832 a(3)-a(4) corrected and a(7)-a(10) from _François Labelle_, Nov 29 2016

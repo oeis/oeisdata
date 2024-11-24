@@ -1,0 +1,60 @@
+%I A344005 #83 Jan 21 2024 09:36:37
+%S A344005 1,1,2,3,4,2,6,7,8,4,10,3,12,6,5,15,16,8,18,4,6,10,22,8,24,12,26,7,28,
+%T A344005 5,30,31,11,16,14,8,36,18,12,15,40,6,42,11,9,22,46,15,48,24,17,12,52,
+%U A344005 26,10,7,18,28,58,15,60,30,27,63,25,11,66,16,23,14,70,8,72,36,24,19,21
+%N A344005 a(n) = smallest positive m such that n divides the oblong number m*(m+1).
+%C A344005 a(n) <= A011772(n); equality holds if n is odd.
+%C A344005 It appears that a(n) <= A047994(n).
+%C A344005 a(n) = n-1 if n is a prime power. - _Chai Wah Wu_, Jun 04 2021
+%C A344005 Theorem: a(n) <= n-1; a(n) = n-1 iff n is a prime power; if n is divisible by at least two different primes then a(n) <= n/2 - 1. a(n) >= (sqrt(4*n+1)-1)/2, with equality iff n is twice a triangular number. - _N. J. A. Sloane_, Jul 11 2021
+%C A344005 Comment from _N. J. A. Sloane_, Jul 12 2021: (Start)
+%C A344005 An efficient algorithm for a(n). Suppose a(n) = m. Since gcd(m,m+1) = 1. there are numbers X, Y >= 1 such that n = X*Y, X|m, and Y|m+1. Let m = u*X, m+1 = v*Y = u*X + 1, so u*X - v*Y = -1.
+%C A344005 We can use the Euclidean algorithm to find u and v for a given factorization n = X*Y, except that there is ambiguity in the choice of (u,v), since we can add any multiple of (Y,X) to (u,v) to get other solutions. There is also the possibility that it would be better to have m+1 = u*X and m = v*Y, with u*X - v*Y = 1.
+%C A344005 We can summarize these arguments as follows:
+%C A344005 Theorem: m is the minimum of min(|u|*X, |v|*Y) over all factorizations n = X*Y with gcd(X,Y)=1 and u*X - v*Y = +-1.
+%C A344005 The attached Maple program Findm computes m and returns a possible choice for X and Y.
+%C A344005 The number of possible factorizations of n is 2^(omega(n)-1) - see A007875 and A001221. Since the average order of omega(n) is log log n (Hardy and Wright), this is about log n on the average. For a given pair X,Y, the Euclidean algorithm takes O(log n) word operations (not bit operations) [Bach and Shallit], so the overall complexity is O((log n)^2).
+%C A344005 Note that we can always achieve |u| <= Y or |v| <= X by adding a suitable multiple of (Y,X) to (u,v). (End)
+%D A344005 E. Bach and J. Shallit, Algorithmic Number Theory, Vol. 1: Efficient Algorithms, MIT Press, Cambridge, MA, 1996.
+%D A344005 G. H. Hardy and E. M. Wright, An Introduction to the Theory of Numbers. 3rd ed., Oxford Univ. Press, 1954.
+%H A344005 Antti Karttunen, <a href="/A344005/b344005.txt">Table of n, a(n) for n = 1..10001</a> (first 10000 terms from Jon E. Schoenfield)
+%H A344005 N. J. A. Sloane, <a href="/A344005/a344005.txt">Table of n, a(n) for n = 1..100000</a>
+%H A344005 N. J. A. Sloane, <a href="/A344005/a344005_2.txt">Table of n, a(n) for n = 1..10^6</a>
+%H A344005 N. J. A. Sloane, <a href="/A344005/a344005_10Million.gz">Table of n, a(n) for n = 1..10^7</a> (gzipped file)
+%H A344005 N. J. A. Sloane, <a href="/A344005/a344005_1.txt">The Maple program Findm for computing a(n)</a>
+%F A344005 a(n) = n - A182665(n). - _Antti Karttunen_, Jun 12 2022
+%F A344005 a(n) = A345992(n) * A345998(n). - _Antti Karttunen_, Jan 21 2024
+%p A344005 # To compute the first M terms, from _N. J. A. Sloane_, Jun 18 2021
+%p A344005 with(NumberTheory);
+%p A344005 M:=100000;
+%p A344005 W:=Array(1..M,0);
+%p A344005 W[1]:=1; W[2]:=1; Lo:=[1,2]; # divisors of m
+%p A344005 for m from 2 to M do
+%p A344005 Ln:=Divisors(m+1); # divisors of m+1
+%p A344005   for d1 in Lo do
+%p A344005     for d2 in Ln do
+%p A344005       d:=d1*d2;
+%p A344005       if d<=M and W[d]=0 then W[d]:=m; fi;
+%p A344005     od: # d2
+%p A344005   od: # d1
+%p A344005   Lo:=Ln;
+%p A344005 od: # od m
+%p A344005 WW:=[seq(W[i],i=1..100)];
+%t A344005 Table[m=1;While[!Divisible[m(m+1),n],m++];m,{n,100}] (* _Giorgos Kalogeropoulos_, Jul 29 2021 *)
+%t A344005 spm[n_]:=Module[{m=1},While[!Divisible[m(m+1),n],m++];m]; Array[spm,100] (* _Harvey P. Dale_, Dec 04 2022 *)
+%o A344005 (PARI) a(n) = for(m=1, oo, if((m*(m+1))%n==0, return(m))) \\ _Felix Fröhlich_, Jun 04 2021
+%o A344005 (Python 3.8+)
+%o A344005 from itertools import combinations
+%o A344005 from math import prod
+%o A344005 from sympy import factorint
+%o A344005 from sympy.ntheory.modular import crt
+%o A344005 def A344005(n):
+%o A344005     if n == 1:
+%o A344005         return 1
+%o A344005     plist = [p**q for p, q in factorint(n).items()]
+%o A344005     return n-1 if len(plist) == 1 else int(min(min(crt([m,n//m],[0,-1])[0],crt([n//m,m],[0,-1])[0]) for m in (prod(d) for l in range(1,len(plist)//2+1) for d in combinations(plist,l)))) # _Chai Wah Wu_, Jun 04 2021
+%Y A344005 Cf. A002378, A011772 and A345444 (bisections), A047994, A182665, A344006, A345983 (partial sums), A345988, A345992 [= gcd(a(n), n)], A345998, A346607 [= A047994(n)-a(n)], A346608 (where differs from A047994), A354875, A354918 (parity), A354919 (positions of odd terms), A354921 (where parity of a(n) differs from that of n), A354922 (where parity is same), A354924, A368698 [= a(Doudna(1+n)), see also A368693].
+%Y A344005 See also A001221, A007875.
+%K A344005 nonn
+%O A344005 1,3
+%A A344005 _N. J. A. Sloane_, Jun 04 2021

@@ -1,0 +1,36 @@
+%I A371569 #13 Mar 29 2024 08:48:11
+%S A371569 4259,61643,94307,110063,118171,348149,1037903,1872587,2149403,
+%T A371569 2331859,2450807,2490263,2500847,2521823,2534659,2772179,2788367,
+%U A371569 2789939,3271883,3399707,3550751,3577487,3640859,3861899,3904309,4016219,4063211,4236719,4245239,4368739,4441007,4542779,5033477,5446283
+%N A371569 Primes p such that for all initial conditions (x(0),x(1),x(2),x(3),x(4)) in [0..p-1]^5 except [0,0,0,0,0], the 5-step recurrence x(k) = x(k-1) + x(k-2) + x(k-3) + x(k-4) + x(k-5) (mod p) has the same period, but x^5 - x^4 - x^3 - x^2 - x - 1 is reducible (mod p).
+%C A371569 Terms of A106309 that are not in A371566.
+%C A371569 In each of the first 2000 terms, x^5 - x^4 - x^3 - x^2 - x - 1 splits into linear factors (mod p). Are there any where it does not?
+%H A371569 Robert Israel, <a href="/A371569/b371569.txt">Table of n, a(n) for n = 1..2000</a>
+%H A371569 Robert Israel, <a href="/A371569/a371569.pdf">Linear Recurrences with a Single Minimal Period</a>
+%e A371569 a(3) = 94307 is a term because 94307 is prime, z^5  - z^4 - z^3 - z^2 - z - 1 = (z + 11827)*(z + 78583)*(z + 54610)*(z + 14536)*(z + 29057) (mod 94307), and the recurrence has period 47153 for all initial conditions except (0,0,0,0,0), as -11827, -78583, -54610, -14536, and -29057 all have multiplicative order 47153 (mod 94307).
+%p A371569 filter:= proc(p) local Q, q, F, i, z, d, k, kp, G, alpha;
+%p A371569   if not isprime(p) then return false fi;
+%p A371569   Q:= z^5  - z^4 - z^3 - z^2 - z - 1;
+%p A371569   if Irreduc(Q) mod p then return false fi;
+%p A371569   F:= (Factors(Q) mod p)[2];
+%p A371569   if ormap(t -> t[2]>1, F) then return false fi;
+%p A371569   for i from 1 to nops(F) do
+%p A371569      q:= F[i][1];
+%p A371569      d:= degree(q);
+%p A371569      if d = 1 then kp:= NumberTheory:-MultiplicativeOrder(p+solve(q, z), p);
+%p A371569      else
+%p A371569          G:= GF(p, d, q);
+%p A371569          alpha:= G:-ConvertIn(z);
+%p A371569          kp:= G:-order(alpha);
+%p A371569      fi;
+%p A371569      if i = 1 then k:= kp
+%p A371569      elif kp <> k then return false
+%p A371569      fi;
+%p A371569   od;
+%p A371569   true
+%p A371569 end proc:
+%p A371569 select(filter, [seq(i, i=3 .. 10^7,2)]);
+%Y A371569 Cf. A106309, A371566.
+%K A371569 nonn
+%O A371569 1,1
+%A A371569 _Robert Israel_, Mar 28 2024

@@ -1,0 +1,42 @@
+%I A368836 #11 Jan 14 2024 11:50:01
+%S A368836 1,0,1,0,1,1,1,2,2,1,2,6,6,2,1,6,17,18,8,2,1,21,52,58,30,9,2,1,65,173,
+%T A368836 191,107,37,9,2,1,221,585,666,393,148,39,9,2,1,771,2064,2383,1493,589,
+%U A368836 168,40,9,2,1,2769,7520,8847,5765,2418,718,176,40,9,2,1
+%N A368836 Triangle read by rows where T(n,k) is the number of unlabeled loop-graphs on up to n vertices with k loops and n-k non-loops.
+%C A368836 Are the row sums the same as column k = 1 (shifted left)?
+%C A368836 Yes. When k = 1 there is one loop. Remove the vertex with the loop and add loops to its neighbors. This process is reversible so there is a bijection. - _Andrew Howroyd_, Jan 13 2024
+%H A368836 Andrew Howroyd, <a href="/A368836/b368836.txt">Table of n, a(n) for n = 0..1325</a> (rows 0..50)
+%e A368836 Triangle begins:
+%e A368836    1
+%e A368836    0  1
+%e A368836    0  1  1
+%e A368836    1  2  2  1
+%e A368836    2  6  6  2  1
+%e A368836    6 17 18  8  2  1
+%e A368836   21 52 58 30  9  2  1
+%e A368836 Representatives of the loop-graphs counted by row n = 4:
+%e A368836   {12}{13}{14}{23} {1}{12}{13}{14} {1}{2}{12}{13} {1}{2}{3}{12} {1}{2}{3}{4}
+%e A368836   {12}{13}{24}{34} {1}{12}{13}{23} {1}{2}{12}{34} {1}{2}{3}{14}
+%e A368836                    {1}{12}{13}{24} {1}{2}{13}{14}
+%e A368836                    {1}{12}{23}{24} {1}{2}{13}{23}
+%e A368836                    {1}{12}{23}{34} {1}{2}{13}{24}
+%e A368836                    {1}{23}{24}{34} {1}{2}{13}{34}
+%t A368836 brute[m_]:=First[Sort[Table[Sort[Sort /@ (m/.Rule@@@Table[{(Union@@m)[[i]],p[[i]]},{i,Length[p]}])], {p,Permutations[Range[Length[Union@@m]]]}]]];
+%t A368836 Table[Length[Union[brute /@ Select[Subsets[Subsets[Range[n],{1,2}],{n}],Count[#,{_}]==k&]]], {n,0,4},{k,0,n}]
+%o A368836 (PARI)
+%o A368836 permcount(v) = {my(m=1, s=0, k=0, t); for(i=1, #v, t=v[i]; k=if(i>1&&t==v[i-1], k+1, 1); m*=t*k; s+=t); s!/m}
+%o A368836 edges(v, t) = {prod(i=2, #v, prod(j=1, i-1, my(g=gcd(v[i], v[j])); t(v[i]*v[j]/g)^g )) * prod(i=1, #v, my(c=v[i]); t(c)^((c-1)\2)*if(c%2, 1, t(c/2)))}
+%o A368836 row(n) = {my(s=0, A=1+O(x*x^n)); forpart(p=n, s+=permcount(p) * polcoef(edges(p, i->A + x^i)*prod(i=1, #p, A + (x*y)^p[i]), n)); Vecrev(s/n!)} \\ _Andrew Howroyd_, Jan 13 2024
+%Y A368836 Column k = 0 is A001434.
+%Y A368836 Row sums are A368598.
+%Y A368836 The labeled version is A368928.
+%Y A368836 A000085, A100861, A111924 count set partitions into singletons or pairs.
+%Y A368836 A006125 counts graphs, unlabeled A000088.
+%Y A368836 A006129 counts covering graphs, unlabeled A002494.
+%Y A368836 A014068 counts loop-graphs, unlabeled A000666.
+%Y A368836 A058891 counts set-systems, unlabeled A000612.
+%Y A368836 Cf. A000272, A007717, A062740, A322661, A333331, A368596, A368730, A368835.
+%K A368836 nonn,tabl
+%O A368836 0,8
+%A A368836 _Gus Wiseman_, Jan 11 2024
+%E A368836 a(28) onwards from _Andrew Howroyd_, Jan 13 2024

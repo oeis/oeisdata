@@ -1,0 +1,95 @@
+%I A358056 #63 Jul 08 2023 18:59:36
+%S A358056 1,1,2,4,8,20,48,216,576,1392,7200,43200,184320,1065600,4314240,
+%T A358056 21611520,150958080,573834240,2293401600,32107622400,236017152000,
+%U A358056 2798762803200,22493915136000,189837914112000,1165284436377600,13260174468710400,148874616963072000
+%N A358056 Given a row of n payphones (or phone booths), all initially unused, how many ways are there for n people to choose the payphones, assuming each always chooses one of the most distant payphones from those in use already? We consider here only the distance to the closest neighbor (in contrast to A095236).
+%C A358056 More precisely: The first person chooses any payphone. Thereafter, we assign each unused place a distance metric. All places with one or two direct neighbors get the metric 1, all places where the closest neighbor is one place away get 2 and so forth. Each person chooses a place from the set of places with the greatest metric assigned.
+%C A358056 Each person continues to use his payphone until all are in use.
+%H A358056 Max Alekseyev, <a href="/A358056/b358056.txt">Table of n, a(n) for n = 0..100</a>
+%H A358056 Max A. Alekseyev, <a href="https://arxiv.org/abs/2304.04324">Enumeration of Payphone Permutations</a>, arXiv:2304.04324 [math.CO], 2023.
+%H A358056 Johann Beurich, <a href="https://www.youtube.com/watch?v=a36zHPlbd2g">Das Pissoir-Problem</a>, YouTube video, 2022 (in German).
+%H A358056 Simon Wundling, <a href="https://arxiv.org/abs/2303.18175">About a combinatorial problem with n seats and n people</a>, arXiv:2303.18175 [math.CO], 2023. See p. 15. (German)
+%F A358056 For convenience will we use here some special symbols in this formula section. We will use operations from the tropical semiring:
+%F A358056   (+) -> min(b, c), (*) -> b+c, (/) -> b-c, (^) -> b*c.
+%F A358056 Let's define the tropical polynomials P(x, m, k, n):
+%F A358056   For k = 0: P(x, m, 0, n) = (x(^)2(/)m (+) m)(/)x.
+%F A358056   For k > 0: We find M = min_{x = 1..n} P(x,m,k-1,n), then we find the set x = {X_1, ..., X_n} such that P(x,m,k-1,n) = M. If our set contains any pairs such that X_b = 1 + X_c then eliminate X_b from our set. Now we are ready to define the polynomial for k > 0:
+%F A358056   P(x, m, k, n) = 1(/)( 1(/)P(x, m, k-1, n) (+) x(/)(x(^)2(/)X_1 (+) X_1) (+) .. (+) x(/)(x(^)2(/)X_n (+) X_n) ).
+%F A358056 StartCase(m, n) = EqM(P(x ,m, 0, n))!*2^EqdM(P(x, m, 0, n))*EqM(P(x, m, 1, n))!*2^EqdM(P(x, m, 1, n))* ... *EqM(P(x, m, kmax, n))!*2^EqdM(P(x, m, kmax, n)), kmax is the greatest k where P(x,m,k,n) may evaluate to nonzero values for x in the range 1 to n.
+%F A358056 EqM counts all x in the range 1 to n where P(x, m, k, n) evaluates to the overall minimum in this range of x, but we exclude from our count all solutions x where x-1 is a solution too.
+%F A358056 EqdM counts all x in the range 1 to n where P(x, m, k, n) evaluates to the overall minimum in this range of x and P(x+1, m, k, n) evaluates to the same value.
+%F A358056 a(n) = Sum_{m = 1..n} StartCase(m, n), m is the selection of the first phone in usage.
+%F A358056 StartCase(m+b, n) = StartCase(n-b, n), for b = 0..floor(n/2).
+%F A358056 StartCase(n, 2*n) = (1/2)*StartCase(1, 2*n), for n > 2.
+%F A358056 StartCase(n, 2*n+1) = 2*StartCase(1, 2*n), for n > 1.
+%F A358056 a(n) = floor(n/2)! * Combinations if only floor((n+1)/2) phone users arrive.
+%F A358056 a(n) = Sum_{i=1..n} (b(i,1) + b(n+1-i,1))! * Product_{j=2..n-1} 2^(d(i,j) + d(n+1-i,j)) * (b(i,j) + b(n+1-i,j))! (See A095236 for definition and calculation of b(p,k) and d(p,k)). - _Simon Wundling_, May 21 2023
+%e A358056 a(5) = 20 because:  (x = free, o = occupied).
+%e A358056 We start with 5 free places:
+%e A358056   xxxxx
+%e A358056 Each position may be occupied in the next step:
+%e A358056   xxxxx-+--oxxxx
+%e A358056         |
+%e A358056         +--xoxxx
+%e A358056         |
+%e A358056         +--xxoxx
+%e A358056         |
+%e A358056         +--xxxox
+%e A358056         |
+%e A358056         +--xxxxo
+%e A358056 In the next step we do not have any choice for four out of five cases, but for the case where the central position was occupied first we have two possibilities for the next step:
+%e A358056   xxxxx-+--oxxxx----oxxxo
+%e A358056         |
+%e A358056         +--xoxxx----xoxxo
+%e A358056         |
+%e A358056         +--xxoxx-+--oxoxx
+%e A358056         |        |
+%e A358056         |        ---xxoxo
+%e A358056         |
+%e A358056         +--xxxox----oxxox
+%e A358056         |
+%e A358056         +--xxxxo----oxxxo
+%e A358056 In the next step we have only one choice in the cases where only the outer positions are occupied, we also have only one choice in the two central cases, and in all other cases each free position is a direct neighbor to an already occupied position and therefore equally possible.
+%e A358056   xxxxx-+--oxxxx----oxxxo----oxoxo- two possibilities ( 2! )
+%e A358056         |
+%e A358056         +--xoxxx----xoxxo- six possibilities ( 3! )
+%e A358056         |
+%e A358056         +--xxoxx-+--oxoxx----oxoxo- two possibilities ( 2! )
+%e A358056         |        |
+%e A358056         |        ---xxoxo----oxoxo- two possibilities ( 2! )
+%e A358056         |
+%e A358056         +--xxxox----oxxox- six possibilities ( 3! )
+%e A358056         |
+%e A358056         +--xxxxo----oxxxo----oxoxo- two possibilities ( 2! )
+%e A358056 Thus a(5) = 4*2! + 2*3! = 20.
+%o A358056 (MATLAB)
+%o A358056 function a = A358056( max_n )
+%o A358056     a = 1;
+%o A358056     for n = 2:max_n
+%o A358056         k = 0;
+%o A358056         for m = 1:floor(n/2) % results are symmetrical calculate once *2
+%o A358056             k = k + 2*calcinitialchoice(n,m);
+%o A358056         end
+%o A358056         if mod(n,2) == 1 % case for central phone
+%o A358056             k = k + calcinitialchoice(n,m+1);
+%o A358056         end
+%o A358056         a(n) = k;
+%o A358056     end
+%o A358056 end
+%o A358056 function k = calcinitialchoice(len,pos)
+%o A358056     k = 1;
+%o A358056     s = abs([1:len]-pos); % init vector with metrics
+%o A358056     while max(s) > 1  % run until each unused phone has one used neighbor
+%o A358056         j = find(s == max(s)); d = find(diff(j)==1);
+%o A358056         k = k*2^length(d); % special case two neighbors with same metric
+%o A358056         j(d) = []; l = length(j);
+%o A358056         k = k*factorial(l); % permutation over cases with highest metric
+%o A358056           % update metrics
+%o A358056         s = min([s;abs(repmat([1:len],l,1)-repmat(j',1,len))],[],1);
+%o A358056     end
+%o A358056     k = k*factorial(length(find(s == 1))); % permutation over last unused places
+%o A358056 end
+%Y A358056 Cf. A095236, A095698, A166079, A095912, A095239, A361294, A361295, A361296, A362192.
+%K A358056 nonn
+%O A358056 0,3
+%A A358056 _Thomas Scheuerle_, Oct 28 2022

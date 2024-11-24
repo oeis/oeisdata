@@ -1,0 +1,28 @@
+%I A343149 #28 Jul 29 2021 01:11:25
+%S A343149 2,3,6,7,15,23,24,44,47,48,56,57,58,59,60,61,62,63,79,97,98,113,143,
+%T A343149 167,184,185,186,210,211,212,213,214,215,222,223,247,287,320,321,356,
+%U A343149 381,462,463,474,475,481,482,483,507,508,520,521,522,553,559,604,623
+%N A343149 Floor-powerfree numbers: positive integers not expressible as a (nontrivially) nested floor function using the same positive real slope throughout the nesting.
+%C A343149 Any of these integers can be expressed by a composition of floor functions f(n) = [mu*n] and g(n) = [nu*n], provided that the composition applies at least one f(n) and one g(n), for an irrational slope 1 < mu < 2 and its conjugate nu = 1/(1-1/mu). This follows from the Rayleigh-Beatty theorem. See reference in link. A064801 gives "floor squares."
+%H A343149 J. Parker Shectman, <a href="http://www.ootlinc.com/Fibonacci_Quilt_2_of_3_Cohorts_and_Numeration.pdf">A Quit after Fibonacci, Part 2 of 3: Cohorts, Free Monoids, and Numeration</a>
+%e A343149 Example (of calculation by sieve, see reference in link, p. 221): The first term, 2, while given by the (un-nested) floor [mu] of a real slope 2 <= mu < 3, is too big to result from a twice-nested floor [[mu]mu], thrice-nested floor [mu[mu[mu]]], etc. for mu < 2. Yet for mu >= 2, the integer 2 is too small to result from a twice-nested, thrice-nested, etc. floor. Sequence A064801 = 1,4,5,9,... gives the "floor squares" - positive integers that are expressible as the twice-nested floor [mu[mu]] for a positive real slope mu. Thus 2,3,6,7 and 8 are not "floor squares". Besides 0 and 1, the next smallest integer obtainable from nesting a floor function with real positive slope t times is 2^t. Thus, the sequence of positive "floor cubes" starts with 1 and continues 8,9,12,13,14,27,... Hence, the first level of the sieve catches the floor squares 1,4,5,9,..., the second level of the sieve catches the floor cubes 1,8,... So, 2,3,6, and 7 are the initial floor-powerfree numbers passing the sieve for all t >= 2.
+%t A343149 (*Define the nested floor function.*)
+%t A343149 NestedFloor[slope_, t_] := Nest[Function[Floor[#*slope]], 1, t]
+%t A343149 (*Specify an upper bound on a(n) in DATA.*)
+%t A343149 aMax = 1017;
+%t A343149 (*Calculate the number of floor powers that must be sifted out.*)
+%t A343149 tMax = Ceiling[Log[2, aMax]];
+%t A343149 (*Initialize slopes for each floor power.*)
+%t A343149 slopes = Table[{1}, {tMax}]; slopes[[1]] = Table[n, {n, 1, aMax}];
+%t A343149 (*Initialize "floor-powerful" numbers for each floor power.*)
+%t A343149 powerfuls = Table[{1}, {tMax}]; powerfuls[[1]] = Table[n, {n, 1, aMax}];
+%t A343149 Do[n = 2; While[Last[powerfuls[[t]]] < aMax,
+%t A343149   (*Include slopes from previously sifted power as coarse slopes.*) coarseSlope = slopes[[t - 1]][[n]]; AppendTo[slopes[[t]], coarseSlope]; AppendTo[powerfuls[[t]], NestedFloor[coarseSlope, t]];
+%t A343149   (*Generate fine slopes between the coarse slopes; use floor-powerful numbers from previously sifted floor power as denominators q, start with a numerator p that gives the least fine slope exceeding the current coarse one*) q = powerfuls[[t - 1]][[n]]; p = Floor[coarseSlope*q] + 1; fineSlope = p/q;
+%t A343149   (*Insert fine slope(s) (if any) between the current coarse slope and the next smallest one.*) nextCoarse = slopes[[t - 1]][[n + 1]]; While[fineSlope < nextCoarse, AppendTo[slopes[[t]], fineSlope]; AppendTo[powerfuls[[t]], NestedFloor[fineSlope, t]]; p++; fineSlope = p/q;]; n++], {t, 2, tMax}]
+%t A343149 (*Sift out all floor-powerful numbers to output the floor-powerfree numbers, a(n)*)
+%t A343149 Complement[Table[n, {n, 1, aMax}], Union[Flatten[Rest[powerfuls]]]]
+%Y A343149 Cf. A064801.
+%K A343149 nonn,easy
+%O A343149 1,1
+%A A343149 _J. Parker Shectman_, Apr 06 2021

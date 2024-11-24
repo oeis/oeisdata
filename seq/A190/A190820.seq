@@ -1,0 +1,63 @@
+%I A190820 #38 Apr 14 2021 05:28:39
+%S A190820 2,2,4,8,15,29,55,105,197,367,678,1261,2326,4293,7902,14431,26363,
+%T A190820 47899
+%N A190820 In base-2 lunar arithmetic, number of distinct squares of length 2n+1.
+%H A190820 D. Applegate, M. LeBrun and N. J. A. Sloane, <a href="http://arxiv.org/abs/1107.1130">Dismal Arithmetic</a>, arXiv:1107.1130 [math.NT], 2011. [Note: we have now changed the name from "dismal arithmetic" to "lunar arithmetic" - the old name was too depressing]
+%H A190820 D. Applegate, M. LeBrun, and N. J. A. Sloane, <a href="https://cs.uwaterloo.ca/journals/JIS/VOL14/Sloane/carry2.html">Dismal Arithmetic</a>, J. Int. Seq. 14 (2011) # 11.9.8.
+%H A190820 <a href="/index/Di#dismal">Index entries for sequences related to dismal (or lunar) arithmetic</a>
+%F A190820 a(n) = #{k in A067398: A070939(k)=2*n+1}. - _R. J. Mathar_, Nov 23 2015
+%p A190820 rebase := proc(L)
+%p A190820     add( op(i,L)*2^(i-1),i=1..nops(L)) ;
+%p A190820 end proc:
+%p A190820 dismadd := proc(a,b)
+%p A190820     local adgs,bdgs,alen,blen,L,i ;
+%p A190820     adgs := convert(a,base,2) ;
+%p A190820     bdgs := convert(b,base,2) ;
+%p A190820     alen := nops(adgs) ;
+%p A190820     blen := nops(bdgs) ;
+%p A190820     L := [] ;
+%p A190820     for i from 1 to max(alen,blen) do
+%p A190820         if i <= alen and i <= blen then
+%p A190820             L := [op(L),max(op(i,adgs),op(i,bdgs))] ;
+%p A190820         elif i <= alen then
+%p A190820             L := [op(L),op(i,adgs)] ;
+%p A190820         else
+%p A190820             L := [op(L),op(i,bdgs)] ;
+%p A190820         end if;
+%p A190820     end do:
+%p A190820     rebase(L) ;
+%p A190820 end proc:
+%p A190820 dismult := proc(a,b)
+%p A190820     local bdgs,blen,c,i ;
+%p A190820     if b = 0 then
+%p A190820         return 0;
+%p A190820     end if;
+%p A190820     bdgs := convert(b,base,2) ;
+%p A190820     blen := nops(bdgs) ;
+%p A190820     if blen = 1 then
+%p A190820         # cannot be 0 (already above), so b=1
+%p A190820         return a;
+%p A190820     else
+%p A190820         c := 0 ;
+%p A190820         for i from 1 to blen do
+%p A190820             if op(i,bdgs) <> 0 then
+%p A190820                 c := dismadd(c, 2^(i-1)*a ) ;
+%p A190820             end if;
+%p A190820         end do:
+%p A190820     end if;
+%p A190820     c ;
+%p A190820 end proc:
+%p A190820 A190820 := proc(n)
+%p A190820     local c,sq;
+%p A190820     sq := {} ;
+%p A190820     # length of square is 2*n+1 = 2*len(i)-1, so len(i)=n+1.
+%p A190820     for c from 2^n to 2^(n+1)-1 do
+%p A190820         sq := sq union { dismult(c,c) } ;
+%p A190820     end do:
+%p A190820     nops(sq) ;
+%p A190820 end proc:
+%Y A190820 Cf. A067398, A191342.
+%K A190820 nonn,base,more
+%O A190820 0,1
+%A A190820 _N. J. A. Sloane_, Jun 01 2011
+%E A190820 a(16) and a(17) from _R. J. Mathar_, Nov 23 2015

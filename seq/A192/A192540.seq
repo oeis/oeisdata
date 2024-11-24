@@ -1,0 +1,41 @@
+%I A192540 #32 Jan 17 2024 09:44:53
+%S A192540 1,1,2,6,20,70,255,960,3707,14597,58382,236522,968597,4003061,
+%T A192540 16674858,69936760,295092057,1251747436,5334958079,22834290248,
+%U A192540 98108081192,422986894605,1829443421394,7935301625600,34510975557383,150456011512671,657415433062780
+%N A192540 G.f.: A(x) = Series_Reversion(x*G(x)) where G(x) = Sum_{n>=0} (-x)^(n*(n+1)/2).
+%C A192540 Related q-series: Sum_{n>=0} (-q)^(n*(n+1)/2) = q^(-1/8)*eta(q)*eta(q^4)/eta(q^2) is a g.f. of A106459.
+%H A192540 Vaclav Kotesovec, <a href="/A192540/b192540.txt">Table of n, a(n) for n = 1..1000</a>
+%F A192540 G.f. satisfies:
+%F A192540 (1) A(x) = x/[Sum_{n>=0} (-A(x))^(n*(n+1)/2)].
+%F A192540 (2) A(x) = x/[Product_{n>=1} (1 - A(x)^n)*(1 + A(x)^(2*n))].
+%F A192540 (3) A(x) = x/[Product_{n>=1} (1 - A(x)^(2*n-1))*(1 - A(x)^(4*n))].
+%F A192540 (4) A(x) = x* Product_{n>=1} (1 + A(x)^(2*n-1))/(1 - A(x)^(2*n)).
+%F A192540 (5) A(x) = x* Product_{n>=1} (1 - A(x)^(4*n-2))/(1 - A(x)^n).
+%F A192540 (6) A(x) = x* exp( Sum_{n>=1} -(-A(x))^n/(n*(1 + (-A(x))^n)) ).
+%F A192540 (7) A(x) = x* exp( Sum_{n>=1} A(x)^n*Sum_{d|n} (-1)^(n-d)*d/n ).
+%F A192540 a(n) = [x^n] (1/n)*x/[Product_{k>=1} (1 - x^k)*(1 + x^(2*k))]^n for n >= 1.
+%F A192540 a(n) ~ c * d^n / n^(3/2), where d = 4.6257905683677649210878404538251898489748116820946869227688637924996..., c = 0.1001072494040204029591345793571534412084516176488795... . - _Vaclav Kotesovec_, Aug 17 2015
+%e A192540 G.f.: A(x) = x + x^2 + 2*x^3 + 6*x^4 + 20*x^5 + 70*x^6 + 255*x^7 + ...
+%e A192540 The g.f. A = A(x) satisfies the following relations:
+%e A192540 (1) A = x/(1 - A - A^3 + A^6 + A^10 - A^15 - A^21 + A^28 + A^36 + ...).
+%e A192540 (2) A = x/((1-A)*(1+A^2)* (1-A^2)*(1+A^4)* (1-A^3)*(1+A^6)* (1-A^4)*(1+A^8)*...).
+%e A192540 (3) A = x/((1-A)*(1-A^4)* (1-A^3)*(1-A^8)* (1-A^5)*(1-A^12)* (1-A^7)*(1-A^16)*...).
+%e A192540 (4) A = x*(1+A)/(1-A^2)* (1+A^3)/(1-A^4)* (1+A^5)/(1-A^6) * (1+A^7)/(1-A^8)*...
+%e A192540 (5) A = x*(1-A^2)/(1-A)* (1-A^6)/(1-A^2)* (1-A^10)/(1-A^3)* (1-A^14)/(1-A^4)*...
+%e A192540 (6) A = x*exp(A/(1-A) - A^2/(2*(1+A^2)) + A^3/(3*(1-A^3)) - A^4/(4*(1+A^4)) + ...).
+%e A192540 (7) A = x*exp(A + A^2/2 + 4*A^3/3 + 5*A^4/4 + 6*A^5/5 +...+ A113184(n)*A^n/n + ...).
+%p A192540 nmax:=27: with(gfun): f := proc(x): x*add((-x)^(n*(n+1)/2),n=0..nmax) end: S:=series(f(x),x,nmax): g:= seriestoseries(S,'revogf'): seq(coeftayl (g,x=0,n),n=1..nmax); # _Johannes W. Meijer_, Jul 04 2011
+%t A192540 Rest[CoefficientList[InverseSeries[Series[x*EllipticTheta[2, 0, Sqrt[-x]] / (2*(-x)^(1/8)), {x, 0, 30}], x], x]] (* _Vaclav Kotesovec_, Aug 17 2015 *)
+%t A192540 (* Calculation of constants {d,c}: *) Chop[{1/r, 8*(s/Sqrt[2*Pi*(77 - 8*(-s)^(7/8) *s*(Derivative[0, 0, 2][EllipticTheta][2, 0, Sqrt[-s]] / r))])} /. FindRoot[{2*r == -(-s)^(7/8)*EllipticTheta[2, 0, Sqrt[-s]], 2*(-s)^(11/8)*Derivative[0, 0, 1][EllipticTheta][2, 0, Sqrt[-s]] == 7*r}, {r, 1/5}, {s, 1/2}, WorkingPrecision -> 70]] (* _Vaclav Kotesovec_, Jan 17 2024 *)
+%o A192540 (PARI) {a(n)=polcoeff(serreverse(x*sum(m=0,sqrtint(2*n)+1,(-x)^(m*(m+1)/2)+x*O(x^n))),n)}
+%o A192540 (PARI) {a(n)=local(A=x+x^2);for(i=1,n,A=x/prod(m=1,n,(1 - A^m)*(1 + A^(2*m))+x*O(x^n)));polcoeff(A,n)}
+%o A192540 (PARI) {a(n)=local(A=x+x^2);for(i=1,n,A=x/prod(m=1,n\2,(1 - A^(2*m-1))*(1 - A^(4*m))+x*O(x^n)));polcoeff(A,n)}
+%o A192540 (PARI) {a(n)=local(A=x+x^2);for(i=1,n,A=x*prod(m=1,n\2,(1 + A^(2*m-1))/(1 - A^(2*m)+x*O(x^n))));polcoeff(A,n)}
+%o A192540 (PARI) {a(n)=local(A=x+x^2);for(i=1,n,A=x*prod(m=1,n,(1 - A^(4*m-2))/(1 - A^m+x*O(x^n))));polcoeff(A,n)}
+%o A192540 (PARI) {a(n)=local(A=x+x^2); for(i=1, n, A=x*exp(sum(m=1, n, -(-A+x*O(x^n))^m/(1+(-A)^m)/m))); polcoeff(A, n)}
+%o A192540 (PARI) {a(n)=if(n<1,0,(1/n)*polcoeff(x/prod(k=1,n,(1-x^k)*(1+x^(2*k)+x*O(x^n)))^n,n))}
+%o A192540 (PARI) {a(n)=local(A=x+x^2);for(i=1,n,A=x*exp(sum(m=1,n, A^m*sumdiv(m,d,(-1)^(m-d)*d)/m)+x*O(x^n)));polcoeff(A,n)}
+%Y A192540 Cf. A106459, A006950, A296045.
+%K A192540 nonn
+%O A192540 1,3
+%A A192540 _Paul D. Hanna_, Jul 03 2011

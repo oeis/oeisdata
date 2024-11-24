@@ -1,0 +1,42 @@
+%I A186361 #12 Aug 30 2020 13:36:49
+%S A186361 1,1,2,5,1,16,8,61,59,272,438,10,1385,3445,210,7936,29080,3304,50521,
+%T A186361 264871,47208,280,353792,2605002,658806,11200,2702765,27634817,
+%U A186361 9275838,303380,22368256,315591124,134010580,7016240,15400,199360981,3870632947,2005021876,151003996,1001000
+%N A186361 Triangle read by rows: T(n,k) is the number of permutations of {1,2,...,n} having k cycles that are not up-down. A cycle (b(1), b(2), ...) is said to be up-down if, when written with its smallest element in the first position, it satisfies b(1)<b(2)>b(3)<... .
+%C A186361 Row n contains 1 + floor(n/3) entries.
+%C A186361 Sum of entries in row n is n!.
+%C A186361 T(n,0)=A000111(n+1) (the Euler or up-down numbers).
+%C A186361 Sum(k*T(n,k),k>=0) = A186362(n).
+%H A186361 Alois P. Heinz, <a href="/A186361/b186361.txt">Rows n = 0..200, flattened</a>
+%H A186361 E. Deutsch and S. Elizalde, <a href="http://arxiv.org/abs/0909.5199v1"> Cycle up-down permutations</a>, arXiv:0909.5199v1 [math.CO].
+%F A186361 E.g.f.=(1-sin z)^{s-1}/(1-z)^s.
+%F A186361 The trivariate e.g.f. H(t,s,z) of the permutations of {1,2,...,n} with respect to size (marked by z), number of up-down cycles (marked by t), and number of cycles that are not up-down (marked by s) is given by H(t,s,z)=(1-sin z)^{s-t}/(1-z)^s.
+%e A186361 T(3,1)=1 because we have (123).
+%e A186361 T(4,1)=8 because we have (1432), (1)(234), (1342), (1243), (123)(4), (1234), (124)(3), and (134)(2).
+%e A186361 Triangle starts:
+%e A186361     1;
+%e A186361     1;
+%e A186361     2;
+%e A186361     5,   1;
+%e A186361    16,   8;
+%e A186361    61,  59;
+%e A186361   272, 438, 10;
+%e A186361   ...
+%p A186361 G := (1-sin(z))^(t-1)/(1-z)^t: Gser := simplify(series(G, z = 0, 16)): for n from 0 to 13 do P[n] := sort(expand(factorial(n)*coeff(Gser, z, n))) end do: for n from 0 to 13 do seq(coeff(P[n], t, j), j = 0 .. floor((1/3)*n)) end do; # yields sequence in triangular form
+%p A186361 # second Maple program:
+%p A186361 g:= proc(u, o) option remember;
+%p A186361       `if`(u+o=0, 1, add(g(o-1+j, u-j), j=1..u))
+%p A186361     end:
+%p A186361 b:= proc(n) option remember; expand(`if`(n=0, 1, add(b(n-j)*
+%p A186361       binomial(n-1, j-1)*((j-1)!*x-g(j-1, 0)*(x-1)), j=1..n)))
+%p A186361     end:
+%p A186361 T:= n-> (p-> seq(coeff(p, x, i), i=0..degree(p)))(b(n)):
+%p A186361 seq(T(n), n=0..14);  # _Alois P. Heinz_, Apr 15 2017
+%t A186361 g[u_, o_] := g[u, o] = If[u + o == 0, 1, Sum[g[o-1+j, u-j], {j, 1, u}]];
+%t A186361 b[n_] := b[n] = Expand[If[n == 0, 1, Sum[b[n - j]*Binomial[n-1, j-1] * ((j - 1)!*x - g[j - 1, 0]*(x - 1)), {j, 1, n}]]];
+%t A186361 T[n_] := Function[p, Table[Coefficient[p, x, i], {i, 0, Exponent[p, x]}] ][b[n]];
+%t A186361 Table[T[n], {n, 0, 14}] // Flatten (* _Jean-François Alcover_, Nov 07 2017, after _Alois P. Heinz_ *)
+%Y A186361 Cf. A000111, A186362, A186358.
+%K A186361 nonn,tabf
+%O A186361 0,3
+%A A186361 _Emeric Deutsch_, Feb 28 2011

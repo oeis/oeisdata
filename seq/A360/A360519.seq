@@ -1,0 +1,52 @@
+%I A360519 #46 Mar 07 2023 22:15:58
+%S A360519 1,6,10,35,21,12,20,55,33,18,14,77,99,15,40,22,143,39,24,28,91,65,30,
+%T A360519 34,119,63,36,26,221,51,42,38,95,45,48,44,187,85,50,46,69,57,76,52,
+%U A360519 117,75,70,58,87,93,62,56,105,111,74,68,153,123,82,80,115,161,84,60,145,203,98,54,129,215,100,66,141
+%N A360519 Let C consist of 1 together with all numbers with at least two distinct prime factors; this is the lexicographically earliest infinite sequence {a(n)} of distinct elements of C such that, for n>2, a(n) has a common factor with a(n-1) but not with a(n-2).
+%C A360519 In other words, C contains all positive numbers except powers of primes p^k, k>=1.
+%C A360519 This is a modified version of the Enots Wolley sequence A336957. The modification ensures that the sequence does not contain the prime 2.
+%C A360519 Let Ker(k), the kernel of k, denote the set of primes dividing k. Thus Ker(36} = {2,3}, Ker(1) = {}.
+%C A360519 Theorem: a(1)=1, a(2)=6; thereafter, a(n) is the smallest number m not yet in the sequence such that
+%C A360519 (i) Ker(m) intersect Ker(a(n-1)) is nonempty,
+%C A360519 (ii) Ker(m) intersect Ker(a(n-2)) is empty, and
+%C A360519 (iii) The set Ker(m) \ Ker(a(n-1)) is nonempty.
+%C A360519 Conjecture: The sequence is a permutation of C.
+%H A360519 Scott R. Shannon, <a href="/A360519/b360519.txt">Table of n, a(n) for n = 1..100000</a>
+%H A360519 Michael De Vlieger, <a href="/A360519/a360519_2.png">Log log scatterplot of a(n)</a>, n = 1..2^16, showing squarefree composites (in A120944) in green, numbers neither prime power nor squarefree (in A126706) in blues, highlighting powerful numbers (in A001694 and A286708) in large dark blue.
+%H A360519 Scott R. Shannon, <a href="/A360519/a360519.png">White on black graph of first 10^5 terms</a> [Some aspects of the graph are more visible when black and white are swapped. The green line is a(n) = n]
+%H A360519 Scott R. Shannon, <a href="/A360519/a360519_1.png">Image of the first 1 million terms in color</a>. The terms with a lowest prime factor of 2,3,5,7,9,11,13,17,19,>=23 are colored white, red, orange, yellow, green, blue, indigo, violet, gray respectively.
+%H A360519 N. J. A. Sloane, <a href="/A360519/a360519.pdf">Table showing a(1)-a(13)</a>, also the smallest missing number (smn, A361109 and A361110), binary vectors showing which terms are divisible by the primes 2, 3, 5, 7, 11; and phi, a decimal representation of those binary vectors (A361111).
+%p A360519 with(numtheory);
+%p A360519 N:= 10^4: # to get a(1) to a(n) where a(n+1) is the first term > N
+%p A360519 B:= Vector(N, datatype=integer[4]):
+%p A360519 A[1]:=1; A[2]:=6;
+%p A360519 for n from 3 do
+%p A360519   for k from 10 to N do
+%p A360519     if B[k] = 0 and igcd(k, A[n-1]) > 1 and igcd(k, A[n-2]) = 1 then
+%p A360519           if nops(factorset(k) minus factorset(A[n-1])) > 0 then
+%p A360519        A[n]:= k;
+%p A360519        B[k]:= 1;
+%p A360519        break;
+%p A360519           fi;
+%p A360519     fi
+%p A360519   od:
+%p A360519   if k > N then break; fi;
+%p A360519 od:
+%p A360519 s1:=[seq(A[i], i=1..n-1)];
+%t A360519 nn = 2^12; c[_] = False;
+%t A360519 f[x_] := f[x] = Times @@ FactorInteger[x][[All, 1]];
+%t A360519 MapIndexed[
+%t A360519  Set[{a[First[#2]], c[#1]}, {#1, True}] &, {1, 6}];
+%t A360519  u = 10; i = a[1]; j = a[2];
+%t A360519 Do[k = u;
+%t A360519   While[Nand[! PrimePowerQ[k], ! c[k],
+%t A360519     CoprimeQ[i, k], ! CoprimeQ[j, k], ! Divisible[j, f[k]]], k++];
+%t A360519   Set[{a[n], c[k], i, j}, {k, True, j, f[k]}];
+%t A360519   If[k == u, While[Or[c[u], PrimePowerQ[u]], u++]]
+%t A360519   , {n, 3, nn}];
+%t A360519 Array[a, nn] (* _Michael De Vlieger_, Mar 03 2023 *)
+%Y A360519 Cf. A098550, A336957.
+%Y A360519 For a number of sequences related to this, see A361102 (the sequence C) and the following entries.
+%K A360519 nonn
+%O A360519 1,2
+%A A360519 _Scott R. Shannon_ and _N. J. A. Sloane_, Mar 01 2023

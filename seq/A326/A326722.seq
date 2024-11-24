@@ -1,0 +1,63 @@
+%I A326722 #28 Aug 12 2019 05:33:19
+%S A326722 1,0,1,-1,0,1,0,-1,0,1,2,0,-4,0,2,0,5,0,-10,0,5,-16,0,48,0,-48,0,16,0,
+%T A326722 -61,0,183,0,-183,0,61,272,0,-1088,0,1632,0,-1088,0,272,0,1385,0,
+%U A326722 -5540,0,8310,0,-5540,0,1385,-7936,0,39680,0,-79360,0,79360,0,-39680,0,7936
+%N A326722 T(n, k) = n! * [x^k] [y^n] sec(z)(x + z*sin(z)/y) where z = y*sqrt(x^2 - 1) for 0 <= k <= n+1 and T(-1, 0) = 1, triangle read by rows.
+%F A326722 T(n, k) = A178111(n, k)*A000111(n-1) if n > 1 else k^n, assuming 0 based triangle.
+%F A326722 Exponential generating functions for the columns (n >= 0) are:
+%F A326722 egf_col0(x) = -tanh(x).
+%F A326722 egf_col1(x) = sech(x).
+%F A326722 egf_col2(x) = (tanh(x) + x*sech(x)^2)/2.
+%F A326722 egf_col3(x) = x*tanh(x)*sech(x)/2.
+%F A326722 egf_col4(x) = (tanh(x) + x*(2*x*tanh(x) - 1)*sech(x)^2)/8.
+%F A326722 egf_col5(x) = x*sech(x)*(x + tanh(x) - 2*x*sech(x)^2)/8.
+%F A326722 egf_col6(x) = (3*tanh(x) + x*sech(x)^2*(4*x^2 - 6*x^2*sech(x)^2 - 3))/48.
+%F A326722 A recurrence of the row polynomials based on offset 0 is given by the recurrence of the Euler-Bernoulli-Entringer numbers A008281 combined with Paul Barry's A178111. See the Maple script.
+%e A326722 [-1]     1;
+%e A326722 [ 0]     0,    1;
+%e A326722 [ 1]    -1,    0,     1;
+%e A326722 [ 2]     0,   -1,     0,     1;
+%e A326722 [ 3]     2,    0,    -4,     0,      2;
+%e A326722 [ 4]     0,    5,     0,   -10,      0,    5;
+%e A326722 [ 5]   -16,    0,    48,     0,    -48,    0,    16;
+%e A326722 [ 6]     0,  -61,     0,   183,      0, -183,     0,    61;
+%e A326722 [ 7]   272,    0, -1088,     0,   1632,    0, -1088,     0,    272;
+%e A326722 [ 8]     0, 1385,     0, -5540,      0, 8310,     0, -5540,      0, 1385;
+%e A326722 [ 9] -7936,    0, 39680,     0, -79360,    0, 79360,     0, -39680,    0, 7936;
+%p A326722 z := y*sqrt(x^2 - 1): gf := sec(z)*(x + z*sin(z)/y):
+%p A326722 ser := series(gf, y, 16): cy :=  n -> convert(n!*coeff(ser, y, n), polynom):
+%p A326722 Trow := n -> `if`(n=-1, [1], PolynomialTools:-CoefficientList(cy(n), x)):
+%p A326722 ListTools:-Flatten([seq(Trow(n), n=-1..9)]);
+%p A326722 # Alternatively, compute the row polynomials based on offset 0 by recurrence.
+%p A326722 RowPoly := proc(n) local E, P, L;
+%p A326722     E := proc(n, k) option remember; if k = 0 then return(`if`(n = 0, 1, 0)) fi;
+%p A326722         E(n, k-1) + E(n-1, n-k) end:
+%p A326722     P := proc(n) option remember; `if`(n < 2, x^n,
+%p A326722         x*P(n-1) - ((1 + (-1)^n)/2)*P(n-2)) end:
+%p A326722     # `if`(n = 0, 1, sort(expand(P(n)*E(n-1,n-1)), x, ascending)):
+%p A326722     L := n -> PolynomialTools:-CoefficientList(P(n), x):
+%p A326722     `if`(n = 0, [1], L(n)*E(n-1, n-1)):
+%p A326722 end: for n from 0 to 9 do RowPoly(n) end;
+%p A326722 # Alternative:
+%p A326722 T := (n, k) -> if n <= 1 then k^n else A178111(n, k)*A000111(n-1) fi:
+%p A326722 seq(seq(T(n,k), k=0..n), n=0..10);
+%t A326722 z := y Sqrt[x^2 - 1]; gf := Sec[z](x + z Sin[z]/y); ser := Series[gf, {y, 0, 16}];
+%t A326722 cy[-1] := {1}; cy[n_] := n! Coefficient[ser, y, n];
+%t A326722 row[n_] := CoefficientList[cy[ n], x]; Table[row[n], {n, -1, 9}] // Flatten
+%o A326722 (SageMath)
+%o A326722 def A326722(n,k):
+%o A326722     if n == 0: return 1
+%o A326722     if is_odd(n-k): return 0
+%o A326722     b = I^(n-k)*binomial(floor(n/2),floor(k/2))
+%o A326722     if is_odd(n): return b*I^(n-1)*euler_number(n-1)
+%o A326722     return 2*b*psi(n-1, 1/2)/pi^n
+%o A326722 for n in range(11): print([A326722(n,k) for k in range(n+1)])
+%Y A326722 Cf. A000364, A028296, A000182, A000111, A008281, A178111, A012816, A261042, A326721, A326723, A326724.
+%Y A326722 T(n, 0) = -A155585(n) for n >= 1.
+%Y A326722 T(n, 1) =  A122045(n) for n >= 0.
+%Y A326722 |T(2*n-1, 2)| = A024255(n) for n >= 0.
+%Y A326722 T(n, 3) = A326719(n) for n >= 0.
+%Y A326722 T(n, 4) = A326718(n) for n >= 0.
+%K A326722 sign,tabl
+%O A326722 -1,11
+%A A326722 _Peter Luschny_, Aug 08 2019

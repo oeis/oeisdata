@@ -1,0 +1,100 @@
+%I A364247 #29 Aug 07 2023 09:55:27
+%S A364247 1,2,4,16,5,6,8,24,10,26,48,80,120,168,122,170,226,227,228,172,173,
+%T A364247 174,232,176,128,88,56,90,92,136,93,58,32,13,3,12,11,28,52,84,85,53,
+%U A364247 29,30,31,57,89,130,180,181,131,132,133,184,244,186,245,312,246,314
+%N A364247 Squares visited by the chess king on a spiral-numbered board, where the king moves to the square with the fewest steps to reach 1 using the 3x+1 function. In case of a tie, the king moves to the square with the smallest number.
+%C A364247 The king moves to the square with the fewest steps to reach 1 using the 3x+1 function. The function works as follows: start with the number, and if it is even, divide it by 2. Otherwise, multiply it by 3 and add 1, and repeat the process until you reach 1. If there are two squares with the same number of steps, the king picks the square with the smaller number.
+%C A364247 The sequence contains 511 terms; the king gets stuck because all the adjacent squares are already taken.
+%C A364247 The last square visited is numbered a(511) = 6619.
+%C A364247 The highest-numbered square reached is a(327) = 12853.
+%e A364247 The spiral board:
+%e A364247   17--16--15--14--13   .
+%e A364247    |               |   .
+%e A364247   18   5---4---3  12  29
+%e A364247    |   |       |   |   |
+%e A364247   19   6   1---2  11  28
+%e A364247    |   |           |   |
+%e A364247   20   7---8---9--10  27
+%e A364247    |                   |
+%e A364247   21--22--23--24--25--26
+%e A364247 a(1) = 1, the initial square.
+%e A364247 a(2) = 2 because 2 has the fewest steps to reach 1 applying the function {n/2 if n is even, 3n + 1 if n is odd} repeatedly.
+%o A364247 (Python)
+%o A364247 class Spiral:
+%o A364247     def __init__(self):
+%o A364247         self.spiral = [[1]]
+%o A364247     def increment(self, increment_size):
+%o A364247         if increment_size == 0:  # Recursion stop condition
+%o A364247             return
+%o A364247         size = len(self.spiral)
+%o A364247         count = size ** 2 + 1
+%o A364247         if size % 2 != 0:
+%o A364247             self.spiral.insert(0, [])
+%o A364247             for i in reversed(range(0, size + 1)):
+%o A364247                 self.spiral[i].append(count)
+%o A364247                 count += 1
+%o A364247             for _ in range(size):
+%o A364247                 self.spiral[0].insert(0, count)
+%o A364247                 count += 1
+%o A364247         else:
+%o A364247             self.spiral.append([])
+%o A364247             for i in range(0, size + 1):
+%o A364247                 self.spiral[i].insert(0, count)
+%o A364247                 count += 1
+%o A364247             for _ in range(size):
+%o A364247                 self.spiral[-1].append(count)
+%o A364247                 count += 1
+%o A364247         self.increment(increment_size - 1)
+%o A364247     def find_position(self, target):
+%o A364247         for i, row in enumerate(self.spiral):
+%o A364247             for j, element in enumerate(row):
+%o A364247                 if element == target:
+%o A364247                     return (i, j)
+%o A364247     def find_king_neighbours(self, target):
+%o A364247         i, j = self.find_position(target)
+%o A364247         neighbours_position = (
+%o A364247             (i - 1, j - 1), (i - 1, j), (i - 1, j + 1),
+%o A364247             (i, j - 1), (i, j + 1),
+%o A364247             (i + 1, j - 1), (i + 1, j), (i + 1, j + 1)
+%o A364247         )
+%o A364247         return [self.spiral[i][j] for i, j in neighbours_position]
+%o A364247 def steps(x):
+%o A364247     count = 0
+%o A364247     while x != 1:
+%o A364247         if x % 2 == 0:
+%o A364247             x //= 2
+%o A364247         else:
+%o A364247             x = 3 * x + 1
+%o A364247         count += 1
+%o A364247     return count
+%o A364247 def min_steps(lst):
+%o A364247     """Find the value with the minimal amount of steps with the 3x+1 function (the smallest in case of tie)"""
+%o A364247     if len(lst) == 0:
+%o A364247         raise ValueError("Empty list")
+%o A364247     min_steps_seen, min_seed = float("inf"), float("inf")
+%o A364247     for n in lst:
+%o A364247         step = steps(n)
+%o A364247         if step < min_steps_seen or step == min_steps_seen and n < min_seed:
+%o A364247             min_steps_seen = step
+%o A364247             min_seed = n
+%o A364247     return min_seed
+%o A364247 spiral = Spiral()
+%o A364247 sequence = [1]
+%o A364247 count = 1
+%o A364247 print(count, 1)
+%o A364247 while True:
+%o A364247     count += 1
+%o A364247     spiral.increment(2)
+%o A364247     neighbours = spiral.find_king_neighbours(sequence[-1])
+%o A364247     neighbours = [n for n in neighbours if n not in sequence]
+%o A364247     try:
+%o A364247         next_square = min_steps(neighbours)
+%o A364247     except ValueError:
+%o A364247         print("End of the sequence.")
+%o A364247         break
+%o A364247     sequence.append(next_square)
+%o A364247     print(count, sequence[-1])
+%Y A364247 Cf. A014682, A006577, A335816, A316667, A330008, A329520, A326922, A328928, A328929.
+%K A364247 nonn,walk,fini
+%O A364247 1,2
+%A A364247 _Wagner Martins_, Jul 15 2023

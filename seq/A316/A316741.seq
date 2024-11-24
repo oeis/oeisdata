@@ -1,0 +1,24 @@
+%I A316741 #25 Oct 20 2024 18:36:17
+%S A316741 29,43,67,69,77,115,136,171,173,187,189,219,224,235,237,245,259,267,
+%T A316741 283,285,291,296,317,339,341,344,355,365,368,376,381,403,405,411,413,
+%U A316741 424,427,429,435,437,451,453,485,501,507,536,549,555,568,576,595,597,603,605
+%N A316741 Numbers k with the property that there exists a matrix of squares m = [p^2, q^2; r^2, s^2] such that p, q, r, s are all distinct primes less than k, and det(m) = k.
+%e A316741 29 belongs to this sequence because we have a matrix m = [25, 49; 4, 9] in which each element is the square of a prime smaller than 29, and det(m) = 25*9 - 49*4 = 29.
+%t A316741 t[x_, n_] := Block[{f = FactorInteger@x}, Last /@ f == {1,1} && f[[2,1]] < n]; ok[n_] := Block[{s = List@ ToRules@ Reduce[n == x^2-y^2 && x>y>0, {x,y}, Integers]}, s =!= {} && AnyTrue[ {x,y}/.s, GCD @@ # == 1 && t[#[[1]], n] && t[#[[2]], n] &]]; Select[Range[400], ok] (* _Giovanni Resta_, Jul 12 2018 *)
+%o A316741 (MiniZinc)
+%o A316741 include "globals.mzn";
+%o A316741 int: n = 4;
+%o A316741 %to get all numbers less than 250 of this sequence
+%o A316741 int: max_val = 250;
+%o A316741 array[1..n+1] of var 2..max_val: x;
+%o A316741 % primes between 2..max_val
+%o A316741 set of int: prime = 2..max_val diff { i | i in 2..max_val, j in 2..ceil(sqrt(i)) where i mod j = 0} ;
+%o A316741 set of int: primes;
+%o A316741 primes = prime union {2};
+%o A316741 solve satisfy;
+%o A316741 constraint all_different(x) /\ x[1] in primes /\ x[2] in primes /\ x[3] in primes /\ x[4] in primes /\ forall(i in 1..n) ((x[i]<x[5])) /\ pow(x[1],2)*pow(x[4],2)-pow(x[2],2)*pow(x[3],2) = x[5];
+%o A316741 output [ show(x[5]) ];
+%K A316741 nonn
+%O A316741 1,1
+%A A316741 _Pierandrea Formusa_, Jul 11 2018
+%E A316741 More terms from _Giovanni Resta_, Jul 12 2018

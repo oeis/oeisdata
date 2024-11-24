@@ -1,0 +1,43 @@
+%I A288852 #27 Aug 01 2023 14:57:19
+%S A288852 1,1,1,3,1,9,15,2,1,18,99,193,108,6,1,30,333,1734,4416,5193,2331,240,
+%T A288852 1,45,825,8027,45261,151707,298357,327237,180234,40464,2238,1,63,1710,
+%U A288852 26335,255123,1629474,6995539,20211423,38743020,47768064,35913207,15071019
+%N A288852 Number T(n,k) of matchings of size k in the n X n X n triangular grid; triangle T(n,k), n>=0, 0<=k<=floor(n*(n+1)/4), read by rows.
+%C A288852 The n X n X n triangular grid has n rows with i vertices in row i. Each vertex is connected to the neighbors in the same row and up to two vertices in each of the neighboring rows. The graph has A000217(n) vertices and 3*A000217(n-1) edges altogether.
+%H A288852 Alois P. Heinz, <a href="/A288852/b288852.txt">Rows n = 0..17, flattened</a>
+%H A288852 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/Matching-GeneratingPolynomial.html">Matching-Generating Polynomial</a>
+%H A288852 Wikipedia, <a href="https://en.wikipedia.org/wiki/Matching_(graph_theory)">Matching (graph theory)</a>
+%H A288852 Wikipedia, <a href="https://en.wikipedia.org/wiki/Lattice_graph#Other_kinds">Triangular grid graph</a>
+%F A288852 T(n,floor(n*(n+1)/4)) = A271610(n).
+%F A288852 Sum_{i=0..1} T(n,floor(n*(n+1)/4)-i) = A271612(n).
+%F A288852 Sum_{i=0..2} T(n,floor(n*(n+1)/4)-i) = A271614(n).
+%F A288852 Sum_{i=0..3} T(n,floor(n*(n+1)/4)-i) = A271616(n).
+%e A288852 Triangle T(n,k) begins:
+%e A288852   1;
+%e A288852   1;
+%e A288852   1,  3;
+%e A288852   1,  9,  15,    2;
+%e A288852   1, 18,  99,  193,   108,      6;
+%e A288852   1, 30, 333, 1734,  4416,   5193,   2331,    240;
+%e A288852   1, 45, 825, 8027, 45261, 151707, 298357, 327237, 180234, 40464, 2238;
+%p A288852 b:= proc(l) option remember;  local n, k; n:= nops(l);
+%p A288852       if n=0 then 1
+%p A288852     elif min(l)>0 then b(subsop(-1=NULL, map(h-> h-1, l)))
+%p A288852     else for k to n while l[k]>0 do od; b(subsop(k=1, l))+
+%p A288852          expand(x*(`if`(k<n, b(subsop(k=2, l)), 0)+
+%p A288852          `if`(k<n and l[k+1]=0, b(subsop(k=1, k+1=1, l)), 0)+
+%p A288852          `if`(k>1 and l[k-1]=1, b(subsop(k=1, k-1=2, l)), 0)))
+%p A288852       fi
+%p A288852     end:
+%p A288852 T:= n-> (p-> seq(coeff(p,x,i), i=0..degree(p)))(b([0$n])):
+%p A288852 seq(T(n), n=0..10);
+%t A288852 b[l_] := b[l] = Module[{n = Length[l], k}, Which[n == 0, 1, Min[l] > 0, b[ReplacePart[l - 1, -1 -> Nothing]], True, For[k = 1, k <= n && l[[k]] > 0, k++]; b[ReplacePart[l, k -> 1]] + x*Expand[If[k < n, b[ReplacePart[l, k -> 2]], 0] + If[k < n && l[[k + 1]] == 0, b[ReplacePart[l, {k -> 1, k + 1 -> 1}]], 0] + If[k > 1 && l[[k - 1]] == 1, b[ReplacePart[l, {k -> 1, k - 1 -> 2}]], 0]]]];
+%t A288852 T[n_] := Table[Coefficient[#, x, i], {i, 0, Exponent[#, x]}]&[b[Table[0, n] ]];
+%t A288852 Table[T[n], {n, 0, 10}] // Flatten (* _Jean-François Alcover_, May 24 2018, translated from Maple *)
+%Y A288852 Columns k=0-1 give: A000012, A045943(n-1) for n>0.
+%Y A288852 Row sums give A269869.
+%Y A288852 Last elements of rows give A271610.
+%Y A288852 Cf. A000217, A011848, A271612, A271614, A271616.
+%K A288852 nonn,tabf
+%O A288852 0,4
+%A A288852 _Alois P. Heinz_, Jun 18 2017

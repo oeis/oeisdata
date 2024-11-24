@@ -1,0 +1,42 @@
+%I A227184 #45 May 10 2017 06:54:44
+%S A227184 1,1,1,2,4,1,2,3,9,4,1,8,6,2,3,4,16,9,4,18,16,1,8,27,12,6,2,12,8,3,4,
+%T A227184 5,25,16,9,32,36,4,18,48,81,16,1,32,54,8,27,64,20,12,6,24,24,2,12,36,
+%U A227184 15,8,3,16,10,4,5,6,36,25,16,50,64,9,32,75,144,36,4,72
+%N A227184 a(n) = product of parts of the unordered partition encoded with the runlengths of binary expansion of n.
+%C A227184 a(0) = 1, as 0 is here considered to encode an empty partition {}, and the empty product is one.
+%C A227184 Like A129594, this sequence is based on the fact that compositions (i.e., ordered partitions) can be mapped 1-to-1 to partitions by taking the partial sums of the list where one is subtracted from each composant except the first (originally explained by Marc LeBrun in his Jan 11 2006 post on SeqFan mailing list, with an additional twist involving factorization and prime exponents, cf. A129595). The example below show how this works.
+%C A227184 Compare the scatterplot of this sequence to those of A002487, A243353, A243499 and A253552.
+%H A227184 Antti Karttunen, <a href="/A227184/b227184.txt">Table of n, a(n) for n = 0..8192</a>
+%F A227184 Can be also obtained by mapping with an appropriate permutation from the products of parts of each partition computed for other enumerations similar to A227739:
+%F A227184 a(n) = A243499(A003188(n)).
+%F A227184 a(n) = A003963(A243353(n)).
+%F A227184 a(n) = A243504(1+A075157(n)).
+%e A227184 8 has binary expansion "1000", whose runs have lengths [3,1] when arranged from the least significant to the most significant end. Taking partial sums of 3 and 0, we get 3 and 3, whose product is 9, thus a(8) = 9.
+%e A227184 For 44, in binary "101100", the run lengths are [2,2,1,1] (from the least significant end), and subtracting one from all terms except the first one, we get [2,1,0,0], whose partial sums are [2,3,3,3], and 2*3*3*3 = 54, thus a(44)=54.
+%t A227184 Table[Function[b, Times @@ Accumulate@ Prepend[If[Length@ b > 1, Rest[b] - 1, {}], First@ b]]@ Map[Length, Split@ Reverse@ IntegerDigits[n, 2]], {n, 0, 75}] // Flatten (* _Michael De Vlieger_, May 09 2017 *)
+%o A227184 (Scheme):
+%o A227184 (define (A227184 n) (if (zero? n) 1 (apply * (binexp_to_ascpart n))))
+%o A227184 (define (binexp_to_ascpart n) (let ((runlist (reverse! (binexp->runcount1list n)))) (PARTSUMS (cons (car runlist) (map -1+ (cdr runlist))))))
+%o A227184 (define (binexp->runcount1list n) (if (zero? n) (list) (let loop ((n n) (rc (list)) (count 0) (prev-bit (modulo n 2))) (if (zero? n) (cons count rc) (if (eq? (modulo n 2) prev-bit) (loop (floor->exact (/ n 2)) rc (1+ count) (modulo n 2)) (loop (floor->exact (/ n 2)) (cons count rc) 1 (modulo n 2)))))))
+%o A227184 (define (PARTSUMS a) (cdr (reverse! (fold-left (lambda (psums n) (cons (+ n (car psums)) psums)) (list 0) a))))
+%o A227184 (Python)
+%o A227184 def A227184(n):
+%o A227184   '''Product of parts of the unique unordered partition encoded in the run lengths of the binary expansion of n.'''
+%o A227184   p = 1
+%o A227184   b = n%2
+%o A227184   i = 1
+%o A227184   while (n != 0):
+%o A227184     n >>= 1
+%o A227184     if ((n%2) == b): i += 1
+%o A227184     else:
+%o A227184       b = n%2
+%o A227184       p *= i
+%o A227184   return(p)
+%Y A227184 For n>=1, a(n) gives the product of nonzero terms on row n of table A227189/A227739.
+%Y A227184 Cf. A227183 (gives the corresponding sums).
+%Y A227184 See also A167489 for a similar sequence, which gives the product of parts of the compositions (ordered partitions).
+%Y A227184 Cf. A243499, A003963, A243504 (other such product sequences) and A003188, A243353, A075157 (associated permutations mapping between these schemes).
+%Y A227184 Cf. also A002487, A243353, A253552.
+%K A227184 nonn,base,look
+%O A227184 0,4
+%A A227184 _Antti Karttunen_, Jul 04 2013

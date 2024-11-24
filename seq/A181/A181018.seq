@@ -1,0 +1,89 @@
+%I A181018 #76 Jul 08 2018 19:59:04
+%S A181018 1,4,6,9,16,20,26,36,42,52,64,74,86,100,114,130
+%N A181018 Maximum number of 1's in an n X n binary matrix with no three 1's adjacent in a line along a row, column or diagonally.
+%C A181018 Diagonal of A181019.
+%C A181018 Three or more "1"s may be adjacent in an L-shape or step shape (cf. bottom of first example) or 2 X 2 square (top right of 2nd example) or similar. One possible (not always optimal) solution is therefore to fill the square with 2 X 2 squares of "1"s, separated by rows of "0"s: this yields the lower bound (n - floor(n/3))^2 = ceiling(2n/3)^2 given in FORMULA. I conjecture that this is optimal for n = 2 (mod 3) and that a(n) ~ (2n/3)^2. For n = 3k, the array can be filled with 2k(2k+1) "1"s by repeating the optimal solution for n = 3 on the diagonal, and filling the rest with 2 X 2 blocks separated by rows of "0"s, cf. the 4th example for 6 X 6. - _M. F. Hasler_, Jul 17 2015 [Conjecture proved to be wrong, see below. - _M. F. Hasler_, Jan 19 2016]
+%C A181018 74 <= a(12) <= 77. - _Manfred Scheucher_, Jul 23 2015
+%C A181018 You can repeat a 4 X 2 block [1100; 0011] infinitely in both directions and then crop the needed square. That gives ceiling(n^2/2). It eventually surpasses the solutions we've found so far: at 17*17 the pattern above gives 12*12=144 but this one ceiling(17*17/2)=145. The credit for finding this goes to Jaakko Himberg. - _Juhani Heino_, Aug 11 2015
+%H A181018 Manfred Scheucher, <a href="/A181018/a181018.py.txt">Python Script</a>
+%H A181018 Peter J. Taylor, <a href="/A181018/a181018.java.txt">Java program to compute terms</a>
+%F A181018 a(n) >= ceiling(2n/3)^2; a(3k) >= A002943(k) = 2k(2k+1). - _M. F. Hasler_, Jul 17 2015; revised by _Juhani Heino_, Aug 11 2015
+%F A181018 a(n) >= ceiling(n^2/2). - _Juhani Heino_, Aug 11 2015
+%e A181018 Some solutions for 6 X 6:
+%e A181018   0 1 1 0 1 1    0 1 1 0 1 1    0 1 1 0 1 1    0 1 1 0 1 1
+%e A181018   1 0 1 0 0 1    1 0 1 0 1 1    1 0 1 0 0 1    1 0 1 0 1 1
+%e A181018   1 1 0 0 1 0    1 1 0 0 0 0    1 1 0 0 1 0    1 1 0 0 0 0
+%e A181018   0 0 0 0 1 1    0 0 0 0 1 1    0 0 0 0 1 1    0 0 0 0 1 1
+%e A181018   1 0 1 1 0 1    1 0 1 1 0 1    1 1 0 1 0 1    1 1 0 1 0 1
+%e A181018   1 1 0 1 1 0    1 1 0 1 1 0    1 1 0 1 1 0    1 1 0 1 1 0
+%e A181018 A solution with 73 ones for 12 X 12 (I replaced "0" with "." for readability):
+%e A181018   1 1 . 1 1 . 1 1 . 1 . 1
+%e A181018   1 1 . . 1 1 . 1 1 . 1 1
+%e A181018   . . . 1 . . . . . . 1 .
+%e A181018   1 1 . 1 . 1 . 1 1 . . 1
+%e A181018   . 1 1 . . 1 1 . . 1 1 .
+%e A181018   1 . . . 1 . 1 . 1 . . 1
+%e A181018   1 1 . . 1 1 . . 1 . 1 .
+%e A181018   . 1 . 1 . 1 . 1 . . 1 1
+%e A181018   1 . . 1 1 . . 1 1 . . 1
+%e A181018   . 1 . . . . 1 . 1 . 1 .
+%e A181018   1 1 . 1 1 . 1 1 . . 1 1
+%e A181018   1 . 1 . 1 1 . 1 . 1 . 1
+%e A181018 - _Manfred Scheucher_, Jul 23 2015
+%e A181018 An optimal solution with 74 ones (denoted by O) for 12 X 12 (also symmetric):
+%e A181018   O . O . O . O O . O O .
+%e A181018   O O . O O . . . O O . O
+%e A181018   . O . O . O O . . . O O
+%e A181018   O . . . O O . O O . O .
+%e A181018   . O O . . . O . . . . O
+%e A181018   O O . O O . O . O O . .
+%e A181018   . . O O . O . O O . O O
+%e A181018   O . . . . O . . . O O .
+%e A181018   . O . O O . O O . . . O
+%e A181018   O O . . . O O . O . O .
+%e A181018   O . O O . . . O O . O O
+%e A181018   . O O . O O . O . O . O - _Giovanni Resta_, Jul 29 2015
+%o A181018 (Java) See Taylor link
+%o A181018 (MATLAB with CPLEX)
+%o A181018 function v = A181018(n)
+%o A181018 %
+%o A181018 Grid = [1:n]' * ones(1,n) + n*ones(n,1)*[0:n-1];
+%o A181018 f = -ones(n^2,1);
+%o A181018 A = sparse(4*(n-2)*(n-1),n^2);
+%o A181018 count = 0;
+%o A181018 for i =1:n
+%o A181018   for j = 1:n-2
+%o A181018     count = count+1;
+%o A181018     A(count, [Grid(i,j),Grid(i,j+1),Grid(i,j+2)]) = 1;
+%o A181018   end
+%o A181018 end
+%o A181018 for i = 1:n-2
+%o A181018   for j = 1:n
+%o A181018     count = count+1;
+%o A181018     A(count, [Grid(i,j),Grid(i+1,j),Grid(i+2,j)]) = 1;
+%o A181018   end
+%o A181018 end
+%o A181018 for i = 1:n-2
+%o A181018   for j = 1:n-2
+%o A181018     count = count+2;
+%o A181018     A(count-1,[Grid(i,j+2),Grid(i+1,j+1),Grid(i+2,j)]) = 1;
+%o A181018     A(count, [Grid(i,j),Grid(i+1,j+1),Grid(i+2,j+2)]) = 1;
+%o A181018   end
+%o A181018 end
+%o A181018 b = 2*ones(4*(n-2)*(n-1),1);
+%o A181018 [x,v,exitflag,output] = cplexbilp(f,A,b);
+%o A181018 end;
+%o A181018 for n = 1:11
+%o A181018   A(n) = A181018(n);
+%o A181018 end
+%o A181018 A % _Robert Israel_, Jan 14 2016
+%Y A181018 Cf. A000769, A181019, A219760, A225623.
+%K A181018 nonn,more,nice
+%O A181018 1,2
+%A A181018 _R. H. Hardin_, Sep 30 2010
+%E A181018 a(11)-a(12) from _M. F. Hasler_, Jul 20 2015
+%E A181018 a(12) deleted by _Manfred Scheucher_, Jul 23 2015
+%E A181018 a(12) from _Giovanni Resta_, Jul 29 2015
+%E A181018 PARI code (which implemented a conjectured formula shown to underestimate) deleted by _Peter J. Taylor_, Jan 06 2016
+%E A181018 a(13)-a(15) from _Peter J. Taylor_, Jan 09 2016
+%E A181018 a(16) from _Peter J. Taylor_, Jan 14 2016

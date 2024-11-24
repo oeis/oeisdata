@@ -1,0 +1,78 @@
+%I A340630 #40 Nov 25 2021 12:41:20
+%S A340630 0,6,9,27,63,128,237
+%N A340630 Fill an n X n square with nonnegative integers so that all n^2 von Neumann neighborhoods have distinct sums; a(n) is smallest possible sum of the entries.
+%C A340630 Also known: 405 <= a(8) <= 411; 650 <= a(9) <= 653; a(10) = 992; 1454 <= a(11) <= 1457; 2061 <= a(12) <= 2066.
+%C A340630 Conjecture: a(n) = ceiling( (n^4 - n^2 + 14) / 10 ), matching the lower bound, for all n > n_0 for some constant n_0.
+%F A340630 Lower bound: a(n) >= ceiling( (n^4 - n^2 + 14) / 10 ) for n > 1.
+%F A340630 Proof: letting S_c be the sum of the corner elements and S_e the sum of the non-corner edge elements, the sum over all the n^2 von Neumann neighborhoods for any minimal example is 5a(n) - S_e - 2S_c. However those n^2 contributions are required to be n^2 distinct nonnegative integers, which must sum to at least Sum_{0 .. n^2 - 1} i = n^2 (n^2 - 1) / 2. For n > 4, getting the von Neumann neighborhoods of the corner elements to have distinct sums requires edge or corner elements contributing to sums of at least { 0, 1, 2, 3 }. The edge pieces adjacent to the corner with 0 sum must additionally have their other adjacent edge differ by at least 1, so we have S_e + 2S_c >= 7, and hence a(n) >= ceiling((n^2*(n^2 - 1)/2 + 7) / 5) = ceiling( (n^4 - n^2 + 14) / 10 ) for n > 4. Values found show that it actually holds for n > 1.
+%F A340630 a(n) < (1/10)*n^4 + 48*n^3 + (1299/10)*n^2 + 4*n, see the PARI program. - _Robert Gerbicz_, Jan 15 2021
+%e A340630 For n = 3 we can construct a square grid such as { 0, 0, 0; 0, 1, 3; 1, 4, 0 } in which the elements sum to 9, and for which the respective sums of each element with its orthogonal neighbors gives the co-grid { 0, 1, 3; 2, 8, 4; 5, 6, 7 } all of whose values are distinct, so a(3) <= 9. There is no qualifying grid with a smaller sum (indeed, by the lower bound no smaller one is possible), so a(3) = 9.
+%e A340630 Examples for each size:
+%e A340630 n = 1
+%e A340630   0
+%e A340630 n = 2
+%e A340630   0 1
+%e A340630   2 3
+%e A340630 n = 3
+%e A340630   0 0 0
+%e A340630   0 1 3
+%e A340630   1 4 0
+%e A340630 n = 4
+%e A340630   0 0 0 0
+%e A340630   0 1 3 7
+%e A340630   3 6 3 1
+%e A340630   0 2 0 1
+%e A340630 n = 5
+%e A340630   0  0  0  0  0
+%e A340630   0  9  5 11  1
+%e A340630   1  5  1  3  0
+%e A340630   1  6  4  6  0
+%e A340630   0  1  6  3  0
+%e A340630 n = 6 (Rob Pratt)
+%e A340630   0  0  0  0  0  0
+%e A340630   0 12 10  5 15  1
+%e A340630   1  2  3  4  7  0
+%e A340630   0  3  4  3  9  0
+%e A340630   2 17  5  5 14  0
+%e A340630   0  0  0  2  4  0
+%e A340630 n = 7 (Rob Pratt)
+%e A340630   0  0  2  0  0  0  0
+%e A340630   0  4 15 20  8 20  1
+%e A340630   0 13  0  0  0  6  0
+%e A340630   1  8  5 14 10 16  0
+%e A340630   0  9  0  2  0 14  0
+%e A340630   2 11 23 10  3 17  1
+%e A340630   0  0  0  0  0  2  0
+%e A340630 n = 10
+%e A340630   0  0  0  0  0  0  0  0  0  0
+%e A340630   0  4 11 20 29 31 22 14  6  1
+%e A340630   1 11  5  0  0  0  0  0 14  0
+%e A340630   0 20 11 25 24 27 29 16 23  0
+%e A340630   0 30  0 33  8 10  7  0 32  0
+%e A340630   0 33  0 31  0 19 20  1 36  0
+%e A340630   0 24  1 25 30 14 31  0 27  0
+%e A340630   0 15  2 13  0  0 11  0 18  0
+%e A340630   1  7 15 24 34 37 28 16 10  0
+%e A340630   0  1  1  0  0  0  0  0  3  0
+%o A340630 (PARI) /* Example for a(n)<1/10*n^4+48*n^3+1299/10*n^2+4*n.
+%o A340630   To get the explicit matrix solution call F(n);
+%o A340630   this also checks if the matrix is a good solution or not. */
+%o A340630 c(x,y,n)={if(x>1&&x<n&&y>1&&y<n, 0, x==1&&y==1, 31, x==1&&y==n, 61, x==n&&y==n, 77, x==n&&y==1, 55, x==1, 2, y==n, 10, x==n, 15, y==1, 19)}
+%o A340630 F(n)={A=matrix(n,n,i,j,(n*(i-1)+j-1)\5+ (n%5==0)*((j-1)%5==3)+ (n%5==1)*(((j-1)%5==4)-((j-1)%5==1))+ (n%5==4)*(((j-1)%5==2)-((j-1)%5==4))+ c(i,j,n)*n^2);
+%o A340630   for(j=2,n-1,A[1,j]+=(j-1)*n;A[n,j]+=(j-1)*n);
+%o A340630   for(i=2,n-1,A[i,1]+=(i-1)*n;A[i,n]+=(i-1)*n);
+%o A340630   my( S=matrix(n,n), w=vector(n^2), dx=[0,1,-1,0,0], dy=[0,0,0,1,-1], ans=0);
+%o A340630   for(i=1,n, for(j=1,n,ans+=A[i,j]; for(h=1,5,x=i+dx[h];y=j+dy[h];
+%o A340630   if(x>0&&x<=n&&y>0&&y<=n, S[i,j]+=A[x,y])); w[n*(i-1)+j]=S[i,j]));
+%o A340630   if(length(Set(w))<n^2, 0, print(ans); A)}
+%o A340630   \\ _Robert Gerbicz_, Jan 15 2021
+%o A340630 (PARI) /* Return 0 if the matrix M is not a solution, else sum of elements, always > 0 except for M=(0). The 2nd arg specifies the neighborhoods, see below. */
+%o A340630 score(M, N=vN(#M), U=[])={M=concat(Vec(M)); for(i=1,#N, #U<#(U=setunion(U,[vecsum(vecextract(M,N[i]))])) || return); vecsum(M)}
+%o A340630 /* The function vN() below computes the list of von Neumann neighborhoods for each cell labeled 1..n^2. (For repeated calls of score(), this should be computed once, stored, and given as 2nd arg.) */
+%o A340630 vN(n)=vector(n^2,i,[c|c<-[i,i-n,if(i%n!=1,i-1),if(i%n,i+1),if(i<=n^2-n,i+n)],c>0])
+%o A340630 /* Brute force computation of a(n), not practicable for n>=4. Optional args: verbosity (show increasingly better solutions), neighborhoods, lower & upper bound for elements, target value (stop if found). */
+%o A340630 {a(n, verbose=1, N=vN(n), o=0, L=n^2\2+(n==2), T=(n^4-n^2+23)\10+(3<n&&n<6), m=n^4-1+o)= n>1 && forvec(M=vector(#N,i,[o,if(i>n||n==2,min(i,L))]), my(s=score(M,N)); if(s && s<m, m=s; verbose && printf("s%d=%d, ", M, s); m<=T && break)); m} \\  _M. F. Hasler_, Jan 15 2021
+%K A340630 nonn,more,nice
+%O A340630 1,2
+%A A340630 _Hugo van der Sanden_, Jan 13 2021
+%E A340630 a(5) confirmed minimal and a(6)-a(7) found by Rob Pratt

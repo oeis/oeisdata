@@ -1,0 +1,57 @@
+%I A246029 #43 Mar 19 2023 23:36:06
+%S A246029 1,2,2,3,2,4,3,5,2,4,4,6,3,6,5,7,2,4,4,6,4,8,6,10,3,6,6,9,5,10,7,11,2,
+%T A246029 4,4,6,4,8,6,10,4,8,8,12,6,12,10,14,3,6,6,9,6,12,9,15,5,10,10,15,7,14,
+%U A246029 11,13,2,4,4,6,4,8,6,10,4,8,8,12,6,12,10,14,4,8,8,12,8,16,12,20,6,12,12,18
+%N A246029 a(n) = Product_{i in row n of A245562} prime(i).
+%C A246029 This is the Run Length Transform of S(n) = {1,2,3,5,7,11,...} (1 followed by the primes).
+%C A246029 The Run Length Transform of a sequence {S(n), n>=0} is defined to be the sequence {T(n), n>=0} given by T(n) = Product_i S(i), where i runs through the lengths of runs of 1's in the binary expansion of n. E.g., 19 is 10011 in binary, which has two runs of 1's, of lengths 1 and 2. So T(19) = S(1)*S(2). T(0)=1 (the empty product).
+%H A246029 Alois P. Heinz, <a href="/A246029/b246029.txt">Table of n, a(n) for n = 0..8191</a>
+%H A246029 Shalosh B. Ekhad, N. J. A. Sloane, and  Doron Zeilberger, <a href="http://arxiv.org/abs/1503.01796">A Meta-Algorithm for Creating Fast Algorithms for Counting ON Cells in Odd-Rule Cellular Automata</a>, arXiv:1503.01796 [math.CO], 2015; see also the <a href="http://www.math.rutgers.edu/~zeilberg/mamarim/mamarimhtml/CAcount.html">Accompanying Maple Package</a>.
+%H A246029 Shalosh B. Ekhad, N. J. A. Sloane, and  Doron Zeilberger, <a href="http://arxiv.org/abs/1503.04249">Odd-Rule Cellular Automata on the Square Grid</a>, arXiv:1503.04249 [math.CO], 2015.
+%H A246029 N. J. A. Sloane, On the No. of ON Cells in Cellular Automata, Video of talk in Doron Zeilberger's Experimental Math Seminar at Rutgers University, Feb. 05 2015: <a href="https://vimeo.com/119073818">Part 1</a>, <a href="https://vimeo.com/119073819">Part 2</a>
+%H A246029 N. J. A. Sloane, <a href="http://arxiv.org/abs/1503.01168">On the Number of ON Cells in Cellular Automata</a>, arXiv:1503.01168 [math.CO], 2015.
+%H A246029 <a href="/index/Ce#cell">Index entries for sequences related to cellular automata</a>
+%F A246029 a(n) = A181819(A005940(1+n)). - _Antti Karttunen_, Oct 15 2016
+%e A246029 From _Omar E. Pol_, Feb 12 2015: (Start)
+%e A246029 Written as an irregular triangle in which row lengths is A011782:
+%e A246029 1;
+%e A246029 2;
+%e A246029 2,3;
+%e A246029 2,4,3,5;
+%e A246029 2,4,4,6,3,6,5,7;
+%e A246029 2,4,4,6,4,8,6,10,3,6,6,9,5,10,7,11;
+%e A246029 2,4,4,6,4,8,6,10,4,8,8,12,6,12,10,14,3,6,6,9,6,12,9,15,5,10,10,15,7,14,11,13;
+%e A246029 ...
+%e A246029 Right border gives the noncomposite numbers. This is simply a restatement of the theorem that this sequence is the Run Length Transform of A008578.
+%e A246029 (End)
+%p A246029 ans:=[];
+%p A246029 for n from 0 to 100 do lis:=[]; t1:=convert(n,base,2); L1:=nops(t1); out1:=1; c:=0;
+%p A246029 for i from 1 to L1 do
+%p A246029 if out1 = 1 and t1[i] = 1 then out1:=0; c:=c+1;
+%p A246029 elif out1 = 0 and t1[i] = 1 then c:=c+1;
+%p A246029 elif out1 = 1 and t1[i] = 0 then c:=c;
+%p A246029 elif out1 = 0 and t1[i] = 0 then lis:=[c,op(lis)]; out1:=1; c:=0;
+%p A246029 fi;
+%p A246029 if i = L1 and c>0 then lis:=[c,op(lis)]; fi;
+%p A246029 od:
+%p A246029 a:=mul(ithprime(i), i in lis);
+%p A246029 ans:=[op(ans),a];
+%p A246029 od:
+%p A246029 ans;
+%t A246029 f[n_, i_, x_] := f[n, i, x] = Which[n == 0, x, EvenQ[n], f[n/2, i + 1, x], True, f[(n - 1)/2, i, x*Prime[i]]];
+%t A246029 a5940[n_] := f[n - 1, 1, 1];
+%t A246029 a181819[n_] := Times @@ Prime[FactorInteger[n][[All, 2]]];
+%t A246029 a[0] = 1; a[n_] := a181819[a5940[n + 1]];
+%t A246029 Table[a[n], {n, 0, 100}] (* _Jean-François Alcover_, Aug 19 2018, after _Antti Karttunen_ *)
+%o A246029 (Python)
+%o A246029 from operator import mul
+%o A246029 from functools import reduce
+%o A246029 from re import split
+%o A246029 from sympy import prime
+%o A246029 def A246029(n):
+%o A246029     return reduce(mul,(prime(len(d)) for d in split('0+',bin(n)[2:]) if d != '')) if n > 0 else 1
+%o A246029 # _Chai Wah Wu_, Sep 12 2014
+%Y A246029 Cf. A245562, A000045, A001045, A005940, A008578, A011782, A071053, A181819, A245565, A246028, A253081 (partial sums).
+%K A246029 nonn
+%O A246029 0,2
+%A A246029 _N. J. A. Sloane_, Aug 15 2014; revised Sep 05 2014

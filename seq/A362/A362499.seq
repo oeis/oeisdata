@@ -1,0 +1,52 @@
+%I A362499 #22 Jun 14 2023 10:34:53
+%S A362499 1,4,15,123,129,134,178,1025,1148,1147,1137,1145,1349,1348,1357,10145,
+%T A362499 3589,10258,10137,10123,11269,10289,10268,10247,10235,10267,10234,
+%U A362499 10789,10279,11378,10378,12369,10349,10358,12368,10357,12689,12358,10459,12379,12679,13489,12346,12349,16789,12479
+%N A362499 a(n) is the least positive integer that has exactly n anagrams that are semiprimes, or -1 if there is no such integer.
+%C A362499 a(n) is the least k such that A131371(k) = n.
+%C A362499 Leading zeros are not allowed.
+%H A362499 Robert Israel, <a href="/A362499/b362499.txt">Table of n, a(n) for n = 0..1000</a>
+%e A362499 a(3) = 123 because 123 has 3 anagrams that are semiprimes, namely 123 = 3 * 41, 213 = 3 * 71, and 321 = 3 * 107, and no smaller number works.
+%p A362499 g:= proc(s,m) local  t;
+%p A362499   if s[1..m-1] = [0$(m-1)] then op(map(t -> [t,op(s)],[0,$(max(s) ..9)]))
+%p A362499   else op(map(t -> [t,op(s)], [$(max(s) .. 9)]))
+%p A362499   fi
+%p A362499 end proc:
+%p A362499 f:= proc(L,m) local P,t,i;
+%p A362499   P:= select(t -> t[-1] <> 0 and numtheory:-bigomega(add(t[i]*10^(i-1), i=1..m))=2, combinat:-permute(L));
+%p A362499   nops(P)
+%p A362499 end proc:
+%p A362499 V:= Array(0..100):
+%p A362499 count:= 2: V[0]:= 1: V[1]:= 4:
+%p A362499 L:= [seq(seq([b,a],b=[0,$a..9]),a=1..9)]:
+%p A362499 for m from 2 while count < 101 do
+%p A362499   for s in L while count < 101 do
+%p A362499     v:= f(s,m);
+%p A362499     if v <= 100 and V[v] = 0 then
+%p A362499       V[v]:= add(s[i]*10^(i-1),i=1..m); count:= count+1;
+%p A362499     fi
+%p A362499   od;
+%p A362499   L:= map(g, L, m)
+%p A362499 od:
+%p A362499 convert(V,list);
+%o A362499 (Python)
+%o A362499 from sympy import factorint
+%o A362499 from sympy.utilities.iterables import multiset_permutations as mp
+%o A362499 from itertools import count, islice, combinations_with_replacement as mc
+%o A362499 def ndgen():
+%o A362499     yield from ((f,)+r for d in count(1) for f in "123456789" for r in mc("0123456789", d-1))
+%o A362499 def c(n): # is_semiprime
+%o A362499     return sum(factorint(n).values()) == 2
+%o A362499 def f(digs):
+%o A362499     return sum(1 for p in mp(digs) if p[0]!="0" and c(t:=int("".join(p))))
+%o A362499 def agen(): # generator of terms
+%o A362499     adict, n = dict(), 0
+%o A362499     for t in ndgen():
+%o A362499         v = f(t)
+%o A362499         if v not in adict: adict[v] = int("".join(t))
+%o A362499         while n in adict: yield adict[n]; n += 1
+%o A362499 print(list(islice(agen(), 46))) # _Michael S. Branicky_, Jun 12 2023
+%Y A362499 Cf. A131371, A001358.
+%K A362499 nonn,base,look
+%O A362499 0,2
+%A A362499 _Robert Israel_, Jun 11 2023

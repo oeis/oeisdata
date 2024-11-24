@@ -1,0 +1,44 @@
+%I A265020 #22 Jul 29 2024 07:13:36
+%S A265020 1,0,1,0,2,0,3,3,0,4,5,0,5,15,0,6,21,16,0,7,42,25,0,8,54,68,0,9,90,
+%T A265020 142,0,10,110,248,125,0,11,165,409,189,0,12,195,710,496,0,13,273,1033,
+%U A265020 967,0,14,315,1562,2096,0,15,420,2291,3265,1296,0,16,476,3180
+%N A265020 Total sum T(n,k) of number of lambda-parking functions of partitions lambda of n into exactly k distinct parts; triangle T(n,k), n>=0, 0<=k<=A003056(n), read by rows.
+%C A265020 Differs from A265208 first at T(5,2). See example.
+%H A265020 Alois P. Heinz, <a href="/A265020/b265020.txt">Rows n = 0..100, flattened</a>
+%H A265020 R. Stanley, <a href="http://math.mit.edu/~rstan/transparencies/parking.pdf">Parking Functions</a>, 2011
+%F A265020 T(A000217(n),n) = A000272(n+1).
+%e A265020 T(5,2) = 15 because there are two partitions of 5 into 2 distinct parts: [2,3] and [1,4]. And [2,3] has 8 lambda-parking functions: [1,1], [1,2], [1,3], [2,1], [2,2], [2,3], [3,1], [3,2] and [1,4] has 7: [1,1], [1,2], [1,3], [1,4], [2,1], [3,1], [4,1]. So [1,1], [1,2], [1,3], [2,1], [3,1] are counted twice.
+%e A265020 Triangle T(n,k) begins:
+%e A265020 00 :  1;
+%e A265020 01 :  0,  1;
+%e A265020 02 :  0,  2;
+%e A265020 03 :  0,  3,   3;
+%e A265020 04 :  0,  4,   5;
+%e A265020 05 :  0,  5,  15;
+%e A265020 06 :  0,  6,  21,   16;
+%e A265020 07 :  0,  7,  42,   25;
+%e A265020 08 :  0,  8,  54,   68;
+%e A265020 09 :  0,  9,  90,  142;
+%e A265020 10 :  0, 10, 110,  248,  125;
+%e A265020 11 :  0, 11, 165,  409,  189;
+%e A265020 12 :  0, 12, 195,  710,  496;
+%e A265020 13 :  0, 13, 273, 1033,  967;
+%e A265020 14 :  0, 14, 315, 1562, 2096;
+%e A265020 15 :  0, 15, 420, 2291, 3265, 1296;
+%e A265020 16 :  0, 16, 476, 3180, 6057, 1921;
+%p A265020 p:= l-> (n-> n!*LinearAlgebra[Determinant](Matrix(n, (i, j)
+%p A265020          -> (t->`if`(t<0, 0, l[i]^t/t!))(j-i+1))))(nops(l)):
+%p A265020 g:= (n, i, l)->  `if`(i*(i+1)/2<n, 0, `if`(n=0, p(l)*x^nops(l),
+%p A265020     g(n, i-1, l)+`if`(i>n, 0, g(n-i, i-1, [i, l[]])))):
+%p A265020 T:= n-> (f-> seq(coeff(f, x, i), i=0..degree(f)))(g(n$2, [])):
+%p A265020 seq(T(n), n=0..20);
+%t A265020 p[l_] := With[{n = Length[l]}, n!*Det[Table[With[{t = j - i + 1}, l[[i]]^t/t!], {i, 1, n}, {j, 1, n}]]];
+%t A265020 g[n_, i_, l_] := If[i*(i + 1)/2 < n, 0, If[n == 0, p[l]*x^Length[l], g[n, i - 1, l] + If[i > n, 0, g[n - i, i - 1, Join[{i}, l]]]]];
+%t A265020 T[n_] := If[n == 0, {1}, CoefficientList[g[n, n, {}], x]];
+%t A265020 Table[T[n], {n, 0, 20}] // Flatten (* _Jean-François Alcover_, Jul 29 2024, after _Alois P. Heinz_ *)
+%Y A265020 Row sums give A265016.
+%Y A265020 Columns k=0-1 give: A000007, A000027.
+%Y A265020 Cf. A000217, A000272, A003056, A265208.
+%K A265020 nonn,tabf
+%O A265020 0,5
+%A A265020 _Alois P. Heinz_, Nov 30 2015

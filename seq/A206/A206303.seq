@@ -1,0 +1,40 @@
+%I A206303 #30 Oct 30 2024 08:38:21
+%S A206303 1,1,2,8,32,184,1264,9568,79232,816128,8769536,101867776,1322831872,
+%T A206303 18122579968,268425347072,4436611211264,73309336469504,
+%U A206303 1303024044310528,25235367455752192,497968598916333568,10431118327503650816,234674470003955204096,5359992446798535852032
+%N A206303 Expansion of e.g.f.: Product_{n>=1} (1 - x^(2*n-1))^(-1/(2*n-1)).
+%H A206303 Alois P. Heinz, <a href="/A206303/b206303.txt">Table of n, a(n) for n = 0..448</a>
+%F A206303 a(n)/n! is the Euler transform of [1, 0, 1/3, 0, 1/5, 0, 1/7, 0, ...].
+%F A206303 E.g.f.: A(x) = B(x) / sqrt(B(x^2)), where B(x) = e.g.f. of A028342.
+%F A206303 E.g.f. A(x) satisfies: Product_{n>=0} A(x^(2^n))^(1/2^n) = e.g.f. of A028342.
+%F A206303 E.g.f.: exp(Sum_{k>=1} (d(2*k) - d(k))*x^k/k), where d(k) = number of divisors of k (A000005). - _Ilya Gutkovskiy_, Sep 17 2018
+%e A206303 G.f.: A(x) = 1 + x + 2*x^2/2! + 8*x^3/3! + 32*x^4/4! + 184*x^5/5! + ...
+%e A206303 The e.g.f. equals the product:
+%e A206303 A(x) = (1-x)^(-1) * (1-x^3)^(-1/3) * (1-x^5)^(-1/5) * (1-x^7)^(-1/7) * (1-x^9)^(-1/9) * (1-x^11)^(-1/11) * ...
+%p A206303 with(numtheory):
+%p A206303 b:= proc(n) option remember; `if`(n=0, 1, add(add(
+%p A206303       `if`(d::odd, 1, 0), d=divisors(j))*b(n-j), j=1..n)/n)
+%p A206303     end:
+%p A206303 a:= n-> b(n)*n!:
+%p A206303 seq(a(n), n=0..25);  # _Alois P. Heinz_, Jan 24 2017
+%t A206303 b[n_]:= b[n]= If[n==0, 1, Sum[Sum[If[OddQ[d], 1, 0], {d, Divisors[j]}]* b[n-j], {j, n}]/n];
+%t A206303 a[n_]:= b[n]*n!;
+%t A206303 Table[a[n], {n, 0, 25}] (* _Jean-François Alcover_, Jun 10 2018, after _Alois P. Heinz_ *)
+%o A206303 (PARI) {a(n)=n!*polcoeff(prod(m=1,n,(1-x^(2*m-1)+x*O(x^n))^(-1/(2*m-1))),n)}
+%o A206303 for(n=0,31,print1(a(n),", "))
+%o A206303 (Magma)
+%o A206303 m:=40;
+%o A206303 f:= func< x | (&*[1/(1 - x^(2*n-1))^(1/(2*n-1)) : n in [1..m+10]]) >;
+%o A206303 R<x>:=PowerSeriesRing(Rationals(), m);
+%o A206303 Coefficients(R!(Laplace( f(x) ))); // _G. C. Greubel_, Dec 21 2022
+%o A206303 (SageMath)
+%o A206303 m=40
+%o A206303 def f(x): return 1/product( (1 - x^(2*n-1))^(1/(2*n-1)) for n in range(1,m+11) )
+%o A206303 def A206303_list(prec):
+%o A206303     P.<x> = PowerSeriesRing(QQ, prec)
+%o A206303     return P( f(x) ).egf_to_ogf().list()
+%o A206303 A206303_list(m+1) # _G. C. Greubel_, Dec 21 2022
+%Y A206303 Cf. A000005, A001227, A028342, A168243.
+%K A206303 nonn
+%O A206303 0,3
+%A A206303 _Paul D. Hanna_, Feb 06 2012

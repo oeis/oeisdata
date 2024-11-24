@@ -1,0 +1,53 @@
+%I A235384 #51 Dec 05 2022 04:45:46
+%S A235384 2,4,6,6,8,8,16,10,12,12,24,14,16,24,28,18,20,20,36,32,24,24,64,26,28,
+%T A235384 28,48,30,48,32,52,48,36,48,60,38,40,56,96,42,64,44,72,60,48,48,112,
+%U A235384 50,52,72,84,54,56,72,128,80,60,60,144,62,64,80,100,84
+%N A235384 Number of involutions in the group Aff(Z/nZ).
+%C A235384 Aff(Z/nZ) is the group of functions on Z/nZ of the form x->ax+b where a and b are elements of Z/nZ and gcd(a,n)=1.
+%C A235384 Since Aff(Z/nZ) is isomorphic to the automorphism group of the dihedral group with 2n elements (when n>=3), this is the number of automorphisms of the dihedral group with 2n elements that have order 1 or 2.
+%C A235384 The sequence is multiplicative: a(k*m) = a(k)*a(m) if m and k are coprime.
+%C A235384 When n=26, this is the number of affine ciphers where encryption and decryption use the same function.
+%H A235384 Alois P. Heinz, <a href="/A235384/b235384.txt">Table of n, a(n) for n = 2..10000</a>
+%H A235384 K. K. A. Cunningham, Tom Edgar, A. G. Helminck, B. F. Jones, H. Oh, R. Schwell and J. F. Vasquez, <a href="http://dx.doi.org/10.1285/i15900932v34n2p23">On the Structure of Involutions and Symmetric Spaces of Dihedral Groups</a>, Note di Mat., Volume 34, No. 2, 2014.
+%F A235384 Suppose n = 2^m*p_1^(r_1)*p_2^(r_2)*...*p_k^(r_k) where each p_i>2 is prime, r_i>0 for all i, and m>=0 is the prime factorization of n, then:
+%F A235384 ...a(n) = Product_{1<=i<=k} (p_i^(r_i)+1) if m=0,
+%F A235384 ...a(n) = 2*Product_{1<=i<=k} (p_i^(r_i)+1) if m=1,
+%F A235384 ...a(n) = 6*Product_{1<=i<=k} (p_i^(r_i)+1) if m=2,
+%F A235384 ...a(n) = (4+2^(m-1)+2^m)*Product_{1<=i<=k} (p_i^(r_i)+1) if m>=3.
+%F A235384 a(n) = Sum_{a in row(n) of A228179} gcd(a+1,n).
+%F A235384 Sum_{k=1..n} a(k) ~ c * n^2, where c = zeta(2)/(2*zeta(3)) = 0.684216... (A335005). - _Amiram Eldar_, Dec 05 2022
+%e A235384 Since 18 = 2*3^2, we get a(18) = 2*(3^2+1) = 20. Since 120 = 2^3*3*5, we have a(120) = (4+2^2+2^3)*(3+1)*(5+1) = 384.
+%p A235384 a:= n-> add(`if`(irem(k^2, n)=1, igcd(n, k+1), 0), k=1..n-1):
+%p A235384 seq(a(n), n=2..100);  # _Alois P. Heinz_, Jan 20 2014
+%t A235384 a[n_] := Sum[If[Mod[k^2, n] == 1, GCD[n, k+1], 0], {k, 1, n-1}]; Table[a[n], {n, 2, 100}] (* _Jean-François Alcover_, Mar 24 2014, after _Alois P. Heinz_ *)
+%t A235384 f[p_, e_] := p^e + 1; f[2, 1] = 2; f[2, 2] = 6; f[2, e_] := 3*2^(e - 1) + 4; a[1] = 1; a[n_] := Times @@ f @@@ FactorInteger[n]; Array[a, 100, 2]  (* _Amiram Eldar_, Dec 05 2022 *)
+%o A235384 (Sage)
+%o A235384 def a(n):
+%o A235384     L=list(factor(n))
+%o A235384     if L[0][0]==2:
+%o A235384         m=L[0][1]
+%o A235384         L.pop(0)
+%o A235384     else:
+%o A235384         m=0
+%o A235384     order=prod([x[0]^x[1]+1 for x in L])
+%o A235384     if m==1:
+%o A235384         order=2*order
+%o A235384     elif m==2:
+%o A235384         order=6*order
+%o A235384     elif m>=3:
+%o A235384         order=(4+2^(m-1)+2^m)*order
+%o A235384     return order
+%o A235384 [a(i) for i in [2..100]]
+%o A235384 (Sage)
+%o A235384 def b(n):
+%o A235384     sum = 0
+%o A235384     for a in [x for x in range(n) if ((x^2) % n == 1)]:
+%o A235384         sum += gcd(a+1,n)
+%o A235384     return sum
+%o A235384 [b(i) for i in [2..100]]
+%o A235384 (PARI) A034448(n,f=factor(n))=factorback(vector(#f~,i,f[i,1]^f[i,2]+1))
+%o A235384 a(n)=my(m=valuation(n,2)); if(m==0,1,m==1,2,m==2,6,4+3<<(m-1))*A034448(n>>m) \\ _Charles R Greathouse IV_, Jul 29 2016
+%Y A235384 Cf. A002618, A228179, A147848, A060594, A283796, A335005.
+%K A235384 nonn,easy,look,mult,nice
+%O A235384 2,1
+%A A235384 _Tom Edgar_, Jan 08 2014

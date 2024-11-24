@@ -1,0 +1,37 @@
+%I A302828 #31 Oct 29 2021 06:38:04
+%S A302828 1,1,1,1,1,1,1,1,1,1,1,2,4,2,1,1,3,21,22,3,1,1,6,111,494,201,6,1,1,10,
+%T A302828 604,9400,18086,2244,12,1,1,20,3196,157040,1141055,794696,29096,27,1,
+%U A302828 1,36,16528,2342480,55967596,161927208,38695548,404064,65,1
+%N A302828 Array read by antidiagonals: T(n,k) = number of noncrossing path sets on k*n nodes up to rotation and reflection with each path having exactly k nodes.
+%H A302828 Andrew Howroyd, <a href="/A302828/b302828.txt">Table of n, a(n) for n = 0..1274</a>
+%H A302828 Math StackExchange, <a href="https://math.stackexchange.com/questions/1294224/">Question from user Matan at math.stackexchange.com: Number of ways to connect sets of k dots in a perfect n-gon</a>
+%e A302828 Array begins:
+%e A302828 =======================================================
+%e A302828 n\k| 1  2     3        4           5              6
+%e A302828 ---+---------------------------------------------------
+%e A302828 0  | 1  1     1        1           1              1 ...
+%e A302828 1  | 1  1     1        2           3              6 ...
+%e A302828 2  | 1  1     4       21         111            604 ...
+%e A302828 3  | 1  2    22      494        9400         157040 ...
+%e A302828 4  | 1  3   201    18086     1141055       55967596 ...
+%e A302828 5  | 1  6  2244   794696   161927208    23276467936 ...
+%e A302828 6  | 1 12 29096 38695548 25334545270 10673231900808 ...
+%e A302828 ...
+%t A302828 nmax = 10; seq[n_, k_] := Module[{p, q, h, c}, p = 1 + InverseSeries[ x/(k*2^(k - 3)*(1 + x)^k) + O[x]^n, x]; h = p /. x -> x^2 + O[x]^n; q = x*D[p, x]/p; c = Integrate[((p - 1)/k + Sum[EulerPhi[d]*(q /. x -> x^d + O[x]^n), {d, 2, n}])/x, x] + If[OddQ[k], 0, 2^(k/2 - 2)*x*h^(k/2)]; If[k == 1, 2/(1 - x) + O[x]^n, 3/2 + c + If[OddQ[k], h + x^2*2^(k - 3)*h^k + x*2^((k - 1)/2)*h^((k + 1)/2), If[k == 2, x*h, 0] + h/(1 - 2^(k/2 - 1)*x*h^(k/2))]/2]/2];
+%t A302828 Clear[col]; col[k_] := col[k] = CoefficientList[seq[nmax, k], x];
+%t A302828 T[n_, k_] := col[k][[n + 1]];
+%t A302828 Table[T[n - k, k], {n, 0, nmax}, {k, n, 1, -1}] // Flatten (* _Jean-François Alcover_, Jul 04 2018, after _Andrew Howroyd_ *)
+%o A302828 (PARI)
+%o A302828 seq(n,k)={ \\ gives gf of k'th column
+%o A302828 my(p=1 + serreverse( x/(k*2^(k-3)*(1 + x)^k) + O(x*x^n) ));
+%o A302828 my(h=subst(p,x,x^2+O(x*x^n)), q=x*deriv(p)/p);
+%o A302828 my(c=intformal( ((p-1)/k + sum(d=2,n,eulerphi(d)*subst(q,x,x^d+O(x*x^n))))/x) + if(k%2, 0, 2^(k/2-2)*x*h^(k/2)));
+%o A302828 if(k==1, 2/(1-x) + O(x*x^n), 3/2 + c + if(k%2, h + x^2*2^(k-3)*h^k + x*2^((k-1)/2)*h^((k+1)/2), if(k==2,x*h,0) + h/(1-2^(k/2-1)*x*h^(k/2)) )/2)/2;
+%o A302828 }
+%o A302828 Mat(vector(6, k, Col(seq(7, k))))
+%Y A302828 Columns 2..4 are A006082(n+1), A303330, A303867.
+%Y A302828 Row n=1 is A005418(k-2).
+%Y A302828 Cf. A303839, A303864, A303868, A303929.
+%K A302828 nonn,tabl
+%O A302828 0,12
+%A A302828 _Andrew Howroyd_, May 01 2018

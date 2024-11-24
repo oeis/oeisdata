@@ -1,0 +1,41 @@
+%I A350434 #4 Dec 30 2021 23:24:12
+%S A350434 1,1,2,5,15,47,153,513,1765,6193,22071,79664,290636,1070030,3970554,
+%T A350434 14834370,55755406,210671102,799783375,3049139589,11669146635,
+%U A350434 44812839601,172636642278,666981050965,2583695305266,10032884823527,39046925631765,152283522642736,595059178361120
+%N A350434 G.f. A(x) satisfies: A(x^3*R(x)) = x^4 - x^5 where A(R(x)) = x.
+%F A350434 G.f.: A(x) = Series_Reversion( Product_{n>=0} F(n) ), where F(0) = x, F(1) = 1-x, and F(n+1) = 1 - (1 - F(n))^4 * F(n) for n > 0.
+%e A350434 G.f.: A(x) = x + x^2 + 2*x^3 + 5*x^4 + 15*x^5 + 47*x^6 + 153*x^7 + 513*x^8 + 1765*x^9 + 6193*x^10 + 22071*x^11 + ...
+%e A350434 Let R(x) be the series reversion of A(x),
+%e A350434 R(x) = x - x^2 - x^5 + 2*x^6 - x^7 - x^17 + 5*x^18 - 10*x^19 + 10*x^20 - 3*x^21 - 11*x^22 + 30*x^23 - 40*x^24 + 29*x^25 + ...
+%e A350434 then R(x) and g.f. A(x) satisfy:
+%e A350434 (1) A(R(x)) = x,
+%e A350434 (2) A(x^3*R(x)) = x^4 - x^5.
+%e A350434 GENERATING METHOD.
+%e A350434 Define F(n), a polynomial in x of order 5^(n-1), by the following recurrence:
+%e A350434 F(0) = x,
+%e A350434 F(1) = (1 - x),
+%e A350434 F(2) = (1 - x^4 * (1-x)),
+%e A350434 F(3) = (1 - x^16 * (1-x)^4 * F(2)),
+%e A350434 F(4) = (1 - x^64 * (1-x)^16 * F(2)^4 * F(3)),
+%e A350434 F(5) = (1 - x^256 * (1-x)^64 * F(2)^16 * F(3)^4 * F(4)),
+%e A350434 ...
+%e A350434 F(n+1) = 1 - (1 - F(n))^4 * F(n)
+%e A350434 ...
+%e A350434 Then the series reversion R(x) equals the infinite product:
+%e A350434 R(x) = x * F(1) * F(2) * F(3) * ... * F(n) * ...
+%e A350434 that is,
+%e A350434 R(x) = x * (1-x) * (1 - x^4*(1-x)) * (1 - x^16*(1-x)^4*(1 - x^4*(1-x))) * (1 - x^64*(1-x)^16*(1 - x^4*(1-x))^4*(1 - x^16*(1-x)^4*(1 - x^4*(1-x)))) * ...
+%o A350434 (PARI) /* Using Functional Equation in Definition */
+%o A350434 {a(n) = my(A=[1,1],B); for(i=1,n, A = concat(A,0);
+%o A350434 R = serreverse(x*Ser(A));
+%o A350434 A[#A] = -polcoeff( x^4 + x^5 - subst(x*Ser(A),x,x^3*R),#A+3) );H=A;A[n]}
+%o A350434 for(n=1,30,print1(a(n),", "))
+%o A350434 (PARI) /* Using Infinite Product Formula for Series Reversion */
+%o A350434 {F(n) = my(G=x); if(n==0,G=x, if(n==1,G=1-x, G = 1 - (1 - F(n-1))^4 * F(n-1) ));G}
+%o A350434 {a(n) = my(A, R = prod(k=0,#binary(n), F(k) +x*O(x^n)));
+%o A350434 A = serreverse(R); polcoeff(A,n)}
+%o A350434 for(n=1,30,print1(a(n),", "))
+%Y A350434 Cf. A273162, A273203.
+%K A350434 nonn
+%O A350434 1,3
+%A A350434 _Paul D. Hanna_, Dec 30 2021

@@ -1,0 +1,37 @@
+%I A276735 #51 Jul 25 2017 04:17:55
+%S A276735 1,0,0,1,1,3,5,12,87,261,324,1433,5881,37444,196797,708901,2020836,
+%T A276735 12375966,105896734,955344450,11136621319,95274505723,590283352231,
+%U A276735 4285001635230,36417581252044,272699023606314
+%N A276735 Number of permutations p of (1..n) such that k+p(k) is a semiprime for 1 <= k <= n.
+%e A276735 a(4) = 1 because the permutation (3,4,1,2) added termwise to (1,2,3,4) yields (4,6,4,6) - both semiprimes - and only that permutation does so. a(5) = 3 because exactly 3 permutations - (3,2,1,5,4), (3,4,1,2,5) & (5,4,3,2,1) - added termwise to (1,2,3,4,5) yield semiprime entries.
+%e A276735 From _David A. Corneth_, Sep 28 2016 (Start):
+%e A276735 The semiprimes up to 10 are 4, 6, 9 and 10. To find a(5), we add (1,2,3,4,5) to some p. Therefore, p(1) in {3, 5}, p(2) in {2, 4}, p(3) in {1, 3}, p(4) in {2, 5} and p(5) in {1, 4, 5}.
+%e A276735 If p(1) = 3 then p(3) must be 1. Then {p(2), p(4), p(5)} = {2, 4, 5} for which there are two possibilities.
+%e A276735 If p(1) = 5 then p(3) = 3 and p(4) = 2. Then p(2) = 4 and p(5) = 1. So there's one permutation for which p(1) = 5.
+%e A276735 This exhausts the options for p(1) and we found 3 permutations. Therefore, a(5) = 3. (End)
+%p A276735 with(LinearAlgebra): with(numtheory):
+%p A276735 a:= n-> `if`(n=0, 1, Permanent(Matrix(n, (i, j)->
+%p A276735         `if`((s-> bigomega(s)=2)(i+j), 1, 0)))):
+%p A276735 seq(a(n), n=0..16);  # _Alois P. Heinz_, Sep 28 2016
+%t A276735 perms[n0_] :=
+%t A276735 Module[{n = n0, S, func, T, T2},
+%t A276735   S = Select[Range[2, 2*n], PrimeOmega[#] == 2 &];
+%t A276735   func[k_] := Cases[S, x_ /; 1 <= x - k <= n] - k;
+%t A276735   T = Tuples[Table[func[k], {k, 1, n}]];
+%t A276735   T2 = Cases[T, x_ /; Length[Union[x]] == Length[x]];
+%t A276735   Length[T2]]
+%t A276735 Table[perms[n], {n, 0, 12}]
+%t A276735 (* Second program (version >= 10): *)
+%t A276735 a[0] = 1; a[n_] := Permanent[Table[Boole[PrimeOmega[i + j] == 2], {i, 1, n}, {j, 1, n}]]; Table[an = a[n]; Print[an]; an, {n, 0, 20}] (* _Jean-François Alcover_, Jul 25 2017 *)
+%o A276735 (PARI) isok(va, vb)=my(v = vector(#va, j, va[j]+vb[j])); #select(x->(bigomega(x) == 2), v) == #v;
+%o A276735 a(n) = my(vpo = numtoperm(n,1)); sum(k=1, n!, vp = numtoperm(n,k); isok(vp, vpo)); \\ _Michel Marcus_, Sep 24 2016
+%o A276735 (PARI) listA001358(lim)=my(v=List()); forprime(p=2, sqrtint(lim\1), forprime(q=p, lim\p, listput(v, p*q))); Set(v)
+%o A276735 has(v)=for(k=1,#v, if(!setsearch(semi, v[k]+k), return(0))); 1
+%o A276735 a(n)=local(semi=listA001358(2*n)); sum(k=1,n!, has(numtoperm(n,k))) \\ _Charles R Greathouse IV_, Sep 28 2016
+%o A276735 (PARI) matperm(M)=my(n=matsize(M)[1], innerSums=vectorv(n)); if(n==0, return(1)); sum(x=1,2^n-1, my(k=valuation(x,2), s=M[,k+1], gray=bitxor(x,x>>1)); if(bittest(gray,k), innerSums+=s,innerSums-=s); (-1)^hammingweight(gray)*factorback(innerSums))*(-1)^n
+%o A276735 a(n)=matperm(matrix(n,n,x,y,bigomega(x+y)==2)) \\ _Charles R Greathouse IV_, Oct 03 2016
+%Y A276735 Cf. A073364, A095986, A096904, A097082.
+%K A276735 nonn
+%O A276735 0,6
+%A A276735 _Gary E. Davis_, Sep 24 2016
+%E A276735 More terms from _Alois P. Heinz_, Sep 28 2016

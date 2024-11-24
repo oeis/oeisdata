@@ -1,0 +1,43 @@
+%I A225434 #11 Mar 20 2022 02:17:09
+%S A225434 1,1,1,1,-58,1,1,-307,-307,1,1,-1556,12006,-1556,1,1,-7805,140722,
+%T A225434 140722,-7805,1,1,-39054,1461615,-5647300,1461615,-39054,1,1,-195303,
+%U A225434 14287093,-109642851,-109642851,14287093,-195303,1,1,-976552,135028828,-1838120344,4873361350,-1838120344,135028828,-976552,1
+%N A225434 Apply the triangle-to-triangle transformation described in the Comments in A159041 to the triangle in A142459.
+%H A225434 G. C. Greubel, <a href="/A225434/b225434.txt">Rows n = 0..50 of the triangle, flattened</a>
+%F A225434 A triangle of polynomial coefficients: p(x,n) = Sum_{i=0..n} ( x^i * if(i = floor(n/2) and (n mod 2) = 0, 0, if(i <= floor(n/2), (-1)^i*A142459(n+1, i+1), (-1)^(n-i+1)*A142459(n+1, i+1) ) )/(1-x).
+%F A225434 T(n, k) = T(n,k-1) + (-1)^k*A142459(n+2,k+1) if k <= floor(n/2), otherwise T(n, n-k), with T(n, 0) = T(n, n) = 1. - _G. C. Greubel_, Mar 19 2022
+%e A225434 The triangle begins:
+%e A225434   1;
+%e A225434   1,       1;
+%e A225434   1,     -58,        1;
+%e A225434   1,    -307,     -307,          1;
+%e A225434   1,   -1556,    12006,      -1556,          1;
+%e A225434   1,   -7805,   140722,     140722,      -7805,        1;
+%e A225434   1,  -39054,  1461615,   -5647300,    1461615,   -39054,       1;
+%e A225434   1, -195303, 14287093, -109642851, -109642851, 14287093, -195303, 1;
+%p A225434 See A159041.
+%t A225434 (* First program *)
+%t A225434 t[n_, k_, m_]:= t[n, k, m]= If[k==0 || k==n, 1, (m*(n+1)-m*(k+1)+1)*t[n-1,k-1,m] + (m*(k+1)-(m-1))*t[n-1,k,m] ]; (* t(n,k,4)=A142459 *)
+%t A225434 p[x_, n_]:= p[x, n]= Sum[x^i*If[i==Floor[n/2] && Mod[n, 2]==0, 0, If[i<=Floor[n/2], (-1)^i*t[n,i,4], (-1)^(n-i+1)*t[n,i,4]]], {i,0,n}]/(1-x);
+%t A225434 Flatten[Table[CoefficientList[p[x, n], x], {n,0,12}]]
+%t A225434 (* Second program *)
+%t A225434 t[n_, k_, m_]:= t[n, k, m]= If[k==1 || k==n, 1, (m*(n+1)-m*(k+1)+1)*t[n-1,k-1,m] + (m*(k+1)-(m-1))*t[n-1,k,m]];
+%t A225434 T[n_, k_]:= T[n, k]= If[k==0 || k==n, 1, If[k<=Floor[n/2], T[n, k-1] + (-1)^k*t[n+2,k+1,4], T[n, n-k]]];
+%t A225434 Table[T[n, k], {n,0,12}, {k,0,n}]//Flatten (* _G. C. Greubel_, Mar 19 2022 *)
+%o A225434 (Sage)
+%o A225434 @CachedFunction
+%o A225434 def T(n, k, m):
+%o A225434     if (k==1 or k==n): return 1
+%o A225434     else: return (m*(n-k)+1)*T(n-1, k-1, m) + (m*k-m+1)*T(n-1, k, m)
+%o A225434 def A142459(n,k): return T(n,k,4)
+%o A225434 @CachedFunction
+%o A225434 def A225434(n,k):
+%o A225434     if (k==0 or k==n): return 1
+%o A225434     elif (k <= (n//2)): return A225434(n,k-1) + (-1)^k*A142459(n+2,k+1)
+%o A225434     else: return A225434(n,n-k)
+%o A225434 flatten([[A225434(n,k) for k in (0..n)] for n in (0..12)]) # _G. C. Greubel_, Mar 19 2022
+%Y A225434 Cf. A142459, A159041.
+%K A225434 sign,tabl
+%O A225434 0,5
+%A A225434 _Roger L. Bagula_, May 07 2013
+%E A225434 Edited by _N. J. A. Sloane_, May 11 2013

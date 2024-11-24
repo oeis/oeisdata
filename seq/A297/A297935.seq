@@ -1,0 +1,22 @@
+%I A297935 #24 Jan 29 2018 08:16:28
+%S A297935 2,2,3,2,19,53,163,53,167,31,3,37,743,97,271,17,3,41,131,691,97,181,
+%T A297935 587,523,227,211,229,3,1697,151,1009,23,131,151,3137,1621,71,439,389,
+%U A297935 521,811,1039,179,23,311,193,227,5869,577,6263,31,1901,113,1439,1451,107
+%N A297935 Least prime k such that n concatenations of n+1 consecutive primes in base 2, starting from k, generate another prime in base 10.
+%H A297935 Paolo P. Lava, <a href="/A297935/b297935.txt">Table of n, a(n) for n = 0..200</a>
+%e A297935 a(4) = 19 because the concatenation of 19, 23, 29, 31, 37 in base 2 is concat(concat(concat(concat(10011, 10111), 11101), 11111), 100101) that is the prime 41414629 in base 10 and 19 is the least prime to have this property.
+%p A297935 with(numtheory): P:=proc(q) local a,b,c,i,k,n;
+%p A297935 for n from 1 to q do for k from 1 to q do
+%p A297935 a:=ithprime(k); b:=convert(a,binary,decimal);
+%p A297935 for i from 1 to n-1 do a:=nextprime(a);
+%p A297935 c:=convert(a,binary,decimal); b:=b*10^(ilog10(c)+1)+c; od;
+%p A297935 a:=convert(b,decimal,binary); if isprime(a) then print(ithprime(k)); break; fi; od; od; end: P(10^3);
+%t A297935 Table[Prime@ SelectFirst[Range[2^12], Function[k, PrimeQ@ FromDigits[Join @@ IntegerDigits[Prime@ Range[k, k + n], 2],2]]], {n, 0, 55}] (* _Michael De Vlieger_, Jan 09 2018 *)
+%o A297935 (PARI) eva(n) = subst(Pol(n), x, 10)
+%o A297935 decimal(v, base) = my(w=[]); for(k=0, #v-1, w=concat(w, v[#v-k]*base^k)); sum(i=1, #w, w[i])
+%o A297935 concat_primes(start, num) = my(v=[], s=""); forprime(p=start, , v=concat(v, [eva(binary(p))]); if(#v==num, break)); for(k=1, #v, s=concat(s, Str(v[k]))); eval(s)
+%o A297935 a(n) = forprime(k=1, , if(ispseudoprime(decimal(digits(concat_primes(k, n+1)), 2)), return(k))) \\ _Felix Fröhlich_, Jan 09 2018
+%Y A297935 Cf. A000040, A030996, A030997.
+%K A297935 nonn,base,easy
+%O A297935 0,1
+%A A297935 _Paolo P. Lava_, Jan 09 2018

@@ -1,0 +1,42 @@
+%I A317826 #28 Aug 26 2018 12:24:39
+%S A317826 1,1,1,2,2,4,1,2,2,5,4,11,2,4,4,11,9,26,3,7,7,21,16,52,1,2,2,5,4,11,2,
+%T A317826 5,5,15,11,36,4,11,11,36,26,92,7,21,21,74,52,198,2,4,4,11,9,26,4,11,
+%U A317826 11,36,26,92,9,26,26,92,66,249,16,52,52,198,137,560,3,7,7,21,16,52,7,21,21,74,52,198,16,52,52,198,137,560,31,109
+%N A317826 Number of partitions of n with carry-free sum in factorial base.
+%C A317826 "Carry-free sum" in this context means that when the digits of summands (written in factorial base, see A007623) are lined up (right-justified), then summing up of each column will not result in carries to any columns left of that column, that is, the sum of digits of the k-th column from the right (with the rightmost as column 1) over all the summands is the same as the k-th digit of n, thus at most k. Among other things, this implies that in any solution, at most one of the summands may be odd. Moreover, such an odd summand is present if and only if n is odd.
+%C A317826 a(n) is the number of set partitions of the multiset that contains d copies of each number k, collected over all k in which digit-positions (the rightmost being k=1) there is a nonzero digit d in true factorial base representation of n, where also digits > 9 are allowed.
+%C A317826 Distinct terms are the distinct terms in A050322, that is, A045782. - _David A. Corneth_ & _Antti Karttunen_, Aug 10 2018
+%H A317826 Antti Karttunen, <a href="/A317826/b317826.txt">Table of n, a(n) for n = 0..5040</a>
+%H A317826 <a href="/index/Fa#facbase">Index entries for sequences related to factorial base representation</a>
+%H A317826 <a href="/index/Par#part">Index entries for sequences related to partitions</a>
+%F A317826 a(n) = A001055(A276076(n)) = A001055(A278236(n)).
+%F A317826 a(A000142(n)) = 1.
+%F A317826 a(A001563(n)) = A000041(n).
+%F A317826 a(A033312(n+1)) = A317829(n) for n >= 1.
+%e A317826   n  in fact.base  a(n) carry-free partitions
+%e A317826 ------------------------------
+%e A317826   0     "0"         1   {}    (unique empty partition, thus a(0) = 1)
+%e A317826   1     "1"         1   {1}
+%e A317826   2    "10"         1   {2}
+%e A317826   3    "11"         2   {2, 1} and {3}, in fact.base: {"10", "1"} and {"11"}
+%e A317826   4    "20"         2   {2, 2} and {4}, in fact.base: {"10" "10"} and {"20"}
+%e A317826   5    "21"         4   {2, 2, 1}, {3, 2}, {4, 1} and {5},
+%e A317826     in factorial base:  {"10", "10", "1"}, {"11", "10"}, {"20", "1"} and {"21"}.
+%o A317826 (PARI)
+%o A317826 fcnt(n, m) = {local(s); s=0; if(n == 1, s=1, fordiv(n, d, if(d > 1 & d <= m, s=s+fcnt(n/d, d)))); s};
+%o A317826 A001055(n) = fcnt(n, n); \\ From A001055
+%o A317826 A276076(n) = { my(i=0,m=1,f=1,nextf); while((n>0),i=i+1; nextf = (i+1)*f; if((n%nextf),m*=(prime(i)^((n%nextf)/f));n-=(n%nextf));f=nextf); m; };
+%o A317826 A317826(n) = A001055(A276076(n));
+%o A317826 (PARI)
+%o A317826 \\ Slightly faster, memoized version:
+%o A317826 memA001055 = Map();
+%o A317826 A001055(n) = {my(v); if(mapisdefined(memA001055,n), v = mapget(memA001055,n), v = fcnt(n, n); mapput(memA001055,n,v); (v));}; \\ Cached version.
+%o A317826 A276076(n) = { my(i=0,m=1,f=1,nextf); while((n>0),i=i+1; nextf = (i+1)*f; if((n%nextf),m*=(prime(i)^((n%nextf)/f));n-=(n%nextf));f=nextf); m; };
+%o A317826 A046523(n) = { my(f=vecsort(factor(n)[, 2], , 4), p); prod(i=1, #f, (p=nextprime(p+1))^f[i]); }; \\ From A046523
+%o A317826 A317826(n) = A001055(A046523(A276076(n)));
+%Y A317826 Cf. A001055, A007623, A025487, A045782 (range of this sequence), A050322, A276076, A278236.
+%Y A317826 Cf. A317827 (positions of records), A317828 (record values), A317829.
+%Y A317826 Cf. also A227154, A317836.
+%K A317826 nonn
+%O A317826 0,4
+%A A317826 _Antti Karttunen_, Aug 08 2018

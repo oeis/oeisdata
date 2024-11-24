@@ -1,0 +1,47 @@
+%I A331233 #25 May 20 2021 04:08:53
+%S A331233 0,0,0,1,2,5,12,30,75,194,501,1317,3485,9302,24976,67500,183290,
+%T A331233 500094,1369939,3766831,10391722,28756022,79794407,221987348,
+%U A331233 619019808,1729924110,4844242273,13590663071,38195831829,107523305566,303148601795,855922155734,2419923253795
+%N A331233 Number of unlabeled rooted trees with n vertices and more than two branches of the root.
+%H A331233 Alois P. Heinz, <a href="/A331233/b331233.txt">Table of n, a(n) for n = 1..1000</a> (first 500 terms from Andrew Howroyd)
+%F A331233 For n > 1, a(n) = Sum_{k > 2} A033185(n - 1, k).
+%F A331233 G.f.: f(x) - x*(1 + f(x) + (f(x)^2 + f(x^2))/2) where f(x) is the g.f. of A000081. - _Andrew Howroyd_, Jan 22 2020
+%e A331233 The a(4) = 1 through a(7) = 12 rooted trees:
+%e A331233   (ooo)  (oooo)   (ooooo)    (oooooo)
+%e A331233          (oo(o))  (oo(oo))   (oo(ooo))
+%e A331233                   (ooo(o))   (ooo(oo))
+%e A331233                   (o(o)(o))  (oooo(o))
+%e A331233                   (oo((o)))  (o(o)(oo))
+%e A331233                              (oo((oo)))
+%e A331233                              (oo(o)(o))
+%e A331233                              (oo(o(o)))
+%e A331233                              (ooo((o)))
+%e A331233                              ((o)(o)(o))
+%e A331233                              (o(o)((o)))
+%e A331233                              (oo(((o))))
+%p A331233 g:= proc(n, i, t) option remember; `if`(n=0, `if`(t=0, 1, 0),
+%p A331233       `if`(i<1, 0, add(binomial(g(i-1$2, 0)+j-1, j)*
+%p A331233          g(n-i*j, i-1, max(0, t-j)), j=0..n/i)))
+%p A331233     end:
+%p A331233 a:= n-> g(n-1$2, 3):
+%p A331233 seq(a(n), n=1..40);  # _Alois P. Heinz_, Jan 22 2020
+%t A331233 urt[n_]:=Join@@Table[Union[Sort/@Tuples[urt/@ptn]],{ptn,IntegerPartitions[n-1]}];
+%t A331233 Table[Length[Select[urt[n],Length[#]>2&]],{n,10}]
+%t A331233 (* Second program: *)
+%t A331233 g[n_, i_, t_] := g[n, i, t] = If[n == 0, If[t == 0, 1, 0],
+%t A331233      If[i < 1, 0, Sum[Binomial[g[i - 1, i - 1, 0] + j - 1, j]*
+%t A331233      g[n - i*j, i - 1, Max[0, t - j]], {j, 0, n/i}]]];
+%t A331233 a[n_] := g[n-1, n-1, 3];
+%t A331233 Array[a, 40] (* _Jean-François Alcover_, May 20 2021, after _Alois P. Heinz_ *)
+%o A331233 (PARI) \\ TreeGf gives gf of A000081.
+%o A331233 TreeGf(N)={my(A=vector(N, j, 1)); for (n=1, N-1, A[n+1] = 1/n * sum(k=1, n, sumdiv(k, d, d*A[d]) * A[n-k+1] ) ); x*Ser(A)}
+%o A331233 seq(n)={my(g=TreeGf(n)); Vec(g - x*(1 + g + (g^2 + subst(g, x, x^2))/2), -n)} \\ _Andrew Howroyd_, Jan 22 2020
+%Y A331233 The Matula-Goebel numbers of these trees are given by A033942.
+%Y A331233 The series-reduced case is A331488.
+%Y A331233 The lone-child-avoiding case is (also) A331488.
+%Y A331233 The labeled version is A331577.
+%Y A331233 Unlabeled rooted trees are counted by A000081.
+%Y A331233 Cf. A001678, A001679, A004111, A033185, A060313, A206429, A331490, A331578.
+%K A331233 nonn
+%O A331233 1,5
+%A A331233 _Gus Wiseman_, Jan 21 2020

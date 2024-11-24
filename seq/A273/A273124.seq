@@ -1,0 +1,41 @@
+%I A273124 #30 Jan 13 2017 08:36:49
+%S A273124 6,24,28,30,48,80,84,90,96,108,120,126,132,140,150,156,160,168,192,
+%T A273124 198,200,204,210,216,220,228,240,252,260,264,270,276,300,312,320,330,
+%U A273124 336,348,372,378,384,390,396,400,408,420,432,440,444,448,450,456,462,480
+%N A273124 Numbers n such that the sum of the residues (mod k) of their aliquot parts is equal to n, for some 1 <= k <= n.
+%C A273124 The majority of the numbers of the sequence admit just one or two values of k. Anyway, there are numbers with more than two values. The first five numbers with 3 values of k are:
+%C A273124 2940: 308, 336 and 462;
+%C A273124 3276: 280, 455 and 520;
+%C A273124 4560: 384, 480 and 720;
+%C A273124 9120: 800, 1000 and 1500;
+%C A273124 9180: 792, 990 and 1485.
+%C A273124 Perfect numbers x have x/2 - 1 different values of k: (x/2 + 1) <= k <= x - 1.
+%C A273124 Is there any number, apart from the perfect ones, with more than 3 different values of k?
+%C A273124 The least such n is 111360, which has k = 9680, 12100, 13200, 18150. - _Robert Israel_, May 18 2016
+%H A273124 Paolo P. Lava, <a href="/A273124/b273124.txt">Table of n, a(n) for n = 1..1000</a>
+%H A273124 Paolo P. Lava, <a href="/A273124/a273124_1.txt">First 100 terms with different values of k >= 3</a>
+%e A273124 Aliquot parts of 108 are 1, 2, 3, 4, 6, 9, 12, 18, 27, 36, 54. If we choose k = 32 we get: 1 mod 32 = 1, 2 mod 32 = 2, 3 mod 32 = 3, 4 mod 32 = 4, 6 mod 32 = 6, 9 mod 32 = 9, 12 mod 32 = 12, 18 mod 32 = 18, 27 mod 32 = 27, 36 mod 32 = 4, 54 mod 32 = 22 and 1 + 2 + 3 + 4 + 6 + 9 + 12 + 18 + 27 + 4 + 22 = 108.
+%e A273124 Aliquot parts of 120 are 1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 20, 24, 30, 40, 60. In this case we can choose two different values for k: 24 and 30. In fact the sum of divisors from 1 to 20 is 86. Then 24 mod 24 = 0, 30 mod 24 = 6, 40 mod 24 = 16, 60 mod 24 = 12 and 86 + 0 + 6 + 16 + 12 = 120. Again, 24 mod 30 = 24, 30 mod 30 = 0, 40 mod 30 = 10, 60 mod 30 = 0 and 86 + 24 + 0 + 10 + 0 = 120.
+%p A273124 with(numtheory): P:= proc(q) local a,b,j,k,n;
+%p A273124 for n from 1 to q do a:=sort([op(divisors(n))]);
+%p A273124 for k from 1 to n do b:=0; for j from 1 to nops(a)-1 do
+%p A273124 b:=b+(a[j] mod k); od; if b=n then print(n); break; fi; od; od; end: P(10^5);
+%p A273124 # alternative:
+%p A273124 filter:= proc(n) local D,Ks,d,k,kmin;
+%p A273124   uses numtheory;
+%p A273124   D:= divisors(n) minus {n};
+%p A273124   kmin:= ceil(n/nops(D))+1;
+%p A273124   Ks:= divisors(convert(D,`+`)-n);
+%p A273124   if Ks = {} then return true fi;
+%p A273124   Ks:= select(k -> (k >= kmin and k <= n), Ks);
+%p A273124   for k in Ks do
+%p A273124      if add(d mod k, d=D) = n then return true fi
+%p A273124   od:
+%p A273124   false
+%p A273124 end proc:
+%p A273124 select(filter, [$2..10^5]); # _Robert Israel_, May 18 2016
+%t A273124 Select[Range@ 500, Function[d, Length@ Select[Range@ #, Function[k, Total@ Map[Mod[#, k] &, d] == #]] > 0]@ Most@ Divisors@ # &] (* _Michael De Vlieger_, May 17 2016 *)
+%Y A273124 Cf. A265646.
+%K A273124 nonn,easy
+%O A273124 1,1
+%A A273124 _Paolo P. Lava_, May 16 2016

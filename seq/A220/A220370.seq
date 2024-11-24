@@ -1,0 +1,106 @@
+%I A220370 #47 Jun 25 2019 17:31:06
+%S A220370 1,1,2,2,3,2,3,4,7,4,5,4,4,3,4,8,15,9,12,8,9,6,7,8,11,6,6,6,5,4,5,16,
+%T A220370 30,19,26,18,20,14,17,16,22,13,14,12,11,8,9,16,26,15,18,12,13,8,8,12,
+%U A220370 16,8,7,8,6,5,6,32,58,38,52,38,41,30,37,36,45,29,31
+%N A220370 Number of nonzero squares that appear as a subsequences in the binary digits of n.
+%H A220370 Robert Israel, <a href="/A220370/b220370.txt">Table of n, a(n) for n = 1..10000</a> (first 90 terms from Marko Riedel)
+%H A220370 Marko Riedel, <a href="http://math.stackexchange.com/questions/253554">Asymptotics of the square indicator sum for subsequences of digits</a>
+%e A220370 When n = 9 = (1001)_2, we obtain the following subsequences: (1)_2=1, (0)_2=0, (0)_2=0, (1)_2=1, (10)_2=2, (10)_2=2, (11)_2=3, (00)_2=0, (01)_2=1, (01)_2=1 and (100)_2=4, (101)_2=5, (101)_2=5, (001)_2=1, (1001)_2=9 and this includes seven nonzero squares, so a(9) = 7.
+%p A220370 g :=
+%p A220370 proc(n,flag)
+%p A220370         option remember;
+%p A220370         local dlist, ind, flind, sseq, len, sel, val, r, res;
+%p A220370         dlist := convert(n, base, 2);
+%p A220370         len := nops(dlist);
+%p A220370         res := 0;
+%p A220370         for ind from 0 to 2^len-1 do
+%p A220370             sel := convert(ind, base, 2);
+%p A220370             sseq := [];
+%p A220370             for flind to nops(sel) do
+%p A220370                 if sel[flind] = 1 then
+%p A220370                    sseq := [op(sseq), dlist[flind]];
+%p A220370                 fi;
+%p A220370             od;
+%p A220370             val := add(sseq[k]*2^(k-1), k=1..nops(sseq));
+%p A220370             if flag = 0 then
+%p A220370                r := floor(sqrt(val));
+%p A220370                if val>0 and r*r = val then
+%p A220370                   res := res+1;
+%p A220370                fi;
+%p A220370             else
+%p A220370                r := floor(sqrt(val/2));
+%p A220370                if val>0 and 2*r*r = val then
+%p A220370                   res := res+1;
+%p A220370                fi;
+%p A220370             fi;
+%p A220370         od;
+%p A220370         res;
+%p A220370 end;
+%p A220370 # Alternative
+%p A220370 SubSequenceCount:= proc(P, T) option remember;
+%p A220370   local t;
+%p A220370   if length(T) < length(P) then return 0 fi;
+%p A220370   if length(P) = 1 then return StringTools:-CountCharacterOccurrences(T,P) fi;
+%p A220370   if P[1] = T[1] then t:= procname(P[2..-1],T[2..-1]) else t:= 0 fi;
+%p A220370   t + procname(P,T[2..-1]);
+%p A220370 end proc:
+%p A220370 f:= proc(n) local B,k,t,C,j;
+%p A220370   B:= convert(convert(n,binary),string);
+%p A220370   t:= 0:
+%p A220370   for k from 1 to isqrt(n) do
+%p A220370     C:= convert(convert(k^2,binary),string);
+%p A220370     t:= t + add(SubSequenceCount(cat("0"$j,C),B),j=0..length(B)-length(C));
+%p A220370   od;
+%p A220370   t;
+%p A220370 end proc:
+%p A220370 map(f, [$1..100]); # _Robert Israel_, Jun 25 2019
+%o A220370 (C)
+%o A220370 unsigned long isqrt(unsigned long n)
+%o A220370 {
+%o A220370   if(!n) return 0;
+%o A220370   unsigned long a = 1, b = n, mid;
+%o A220370   do {
+%o A220370     mid = (a+b)/2;
+%o A220370     if(mid*mid>n){
+%o A220370       b = mid;
+%o A220370     }
+%o A220370     else{
+%o A220370       a = mid;
+%o A220370     }
+%o A220370   } while(b-a>1);
+%o A220370   return a;
+%o A220370 }
+%o A220370 unsigned long g(unsigned long n)
+%o A220370 {
+%o A220370   int bits[256], len = 0;
+%o A220370   while(n>0){
+%o A220370     bits[len++] = n%2;
+%o A220370     n >>= 1;
+%o A220370   }
+%o A220370   unsigned long res = 0, ind;
+%o A220370   for(ind=0; ind<(1<<len); ind++){
+%o A220370     unsigned long varind = ind;
+%o A220370     int subseq[256], srcpos=0, pos=0;
+%o A220370     while(varind>0){
+%o A220370       if(varind%2){
+%o A220370         subseq[pos++] = bits[srcpos];
+%o A220370       }
+%o A220370       srcpos++;
+%o A220370       varind >>= 1;
+%o A220370     }
+%o A220370     unsigned long val = 0;
+%o A220370     int seqpos = 0;
+%o A220370     while(seqpos<pos){
+%o A220370       val += (1<<seqpos)*subseq[seqpos];
+%o A220370       seqpos++;
+%o A220370     }
+%o A220370     unsigned long cs = isqrt(val);
+%o A220370     if(val>0 && cs*cs == val){
+%o A220370       res++;
+%o A220370     }
+%o A220370   }
+%o A220370   return res;
+%o A220370 }
+%K A220370 nonn,base,look
+%O A220370 1,3
+%A A220370 _Marko Riedel_, Dec 14 2012

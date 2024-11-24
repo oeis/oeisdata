@@ -1,0 +1,64 @@
+%I A240009 #46 Jan 26 2022 15:18:51
+%S A240009 1,1,1,0,0,1,1,1,0,1,1,1,0,1,1,0,1,1,2,1,1,1,0,1,1,1,1,1,2,2,1,1,0,1,
+%T A240009 1,2,3,2,2,2,1,1,0,1,1,1,2,2,2,4,3,2,2,1,1,0,1,1,2,4,5,3,4,4,2,2,1,1,
+%U A240009 0,1,1,1,2,3,3,5,7,5,4,4,2,2,1,1,0,1,1,2,4,7,7,6,8,6,4,4,2,2,1,1,0,1
+%N A240009 Number T(n,k) of partitions of n, where k is the difference between the number of odd parts and the number of even parts; triangle T(n,k), n>=0, -floor(n/2)+(n mod 2)<=k<=n, read by rows.
+%C A240009 T(n,k) = T(n+k,-k).
+%C A240009 Sum_{k=-floor(n/2)+(n mod 2)..-1} T(n,k) = A108949(n).
+%C A240009 Sum_{k=-floor(n/2)+(n mod 2)..0} T(n,k) = A171966(n).
+%C A240009 Sum_{k=1..n} T(n,k) = A108950(n).
+%C A240009 Sum_{k=0..n} T(n,k) = A130780(n).
+%C A240009 Sum_{k=-1..1} T(n,k) = A239835(n).
+%C A240009 Sum_{k<>0} T(n,k) = A171967(n).
+%C A240009 T(n,-1) + T(n,1) = A239833(n).
+%C A240009 Sum_{k=-floor(n/2)+(n mod 2)..n} k * T(n,k) = A209423(n).
+%C A240009 Sum_{k=-floor(n/2)+(n mod 2)..n} (-1)^k*T(n,k) = A081362(n) = (-1)^n*A000700(n).
+%H A240009 Alois P. Heinz, <a href="/A240009/b240009.txt">Rows n = 0..120, flattened</a>
+%F A240009 G.f.: 1 / prod(n>=1, 1 - e(n)*q^n ) = 1 + sum(n>=1, e(n)*q^n / prod(k=1..n, 1-e(k)*q^k) ) where e(n) = u if n odd, otherwise 1/u; see Pari program. [_Joerg Arndt_, Mar 31 2014]
+%e A240009 T(5,-1) = 1: [2,2,1].
+%e A240009 T(5,0) = 2: [4,1], [3,2].
+%e A240009 T(5,1) = 1: [5].
+%e A240009 T(5,2) = 1: [2,1,1,1].
+%e A240009 T(5,3) = 1: [3,1,1].
+%e A240009 T(5,5) = 1: [1,1,1,1,1].
+%e A240009 Triangle T(n,k) begins:
+%e A240009 : n\k : -5 -4 -3 -2 -1  0  1  2  3  4  5  6  7  8  9 10 ...
+%e A240009 +-----+----------------------------------------------------
+%e A240009 :  0  :                 1;
+%e A240009 :  1  :                    1;
+%e A240009 :  2  :              1, 0, 0, 1;
+%e A240009 :  3  :                 1, 1, 0, 1;
+%e A240009 :  4  :           1, 1, 0, 1, 1, 0, 1;
+%e A240009 :  5  :              1, 2, 1, 1, 1, 0, 1;
+%e A240009 :  6  :        1, 1, 1, 1, 2, 2, 1, 1, 0, 1;
+%e A240009 :  7  :           1, 2, 3, 2, 2, 2, 1, 1, 0, 1;
+%e A240009 :  8  :     1, 1, 2, 2, 2, 4, 3, 2, 2, 1, 1, 0, 1;
+%e A240009 :  9  :        1, 2, 4, 5, 3, 4, 4, 2, 2, 1, 1, 0, 1;
+%e A240009 : 10  :  1, 1, 2, 3, 3, 5, 7, 5, 4, 4, 2, 2, 1, 1, 0, 1;
+%p A240009 b:= proc(n, i) option remember; `if`(n=0, 1, `if`(i<1, 0,
+%p A240009       expand(b(n, i-1)+`if`(i>n, 0, b(n-i, i)*x^(2*irem(i, 2)-1)))))
+%p A240009     end:
+%p A240009 T:= n-> (p-> seq(coeff(p, x, i), i=ldegree(p)..degree(p)))(b(n$2)):
+%p A240009 seq(T(n), n=0..14);
+%t A240009 b[n_, i_] := b[n, i] = If[n == 0, 1, If[i<1, 0, b[n, i-1] + If[i>n, 0, b[n-i, i]*x^(2*Mod[i, 2]-1)]]]; T[n_] := (degree = Exponent[b[n, n], x]; ldegree = -Exponent[b[n, n] /. x -> 1/x, x]; Table[Coefficient[b[n, n], x, i], {i, ldegree, degree}]); Table[T[n], {n, 0, 14}] // Flatten (* _Jean-François Alcover_, Jan 06 2015, translated from Maple *)
+%o A240009 (PARI) N=20; q='q+O('q^N);
+%o A240009 e(n) = if(n%2!=0, u, 1/u);
+%o A240009 gf = 1 / prod(n=1,N, 1 - e(n)*q^n );
+%o A240009 V = Vec( gf );
+%o A240009 { for (j=1, #V,  \\ print triangle, including leading zeros
+%o A240009     for (i=0, N-j, print1("   "));  \\ padding
+%o A240009     for (i=-j+1, j-1, print1(polcoeff(V[j], i, u),", "));
+%o A240009     print();
+%o A240009 ); }
+%o A240009 /* _Joerg Arndt_, Mar 31 2014 */
+%Y A240009 Columns k=(-1)-10 give: A239832, A045931, A240010, A240011, A240012, A240013, A240014, A240015, A240016, A240017, A240018, A240019.
+%Y A240009 Row sums give A000041.
+%Y A240009 T(2n,n) gives A002865.
+%Y A240009 T(4n,2n) gives A182746.
+%Y A240009 T(4n+2,2n+1) gives A182747.
+%Y A240009 Row lengths give A016777(floor(n/2)).
+%Y A240009 Cf. A240021 (the same for partitions into distinct parts), A242618 (the same for parts counted without multiplicity).
+%Y A240009 Cf. A000700, A081362, A209423.
+%K A240009 nonn,tabf
+%O A240009 0,19
+%A A240009 _Alois P. Heinz_, Mar 30 2014

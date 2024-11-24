@@ -1,0 +1,60 @@
+%I A225118 #39 Aug 25 2023 12:03:37
+%S A225118 1,3,1,9,22,1,27,235,121,1,81,1996,3446,620,1,243,15349,63854,40314,
+%T A225118 3119,1,729,112546,963327,1434812,422087,15618,1,2187,806047,12960063,
+%U A225118 37898739,26672209,4157997,78117,1,6561,5705752,162711868,840642408,1151050534
+%N A225118 Triangle read by rows, coefficients of the generalized Eulerian polynomials A_{n, 4}(x) in descending order.
+%C A225118 The row sums equal the quadruple factorial numbers A047053 and the alternating row sums, i.e., sum((-1)^k*T(n,k),k=0..n), are up to a sign A079858. - _Johannes W. Meijer_, May 04 2013
+%H A225118 Peter Luschny, <a href="http://oeis.org/wiki/User:Peter_Luschny/EulerianPolynomialsGeneralized">Generalized Eulerian polynomials</a>.
+%H A225118 Zhe Wang and Zhi-Yong Zhu, <a href="https://ajc.maths.uq.edu.au/pdf/87/ajc_v87_p198.pdf">The spiral property of q-Eulerian numbers of type B</a>, The Australasian Journal of Combinatorics, Volume 87(1) (2023), Pages 198-202. See p. 199.
+%F A225118 G.f. of the polynomials is gf(n, k) = k^n*n!*(1/x-1)^(n+1)[t^n](x*e^(t*x/k)*(1-x*e(t*x))^(-1)) for k = 4; here [t^n]f(t,x) is the coefficient of t^n in f(t,x).
+%F A225118 From _Wolfdieter Lang_, Apr 12 2017 : (Start)
+%F A225118 E.g.f. of row polynomials (rising powers of x): (1-x)*exp(3*(1-x)*z)/(1-y*exp(4*(1-x)*z)), i.e. e.g.f. of the triangle.
+%F A225118 E.g.f. for the row polynomials with falling powers of x (A_{n, 4}(x) of the name): (1-x)*exp((1-x)*z)/(1 - x*exp(4*(1-x)*z)).
+%F A225118 T(n, k) = Sum_{j=0..k} (-1)^(k-j) * binomial(n+1,k-j) * (3+4*j)^n, 0 <= k <= n.
+%F A225118 Recurrence: T(n, k) = (4*(n-k) + 1)*T(n-1, k-1) + (3 + 4*k)*T(n-1, k), n >= 1, with T(n, -1) = 0, T(0, 0) = 1 and T(n, k) = 0 for n < k. (End)
+%F A225118 In terms of Euler's triangle = A123125: T(n, k) = Sum_{m=0..n} (binomial(n, m)*3^(n-m)*4^m*Sum_{p=0..k} (-1)^(k-p)*binomial(n-m, k-p)*A123125(m, p)), 0 <= k <= n. - _Wolfdieter Lang_, Apr 13 2017
+%e A225118 [0]  1
+%e A225118 [1]  3*x   +    1
+%e A225118 [2]  9*x^2 +   22*x   +    1
+%e A225118 [3] 27*x^3 +  235*x^2 +  121*x   + 1
+%e A225118 [4] 81*x^4 + 1996*x^3 + 3446*x^2 + 620*x + 1
+%e A225118 ...
+%e A225118 The triangle T(n, k) begins:
+%e A225118 n\k
+%e A225118 0:    1
+%e A225118 1:    3      1
+%e A225118 2:    9     22        1
+%e A225118 3:   27    235      121        1
+%e A225118 4:   81   1996     3446      620        1
+%e A225118 5:  243  15349    63854    40314     3119       1
+%e A225118 6:  729 112546   963327  1434812   422087   15618     1
+%e A225118 7: 2187 806047 12960063 37898739 26672209 4157997 78117 1
+%e A225118 ...
+%e A225118 row n=8: 6561 5705752 162711868 840642408 1151050534 442372648 39531132 390616 1,
+%e A225118 row n=9: 19683 40156777 1955297356 16677432820 39523450714 29742429982 6818184988 367889284 1953115 1.
+%e A225118 ... - _Wolfdieter Lang_, Apr 12 2017
+%p A225118 gf := proc(n, k) local f; f := (x,t) -> x*exp(t*x/k)/(1-x*exp(t*x));
+%p A225118 series(f(x,t), t, n+2); ((1-x)/x)^(n+1)*k^n*n!*coeff(%, t, n):
+%p A225118 collect(simplify(%), x) end:
+%p A225118 seq(print(seq(coeff(gf(n, 4), x, n-k), k=0..n)), n=0..6);
+%p A225118 # Recurrence:
+%p A225118 P := proc(n,x) option remember; if n = 0 then 1 else
+%p A225118   (n*x+(1/4)*(1-x))*P(n-1,x)+x*(1-x)*diff(P(n-1,x),x);
+%p A225118   expand(%) fi end:
+%p A225118 A225117 := (n,k) -> 4^n*coeff(P(n,x),x,n-k):
+%p A225118 seq(print(seq(A225117(n,k), k=0..n)), n=0..5);  # _Peter Luschny_, Mar 08 2014
+%t A225118 gf[n_, k_] := Module[{f, s}, f[x_, t_] := x*Exp[t*x/k]/(1-x*Exp[t*x]); s = Series[f[x, t], {t, 0, n+2}]; ((1-x)/x)^(n+1)*k^n*n!*SeriesCoefficient[s, {t, 0, n}]]; Table[Table[SeriesCoefficient[gf[n, 4], {x, 0, n-k}], {k, 0, n}], {n, 0, 8}] // Flatten (* _Jean-François Alcover_, Jan 27 2014, after Maple *)
+%o A225118 (Sage)
+%o A225118 @CachedFunction
+%o A225118 def EB(n, k, x):  # Modified cardinal B-splines
+%o A225118     if n == 1: return 0 if (x < 0) or (x >= 1) else 1
+%o A225118     return k*x*EB(n-1, k, x) + k*(n-x)*EB(n-1, k, x-1)
+%o A225118 def EulerianPolynomial(n, k): # Generalized Eulerian polynomials
+%o A225118     R.<x> = ZZ[]
+%o A225118     if x == 0: return 1
+%o A225118     return add(EB(n+1, k, m+1/k)*x^m for m in (0..n))
+%o A225118 [EulerianPolynomial(n, 4).coefficients()[::-1] for n in (0..5)]
+%Y A225118 Coefficients of A_{n,1}(x) = A008292, coefficients of A_{n,2}(x) = A060187, coefficients of A_{n,3}(x) = A225117. A123125, A225467, A225469, A225473.
+%K A225118 nonn,easy,tabl
+%O A225118 0,2
+%A A225118 _Peter Luschny_, May 02 2013

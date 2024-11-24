@@ -1,0 +1,91 @@
+%I A353063 #101 Oct 31 2022 05:58:37
+%S A353063 1,1,1,1,-3,1,-3,1,1,1,3,-3,-9,1,13,-3,9,1,1,1,1,1,-9,3,-9,-3,-3,-9,
+%T A353063 -27,1,-15,13,13,-3,-3,9,-27,1,-19,1,13,1,1,1,1,1,9,-9,-9,3,3,-9,27,
+%U A353063 -3,27,-3,-27,-9,-9,-27,-81,1,49,-15,-15,13,13,13,121,-3,109,-3,33
+%N A353063 Irregular triangle T(n,k) read by rows: Coefficients for the ordinary generating function of A014682^n as sum of partial fractions (up to one factor x); ^n means n iterations into the Collatz function.
+%C A353063 This sequence is an attempt to compress the complete information about the dynamics of the Collatz function into a single mathematically dense description.
+%C A353063 We observe that the length of the rows in this triangle is growing in powers of two. This is true for all variants of the Collatz function of the form: odd->(b*x+c)/2; even->x/2, because after the first iteration into such a function we could write out the result into two rows (example here for (3*x+1)/2):
+%C A353063    for odd n:   2, 5, 8,11,14,... progression with 3^1 (b^1) and start with 2,
+%C A353063    for even n:  1, 2, 3, 4, 5,... progression with 3^0 (b^0) and start with 1.
+%C A353063   After the second iteration we could write the result in four rows, then into eight and so forth. Each row will have a starting value and will have a progression in a power of b. The distribution of powers will be a permutation of A023416. This distribution of powers is reflected in our triangle by the coefficients T(n, 2^(n-1)+1..2^n). The distribution of start values of each such row determines T(n, 1..2^(n-1)) in our triangle.
+%C A353063 The Collatz conjecture is true if for each k < 2^n-1, |T(n, 2^n-1 + k)| - (|T(n, k)| + 1)/2 reaches a value of <= 2 for some n big enough.
+%C A353063 If this happens A014682^(n-1)(k) < 3 is reached. Alternatively we could say |T(n, 2^n-1 + k)| - (|T(n, k)| + 1)/2 may never be equal for same k but different in n, if it evaluates to a value > 2.
+%C A353063 This sequence allows us to develop A014682^n(k) as a sum of sequences s1(k) + s2(k) + ... + sn(k). See the o.g.f. of A014682^n(y)-A014682^(n-1)(y) in the formula section.
+%H A353063 Kevin Ryde, <a href="https://user42.tuxfamily.org/pari-recurrence-guess/index.html">"recurrence-guess.gp" A free PARI/GP tool which can write these generating functions as sums of partial fractions</a>.
+%H A353063 <a href="/index/3#3x1">Index entries for sequences related to 3x+1 (or Collatz) problem</a>.
+%F A353063 The ordinary generating function of A014682^n(y):
+%F A353063 x*(n*(1/4)/(1 - x) + 1/(1 - x)^2 + Sum_{k=1..n} ( Sum_{j=1..2^(n-1)} ( T(k, j)/4 / (1 + x^(2^(k-1))) ) + Sum_{m=1..2^(n-1)} ( T(k, 2^(n-1) + m)/2 / (1 + x^(2^(k-1)))^2 ) ) ).
+%F A353063 The ordinary generating function of A014682^n(y) - A014682^(n-1)(y):
+%F A353063 x*((1/4)/(1 - x) + Sum_{j=1..2^(n-1)} ( T(n, j)/4 / (1 + x^(2^(n-1))) ) + Sum_{m=1..2^(n-1)} ( T(n, 2^(n-1) + m)/2 / (1 + x^(2^(n-1)))^2 )).
+%F A353063 T(n, 2^(n-1)) = 1.
+%F A353063 T(n, 2^n) = 1.
+%F A353063 T(n, 2^n-1) = -(3^(n-1)), for n > 1.
+%F A353063 T(n, 2^c*k) = T(n-c, k) for n > c.
+%F A353063 T(n, 2^(n-1) + 2*k - 1) = 3*T(n-1, 2^(n-2) + (((3*k + 1)/2) mod 2^(n-2))))*(-1)^floor(((3*k + 1)/2) / (2^(n-2) + (1/2))), for n > 1 and 0 < k <= 2^(n-2).
+%F A353063 T(n, 2*k - 1) = -(2*(2-f(k,n))*abs(T(n-1, 2^(n-2) + m(k,n))) + abs(T(n-1, m(k,n))))*signum(T(n, 2^(n-1) + 2*k - 1)), for n > 1 and 0 < k <= 2^(n-2). f(k,n) = floor(((3*k + 1)/2) / (2^(n-2))), m(k,n) = ((3*k + 1)/2) mod 2^(n-2)) with the exception that if m(k,n) = 0, we add 2^(n-2) to the result.
+%F A353063 Abs(T(n, k)) = max(2*(A014682^(n-1)(1+2^(n-1)+k) - 2*A014682^(n-1)(1+k)) - 1, 1), for k < 2^(n-1).
+%F A353063 Abs(T(n, 2^(n-1) + k - 1)) = A014682^(n-1)(1+2^(n-1)+k) - A014682^(n-1)(1+k), for k < 2^(n-1).
+%F A353063 Abs(T(n, 2^(n-1) + k)) = 3^A339694(n-1, k+1), for k < 2^(n-1) - 1.
+%F A353063 Sum_{k=1..n} abs(T(n, 2^(n-1) + k)) = 2^(2*(n-1)).
+%F A353063 Sum_{k=1..n} log_3(abs(T(n, 2^(n-1) + k)) = A001787(n-1).
+%F A353063 n - 1 is the number of k where abs(T(n, 2^(n-1) + k)) = 3 for k = 1..2^(n-1).
+%F A353063 A268292(n + 3) is the number of k where abs(T(n, k)) > 12 and abs(T(n, 2^(n-1) + k)) = 9 for k = 1..2^(n-1).
+%e A353063 Written as an irregular triangle T(n,k):
+%e A353063   n\k  1   2   3   4   5   6   7   8   9  10  11  12  13  14  15  16 ...
+%e A353063   1    1,  1
+%e A353063   2    1,  1, -3,  1
+%e A353063   3   -3,  1,  1,  1,  3, -3, -9,  1
+%e A353063   4   13, -3,  9,  1,  1,  1,  1,  1, -9,  3, -9, -3, -3, -9,-27,  1
+%e A353063 .
+%e A353063 The ordinary generating function of A014682(y) is:
+%e A353063   x*(
+%e A353063     1/4 /(1 - x)     | n*(1/4)/(1 - x), n = 1
+%e A353063   + 1/(1 - x)^2
+%e A353063   + 1/4 /(1 + x)     | (T(1,1)/4)/(1 + x^(2^(k-1))), k = 1
+%e A353063   + 1/2 /(1 + x)^2)  | (T(1,2)/2)/(1 + x^(2^(k-1)))^2 ), k = 1.
+%e A353063 The ordinary generating function of A014682(A014682(y)) is:
+%e A353063   x*(
+%e A353063     1/2 /(1 - x)               | n*(1/4)/(1 - x), n = 2
+%e A353063   + 1/(1 - x)^2
+%e A353063   + 1/4 /(1 + x)               | (T(1,1)/4)/(1 + x^(2^(k-1))), k = 1
+%e A353063   + 1/2 /(1 + x)^2             | (T(1,2)/2)/(1 + x^(2^(k-1)))^2 ), k = 1
+%e A353063   + (1/4 + 1/4*x)/(1 + x^2)    | ((T(2,1) + T(2,2))/4)/(1 + x^(2^(k-1))), k = 2
+%e A353063   + (-3/2 + 1/2*x)/(1 + x^2)^2)| ((T(2,3) + T(2,4))/2)/(1 + x^(2^(k-1)))^2 ), k = 2.
+%e A353063 The ordinary generating function of A014682(A014682(A014682(y))) is:
+%e A353063   x*(
+%e A353063     3/4 /(1 - x)
+%e A353063   + 1/(1 - x)^2
+%e A353063   + 1/4 /(1 + x)
+%e A353063   + 1/2 /(1 + x)^2
+%e A353063   + (1/4 + 1/4*x)/(1 + x^2)
+%e A353063   + (-3/2 + 1/2*x)/(1 + x^2)^2
+%e A353063   + (-3/4 + 1/4*x + 1/4*x^2 + 1/4*x^3)/(1 + x^4)
+%e A353063   + (3/2 - 3/2*x - 9/2*x^2 + 1/2*x^3)/(1 + x^4)^2).
+%o A353063 (MATLAB)
+%o A353063 function a = A353063( max_n )
+%o A353063     a = cell(0);
+%o A353063     a{1} = [1 1];
+%o A353063     for n = 2:max_n
+%o A353063         row = zeros(1,2^n);
+%o A353063          % T(n, 2*k) = T(n-1, k)
+%o A353063         row(2.*[1:2^(n-1)]) = a{n-1};
+%o A353063         j = 2.*[1:2^(n-2)]-1;
+%o A353063         m = mod((j*3+1)/2,2^(n-2));
+%o A353063         f = floor(((j*3+1)/2)/2^(n-2));
+%o A353063         f2 = f; f2(m==0) = f(m==0)-1;
+%o A353063          % T(n, 2^(n-1) + 2*k - 1) = 3*T(n-1, 2^(n-2)
+%o A353063          % + (((3*k + 1)/2) mod 2^(n-2))))
+%o A353063          % *(-1)^floor(((3*k + 1)/2) / (2^(n-2) + (1/2)))
+%o A353063         row(2^(n-1) + j) = 3*a{n-1}(2^(n-2) + m).*(-1).^f2;
+%o A353063         m(m==0) = 2^(n-2);
+%o A353063          % T(n, 2*k - 1) = -(2*(2-f(k))*abs(T(n-1, 2^(n-2) + m(k)))
+%o A353063          % + abs(T(n-1, m(k))))*signum(T(n, 2^(n-1) + 2*k - 1))
+%o A353063         row(j) = (2*(2-f).*abs(a{n-1}(2^(n-2) + m))+abs(a{n-1}(m)))...
+%o A353063                  .*(-1*sign(row(2^(n-1) + j)));
+%o A353063         a{n} = row;
+%o A353063     end
+%o A353063 end
+%Y A353063 Cf. A001787, A014682, A023416, A268292, A339694.
+%K A353063 sign,tabf
+%O A353063 1,5
+%A A353063 _Thomas Scheuerle_, Apr 21 2022

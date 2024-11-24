@@ -1,0 +1,39 @@
+%I A217043 #24 Dec 29 2022 06:46:17
+%S A217043 1,2,4,11,34,152,1143,8285,98863,1211572
+%N A217043 a(1) = 1; a(n+1) is the smallest integer >=0 that cannot be obtained from the integers {a(1), ..., a(n)} using each number at most once and the operators +, -, *, / and accepting fractional intermediate results.
+%H A217043 Gilles Bannay, <a href="https://web.archive.org/web/20061201125224/http://gilles.bannay.free.fr/jeux_us.html">Countdown Problem</a>
+%e A217043 a(4)=11 because we can write 4+1=5, 4+2=6, 4+2+1=7, 4*2=8, 4*2+1=9, (4+1)*2=10 by using 1, 2 and 4, but we cannot construct 11 this way.
+%e A217043 a(7)=1143 because 1142 = (152+((34-4)*(11*(2+1)))), and 1143 is impossible.
+%e A217043 a(7) is not 1007 because it can be constructed as 1007 = 152*(11-(34+1)/(4*2)); the fractional intermediate result 35/8, for example, is accepted in the composition.
+%o A217043 (Python)
+%o A217043 from fractions import Fraction
+%o A217043 def a(n, v):
+%o A217043     R = dict() # index of each reachable subset is [card(s)-1][s]
+%o A217043     for i in range(n): R[i] = dict()
+%o A217043     for i in range(n): R[0][(v[i],)] = {v[i]}
+%o A217043     reach = set(v)
+%o A217043     for j in range(1, n):
+%o A217043         for i in range((j+1)//2):
+%o A217043             for s1 in R[i]:
+%o A217043                 for s2 in R[j-1-i]:
+%o A217043                     if set(s1) & set(s2) == set():
+%o A217043                         s12 = tuple(sorted(set(s1) | set(s2)))
+%o A217043                         if s12 not in R[len(s12)-1]:
+%o A217043                             R[len(s12)-1][s12] = set()
+%o A217043                         for a in R[i][s1]:
+%o A217043                             for b in R[j-1-i][s2]:
+%o A217043                                 allowed = [a+b, a*b, a-b, b-a]
+%o A217043                                 if a != 0: allowed.append(Fraction(b, a))
+%o A217043                                 if b != 0: allowed.append(Fraction(a, b))
+%o A217043                                 R[len(s12)-1][s12].update(allowed)
+%o A217043                                 reach.update(allowed)
+%o A217043     k = 1
+%o A217043     while k in reach: k += 1
+%o A217043     return k
+%o A217043 alst = [1]
+%o A217043 [alst.append(a(n, alst)) for n in range(1, 6)]
+%o A217043 print(alst) # _Michael S. Branicky_, Jul 01 2022
+%Y A217043 Cf. A060315, A071115 (disallows intermediate fractions).
+%K A217043 nonn,more
+%O A217043 1,2
+%A A217043 _Clément Morelle_, Sep 25 2012

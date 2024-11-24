@@ -1,0 +1,45 @@
+%I A286800 #23 May 26 2017 22:18:40
+%S A286800 1,1,2,7,6,63,74,10,729,974,254,8,10113,15084,5376,406,161935,264724,
+%T A286800 117424,14954,320,2923135,5163276,2697804,481222,23670,112,58547761,
+%U A286800 110483028,65662932,14892090,1186362,21936,1286468225,2570021310,1695874928,461501018,51034896,1866986,11264,30747331223,64547199082,46461697760,14603254902,2055851560,116329886,1905888,2560
+%N A286800 Triangle T(n,k) read by rows: coefficients of polynomials P_n(t) defined in Formula section.
+%C A286800 Row n>0 contains floor(2*(n+1)/3) terms.
+%H A286800 Gheorghe Coserea, <a href="/A286800/b286800.txt">Rows n=1..123, flattened</a>
+%H A286800 Luca G. Molinari, Nicola Manini, <a href="https://arxiv.org/abs/cond-mat/0512342">Enumeration of many-body skeleton diagrams</a>, arXiv:cond-mat/0512342 [cond-mat.str-el], 2006.
+%F A286800 y(x;t) = Sum_{n>0} P_n(t)*x^n satisfies x*deriv(y,x) = (1-y) * (2*t*x^2*(1-y)^2 + x*(1-y) - y) / (t*x^2*(1-y)^2 - t*x*y*(1-y) - 2*y), with y(0;t) = 0, where P_n(t) = Sum_{k=0..floor((2*n-1)/3)} T(n,k)*t^k for n>0.
+%F A286800 A049464(n) = T(n,0), P_n(-1) = (-1)^(n-1), A287029(n) = P_n(1).
+%e A286800 A(x;t) = x + (1 + 2*t)*x^2 + (7 + 6*t)*x^3 + (63 + 74*t + 10*t^2)*x^4 + ...
+%e A286800 Triangle starts:
+%e A286800 n\k  [0]       [1]        [2]       [3]       [4]      [5]
+%e A286800 [1]  1;
+%e A286800 [2]  1,        2;
+%e A286800 [3]  7,        6;
+%e A286800 [4]  63,       74,        10;
+%e A286800 [5]  729,      974,       254,      8;
+%e A286800 [6]  10113,    15084,     5376,     406;
+%e A286800 [7]  161935,   264724,    117424,   14954,    320;
+%e A286800 [8]  2923135,  5163276,   2697804,  481222,   23670,   112;
+%e A286800 [9]  58547761, 110483028, 65662932, 14892090, 1186362, 21936;
+%e A286800 [10] ...
+%t A286800 max = 12; y0[0, _] = y1[0, _] = 0; y0[x_, t_] = x; y1[x_, t_] = 0; For[n = 1, n <= max, n++, y1[x_, t_] = Normal[(1/(-1 + y0[x, t]))*x*(-1 - y0[x, t]^2 - 2*y0[x, t]*(-1 + D[y0[x, t], x]) + t*x*(-1 + y0[x, t])*(2*(-1 + y0[x, t])^2 + (x*(-1 + y0[x, t]) + y0[x, t])*D[y0[x, t], x])) + O[x]^n]; y0[x_, t_] = y1[x, t]];
+%t A286800 row[n_] := CoefficientList[SeriesCoefficient[y0[x, t], {x, 0, n}], t];
+%t A286800 Flatten[Table[row[n], {n, 0, max-1}]] (* _Jean-François Alcover_, May 24 2017, adapted from PARI *)
+%o A286800 (PARI)
+%o A286800 A286795_ser(N, t='t) = {
+%o A286800   my(x='x+O('x^N), y0=1, y1=0, n=1);
+%o A286800   while(n++,
+%o A286800     y1 = (1 + x*(1 + 2*t + x*t^2)*y0^2 + t*(1-t)*x^2*y0^3 + 2*x^2*y0*y0');
+%o A286800     y1 = y1 / (1+2*x*t); if (y1 == y0, break()); y0 = y1;); y0;
+%o A286800 };
+%o A286800 A286798_ser(N,t='t) = {
+%o A286800   my(v = A286795_ser(N,t)); subst(v, 'x, serreverse(x/(1-x*t*v)));
+%o A286800 };
+%o A286800 A286800_ser(N, t='t) = {
+%o A286800   my(v = A286798_ser(N,t)); 1-1/subst(v, 'x, serreverse(x*v^2));
+%o A286800 };
+%o A286800 concat(apply(p->Vecrev(p), Vec(A286800_ser(12))))
+%o A286800 \\ test: y=A286800_ser(50); x*y' == (1-y) * (2*t*x^2*(1-y)^2 + x*(1-y) - y) / (t*x^2*(1-y)^2 - t*x*y*(1-y) - 2*y)
+%Y A286800 Cf. A286781, A286782, A286783, A286784, A286785.
+%K A286800 nonn,tabf
+%O A286800 1,3
+%A A286800 _Gheorghe Coserea_, May 22 2017

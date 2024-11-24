@@ -1,0 +1,57 @@
+%I A280873 #44 Jan 22 2024 08:59:20
+%S A280873 0,1,3,6,7,13,14,15,26,27,29,30,31,53,54,55,58,59,61,62,63,106,107,
+%T A280873 109,110,111,117,118,119,122,123,125,126,127,213,214,215,218,219,221,
+%U A280873 222,223,234,235,237,238,239,245,246,247,250,251,253,254,255
+%N A280873 Numbers whose binary expansion does not begin 10 and does not contain 2 adjacent 0's; Ahnentafel numbers of X-chromosome inheritance of a male.
+%C A280873 The number of ancestors at generation m from whom a living individual may have received an X chromosome allele is F_m, the m-th term of the Fibonacci Sequence.
+%C A280873 From _Antti Karttunen_, Oct 11 2017: (Start)
+%C A280873 The starting offset is zero (with a(0) = 0) for the same reason that we have A003714(0) = 0. Indeed, b(n) = A054429(A003714(n)) for n >= 0 yields the terms of this sequence, but in different order.
+%C A280873 A163511(a(n)) for n >= 0 gives a permutation of squarefree numbers (A005117). See also A277006.
+%C A280873 (End)
+%H A280873 Antti Karttunen, <a href="/A280873/b280873.txt">Table of n, a(n) for n = 0..10946</a>
+%H A280873 David Eppstein, <a href="http://code.activestate.com/recipes/221457/">Self-recursive generators (Python recipe)</a>
+%H A280873 L. A. D. Hutchison, N. M. Myres and S. R. Woodward, <a href="http://fhtw.byu.edu/static/conf/2005/hutchison-growing-fhtw2005.pdf">Growing the Family Tree: The Power of DNA in Reconstructing Family Relationships</a>, Proceedings of the First Symposium on Bioinformatics and Biotechnology (BIOT-04, Colorado Springs), pp. 42-49, Sept. 2004.
+%H A280873 <a href="/index/Bi#binary">Index entries for sequences related to binary expansion of n</a>
+%F A280873 {a(n) : n >= 1} = {k >= 1 : A365538(A054429(k)) > 0}. - _Peter Munn_, Jan 22 2024
+%p A280873 gen[0]:= {0,1,3}:
+%p A280873 gen[1]:= {6,7}:
+%p A280873 for n from 2 to 10 do
+%p A280873   gen[n]:= map(t -> 2*t+1, gen[n-1]) union
+%p A280873       map(t -> 2*t, select(type, gen[n-1],odd))
+%p A280873 od:
+%p A280873 sort(convert(`union`(seq(gen[i],i=0..10)),list)); # _Robert Israel_, Oct 11 2017
+%t A280873 male = {1, 3}; generations = 8;
+%t A280873 Do[x = male[[i - 1]]; If[EvenQ[x],
+%t A280873                           male = Append[ male,   2*x + 1] ,
+%t A280873                           male = Flatten[Append[male, {2*x, 2*x + 1}]]]
+%t A280873        , {i, 3, Fibonacci[generations + 1]}]; male
+%o A280873 (PARI)
+%o A280873 isA003754(n) = { n=bitor(n, n>>1)+1; n>>=valuation(n, 2); (n==1); }; \\ After _Charles R Greathouse IV_'s Feb 06 2017 code.
+%o A280873 isA004760(n) = (n<2 || (binary(n)[2])); \\ This function also from _Charles R Greathouse IV_, Sep 23 2012
+%o A280873 isA280873(n) = (isA003754(n) && isA004760(n));
+%o A280873 n=0; k=0; while(k <= 10946, if(isA280873(n),write("b280873.txt", k, " ", n);k=k+1); n=n+1;); \\ _Antti Karttunen_, Oct 11 2017
+%o A280873 (Python)
+%o A280873 def A280873():
+%o A280873     yield 1
+%o A280873     for x in A280873():
+%o A280873         if ((x & 1) and (x > 1)):
+%o A280873             yield 2*x
+%o A280873         yield 2*x+1
+%o A280873 def take(n, g):
+%o A280873   '''Returns a list composed of the next n elements returned by generator g.'''
+%o A280873   z = []
+%o A280873   if 0 == n: return(z)
+%o A280873   for x in g:
+%o A280873     z.append(x)
+%o A280873     if n > 1: n = n-1
+%o A280873     else: return(z)
+%o A280873 take(120, A280873())
+%o A280873 # _Antti Karttunen_, Oct 11 2017, after the given Mathematica-code (by _Floris Strijbos_) and a similar generator-example for A003714 by _David Eppstein_ (cf. "Self-recursive generators" link).
+%Y A280873 Cf. A003714, A054429, A365538.
+%Y A280873 Intersection of A003754 and A004760.
+%Y A280873 Positions where A163511 obtains squarefree (A005117) values.
+%Y A280873 Cf. also A293437 (a subsequence).
+%K A280873 nonn,base,easy
+%O A280873 0,3
+%A A280873 _Floris Strijbos_, Jan 09 2017
+%E A280873 a(0) = 0 prepended and more descriptive alternative name added by _Antti Karttunen_, Oct 11 2017

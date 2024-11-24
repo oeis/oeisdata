@@ -1,0 +1,47 @@
+%I A196056 #47 Jun 25 2024 13:10:42
+%S A196056 1,1,1,2,1,1,1,2,1,1,2,3,2,2,2,1,1,1,1,1,1,3,1,1,2,1,2,2,2,2,1,4,1,1,
+%T A196056 2,3,2,1,3,3,1,1,2,3,2,1,1,1,1,2,2,4,1,2,2,2,2,2,1,3,3,3,2,1,2,1,1,3,
+%U A196056 2,1,1,1,1,1,1,5,2,2,1,1,2,1,2,2,3,1,4,2,1,3,1,2,3,2,3,1,4,1,1,1,1,2,1,3,3,1,2,2,3,1,1,1,3,3,1
+%N A196056 Triangle read by rows: T(n,k) is the number of nodes at level k>=1 of the rooted tree having Matula-Goebel number n (n>=2).
+%C A196056 The Matula-Goebel number of a rooted tree can be defined in the following recursive manner: to the one-vertex tree there corresponds the number 1; to a tree T with root degree 1 there corresponds the t-th prime number, where t is the Matula-Goebel number of the tree obtained from T by deleting the edge emanating from the root; to a tree T with root degree m>=2 there corresponds the product of the Matula-Goebel numbers of the m branches of T.
+%C A196056 Number of entries in row n is A109082(n) (n=2,3,...).
+%C A196056 The generating polynomial of row n is the partial Wiener polynomial of the rooted tree having Matula-Goebel number n with respect to the root (for partial Wiener polynomial see the Doslic reference, p. 68).
+%H A196056 François Marques, <a href="/A196056/b196056.txt">Table of n, a(n) for n = 2..10001</a> (rows 2 to 2668).
+%H A196056 Emeric Deutsch, <a href="http://arxiv.org/abs/1111.4288">Tree statistics from Matula numbers</a>, arXiv preprint arXiv:1111.4288 [math.CO], 2011.
+%H A196056 T. Doslic, <a href="https://doi.org/10.26493/1855-3974.15.895">Vertex-weighted Wiener polynomials for composite graphs</a>, Ars Mathematica Contemporanea, 1, 2008, 66-80.
+%H A196056 F. Goebel, <a href="http://dx.doi.org/10.1016/0095-8956(80)90049-0">On a 1-1-correspondence between rooted trees and natural numbers</a>, J. Combin. Theory, B 29 (1980), 141-143.
+%H A196056 I. Gutman and A. Ivic, <a href="http://dx.doi.org/10.1016/0012-365X(95)00182-V">On Matula numbers</a>, Discrete Math., 150, 1996, 131-142.
+%H A196056 I. Gutman and Yeong-Nan Yeh, <a href="http://www.emis.de/journals/PIMB/067/3.html">Deducing properties of trees from their Matula numbers</a>, Publ. Inst. Math., 53 (67), 1993, 17-22.
+%H A196056 D. W. Matula, <a href="http://www.jstor.org/stable/2027327">A natural rooted tree enumeration by prime factorization</a>, SIAM Rev. 10 (1968) 273.
+%H A196056 <a href="/index/Mat#matula">Index entries for sequences related to Matula-Goebel numbers</a>
+%F A196056 We give the recursive construction of the row generating polynomials R(n)=R(n,x). R(1)=0; if n = pprime(t) (=the t-th prime), then R(n)=x*R(t) + x; if n=r*s (r,s>=2), then R(n)=R(r)+R(s) (2nd Maple program yields R(n)).
+%e A196056 Row n=7 is [1,2] because the rooted tree with Matula-Goebel number 7 is the rooted tree Y, having 1 node at level 1 and 2 nodes at level 2.
+%e A196056 Row n=2^m is [m] because the rooted tree with Matula-Goebel number 2^m is a star with m edges.
+%e A196056 Triangle starts:
+%e A196056   1;
+%e A196056   1,1;
+%e A196056   2,
+%e A196056   1,1,1;
+%e A196056   2,1;
+%e A196056   1,2;
+%e A196056   3;
+%e A196056   2,2;
+%e A196056   2,1,1;
+%e A196056   ...
+%p A196056 with(numtheory): R := proc (n) local r, s: r := proc (n) options operator, arrow: op(1, factorset(n)) end proc: s := proc (n) options operator, arrow; n/r(n) end proc: if n = 1 then 0 elif bigomega(n) = 1 then sort(expand(x*R(pi(n))+x)) else sort(expand(R(r(n))+R(s(n)))) end if end proc: for n from 2 to 45 do seq(coeff(R(n), x, k), k = 1 .. degree(R(n))) end do;
+%p A196056 with(numtheory): R := proc (n) local r, s: r := proc (n) options operator, arrow: op(1, factorset(n)) end proc: s := proc (n) options operator, arrow: n/r(n) end proc: if n = 1 then 0 elif bigomega(n) = 1 then sort(expand(x*R(pi(n))+x)) else sort(expand(R(r(n))+R(s(n)))) end if end proc: R(987654321);
+%t A196056 r[n_] := FactorInteger[n][[1, 1]];
+%t A196056 s[n_] := n/r[n];
+%t A196056 R[n_] := Which[ n == 1, 0, PrimeOmega[n] == 1, x*R[PrimePi[n]] + x, True, R[r[n]] + R[s[n]]];
+%t A196056 T[n_] := Rest@CoefficientList[R[n], x];
+%t A196056 Table[T[n], {n, 2, 45}] // Flatten (* _Jean-François Alcover_, Jun 21 2024, after Maple code *)
+%o A196056 (PARI) P(n)={ if(n==1, return(0),
+%o A196056     my(f=factor(n)~, v=vector(#f,k,P(primepi(f[1,k]))) );
+%o A196056     return( 'x*sum(k=1,#f,(v[k]+1)*f[2,k]) ) )
+%o A196056 };
+%o A196056 A196056_Row(n) = Vecrev(P(n))[^1]; \\ _François Marques_, Apr 03 2021
+%Y A196056 Cf. A109082.
+%K A196056 nonn,tabf
+%O A196056 2,4
+%A A196056 _Emeric Deutsch_, Sep 30 2011
+%E A196056 Keyword tabf added by _Michel Marcus_, Apr 09 2013

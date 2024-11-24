@@ -1,0 +1,59 @@
+%I A373423 #19 Jun 12 2024 15:44:13
+%S A373423 1,1,0,1,1,0,1,2,1,0,1,3,1,1,0,1,4,3,1,1,0,1,5,6,5,1,1,0,1,6,10,14,8,
+%T A373423 1,1,0,1,7,15,30,31,13,1,1,0,1,8,21,55,85,70,21,1,1,0,1,9,28,91,190,
+%U A373423 246,157,34,1,1,0,1,10,36,140,371,671,707,353,55,1,1,0
+%N A373423 Array read by ascending antidiagonals: T(n, k) = [x^k] cf(n) where cf(0) = 1, cf(1) = -1/(x - 1), and for n > 1 is cf(n) = ~( ~x - 1/(~x - 1/(~x - 1/(~x - 1/(~x - ... 1/(~x + 1))))...) ) where '~' is '-' if n is even, and '+' if n is odd, and x appears n times in the expression.
+%e A373423 Generating functions of row n:
+%e A373423    gf0 = 1;
+%e A373423    gf1 =   - 1/( x-1);
+%e A373423    gf2 = x + 1/(-x+1);
+%e A373423    gf3 = x - 1/( x-1/( x+1));
+%e A373423    gf4 = x + 1/(-x-1/(-x-1/(-x+1)));
+%e A373423    gf5 = x - 1/( x-1/( x-1/( x-1/( x+1))));
+%e A373423    gf6 = x + 1/(-x-1/(-x-1/(-x-1/(-x-1/(-x+1)))));
+%e A373423 .
+%e A373423 Array begins:
+%e A373423   [0] 1, 0,  0,   0,   0,    0,     0,     0,      0, ...
+%e A373423   [1] 1, 1,  1,   1,   1,    1,     1,     1,      1, ...
+%e A373423   [2] 1, 2,  1,   1,   1,    1,     1,     1,      1, ...  A373565
+%e A373423   [3] 1, 3,  3,   5,   8,   13,    21,    34,     55, ...  A373566
+%e A373423   [4] 1, 4,  6,  14,  31,   70,   157,   353,    793, ...  A373567
+%e A373423   [5] 1, 5, 10,  30,  85,  246,   707,  2037,   5864, ...  A373568
+%e A373423   [6] 1, 6, 15,  55, 190,  671,  2353,  8272,  29056, ...  A373569
+%e A373423        A000217,  A006322,     A108675, ...
+%e A373423             A000330,   A085461,      A244881, ...
+%e A373423 .
+%e A373423 Triangle starts:
+%e A373423   [0] 1;
+%e A373423   [1] 1, 0;
+%e A373423   [2] 1, 1,  0;
+%e A373423   [3] 1, 2,  1,  0;
+%e A373423   [4] 1, 3,  1,  1,  0;
+%e A373423   [5] 1, 4,  3,  1,  1,  0;
+%e A373423   [6] 1, 5,  6,  5,  1,  1, 0;
+%p A373423 row := proc(n, len) local x, a, j, ser;
+%p A373423 if n = 0 then a := -1 elif n = 1 then a := -1/(x - 1) elif irem(n, 2) = 1 then
+%p A373423   a :=  x + 1; for j from 1 to n-1 do a :=  x - 1 / a od: else
+%p A373423   a := -x + 1; for j from 1 to n-1 do a := -x - 1 / a od: fi;
+%p A373423 ser := series((-1)^(n-1)*a, x, len + 2); seq(coeff(ser, x, j), j = 0..len) end:
+%p A373423 A := (n, k) -> row(n, 12)[k+1]:      # array form
+%p A373423 T := (n, k) -> row(n - k, k+1)[k+1]: # triangular form
+%p A373423 seq(lprint([n], row(n, 9)), n = 0..9);
+%o A373423 (SageMath)
+%o A373423 def Arow(n, len):
+%o A373423     R.<x> = PowerSeriesRing(ZZ, len)
+%o A373423     if n == 0: return [1] + [0]*(len - 1)
+%o A373423     if n == 1: return [1]*(len - 1)
+%o A373423     x = x if n % 2 == 1 else -x
+%o A373423     a = x + 1
+%o A373423     for _ in range(n - 1):
+%o A373423         a = x - 1 / a
+%o A373423     if n % 2 == 0: a = -a
+%o A373423     return a.list()
+%o A373423 for n in range(8): print(Arow(n, 9))
+%Y A373423 Cf. A373424, A276312 (main diagonal).
+%Y A373423 Rows include: A373565, A373566, A373567, A373568, A373569.
+%Y A373423 Columns include: A000217, A000330, A006322, A085461, A108675, A244881.
+%K A373423 nonn,tabl
+%O A373423 0,8
+%A A373423 _Peter Luschny_, Jun 09 2024

@@ -1,0 +1,46 @@
+%I A182929 #21 Nov 25 2019 00:59:43
+%S A182929 0,1,4,7,16,61,160,547,1456,5110,13120,44287,118096,398581,1075840,
+%T A182929 3720094,9565936,32285041,86093440,290565367,774840976,2711943430,
+%U A182929 7059662080,23535794707,61987278400,212693848522,564945153280,1979718703900,5083731656656
+%N A182929 The rows of the binomial triangle reduced to balanced ternary lists encoded as decimal numbers.
+%C A182929 Define an operation ~: ZxZ -> {-1,0,1} (Z integers) by b ~ n = (b sigmod n) [|b sigmod n|=1]. Here [] is the Iverson bracket and sigmod is the signed mod operation defined as b sigmod n = b - n*ceil(b/n - 1/2) if n <> 0 and b otherwise. Further let T(n) = list_{k=0..n-1} binomial(n-1,k) ~ n for n > 1 and n if n is 0 or 1. We call T(n) the binomial notation of n.
+%C A182929 A non-obvious arithmetical property of the binomial triangle becomes apparent from these balanced ternary lists: the rows which have an odd prime number as an index and only these rows are represented by a ternary list where 1 and -1 are alternating. One might also say that an odd integer is prime iff n > 1 and its binomial notation is zerofree.
+%C A182929 Finally a(n) = Sum_{k=0..n-1} T(n)[k]*3^k.
+%C A182929 The sequence starts at n=0 although the definitions can be extended to the negative integers by flipping the signs of the ternary digits. To illustrate the definitions:
+%C A182929   n           T(n)            a(n)
+%C A182929 ----------------------------------
+%C A182929 [-6] -1,  1,  0,  0,  1, -1 [-160]
+%C A182929 [-5]   -1,  1, -1,  1, -1   [ -61]
+%C A182929 [-4]     -1,  1,  1, -1     [ -16]
+%C A182929 [-3]       -1,  1, -1       [  -7]
+%C A182929 [-2]         -1, -1         [  -4]
+%C A182929 [-1]           -1           [  -1]
+%C A182929 [ 0]            0           [   0]
+%C A182929 [ 1]            1           [   1]
+%C A182929 [ 2]          1,  1         [   4]
+%C A182929 [ 3]        1, -1,  1       [   7]
+%C A182929 [ 4]      1, -1, -1,  1     [  16]
+%C A182929 [ 5]    1, -1,  1, -1,  1   [  61]
+%C A182929 [ 6]  1, -1,  0,  0, -1,  1 [ 160]
+%H A182929 Wikipedia, <a href="http://en.wikipedia.org/wiki/Balanced_ternary">Balanced ternary</a>
+%p A182929 A182929 := proc(n) local lop, k, Tlist;
+%p A182929 lop := proc(a,n) if n = 0 then a else mods(a,n);
+%p A182929 `if`(abs(%)=1,%,0) fi end;
+%p A182929 Tlist := proc(n) `if`(abs(n)<2,n,seq(signum(n)*
+%p A182929 lop(binomial(abs(n)-1,k),n),k=0..abs(n)-1)) end:
+%p A182929 [Tlist(n)]; signum(n)*add(3^k*%[k+1],k=0..abs(n)-1) end:
+%p A182929 seq(A182929(n),n=0..30);
+%t A182929 lop[a_, n_] := Module[{m}, m = If[n == 0, a, Mod[a, n, -Quotient[Abs[n]-1, 2]]]; If[Abs[m] == 1, m, 0]];
+%t A182929 Tlist[n_] := If[Abs[n]<2, {n}, Table[Sign[n]*lop[Binomial[Abs[n]-1, k], n], {k, 0, Abs[n]-1}]];
+%t A182929 a[n_] := Module[{t=Tlist[n]}, Sign[n]*Sum[3^k*t[[k+1]], {k, 0, Abs[n]-1}]];
+%t A182929 Table[a[n], {n, 0, 30}] (* _Jean-François Alcover_, Jun 22 2019, from Maple *)
+%o A182929 (PARI)
+%o A182929 a(n) = {
+%o A182929   if (n == 0, 0,
+%o A182929   subst(apply(r->if(r==1,1,r==n-1,-1,0), lift(Mod(1+'x,n)^(n-1))), 'x, 3));
+%o A182929 };
+%o A182929 vector(29, n, a(n-1))  \\ _Gheorghe Coserea_, Nov 21 2016
+%Y A182929 Cf. A007318, A047999, A001317.
+%K A182929 nonn
+%O A182929 0,3
+%A A182929 _Peter Luschny_, Mar 16 2011

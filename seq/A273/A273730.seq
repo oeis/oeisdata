@@ -1,0 +1,40 @@
+%I A273730 #13 Mar 13 2017 09:04:29
+%S A273730 1,1,1,1,1,2,1,1,1,6,1,1,1,2,24,1,1,1,1,3,120,1,1,1,1,2,6,720,1,1,1,1,
+%T A273730 1,3,9,5040,1,1,1,1,1,2,4,24,40320,1,1,1,1,1,1,3,8,45,362880,1,1,1,1,
+%U A273730 1,1,2,4,12,108,3628800,1,1,1,1,1,1,1,3,5,16,189,39916800
+%N A273730 Square array read by antidiagonals: A(n,k) = number of permutations of n elements divided by the number of k-ary heaps on n+1 elements, n>=0, k>=1.
+%H A273730 Alois P. Heinz, <a href="/A273730/b273730.txt">Antidiagonals n = 0..140, flattened</a>
+%H A273730 Wikipedia, <a href="https://en.wikipedia.org/wiki/D-ary_heap">D-ary heap</a>
+%F A273730 A(n,k) = A000142(n)/A273693(n+1,k).
+%e A273730 Square array A(n,k) begins:
+%e A273730 :     1,  1,  1, 1, 1, 1, 1, 1, ...
+%e A273730 :     1,  1,  1, 1, 1, 1, 1, 1, ...
+%e A273730 :     2,  1,  1, 1, 1, 1, 1, 1, ...
+%e A273730 :     6,  2,  1, 1, 1, 1, 1, 1, ...
+%e A273730 :    24,  3,  2, 1, 1, 1, 1, 1, ...
+%e A273730 :   120,  6,  3, 2, 1, 1, 1, 1, ...
+%e A273730 :   720,  9,  4, 3, 2, 1, 1, 1, ...
+%e A273730 :  5040, 24,  8, 4, 3, 2, 1, 1, ...
+%e A273730 : 40320, 45, 12, 5, 4, 3, 2, 1, ...
+%p A273730 with(combinat):
+%p A273730 b:= proc(n, k) option remember; local h, i, x, y, z;
+%p A273730       if n<2 then 1 elif k<2 then k
+%p A273730     else h:= ilog[k]((k-1)*n+1);
+%p A273730          if k^h=(k-1)*n+1 then b((n-1)/k, k)^k*
+%p A273730             multinomial(n-1, ((n-1)/k)$k)
+%p A273730        else x, y:=(k^h-1)/(k-1), (k^(h-1)-1)/(k-1);
+%p A273730             for i from 0 do z:= (n-1)-(k-1-i)*y-i*x;
+%p A273730               if y<=z and z<=x then b(y, k)^(k-1-i)*
+%p A273730                  multinomial(n-1, y$(k-1-i), x$i, z)*
+%p A273730                  b(x, k)^i*b(z, k); break fi
+%p A273730             od
+%p A273730       fi fi
+%p A273730     end:
+%p A273730 A:= (n, k)-> n!/b(n+1, k):
+%p A273730 seq(seq(A(n, 1+d-n), n=0..d), d=0..14);
+%t A273730 multinomial[n_, k_List] := n!/Times @@ (k!); b[n_, k_] := b[n, k] = Module[{h, i, x, y, z}, Which[n<2, 1, k<2, k, True, h = Floor @ Log[k, (k - 1)*n + 1]; If [k^h == (k-1)*n+1, b[(n-1)/k, k]^k*multinomial[n-1, Array[(n-1)/k&, k]], {x, y} = {(k^h-1)/(k-1), (k^(h-1)-1)/(k-1)}; For[i = 0, True, i++, z = (n-1) - (k-1-i)*y - i*x; If[y <= z && z <= x, b[y, k]^(k-1-i)*multinomial[n-1, Join[Array[y&, k-1-i], Array[x&, i], {z}]] * b[x, k]^i*b[z, k] // Return]]]]]; A[n_, k_] :=  n!/b[n+1, k]; Table[A[n, 1+d-n], {d, 0, 14}, {n, 0, d}] // Flatten (* _Jean-François Alcover_, Mar 13 2017, translated from Maple *)
+%Y A273730 Columns k=1-10 give: A000142, A133385, A273731, A273732, A273733, A273734, A273735, A273736, A273737, A273738.
+%Y A273730 Cf. A273693.
+%K A273730 nonn,tabl
+%O A273730 0,6
+%A A273730 _Alois P. Heinz_, May 28 2016

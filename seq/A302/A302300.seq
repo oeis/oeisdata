@@ -1,0 +1,80 @@
+%I A302300 #32 Mar 24 2023 14:21:30
+%S A302300 0,1,1,5,6,12,21,33,50,79,116,169,246,346,487,675,927,1254,1702,2263,
+%T A302300 3014,3966,5210,6766,8795,11303,14531,18521,23583,29803,37654,47231,
+%U A302300 59206,73792,91867,113778,140788,173377,213289,261318,319764,389846,474745,576164
+%N A302300 a(n) = Sum_{p in P} (Sum_{k_j = 1} 1)^2, where P is the set of partitions of n, and the k_j are the frequencies in p.
+%C A302300 This sequence is part of the contribution to the b^2 term of C_{1-b,2}(q) for(1-b,2)-colored partitions - partitions in which we can label parts any of an indeterminate 1-b colors, but are restricted to using only 2 of the colors per part size. This formula is known to match the Han/Nekrasov-Okounkov hooklength formula truncated at hooks of size two up to the linear term in b.
+%C A302300 It is of interest to enumerate and determine specific characteristics of partitions of n, considering each partition individually.
+%H A302300 Alois P. Heinz, <a href="/A302300/b302300.txt">Table of n, a(n) for n = 0..4000</a>
+%H A302300 Guo-Niu Han, <a href="https://arxiv.org/abs/0805.1398">The Nekrasov-Okounkov hook length formula: refinement, elementary proof, extension and applications</a>, arXiv:0805.1398 [math.CO], 2008.
+%H A302300 Guo-Niu Han, <a href="https://doi.org/10.5802/aif.2515">The Nekrasov-Okounkov hook length formula: refinement, elementary proof, extension and applications</a>, Annales de l'institut Fourier, Tome 60 (2010) no. 1, pp. 1-29.
+%H A302300 W. J. Keith, <a href="https://doi.org/10.1007/s11139-015-9704-x">Restricted k-color partitions</a>, Ramanujan Journal (2016) 40: 71.
+%F A302300 a(n) = Sum_{p in P} (Sum_{k_j = 1} 1)^2, where P is the set of partitions of n, and k_j are the frequencies in p.
+%e A302300 For a(6), we sum over partitions of six. For each partition, we count 1 for each part which appears once, then square the total in each partition.
+%e A302300    6............1^2 = 1
+%e A302300    5,1..........2^2 = 4
+%e A302300    4,2..........2^2 = 4
+%e A302300    4,1,1........1^2 = 1
+%e A302300    3,3..........0^2 = 0
+%e A302300    3,2,1........3^2 = 9
+%e A302300    3,1,1,1......1^2 = 1
+%e A302300    2,2,2........0^2 = 0
+%e A302300    2,2,1,1......0^2 = 0
+%e A302300    2,1,1,1,1....1^2 = 1
+%e A302300    1,1,1,1,1,1..0^2 = 0
+%e A302300    --------------------
+%e A302300    Total.............21
+%p A302300 b:= proc(n, i, p) option remember; `if`(n=0 or i=1, (
+%p A302300       `if`(n=1, 1, 0)+p)^2, add(b(n-i*j, i-1,
+%p A302300       `if`(j=1, 1, 0)+p), j=0..n/i))
+%p A302300     end:
+%p A302300 a:= n-> b(n$2, 0):
+%p A302300 seq(a(n), n=0..60);  # _Alois P. Heinz_, Apr 05 2018
+%t A302300 Array[Total@ Map[Count[Split@ #, _?(Length@ # == 1 &)]^2 &, IntegerPartitions[#]] &, 43] (* _Michael De Vlieger_, Apr 05 2018 *)
+%t A302300 b[n_, i_, p_] := b[n, i, p] = If[n == 0 || i == 1, (
+%t A302300      If[n == 1, 1, 0] + p)^2, Sum[b[n - i*j, i - 1,
+%t A302300      If[j == 1, 1, 0] + p], {j, 0, n/i}]];
+%t A302300 a[n_] := b[n, n, 0];
+%t A302300 a /@ Range[0, 60] (* _Jean-François Alcover_, Jun 06 2021, after _Alois P. Heinz_ *)
+%o A302300 (Python)
+%o A302300 def frequencies(partition, n):
+%o A302300     tot = 0
+%o A302300     freq_list = []
+%o A302300     i = 0
+%o A302300     for p in partition:
+%o A302300         freq = [0 for i in range(n+1)]
+%o A302300         for i in p:
+%o A302300             freq[i] += 1
+%o A302300         for f in freq:
+%o A302300             if f == 0:
+%o A302300                 tot += 1
+%o A302300         freq_list.append(freq)
+%o A302300     return freq_list
+%o A302300 def sum_square_freqs_of_one(freq_part):
+%o A302300     tot = 0
+%o A302300     for f in freq_part:
+%o A302300         count = 0
+%o A302300         for i in f:
+%o A302300             if i == 1:
+%o A302300                 count += 1
+%o A302300         tot += count*count
+%o A302300     return tot
+%o A302300 import sympy.combinatorics
+%o A302300 def A302300(n): # rewritten by _R. J. _Mathar_, 2023-03-24
+%o A302300     a =0
+%o A302300     if n ==0 :
+%o A302300         return 0
+%o A302300     part = sympy.combinatorics.IntegerPartition([n])
+%o A302300     partlist = []
+%o A302300     while True:
+%o A302300         part = part.next_lex()
+%o A302300         partlist.append(part.partition)
+%o A302300         if len(part.partition) <=1 :
+%o A302300             break
+%o A302300     freq_part = frequencies(partlist, n)
+%o A302300     return sum_square_freqs_of_one(freq_part)
+%o A302300 for n in range(20): print(A302300(n))
+%Y A302300 Cf. A024786, A197126.
+%K A302300 nonn
+%O A302300 0,4
+%A A302300 _Emily Anible_, Apr 04 2018

@@ -1,0 +1,40 @@
+%I A325015 #26 Aug 27 2020 04:32:18
+%S A325015 1,2,1,3,6,1,4,18,21,1,5,40,201,308,1,6,75,1076,34128,180342,1,7,126,
+%T A325015 4025,1056576,2945136213,366975285216,1,8,196,11901,15303750,
+%U A325015 2932338749408,103863386269870076808,10316179427644325573474464,1
+%N A325015 Array read by descending antidiagonals: T(n,k) is the number of achiral colorings of the facets of a regular n-dimensional orthoplex using up to k colors.
+%C A325015 Also called cross polytope and hyperoctahedron. For n=1, the figure is a line segment with two vertices. For n=2 the figure is a square with four edges. For n=3 the figure is an octahedron with eight triangular faces. For n=4, the figure is a 16-cell with sixteen tetrahedral facets. The Schläfli symbol, {3,...,3,4}, of the regular n-dimensional orthoplex (n>1) consists of n-2 threes followed by a four. Each of its 2^n facets is an (n-1)-dimensional simplex. An achiral coloring is identical to its reflection.
+%C A325015 Also the number of achiral colorings of the vertices of a regular n-dimensional orthotope (cube) using up to k colors.
+%H A325015 Robert A. Russell, <a href="/A325015/b325015.txt">Table of n, a(n) for n = 1..78</a>
+%H A325015 E. M. Palmer and R. W. Robinson, <a href="https://doi.org/10.1007/BF02392038">Enumeration under two representations of the wreath product</a>, Acta Math., 131 (1973), 123-143.
+%H A325015 Wikipedia, <a href="https://en.wikipedia.org/wiki/Cross-polytope">Cross-polytope</a>
+%F A325015 The algorithm used in the Mathematica program below assigns each permutation of the axes to a partition of n. It then determines the number of permutations for each partition and the cycle index for each partition.
+%F A325015 T(n,k) = 2*A325013(n,k) - A325012(n,k) = A325012(n,k) - 2*A325014(n,k) = A325013(n,k) - A325014(n,k).
+%F A325015 T(n,k) = Sum_{j=1..3*2^(n-2)} A325019(n,j) * binomial(k,j).
+%e A325015 Array begins with T(1,1):
+%e A325015 1   2     3       4        5         6         7          8 ...
+%e A325015 1   6    18      40       75       126       196        288 ...
+%e A325015 1  21   201    1076     4025     11901     29841      66256 ...
+%e A325015 1 308 34128 1056576 15303750 136236276 865711763 4296782848 ...
+%e A325015 ...
+%e A325015 For T(2,2)=6, two squares have all edges the same color, two have three edges the same color, one has opposite edges the same color, and one has opposite edges different colors.
+%t A325015 a48[n_] := a48[n] = DivisorSum[NestWhile[#/2&, n, EvenQ], MoebiusMu[#]2^(n/#)&]/(2n); (* A000048 *)
+%t A325015 a37[n_] := a37[n] = DivisorSum[n, MoebiusMu[n/#]2^#&]/n; (* A001037 *)
+%t A325015 CI0[{n_Integer}] := CI0[{n}] = CI[Transpose[If[EvenQ[n], p2 = IntegerExponent[n, 2]; sub = Divisors[n/2^p2]; {2^(p2+1) sub, a48 /@ (2^p2 sub) }, sub = Divisors[n]; {sub, a37 /@ sub}]]] 2^(n-1); (* even perm. *)
+%t A325015 CI1[{n_Integer}] := CI1[{n}] = CI[sub = Divisors[n]; Transpose[If[EvenQ[n], {sub, a37 /@ sub}, {2 sub, a48 /@ sub}]]] 2^(n-1); (* odd perm. *)
+%t A325015 compress[x : {{_, _} ...}] := (s = Sort[x]; For[i = Length[s], i > 1, i -= 1, If[s[[i, 1]]==s[[i-1, 1]], s[[i-1, 2]] += s[[i, 2]]; s = Delete[s, i], Null]]; s)
+%t A325015 cix[{a_, b_}, {c_, d_}] := {LCM[a, c], (a b c d)/LCM[a, c]};
+%t A325015 Unprotect[Times]; Times[CI[a_List], CI[b_List]] :=  (* combine *) CI[compress[Flatten[Outer[cix, a, b, 1], 1]]]; Protect[Times];
+%t A325015 CI0[p_List] := CI0[p] = Expand[CI0[Drop[p, -1]] CI0[{Last[p]}] + CI1[Drop[p, -1]] CI1[{Last[p]}]]
+%t A325015 CI1[p_List] := CI1[p] = Expand[CI0[Drop[p, -1]] CI1[{Last[p]}] + CI1[Drop[p, -1]] CI0[{Last[p]}]]
+%t A325015 pc[p_List] := Module[{ci,mb},mb = DeleteDuplicates[p]; ci = Count[p, #] & /@ mb; n!/(Times @@ (ci!) Times @@ (mb^ci))] (* partition count *)
+%t A325015 row[n_Integer] := row[n] = Factor[(Total[(CI1[#] pc[#]) & /@ IntegerPartitions[n]])/(n! 2^(n - 1))] /. CI[l_List] :> j^(Total[l][[2]])
+%t A325015 array[n_, k_] := row[n] /. j -> k
+%t A325015 Table[array[n, d-n+1], {d, 1, 10}, {n, 1, d}] // Flatten
+%Y A325015 Cf. A325012 (oriented), A325013 (unoriented), A325014 (chiral), A325019 (exactly k colors).
+%Y A325015 Other n-dimensional polytopes: A325001 (simplex), A325007 (orthotope).
+%Y A325015 Rows 1-2 are A000027, A002411.
+%Y A325015 Cf. A000048, A001037.
+%K A325015 nonn,tabl,easy
+%O A325015 1,2
+%A A325015 _Robert A. Russell_, May 27 2019

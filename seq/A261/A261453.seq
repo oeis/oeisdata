@@ -1,0 +1,55 @@
+%I A261453 #37 May 25 2022 11:49:34
+%S A261453 101,121,131,141,151,161,171,181,191,202,212,232,242,252,262,272,282,
+%T A261453 292,303,313,323,343,353,363,373,383,393,404,414,424,434,454,464,474,
+%U A261453 484,494,505,515,525,535,545,565,575,585,595,606,616,626,636,646,656,676
+%N A261453 Near-repdigit palindromes with an odd number of digits and all digits except the middle digit equal.
+%H A261453 Michael S. Branicky, <a href="/A261453/b261453.txt">Table of n, a(n) for n = 1..10000</a> (terms 1..171 from R. J. Mathar)
+%F A261453 a(n) = A002113(A210666(A001633(n))).
+%p A261453 isA261453 := proc(n)
+%p A261453     local ndgs,dgs,d ;
+%p A261453     if isA002113(n) then
+%p A261453         ndgs := A055642(n) ;
+%p A261453         if type(ndgs,'odd') and A043537(n) = 2 then
+%p A261453             dgs := convert(n,base,10) ;
+%p A261453             for d from 2 to nops(dgs)/2 do
+%p A261453                 if op(d,dgs) <> op(d-1,dgs) then
+%p A261453                     return false;
+%p A261453                 end if;
+%p A261453             end do:
+%p A261453             true ;
+%p A261453         else
+%p A261453             false;
+%p A261453         end if;
+%p A261453     else
+%p A261453         false;
+%p A261453     end if;
+%p A261453 end proc:
+%p A261453 n := 1:
+%p A261453 for i from 100 to 2000000 do
+%p A261453     if isA261453(i) then
+%p A261453         printf("%d %d\n",n,i) ;
+%p A261453         n := n+1 ;
+%p A261453     end if;
+%p A261453 end do: # _R. J. Mathar_, Sep 30 2015
+%t A261453 id[n_]:=IntegerDigits[n];len[n_]:=Length[id[n]];
+%t A261453 del[n_]:=Delete[id[n],Ceiling[len[id[n]]/2]];
+%t A261453 u[n_]:=Union[del[id[n]]];
+%t A261453 Select[Range[10^5],StringMatchQ[ToString[#],a__~~b_~~a__]&&Length[u[#]]==1&&u[#]!= Union[id[#]]&] (* _Ivan N. Ianakiev_, Sep 06 2015 *)
+%o A261453 (Python)
+%o A261453 from itertools import count, islice
+%o A261453 def agen(): # generator of terms
+%o A261453     for d in count(1):
+%o A261453         for out in "123456789":
+%o A261453             for mid in "0123456789":
+%o A261453                 if mid != out:
+%o A261453                     yield int(out*d + mid + out*d)
+%o A261453 print(list(islice(agen(), 52))) # _Michael S. Branicky_, May 17 2022
+%o A261453 (PARI) is_a002113(n) = my(d=digits(n)); d==Vecrev(d)
+%o A261453 is_a210666(n) = my(d=digits(n)); #d>2 && (#setintersect(vecsort(d), vector(#d, x, vecmax(d)))==#d-1 || #setintersect(vecsort(d), vector(#d, x, vecmin(d)))==#d-1)
+%o A261453 is_a001633(n) = #Str(n)%2 \\ after _Charles R Greathouse IV_ in A001633
+%o A261453 is(n) = is_a002113(n) && is_a210666(n) && is_a001633(n) \\ _Felix Fröhlich_, May 25 2022
+%Y A261453 Subsequence of A088882.
+%Y A261453 Cf. A001633, A002113, A210666.
+%K A261453 nonn,base,easy
+%O A261453 1,1
+%A A261453 _Felix Fröhlich_, Aug 25 2015

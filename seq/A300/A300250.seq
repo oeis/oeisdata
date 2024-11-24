@@ -1,0 +1,27 @@
+%I A300250 #13 Mar 24 2018 18:53:50
+%S A300250 1,2,2,3,2,4,2,5,3,4,2,6,2,4,4,7,2,8,2,9,4,4,2,10,3,4,5,9,2,11,2,12,4,
+%T A300250 4,4,13,2,4,4,14,2,15,2,9,6,4,2,16,3,8,4,9,2,17,4,14,4,4,2,18,2,4,6,
+%U A300250 19,4,15,2,9,4,11,2,20,2,4,8,9,4,15,2,21,7,4,2,22,4,4,4,23,2,24,4,9,4,4,4,25,2,8,9,26,2,15,2,23,11
+%N A300250 Restricted growth sequence transform of A297174: a filter sequence recording the prime signatures of divisors of n, with divisors ordered by their magnitude.
+%C A300250 This sequence gives a coarser partitioning of natural numbers than A290110, and finer than A101296:
+%C A300250 For all i, j:
+%C A300250   A290110(i) = A290110(j) => a(i) = a(j) => A101296(i) = A101296(j).
+%H A300250 Antti Karttunen, <a href="/A300250/b300250.txt">Table of n, a(n) for n = 1..65537</a>
+%e A300250 Divisors of 462 are 1, 2, 3, 6, 7, 11, 14, 21, 22, 33, 42, 66, 77, 154, 231, 462.
+%e A300250 Divisors of 858 are 1, 2, 3, 6, 11, 13, 22, 26, 33, 39, 66, 78, 143, 286, 429, 858.
+%e A300250 If one takes the smallest prime-signature representative (A046523) of each these, one gets in both cases [1, 2, 2, 6, 2, 2, 6, 6, 6, 6, 30, 30, 6, 30, 30, 210]. E.g. 462 = 2*3*7*11 and 858 = 2*3*11*13, which both have the same prime signature as 210 = 2*3*5*7. And similarly for all the other divisors, from which follows that a(462) = a(858).
+%e A300250 On the other hand, for 12 = 2*2*3 the divisors are 1, 2, 3, 2*2, 2*3, 2*2*3, and for 18 = 2*3*3 the divisors are 1, 2, 3, 2*3, 3*3, 2*3*3, and because the prime signatures differ both in the fourth and in the fifth places, a(18) != a(12).
+%o A300250 (PARI)
+%o A300250 up_to = 65537;
+%o A300250 rgs_transform(invec) = { my(om = Map(), outvec = vector(length(invec)), u=1); for(i=1, length(invec), if(mapisdefined(om,invec[i]), my(pp = mapget(om, invec[i])); outvec[i] = outvec[pp] , mapput(om,invec[i],i); outvec[i] = u; u++ )); outvec; };
+%o A300250 write_to_bfile(start_offset,vec,bfilename) = { for(n=1, length(vec), write(bfilename, (n+start_offset)-1, " ", vec[n])); }
+%o A300250 A046523(n) = { my(f=vecsort(factor(n)[, 2], , 4), p); prod(i=1, #f, (p=nextprime(p+1))^f[i]); };  \\ From A046523
+%o A300250 v101296 = rgs_transform(vector(up_to, n, A046523(n)));
+%o A300250 A101296(n) = v101296[n];
+%o A300250 A297174(n) = { my(s=0,i=-1); fordiv(n, d, if(d>1, i += (A101296(d)-1); s += 2^i)); (s); };
+%o A300250 write_to_bfile(1,rgs_transform(vector(up_to,n,A297174(n))),"b300250.txt");
+%Y A300250 Cf. A046523, A101296, A297174, A300716.
+%Y A300250 Differs from similar A290110 for the first time at n=858.
+%K A300250 nonn
+%O A300250 1,2
+%A A300250 _Antti Karttunen_, Mar 07 2018

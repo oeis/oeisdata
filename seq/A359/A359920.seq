@@ -1,0 +1,37 @@
+%I A359920 #35 Jan 19 2024 09:03:17
+%S A359920 1,1,6,29,137,690,3815,22579,138353,862692,5451339,34911444,226475135,
+%T A359920 1485571965,9833401534,65578882177,440170565711,2971402946711,
+%U A359920 20161828468803,137434420403678,940701180157773,6462787501335564,44550102080595910,308041365014677804,2135938633975050831
+%N A359920 a(n) = coefficient of x^n in A(x) such that x = Sum_{n=-oo..+oo} x^(n*(3*n+1)/2) * (A(x)^(3*n) - 1/A(x)^(3*n+1)).
+%H A359920 Paul D. Hanna, <a href="/A359920/b359920.txt">Table of n, a(n) for n = 0..200</a>
+%H A359920 Eric Weisstein's World of Mathematics, <a href="https://mathworld.wolfram.com/QuintupleProductIdentity.html">Quintuple Product Identity</a>.
+%F A359920 G.f. A(x) = Sum_{n>=0} a(n)*x^n satisfies the following.
+%F A359920 (1) x = Sum_{n=-oo..+oo} x^(n*(3*n+1)/2) * (A(x)^(3*n) - 1/A(x)^(3*n+1)).
+%F A359920 (2) x = Sum_{n=-oo..+oo} x^(n*(3*n-1)/2) * A(x)^(3*n) * (x^n - 1/A(x)).
+%F A359920 (3) x = Product_{n>=1} (1 - x^n) * (1 - x^n*A(x)) * (1 - x^(n-1)/A(x)) * (1 - x^(2*n-1)*A(x)^2) * (1 - x^(2*n-1)/A(x)^2), by the Watson quintuple product identity.
+%F A359920 a(n) ~ c * d^n / n^(3/2), where d = 7.388458151593... and c = 0.36167254645... - _Vaclav Kotesovec_, Mar 19 2023
+%F A359920 Formula (3) can be rewritten as the functional equation x = QPochhammer(x) * QPochhammer(y, x)/(1 - y) * QPochhammer(1/(x*y), x)/(1 - 1/(x*y)) * QPochhammer(y^2/x, x^2)/(1 - y^2/x) * QPochhammer(1/(x*y^2), x^2)/(1 - 1/(x*y^2)). - _Vaclav Kotesovec_, Jan 19 2024
+%e A359920 G.f.: A(x) = 1 + x + 6*x^2 + 29*x^3 + 137*x^4 + 690*x^5 + 3815*x^6 + 22579*x^7 + 138353*x^8 + 862692*x^9 + 5451339*x^10 + 34911444*x^11 + 226475135*x^12 + ...
+%e A359920 where A = A(x) satisfies the doubly infinite sum
+%e A359920 x = ... + x^12*(1/A^9 - A^8) + x^5*(1/A^6 - A^5) + x*(1/A^3 - A^2) + (1 - 1/A) + x^2*(A^3 - 1/A^4) + x^7*(A^6 - 1/A^7) + x^15*(A^9 - 1/A^10) + ... + x^(n*(3*n+1)/2) * (A(x)^(3*n) - 1/A(x)^(3*n+1)) + ...
+%e A359920 also, by the Watson quintuple product identity,
+%e A359920 x = (1-x)*(1-x*A)*(1-1/A)*(1-x*A^2)*(1-x/A^2) * (1-x^2)*(1-x^2*A)*(1-x/A)*(1-x^3*A^2)*(1-x^3/A^2) * (1-x^3)*(1-x^3*A)*(1-x^2/A)*(1-x^5*A^2)*(1-x^5/A^2) * (1-x^4)*(1-x^4*A)*(1-x^3/A)*(1-x^7*A^2)*(1-x^7/A^2) * ...
+%e A359920 SPECIFIC VALUES.
+%e A359920 A(x) at x = 100/738 diverges.
+%e A359920 A(100/739) = 1.680090298639836342808608867776256534712736768391...
+%e A359920 A(1/8) = 1.40048762211279862753069563580599076131617792526323...
+%e A359920 A(1/9) = 1.28067125711115350114265686789651886973848631068277...
+%t A359920 (* Calculation of constant d: *) With[{k = 1}, 1/r /. FindRoot[{r^3*s^3 * QPochhammer[r] * QPochhammer[1/(r*s^2), r^2] *  QPochhammer[1/(r*s), r] * QPochhammer[s, r] * QPochhammer[s^2/r, r^2] / ((-1 + s)*(-1 + r*s)*(-r + s^2)*(-1 + r*s^2)) == k*r, 1/(-1 + s) + 1/(s*(-1 + r*s)) + (2*s)/(-r + s^2) - 2/(s - r*s^3) + (-QPolyGamma[0, -Log[r*s]/Log[r], r] + QPolyGamma[0, Log[s]/Log[r], r] - QPolyGamma[0, -Log[r*s^2]/Log[r^2], r^2] + QPolyGamma[0, Log[s^2/r]/Log[r^2], r^2]) / (s*Log[r]) == 0}, {r, 1/7}, {s, 2}, WorkingPrecision -> 70]] (* _Vaclav Kotesovec_, Jan 18 2024 *)
+%o A359920 (PARI) /* Using the doubly infinite series */
+%o A359920 {a(n) = my(A=[1]); for(i=1,n, A = concat(A,0);
+%o A359920 A[#A] = polcoeff(x - sum(m=-#A,#A, (Ser(A)^(3*m) - 1/Ser(A)^(3*m+1)) * x^(m*(3*m+1)/2) ),#A-1) ); A[n+1]}
+%o A359920 for(n=0,30, print1(a(n),", "))
+%o A359920 (PARI) /* Using the quintuple product */
+%o A359920 {a(n) = my(A=[1]); for(i=1,n, A = concat(A,0);
+%o A359920 A[#A] = polcoeff(x - prod(m=1,#A, (1 - x^m) * (1 - x^m*Ser(A)) * (1 - x^(m-1)/Ser(A)) * (1 - x^(2*m-1)*Ser(A)^2) * (1 - x^(2*m-1)/Ser(A)^2) ),#A-1) ); A[n+1]}
+%o A359920 for(n=0,30, print1(a(n),", "))
+%Y A359920 Cf. A359915, A359916, A359919, A359921, A359924, A359719.
+%Y A359920 Cf. A359914.
+%K A359920 nonn
+%O A359920 0,3
+%A A359920 _Paul D. Hanna_, Jan 22 2023

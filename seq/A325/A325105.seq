@@ -1,0 +1,37 @@
+%I A325105 #13 Jul 27 2019 14:57:51
+%S A325105 1,2,3,7,8,20,48,112,113,325,777,1737,3709,7741,15869,32253,32254,
+%T A325105 96538,225798,485702,1006338,2049602,4137346,8315266,16697102,
+%U A325105 33465934,67007886,134100366,268301518,536720590,1073575118,2147316942,2147316943,6441886323
+%N A325105 Number of binary carry-connected subsets of {1...n}.
+%C A325105 A binary carry of two positive integers is an overlap of the positions of 1's in their reversed binary expansion. A subset is binary carry-connected if the graph whose vertices are the elements and whose edges are binary carries is connected.
+%H A325105 Alois P. Heinz, <a href="/A325105/b325105.txt">Table of n, a(n) for n = 0..1023</a>
+%F A325105 a(n) = A306297(n,0) + A306297(n,1). - _Alois P. Heinz_, Mar 31 2019
+%e A325105 The a(0) = 1 through a(4) = 8 subsets:
+%e A325105   {}  {}   {}   {}       {}
+%e A325105       {1}  {1}  {1}      {1}
+%e A325105            {2}  {2}      {2}
+%e A325105                 {3}      {3}
+%e A325105                 {1,3}    {4}
+%e A325105                 {2,3}    {1,3}
+%e A325105                 {1,2,3}  {2,3}
+%e A325105                          {1,2,3}
+%p A325105 h:= proc(n, s) local i, m; m:= n;
+%p A325105       for i in s do m:= Bits[Or](m, i) od; {m}
+%p A325105     end:
+%p A325105 g:= (n, s)-> (w-> `if`(w={}, s union {n}, s minus w union
+%p A325105               h(n, w)))(select(x-> Bits[And](n, x)>0, s)):
+%p A325105 b:= proc(n, s) option remember; `if`(n=0,
+%p A325105       `if`(nops(s)>1, 0, 1), b(n-1, s)+b(n-1, g(n, s)))
+%p A325105     end:
+%p A325105 a:= n-> b(n, {}):
+%p A325105 seq(a(n), n=0..35);  # _Alois P. Heinz_, Mar 31 2019
+%t A325105 binpos[n_]:=Join@@Position[Reverse[IntegerDigits[n,2]],1];
+%t A325105 csm[s_]:=With[{c=Select[Tuples[Range[Length[s]],2],And[OrderedQ[#],UnsameQ@@#,Length[Intersection@@s[[#]]]>0]&]},If[c=={},s,csm[Sort[Append[Delete[s,List/@c[[1]]],Union@@s[[c[[1]]]]]]]]];
+%t A325105 Table[Length[Select[Subsets[Range[n]],Length[csm[binpos/@#]]<=1&]],{n,0,10}]
+%Y A325105 Cf. A019565, A080572, A247935, A304714, A304716, A305078.
+%Y A325105 Cf. A325095, A325098, A325099, A325104, A325107, A325118, A325119.
+%Y A325105 Partial sums of A306299.
+%K A325105 nonn
+%O A325105 0,2
+%A A325105 _Gus Wiseman_, Mar 28 2019
+%E A325105 a(16)-a(33) from _Alois P. Heinz_, Mar 31 2019

@@ -1,0 +1,44 @@
+%I A265017 #21 Aug 20 2021 04:27:06
+%S A265017 1,0,1,0,0,2,0,3,0,3,0,5,0,0,4,0,7,8,0,0,5,0,25,12,0,0,0,6,0,36,16,15,
+%T A265017 0,0,0,7,0,81,20,21,0,0,0,0,8,0,107,74,27,24,0,0,0,0,9,0,316,102,33,
+%U A265017 32,0,0,0,0,0,10,0,427,222,39,40,35,0,0,0,0,0,11
+%N A265017 Total sum T(n,k) of number of lambda-parking functions of partitions lambda of n into distinct parts with smallest part k; triangle T(n,k), n>=0, 0<=k<=n, read by rows.
+%H A265017 Alois P. Heinz, <a href="/A265017/b265017.txt">Rows n = 0..100, flattened</a>
+%H A265017 Richard P. Stanley, <a href="http://math.mit.edu/~rstan/transparencies/parking.pdf">Parking Functions</a>, 2011.
+%e A265017 Triangle T(n,k) begins:
+%e A265017 00 :  1;
+%e A265017 01 :  0,   1;
+%e A265017 02 :  0,   0,   2;
+%e A265017 03 :  0,   3,   0,   3;
+%e A265017 04 :  0,   5,   0,   0,  4;
+%e A265017 05 :  0,   7,   8,   0,  0,  5;
+%e A265017 06 :  0,  25,  12,   0,  0,  0, 6;
+%e A265017 07 :  0,  36,  16,  15,  0,  0, 0, 7;
+%e A265017 08 :  0,  81,  20,  21,  0,  0, 0, 0, 8;
+%e A265017 09 :  0, 107,  74,  27, 24,  0, 0, 0, 0, 9;
+%e A265017 10 :  0, 316, 102,  33, 32,  0, 0, 0, 0, 0, 10;
+%e A265017 11 :  0, 427, 222,  39, 40, 35, 0, 0, 0, 0,  0, 11;
+%e A265017 12 :  0, 869, 286, 153, 48, 45, 0, 0, 0, 0,  0,  0, 12;
+%p A265017 p:= l-> (n-> n!*LinearAlgebra[Determinant](Matrix(n, (i, j)
+%p A265017          -> (t->`if`(t<0, 0, l[i]^t/t!))(j-i+1))))(nops(l)):
+%p A265017 g:= (n, i, l)-> `if`(i*(i+1)/2<n, 0, `if`(n=0, p(l)*x^
+%p A265017                 `if`(l=[], 0, l[1]), g(n, i-1, l)+
+%p A265017                 `if`(i>n, 0, g(n-i, i-1, [i, l[]])))):
+%p A265017 T:= n-> (f-> seq(coeff(f, x, i), i=0..n))(g(n$2, [])):
+%p A265017 seq(T(n), n=0..16);
+%t A265017 p[l_] := With[{n = Length[l]}, n!*Det[Table[Function[t,
+%t A265017      If[t < 0, 0, l[[i]]^t/t!]][j - i + 1], {i, n}, {j, n}]]];
+%t A265017 g[n_, i_, l_] := If[i(i+1)/2 < n, 0, If[n == 0, p[l]*x^
+%t A265017      If[l == {}, 0, l[[1]]], g[n, i - 1, l] +
+%t A265017      If[i > n, 0, g[n - i, i - 1, Prepend[l, i]]]]];
+%t A265017 T[n_] := If[n == 0, {1}, CoefficientList[g[n, n, {}], x]];
+%t A265017 Table[T[n], {n, 0, 16}] // Flatten (* _Jean-François Alcover_, Aug 20 2021, after _Alois P. Heinz_ *)
+%Y A265017 Row sums give A265016.
+%Y A265017 Column k=0 gives A000007.
+%Y A265017 Main diagonal gives A028310, first lower diagonal is A000004.
+%Y A265017 T(2n+1,n) gives A005563.
+%Y A265017 T(2n+2,n) gives A028347(n+2).
+%Y A265017 T(2n+3,n) gives A028560.
+%K A265017 nonn,tabl
+%O A265017 0,6
+%A A265017 _Alois P. Heinz_, Nov 30 2015

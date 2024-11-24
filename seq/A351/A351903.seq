@@ -1,0 +1,70 @@
+%I A351903 #53 Jun 20 2024 16:58:44
+%S A351903 1,3,2,7,9,11,4,15,10,19,21,6,25,27,8,31,33,22,37,39,26,43,45,47,49,
+%T A351903 51,34,12,57,38,16,45,65,67,69,46,73,75,18,79,81,20,85,87,58,91,93,62,
+%U A351903 52,99,101,103,105,70,109,28,74,115,117,24,121,123,32,127,129,86,133,135,137,76
+%N A351903 a(n) is the smallest number k such that the symmetric representation of sigma(k) has at least one part of size n.
+%C A351903 Conjecture 1: there are infinitely many pairs of the form a(x) = y; a(y) = x (see examples).
+%C A351903 First differs from A351904 at a(11).
+%C A351903 From _Hartmut F. W. Hoft_, Jun 10 2024: (Start)
+%C A351903 For numbers less than or equal to a(2^20), (2^k, 2^(k+1) - 1), 0 <= k <= 19, are the only pairs satisfying a(a(x)) = x; the triple (36, 46, 91) is the only one satisfying a(a(a(x))) = x, and there are no proper order 4 quadruples and no order 5 quintuples, apart from fixed point 1.
+%C A351903 Conjecture 2: Only the pairs x = 2^k and y = 2^(k+1) - 1, k >= 0, satisfy a(x) = y and a(y) = x.
+%C A351903 A repeated number d in this sequence determines a pair of distinct indices u and v such that d = a(u) = a(v). This means that d is the smallest number for which parts of sizes u and v occur in the symmetric representation of sigma(d), SRS(d). There are 5507 such pairs less than a(2^20). (End)
+%H A351903 Hartmut F. W. Hoft, <a href="/A351903/b351903.txt">Table of n, a(n) for n = 1..1000</a>
+%F A351903 a(n) = min( k : exists 1 <= j <= |SRS(k)|, SRS(k)[j] = n ) where |SRS(k)| denotes the number of parts in SRS(k) and SRS(k)[j] its j-th part. - _Hartmut F. W. Hoft_, Jun 10 2024
+%e A351903 For n = 11 we have that 21 is the smallest number k with at least one part 11 in the symmetric representation of sigma(k), so a(11) = 21.
+%e A351903 The symmetric representation of sigma(21) in the first quadrant looks like this:
+%e A351903 .
+%e A351903    _ _ _ _ _ _ _ _ _ _ _ 11
+%e A351903   |_ _ _ _ _ _ _ _ _ _ _|
+%e A351903                         |
+%e A351903                         |
+%e A351903                         |_ _ _
+%e A351903                         |_ _  |_ 5
+%e A351903                             |_ _|_
+%e A351903                                 | |_ 5
+%e A351903                                 |_  |
+%e A351903                                   | |
+%e A351903                                   |_|_ _ _ _ 11
+%e A351903                                           | |
+%e A351903                                           | |
+%e A351903                                           | |
+%e A351903                                           | |
+%e A351903                                           | |
+%e A351903                                           | |
+%e A351903                                           | |
+%e A351903                                           | |
+%e A351903                                           | |
+%e A351903                                           | |
+%e A351903                                           |_|
+%e A351903 .
+%e A351903 For n = 12 we have that 6 is the smallest number k with at least one part 12 in the symmetric representation of sigma(k), so a(12) = 6.
+%e A351903 The symmetric representation of sigma(6) in the first quadrant looks like this:
+%e A351903 .
+%e A351903    _ _ _ _
+%e A351903   |_ _ _  |_
+%e A351903         |   |_ 12
+%e A351903         |_ _  |
+%e A351903             | |
+%e A351903             | |
+%e A351903             |_|
+%e A351903 .
+%e A351903 Some pairs of the form a(x) = y; a(y) = x:
+%e A351903    a(2) =  3;   a(3) =  2.
+%e A351903    a(4) =  7;   a(7) =  4.
+%e A351903    a(8) = 15;  a(15) =  8.
+%e A351903   a(16) = 31;  a(31) = 16.
+%e A351903 .
+%e A351903 The first three repeated terms are 45 = a(23) = a(32), 135 = a(68) = a(104) and 225 = a(113) = a(177), - _Hartmut F. W. Hoft_, Jun 10 2024
+%t A351903 (* a237270[ ] implements improved computing time for A237270 *)
+%t A351903 a237591[n_, k_] := Map[Ceiling[(n+1)/#-(#+1)/2]-Ceiling[(n+1)/(#+1)-(#+2)/2]&, Range[k]]
+%t A351903 a249223[n_, k_] := FoldList[#1+(-1)^(#2+1)KroneckerDelta[Mod[n-#2 (#2+1)/2, #2]]&, 1, Range[2, k]]
+%t A351903 row[n_] := Floor[(Sqrt[8*n+1]-1)/2]
+%t A351903 a237270[n_] := Module[{lw=Transpose[{a237591[n, row[n]], a249223[n, row[n]]}], diag, sL, pL}, diag=Last[lw][[2]]; sL=Split[lw, #[[2]]!=0&]; pL=Map[Apply[Dot, Transpose[#]]&, Select[sL, #[[1, 2]]!=0&]]; If[diag==0, Join[pL, Reverse[pL]], If[Length[pL]>1, Join[Most[pL], {2Last[pL]-diag}, Reverse[Most[pL]]], 2pL-diag]]]
+%t A351903 a351903[n_] := Module[{list=Table[0, n], count0=n, i=1}, While[count0>0, Map[If[list[[#]]==0, list[[#]]=i; count0--]&, Select[a237270[i], #<=n&]]; i++]; list]
+%t A351903 a351903[70] (* _Hartmut F. W. Hoft_, Jun 10 2024 *)
+%Y A351903 Cf. A351904 (Analog for subparts).
+%Y A351903 Cf. A000079, A000203, A000225, A196020, A235791, A236104, A237270 (parts), A237271, A237591, A237593, A239660, A239663, A239931, A239932, A239933, A239934, A241558, A245092, A262626.
+%K A351903 nonn
+%O A351903 1,2
+%A A351903 _Omar E. Pol_, Feb 25 2022
+%E A351903 a(17)-a(70) from _Hartmut F. W. Hoft_, Jun 10 2024

@@ -1,0 +1,37 @@
+%I A303765 #25 May 04 2018 22:38:33
+%S A303765 0,1,3,2,7,4,5,15,8,9,11,10,31,16,17,19,18,23,6,63,32,33,35,34,39,36,
+%T A303765 37,47,12,13,127,64,65,67,66,71,68,69,79,14,255,128,129,131,130,135,
+%U A303765 132,133,143,136,137,139,138,159,20,21,511,256,257,259,258,263,260,261,271,264,265,267,266,287,24,25,27,26,1023,512,513,515,514,519,516,517,527
+%N A303765 Permutation of nonnegative integers: a(n) = A048675(A303761(n)); see comments for an equivalent alternative description.
+%C A303765 a(0) = 0 and for n > 0, if there are one or more k_i that are not already present in the sequence among terms a(0) .. a(n-1), and for which bitor(k_i,a(n-1)) = a(n-1), then a(n) = that k_i which gives minimum value of A019565(k_i) amongst them; otherwise, when no such k_i exists, a(n) = the least number not already present that can be obtained by cumulatively filling the successive vacant bits of a(n-1) from the least significant end of its binary representation (by toggling 0's to 1's, possibly also one or more leading zeros).
+%C A303765 Shares with permutations like A003188, A006068, A300838, A302846, A303763, and A303767 the property that when moving from any a(n) to a(n+1) either a subset of 0-bits are toggled on (changed to 1's), or a subset of 1-bits are toggled off (changed to 0's), but no both kind of changes may occur at the same step.
+%C A303765 A300829 gives the positions of records (terms of A000225 in ascending order), that for cases n=2..79 are followed by 2^(n-1).
+%H A303765 Antti Karttunen, <a href="/A303765/b303765.txt">Table of n, a(n) for n = 0..2499</a>
+%H A303765 <a href="/index/Bi#binary">Index entries for sequences related to binary expansion of n</a>
+%H A303765 <a href="/index/Per#IntegerPermutation">Index entries for sequences that are permutations of the natural numbers</a>
+%F A303765 a(n) = A048675(A303761(n)).
+%F A303765 For all n >= 0, A019565(a(n)) = A303761(n).
+%e A303765 For a(2), a(1) = 1, and the only subset mask (a number k for which bitor(k,1) = k) is 1 itself, already present, so we start toggling 0's to 1's with binary expansion "...00001" of 1, and we get "11" (= binary representation of 3), and 3 is not yet present, thus a(2) = 3.
+%e A303765 For a(3), previous a(2) = 3, "...011" in binary, and "10" (= 2) is the least and only submask that is not already present, thus a(3) = 2.
+%e A303765 For a(4), previous = 2, "...010" in binary, and there are no submasks that are not already used, thus we start toggling 0's to 1's from the right, and "11" (3) is already present, but "111" (7) is not, thus a(4) = 7.
+%e A303765 For a(5), previous = 7, with seven submasks "1", "10", "11", "100", "101", "110", "111" (binary representations for 1 - 7), and of these "100", "101", "110" (4, 5 and 6) are not yet present. A019565(4) = 5, A019565(5) = 10 and A019565(6) = 15, so we choose the first one, thus a(5) = 4.
+%e A303765 For a(6), previous = 4, "..0100" in binary, and no submasks that wouldn't have been already used, thus by toggling from the right, we first obtain "...0101" = 5, which is still free, so a(6) = 5.
+%e A303765 For a(7), previous = 5, "..0101" in binary, and no submasks that would be free (both 1 and 4 are already present), thus by toggling from the right, we first obtain "...0111" = 7, which also has been used, so we continue filling the zeros, to next obtain "...1111" = 15, which is still free, so a(7) = 15.
+%e A303765 For a(8), previous = 15, "..1111" in binary, and the submasks not used are "110" = 6, "1000" = 8, "1001" = 9, "1010" = 10, "1011" = 11, "1100" = 12, "1101" = 13 and "1110" = 14. Applying A019565 to these numbers, A019565(8) = 7 gives the smallest value, thus a(8) = 8.
+%o A303765 (PARI)
+%o A303765 up_to = (2^7)-1;
+%o A303765 A006519(n) = (2^valuation(n, 2));
+%o A303765 A019565(n) = {my(j,v); factorback(Mat(vector(if(n, #n=vecextract(binary(n), "-1..1")), j, [prime(j), n[j]])~))}; \\ From A019565
+%o A303765 A048675(n) = { my(f = factor(n)); sum(k=1, #f~, f[k, 2]*2^primepi(f[k, 1]))/2; };
+%o A303765 v303765 = vector(up_to);
+%o A303765 m303766 = Map();
+%o A303765 w=1; for(n=1,up_to,s = Set([]); for(m=1,w, if((bitor(w,m)==w) && !mapisdefined(m303766,m), s = setunion(Set([A019565(m)]),s))); if(length(s)>0, w = A048675(vecmin(s)), while(mapisdefined(m303766,w), w += A006519(1+w))); v303765[n] = w; mapput(m303766,w,n));
+%o A303765 A303765(n) = if(!n,n,v303765[n]);
+%o A303765 A303766(n) = if(!n,n,mapget(m303766,n));
+%Y A303765 Cf. A303766 (inverse).
+%Y A303765 Cf. A006519, A019565, A048675, A303761.
+%Y A303765 Cf. A303763, A303767 (variants).
+%Y A303765 Cf. A300829 (positions of records).
+%K A303765 nonn,base
+%O A303765 0,3
+%A A303765 _Antti Karttunen_, May 02 2018

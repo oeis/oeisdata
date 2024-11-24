@@ -1,0 +1,36 @@
+%I A276427 #45 Jan 07 2022 19:32:44
+%S A276427 1,0,1,2,2,1,3,2,5,1,1,8,3,9,6,16,5,1,19,10,1,29,11,2,36,18,2,53,21,3,
+%T A276427 65,32,4,92,38,4,1,115,54,7,154,67,10,195,88,14,257,112,15,1,318,152,
+%U A276427 19,1,419,178,29,1,516,243,31,2,663,293,44,2,821,376,56,2,1039,465,67,4,1277,589,89,3,1606,715,108,7
+%N A276427 Irregular triangle read by rows: T(n,k) = number of partitions of n having k distinct parts i of multiplicity i; 0 <= k <= A328806(n)-1 = largest index of a nonzero value; n >= 0.
+%C A276427 The sum of entries in row n is A000041(n): the partition numbers. [This allows us to know the row length, i.e., when the largest value of k is reached for which T(n,k) is nonzero. The row lengths are now listed as A328806. - _M. F. Hasler_, Oct 28 2019]
+%H A276427 Alois P. Heinz, <a href="/A276427/b276427.txt">Rows n = 0..1000, flattened</a>
+%F A276427 G.f.:  G(t,x) = Product_{i>=1} ((t-1)*x^{i^2} + 1/(1-x^i)).
+%F A276427 T(n,0) = A276429(n).
+%F A276427 Sum(k*T(n,k), k>=0) = A276428(n).
+%e A276427 Triangle starts:
+%e A276427 1;       (n=0: partition [] has k=0 parts i of multiplicity i: T(0,0) = 1.)
+%e A276427 0, 1;    (n=1: partition [1] has k=1 part i of multiplicity i: T(1,1) = 1.)
+%e A276427 2;       (n=2: partitions [1,1] and [2] have k=0 parts i occurring i times.)
+%e A276427 2, 1;    (n=3: [1,1,1] and [3] have 0, [1,2] has 1 part i occurring i times)
+%e A276427 3, 2;    (n=4: [4], [1,1,2] and [1,1,1,1] for k=0; [1,3] & [2,2] for k=1.)
+%e A276427 5, 1, 1; (n=5: [1,4] has i=1, [1,2,2] has i=1 and i=2 occurring i times.)
+%e A276427 (...)
+%e A276427 The partition [1,2,3,3,3,4] has 2 parts i of multiplicity i: i=1 and i=3.
+%e A276427 T(14,3) = 1, since [1,2,2,3,3,3] is the only partition of 14 having k=3 parts i with multiplicity i, namely i = 1, 2 and 3.
+%e A276427 T(14,2) = 4, counting [1,2,2,3,6], [1,2,2,4,5], [1,2,2,9] (with i=1 and i=2), and [1,3,3,3,4] (with i=1 and i=3).
+%p A276427 G := mul((t-1)*x^(i^2)+1/(1-x^i), i = 1 .. 100): Gser := simplify(series(G, x = 0, 35)): for n from 0 to 30 do P[n] := sort(coeff(Gser, x, n)) end do: for n from 0 to 30 do seq(coeff(P[n], t, k), k = 0 .. degree(P[n])) end do; # yields sequence in triangular form
+%p A276427 # second Maple program:
+%p A276427 b:= proc(n, i) option remember; expand(
+%p A276427       `if`(n=0, 1, `if`(i<1, 0, add(
+%p A276427       `if`(i=j, x, 1)*b(n-i*j, i-1), j=0..n/i))))
+%p A276427     end:
+%p A276427 T:= n->(p->seq(coeff(p, x, i), i=0..degree(p)))(b(n$2)):
+%p A276427 seq(T(n), n=0..30);  # _Alois P. Heinz_, Sep 19 2016
+%t A276427 b[n_, i_] := b[n, i] = Expand[If[n==0, 1, If[i<1, 0, Sum[If[i==j, x, 1] * b[n-i*j, i-1], {j, 0, n/i}]]]]; T[n_] := Function[p, Table[ Coefficient[ p, x, i], {i, 0, Exponent[p, x]}]][b[n, n]]; Table[T[n], {n, 0, 30}] // Flatten (* _Jean-François Alcover_, Oct 20 2016, after _Alois P. Heinz_ *)
+%o A276427 (PARI) apply( A276427_row(n, r=List(0))={forpart(p=n, my(s, c=1); for(i=1, #p, p[i]==if(i<#p, p[i+1]) && c++ && next; c==p[i] && s++; c=1); while(#r<=s, listput(r,0)); r[s+1]++);Vec(r)}, [0..20]) \\ _M. F. Hasler_, Oct 27 2019
+%Y A276427 Cf. A000041 (row sums), A276428, A276429, A328806 (row lengths).
+%K A276427 nonn,tabf
+%O A276427 0,4
+%A A276427 _Emeric Deutsch_, Sep 19 2016
+%E A276427 Name edited by _M. F. Hasler_, Oct 27 2019

@@ -1,0 +1,49 @@
+%I A331007 #48 Sep 27 2022 08:45:03
+%S A331007 1,0,0,0,4,24,168,1280,10860,101976,1053136,11881152,145510740,
+%T A331007 1923678680,27313300344,414633520704,6702860119228,114974897260440,
+%U A331007 2085904412222880,39909278145297536,803157866412577956,16960527261105495192,375011130469825988680,8664636644578485432960
+%N A331007 Number of derangements of a set of n elements where 2 specific elements cannot appear in each other's positions.
+%C A331007 The sequence was originally generated using Python to exhaustively enumerate permutations describing the secret Santa setup for n people where 2 specific people cannot receive each other's names. Derangements, A000166, describe a restriction-free secret Santa setup and are related to this sequence.
+%C A331007 If a derangement is not included, then both of the two friends must be in the same permutation cycle and must be adjacent in this cycle. The second friend can be either immediately before or immediately after the first giving two possibilities (except when the cycle contains only the two friends). These considerations lead to a formula for a(n). - _Andrew Howroyd_, Jan 07 2020
+%C A331007 There are three distinct types of derangement that must be excluded, (1) friend 1 and friend 2 receive each other's names, (2) friend 2 receives friend 1's name but friend 1 does not receive friend 2's name, and (3) friend 1 receives friend 2's name but friend 2 does not receive friend 1's name. - _William P. Orrick_, Jul 25 2020
+%H A331007 J. Touchard, <a href="https://gallica.bnf.fr/ark:/12148/bpt6k31506/f631.item.zoom">Sur un problème de permutations</a>, Comptes Rendus Acad. Sci. Paris, 198 (1934) 631-633.
+%F A331007 a(n) = A000166(n) + A000166(n-2) - 2*Sum_{k=0, n-2} binomial(n-2,k)*A000166(k)*(n-k-2)! for n >= 2. - _Andrew Howroyd_, Jan 07 2020
+%F A331007 a(n) = (n-3)*(n-2)*A055790(n-3) for n > 2. - _Jon E. Schoenfield_, Jan 07 2020
+%F A331007 a(n) = !n - 2 * !(n-1) - !(n-2) for n >= 2, where !n = A000166(n). - _William P. Orrick_, Jul 25 2020
+%F A331007 a(n) = A335391(n-2, 2) for n >= 2 (Touchard). - _William P. Orrick_, Jul 25 2020
+%F A331007 D-finite with recurrence: (n-4)*a(n) = (n-2)*(n-3)*(a(n-1) + a(n-2)), a(0)=1, a(1)=0, a(2)=0, a(3)=0, a(4)=4. - _Georg Fischer_, Jun 12 2021
+%e A331007 For a group of 4 friends, the number of possible permutations of their names in a secret Santa draw in which neither friend number 1 nor friend number 2 can draw the other one's name is 4. The permutations are 3412, 3421, 4312, 4321.
+%e A331007 For a group of 6 friends, the number of possible permutations of their names in a secret Santa draw in which neither friend number 1 nor friend number 2 can draw the other one's name is 168.
+%p A331007 f:=gfun:-rectoproc({(n-4)*a(n) = (n-2)*(n-3)*(a(n-1) + a(n-2)), a(0)=1, a(1)=0, a(2)=0, a(3)=0, a(4)=4}, a(n), remember): map(f,[$0..23]); # _Georg Fischer_, Jun 12 2021
+%t A331007 f[n_] := If[n < 0, 0, Subfactorial[n]];
+%t A331007 a[n_] := f[n] + f[n-2] - 2 Sum[Binomial[n-2, k]*f[k]*(n-k-2)!, {k, 0, n-2}];
+%t A331007 Table[a[n], {n, 0, 23}] (* _Jean-François Alcover_, Sep 27 2022, after _Andrew Howroyd_ *)
+%o A331007 (Python)
+%o A331007 def permutation(n):
+%o A331007     permutations = [[]]
+%o A331007     for i in range(1,n + 1):
+%o A331007         new_permutations = []
+%o A331007         for p in permutations:
+%o A331007             for j in range(0, len(p) + 1):
+%o A331007                 n = p.copy()
+%o A331007                 n.insert(j, i)
+%o A331007                 new_permutations.append(n)
+%o A331007         permutations = new_permutations
+%o A331007     return permutations
+%o A331007 def check_secret_santa(permutations):
+%o A331007     num_valid = 0
+%o A331007     for perm in permutations:
+%o A331007         valid = True
+%o A331007         for i, p in enumerate(perm):
+%o A331007             if i == p - 1 or (i == 0 and p == 2) or (i == 1 and p == 1):
+%o A331007                 valid = False
+%o A331007                 break
+%o A331007         if valid:
+%o A331007             num_valid += 1
+%o A331007     return num_valid
+%o A331007 (PARI) a(n) = {if(n<=1, n==0, b(n) + b(n-2) - 2*sum(k=0, n-2, binomial(n-2,k)*b(k)*(n-k-2)!))} \\ _Andrew Howroyd_, Jan 07 2020
+%Y A331007 Cf. A000166 (number of derangements), A055790, A335391.
+%K A331007 nonn
+%O A331007 0,5
+%A A331007 _Anthony Susevski_, Jan 06 2020
+%E A331007 Terms a(11) and beyond from _Andrew Howroyd_, Jan 07 2020

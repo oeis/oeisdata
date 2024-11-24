@@ -1,0 +1,41 @@
+%I A247150 #42 Sep 08 2019 02:05:47
+%S A247150 1,6,90,1314,21084,353772,6128208,108606408,1958248980,35787633828,
+%T A247150 661145207064,12322983505860,231395387482470,4372431546366636,
+%U A247150 83068148270734740,1585548331063624992,30388252830928088010,584527926996090202428,11279880522021539956860
+%N A247150 Number of paths from (0,0,0) to (n,n,n) avoiding 3 or more consecutive right steps, 3 or more consecutive up steps, and 3 or more consecutive away steps.
+%C A247150 This is a generalization of A177790 from 2D to 3D.
+%C A247150 a(n) is also the number of ternary vectors (symbols 0, 1, and 2, for example) that can be composed with 3n elements (same number of each of the symbols) where each symbol cannot be repeated more than twice consecutively. For example, 0,2,1,0,2,2,1,0,1 is allowed, but 0,2,1,1,1,2,2,0,0 is prohibited because the symbol 1 is repeated 3 times.
+%H A247150 Alois P. Heinz, <a href="/A247150/b247150.txt">Table of n, a(n) for n = 0..250</a>
+%H A247150 M. Erickson, S. Fernando, K. Tran, <a href="https://www.semanticscholar.org/paper/Enumerating-Rook-and-Queen-Paths-Erickson-Fernando/fc8d32756ec73ccae8b28ad93431c13c571c6f10">Enumerating rook and queen paths</a>, Bulletin of the Institute for Combinatorics and Its Applications, Volume 60 (2010), 37-48.
+%F A247150 a(n) = [x^n y^n z^n] ((1+x+x^2)*(1+y+y^2)*(1+z+z^2)/(1-x*y*(1+x)*(1+y)-x*z*(1+x)*(1+z)-y*z*(1+y)*(1+z)-2*x*y*z*(1+x)*(1+y)*(1+z))).
+%F A247150 Recurrence (20 terms):
+%F A247150 a(p,q,r) = a(p-1,q-1,r) +a(p-1,q-2,r) +a(p-2,q-1,r) +a(p-2,q-2,r) +2*a(p-1,q-1,r-1) +a(p,q-2,r-1) +2*a(p-1,q-2,r-1) +a(p-1,q,r-1) +2*a(p-2,q-1,r-1) +a(p-2,q,r-1) +2*a(p-2,q-2,r-1) +a(p,q-1,r-1) +2*a(p-2,q-2,r-2) +a(p,q-1,r-2) +2*a(p-1,q-1,r-2) +a(p,q-2,r-2) +2*a(p-1,q-2,r-2) +a(p-1,q,r-2) +2*a(p-2,q-1,r-2) +a(p-2,q,r-2), for (p,q,r) > 2.
+%F A247150 a(p,q,r) = 0 when p or q or r is negative.
+%F A247150 Initial conditions: a(0,0,0) = 1, a(1,0,0) = 1, a(1,1,0) = 2, a(1,1,1) = 6, a(2,0,0) = 1, a(2,1,0) = 3, a(2,1,1) = 12, a(2,2,0) = 6, a(2,2,1) = 30, a(2,2,2) = 90.
+%F A247150 Symmetry: a(p,q,r) = a(p,r,q) = a(q,p,r) = a(q,r,p) = a(r,p,q) = a(r,q,p).
+%e A247150 For n=1 the 6 paths are (000>001>011>111), (000>001>101>111), (000>010>011>111), (000>010>110>111), (000>100>101>111), (000>100>110>111).
+%p A247150 f:= proc(p,q,r) option remember;
+%p A247150   if p<q or q < r then return procname(op(sort([p,q,r],`>`))) fi;
+%p A247150   if r < 0 then return 0 fi;
+%p A247150    procname(p-1,q-1,r)+procname(p-1,q-2,r)+procname(p-2,q-1,r)+procname(p-2,q-2,r)+2*procname(p-1,q-1,r-1)+procname(p,q-2,r-1)+2*procname(p-1,q-2,r-1)+procname(p-1,q,r-1)+2*procname(p-2,q-1,r-1)+procname(p-2,q,r-1)+2*procname(p-2,q-2,r-1)+procname(p,q-1,r-1)+2*procname(p-2,q-2,r-2)+procname(p,q-1,r-2)+2*procname(p-1,q-1,r-2)+procname(p,q-2,r-2)+2*procname(p-1,q-2,r-2)+procname(p-1,q,r-2)+2*procname(p-2,q-1,r-2)+procname(p-2,q,r-2)
+%p A247150 end proc:
+%p A247150 f(0,0,0) := 1: f(1,0,0) := 1:
+%p A247150 f(1,1,0) := 2: f(1,1,1) := 6:
+%p A247150 f(2,0,0) := 1: f(2,1,0) := 3:
+%p A247150 f(2,1,1) := 12: f(2,2,0) := 6:
+%p A247150 f(2,2,1) := 30: f(2,2,2) := 90:
+%p A247150 seq(f(n,n,n), n=0..30); # _Robert Israel_, Nov 26 2014
+%p A247150 # second Maple program:
+%p A247150 b:= proc(i, j, k, t) option remember; `if`(max(i, j, k)=0, 1,
+%p A247150       `if`(j>0, b(j-1, `if`(i<k, [i, k], [k, i])[], 1), 0)+
+%p A247150       `if`(k>0, b(k-1, `if`(i<j, [i, j], [j, i])[], 1), 0)+
+%p A247150       `if`(i>0 and t>0, b(i-1, j, k, t-1), 0))
+%p A247150     end:
+%p A247150 a:= n-> b(n$3, 2):
+%p A247150 seq(a(n), n=0..30);  # _Alois P. Heinz_, Nov 26 2014
+%t A247150 (* Very slow *) a[0] = 1; a[n_] := SeriesCoefficient[((1+x+x^2)*(1+y+y^2)*(1+z+z^2)/(1-x*y*(1+x)*(1+y) - x*z*(1+x)*(1+ z) - y*z*(1+y)*(1+z) - 2*x*y*z*(1+x)*(1+y)*(1+z))), {x, 0, n}, {y, 0, n}, {z, 0, n}]; Table[Print[an = a[n]]; an, {n, 0, 10}] (* _Jean-François Alcover_, Nov 26 2014 *)
+%t A247150 b[i_, j_, k_, t_] := b[i, j, k, t] = If[Max[i, j, k] == 0, 1, If[j>0, If[i<k, b[j-1, i, k, 1], b[j-1, k, i, 1]], 0] + If[k>0, If[i<j, b[k-1, i, j, 1], b[k-1, i, j, 1]], 0] + If[i>0 && t>0, b[i-1, j, k, t-1], 0]]; a[n_] := b[n, n, n, 2]; Table[a[n], {n, 0, 30}] (* _Jean-François Alcover_, Nov 27 2014, after _Alois P. Heinz_ *)
+%Y A247150 Cf. A177790.
+%K A247150 nonn
+%O A247150 0,2
+%A A247150 _Jean-Pierre Levrel_, Nov 21 2014

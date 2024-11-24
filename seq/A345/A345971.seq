@@ -1,0 +1,56 @@
+%I A345971 #128 Sep 29 2021 13:08:21
+%S A345971 1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,2,2,2,1,1,1,1,2,3,1,4,1,1,1,1,1,
+%T A345971 2,3,2,2,4,6,2,1,1,1,1,1,2,3,3,2,2,4,9,4,8,1,1,1,1,1,1,2,3,3,2,2,3,1,
+%U A345971 4,9,6,9,2,8,14,4,1,1,1,1,1,1,2,3,3,3,2,3,2,2,4,9,9,9,9,4,8,25,14,15
+%N A345971 Irregular triangle T(n,k) read by rows in which n-th row lists numbers of series-reduced trees realized by respective degree sequences in n-th row of A345970; n >= 4, 1 <= k <= A002865(n-2).
+%C A345971 The first floor((n-2)/2) terms of n-th row are all 1 thus the first floor((n-2)/2) degree sequences of n-th row of A345970 have only one realization.
+%C A345971 Let a "unigraph" be a graph which is the only realization of its degree sequence. Among all series-reduced trees on n vertices we have floor((n-2)/2) + [n>=8] * [(n-8) == 0 (mod 3)] unigraphs.
+%C A345971 Let T be a series-reduced tree of diameter dT, with h nodes of degree >= 3, and degree sequence D. If h <= 2, dT <= 3, and T is a unigraph [R. H. Johnson Corollary 2.3]. For each degree sequence the value of h is equal to the number of parts of a unique partition [Myerson], thus the number of unigraphs would be equal to the number of partitions (without parts 1) of n-2 with at most 2 parts, which is floor((n-2)/2). Degree sequences of the form [d,d,d,1,..,1] give an additional unigraph when n >= 8 and (n-8) == 0 (mod 3). These unigraphic sequences can be depicted as:
+%C A345971 _|_|_|_ , _|_|_|_ , ...
+%C A345971            | | |
+%C A345971 A250308(n) = Sum_{ k= 1 .. A002865(2*n-2) } ( T(2*n,k) * odd( Decode( A345970(2*n, k) ) ), where odd(D) is 1 if all d in D are odd, and 0 otherwize.
+%H A345971 Nima Amini, <a href="https://amininima.wordpress.com/2013/05/12/not-that-good-will-hunting/">Not That Good, Will Hunting</a>
+%H A345971 R. H. Johnson, <a href="https://doi.org/10.1016/0012-365X(80)90035-7">Properties of unique realizations-a survey</a>, Discrete Mathematics, Volume 31 January, 1980 pp 185-192.
+%H A345971 B. D. McKay, <a href="http://users.cecs.anu.edu.au/~bdm/data/trees.html">Lists of Trees sorted by diameter and Homeomorphically irreducible trees, with <= 22 nodes.</a>
+%H A345971 Gerry Myerson, <a href="https://www.math.colostate.edu/~achter/wntc/problems/problems2004.pdf">Problems2004</a>
+%H A345971 <a href="/index/Tra#trees">Index entries for sequences related to trees</a>
+%e A345971 Row number 9 is {1, 1, 1, 2} because the 9th row of A345970 is {4864, 8320, 9856, 11200} which can be decoded (using Decode() of A345970) to the 4-degree sequences [8,1,1,1,1,1,1,1,1], which obviously has just 1 realization, [6,3,1,1,1,1,1,1,1], [5,4,1,1,1,1,1,1,1], that also have one, and [4,3,3,1,1,1,1,1,1] which realizes the 2 trees:
+%e A345971 .
+%e A345971        *  *  *            *  *  *
+%e A345971        |  |  |            |  |  |
+%e A345971     *--0--*--*         *--*--0--*
+%e A345971        |     |               |  |
+%e A345971        *     *               *  *
+%e A345971 .
+%e A345971 Triangle begins
+%e A345971    n \ k 1  2  3  4  5  6  7  8  9 10 11 12
+%e A345971     4    1;
+%e A345971     5    1;
+%e A345971     6    1, 1;
+%e A345971     7    1, 1;
+%e A345971     8    1, 1, 1, 1;
+%e A345971     9    1, 1, 1, 2;
+%e A345971    10    1, 1, 1, 1, 2, 2, 2;
+%e A345971    11    1, 1, 1, 1, 2, 3, 1, 4;
+%e A345971    12    1, 1, 1, 1, 1, 2, 3, 2, 2, 4, 6, 2;
+%e A345971    ...
+%o A345971 (PARI)
+%o A345971 D_Generator(n) = { my(D = vectorsmall(n), j);
+%o A345971 M = Map();                                \\ For each partition of n-2, "P",
+%o A345971 forpart( P = n-2,                         \\ P without parts 1, make D =
+%o A345971    for(i = 1, n-#P, D[i] = 1); j = n-#P;  \\ [1..1 0..0], n-#P terms 1, and
+%o A345971    for(i = 1,   #P, D[j++] = P[i] + 1);   \\ #p terms 0. Complete D.
+%o A345971    mapput(M, D, 0) , [2, n-2] )        \\ store D.
+%o A345971 };
+%o A345971 EdgesList2D(n, Tr) = {my(D = vectorsmall(n), E = strsplit(Tr, "  "), u_v);
+%o A345971 for(j = 1, n-1, u_v = strsplit(E[j], " "); u_v = eval(u_v);
+%o A345971    D[ u_v[1]+1 ]++; D[ u_v[2]+1 ]++); vecsort(D) };
+%o A345971                                       \\ Using files hitree4.txt etc from McKay.
+%o A345971 Rows(r1, r2) = {my(Trees, D, j, C); for(n = r1, r2,
+%o A345971 Trees = readstr(Str("hitree", n, ".txt")); D_Generator(n);
+%o A345971 for(i = 1, #Trees, D = EdgesList2D(n, Trees[i]); j = mapget(M, D); mapput(~M, D, j+1));
+%o A345971 C = Mat(M)[, 2]; print1(n" "); for(i = 1, #C, print1(C[i]", ")); print() ) };
+%Y A345971 Cf. A000014 (row sums), A002865 (row widths), A345970 (encoded degree sequences), A250308.
+%K A345971 nonn,tabf
+%O A345971 4,14
+%A A345971 _Washington Bomfim_, Jul 05 2021

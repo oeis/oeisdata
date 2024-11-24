@@ -1,0 +1,36 @@
+%I A347092 #18 Oct 23 2023 02:01:22
+%S A347092 1,-4,-6,5,-10,24,-14,-4,10,40,-22,-30,-26,56,60,5,-34,-40,-38,-50,84,
+%T A347092 88,-46,24,26,104,-6,-70,-58,-240,-62,-4,132,136,140,50,-74,152,156,
+%U A347092 40,-82,-336,-86,-110,-100,184,-94,-30,50,-104,204,-130,-106,24,220,56,228,232,-118,300,-122,248,-140,5,260,-528,-134
+%N A347092 Dirichlet inverse of A322577, which is the convolution of Dedekind psi with Euler phi.
+%C A347092 Multiplicative because A322577 is.
+%H A347092 Sebastian Karlsson, <a href="/A347092/b347092.txt">Table of n, a(n) for n = 1..10000</a>
+%F A347092 a(1) = 1; a(n) = -Sum_{d|n, d < n} A322577(n/d) * a(d).
+%F A347092 a(n) = A347093(n) - A322577(n).
+%F A347092 From _Sebastian Karlsson_, Oct 29 2021: (Start)
+%F A347092 Dirichlet g.f.: zeta(2*s)/zeta(s-1)^2.
+%F A347092 a(n) = Sum_{d|n} A323363(n/d)*A023900(d).
+%F A347092 Multiplicative with a(p^e) = 1 + p^2 if e is even, -2*p if e is odd. (End)
+%t A347092 f[p_, e_] := If[EvenQ[e], p^2 + 1, -2*p]; a[1] = 1; a[n_] := Times @@ f @@@ FactorInteger[n]; Array[a, 100] (* _Amiram Eldar_, Oct 23 2023 *)
+%o A347092 (PARI)
+%o A347092 up_to = 16384;
+%o A347092 A001615(n) = if(1==n,n, my(f=factor(n)); prod(i=1, #f~, f[i, 1]^f[i, 2] + f[i, 1]^(f[i, 2]-1))); \\ After code in A001615
+%o A347092 A322577(n) = sumdiv(n,d,A001615(n/d)*eulerphi(d));
+%o A347092 DirInverseCorrect(v) = { my(u=vector(#v)); u[1] = (1/v[1]); for(n=2, #v, u[n] = (-u[1]*sumdiv(n, d, if(d<n, v[n/d]*u[d], 0)))); (u) }; \\ Compute the Dirichlet inverse of the sequence given in input vector v.
+%o A347092 v347092 = DirInverseCorrect(vector(up_to,n,A322577(n)));
+%o A347092 A347092(n) = v347092[n];
+%o A347092 (PARI) A347092(n) = { my(f=factor(n)); prod(i=1, #f~, if(f[i, 2]%2, -2*f[i, 1], 1+(f[i, 1]^2))); }; \\ (after _Sebastian Karlsson_'s multiplicative formula) - _Antti Karttunen_, Nov 11 2021
+%o A347092 (Haskell)
+%o A347092 import Math.NumberTheory.Primes
+%o A347092 a n = product . map (\(p, e) -> if even e then 1 + unPrime p^2 else -2*unPrime p) . factorise $ n -- _Sebastian Karlsson_, Oct 29 2021
+%o A347092 (Python)
+%o A347092 from sympy import factorint, prod
+%o A347092 def f(p, e): return 1 + p**2 if e%2 == 0 else -2*p
+%o A347092 def a(n):
+%o A347092     factors = factorint(n)
+%o A347092     return prod(f(p, factors[p]) for p in factors) # _Sebastian Karlsson_, Oct 29 2021
+%Y A347092 Cf. A000010, A001615, A322577, A347093.
+%Y A347092 Cf. A023900, A323363.
+%K A347092 sign,easy,mult
+%O A347092 1,2
+%A A347092 _Antti Karttunen_, Aug 18 2021

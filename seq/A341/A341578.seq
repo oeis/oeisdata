@@ -1,0 +1,49 @@
+%I A341578 #60 Jan 14 2023 09:55:07
+%S A341578 1,3,4,8,9,14,16,24,25,33,36,45,49,60,64,80,81,95,100,117,121,138,144,
+%T A341578 165,169,189,196,224,225,247,256,288,289,315,324,350,361,390,400,429,
+%U A341578 441,473,484,528,529,564,576,624,625,663,676,728,729,770,784,825,841,885,900,943
+%N A341578 a(n) is the minimum number of total votes needed for one party to win if there are n^2 voters divided into equal districts.
+%C A341578 Comments from _Jack W Grahl_ and _Andrew Weimholt_, Feb 26 2021: (Start):
+%C A341578 This is a two-party election. The size d of each district must divide n^2, so there are n^2/d equal districts.
+%C A341578 The districts are winner-takes-all, and tied districts go to neither candidate. For an even number of districts, it is enough to win half the districts and tie in one further district.
+%C A341578 So for 5 districts of 5 votes each, one party could win with 3 votes in each of 3 districts, and 0 in all other districts, for a total of a(5) = 9 votes.
+%C A341578 For 8 districts of size 8, 5 votes in each of 4 districts and 4 votes in a fifth district are enough, for a total of a(8) = 24 votes.
+%C A341578 d need not equal n. For n=6, it is better to gerrymander the 36 votes into 3 districts with 12 votes each, and then a(6) = 14 = 7+7+0 votes are enough to win. (End)
+%C A341578 This is related to the gerrymandering question. What is the asymptotic behavior of a(n)? - _N. J. A. Sloane_, Feb 20 2021. Answer from _Don Reble_, Feb 26 2020: The lower bound is [(n^2+1)/4 + n/2]; the upper bound is [n^2/4 + n]. Each bound is reached infinitely often. In general the best choice for d is not unique, since d and n/d give the same answer.
+%H A341578 N. J. A. Sloane, <a href="/A341578/b341578.txt">Table of n, a(n) for n = 1..5000</a>
+%H A341578 N. J. A. Sloane, <a href="/A341578/a341578.pdf">How to use Gerrymandering to win with only 14 votes when you opponent has 22: (1) Locations of voters</a>
+%H A341578 N. J. A. Sloane, <a href="/A341578/a341578_1.pdf">How to use Gerrymandering to win with only 14 votes when you opponent has 22: (2) Make three districts with 12 voters in each, drawn so that your 14 votes win 2 out of the 3 districts</a>
+%H A341578 N. J. A. Sloane, <a href="https://www.youtube.com/watch?v=9ogbsh8KuEM">Exciting Number Sequences</a> (video of talk), Mar 05 2021.
+%H A341578 N. J. A. Sloane, <a href="https://vimeo.com/704569041/4ffa06b95e">The On-Line Encyclopedia of Integer Sequences: An illustrated guide with many unsolved problems</a>, Guest Lecture given in Doron Zeilberger's Experimental Mathematics Math640 Class, Rutgers University, Spring Semester, Apr 28 2022: <a href="https://sites.math.rutgers.edu/~zeilberg/EM22/C27.pdf">Slides</a>; <a href="http://NeilSloane.com/doc/Math640.04.2022.pdf">Slides (an alternative source)</a>.
+%H A341578 N. J. A. Sloane, <a href="https://arxiv.org/abs/2301.03149">"A Handbook of Integer Sequences" Fifty Years Later</a>, arXiv:2301.03149 [math.NT], 2023, p. 21.
+%F A341578 a(n) is the minimum value of {(floor(d/2)+1)*(floor(n^2/(2*d))+1) over all divisors d of n^2 AND (n/2+1)^2-1, if n is even}.
+%e A341578 For a(2), divisors of 2^2 are 1, 2, 4:
+%e A341578 d=1: (floor(1/2)+1)*(floor(2^2/(2*1))+1) = 1*3 = 3
+%e A341578 d=3: (floor(2/2)+1)*(floor(2^2/(2*2))+1) = 2*2 = 4
+%e A341578 d=9: (floor(4/2)+1)*(floor(2^2/(2*4))+1) = 3*1 = 3
+%e A341578 OR
+%e A341578 since n is even, ((2/2)+1)^2-1=3
+%e A341578 Party A only needs 3 cells out of 4 to win a majority of districts.
+%e A341578 For a(6), divisors of 6^2 are 1, 2, 3, 4, 6, 9, 12, 18, 36:
+%e A341578 By symmetry we can ignore d = 9, 12, 18 and 36;
+%e A341578 d=1: (floor(1/2)+1)*(floor(6^2/(2*1))+1) = 1*19 = 19
+%e A341578 d=2: (floor(2/2)+1)*(floor(6^2/(2*2))+1) = 2*10 = 20
+%e A341578 d=3: (floor(3/2)+1)*(floor(6^2/(2*3))+1) = 2*7  = 14
+%e A341578 d=4: (floor(4/2)+1)*(floor(6^2/(2*4))+1) = 3*5  = 15
+%e A341578 d=6: (floor(6/2)+1)*(floor(6^2/(2*6))+1) = 4*4  = 16
+%e A341578 OR
+%e A341578 since n is even, ((6/2)+1)^2-1=15
+%e A341578 Party A only needs 14 cells out of 36 to win a majority of districts.
+%t A341578 Table[Min[Table[(Floor[d/2]+1)*(Floor[n^2/(2*d)]+1),{d,Divisors[n^2]}],If[EvenQ[n],(n/2+1)^2-1,Infinity]],{n,60}](* _Stefano Spezia_, Feb 15 2021 *)
+%o A341578 (Python)
+%o A341578 from sympy import divisors
+%o A341578 def A341578(n):
+%o A341578     c = min((d//2+1)*(n**2//(2*d)+1) for d in divisors(n**2,generator=True) if d<=n)
+%o A341578     return c if n % 2 else min(c,(n//2+1)**2-1) # _Chai Wah Wu_, Mar 05 2021
+%Y A341578 See A341721 for an analog where there are n voters, not n^2.
+%Y A341578 See A341319 for a variant.
+%Y A341578 See also A290323.
+%K A341578 nonn
+%O A341578 1,2
+%A A341578 _Sean Chorney_, Feb 14 2021
+%E A341578 Entry revised by _N. J. A. Sloane_, Feb 26 2021.

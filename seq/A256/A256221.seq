@@ -1,0 +1,49 @@
+%I A256221 #33 Feb 16 2022 09:21:22
+%S A256221 1,2,3,4,5,6,8,8,8,12,12,13,13,13,13,15,15,15,17,17,17,19,21,21,23,24,
+%T A256221 25,25,25,25,25,27
+%N A256221 Number of distinct nonzero Fibonacci numbers in the numerator of the 2^n sums generated from the set 1, 1/2, 1/3, ..., 1/n.
+%C A256221 For the largest generated Fibonacci number, see A256222. For the smallest Fibonacci number not generated, see A256223.
+%e A256221 a(4) = 4 because 4 sums yield distinct Fibonacci numerators: 1, 1 + 1/2 = 3/2, 1/2 + 1/3 = 5/6 and 1/2 + 1/3 + 1/4 = 13/12.
+%p A256221 S:= {0,1}: N:= {1}:
+%p A256221 nfibs:= 10:
+%p A256221 fibs:= {seq(combinat:-fibonacci(n),n=1..nfibs)}:
+%p A256221 A[1]:= 1:
+%p A256221 fibnums:= {1}:
+%p A256221 for n from 2 to 24 do
+%p A256221     Sp:= map(`+`,S,1/n);
+%p A256221     N:= N union map(numer, Sp);
+%p A256221   Nmax:= max(N);
+%p A256221   S:= S union Sp;
+%p A256221   while combinat:-fibonacci(nfibs) < Nmax do nfibs:= nfibs+1; fibs:= fibs union {combinat:-fibonacci(nfibs)} od;
+%p A256221   newfibnums:= N intersect fibs;
+%p A256221   fibnums:= newfibnums;
+%p A256221   A[n]:= nops(fibnums);
+%p A256221 od:
+%p A256221 seq(A[n],n=1..24); # _Robert Israel_, Dec 09 2016
+%t A256221 <<"DiscreteMath`Combinatorica`";maxN=23; For[prms={}; i=0; n=1, n<=maxN, n++, While[i<2^n-1, i++; s=NthSubset[i, Range[n]]; k=Numerator[Plus@@(1/s)]; If[IntegerQ[Sqrt[5*k^2+4]]||IntegerQ[Sqrt[5*k^2-4]],prms=Union[prms, {k}]]]; Print[Length[prms]]]
+%o A256221 (Python)
+%o A256221 from math import gcd, lcm
+%o A256221 from itertools import combinations
+%o A256221 def A256221(n):
+%o A256221     m = lcm(*range(1,n+1))
+%o A256221     fset, fibset, mlist = set(), set(), tuple(m//i for i in range(1,n+1))
+%o A256221     a, b, k = 0, 1, sum(mlist)
+%o A256221     while b <= k:
+%o A256221         fibset.add(b)
+%o A256221         a, b = b, a+b
+%o A256221     for l in range(1,n//2+1):
+%o A256221         for p in combinations(mlist,l):
+%o A256221             s = sum(p)
+%o A256221             if (t := s//gcd(s,m)) in fibset:
+%o A256221                 fset.add(t)
+%o A256221             if 2*l != n and (t := (k-s)//gcd(k-s,m)) in fibset:
+%o A256221                 fset.add(t)
+%o A256221     if (t:= k//gcd(k,m)) in fibset: fset.add(t)
+%o A256221     return len(fset) # _Chai Wah Wu_, Feb 15 2022
+%Y A256221 Cf. A000045, A075189, A010056, A256220, A256222, A256223.
+%K A256221 nonn,more
+%O A256221 1,2
+%A A256221 _Michel Lagneau_, Mar 19 2015
+%E A256221 Corrected and more terms added by _Robert Israel_, Dec 09 2016
+%E A256221 a(29)-a(31) from _Chai Wah Wu_, Feb 15 2022
+%E A256221 a(32) from _Chai Wah Wu_, Feb 16 2022

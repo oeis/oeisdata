@@ -1,0 +1,52 @@
+%I A291883 #29 Oct 18 2018 15:50:51
+%S A291883 1,0,1,0,1,1,0,1,2,1,0,1,5,3,1,0,1,9,11,4,1,0,1,19,31,19,5,1,0,1,35,
+%T A291883 91,69,29,6,1,0,1,71,250,252,127,41,7,1,0,1,135,690,855,540,209,55,8,
+%U A291883 1,0,1,271,1863,2867,2117,1005,319,71,9,1,0,1,527,5017,9339,8063,4411,1705,461,89,10,1
+%N A291883 Number T(n,k) of symmetrically unique Dyck paths of semilength n and height k; triangle T(n,k), n>=0, 0<=k<=n, read by rows.
+%H A291883 Alois P. Heinz, <a href="/A291883/b291883.txt">Rows n = 0..140, flattened</a>
+%F A291883 T(n,k) = (A080936(n,k) + A132890(n,k))/2.
+%F A291883 Sum_{k=1..n} k * T(n,k) = A291886(n).
+%e A291883 : T(4,2) = 5:       /\      /\        /\/\    /\  /\    /\/\/\
+%e A291883 :              /\/\/  \  /\/  \/\  /\/    \  /  \/  \  /      \
+%e A291883 :
+%e A291883 Triangle T(n,k) begins:
+%e A291883   1;
+%e A291883   0, 1;
+%e A291883   0, 1,   1;
+%e A291883   0, 1,   2,   1;
+%e A291883   0, 1,   5,   3,   1;
+%e A291883   0, 1,   9,  11,   4,   1;
+%e A291883   0, 1,  19,  31,  19,   5,   1;
+%e A291883   0, 1,  35,  91,  69,  29,   6,  1;
+%e A291883   0, 1,  71, 250, 252, 127,  41,  7, 1;
+%e A291883   0, 1, 135, 690, 855, 540, 209, 55, 8, 1;
+%p A291883 b:= proc(x, y, k) option remember; `if`(x=0, z^k, `if`(y<x-1,
+%p A291883       b(x-1, y+1, max(y+1, k)), 0)+`if`(y>0, b(x-1, y-1, k), 0))
+%p A291883     end:
+%p A291883 g:= proc(x, y, k) option remember; `if`(x=0, z^k, `if`(y>0,
+%p A291883       g(x-2, y-1, k), 0)+ g(x-2, y+1, max(y+1, k)))
+%p A291883     end:
+%p A291883 T:= n-> (p-> seq(coeff(p, z, i)/2, i=0..n))(b(2*n, 0$2)+g(2*n, 0$2)):
+%p A291883 seq(T(n), n=0..14);
+%t A291883 b[x_, y_, k_] := b[x, y, k] = If[x == 0, z^k, If[y < x - 1, b[x - 1, y + 1, Max[y + 1, k]], 0] + If[y > 0, b[x - 1, y - 1, k], 0]];
+%t A291883 g[x_, y_, k_] := g[x, y, k] = If[x == 0, z^k, If[y > 0, g[x - 2, y - 1, k], 0] + g[x - 2, y + 1, Max[y + 1, k]]];
+%t A291883 T[n_] := Function[p, Table[Coefficient[p, z, i]/2, {i, 0, n}]][b[2*n, 0, 0] + g[2*n, 0, 0]];
+%t A291883 Table[T[n], {n, 0, 14}] // Flatten (* _Jean-François Alcover_, Jun 03 2018, from Maple *)
+%o A291883 (Python)
+%o A291883 from sympy.core.cache import cacheit
+%o A291883 from sympy import Poly, Symbol, flatten
+%o A291883 z=Symbol('z')
+%o A291883 @cacheit
+%o A291883 def b(x, y, k): return z**k if x==0 else (b(x - 1, y + 1, max(y + 1, k)) if y<x - 1 else 0) + (b(x - 1, y - 1, k) if y>0 else 0)
+%o A291883 @cacheit
+%o A291883 def g(x, y, k): return z**k if x==0 else (g(x - 2, y - 1, k) if y>0 else 0) + g(x - 2, y + 1, max(y + 1, k))
+%o A291883 def T(n): return 1 if n==0 else [i//2 for i in Poly(b(2*n, 0, 0) + g(2*n, 0, 0)).all_coeffs()[::-1]]
+%o A291883 print(flatten(map(T, range(15)))) # _Indranil Ghosh_, Sep 06 2017
+%Y A291883 Columns k=0-10 give: A000007, A057427, A056326, A291887, A291888, A291889, A291890, A291891, A291892, A291893, A291894.
+%Y A291883 Main and first two lower diagonals give A000012, A001477, A028387(n-1) for n>0.
+%Y A291883 Row sums give A007123(n+1).
+%Y A291883 T(2n,n) give A291885.
+%Y A291883 Cf. A080936, A132890, A291886.
+%K A291883 nonn,tabl
+%O A291883 0,9
+%A A291883 _Alois P. Heinz_, Sep 05 2017

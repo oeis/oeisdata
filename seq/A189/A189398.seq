@@ -1,0 +1,53 @@
+%I A189398 #32 Jan 09 2016 11:54:55
+%S A189398 2,4,8,16,32,64,128,256,512,2,6,18,54,162,486,1458,4374,13122,39366,4,
+%T A189398 12,36,108,324,972,2916,8748,26244,78732,8,24,72,216,648,1944,5832,
+%U A189398 17496,52488,157464,16,48,144,432,1296,3888,11664,34992,104976,314928,32
+%N A189398 a(n) = 2^d(1) * 3^d(2) * ... * prime(k)^d(k), where d(1)d(2)...d(k) is the decimal representation of n.
+%C A189398 Not the same as A061509: a(n) = A061509(n) for n <= 100; a(101)=2^1*3^0*5^1=10 <> A061509(101)=2^1*3^1=6;
+%C A189398 a(A052382(n)) = A000079(A000030(a052382(n))) = A061509(A052382(n));
+%C A189398 a(A002275(n)) = A002110(n): a(n-th rep-unit) = n-th primorial;
+%C A189398 a(n*A011557(k)) = a(n): trailing zeros don't matter;
+%C A189398 A001221(a(n)) = A055640(n): number of distinct prime factors of a(n) = number of nonzero digits of n;
+%C A189398 A001222(a(n)) = A007953(n): number of all prime factors of a(n) = sum of digits of n;
+%C A189398 a(81312000) = 2^8*3^1*5^3*7^1*11^2*13^0*17^0*19^0 = 81312000, the smallest fixed point, is called the Meertens number.
+%H A189398 Reinhard Zumkeller, <a href="/A189398/b189398.txt">Table of n, a(n) for n = 1..10000</a>
+%H A189398 Richard S. Bird, <a href="http://journals.cambridge.org/action/displayAbstract?fromPage=online&amp;aid=44141&amp;fulltextType=RL&amp;fileId=S0956796897002931">Functional Pearl: Meertens number</a>, Journal of Functional Programming 8 (1), Jan 1998, 83-88.
+%H A189398 Wikipedia, <a href="http://en.wikipedia.org/wiki/Meertens_number">Meertens number</a>
+%p A189398 a:= n-> `if`(n=0, 1, ithprime(length(n))^irem(n, 10, 'm') *a(m)):
+%p A189398 seq(a(n), n=1..110);  # _Alois P. Heinz_, May 04 2011
+%t A189398 a[n_] := (p = Prime[Range[Length[d = IntegerDigits[n]]]]; Times @@ (p^d)); Array[a, 50] (* _Jean-François Alcover_, Jan 09 2016 *)
+%o A189398 (Haskell)
+%o A189398 import Data.Char (digitToInt)
+%o A189398 import Data.List (findIndices)
+%o A189398 a189398 n = product $ zipWith (^) a000040_list (map digitToInt $ show n)
+%o A189398 -- Two computations of the Meertens number: the first is brute force,
+%o A189398 meertens = map succ $ findIndices (\x -> a189398 x == x) [1..]
+%o A189398 -- ... and the second is more efficient, from Bird reference, page 87:
+%o A189398 meertens' k = [n | (n,g) <- candidates (0,1), n == g] where
+%o A189398   candidates        = concat . map (search pps) . tail . labels ps
+%o A189398   ps : pps          = map (\p -> iterate (p *) 1) $ take k a000040_list
+%o A189398   search [] x       = [x]
+%o A189398   search (ps:pps) x = x : concat (map (search pps) (labels ps x))
+%o A189398   labels ps (n,g)   = zip (map (10*n +) [0..9]) (chop $ map (g *) ps)
+%o A189398   chop              = takeWhile (< 10^k)
+%o A189398 -- Time and space required, GHC interpreted, Mac OS X, 2.66 GHz:
+%o A189398 -- for >head meertens: (466.87 secs, 254780027728 bytes);
+%o A189398 -- for >meertens' 8:   (  0.28 secs,     62027124 bytes).
+%o A189398 (PARI) a(n)=my(d=digits(n),p=primes(#d)); prod(i=1,#d,p[i]^d[i]) \\ _Charles R Greathouse IV_, Aug 19 2014
+%o A189398 (Python)
+%o A189398 from sympy import prime
+%o A189398 from operator import mul
+%o A189398 from functools import reduce
+%o A189398 def A189398(n):
+%o A189398 ....return reduce(mul, (prime(i)**int(d) for i,d in enumerate(str(n),start=1)))
+%o A189398 # implementation using recursion
+%o A189398 def _A189398(n):
+%o A189398 ....nlen = len(n)
+%o A189398 ....return _A189398(n[:-1])*prime(nlen)**int(n[-1]) if nlen > 1 else 2**int(n)
+%o A189398 def A189398(n):
+%o A189398 ....return _A189398(str(n))
+%o A189398 # _Chai Wah Wu_, Aug 31 2014
+%Y A189398 Cf. A000040.
+%K A189398 nonn,base,look
+%O A189398 1,1
+%A A189398 _Reinhard Zumkeller_, May 03 2011

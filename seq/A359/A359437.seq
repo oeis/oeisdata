@@ -1,0 +1,41 @@
+%I A359437 #36 May 07 2024 02:00:20
+%S A359437 2,17,11,7,239,167,1933,9241,19319,120121,649991,4564559,513239,
+%T A359437 11324041,31831799,54708721,59219161,215975759,241431959,265012441,
+%U A359437 549789239,138389159,3336693359,1990674841
+%N A359437 a(n) is the first prime p such that there are exactly n numbers i with 1 <= i < p such that one of i*p-(p-i) and i*p+(p-i) is a prime and the other is the square of a prime.
+%C A359437 Suggested in an email from _J. M. Bergot_.
+%C A359437 It appears that in most cases the squares are either all i*p-(p-i) or all i*p+(p-i). However, this is not the case for a(3) or a(18).
+%C A359437 a(21) = 138389159.
+%e A359437 a(1) = 17 because 2*17 - (17 - 2) =  19, 2*17 + (17 - 2) = 7^2.
+%e A359437 a(2) = 11 because 3*11 - (11 - 3) = 5^2, 3*11 + (11 - 3) =  41;
+%e A359437                   5*11 - (11 - 5) = 7^2, 5*11 + (11 - 5) =  61.
+%e A359437 a(3) =  7 because 2*7  -  (7 - 2) = 3^2, 2*7  +  (7 - 2) =  19;
+%e A359437                   3*7  -  (7 - 3) =  17, 3*7  +  (7 - 3) = 5^2;
+%e A359437                   4*7  -  (7 - 4) = 5^2, 4*7  +  (7 - 4) =  31.
+%p A359437 f:= proc(p) local x, S1, S2, R1, R2;
+%p A359437 S1:= {msolve(x^2 = -p, p+1)};
+%p A359437 R1:= select(i -> i < p and isprime(i*p+p-i), map(t -> (t^2+p)/(p+1), select(isprime, map(rhs@op,S1))));
+%p A359437 S2:= {msolve(x^2 = p, p-1)};
+%p A359437 R2:= select(i -> i < p and isprime(i*p-p+i), map(t -> (t^2-p)/(p-1), select(isprime, map(rhs@op,S2))));
+%p A359437 nops(R1 union R2)
+%p A359437 end proc:
+%p A359437 f(2):= 0:
+%p A359437 V:= Array(0..12): count:= 0:
+%p A359437 p:= 1:
+%p A359437 while count < 13 do
+%p A359437 p:= nextprime(p); v:= f(p);
+%p A359437 if V[v] = 0 then V[v]:= p; count:= count+1 fi
+%p A359437 od:
+%p A359437 convert(V,list);
+%o A359437 (Python)
+%o A359437 from sympy import sqrt_mod_iter, nextprime, isprime
+%o A359437 def A359437(n):
+%o A359437     p = 1
+%o A359437     while (p:=nextprime(p)):
+%o A359437         if len(set(filter(lambda x:isprime(p*(x+1)-x),((d**2+p)//(p+1) for d in sqrt_mod_iter(-p,p+1) if isprime(d)))) | set(filter(lambda x: isprime(p*(x-1)+x),((d**2-p)//(p-1) for d in sqrt_mod_iter(p,p-1) if isprime(d)))))==n:
+%o A359437             return p # _Chai Wah Wu_, May 06 2024
+%K A359437 nonn,more
+%O A359437 0,1
+%A A359437 _Robert Israel_, Dec 31 2022
+%E A359437 a(21) from _Robert Israel_, Dec 31 2022
+%E A359437 a(20), a(22)-a(23) from _Chai Wah Wu_, May 06 2024

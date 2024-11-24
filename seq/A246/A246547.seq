@@ -1,0 +1,59 @@
+%I A246547 #85 Sep 17 2024 10:36:47
+%S A246547 4,8,9,16,25,27,32,49,64,81,121,125,128,169,243,256,289,343,361,512,
+%T A246547 529,625,729,841,961,1024,1331,1369,1681,1849,2048,2187,2197,2209,
+%U A246547 2401,2809,3125,3481,3721,4096,4489,4913,5041,5329,6241,6561,6859,6889,7921,8192,9409,10201,10609,11449,11881,12167,12769,14641
+%N A246547 Prime powers p^e where p is a prime and e >= 2 (prime powers without the primes or 1).
+%C A246547 These are sometimes called the proper prime powers.
+%C A246547 A proper subset of A001597.
+%C A246547 Equals A000961 \ A008578 = { x in A001597 | A001221(x)=1 }. - _M. F. Hasler_, Aug 29 2014
+%H A246547 Jens Kruse Andersen, <a href="/A246547/b246547.txt">Table of n, a(n) for n = 1..10000</a>
+%H A246547 Chai Wah Wu, <a href="https://arxiv.org/abs/2409.05844">Algorithms for complementary sequences</a>, arXiv:2409.05844 [math.NT], 2024.
+%F A246547 a(n) = A025475(n+1). - _M. F. Hasler_, Aug 29 2014
+%F A246547 Sum_{n>=1} 1/a(n) = Sum_{p prime} 1/(p*(p-1)) = A136141. - _Amiram Eldar_, Dec 21 2020
+%p A246547 isA246547 := proc(n)
+%p A246547     local ifs;
+%p A246547     ifs := ifactors(n)[2] ;
+%p A246547     if nops(ifs) <> 1 then
+%p A246547         false;
+%p A246547     else
+%p A246547         is(op(2, op(1, ifs)) > 1);
+%p A246547     end if;
+%p A246547 end proc:
+%p A246547 for n from 2 do
+%p A246547     if isA246547(n) then
+%p A246547         print(n) ;
+%p A246547     end if;
+%p A246547 end do: # _R. J. Mathar_, Feb 01 2016 # Or:
+%p A246547 isA246547 := n -> not isprime(n) and nops(numtheory:-factorset(n)) = 1:
+%p A246547 select(isA246547, [$1..10000]); # _Peter Luschny_, May 01 2018
+%t A246547 With[{upto=15000},Complement[Select[Range[upto],PrimePowerQ],Prime[ Range[ PrimePi[ upto]]]]] (* _Harvey P. Dale_, Nov 28 2014 *)
+%t A246547 Select[ Range@ 15000, PrimePowerQ@# && !SquareFreeQ@# &] (* _Robert G. Wilson v_, Dec 01 2014 *)
+%t A246547 With[{n = 15000}, Union@ Flatten@ Table[Array[p^# &, Floor@ Log[p, n] - 1, 2], {p, Prime@ Range@ PrimePi@ Sqrt@ n}] ] (* _Michael De Vlieger_, Jul 06 2018, faster program *)
+%o A246547 (PARI) for(n=1,10^5,if(isprimepower(n)>=2,print1(n,", ")));
+%o A246547 (PARI) m=10^5; v=[]; forprime(p=2, sqrtint(m), e=2; while(p^e<=m, v=concat(v, p^e); e++)); v=vecsort(v) \\ Faster program. _Jens Kruse Andersen_, Aug 29 2014
+%o A246547 (SageMath)
+%o A246547 def A246547List(n):
+%o A246547     return [p for p in srange(2, n) if p.is_prime_power() and not p.is_prime()]
+%o A246547 print(A246547List(14642))  # _Peter Luschny_, Sep 16 2023
+%o A246547 (Python)
+%o A246547 from sympy import primepi, integer_nthroot
+%o A246547 def A246547(n):
+%o A246547     def f(x): return int(n-1+x-sum(primepi(integer_nthroot(x,k)[0]) for k in range(2,x.bit_length())))
+%o A246547     kmin, kmax = 1,2
+%o A246547     while f(kmax) >= kmax:
+%o A246547         kmax <<= 1
+%o A246547     while True:
+%o A246547         kmid = kmax+kmin>>1
+%o A246547         if f(kmid) < kmid:
+%o A246547             kmax = kmid
+%o A246547         else:
+%o A246547             kmin = kmid
+%o A246547         if kmax-kmin <= 1:
+%o A246547             break
+%o A246547     return kmax # _Chai Wah Wu_, Aug 14 2024
+%Y A246547 Essentially the same as A025475.
+%Y A246547 Cf. A000961, A001597, A025528, A051953, A136141, A246655.
+%Y A246547 There are four different sequences which may legitimately be called "prime powers": A000961 (p^k, k >= 0), A246655 (p^k, k >= 1), A246547 (p^k, k >= 2), A025475 (p^k, k=0 and k >= 2). When you refer to "prime powers", be sure to specify which of these you mean. Also A001597 is the sequence of nontrivial powers n^k, n >= 1, k >= 2. - _N. J. A. Sloane_, Mar 24 2018
+%K A246547 nonn,easy
+%O A246547 1,1
+%A A246547 _Joerg Arndt_, Aug 29 2014

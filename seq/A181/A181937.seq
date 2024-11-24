@@ -1,0 +1,63 @@
+%I A181937 #64 Aug 25 2024 04:19:04
+%S A181937 1,1,1,1,1,1,1,1,1,2,1,1,1,1,5,1,1,1,1,3,16,1,1,1,1,1,9,61,1,1,1,1,1,
+%T A181937 4,19,272,1,1,1,1,1,1,14,99,1385,1,1,1,1,1,1,5,34,477,7936,1,1,1,1,1,
+%U A181937 1,1,20,69,1513,50521,1,1,1,1,1,1,1,6,55,496,11259,353792
+%N A181937 André numbers. Square array A(n,k), n>=2, k>=0, read by antidiagonals upwards, A(n,k) = n-alternating permutations of length k.
+%C A181937 The André numbers were studied by Désiré André in the case n=2 around 1880. The present author suggests that the numbers A(n,k) be named in honor of André. Already in 1877 Ludwig Seidel gave an efficient algorithm for computing the coefficients of secant and tangent which immediately carries over to the general case. Anthony Mendes and Jeffrey Remmel give exponential generating functions for the general case.
+%D A181937 Anthony Mendes and Jeffrey Remmel, Generating functions from symmetric functions, Preliminary version of book, available from Jeffrey Remmel's home page.
+%H A181937 Alois P. Heinz, <a href="/A181937/b181937.txt">Antidiagonals k = 0..140, flattened</a>
+%H A181937 Désiré André, <a href="https://gallica.bnf.fr/ark:/12148/bpt6k30457/f961.image">Développement de séc x et de tang x</a>, C. R. Math. Acad. Sci. Paris 88 (1879), 965-967.
+%H A181937 Désiré André, <a href="http://sites.mathdoc.fr/JMPA/PDF/JMPA_1881_3_7_A10_0.pdf">Sur les permutations alternées</a>, J. Math. pur. appl., 7 (1881), 167-184.
+%H A181937 Peter Luschny, <a href="http://oeis.org/wiki/User:Peter_Luschny/SeidelTransform">An old operation on sequences: the Seidel transform</a>.
+%H A181937 Ludwig Seidel, <a href="https://babel.hathitrust.org/cgi/pt?id=hvd.32044092897461&amp;view=1up&amp;seq=176">Über eine einfache Entstehungsweise der Bernoulli'schen Zahlen und einiger verwandten Reihen</a>, Sitzungsberichte der mathematisch-physikalischen Classe der königlich bayerischen Akademie der Wissenschaften zu München, volume 7 (1877), 157-187. [USA access only through the <a href="https://www.hathitrust.org/accessibility">HATHI TRUST Digital Library</a>]
+%H A181937 Ludwig Seidel, <a href="https://www.zobodat.at/pdf/Sitz-Ber-Akad-Muenchen-math-Kl_1877_0157-0187.pdf">Über eine einfache Entstehungsweise der Bernoulli'schen Zahlen und einiger verwandten Reihen</a>, Sitzungsberichte der mathematisch-physikalischen Classe der königlich bayerischen Akademie der Wissenschaften zu München, volume 7 (1877), 157-187. [Access through <a href="https://de.wikipedia.org/wiki/ZOBODAT">ZOBODAT</a>]
+%e A181937 n\k [0][1][2][3][4] [5] [6]  [7]   [8]   [9]  [10]    [11]
+%e A181937 [1]  1, 1, 1, 1, 1,  1,  1,   1,    1,    1,    1,       1  [A000012]
+%e A181937 [2]  1, 1, 1, 2, 5, 16, 61, 272, 1385, 7936, 50521, 353792  [A000111]
+%e A181937 [3]  1, 1, 1, 1, 3,  9, 19,  99,  477, 1513, 11259,  74601  [A178963]
+%e A181937 [4]  1, 1, 1, 1, 1,  4, 14,  34,   69,  496,  2896,  11056  [A178964]
+%e A181937 [5]  1, 1, 1, 1, 1,  1,  5,  20,   55,  125,   251,   2300  [A181936]
+%e A181937 [6]  1, 1, 1, 1, 1,  1,  1,   6,   27,   83,   209,    461  [A250283]
+%p A181937 A181937_list := proc(n, len) local E,dim,i,k;  # Seidel's boustrophedon transform
+%p A181937 dim := len-1; E := array(0..dim, 0..dim); E[0,0] := 1;
+%p A181937 for i from 1 to dim do
+%p A181937 if i mod n = 0 then E[i,0] := 0 ;
+%p A181937    for k from i-1 by -1 to 0 do E[k,i-k] := E[k+1,i-k-1] + E[k,i-k-1] od;
+%p A181937 else E[0,i] := 0;
+%p A181937    for k from 1 by 1 to i do E[k,i-k] := E[k-1,i-k+1] + E[k-1,i-k] od;
+%p A181937 fi od; [E[0,0],seq(E[k,0]+E[0,k],k=1..dim)] end:
+%p A181937 for n from 2 to 6 do print(A181937_list(n,12)) od;
+%p A181937 # Alternative, with an additional row 0:
+%p A181937 Andre := proc(m, n) option remember; local k; ifelse(n <= 0, 1, ifelse(m = 0, 1,
+%p A181937 -add(binomial(n, k) * Andre(m, k), k = 0..n-1, m))) end:
+%p A181937 T := (n, k) -> abs(Andre(n, k)): seq(lprint(seq(T(n, k), k = 0..11)), n = 0..9);
+%p A181937 # _Peter Luschny_, Aug 19 2024
+%t A181937 dim = 13; e[_][0, 0] = 1; e[m_][n_ /; 0 <= n <= dim, 0] /; Mod[n, m] == 0 = 0; e[m_][k_ /; 0 <= k <= dim, n_ /; 0 <= n <= dim] /; Mod[n+k, m] == 0 := e[m][k, n] = e[m][k, n-1] + e[m][k+1, n-1]; e[m_][0, n_ /; 0 <= n <= dim] /; Mod[n, m] == 0 = 0; e[m_][k_ /; 0 <= k <= dim, n_ /; 0 <= n <= dim] /; Mod[n+k, m] != 0 := e[m][k, n] = e[m][k-1, n] + e[m][k-1, n+1]; e[_][_, _] = 0; a[_, 0] = 1; a[m_, n_] := e[m][n, 0] + e[m][0, n]; Table[a[m-n+1, n], {m, 1, dim-1}, {n, 0, m-1}] // Flatten (* _Jean-François Alcover_, Jul 23 2013, after Maple *)
+%t A181937 b[r_, u_, o_, t_] := b[r, u, o, t] = If[u + o == 0, 1, If[t == 0, Sum[b[r, u - j, o + j - 1, Mod[t + 1, r]], {j, 1, u}], Sum[b[r, u + j - 1, o - j, Mod[t + 1, r]], {j, 1, o}]]]; A[n_, k_] := b[n, k, 0, 0];
+%t A181937 Table[A[n - k, k], {n, 2, 13}, {k, 0, n - 2}] // Flatten
+%t A181937 (* _Jean-François Alcover_, Nov 22 2023, after _Alois P. Heinz_ in A250283 *)
+%t A181937 Andre[n_, k_] := Andre[n, k] = If[k <= 0, 1, If[n == 0, 1, -Sum[Binomial[k, j] Andre[n, j], {j, 0, k-1, n}]]];
+%t A181937 Table[Abs[Andre[n, k]], {n, 0, 6}, {k, 0, 11}] // MatrixForm
+%t A181937 (* _Peter Luschny_, Aug 19 2024 *)
+%o A181937 (Sage)
+%o A181937 @cached_function
+%o A181937 def A(m, n):
+%o A181937     if n == 0: return 1
+%o A181937     s = -1 if m.divides(n) else 1
+%o A181937     t = [m*k for k in (0..(n-1)//m)]
+%o A181937     return s*add(binomial(n, k)*A(m, k) for k in t)
+%o A181937 A181937_row = lambda m, n: (-1)^int(is_odd(n//m))*A(m, n)
+%o A181937 for n in (1..6): print([A181937_row(n, k) for k in (0..20)]) # _Peter Luschny_, Feb 06 2017
+%o A181937 (Julia) # Signed version.
+%o A181937 using Memoize
+%o A181937 @memoize function André(m, n)
+%o A181937     n ≤ 0 && return 1
+%o A181937     r = range(0, stop=n-1, step=m)
+%o A181937     S = sum(binomial(n, k) * André(m, k) for k in r)
+%o A181937     n % m == 0 ? -S : S
+%o A181937 end
+%o A181937 for m in 1:8 println([André(m, n) for n in 0:11]) end # _Peter Luschny_, Feb 09 2019
+%Y A181937 Cf. A000111, A178963, A178964, A181936, A250283, A250284, A250285, A250286, A250287.
+%K A181937 nonn,tabl
+%O A181937 0,10
+%A A181937 _Peter Luschny_, Apr 03 2012

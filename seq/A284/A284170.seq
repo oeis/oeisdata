@@ -1,0 +1,52 @@
+%I A284170 #16 Mar 22 2017 12:41:23
+%S A284170 5,43,43,5,43,5,7,43,43,43,43,41,131,43,43,13,43,43,43,41,13,17,43,41,
+%T A284170 43,131,43,137,43,43,131,43,43,43,43,43,23,43,137,43,131,43,41,67,151,
+%U A284170 29,43,131,43,41,131,137,131,43,29,137,41,137,41,151,43,131,43,137,73,43,37,43,43,131,43,47
+%N A284170 Array read by antidiagonals: T(i,j) is the largest prime in the sequence defined by a(1) = prime(i), a(2) = prime(j), a(n) = A006530(a(n-1)+a(n-2)+1) for n>=3, or 0 if that sequence contains arbitrarily large primes.
+%C A284170 Conjecture: the sequence always eventually repeats, so T(i,j) > 0.
+%H A284170 Robert Israel, <a href="/A284170/b284170.txt">Table of n, a(n) for n = 1..14196</a> (first 168 antidiagonals, flattened)
+%H A284170 MathOverflow, <a href="http://mathoverflow.net/questions/264848/if-p-n-is-the-largest-prime-factor-of-p-n-1p-n-2m-then-p-n-is-b/264922"> If p_n is the largest prime factor of p_{n-1}+p_{n-2}+m, then p_n is bounded </a>
+%e A284170 T(1,2) = 43 because the sequence in this case starts 2,3,3,7,11,19,31,17,7, and then repeats 5,13,19,11,31,43,5,7,13,7,7 in a cycle.
+%e A284170 Array starts
+%e A284170 5   43   5  43  43  13 137  43 151  29 ...
+%e A284170 43  43  43  43  41  43  43  67  43  73 ...
+%e A284170 5   43 131  43 131  43  41 131 137 137 ...
+%e A284170 7   41  43  43  43  43 137  43 131  67 ...
+%e A284170 43  43  41  43 131 131 131  43 131 151 ...
+%e A284170 13  43 131  43  41  43  43  43  73  73 ...
+%e A284170 17  43 137  43 151  47  43  41  41 131 ...
+%e A284170 43  43 131  41  43  41  43  41  67 137 ...
+%e A284170 23  43 137 131  43 151 137 137 197 137 ...
+%e A284170 29  41  43 137  73  43 131  41 131 389 ...
+%p A284170 M:= 20: # to get the first M antidiagonals
+%p A284170 with(queue):
+%p A284170 backprop:= proc(r, p)
+%p A284170   local t; global F;
+%p A284170   for t in Parents[r] do
+%p A284170     if F[t] < p then
+%p A284170       F[t]:= p;
+%p A284170       procname(t, p);
+%p A284170     fi
+%p A284170   od
+%p A284170 end proc:
+%p A284170 Verts:= {seq(seq([ithprime(i),ithprime(j)],i=1..M),j=1..M)}:
+%p A284170 for v in Verts do F[v]:= max(v); Parents[v]:= {} od:
+%p A284170 Agenda:= new(op(Verts)):
+%p A284170 while not empty(Agenda) do
+%p A284170   t:= dequeue(Agenda);
+%p A284170   r:= [t[2],max(numtheory:-factorset(t[1]+t[2]+1))];
+%p A284170   if member(r,Verts) then
+%p A284170     Parents[r]:= Parents[r] union {t};
+%p A284170   else
+%p A284170     Verts:= Verts union {r};
+%p A284170     Parents[r]:= {t};
+%p A284170     enqueue(Agenda,r);
+%p A284170     F[r]:= max(r);
+%p A284170   fi;
+%p A284170   backprop(r, F[r]);
+%p A284170 od:
+%p A284170 seq(seq(F[[ithprime(m-j),ithprime(j)]],j=1..m-1),m=2..M+1);
+%Y A284170 Cf. A006530.
+%K A284170 nonn,tabl
+%O A284170 1,1
+%A A284170 _Robert Israel_, Mar 21 2017

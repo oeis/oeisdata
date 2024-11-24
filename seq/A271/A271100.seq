@@ -1,0 +1,40 @@
+%I A271100 #55 Oct 28 2021 10:00:55
+%S A271100 0,1093,2,71,11,3,3511,19,13,2,359,331,71,11,3,359,331,307,71,11,3,
+%T A271100 359,331,307,71,19,11,3,863,359,331,71,23,13,11,3,863,359,331,307,71,
+%U A271100 19,13,11,3,863,467,359,331,307,71,19,13,11,3
+%N A271100 Triangular array read by rows: T(n, k) = k-th largest member of lexicographically earliest Wieferich n-tuple that contains no duplicate members, read by rows, or T(n, k) = 0 if no Wieferich n-tuple exists.
+%C A271100 Let p_1, p_2, p_3, ..., p_u be a set P of distinct prime numbers and let m_1, m_2, m_3, ..., m_u be a set V of variables. Then P is a Wieferich u-tuple if there exists a mapping from the elements of P to the elements of V such that each of the following congruences is satisfied:
+%C A271100 m_1^(m_2-1) == 1 (mod (m_2)^2), m_2^(m_3-1) == 1 (mod (m_3)^2), ..., m_u^(m_1-1) == 1 (mod (m_1)^2).
+%C A271100 For finding candidate values for m_1 given some m_u, one checks primes higher than m_u for primes satisfying m_u^(m_1-1) == 1 (mod (m_1)^2). For example, to see what we could get if m_u = 2, we check up to say m_1 = 1,000,000 to get candidates for m_1. This would give m_1 in {1093, 3511}. - _David A. Corneth_, May 14 2016
+%H A271100 Bruce Leenstra, <a href="/A271100/b271100.txt">Table of n, a(n) for n = 1..300</a>
+%H A271100 Wikipedia, <a href="https://en.wikipedia.org/wiki/Wieferich_pair">Wieferich pair</a>
+%e A271100 For n = 1: There is no Wieferich singleton (1-tuple), because no prime p satisfies the congruence p^(p-1) == 1 (mod p^2), so T(1, 1) = 0.
+%e A271100 For n = 4: The primes 3511, 19, 13, 2 satisfy the congruences 3511^(19-1) == 1 (mod 19^2), 19^(13-1) == 1 (mod 13^2), 13^(2-1) == 1 (mod 2^2) and 2^(3511-1) == 1 (mod 3511^2) and thus form a "Wieferich quadruple". Since this is the lexicographically earliest such set of primes, T(4, 1..4) = 3511, 19, 13, 2.
+%e A271100 Triangle starts:
+%e A271100 n=1:     0;
+%e A271100 n=2:  1093,   2;
+%e A271100 n=3:    71,  11,   3;
+%e A271100 n=4:  3511,  19,  13,   2;
+%e A271100 n=5:   359, 331,  71,  11,   3;
+%e A271100 n=6:   359, 331, 307,  71,  11,   3;
+%e A271100 n=7:   359, 331, 307,  71,  19,  11,   3;
+%e A271100 n=8:   863, 359, 331,  71,  23,  13,  11,   3;
+%e A271100 n=9:   863, 359, 331, 307,  71,  19,  13,  11,   3;
+%e A271100 n=10:  863, 467, 359, 331, 307,  71,  19,  13,  11,   3;
+%e A271100 ....
+%o A271100 \\finds candidate values for the highest value of a tuple up to some value u.
+%o A271100 (PARI) ulimupto(u,{llim=2}) = {my(l=List());
+%o A271100 forprime(i=nextprime(llim+1),u,if(Mod(llim,i^2)^(i-1)==1,listput(l,i)));l \\ _David A. Corneth_, May 14 2016
+%o A271100 \\tests if a tuple is a valid Wieferich n-tuple.
+%o A271100 (PARI) istuple(v) = {if(#Set(v)==#v,return(0));for(j=0,(#v-1)!-1, w=vector(#v,k,v[numtoperm(#v,j)[k]]); if(sum(i=2,#w,Mod(w[i-1],w[i]^2)^(w[i]-1)==1)+(Mod(w[1],w[#w])^(w[#w]-1)==1)==#w,return(1)));0} \\ _David A. Corneth_, May 15 2016
+%o A271100 (Sage)
+%o A271100 wief = DiGraph([prime_range(3600), lambda p, q: power_mod(p, q-1, q^2)==1])
+%o A271100 sc = [[0]] + [sorted(c[1:], reverse=1) for c in wief.all_simple_cycles()]
+%o A271100 tbl = [sorted(filter(lambda c: len(c)==n, sc))[0] for n in range(1, len(sc[-1]))]
+%o A271100 for t in tbl: print('n=%d:'% len(t), ', '.join("%s"%i for i in t)) # _Bruce Leenstra_, May 18 2016
+%Y A271100 Cf. A124121, A124122, A253683, A253684, A253685, A266829.
+%K A271100 nonn,tabl
+%O A271100 1,2
+%A A271100 _Felix Fröhlich_, Mar 30 2016
+%E A271100 a(11)-a(15) from _Felix Fröhlich_, Apr 26 2016
+%E A271100 More terms from _Bruce Leenstra_, May 18 2016

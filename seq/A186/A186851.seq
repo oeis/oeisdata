@@ -1,0 +1,48 @@
+%I A186851 #19 Jan 02 2023 21:57:20
+%S A186851 9,16,16,25,48,16,36,96,104,16,49,160,328,208,16,64,240,664,976,400,
+%T A186851 16,81,336,1112,2576,2800,800,16,100,448,1672,5056,9328,8352,1280,16,
+%U A186851 121,576,2344,8320,21480,34448,21664,2208,0,144,720,3128,12368,39616,91328
+%N A186851 Array read by antidiagonals: T(n,k) = number of n-step knight's tours on a (k+2)X(k+2) board summed over all starting positions.
+%C A186851 Here an n-step knight's tour is a directed path with n vertices (or a self-avoiding walk with n-1 steps). - _Andrew Howroyd_, Jan 02 2023
+%H A186851 R. H. Hardin, <a href="/A186851/b186851.txt">Table of n, a(n) for n = 1..99</a>
+%F A186851 Empirical, for all rows: a(n) = 3*a(n-1) - 3*a(n-2) + a(n-3) for n>3,3,4,6,8,10 respectively for row in 1..6.
+%F A186851 From _Andrew Howroyd_, Jan 02 2023: (Start)
+%F A186851 The above empirical formula is correct. Equivalently T(m,n) for given m and n >= 2*m-4 is given by a quadratic polynomial in n. This is because a w X h rectangle can be placed on a k X k grid at integer coordinates in (k-w+1)*(k-h+1) ways when w and h are at most k and every knights path with m vertices spans such a rectangle with width and height at most 2*m - 1.
+%F A186851 Sum_{i=2..(k+2)^2} T(i,k)/2 = A289204(k+2).
+%F A186851 T(n,k) = 0 for n > (k-2)^2.
+%F A186851 (End)
+%e A186851 Table starts:
+%e A186851    9   16     25      36      49      64      81     100    121    144 ...
+%e A186851   16   48     96     160     240     336     448     576    720    880 ...
+%e A186851   16  104    328     664    1112    1672    2344    3128   4024   5032 ...
+%e A186851   16  208    976    2576    5056    8320   12368   17200  22816  29216 ...
+%e A186851   16  400   2800    9328   21480   39616   63440   92656 127264 167264 ...
+%e A186851   16  800   8352   34448   91328  186544  322528  498320 712080 ...
+%e A186851   16 1280  21664  118480  372384  847520 1584576 2596480 ...
+%e A186851   16 2208  57392  405040 1508784 3846192 7777808 ...
+%e A186851    0 3184 135184 1290112 5807488 ...
+%e A186851    0 4640 317296 4089632 ...
+%e A186851   ...
+%e A186851 Some n=3 solutions for 5X5:
+%e A186851   0 0 0 0 0    0 0 0 0 1    0 0 0 0 0    0 0 0 0 0
+%e A186851   0 0 0 0 0    0 0 2 0 0    0 0 0 0 0    0 0 0 0 0
+%e A186851   0 0 1 0 0    0 0 0 0 0    0 0 3 0 0    0 0 0 0 0
+%e A186851   0 0 0 3 0    0 3 0 0 0    2 0 0 0 0    3 0 0 0 1
+%e A186851   0 2 0 0 0    0 0 0 0 0    0 0 1 0 0    0 0 2 0 0
+%o A186851 (PARI) \\ G(n) gives polynomial valid for k >= 2*n-4.
+%o A186851 Knights={[1,2; 1,-2; -1,2; -1,-2; 2,1; 2,-1; -2,1; -2,-1]}
+%o A186851 G(n,f=i->'n-(i-2)) = {
+%o A186851   local(x=vector(n), y=vector(n));
+%o A186851   my(recurse(k)=
+%o A186851      forstep(i=2-k%2, k-1, 2, if(x[i]==x[k] && y[i]==y[k], return(0)));
+%o A186851      if (k==n, f(vecmax(x)-vecmin(x))*f(vecmax(y)-vecmin(y)), sum(i=1, 8, x[k+1] = x[k]+Knights[i,1]; y[k+1]=y[k]+Knights[i,2]; self()(k+1)) );
+%o A186851   );
+%o A186851   if(n==1, recurse(1), x[1]=1; y[1]=2; 8*recurse(2))
+%o A186851 }
+%o A186851 row(m,n)={my(p=if(n>=2*m-4, G(m,i->'x-(i-2)))); vector(n, k, if(k>=2*m-4, subst(p,'x, k), G(m, i->max(0, k+2-i))))} \\ _Andrew Howroyd_, Jan 02 2023
+%Y A186851 Rows 1..8 are A000290(n+2), A035008, A186852, A186853, A186854, A186855, A186856, A186857.
+%Y A186851 Column 6 is A186441.
+%Y A186851 Cf. A289204.
+%K A186851 nonn,tabl
+%O A186851 1,1
+%A A186851 _R. H. Hardin_ and _D. S. McNeil_ in the Sequence Fans Mailing List, Feb 27 2011

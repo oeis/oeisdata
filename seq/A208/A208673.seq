@@ -1,0 +1,52 @@
+%I A208673 #38 Feb 22 2022 11:56:48
+%S A208673 1,1,1,1,1,1,1,1,1,1,1,1,3,1,1,1,1,5,10,1,1,1,1,9,37,35,1,1,1,1,15,
+%T A208673 163,309,126,1,1,1,1,25,640,3593,2751,462,1,1,1,1,41,2503,36095,87501,
+%U A208673 25493,1716,1,1,1,1,67,9559,362617,2336376,2266155,242845,6435,1,1
+%N A208673 Number of words A(n,k), either empty or beginning with the first letter of the k-ary alphabet, where each letter of the alphabet occurs n times and letters of neighboring word positions are equal or neighbors in the alphabet; square array A(n,k), n>=0, k>=0, read by antidiagonals.
+%C A208673 Also the number of (n*k-1)-step walks on k-dimensional cubic lattice from (1,0,...,0) to (n,n,...,n) with positive unit steps in all dimensions such that the absolute difference of the dimension indices used in consecutive steps is <= 1.
+%C A208673 All rows are linear recurrences with constant coefficients and for n > 0 the order of the recurrence is bounded by 2*n-1. For n up to at least 20 this upper bound is exact. - _Andrew Howroyd_, Feb 22 2022
+%H A208673 Andrew Howroyd, <a href="/A208673/b208673.txt">Table of n, a(n) for n = 0..1325</a>
+%e A208673 A(0,0) = A(n,0) = A(0,k) = 1: the empty word.
+%e A208673 A(2,3) = 5:
+%e A208673   +------+   +------+   +------+   +------+   +------+
+%e A208673   |aabbcc|   |aabcbc|   |aabccb|   |ababcc|   |abccba|
+%e A208673   +------+   +------+   +------+   +------+   +------+
+%e A208673   |122222|   |122222|   |122222|   |112222|   |111112|
+%e A208673   |001222|   |001122|   |001112|   |011222|   |011122|
+%e A208673   |000012|   |000112|   |000122|   |000012|   |001222|
+%e A208673   +------+   +------+   +------+   +------+   +------+
+%e A208673   |xx    |   |xx    |   |xx    |   |x x   |   |x    x|
+%e A208673   |  xx  |   |  x x |   |  x  x|   | x x  |   | x  x |
+%e A208673   |    xx|   |   x x|   |   xx |   |    xx|   |  xx  |
+%e A208673   +------+   +------+   +------+   +------+   +------+
+%e A208673 Square array A(n,k) begins:
+%e A208673   1,  1,    1,     1,       1,         1,           1, ..
+%e A208673   1,  1,    1,     1,       1,         1,           1, ..
+%e A208673   1,  1,    3,     5,       9,        15,          25, ..
+%e A208673   1,  1,   10,    37,     163,       640,        2503, ..
+%e A208673   1,  1,   35,   309,    3593,     36095,      362617, ..
+%e A208673   1,  1,  126,  2751,   87501,   2336376,    62748001, ..
+%e A208673   1,  1,  462, 25493, 2266155, 164478048, 12085125703, ..
+%p A208673 b:= proc(t, l) option remember; local n; n:= nops(l);
+%p A208673      `if`(n<2 or {0}={l[]}, 1,
+%p A208673      `if`(l[t]>0, b(t, [seq(l[i]-`if`(i=t, 1, 0), i=1..n)]), 0)+
+%p A208673      `if`(t<n and l[t+1]>0,
+%p A208673                   b(t+1, [seq(l[i]-`if`(i=t+1, 1, 0), i=1..n)]), 0)+
+%p A208673      `if`(t>1 and l[t-1]>0,
+%p A208673                   b(t-1, [seq(l[i]-`if`(i=t-1, 1, 0), i=1..n)]), 0))
+%p A208673     end:
+%p A208673 A:= (n, k)-> `if`(n=0 or k=0, 1, b(1, [n-1, n$(k-1)])):
+%p A208673 seq(seq(A(n, d-n), n=0..d), d=0..10);
+%t A208673 b[t_, l_List] := b[t, l] = Module[{n = Length[l]}, If[n < 2 || {0} == Union[l], 1, If[l[[t]] > 0, b[t, Table[l[[i]] - If[i == t, 1, 0], {i, 1, n}]], 0] + If[t < n && l[[t + 1]] > 0, b[t + 1, Table[l[[i]] - If[i == t + 1, 1, 0], {i, 1, n}]], 0] + If[t > 1 && l[[t - 1]] > 0, b[t - 1, Table[l[[i]] - If[i == t - 1, 1, 0], {i, 1, n}]], 0]]]; A[n_, k_] := If[n == 0 || k == 0, 1, b[1, Join[{n - 1}, Array[n&, k - 1]]]]; Table[Table[A[n, d - n], {n, 0, d}], {d, 0, 10}] // Flatten (* _Jean-François Alcover_, Dec 27 2013, translated from Maple *)
+%o A208673 (PARI)
+%o A208673 F(u)={my(n=#u); sum(k=1, n,u[k]*binomial(n-1,k-1))}
+%o A208673 step(u, c)={my(n=#u); vector(n, k, sum(i=max(0, 2*k-c-n), k-1, sum(j=0, n-2*k+i+c, u[k-i+j]*binomial(n-1, 2*k-1-c-i+j)*binomial(k-1, k-i-1)*binomial(k-i+j-c, j) ))) }
+%o A208673 R(n,k)={my(r=vector(n+1), u=vector(k), v=vector(k)); u[1]=v[1]=r[1]=r[2]=1; for(n=3, #r, u=step(u,1); v=step(v,0)+u; r[n]=F(v)); r}
+%o A208673 T(n,k)={if(n==0||k==0, 1, R(k,n)[1+k])} \\ _Andrew Howroyd_, Feb 22 2022
+%Y A208673 Columns k=0+1, 2-4 give: A000012, A088218, A208675, A212334.
+%Y A208673 Rows n=0+1, 2-3 give: A000012, A001595, A208674.
+%Y A208673 Main diagonal gives A351759.
+%Y A208673 Cf. A208879 (cyclic alphabet), A331562.
+%K A208673 nonn,tabl
+%O A208673 0,13
+%A A208673 _Alois P. Heinz_, Feb 29 2012

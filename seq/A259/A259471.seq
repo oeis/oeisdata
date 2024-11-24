@@ -1,0 +1,31 @@
+%I A259471 #16 Jan 08 2021 05:32:19
+%S A259471 1,1,1,1,3,1,1,7,7,1,1,19,66,19,1,1,47,916,916,47,1,1,130,16816,91212,
+%T A259471 16816,130,1,1,343,373630,12888450,12888450,373630,343,1,1,951,
+%U A259471 9727010,2411213698,14334255100,2411213698,9727010,951,1,1,2615,289374391,575737451509,22080097881081,22080097881081,575737451509,289374391,2615,1
+%N A259471 Triangle read by rows: T(n,k) is the number of semi-regular relations on n nodes with each node having out-degree k (0 <= k <= n).
+%H A259471 Andrew Howroyd, <a href="/A259471/b259471.txt">Table of n, a(n) for n = 0..1325</a>
+%H A259471 S. A. Choudum, K. R. Parthasarathy, <a href="http://dx.doi.org/10.1016/1385-7258(72)90047-9">Semi-regular relations and digraphs</a>, Nederl. Akad. Wetensch. Proc. Ser. A. {75}=Indag. Math. 34 (1972), 326-334.
+%F A259471 T(n,k) = T(n,n-k). - _Andrew Howroyd_, Sep 13 2020
+%e A259471 Triangle begins:
+%e A259471   1;
+%e A259471   1,   1;
+%e A259471   1,   3,     1;
+%e A259471   1,   7,     7,     1;
+%e A259471   1,  19,    66,    19,     1;
+%e A259471   1,  47,   916,   916,    47,   1;
+%e A259471   1, 130, 16816, 91212, 16816, 130, 1;
+%e A259471   ...
+%t A259471 permcount[v_] := Module[{m = 1, s = 0, k = 0, t}, For[i = 1, i <= Length[v], i++, t = v[[i]]; k = If[i > 1 && t == v[[i - 1]], k + 1, 1]; m *= t*k; s += t]; s!/m];
+%t A259471 edges[v_, k_] := Product[SeriesCoefficient[Product[g = GCD[v[[i]], v[[j]] ]; (1 + x^(v[[j]]/g) + O[x]^(k + 1))^g, {j, 1, Length[v]}], {x, 0, k}], {i, 1, Length[v]}];
+%t A259471 T[n_, k_] := Module[{s = 0}, Do[s += permcount[p]*edges[p, k], {p, IntegerPartitions[n]}]; s/n!];
+%t A259471 Table[T[n, k], {n, 0, 9}, {k, 0, n}] // Flatten (* _Jean-François Alcover_, Jan 08 2021, after _Andrew Howroyd_ *)
+%o A259471 (PARI)
+%o A259471 permcount(v) = {my(m=1, s=0, k=0, t); for(i=1, #v, t=v[i]; k=if(i>1&&t==v[i-1], k+1, 1); m*=t*k; s+=t); s!/m}
+%o A259471 edges(v,k)={prod(i=1, #v, polcoef(prod(j=1, #v, my(g=gcd(v[i],v[j])); (1 + x^(v[j]/g) + O(x*x^k))^g), k))}
+%o A259471 T(n,k)={my(s=0); forpart(p=n, s+=permcount(p)*edges(p,k)); s/n!} \\ _Andrew Howroyd_, Sep 13 2020
+%Y A259471 Columns k=1..3 are A001372, A003286, A005535.
+%Y A259471 Cf. A329228.
+%K A259471 nonn,tabl
+%O A259471 0,5
+%A A259471 _N. J. A. Sloane_, Jul 03 2015
+%E A259471 Terms a(28) and beyond from _Andrew Howroyd_, Sep 13 2020

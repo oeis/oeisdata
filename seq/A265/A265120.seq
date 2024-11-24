@@ -1,0 +1,62 @@
+%I A265120 #16 Dec 04 2015 13:04:06
+%S A265120 1,1,1,1,1,1,1,2,1,1,1,1,2,2,1,3,1,1,2,2,1,1,2,1,1,4,4,1,3,1,1,2,2,2,
+%T A265120 4,1,1,2,2,1,3,4,1,3,4,1,1,2,4,8,1,1,2,2,1,1,2,2,6,6,1,3,4,1,3,2,6,1,
+%U A265120 1,4,4,1,1,10,10,1,7,1,1,2,4,4,8
+%N A265120 Irregular array read by rows: Row n gives the number of elements in the multiplicative group mod n, (Z/nZ, *), that have order d for each divisor d of the exponent of the group.
+%C A265120 The exponent of the multiplicative group mod n is Carmichael lambda(n) given in A002322.
+%C A265120 The row lengths are tau(lambda(n)) = A000005(A002322(n)) = A066800(n).
+%C A265120 The invariant factor decomposition of (Z/nZ,*) is given in A258446.
+%C A265120 The row sums are phi(n) = A000010(n).
+%C A265120 It appears that column 2 is A155828.
+%e A265120 {1}
+%e A265120 {1, 1}
+%e A265120 {1, 1}
+%e A265120 {1, 1, 2}
+%e A265120 {1, 1}
+%e A265120 {1, 1, 2, 2}
+%e A265120 {1, 3}
+%e A265120 {1, 1, 2, 2}
+%e A265120 {1, 1, 2}
+%e A265120 {1, 1, 4, 4}
+%e A265120 {1, 3}
+%e A265120 {1, 1, 2, 2, 2, 4}
+%e A265120 {1, 1, 2, 2}
+%e A265120 {1, 3, 4}
+%e A265120 {1, 3, 4}
+%e A265120 {1, 1, 2, 4, 8}
+%e A265120 {1, 1, 2, 2}
+%e A265120 {1, 1, 2, 2, 6, 6}
+%e A265120 {1, 3, 4}
+%e A265120 {1, 3, 2, 6}
+%e A265120 {1, 1, 4, 4}
+%e A265120 {1, 1, 10, 10}
+%e A265120 {1, 7},
+%e A265120 {1, 1, 2, 4, 4, 8}
+%e A265120 The row for n=21 reads: 1,3,2,6 because the multiplicative group mod 21,  (Z/21*Z,*) is isomorphic to C_6 X C_2. The exponent of this group is 6. This group contains one element of order 1, three elements of order 2, two elements of order 3, and six elements of order 6.
+%t A265120 f[{p_, e_}] := {FactorInteger[p - 1][[All, 1]]^
+%t A265120     FactorInteger[p - 1][[All, 2]],
+%t A265120    FactorInteger[p^(e - 1)][[All, 1]]^
+%t A265120     FactorInteger[p^(e - 1)][[All, 2]]};
+%t A265120 fun[lst_] :=
+%t A265120 Module[{int, num, res},
+%t A265120   int = Sort /@ GatherBy[Join @@ (FactorInteger /@ lst), First];
+%t A265120   num = Times @@ Power @@@ (Last@# & /@ int);
+%t A265120   res = Flatten[Map[Power @@ # &, Most /@ int, {2}]];
+%t A265120   {num, res}]
+%t A265120 rec[lt_] :=
+%t A265120 First@NestWhile[{Append[#[[1]], fun[#[[2]]][[1]]],
+%t A265120      fun[#[[2]]][[2]]} &, {{}, lt}, Length[#[[2]]] > 0 &];
+%t A265120 t[list_] :=
+%t A265120 Table[Count[Map[PermutationOrder, GroupElements[AbelianGroup[list]]],
+%t A265120     d], {d, Divisors[First[list]]}];
+%t A265120 Map[t, Table[
+%t A265120    If[! IntegerQ[n/8],
+%t A265120     DeleteCases[rec[Flatten[Map[f, FactorInteger[n]]]], 1],
+%t A265120     DeleteCases[
+%t A265120      rec[Join[{2, 2^(FactorInteger[n][[1, 2]] - 2)},
+%t A265120        Flatten[Map[f, Drop[FactorInteger[n], 1]]]]], 1]], {n, 2,
+%t A265120     25}] /. {} -> {1}]
+%Y A265120 Cf. A000005, A000010, A002322, A066800, A155828, A258446.
+%K A265120 nonn,tabf
+%O A265120 2,8
+%A A265120 _Geoffrey Critzer_, Dec 01 2015

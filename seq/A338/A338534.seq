@@ -1,0 +1,18 @@
+%I A338534 #25 Dec 09 2020 01:27:29
+%S A338534 1,3,9,21,81,147,441,903,2499,6069,15351,29095,80367,153065,366025,
+%T A338534 643885
+%N A338534 a(n) is the smallest number k whose symmetric representation of sigma(k) consists of n regions (or parts) and whose areas are strictly decreasing towards the diagonal.
+%C A338534 For a(n) <= 750000 the regions in the symmetric representation of sigma(a(n)) have at most width of 2.
+%e A338534 a(5) = 81 is in this sequence since its symmetric representation of sigma is the first to consist of 5 regions [41, 15, 9, 15, 41] decreasing towards the diagonal.
+%e A338534 63 is the only number smaller than 81 with 5 regions, but is not in the sequence since the regions of its symmetric representation of sigma are [32, 12, 16, 12, 32].
+%t A338534 cd[n_, k_] := If[Divisible[n, k], 1, 0]
+%t A338534 legs[n_, len_] := Module[{tL = Map[Ceiling[(n + 1)/# - (# + 1)/2] &, Range[len]]}, tL - Append[Rest[tL], 0]]
+%t A338534 a237048[n_, len_] := Map[If[OddQ[#], cd[n, #], cd[n-#/2, #]]&, Range[len]]
+%t A338534 widths[n_, len_] := Drop[FoldList[Plus, 0, Map[(-1)^(#+1)&, Range[len]] a237048[n, len]], 1]
+%t A338534 regions[n_] := Module[{r=Floor[(Sqrt[8n+1]-1)/2], wL, wM, diag, sL, sLs, regs, lens}, wL=widths[n, r]; wM=Max[wL]; diag=Last[wL]; sL=legs[n, r]wL; sLs=SplitBy[sL, #!=0&]; regs=Select[Map[Fold[Plus, 0, #]&, sLs], #!=0&]; lens=Length[regs]; If[diag==0, {wM, Join[regs, Reverse[regs]]}, {wM, Join[Most[regs], {2Last[regs]-diag}, Reverse[Most[regs]]]}]]
+%t A338534 a338534[n_, b_] := Module[{k, r, len, s, list=Table[0, b]}, For[k=1, k<=n, k++, r=Last[regions[k]]; len=Length[r]; s=Take[r, Floor[(len+1)/2]]; If[AllTrue[Most[s]-Rest[s], #>0&]&&list[[len]]==0, list[[len]]=k]]; list]
+%t A338534 Take[a338534[750000, 20], 16] (* sequence data *)
+%Y A338534 Cf. A237048, A237270, A237271, A237593, A239663, A318843.
+%K A338534 nonn,more
+%O A338534 1,2
+%A A338534 _Hartmut F. W. Hoft_, Nov 01 2020

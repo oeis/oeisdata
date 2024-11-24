@@ -1,0 +1,82 @@
+%I A339269 #12 Nov 30 2020 21:39:30
+%S A339269 2,0,425,36,243,756,29889,4704,207765,8448,4465125,108864,13640319,
+%T A339269 1022976,146146275,3010560,6500054871,4259840,60767621145,36864000,
+%U A339269 454444233597,167215104,8664659236485,796262400,49362406764957,7935623168,2310430513712625,4160749568,4216955409197811,28538044416
+%N A339269 a(n) is the least number that is the product of n primes (not necessarily distinct) and is the sum of n consecutive primes, or 0 if there are none.
+%C A339269 Conjecture: a(n) > 0 for every n > 2.
+%C A339269 If n > 2 is odd, the sum of n consecutive odd primes is odd, so (if nonzero) a(n) >= 3^n.
+%H A339269 Robert Israel, <a href="/A339269/b339269.txt">Table of n, a(n) for n = 1..50</a>
+%F A339269 a(n) = A143121(A339185(n)+n, A339185(n)).
+%e A339269 a(3)=425 because 425 = 5^2*7 is the product of three primes and 425 = 137+139+149 is the sum of three consecutive primes, and no smaller number has this property.
+%p A339269 sumofconsecprimes:= proc(x, n)
+%p A339269   local P, k, p, q, t;
+%p A339269   P:= nextprime(floor(x/n));
+%p A339269   p:= P; q:= P;
+%p A339269   for k from 1 to n-1 do
+%p A339269     if k::even or q = 2 then p:= nextprime(p); P:= P, p;
+%p A339269     else q:= prevprime(q); P:= q, P;
+%p A339269     fi
+%p A339269   od;
+%p A339269   P:= [P];
+%p A339269   t:= convert(P, `+`);
+%p A339269   if t = x then return P fi;
+%p A339269   if t > x then
+%p A339269     while t > x do
+%p A339269       if q = 2 then return false fi;
+%p A339269       q:= prevprime(q);
+%p A339269       t:= t + q - p;
+%p A339269       P:= [q, op(P[1..-2])];
+%p A339269       p:= P[-1];
+%p A339269       if t = x then return P fi;
+%p A339269     od
+%p A339269   else
+%p A339269     while t < x do
+%p A339269       p:= nextprime(p);
+%p A339269       t:= t + p - q;
+%p A339269       P:= [op(P[2..-1]), p];
+%p A339269       q:= P[1];
+%p A339269       if t = x then return P fi;
+%p A339269     od
+%p A339269   fi;
+%p A339269   false
+%p A339269 end proc:
+%p A339269 children:= proc(r) local L, x, p, q, t, R;
+%p A339269   x:= r[1];
+%p A339269   L:= r[2];
+%p A339269   t:= L[-1];
+%p A339269   p:= t[1]; q:= nextprime(p);
+%p A339269   if t[2]=1 then t:= [q, 1];
+%p A339269   else t:= [p, t[2]-1], [q, 1]
+%p A339269   fi;
+%p A339269   R:= [x*q/p, [op(L[1..-2]), t]];
+%p A339269   if nops(L) >= 2 then
+%p A339269     p:= L[-2][1];
+%p A339269     q:= L[-1][1];
+%p A339269     if L[-2][2]=1 then t:= [q, L[-1][2]+1]
+%p A339269     else t:= [p, L[-2][2]-1], [q, L[-1][2]+1]
+%p A339269     fi;
+%p A339269     R:= R, [x*q/p, [op(L[1..-3]), t]]
+%p A339269   fi;
+%p A339269   [R]
+%p A339269 end proc:
+%p A339269 f:= proc(n) local Q, t, x, v;
+%p A339269       uses priqueue;
+%p A339269       initialize(Q);
+%p A339269       if n::even then insert([-2^n, [[2, n]]], Q)
+%p A339269       else insert([-3^n, [[3, n]]], Q)
+%p A339269       fi;
+%p A339269       do
+%p A339269         t:= extract(Q);
+%p A339269         x:= -t[1];
+%p A339269         v:= sumofconsecprimes(x, n);
+%p A339269         if v <> false then return x fi;
+%p A339269         for t in children(t) do insert(t, Q) od;
+%p A339269       od
+%p A339269    end proc:
+%p A339269 f(1):= 2:
+%p A339269 f(2):= 0:
+%p A339269 map(f, [$1..34]);
+%Y A339269 Cf. A001222, A143121, A339185.
+%K A339269 nonn
+%O A339269 1,1
+%A A339269 _J. M. Bergot_ and _Robert Israel_, Nov 29 2020

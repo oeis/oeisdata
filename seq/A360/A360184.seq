@@ -1,0 +1,23 @@
+%I A360184 #28 Mar 09 2023 06:24:46
+%S A360184 2047,15841,703,800605,8911,341,293609485,152551,4371,781,10761055201,
+%T A360184 41341321,129921,24211,217,5478598723585,12283706701,9224391,4382191,
+%U A360184 29341,325,713808066913201,1064404682551,2592053871,381347461,3405961,58825,65,90614118359482705
+%N A360184 Square array A(n, k) read by antidiagonals downwards: smallest base-n strong Fermat pseudoprime with k distinct prime factors for k, n >= 2.
+%C A360184 The array A(n, k) starts as follows:
+%C A360184    k  =   2     3       4         5            6
+%C A360184 n = 2: 2047 15841  800605 293609485  10761055201
+%C A360184 n = 3:  703  8911  152551  41341321  12283706701
+%C A360184 n = 4:  341  4371  129921   9224391   2592053871
+%C A360184 n = 5:  781 24211 4382191 381347461   9075517561
+%C A360184 n = 6:  217 29341 3405961 557795161 333515107081
+%H A360184 Daniel Suteu, <a href="/A360184/b360184.txt">Table of n, a(n) for n = 2..137</a>
+%o A360184 (PARI)
+%o A360184 strong_check(p, base, e, r) = my(tv=valuation(p-1, 2)); tv > e && Mod(base, p)^((p-1)>>(tv-e)) == r;
+%o A360184 strong_fermat_psp(A, B, k, base) = A=max(A, vecprod(primes(k))); (f(m, l, lo, k, e, r) = my(list=List()); my(hi=sqrtnint(B\m, k)); if(lo > hi, return(list)); if(k==1, forstep(p=lift(1/Mod(m, l)), hi, l, if(isprimepower(p) && gcd(m*base, p) == 1 && strong_check(p, base, e, r), my(n=m*p); if(n >= A && (n-1) % znorder(Mod(base, p)) == 0, listput(list, n)))), forprime(p=lo, hi, base%p == 0 && next; strong_check(p, base, e, r) || next; my(z=znorder(Mod(base, p))); gcd(m,z) == 1 || next; my(q=p, v=m*p); while(v <= B, list=concat(list, f(v, lcm(l, z), p+1, k-1, e, r)); q *= p; Mod(base, q)^z == 1 || break; v *= p))); list); my(res=f(1, 1, 2, k, 0, 1)); for(v=0, logint(B, 2), res=concat(res, f(1, 1, 2, k, v, -1))); vecsort(Set(res));
+%o A360184 T(n, k) = if(n < 2, return()); my(x=vecprod(primes(k)), y=2*x); while(1, my(v=strong_fermat_psp(x, y, k, n)); if(#v >= 1, return(v[1])); x=y+1; y=2*x);
+%o A360184 print_table(n, k) = for(x=2, n, for(y=2, k, print1(T(x, y), ", ")); print(""));
+%o A360184 for(k=2, 9, for(n=2, k, print1(T(n, k-n+2)", ")));
+%Y A360184 Cf. A001262, A180065 (row n=2), A271873.
+%K A360184 nonn,tabl
+%O A360184 2,1
+%A A360184 _Daniel Suteu_, Mar 04 2023

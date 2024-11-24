@@ -1,0 +1,37 @@
+%I A350884 #10 Jan 25 2022 04:21:36
+%S A350884 15733,15803,18413,19037,37243,75913,157363,371057,393919,396509,
+%T A350884 705169,722983,740477,794141,1857599,1858093,1858643,1865491,1918529,
+%U A350884 1922351,1950989,3002977,3006551,3007723,3127139,3234857,3266369,3444017,3548891,3614339,3658981,3687127,3734657,3763567,3807173
+%N A350884 Emirps p such that, if q is the next emirp after p, p*q mod (p+q) and floor(p*q/(p+q)) are both emirps.
+%H A350884 Robert Israel, <a href="/A350884/b350884.txt">Table of n, a(n) for n = 1..2000</a>
+%e A350884 a(3) = 18413 = p is a term because it is an emirp (18413 and 31481 being distinct primes), the next emirp is q = 18427, and (p*q) mod (p+q) = 36791 and floor((p*q)/(p+q)) = 9209 are emirps.
+%p A350884 rev:= proc(n) local L,i;
+%p A350884   L:= convert(n,base,10);
+%p A350884   add(L[-i]*10^(i-1),i=1..nops(L))
+%p A350884 end proc:
+%p A350884 isemirp:= proc(n) local r;
+%p A350884    if not isprime(n) then return false fi;
+%p A350884    r:= rev(n);
+%p A350884    r <> n and isprime(r)
+%p A350884 end proc:
+%p A350884 R:= NULL: count:= 0:
+%p A350884 p:= 0:
+%p A350884 for d from 1 while count < 40 do
+%p A350884 for i in [1,3,7,9] do
+%p A350884    for j from 1 to 10^d-1 by 2 while count < 40 do
+%p A350884      q:= i*10^d+j;
+%p A350884      if isemirp(q) then
+%p A350884         s:= p+q;
+%p A350884         t:= p*q;
+%p A350884         if isemirp(t mod s) and isemirp(floor(t/s)) then
+%p A350884            count:= count+1; R:= R, p;
+%p A350884         fi;
+%p A350884         p:= q;
+%p A350884      fi;
+%p A350884 od od od;
+%p A350884 R;
+%t A350884 emirpQ[p_] := (q = IntegerReverse[p]) != p && And @@ PrimeQ[{p, q}]; nextEmirp[p_] := Module[{k = NextPrime[p]}, While[(q = IntegerReverse[k]) == k || ! PrimeQ[q], k = NextPrime[k]]; k]; seqQ[p_] := emirpQ[p] && Module[{q = nextEmirp[p]}, And @@ emirpQ /@ {Mod[p*q, p + q], Floor[p*q/(p + q)]}]; Select[Range[2*10^6], seqQ] (* _Amiram Eldar_, Jan 21 2022 *)
+%Y A350884 Cf. A006567, A346147.
+%K A350884 nonn,base
+%O A350884 1,1
+%A A350884 _J. M. Bergot_ and _Robert Israel_, Jan 20 2022

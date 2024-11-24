@@ -1,0 +1,60 @@
+%I A188431 #64 Jun 21 2020 05:40:18
+%S A188431 1,1,0,1,0,0,1,1,0,0,1,1,2,2,1,2,1,2,3,4,5,7,7,8,9,11,10,13,14,17,20,
+%T A188431 25,28,34,40,46,54,62,69,80,90,102,115,131,144,167,186,213,239,273,
+%U A188431 304,349,388,441,495,563,625,710,790,890,990,1114,1232,1387,1530,1713,1894,2119,2330,2605,2866,3192,3512,3910,4289,4774,5237,5809,6377,7068,7739
+%N A188431 The number of n-full sets, F(n).
+%C A188431 Let A be a set of positive integers. We say that A is n-full if (sum A)=[n] for a positive integer n, where (sum A) is the set of all positive integers which are a sum of distinct elements of A and [n]={1,2,...,n}. Then F(n) denotes the number of n-full sets.
+%C A188431 Also the number of distinct and complete partitions of n, by definition, which are counted by A000009 and A126796. - _George Beck_, Nov 06 2017
+%C A188431 An integer partition of n is complete (see also A325781) if every number from 0 to n is the sum of some submultiset of the parts. The Heinz numbers of these partitions are given by A325986. - _Gus Wiseman_, May 31 2019
+%H A188431 Alois P. Heinz, <a href="/A188431/b188431.txt">Table of n, a(n) for n = 0..10000</a> (terms n=1..1000 from Reinhard Zumkeller)
+%H A188431 Mohammad Saleh Dinparvar, <a href="http://github.com/SalehDinparvar/sequence_computer/blob/master/A188431.py">Python program</a>
+%H A188431 L. Naranjani and M. Mirzavaziri, <a href="https://cs.uwaterloo.ca/journals/JIS/VOL14/Mirzavaziri/mirza4.html">Full Subsets of N</a>, Journal of Integer Sequences, 14 (2011), Article 11.5.3.
+%H A188431 Arash Sal Moslehian, <a href="https://editor.p5js.org/arashsm79/sketches/bu130hzxv">JavaScript p5 program for three different algorithms</a>
+%F A188431 F(n) = Sum_(i=L(n) .. U(n), F(n,i)), where F(n,i) = Sum_(j=L(n-i) .. min(U(n-i),i-1), F(n-i,j) ) and L(n), U(n) are defined in A188429 and A188430, respectively.
+%F A188431 G.f.: 1 = Sum_{n>=0} a(n)*x^n / Product_{k=1..n+1} (1+x^k), with a(0)=1. - _Paul D. Hanna_, Mar 08 2012
+%F A188431 a(n) ~ c * exp(Pi*sqrt(n/3)) / n^(3/4), where c = 0.03316508... - _Vaclav Kotesovec_, Oct 21 2019
+%e A188431 a(26) = 10, because there are 10 26-full sets: {1,2,4,5,6,8}, {1,2,3,5,7,8}, {1,2,3,5,6,9}, {1,2,3,4,7,9}, {1,2,3,4,6,10}, {1,2,3,4,5,11}, {1,2,4,8,11}, {1,2,4,7,12}, {1,2,4,6,13}, {1,2,3,7,13}.
+%e A188431 G.f.: 1 = 1/(1+x) + 1*x/((1+x)*(1+x^2)) + 0*x^2/((1+x)*(1+x^2)*(1+x^3)) + 1*x^3/((1+x)*(1+x^2)*(1+x^3)*(1+x^4)) +...+ a(n)*x^n / Product_{k=1..n+1} (1+x^k) +...
+%p A188431 sums:= proc(s) local i, m;
+%p A188431           m:= max(s[]);
+%p A188431          `if`(m<1, {}, {m, seq([i, i+m][], i=sums(s minus {m}))})
+%p A188431        end:
+%p A188431 a:= proc(n) local b;
+%p A188431       b:= proc(i,s) local si;
+%p A188431             if i=1 then `if`(sums(s)={$1..n}, 1, 0)
+%p A188431           else si:= s union {i};
+%p A188431                b(i-1, s)+ `if`(max(sums(si)[])>n, 0, b(i-1, si))
+%p A188431             fi
+%p A188431           end; b(n, {1})
+%p A188431     end:
+%p A188431 seq(a(n), n=1..40);  # _Alois P. Heinz_, Apr 03 2011
+%p A188431 # second Maple program:
+%p A188431 b:= proc(n, i) option remember; `if`(i*(i+1)/2<n, 0, `if`(n=0, 1,
+%p A188431       b(n, i-1)+`if`(i>n or i>n-i+1, 0, b(n-i, i-1))))
+%p A188431     end:
+%p A188431 a:= n-> b(n$2):
+%p A188431 seq(a(n), n=0..80);  # _Alois P. Heinz_, May 20 2017
+%t A188431 Sums[s_] := Sums[s] = With[{m = Max[s]}, If[m < 1, {}, Union @ Flatten @ Join[{m}, Table[{i, i + m}, {i, Sums[s ~Complement~ {m}]}]]]];
+%t A188431 a[n_] := Module[{b}, b[i_, s_] := b[i, s] = Module[{si}, If[i == 1, If[Sums[s] == Range[n], 1, 0], si = s ~Union~ {i}; b[i-1, s] + If[Max[ Sums[si]] > n, 0, b[i - 1, si]]]]; b[n, {1}]];
+%t A188431 Table[an = a[n]; Print["a(", n, ") = ", an]; an, {n, 1, 80}] (* _Jean-François Alcover_, Apr 12 2017, after _Alois P. Heinz_ *)
+%t A188431 Table[Length[Select[IntegerPartitions[n],UnsameQ@@#&&Union[Total/@Union[Subsets[#]]]==Range[0,n]&]],{n,30}] (* _Gus Wiseman_, May 31 2019 *)
+%o A188431 (PARI) /* As coefficients in g.f. */
+%o A188431 {a(n)=local(A=[1]); for(i=1, n+1, A=concat(A,0); A[#A]=polcoeff(1 - sum(m=1,#A,A[m]*x^m/prod(k=1, m, 1+x^k +x*O(x^#A) )), #A) ); A[n+1]}
+%o A188431 for(n=0, 50, print1(a(n),", ")) /* _Paul D. Hanna_, Mar 06 2012 */
+%o A188431 (Haskell)
+%o A188431 import Data.MemoCombinators (memo2, integral, Memo)
+%o A188431 a188431 n = a188431_list !! (n-1)
+%o A188431 a188431_list = map
+%o A188431    (\x -> sum [fMemo x i | i <- [a188429 x .. a188430 x]]) [1..] where
+%o A188431    fMemo = memo2 integral integral f
+%o A188431    f _ 1 = 1
+%o A188431    f m i = sum [fMemo (m - i) j |
+%o A188431                 j <- [a188429 (m - i) .. min (a188430 (m - i)) (i - 1)]]
+%o A188431 -- _Reinhard Zumkeller_, Aug 06 2015
+%Y A188431 Cf. A188429, A188430, A126796.
+%Y A188431 Cf. A002033, A103295, A108917, A276024, A325763, A325765, A325781, A325782, A325788, A325986, A325790, A325791.
+%K A188431 nonn
+%O A188431 0,13
+%A A188431 _Madjid Mirzavaziri_, Mar 31 2011
+%E A188431 More terms from _Alois P. Heinz_, Apr 03 2011
+%E A188431 a(0)=1 prepended by _Alois P. Heinz_, May 20 2017

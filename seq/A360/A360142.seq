@@ -1,0 +1,56 @@
+%I A360142 #27 Mar 07 2023 07:40:11
+%S A360142 0,1,2,2,4,5,8,9,10,17,18,18,20,35,36,37,40,69,73,74,81,138,145,146,
+%T A360142 146,148,163,276,291,292,293,296,325,553,582,585,586,593,650,1105,
+%U A360142 1162,1169,1170,1172,1187,1300,2211,2324,2339,2340,2341,2344,2373,2601
+%N A360142 Bitwise encoding of the left half, initially fully occupied, state of the 1D cellular automaton from A359303 after n steps.
+%C A360142 See A359303 for how the automaton steps.
+%C A360142 The automaton state is a bi-infinite string of 1's and 0's of the form ...1111 middle 0000... and the left half here is the part which began as 1's.
+%C A360142 The left half state is encoded in an integer by inverting the bits (0<->1) and interpreting the them from right to left as binary from least to most significant bit.
+%H A360142 Kevin Ryde, <a href="/A360142/b360142.txt">Table of n, a(n) for n = 0..3000</a>
+%H A360142 Kevin Ryde, <a href="/A360141/a360141.gp.txt">PARI/GP Code</a>
+%e A360142 Following the state progression from A359303 (state(n)) is converted to the sequence (a(n)) by:
+%e A360142                state(0) =   ..1111|0000..
+%e A360142                             ..1111|
+%e A360142                             ..0000|
+%e A360142    a(0) = 0 = bits               0
+%e A360142                state(1) =   ..1110|1000..
+%e A360142                             ..1110|
+%e A360142                             ..0001|
+%e A360142    a(1) = 1 = bits               1
+%e A360142                state(2) = ..111101|10000..
+%e A360142                           ..111101|
+%e A360142                           ..000010|
+%e A360142    a(2) = 2 = bits              10
+%e A360142                state(3) = ..111101|10000..
+%e A360142                           ..111101|
+%e A360142                           ..000010|
+%e A360142    a(3) = 2 = bits              10
+%e A360142                state(4) = ..111011|01000..
+%e A360142                           ..111011|
+%e A360142                           ..000100|
+%e A360142    a(4) = 4 = bits             100
+%e A360142                state(5) = ..111010|11000..
+%e A360142                           ..111010|
+%e A360142                           ..000101|
+%e A360142    a(5) = 5 = bits             101
+%t A360142 ClearAll[{s, prop, checkprop, doprop, run, p, a, j,runneg}];
+%t A360142 prop[s_]:=(p=Array[0#&, Length[s]];
+%t A360142 Do[If[i==1 ||i==Length[s], p[[i]]=0,
+%t A360142 {p[[i-1]], p[[i]], p[[i+1]]}+=
+%t A360142 Piecewise[{{{1, -1, 0}, {s[[i-1]], s[[i]], s[[i+1]]}=={0, 1, 1}},
+%t A360142 {{0, -1, 1}, {s[[i-1]], s[[i]], s[[i+1]]}=={1, 1, 0}}}, {0, 0, 0}]], {i, 1, Length[s]-1} ];
+%t A360142 Return[p])
+%t A360142 checkprop[s_]:=(p=s;
+%t A360142 Do[If[p[[i]]==2, {p[[i-1]], p[[i]], p[[i+1]]}={0, 0, 0}], {i, 2, Length[s]-1}];
+%t A360142 Return[p])
+%t A360142 doprop[s_]:= Return[s +checkprop[prop[s]]]
+%t A360142 runneg[n_]:=( s=Join[Array[#/#&, n+5], Array[0#&, n+5]] ; Table[Drop[Nest[doprop[#]&, s, k],-(n+5)], {k, 0, n}])
+%t A360142 a[j_]:=FromDigits[(runneg[j+1]/.{0->1,1->0})[[j+1, All]],2]
+%t A360142 (* Table[a[n],{n,0,10,1}]          *)
+%t A360142 (* returns the first 11 elements   *)
+%t A360142 (* {0,1,2,2,4,5,8,9,10,17,18}      *)
+%o A360142 (PARI) See links.
+%Y A360142 Cf. A359303, A360141.
+%K A360142 nonn,base
+%O A360142 0,3
+%A A360142 _Raphael J. F. Berger_, Jan 27 2023

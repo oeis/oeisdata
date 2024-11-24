@@ -1,0 +1,33 @@
+%I A225871 #28 Nov 27 2021 04:59:15
+%S A225871 4,6,7,9,10,11,12,13,15,16,17,18,18,19,20,21,22,23,24,25,25,26,27,28,
+%T A225871 28,29,30,31,32,32,33,34,34,35,36,37,37,38,39,39,40,41,41,42,43,43,44,
+%U A225871 45,45,46,46,47,48,48,49,50,50,51,51,52,53,53,54,54,55,56
+%N A225871 Number of people required for there to be a 50% probability that at least 4 share a birthday in a year with n days.
+%C A225871 a(365)=187.
+%C A225871 For n<1000, the formula a(n) = 2.79 + 2.456*n^0.732 - 1.825/n provides an estimate of a(n) accurate to 0.82.
+%H A225871 Christian N. K. Anderson, <a href="/A225871/b225871.txt">Table of n, a(n) for n = 1..1000</a>
+%H A225871 Christian N. K. Anderson, <a href="/A225871/a225871.txt">Table of n, exact probabilities of a(n)-1 and a(n) for n = 1..1000.</a>
+%H A225871 Patrice Le Conte, <a href="/A225852/a225852.pdf">Coincident Birthdays</a>
+%e A225871 For a year with 365 days, a(365), the probability that out of 186 people 4 of them share a birthday is 0.495825. The corresponding probability for 187 people is 0.502685, and therefore a(365)=187.
+%o A225871 (R) library(gmp);#prob of a maximum of exactly k coincident birthdays is
+%o A225871 BigQ<-function(nday,p,k) { #nday=days in a year; p=people
+%o A225871     if(p<k | nday<1) return(0)
+%o A225871     if(k==1) return(prod(1-(1:p-1)/nday))
+%o A225871     tot=0;
+%o A225871     for(i in 1:floor(p/k)) {
+%o A225871         q=(1-as.bigz(i)/nday)^(p-k*i) * prod((p-as.bigz(1:(k*i))+1)/nday) * prod((nday-as.bigz(1:i)+1)/((1:i)*factorialZ(k)))
+%o A225871         tot=tot+as.numeric(q)*ifelse(k*i<p & k>1,sum(sapply(2:k-1,function(j) BigQ(nday-i,p-k*i,j))),1)
+%o A225871     }
+%o A225871     tot
+%o A225871 }
+%o A225871 BDaySharedByAtLeast<-function(nday,people,k) {
+%o A225871     if(nday<1 | people<k) return(0)
+%o A225871     if(k==1) return(prod(1-(1:people-1)/nday))
+%o A225871     prob=1; for(j in 2:k-1) prob=prob-BigQ(nday,people,j); prob
+%o A225871 }
+%o A225871 y=rep(0,100); for(i in 1:100) { j=ifelse(i==1,4,y[i-1]); while(BDaySharedByAtLeast(i,j,4)<.5) j=j+1; y[i]=j}; y
+%Y A225871 Cf. A014088 (n people on 365 days), A033810 (2 people on n days), A225852 (3 on n days).
+%Y A225871 Cf. A088141, A182008, A182009, A182010.
+%K A225871 nonn
+%O A225871 1,1
+%A A225871 _Kevin L. Schwartz_ and _Christian N. K. Anderson_, May 18 2013

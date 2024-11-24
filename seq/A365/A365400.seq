@@ -1,0 +1,48 @@
+%I A365400 #11 Sep 06 2023 18:09:22
+%S A365400 63,63,63,62,62,62,62,62,61,61,61,61,61,61,60,59,59,59,59,59,59,59,59,
+%T A365400 59,59,59,58,58,58,58,58,58,58,58,57,57,57,57,57,57,57,57,57,57,57,57,
+%U A365400 57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,57,56
+%N A365400 a(n) = 64 + A000720(n) - A365339(n).
+%C A365400 It is conjectured that A365339(n) = PrimePi(n) + 64 for all n >= 31957 (Pollack et al.). Assuming this conjecture a(n) = 0 for n > 31956.
+%C A365400 a is not monotonically decreasing.
+%H A365400 Paul Pollack, Carl Pomerance, and Enrique Treviño, <a href="https://math.dartmouth.edu/~carlp/MonotonePhi.pdf">Sets of monotonicity for Euler's totient function</a>, preprint. See M(n).
+%H A365400 Paul Pollack, Carl Pomerance, and Enrique Treviño, <a href="https://doi.org/10.1007/s11139-012-9386-6">Sets of monotonicity for Euler's totient function</a>, Ramanujan J. 30 (2013), no. 3, pp. 379-398.
+%H A365400 Terence Tao, <a href="https://arxiv.org/abs/2309.02325">Monotone non-decreasing sequences of the Euler totient function</a>, arXiv:2309.02325 [math.NT], 2023.
+%o A365400 (Julia) # Computes the first N terms of the sequence.
+%o A365400 using Nemo
+%o A365400 function A365400List(N)
+%o A365400     phi = Int64[i for i in 1:N + 1]
+%o A365400     for i in 2:N + 1
+%o A365400         if phi[i] == i
+%o A365400             for j in i:i:N + 1
+%o A365400                 phi[j] -= div(phi[j], i)
+%o A365400     end end end
+%o A365400     lst = zeros(Int64, N)
+%o A365400     dyn = zeros(Int64, N)
+%o A365400     pi = 64
+%o A365400     for n in 1:N
+%o A365400         p = phi[n]
+%o A365400         nxt = dyn[p] + 1
+%o A365400         while p <= N && dyn[p] < nxt
+%o A365400             dyn[p] = nxt
+%o A365400             p += 1
+%o A365400         end
+%o A365400         pi += is_prime(n) ? 1 : 0
+%o A365400         lst[n] = pi - dyn[n]
+%o A365400     end
+%o A365400     return lst
+%o A365400 end
+%o A365400 println(A365400List(32000))
+%o A365400 (Python)
+%o A365400 from bisect import bisect
+%o A365400 from sympy import totient, primepi
+%o A365400 def A365400(n):
+%o A365400     plist, qlist, c = tuple(totient(i) for i in range(1,n+1)), [0]*(n+1), 0
+%o A365400     for i in range(n):
+%o A365400         qlist[a:=bisect(qlist,plist[i],lo=1,hi=c+1,key=lambda x:plist[x])]=i
+%o A365400         c = max(c,a)
+%o A365400     return 64+primepi(n)-c # _Chai Wah Wu_, Sep 06 2023
+%Y A365400 Cf. A000720, A365339, A365474.
+%K A365400 nonn
+%O A365400 1,1
+%A A365400 _Peter Luschny_, Sep 06 2023

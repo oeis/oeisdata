@@ -1,0 +1,27 @@
+%I A176433 #23 Jun 01 2022 01:52:15
+%S A176433 1,1,3,8,15,35,96,186,419,1035,2021,4353,10171,19721,41466,93118,
+%T A176433 180018,371539,813425,1566398,3194133,6859558,13179004,26617619,
+%U A176433 56371355,108060479,216736146,453947049,868857655,1732792511,3598157885,6877348410,13655273038
+%N A176433 The number of words of length n created with letters a, b, and c with at least as many a's as b's and at least as many b's as c's and no adjacent letters forming the pattern aba and no subwords (any adjacent or nonadjacent subsequence of letters) of the form abc.
+%H A176433 Alois P. Heinz, <a href="/A176433/b176433.txt">Table of n, a(n) for n = 0..200</a>
+%p A176433 a:= n-> add(add(w(na, nb, n-na-nb, 0, 0),
+%p A176433         nb=ceil((n-na)/2)..min(n-na, na)), na=ceil(n/3)..n):
+%p A176433 w:= proc(a, b, c, x, y) option remember;
+%p A176433       `if`([a, b, c]=[0$3], 1,
+%p A176433       `if`(a>0 and x<2 and y<2, w(a-1, b, c, 1, y), 0)+
+%p A176433       `if`(b>0, w(a, b-1, c, `if`(x=1, 2, 0), `if`(y>0, 2, 0)), 0)+
+%p A176433       `if`(c>0, w(a, b, c-1, 0, `if`(y=0,1,y)), 0))
+%p A176433     end:
+%p A176433 seq(a(n), n=0..40);  # _Alois P. Heinz_, May 22 2012
+%t A176433 a[n_] := Sum[Sum[w[na, nb, n - na - nb, 0, 0], {nb, Ceiling[(n - na)/2], Min[n - na, na]}], {na, Ceiling[n/3], n}];
+%t A176433 w[a_, b_, c_, x_, y_] := w[a, b, c, x, y] =
+%t A176433   If[{a, b, c} == {0, 0, 0}, 1,
+%t A176433   If[a > 0 && x < 2 && y < 2, w[a - 1, b, c, 1, y], 0] +
+%t A176433   If[b > 0, w[a, b - 1, c, If[x == 1, 2, 0], If[y > 0, 2, 0]], 0] +
+%t A176433   If[c > 0, w[a, b, c - 1, 0, If[y == 0, 1, y]], 0]];
+%t A176433 a /@ Range[0, 40] (* _Jean-François Alcover_, Nov 20 2020, after _Alois P. Heinz_ *)
+%o A176433 (C#) private static void GenerateCombo(string currentWord, int maxLength, ICollection<string> currentStrings) { if (currentWord.Length < maxLength) { GenerateCombo(currentWord+"a", maxLength, currentStrings); GenerateCombo(currentWord+"b", maxLength, currentStrings); GenerateCombo(currentWord+"c", maxLength, currentStrings); } else { if (Regex.IsMatch(currentWord, "aba")) return; if (Regex.IsMatch(currentWord, "[abc]*a[abc]*b[abc]*c[abc]*")) return; int aCount = CountOccurrences('a', currentWord); int bCount = CountOccurrences('b', currentWord); int cCount = CountOccurrences('c', currentWord); if(cCount > bCount) return; if(bCount > aCount) return; currentStrings.Add(currentWord); } } private static int CountOccurrences(char ch, string word) { int rez = 0; for(int i = 0 ; i < word.Length; i ++) if (word == ch) rez++; return rez; }
+%K A176433 nonn
+%O A176433 0,3
+%A A176433 Patrick McQuade (patrick.mcquade(AT)peelsb.com), Apr 17 2010
+%E A176433 More terms from _Alois P. Heinz_, May 22 2012

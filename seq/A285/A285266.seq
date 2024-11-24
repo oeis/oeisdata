@@ -1,0 +1,32 @@
+%I A285266 #11 Jun 17 2017 02:28:42
+%S A285266 1,3,1,9,4,1,27,14,5,1,81,50,19,6,1,243,178,75,24,7,1,729,634,295,100,
+%T A285266 29,8,1,2187,2258,1161,418,125,34,9,1,6561,8042,4569,1748,543,150,39,
+%U A285266 10,1,19683,28642,17981,7310,2363,668,175,44,11,1
+%N A285266 Array read by antidiagonals: T(m,n) = number of m-ary words of length n with adjacent elements differing by 2 or less.
+%C A285266 All rows are linear recurrences with constant coefficients. See PARI script to obtain generating functions.
+%H A285266 Andrew Howroyd, <a href="/A285266/b285266.txt">Table of n, a(n) for n = 3..1277</a>
+%e A285266 Array starts (m>=3, n>=0):
+%e A285266 1  3  9  27  81  243   729  2187   6561 ...
+%e A285266 1  4 14  50 178  634  2258  8042  28642 ...
+%e A285266 1  5 19  75 295 1161  4569 17981  70763 ...
+%e A285266 1  6 24 100 418 1748  7310 30570 127842 ...
+%e A285266 1  7 29 125 543 2363 10287 44787 194995 ...
+%e A285266 1  8 34 150 668 2986 13362 59816 267802 ...
+%e A285266 1  9 39 175 793 3611 16475 75229 343633 ...
+%e A285266 1 10 44 200 918 4236 19598 90790 420870 ...
+%t A285266 diff = 2; m0 = 3; mmax = 12;
+%t A285266 TransferGf[m_, u_, t_, v_, z_] := Array[u, m].LinearSolve[IdentityMatrix[m] - z*Array[t, {m, m}], Array[v, m]]
+%t A285266 RowGf[d_, m_, z_] := 1+z*TransferGf[m, 1&, Boole[Abs[#1-#2] <= d]&, 1&, z];
+%t A285266 row[m_] := row[m] = CoefficientList[RowGf[diff, m, x] + O[x]^mmax, x];
+%t A285266 T[m_ /; m >= m0, n_ /; n >= 0] := row[m][[n + 1]];
+%t A285266 Table[T[m - n , n], {m, m0, mmax}, {n, m - m0, 0, -1}] // Flatten (* _Jean-François Alcover_, Jun 17 2017, adapted from PARI *)
+%o A285266 (PARI)
+%o A285266 TransferGf(m,u,t,v,z)=vector(m,i,u(i))*matsolve(matid(m)-z*matrix(m,m,i,j,t(i,j)),vectorv(m,i,v(i)));
+%o A285266 RowGf(d,m,z)=1+z*TransferGf(m, i->1, (i,j)->abs(i-j)<=d, j->1, z);
+%o A285266 for(m=3, 10, print(RowGf(2,m,x)));
+%o A285266 for(m=3, 10, v=Vec(RowGf(2,m,x) + O(x^9)); for(n=1, length(v), print1( v[n], ", ") ); print(); );
+%Y A285266 Rows 4-32 are A055099, A126392-A126419.
+%Y A285266 Cf. A285280, A188866, A285267.
+%K A285266 nonn,tabl
+%O A285266 3,2
+%A A285266 _Andrew Howroyd_, Apr 15 2017

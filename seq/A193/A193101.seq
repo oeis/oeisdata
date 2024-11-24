@@ -1,0 +1,50 @@
+%I A193101 #24 Oct 12 2017 10:20:13
+%S A193101 1,2,1,2,3,2,1,2,3,2,3,4,3,1,2,3,2,3,4,3,2,3,4,3,1,2,3,2,3,4,3,2,3,4,
+%T A193101 3,4,5,4,2,3,1,2,3,2,3,3,3,2,3,2,3,4,3,4,2,3,3,3,4,4,4,3,1,2,3,2,3,4,
+%U A193101 3,2,3,4,3,4,3,4,2,3,4,3,4,2,3,3,3,4,4,2,3,4,3,1,2,3,2,3,4,3,2,3,4,3,4,2,3,2,3,4,3,4,3,4,3,4,5,4,2,3,4,3
+%N A193101 Minimal number of numbers of the form (m^3+5m)/6 (see A004006) needed to sum to n.
+%C A193101 Watson showed that a(n) <= 8 for all n.
+%C A193101 It is conjectured that a(n) <= 5 for all n.
+%H A193101 Lars Blomberg, <a href="/A193101/b193101.txt">Table of n, a(n) for n = 1..10000</a>
+%H A193101 H. E. Salzer and N. Levine, <a href="https://doi.org/10.1090/S0025-5718-1968-0224578-6">Proof that every integer <= 452,479,659 is a sum of five numbers of the form Q_x = (x^3+5x)/6, x>= 0</a>, Math. Comp., (1968), 191-192.
+%H A193101 N. J. A. Sloane, <a href="/transforms.txt">Transforms</a>
+%H A193101 G. L. Watson, <a href="https://doi.org/10.1112/jlms/s1-27.2.217">Sums of eight values of a cubic polynomial</a>, J. London Math. Soc., 27 (1952), 217-224.
+%p A193101 # LAGRANGE transform of a sequence {a(n)}
+%p A193101 # Suggested by Lagrange's theorem that at most 4 squares are needed to sum to n.
+%p A193101 # Returns b(n) = minimal number of terms of {a} needed to sum to n for 1 <= n <= M.
+%p A193101 # C = maximal number of terms of {a} to try to build n
+%p A193101 # M = upper limit on n
+%p A193101 # Internally, the initial terms of both a and b are taken to be 0, but since this is a number-theoretic function, the output starts at n=1
+%p A193101 LAGRANGE:=proc(a,C,M)
+%p A193101 local t1,ip,i,j,a1,a2,b,c,N1,N2,Nc;
+%p A193101 if whattype(a) <> list then RETURN([]); fi:
+%p A193101 # sort a, remove duplicates, include 0
+%p A193101 t1:=sort(a);
+%p A193101 a1:=sort(convert(convert(a,set),list));
+%p A193101 if not member(0,a1) then a1:=[0,op(a1)]; fi;
+%p A193101 N1:=nops(a1);
+%p A193101 b:=Array(1..M+1,-1);
+%p A193101 for i from 1 to N1 while a1[i]<=M do b[a1[i]+1]:=1; od;
+%p A193101 a2:=a1; N2:=N1;
+%p A193101 for ip from 2 to C do
+%p A193101 c:={}:
+%p A193101    for i from 1 to N1 while a1[i] <= M do
+%p A193101       for j from 1 to N2 while a1[i]+a2[j] <= M do
+%p A193101 c:={op(c),a1[i]+a2[j]};
+%p A193101                                                 od;
+%p A193101                                        od;
+%p A193101 c:=sort(convert(c,list));
+%p A193101 Nc:=nops(c);
+%p A193101    for i from 1 to Nc do
+%p A193101       if b[c[i]+1] = -1 then b[c[i]+1]:= ip; fi;
+%p A193101                       od;
+%p A193101 a2:=c; N2:=Nc;
+%p A193101                    od;
+%p A193101 [seq(b[i],i=2..M+1)];
+%p A193101 end;
+%p A193101 Q:=[seq((m^3+5*m)/6,m=0..20)];
+%p A193101 LAGRANGE(Q,8,120);
+%Y A193101 Cf. A004006. A002828, A104246, A193105.
+%K A193101 nonn
+%O A193101 1,2
+%A A193101 _N. J. A. Sloane_, Jul 15 2011

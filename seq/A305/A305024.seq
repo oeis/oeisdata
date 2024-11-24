@@ -1,0 +1,48 @@
+%I A305024 #37 Dec 12 2019 20:12:57
+%S A305024 0,0,2,4,3,2,2,3,4,2,4,2,2,3,7,2,5,4,4,4,2,4,3,2,3,3,5,3,4,5,4,3,2,3,
+%T A305024 2,4,2,4,4,3,3,2,4,4,4,4,3,4,3,4,3,4,3,3,2,4,2,4,3,2,3,2,4,4,2,4,4,4,
+%U A305024 3,2,3,4,4,2,3,4,3,2,2,2,3,2,4,3,4,3,3,4,2,4,3,4,4,3,3
+%N A305024 Minimal number of squares, not all equal to 1, having as sum prime(n), such that their squares also sum to a prime; 0 if no such decomposition exists.
+%C A305024 It has been conjectured (cf. A126769) that any prime p >= 5 can be written in a nontrivial way as p = Sum (b_i)^2 such that Sum (b_i)^4 is also prime. This sequence lists the number of required terms b_i for each prime.
+%C A305024 The two initial zeros say that this decomposition is not possible for prime(1) = 2 and prime(2) = 3, and are thus conjectured to be the only zeros of the sequence. Since we are interested in the minimal number of terms, we can consider only nonzero b_i >= 1 and min{b_i} >= 2 to avoid the trivial solution b_i = 1 for all i <= k = prime(n).
+%H A305024 Robert Israel, <a href="/A305024/b305024.txt">Table of n, a(n) for n = 1..5000</a>
+%F A305024 If
+%e A305024 The first two primes, 2 and 3, cannot be written as a sum of squares not all equal to 1, because the smallest such sum is 1^2 + 2^2 = 5. (The empty sum and a one-term sum of a square cannot be prime, either.) Therefore a(1) = a(2) = 0.
+%e A305024 The third prime, 5, can be written in exactly one way as a nontrivial sum of two squares, 5 = 1^2 + 2^2, and the sum of the fourth powers is 1^4 + 2^4 = 17, which is again prime. Therefore, a(3) = 2.
+%e A305024 The fourth prime, 7, cannot be written as sum of 2 or 3 squares, but only 4 squares, as 7 = 1^2 + 1^2 + 1^2 + 2^2, and it turns out that sum of the fourth powers also yields a prime,  1^4 + 1^4 + 1^4 + 2^4 = 19. Therefore, a(4) = 4.
+%e A305024 prime(15) = 47 = 1^2 + 2^2 + 2^2 + 2^2 + 3^2 + 3^2 + 4^2, and the sum of the fourth powers gives the prime 467. Since no smaller number of terms has this property, a(15) = 7.
+%e A305024 prime(18) = 61 = 2^2 + 4^2 + 4^2 +5^2, and 2^4 + 4^4 + 4^4 +5^4 = 1153, a prime, and no smaller number of terms has this property, so a(18) = 4.
+%e A305024 prime(27) = 103 = 1^2 + 4^2 + 5^2 + 5^2 + 6^2 and 1^4 + 4^4 + 5^4 + 5^4 + 6^4 = 2803, a prime, and no smaller number of terms has this property, so a(27) = 5.
+%e A305024 The values 2, 3, 4, 5 appear for the first time at index n = 3, 5, 4, 17, and a(15) = 7. We don't know when the first 6 occurs, nor whether this happens at all.
+%e A305024 Conjecture: The sequence is bounded.
+%e A305024 Is it possible to show that no term of the sequence is larger than 7?
+%p A305024 repss:= proc(n,k,i) option remember;
+%p A305024 # lists of k squares >= i^2 summing to n
+%p A305024   if k = 1 then
+%p A305024    if issqr(n) and n >= i^2 then {[sqrt(n)]}
+%p A305024    else {}
+%p A305024    fi
+%p A305024   elif n < k then {}
+%p A305024   else
+%p A305024    `union`(seq(map(t -> [j,op(t)], procname(n-j^2,k-1,j)),j=i..floor(sqrt(n))))
+%p A305024   fi
+%p A305024 end proc:
+%p A305024 f:= proc(n) local p,k,i,S; global Rep;
+%p A305024   p:= ithprime(n);
+%p A305024   for k from 2 do
+%p A305024     S:= select(t -> isprime(convert(map(`^`,t,4),`+`)), repss(p,k,1));
+%p A305024     if nops(S) > 0 then Rep[n]:= S[1]; return k fi
+%p A305024   od
+%p A305024 end proc:
+%p A305024 0,0,seq(f(n),n=3..100); # _Robert Israel_, Dec 12 2019
+%t A305024 a[n_] := Block[{p = Prime@n, c, k=2}, c = Range[Sqrt[p]]^2; While[ k<p, If[ Select[ IntegerPartitions[ p, {k}, c], PrimeQ@ Total[ #^2] &, 1] != {}, Break[]]; k++]; If[k < p, k, 0]]; Array[a, 95] (* _Giovanni Resta_, Dec 12 2019 *)
+%o A305024 (PARI) apply( A305024(n)={n=prime(n); for(k=2, n-3, my(s=sqrtint((n-k)\3+1), t);
+%o A305024     forvec(b=vector(k-2, i, [1,s]), t=vecsum([t^4|t<-b]);
+%o A305024       for(i=1,#s=sum2sqr(n-norml2(b))/* see A133388 for sum2sqr() */,
+%o A305024         s[i][1]>0 && isprime(s[i][1]^4+s[i][2]^4+t) && return(k))/*end for i*/
+%o A305024     , 1/*forvec:increasing*/))}, [1..95]) \\ Bug fixed: _M. F. Hasler_, Dec 12 2019
+%Y A305024 Cf. A126769, A128292.
+%K A305024 nonn
+%O A305024 1,3
+%A A305024 _M. F. Hasler_, May 23 2018
+%E A305024 Corrected by _Robert Israel_, Dec 12 2019

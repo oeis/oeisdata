@@ -1,0 +1,73 @@
+%I A358838 #107 May 21 2023 10:26:52
+%S A358838 0,1,2,5,3,6,9,4,7,10,10,5,8,8,11,11,11,6,14,9,9,12,12,12,15,12,7,18,
+%T A358838 15,10,10,10,13,13,13,13,16,16,13,16,8,19,19,16,11,11,11,11,19,14,14,
+%U A358838 14,14,14,22,17,17,17,14,17,17,9,20,20,20,17,17,12,12,12
+%N A358838 Minimum number of jumps needed to go from slab 0 to slab n in Jane Street's infinite sidewalk.
+%C A358838 Slabs on the sidewalk are numbered n = 0, 1, 2,... and each has a label L(n) = 1, 1, 2, 2, 3, 3,...
+%C A358838 At a given slab, a jump can be taken forward or backward by L(n) places (but not back before slab 0).
+%C A358838 .
+%C A358838 For every n >= 0,
+%C A358838   let L(n) = 1 + floor(n/2) -- the label on slab n,
+%C A358838   let forward(n) = n + L(n) -- jumping forward,
+%C A358838   if n > 0, let backward(n) = n - L(n) -- jumping backward,
+%C A358838   let lambda(n) = floor((2/3)*n),
+%C A358838   let mu(n) = 1 + 2*n,
+%C A358838   let nu(n) = 2 + 2*n.
+%C A358838 Observe that given n >= 0, there are exactly two ways of landing onto slab n with a direct jump backwards:
+%C A358838   backward-jumping from mu(n) to n, and
+%C A358838   backward-jumping from nu(n) to n.
+%C A358838 If n is a multiple of 3, there is no other ways of jumping onto slab n. But if n is not a multiple of 3, there is one additional way:
+%C A358838   forward-jumping from lambda(n) to n.
+%C A358838 (Note that L is A008619, forward(n) == A006999(n+1), lambda is A004523, mu is A005408, nu is A299174.)
+%C A358838 .
+%C A358838 Every slab n > 0 is reachable from slab 0, since there always exists some slab s < n which reaches n by one or more jumps:
+%C A358838   if n != 0 (mod 3), then s = lambda(n) = floor((2/3)*n) takes one forward jump to n,
+%C A358838   if n == 0 (mod 3) but n != 0 (mod 9), then s = lambda o lambda o mu(n) = floor((8/9)*n) takes two forward jumps and one backward jump to n,
+%C A358838   if n == 0 (mod 9), then s = lambda o lambda o nu(n) = floor((8/9)*n + 6/9) takes two forward jumps and one backward jump to n.
+%C A358838 This demonstrates that the sequence never stops.
+%C A358838 This also gives the following bounds:
+%C A358838   a(n) <= 1 + (4/3)*n,
+%C A358838   a(n) <= 6*log(n)/log(9/8).
+%C A358838 .
+%C A358838 The sequence is a surjective mapping N -> N, since given any n >= 0:
+%C A358838   a(forward^n(0)) == n.
+%H A358838 Neal Gersh Tolunsky, <a href="/A358838/b358838.txt">Table of n, a(n) for n = 0..10000</a>
+%H A358838 Atlantis, <a href="https://blog.atlant.is/?p=4034">Infinite sidewalk blog post</a>.
+%H A358838 Jane Street, <a href="https://www.janestreet.com/numberphile/">Numberphile webpage</a>.
+%e A358838 For n=0, a(0) = 0 since it takes zero jump to go from slab 0 to slab 0.
+%e A358838 For n=3, a(3) = 5 jumps is the minimum needed to go from slab 0 to slab 3:
+%e A358838 .
+%e A358838         1st   2nd      3rd           4th
+%e A358838         jump  jump     jump          jump
+%e A358838         ->-   ->-   ---->----   ------->-------
+%e A358838        /   \ /   \ /         \ /               \
+%e A358838 n     0     1     2     3     4     5     6     7     8  ...
+%e A358838 L(n)  1     1     2     2     3     3     4     4     5  ...
+%e A358838                          \                     /
+%e A358838                           ----------<----------
+%e A358838                                  5th jump (backwards)
+%o A358838 (Python)
+%o A358838 def a(n: int) -> int:
+%o A358838     import itertools
+%o A358838     if n < 0: raise Exception("n must be a nonnegative integer")
+%o A358838     if n == 0: return 0
+%o A358838     if n == 1: return 1
+%o A358838     visited = {0, 1}  # the slabs we have visited so far
+%o A358838     rings = [{0}, {1}]  # the slabs ordered by depth (min length of path from 0)
+%o A358838     for depth in itertools.count(2):
+%o A358838         new_ring = set()
+%o A358838         for slab in rings[depth - 1]:
+%o A358838             label = (slab >> 1) + 1
+%o A358838             for next_slab in {slab - label, slab + label}:
+%o A358838                 if not next_slab in visited:
+%o A358838                     if next_slab == n: return depth
+%o A358838                     visited.add(next_slab)
+%o A358838                     new_ring.add(next_slab)
+%o A358838         rings.append(new_ring)
+%Y A358838 Cf. A359005, A359008.
+%Y A358838 Always jumping forwards yields A006999.
+%Y A358838 In the COMMENTS section, L is A008619, forward(n) == A006999(n+1), lambda is A004523, mu is A005408, nu is A299174.
+%Y A358838 For related sequences, see A360744-A360746 and A360593-A360595.
+%K A358838 nonn
+%O A358838 0,3
+%A A358838 _Frederic Ruget_, Dec 02 2022

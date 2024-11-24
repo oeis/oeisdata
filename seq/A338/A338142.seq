@@ -1,0 +1,30 @@
+%I A338142 #7 Oct 14 2020 10:38:39
+%S A338142 1,1,4,9,6,1,216,22164,613804,6901425,39713430,131754420,267165360,
+%T A338142 336798000,257796000,109771200,19958400,1,22409618,9651132365418,
+%U A338142 96038196404417832,120785673234798359850
+%N A338142 Triangle read by rows: T(n,k) is the number of oriented colorings of the edges of a regular n-D orthotope (or ridges of a regular n-D orthoplex) using exactly k colors. Row n has n*2^(n-1) columns.
+%C A338142 Each chiral pair is counted as two when enumerating oriented arrangements. A ridge is an (n-2)-face of an n-D polytope. For n=1, the figure is a line segment with one edge. For n=2, the figure is a square with 4 edges (vertices). For n=3, the figure is a cube (octahedron) with 12 edges. The number of edges (ridges) is n*2^(n-1). The Schläfli symbols for the n-D orthotope (hypercube) and the n-D orthoplex (hyperoctahedron, cross polytope) are {4,...,3,3} and {3,3,...,4} respectively, with n-2 3's in each case. The figures are mutually dual.
+%C A338142 The algorithm used in the Mathematica program below assigns each permutation of the axes to a partition of n and then considers separate conjugacy classes for axis reversals. It uses the formulas in Balasubramanian's paper. If the value of m is increased, one can enumerate colorings of higher-dimensional elements beginning with T(m,1).
+%H A338142 K. Balasubramanian, <a href="https://doi.org/10.33187/jmsm.471940">Computational enumeration of colorings of hyperplanes of hypercubes for all irreducible representations and applications</a>, J. Math. Sci. & Mod. 1 (2018), 158-180.
+%F A338142 A337407(n,k) = Sum_{j=1..n*2^(n-1)} T(n,j) * binomial(k,j).
+%F A338142 T(n,k) = A338143(n,k) + A338144(n,k) = 2*A338143(n,k) - A338145(n,k) = 2*A338144(n,k) + A338145(n,k).
+%F A338142 T(2,k) = A338146(2,k) = A325016(2,k) = A325008(2,k); T(3,k) = A338146(3,k).
+%e A338142 Triangle begins with T(1,1):
+%e A338142   1
+%e A338142   1   4     9      6
+%e A338142   1 216 22164 613804 6901425 39713430 131754420 267165360 336798000
+%e A338142   ...
+%t A338142 m=1; (* dimension of color element, here an edge *)
+%t A338142 Fi1[p1_] := Module[{g, h}, Coefficient[Product[g = GCD[k1, p1]; h = GCD[2 k1, p1]; (1 + 2 x^(k1/g))^(r1[[k1]] g) If[Divisible[k1, h], 1, (1+2x^(2 k1/h))^(r2[[k1]] h/2)], {k1, Flatten[Position[cs, n1_ /; n1 > 0]]}], x, n - m]];
+%t A338142 FiSum[] := (Do[Fi2[k2] = Fi1[k2], {k2, Divisors[per]}]; DivisorSum[per, DivisorSum[d1 = #, MoebiusMu[d1/#] Fi2[#] &]/# &]);
+%t A338142 CCPol[r_List] := (r1 = r; r2 = cs - r1; If[EvenQ[Sum[If[EvenQ[j3], r1[[j3]], r2[[j3]]], {j3, n}]], (per = LCM @@ Table[If[cs[[j2]] == r1[[j2]], If[0 == cs[[j2]], 1, j2], 2j2], {j2, n}]; Times @@ Binomial[cs, r1] 2^(n-Total[cs]) b^FiSum[]), 0]);
+%t A338142 PartPol[p_List] := (cs = Count[p, #]&/@ Range[n]; Total[CCPol[#]&/@ Tuples[Range[0, cs]]]);
+%t A338142 pc[p_List] := Module[{ci, mb}, mb = DeleteDuplicates[p]; ci = Count[p, #]&/@ mb; n!/(Times@@(ci!) Times@@(mb^ci))] (*partition count*)
+%t A338142 row[n_Integer] := row[n] = Factor[(Total[(PartPol[#] pc[#])&/@ IntegerPartitions[n]])/(n! 2^(n-1))]
+%t A338142 array[n_, k_] := row[n] /. b -> k
+%t A338142 Table[LinearSolve[Table[Binomial[i,j],{i,2^(n-m)Binomial[n,m]},{j,2^(n-m)Binomial[n,m]}], Table[array[n,k],{k,2^(n-m)Binomial[n,m]}]], {n,m,m+4}] // Flatten
+%Y A338142 Cf. A338143 (unoriented), A338144 (chiral), A338145 (achiral), A337407 (k or fewer colors), A325016 (orthotope vertices, orthoplex facets).
+%Y A338142 Cf. A327087 (simplex), A338146 (orthoplex edges, orthotope ridges).
+%K A338142 nonn,tabf
+%O A338142 1,3
+%A A338142 _Robert A. Russell_, Oct 12 2020

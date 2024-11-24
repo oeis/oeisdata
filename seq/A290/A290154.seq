@@ -1,0 +1,67 @@
+%I A290154 #33 Jun 22 2021 08:36:49
+%S A290154 6,20,42,78,118,184,248,332,428,534,654,772,906,1052,1208,1388,1562,
+%T A290154 1754,1958,2164,2396,2638,2896,3144,3424,3682,3986,4304,4622,4976,
+%U A290154 5286,5652,6002,6374,6748,7148,7532,7934,8356,8786,9224,9684,10158,10618,11114,11604
+%N A290154 Smallest number k such that exactly half the numbers in [1..k] are prime(n)-smooth.
+%C A290154 All terms are even numbers (because of the "exactly half the numbers in [1..k]" part of the definition).
+%H A290154 Michael S. Branicky, <a href="/A290154/b290154.txt">Table of n, a(n) for n = 1..10000</a> (terms 1..2000 from Robert Israel)
+%H A290154 Michael S. Branicky, <a href="/A290154/a290154.txt">Python program for bfile</a>
+%e A290154 The 2-smooth numbers are 1, 2, 4, 8, 16, 32, ... (A000079, the powers of 2), so the numbers of 2-smooth numbers in the interval [1..k] for k = 2, 4, and 6 are 2, 3, and 3, respectively; thus, the smallest k at which the number of 2-smooth numbers in [1..k] is exactly k/2 is k=6, so a(1)=6.
+%e A290154 The 3-smooth numbers are 1, 2, 3, 4, 6, 8, 9, 12, 16, 18, 24, 27, 32, ... (A003586), so there are more than k/2 3-smooth numbers in [1..k] for every positive k < 20, but exactly k/2 3-smooth numbers in [1..20], so a(2) = 20.
+%p A290154 N:= 100:
+%p A290154 mypi:= proc(n) option remember; global pmax; local k;
+%p A290154   k:= procname(pmax);
+%p A290154   while pmax < n do pmax:= nextprime(pmax); k:= k+1 od;
+%p A290154   k
+%p A290154 end proc:
+%p A290154 pmax:= 2: mypi(2):= 1:
+%p A290154 V:= Vector(N):
+%p A290154 count:= 0:
+%p A290154 loheap:=heap[new](`<`,0): nlo:= 1:
+%p A290154 hiheap:= heap[new](`>`,1): nhi:= 1:
+%p A290154 for k from 4 by 2 while count < N do
+%p A290154    for v in [mypi(max(numtheory:-factorset(k-1))), mypi(max(numtheory:-factorset(k)))] do
+%p A290154      if v <= heap[max](loheap) then heap[insert](v,loheap); nlo:= nlo+1;
+%p A290154      elif v >= heap[max](hiheap) then heap[insert](v,hiheap); nhi:= nhi+1;
+%p A290154      elif nlo <= nhi then heap[insert](v,loheap); nlo:= nlo+1;
+%p A290154      else heap[insert](v,hiheap); nhi:= nhi+1;
+%p A290154      fi;
+%p A290154    od;
+%p A290154    if nlo < nhi-1 then
+%p A290154         t:= heap[extract](hiheap);
+%p A290154         heap[insert](t,loheap);
+%p A290154         nlo:= nlo+1; nhi:= nhi-1;
+%p A290154    elif nhi < nlo-1 then
+%p A290154         t:= heap[extract](loheap);
+%p A290154         heap[insert](t,hiheap);
+%p A290154         nhi:= nhi+1; nlo:= nlo-1;
+%p A290154    fi;
+%p A290154    for n from heap[max](loheap) to min(heap[max](hiheap)-1, N) do
+%p A290154      if V[n] = 0 then count:= count+1; V[n]:= k;
+%p A290154      fi
+%p A290154    od;
+%p A290154 od:
+%p A290154 convert(V,list); # _Robert Israel_, Mar 28 2019
+%t A290154 smoothQ[k_, p_] := k <= p || Max[FactorInteger[k][[All, 1]]] <= p; a[n_] := For[p = Prime[n]; cnt = 0; k = 1, True, k++, If[smoothQ[k, p], cnt++]; If[cnt == k/2, Return[k]]]; Array[a, 46] (* _Jean-François Alcover_, Jul 22 2017 *)
+%o A290154 (PARI) is(k,n) = {m=k; forprime(p=2, prime(n), while(m%p==0, m=m/p)); return(m==1); }
+%o A290154 a(n) = {j=2; x=2; y=0; while(x!=y, j+=2; s=is(j,n)+is(j-1,n); x+=s; y+=2-s); j; } \\ _Jinyuan Wang_, Aug 03 2019
+%o A290154 (Python) # see link for a faster version producing bfile
+%o A290154 from sympy import factorint, prevprime, primerange, prod
+%o A290154 def aupto(limit):
+%o A290154     adict, pN = dict(), prevprime(limit+1)
+%o A290154     pi = {p: i for i, p in enumerate(primerange(1, pN+1), start=1)}
+%o A290154     smooth = {i: 0 for i in pi.values()}
+%o A290154     watching = smooth[0] = 1  # 1 is prime(n) smooth for all n
+%o A290154     for n in range(2, limit+1):
+%o A290154         f = factorint(n, limit=pN)
+%o A290154         nt = prod(p**f[p] for p in f if p <= pN)
+%o A290154         if nt == n: smooth[pi[max(f)]] += 1
+%o A290154         if 2*sum(smooth[i] for i in range(watching+1)) == n:
+%o A290154             adict[watching] = n
+%o A290154             watching += 1
+%o A290154     return sorted(adict.values())
+%o A290154 print(aupto(12000)) # _Michael S. Branicky_, Jun 20 2021
+%Y A290154 Cf. A000079, A003586, A126283.
+%K A290154 nonn
+%O A290154 1,1
+%A A290154 _Jon E. Schoenfield_, Jul 21 2017

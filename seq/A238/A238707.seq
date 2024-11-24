@@ -1,0 +1,60 @@
+%I A238707 #30 Feb 07 2017 10:43:37
+%S A238707 1,1,0,2,0,0,2,2,0,0,4,3,3,0,0,2,14,6,4,0,0,12,14,35,10,5,0,0,2,69,71,
+%T A238707 69,15,6,0,0,30,97,295,195,119,21,7,0,0,44,251,751,929,421,188,28,8,0,
+%U A238707 0,86,671,2326,3044,2254,791,279,36,9,0,0,2,1847,6524,11824,8999,4696,1354,395,45,10,0,0
+%N A238707 Number T(n,k) of ballot sequences of length n having difference k between the multiplicities of the smallest and the largest value; triangle T(n,k), n>=0, 0<=k<=n, read by rows.
+%C A238707 Also the number of standard Young tableaux (SYT) with n cells having difference k between the lengths of the first and the last row.
+%H A238707 Joerg Arndt and Alois P. Heinz, <a href="/A238707/b238707.txt">Rows n = 0..67, flattened</a>
+%H A238707 Wikipedia, <a href="https://en.wikipedia.org/wiki/Young_tableau">Young tableau</a>
+%e A238707 For n=4 the 10 ballot sequences of length 4 and differences between the multiplicities of the smallest and the largest value are:
+%e A238707 [1, 2, 3, 4]  ->  1-1 = 0,
+%e A238707 [1, 1, 2, 2]  ->  2-2 = 0,
+%e A238707 [1, 2, 1, 2]  ->  2-2 = 0,
+%e A238707 [1, 1, 1, 1]  ->  4-4 = 0,
+%e A238707 [1, 1, 2, 3]  ->  2-1 = 1,
+%e A238707 [1, 2, 1, 3]  ->  2-1 = 1,
+%e A238707 [1, 2, 3, 1]  ->  2-1 = 1,
+%e A238707 [1, 1, 1, 2]  ->  3-1 = 2,
+%e A238707 [1, 1, 2, 1]  ->  3-1 = 2,
+%e A238707 [1, 2, 1, 1]  ->  3-1 = 2,
+%e A238707 thus row 4 = [4, 3, 3, 0, 0].
+%e A238707 The 10 tableaux with 4 cells sorted by the difference between the lengths of the first and the last row are:
+%e A238707 :[1] [1 2] [1 3] [1 2 3 4]:[1 2] [1 3] [1 4]:[1 2 3] [1 2 4] [1 3 4]:
+%e A238707 :[2] [3 4] [2 4]          :[3]   [2]   [2]  :[4]     [3]     [2]    :
+%e A238707 :[3]                      :[4]   [4]   [3]  :                       :
+%e A238707 :[4]                      :                 :                       :
+%e A238707 : -----------0----------- : -------1------- : ----------2---------- :
+%e A238707 Triangle T(n,k) begins:
+%e A238707 00:   1;
+%e A238707 01:   1,   0;
+%e A238707 02:   2,   0,    0;
+%e A238707 03:   2,   2,    0,    0;
+%e A238707 04:   4,   3,    3,    0,    0;
+%e A238707 05:   2,  14,    6,    4,    0,   0;
+%e A238707 06:  12,  14,   35,   10,    5,   0,   0;
+%e A238707 07:   2,  69,   71,   69,   15,   6,   0,  0;
+%e A238707 08:  30,  97,  295,  195,  119,  21,   7,  0,  0;
+%e A238707 09:  44, 251,  751,  929,  421, 188,  28,  8,  0,  0;
+%e A238707 10:  86, 671, 2326, 3044, 2254, 791, 279, 36,  9,  0,  0;
+%p A238707 b:= proc(n, l) option remember; `if`(n<1, x^(l[1]-l[-1]),
+%p A238707       expand(b(n-1, [l[], 1])+add(`if`(i=1 or l[i-1]>l[i],
+%p A238707       b(n-1, subsop(i=l[i]+1, l)), 0), i=1..nops(l))))
+%p A238707     end:
+%p A238707 T:= n-> (p-> seq(coeff(p, x, i), i=0..n))(b(n-1, [1])):
+%p A238707 seq(T(n), n=0..12);
+%p A238707 # second Maple program (counting SYT):
+%p A238707 h:= proc(l) local n; n:=nops(l); add(i, i=l)!/mul(mul(1+l[i]-j+
+%p A238707        add(`if`(l[k]>=j, 1, 0), k=i+1..n), j=1..l[i]), i=1..n)
+%p A238707     end:
+%p A238707 g:= proc(n, i, l) `if`(n=0 or i=1, (p->h(p)*x^(`if`(p=[], 0, p[1]-
+%p A238707       p[-1])))([l[], 1$n]), add(g(n-i*j, i-1, [l[], i$j]), j=0..n/i))
+%p A238707     end:
+%p A238707 T:= n->(p-> seq(coeff(p, x, i), i=0..n))(g(n, n, [])):
+%p A238707 seq(T(n), n=0..12);
+%t A238707 b[n_, l_List] := b[n, l] = If[n<1, x^(l[[1]] - l[[-1]]), Expand[b[n-1, Append[l, 1]] + Sum[If[i == 1 || l[[i-1]] > l[[i]], b[n-1, ReplacePart[l, i -> l[[i]]+1]], 0], {i, 1, Length[l]}]]]; T[n_] := Function[{p}, Table[Coefficient[p, x, i], {i, 0, n}]][b[n-1, {1}]]; Table[T[n], {n, 0, 12}] // Flatten (* _Jean-François Alcover_, Jan 07 2015, translated from Maple *)
+%Y A238707 Columns k=0-10 give: A067228, A244295, A244296, A244297, A244298, A244299, A244300, A244301, A244302, A244303, A244304.
+%Y A238707 T(2n,n) gives A244305.
+%Y A238707 Row sums give A000085.
+%K A238707 nonn,tabl
+%O A238707 0,4
+%A A238707 _Joerg Arndt_ and _Alois P. Heinz_, Mar 03 2014

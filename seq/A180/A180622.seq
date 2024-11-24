@@ -1,0 +1,36 @@
+%I A180622 #31 Aug 22 2024 02:09:13
+%S A180622 3,6,12,19,30,38,56,68,86,100,129,143,178,197,222,246,293,313,367,392,
+%T A180622 428,460,525,551,606,643,694,730,813,841,931,977,1034,1084,1151,1188,
+%U A180622 1296,1351,1419,1467,1586,1627,1752,1811,1880,1947,2084,2132,2247,2308
+%N A180622 Number of distinct sums i+j, absolute differences |i-j|, products ij and quotients i/j and j/i with 1 <= i, j <= n.
+%C A180622 I was inspired by the 24-game. How many results can you get from two numbers by addition, subtraction, multiplication and division?
+%H A180622 Chai Wah Wu, <a href="/A180622/b180622.txt">Table of n, a(n) for n = 1..10000</a> (terms 1..2000 from Owen Whitby)
+%F A180622 a(n) = A263995(n) + 2*A002088(n) - n = A263995(n) + A018805(n) - n + 1. To see this, terms of the form |i-j| are covered by terms of the form i+j or i*j with the exception of 0. Thus i+j, |i-j| and ij result in A263995(n)+1 distinct terms. Terms i/j where gcd(i,j) > 1 can be reduced to a term i'/j' where gcd(i',j')=1. The only terms left are i/j with gcd(i,j) = 1 for which there are A018805(n) such terms. We need to subtract n terms for the cases where j=1 since i/j=i/1 are integers. This results in the formula. - _Chai Wah Wu_, Aug 21 2024
+%e A180622 For n = 3 sums 2, 3, 4, 5, 6 differences 0, 1, 2 multiplications 1, 2, 3, 4, 6, 9 divisions 1/2, 1/3, 2/3, 2, 3, 3/2 different results are 2, 3, 4, 5, 6, 0, 1, 9, 1/2, 1/3, 2/3, 3/2 or ordered 0, 1/3, 1/2, 2/3, 1, 3/2, 2, 3, 4, 5, 6, 9 so f(3) = 12.
+%p A180622 A180622 := proc(n) s := {} ; for i from 1 to n do for j from 1 to n do s := s union {i+j} ; s := s union {abs(i-j)} ; s := s union {i*j} ; s := s union {i/j} ; s := s union {j/i} ; end do: end do: nops(s) ; end proc: seq(A180622(n),n=1..83) ; # _R. J. Mathar_, Sep 19 2010
+%t A180622 a180622[maxn_] := Module[{seq = {}, vals = {}, vnew, an, n1}, Do[vnew = {}; n1 = n - 1; Do[vnew = vnew~Join~{i + n, n - i, i*n, i/n, n/i}, {i, n1}]; vnew = vnew~Join~{n + n, 0, n*n, 1}; vals = Union[vals, vnew]; an = Length[vals]; AppendTo[seq, an], {n, maxn}]; seq] (* _Owen Whitby_, Nov 03 2010 *)
+%o A180622 (Python)
+%o A180622 from fractions import Fraction
+%o A180622 def A180622(n): return len(set(range((n<<1)+1))|set().union(*({i*j,Fraction(i,j),Fraction(j,i)} for i in range(1,n+1) for j in range(1,i+1)))) # _Chai Wah Wu_, Aug 21 2024
+%o A180622 (Python)
+%o A180622 # faster program
+%o A180622 from functools import lru_cache
+%o A180622 from sympy import primepi
+%o A180622 def A180622(n):
+%o A180622     @lru_cache(maxsize=None)
+%o A180622     def f(n): # based on second formula in A018805
+%o A180622         if n == 0:
+%o A180622             return 0
+%o A180622         c, j = 0, 2
+%o A180622         k1 = n//j
+%o A180622         while k1 > 1:
+%o A180622             j2 = n//k1 + 1
+%o A180622             c += (j2-j)*(f(k1)-1)
+%o A180622             j, k1 = j2, n//j2
+%o A180622         return (n*(n-1)-c+j)
+%o A180622     return len({i*j for i in range(1,n+1) for j in range(1,i+1)})+f(n)+primepi(n<<1)-primepi(n)-n # _Chai Wah Wu_, Aug 21 2024
+%Y A180622 Cf. A002088, A018805, A027424, A263995.
+%K A180622 nonn
+%O A180622 1,1
+%A A180622 Hein van Winkel (hein65(AT)duizendknoop.com), Sep 12 2010
+%E A180622 More terms from _R. J. Mathar_, Sep 19 2010

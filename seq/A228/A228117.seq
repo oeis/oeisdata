@@ -1,0 +1,45 @@
+%I A228117 #17 Jan 22 2016 09:47:04
+%S A228117 1,1,2,2,3,4,4,6,7,9,10,16,14,23,24,33,33,50,50,71,75,101,103,146,151,
+%T A228117 201,211,280,292,389,409,519,573,707,765,960,1043,1276,1393,1704,1870,
+%U A228117 2258,2483,2970,3281,3920,4290,5101,5659,6640,7318,8628,9506,11081
+%N A228117 Number of partitions of n that have hookset {1,2,...,k} for some k.
+%C A228117 It appears to be the case that the difference between entry a(2n-1) and a(2n) is substantially less than the difference between a(2n) and a(2n+1), after a few initial exceptions.
+%e A228117 a(7) = 6, counting the partitions (7), (43), (331), (322), (2221), and (111111).  The hooklengths of (7) are {1,2,3,4,5,6,7}, and the hooklengths of (322) are {1,1,2,2,3,4,5}.
+%p A228117 h:= proc(l) local n, s; n:=nops(l); s:= {seq(seq(1+l[i]-j
+%p A228117        +add(`if`(l[k]>=j, 1, 0), k=i+1..n), j=1..l[i]), i=1..n)};
+%p A228117        `if`(s={$1..max(s[], 0)}, 1, 0)
+%p A228117     end:
+%p A228117 g:= (n, i, l)-> `if`(n=0 or i=1, h([l[], 1$n]), `if`(i<1, 0,
+%p A228117              g(n, i-1, l)+`if`(i>n, 0, g(n-i, i, [l[], i])))):
+%p A228117 a:= n-> g(n$2, []):
+%p A228117 seq(a(n), n=0..30);  # _Alois P. Heinz_, Aug 12 2013
+%t A228117 << "Combinatorica`"
+%t A228117 HookSet[Lambda_] := Module[{i, j, k, HookHolder},
+%t A228117   HookHolder = {};
+%t A228117   HS = {};
+%t A228117   For[i = 1, i < Length[Lambda] + 1, i++,
+%t A228117    For[j = 1, j < Lambda[[i]] + 1, j++,
+%t A228117     CurrentHook =
+%t A228117      Lambda[[i]] - j + TransposePartition[Lambda][[j]] - i + 1;
+%t A228117     If[! MemberQ[HS, CurrentHook],
+%t A228117      HookHolder = Append[HS, CurrentHook]; HS = HookHolder]
+%t A228117     ]
+%t A228117    ];
+%t A228117   HookHolder = Sort[HS];
+%t A228117   HS = HookHolder;
+%t A228117   Return[HS]]
+%t A228117 For[i = 1, i < 31, i++,
+%t A228117 For[j = 1, j < PartitionsP[i] + 1, j++,
+%t A228117   CurrSet=HookSet[Partitions[i][[j]]];
+%t A228117   If[CurrSet == Table[i,{i,1,Length[CurrSet]}],
+%t A228117    SGFHolder = SegGenFn + q^i;
+%t A228117    SegGenFn = SGFHolder]
+%t A228117   ]
+%t A228117 ]
+%t A228117 (* second program: *)
+%t A228117 h[l_] := Module[{n, s}, n = Length[l]; s = Table[Table[1 + l[[i]] - j + Sum[If[l[[k]] >= j, 1, 0], {k, i+1, n}], {j, 1, l[[i]]}], {i, 1, n}] // Flatten // Union; If[s == Range[Max[Append[s, 0]]], 1, 0]]; g[n_, i_, l_] := g[n, i, l] = If[n == 0 || i == 1, h[Join[l, Array[1&, n]]], If[i<1, 0, g[n, i-1, l] + If[i>n, 0, g[n-i, i, Append[l, i]]]]]; a[n_] := g[n, n, {}]; Table[an = a[n]; Print["a(", n, ") = ", an]; an, {n, 0, 60}] (* _Jean-François Alcover_, Jan 22 2016, after _Alois P. Heinz_ *)
+%Y A228117 Cf. A158291, the number of partitions which have hookset {1,2,...,n}, not counting multiplicities.
+%K A228117 nonn
+%O A228117 0,3
+%A A228117 _William J. Keith_, Aug 10 2013
+%E A228117 a(31)-a(53) from _Alois P. Heinz_, Aug 12 2013

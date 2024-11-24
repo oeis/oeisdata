@@ -1,0 +1,42 @@
+%I A306888 #61 Aug 25 2023 12:20:14
+%S A306888 0,1,1,2,1,4,3,8,11,20,31,64,105,202,367,696,1285,2452,4599,8776,
+%T A306888 16651,31838,60787,116640,223697,430396,828525,1598228,3085465,
+%U A306888 5966000,11545611,22371000,43383571,84217616,163617805,318150720,619094385,1205614054,2349384031,4581315968
+%N A306888 Number of inequivalent colorful necklaces.
+%C A306888 Cf. Bernstein-Kouba paper, function K(n).
+%C A306888 A necklace or bracelet is colorful if no pair of adjacent beads are the same color. In addition, two necklaces are equivalent if one results from the other by permuting its colors, and two bracelets are equivalent if one results from the other by either permuting its colors or reversing the order of the beads; a bracelet is thus a necklace that can be turned over.
+%H A306888 Michael De Vlieger, <a href="/A306888/b306888.txt">Table of n, a(n) for n = 1..3336</a>
+%H A306888 Dennis S. Bernstein and Omran Kouba, <a href="https://arxiv.org/abs/1901.10703">Counting Colorful Necklaces and Bracelets in Three Colors</a>, arXiv:1901.10703 [math.CO], 2019.
+%H A306888 Dennis S. Bernstein and Omran Kouba, <a href="https://doi.org/10.1007/s00010-019-00645-w">Counting Colorful Necklaces and Bracelets in Three Colors</a>, Aequat. Math, 2019.
+%F A306888 a(n) = floor(Sum_{d|n} (1 + 4/3 * cos(d * Pi/2)^2 * sin(d * Pi/3)^2 ) * gcd(d,6) * phi(d) * 2^(n/d)/(6*n)). [corrected by _Omran Kouba_, Apr 11 2019]
+%F A306888 Eq. (4.15) of Bernstein-Kouba expresses K(n) in terms of A_n, B_n, C_n, and the Maple code below calculates all four sequences and confirms the values given here. - _N. J. A. Sloane_, Mar 15 2019
+%F A306888 a(n) = Sum_{k=1..3} A327396(n, k). - _Andrew Howroyd_, Oct 09 2019
+%F A306888 a(n) ~ 2^(n-1) / (3*n). - _Vaclav Kotesovec_, May 02 2020
+%p A306888 # Maple code from _N. J. A. Sloane_, Mar 15 2019
+%p A306888 p:=numtheory[phi]; M:=80;
+%p A306888 fA:=proc(n) local d,t1; global p; t1:=0; # A_n, A306896
+%p A306888 for d from 1 to n do
+%p A306888 if (n mod d) = 0 then t1:=t1 + (2^d+ 2*(-1)^d)*p(n/d); fi; od; t1; end;
+%p A306888 [seq(fA(n),n=1..M)]; # A306896
+%p A306888 fB:=proc(n) local d,t1; global p; t1:=0; # B_n, A306898
+%p A306888 for d from 1 to n do
+%p A306888 if ((n mod 2) = 0 and ((n/2) mod d) = 0) then t1:=t1 + 2^d*p(n/d); fi; od; t1; end;
+%p A306888 [seq(fB(2*n),n=1..M)]; # A306898
+%p A306888 fC:=proc(n) local d,t1; global p; t1:=0; # C_n, A306899
+%p A306888 for d from 1 to n do
+%p A306888 if ((n mod 3) = 0 and ((n/3) mod d) = 0)
+%p A306888 then t1:=t1 + (2^d - (-1)^d)*p(n/d); fi; od; t1; end;
+%p A306888 [seq(fC(3*n),n=1..M)]; # A306899
+%p A306888 K:=proc(n) global fA, fB, fC;
+%p A306888 (fA(n)+3*fB(n)+2*fC(n))/(6*n); end;
+%p A306888 [seq(K(n),n=1..M)]; # A306888
+%t A306888 f[n_] := DivisorSum[n, (2^# + 2 (-1)^#) EulerPhi[n/#] &]; g[n_] := DivisorSum[n, 2^# *EulerPhi[n/#] &, And[Mod[n, 2] == 0, Mod[(n/2), #] == 0] &]; h[n_] := DivisorSum[n, (2^# - (-1)^#) EulerPhi[n/#] &, And[Mod[n, 3] == 0, Mod[(n/3), #] == 0] &]; Array[(f[#] + 3 g[#] + 2 h[#])/(6 #) &, 40] (* _Michael De Vlieger_, Mar 18 2019 *)
+%t A306888 (* Alternatively, using Remark 4.4 from the article *)
+%t A306888 K[n_]:=Floor[ 1/(6 n) DivisorSum[n, 2^(n/#)(1 + 4/3 Cos[# Pi/2]^2
+%t A306888 Sin[# Pi/3]^2) GCD[#,6] EulerPhi[#] &]]; Table[K[n],{n,1,500}]
+%t A306888 (* _Omran Kouba_, Apr 11 2019; typo fixed by _Jean-François Alcover_, May 01 2020 *)
+%o A306888 (PARI) a(n) = round(sumdiv(n, d, (1 + (4/3) * (1-(d%2)) * (if (d%3, 3/4))) * gcd(d, 6) * eulerphi(d) * 2^(n/d))/(6*n)); \\ _Michel Marcus_, May 01 2020; corrected Jun 15 2022
+%Y A306888 Cf. A114438, A306896, A306898, A306899, A309673, A327396, A327397.
+%K A306888 nonn
+%O A306888 1,4
+%A A306888 _Omran Kouba_, Mar 15 2019

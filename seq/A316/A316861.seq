@@ -1,0 +1,43 @@
+%I A316861 #28 Sep 16 2019 08:23:44
+%S A316861 0,0,1,1,4,7,13,22,38,58,93,139,208,302,438,616,869,1200,1650,2239,
+%T A316861 3026,4038,5374,7081,9292,12103,15704,20236,25992,33191,42237,53490,
+%U A316861 67524,84860,106341,132736,165212,204928,253518,312629,384585,471734,577276,704584,858078
+%N A316861 a(n) = Sum_{p in P} y(1)*y(2), where P is the set of partitions of n, and y(k) is the number of parts with multiplicity at least k in p.
+%C A316861 Also (1/2)*Sum_{p in P} H(1)*H(2), where P is the set of partitions of n, and H(k) is the number of k-hooks in p.
+%H A316861 Alois P. Heinz, <a href="/A316861/b316861.txt">Table of n, a(n) for n = 0..1000</a>
+%F A316861 G.f.: (q^3/((1-q)(1-q^2)) + q^2/(1-q^2) - q^3/(1-q^3))*Product_{j>=1} 1/(1-q^j).
+%F A316861 a(n) = A000097(n+3) + A116646(n).
+%F A316861 In general, Sum_{n>=0} q^n Sum_{p in P} y(s)*y(t) for s < t is given by (q^(s+t)/((1-q^s)(1-q^t)) + q^t/(1-q^t) - q^(s+t)/(1-q^(s+t))) * Product_{j>=1} 1/(1-q^j).
+%e A316861 For n=6, we sum over the partitions of 6. For each partition, we count the parts with multiplicity at least one, and those of at least two.
+%e A316861 6............y(1)*y(2) = 1*0 = 0
+%e A316861 5,1..........y(1)*y(2) = 2*0 = 0
+%e A316861 4,2..........y(1)*y(2) = 2*0 = 0
+%e A316861 4,1,1........y(1)*y(2) = 2*1 = 2
+%e A316861 3,3..........y(1)*y(2) = 1*1 = 1
+%e A316861 3,2,1........y(1)*y(2) = 3*0 = 0
+%e A316861 3,1,1,1......y(1)*y(2) = 2*1 = 2
+%e A316861 2,2,2........y(1)*y(2) = 1*1 = 1
+%e A316861 2,2,1,1......y(1)*y(2) = 2*2 = 4
+%e A316861 2,1,1,1,1....y(1)*y(2) = 2*1 = 2
+%e A316861 1,1,1,1,1,1..y(1)*y(2) = 1*1 = 1
+%e A316861 --------------------------------
+%e A316861 Total.........................13
+%p A316861 b:= proc(n, i, x, y) option remember;
+%p A316861      `if`(n=0, x*y, `if`(i<1, 0, add(b(n-i*j, i-1,
+%p A316861      `if`(j>0, 1, 0)+x, `if`(j>1, 1, 0)+y), j=0..n/i)))
+%p A316861     end:
+%p A316861 a:= n-> b(n$2, 0$2):
+%p A316861 seq(a(n), n=0..55);  # _Alois P. Heinz_, Jul 30 2018
+%t A316861 Array[Total[
+%t A316861    Count[Split@#, (_?(Length@# >= 1 &))] Count[
+%t A316861        Split@#, (_?(Length@# >= 2 &))] & /@
+%t A316861     IntegerPartitions[#]] &, 50]
+%t A316861 (* Second program: *)
+%t A316861 b[n_, i_, x_, y_] := b[n, i, x, y] = If[n == 0, x*y, If[i < 1, 0, Sum[b[n - i*j, i - 1, If[j > 0, 1, 0] + x, If[j > 1, 1, 0] + y], {j, 0, n/i}]]];
+%t A316861 a[n_] := b[n, n, 0, 0];
+%t A316861 a /@ Range[0, 55] (* _Jean-François Alcover_, Sep 16 2019, after _Alois P. Heinz_ *)
+%o A316861 (PARI) seq(n)={Vec(x*(1 + x^2 + x^3)/((1 - x)^2*(1 + x)*(1 + x + x^2)*prod(i=1, n-1, 1 - x^i + O(x^n))) + O(x^n), -n)} \\ _Andrew Howroyd_, Jul 15 2018
+%Y A316861 Cf. A000097, A116646, A000070, A024786.
+%K A316861 nonn
+%O A316861 0,5
+%A A316861 _Emily Anible_, Jul 15 2018

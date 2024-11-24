@@ -1,0 +1,51 @@
+%I A241773 #27 May 22 2014 11:39:06
+%S A241773 1,2,3,1,4,1,5,2,1,6,1,7,1,2,3,1,8,1,9,2,1,4,1,10,1,3,2,1,11,1,2,5,1,
+%T A241773 12,1,3,1,2,4,1,13,1,2,6,1,14,1,3,1,2,15,1,16,1,2,4,1,3,1,5,7,1,2,1,
+%U A241773 17,1,2,3,1,18,1,8,2,1,4,1,6,1,2,3,1,5,1,19
+%N A241773 A sequence constructed so that the probability of occurrence of integer i > 0 is given by p(i) = log_2[(i+1)^2/(i^2+2*i)], which is the Gauss-Kuzmin distribution.
+%C A241773 Let the sequence be A = {a(i)}, i = 1, 2, 3,... and define p(i) =
+%C A241773 log_2[(i+1)^2/(i^2+2*i)]. Additionally, define u(j, k) = k*p(j) - N(j, k), where N(j, k) is the number of occurrences of j in {a(i)}, i = 1,..., k-1. Refer to the first argument of u as the "index" of u. Then A is defined by a(1) = 1 and, for i > 1, a(i) = m, where m is the index of the maximal element of the set {u(j, i)}, j = 1, 2, 3,... That there is a single maximal element for all i is guaranteed by the fact that p(i) - p(j) is irrational for all i not equal to j.
+%C A241773 Interpreting sequence A as the partial coefficients of the continued fraction expansion of a real number C, say, then C = 1.44224780173510148... which is, by construction, normal (in the continued fraction sense).
+%H A241773 Jonathan Deane, <a href="/A241773/b241773.txt">Table of n, a(n) for n = 1..10000</a>
+%H A241773 Jonathan Deane, <a href="/A241773/a241773.pdf">An integer sequence whose members obey a given p.d.f.</a>
+%p A241773 pdf := i -> -log[2](1 - 1/(i+1)^2);
+%p A241773 gen_seq := proc(n)
+%p A241773 local i, j, N, A, u, mm, ndig;
+%p A241773 ndig := 40; N := 'N';
+%p A241773 for i from 1 to n do    N[i] := 0;      end do;
+%p A241773 A := 'A'; A[1] := 1; N[1] := 1;
+%p A241773 for i from 2 to n do
+%p A241773         u := 'u';
+%p A241773         for j from 1 to n do
+%p A241773                 u[j] := i*pdf(j) - N[j];
+%p A241773         end do;
+%p A241773         mm := max_maxind(evalf(convert(u, list), ndig));
+%p A241773         if mm[3] then
+%p A241773                 A[i] := mm[1];
+%p A241773                 N[mm[1]] := N[mm[1]] + 1;
+%p A241773         else
+%p A241773                 return();
+%p A241773         end if;
+%p A241773 end do;
+%p A241773 return(convert(A, list));
+%p A241773 end:
+%p A241773 max_maxind := proc(inl)
+%p A241773 local uniq, mxind, mx, i;
+%p A241773 uniq := `true`;
+%p A241773 if nops(inl) = 1 then return([1, inl[1], uniq]); end if;
+%p A241773 mxind := 1; mx := inl[1];
+%p A241773 for i from 2 to nops(inl) do
+%p A241773         if inl[i] > mx then
+%p A241773                 mxind := i;
+%p A241773                 mx := inl[i];
+%p A241773                 uniq := `true`;
+%p A241773         elif inl[i] = mx then
+%p A241773                 uniq := `false`;
+%p A241773         end if;
+%p A241773 end do;
+%p A241773 return([mxind, mx, uniq]);
+%p A241773 end:
+%p A241773 gen_seq(100);
+%K A241773 cofr,easy,nonn
+%O A241773 1,2
+%A A241773 _Jonathan Deane_, Apr 28 2014

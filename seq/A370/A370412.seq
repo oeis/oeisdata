@@ -1,0 +1,45 @@
+%I A370412 #28 Apr 30 2024 08:28:06
+%S A370412 0,2,0,4,1,0,536,11,1,0,2888,361,23,2,0,3302008,24611,1681,116,4,0,
+%T A370412 12724582576,2873041,257543,267704,328,4,0,18194938976,27233033477,
+%U A370412 67637281,3741352,92656,88,1,0,875222833138832,11779156811,18752521534133,1156377368,479214352,287536,29,2,0
+%N A370412 Square array T(n, k) = numerator( zeta_r(2*n) * sqrt(A003658(k + 2)) / Pi^(4*n) ), read by antidiagonals, where zeta_r is the Dedekind zeta-function over r and r is the real quadratic field with discriminant A003658(k + 2).
+%H A370412 <a href="/index/Z#zeta_function">Index entries for zeta function</a>.
+%F A370412 T(n, k) = numerator( 2^(n*4) * n^2 * zeta_r(1 - 2*n) /((2*n)!^2 * A003658(k + 2)^(2*n - 1)) ), where zeta_r is the Dedekind zeta-function over r and r is the real quadratic field with discriminant A003658(k + 2).
+%F A370412 T(n, 0) = numerator((5^(-2*n)*(zeta(2*n, 1/5) - zeta(2*n, 2/5) - zeta(2*n, 3/5) + zeta(2*n, 4/5) ))*zeta(2*n)*sqrt(5)*Pi^(-4*n)). A sum of Hurwitz zeta functions with signs according A080891.
+%F A370412 T(n, 1) = numerator( 2^(n*4) * n^2 * zeta(1 - 2*n) * (-1)^n * A000464(n+1) /((2*n)!^2 * 8^(2*n - 1)) ).
+%F A370412 T(n, 2) = numerator( 2^(n*4) * n^2 * zeta(1 - 2*n) * (-1)^n * A000191(n+1) /((2*n)!^2 * 12^(2*n - 1)) ).
+%F A370412 T(n, 3) = numerator((13^(-2*n)*(zeta(2*n, 1/13) - zeta(2*n, 2/13) + zeta(2*n, 3/13) + zeta(2*n, 4/13) - zeta(2*n, 5/13) - zeta(2*n, 6/13) - zeta(2*n, 7/13) -  zeta(2*n, 8/13) + zeta(2*n, 9/13) + zeta(2*n, 10/13) - zeta(2*n, 11/13) + zeta(2*n, 12/13) ))*zeta(2*n)*sqrt(13)*Pi^(-4*n)). A sum of Hurwitz zeta functions with signs according the Dirichlet character X13(12,.).
+%F A370412 T(n, 6) = numerator( 2^(n*4) * n^2 * zeta(1 - 2*n) * (-1)^n * A000411(n+1) /((2*n)!^2 * 24^(2*n - 1)) ).
+%F A370412 T(n, 7) = numerator( 2^(n*4) * n^2 * zeta(1 - 2*n) * (-1)^n * A064072(n+1) /((2*n)!^2 * 28^(2*n - 1)) ).
+%F A370412 T(n, 11) = numerator( 2^(n*4) * n^2 * zeta(1 - 2*n) * (-1)^n * A064075(n+1) /((2*n)!^2 * 40^(2*n - 1)) ).
+%F A370412 T(n, k) = numerator( 2^(n*4) * n^2 * zeta(1 - 2*n) * (-1)^n * d(A003658(k+2)/4, n+1) /((2*n)!^2 * 40^(2*n - 1)) ), for all k where A003658(k+2) is a multiple of four (The discriminant of the quadratic field is from 4*A230375). d() are the generalized tangent numbers.
+%F A370412 T(0, k) = 0, because for a real quadratic number field the discriminant D is positive, hence the Kronecker symbol (D/-1) = 1. This means the associated Dirichlet L-function will be zero at s = 0 inside the expression zeta_r(s) = zeta(s)*L(s, x).
+%e A370412 The array begins:
+%e A370412           0,           0,              0,               0,                 0
+%e A370412           2,           1,              1,               2,                 4
+%e A370412           4,          11,             23,             116,               328
+%e A370412         536,         361,           1681,          267704,             92656
+%e A370412        2888,       24611,         257543,         3741352,         479214352
+%e A370412     3302008,     2873041,       67637281,      1156377368,       14816172016
+%e A370412 12724582576, 27233033477, 18752521534133, 753075777246704, 16476431095568992
+%o A370412 (PARI)
+%o A370412 \p 700
+%o A370412 row(n) = {v=[]; for(k=2, 50, if(isfundamental(k), v=concat(v, numerator(bestappr(sqrt(k)*lfun(x^2-(k%2)*x-floor(k/4), 2*n)/Pi^(4*n)))))); v}
+%o A370412 z(n,d) = if(n == 0, 0,(1/(-2*n))*bernfrac(2*n)*d^(2*n-1)*sum(k=1,d-1, kronecker(d, k)*subst(bernpol(2*n),x,k/d)*(1/(-2*n))))
+%o A370412 row(n) = {v=[]; for(k=2, 100, if(isfundamental(k), v=concat(v, numerator((2^(n*4)*n^2*z(n,k))/((2*n)!^2 * (k^(2*n-1))))))); v} \\ more accuracy here
+%o A370412 (Sage)  # Only suitable for small n and k
+%o A370412 def T(n, k):
+%o A370412     discs = [fundamental_discriminant(i) for i in range(1, 4*k+10)]
+%o A370412     D = sorted(list(set(discs)))[k+1]
+%o A370412     zetaK = QuadraticField(D).zeta_function(1000)
+%o A370412     val = (zetaK(2*n)*sqrt(D)/(pi^(4*n))).n(1000).nearby_rational(2^-900)
+%o A370412     return val.numerator() # _Robin Visser_, Mar 19 2024
+%Y A370412 Cf. A370411 (denominators).
+%Y A370412 Cf. A003658, A080891, A097916, A097917, A230375, A370413.
+%Y A370412 Cf. A000191, A000411, A000464, A064072, A064075.
+%Y A370412 Cf. A002432 (denominators zeta(2*n)/Pi^(2*n)).
+%Y A370412 Cf. A046988 (numerators zeta(2*n)/Pi^(2*n)).
+%Y A370412 Coefficients of Dedekind zeta functions for real quadratic number fields of discriminants 5, 8, 12, 13, 17, 21, 24, 28, 29, 33, 37, 40 are A035187, A035185, A035194, A035195, A035199, A035203, A035188, A035210, A035211, A035215, A035219, A035192, respectively.
+%K A370412 nonn,tabl,frac
+%O A370412 0,2
+%A A370412 _Thomas Scheuerle_, Feb 22 2024

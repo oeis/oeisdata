@@ -1,0 +1,43 @@
+%I A242534 #17 Oct 25 2018 21:26:01
+%S A242534 1,0,0,0,0,0,0,0,0,72,288,3600,17856,174528,2540160,14768640,
+%T A242534 101030400,1458266112,11316188160,140951577600,2659218508800,
+%U A242534 30255151463424,287496736542720,5064092578713600,76356431941939200,987682437203558400,19323690313219522560
+%N A242534 Number of cyclic arrangements of S={1,2,...,n} such that the difference of any two neighbors is not coprime to their sum.
+%C A242534 a(n)=NPC(n;S;P) is the count of all neighbor-property cycles for a specific set S of n elements and a specific pair-property P. For more details, see the link and A242519.
+%C A242534 Compare this with A242533 where the property is inverted.
+%H A242534 Hiroaki Yamanouchi, <a href="/A242534/b242534.txt">Table of n, a(n) for n = 1..27</a>
+%H A242534 S. Sykora, <a href="http://dx.doi.org/10.3247/SL5Math14.002">On Neighbor-Property Cycles</a>, <a href="http://ebyte.it/library/Library.html#math">Stan's Library</a>, Volume V, 2014.
+%e A242534 The first and the last of the 72 cycles for n=10 are:
+%e A242534 C_1={1,3,5,10,2,4,8,6,9,7} and C_72={1,7,5,10,8,4,2,6,3,9}.
+%e A242534 There are no solutions for cycle lengths from 2 to 9.
+%t A242534 A242534[n_] := Count[Map[lpf, Map[j1f, Permutations[Range[2, n]]]], 0]/2;
+%t A242534 j1f[x_] := Join[{1}, x, {1}];
+%t A242534 lpf[x_] := Length[Select[cpf[x], ! # &]];
+%t A242534 cpf[x_] := Module[{i},
+%t A242534    Table[! CoprimeQ[x[[i]] - x[[i + 1]], x[[i]] + x[[i + 1]]], {i,
+%t A242534      Length[x] - 1}]];
+%t A242534 Join[{1}, Table[A242534[n], {n, 2, 10}]]
+%t A242534 (* OR, a less simple, but more efficient implementation. *)
+%t A242534 A242534[n_, perm_, remain_] := Module[{opt, lr, i, new},
+%t A242534    If[remain == {},
+%t A242534      If[!
+%t A242534        CoprimeQ[First[perm] + Last[perm], First[perm] - Last[perm]],
+%t A242534       ct++];
+%t A242534      Return[ct],
+%t A242534      opt = remain; lr = Length[remain];
+%t A242534      For[i = 1, i <= lr, i++,
+%t A242534       new = First[opt]; opt = Rest[opt];
+%t A242534       If[CoprimeQ[Last[perm] + new, Last[perm] - new], Continue[]];
+%t A242534       A242534[n, Join[perm, {new}],
+%t A242534        Complement[Range[2, n], perm, {new}]];
+%t A242534       ];
+%t A242534      Return[ct];
+%t A242534      ];
+%t A242534    ];
+%t A242534 Join[{1}, Table[ct = 0; A242534[n, {1}, Range[2, n]]/2, {n, 2, 12}] ](* _Robert Price_, Oct 25 2018 *)
+%o A242534 (C++) See the link.
+%Y A242534 Cf. A242519, A242520, A242521, A242522, A242523, A242524, A242525, A242526, A242527, A242528, A242529, A242530, A242531, A242532, A242533.
+%K A242534 nonn,hard
+%O A242534 1,10
+%A A242534 _Stanislav Sykora_, May 30 2014
+%E A242534 a(19)-a(27) from _Hiroaki Yamanouchi_, Aug 30 2014

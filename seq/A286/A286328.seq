@@ -1,0 +1,64 @@
+%I A286328 #31 Nov 23 2024 03:34:04
+%S A286328 4,3,24,60,14,9,180,264,20,480,19,84,924,1104,51,1740,155,2244,2520,
+%T A286328 2664,3120,3444,99,51,51,5304,5724,65,399,8064,8580,9384,9660,221,
+%U A286328 11400,12324,13284,13944,14964,16020,819,18240,194,99,19800,22260,24864,25764,26220
+%N A286328 Least integer k such that the area of the triangle (prime(n), k, k+1) is integer.
+%C A286328 The area A of a triangle whose sides have lengths a, b, and c is given by Heron's formula : A = sqrt(s*(s-a)*(s-b)*(s-c)), where s = (a+b+c)/2.
+%C A286328 The corresponding areas are 6, 6, 84, 330, 84, 36, 1710, 3036, 210,...
+%C A286328 The following table gives the first values of n, the sides (prime(n), k, k+1) and the area A of each triangle.
+%C A286328 +-----+---------+------+------+-------+
+%C A286328 |  n  | prime(n)|   k  |  k+1 |    A  |
+%C A286328 +-----+---------+------+------+-------+
+%C A286328 |  2  |    3    |   4  |   5  |    6  |
+%C A286328 |  3  |    5    |   3  |   4  |    6  |
+%C A286328 |  4  |    7    |  24  |  25  |   84  |
+%C A286328 |  5  |   11    |  60  |  61  |  330  |
+%C A286328 |  6  |   13    |  14  |  15  |   84  |
+%C A286328 |  7  |   17    |   9  |  10  |   36  |
+%C A286328 |  8  |   19    | 180  |  181 | 1710  |
+%C A286328 |  9  |   23    | 264  |  265 | 3036  |
+%C A286328 | 10  |   29    |  20  |   21 |  210  |
+%C A286328 .......................................
+%C A286328 We observe triangles of sides (prime(m), prime(m)+1, prime(m)+2) = (3, 4, 5), (13, 14, 15), (193, 194, 195), (37633, 37634, 37635), ... with the corresponding areas 6, 84, 16296, 613283664, ... (subsequence of A011945).
+%C A286328 We observe Pythagorean triangles for n = 2, 3, 4, 5, 8, 9, 10, ....
+%C A286328 In this case, if prime(n) < k, the numbers k of the sequence such that prime(n) = sqrt(2k+1) are given by the numbers {4, 24, 60, 180, 264, ...}, subsequence of {A084921} = {4, 12, 24, 60, 84, 144, 180, 264, ...}. If prime(n) > k, the numbers k of the sequence such that prime(n) = sqrt(2k^2+2k+1) are given by the numbers 3, 20, 4059, 23660, ....
+%C A286328 From _Chai Wah Wu_, May 15 2017: (Start)
+%C A286328 Assumes triangle has positive area.
+%C A286328 Let p = prime(n). Then
+%C A286328 (p+1)/2 <= a(n) <= (p^2-1)/2.
+%C A286328 a(n) = (p+1)/2 if n > 1 is a term in A062325, i.e. p is of the form m^2+1 (A002496); otherwise, a(n) > (p+1)/2.
+%C A286328 a(n) is the smallest k >= (p+1)/2 such that sum_{i=(p+1)/2}^{k} i*(p^2-1)/2 is a square.
+%C A286328 These statements follow from the fact that the area of a triangle with sides of length p, k and k+1 is equal to (p^2-1)*((2k+1)^2-p^2)/16.
+%C A286328 (End)
+%H A286328 Chai Wah Wu, <a href="/A286328/b286328.txt">Table of n, a(n) for n = 2..1000</a>
+%e A286328 a(4) = 24 because the area of the triangle (prime(4), 24, 25) = (7, 24, 25) = sqrt(28*(28-7)*(28-24)*(28-25)) = 84, where the semiperimeter 28 = (7+24+25)/2.
+%p A286328 nn:=10^7:
+%p A286328 for n from 2 to 50 do:
+%p A286328 a:=ithprime(n):ii:=0:
+%p A286328 for k from 1 to nn while(ii=0) do:
+%p A286328 p:=(a+2*k+1)/2:q:=p*(p-a)*(p-k)*(p-k-1):
+%p A286328 if q>0 and floor(sqrt(q))=sqrt(q) then
+%p A286328        ii:=1: printf(`%d, `,k):
+%p A286328       else
+%p A286328       fi:
+%p A286328      od:
+%p A286328     od:
+%t A286328 Do[kk=0;Do[s=(Prime[n]+2k+1)/2;If[IntegerQ[s],area2=s(s-Prime[n])(s-k)(s-k-1);If[area2>0&&kk==0&&IntegerQ[Sqrt[area2]],Print[n," ",k];kk=1]],{k,1,3*10^4}],{n,2,10}] (* or *)
+%t A286328 a[n_] := Block[{p = Prime@n, k}, k = (p + 1)/2; While[! IntegerQ@ Sqrt[(4 k^2 - p^2 + 4 k + 1) (p^2 - 1)/16], k++]; k]; a /@ Range[2, 50] (* _Giovanni Resta_, May 07 2017 *)
+%o A286328 (Python)
+%o A286328 from __future__ import division
+%o A286328 from sympy import prime
+%o A286328 from gmpy2 import is_square
+%o A286328 def A286328(n): # assumes n >= 2
+%o A286328     p, area = prime(n), 0
+%o A286328     k, q, kq = (p + 1)//2, (p**2 - 1)//2, (p - 1)*(p + 1)**2//4
+%o A286328     while True:
+%o A286328         area += kq
+%o A286328         if is_square(area):
+%o A286328             return k
+%o A286328         k += 1
+%o A286328         kq += q # _Chai Wah Wu_, May 15 2017
+%Y A286328 Cf. A002496, A011945, A062325, A084921, A188158.
+%K A286328 nonn,changed
+%O A286328 2,1
+%A A286328 _Michel Lagneau_, May 07 2017

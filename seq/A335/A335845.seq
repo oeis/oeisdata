@@ -1,0 +1,36 @@
+%I A335845 #23 Feb 03 2023 20:14:24
+%S A335845 1,1,1,1,1,2,2,1,1,3,5,3,3,5,3,1,1,4,9,9,4,6,16,11,11,16,6,4,9,9,4,1,
+%T A335845 1,5,14,19,14,5,10,35,40,19,26,61,40,26,35,10,10,35,26,40,61,26,19,40,
+%U A335845 35,10,5,14,19,14,5,1,1,6,20,34,34,20,6,15,64,99
+%N A335845 Irregular triangular array T(n,k) read by rows.  Row n gives the number of permutations of {1,2,...,n} whose descent set is S for each subset S of {1,2,...,n-1} ordered lexicographically within the rows.
+%C A335845 Row lengths are A011782(n).
+%C A335845 Every row begins and ends with a 1 because there is exactly 1 n-permutation whose descent set is the empty set and there is exactly 1 n-permutation whose descent set is {1,2,...,n-1}, namely the identity permutation and its reverse.
+%H A335845 Alois P. Heinz, <a href="/A335845/b335845.txt">Rows n = 0..15, flattened</a>
+%e A335845 T(5,5) = 6 because there are 6 permutations of [5] whose descent set is {1,2}: (3,2,1,4,5), (4,2,1,3,5), (4,3,1,2,5), (5,2,1,3,4), (5,3,1,2,4), (5,4,1,2,3).
+%e A335845 Triangle T(n,k) begins:
+%e A335845   1;
+%e A335845   1;
+%e A335845   1, 1;
+%e A335845   1, 2, 2, 1;
+%e A335845   1, 3, 5, 3, 3, 5,  3,  1;
+%e A335845   1, 4, 9, 9, 4, 6, 16, 11, 11, 16, 6, 4, 9, 9, 4, 1;
+%e A335845   ...
+%p A335845 T:= proc(n) option remember; local b, i, l; l:=
+%p A335845       map(x-> add(2^(i-1), i=x), [seq(combinat[choose](
+%p A335845               [$1..n-1], i)[], i=0..n-1)]); h(0):=0;
+%p A335845       for i to nops(l) do h(l[i]):= (i-1) od: b:=
+%p A335845       proc(u, o, t) option remember; `if`(u+o=0, x^h(t),
+%p A335845         add(b(u-j, o+j-1, t), j=1..u)+
+%p A335845         add(b(u+j-1, o-j, t+2^(u+o-1)), j=1..o))
+%p A335845       end; (p->
+%p A335845       seq(coeff(p, x, i), i=0..degree(p)))(b(n, 0$2))
+%p A335845     end:
+%p A335845 seq(T(n), n=0..7);  # _Alois P. Heinz_, Feb 03 2023
+%t A335845 f[list_] := (-1)^(Length[list] + 1) Apply[Multinomial, list];
+%t A335845 Table[g[S_] :=Abs[Total[Map[f, Map[Differences,Map[Prepend[#, 0] &, Map[Append[#, n] &, Subsets[S]]]]]]];Map[g, Subsets[Range[n - 1]]], {n, 1, 5}] // Grid
+%Y A335845 Row sums give A000142.
+%Y A335845 Cf. A011782, A060350, A060351, A082185.
+%K A335845 nonn,tabf
+%O A335845 0,6
+%A A335845 _Geoffrey Critzer_, Jun 26 2020
+%E A335845 T(0,0)=1 prepended by _Alois P. Heinz_, Sep 08 2020

@@ -1,0 +1,74 @@
+%I A354078 #68 May 21 2022 14:52:57
+%S A354078 1,4,9,144,441,10404,12321,40401,69696,1004004,1022121,1212201,
+%T A354078 4004001,4088484,4848804,100040004,100220121,102030201,121022001,
+%U A354078 400040001,400880484,404492544,420578064,445294404,460875024,484088004,617323716,10000400004,10002200121
+%N A354078 Squares k that are not divisible by 10, and whose reverse and digit sum are also squares, such that the digit sum divides both k and its reverse.
+%C A354078 Palindromic terms include 12321, 69696, 102030201, 617323716.
+%C A354078 144, 10404, 1004004, 100040004, 10000400004, 1000004000004, ... are all terms, so the sequence is infinite.
+%C A354078 From _Jon E. Schoenfield_, May 20 2022: (Start)
+%C A354078 Among the 3358 terms < 10^21, several classes of terms are rare or nonexistent:
+%C A354078 - no term has an even number of digits
+%C A354078 - no term begins or ends with a 5
+%C A354078 - no term begins with 18 or 92
+%C A354078 - no term that begins with 16 has any digit other than 9 as its third digit
+%C A354078 - only one term (420578064) begins with 42, and only one (460875024) begins with 46
+%C A354078 - only one term (9488660854689) begins with 94, and only one (9864580668849) begins with 98
+%C A354078 - only two terms begin or end with a 6: 69696 and 617323716 (each of which is a palindrome)
+%C A354078 - only three terms begin with a 9 and end with anything other than a 1: 9, 9488660854689, and 9864580668849
+%C A354078 Do there exist any terms > 10^21 of any of these classes?
+%C A354078 (End)
+%H A354078 Jon E. Schoenfield, <a href="/A354078/b354078.txt">Table of n, a(n) for n = 1..3358</a>
+%H A354078 <a href="/index/Sq#sqrev">Index entry for sequences related to reversing digits of squares</a>
+%e A354078 10404 and its reverse, 40401 are terms because both are squares,
+%e A354078 10404 = 102^2 and 40401 = 201^2, both have digit sum 9 and digit sum divides both 10404 and its reverse. 10404/9 = 1156, and 40401/9 = 4489.
+%o A354078 (C)
+%o A354078 int get_digit_sum(int integer, int *reverse)
+%o A354078 {
+%o A354078     int sum = 0;
+%o A354078     int rev_num = 0;
+%o A354078     int num = integer;
+%o A354078     int rem = 0;
+%o A354078     while (num != 0) {
+%o A354078         rem = num % 10;
+%o A354078         sum += rem;
+%o A354078         num = num / 10;
+%o A354078         rev_num = 10*rev_num + rem;
+%o A354078     }
+%o A354078     *reverse = rev_num;
+%o A354078     return sum;
+%o A354078 }
+%o A354078 int is_square(int integer)
+%o A354078 {
+%o A354078     int mid = (int)(sqrt(integer));
+%o A354078     if ((mid*mid) == integer) {
+%o A354078         return mid;
+%o A354078     }
+%o A354078     else {
+%o A354078         return 0;
+%o A354078     }
+%o A354078 }
+%o A354078 int main(int argc, char *argv[])
+%o A354078 {
+%o A354078    int reverse = 0;
+%o A354078    for (int j = 1; j <= 100011; j++) {
+%o A354078        if (j % 10 == 0) {
+%o A354078            continue;
+%o A354078        }
+%o A354078        int i = j*j;
+%o A354078        int digit_sum = get_digit_sum(i, &reverse);
+%o A354078        if ((i % digit_sum == 0) && (reverse % digit_sum == 0) &&
+%o A354078                 (is_square(digit_sum) != 0) && (is_square(reverse) != 0)) {
+%o A354078            printf("%d, ", i);
+%o A354078        }
+%o A354078    }
+%o A354078    printf("\n");
+%o A354078    return 0;
+%o A354078 }
+%o A354078 (PARI) isok1(k) = if (k % 100, my(s=sumdigits(k), q=k/s); issquare(s) && issquare(q) && (denominator(q)==1));
+%o A354078 isok(k) = isok1(k) && isok1(fromdigits(Vecrev(digits(k)))); \\ _Michel Marcus_, May 17 2022
+%o A354078 (Magma) J:=100011; a:=[]; for j in [1..J] do if j mod 10 ne 0 then k:=j^2; I:=Intseq(k); s:=&+I; if (k mod s eq 0) and IsSquare(s) then r:=Seqint(Reverse(I)); if (r mod s eq 0) and IsSquare(r) then a[#a+1]:=k; end if; end if; end if; end for; a; // _Jon E. Schoenfield_, May 19 2022
+%Y A354078 Cf. A001102, A028839.
+%Y A354078 Subsequence of A061457.
+%K A354078 nonn,base
+%O A354078 1,2
+%A A354078 _Debapriyay Mukhopadhyay_, May 17 2022

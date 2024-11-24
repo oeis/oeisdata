@@ -1,0 +1,39 @@
+%I A365512 #19 Sep 08 2023 07:09:51
+%S A365512 3,3,5,3,3,5,17,3,3,3,17,5,17,17,17,3,3,3,5,3,3,17,257,5,5,17,257,17,
+%T A365512 257,17,257,3,3,3,5,3,3,5,257,3,3,3,257,17,17,257,257,5,5,5,5,17,257,
+%U A365512 257,257,17,257,257,257,17,257,257,257,3,3,3,5,3,3,5,257,3,3,3,17,5,257,257,257,3
+%N A365512 a(n) is the least odd prime p such that A000120(n*p) = A000120(n) * A000120(p).
+%C A365512 a(2*n) = a(n).
+%C A365512 a(n) <= A365475(A070939(n)), with a(2^n-1) = A365475(n).
+%H A365512 Robert Israel, <a href="/A365512/b365512.txt">Table of n, a(n) for n = 1..10000</a>
+%H A365512 <a href="/index/Bi#binary">Index entries for sequences related to binary expansion of n</a>
+%e A365512 a(3) = 5 because 5 is an odd prime with A000120(3 * 5) = 4 = A000120(3) * A000120(5) while A000120(3 * 3) = 2 < 4 = A000120(3) * A000120(3).
+%p A365512 g:= n -> convert(convert(n,base,2),`+`):
+%p A365512 f:= proc(n) option remember; local t,S,d,L,B,forbid,i,j,r,q;
+%p A365512   if n::even then return procname(n/2^padic:-ordp(n,2)) fi;
+%p A365512   L:= convert(n,base,2);
+%p A365512   t:= convert(L,`+`);
+%p A365512   B:= select(t -> L[t]=1, [$1..nops(L)]);
+%p A365512   forbid:= {seq(seq(B[i]-B[j],j=1..i-1),i=1..nops(B))};
+%p A365512   S[0]:= [1];
+%p A365512   for d from 1 do
+%p A365512     S[d]:= NULL;
+%p A365512     for j from 0 to d-1 do
+%p A365512       if member(d-j,forbid) then next fi;
+%p A365512       for r in S[j] do
+%p A365512         q:= r + 2^d;
+%p A365512         if g(q*n) = t*g(q) then
+%p A365512           if isprime(q) then return q fi;
+%p A365512           S[d]:= S[d], q;
+%p A365512         fi
+%p A365512       od
+%p A365512     od;
+%p A365512     S[d]:= [S[d]];
+%p A365512   od
+%p A365512 end proc:
+%p A365512 map(f, [$1..100]);
+%o A365512 (PARI) a(n) = my(p=3, h=hammingweight(n)); while (hammingweight(n*p) != h*hammingweight(p), p = nextprime(p+1)); p; \\ _Michel Marcus_, Sep 08 2023
+%Y A365512 Cf. A000120, A070939, A365475.
+%K A365512 nonn,base
+%O A365512 1,1
+%A A365512 _Robert Israel_, Sep 07 2023

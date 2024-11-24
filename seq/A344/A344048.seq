@@ -1,0 +1,62 @@
+%I A344048 #18 May 09 2021 08:04:25
+%S A344048 1,1,2,2,7,14,6,34,86,168,24,209,648,1473,2840,120,1546,5752,14988,
+%T A344048 32344,61870,720,13327,58576,173007,414160,866695,1649232,5040,130922,
+%U A344048 671568,2228544,5876336,13373190,27422352,51988748
+%N A344048 T(n, k) = n! * [x^n] exp(k * x/(1 - x))/(1 - x). Triangle read by rows, T(n, k) for 0 <= k <= n.
+%F A344048 T(n, k) = (-1)^n*U(-n, 1, -k), where U is the Kummer U function.
+%F A344048 T(n, k) = n! * L(n, -k), where L is the Laguerre polynomial function.
+%F A344048 T(n, k) = n! * Sum_{j=0..n} binomial(n, j) * k^j / j!.
+%e A344048 Triangle starts:
+%e A344048 [0]    1;
+%e A344048 [1]    1,      2;
+%e A344048 [2]    2,      7,     14;
+%e A344048 [3]    6,     34,     86,     168;
+%e A344048 [4]   24,    209,    648,    1473,    2840;
+%e A344048 [5]  120,   1546,   5752,   14988,   32344,    61870;
+%e A344048 [6]  720,  13327,  58576,  173007,  414160,   866695,  1649232;
+%e A344048 [7] 5040, 130922, 671568, 2228544, 5876336, 13373190, 27422352, 51988748;
+%e A344048 .
+%e A344048 Array whose upward read antidiagonals are the rows of the triangle.
+%e A344048 n\k   0       1        2          3           4              5
+%e A344048 --------------------------------------------------------------------
+%e A344048 [0]   1,      2,      14,       168,        2840,         61870, ...
+%e A344048 [1]   1,      7,      86,      1473,       32344,        866695, ...
+%e A344048 [2]   2,     34,     648,     14988,      414160,      13373190, ...
+%e A344048 [3]   6,    209,    5752,    173007,     5876336,     224995745, ...
+%e A344048 [4]  24,   1546,   58576,   2228544,    91356544,    4094022230, ...
+%e A344048 [5] 120,  13327,  671568,  31636449,  1542401920,   80031878175, ...
+%e A344048 [6] 720, 130922, 8546432, 490102164, 28075364096, 1671426609550, ...
+%p A344048 # Rows of the array:
+%p A344048 A := (n, k) -> (n + k)!*LaguerreL(n + k, -k):
+%p A344048 seq(print(seq(simplify(A(n, k)), k = 0..6)), n = 0..6);
+%p A344048 # Columns of the array:
+%p A344048 egf := n -> exp(n*x/(1-x))/(1-x): ser := n -> series(egf(n), x, 16):
+%p A344048 C := (k, n) -> (n + k)!*coeff(ser(k), x, n + k):
+%p A344048 seq(print(seq(C(k, n), n = 0..6)), k=0..6);
+%t A344048 T[n_, k_] := (-1)^(n) HypergeometricU[-n, 1,  -k];
+%t A344048 Table[T[n, k], {n, 0, 7}, {k, 0, n}]  // Flatten
+%t A344048 (* Alternative: *)
+%t A344048 T[n_, k_] := n ! LaguerreL[n , -k];
+%t A344048 Table[T[n, k], {n, 0, 7}, {k, 0, n}] // Flatten
+%o A344048 (SageMath) # Columns of the array:
+%o A344048 def column(k, len):
+%o A344048     R.<x> = PowerSeriesRing(QQ, default_prec=len+k)
+%o A344048     f = exp(k * x / (1 - x)) / (1 - x)
+%o A344048     return f.egf_to_ogf().list()[k:]
+%o A344048 for col in (0..6): print(column(col, 8))
+%o A344048 # Alternative:
+%o A344048 @cached_function
+%o A344048 def L(n, x):
+%o A344048     if n == 0: return 1
+%o A344048     if n == 1: return 1 - x
+%o A344048     return (L(n-1, x) * (2*n - 1 - x) - L(n-2, x)*(n - 1)) / n
+%o A344048 A344048 = lambda n, k: factorial(n)*L(n, -k)
+%o A344048 print(flatten([[A344048(n, k) for k in (0..n)] for n in (0..7)]))
+%o A344048 (PARI)
+%o A344048 T(n, k) = n! * sum(j=0, n, binomial(n, j) * k^j / j!)
+%o A344048 for(n=0, 9, for(k=0, n, print(T(n, k))))
+%Y A344048 T(n, n) = A277373(n). T(2*n, n) = A344049(n). Row sums are A343849.
+%Y A344048 Cf. A343847.
+%K A344048 nonn,tabl
+%O A344048 0,3
+%A A344048 _Peter Luschny_, May 08 2021

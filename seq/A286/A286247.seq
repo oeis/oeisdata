@@ -1,0 +1,64 @@
+%I A286247 #32 Dec 07 2019 12:18:29
+%S A286247 1,2,3,4,0,3,7,5,0,10,11,0,0,0,3,16,8,5,0,0,21,22,0,0,0,0,0,3,29,12,0,
+%T A286247 14,0,0,0,36,37,0,8,0,0,0,0,0,10,46,17,0,0,5,0,0,0,0,21,56,0,0,0,0,0,
+%U A286247 0,0,0,0,3,67,23,12,19,0,27,0,0,0,0,0,78,79,0,0,0,0,0,0,0,0,0,0,0,3,92,30,0,0,0,0,5,0,0,0,0,0,0,21,106,0,17,0,8,0,0,0,0,0,0,0,0,0,21
+%N A286247 Triangular table: T(n,k) = 0 if k does not divide n, otherwise T(n,k) = P(A046523(k), n/k), where P is sequence A000027 used as a pairing function N x N -> N. Table is read by rows as T(1,1), T(2,1), T(2,2), etc.
+%C A286247 Equally: square array A(n,k) = P(A046523(n), (n+k-1)/n) if n divides (n+k-1), 0 otherwise, read by descending antidiagonals as A(1,1), A(1,2), A(2,1), etc. Here P is a two-argument form of sequence A000027 used as a pairing function N x N -> N.
+%C A286247 When viewed as a triangular table, this sequence packs the values of A046523(k) [which essentially stores the prime signature of k] and quotient n/k (when it is integral) to a single value with the pairing function A000027. The two "components" can be accessed with functions A002260 & A004736, which allows us to generate from this sequence (among other things) various sums related to the enumeration of aperiodic necklaces, because Moebius mu (A008683) obtains the same value on any representative of the same prime signature.
+%C A286247 For example, we have:
+%C A286247   Sum_{i=A000217(n-1) .. A000217(n)} [a(i) > 0] * mu(A002260(a(i))) * 2^(A004736(a(i))) = A027375(n).
+%C A286247 and
+%C A286247   Sum_{i=A000217(n-1) .. A000217(n)} [a(i) > 0] * mu(A002260(a(i))) * 3^(A004736(a(i))) = A054718(n).
+%C A286247 Triangle A286249 has the same property.
+%H A286247 Antti Karttunen, <a href="/A286247/b286247.txt">Table of n, a(n) for n = 1..10585; the first 145 rows of triangle/antidiagonals of array</a>
+%H A286247 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/PairingFunction.html">Pairing Function</a>
+%F A286247 As a triangle (with n >= 1, 1 <= k <= n):
+%F A286247 T(n,k) = 0 if k does not divide n, otherwise T(n,k) = (1/2)*(2 + ((A046523(k)+(n/k))^2) - A046523(k) - 3*(n/k)).
+%F A286247 T(n,k) = A051731(n,k) * A286245(n,k).
+%e A286247 The first fifteen rows of triangle:
+%e A286247     1,
+%e A286247     2,  3,
+%e A286247     4,  0,  3,
+%e A286247     7,  5,  0, 10,
+%e A286247    11,  0,  0,  0,  3,
+%e A286247    16,  8,  5,  0,  0, 21,
+%e A286247    22,  0,  0,  0,  0,  0,  3,
+%e A286247    29, 12,  0, 14,  0,  0,  0, 36,
+%e A286247    37,  0,  8,  0,  0,  0,  0,  0, 10,
+%e A286247    46, 17,  0,  0,  5,  0,  0,  0,  0, 21,
+%e A286247    56,  0,  0,  0,  0,  0,  0,  0,  0,  0, 3,
+%e A286247    67, 23, 12, 19,  0, 27,  0,  0,  0,  0,  0, 78,
+%e A286247    79,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  3,
+%e A286247    92, 30,  0,  0,  0,  0,  5,  0,  0,  0,  0,  0,  0, 21,
+%e A286247   106,  0, 17,  0,  8,  0,  0,  0,  0,  0,  0,  0,  0,  0, 21
+%e A286247   (Note how triangle A286249 contains on each row the same numbers
+%e A286247   in the same "divisibility-allotted" positions, but in reverse order).
+%e A286247   ---------------------------------------------------------------
+%e A286247 In the following examples: a = this sequence interpreted as a one-dimensional sequence, T = interpreted as a triangular table, A = interpreted as a square array, P = A000027 interpreted as a two-argument pairing function N x N -> N.
+%e A286247 ---
+%e A286247 a(7) = T(4,1) = A(1,4) = P(A046523(1),4/1) = P(1,4) = 1+(((1+4)^2 - 1 - (3*4))/2) = 7.
+%e A286247 a(30) = T(8,2) = A(2,7) = P(A046523(2),8/2) = P(2,4) = (1/2)*(2 + ((2+4)^2) - 2 - 3*4) = 12.
+%o A286247 (Scheme)
+%o A286247 (define (A286247 n) (A286247bi (A002260 n) (A004736 n)))
+%o A286247 (define (A286247bi row col) (if (not (zero? (modulo (+ row col -1) row))) 0 (let ((a (A046523 row)) (b (quotient (+ row col -1) row))) (* (/ 1 2) (+ (expt (+ a b) 2) (- a) (- (* 3 b)) 2)))))
+%o A286247 ;; Alternatively, with triangular indexing:
+%o A286247 (define (A286247 n) (A286247tr (A002024 n) (A002260 n)))
+%o A286247 (define (A286247tr n k) (if (not (zero? (modulo n k))) 0 (let ((a (A046523 k)) (b (/ n k))) (* (/ 1 2) (+ (expt (+ a b) 2) (- a) (- (* 3 b)) 2)))))
+%o A286247 (Python)
+%o A286247 from sympy import factorint
+%o A286247 def T(n, m): return ((n + m)**2 - n - 3*m + 2)/2
+%o A286247 def P(n):
+%o A286247     f = factorint(n)
+%o A286247     return sorted([f[i] for i in f])
+%o A286247 def a046523(n):
+%o A286247     x=1
+%o A286247     while True:
+%o A286247         if P(n) == P(x): return x
+%o A286247         else: x+=1
+%o A286247 def t(n, k): return 0 if n%k!=0 else T(a046523(k), n/k)
+%o A286247 for n in range(1, 21): print [t(n, k) for k in range(1, n + 1)] # _Indranil Ghosh_, May 08 2017
+%Y A286247 Cf. A000027, A002024, A002260, A004736, A008683, A027375, A046523, A051731, A054718, A286245, A286249, A286237.
+%Y A286247 Cf. A000124 (left edge of the triangle), A000217 (every number at the right edge is a triangular number).
+%K A286247 nonn,tabl
+%O A286247 1,2
+%A A286247 _Antti Karttunen_, May 06 2017

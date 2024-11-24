@@ -1,0 +1,38 @@
+%I A226545 #23 Sep 06 2021 01:44:23
+%S A226545 0,0,0,0,1,0,0,2,2,0,0,3,5,3,0,0,4,12,12,4,0,0,5,25,34,25,5,0,0,6,50,
+%T A226545 98,98,50,6,0,0,7,96,256,386,256,96,7,0,0,8,180,654,1402,1402,654,180,
+%U A226545 8,0,0,9,331,1625,4938,6940,4938,1625,331,9,0
+%N A226545 Number A(n,k) of squares in all tilings of a k X n rectangle using integer-sided square tiles; square array A(n,k), n>=0, k>=0, read by antidiagonals.
+%H A226545 Alois P. Heinz, <a href="/A226545/b226545.txt">Antidiagonals n = 0..30, flattened</a>
+%e A226545 A(3,3) = 1 + 6 + 6 + 6 + 6 + 9 = 34:
+%e A226545   ._____.  ._____.  ._____.  ._____.  ._____.  ._____.
+%e A226545   |     |  |   |_|  |_|   |  |_|_|_|  |_|_|_|  |_|_|_|
+%e A226545   |     |  |___|_|  |_|___|  |_|   |  |   |_|  |_|_|_|
+%e A226545   |_____|  |_|_|_|  |_|_|_|  |_|___|  |___|_|  |_|_|_|
+%e A226545 Square array A(n,k) begins:
+%e A226545   0, 0,   0,    0,     0,      0,       0,        0, ...
+%e A226545   0, 1,   2,    3,     4,      5,       6,        7, ...
+%e A226545   0, 2,   5,   12,    25,     50,      96,      180, ...
+%e A226545   0, 3,  12,   34,    98,    256,     654,     1625, ...
+%e A226545   0, 4,  25,   98,   386,   1402,    4938,    16936, ...
+%e A226545   0, 5,  50,  256,  1402,   6940,   33502,   157279, ...
+%e A226545   0, 6,  96,  654,  4938,  33502,  221672,  1426734, ...
+%e A226545   0, 7, 180, 1625, 16936, 157279, 1426734, 12582472, ...
+%p A226545 b:= proc(n, l) option remember; local i, k, s, t;
+%p A226545       if max(l[])>n then [0,0] elif n=0 or l=[] then [1,0]
+%p A226545     elif min(l[])>0 then t:=min(l[]); b(n-t, map(h->h-t, l))
+%p A226545     else for k do if l[k]=0 then break fi od; s:=[0$2];
+%p A226545          for i from k to nops(l) while l[i]=0 do s:=s+(h->h+[0, h[1]])
+%p A226545            (b(n, [l[j]$j=1..k-1, 1+i-k$j=k..i, l[j]$j=i+1..nops(l)]))
+%p A226545          od; s
+%p A226545       fi
+%p A226545     end:
+%p A226545 A:= (n, k)-> `if`(n>=k, b(n, [0$k]), b(k, [0$n]))[2]:
+%p A226545 seq(seq(A(n, d-n), n=0..d), d=0..14);
+%t A226545 b[n_, l_List] := b[n, l] = Module[{i, k, s, t}, Which[Max[l] > n, {0, 0}, n == 0 || l == {}, {1, 0}, Min[l] > 0, t=Min[l]; b[n-t, l-t], True, k = Position[l, 0, 1][[1, 1]]; s={0, 0}; For[i=k, i <= Length[l] && l[[i]] == 0, i++, s = s + Function[h, h+{0, h[[1]]}][b[n, Join[l[[1 ;; k-1]], Table[1+i-k, {j, k, i}], l[[i+1 ;; -1]]]]] ]; s]]; a[n_, k_] := If[n >= k, b[n, Array[0&, k]], b[k, Array[0&, n]]][[2]]; Table[Table[a[n, d-n], {n, 0, d}], {d, 0, 14}] // Flatten (* _Jean-François Alcover_, Dec 13 2013, translated from Maple *)
+%Y A226545 Columns (or rows) k=0-10 give: A000004, A001477, A067331(n-1) for n>0, A226546, A226547, A226548, A226549, A226550, A226551, A226552, A226553.
+%Y A226545 Main diagonal gives A226554.
+%Y A226545 Cf. A113881, A219924.
+%K A226545 nonn,tabl
+%O A226545 0,8
+%A A226545 _Alois P. Heinz_, Jun 10 2013

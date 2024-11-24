@@ -1,0 +1,35 @@
+%I A290323 #39 Sep 18 2023 02:02:30
+%S A290323 1,2,2,3,3,4,4,5,4,6,6,6,7,8,6,9,9,8,10,9,8,12,12,10,9,14,8,12,15,12,
+%T A290323 16,15,12,18,12,12,19,20,14,15,21,16,22,18,12,24,24,18,16,18,18,21,27,
+%U A290323 16,18,20,20,30,30,18,31,32,16,25,21,24,34,27
+%N A290323 Minimal number of supporters among total of n voters that may make (but not guarantee) their candidate win in a multi-level selection based on the majority vote at each level.
+%C A290323 Each group in a given level must have the same number of voters. A tie in the voting results in a win for the opposition. (A003960 appears to describe the case in which a tie results in a loss for the opposition.) - _Peter Kagey_, Aug 16 2017
+%C A290323 This is related to the gerrymandering question. - _N. J. A. Sloane_, Feb 27 2021
+%H A290323 Peter Kagey, <a href="/A290323/b290323.txt">Table of n, a(n) for n = 1..10000</a>
+%H A290323 Author?, <a href="http://kvant.mccme.ru/1970/07/resheniya_zadachnika_kvanta_ma.htm">Solution to problem M1</a> (in Russian), Kvant 7 (1970), 49-51.
+%H A290323 Author?, <a href="http://www.kvant.info/zkm_sol/0001/0001.pdf">Problem M1 with solution</a> (in Russian)
+%H A290323 Wikipedia, <a href="https://en.wikipedia.org/wiki/Gerrymandering">Gerrymandering</a>.
+%F A290323 Let n = 2^m*p1*...*pk, where pi are odd primes. Then a(n) = c*(p1+1)/2*...*(pk+1)/2 = c*A003960(n), where c=2 if m=1; c=5^b if m=3b; c=3*5^b if m=3b+2; c=9*5^b, if m=3b+4 (b>=0). [So c(m) = A005517(m+1). - _Andrey Zabolotskiy_, Jan 27 2022]
+%e A290323 For n=9, four supporters are enough in the following 2-level selection with (s)upporters and (o)pponents: ((sso),(sso),(ooo)). On the other hand, no smaller number of supporters can lead to a win in any multi-level selection. Hence, a(9)=4.
+%t A290323 f[p_, e_] := ((p + 1)/2)^e; f[2, e_] := Switch[Mod[e, 3], 1, 9/5, 2, 3, 0, 1] * 5^Floor[e/3]; f[2, 1] = 2; a[1] = 1; a[n_] := Times @@ f @@@ FactorInteger[n]; Array[a, 100] (* _Amiram Eldar_, Sep 18 2023 *)
+%o A290323 (PARI) A290323(n) = my(m=valuation(n,2),f=factor(n>>m)); if(m==1, 2, [1,9/5,3][m%3+1]*5^(m\3)) * prod(i=1,#f~, ((f[i,1]+1)/2)^f[i,2]);
+%o A290323 (Ruby)
+%o A290323 def divisors_of(n); (2..n).select { |d| n % d == 0 } end
+%o A290323 def f(n, group_size); (group_size/2 + 1) * a(n / group_size) end
+%o A290323 def a(n); n == 1 ? 1 : divisors_of(n).map { |d| f(n, d) }.min end
+%o A290323 # _Peter Kagey_, Aug 16 2017
+%o A290323 (Python)
+%o A290323 from sympy import factorint
+%o A290323 from functools import reduce
+%o A290323 from operator import mul
+%o A290323 def A290323(n):
+%o A290323     f = factorint(n)
+%o A290323     m = f[2] if 2 in f else 0
+%o A290323     a, b = divmod(m,3)
+%o A290323     c = 2 if m == 1 else 3**(b*(b+1)%5)*5**(a-(b%2))
+%o A290323     return c*reduce(mul,(((d+1)//2)**f[d] for d in f if d != 2),1) # _Chai Wah Wu_, Mar 05 2021
+%Y A290323 Cf. A003960, A005517.
+%K A290323 nonn,easy,nice,mult
+%O A290323 1,2
+%A A290323 _Max Alekseyev_, Jul 27 2017
+%E A290323 Keyword:mult added by _Andrew Howroyd_, Aug 06 2018

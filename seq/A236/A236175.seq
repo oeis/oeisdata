@@ -1,0 +1,73 @@
+%I A236175 #37 Jun 30 2024 22:07:14
+%S A236175 11,6,3,6,3,6,11,2,11,6,3,6,3,6,11,2,11,6,3,6,3,6,11,2,11,6,3,6,3,6,
+%T A236175 11,2,11,6,3,6,3,6,11,2,11,6,3,6,3,6,11,2,11,6,3,6,3,6,11,2,11,6,3,6,
+%U A236175 3,6,11,2,11,6,3,6,3,6,11,2,11,6,3,6,3,6,11,2
+%N A236175 Prime gap pattern of compacting Eratosthenes sieve for prime(4) = 7.
+%C A236175 P(x) is a function which produces a prime number at a particular ordinal x (A000040).  This pattern, p(x), describes the number of values emitted as potentially prime by a reductive sieve before a value is marked "not prime" when processing the prime at ordinal x. p(x) represents only the unique portion of the pattern and terminates when the pattern repeats.  The first digit of p(x) corresponds to A079047 for index x.
+%C A236175 In this sequence, x = 4 and thus a(1) = A079047(4) = 11. - _Michael Somos_, Mar 09 2014
+%C A236175 The Eratosthenes sieve can be expressed as follows. Start with S1 = [2, 3, 4, 5, ...] the list of numbers bigger than 1. Removing all multiples of the first element 2 yields the list S2 = [3, 5, 7, 9, ...]. Removing all multiples of the first element 3 yields S3 = [5, 7, 11, 13, 17, 19, ...], Removing all multiples of the first element 5 yields S4 = [7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 49, ...], and so on. The list of first differences of S4 is [4, 2, 4, 2, 4, 6, 2, 6, 4, 2, 4, 2, ...] which is A236185. The list of indices of all multiples of S4(1) = 7 is [1, 13, 20, 24, 31, 35, 42, 54, 57, 69, 76, 80, ...]. The list of first differences of this list is [12, 7, 4, 7, 4, 7, 12, 3, 12, 7, 4, ...]. Subtract one from each element yields [11, 6, 3, 6, 3, 6, 11, 2, 11, 6, 3, ...] which is this sequence. - _Michael Somos_, Mar 12 2014
+%H A236175 Michael Somos, <a href="/A236175/b236175.txt">Table of n, a(n) for n = 1..80</a>
+%H A236175 Christopher J. Hanson, <a href="http://www.codeproject.com/Articles/716180/The-structure-of-prime-numbers-and-twin-prime-gaps">The structure of prime numbers and twin prime gaps</a>
+%H A236175 <a href="/index/Rec#order_08">Index entries for linear recurrences with constant coefficients</a>, signature (0,0,0,0,0,0,0,1).
+%F A236175 a(n + 8) = a(n). - _Michael Somos_, Mar 09 2014
+%F A236175 a(n) = A359632(n) - 1. - _Peter Munn_, Jan 21 2023
+%t A236175 PadRight[{}, 100, {11, 6, 3, 6, 3, 6, 11, 2}] (* _Paolo Xausa_, Jun 30 2024 *)
+%o A236175 (PARI) {a(n) = my(A); if( n<1, 0, A = vector( (n+1) * 1024 \ 37, k, k+1); for( i = 1, 3, A = select( k -> k%prime(i), A) ); polcoeff( (1 - x) * Ser( select( k -> (k%7) == 0, A, 1)), n) - 1) }; /* _Michael Somos_, Mar 09 2014 */
+%o A236175 (C#)
+%o A236175 // p(4) = GeneratePrimePattern( 4 );
+%o A236175 static void GeneratePrimePattern( int ordinal )
+%o A236175 {
+%o A236175     // Contract
+%o A236175     if( ordinal < 1 )
+%o A236175         throw new ArgumentOutOfRangeException( "ordinal" );
+%o A236175     // Local data
+%o A236175     int size = 1 << 18;
+%o A236175     int[] numberLine = Enumerable.Range( 2, size ).ToArray();
+%o A236175     int pointer = 0;
+%o A236175     // Apply sieve: for each integer greater than 1
+%o A236175     while( pointer < numberLine.Length )
+%o A236175     {
+%o A236175         // Locals
+%o A236175         int x = numberLine[pointer];
+%o A236175         int index = pointer;
+%o A236175         List<int> pattern = new List<int>();
+%o A236175         int skips = 0;
+%o A236175         // Find all products
+%o A236175         for( int n = x + x; n < size; n += x )
+%o A236175         {
+%o A236175             // Fast forward through number-line
+%o A236175             while( numberLine[++index] < n )
+%o A236175                 skips++;
+%o A236175             // If the number was not already removed
+%o A236175             if( numberLine[index] == n )
+%o A236175             {
+%o A236175                 // Mark as not prime
+%o A236175                 numberLine[index] = 0;
+%o A236175                 // Add skip count to pattern
+%o A236175                 pattern.Add( skips );
+%o A236175                 // Reset skips
+%o A236175                 skips = 0;
+%o A236175             }
+%o A236175             // Otherwise we've skipped again
+%o A236175             else skips++;
+%o A236175         }
+%o A236175         // Reduce number-line
+%o A236175         numberLine = numberLine.Where( n => n > 0 ).ToArray();
+%o A236175         // If we have a pattern we want
+%o A236175         if( pattern.Any() && pointer == ordinal - 1 )
+%o A236175         {
+%o A236175             // Report pattern
+%o A236175             int previousValue = 3; // > 2
+%o A236175             System.Console.WriteLine( "Pattern P({0}) = {1} :: p({0}) = {2}", pointer + 1, numberLine[pointer], String.Join( ", ", pattern.TakeWhile( value => previousValue > 2 && ( previousValue = value ) > 0 ) ) );
+%o A236175             return;
+%o A236175         }
+%o A236175         // Move number-line pointer forward
+%o A236175         pointer++;
+%o A236175     }
+%o A236175 }
+%Y A236175 Equivalent sequences for prime(k): A236176 (k=5), A236177 (k=6), A236178 (k=7), A236179 (k=8), A236180 (k=9).
+%Y A236175 Cf. A079047, A236185-A236190, A359632.
+%K A236175 nonn,easy
+%O A236175 1,1
+%A A236175 _Christopher J. Hanson_, Jan 19 2014
+%E A236175 Edited by _Michael Somos_, Mar 09 2014. Made sequence periodic.

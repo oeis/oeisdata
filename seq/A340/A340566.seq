@@ -1,0 +1,29 @@
+%I A340566 #19 Jan 12 2021 02:43:00
+%S A340566 0,11,1,111,1110,11101,1110100,111010,10,1100,100,1110101,110,1111,
+%T A340566 11100,1110111,101,11001,111011,11111,1101,110011,1010,11101001,1000,
+%U A340566 11101011,111010010,10001,1110000,111110,1110110,111000,11000,111010110,11110,111010000
+%N A340566 Square array, read by descending antidiagonals; T(n,k) is A001057(n) + A001057(k)*i, converted to complex binary (base -1 + i), where i=sqrt(-1).
+%C A340566 Complex binary (base -1 + i) has the ability to express all positive or negative, real or complex, integers with only 2 numerical symbols ('0' and '1') as integers, without the need for a sign marking the integers as such.
+%C A340566 Converting a real number, n, to complex binary requires one to convert it to base -4 ((n + N) xor N, N = floor(4/5*16^(ceiling(log_4(abs(n))) + 1))), then adding 10 to every digit greater than 1, then treating it as a number in base 16 and converting that to binary. (E.g., -5 => [2,3] => [12,13] => 205 => 11001101.)
+%C A340566 Converting a complex number, n + k*i, requires one to convert X = n + k into complex binary and then convert k into the same but shift it one digit to the left. After this, one must add them together. This functions much the same way as binary addition, but the carry is '110' rather than '1' and 11 + 111 = 0.
+%D A340566 T. Jamil, Complex Binary Number System, Springer, 2013.
+%e A340566 Square array T(n,k) begins:
+%e A340566   \k      0         1         2          3        4       5        6 ...
+%e A340566   n\
+%e A340566    0|     0        11       111    1110100      100 1110111   110011 ...
+%e A340566    1|     1      1110    111010    1110101      101    1010   111110 ...
+%e A340566    2| 11101        10       110      11001 11101001 1110110   110010 ...
+%e A340566    3|  1100      1111    111011       1000   111000    1011   111111 ...
+%e A340566    4| 11100     11111  11101011      11000 11101000   11011 11101111 ...
+%e A340566    5|  1101 111010010 111010110       1001   111001 1100110   100010 ...
+%e A340566    6| 10001     11110  11101010 1110100101    10101   11010 11101110 ...
+%o A340566 (PARI) A340566(n,k)={my(A001057(x)=if(x%2,x\2+1,-x/2),V=vecsum(Vec(matconcat(apply(w->my(Y=if(w,A001057(k), A001057(n)+A001057(k)));if(Y, my(X=floor(4^(2*logint(abs(Y), 4)+5)/5));Vecrev(binary(shift(fromdigits(apply(z->z+(10*(z>1)), digits(bitxor(Y+X,X),4)),16),w)))),[0,1])~)~))~);
+%o A340566 while(vecmax(V)>1,my(Z=Vec(select(x->x>1,V,1)));for(x=1,#Z,my(z=Z[x]);if(V[z]<=1,,(z+2<=#V)&&(V[z+1]>1)&&V[z+2],for(j=z,z+2,V[j]-=2^(j!=(z+2))),(z+4<=#V)&&vecmin(V[z+2..z+4]),V[z]-=2;for(j=z+2,z+4,V[j]-=1),z+1>#V,V[z]-=2;V=concat(V,[0,1,1]),V[z]-=2;for(j=z+2,z+3,if(j<=#V,V[j]+=1,V=concat(V,1))))));fromdigits(Vecrev(V))}
+%o A340566 (PARI) { T(n,k) = my(z=n\/2*-(-1)^n + k\/2*-(-1)^k*I, ret=List([]));
+%o A340566   while(z, my(bit=(real(z)+imag(z))%2);
+%o A340566     listput(ret,bit); z=(z-bit)/(I-1));
+%o A340566   fromdigits(Vecrev(ret)); } \\ _Kevin Ryde_, Jan 12 2021
+%Y A340566 Cf. A001057, A318438, A318439.
+%K A340566 nonn,tabl,base
+%O A340566 0,2
+%A A340566 _Davis Smith_, Jan 11 2021

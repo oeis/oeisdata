@@ -1,0 +1,88 @@
+%I A228100 #32 May 12 2020 12:59:41
+%S A228100 1,1,1,2,1,1,1,2,1,3,1,1,1,1,2,1,1,2,2,3,1,4,1,1,1,1,1,2,1,1,1,2,2,1,
+%T A228100 3,1,1,3,2,4,1,5,1,1,1,1,1,1,2,1,1,1,1,2,2,1,1,3,1,1,1,2,2,2,3,2,1,4,
+%U A228100 1,1,3,3,4,2,5,1,6,1,1,1,1,1,1,1,2,1,1
+%N A228100 Triangle in which n-th row lists all partitions of n, such that partitions of n into m parts appear in lexicographic order previous to the partitions of n into k parts if k < m. (Fenner-Loizou tree.)
+%C A228100 First differs from A193073 at a(58). - _Omar E. Pol_, Sep 22 2013
+%C A228100 The partition lengths appear to be A331581. - _Gus Wiseman_, May 12 2020
+%D A228100 T. I. Fenner, G. Loizou: A binary tree representation and related algorithms for generating integer partitions. The Computer J. 23(4), 332-337 (1980)
+%D A228100 D. E. Knuth: The Art of Computer Programming. Generating all combinations and partitions, vol. 4, fasc. 3, 7.2.1.4, exercise 10.
+%D A228100 K. Yamanaka, Y. Otachi, Sh. Nakano: Efficient enumeration of ordered trees with k leaves. In: WALCOM: Algorithms and Computation, Lecture Notes in Computer Science Volume 5431, 141-150 (2009)
+%D A228100 S. Zaks, D. Richards: Generating trees and other combinatorial objects lexicographically. SIAM J. Comput. 8(1), 73-81 (1979)
+%D A228100 A. Zoghbi, I. Stojmenovic': Fast algorithms for generating integer partitions. Int. J. Comput. Math. 70, 319-332 (1998)
+%H A228100 Alois P. Heinz, <a href="/A228100/b228100.txt">rows n = 1..19, flattened</a>
+%H A228100 Peter Luschny, <a href="http://oeis.org/wiki/User:Peter_Luschny/IntegerPartitionTrees">Integer Partition Trees</a>
+%H A228100 OEIS Wiki, <a href="http://oeis.org/wiki/Orderings of partitions">Orderings of partitions</a>
+%H A228100 Wikiversity, <a href="https://en.wikiversity.org/wiki/Lexicographic_and_colexicographic_order">Lexicographic and colexicographic order</a>
+%e A228100 The sixth row is:
+%e A228100 [1, 1, 1, 1, 1, 1]
+%e A228100 [2, 1, 1, 1, 1]
+%e A228100 [2, 2, 1, 1]
+%e A228100 [3, 1, 1, 1]
+%e A228100 [2, 2, 2]
+%e A228100 [3, 2, 1]
+%e A228100 [4, 1, 1]
+%e A228100 [3, 3]
+%e A228100 [4, 2]
+%e A228100 [5, 1]
+%e A228100 [6]
+%e A228100 From _Gus Wiseman_, May 10 2020: (Start)
+%e A228100 The triangle with partitions shown as Heinz numbers (A333485) begins:
+%e A228100     1
+%e A228100     2
+%e A228100     4   3
+%e A228100     8   6   5
+%e A228100    16  12   9  10   7
+%e A228100    32  24  18  20  15  14  11
+%e A228100    64  48  36  40  27  30  28  25  21  22  13
+%e A228100   128  96  72  80  54  60  56  45  50  42  44  35  33  26  17
+%e A228100 (End)
+%p A228100 b:= proc(n, i) b(n, i):= `if`(n=0 or i=1, [[1$n]], [b(n, i-1)[],
+%p A228100       `if`(i>n, [], map(x-> [i, x[]], b(n-i, i)))[]])
+%p A228100     end:
+%p A228100 T:= n-> map(h-> h[], sort(b(n$2), proc(x, y) local i;
+%p A228100         if nops(x)<>nops(y) then return nops(x)>nops(y) else
+%p A228100         for i to nops(x) do if x[i]<>y[i] then return x[i]<y[i]
+%p A228100         fi od fi end))[]:
+%p A228100 seq(T(n), n=1..8);  # _Alois P. Heinz_, Aug 13 2013
+%t A228100 row[n_] := Flatten[Reverse[Sort[#]]& /@ SplitBy[Sort[IntegerPartitions[n] ], Length], 1] // Reverse; Array[row, 8] // Flatten (* _Jean-François Alcover_, Dec 05 2016 *)
+%t A228100 ralensort[f_,c_]:=If[Length[f]!=Length[c],Length[f]>Length[c],OrderedQ[{f,c}]];
+%t A228100 Join@@Table[Sort[IntegerPartitions[n],ralensort],{n,0,8}] (* _Gus Wiseman_, May 10 2020 *)
+%o A228100 (Sage)
+%o A228100 from collections import deque
+%o A228100 def GeneratePartitions(n, visit):
+%o A228100     p = ([], 0, n)
+%o A228100     queue = deque()
+%o A228100     queue.append(p)
+%o A228100     visit(p)
+%o A228100     while len(queue) > 0 :
+%o A228100         (phead, pheadLen, pnum1s) = queue.popleft()
+%o A228100         if pnum1s != 1 :
+%o A228100             head = phead[:pheadLen] + [2]
+%o A228100             q = (head, pheadLen + 1, pnum1s - 2)
+%o A228100             if 1 <= q[2] : queue.append(q)
+%o A228100             visit(q)
+%o A228100         if pheadLen == 1 or (pheadLen > 1 and \
+%o A228100                       (phead[pheadLen - 1] != phead[pheadLen - 2])) :
+%o A228100             head = phead[:pheadLen]
+%o A228100             head[pheadLen - 1] += 1
+%o A228100             q = (head, pheadLen, pnum1s - 1)
+%o A228100             if 1 <= q[2] : queue.append(q)
+%o A228100             visit(q)
+%o A228100 def visit(q): print(q[0] + [1 for i in range(q[2])])
+%o A228100 for n in (1..7): GeneratePartitions(n, visit)
+%Y A228100 See A036036 for the Hindenburg (graded reflected colexicographic) ordering.
+%Y A228100 See A036037 for the graded colexicographic ordering.
+%Y A228100 See A080576 for the Maple (graded reflected lexicographic) ordering.
+%Y A228100 See A080577 for the Mathematica (graded reverse lexicographic) ordering.
+%Y A228100 See A182937 the Fenner-Loizou (binary tree in preorder traversal) ordering.
+%Y A228100 See A193073 for the graded lexicographic ordering.
+%Y A228100 The version for compositions is A296773.
+%Y A228100 Taking Heinz numbers gives A333485.
+%Y A228100 Lexicographically ordered reversed partitions are A026791.
+%Y A228100 Sorting partitions by Heinz number gives A296150, or A112798 for reversed partitions.
+%Y A228100 Reversed partitions under the (sum/length/revlex) ordering are A334302.
+%Y A228100 Cf. A000041, A036043, A048793, A211992, A228351, A228531, A331581, A333484, A334301, A334439.
+%K A228100 nonn,tabf
+%O A228100 1,4
+%A A228100 _Peter Luschny_, Aug 10 2013

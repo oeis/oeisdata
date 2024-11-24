@@ -1,0 +1,35 @@
+%I A327449 #46 Apr 09 2020 09:57:28
+%S A327449 0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,423,0,2624,0,13474,0,0,0,611736,0,
+%T A327449 4169165,0,30926812,0,214975174,0,1590432628,0,11431365932,0,
+%U A327449 83946004461,0,0,0,4615654888831,0,35144700468737,0,271133285220726,0,2103716957561013,0,0,0,0,0,990170108748552983,0,7855344215856348141
+%N A327449 Number of ways the first n primes can be partitioned into three sets with equal sums.
+%C A327449 It is not true that a(2k+1) is always 0.
+%D A327449 Keith F. Lynch, Posting to Math Fun Mailing List, Sep 17 2019.
+%H A327449 Alois P. Heinz, <a href="/A327449/b327449.txt">Table of n, a(n) for n = 1..102</a>
+%F A327449 a(n) > 0 <=> n in { A103208 }, with odd n in { A111320 }. - _Alois P. Heinz_, Sep 19 2019
+%e A327449 One of the three solutions for n = 10: 3 + 17 + 23 = 2 + 5 + 7 + 29 = 11 + 13 + 19.
+%p A327449 s:= proc(n) option remember; `if`(n<2, 0, ithprime(n)+s(n-1)) end:
+%p A327449 b:= proc(n, x, y) option remember; `if`(n=1, 1, (p-> (l->
+%p A327449       add(`if`(p>l[i], 0, b(n-1, sort(subsop(i=l[i]-p, l))
+%p A327449       [1..2][])), i=1..3))([x, y, s(n)-x-y]))(ithprime(n)))
+%p A327449     end:
+%p A327449 a:= n-> `if`(irem(2+s(n), 3, 'q')=0, b(n, q-2, q)/2, 0):
+%p A327449 seq(a(n), n=1..40);  # _Alois P. Heinz_, Sep 19 2019
+%t A327449 s[n_] := s[n] = If[n < 2, 0, Prime[n] + s[n - 1]];
+%t A327449 b[n_, x_, y_] := b[n, x, y] = If[n == 1, 1, Function[p, Function[l, Sum[If[ p > l[[i]], 0, b[n - 1, Sequence @@ Sort[ReplacePart[l, i -> l[[i]] - p]][[1;; 2]]]], {i, 1, 3}]][{x, y, s[n] - x - y}]][Prime[n]]];
+%t A327449 a[n_] := If[Mod[2+s[n], 3]==0, q = Quotient[2+s[n], 3]; b[n, q-2, q]/2, 0];
+%t A327449 Array[a, 40] (* _Jean-François Alcover_, Apr 09 2020, after _Alois P. Heinz_ *)
+%o A327449 (PARI)
+%o A327449 EqSumThreeParts(v)={ my(n=#v, vs=vector(n), m=vecsum(v)/3, brk=0);
+%o A327449   for(i=1, n-1, vs[i+1]=vs[i]+v[i]; if(vs[i]<=min(1000,m), brk=i));
+%o A327449   my(q=Vecrev(prod(i=1, brk, 1+x^v[i]+y^v[i])));
+%o A327449   my(recurse(k,s,p)=if(k==brk, if(s<#q, polcoef(p*q[s+1],m,y)), if(s<=vs[k], self()(k-1, s, p*(1 + y^v[k]))) + if(s>=v[k], self()(k-1, s-v[k], p)) ));
+%o A327449   if(frac(m), 0, recurse(n-1, m, 1 + O(y*y^m))/2);
+%o A327449 }
+%o A327449 a(n)={EqSumThreeParts(primes(n))} \\ _Andrew Howroyd_, Sep 19 2019
+%Y A327449 Cf. A000040, A007504, A022894, A112972, A275714, A103208, A111320, A113263, A327448, A327450.
+%K A327449 nonn
+%O A327449 1,10
+%A A327449 _N. J. A. Sloane_, Sep 19 2019
+%E A327449 Corrected and a(30)-a(52) added by _Andrew Howroyd_, Sep 19 2019
+%E A327449 a(53) and beyond from _Alois P. Heinz_, Sep 19 2019

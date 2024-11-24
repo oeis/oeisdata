@@ -1,0 +1,72 @@
+%I A366251 #45 Oct 27 2023 08:24:14
+%S A366251 1,3,5,7,9,11,13,17,19,21,23,25,27,29,31,35,37,39,41,43,47,49,53,55,
+%T A366251 57,59,61,63,65,67,71,73,77,79,81,83,85,89,91,93,95,97,101,103,107,
+%U A366251 109,111,113,115,117,119,121,125,127,129,131,133,137,139,143,145
+%N A366251 Numbers with a coprime divisor shift.
+%C A366251 A number k has a coprime divisor shift s if GCD(d + s, k) = 1 for all divisors d of k.
+%C A366251 If k is in the sequence, then all divisors of k are in the sequence too.
+%C A366251 From _David A. Corneth_, Oct 06 2023: (Start)
+%C A366251 As a consequence of the above, if some m is not in the sequence then any multiple of m is not in the sequence either. So all terms are odd as 2 is not in the sequence.
+%C A366251 To see if k is a term we can do the following:
+%C A366251 - Check whether k is even; if so then k is not in the sequence.
+%C A366251 - Make a list of the divisors of k. Let tau(k) be the number of divisors of k. Then for each prime p <= tau(k) if the number of residues mod p of the divisors of k is equal to p then k is not in the sequence. Otherwise by the Chinese Remainder Theorem we can find a number s such that gcd(d + s, n) = 1 for all d.
+%C A366251 So every odd prime is a term. (End)
+%H A366251 M. Farrokhi D. G., <a href="/A366251/b366251.txt">Table of n, a(n) for n = 1..10000</a>
+%e A366251 1 is a term since GCD(1 + 0, 1) = 1.
+%e A366251 2 is not a term since GCD(1 + s, 2) > 1 or GCD(2 + s, 2) > 1 for all nonnegative integers s.
+%e A366251 3 is a term since GCD(1 + 1, 3) = GCD(3 + 1, 3) = 1.
+%p A366251 aList := proc(len) local isds, findds;
+%p A366251 isds := (k, s) -> andmap(d -> igcd(d + s, k) = 1, NumberTheory:-Divisors(k));
+%p A366251 findds := k -> ormap(s -> isds(k, s), [seq(1..k)]);
+%p A366251 select(k -> findds(k), [seq(1..len)]) end:
+%p A366251 aList(133);  # _Peter Luschny_, Oct 06 2023
+%p A366251 # More efficient, after _David A. Corneth_:
+%p A366251 isa := proc(n) local d, p, t; p := 3;
+%p A366251 if irem(n, 2) = 0 then return false fi;
+%p A366251 d := NumberTheory:-Divisors(n);
+%p A366251 while p < nops(d) do
+%p A366251    {seq(irem(t, p), t = d)};
+%p A366251    if nops(%) = p then return false fi;
+%p A366251    p := nextprime(p);
+%p A366251 od: true end:
+%p A366251 aList := len -> select(isa, [seq(1..len)]):
+%p A366251 aList(145);  # _Peter Luschny_, Oct 07 2023
+%t A366251 isa[n_] := Module[{d, p, t}, p = 3; If[Mod[n, 2] == 0, Return[False]]; d = Divisors[n]; While[p < Length[d], If[Length[Union@Table[Mod[t, p], {t, d}]] == p, Return[False]]; p = NextPrime[p]]; True];
+%t A366251 aList[len_] := Select[Range[len], isa];
+%t A366251 aList[145] (* _Jean-François Alcover_, Oct 27 2023, after _Peter Luschny_ *)
+%o A366251 (PARI)
+%o A366251 isds(k,s)={fordiv(k, d, if(gcd(d+s, k)<>1, return(0))); 1}
+%o A366251 findds(k)={for(s=1, k, if(isds(k,s), return(s))); 0}
+%o A366251 select(k->findds(k), [1..150]) \\ _Andrew Howroyd_, Oct 05 2023
+%o A366251 (PARI)
+%o A366251 is(n) = {
+%o A366251 	if(!bitand(n, 1), return(0));
+%o A366251 	my(d = divisors(n));
+%o A366251 	forprime(p = 3, #d,
+%o A366251 		if(#Set(d % p) == p,
+%o A366251 			return(0)
+%o A366251 		)
+%o A366251 	); 1	
+%o A366251 } \\ _David A. Corneth_, Oct 06 2023
+%o A366251 (GAP)
+%o A366251 CoprimeDivisorShift := function(n)
+%o A366251 local shift, divisors;
+%o A366251 shift := 0;
+%o A366251 if not IsPrimeInt(n) and First(PrimeDivisors(n), p -> CoprimeDivisorShift(n / p) = infinity) <> fail then
+%o A366251 	shift := infinity;
+%o A366251 fi;
+%o A366251 if shift < infinity then
+%o A366251 	divisors := DivisorsInt(n);
+%o A366251 	while shift < n and First(divisors, d -> GcdInt(d + shift, n) > 1) <> fail do
+%o A366251 		shift := shift + 1;
+%o A366251 	od;
+%o A366251 	if shift = n then
+%o A366251 		shift := infinity;
+%o A366251 	fi;
+%o A366251 fi;
+%o A366251 return shift;
+%o A366251 end;
+%Y A366251 Cf. A366219, A366330.
+%K A366251 nonn,easy
+%O A366251 1,2
+%A A366251 _M. Farrokhi D. G._, Oct 05 2023

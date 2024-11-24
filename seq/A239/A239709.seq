@@ -1,0 +1,151 @@
+%I A239709 #17 Nov 02 2014 12:18:37
+%S A239709 5,11,17,19,23,29,41,47,67,71,79,83,89,107,109,131,149,181,191,239,
+%T A239709 251,257,263,269,271,349,379,383,419,461,599,701,809,811,929,971,991,
+%U A239709 1009,1031,1039,1087,1151,1259,1279,1301,1451,1481,1511,1559,1721,1871,1979,2063,2069,2111,2161,2213,2267,2351,2549,2861,2939,2969,3079,3191,3389
+%N A239709 Primes of the form m = b^i + b^j - 1, where i > j > 0, b > 1.
+%C A239709 If m is a term, then there is a base b > 1 such that the base-b representation of m has digital sum = 1 + j*(b-1) == 1 (mod (b-1)).
+%C A239709 The base b for which m = b^i + b^j - 1 is not uniquely determined. Example: 11 = 2^3+2^2-1 = 3^2 +3^1-1.
+%C A239709 Numbers m which satisfy m = b^i + b^j - 1 with odd i and j and b == 2 (mod 3) are not terms. Example: 12189 = 23^3 + 23^1 - 1 is not a prime.
+%H A239709 Hieronymus Fischer, <a href="/A239709/b239709.txt">Table of n, a(n) for n = 1..10000</a>
+%e A239709 a(1) = 5, since 5 = 2^2 + 2^1 - 1 is prime.
+%e A239709 a(2) = 11, since 11 = 2^3 + 2^2 - 1 is prime.
+%e A239709 a(6) = 29, since 29 = 3^3 + 3^1 - 1 is prime.
+%e A239709 a(10^1) = 71.
+%e A239709 a(10^2) = 13109.
+%e A239709 a(10^3) = 9336079.
+%e A239709 a(10^4) = 2569932329.
+%e A239709 a(10^5) = 455578426189.
+%e A239709 a(10^6) = 68543190483641.
+%o A239709 (Smalltalk)
+%o A239709 A239709
+%o A239709 "Answers the n-th term of A239709.
+%o A239709   Iterative calculation using A239709_termsLTn.
+%o A239709   Usage: n A239709
+%o A239709   Answer: a(n)"
+%o A239709   | n terms m |
+%o A239709   terms := SortedCollection new.
+%o A239709   n := self.
+%o A239709   m := (n prime // 2) squared.
+%o A239709   terms := m A239709_termsLTn.
+%o A239709   [terms size < n] whileTrue:
+%o A239709          [m := 2 * m.
+%o A239709          terms := m A239709_termsLTn].
+%o A239709   ^terms at: n
+%o A239709   "Remark: A last line of
+%o A239709   ^terms copyFrom: 1 to: n
+%o A239709   answers an array of the first n terms"
+%o A239709 [by_Hieronymus Fischer_, Apr 14 2014]
+%o A239709 -----------
+%o A239709 (Smalltalk)
+%o A239709 A239709_termsLTn
+%o A239709   "Answers all the terms of A239709 which are < n.
+%o A239709   Direct processing by scanning the scanning the bases b in increasing order, up to b = sqrt(n), and calculating the numbers b^i + b^j - 1.
+%o A239709   Usage: n A239709_termsLTn
+%o A239709   Answer: #(5 11 17 19 23 ...) [terms < n]"
+%o A239709   | bmax p q n m terms a |
+%o A239709   terms := OrderedCollection new.
+%o A239709   n := self.
+%o A239709   bmax := n sqrtTruncated.
+%o A239709   2 to: bmax
+%o A239709      do:
+%o A239709          [:b |
+%o A239709          m := 1 + (n floorLog: b).
+%o A239709          p := b.
+%o A239709          2 to: m
+%o A239709               by: 1
+%o A239709               do:
+%o A239709                    [:i |
+%o A239709                    p := b * p.
+%o A239709                    q := b.
+%o A239709                    1 to: i - 1
+%o A239709                         by: 1
+%o A239709                         do:
+%o A239709                             [:j |
+%o A239709                             a := p + q - 1.
+%o A239709                             a < n ifTrue: [a isPrime ifTrue: [terms add: a]].
+%o A239709                             q := b * q]]].
+%o A239709   ^terms asSet asArray sorted
+%o A239709 [by_Hieronymus Fischer_, Apr 14 2014]
+%o A239709 -----------
+%o A239709 (Smalltalk)
+%o A239709 A239709nTerms
+%o A239709   "Alternative version: Answers the first n terms of A239709. Direct calculation by scanning the numbers b^i + b^j - 1 in increasing order.
+%o A239709   Usage: n A239709
+%o A239709   Answer: a(n)"
+%o A239709   | a amax an b bmax k terms p q p_i q_j a_b amin bamin |
+%o A239709   terms := SortedCollection new.
+%o A239709   p_i := OrderedCollection new.
+%o A239709   q_j := OrderedCollection new.
+%o A239709   a_b := OrderedCollection new.
+%o A239709   p_i add: 1.
+%o A239709   q_j add: 1.
+%o A239709   a_b add: 1.
+%o A239709   k := 0.
+%o A239709   b := 2.
+%o A239709   bmax := b.
+%o A239709   p := b * b.
+%o A239709   q := b.
+%o A239709   a := p + q - 1.
+%o A239709   p_i add: p.
+%o A239709   q_j add: q.
+%o A239709   a_b add: a.
+%o A239709   amax := 2 * (b + 1) + a.
+%o A239709   an := 0.
+%o A239709   [(k < self and: [a < amax]) or: [a < an]] whileTrue:
+%o A239709          [[(k < self and: [a < amax]) or: [a < an]] whileTrue:
+%o A239709                    [[q < p and: [(k < self and: [a < amax]) or: [a < an]]] whileTrue:
+%o A239709                             [a isPrime2
+%o A239709                                  ifTrue:
+%o A239709                                       [(terms includes: a)
+%o A239709                                           ifFalse:
+%o A239709                                                [k := k + 1.
+%o A239709                                                terms add: a.
+%o A239709                                                k >= self ifTrue: [an := terms at: self]]].
+%o A239709                             q := b * q.
+%o A239709                             a := p + q - 1].
+%o A239709                    p = q
+%o A239709                         ifTrue:
+%o A239709                             [p := b * p.
+%o A239709                             q := b.
+%o A239709                             a := p + q - 1].
+%o A239709                    p_i at: b put: p.
+%o A239709                    q_j at: b put: q.
+%o A239709                    a_b at: b put: a].
+%o A239709          amin := a.
+%o A239709          2 to: b - 1
+%o A239709               do:
+%o A239709                    [:bb |
+%o A239709                    (a_b at: bb) < amin
+%o A239709                         ifTrue:
+%o A239709                             [amin := a_b at: bb.
+%o A239709                             bamin := bb]].
+%o A239709          b + 1 to: bmax
+%o A239709               do:
+%o A239709                    [:bb |
+%o A239709                    (a_b at: bb) < amin
+%o A239709                         ifTrue:
+%o A239709                             [amin := a_b at: bb.
+%o A239709                             bamin := bb]].
+%o A239709          amin < (a min: amax)
+%o A239709               ifTrue:
+%o A239709                    [b := bamin.
+%o A239709                    p := p_i at: b.
+%o A239709                    q := q_j at: b.
+%o A239709                    a := a_b at: b]
+%o A239709               ifFalse:
+%o A239709                    [bmax := bmax + 1.
+%o A239709                    b := bmax.
+%o A239709                    p := b * b.
+%o A239709                    q := b.
+%o A239709                    a := p + q - 1.
+%o A239709                    p_i add: p.
+%o A239709                    q_j add: q.
+%o A239709                    a_b add: a.
+%o A239709                    amax := 2 * (b + 1) + a max: amax]].
+%o A239709   ^terms copyFrom: 1 to: self
+%o A239709 [by_Hieronymus Fischer_, Apr 20 2014]
+%Y A239709 Cf. A239710, A239711, A239712 - A239720.
+%Y A239709 Cf. A239708, A018900.
+%K A239709 nonn
+%O A239709 1,1
+%A A239709 _Hieronymus Fischer_, Mar 27 2014

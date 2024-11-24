@@ -1,0 +1,52 @@
+%I A177792 #31 Mar 29 2017 11:45:56
+%S A177792 1,2,6,20,62,194,616,1972,6344,20498,66486,216352,705982,2309246,
+%T A177792 7569420,24857864,81768144,269369282,888569354,2934666604,9702925752,
+%U A177792 32113058042,106379839060,352698604852,1170271492014,3885821473458,12911299418962,42926732404728
+%N A177792 Number of paths from (0,0) to (n,n) avoiding 4 or more consecutive east steps and 4 or more consecutive north steps.
+%C A177792 Number of binary strings of length 2*n containing n zeros and n ones, avoiding the patterns 0000 and 1111, see example. [_Joerg Arndt_, Dec 02 2013]
+%H A177792 Alois P. Heinz, <a href="/A177792/b177792.txt">Table of n, a(n) for n = 0..1000</a>
+%F A177792 a(n) = 2*Sum_{i=0..floor(n/3)} Sum_{j=0..floor((n-3*i)/2)} C(n-2*i-j,i) * C(n-3*i-j,j) * (Sum_{s=0..min(floor(n/3), floor((2*i+j)/2))} C(n-2*i-j,s) * C(n-2*i-j-s, 2*i+j-2*s) + Sum_{s=0..min(floor(n/3), floor((2*i+j+1)/2))} C(n-2*i-j-1,s) * C(n-2*i-j-s-1, 2*i+j+1-2*s)) if n>0; a(0) = 1.
+%F A177792 a(n) = [x^n y^n] (1+x+x^2+x^3)*(1+y+y^2+y^3) / (1-x*y-x*y^2 -x*y^3-x^2*y -x^2*y^2-x^2*y^3 -x^3*y-x^3*y^2 -x^3*y^3).
+%F A177792 a(n) ~ c * d^n / sqrt(Pi*n), where d = 1 + 1/3*(54-6*sqrt(33))^(1/3) + (2*(9+sqrt(33)))^(1/3) / 3^(2/3) = 3.382975767906237494122708536455034586... is the root of the equation 1 + d + 3*d^2 - d^3 = 0, and c = 2.106003170801818641958056379397216... is the root of the equation -4 - 80*c^2 - 616*c^4 + 143*c^6 = 0. - _Vaclav Kotesovec_, Aug 22 2014
+%e A177792 From _Joerg Arndt_, Dec 02 2013: (Start)
+%e A177792 The a(3) = 20 binary strings of length 3 containing 3 zeros and 3 ones, avoiding the patterns 0000 and 1111 are (putting dots for zeros)
+%e A177792 01:  [ . . . 1 1 1 ]
+%e A177792 02:  [ . . 1 . 1 1 ]
+%e A177792 03:  [ . . 1 1 . 1 ]
+%e A177792 04:  [ . . 1 1 1 . ]
+%e A177792 05:  [ . 1 . . 1 1 ]
+%e A177792 06:  [ . 1 . 1 . 1 ]
+%e A177792 07:  [ . 1 . 1 1 . ]
+%e A177792 08:  [ . 1 1 . . 1 ]
+%e A177792 09:  [ . 1 1 . 1 . ]
+%e A177792 10:  [ . 1 1 1 . . ]
+%e A177792 11:  [ 1 . . . 1 1 ]
+%e A177792 12:  [ 1 . . 1 . 1 ]
+%e A177792 13:  [ 1 . . 1 1 . ]
+%e A177792 14:  [ 1 . 1 . . 1 ]
+%e A177792 15:  [ 1 . 1 . 1 . ]
+%e A177792 16:  [ 1 . 1 1 . . ]
+%e A177792 17:  [ 1 1 . . . 1 ]
+%e A177792 18:  [ 1 1 . . 1 . ]
+%e A177792 19:  [ 1 1 . 1 . . ]
+%e A177792 20:  [ 1 1 1 . . . ]
+%e A177792 (End)
+%p A177792 A177792a := proc(n,i,j,s,l) binomial(n-2*i-j,i)*binomial(n-3*i-j,j)*binomial(n-2*i-j-l,s) *binomial(n-2*i-j-l-s,2*i+j-2*s+l) ; end proc:
+%p A177792 A177792 := proc(n) local a,i,j,slim,s ; if n=0 then return(1) fi; a := 0 ; for i from 0 to n/3 do for j from 0 to (n-3*i)/2 do slim := min( n/3,i+j/2) ; a := a+add( A177792a(n,i,j,s,0),s=0..slim) ; slim := min( n/3,i+(j+1)/2) ; a := a+add( A177792a(n,i,j,s,1),s=0..slim) ; end do: end do: 2*a; end proc:
+%p A177792 seq(A177792(n), n=0..16) ;
+%p A177792 # _R. J. Mathar_, May 31 2010
+%p A177792 # second Maple Program:
+%p A177792 b:= proc(i, j, k) option remember; `if`(i<0 or j<0, 0,
+%p A177792       `if`(i=0 and j=0, 1, `if`(k<3, b(i-1, j, max(k, 0)+1), 0)+
+%p A177792       `if`(k>-3, b(i, j-1, min(k, 0)-1), 0)))
+%p A177792     end:
+%p A177792 a:= n-> b(n, n, 0):
+%p A177792 seq(a(n), n=0..30);  # _Alois P. Heinz_, Jun 01 2011
+%t A177792 b[i_, j_, k_] := b[i, j, k] = If[i<0 || j<0, 0, If[i==0 && j==0, 1, If[k<3, b[i-1, j, Max[k, 0]+1], 0] + If[k > -3, b[i, j-1, Min[k, 0]-1], 0]]];
+%t A177792 a[n_] := b[n, n, 0];
+%t A177792 Table[a[n], {n, 0, 30}] (* _Jean-François Alcover_, Mar 29 2017, after _Alois P. Heinz_ *)
+%K A177792 nonn,walk
+%O A177792 0,2
+%A A177792 _Shanzhen Gao_, May 13 2010
+%E A177792 More terms from _R. J. Mathar_, May 31 2010
+%E A177792 Edited by _Alois P. Heinz_, Jun 04 2011

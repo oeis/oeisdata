@@ -1,0 +1,49 @@
+%I A258865 #23 Aug 09 2021 09:10:13
+%S A258865 24,43,62,81,141,160,179,258,277,359,375,378,397,476,495,593,694,713,
+%T A258865 811,1029,1347,1366,1385,1464,1483,1581,1682,1701,1799,2017,2213,2232,
+%U A258865 2251,2330,2349,2447,2548,2567,2665,2670,2689,2787,2883,3005,3536,3555
+%N A258865 Numbers that are a sum of the cubes of three primes.
+%C A258865 The subsequence of cubes in the sequence starts 505^3, 535^3, 709^3, 865^3, 1033^3, 1037^3, 1067^3, 1133^3, 1513^3, ...  See A258262.
+%H A258865 Reinhard Zumkeller, <a href="/A258865/b258865.txt">Table of n, a(n) for n = 1..10000</a>
+%F A258865 a(n) = A030078(i)+A030078(j)+A030078(k) for some triple (i,j,k).
+%F A258865 By a counting argument a(n) >> n log^3 n and hence the sequence is of density 0. - _Charles R Greathouse IV_, Aug 09 2021
+%e A258865 2^3+2^3+2^3=24. 2^3+2^3+3^3=43. 2^3+3^3+3^3=62. 3^3+3^3+3^3=81.
+%p A258865 A258865 := proc(lim)
+%p A258865     local a,p,q,r ;
+%p A258865     a := {} ;
+%p A258865     p := 2 ;
+%p A258865     while p^3 < lim do
+%p A258865         q := p ;
+%p A258865         while p^3 +q^3< lim do
+%p A258865             r := q ;
+%p A258865             while p^3+q^3+r^3 <= lim do
+%p A258865                 a := a union {p^3+q^3+r^3} ;
+%p A258865                 r := nextprime(r) ;
+%p A258865             end do:
+%p A258865             q := nextprime(q) ;
+%p A258865         end do:
+%p A258865         p := nextprime(p) ;
+%p A258865     end do ;
+%p A258865     a ;
+%p A258865 end proc:
+%p A258865 A258865(30000) ;
+%t A258865 lim = 15; Take[Sort@ DeleteDuplicates[Total /@ (Tuples[Prime@ Range@ lim, 3]^3)], 3 lim] (* _Michael De Vlieger_, Jun 12 2015 *)
+%o A258865 (Haskell)
+%o A258865 import Data.Set (singleton, deleteFindMin, fromList)
+%o A258865 import qualified Data.Set as Set (union)
+%o A258865 import qualified Data.List.Ordered as List (union)
+%o A258865 a258865 n = a258865_list !! (n-1)
+%o A258865 a258865_list = tail $ f (singleton 1) 1 [] [] a030078_list where
+%o A258865    f s z vs qcs pcs'@(pc:pcs)
+%o A258865      | m < z = m : f s' z vs qcs pcs'
+%o A258865      | otherwise = f (Set.union s $ fromList $ map (+ pc) ws)
+%o A258865                      pc ws (pc:qcs) pcs
+%o A258865      where ws = List.union vs $ map (+ pc) (pc : qcs)
+%o A258865            (m, s') = deleteFindMin s
+%o A258865 -- _Reinhard Zumkeller_, Jun 13 2015
+%o A258865 (PARI) list(lim)=my(v=List(), P=apply(p->p^3,primes(sqrtnint(lim\=1,3)))); foreach(P,p, foreach(P,q, my(s=p+q,t); for(i=1,#P, t=s+P[i]; if(t>lim,break); listput(v,t)))); Set(v) \\ _Charles R Greathouse IV_, Aug 09 2021
+%Y A258865 Cf. A138854, A114923.
+%Y A258865 Cf. A030078, A258262 (subsequence).
+%K A258865 nonn
+%O A258865 1,1
+%A A258865 _R. J. Mathar_, Jun 12 2015

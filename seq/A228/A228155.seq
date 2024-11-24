@@ -1,0 +1,75 @@
+%I A228155 #37 Jun 29 2014 12:51:06
+%S A228155 0,2,5,8,12,16,20,25,30,35,40,44,50,56,62,68,73,79,85,91,97,103,110,
+%T A228155 117,123,130,137,144,151,157,163,170,177,184,191,197,204,211,219,227,
+%U A228155 235,243,250,257,265,273,281,289,296,304,312,320,328,335,342,349,356
+%N A228155 Maximal external path length of AVL trees with n (leaf-) nodes.
+%C A228155 The external path length of a tree is the sum of the levels of its external nodes (i.e. leaves).
+%D A228155 D. E. Knuth, Art of Computer Programming, Vol. 3, Sect. 6.2.3 (7) and (8).
+%H A228155 Alois P. Heinz, <a href="/A228155/b228155.txt">Table of n, a(n) for n = 1..5000</a>
+%H A228155 R. C. Richards, <a href="http://dx.doi.org/10.1016/0020-0190(83)90085-6">Shape distribution of height-balanced trees</a>, Info. Proc. Lett., 17 (1983), 17-20.
+%H A228155 Wikipedia, <a href="http://en.wikipedia.org/wiki/AVL_tree">AVL tree</a>
+%H A228155 <a href="/index/Ro#rooted">Index entries for sequences related to rooted trees</a>
+%e A228155 The (two) AVL trees with 3 (leaf-) nodes have one with depth 1 and two with depth 2:
+%e A228155        o       o
+%e A228155       / \     / \
+%e A228155      o   1   1   o
+%e A228155     / \         / \
+%e A228155    2   2       2   2
+%e A228155 so a(3) = 5.
+%t A228155 maxNods = 100; Clear[T, A029837, A072649, A036289, A228155]; T[0, 1] = 0; A029837[1] = 0; A072649[1] = 1; A228155[1] = 0; For[k = 2, k <= maxNods, k++, A029837[k] = maxNods; A072649[k] = 0; A228155u = 0; For[kL = 1, kL <= Floor[k/2], kL++, For[hL = A029837[kL], hL <= A072649[kL] - 1, hL++, For[hR = Max[hL - 1, A029837[k - kL]], hR <= Min[hL + 1, A072649[k - kL] - 1], hR++, maxDepthSum = k + T[hL, kL] + T[hR, k - kL]; A228155u = Max[maxDepthSum, A228155u]; h = Max[hL, hR] + 1; If[ !IntegerQ[T[h, k]], T[h, k] = maxDepthSum, T[h, k] = Max[maxDepthSum, T[h, k]]]; A029837[k] = Min[h, A029837[k]]; If[ !IntegerQ[A036289[h]], A036289[h] = maxDepthSum, A036289[h] = Max[maxDepthSum, A036289[h]]]; A072649[k] = Max[h + 1, A072649[k]]; ]]]; A228155[k] = A228155u]; k =.; Table[A228155[k], {k, 1, maxNods}] (* _Jean-François Alcover_, Aug 19 2013, translated and adapted from Herbert Eberle's MuPAD program *)
+%o A228155 (MuPAD)
+%o A228155 maxNods:=100: // max number of leaves (= external nodes)
+%o A228155 // Triangle T for all AVL trees with <= maxNods leaves:
+%o A228155 delete T:
+%o A228155 // table T indexed [h, k] (h=height, k=number of leaves):
+%o A228155 T[0, 1]:=0:
+%o A228155 // A029837 indexed [k], min height of tree with k leaves:
+%o A228155 A029837:=array(1..maxNods): A029837[1]:=0:
+%o A228155 // A072649 indexed [k], 1+max height of AVL tree with k leaves:
+%o A228155 A072649:=array(1..maxNods): A072649[1]:=1:
+%o A228155 // A036289 indexed [h], max depthsum of all height h AVL trees:
+%o A228155 A036289:=array(1..maxNods):
+%o A228155 // A228155 indexed [k], max depthsum of all AVL trees with k leaves:
+%o A228155 A228155:=array(1..maxNods): A228155[1]:=0:
+%o A228155 for k from 2 to maxNods do:
+%o A228155   A029837[k]:=maxNods: // try infinity for the min height
+%o A228155   A072649[k]:=0:
+%o A228155   A228155u:=0:
+%o A228155   // Put together 2 AVL trees:
+%o A228155   for kL from 1 to floor(k/2) do:
+%o A228155     // kL leaves in the left tree
+%o A228155     for hL from A029837[kL] to A072649[kL]-1 do:
+%o A228155       for hR from max(hL-1, A029837[k-kL])
+%o A228155                to min(hL+1, A072649[k-kL]-1) do:
+%o A228155         // k-kL leaves in the right subtree
+%o A228155         maxDepthSum:=T[hL, kL]+T[hR, k-kL]+k:
+%o A228155         A228155u:=max(maxDepthSum, A228155u):
+%o A228155         h:=max(hL, hR)+1:
+%o A228155         if type(T[h, k]) <> DOM_INT then // T[h, k] uninit
+%o A228155           T[h, k]:=maxDepthSum:
+%o A228155         else
+%o A228155           T[h, k]:=max(maxDepthSum, T[h, k]):
+%o A228155         end_if:
+%o A228155         A029837[k]:=min(h, A029837[k]):
+%o A228155         if type(A036289[h]) <> DOM_INT then
+%o A228155           A036289[h]:=maxDepthSum:
+%o A228155         else
+%o A228155           A036289[h]:=max(maxDepthSum, A036289[h]):
+%o A228155         end_if:
+%o A228155         A072649[k]:=max(h+1, A072649[k]):
+%o A228155       end_for: // hR
+%o A228155     end_for: // hL
+%o A228155   end_for: // kL
+%o A228155   A228155[k]:=A228155u:
+%o A228155 end_for: // k
+%Y A228155 Column maxima of triangles A228152, A228153.
+%Y A228155 Row maxima give: n*2^n = A036289(n).
+%Y A228155 Row minima give: A067331(n-1) for n>0 or A166106(n+2).
+%Y A228155 Row lengths give: 1+A008466(n).
+%Y A228155 Column heights give: A217710(k).
+%Y A228155 Number of AVL trees read by rows gives: A143897.
+%Y A228155 The infimum of all external path lengths of all binary trees with k (leaf-) nodes is: A003314(k) for k>0.
+%Y A228155 Number of AVL trees read by columns gives: A217298.
+%K A228155 nonn
+%O A228155 1,2
+%A A228155 _Herbert Eberle_, Aug 14 2013

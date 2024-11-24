@@ -1,0 +1,43 @@
+%I A321713 #27 Mar 28 2022 08:14:10
+%S A321713 2,6,0,12,0,16,0,4,0,8,0,84,0,0,0,32,0,40,0,32,0,8,0,20,0,0,0,20,0,64,
+%T A321713 0,8,0,0,0,480,0,0,0,80,0,48,0,12,0,8,0,160,0,0,0,20,0,16,0,4,0,8,0,
+%U A321713 1216,0,0,0,8,0,64,0,0,0,16,0,872,0,0,0,0,0,24,0,160,0,8,0,532,0,0,0,52,0,120,0,12,0,0,0,424,0,0,0,100
+%N A321713 a(n) is the number of values k satisfying lambda(k)=n or zero if there is no solution, where lambda(k) is Carmichael's lambda function.
+%H A321713 Bertram Felgenhauer, <a href="/A321713/b321713.txt">Table of n, a(n) for n = 1..10000</a> (first 3023 terms by Gheorghe Coserea)
+%H A321713 R. D. Carmichael, <a href="https://doi.org/10.1090/S0002-9904-1910-01892-9">Note on a new number theory function</a>, Bull. Amer. Math. Soc. 16 (1910), 232-238.
+%e A321713 For n=12 there are a(12)=84 values N satisfying lambda(N)=12; the values are enumerated in A321714.
+%o A321713 (PARI)
+%o A321713 lambda(n) = { \\ A002322
+%o A321713   my(f=factor(n), fsz=matsize(f)[1]);
+%o A321713   lcm(vector(fsz, k, my(p=f[k,1], e=f[k,2]);
+%o A321713       if (p != 2, p^(e-1)*(p-1), e > 2, 2^(e-2), 2^(e-1))));
+%o A321713 };
+%o A321713 invlambda(n) = { \\ A270562
+%o A321713   if (n <= 0, return(0), n==1, return(2), n%2, return(0));
+%o A321713   my(f=factor(n), fsz=matsize(f)[1], g=1, h=1);
+%o A321713   for (k=1, fsz, my(p=f[k,1], e=1);
+%o A321713     while (n % lambda(p^e) == 0, e++); g *= p^(e-1));
+%o A321713   fordiv(n, d, if (isprime(d+1) && g % (d+1) != 0, h *= (d+1)));
+%o A321713   g *= h; if (lambda(g) != n, 0, g);
+%o A321713 };
+%o A321713 lambda_level(n) = {
+%o A321713   my(N = invlambda(n)); if (!N, return([])); my(s=List());
+%o A321713   fordiv(N, d, if (lambda(d) == n, listput(s, d)));
+%o A321713   Set(s);
+%o A321713 };
+%o A321713 a(n) = length(lambda_level(n));
+%o A321713 vector(100, n, a(n))
+%o A321713 (PARI)
+%o A321713 b(n) = { \\ number of k satisfying lambda(k) | n
+%o A321713 my(R = 1);
+%o A321713 fordiv (n, d, if(isprime(d+1),
+%o A321713   my(e = 1); while(n % (d+1) == 0, n /= d+1; e++);
+%o A321713   if (d == 1 && e > 1, e++); R *= e+1));
+%o A321713 R
+%o A321713 };
+%o A321713 a(n) = if (n <= 0, 0, n == 1, 2, n % 2, 0, sumdiv(n, d, moebius(n/d) * b(d)));
+%o A321713 vector(100, n, a(n)) \\ _Bertram Felgenhauer_, Mar 27 2022
+%Y A321713 Cf. A002322, A270562, A321714.
+%K A321713 nonn
+%O A321713 1,1
+%A A321713 _Gheorghe Coserea_, Feb 21 2019

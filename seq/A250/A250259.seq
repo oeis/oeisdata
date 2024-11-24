@@ -1,0 +1,63 @@
+%I A250259 #19 Jul 10 2017 15:03:14
+%S A250259 1,1,1,2,3,4,19,78,217,496,3961,25442,105963,349504,3908059,34227438,
+%T A250259 190065457,819786496,11785687921,130746521282,907546301523,
+%U A250259 4835447317504,84965187064099,1141012634368398,9504085749177097,60283564499562496,1251854782837499881
+%N A250259 The number of 4-alternating permutations of [n].
+%C A250259 A sequence a(1),a(2),... is called k-alternating if a(i) > a(i+1) iff i=1 (mod k).
+%H A250259 Alois P. Heinz, <a href="/A250259/b250259.txt">Table of n, a(n) for n = 0..500</a>
+%H A250259 R. P. Stanley, <a href="http://arxiv.org/abs/0912.4240">A survey of alternating permutations</a>, arXiv:0912.4240 [math.CO], 2009, page 17.
+%p A250259 onestep := proc(n::integer,ups::integer,downs::integer,uplen::integer)
+%p A250259     local thisstep,left,doup,tak,ret ;
+%p A250259     option remember;
+%p A250259     left := ups+downs ;
+%p A250259     if left = 0 then
+%p A250259         return 1;
+%p A250259     end if;
+%p A250259     thisstep := n-left+1 ;
+%p A250259     if modp(thisstep-2,uplen+1) = 0 then
+%p A250259         doup := false;
+%p A250259     else
+%p A250259         doup := true;
+%p A250259     end if;
+%p A250259     if doup then
+%p A250259         ret := 0 ;
+%p A250259         for tak from 1 to ups do
+%p A250259             ret := ret+procname(n,ups-tak,downs+tak-1,uplen) ;
+%p A250259         end do:
+%p A250259         return ret ;
+%p A250259     else
+%p A250259         ret := 0 ;
+%p A250259         for tak from 1 to downs do
+%p A250259             ret := ret+procname(n,ups+tak-1,downs-tak,uplen) ;
+%p A250259         end do:
+%p A250259         return ret ;
+%p A250259     end if;
+%p A250259 end proc:
+%p A250259 downupP := proc(n::integer,uplen::integer)
+%p A250259     local ret,tak;
+%p A250259     if n = 0 then
+%p A250259         return 1;
+%p A250259     end if;
+%p A250259     ret := 0 ;
+%p A250259     for tak from 1 to n do
+%p A250259         ret := ret+onestep(n,n-tak,tak-1,uplen) ;
+%p A250259     end do:
+%p A250259     return ret ;
+%p A250259 end proc:
+%p A250259 A250259 :=proc(n)
+%p A250259     downupP(n,3) ;
+%p A250259 end proc:
+%p A250259 seq(A250259(n),n=0..20) ; # _R. J. Mathar_, Nov 15 2014
+%p A250259 # second Maple program:
+%p A250259 b:= proc(u, o, t) option remember; `if`(u+o=0, 1,
+%p A250259      `if`(t=1, add(b(u-j, o+j-1, irem(t+1, 4)), j=1..u),
+%p A250259                add(b(u+j-1, o-j, irem(t+1, 4)), j=1..o)))
+%p A250259     end:
+%p A250259 a:= n-> b(0, n, 0):
+%p A250259 seq(a(n), n=0..35);  # _Alois P. Heinz_, Nov 15 2014
+%t A250259 b[u_, o_, t_] := b[u, o, t] = If[u + o == 0, 1, If[t == 1, Sum[b[u - j, o + j - 1, Mod[t + 1, 4]], {j, 1, u}], Sum[b[u + j - 1, o - j, Mod[t + 1, 4]], {j, 1, o}]]]; a[n_] := b[0, n, 0]; Table[a[n], {n, 0, 35}] (* _Jean-François Alcover_, Jul 10 2017, after _Alois P. Heinz_ *)
+%Y A250259 Cf. A249402 (3-alternating), A065619 (2-alternating), A250260 (5-alternating).
+%Y A250259 Column k=4 of A250261.
+%K A250259 nonn
+%O A250259 0,4
+%A A250259 _R. J. Mathar_, Nov 15 2014

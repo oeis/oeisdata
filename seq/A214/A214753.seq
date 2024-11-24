@@ -1,0 +1,40 @@
+%I A214753 #36 Oct 05 2018 19:32:54
+%S A214753 1,0,1,0,2,1,0,4,4,1,0,10,16,6,1,0,26,66,34,8,1,0,76,296,192,58,10,1,
+%T A214753 0,232,1334,1134,406,88,12,1,0,764,6322,6716,2918,730,124,14,1,0,2620,
+%U A214753 30930,40872,20718,6118,1186,166,16,1,0,9496,158008,255308,149826,50056,11310,1796,214,18,1
+%N A214753 Number T(n,k) of solid standard Young tableaux of n cells and height = k; triangle T(n,k), n>=0, 0<=k<=n, read by rows.
+%H A214753 Alois P. Heinz, <a href="/A214753/b214753.txt">Rows n = 0..20, flattened</a>
+%H A214753 S. B. Ekhad, D. Zeilberger, <a href="https://arxiv.org/abs/1202.6229">Computational and Theoretical Challenges on Counting Solid Standard Young Tableaux</a>, arXiv:1202.6229 [math.CO], 2012
+%H A214753 Wikipedia, <a href="https://en.wikipedia.org/wiki/Young_tableau">Young tableau</a>
+%F A214753 T(n,k) = A215086(n,k) - A215086(n,k-1) for k>0, T(n,0) = A215086(n,0) = A000007(n).
+%e A214753 Triangle T(n,k) begins:
+%e A214753   1;
+%e A214753   0,   1;
+%e A214753   0,   2,    1;
+%e A214753   0,   4,    4,    1;
+%e A214753   0,  10,   16,    6,   1;
+%e A214753   0,  26,   66,   34,   8,  1;
+%e A214753   0,  76,  296,  192,  58, 10,  1;
+%e A214753   0, 232, 1334, 1134, 406, 88, 12,  1;
+%p A214753 b:= proc(n, k, l) option remember; `if`(n=0, 1,
+%p A214753        b(n-1, k, [l[], [1]])+ add(`if`(i=1 or nops(l[i])<nops(l[i-1]),
+%p A214753        b(n-1, k, subsop(i=[l[i][], 1], l)), 0)+ add(`if`(l[i][j]<k and
+%p A214753        (i=1 or l[i][j]<l[i-1][j]) and (j=1 or l[i][j]<l[i][j-1]),
+%p A214753        b(n-1, k, subsop(i=subsop(j=l[i][j]+1, l[i]), l)), 0),
+%p A214753        j=1..nops(l[i])), i=1..nops(l)))
+%p A214753     end:
+%p A214753 A:= (n, k)-> `if`(k=0, `if`(n=0, 1, 0), b(n, min(n, k), [])):
+%p A214753 T:= (n, k)-> A(n,k) -`if`(k=0, 0, A(n, k-1)):
+%p A214753 seq(seq(T(n, k), k=0..n), n=0..10);
+%t A214753 b[n_, k_, L_] := b[n, k, L] = If[n == 0, 1, b[n-1, k, Append[L, {1}]] + Sum[If[i == 1 || Length[L[[i]]] < Length[L[[i-1]]], b[n-1, k, ReplacePart[L, i -> Append[L[[i]], 1]]], 0] + Sum[If[L[[i, j]] < k && (i == 1 || L[[i, j]] < L[[i-1, j]]) && (j == 1 || L[[i, j]] < L[[i, j-1]]), b[n-1, k, ReplacePart[L, i -> ReplacePart[ L[[i]], j -> L[[i, j]]+1]]], 0], {j, 1, Length[L[[i]]]}], {i, 1, Length[L]}]];
+%t A214753 A[n_, k_] := If[k == 0, If[n == 0, 1, 0], b[n, Min[n, k], {}]];
+%t A214753 T[n_, k_] := A[n, k] - If[k == 0, 0, A[n, k-1]];
+%t A214753 Table[Table[T[n, k], {k, 0, n}], {n, 0, 10}] // Flatten (* _Jean-François Alcover_, May 23 2016, after _Alois P. Heinz_ *)
+%Y A214753 Columns k=0-10 give: A000007(n), A000085(n) for n>0, A273582, A273583, A273584, A273585, A273586, A273587, A273588, A273589, A273590.
+%Y A214753 Diagonal and lower diagonal give: A000012, A005843.
+%Y A214753 Row sums give: A207542.
+%Y A214753 T(2n,n) gives A273591.
+%Y A214753 Cf. A215086.
+%K A214753 nonn,tabl
+%O A214753 0,5
+%A A214753 _Alois P. Heinz_, Aug 02 2012

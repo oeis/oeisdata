@@ -1,0 +1,31 @@
+%I A321588 #12 Jan 24 2024 18:33:19
+%S A321588 1,1,1,9,29,181,1285,10635,102355,1118021,13637175,184238115,
+%T A321588 2727293893,43920009785,764389610843,14297306352937,286014489487815,
+%U A321588 6093615729757841,137750602009548533,3293082026520294529,83006675263513350581,2200216851785981586729,61180266502369886181253
+%N A321588 Number of connected nonnegative integer matrices with sum of entries equal to n, no zero rows or columns, and distinct rows and columns.
+%C A321588 A matrix is connected if the positions in each row (or each column) of the nonzero entries form a connected hypergraph.
+%H A321588 Andrew Howroyd, <a href="/A321588/b321588.txt">Table of n, a(n) for n = 0..40</a>
+%e A321588 The a(4) = 29 matrices:
+%e A321588 4 31 13
+%e A321588 .
+%e A321588 3 21 21 20 12 12 11 110 11 110 101 101 1 10 10 02 011 011 01 01
+%e A321588 1 10 01 11 10 01 20 101 02 011 110 011 3 21 12 11 110 101 21 12
+%e A321588 .
+%e A321588 11 11 10 10 01 01
+%e A321588 10 01 11 01 11 10
+%e A321588 01 10 01 11 10 11
+%t A321588 prs2mat[prs_]:=Table[Count[prs,{i,j}],{i,Union[First/@prs]},{j,Union[Last/@prs]}];
+%t A321588 multsubs[set_,k_]:=If[k==0,{{}},Join@@Table[Prepend[#,set[[i]]]&/@multsubs[Drop[set,i-1],k-1],{i,Length[set]}]];
+%t A321588 csm[s_]:=With[{c=Select[Tuples[Range[Length[s]],2],And[OrderedQ[#],UnsameQ@@#,Length[Intersection@@s[[#]]]>0]&]},If[c=={},s,csm[Union[Append[Delete[s,List/@c[[1]]],Union@@s[[c[[1]]]]]]]]];
+%t A321588 Table[Length[Select[multsubs[Tuples[Range[n],2],n],And[Union[First/@#]==Range[Max@@First/@#],Union[Last/@#]==Range[Max@@Last/@#],UnsameQ@@prs2mat[#],UnsameQ@@Transpose[prs2mat[#]],Length[csm[Map[Last,GatherBy[#,First],{2}]]]==1]&]],{n,6}]
+%o A321588 (PARI)
+%o A321588 permcount(v) = {my(m=1, s=0, k=0, t); for(i=1, #v, t=v[i]; k=if(i>1&&t==v[i-1], k+1, 1); m*=t*k; s+=t); s!/m}
+%o A321588 K(q,t,wf)={prod(j=1, #q, wf(t*q[j]))-1}
+%o A321588 Q(m,n,wf=w->2)={my(s=0); forpart(p=m, s+=(-1)^#p*permcount(p)*exp(-sum(t=1, n, (-1)^t*x^t*K(p,t,wf)/t, O(x*x^n))) ); Vec((-1)^m*serchop(serlaplace(s),1), -n)}
+%o A321588 ConnectedMats(M)={my([m, n]=matsize(M), R=matrix(m, n)); for(m=1, m, for(n=1, n, R[m, n] = M[m, n] - sum(i=1, m-1, sum(j=1, n-1, binomial(m-1, i-1)*binomial(n, j)*R[i, j]*M[m-i, n-j])))); R}
+%o A321588 seq(n)={my(R=vectorv(n,m,Q(m,n,w->1/(1 - y^w) + O(y*y^n)))); for(i=2, #R, R[i] -= i*R[i-1]); Vec(1 + vecsum( vecsum( Vec( ConnectedMats( Mat(R))))))} \\ _Andrew Howroyd_, Jan 24 2024
+%Y A321588 Cf. A007718, A056156, A059201, A120733, A283877, A316980, A319557, A319558, A319559, A319565, A319647, A319616-A319629, A321446, A321515, A369285.
+%K A321588 nonn
+%O A321588 0,4
+%A A321588 _Gus Wiseman_, Nov 13 2018
+%E A321588 a(7) onwards from _Andrew Howroyd_, Jan 24 2024

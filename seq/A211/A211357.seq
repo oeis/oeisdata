@@ -1,0 +1,38 @@
+%I A211357 #19 Jul 03 2018 05:28:28
+%S A211357 1,0,1,1,0,1,1,1,0,1,2,1,2,0,1,2,3,2,2,0,1,5,6,9,4,3,0,1,6,15,18,15,5,
+%T A211357 3,0,1,15,36,56,42,29,7,4,0,1,28,91,144,142,84,42,10,4,0,1,67,232,419,
+%U A211357 432,322,152,66,12,5,0,1,145,603,1160,1365,1080,630,252,90,15,5,0,1
+%N A211357 Triangle read by rows: T(n,k) is the number of noncrossing partitions up to rotation of an n-set that contain k singleton blocks.
+%H A211357 Andrew Howroyd, <a href="/A211357/b211357.txt">Table of n, a(n) for n = 0..1274</a> (terms 0..90 from Tilman Piesk)
+%F A211357 T(n,k) = (1/n)*(A091867(n,k) - A171128(n,k) + Sum_{d|gcd(n,k)} phi(d) * A171128(n/d, k/d)) for n > 0. - _Andrew Howroyd_, Nov 16 2017
+%e A211357 From _Andrew Howroyd_, Nov 16 2017: (Start)
+%e A211357 Triangle begins: (n >= 0, 0 <= k <= n)
+%e A211357    1;
+%e A211357    0,   1;
+%e A211357    1,   0,   1;
+%e A211357    1,   1,   0,   1;
+%e A211357    2,   1,   2,   0,   1;
+%e A211357    2,   3,   2,   2,   0,   1;
+%e A211357    5,   6,   9,   4,   3,   0,  1;
+%e A211357    6,  15,  18,  15,   5,   3,  0,  1;
+%e A211357   15,  36,  56,  42,  29,   7,  4,  0, 1;
+%e A211357   28,  91, 144, 142,  84,  42, 10,  4, 0, 1;
+%e A211357   67, 232, 419, 432, 322, 152, 66, 12, 5, 0, 1;
+%e A211357 (End)
+%t A211357 a91867[n_, k_] := If[k == n, 1, (Binomial[n + 1, k]/(n + 1)) Sum[Binomial[n + 1 - k, j] Binomial[n - k - j - 1, j - 1], {j, 1, (n - k)/2}]];
+%t A211357 a2426[n_] := Sum[Binomial[n, 2*k]*Binomial[2*k, k], {k, 0, Floor[n/2]}];
+%t A211357 a171128[n_, k_] := Binomial[n, k]*a2426[n - k];
+%t A211357 T[0, 0] = 1;
+%t A211357 T[n_, k_] := (1/n)*(a91867[n, k] - a171128[n, k] + Sum[EulerPhi[d]* a171128[n/d, k/d], {d, Divisors[GCD[n, k]]}]);
+%t A211357 Table[T[n, k], {n, 0, 11}, {k, 0, n}] // Flatten (* _Jean-François Alcover_, Jul 03 2018, after _Andrew Howroyd_ *)
+%o A211357 (PARI)
+%o A211357 g(x,y) = {1/sqrt((1 - (1 + y)*x)^2 - 4*x^2) - 1}
+%o A211357 S(n)={my(A=(1-sqrt(1-4*x/(1-(y-1)*x) + O(x^(n+2))))/(2*x)-1); Vec(1+intformal((A + sum(k=2, n, eulerphi(k)*g(x^k + O(x*x^n), y^k)))/x))}
+%o A211357 my(v=S(10)); for(n=1, #v, my(p=v[n]); for(k=0, n-1, print1(polcoeff(p,k), ", ")); print) \\ _Andrew Howroyd_, Nov 16 2017
+%Y A211357 Column k=0 is A295198.
+%Y A211357 Row sums are A054357.
+%Y A211357 Cf. A091867 (noncrossing partitions of an n-set with k singleton blocks), A211359 (up to rotations and reflections).
+%Y A211357 Cf. A171128.
+%K A211357 nonn,tabl
+%O A211357 0,11
+%A A211357 _Tilman Piesk_, Apr 12 2012

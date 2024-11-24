@@ -1,0 +1,35 @@
+%I A281684 #37 Jan 02 2023 12:30:52
+%S A281684 8,138,87,88,14,122,121,70,21,206,405,94,15,82,195,27,729,266,358,136,
+%T A281684 318,592,18,342,202,1182,268,155,85,292,386,888,295,551,892,118,63,95,
+%U A281684 696,1497,315,400,954,574,33,72,85,1377,140,1417,158,448,994,1370,3399
+%N A281684 Least composite k such that the concatenation of n consecutive composites, starting from k, is a prime.
+%C A281684 If k = 1 is allowed then a(27) = 1 and a(50) = 1.
+%C A281684 From _Michel Marcus_, Mar 06 2021: (Start)
+%C A281684 Some small values:
+%C A281684 a(2)     = 8  = A002808(3);
+%C A281684 a(646)   = 10 = A002808(5);
+%C A281684 a(14662) = 12 = A002808(6) [Hans Havermann];
+%C A281684 a(6)     = 14 = A002808(7);
+%C A281684 a(14)    = 15 = A002808(8);
+%C A281684 a(302)   = 16 = A002808(9);
+%C A281684 a(24)    = 18 = A002808(10);
+%C A281684 a(1388)  = 20 = A002808(11) [seqfan user cwwuieee]. (End)
+%C A281684 Records: 8, 138, 206, 405, 729, 1182, 1497, 3399, 3588, 8097, 11064, 11076, 12806, 28089, 35084, 37912, 39897, 45330, 50828, 76589, ..., . - _Robert G. Wilson v_, Mar 12 2021
+%H A281684 Robert G. Wilson v, <a href="/A281684/b281684.txt">Table of n, a(n) for n = 1..1000</a> (terms 2..250 from Paolo P. Lava, terms 201..500 from Michel Marcus).
+%H A281684 Seqfan thread, <a href="http://list.seqfan.eu/oldermail/seqfan/2021-March/021363.html">Reversing A281684</a>, March 2021.
+%e A281684 a(2) = 8 because the next composite after 8 is 9: concat(8, 9) = 89 is prime and 8 is the least number with this property;
+%e A281684 a(3) = 138 because the next composites after 138 are 140, 141: concat(138, 140, 141) = 138140141 is prime and 138 is the least number with this property.
+%p A281684 with(numtheory): P:=proc(q) local a,b,i,j,k,n; for n from 2 to q do
+%p A281684 for k from 1 to q do if not isprime(k) then a:=k; b:=a; j:=1; while j<n do j:=j+1; i:=1;
+%p A281684 while isprime(b+i) do i:=i+1; od; a:=a*10^(ilog10(b+i)+1)+b+i; b:=b+i; od;
+%p A281684 if isprime(a) then print(k); break; fi; fi; od; od; end: P(10^9);
+%t A281684 With[{c = Select[Range[10^5], CompositeQ]}, Table[k = 1; While[! PrimeQ@ FromDigits@ Flatten@ IntegerDigits@ Take[c, {k, k + n}], k++]; c[[k]], {n, 55}]] (* _Michael De Vlieger_, Jan 27 2017 *)
+%t A281684 NextComposite[n_Integer /; n > -1] := If[-1 < n < 3, 4, If[ PrimeQ[n + 1], n + 2, n + 1]]; a[n_] := Block[{k = 4}, While[ !PrimeQ[ FromDigits[ Flatten[ IntegerDigits[ NestList[ NextComposite, k, n - 1]]]]], k = NextComposite@ k]; k]; Array[a, 55, 2] (* _Robert G. Wilson v_, Mar 12 2021 *)
+%o A281684 (PARI) nextc(c, n) = {my(vc = vector(n), j = 2, x = c+1); vc[1] = c; while (j <= n, if (!isprime(x), vc[j] = x; j++); x++;); vc;}
+%o A281684 isok(vc) = {my(x=""); for (i=1, #vc, x = concat(x, Str(vc[i]))); ispseudoprime(eval(x));}
+%o A281684 a(n) = {forcomposite(c=4, oo, my(vc = nextc(c, n)); if (isok(vc), return(c)););} \\ _Michel Marcus_, Mar 03 2021
+%o A281684 (PARI) {inv_A281684(n,L=oo,k=1)=forcomposite(c=1+n=A002808(n),L,k++;ispseudoprime(n=n*10^(logint(c,10)+1)+c)&&return(k))} \\ "reversed function" (cf. comments): Find the least k such that the concatenation of k composites, starting with the n-th composite, yield a prime. 2nd optional arg allows to specify a search limit L, then an empty/zero result means that k > L. - _M. F. Hasler_, Aug 07 2021
+%Y A281684 Cf. A000040, A002808, A030996.
+%K A281684 nonn,base
+%O A281684 2,1
+%A A281684 _Paolo P. Lava_, Jan 27 2017

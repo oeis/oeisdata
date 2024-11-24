@@ -1,0 +1,38 @@
+%I A371949 #77 Apr 21 2024 19:19:03
+%S A371949 3240,6415200,45606240,12702096000,170514616320,430865593920,
+%T A371949 25150150080000,753411576268800,2398271752673280,3552119332387200,
+%U A371949 49797297158400000,2595785508222566400,13369373984761528320,22330692411407861760,28155000551019598080
+%N A371949 Array read by antidiagonals: T(n,k) is the numerator of the probability of attacker victory in the game of Risk when n attacking armies face k defending armies in a territory.
+%C A371949 In the game of Risk, an attack occurs when a player moves some number of armies into a territory defended by the armies of another player, and the outcome of the attack is determined by repeatedly rolling 6-sided dice according to the number of attacking and defending armies present, up to a maximum of 3 and 2 dice for the attacker and defender, respectively.  Some number of armies are eliminated corresponding to comparing highest versus highest roll (with the loser losing one army), and second-highest versus second-highest roll (with the loser again losing one army), with ties going to the defending side.  This continues either until the aggressor decides to retreat before the next roll, or until one side has lost all of its armies in the territory (in which case the victor has possession of the territory with the remaining armies).
+%C A371949 Example: 3 of Alice's armies invade a territory held by 3 of Bob's armies; Alice rolls a (1,2,5) and Bob rolls a (4,2).  Alice's 5 beats Bob's 4, and Bob's 2 beats Alice's 2 (as Bob is defending).  Each side therefore loses one army, with each side having 2 armies remaining.  Note that in this example, if Alice continues the attack, she will now roll only 2 dice against Bob's 2, thereby reducing her odds of eliminating Bob's armies in that territory. It can be shown that, in an arbitrarily large set of rolls, the odds favor the attacker.  When the attacking player rolls 3 dice and the defending player rolls 2, of the 6^5 = 7776 possible rolls (all equally likely to occur), there are
+%C A371949     2890 that result in the loss of 2 armies by the defender,
+%C A371949     2275 that result in the loss of 2 armies by the attacker, and
+%C A371949     2611 that result in the loss of 1 army by each.
+%C A371949 However, in a 1-vs.-1 scenario, the defense is favored 7/12 to 5/12 because defenders win ties.  Thus the probabilities are not so trivial as to which matchups are favorable.  This is further complicated by intermediate-size armies which require repeated rolling, such as the 3-vs.-3 example above, where there is a nearly 2/3 chance that the attacker will lose troops that land them below the three-army threshold, but a 1/3 chance that the defender will be down to 1 defender against 3 attackers, which heavily favors the attacker.  This requires recursively calculating the probabilities for the further downstream outcomes.
+%H A371949 <a href="https://www.hasbro.com/common/instruct/risk.pdf">Risk Official Game Rules</a>.
+%H A371949 <a href="https://en.wikipedia.org/wiki/Risk_(game)">Risk - Wikipedia</a>.
+%e A371949 This sequence lists the numerators T(n,k) along antidiagonals of the probability of n attacking armies winning against k defending armies.  The denominator of each probability is 7776^(n+k-1).  The sequence starts with T(1,1) and moves to T(1,2), T(2,1); T(1,3), T(2,2), T(3,1); etc.  Hence the first value is 3240/7776 = 5/12.
+%e A371949 A k-vs.-k attack by 4 or fewer armies, played until complete elimination, will favor the defender, but 5-vs.-5 or more will favor the attacker, with the probability of victory by the attacker steadily increasing with each additional die added to both sides.
+%o A371949 (Python)
+%o A371949 from itertools import product
+%o A371949 from collections import Counter
+%o A371949 from functools import lru_cache
+%o A371949 from fractions import Fraction
+%o A371949 def get_elims(o,d): return tuple(-''.join(['od'[int(o>d)] for o,d in zip(*[sorted(i)[-2:][::-1] for i in [o,d]])]).count(j) for j in 'od')
+%o A371949 @lru_cache()
+%o A371949 def elim_p(o_n,d_n): return {j:Fraction(k,7776) for j,k in Counter([get_elims(i[:o_n],i[o_n:o_n+d_n]) for i in product(range(1,7),repeat=5)]).most_common()}
+%o A371949 @lru_cache()
+%o A371949 def res_p(o_n,d_n): return {(o_n+i[0],d_n+i[1]):j for i,j in elim_p(min(3,o_n), min(2,d_n)).items()}
+%o A371949 def get_final_result(o_n,d_n):
+%o A371949     d,g = {(o_n,d_n):1}, [(o_n,d_n)]
+%o A371949     while g:
+%o A371949         w,p = g[0], d.pop(g[0])
+%o A371949         for i,j in res_p(*w).items():
+%o A371949             d[i] = d.get(i,0)+j*p
+%o A371949         g = [i for i in d.keys() if min(i)>0]
+%o A371949     return d
+%o A371949 def get_win_count(o_n,d_n): return (sum(j for i,j in get_final_result(o_n,d_n).items() if i[0]>i[1])*(7776**(o_n+d_n-1))).numerator
+%o A371949 a = [get_win_count(o_n,t-o_n) for t in range(2,30) for o_n in range(1,t)]
+%K A371949 nonn,tabl,frac
+%O A371949 1,1
+%A A371949 _Nicholas Stefan Georgescu_, Apr 12 2024

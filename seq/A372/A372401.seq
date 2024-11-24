@@ -1,0 +1,47 @@
+%I A372401 #21 Sep 23 2024 04:00:49
+%S A372401 1,68,547,2119,5817,13008,25412,45078,74409,116147,173379,249532,
+%T A372401 348375,474018,630922,823885,1058051,1338898,1672260,2064302,2521535,
+%U A372401 3050825,3659361,4354687,5144682,6037582,7041946,8166692,9421074,10814695,12357491,14059744,15932086,17985473
+%N A372401 Position of 210^n among 7-smooth numbers A002473.
+%C A372401 Also position of 210^(n+1) in A147571.
+%F A372401 a(n) ~ c * n^4, where c = log(210)^4/(24*log(2)*log(3)*log(5)*log(7)) = 14.282278766622... - _Vaclav Kotesovec_ and _Amiram Eldar_, Sep 22 2024
+%t A372401 Table[
+%t A372401   Sum[Floor@ Log[7, 210^n/(2^i*3^j*5^k)] + 1,
+%t A372401     {i, 0, Log[2, 210^n]},
+%t A372401     {j, 0, Log[3, 210^n/2^i]},
+%t A372401     {k, 0, Log[5, 210^n/(2^i*3^j)]}],
+%t A372401   {n, 0, 12}]
+%o A372401 (Python)
+%o A372401 import heapq
+%o A372401 from itertools import islice
+%o A372401 from sympy import primerange
+%o A372401 def A372401gen(p=7): # generator for p-smooth terms
+%o A372401     v, oldv, psmooth_primes, = 1, 0, list(primerange(1, p+1))
+%o A372401     h = [(1, [0]*len(psmooth_primes))]
+%o A372401     idx = {psmooth_primes[i]:i for i in range(len(psmooth_primes))}
+%o A372401     loc = 0
+%o A372401     while True:
+%o A372401         v, e = heapq.heappop(h)
+%o A372401         if v != oldv:
+%o A372401             loc += 1
+%o A372401             if len(set(e)) == 1:
+%o A372401                 yield loc
+%o A372401             oldv = v
+%o A372401             for p in psmooth_primes:
+%o A372401                 vp, ep = v*p, e[:]
+%o A372401                 ep[idx[p]] += 1
+%o A372401                 heapq.heappush(h, (v*p, ep))
+%o A372401 print(list(islice(A372401gen(), 15))) # _Michael S. Branicky_, Jun 05 2024
+%o A372401 (Python)
+%o A372401 from sympy import integer_log
+%o A372401 def A372401(n):
+%o A372401     c, x = 0, 210**n
+%o A372401     for i in range(integer_log(x,7)[0]+1):
+%o A372401         for j in range(integer_log(m:=x//7**i,5)[0]+1):
+%o A372401             for k in range(integer_log(r:=m//5**j,3)[0]+1):
+%o A372401                 c += (r//3**k).bit_length()
+%o A372401     return c # _Chai Wah Wu_, Sep 16 2024
+%Y A372401 Cf. A002110, A002473, A022330, A147571, A202821, A372400, A372402.
+%K A372401 nonn
+%O A372401 0,2
+%A A372401 _Michael De Vlieger_, Jun 03 2024

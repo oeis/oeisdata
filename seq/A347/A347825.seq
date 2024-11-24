@@ -1,0 +1,100 @@
+%I A347825 #73 Mar 15 2023 20:03:42
+%S A347825 1,2,6,17,61,220,883,3597,15232,65130,282294,1229729,5384065,23630332,
+%T A347825 103922707,457561989,2016346540,8890227762,39212714934,173001054449,
+%U A347825 763388725141,3368934926716,14868728620387,65626328874621,289666423135048,1278582804528090
+%N A347825 Number of ways to cut a 2 X n rectangle into rectangles with integer sides up to symmetries of the rectangle.
+%C A347825 If all rotations and reflections are considered, a(2)=4 instead of 6.
+%H A347825 Thomas Garrison, <a href="/A347825/b347825.txt">Table of n, a(n) for n = 0..1000</a>
+%H A347825 Soumil Mukherjee, Thomas Garrison, <a href="/A347825/a347825_1.pdf">2 X n tiling up to symmetries of a rectangle</a>
+%H A347825 <a href="/index/Rec#order_07">Index entries for linear recurrences with constant coefficients</a>, signature (9,-19,-33,143,-63,-175,147).
+%F A347825 Define V(n) to be the set of tilings that are vertically symmetric.
+%F A347825 Define H(n) to be the set of tilings that are horizontally symmetric.
+%F A347825 Define R(n) to be the set of tilings that are rotationally symmetric.
+%F A347825 a(n) = (c(n) + |V(n)| + |H(n)| + |R(n)|)/4 for n > 0, where:
+%F A347825   c(n) = A034999(n),
+%F A347825   |H(n)| = 2 * (3^n-1),
+%F A347825   |V(n)| = c(n/2+1) - c(n/2) for even n; otherwise c(floor(n/2)+1),
+%F A347825   |R(n)| = 2*c(n/2) for even n; otherwise c(floor(n/2)+1).
+%F A347825 From _Andrew Howroyd_, Feb 08 2022: (Start)
+%F A347825 a(n) = (c(n) + 2*3^(n-1) + c(floor((n+1)/2)) + c(floor((n+2)/2)))/4 for n > 0, where c(n) = A034999(n).
+%F A347825 a(n) = 9*a(n-1) - 19*a(n-2) - 33*a(n-3) + 143*a(n-4) - 63*a(n-5) - 175*a(n-6) + 147*a(n-7) for n > 7.
+%F A347825 G.f.: (1 - 7*x + 7*x^2 + 34*x^3 - 55*x^4 - 31*x^5 + 66*x^6 - 7*x^7)/((1 - 3*x)*(1 - 6*x + 7*x^2)*(1 - 6*x^2 + 7*x^4)).
+%F A347825 (End)
+%F A347825 a(n) ~ k*(3 + sqrt(2))^n, where k = (4 + sqrt(2))/56. - _Stefano Spezia_, Feb 17 2022
+%e A347825 The a(2) = 6 ways to partition are:
+%e A347825   +-------+    +---+---+    +-------+
+%e A347825   |       |    |   |   |    |       |
+%e A347825   |       |    |   |   |    +-------+
+%e A347825   |       |    |   |   |    |       |
+%e A347825   +-------+    +---+---+    +-------+
+%e A347825 .
+%e A347825   +---+---+    +-------+    +---+---+
+%e A347825   |   |   |    |       |    |   |   |
+%e A347825   |   +---+    +---+---+    +---+---+
+%e A347825   |   |   |    |   |   |    |   |   |
+%e A347825   +---+---+    +---+---+    +---+---+
+%o A347825 (Python)
+%o A347825 # By Soumil Mukherjee
+%o A347825 # Algebraic solutions to the number of ways to tile a 2 X n grid
+%o A347825 import sys
+%o A347825 # Total number of tilings
+%o A347825 # Counts different reflections and rotations as distinct
+%o A347825 counts = [1,2,8]
+%o A347825 def tilings(n):
+%o A347825     if (n < len(counts)): return counts[n]
+%o A347825     for i in range(len(counts), n+1):
+%o A347825         val = 6 * counts[i-1] - 7 * counts[i-2]
+%o A347825         counts.append(val)
+%o A347825     return counts[n]
+%o A347825 def getCounts(n):
+%o A347825   return counts[n]
+%o A347825 def horizontallySymmetric(i):
+%o A347825     if i == 0: return 1
+%o A347825     return 2 * (3 ** (i-1))
+%o A347825 def verticallySymmetric(i):
+%o A347825     if i == 0: return 1
+%o A347825     k = i//2
+%o A347825     if (i % 2 == 0):
+%o A347825         return counts[k+1] - counts[k]
+%o A347825     else:
+%o A347825         return counts[k+1]
+%o A347825 def rotationallySymmetric(i):
+%o A347825     if i == 0: return 1
+%o A347825     k = i//2
+%o A347825     if (i % 2 == 0):
+%o A347825         return 2 * counts[k]
+%o A347825     else:
+%o A347825         return counts[k+1]
+%o A347825 def perfectlySymmetric(i):
+%o A347825     if i == 0: return 1
+%o A347825     k = i//2
+%o A347825     if (i % 2 == 0):
+%o A347825         return 4 * (3 ** (k-1))
+%o A347825     else:
+%o A347825         return 2 * (3 ** k)
+%o A347825 def asymmetric(i):
+%o A347825     return (
+%o A347825         counts[i]
+%o A347825         - verticallySymmetric(i)
+%o A347825         - horizontallySymmetric(i)
+%o A347825         - rotationallySymmetric(i)
+%o A347825         + (2 * perfectlySymmetric(i))
+%o A347825     )
+%o A347825 def equivalenceClasses(i):
+%o A347825     tilings(i)
+%o A347825     return (
+%o A347825         (
+%o A347825           counts[i]
+%o A347825           + verticallySymmetric(i)
+%o A347825           + horizontallySymmetric(i)
+%o A347825           + rotationallySymmetric(i)
+%o A347825         )//4
+%o A347825         )
+%o A347825 (PARI) \\ here c(n) is A034999(n)
+%o A347825 c(n) = polcoef((1-x)*(1-3*x)/(1-6*x+7*x^2) + O(x*x^n), n)
+%o A347825 a(n) = if(n==0, 1, (c(n) + 2*3^(n-1) + c((n+1)\2) + c((n+2)\2))/4) \\ _Andrew Howroyd_, Feb 08 2022
+%Y A347825 The 1 X n case is A005418.
+%Y A347825 Cf. A034999, A068911 (fully symmetric).
+%K A347825 nonn,easy
+%O A347825 0,2
+%A A347825 _Thomas Garrison_, Jan 26 2022

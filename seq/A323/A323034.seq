@@ -1,0 +1,37 @@
+%I A323034 #18 Dec 08 2019 02:05:50
+%S A323034 1,27,103,175,198,310,411,495,627,675,720,838,880,1008,1014,1191,1245,
+%T A323034 1296,1575,1776,1911,1953,2011,2136,2160,2416,2502,2673,2736,3015,
+%U A323034 3123,3195,3270,3450,3528,3600,3696,4041,4248,4251,4323,4356,4410,4518,4531,4716
+%N A323034 Where records occur in A321223.
+%C A323034 Numbers k that set records for the number m of recursively self-conjugate partitions (RCSPs).
+%C A323034 1 is the only square in the sequence.
+%C A323034 The graph of A321223 suggests there is a finite number of numbers k with a given number m of RSCPs (not all such k appear here). We know that A190900 (positive integers without RSCPs) is finite. For index i <= 2^16, there are 6 squares in A321223, i.e., those of {1, 2, 3, 5, 8}, that have just 1 RSCP; there are 120 nonsquares 3 <= k <= 590 in A321223 that have m = 1 RSCP. In the same range, there are 127 numbers 27 <= k <= 830 in A321223 that have m = 2 RSCPs, and 142 numbers 103 <= k <= 1280 in A321223 that have m = 3 RSCPs. This sequence includes many of the first terms k of these finite sequences, all k having m RSCPs.
+%C A323034 Examining the smallest 381 terms (i.e., all k < 2^16) and the plot of A321223, we observe the following:
+%C A323034 1. a(3) = 103 and a(23) = 2011 are the only primes.
+%C A323034 2. a(2) = 27 = 3^3 and a(64) = 6561 = 3^8 are the only prime powers.
+%C A323034 3. Numbers k such that k mod 3 = 2 are never in this sequence.
+%C A323034 4. Only k in {1, 103, 175, 310, 838, 880, 2011, 2416, 4531, 4720, 5872, 11248, 11632, 12400, 15136, 16081, 19696, 20464, 29296, 40816, 51568, 52336} are congruent to 1 (mod 3); this of course includes both primes 103 and 2011. It appears that there are yet more k congruent to 1 (mod 3) greater than 2^16.
+%H A323034 Michael De Vlieger, <a href="/A323034/b323034.txt">Table of n, a(n) for n = 1..381</a>
+%H A323034 William J. Keith, <a href="http://math.colgate.edu/~integers/vol11a.html">Recursively Self-Conjugate Partitions</a>, Integers 11A, (2011) Article 12.
+%H A323034 Michael De Vlieger, <a href="/A323034/a323034.png">Illustration of first 5 terms.</a>
+%H A323034 Michael De Vlieger, <a href="/A323034/a323034_1.png">Recursively Self-Conjugate Partitions for Numbers in OEIS A323034</a>, 3600 x 2400 pixel PNG file.
+%H A323034 Michael De Vlieger, <a href="/A323034/a323034_2.png">Plot of terms of A323034 (black) in A321223(n) (color)</a> for n <= 65536.
+%e A323034 RSCPs of the first 3 terms:
+%e A323034   a(1) = 1:   (1).
+%e A323034   a(2) = 27:  (6,6,6,3,3,3), (6,5,5,5,5,1).
+%e A323034   a(3) = 103: (13,13,13,10,10,10,7,6,6,6,3,3,3),
+%e A323034               (13,12,12,12,12,8,7,6,5,5,5,5,1),
+%e A323034               (13,12,12,10,9,9,9,9,9,4,3,3,1).
+%e A323034 RSCPs stated in terms of recursive Durfee squares for the first 5 terms:
+%e A323034   a(1) = 1:   {1}.
+%e A323034   a(2) = 27:  {3,3}, {5,1}.
+%e A323034   a(3) = 103: {7,3,3}, {7,5,1}, {9,3,1}.
+%e A323034   a(4) = 175: {9,5,3,1}, {11,3,3}, {11,5,1}, {13,1,1}.
+%e A323034   a(5) = 198: {10,5,2,2}, {10,7}, {12,3,3}, {12,5,1}, {14,1}.
+%e A323034   a(6) = 310: {12,7,3,2}, {12,9,1}, {14,5,4}, {14,7,2},
+%e A323034               {16,3,3}, {16,5,1}.
+%t A323034 f[w_] := Block[{k}, k = Total@ w; Total@ Map[Apply[Function[{s, t}, s Array[Boole[t <= # <= s + t - 1] &, k] ], #] &, Apply[Join, Prepend[Table[Function[{v, c}, Map[{w[[k]], # + 1} &, Map[Total[v #] &, Tuples[{0, 1}, {Length@ v}]]]] @@ {Most@ #, ConstantArray[1, Length@ # - 1]} &@ Take[w, k], {k, 2, Length@ w}], {{w[[1]], 1}}]]] ]; g[n_] := Block[{w = {n}, c}, c[x_] := Apply[Times, Most@ x - Reverse@ Accumulate@ Reverse@ Rest@ x]; Reap[Do[Which[And[Length@ w == 2, SameQ @@ w], Sow[w]; Break[], Length@ w == 1, Sow[w]; AppendTo[w, 1], c[w] > 0, Sow[w]; AppendTo[w, 1], True, Sow[w]; w = MapAt[1 + # &, Drop[w, -1], -1] ], {i, Infinity}] ][[-1, 1]] ]; Block[{n = 30, a, s}, a = Merge[Map[<| #1 -> #2 |> & @@ # &, #], Identity] &@ TakeWhile[Sort@ Map[{Total@ #2, #1, #2} & @@ {#, f[#]} &, Apply[Join, Array[g, n]] ], First@ # <= n^2 &][[All, 1 ;; 2]]; s = Array[Length[Lookup[a, #] /. k_ /; MissingQ@ k -> {}] &, Length@ a]; Map[FirstPosition[s, #][[1]] &, Union@ FoldList[Max, s]]]
+%Y A323034 Cf. A190899, A190900, A321223, A322156, A322457.
+%K A323034 nonn
+%O A323034 1,2
+%A A323034 _Michael De Vlieger_, Jan 02 2019

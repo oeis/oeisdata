@@ -1,0 +1,38 @@
+%I A333157 #10 Mar 14 2020 18:53:56
+%S A333157 1,1,1,1,2,1,1,4,4,1,1,10,18,10,1,1,26,112,112,26,1,1,76,820,1760,820,
+%T A333157 76,1,1,232,6912,35150,35150,6912,232,1,1,764,66178,848932,1944530,
+%U A333157 848932,66178,764,1,1,2620,708256,24243520,133948836,133948836,24243520,708256,2620,1
+%N A333157 Triangle read by rows: T(n,k) is the number of n X n symmetric binary matrices with k ones in every row and column.
+%C A333157 T(n,k) is the number of k-regular symmetric relations on n labeled nodes.
+%C A333157 T(n,k) is the number of k-regular graphs with half-edges on n labeled vertices.
+%C A333157 Terms may be computed without generating all graphs by enumerating the number of graphs by degree sequence. A PARI program showing this technique is given below. Burnside's lemma as applied in A122082 and A000666 can be used to extend this method to the case of unlabeled vertices A333159 and A333161 respectively.
+%H A333157 Andrew Howroyd, <a href="/A333157/b333157.txt">Table of n, a(n) for n = 0..230</a>
+%F A333157 T(n,k) = T(n,n-k).
+%e A333157 Triangle begins:
+%e A333157   1,
+%e A333157   1,   1;
+%e A333157   1,   2,     1;
+%e A333157   1,   4,     4,      1;
+%e A333157   1,  10,    18,     10,       1;
+%e A333157   1,  26,   112,    112,      26,      1;
+%e A333157   1,  76,   820,   1760,     820,     76,     1;
+%e A333157   1, 232,  6912,  35150,   35150,   6912,   232,   1;
+%e A333157   1, 764, 66178, 848932, 1944530, 848932, 66178, 764, 1;
+%e A333157   ...
+%o A333157 (PARI) \\ See script in A295193 for comments.
+%o A333157 GraphsByDegreeSeq(n, limit, ok)={
+%o A333157   local(M=Map(Mat([x^0,1])));
+%o A333157   my(acc(p,v)=my(z); mapput(M, p, if(mapisdefined(M, p, &z), z+v, v)));
+%o A333157   my(recurse(r,p,i,q,v,e) = if(e<=limit && poldegree(q)<=limit, if(i<0, if(ok(x^e+q, r), acc(x^e+q, v)), my(t=polcoeff(p,i)); for(k=0,t,self()(r,p,i-1,(t-k+x*k)*x^i+q,binomial(t,k)*v,e+k)))));
+%o A333157   for(k=2, n, my(src=Mat(M)); M=Map(); for(i=1, matsize(src)[1], my(p=src[i,1]); recurse(n-k, p, poldegree(p), 0, src[i,2], 0))); Mat(M);
+%o A333157 }
+%o A333157 Row(n)={my(M=GraphsByDegreeSeq(n, n\2, (p,r)->poldegree(p)-valuation(p,x) <= r + 1), v=vector(n+1)); for(i=1, matsize(M)[1], my(p=M[i,1], d=poldegree(p)); v[1+d]+=M[i,2]; if(pollead(p)==n, v[2+d]+=M[i,2])); for(i=1, #v\2, v[#v+1-i]=v[i]); v}
+%o A333157 for(n=0, 8, print(Row(n))) \\ _Andrew Howroyd_, Mar 14 2020
+%Y A333157 Columns k=0..8 are A000012, A000085, A000986, A110040, A139670, A139671, A139673, A139674, A139675.
+%Y A333157 Row sums are A322698.
+%Y A333157 Central coefficients are A333164.
+%Y A333157 Cf. A188448 (transposed as array).
+%Y A333157 Cf. A059441, A295193, A333158, A333159, A333161.
+%K A333157 nonn,tabl
+%O A333157 0,5
+%A A333157 _Andrew Howroyd_, Mar 09 2020

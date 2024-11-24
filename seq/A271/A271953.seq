@@ -1,0 +1,42 @@
+%I A271953 #29 Jul 21 2018 12:21:40
+%S A271953 1,7,8,14,31,56,57,28,24,217,60,56,168,399,248,56,288,168,381,434,456,
+%T A271953 420,528,56,155,168,72,798,840,1736,930,112,120,2016,1767,168,342,
+%U A271953 2667,168,868,1723,3192,1848,420,744,3696,46,56,399,1085,288,168,468,504,1860,1596,3048,840,3541,1736,1240,6510
+%N A271953 a(n) is the period of A000930 modulo n.
+%H A271953 Joerg Arndt, <a href="/A271953/b271953.txt">Table of n, a(n) for n = 1..1000</a>
+%H A271953 H. T. Engstrom, <a href="https://doi.org/10.1090/S0002-9947-1931-1501585-5">On sequences defined by linear recurrence relations</a>, Trans. Am. Math. Soc. 33 (1) (1931) 210-218.
+%H A271953 K. Kirthi, <a href="http://arxiv.org/abs/1509.05745">Narayana Sequences for Cryptographic Applications</a>, arXiv preprint arXiv:1509.05745 [math.NT], 2015.
+%H A271953 M. B. Nathanson, <a href="https://doi.org/10.1090/S0002-9939-1975-0364124-5">Linear recurrences and uniform distribution</a>, Proc. Amer. Math. Soc. 48 (1975), 289-291.
+%H A271953 D. D. Wall, <a href="http://www.jstor.org/stable/2309169">Fibonacci series modulo m</a>, Amer. Math. Monthly, 67 (1960), 525-532.
+%F A271953 Let the prime factorization of n be p1^e1*...*pk^ek. Then a(n) = lcm(a(p1^e1), ..., a(pk^ek)) [Engstrom]. - _N. J. A. Sloane_, Feb 18 2017
+%t A271953 minlen = 100; maxlen = 2*10^4;
+%t A271953 per[lst_] := FindTransientRepeat[lst, 2] // Last // Length;
+%t A271953 a[n_] := Module[{p0=0, len=minlen}, While[p0 = Mod[LinearRecurrence[{1, 0, 1}, {1, 1, 1}, len], n] // per; p0<=1 && len<=maxlen, len = 2 len]; p0];
+%t A271953 Table[an = a[n]; Print["a(", n, ") = ", an]; an, {n, 1, 100}] (* _Jean-François Alcover_, Jul 21 2018 *)
+%o A271953 (PARI)
+%o A271953 per(n, S, R) = {  \\ S[]: leading terms, R[]: recurrence
+%o A271953     if ( n==1, return( 1 ) );
+%o A271953     my ( r = #R );
+%o A271953     if ( r != #S , error("Mismatch in length of S[] and R[]") );
+%o A271953     S = vector(#S, j, Mod(S[j], n) );
+%o A271953     R = vector(#S, j, Mod(R[j], n) );
+%o A271953     my( T = S );
+%o A271953     my( j = 0 );
+%o A271953     until ( 0,  \\ forever
+%o A271953         j += 1;
+%o A271953         my( t = sum(i=1, r, R[i] * T[r+1-i] ) );  \\ next term
+%o A271953         for (k=1, r-1, T[k] = T[k+1] );
+%o A271953         T[r] = t;
+%o A271953         if ( T == S , return(j) );
+%o A271953     );
+%o A271953 }
+%o A271953 \\vector(66, n, per(n, [0,1], [1,1]) )  \\ A001175
+%o A271953 \\vector(66, n, per(prime(n), [0,1], [1,1]) )  \\ A060305
+%o A271953 vector(66, n, per(n, [0,0,1], [1,0,1]) )  \\ A271953
+%o A271953 \\vector(66, n, per(prime(n), [0,0,1], [1,0,1]) )  \\ A271901
+%o A271953 \\vector(66, n, per(n, [0,0,1], [0,1,1]) )  \\ A104217
+%o A271953 /* _Joerg Arndt_, Apr 17 2016 */
+%Y A271953 Cf. A000930, A271901 (periods mod primes), A001175 (periods of A000045 modulo n).
+%K A271953 nonn
+%O A271953 1,2
+%A A271953 _Joerg Arndt_, Apr 17 2016

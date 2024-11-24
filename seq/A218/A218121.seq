@@ -1,0 +1,49 @@
+%I A218121 #35 Dec 01 2023 15:57:51
+%S A218121 1,5,5,11,11,17,17,17,29,29,29,41,41,41,41,41,41,67,67,67,67,83,83,83,
+%T A218121 83,83,83,109,109,127,127,127,127,149,149,149,149,149,149,149,181,181,
+%U A218121 181,181,181,181,181,181,229,229,229,229,251,251,251,251,251,251,251,251
+%N A218121 Numerator of c(n) defined by c(1)=1, c(2)=5/2 and for n>=3, c(n) is the minimal rational number >= c(n-1) such that there are no primes in the interval (prime(n)/c(n), prime(n+1)/c(n)).
+%C A218121 The sequence c(n) begins 1, 5/2, 5/2, 11/2, 11/2, 17/3, ...
+%C A218121 Its terms > 1 are ratios of primes.
+%F A218121 For n>=3, if interval (prime(n)/c(n-1), prime(n+1)/c(n-1)) is free from primes, then c(n)=c(n-1); otherwise, c(n)=prime(n+1)/prime(k), where k<=n is the maximal, such that a) prime(n+1)/prime(k)>c(n-1) and b) the open interval (prime(n)*prime(k)/prime(n+1), prime(k)) does not contain any prime.
+%F A218121 Note that such k exists, since, for k=1, the interval (2*prime(n)/prime(n+1),2) is free from primes.
+%e A218121 Intervals (2/1,3/1),(3/(5/2),5/(5/2)) are free from primes. By the condition, c(3) >= c(2) = 5/2. Since also (5/(5/2),7/(5/2)) contains no prime, then c(3)=5/2. Further, c(4) should be chosen minimal>=5/2 such that the interval (7/c(4),11/c(4)) does not contain 2 and 3 (it is clear that it contains no prime>=5). It is easy to see that the minimal c(4)=11/2, etc.
+%p A218121 ispfree := proc(a,b)
+%p A218121     local alow ;
+%p A218121     alow := floor(a);
+%p A218121     if nextprime(alow) < b then
+%p A218121         false;
+%p A218121     else
+%p A218121         true;
+%p A218121     end if;
+%p A218121 end proc:
+%p A218121 A218121c := proc(n)
+%p A218121     option remember;
+%p A218121     local k ;
+%p A218121     if n = 1 then
+%p A218121         return 1;
+%p A218121     elif n = 2 then
+%p A218121         return 5/2 ;
+%p A218121     else
+%p A218121         if ispfree(ithprime(n)/procname(n-1),ithprime(n+1)/procname(n-1)) then
+%p A218121             return procname(n-1) ;
+%p A218121         end if ;
+%p A218121         for k from n by -1 do
+%p A218121             if ispfree( ithprime(n)*ithprime(k)/ithprime(n+1),ithprime(k) )
+%p A218121                 and ithprime(n+1)/ithprime(k) > procname(n-1) then
+%p A218121                 return ithprime(n+1)/ithprime(k) ;
+%p A218121             end if;
+%p A218121         end do:
+%p A218121     end if;
+%p A218121 end proc:
+%p A218121 A218121 := proc(n)
+%p A218121     numer(A218121c(n)) ;
+%p A218121 end proc: # _R. J. Mathar_, Dec 02 2012
+%t A218121 ispfree[a_, b_] := NextPrime[Floor[a]] >= b;
+%t A218121 c[n_] := c[n] = Module[{k}, Which[n == 1, Return[1], n == 2, Return[5/2], True, If[ispfree[Prime[n]/c[n-1], Prime[n+1]/c[n-1]], Return[c[n-1]]]; For[k = n, True, k--, If[ispfree[Prime[n]*Prime[k]/Prime[n+1], Prime[k]] && Prime[n+1]/Prime[k] > c[n-1], Return[Prime[n+1]/Prime[k]]]]]];
+%t A218121 a[n_] := Numerator[c[n]];
+%t A218121 Table[a[n], {n, 1, 60}] (+ _Jean-François Alcover_, Dec 01 2023, after _R. J. Mathar_ *)
+%Y A218121 Cf. A218123, A217871, A217689, A217691, A217833, A217884.
+%K A218121 nonn,frac
+%O A218121 1,2
+%A A218121 _Vladimir Shevelev_, Oct 21 2012

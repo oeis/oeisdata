@@ -1,0 +1,46 @@
+%I A285595 #31 May 23 2018 02:42:47
+%S A285595 1,4,2,17,10,3,76,52,18,4,362,274,111,28,5,1842,1500,675,200,40,6,
+%T A285595 9991,8614,4185,1380,325,54,7,57568,51992,26832,9568,2510,492,70,8,
+%U A285595 351125,329650,178755,67820,19255,4206,707,88,9,2259302,2192434,1239351,494828,149605,35382,6629,976,108,10
+%N A285595 Sum T(n,k) of the k-th entries in all blocks of all set partitions of [n]; triangle T(n,k), n>=1, 1<=k<=n, read by rows.
+%C A285595 T(n,k) is also k times the number of blocks of size >k in all set partitions of [n+1]. T(3,2) = 10 = 2 * 5 because there are 5 blocks of size >2 in all set partitions of [4], namely in 1234, 123|4, 124|3, 134|2, 1|234.
+%H A285595 Alois P. Heinz, <a href="/A285595/b285595.txt">Rows n = 1..141, flattened</a>
+%H A285595 Wikipedia, <a href="https://en.wikipedia.org/wiki/Partition_of_a_set">Partition of a set</a>
+%F A285595 T(n,k) = k * Sum_{j=k+1..n+1} binomial(n+1,j)*A000110(n+1-j).
+%F A285595 T(n,k) = k * Sum_{j=k+1..n+1} A175757(n+1,j).
+%F A285595 Sum_{k=1..n} T(n,k)/k = A278677(n+1).
+%e A285595 T(3,2) = 10 because the sum of the second entries in all blocks of all set partitions of [3] (123, 12|3, 13|2, 1|23, 1|2|3) is 2+2+3+3+0  = 10.
+%e A285595 Triangle T(n,k) begins:
+%e A285595 :     1;
+%e A285595 :     4,     2;
+%e A285595 :    17,    10,     3;
+%e A285595 :    76,    52,    18,    4;
+%e A285595 :   362,   274,   111,   28,    5;
+%e A285595 :  1842,  1500,   675,  200,   40,   6;
+%e A285595 :  9991,  8614,  4185, 1380,  325,  54,  7;
+%e A285595 : 57568, 51992, 26832, 9568, 2510, 492, 70, 8;
+%p A285595 T:= proc(h) option remember; local b; b:=
+%p A285595       proc(n, l) option remember; `if`(n=0, [1, 0],
+%p A285595         (p-> p+[0, (h-n+1)*p[1]*x^1])(b(n-1, [l[], 1]))+
+%p A285595          add((p-> p+[0, (h-n+1)*p[1]*x^(l[j]+1)])(b(n-1,
+%p A285595          sort(subsop(j=l[j]+1, l), `>`))), j=1..nops(l)))
+%p A285595       end: (p-> seq(coeff(p, x, i), i=1..n))(b(h, [])[2])
+%p A285595     end:
+%p A285595 seq(T(n), n=1..12);
+%p A285595 # second Maple program:
+%p A285595 b:= proc(n) option remember; `if`(n=0, [1, 0],
+%p A285595       add((p-> p+[0, p[1]*add(x^k, k=1..j-1)])(
+%p A285595          b(n-j)*binomial(n-1, j-1)), j=1..n))
+%p A285595     end:
+%p A285595 T:= n-> (p-> seq(coeff(p, x, i)*i, i=1..n))(b(n+1)[2]):
+%p A285595 seq(T(n), n=1..12);
+%t A285595 b[n_] := b[n] = If[n == 0, {1, 0}, Sum[# + {0, #[[1]]*Sum[x^k, {k, 1, j-1} ]}&[b[n - j]*Binomial[n - 1, j - 1]], {j, 1, n}]];
+%t A285595 T[n_] := Table[Coefficient[#, x, i]*i, {i, 1, n}] &[b[n + 1][[2]]];
+%t A285595 Table[T[n], {n, 1, 12}] // Flatten (* _Jean-François Alcover_, May 23 2018, translated from 2nd Maple program *)
+%Y A285595 Column k=1 gives A124325(n+1).
+%Y A285595 Row sums give A000110(n) * A000217(n) = A105488(n+3).
+%Y A285595 Main diagonal and first lower diagonal give: A000027, A028552.
+%Y A285595 Cf. A007318, A175757, A278677, A283424, A285362, A285793, A286897.
+%K A285595 nonn,tabl
+%O A285595 1,2
+%A A285595 _Alois P. Heinz_, Apr 22 2017

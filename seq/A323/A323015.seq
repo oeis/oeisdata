@@ -1,0 +1,36 @@
+%I A323015 #22 Nov 22 2020 07:13:34
+%S A323015 0,0,0,0,1,1,1,1,2,1,2,2,2,2,2,2,4,3,4,3,4,4,4,4,4,3,6,5,5,4,5,6,4,6,
+%T A323015 5,2,6,6,6,5,5,7,3,7,8,3,8,7,6,6,7,9,5,6,9,4,7,7,6,7,7,10,4,5,10,5,9,
+%U A323015 7,6,7,4,10,8,6,10,5,9,7,8,10,6,11,10,8,11
+%N A323015 a(n) is the number of unordered partitions of 24*n + 4 into four squares of primes (A001248).
+%C A323015 Also, a(n) is the number of unordered partitions of n into four terms of A024702.
+%C A323015 a(n) > 0 for 4 <= n <= 2*10^4. Conjecture: a(n) > 0 for all n >= 4. A stronger conjecture: lim inf a(n) = +oo.
+%C A323015 This is a quadratic analog of Goldbach's conjecture, asking for the smallest k such that any sufficiently large number congruent to k modulo 24 can be written as the sum of k squares of primes. k = 1 is trivially false. Let n = 49*t + 2 (t > 0), then 24*n + 2 = 24*49*t + 98, which is a multiple of 7^2. If p^2 + q^2 = 24*n + 2, since the squares of primes other than 7 are congruent to 1, 2, 4 modulo 7, we must have p = q = 7, but p^2 + q^2 < n. So k = 2 is false. Let n = 245*t + 103, then 24*n + 3 = 24*245*t + 2475, which is a multiple of 5. If p^2 + q^2 + r^2 = 24*n + 3, since the squares of primes other than 5 are congruent to 1, 4 modulo 5, we must have that at least one of p, q, r is 5. Suppose that p = 5, then q^2 + r^2 = 24*245*t + 2450, which is a multiple of 7^2. As is shown above, q = r = 7, but p^2 + q^2 + r^2 < n. So k = 3 is also false. On the other hand, if the case k = 4 is true, then all the cases k >= 4 are trivially true, because we can add as many 5^2 as needed. So the case k = 4 is the most interesting.
+%H A323015 Alois P. Heinz, <a href="/A323015/b323015.txt">Table of n, a(n) for n = 0..65536</a>
+%e A323015 100 = 5^2 + 5^2 + 5^2 + 5^2.
+%e A323015 124 = 5^2 + 5^2 + 5^2 + 7^2.
+%e A323015 148 = 5^2 + 5^2 + 7^2 + 7^2.
+%e A323015 172 = 5^2 + 7^2 + 7^2 + 7^2.
+%e A323015 196 = 7^2 + 7^2 + 7^2 + 7^2 = 5^2 + 5^2 + 5^2 + 11^2.
+%e A323015 220 = 5^2 + 5^2 + 7^2 + 11^2.
+%e A323015 244 = 5^2 + 7^2 + 7^2 + 11^2 = 5^2 + 5^2 + 5^2 + 13^2.
+%e A323015 268 = 7^2 + 7^2 + 7^2 + 11^2 = 5^2 + 5^2 + 7^2 + 13^2.
+%e A323015 ...
+%p A323015 h:= proc(n) option remember; `if`(n<1, 0, (t->
+%p A323015       `if`((ithprime(t+2)^2-1)/24>n, t-1, t))(1+h(n-1)))
+%p A323015     end:
+%p A323015 b:= proc(n, i, c) option remember; `if`(n=0, `if`(c=0, 1, 0),
+%p A323015       `if`(min(i, c)<1, 0, b(n, i-1, c)+(t-> b(n-t, min(i,
+%p A323015          h(n-t)), c-1))((ithprime(i+2)^2-1)/24)))
+%p A323015     end:
+%p A323015 a:= n-> b(n, h(n), 4):
+%p A323015 seq(a(n), n=0..120);  # _Alois P. Heinz_, Jan 05 2019
+%t A323015 h[n_] := h[n] = If[n < 1, 0, Function[t, If[(Prime[t + 2]^2 - 1)/24 > n, t - 1, t]][1 + h[n - 1]]];
+%t A323015 b[n_, i_, c_] := b[n, i, c] = If[n == 0, If[c == 0, 1, 0], If[Min[i, c] < 1, 0, b[n, i - 1, c] + Function[t, b[n - t, Min[i, h[n - t]], c - 1]][(Prime[i + 2]^2 - 1)/24]]];
+%t A323015 a[n_] := b[n, h[n], 4];
+%t A323015 a /@ Range[0, 120] (* _Jean-François Alcover_, Nov 22 2020, after _Alois P. Heinz_ *)
+%o A323015 (PARI) a(n) = if(n<4, 0, my(i=0, k=sqrt(24*n-71)); forprime(p=5, k, forprime(q=p, k, forprime(r=q, k, forprime(s=r, k, if(p^2+q^2+r^2+s^2==24*n+4, i++))))); i)
+%Y A323015 See A323016 for the ordered version.
+%K A323015 nonn
+%O A323015 0,9
+%A A323015 _Jianing Song_, Jan 05 2019

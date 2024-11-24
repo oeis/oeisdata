@@ -1,0 +1,57 @@
+%I A238762 #19 Jul 10 2019 10:24:01
+%S A238762 1,0,1,1,0,1,0,2,0,3,1,0,2,0,2,0,3,0,8,0,10,1,0,3,0,5,0,5,0,4,0,15,0,
+%T A238762 30,0,35,1,0,4,0,9,0,14,0,14,0,5,0,24,0,63,0,112,0,126,1,0,5,0,14,0,
+%U A238762 28,0,42,0,42,0,6,0,35,0,112,0,252,0,420,0,462
+%N A238762 Triangle read by rows, generalized ballot numbers, 0<=k<=n.
+%C A238762 Compare with the definition of the Motzkin triangle A238763.
+%D A238762 D. E. Knuth, TAOCP, Vol. 4a, Section 7.2.1.6, Eq. 22, p. 451.
+%H A238762 P. Luschny, <a href="http://oeis.org/wiki/User:Peter_Luschny/TheLostCatalanNumbers">The lost Catalan numbers</a>
+%F A238762 Definition: T(0, 0) = 1; T(p, q) = 0 if p < 0 or p > q; T(p, q) = T(p-2, q) + (q mod 2) T(p-1, q-1) + T(p, q-2). (The notation is in the style of Knuth, TAOCP 4a (7.2.1.6)).
+%F A238762 T(2*k, 2*n) are the classical ballot numbers A009766(n, k).
+%F A238762 T(2*k-1, 2*n-1) = A238761(n, k).
+%F A238762 T(n,k) = c*A189231(a, b) with a = floor((n + k + (k mod 2))/2), b = floor((n-k)/2) and c = ((n+k+1) mod 2).
+%F A238762 T(n, k) = ((n+k+1) mod 2)*(floor(n/2)+floor(k/2) + 1)^(k mod 2)) * (binomial(floor(n/2) + floor(k/2), floor(n/2)) - binomial( floor(n/2) + floor(k/2), floor(n/2) + 1)).
+%F A238762 T(n, k) = ((n+k+1) mod 2)*(floor(n/2)+floor(k/2) + 1)^(k mod 2)) *(floor((n-k)/2) + 1)/(floor(n/2) + 1) * binomial( floor(n/2) + floor(k/2), floor(n/2)).
+%F A238762 T(n, n) = A057977(n).
+%F A238762 T(n, n-2) = A238452(n-1).
+%F A238762 Row sums are A238879.
+%e A238762 [n\k 0  1  2   3  4   5   6   7]
+%e A238762 [0]  1,
+%e A238762 [1]  0, 1,
+%e A238762 [2]  1, 0, 1,
+%e A238762 [3]  0, 2, 0,  3,
+%e A238762 [4]  1, 0, 2,  0, 2,
+%e A238762 [5]  0, 3, 0,  8, 0, 10,
+%e A238762 [6]  1, 0, 3,  0, 5,  0, 5,
+%e A238762 [7]  0, 4, 0, 15, 0, 30, 0, 35.
+%p A238762 binom2 := proc(n, k) local h;
+%p A238762    h := n -> (n-((1-(-1)^n)/2))/2;
+%p A238762    n!/(h(n-k)!*h(n+k)!) end:
+%p A238762 A238762 := proc(n, k) local a,b,c;
+%p A238762    a := iquo(n+k+2+modp(n,2), 2);
+%p A238762    b := iquo(n-k+2, 2);
+%p A238762    c := modp(n+k+1, 2);
+%p A238762    binom2(a,b)*b*c/a end:
+%p A238762 seq(print(seq(A238762(n, k), k=0..n)), n=0..7);
+%p A238762 # Alternativ:
+%p A238762 ballot := proc(p, q) option remember;
+%p A238762     if p = 0 and q = 0 then return 1 fi;
+%p A238762     if p < 0 or  p > q then return 0 fi;
+%p A238762     ballot(p-2, q) + ballot(p, q-2);
+%p A238762     if type(q, odd) then % + ballot(p-1, q-1) fi;
+%p A238762     % end:
+%t A238762 T[n_, k_] := T[n, k] = Which[k == 0 && n == 0, 1, k < 0 || k > n, 0, True, s = T[n, k - 2] + T[n - 2, k]; If[OddQ[n], s += T[n - 1, k - 1]]; s];
+%t A238762 Table[T[n, k], {n, 0, 11}, {k, 0, n}] // Flatten (* _Jean-François Alcover_, Jul 10 2019, adapted from Sage code *)
+%o A238762 (Sage)
+%o A238762 @CachedFunction
+%o A238762 def ballot(p, q):
+%o A238762     if p == 0 and q == 0: return 1
+%o A238762     if p < 0 or p > q: return 0
+%o A238762     S = ballot(p-2, q) + ballot(p, q-2)
+%o A238762     if q % 2 == 1: S += ballot(p-1, q-1)
+%o A238762     return S
+%o A238762 for q in range(8): [ballot(p, q) for p in (0..q)]
+%Y A238762 Cf. A009766, A189231, A238761, A238879.
+%K A238762 nonn,tabl
+%O A238762 0,8
+%A A238762 _Peter Luschny_, Mar 05 2014

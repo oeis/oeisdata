@@ -1,0 +1,53 @@
+%I A262307 #58 May 22 2021 20:58:12
+%S A262307 1,1,1,1,5,1,1,19,19,1,1,65,205,65,1,1,211,1795,1795,211,1,1,665,
+%T A262307 14221,36317,14221,665,1,1,2059,106819,636331,636331,106819,2059,1,1,
+%U A262307 6305,778765,10365005,23679901,10365005,778765,6305,1
+%N A262307 Array read by antidiagonals: T(m,n) = number of m X n binary matrices with all 1's connected and no zero rows or columns.
+%C A262307 Two 1's are connected if they are in the same row or column. The requirement is for them to form a single connected set.
+%C A262307 The number of m X n binary matrices with no zero rows or columns is given by A183109(m, n). If there are multiple components (not connected) then they cannot share either rows or columns. For i < n and j < m there are T(i,j) ways of creating an i X j component that occupies the first row. Its remaining i-1 rows may be on any of the remaining m-1 rows with its j columns on any of the n columns. The m-i rows and n-j columns not used by this component can be any matrix with no zero rows or columns.
+%C A262307 T(m,n) is also the number of bipartite connected labeled graphs with parts of size m and n. (See A005333, A227322.)
+%C A262307 This is the array a(m,n) in Kreweras (1969). Kreweras describes this as a symmetric triangle read by rows, giving numbers of connected relations.
+%C A262307 The companion array b(m,n) (and the first few of its diagonals) in Kreweras (1969) should also be added to the OEIS if they are not already present.
+%H A262307 Andrew Howroyd, <a href="/A262307/b262307.txt">Table of n, a(n) for n = 1..780</a>
+%H A262307 G. Kreweras, <a href="http://gallica.bnf.fr/ark:/12148/bpt6k480296q/f583.image">Inversion des polynômes de Bell bidimensionnels et application au dénombrement des relations binaires connexes</a>, C. R. Acad. Sci. Paris Ser. A-B 268 1969 A577-A579.
+%F A262307 T(m,n) = A183109(m,n) - Sum_{i=1..m-1} Sum_{j=1..n-1} T(i,j)*A183109(m-i, n-j)*binomial(m-1,i-1)*binomial(n,j). -  _Andrew Howroyd_, May 22 2017
+%e A262307 Table starts:
+%e A262307 ==========================================================================
+%e A262307 m\n| 1    2      3         4           5             6               7
+%e A262307 ---|----------------------------------------------------------------------
+%e A262307 1  | 1    1      1         1           1             1               1 ...
+%e A262307 2  | 1    5     19        65         211           665            2059 ...
+%e A262307 3  | 1   19    205      1795       14221        106819          778765 ...
+%e A262307 4  | 1   65   1795     36317      636331      10365005       162470155 ...
+%e A262307 5  | 1  211  14221    636331    23679901     805351531     26175881341 ...
+%e A262307 6  | 1  665 106819  10365005   805351531   56294206205   3735873535339 ...
+%e A262307 7  | 1 2059 778765 162470155 26175881341 3735873535339 502757743028605 ...
+%e A262307 ...
+%e A262307 As a triangle, this begins:
+%e A262307   1;
+%e A262307   1,    1;
+%e A262307   1,    5,      1;
+%e A262307   1,   19,     19,      1;
+%e A262307   1,   65,    205,     65,      1;
+%e A262307   1,  211,   1795,   1795,    211,      1;
+%e A262307   1,  665,  14221,  36317,  14221,    665,    1;
+%e A262307   1, 2059, 106819, 636331, 636331, 106819, 2059, 1;
+%e A262307   ...
+%t A262307 A183109[n_, m_] := Sum[(-1)^j*Binomial[m, j]*(2^(m-j) - 1)^n, {j, 0, m}];
+%t A262307 T[m_, n_] := A183109[m, n] - Sum[T[i, j]*A183109[m - i, n - j] Binomial[m - 1, i - 1]*Binomial[n, j], {i, 1, m - 1}, {j, 1, n - 1}];
+%t A262307 Table[T[m - n + 1, n], {m, 1, 9}, {n, 1, m}] // Flatten (* _Jean-François Alcover_, Oct 08 2017, after _Andrew Howroyd_ *)
+%o A262307 (PARI)
+%o A262307 G(N)={my(S=matrix(N,N), T=matrix(N,N));
+%o A262307 for(m=1,N,for(n=1,N,
+%o A262307 S[m,n]=sum(j=0, m, (-1)^j*binomial(m, j)*(2^(m - j) - 1)^n);
+%o A262307 T[m,n]=S[m,n]-sum(i=1, m-1, sum(j=1, n-1, T[i,j]*S[m-i,n-j]*binomial(m-1,i-1)*binomial(n,j)));
+%o A262307 ));T}
+%o A262307 G(7) \\ _Andrew Howroyd_, May 22 2017
+%Y A262307 Essentially same table as triangle A227322 (where the antidiagonals only go halfway).
+%Y A262307 Main diagonal is A005333.
+%Y A262307 Initial diagonals give A001047, A002501, A002502.
+%Y A262307 Cf. A226658, A123260, A286189, A183109, A048291, A287274.
+%K A262307 nonn,tabl
+%O A262307 1,5
+%A A262307 _N. J. A. Sloane_, Oct 04 2015
+%E A262307 Revised by _N. J. A. Sloane_, May 26 2017, to incorporate material from _Andrew Howroyd_'s May 22 2017 submission (formerly A287297), which was essentially identical to this, although giving an alternative description and more information.

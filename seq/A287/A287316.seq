@@ -1,0 +1,66 @@
+%I A287316 #56 Apr 05 2024 11:10:14
+%S A287316 1,1,0,1,1,0,1,2,1,0,1,3,6,1,0,1,4,15,20,1,0,1,5,28,93,70,1,0,1,6,45,
+%T A287316 256,639,252,1,0,1,7,66,545,2716,4653,924,1,0,1,8,91,996,7885,31504,
+%U A287316 35169,3432,1,0,1,9,120,1645,18306,127905,387136,272835,12870,1,0
+%N A287316 Square array A(n,k) = (n!)^2 [x^n] BesselI(0, 2*sqrt(x))^k read by antidiagonals.
+%C A287316 A287314 provide polynomials and A287315 rational functions generating the columns of the array.
+%H A287316 Jeremy Tan, <a href="/A287316/b287316.txt">Antidiagonals n = 0..50, flattened</a>
+%H A287316 Ryan S. Bennink, <a href="https://arxiv.org/abs/2208.02360">Counting Abelian Squares for a Problem in Quantum Computing</a>, arXiv:2208.02360 [quant-ph], 2022.
+%H A287316 Jonathan M. Borwein, <a href="https://carmamaths.org/resources/jon/beauty.pdf">A short walk can be beautiful</a>, preprint, Journal of Humanistic Mathematics, Volume 6 Issue 1 (January 2016), pages 86-109.
+%H A287316 Jonathan M. Borwein and Armin Straub, <a href="https://www.carmamaths.org/resources/jon/wmi-paper.pdf">Mahler measures, short walks and log-sine integrals</a>, preprint, Theoretical Computer Science, Volume 479, 1 April 2013, Pages 4-21.
+%H A287316 Jonathan M. Borwein, Dirk Nuyens, Armin Straub and James Wan, <a href="https://www.carmamaths.org/resources/jon/walks.pdf">Some Arithmetic Properties of Short Random Walk Integrals</a>, preprint, FPSAC 2010, San Francisco, USA.
+%H A287316 L. B. Richmond and J. Shallit, <a href="http://arxiv.org/abs/0807.5028">Counting Abelian Squares</a>, arXiv:0807.5028 [math.CO], 2008.
+%H A287316 Armin Straub, <a href="http://arminstraub.com/pub/dissertation">Arithmetic aspects of random walks and methods in definite integration</a>, Ph. D. Dissertation, School Of Science And Engineering, Tulane University, 2012.
+%F A287316 A(n,k) = A287318(n,k) / binomial(2*n,n).
+%F A287316 If a+b=k then A(n,k) = Sum_{i=0..n} A(i,a)*A(n-i,b)*binomial(n,i)^2 (Richmond and Shallit). In particular A(n,k) = Sum_{i=0..n} A(i,k-1)*binomial(n,i)^2. - _Jeremy Tan_, Dec 10 2021
+%e A287316 Arrays start:
+%e A287316 k\n| 0  1    2      3         4        5          6           7
+%e A287316 ---|----------------------------------------------------------------
+%e A287316 k=0| 1, 0,   0,      0,       0,       0,         0,          0, ... A000007
+%e A287316 k=1| 1, 1,   1,      1,       1,       1,         1,          1, ... A000012
+%e A287316 k=2| 1, 2,   6,     20,      70,     252,       924,       3432, ... A000984
+%e A287316 k=3| 1, 3,  15,     93,     639,    4653,     35169,     272835, ... A002893
+%e A287316 k=4| 1, 4,  28,    256,    2716,   31504,    387136,    4951552, ... A002895
+%e A287316 k=5| 1, 5,  45,    545,    7885,  127905,   2241225,   41467725, ... A169714
+%e A287316 k=6| 1, 6,  66,    996,   18306,  384156,   8848236,  218040696, ... A169715
+%e A287316 k=7| 1, 7,  91,   1645,   36715,  948157,  27210169,  844691407, ...
+%e A287316 k=8| 1, 8, 120,   2528,   66424, 2039808,  70283424, 2643158400, ...
+%e A287316 k=9| 1, 9, 153,   3681,  111321, 3965409, 159700401, 7071121017, ...
+%e A287316        A000384,A169711, A169712, A169713,                            A033935
+%p A287316 A287316_row := proc(k, len) local b, ser;
+%p A287316 b := k -> BesselI(0, 2*sqrt(x))^k: ser := series(b(k), x, len);
+%p A287316 seq((i!)^2*coeff(ser,x,i), i=0..len-1) end:
+%p A287316 for k from 0 to 6 do A287316_row(k, 9) od;
+%p A287316 A287316_col := proc(n, len) local k, x;
+%p A287316 sum(z^k/k!^2, k = 0..infinity); series(%^x, z=0, n+1):
+%p A287316 unapply(n!^2*coeff(%, z, n), x); seq(%(j), j=0..len) end:
+%p A287316 for n from 0 to 7 do A287316_col(n, 9) od;
+%t A287316 Table[Table[SeriesCoefficient[BesselI[0, 2 Sqrt[x]]^k, {x, 0, n}] (n!)^2, {n, 0, 6}], {k, 0,9}]
+%o A287316 (PARI)
+%o A287316 A287316_row(K, N) = {
+%o A287316   my(x='x + O('x^(2*N-1)));
+%o A287316   Vec(serlaplace(serlaplace(substpol(besseli(0,2*x)^K, 'x^2, 'x))));
+%o A287316 };
+%o A287316 N=8; concat([vector(N, n, n==1)], vector(9, k, A287316_row(k, N))) \\ _Gheorghe Coserea_, Jan 12 2018
+%o A287316 (PARI) {A(n, k) = if(n<0 || k<0, 0, n!^2 * polcoeff(besseli(0, 2*x + x*O(x^(2*n)))^k, 2*n))}; /* _Michael Somos_, Dec 30 2021 */
+%o A287316 (Python)
+%o A287316 from math import comb
+%o A287316 from functools import lru_cache
+%o A287316 @lru_cache(maxsize=None)
+%o A287316 def A(n,k):
+%o A287316     if k <= 0:
+%o A287316         return 0**n
+%o A287316     return sum(A(i,k-1)*comb(n,i)**2 for i in range(n+1))
+%o A287316 N = 50
+%o A287316 i = 0
+%o A287316 for n in range(N+1):
+%o A287316     for k in range(n+1):
+%o A287316         print(i, A(k,n-k))
+%o A287316         i += 1
+%o A287316 # _Jeremy Tan_, Dec 10 2021
+%Y A287316 Rows: A000007 (k=0), A000012 (k=1), A000984 (k=2), A002893 (k=3), A002895 (k=4), A169714 (k=5), A169715 (k=6).
+%Y A287316 Columns: A001477(n=1), A000384 (n=2), A169711 (n=3), A169712 (n=4), A169713 (n=5).
+%Y A287316 Cf. A033935 (diagonal), A287314, A287315, A287318.
+%K A287316 nonn,tabl
+%O A287316 0,8
+%A A287316 _Peter Luschny_, May 23 2017

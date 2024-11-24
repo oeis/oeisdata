@@ -1,0 +1,53 @@
+%I A290694 #28 Aug 26 2017 10:29:19
+%S A290694 0,1,0,0,1,0,0,-1,2,0,0,1,-2,3,0,0,-1,14,-9,24,0,0,1,-10,75,-48,20,0,
+%T A290694 0,-1,62,-135,312,-300,720,0,0,1,-42,903,-1680,2800,-2160,630,0,0,-1,
+%U A290694 254,-1449,40824,-21000,27360,-17640,4480
+%N A290694 Triangle read by rows, numerators of coefficients (in rising powers) of rational polynomials P(n, x) such that Integral_{x=0..1} P'(n, x) = Bernoulli(n, 1).
+%C A290694 Consider a family of integrals I_m(n) = Integral_{x=0..1} P'(n, x)^m with P'(n,x) = Sum_{k=0..n}(-1)^(n-k)*Stirling2(n, k)*k!*x^k (see A278075 for the coefficients).
+%C A290694 I_1(n) are the Bernoulli numbers A164555/A027642, I_2(n) are the Bernoulli median numbers A212196/A181131, I_3(n) are the numbers A291449/A291450.
+%C A290694 The coefficients of the polynomials P_n(x)^m are for m = 1 A290694/A290695 and for m = 2 A291447/A291448.
+%C A290694 Only omega(Clausen(n)) = A001221(A160014(n,1)) = A067513(n) coefficients are rational numbers if n is even. For odd n > 1 there are two rational coefficients.
+%C A290694 Let C_k(n) = [x^k] P_n(x), k > 0 and n even. Conjecture: k is a prime factor of Clausen(n) <=> k = denominator(C_k(n)) <=> k does not divide Stirling2(n, k-1)*(k-1)!. (Note that by a comment in A019538 Stirling2(n, k-1)*(k-1)! is the number of chain topologies on an n-set having k open sets.)
+%H A290694 Peter Luschny, <a href="/A290694/a290694.jpg">Illustrating A290694.</a>
+%F A290694 T(n, k) = Numerator(Stirling2(n, k - 1)*(k - 1)!/k) if k > 0 else 0; for n >= 0 and 0 <= k <= n+1.
+%e A290694 Triangle starts:
+%e A290694 [0, 1]
+%e A290694 [0, 0,  1]
+%e A290694 [0, 0, -1,   2]
+%e A290694 [0, 0,  1,  -2,    3]
+%e A290694 [0, 0, -1,  14,   -9,  24]
+%e A290694 [0, 0,  1, -10,   75, -48,   20]
+%e A290694 [0, 0, -1,  62, -135, 312, -300, 720]
+%e A290694 The first few polynomials are:
+%e A290694 P_0(x) = x.
+%e A290694 P_1(x) =  (1/2)*x^2.
+%e A290694 P_2(x) = -(1/2)*x^2 + (2/3)*x^3.
+%e A290694 P_3(x) =  (1/2)*x^2 - 2*x^3 + (3/2)*x^4.
+%e A290694 P_4(x) = -(1/2)*x^2 + (14/3)*x^3 - 9*x^4 + (24/5)*x^5.
+%e A290694 P_5(x) =  (1/2)*x^2 - 10*x^3 + (75/2)*x^4 - 48*x^5 + 20*x^6.
+%e A290694 P_6(x) = -(1/2)*x^2 + (62/3)*x^3 - 135*x^4 + 312*x^5 - 300*x^6 + (720/7)*x^7.
+%e A290694 Evaluated at x = 1 this gives an additive decomposition of the Bernoulli numbers:
+%e A290694 B(0) =     1 =    1.
+%e A290694 B(1) =   1/2 =  1/2.
+%e A290694 B(2) =   1/6 = -1/2 +  2/3.
+%e A290694 B(3) =     0 =  1/2 -    2 + 3/2.
+%e A290694 B(4) = -1/30 = -1/2 + 14/3 -    9 + 24/5.
+%e A290694 B(5) =     0 =  1/2 -   10 + 75/2 -   48 +  20.
+%e A290694 B(6) =  1/42 = -1/2 + 62/3 -  135 +  312 - 300 + 720/7.
+%p A290694 BG_row := proc(m, n, frac, val) local F, g, v;
+%p A290694 F := (n, x) -> add((-1)^(n-k)*Stirling2(n,k)*k!*x^k, k=0..n):
+%p A290694 g := x -> int(F(n,x)^m, x):
+%p A290694 `if`(val = "val", subs(x=1, g(x)), [seq(coeff(g(x),x,j), j=0..m*n+1)]):
+%p A290694 `if`(frac = "num", numer(%), denom(%)) end:
+%p A290694 seq(BG_row(1, n, "num", "val"), n=0..16);         # A164555
+%p A290694 seq(BG_row(1, n, "den", "val"), n=0..16);         # A027642
+%p A290694 seq(print(BG_row(1, n, "num", "poly")), n=0..12); # A290694 (this seq.)
+%p A290694 seq(print(BG_row(1, n, "den", "poly")), n=0..12); # A290695
+%p A290694 # Alternatively:
+%p A290694 T_row := n -> numer(PolynomialTools:-CoefficientList(add((-1)^(n-j+1)*Stirling2(n, j-1)*(j-1)!*x^j/j, j=1..n+1), x)): for n from 0 to 6 do T_row(n) od;
+%t A290694 T[n_, k_] := If[k > 0, Numerator[StirlingS2[n, k - 1]*(k - 1)! / k], 0]; Table[T[n, k], {n, 0, 8}, {k, 0, n+1}] // Flatten
+%Y A290694 Cf. A164555/A027642, A212196/A181131, A291449/A291450, A290694/A290695, A291447/A291448.
+%Y A290694 Cf. A160014, A278075.
+%K A290694 sign,tabf,frac
+%O A290694 0,9
+%A A290694 _Peter Luschny_, Aug 24 2017

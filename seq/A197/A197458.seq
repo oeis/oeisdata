@@ -1,0 +1,58 @@
+%I A197458 #25 Apr 08 2020 00:16:53
+%S A197458 1,2,16,265,7343,304186,17525812,1336221251,129980132305,
+%T A197458 15686404067098,2297230134084416,400977650310256537,
+%U A197458 82188611938415464231,19536244019455339261970,5328019975275896220786388,1651867356348327784988233291,577522171260292028520919811777
+%N A197458 Number of n X n binary matrices with at most two 1's in each row and column, other entries 0.
+%H A197458 <a href="http://math.stackexchange.com/q/72600">Filling out an n x n square grid with 0's and 1's</a> at math.stackexchange
+%H A197458 R. J. Mathar, <a href="/A247158/a247158.pdf">The number of binary n X m matrices with at most k 1's in each row or column</a>, (2014) Table 2.
+%F A197458 a(n) = Sum_{k=0}^n Sum_{l=0}^{n-k} a(k,l,n,n) where a(k,l,m,n) is the number of binary m X n matrices with at most two 1's per row, k columns with sum 0, l columns with sum 1 and the remaining n - k - l columns with sum 2.
+%F A197458 a(k,l,m,n) = a(k,l,m-1,n) +(k+1)*a(k+1,l-1,m-1,n) +(l+1)*a(k,l+1,m-1,n) +(k+1)*2*a(k+2,l-2,m-1,n)/(k+2) +(k+1)*l*a(k+1,l,m-1,n) +(l+1)*2*a(k,l+2,m-1,n)/(l+2).
+%o A197458 (Java)
+%o A197458 import java.math.BigInteger;
+%o A197458 public class AtMostTwoOnes {
+%o A197458     public static void main (String [] args) {
+%o A197458         for (int n = 0;n <= 40;n++) {
+%o A197458             BigInteger [] [] [] counts = new BigInteger [n + 1] [n + 1] [n + 1]; // counts [m] [k] [l] : number of mxn matrices with k column sums 0, l column sums 1
+%o A197458             for (int k = 0;k <= n;k++)
+%o A197458                 for (int l = 0;l <= n;l++)
+%o A197458                     counts [0] [k] [l] = BigInteger.ZERO;
+%o A197458             counts [0] [n] [0] = BigInteger.ONE; // only one 0xn matrix, with all n column sums 0
+%o A197458             for (int m = 1;m <= n;m++) {
+%o A197458                 BigInteger [] [] old = counts [m - 1];
+%o A197458                 for (int k = 0;k <= n;k++)
+%o A197458                     for (int l = 0;l <= n;l++) {
+%o A197458                         BigInteger sum = BigInteger.ZERO;
+%o A197458                         // new row contains no 1s
+%o A197458                         sum = sum.add (old [k] [l]);
+%o A197458                         // new row contains one 1
+%o A197458                         //   added to column sum 0
+%o A197458                         if (k < n && l > 0)
+%o A197458                             sum = sum.add (old [k + 1] [l - 1].multiply (BigInteger.valueOf (k + 1)));
+%o A197458                         //   added to column sum 1
+%o A197458                         if (l < n)
+%o A197458                             sum = sum.add (old [k] [l + 1].multiply (BigInteger.valueOf (l + 1)));
+%o A197458                         // new row contains two 1s
+%o A197458                         //   added to two column sums 0
+%o A197458                         if (k < n - 1 && l > 1)
+%o A197458                             sum = sum.add (old [k + 2] [l - 2].multiply (BigInteger.valueOf (((k + 2) * (k + 1)) / 2)));
+%o A197458                         //   added to one column sum 0, one column sum 1
+%o A197458                         if (k < n)
+%o A197458                             sum = sum.add (old [k + 1] [l].multiply (BigInteger.valueOf ((k + 1) * l)));
+%o A197458                         //   added to two column sums 1
+%o A197458                         if (l < n - 1)
+%o A197458                             sum = sum.add (old [k] [l + 2].multiply (BigInteger.valueOf (((l + 2) * (l + 1)) / 2)));
+%o A197458                         counts [m] [k] [l] = sum;
+%o A197458                     }
+%o A197458             }
+%o A197458             BigInteger sum = BigInteger.ZERO;
+%o A197458             for (int k = 0;k <= n;k++)
+%o A197458                 for (int l = 0;l <= n;l++)
+%o A197458                     sum = sum.add (counts [n] [k] [l]);
+%o A197458             System.out.println (n + " : " + sum);
+%o A197458         }
+%o A197458     }
+%o A197458 }
+%Y A197458 Cf. A001499, A002720. Column of A283500.
+%K A197458 nonn
+%O A197458 0,2
+%A A197458 _Felix A. Pahl_, Oct 15 2011

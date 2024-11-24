@@ -1,0 +1,39 @@
+%I A341867 #48 Sep 11 2024 11:17:58
+%S A341867 1,2,2,4,5,4,8,12,12,8,16,28,33,28,16,32,64,86,86,64,32,64,144,216,
+%T A341867 245,216,144,64,128,320,528,664,664,528,320,128,256,704,1264,1736,
+%U A341867 1921,1736,1264,704,256,512,1536,2976,4416,5322,5322,4416,2976,1536,512
+%N A341867 Square array read by downward antidiagonals: T(m,n) = Sum_{i=0..m, j=0..n} binomial(m,i)*binomial(n,j)*binomial(i+j,i).
+%C A341867 T(m,n) is the coefficient of x^m*y^n of 1/(1 - 2*x - 2*y + 3*x*y).
+%C A341867 In general, define T_{s,t}(m,n) = Sum_{i=0..m, j=0..n} binomial(m,i)*binomial(n,j)*binomial(i+j,i)*s^i*t^j, then T_{s,t}(m,n) is the coefficient of x^m*y^n of 1/(1 - (1+s)*x - (1+t)*y + (1+s+t)*x*y).
+%C A341867 T(m,n) is the coefficient of x^n of (2 - 3*x)^m/(1 - 2*x)^(m+1). In general, T_{s,t}(m,n) is the coefficient of x^n of ((1+t) - (1+s+t)*x)^m/(1 - (1+s)*x)^(m+1).
+%C A341867 T(m,n) is odd if and only if m = n. Proof: T(m,n) == T_{-1,-1}(m,n) (mod 2). The RHS is the coefficient of x^m*y^n of 1/(1 - x*y), which is 1 if m = n and 0 otherwise.
+%C A341867 This is the table of cardinalities of bubble posets and shuffle posets, see McConville and Mühle reference. - _F. Chapoton_, Sep 11 2024
+%H A341867 Jianing Song, <a href="/A341867/b341867.txt">Table of n, a(n) for n = 0..5150</a> (diagonals 0..100).
+%H A341867 T. McConville and H. Mühle, <a href="https://arxiv.org/abs/2202.02874">Bubble Lattices I: Structure</a>, arXiv:2202.02874 [math.CO], 2022.
+%H A341867 T. McConville and H. Mühle, <a href="https://arxiv.org/abs/2208.13683">Bubble Lattices II: Combinatorics</a>, arXiv:2208.13683 [math.CO], 2022.
+%F A341867 T(0,n) = Sum_{k=0..n} binomial(n,k) = 2^n;
+%F A341867 T(1,n) = Sum_{k=0..n} binomial(n,k) * (k+2) = (n+4)*2^(n-1);
+%F A341867 T(2,n) = Sum_{k=0..n} binomial(n,k) * (k^2+7*k+8)/2 = (n^2+15*n+32)*2^(n-3);
+%F A341867 T(3,n) = Sum_{k=0..n} binomial(n,k) * (k^3+15*k^2+56*k+48)/6 = (n^3+33*n^2+254*n+384)*2^(n-4)/3.
+%F A341867 E.g.f.: Sum_{m,n>=0} T(m,n)*x^m*y^n/(m!*n!) = exp(2*x+2*y) * BesselI(0,2*sqrt(x*y)). In general, Sum_{m,n>=0} T_{s,t}(m,n)*x^m*y^n/(m!*n!) = exp((1+s)*x+(1+t)*y) * BesselI(0,2*sqrt(s*t*x*y)). Note that BesselI(0,2*sqrt(x)) = Sum_{k>=0} x^k/(k!)^2.
+%F A341867 E.g.f. for m-th row: Sum_{n>=0} T(m,n)*x^n/n! = exp(2*x) * Sum_{k=0..m} (binomial(m,k)*2^(m-k)/k!) * x^k. In general, Sum_{n>=0} T_{s,t}(m,n)*x^n/n! = exp((1+s)*x) * Sum_{k=0..m} (binomial(m,k)*(1+t)^(m-k)/k!) * (s*t*x)^k.
+%F A341867 Define P_n(x) = exp(-x) * d^n/dx^n (x^n*exp(x)), then Sum_{n>=0} T_{s,t}(m,n)*x^n/n! = exp((1+s)*x) * ((1+t)^m/m!) * P_m(s*t*x/(1+t)) if t != -1 and Sum_{n>=0} T_{s,t}(m,n)*x^n/n! = exp((1+s)*x) * (s*t*x)^m/m! if t = -1.
+%F A341867 T(m, n) = Sum_{j=0..n} binomial(n, j)*hypergeom([j + 1, -m], [1], -1). - _Peter Luschny_, Nov 08 2021
+%e A341867 Rows 0-7:
+%e A341867     1,   2,    4,     8,    16,     32,     64,     128, ...
+%e A341867     2,   5,   12,    28,    64,    144,    320,     704, ...
+%e A341867     4,  12,   33,    86,   216,    528,   1264,    2976, ...
+%e A341867     8,  28,   86,   245,   664,   1736,   4416,   10992, ...
+%e A341867    16,  64,  216,   664,  1921,   5322,  14268,   37272, ...
+%e A341867    32, 144,  528,  1736,  5322,  15525,  43620,  118980, ...
+%e A341867    64, 320, 1264,  4416, 14268,  43620, 127905,  362910, ...
+%e A341867   128, 704, 2976, 10992, 37272, 118980, 362910, 1067925, ...
+%e A341867   ...
+%t A341867 T[m_, n_] := Sum[Binomial[m, i] * Binomial[n, j] * Binomial[i + j, i], {i, 0, m}, {j, 0, n} ]; Table[T[m, n - m], {n, 0, 9}, {m, 0, n}] // Flatten (* _Amiram Eldar_, Nov 08 2021 *)
+%t A341867 T[m_, n_] := Sum[Binomial[n, j] Hypergeometric2F1[j + 1, -m, 1, -1], {j, 0, n}];
+%t A341867 (* _Peter Luschny_, Nov 08 2021 *)
+%o A341867 (PARI) T(m,n) = sum(i=0, m, sum(j=0, n, binomial(m,i)*binomial(n,j)*binomial(i+j,i)))
+%Y A341867 Cf. A000079 (0th row), A045623(n+1) (1st row), A343561 (2nd row), A084771 (main diagonal).
+%K A341867 nonn,tabl
+%O A341867 0,2
+%A A341867 _Jianing Song_, Nov 07 2021

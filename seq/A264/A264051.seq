@@ -1,0 +1,38 @@
+%I A264051 #24 Jan 22 2016 08:08:21
+%S A264051 0,1,0,1,1,1,1,2,2,2,1,2,3,0,2,4,2,1,1,1,1,1,4,3,1,0,0,2,2,0,1,0,1,0,
+%T A264051 0,0,1,7,2,0,0,1,0,3,0,1,0,2,1,0,0,0,1,1,0,1,0,0,0,0,0,0,0,0,0,1,0,1,
+%U A264051 7,3,1,2,0,0,1,2,0,0,1,0,0,0,0,1,0,0,0,0,0,1,0,1,1,0,0,0,1,0,0,0,0,1,1,1
+%N A264051 Triangle read by rows: T(n,k) (n>=0, 0<=k<=A264078(n)) is the number of integer partitions of n having k standard Young tableaux such that no entries i and i+1 appear in the same row.
+%C A264051 Row sums give A000041.
+%C A264051 Column k=0 gives A025065(n-2) for n>=2.
+%H A264051 Alois P. Heinz, <a href="/A264051/b264051.txt">Rows n = 0..14, flattened</a>
+%H A264051 S. Dulucq and O. Guibert, <a href="http://dx.doi.org/10.1016/S0012-365X(96)83009-3">Stack words, standard tableaux and Baxter permutations</a>, Disc. Math. 157 (1996), 91-106.
+%H A264051 FindStat - Combinatorial Statistic Finder, <a href="http://www.findstat.org/StatisticsDatabase/St000212">Number of standard Young tableaux of an integer partition such that no k and k+1 appear in the same row</a>.
+%F A264051 Sum_{k=1..A264078(n)} k*T(n,k) = A237770(n). - _Alois P. Heinz_, Nov 02 2015
+%e A264051 Triangle begins:
+%e A264051 0,1,
+%e A264051 0,1,
+%e A264051 1,1,
+%e A264051 1,2,
+%e A264051 2,2,1,
+%e A264051 2,3,0,2,
+%e A264051 4,2,1,1,1,1,1,
+%e A264051 4,3,1,0,0,2,2,0,1,0,1,0,0,0,1,
+%e A264051 7,2,0,0,1,0,3,0,1,0,2,1,0,0,0,1,1,0,1,0,0,0,0,0,0,0,0,0,1,0,1,
+%e A264051 ...
+%p A264051 h:= proc(l, j) option remember; `if`(l=[], 1,
+%p A264051       `if`(l[1]=0, h(subsop(1=[][], l), j-1), add(
+%p A264051       `if`(i<>j and l[i]>0 and (i=1 or l[i]>l[i-1]),
+%p A264051        h(subsop(i=l[i]-1, l), i), 0), i=1..nops(l))))
+%p A264051     end:
+%p A264051 g:= proc(n, i, l) `if`(n=0 or i=1, x^h([1$n, l[]], 0),
+%p A264051       `if`(i<1, 0, g(n, i-1, l)+ `if`(i>n, 0,
+%p A264051        g(n-i, i, [i, l[]]))))
+%p A264051     end:
+%p A264051 T:= n-> (p-> seq(coeff(p, x, i), i=0..degree(p)))(g(n$2, [])):
+%p A264051 seq(T(n), n=0..10);  # _Alois P. Heinz_, Nov 02 2015
+%t A264051 h[l_, j_] := h[l, j] = If[l == {}, 1, If[l[[1]] == 0, h[ReplacePart[l, 1 -> Sequence[]], j - 1], Sum[If[i != j && l[[i]] > 0 && (i == 1 || l[[i]] > l[[i - 1]]), h[ReplacePart[l, i -> l[[i]] - 1], i], 0], {i, 1, Length[l]} ]]]; g[n_, i_, l_] := If[n == 0 || i == 1, x^h[Join[Array[1 &, n], l], 0], If[i < 1, 0, g[n, i - 1, l] + If[i > n, 0, g[n - i, i, Join[{i}, l]]] ]]; T[n_] := Function[p, Table[Coefficient[p, x, i], {i, 0, Exponent[p, x]}]][g[n, n, {}]]; Table[T[n], {n, 0, 10}] // Flatten (* _Jean-François Alcover_, Jan 22 2016, after _Alois P. Heinz_ *)
+%Y A264051 Cf. A000041, A001181, A237770, A264078.
+%K A264051 nonn,tabf
+%O A264051 0,8
+%A A264051 _Christian Stump_, Nov 01 2015

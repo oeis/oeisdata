@@ -1,0 +1,53 @@
+%I A304962 #33 Sep 15 2021 05:35:26
+%S A304962 1,2,6,18,50,138,374,994,2610,6778,17414,44346,112034,280970,700038,
+%T A304962 1733706,4269970,10463154,25518198,61962458,149839602,360958306,
+%U A304962 866405702,2072579058,4942074082,11748730482,27849974598,65837539522,155236876018,365125130490,856767548022
+%N A304962 Expansion of Product_{k>=1} ((1 + x^k)/(1 - x^k))^(2^(k-1)).
+%C A304962 Convolution of the sequences A034691 and A098407.
+%H A304962 Alois P. Heinz, <a href="/A304962/b304962.txt">Table of n, a(n) for n = 0..1000</a>
+%H A304962 Simon Plouffe, <a href="http://vixra.org/abs/1409.0048">Conjectures of the OEIS, as of June 20, 2018.</a>
+%H A304962 Simon Plouffe, <a href="http://vixra.org/abs/1409.0081">Approximations de séries génératrices et quelques conjectures</a>, Master's thesis, 1992. [see page 24]
+%H A304962 N. J. A. Sloane, <a href="/transforms.txt">Transforms</a>
+%H A304962 <a href="/index/Par#part">Index entries for sequences related to partitions</a>
+%H A304962 <a href="/index/Com#comp">Index entries for sequences related to compositions</a>
+%F A304962 G.f.: Product_{k>=1} ((1 + x^k)/(1 - x^k))^A011782(k).
+%F A304962 Euler transform of c(n) with g.f.: -x*(-2*x^2-x+2)/(-4*x^3+2*x^2+2*x-1). - _Simon Plouffe_, Jun 20 2018
+%F A304962 a(n) ~ A247003 * 2^(n-1) * exp(2*sqrt(n) - 1/2 + c) / (sqrt(Pi)*n^(3/4)), where c = Sum_{k>=2} -(-1)^k / (k*(2^k-2)) = -0.207530918644117743551169251314627032... - _Vaclav Kotesovec_, Sep 15 2021
+%p A304962 g:= proc(n) option remember; `if`(n=0, 1, add(add(d*
+%p A304962       2^(d-1), d=numtheory[divisors](j))*g(n-j), j=1..n)/n)
+%p A304962     end:
+%p A304962 b:= proc(n, i) option remember; `if`(n=0 or i=1, `if`(n>1, 0, 1),
+%p A304962       add(b(n-i*j, i-1)*binomial(2^(i-1), j), j=0..n/i))
+%p A304962     end:
+%p A304962 a:= n-> add(g(n-j)*b(j$2), j=0..n):
+%p A304962 seq(a(n), n=0..35);  # _Alois P. Heinz_, May 22 2018
+%p A304962 # Maple program to compute c(n) from a(n) or a(n) from c(n).
+%p A304962 with(numtheory):
+%p A304962 andrews:=proc(liste) local n,z,serie,ls,i,d,aaa;
+%p A304962    n:=nops(liste);
+%p A304962 aaa:=liste;
+%p A304962 serie:=listtoseries(aaa,z,ogf):
+%p A304962 ls:=series(ln(serie),z,n);
+%p A304962    [seq(coeff(ls,z,d),d=1..n)];
+%p A304962    [seq(elemmobius(%,i),i=1..n-1)]
+%p A304962 end:
+%p A304962 swerdna:=proc(liste) local n,i,z;
+%p A304962   n:=nops(liste);
+%p A304962   series(convert([seq((1-z^i)^(-liste[i]),i=1..n)],`*`),z,n);
+%p A304962   [seq(coeff(%,z,i),i=0..n-1)]
+%p A304962 end:
+%p A304962 elemmobius:=proc(liste,d) local k,rep;
+%p A304962    rep:=0;
+%p A304962    for k in divisors(d) do
+%p A304962       rep:=rep+liste[k]*mobius(iquo(d,k))/iquo(d,k)
+%p A304962    od;
+%p A304962    rep
+%p A304962 end:
+%p A304962 # Here andrews() finds the c(n) and swerdna() finds the a(n) if the c(n) are known.
+%p A304962 # For ordinary partitions the c(n) are [1,1,1,1,1, ...].
+%p A304962 # _Simon Plouffe_, Jun 20 2018
+%t A304962 nmax = 30; CoefficientList[Series[Product[((1 + x^k)/(1 - x^k))^(2^(k - 1)), {k, 1, nmax}], {x, 0, nmax}], x]
+%Y A304962 Cf. A011782, A015128, A034691, A098407, A156616, A261519, A302239.
+%K A304962 nonn
+%O A304962 0,2
+%A A304962 _Ilya Gutkovskiy_, May 22 2018

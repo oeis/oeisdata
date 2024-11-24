@@ -1,0 +1,47 @@
+%I A358015 #47 Dec 09 2023 07:07:30
+%S A358015 2,2,3,2,4,4,6,3,6,8,7,4,12,8,9,6,10,12,16,6,12,16,15,7,18,16,15,12,
+%T A358015 16,16,24,9,24,24,19,10,28,24,21,16,22,24,36,12,24,32,28,15,36,28,27,
+%U A358015 18,36,32,40,15,30,48,31,16,48,32,42,24,34,36,48,24,36,48,37,19,60
+%N A358015 a(n) = DedekindPsi(n*2^(-k))*2^(j-1) where k = valuation(n, 2) and j = k if 4 divides n and otherwise 0.
+%C A358015 Reciprocals of the constants determining the tail of limiting distribution of quadratic Weyl sums with rational parameters.
+%H A358015 Francesco Cellarosi and Tariq Osman, <a href="https://arxiv.org/abs/2210.09838">Heavy tailed and compactly supported distributions of quadratic Weyl sums with rational parameters</a>, arXiv:2210.09838 [math.NT], 2022-2023.
+%F A358015 Let DedekindPsi(m) = m * Product{p|m, p prime} (1 + 1/p).
+%F A358015 Write n = m*2^k with odd m and k >= 0.
+%F A358015 If k = 0 or k = 1, then const(n) = 2/DedekindPsi(m).
+%F A358015 If k > 1, then const(n) = 1/(2^(k-1)*DedekindPsi(m)).
+%F A358015 const(1) = const(2) = 1/2 and for all n >= 3, 1/const(n) is an integer.
+%F A358015 a(n) = 1/const(n) for n >= 3.
+%F A358015 From _Peter Luschny_, Oct 26 2022: (Start)
+%F A358015 a(n) = (DedekindPsi(OddPart(n))/2) * [4 divides n ? EvenPart(n) : 1] = (A001615(A000265(n))/2) * [4 divides n ? A006519(n) : 1].
+%F A358015 Define: k in S <=> k is a number that divides DedekindPsi(k) and its even part is greater than 2. Then sequence(k/12 for k in S) = sequence(a(k)/8 for k in S) = A003586. (End)
+%F A358015 Sum_{k=1..n} a(k) ~ c * n^2, where c = 21/(8*Pi^2) = 0.265968... . - _Amiram Eldar_, Dec 09 2023
+%e A358015 a(3) = DedekindPsi(3)/2 = 4/2 = 2.
+%e A358015 a(4) = 2^(2-1)*DedekindPsi(1) = 2*1 = 2.
+%e A358015 a(5) = DedekindPsi(5)/2 = 6/2 = 3.
+%e A358015 a(6) = DedekindPsi(3)/2 = 2.
+%e A358015 a(16) = 2^(4-1)*DedekindPsi(1) = 8*1 = 8.
+%e A358015 a(120) = 2^(3-1)*DedekindPsi(15) = 4*24 = 96.
+%p A358015 alias(DedekindPsi = A001615):
+%p A358015 A358015 := proc(n) local k, h; k := padic[ordp](n, 2); h := 2^k;
+%p A358015 DedekindPsi(n/h)/2; if h > 2 then %*h else % fi end:
+%p A358015 seq(A358015(n), n = 3..75); # _Peter Luschny_, Oct 25 2022
+%t A358015 DedekindPsi[n_] := n Sum[MoebiusMu[d]^2/d, {d, Divisors@n}];
+%t A358015 const[n_]:=If[OddQ[n] || (Mod[n, 4] == 2), 2/DedekindPsi[n/2^IntegerExponent[n,2]], 1/(2^(IntegerExponent[n, 2]-1) DedekindPsi[n/2^IntegerExponent[n, 2]])]
+%t A358015 a[n_]:=1/const[n]
+%o A358015 (SageMath)
+%o A358015 from sage.arith.misc import dedekind_psi
+%o A358015 def A358015(n):
+%o A358015     k = valuation(n, 2)
+%o A358015     j = k if mod(n, 4) == 0 else 0
+%o A358015     return dedekind_psi(n*2^(-k))*2^(j-1)
+%o A358015 print([A358015(n) for n in range(3, 76)]) # _Peter Luschny_, Oct 26 2022
+%o A358015 (Python)
+%o A358015 from math import prod
+%o A358015 from sympy import primefactors
+%o A358015 def A358015(n):
+%o A358015     s =(m:=n>>(k:=(~n & n-1).bit_length()))//prod(q:=primefactors(m))*prod(p+1 for p in q)
+%o A358015     return s>>1 if n&3 else s<<k-1 # _Chai Wah Wu_, Oct 27 2022
+%Y A358015 Cf. A001615, A000265, A007814, A006519, A003586.
+%K A358015 nonn
+%O A358015 3,1
+%A A358015 _F Cellarosi_, Oct 24 2022

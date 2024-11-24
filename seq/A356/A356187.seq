@@ -1,0 +1,54 @@
+%I A356187 #19 Aug 06 2022 08:07:22
+%S A356187 1,1,0,0,0,2,2,6,4,24,6,162,330,1428,1632
+%N A356187 Number of permutations f of {1,...,n} with f(1) = 1 such that those k*f(k) + 1 (k = 1..n) are n distinct primes.
+%C A356187 Conjecture: a(n) > 0 except for n = 3,4,5. Also, for any integer n > 5, there is a permutation f of {1,...,n} with f(1) = 3 such that those k*f(k) - 1 (k = 1..n) are n distinct primes.
+%C A356187 This is stronger than part (i) of the conjecture in A321597.
+%H A356187 Zhi-Wei Sun, <a href="https://doi.org/10.1007/s10801-021-01028-8">On permutations of {1,...,n} and related topics</a>, J. Algebraic Combin., 2021.
+%e A356187 a(7) = 2 since the only permutations f of {1,...,7} with f(1) = 1 such that {k*f(k) + 1: k = 1..7} is a set of 7 primes, are (f(1),...,f(7)) = (1,3,4,7,2,5,6) and (1,5,2,3,6,7,4). Note that 1*1 + 1 = 2, 2*3 + 1 = 7, 3*4 + 1 = 13, 4*7 + 1 = 29, 5*2 + 1 = 11, 6*5 + 1 = 31, 7*6+1 = 43 are distinct primes. Also, 1*1 + 1 = 2, 2*5 + 1 = 11, 3*2 + 1 = 7, 4*3 + 1 = 13, 5*6 + 1 = 31, 6*7 + 1 = 43, 7*4 + 1 = 29 are distinct primes.
+%e A356187 a(10) > 0 since for (f(1),...,f(10)) = (1,3,4,7,8,5,6,9,2,10) the set {k*f(k) + 1: k = 1..10} is a set of 10 distinct primes.
+%t A356187 (* A program to find all the permutations f of {1,...,9} with f(1) = 1 such that U = {k*f(k)+1: k = 1..9} is a set of 9 distinct primes. *)
+%t A356187 V[i_]:=V[i]=Part[Permutations[{2,3,4,5,6,7,8,9}],i]
+%t A356187 m=0;Do[U={2};Do[p=j*V[i][[j-1]]+1;If[PrimeQ[p],U=Append[U,p]],{j,2,9}];
+%t A356187 If[Length[Union[U]]==9,m=m+1;Print[m," ",V[i]," ",U]],{i,1,8!}]
+%o A356187 (Python)
+%o A356187 from itertools import permutations as perm
+%o A356187 from itertools import islice
+%o A356187 from sympy import isprime
+%o A356187 from math import factorial as fact
+%o A356187 import collections
+%o A356187 def consume(iterator, n=None):
+%o A356187     "Advance the iterator n-steps ahead. If n is None, consume entirely."
+%o A356187     # Use functions that consume iterators at C speed.
+%o A356187     if n is None:
+%o A356187         # feed the entire iterator into a zero-length deque
+%o A356187         collections.deque(iterator, maxlen=0)
+%o A356187     else:
+%o A356187         # advance to the empty slice starting at position n
+%o A356187         next(islice(iterator, n, n), None)
+%o A356187 for x in range(2,20):
+%o A356187     mult = range(1,x)
+%o A356187     count = 0
+%o A356187     q = perm(range(1,x))
+%o A356187     for y in q:
+%o A356187         keeppos = 0
+%o A356187         keepflag = False
+%o A356187         if y[0] != 1:#stop when the first digit is not 1
+%o A356187             break
+%o A356187         z = [mult[a] * y[a] + 1 for a in range(x-1)]
+%o A356187         for b in z[0:-2]:
+%o A356187             if not isprime(b):
+%o A356187                 keeppos = z.index(b)
+%o A356187                 keepflag = True
+%o A356187                 break
+%o A356187         if keepflag:#skip ahead to advance the next non-prime term
+%o A356187             consume(q,fact(x-keeppos-2)-1)
+%o A356187         elif len(set(z)) == len(z) and all(isprime(b) for b in set(z)):#no duplicates and all primes
+%o A356187             count += 1
+%o A356187     print(x-1,count)
+%o A356187 # _David Consiglio, Jr._, Aug 04 2022
+%Y A356187 Cf. A000040, A321597, A333083.
+%K A356187 nonn,more
+%O A356187 1,6
+%A A356187 _Zhi-Wei Sun_, Jul 28 2022
+%E A356187 a(11)-a(13) from _Jinyuan Wang_, Jul 29 2022
+%E A356187 a(14)-a(15) from _David Consiglio, Jr._, Aug 04 2022

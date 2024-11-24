@@ -1,0 +1,38 @@
+%I A356886 #37 Jan 12 2023 21:19:43
+%S A356886 1,2,3,4,9,6,5,8,15,18,27,12,21,10,7,16,35,30,63,36,81,54,45,24,25,42,
+%T A356886 99,20,33,14,11,32,55,70,165,60,297,126,75,72,135,162,243,108,189,90,
+%U A356886 105,48,49,50,147,84,351,198,195,40,65,66,117,28,39,22,13,64,91
+%N A356886 Write n as 2^m - k, where 2^m is the least power of 2 such that 2^m >= n, and k is a number in the range 0 <= k < 2^(m-1) - 1. Then for n such that k=0, a(n)=n, and for n such that k > 0, a(n) is the smallest odd prime multiple of a(k) that is not already a term.
+%C A356886 Conjectured to be a permutation of the positive integers in which the primes appear in order. The even bisection, when divided by 2 reproduces the sequence. Has similar properties to the Doudna sequence, A005940.
+%H A356886 Michael De Vlieger, <a href="/A356886/b356886.txt">Table of n, a(n) for n = 1..16384</a>
+%H A356886 Michael De Vlieger, <a href="/A356886/a356886.png">Annotated fan-style binary tree of a(n)</a>, n = 1..2^14, with row m = 2^m..2^(m+1)-1 with a heat map color function showing row minima in blue, larger terms in greens, and row maxima in red.
+%F A356886 a(2^m - 1) = prime(m) for m >= 2.
+%F A356886 a(2*n)/2 = a(n) for n >= 1.
+%e A356886 5 = 2^3 - 3 so a(5)=a(3)*3=9.
+%e A356886 13 = 2^4 - 3 and a(3)=3 so a(13)=3*7=21 since 9 and 15 have appeared already.
+%e A356886 17 = 2^5 - 15 and a(15)=7 so a(17)=5*7=35 (since 21=3*7 has appeared already).
+%t A356886 nn = 65; c[_] = False; Do[Set[{m, k}, {2, 2^(Ceiling[Log2[n]]) - n}]; If[k == 0, Set[{a[n], c[n]}, {n, True}], While[Set[t, Prime[m] a[k]]; c[t], m++]; Set[{a[n], c[t]}, {t, True}]], {n, nn}]; Array[a, nn] (* _Michael De Vlieger_, Sep 02 2022 *)
+%o A356886 (PARI) first(n) = { my(res = vector(n), m = Map()); for(i = 1, n, qd = ceil(log(i)/log(2)); nextp = 1<<qd; if(nextp == i, res[i] = i , k = res[nextp - i]; forprime(p = 3, oo, if(!mapisdefined(m, k*p), res[i] = k*p; mapput(m, k*p, 1); next(2) ) ) ) ); res } \\ _David A. Corneth_ and _Michel Marcus_, Sep 13 2022
+%o A356886 (Python)
+%o A356886 from itertools import count, islice
+%o A356886 from sympy import nextprime
+%o A356886 def A356886_gen(): # generator of terms
+%o A356886     aset, alist = {1}, [1]
+%o A356886     yield 1
+%o A356886     for n in count(2):
+%o A356886         if k:=(0 if (i:=1<<n.bit_length())==n<<1 else i-n):
+%o A356886             p, m = 3, alist[k-1]
+%o A356886             while p*m in aset:
+%o A356886                 p = nextprime(p)
+%o A356886             r = p*m
+%o A356886         else:
+%o A356886             r = n
+%o A356886         alist.append(r)
+%o A356886         aset.add(r)
+%o A356886         yield r
+%o A356886 A356886_list = list(islice(A356886_gen(),30)) # _Chai Wah Wu_, Sep 09 2022
+%Y A356886 Cf. A005940.
+%K A356886 nonn
+%O A356886 1,2
+%A A356886 _David James Sycamore_, Sep 02 2022
+%E A356886 More terms from _David A. Corneth_, Sep 02 2022

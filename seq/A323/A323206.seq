@@ -1,0 +1,89 @@
+%I A323206 #49 Feb 27 2019 13:23:04
+%S A323206 1,1,1,1,2,1,1,3,5,1,1,4,13,14,1,1,5,25,67,42,1,1,6,41,190,381,132,1,
+%T A323206 1,7,61,413,1606,2307,429,1,1,8,85,766,4641,14506,14589,1430,1,1,9,
+%U A323206 113,1279,10746,55797,137089,95235,4862,1
+%N A323206 A(n, k) = hypergeometric([-k, k+1], [-k-1], n), square array read by ascending antidiagonals for n,k >= 0.
+%C A323206 Conjecture: A(n, k) is odd if and only if n is even or (n is odd and k + 2 = 2^j for some j > 0).
+%H A323206 J. Abate, W. Whitt, <a href="https://cs.uwaterloo.ca/journals/JIS/VOL14/Whitt/whitt6.html">Brownian Motion and the Generalized Catalan Numbers</a>, J. Int. Seq. 14 (2011).
+%H A323206 B. Derrida, E. Domany and D. Mukamel, <a href="https://pdfs.semanticscholar.org/b5e4/8ce828593c1cab2fe656221c7691104c03dd.pdf">An exact solution of a one-dimensional asymmetric exclusion model with open boundaries</a>, J. Stat. Phys. 69, 1992, 667-687.
+%F A323206 A(n, k) = [x^k] 1/(x - x^2*C(n*x)) if n > 0 and C(x) = (1 - sqrt(1 - 4*x))/(2*x) is the generating function of the Catalan numbers A000108.
+%F A323206 A(n, k) = Sum_{j=0..k} (binomial(2*k-j, k) - binomial(2*k-j, k+1))*n^(k-j).
+%F A323206 A(n, k) = Sum_{j=0..k} binomial(k + j, k)*(1 - j/(k + 1))*n^j (cf. A009766).
+%F A323206 A(n, k) = 1 + Sum_{j=0..k-1} ((1+j)*binomial(2*k-j, k+1)/(k-j))*n^(k-j).
+%F A323206 A(n, k) = (1/(2*Pi))*Integral_{x=0..4*n} (sqrt(x*(4*n-x))*x^k)/(1+(n-1)*x), n>0.
+%F A323206 A(n, k) ~ ((4*n)^k/(Pi^(1/2)*k^(3/2)))*(1+1/(2*n-1))^2.
+%F A323206 If we shift the series f with constant term 1 to the right, invert it with respect to composition and shift the result back to the left then we call this the 'pseudo reversion' of f, prev(f). Row n of the array gives the coefficients of the pseudo reversion of f = (1 + (n - 1)*x)/((1 - x)^2) with an additional inversion of sign. Note that f is not revertible. See also the Sage implementation below.
+%F A323206 A(n, k) = [x^k] prev((1 + (n - 1)*(-x))/(1 - (-x))^2).
+%F A323206 A(n, k) = [x^(k+1)] cf(n, x) where cf(n, x) = K_{i>=1} c(i)/b(i) in the notation of Gauß with b(i) = 1, c(1) = 1, c(2) = -x and c(i) = -n*x for i > 2.
+%F A323206 For a recurrence see the Maple section.
+%e A323206 Array starts:
+%e A323206     [n\k 0  1    2     3       4        5         6           7  ...]
+%e A323206     [0]  1, 1,   1,    1,      1,       1,        1,          1, ... A000012
+%e A323206     [1]  1, 2,   5,   14,     42,     132,      429,       1430, ... A000108
+%e A323206     [2]  1, 3,  13,   67,    381,    2307,    14589,      95235, ... A064062
+%e A323206     [3]  1, 4,  25,  190,   1606,   14506,   137089,    1338790, ... A064063
+%e A323206     [4]  1, 5,  41,  413,   4641,   55797,   702297,    9137549, ... A064087
+%e A323206     [5]  1, 6,  61,  766,  10746,  161376,  2537781,   41260086, ... A064088
+%e A323206     [6]  1, 7,  85, 1279,  21517,  387607,  7312789,  142648495, ... A064089
+%e A323206     [7]  1, 8, 113, 1982,  38886,  817062, 17981769,  409186310, ... A064090
+%e A323206     [8]  1, 9, 145, 2905,  65121, 1563561, 39322929, 1022586105, ... A064091
+%e A323206          A001844 A064096 A064302  A064303   A064304   A064305  diag: A323209
+%e A323206 .
+%e A323206 Seen as a triangle (by reading ascending antidiagonals):
+%e A323206                                1
+%e A323206                               1, 1
+%e A323206                             1, 2, 1
+%e A323206                            1, 3, 5, 1
+%e A323206                         1, 4, 13, 14, 1
+%e A323206                       1, 5, 25, 67, 42, 1
+%e A323206                    1, 6, 41, 190, 381, 132, 1
+%p A323206 # The function ballot is defined in A238762.
+%p A323206 A := (n, k) -> add(ballot(2*j, 2*k)*n^j, j=0..k):
+%p A323206 for n from 0 to 6 do seq(A(n, k), k=0..9) od;
+%p A323206 # Or by recurrence:
+%p A323206 A := proc(n, k) option remember;
+%p A323206 if n = 1 then return `if`(k = 0, 1, (4*k + 2)*A(1, k-1)/(k + 2)) fi:
+%p A323206 if k < 2 then return [1, n+1][k+1] fi; n*(4*k - 2);
+%p A323206 ((%*(n - 1) - k - 1)*A(n, k-1) + %*A(n, k-2))/((n - 1)*(k + 1)) end:
+%p A323206 for n from 0 to 6 do seq(A(n, k), k=0..9) od;
+%p A323206 # Alternative:
+%p A323206 Arow := proc(n, len) # Function REVERT is in Sloane's 'Transforms'.
+%p A323206 [seq(1 + n*k, k=0..len-1)]; REVERT(%); seq((-1)^k*%[k+1], k=0..len-1) end:
+%p A323206 for n from 0 to 8 do Arow(n, 8) od;
+%t A323206 A[n_, k_] := Hypergeometric2F1[-k, k + 1, -k - 1, n];
+%t A323206 Table[A[n, k], {n, 0, 8}, {k, 0, 8}]
+%t A323206 (* Alternative: *)
+%t A323206 prev[f_, n_] := InverseSeries[Series[-x f, {x, 0, n}]]/(-x);
+%t A323206 f[n_, x_] := (1 + (n - 1) x)/((1 - x)^2);
+%t A323206 For[n = 0, n < 9, n++, Print[CoefficientList[prev[f[n, x], 8], x]]]
+%t A323206 (* Continued fraction: *)
+%t A323206 num[k_, n_] := If[k < 2, 1, If[k == 2, -x, -n x]];
+%t A323206 cf[n_, len_] := ContinuedFractionK[num[k, n], 1, {k, len + 2}];
+%t A323206 Arow[n_, len_] := Rest[CoefficientList[Series[cf[n, len], {x, 0, len}], x]];
+%t A323206 For[n = 0, n < 9, n++, Print[Arow[n, 8]]]
+%o A323206 (Sage) # Valid for n > 0.
+%o A323206 def genCatalan(n): return SR(1/(x- x^2*(1 - sqrt(1 - 4*x*n))/(2*x*n)))
+%o A323206 for n in (1..8): print(genCatalan(n).series(x).list())
+%o A323206 # Alternative:
+%o A323206 def pseudo_reversion(g, invsign=false):
+%o A323206     if invsign: g = g.subs(x=-x)
+%o A323206     g = g.shift(1)
+%o A323206     g = g.reverse()
+%o A323206     g = g.shift(-1)
+%o A323206     return g
+%o A323206 R.<x> = PowerSeriesRing(ZZ)
+%o A323206 for n in (0..6):
+%o A323206     f = (1+(n-1)*x)/((1-x)^2)
+%o A323206     s = pseudo_reversion(f, true)
+%o A323206     print(s.list())
+%o A323206 (PARI)
+%o A323206 {A(n,k) = polcoeff((1/x)*serreverse(x*((1+(n-1)*(-x))/((1-(-x))^2)+x*O(x^k))), k)}
+%o A323206 for(n=0, 8, for(k=0, 8, print1(A(n, k), ", ")); print())
+%Y A323206 Rows: A000108, A064062, A064063, A064087, A064088, A064089, A064090, A064091.
+%Y A323206 Columns: A001844, A064096, A064302, A064303, A064304, A064305.
+%Y A323206 Diagonals: A323209 (main), A323208 (sup main), A323217 (sub main).
+%Y A323206 Sums of antidiagonals: A323207
+%Y A323206 Cf. A064094, A009766, A238762.
+%K A323206 nonn,tabl
+%O A323206 0,5
+%A A323206 _Peter Luschny_, Feb 21 2019

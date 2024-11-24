@@ -1,0 +1,67 @@
+%I A225117 #50 Aug 25 2023 12:03:33
+%S A225117 1,2,1,4,13,1,8,93,60,1,16,545,1131,251,1,32,2933,14498,10678,1018,1,
+%T A225117 64,15177,154113,262438,88998,4089,1,128,77101,1475736,4890287,
+%U A225117 3870352,692499,16376,1,256,388321,13270807,77404933,117758659,50476003,5175013,65527,1
+%N A225117 Triangle read by rows, coefficients of the generalized Eulerian polynomials A_{n, 3}(x) in descending order.
+%C A225117 The row sums equal the triple factorial numbers A032031 and the alternating row sums, i.e., Sum_{k=0..n}(-1)^k*T(n,k), are up to a sign A000810. - _Johannes W. Meijer_, May 04 2013
+%H A225117 Peter Luschny, <a href="http://oeis.org/wiki/User:Peter_Luschny/EulerianPolynomialsGeneralized">Generalized Eulerian polynomials</a>.
+%H A225117 Zhe Wang and Zhi-Yong Zhu, <a href="https://ajc.maths.uq.edu.au/pdf/87/ajc_v87_p198.pdf">The spiral property of q-Eulerian numbers of type B</a>, The Australasian Journal of Combinatorics, Volume 87(1) (2023), Pages 198-202. See p. 199.
+%F A225117 Generating function of the polynomials is gf(n, k) = k^n*n!*(1/x-1)^(n+1)[t^n](x*e^(t*x/k)*(1-x*e(t*x))^(-1)) for k = 3; here [t^n]f(t,x) is the coefficient of t^n in f(t,x).
+%F A225117 From _Wolfdieter Lang_, Apr 10 2017: (Start)
+%F A225117 T(n, k) = Sum_{j=0..n-k} (-1)^(n-k-j)*binomial(n+1, n-k-j)*(1+3*j)^n, 0 <= k <= n.
+%F A225117 T(n, k) = Sum_{m=0..n-k} (-1)^(n-k-m)*binomial(n-m, k)*A284861(n, m), 0 <= k <= n.
+%F A225117 The row polynomials R(n, x) = Sum_{k=0..n} T(n, k)*x^k are R(n, x) = (x-1)^n*Sum_{m=0} A284861(n, m)*(1/(x-1))^m, n >= 0, i.e. the row polynomials of A284861 in the variable 1/(x-1) multiplied by (x-1)^n.
+%F A225117 The row polynomials with falling powers are P(n, x) = (1-x)^n*Sum_{m=0..n} A284861(n, m)*(x/(1-x))^m, n >= 0.
+%F A225117 The e.g.f. of the row polynomials in falling powers of x (A_{n, 3}(x) of the name) is exp((1-x)*z)/(1 - (x/(1 - x)) * (exp(3*(1-x)*z) - 1)) = (1-x)*exp((1-x)*z)/(1 - x*exp(3*(1-x)*z)).
+%F A225117 The e.g.f. of the row polynomials R(n, x) (rising powers of x) is then (1-x)*exp(2*(1-x)*z)/(1 - x*exp(3*(1-x)*z)).
+%F A225117 Three term recurrence: T(n, k) = 0 if n < k , T(n, -1) = 0, T(0,0) = 1, T(n, k) = (3*(n-k)+1)*T(n-1, k-1) + (3*k+2)*T(n-1, k) for n >= 1, k=0..n. (End)
+%e A225117 [0]  1
+%e A225117 [1]  2*x   +   1
+%e A225117 [2]  4*x^2 +  13*x   +    1
+%e A225117 [3]  8*x^3 +  93*x^2 +   60*x   +   1
+%e A225117 [4] 16*x^4 + 545*x^3 + 1131*x^2 + 251*x + 1
+%e A225117 ...
+%e A225117 The triangle T(n, k) begins:
+%e A225117 n \ k 0      1        2        3       4      5     6 7 ...
+%e A225117 0:    1
+%e A225117 1:    2      1
+%e A225117 2:    4     13        1
+%e A225117 3:    8     93       60        1
+%e A225117 5:   16    545     1131      251       1
+%e A225117 6:   32   2933    14498    10678    1018      1
+%e A225117 7:   64  15177   154113   262438   88998   4089     1
+%e A225117 8:  128  77101  1475736  4890287 3870352 692499 16376 1
+%e A225117 ...  - _Wolfdieter Lang_, Apr 08 2017
+%e A225117 Three term recurrence: T(2,1) = (3*(2-1)+1)*2 + (3*1+2)*1 = 13. - _Wolfdieter Lang_, Apr 10 2017
+%p A225117 gf := proc(n, k) local f; f := (x,t) -> x*exp(t*x/k)/(1-x*exp(t*x));
+%p A225117 series(f(x,t), t, n+2); ((1-x)/x)^(n+1)*k^n*n!*coeff(%, t, n):
+%p A225117 collect(simplify(%), x) end:
+%p A225117 seq(print(seq(coeff(gf(n, 3), x, n-k), k=0..n)), n=0..6);
+%p A225117 # Recurrence
+%p A225117 P := proc(n,x) option remember; if n = 0 then 1 else
+%p A225117   (n*x+(1/3)*(1-x))*P(n-1,x)+x*(1-x)*diff(P(n-1,x),x);
+%p A225117   expand(%) fi end:
+%p A225117 A225117 := (n,k) -> 3^n*coeff(P(n,x),x,n-k):
+%p A225117 seq(print(seq(A225117(n,k), k=0..n)), n=0..5);  # _Peter Luschny_, Mar 08 2014
+%t A225117 gf[n_, k_] := Module[{f, s}, f[x_, t_] := x*Exp[t*x/k]/(1-x*Exp[t*x]); s = Series[f[x, t], {t, 0, n+2}]; ((1-x)/x)^(n+1)*k^n*n!*SeriesCoefficient[s, {t, 0, n}]]; Table[Table[SeriesCoefficient[gf[n, 3], {x, 0, n-k}], {k, 0, n}], {n, 0, 8}] // Flatten (* _Jean-François Alcover_, Jan 27 2014, after Maple *)
+%o A225117 (Sage)
+%o A225117 @CachedFunction
+%o A225117 def EB(n, k, x):  # Modified cardinal B-splines
+%o A225117     if n == 1: return 0 if (x < 0) or (x >= 1) else 1
+%o A225117     return k*x*EB(n-1, k, x) + k*(n-x)*EB(n-1, k, x-1)
+%o A225117 def EulerianPolynomial(n, k): # Generalized Eulerian polynomials
+%o A225117     R.<x> = ZZ[]
+%o A225117     if x == 0: return 1
+%o A225117     return add(EB(n+1, k, m+1/k)*x^m for m in (0..n))
+%o A225117 [EulerianPolynomial(n, 3).coefficients()[::-1] for n in (0..5)]
+%o A225117 (PARI) T(n, k) = sum(j=0, n - k, (-1)^(n - k - j)*binomial(n + 1, n - k - j)*(1 + 3*j)^n);
+%o A225117 for(n=0, 10, for(k=0, n, print1(T(n, k),", ");); print();) \\ _Indranil Ghosh_, Apr 10 2017
+%o A225117 (Python)
+%o A225117 from sympy import binomial
+%o A225117 def T(n,k): return sum((-1)**(n - k - j)* binomial(n + 1, n - k - j)*(1 + 3*j)**n for j in range(n - k + 1))
+%o A225117 for n in range(11): print([T(n, k) for k in range(n + 1)]) # _Indranil Ghosh_, Apr 10 2017
+%Y A225117 Coefficients of A_{n,1}(x) = A008292, coefficients of A_{n,2}(x) = A060187, coefficients of A_{n,4}(x) = A225118.
+%Y A225117 Cf. A173018, A123125, A284861.
+%K A225117 nonn,tabl
+%O A225117 0,2
+%A A225117 _Peter Luschny_, May 02 2013

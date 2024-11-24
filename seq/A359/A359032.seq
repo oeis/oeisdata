@@ -1,0 +1,82 @@
+%I A359032 #53 Mar 20 2023 19:24:17
+%S A359032 1,2,4,9,23,66,204,669,2305,8348,31542,124021,507937,2154494,9455972,
+%T A359032 42847307,200258387,962904904,4759773172,24142168317,125575232141,
+%U A359032 668689805690,3643481771390,20286338601133
+%N A359032 a(n) is the number of ways to place non-attacking queens on an n X n board with no queens above the main diagonal.
+%C A359032 Equivalently, a(n) is the number of ways to place non-attacking queens on a right triangular board with n cells on each side.
+%C A359032 Task was proposed by Yandex, during ICPC NERC 2022-2023, as a side CTF contest.
+%C A359032 The terms appear to be growing exponentially.
+%e A359032 a(0) = 1, since there is only the empty board.
+%e A359032 a(1) = 2, since there are 2 configurations:
+%e A359032   +---+  +---+
+%e A359032   | Q |  | . |
+%e A359032   +---+  +---+
+%e A359032 a(2) = 4
+%e A359032   +-----+ +-----+ +-----+ +-----+
+%e A359032   | . # | | Q # | | . # | | . # |
+%e A359032   | . . | | . . | | Q . | | . Q |
+%e A359032   +-----+ +-----+ +-----+ +-----+
+%e A359032 a(3) = 9
+%e A359032   +-------+
+%e A359032   | . # # |
+%e A359032   | . . # |
+%e A359032   | . . . |
+%e A359032   +-------+
+%e A359032   +-------+  +-------+
+%e A359032   | Q # # |  | . # # |
+%e A359032   | . . # |  | Q . # |
+%e A359032   | . . . |  | . . . |
+%e A359032   +-------+  +-------+
+%e A359032   +-------+  +-------+
+%e A359032   | . # # |  | . # # |
+%e A359032   | . . # |  | . Q # |
+%e A359032   | Q . . |  | . . . |
+%e A359032   +-------+  +-------+
+%e A359032   +-------+  +-------+
+%e A359032   | . # # |  | . # # |
+%e A359032   | . . # |  | . . # |
+%e A359032   | . Q . |  | . . Q |
+%e A359032   +-------+  +-------+
+%e A359032   +-------+  +-------+
+%e A359032   | Q # # |  | . # # |
+%e A359032   | . . # |  | Q . # |
+%e A359032   | . Q . |  | . . Q |
+%e A359032   +-------+  +-------+
+%o A359032 (Python)
+%o A359032 bitToIndex = {}
+%o A359032 indexToBit = {}
+%o A359032 def addToBoard(board, bit, n):
+%o A359032     (i, j) = bitToIndex[bit]
+%o A359032     for k in range(n - j):
+%o A359032         board |= indexToBit[(k, j)]
+%o A359032     for k in range(n - i):
+%o A359032         board |= indexToBit[(i, k)]
+%o A359032     for k in range(-min(i, j), (n - abs(i - j) + 1) // 2 - min(i, j)):
+%o A359032         board |= indexToBit[(i + k, j + k)]
+%o A359032     for k in range(i + j + 1):
+%o A359032         board |= indexToBit[(k, i + j - k)]
+%o A359032     return board
+%o A359032 def r(start, board, n):
+%o A359032     result = 1
+%o A359032     for i in range(start, n * (n + 1) // 2):
+%o A359032         bit = 1 << i
+%o A359032         if board & bit == 0:
+%o A359032             newBoard = addToBoard(board, bit, n)
+%o A359032             result += r(i + 1, newBoard, n)
+%o A359032     return result
+%o A359032 # Number of peaceful queens boards in a triangular square grid with size n
+%o A359032 def a(n):
+%o A359032     bit = 1
+%o A359032     for j in range(n):
+%o A359032         for k in range(n - j):
+%o A359032             bitToIndex[bit] = (j, k)
+%o A359032             indexToBit[(j, k)] = bit
+%o A359032             bit *= 2
+%o A359032     return r(0, 0, n)
+%o A359032 for n in range(21):
+%o A359032     print(a(n))
+%Y A359032 Cf. A274616, A287227.
+%K A359032 nonn,more,hard
+%O A359032 0,2
+%A A359032 _Alexander Kuleshov_, Dec 13 2022
+%E A359032 a(20)-a(23) from _Bert Dobbelaere_, Jan 29 2023

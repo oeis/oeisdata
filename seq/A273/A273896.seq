@@ -1,0 +1,34 @@
+%I A273896 #23 Aug 19 2017 23:18:20
+%S A273896 1,2,4,1,9,4,22,12,1,56,35,6,146,104,24,1,388,312,86,8,1048,938,300,
+%T A273896 40,1,2869,2824,1032,170,10,7942,8520,3502,680,60,1,22192,25763,11748,
+%U A273896 2632,295,12,62510,78064,39072,9926,1330,84,1,177308,236976,129100,36640,5712,469,14,506008,720574,424344,132960,23660,2352,112,1
+%N A273896 Triangle read by rows: T(n,k) is the number of bargraphs of semiperimeter n having k UHU configurations, where U=(0,1), H(1,0); (n>=2, k>=0).
+%C A273896 Sum of entries in row n = A082582(n).
+%C A273896 T(n,0) = A091561(n-1).
+%C A273896 Sum(k*T(n,k), k>=0) = A273714(n-1). This implies that the number of UHUs in all bargraphs of semiperimeter n is equal to the number of doublerises in all bargraphs of semiperimeter n-1.
+%H A273896 Alois P. Heinz, <a href="/A273896/b273896.txt">Rows n = 2..200, flattened</a>
+%H A273896 M. Bousquet-Mélou and A. Rechnitzer, <a href="http://dx.doi.org/10.1016/S0196-8858(02)00553-5">The site-perimeter of bargraphs</a>, Adv. in Appl. Math. 31 (2003), 86-112.
+%H A273896 Emeric Deutsch, S Elizalde, <a href="http://arxiv.org/abs/1609.00088">Statistics on bargraphs viewed as cornerless Motzkin paths</a>, arXiv preprint arXiv:1609.00088, 2016
+%F A273896 G.f.: G=G(t,z), where t marks number of UHU's and z marks semiperimeter, satisfies zG^2-(1-2z-tz^2)G+z^2 = 0.
+%e A273896 Row 4 is [4,1] because the 5 (=A082582(4)) bargraphs of semiperimeter 4 correspond to the compositions [1,1,1], [1,2], [2,1], [2,2], [3] and the corresponding drawings show that they have 0,1,0,0,0 UHU's.
+%e A273896 Triangle starts
+%e A273896 1;
+%e A273896 2;
+%e A273896 4,1;
+%e A273896 9,4;
+%e A273896 22,12,1;
+%e A273896 56,35,6.
+%p A273896 eq := z*G^2-(1-2*z-t*z^2)*G+z^2 = 0: G := RootOf(eq, G): Gser := simplify(series(G, z = 0, 20)): for n from 2 to 18 do P[n] := sort(coeff(Gser, z, n)) end do: for n from 2 to 18 do seq(coeff(P[n], t, j), j = 0 .. degree(P[n])) end do; # yields sequence in triangular form
+%p A273896 # second Maple program:
+%p A273896 b:= proc(n, y, t, h) option remember; expand(
+%p A273896       `if`(n=0, (1-t), `if`(t<0, 0, b(n-1, y+1, 1, 0)*z^h)+
+%p A273896       `if`(t>0 or y<2, 0, b(n, y-1, -1, 0))+
+%p A273896       `if`(y<1, 0, b(n-1, y, 0, `if`(t>0, 1, 0)))))
+%p A273896     end:
+%p A273896 T:= n-> (p-> seq(coeff(p, z, i), i=0..degree(p)))(b(n, 0$3)):
+%p A273896 seq(T(n), n=2..22); # _Alois P. Heinz_, Jun 06 2016
+%t A273896 b[n_, y_, t_, h_] := b[n, y, t, h] = Expand[If[n==0, 1-t, If[t<0, 0, b[n-1, y+1, 1, 0]*z^h] + If[t>0 || y<2, 0, b[n, y-1, -1, 0]] + If[y<1, 0, b[n-1, y, 0, If[t>0, 1, 0]]]]]; T[n_] := Function[p, Table[Coefficient[p, z, i], {i, 0, Exponent[p, z]}]][b[n, 0, 0, 0]]; Table[T[n], {n, 2, 22}] // Flatten (* _Jean-François Alcover_, Dec 02 2016 after _Alois P. Heinz_ *)
+%Y A273896 Cf. A091561, A082582, A273714.
+%K A273896 nonn,tabf
+%O A273896 2,2
+%A A273896 _Emeric Deutsch_, Jun 02 2016

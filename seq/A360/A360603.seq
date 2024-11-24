@@ -1,0 +1,59 @@
+%I A360603 #34 Dec 02 2023 06:16:49
+%S A360603 1,0,1,0,1,1,0,2,2,4,0,8,6,12,38,0,64,32,48,152,728,0,1024,320,320,
+%T A360603 760,3640,26704,0,32768,6144,3840,6080,21840,160224,1866256,0,2097152,
+%U A360603 229376,86016,85120,203840,1121568,13063792,251548592
+%N A360603 Triangle read by rows. T(n, k) = A360604(n, k) * A001187(k) for 0 <= k <= n.
+%D A360603 F. Harary and E. M. Palmer, Graphical Enumeration, Academic Press, NY, 1973.
+%H A360603 Algorithms for Competitive Programming, <a href="https://cp-algorithms.com/combinatorics/counting_labeled_graphs.html">Counting labeled graphs</a>, cp-algorithms.
+%H A360603 Albert Nijenhuis and Herbert S Wilf, <a href="https://doi.org/10.1016/0097-3165(79)90023-2">The enumeration of connected graphs and linked diagrams</a>, Journal of Combinatorial Theory, Vol. 27(3), 1979, Pages 356-359.
+%H A360603 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/ConnectedGraph.html">Connected Graph</a>.
+%H A360603 Eric Weisstein's World of Mathematics, <a href="http://mathworld.wolfram.com/LabeledGraph.html">Labeled Graph</a>.
+%F A360603 T(n, k) = 2^binomial(n-k, 2)*binomial(n-1, k-1) * A001187(k).
+%F A360603 Recursion over the rows of the triangle: Set row(0) = [1] where [.] denotes a 0-based list. Assume now all rows(j) for j < n computed, next compute r = [2^binomial(n-k, 2) * binomial(n-1, k-1) * row(k)[k] for k = 1..n-1] and s = 2^(n*(n-1)/2) - Sum(r). Then row(n) = [0] & r & [s], where '&' denotes the concatenation of lists. (See the Python program for an implementation.)
+%F A360603 T(n, n) = A001187(n) (connected labeled graphs).
+%F A360603 T(n-1, n) = A053549(n-1) for n >= 1 (labeled rooted connected graphs).
+%F A360603 T(n, 1) = Sum_{k>=0} T(n-1, k) = A006125(n-1) for n >= 1 (all labeled graphs).
+%F A360603 Sum_{k=0..n-1} T(n, k) = A054592(n) for n >= 1 (disconnected labeled graphs).
+%F A360603 See additional formulas in the cross-references.
+%e A360603 Triangle T(n, k) starts:
+%e A360603 [0] 1;
+%e A360603 [1] 0,       1;
+%e A360603 [2] 0,       1,      1;
+%e A360603 [3] 0,       2,      2,     4;
+%e A360603 [4] 0,       8,      6,    12,    38;
+%e A360603 [5] 0,      64,     32,    48,   152,    728;
+%e A360603 [6] 0,    1024,    320,   320,   760,   3640,   26704;
+%e A360603 [7] 0,   32768,   6144,  3840,  6080,  21840,  160224,  1866256;
+%e A360603 [8] 0, 2097152, 229376, 86016, 85120, 203840, 1121568, 13063792, 251548592.
+%p A360603 T := (n, k) -> 2^binomial(n-k, 2)*binomial(n-1, k-1)*A001187(k):
+%p A360603 for n from 0 to 9 do seq(T(n, k), k = 0..n) od;
+%p A360603 # Based on the recursion:
+%p A360603 Trow := proc(n) option remember; if n = 0 then return [1] fi;
+%p A360603 seq(2^binomial(n-k, 2) * binomial(n-1, k-1) * Trow(k)[k+1], k = 1..n-1);
+%p A360603 2^(n*(n-1)/2) - add(j, j = [%]); [0, %%, %] end:
+%p A360603 seq(print(Trow(n)), n = 0..8);
+%t A360603 A001187[n_] := A001187[n] = 2^((n - 1)*n/2) - Sum[Binomial[n - 1, k]*2^((k - n + 1)*(k - n + 2)/2)*A001187[k + 1], {k, 0, n - 2}];
+%t A360603 T[n_, k_] := 2^Binomial[n - k, 2]*Binomial[n - 1, k - 1]*A001187[k];
+%t A360603 Table[T[n, k], {n, 0, 8}, {k, 0, n}] // Flatten (* _Jean-François Alcover_, Dec 02 2023, after _Peter Luschny_ in A001187 *)
+%o A360603 (Python)
+%o A360603 from math import comb as binomial
+%o A360603 from functools import cache
+%o A360603 @cache
+%o A360603 def A360603Row(n: int) -> list[int]:
+%o A360603     if n == 0: return [1]
+%o A360603     s = [2 ** (((k - n + 1) * (k - n)) // 2) * binomial(n - 1, k - 1) * A360603Row(k)[k] for k in range(1, n)]
+%o A360603     b = 2 ** (((n - 1) * n) // 2) - sum(s)
+%o A360603     return [0] + s + [b]
+%Y A360603 Cf. A006125 Graphs on n labeled nodes, T(n+1, 1) and Sum_{k=0..n} T(n, k).
+%Y A360603 Cf. A054592 Disconnected labeled graphs with n nodes, Sum_{k=0..n-1} T(n, k).
+%Y A360603 Cf. A001187 Connected labeled graphs with n nodes, T(n, n).
+%Y A360603 Cf. A123903 Isolated nodes in all simple labeled graphs on n nodes, T(n+2, 2).
+%Y A360603 Cf. A053549 Labeled rooted connected graphs, T(n+1, n).
+%Y A360603 Cf. A275462 Leaves in all simple labeled connected graphs on n nodes T(n+2, n).
+%Y A360603 Cf. A060818 gcd_{k=0..n} T(n, k) = gcd(n!, 2^n).
+%Y A360603 Cf. A143543 Labeled graphs on n nodes with k connected components.
+%Y A360603 Cf. A095340 Total number of nodes in all labeled graphs on n nodes.
+%Y A360603 Cf. A360604, A360860 (accumulation triangle).
+%K A360603 nonn,tabl
+%O A360603 0,8
+%A A360603 _Peter Luschny_, Feb 20 2023

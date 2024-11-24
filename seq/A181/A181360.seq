@@ -1,0 +1,65 @@
+%I A181360 #56 Nov 13 2020 06:40:50
+%S A181360 1,1,3,7,19,47,127,330,889,2378,6450,17510,47907,131388,362081,
+%T A181360 1000665,2774857,7714695,21505455,60084062,168234804,471977022,
+%U A181360 1326558625,3734804268,10531738149,29742332548,84111212892,238176473946,675269414372,1916715819186
+%N A181360 Number of forests of rooted trees containing n nodes not counting the root nodes.
+%C A181360 Every tree in the forest must have at least 2 nodes, i.e. at least one more node besides the root. - _N. J. A. Sloane_, Nov 26 2010
+%C A181360 First, T(n), the number of rooted trees with n+1 nodes A000081(n+1) can be computed using partitions of n as follows: let n = (q1*1 + q2*2 + q3*3 + ... + qn*n) be a nonnegative integer partition of n (the "q"s are the multiplicities of the part sizes), and define a^b to be (a+b-1)! / (a-1)! / b! (the number of ways to color b identical items with a colors), then compute the sum of T(0)^q1 * T(1)^q2 * ... * T(n-1)^qn over all such partitions of n.
+%C A181360 Then F(n), the number of forests of rooted trees containing N nodes not counting the roots, can be similarly computed as the sum of T(1)^q1 * T(2)^q2 * ... * T(n)^qn over all such partitions of n.
+%C A181360 These are the diagonal sums of the triangle in A174135. - _N. J. A. Sloane_, Nov 26 2010.
+%H A181360 N. J. A. Sloane and Alois P. Heinz, <a href="/A181360/b181360.txt">Table of n, a(n) for n = 0..2133</a>
+%H A181360 A. Mansuy, <a href="https://doi.org/10.1016/j.jalgebra.2014.04.017">Preordered forests, packed words and contraction algebras</a>, J. Algebra 411 (2014) 259-311, section 4.1
+%H A181360 R. J. Mathar, <a href="http://arxiv.org/abs/1603.00077">Topologically Distinct Sets of Non-intersecting Circles in the Plane</a>, arXiv:1603.00077 [math.CO], 2016.
+%F A181360 a(n) ~ c * d^n / n^(3/2), where d = 2.955765285651994974714817524... is the Otter's rooted tree constant (see A051491), and c = 10.088029891871277227771831767... . - _Vaclav Kotesovec_, May 09 2014
+%F A181360 a(n) = A033185(2n, n). - _Alois P. Heinz_, Feb 15 2016
+%F A181360 a(n) = A033185(2n+k, n+k) for all n, k >= 0. - _Michael Somos_, Aug 20 2018
+%e A181360 Trees for example (leaving out the "^0" factors for clarity):
+%e A181360 T(0) = 1, T(1) = 1
+%e A181360 T(2) = T(1)^1 + T(0)^2 = 2,
+%e A181360 T(3) = T(2)^1 + T(1)^1*T(0)^1 + T(0)^3 = 4,
+%e A181360 T(4) = T(3)^1 + T(2)^1*T(0)^1 + T(1)^2 + T(1)^1*T(0)^2 +T(0)^4 = 9,
+%e A181360 T(5) = T(4)^1 + T(3)^1*T(0)^1 + T(2)^1*T(1)^1 + T(2)^1*T(0)^2 + T(1)^2*T(0)^1 + T(1)^1*T(0)^3 + T(0)^5 = 20.
+%e A181360 Forests for example (leaving out the "^0" factors for clarity):
+%e A181360 F(2) = T(2)^1 + T(1)^2 = 3,
+%e A181360 F(3) = T(3)^1 + T(2)^1*T(1)^1 + T(1)^3 = 7,
+%e A181360 F(4) = T(4)^1 + T(3)^1*T(1)^1 + T(2)^2 + T(2)*T(1)^2 + T(1)^4 = 19,
+%e A181360 F(5) = T(5)^1 + T(4)^1*T(1)^1 + T(3)^1*T(2)^1 + T(3)^1*T(1)^2 + T(2)^2*T(1)^1 + T(2)^1*T(1)^3 + T(1)^5 = 47.
+%e A181360 {Examples of this a^b definition:
+%e A181360 2^1 = 2, 2^2 = 3, 2^3 = 4, 2^4 = 5,
+%e A181360 3^1 = 3, 3^2 = 6, 3^3 = 10, 3^4 = 15, (triangular numbers)
+%e A181360 4^1 = 4, 4^2 = 10, 4^3 = 20, 4^4 = 35, (tetrahedral numbers)
+%e A181360 equivalently a^b = (b == 0 ? 1 : (a == 1 || b == 1 ? a : (a * (a+1)^(b-1) / b))) }
+%p A181360 (From _N. J. A. Sloane_, Nov 26 2010) First read 110 terms of A000081 into array b1
+%p A181360 M:=100;
+%p A181360 t1:=1/mul((1-x*y^i)^b1[i+1],i=2..M):
+%p A181360 t2:=series(t1,y,M):
+%p A181360 t3:=series(t2,x,M):
+%p A181360 a:=(n,k)->coeff(coeff(t3,x,k),y,n);
+%p A181360 g:=n->add(a(n-1+i,i),i=1..n-1);
+%p A181360 [seq(g(n),n=1..48)];
+%p A181360 # second Maple program:
+%p A181360 g:= proc(n, i) option remember; `if`(n=0, 1, `if`(i<1, 0,
+%p A181360       add(binomial(T(i-1)+j-1, j) *g(n-i*j, i-1), j=0..n/i)))
+%p A181360     end:
+%p A181360 T:= n-> g(n, n):
+%p A181360 b:= proc(n, i) option remember; `if`(n=0, 1, `if`(i<1, 0,
+%p A181360       add(binomial(T(i)+j-1, j) *b(n-i*j, i-1), j=0..n/i)))
+%p A181360     end:
+%p A181360 a:= n-> b(n, n):
+%p A181360 seq(a(n), n=0..40);  # _Alois P. Heinz_, Jul 20 2012
+%p A181360 # third Maple program:
+%p A181360 g:= proc(n) option remember; `if`(n<=1, n, (add(add(d*
+%p A181360       g(d), d=numtheory[divisors](j))*g(n-j), j=1..n-1))/(n-1))
+%p A181360     end:
+%p A181360 a:= proc(n) option remember; `if`(n=0, 1, add(add(d*
+%p A181360       g(d+1), d=numtheory[divisors](j))*a(n-j), j=1..n)/n)
+%p A181360     end:
+%p A181360 seq(a(n), n=0..40);  # _Alois P. Heinz_, Sep 19 2017
+%t A181360 g[n_, i_] := g[n, i] = If[n==0, 1, If[i<1, 0, Sum[Binomial[T[i-1]+j-1, j]*g[n-i*j, i-1], {j, 0, n/i}]]]; T[n_] := g[n, n]; b[n_, i_] := b[n, i] = If[n==0, 1, If[i<1, 0, Sum[Binomial[T[i]+j-1, j]*b[n-i*j, i-1], {j, 0, n/i}]]]; a[n_] := b[n, n] // FullSimplify; Table[a[n], {n, 1, 40}] (* _Jean-François Alcover_, Mar 30 2015, after _Alois P. Heinz_ *)
+%Y A181360 Cf. A000081 (rooted trees).
+%Y A181360 Cf. A093637 (products of partition numbers).
+%Y A181360 Cf. A174135, A033185.
+%K A181360 nonn
+%O A181360 0,3
+%A A181360 _Peter A. Lawrence_, Oct 15 2010
+%E A181360 a(0)=1 prepended by _Alois P. Heinz_, Sep 19 2017

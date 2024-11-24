@@ -1,0 +1,34 @@
+%I A355282 #19 Jul 03 2022 03:12:46
+%S A355282 1,0,1,0,1,1,0,9,4,1,0,343,79,11,1,0,50625,6028,454,26,1,0,28629151,
+%T A355282 1741861,68710,2190,57,1,0,62523502209,1926124954,38986831,656500,
+%U A355282 9687,120,1,0,532875860165503,8264638742599,84816722571,734873171,5760757,40929,247,1
+%N A355282 Triangle read by rows: T(n, k) = Sum_{i=1..n-k} qStirling1(n-k, i) * qStirling2(n-1+i, n-1) for 0 < k < n with initial values T(n, 0) = 0^n and T(n, n) = 1 for n >= 0, here q = 2.
+%C A355282 We aim at a q-generalization of the Comtet-Lehmer numbers A354794, which are the case q = 1. Here we consider the case q = 2. The generalization is based on the qStirling numbers, for qStirling1 see A342186 and for qStirling2 see A139382. The general construction is as follows:
+%C A355282 Let q <> 1 be a fixed integer and f_q(k) = (q^k - 1)/(q - 1) for k >= 0. Define triangle M(q; n, k) for 0 <= k <= n by M(q; n, 0) = 0^n for n >= 0, and M(q; n, k) = 0 for k > n, and M(q; n, k) = M(q; n-1, k-1) + M(q; n-1, k) * f_q(k) for 0 < k <= n. Then M(q; n, n) = 1 for n >= 0 and the matrix inverse I_q = M_q^(-1) exists. Next define the triangle T(q; n, k) for 0 <= k <= n by T(q; n, 0) = 0^n for n >= 0 and T(q; n, k) = Sum_{i=0..n-k} I(q; n-k, i) * M(q; n-1+i, n-1) for 0 < k <= n. Take account of lim_{q->1} (q^n - 1)/(q - 1) = n for n >= 0.
+%C A355282 Conjecture: T(q; n+1, 1) = Sum_{i=0..n} I(q; n, i) * M(q; n+i, n) = (f_q(n))^n = ((q^n - 1)/(q - 1))^n for n >= 0.
+%C A355282 Conjecture: T(q; n, k) = (Sum_{i=0..n-k} (-1)^i * q-binomial(n-1-i, k-1) * binomial(n-1, i) * q^((n-k)*(n-k-i))) / (q - 1)^(n-k) for 0 < k <= n.
+%F A355282 Conjecture: T(n+1, 1) = (2^n - 1)^n for n >= 0.
+%F A355282 Conjecture: T(n, k) = Sum_{i=0..n-k} (-1)^i * binomial(n-1, i) * [n-1-i, k-1]_2 * 2^((n-k)*(n-k-i)) for 0 < k <= n and T(n, 0) = 0^n for n >= 0, where [x, y]_2 = A022166(x, y).
+%e A355282 Triangle T(n, k) for 0 <= k <= n starts:
+%e A355282 n\k : 0               1             2           3         4       5     6   7 8
+%e A355282 ===============================================================================
+%e A355282   0 : 1
+%e A355282   1 : 0               1
+%e A355282   2 : 0               1             1
+%e A355282   3 : 0               9             4           1
+%e A355282   4 : 0             343            79          11         1
+%e A355282   5 : 0           50625          6028         454        26       1
+%e A355282   6 : 0        28629151       1741861       68710      2190      57     1
+%e A355282   7 : 0     62523502209    1926124954    38986831    656500    9687   120   1
+%e A355282   8 : 0 532875860165503 8264638742599 84816722571 734873171 5760757 40929 247 1
+%e A355282   etc.
+%p A355282 # using qStirling2 from A333143.
+%p A355282 A355282 := proc(n, k) if k = 0 then 0^n elif n = k then 1 else
+%p A355282 add(A342186(n - k, i)*qStirling2(n + i - 2, n - 2, 2), i = 1..n-k) fi end:
+%p A355282 seq(print(seq(A355282(n, k), k = 0..n)), n = 0..8); # _Peter Luschny_, Jun 28 2022
+%o A355282 (PARI) mat(nn) = my(m = matrix(nn, nn)); for (n=1, nn, for(k=1, nn, m[n, k] = if (n==1, if (k==1, 1, 0), if (k==1, 1, (2^k-1)*m[n-1, k] + m[n-1, k-1])); ); ); m; \\ A139382
+%o A355282 tabl(nn) = my(m=mat(3*nn), im=1/m); matrix(nn, nn, n, k, n--; k--; if (k==0, 0^n, k<n, sum(i=1, n-k, im[n-k, i]*m[n-1+i, n-1]), if (k==n, 1, 0))); \\ _Michel Marcus_, Jun 27 2022
+%Y A355282 Cf. A022166, A139382, A342186, A354794, A055601 (column 1), A125128 (1st subdiagonal).
+%K A355282 nonn,easy,tabl
+%O A355282 0,8
+%A A355282 _Werner Schulte_, Jun 26 2022

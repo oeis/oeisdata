@@ -1,0 +1,75 @@
+%I A267413 #42 Aug 07 2023 05:40:31
+%S A267413 6,7,11,15,35,39,63,135,255,999,2175,8223,16383,57735,131075,131079,
+%T A267413 262143,524295,1048575,536870919,1073735679,2147483655,4294967295,
+%U A267413 17179770879,4260641103903,4611686018427387903,4720069647059686260735,1237940039285380274899124223
+%N A267413 Dropping any binary digit gives a prime number.
+%C A267413 This is the binary analog of A034895. The sequence contains mostly numbers with very few binary digit runs (BDR, A005811). Those with one BDR are of the type 2^k-1, such that 2^(k-1)-1 is a Mersenne prime (A000668). Vice versa, if M is any Mersenne prime, then 2*M+1 is a term. The number 6 is the only term with an even number of BDRs. There are many terms with 3 BDRs. The first term with 5 BDRs is 57735. The next terms with at least 5 BDRs (if they exist at all) are larger than 10^10. So far, I could test that a(24) > 10^10.
+%C A267413 From _Robert Israel_, Jan 14 2016: (Start)
+%C A267413 For n >= 2, a(n) == 3 (mod 4).
+%C A267413 2^k+3 is in the sequence if 2^(k-1)+1 and 2^(k-1)+3 are primes, i.e., 2^(k-1)+1 is in the intersection of A019434 and A001359.  The only known terms of the sequence in this class are 7, 11, 35, 131075.
+%C A267413 2^k+7 is in the sequence if 2^(k-1)+3 and 2^(k-1)+7 are primes: thus 2^(k-1)+3 is in A057733 and 2^(k-1)+7 is in A104066.  Terms of the sequence in this class include 15, 39, 135, 131079, 524295, 536870919, 2147483655 (but no more for k <= 2000).
+%C A267413 (End)
+%C A267413 a(25) > 2^38. - _Giovanni Resta_, Apr 10 2016
+%C A267413 For n > 1, a(n) = 2p+1 for some prime p. - _Chai Wah Wu_, Aug 27 2021
+%C A267413 From _Bert Dobbelaere_, Aug 07 2023: (Start)
+%C A267413 There are no more terms with an odd number of binary digits: from any number having an odd number of binary digits, one can always drop a digit and obtain a multiple of 3. Numbers of the form 2^k+3 (k even and k > 2) cannot be terms because 2^(k-1)+1 is a multiple of 3.
+%C A267413 (End)
+%e A267413 Decimal and binary forms of the known terms:
+%e A267413    1           6                                110
+%e A267413    2           7                                111
+%e A267413    3          11                               1011
+%e A267413    4          15                               1111
+%e A267413    5          35                             100011
+%e A267413    6          39                             100111
+%e A267413    7          63                             111111
+%e A267413    8         135                           10000111
+%e A267413    9         255                           11111111
+%e A267413   10         999                         1111100111
+%e A267413   11        2175                       100001111111
+%e A267413   12        8223                     10000000011111
+%e A267413   13       16383                     11111111111111
+%e A267413   14       57735                   1110000110000111 <--- (a binary palindrome
+%e A267413   15      131075                 100000000000000011       with 5 digit runs)
+%e A267413   16      131079                 100000000000000111
+%e A267413   17      262143                 111111111111111111
+%e A267413   18      524295               10000000000000000111
+%e A267413   19     1048575               11111111111111111111
+%e A267413   20   536870919     100000000000000000000000000111
+%e A267413   21  1073735679     111111111111111110011111111111
+%e A267413   22  2147483655   10000000000000000000000000000111
+%e A267413   23  4294967295   11111111111111111111111111111111
+%e A267413   24 17179770879 1111111111111111100111111111111111
+%p A267413 filter:= proc(n) local B,k,y;
+%p A267413    if not isprime(floor(n/2)) then return false fi;
+%p A267413    B:= convert(n,base,2);
+%p A267413    for k from 2 to nops(B) do
+%p A267413      if B[k] <> B[k-1] then
+%p A267413        y:= n mod 2^(k-1);
+%p A267413        if not isprime((y+n-B[k]*2^(k-1))/2) then return false fi
+%p A267413      fi
+%p A267413    od;
+%p A267413    true
+%p A267413 end proc:
+%p A267413 select(filter, [6, seq(i,i=7..10^6,4)]); # _Robert Israel_, Jan 14 2016
+%t A267413 Select[Range[2^20], AllTrue[Function[w, Map[FromDigits[#, 2] &@ Drop[w, {#}] &, Range@ Length@ w]]@ IntegerDigits[#, 2], PrimeQ] &] (* _Michael De Vlieger_, Jan 16 2016, Version 10 *)
+%o A267413 (PARI) DroppingAnyDigitGivesAPrime(N,b) = {
+%o A267413 \\ Property-testing function; returns 1 if true for N, 0 otherwise
+%o A267413 \\ Works with any base b. Here used with b=2.
+%o A267413   my(k=b,m); if(N<b,return(0));
+%o A267413   while(N>=(k\b), m=(N\k)*(k\b)+(N%(k\b));
+%o A267413     if ((m<2)||(!isprime(m)),return(0)); k*=b);
+%o A267413   return(1);
+%o A267413 }
+%o A267413 (Python)
+%o A267413 from sympy import isprime
+%o A267413 def ok(n):
+%o A267413     if n < 7 or n%4 != 3: return n == 6
+%o A267413     b = bin(n)[2:]
+%o A267413     return all(isprime(int(b[:i]+b[i+1:], 2)) for i in range(len(b)))
+%o A267413 print(list(filter(ok, range(2, 2**20)))) # _Michael S. Branicky_, Jun 07 2021
+%Y A267413 Cf. A000668, A001359, A005811, A019434, A034895 (base 10), A051362, A057733, A104066.
+%K A267413 nonn,base,more,hard
+%O A267413 1,1
+%A A267413 _Stanislav Sykora_, Jan 14 2016
+%E A267413 a(24) from _Giovanni Resta_, Apr 10 2016
+%E A267413 a(25)-a(28) from _Bert Dobbelaere_, Aug 07 2023

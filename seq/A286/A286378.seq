@@ -1,0 +1,34 @@
+%I A286378 #29 Aug 12 2018 21:25:25
+%S A286378 1,2,2,3,2,4,3,5,2,6,4,7,3,8,5,9,2,10,6,11,4,12,7,13,3,13,8,14,5,15,9,
+%T A286378 16,2,17,10,18,6,19,11,20,4,21,12,22,7,23,13,24,3,24,13,25,8,26,14,27,
+%U A286378 5,28,15,29,9,30,16,31,2,32,17,33,10,34,18,35,6,36,19,37,11,38,20,39,4,40,21,41,12,42,22,43,7,44,23,45,13,46,24,47,3,47,24,48
+%N A286378 Restricted growth sequence computed for Stern-polynomial related filter-sequence A278243.
+%C A286378 Construction: we start with a(0)=1 for A278243(0)=1, and then after, for n > 0, we use the least unused natural number k for a(n) if A278243(n) has not been encountered before, otherwise [whenever A278243(n) = A278243(m), for some m < n], we set a(n) = a(m).
+%C A286378 When filtering sequences (by equivalence class partitioning), this sequence (with its modestly sized terms) can be used instead of A278243, because for all i, j it holds that: a(i) = a(j) <=> A278243(i) = A278243(j).
+%C A286378 For example, for all i, j: a(i) = a(j) => A002487(i) = A002487(j).
+%C A286378 For pairs of distinct primes p, q for which a(p) = a(q) see comments in A317945. - _Antti Karttunen_, Aug 12 2018
+%H A286378 Antti Karttunen, <a href="/A286378/b286378.txt">Table of n, a(n) for n = 0..65537</a>
+%H A286378 <a href="/index/St#Stern">Index entries for sequences related to Stern's sequences</a>
+%e A286378 For n=1, A278243(1) = 2, which has not been encountered before, thus we allot for a(1) the least so far unused number, which is 2, thus a(1) = 2.
+%e A286378 For n=2, A278243(2) = 2, which was already encountered as A278243(1), thus we set a(2) = a(1) = 2.
+%e A286378 For n=3, A278243(3) = 6, which has not been encountered before, thus we allot for a(3) the least so far unused number, which is 3, thus a(3) = 3.
+%e A286378 For n=23, A278243(23) = 2520, which has not been encountered before, thus we allot for a(23) the least so far unused number, which is 13, thus a(23) = 3.
+%e A286378 For n=25, A278243(25) = 2520, which was already encountered at n=23, thus we set a(25) = a(23) = 13.
+%t A286378 a[n_] := a[n] = Which[n < 2, n + 1, EvenQ@ n, Times @@ Map[#1^#2 & @@ # &, FactorInteger[#] /. {p_, e_} /; e > 0 :> {Prime[PrimePi@ p + 1], e}] - Boole[# == 1] &@ a[n/2], True, a[#] a[# + 1] &[(n - 1)/2]]; With[{nn = 100}, Function[s, Table[Position[Keys@ s, k_ /; MemberQ[k, n]][[1, 1]], {n, nn}]]@ Map[#1 -> #2 & @@ # &, Transpose@ {Values@ #, Keys@ #}] &@ PositionIndex@ Table[Times @@ MapIndexed[Prime[First@#2]^#1 &, Sort[FactorInteger[#][[All, -1]], Greater]] - Boole[# == 1] &@ a@ n, {n, 0, nn}]] (* _Michael De Vlieger_, May 12 2017 *)
+%o A286378 (PARI)
+%o A286378 up_to = 65537;
+%o A286378 rgs_transform(invec) = { my(occurrences = Map(), outvec = vector(length(invec)), u=1); for(i=1, length(invec), if(mapisdefined(occurrences,invec[i]), my(pp = mapget(occurrences, invec[i])); outvec[i] = outvec[pp] , mapput(occurrences,invec[i],i); outvec[i] = u; u++ )); outvec; };
+%o A286378 write_to_bfile(start_offset,vec,bfilename) = { for(n=1, length(vec), write(bfilename, (n+start_offset)-1, " ", vec[n])); }
+%o A286378 A046523(n) = { my(f=vecsort(factor(n)[, 2], , 4), p); prod(i=1, #f, (p=nextprime(p+1))^f[i]); };  \\ From A046523
+%o A286378 A003961(n) = my(f = factor(n)); for (i=1, #f~, f[i, 1] = nextprime(f[i, 1]+1)); factorback(f); \\ From A003961
+%o A286378 A260443(n) = if(n<2, n+1, if(n%2, A260443(n\2)*A260443(n\2+1), A003961(A260443(n\2))));
+%o A286378 A278243(n) = A046523(A260443(n));
+%o A286378 v286378 = rgs_transform(vector(up_to+1,n,A278243(n-1)));
+%o A286378 A286378(n) = v286378[1+n];
+%Y A286378 Cf. A002487, A125184, A260443, A278243, A286377.
+%Y A286378 Cf. also A101296, A286603, A286605, A286610, A286619, A286621, A286622, A286626 for similarly constructed sequences.
+%Y A286378 Cf. also A317942, A317943, A317944, A317945.
+%Y A286378 Differs from A103391(1+n) for the first time at n=25, where a(25)=13, while A103391(26) = 14.
+%K A286378 nonn
+%O A286378 0,2
+%A A286378 _Antti Karttunen_, May 09 2017

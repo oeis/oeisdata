@@ -1,0 +1,23 @@
+%I A331302 #25 Feb 08 2020 20:44:32
+%S A331302 0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,0,
+%T A331302 2,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,1,0,0,0,0,1,0,0,1,0,0,0,0,0,
+%U A331302 0,2,0,0,0,0,1,0,2,1,0,0,0,0,0,0,1,0,1,0,0,0,2,0,0,0,2,0,0,0,1,0,0,1,0,0,1
+%N A331302 Number of 4k+3 composites encountered when traversing from n to the root of A005940-tree.
+%C A331302 For numbers > 1, iterate the map x -> A252463(x) which divides even numbers by 2 and for odd numbers shifts every prime in the prime factorization one index step towards smaller primes with A064989. a(n) counts the composite numbers of the form 4k+3 (A091236) encountered until 1 has been reached, including in the count also n itself if it is of the same form.
+%H A331302 Antti Karttunen, <a href="/A331302/b331302.txt">Table of n, a(n) for n = 1..65537</a>
+%H A331302 <a href="/index/Pri#prime_indices">Index entries for sequences computed from indices in prime factorization</a>
+%F A331302 a(1) = 0, a(p) = 0 for all primes, otherwise a(n) = [n == 3 (mod 4)] + a(A252463(n)).
+%F A331302 a(2^k * p) [with k>=0, p prime] = a(n^2) = a(2*(n^2)) = 0, with zeros occurring also on some other positions.
+%F A331302 a(n) <= A292377(n).
+%e A331302 Here -> stands for transition x -> A252463(x):
+%e A331302 For n = 35, 35 mod 4 = 3, 35 -> 15 and 15 mod 4 = 3 also, but then 15 -> 6 (with 6 mod 4 = 2), and 6 -> 3, a prime, after which only noncomposites occur in the trajectory -> 2 -> 1, thus a(35) = 2 as there were exactly two 4k+3 composites on the whole path.
+%t A331302 Array[Count[FixedPointList[Which[# == 1, 1, EvenQ@ #, #/2, True, Times @@ Power[Which[# == 1, 1, # == 2, 1, True, NextPrime[#, -1]] & /@ First@ #, Last@ #] &@ Transpose@ FactorInteger@ #] &, #], _?(And[CompositeQ@ #, Mod[#, 4] == 3] &)] &, 105] (* _Michael De Vlieger_, Feb 08 2020 *)
+%o A331302 (PARI)
+%o A331302 A064989(n) = {my(f); f = factor(n); if((n>1 && f[1,1]==2), f[1,2] = 0); for (i=1, #f~, f[i,1] = precprime(f[i,1]-1)); factorback(f)};
+%o A331302 A252463(n) = if(!(n%2),n/2,A064989(n));
+%o A331302 A331302(n) = if((1==n)||isprime(n),0,(3==(n%4))+A331302(A252463(n)));
+%Y A331302 Cf. A005940, A064989, A091236, A252463, A292377.
+%Y A331302 Subsequences of the indices of zeros: A093641, A028982 (see A292583 for the explanation of the latter).
+%K A331302 nonn
+%O A331302 1,35
+%A A331302 _Antti Karttunen_, Feb 07 2020

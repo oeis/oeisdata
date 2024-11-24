@@ -1,0 +1,29 @@
+%I A298982 #29 Jul 03 2021 07:19:57
+%S A298982 0,0,1,0,0,4,5,7,0,1,0,0,0,2,0,0,3,0,0,4,0,5,0,0,0,7,0,8,0,9,0,0,11,0,
+%T A298982 0,13,14,0,0,16,17,18,0,0,0,0,0,0,0,25,0,0,0,0,0,0,33,34,35,36,0,39,4,
+%U A298982 41,0,44,45,0,48,49,51,52,54,55,0,58,6,61,63,64,66,68,69,71,73,74,76,78,8,81,83,85,87,89,91,93,95,97,0,1
+%N A298982 a(n) is the least k for which the most significant decimal digits of k/n (disregarding any leading zeros) are n, or 0 if no such k exists.
+%C A298982 By decimal digits we mean those of the fractional part of k/n. Otherwise said, we require floor(10^m*k/n) = n for some k < n and m.
+%C A298982 Indices of 0's are listed in A298981, indices of the other terms are listed in A298980.
+%C A298982 It appears that the asymptotic density of 0's is slightly below 45%: The number of 0's among a(1..10^k) is (5, 42, 461, 4553, 45423, 451315, 4506142, 45017570, ...). Is there a simple estimate for the exact value? - _M. F. Hasler_, Feb 01 2018
+%C A298982 There may be no asymptotic density: the fraction of 0's fluctuates too much.  See the linked plot.
+%H A298982 M. F. Hasler, <a href="/A298982/b298982.txt">Table of n, a(n) for n = 1..10000</a>
+%H A298982 Robert Israel, <a href="/A298982/a298982_1.png">Plot: Fraction of 0's in a(1) to a(n)</a>
+%e A298982 a(1) = 0 since there does not exist any k such that k/1 has a decimal digit which begins with 1 (cf. comment).
+%e A298982 a(6) = 4 since 4/6 = 0.666... and its decimal digit begins with 6.
+%e A298982 a(28) = 8 since 8/28 = 0.28571428571428... even though 1/28 = 0.0357142857142857... has "28" as a subsequence.
+%p A298982 f:= proc (n) local m, k;
+%p A298982   for m from ceil(log[10](n^2)) by -1 to 1 do
+%p A298982      k := ceil(n^2/10^m);
+%p A298982      if n <= k then return 0 end if;
+%p A298982      if k < n*(n+1)/10^m then return k end if
+%p A298982   end do;
+%p A298982   0
+%p A298982 end proc:
+%p A298982 map(f, [$1..200]); # _Robert Israel_, Feb 09 2018
+%t A298982 f = Compile[{{n, _Integer}}, Block[{k = 1, il = IntegerLength@ n}, While[m = 10^il*k/n; While[ IntegerLength@ Floor@ m < il, m *= 10]; k < n && Floor[m] != n, k++]; If[k < n, k, 0]]]; Array[f, 100]
+%o A298982 (PARI) A298982(n,k=(n^2-1)\10^(logint(n,10)+1)+1)={k*10^(logint((n^2-(n>1))\k, 10)+1)\n==n && return(k\10^valuation(k,10))} \\ _M. F. Hasler_, Feb 01 2018
+%Y A298982 Cf. A298232, A051626, A298980, A298981.
+%K A298982 easy,nonn,base
+%O A298982 1,6
+%A A298982 _Eric Angelini_, _M. F. Hasler_ and _Robert G. Wilson v_, Jan 30 2018

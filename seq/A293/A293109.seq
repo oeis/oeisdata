@@ -1,0 +1,40 @@
+%I A293109 #26 Jul 10 2018 19:16:01
+%S A293109 1,0,1,0,2,1,0,3,3,1,0,5,10,4,1,0,7,24,17,5,1,0,11,62,58,26,6,1,0,15,
+%T A293109 140,193,107,37,7,1,0,22,329,603,439,178,50,8,1,0,30,725,1852,1663,
+%U A293109 852,275,65,9,1,0,42,1631,5539,6283,3767,1500,402,82,10,1
+%N A293109 Number T(n,k) of multisets of nonempty words with a total of n letters over k-ary alphabet containing the k-th letter such that within each prefix of a word every letter of the alphabet is at least as frequent as the subsequent alphabet letter; triangle T(n,k), n>=0, 0<=k<=n, read by rows.
+%H A293109 Alois P. Heinz, <a href="/A293109/b293109.txt">Rows n = 0..40, flattened</a>
+%F A293109 T(n,k) = A293108(n,k) - A293108(n,k-1) for k>0, T(n,0) = A293108(n,0).
+%e A293109 Triangle T(n,k) begins:
+%e A293109   1;
+%e A293109   0,  1;
+%e A293109   0,  2,   1;
+%e A293109   0,  3,   3,   1;
+%e A293109   0,  5,  10,   4,   1;
+%e A293109   0,  7,  24,  17,   5,   1;
+%e A293109   0, 11,  62,  58,  26,   6,  1;
+%e A293109   0, 15, 140, 193, 107,  37,  7, 1;
+%e A293109   0, 22, 329, 603, 439, 178, 50, 8, 1;
+%p A293109 h:= l-> (n-> add(i, i=l)!/mul(mul(1+l[i]-j+add(`if`(l[k]
+%p A293109     <j, 0, 1), k=i+1..n), j=1..l[i]), i=1..n))(nops(l)):
+%p A293109 g:= proc(n, i, l) option remember;
+%p A293109       `if`(n=0, h(l), `if`(i<1, 0, `if`(i=1, h([l[], 1$n]),
+%p A293109         g(n, i-1, l) +`if`(i>n, 0, g(n-i, i, [l[], i])))))
+%p A293109     end:
+%p A293109 A:= proc(n, k) option remember; `if`(n=0, 1, add(add(g(d, k, [])
+%p A293109       *d, d=numtheory[divisors](j))*A(n-j, k), j=1..n)/n)
+%p A293109     end:
+%p A293109 T:= (n, k)-> A(n, k) -`if`(k=0, 0, A(n, k-1)):
+%p A293109 seq(seq(T(n, k), k=0..n), n=0..12);
+%t A293109 h[l_] := Function[n, Total[l]!/Product[Product[1 + l[[i]] - j + Sum[If[l[[k]] < j, 0, 1], {k, i + 1, n}], {j, 1, l[[i]]}], {i, n}]][Length[l]];
+%t A293109 g[n_, i_, l_] := g[n, i, l] = If[n == 0, h[l], If[i < 1, 0, If[i == 1, h[Join[l, Table[1, n]]], g[n, i - 1, l] + If[i > n, 0, g[n - i, i, Append[l, i]]]]]];
+%t A293109 A[n_, k_] := A[n, k] = If[n == 0, 1, Sum[Sum[g[d, k, {}]*d, {d, Divisors[j]}]*A[n - j, k], {j, 1, n}]/n];
+%t A293109 T[n_, 0] := A[n, 0]; T[n_, k_] := A[n, k] - A[n, k - 1];
+%t A293109 Table[T[n, k], {n, 0, 12}, {k, 0, n}] // Flatten (* _Jean-François Alcover_, Jul 09 2018, after _Alois P. Heinz_ *)
+%Y A293109 Columns k=0-10 give: A000007, A000041 (for n>0), A293797, A293798, A293799, A293800, A293801, A293802, A293803, A293804, A293805.
+%Y A293109 Row sums give A293110.
+%Y A293109 T(2n,n) gives A293111.
+%Y A293109 Cf. A182172, A293108, A293113.
+%K A293109 nonn,tabl
+%O A293109 0,5
+%A A293109 _Alois P. Heinz_, Sep 30 2017

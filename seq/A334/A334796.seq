@@ -1,0 +1,64 @@
+%I A334796 #15 May 20 2020 17:57:04
+%S A334796 2,2,3,2,2,3,3,3,3,3,3,2,2,3,3,2,4,4,4,4,2,3,3,4,4,3,3,4,4,3,5,5,5,5,
+%T A334796 3,2,4,4,4,4,2,3,5,5,5,5,5,3,5,2,5,4,5,4,4,5,4,5,2,5,3,5,6,6,6,6,3,4,
+%U A334796 5,5,4,3,5,5,6,6,6,6,6,6,6,6,5,5,3,4,5
+%N A334796 a(n) = (A070939(A334769(n)) - A334770(n))/3.
+%C A334796 An XOR-triangle T(m) is an inverted 0-1 triangle formed by choosing a top row the binary rendition of n and having each entry in subsequent rows be the XOR of the two values above it, i.e., A038554(m) applied recursively until we reach a single bit.
+%C A334796 A334556 is the sequence of rotationally symmetrical T(m).
+%C A334796 A central zero-triangle (CZT) is a field of contiguous 0-bits, listed in A334769, a subset of A334556. CZTs have side length k = A334770(n), surrounded on all sides by a layer of 1 bits, and generally j > 1 bits of any parity.
+%C A334796 This sequence describes the "frame width" j.
+%C A334796 Smallest n with a given value of j appears in A334836. - _Michael De Vlieger_, May 20 2020
+%H A334796 Michael De Vlieger, <a href="/A334796/b334796.txt">Table of n, a(n) for n = 1..10000</a>
+%H A334796 Michael De Vlieger, <a href="http://vincico.com/seq/a334769.html">Central zero-triangles in rotationally symmetrical XOR-Triangles</a>, 2020.
+%H A334796 Michael De Vlieger, <a href="/A334796/a334796_1.png">Diagram montage</a> showing XOR-triangles for terms in certain linear recurrences and their bit-reversals, illustrating relations in their appearance, most significantly, constant frame width.
+%H A334796 <a href="/index/Bi#binary">Index entries for sequences related to binary expansion of n</a>
+%H A334796 <a href="/index/X#XOR-triangles">Index entries for sequences related to XOR-triangles</a>
+%H A334796 Michael De Vlieger, <a href="/A334796/a334796_2.png">Diagram montage</a> showing the first dozen XOR-triangles exhibiting frame widths of 2, 3, 4, ..., 12 by row.
+%e A334796 a(4) pertains to T(599), with A334770(4) = 4.
+%e A334796 (1 + A070939(599) - 4)/3 = (1 + 9 - 4)/3 = 6/3 = 2, thus a(4) = 2.
+%e A334796 (Diagram, replacing 0 with “.”):
+%e A334796   1 . . 1 . 1 . 1 1 1
+%e A334796    1 . 1 1 1 1 1 . .
+%e A334796     1 1 . . . . 1 .
+%e A334796      . 1 . . . 1 1
+%e A334796       1 1 . . 1 .
+%e A334796        . 1 . 1 1
+%e A334796         1 1 1 .
+%e A334796          . . 1
+%e A334796           . 1
+%e A334796            1
+%e A334796 a(11) pertains to T(2359), with A334770(11) = 3.
+%e A334796 (1 + A070939(2359) - 4)/3 = (1 + 11 - 3)/3 = 9/3 = 3, thus a(11) = 3.
+%e A334796 (Diagram):
+%e A334796   1 . . 1 . . 1 1 . 1 1 1
+%e A334796    1 . 1 1 . 1 . 1 1 . .
+%e A334796     1 1 . 1 1 1 1 . 1 .
+%e A334796      . 1 1 . . . 1 1 1
+%e A334796       1 . 1 . . 1 . .
+%e A334796        1 1 1 . 1 1 .
+%e A334796         . . 1 1 . 1
+%e A334796          . 1 . 1 1
+%e A334796           1 1 1 .
+%e A334796            . . 1
+%e A334796             . 1
+%e A334796              1
+%e A334796 From _Michael De Vlieger_, May 14 2020: (Start)
+%e A334796 Linear recurrences that produce XOR-triangles with frame length j (table may not be exhaustive):
+%e A334796 j   LR          Lower               Upper
+%e A334796 -----------------------------------------------------
+%e A334796 2   (5, -4)     {39, 151}           {57, 223}
+%e A334796 3   (17, -16)   {543, 8607}         {993, 15969}
+%e A334796                 {1379, 22115}       {1589, 25397}
+%e A334796                 {1483, 23755}       {1693, 27037}
+%e A334796                 {2359, 37687}       {3785, 60617}
+%e A334796 4   (17, -16)   {22243, 356067}     {25525, 408501}
+%e A334796                 {39047, 624775}     {57625, 921881}
+%e A334796                 {40679, 650983}     {59257, 948089}
+%e A334796                 {171475, 2743763}   {208613, 3337957}
+%e A334796                 {356067, 5697251}   {408501, 6536117}
+%e A334796 ... (End)
+%t A334796 Block[{f, s = Rest[Import["https://oeis.org/A334556/b334556.txt", "Data"][[All, -1]] ]}, f[n_] := NestWhileList[Map[BitXor @@ # &, Partition[#, 2, 1]] &, IntegerDigits[n, 2], Length@ # > 1 &]; Array[Block[{n = s[[#]]}, If[# == 0, Nothing, (1 + Floor@ Log2[n] - #)/3] &@ FirstCase[MapIndexed[If[2 #2 > #3 + 1, Nothing, #1[[#2 ;; -#2]]] & @@ {#1, First[#2], Length@ #1} &, f[n][[1 ;; Ceiling[IntegerLength[#, 2]/(2 Sqrt[3])] + 3]] ],r_List /; FreeQ[r, 1] :> Length@ r] /. k_ /; MissingQ@ k -> 0] &, Length@ s - 1, 2] ]
+%Y A334796 Cf. A038554, A070939, A334556, A334769, A334770, A334836.
+%K A334796 nonn
+%O A334796 1,1
+%A A334796 _Michael De Vlieger_, May 12 2020

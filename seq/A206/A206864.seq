@@ -1,0 +1,40 @@
+%I A206864 #50 Apr 06 2024 14:57:23
+%S A206864 3,5,7,11,13,17,31,37,43,61,73,101,127,151,157,197,211,241,257,307,
+%T A206864 331,401,421,463,521,547,577,601,677,683,757,1093,1123,1297,1483,1601,
+%U A206864 1723,2551,2731,2801,2917,2971,3137,3307,3541,3907,4357,4423,4561,4831,5113
+%N A206864 Prime numbers of the form Phi_k(m), where k > 2, |m| > 1, and Phi_k(m) is the k-th cyclotomic polynomial evaluated at m.
+%C A206864 These are the prime numbers picked from sequence A206942.
+%C A206864 Choosing negative m does not generate more primes, so it does not need negative m part in the Mathematica program.
+%C A206864 The provided mathematica program generate this sequence in six steps:
+%C A206864 Step 1: Find the minimum m such that Phi(6, m) is greater than the search boundary maxdata, and adjust the search boundary to the next: ( maxdata = 5200; max = Ceiling[(1 + Sqrt[1 + 4*(maxdata - 1)])/2]; )
+%C A206864 Step 2: Find the even number eulerbound such that 2^(eulerbound+1)-1 > maxdata: ( eulerbound = 2*Floor[(Log[2, maxdata])/2 + 0.5]; )
+%C A206864   This is the maximum possible value of Phi(k, 2) when Phi(k, m) has a totient function value of eulerbound;
+%C A206864 Step 3: Adjust (up) the eulerbound such that it is an element of A002202 and find the group of ks such that Phi(k, m) has the same totient function value eulerbound: ( phiinv[n_, pl_] := Module[{i, p, e, pe, val}, If[pl == {}, Return[If[n == 1, {1}, {}]]]; val = {}; p = Last[pl]; For[e = 0; pe = 1, e == 0 || Mod[n, (p - 1) pe/p] == 0, e++; pe *= p, val = Join[val, pe*phiinv[If[e == 0, n, n*p/pe/(p - 1)], Drop[pl, -1]]]]; Sort[val]]; phiinv[n_] := phiinv[n, Select[1 + Divisors[n], PrimeQ]]; While[eulergroup = phiinv[eulerbound]; lu = Length[eulergroup]; lu == 0, eulerbound = eulerbound + 2]; )
+%C A206864 Step 4: Make list of k values such that the totient function of Phi(k, m) smaller or equal to the chosen Euler boundary eulerbound, and sort it in the order of the Phi(k, 2): ( Select[Range[eulergroup[[Length[eulergroup]]]], EulerPhi[#] <= eulerbound &]; ap = SortBy[t, Cyclotomic[#, 2] &])
+%C A206864 Step 5: Scan k in the set of ap, 1 < m <= max, for all appeared primes that are smaller than maxdata: (a = {}; Do[i = 2; While[i++; cc = Cyclotomic[ap[[i]], m]; cc <= maxdata, If[PrimeQ[cc], a = Append[a, cc]]], {m, 2, max}];)
+%C A206864 Step 6: Remove duplicate and sort the set generated in the above step: ( Sort[DeleteDuplicates[a]] )
+%C A206864 Through these steps, a mathematically abundant algorithm is presented to find all the terms up to an arbitrary bound, without requiring the user to determine any other search parameters.
+%H A206864 Charles R Greathouse IV, <a href="/A206864/b206864.txt">Table of n, a(n) for n = 1..10000</a>
+%H A206864 Étienne Fouvry, Claude Levesque, Michel Waldschmidt, <a href="https://arxiv.org/abs/1712.09019">Representation of integers by cyclotomic binary forms</a>, arXiv:1712.09019 [math.NT], 2017.
+%e A206864 Prime 3 = Phi_6(2); so a(1) = 3;
+%e A206864 Prime 5 = Phi_4(2), so a(2) = 5;
+%e A206864 ...
+%e A206864 Prime 17 = Phi_8(2), so a(6)=17;
+%e A206864 Primes 19 and 23 are not in A206942;
+%e A206864 Prime 31 = Phi_5(2), so a(7)=31.
+%t A206864 maxdata = 5200; max = Ceiling[(1 + Sqrt[1 + 4*(maxdata - 1)])/2]; eulerbound = 2*Floor[(Log[2, maxdata])/2 + 0.5]; phiinv[n_, pl_] := Module[{i, p, e, pe, val}, If[pl == {}, Return[If[n == 1, {1}, {}]]]; val = {}; p = Last[pl]; For[e = 0; pe = 1, e == 0 || Mod[n, (p - 1) pe/p] == 0, e++; pe *= p, val = Join[val, pe*phiinv[If[e == 0, n, n*p/pe/(p - 1)], Drop[pl, -1]]]]; Sort[val]]; phiinv[n_] := phiinv[n, Select[1 + Divisors[n], PrimeQ]]; While[eulergroup = phiinv[eulerbound]; lu = Length[eulergroup]; lu == 0, eulerbound = eulerbound + 2]; t = Select[Range[eulergroup[[Length[eulergroup]]]], EulerPhi[#] <= eulerbound &]; ap = SortBy[t, Cyclotomic[#, 2] &]; a = {}; Do[i = 2; While[i++; cc = Cyclotomic[ap[[i]], m]; cc <= maxdata, If[PrimeQ[cc], a = Append[a, cc]]], {m, 2, max}]; Sort[DeleteDuplicates[a]]
+%t A206864 (* Alternatively: *)
+%t A206864 isA206864[n_] := If[! PrimeQ[n], Return[False],
+%t A206864     K = Floor[5.383 Log[n]^1.161]; M = Floor[2 Sqrt[n/3]];
+%t A206864     For[k = 3, k <= K, k++, For[x = 2, x <= M, x++,
+%t A206864         If[n == Cyclotomic[k, x], Return[True]]]];
+%t A206864     Return[False]
+%t A206864 ]; Select[Range[1000], isA206864] (* _Peter Luschny_, Feb 21 2018 *)
+%o A206864 (Julia)
+%o A206864 # Function isA206942 is defined in A206942.
+%o A206864 L = [n for n in 1:5113 if isprime(ZZ(n)) && isA206942(n)]
+%o A206864 println(L) # _Peter Luschny_, Feb 21 2018
+%Y A206864 Cf. A206942, A006511.
+%K A206864 nonn
+%O A206864 1,1
+%A A206864 _Lei Zhou_, Feb 13 2012

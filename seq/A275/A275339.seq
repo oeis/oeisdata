@@ -1,0 +1,32 @@
+%I A275339 #53 Dec 30 2021 00:34:29
+%S A275339 60,120,440,168,264,840,2448,528,1904,624,1360,2295,816,1632,20128,
+%T A275339 1824,48300,3105,15392,2208,13024,2400,10656,4080,8288,2784,5920,2976,
+%U A275339 3552,9120
+%N A275339 a(n) is the smallest number which has a water-capacity of n.
+%C A275339 Define the water-capacity of a number as follows: If n has the prime factorization p1^e1*p2^e2*...*pk^ek let ci be a column of height pi^ei and width 1. Juxtaposing the ci leads to a bar graph which figuratively can be filled by water from the top. The water-capacity of a number is the maximum number of cells which can be filled with water.
+%H A275339 Aubrey Blecher, Charlotte Brennan, and Arnold Knopfmacher, <a href="https://hosted.math.rochester.edu/ojac/vol13/161.pdf">The water capacity of integer compositions</a>, Online Journal of Analytic Combinatorics, Issue 13, 2018, #6.
+%H A275339 Guy L. Steele, <a href="https://www.youtube.com/watch?v=ftcIcn8AmSY">Four Solutions to a Trivial Problem</a>, Google Tech Talk 12/1/2015.
+%e A275339 For example 48300 has the prime factorization 2^2*3*5^2*7*23. The bar graph below has to be rotated counterclockwise for 90 degree.
+%e A275339 2^2   ****
+%e A275339 3     ***W
+%e A275339 5^2   *************************
+%e A275339 7     *******WWWWWWWWWWWWWWWW
+%e A275339 23    ***********************
+%e A275339 48300 is the smallest number which has a water-capacity of 17.
+%p A275339 water_capacity := proc(N) option remember; local x,k,n,left,right,wc;
+%p A275339 x := [seq(f[1]^f[2], f = op(2,ifactors(N)))]; n := nops(x);
+%p A275339 if n = 0 then return 0 fi; left := [seq(0,i=1..n)]; left[1] := x[1];
+%p A275339 for k from 2 to n do left[k] := max(left[k-1],x[k]) od;
+%p A275339 right := [seq(0,i=1..n)]; right[n] := x[n];
+%p A275339 for k from n-1 by -1 to 1 do right[k] := max(right[k+1],x[k]) od;
+%p A275339 wc := 0; for k from 1 to n do wc := wc + min(left[k], right[k]) - x[k] od;
+%p A275339 wc end:
+%p A275339 a := proc(n, search_limit) local j;
+%p A275339 for j from 1 to search_limit do if water_capacity(j) = n then return j fi od:
+%p A275339 return 0; end: seq(a(n,50000), n=1..30);
+%t A275339 w[k_] := With[{fi = Power @@@ FactorInteger[k]}, (fi //. {a___, b_, c__, d_, e___} /; AllTrue[{c}, # < b && # < d &] :> {a, b, Sequence @@ Table[ Min[b, d], {Length[{c}]}], d, e}) - fi // Total];
+%t A275339 a[n_] := For[k = 1, True, k++, If[w[k] == n, Return[k]]];
+%t A275339 Array[a, 30] (* _Jean-François Alcover_, Jul 21 2019 *)
+%K A275339 nonn
+%O A275339 1,1
+%A A275339 _Peter Luschny_, Aug 03 2016

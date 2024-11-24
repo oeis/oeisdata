@@ -1,0 +1,32 @@
+%I A236854 #44 Mar 17 2021 04:19:00
+%S A236854 1,4,9,2,16,7,6,23,3,53,26,17,14,13,83,5,12,241,35,101,59,43,8,41,431,
+%T A236854 11,37,1523,75,149,39,547,277,191,19,179,27,3001,31,157,24,12763,22,
+%U A236854 379,859,167,114,3943,1787,1153,67,1063,10,103,27457,127,919,89,21
+%N A236854 Self-inverse permutation of natural numbers: a(1)=1, then a(p_n)=c_{a(n)}, a(c_n)=p_{a(n)}, where p_n = n-th prime, c_n = n-th composite.
+%C A236854 Shares with A026239 the property that the prime-positions 2, 3, 5, 7, ... contain only composite values and the composite-positions 4, 6, 8, 9, ..., etc. contain only prime values. However, instead of placing terms in those subsets in monotone order this sequence recursively permutes the order of both subsets with the emerging permutation itself, so this is a kind of "deep" variant of A026239. Alternatively, this can be viewed as yet another "entanglement permutation", where two pairs of complementary subsets of natural numbers are entangled with each other. In this case a complementary pair primes/composites (A000040/A002808) is entangled with a complementary pair composites/primes.
+%C A236854 Maps A006508 to A007097 and vice versa.
+%H A236854 Chai Wah Wu, <a href="/A236854/b236854.txt">Table of n, a(n) for n = 1..735</a> (n = 1..150 from Alois P. Heinz)
+%H A236854 <a href="/index/Per#IntegerPermutation">Index entries for sequences that are permutations of the natural numbers</a>
+%F A236854 a(1)=1, a(p_i) = A002808(a(i)) for primes with index i, a(c_j) = A000040(a(j)) for composites with index j (where 4 has index 1, 6 has index 2, and so on).
+%e A236854 a(5)=c(a(3))=c(9)=16, because 5=prime(3), and the 9th composite number is c(9)=16.
+%e A236854 Thus a(10)=prime(a(5))=prime(16)=53 (since 10 is the 5th composite), a(18)=prime(a(10))=prime(53)=241 (since 18 is the 10th composite), a(28)=prime(a(18))=prime(241)=1523.
+%e A236854 A significant record value is a(198) = prime(a(152)) = prime(563167303) since 198=c(152); a(152)=prime(a(115)) since 152=c(115); a(115)=prime(a(84)); a(84)=prime(a(60)); a(60)=prime(a(42)); a(42)=prime(a(28)).
+%t A236854 terms = 150; cc = Select[Range[4, 2 terms^2(*empirical*)], CompositeQ]; compositePi[k_?CompositeQ] := FirstPosition[cc, k][[1]]; a[1] = 1; a[p_?PrimeQ] := a[p] = cc[[a[PrimePi[p]]]]; a[k_] := a[k] = Prime[a[ compositePi[k]]]; Array[a, terms] (* _Jean-François Alcover_, Mar 02 2016 *)
+%o A236854 (Scheme, with memoization-macro definec from _Antti Karttunen_'s IntSeq-library)
+%o A236854 (definec (A236854 n) (cond ((< n 2) n) ((prime? n) (A002808 (A236854 (A000720 n)))) (else (A000040 (A236854 (A065855 n))))))
+%o A236854 (PARI) A236854(n)={if(isprime(n), A002808(A236854(primepi(n))), n==1&&return(1);prime(A236854(n-primepi(n)-1)))} \\ without memoization: not much slower. - _M. F. Hasler_, Feb 03 2014
+%o A236854 (PARI) a236854=vector(999);a236854[1]=1;A236854(n)={a236854[n]&&return(a236854[n]); a236854[n]=if(isprime(n), A002808(A236854(primepi(n))), prime(A236854(n-primepi(n)-1)))} \\ Version with memoization. - _M. F. Hasler_, Feb 03 2014
+%o A236854 (Python)
+%o A236854 from sympy import primepi, prime, isprime
+%o A236854 def a002808(n):
+%o A236854     m, k = n, primepi(n) + 1 + n
+%o A236854     while m != k: m, k = k, primepi(k) + 1 + n
+%o A236854     return m # this function from _Chai Wah Wu_
+%o A236854 def a(n): return n if n<2 else a002808(a(primepi(n))) if isprime(n) else prime(a(n - primepi(n) - 1))
+%o A236854 print([a(n) for n in range(1, 101)]) # _Indranil Ghosh_, Jun 07 2017
+%Y A236854 Differs from A135044 for the first time at n=8, where A135044(8)=13, while here a(8)=23.
+%Y A236854 Cf. A026239, A135141/A227413, A006508, A007097, A000040, A002808, A000720, A065855.
+%K A236854 nonn
+%O A236854 1,2
+%A A236854 _Antti Karttunen_, Feb 01 2014, based on _Katarzyna Matylla_'s original but misplaced definition for A135044 from Feb 11 2008.
+%E A236854 Values double-checked by _M. F. Hasler_, Feb 03 2014

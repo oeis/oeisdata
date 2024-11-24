@@ -1,0 +1,26 @@
+%I A294080 #17 Sep 24 2018 08:54:14
+%S A294080 0,1,1,-1,1,0,1,-1,-1,0,1,2,1,0,0,-2,1,0,1,0,0,0,1,0,-1,0,-1,0,1,0,1,
+%T A294080 -1,0,0,0,3,1,0,0,2,1,0,1,0,0,0,1,-3,-1,0,0,0,1,0,0,0,0,0,1,0,1,0,2,
+%U A294080 -1,0,0,1,0,0,0,1,0,1,0,0,0,0,0,1,0,-2,0,1,-4,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,1,0,1,0,0,0,1,8
+%N A294080 Same-tree Moebius function of the multiorder of integer partitions indexed by Heinz numbers.
+%C A294080 By convention a(1) = 0.
+%C A294080 The Heinz number of an integer partition (y_1,...,y_k) is prime(y_1)*...*prime(y_k).
+%H A294080 Antti Karttunen, <a href="/A294080/b294080.txt">Table of n, a(n) for n = 1..65537</a>
+%F A294080 mu(y) = Sum_{g(t)=y} (-1)^d(t), where the sum is over all same-trees (A281145, A294019) whose multiset of leaves is the integer partition y, and d(t) is the number of non-leaf nodes in t.
+%t A294080 nn=120;
+%t A294080 ptns=Table[If[n===1,{},Join@@Cases[FactorInteger[n]//Reverse,{p_,k_}:>Table[PrimePi[p],{k}]]],{n,nn}];
+%t A294080 tris=Join@@Map[Tuples[IntegerPartitions/@#]&,ptns];
+%t A294080 rmu[y_]:=rmu[y]=If[Length[y]===1,1,-Sum[Times@@rmu/@t,{t,Select[tris,And[Length[#]>1,Sort[Join@@#,Greater]===y,SameQ@@Total/@#]&]}]];
+%t A294080 rmu/@ptns
+%o A294080 (PARI)
+%o A294080 A056239(n) = { my(f); if(1==n, 0, f=factor(n); sum(i=1, #f~, f[i,2] * primepi(f[i,1]))); }
+%o A294080 muifbalancedfactorization(v) = if(!#v, 1, my(pw=A056239(v[1]), m=-1); for(i=1,#v,if(A056239(v[i])!=pw,return(0), m *= A294080(v[i]))); (m));
+%o A294080 A294080aux(n, m, facs) = if(1==n, muifbalancedfactorization(Vec(facs)), my(s=0, newfacs); fordiv(n, d, if((d>1)&&(d<=m), newfacs = List(facs); listput(newfacs,d); s += A294080aux(n/d, m, newfacs))); (s));
+%o A294080 A294080(n) = if(1==n,0,if(isprime(n),1,A294080aux(n, n-1, List([]))));
+%o A294080 \\ A memoized implementation:
+%o A294080 map294080 = Map();
+%o A294080 A294080(n) = if(1==n,0,if(isprime(n),1,if(mapisdefined(map294080,n), mapget(map294080,n), my(v=A294080aux(n, n-1, List([]))); mapput(map294080,n,v); (v)))); \\ _Antti Karttunen_, Sep 22 2018
+%Y A294080 Cf. A000041, A056239, A063834, A196545, A273873, A281145, A289501, A294018, A294019, A296150, A299202, A299203.
+%K A294080 sign
+%O A294080 1,12
+%A A294080 _Gus Wiseman_, Feb 07 2018

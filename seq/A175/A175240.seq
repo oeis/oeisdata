@@ -1,0 +1,42 @@
+%I A175240 #28 Jan 10 2023 08:32:21
+%S A175240 27,5,5,9,5,17,5,3,5,33,3,7,5,65,9,5,3,15,3,3,5,129,3,5,3,27,3,5,5,
+%T A175240 257,17,5,3,5,5,3,3,27,3,3,3,5,3,3,5,513,3,9,3,5,3,3,3,27,7,3,3,5,3,5,
+%U A175240 5,1025,33,5,3,9,5,3,3,5,5,5,3,3,3,3,3,27,3,3,5,3,3,3,3,5,3,3,3,5,3,3,5
+%N A175240 Call any positive integer that is a palindrome when written in binary a "binary palindrome". a(n) = the smallest binary palindrome such that a(n)*(the n-th binary palindrome) is not a binary palindrome.
+%C A175240 There are no palindromes that work for a(1) and a(2), since the first positive binary palindromes are 0 and 1.
+%H A175240 Robert Israel, <a href="/A175240/b175240.txt">Table of n, a(n) for n = 3..10000</a>
+%F A175240 A006995(n)*a(n) = A175241(n), a non-palindrome when written in binary.
+%e A175240 For n=7, A006995(7) = 15 (1111 in binary). And checking 15*A006995(i) for i>=0, we get 15*0=0, 15*1=15, 15*3=45 that belong to A006995, but 15*5=75 does not, so a(7)=5.
+%p A175240 bp:= proc(n) local L; L:= convert(n,base,2); L = ListTools:-Reverse(L) end proc:
+%p A175240 Bp:= select(bp, [$0..10^6]): nBp:= nops(Bp):
+%p A175240 f:= proc(n) local i;
+%p A175240   for i from 3 to nBp do
+%p A175240     if not bp(Bp[i]*Bp[n]) then return Bp[i] fi
+%p A175240   od;
+%p A175240   FAIL
+%p A175240 end proc:
+%p A175240 map(f, [$3..100]); # _Robert Israel_, Jan 09 2023
+%o A175240 (PARI) a(n) = my(p=A006995(n), k=1); while(is_A006995(p*A006995(k)), k++); A006995(k); \\ using A006995 PARI codes; _Michel Marcus_, Jan 09 2023
+%o A175240 (Python)
+%o A175240 from itertools import count, islice, product
+%o A175240 def is_bin_pal(n): return (b:=bin(n)[2:]) == b[::-1]
+%o A175240 def bin_pals(): # generator of positive binary palindromes in base 10
+%o A175240     yield 1
+%o A175240     digits, midrange = 2, [[""], ["0", "1"]]
+%o A175240     for digits in count(2):
+%o A175240         for p in product("01", repeat=digits//2-1):
+%o A175240             left = "1"+"".join(p)
+%o A175240             for middle in midrange[digits%2]:
+%o A175240                 yield int(left + middle + left[::-1], 2)
+%o A175240 def agen(): # generator of terms
+%o A175240     g = bin_pals(); next(g)
+%o A175240     for n in count(3):
+%o A175240         bn = next(g)
+%o A175240         yield next(k for k in bin_pals() if not is_bin_pal(k*bn))
+%o A175240 print(list(islice(agen(), 93))) # _Michael S. Branicky_, Jan 09 2023
+%Y A175240 Cf. A006995, A175241.
+%K A175240 base,nonn
+%O A175240 3,1
+%A A175240 _Leroy Quet_, Mar 11 2010
+%E A175240 Extended by _Ray Chandler_, Mar 13 2010
+%E A175240 Offset 3 from _Michel Marcus_, Jan 09 2023

@@ -1,0 +1,32 @@
+%I A291839 #10 Sep 06 2017 04:07:41
+%S A291839 3,5,7,9,11,14,16,18,21,23,25,27,30,32,34,37,39,41,43,46,48,50,52,55,
+%T A291839 57,59,61,64,66,68,71,73,75,77,80,82,84,86,89,91,93,95,98,100,102,104,
+%U A291839 107,109,111,114,116,118,120,123,125,127,129,132
+%N A291839 a(n) is the minimal position at which the maximal value of row n appears in row n of triangle A100960.
+%H A291839 Gheorghe Coserea, <a href="/A291839/b291839.txt">Table of n, a(n) for n = 3..126</a>
+%H A291839 E. A. Bender, Z. Gao and N. C. Wormald, <a href="http://www.combinatorics.org/ojs/index.php/eljc/article/view/v9i1r43">The number of labeled 2-connected planar graphs</a>, Electron. J. Combin., 9 (2002), #R43.
+%F A291839 a(n) ~ c*n + o(sqrt(n)), where c=2.26287583256262... (A291840).
+%F A291839 T(n, a(n)) = max {T(n,k), n <= k <= 3*(n-2) }, where T(n,k) is defined by A100960.
+%o A291839 (PARI)
+%o A291839 Q(n,k) = { \\ c-nets with n-edges, k-vertices
+%o A291839   if (k < 2+(n+2)\3 || k > 2*n\3, return(0));
+%o A291839   sum(i=2, k, sum(j=k, n, (-1)^((i+j+1-k)%2)*binomial(i+j-k,i)*i*(i-1)/2*
+%o A291839   (binomial(2*n-2*k+2,k-i)*binomial(2*k-2, n-j) -
+%o A291839   4*binomial(2*n-2*k+1, k-i-1)*binomial(2*k-3, n-j-1))));
+%o A291839 };
+%o A291839 A100960_ser(N) = {
+%o A291839 my(x='x+O('x^(3*N+1)), t='t+O('t^(N+4)),
+%o A291839    q=t*x*Ser(vector(3*N+1, n, Polrev(vector(min(N+3, 2*n\3), k, Q(n,k)),'t))),
+%o A291839    d=serreverse((1+x)/exp(q/(2*t^2*x) + t*x^2/(1+t*x))-1),
+%o A291839    g2=intformal(t^2/2*((1+d)/(1+x)-1)));
+%o A291839    serlaplace(Ser(vector(N, n, subst(polcoeff(g2, n,'t),'x,'t)))*'x);
+%o A291839 };
+%o A291839 A291839_seq(N) = {
+%o A291839   my(g2=apply(Vecrev, Vec(A100960_ser(N+2))), m=apply(vecmax, g2));
+%o A291839   apply(v->vecmin(v)-1, vector(#g2, k, select(v->v==m[k], g2[k], 1)));
+%o A291839 };
+%o A291839 A291839_seq(22)
+%Y A291839 Cf. A100960, A291837.
+%K A291839 nonn
+%O A291839 3,1
+%A A291839 _Gheorghe Coserea_, Sep 05 2017

@@ -1,0 +1,34 @@
+%I A346918 #35 Aug 30 2021 22:22:37
+%S A346918 1,1,1,1,1,2,2,9,9,2,1,5,0,0,5,2,8,4,11,0,0,5,4,11,2,11,19,3,11,3,20,
+%T A346918 7,6,6,7,3,4,16,20,4,4,4,14,17,0,26,4,2,17
+%N A346918 a(n) is 1 plus the number of iterations of the map prime(n)# + k -> prime(n)# + lpf(prime(n)# + k) required to reach a prime, starting at k=1, where prime(n)# is the n-th primorial and lpf() is the least prime factor, or 0 if no prime is ever reached.
+%C A346918 The algorithmic process goes on like this.
+%C A346918 Given a primorial prime(n)#.
+%C A346918 1) Add 1 to this primorial.
+%C A346918 2) If this number is prime, we are done.
+%C A346918 3) If not, we look at the prime factors of the number prime(n)# + 1.
+%C A346918 4) Now we add the smallest prime factor p1 of prime(n)# + 1 to prime(n)#.
+%C A346918 5) If prime(n)# + p1 is prime, then we are done.
+%C A346918 6) If not we add the smallest prime factor p2 of prime(n)# + p1 to prime(n)#.
+%C A346918 7) If prime(n)# + p2 is prime, then we are done. If not we repeat this process until we find a prime.
+%C A346918 8) In the case that we will never find a prime through this proces, we set the value to 0.
+%C A346918 There are numbers n such that a(n)=0. Some known values where this happens are n = 13, 14, 20, 21, 45.
+%F A346918 Open question: Are there infinitely many n such that a(n)=0?
+%e A346918 The 6th primorial is 2*3*5*7*11*13. Adding 1 gives us prime(6)# + 1 = 59*509, prime(6)# + 59 is prime. So a(6)=2.
+%e A346918 a(14)=0 because the least prime factors that occur in the process form an infinite loop:
+%e A346918   prime(14)# +       1 =     167 * 78339888213593
+%e A346918   prime(14)# +     167 =      89 * 487 * 301842542779
+%e A346918   prime(14)# +      89 = 1049537 * 12465269287
+%e A346918   prime(14)# + 1049537 =      53 * 246844553447539
+%e A346918   prime(14)# +      53 =   12911 * 1013303487853
+%e A346918   prime(14)# +   12911 = 3393197 * 3855585553
+%e A346918   prime(14)# + 3393197 =      53 * 27031 * 9131906089
+%e A346918   ...
+%t A346918 a[n_] := Module[{primorial = Product[Prime[i], {i, 1, n}], ps = {}, sum, p, count = 1}, sum = primorial + 1; While[! PrimeQ[sum], p = FactorInteger[sum][[1, 1]]; If[MemberQ[ps, p], count = 0; Break[]]; AppendTo[ps, p]; sum = primorial + p; count++]; count]; Array[a, 30] (* _Amiram Eldar_, Aug 20 2021 *)
+%o A346918 (PARI)
+%o A346918 primorial=1 ; for(n=1, 35, primorial=primorial*prime(n) ; iterations=1 ; addtoprimorial=1 ; addtoprimorialvector=[]; done=0 ; while(!done, if(isprime(primorial + addtoprimorial) , print1(iterations, ", ") ; done=1 , iterations++ ; addtoprimorial=factor(primorial + addtoprimorial)[1,1] ; if(vecsearch(addtoprimorialvector,addtoprimorial), print1(0, ", "); done=1) ; addtoprimorialvector=vecsort(concat(addtoprimorialvector,addtoprimorial)) )))
+%Y A346918 Cf. A002110, A020639.
+%K A346918 nonn,more,hard
+%O A346918 1,6
+%A A346918 _Kim Hollesen_, Aug 07 2021
+%E A346918 a(13)-a(49) from _Jinyuan Wang_, Aug 20 2021

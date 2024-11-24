@@ -1,0 +1,50 @@
+%I A371185 #14 Sep 13 2024 08:03:57
+%S A371185 1,3,5,7,8,11,13,17,18,23,25,26,30,34,38,41,42,45,49,54,55,61,63,72,
+%T A371185 77,78,80,82,83,87,89,93,99,105,106,113,115,116,127,128,130,137,140,
+%U A371185 148,151,153,161,164,166,179,185,186,188,192,196,201,206,221,227,234
+%N A371185 Indices of the cubefull numbers in the sequence of powerful numbers.
+%H A371185 Amiram Eldar, <a href="/A371185/b371185.txt">Table of n, a(n) for n = 1..10000</a>
+%H A371185 <a href="/index/Pow#powerful">Index entries for sequences related to powerful numbers</a>.
+%F A371185 A001694(a(n)) = A036966(n).
+%F A371185 a(n) ~ c * n^(3/2), where c = A090699 / A362974^(3/2) = 0.216089803749...
+%e A371185 The first 5 powerful numbers are 1, 4, 8, 9, and 16. The 1st, 3rd, and 5th, 1, 8, and 16, are also cubefull numbers. Therefore, the first 3 terms of this sequence are 1, 3, and 5.
+%t A371185 powQ[n_, emin_] := n == 1 || AllTrue[FactorInteger[n], Last[#] >= emin &]; Position[Select[Range[20000], powQ[#, 2] &], _?(powQ[#1, 3] &), Heads -> False] // Flatten
+%o A371185 (PARI) ispow(n, emin) = n == 1 || vecmin(factor(n)[, 2]) >= emin;
+%o A371185 lista(kmax) = {my(f, c = 0); for(k = 1, kmax, if(ispow(k, 2), c++; if(ispow(k, 3), print1(c, ", "))));}
+%o A371185 (Python)
+%o A371185 from math import isqrt, gcd
+%o A371185 from sympy import mobius, integer_nthroot, factorint
+%o A371185 def A371185(n):
+%o A371185     def squarefreepi(n): return int(sum(mobius(k)*(n//k**2) for k in range(1, isqrt(n)+1)))
+%o A371185     def bisection(f,kmin=0,kmax=1):
+%o A371185         while f(kmax) > kmax: kmax <<= 1
+%o A371185         while kmax-kmin > 1:
+%o A371185             kmid = kmax+kmin>>1
+%o A371185             if f(kmid) <= kmid:
+%o A371185                 kmax = kmid
+%o A371185             else:
+%o A371185                 kmin = kmid
+%o A371185         return kmax
+%o A371185     def f(x):
+%o A371185         c = n+x
+%o A371185         for w in range(1,integer_nthroot(x,5)[0]+1):
+%o A371185             if all(d<=1 for d in factorint(w).values()):
+%o A371185                 for y in range(1,integer_nthroot(z:=x//w**5,4)[0]+1):
+%o A371185                     if gcd(w,y)==1 and all(d<=1 for d in factorint(y).values()):
+%o A371185                         c -= integer_nthroot(z//y**4,3)[0]
+%o A371185         return c
+%o A371185     c, l, m = 0, 0, bisection(f,n,n)
+%o A371185     j = isqrt(m)
+%o A371185     while j>1:
+%o A371185         k2 = integer_nthroot(m//j**2,3)[0]+1
+%o A371185         w = squarefreepi(k2-1)
+%o A371185         c += j*(w-l)
+%o A371185         l, j = w, isqrt(m//k2**3)
+%o A371185     c += squarefreepi(integer_nthroot(m,3)[0])-l
+%o A371185     return c # _Chai Wah Wu_, Sep 12 2024
+%Y A371185 Cf. A001694, A036966.
+%Y A371185 Cf. A090699, A362974.
+%Y A371185 Similar sequences: A361936, A371186.
+%K A371185 nonn,easy
+%O A371185 1,2
+%A A371185 _Amiram Eldar_, Mar 14 2024

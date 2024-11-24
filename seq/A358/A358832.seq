@@ -1,0 +1,43 @@
+%I A358832 #10 Dec 31 2022 14:51:57
+%S A358832 1,1,2,4,7,15,25,49,79,154,248,453,748,1305,2125,3702,5931,9990,16415,
+%T A358832 26844,43246,70947,113653,182314,292897,464614,739640,1169981,1844511,
+%U A358832 2888427,4562850,7079798,11064182,17158151,26676385,41075556,63598025,97420873,150043132
+%N A358832 Number of twice-partitions of n into partitions of distinct lengths and distinct sums.
+%C A358832 A twice-partition of n is a sequence of integer partitions, one of each part of an integer partition of n.
+%e A358832 The a(1) = 1 through a(5) = 15 twice-partitions:
+%e A358832   (1)  (2)   (3)      (4)       (5)
+%e A358832        (11)  (21)     (22)      (32)
+%e A358832              (111)    (31)      (41)
+%e A358832              (11)(1)  (211)     (221)
+%e A358832                       (1111)    (311)
+%e A358832                       (21)(1)   (2111)
+%e A358832                       (111)(1)  (11111)
+%e A358832                                 (21)(2)
+%e A358832                                 (22)(1)
+%e A358832                                 (3)(11)
+%e A358832                                 (31)(1)
+%e A358832                                 (111)(2)
+%e A358832                                 (211)(1)
+%e A358832                                 (111)(11)
+%e A358832                                 (1111)(1)
+%t A358832 twiptn[n_]:=Join@@Table[Tuples[IntegerPartitions/@ptn],{ptn,IntegerPartitions[n]}];
+%t A358832 Table[Length[Select[twiptn[n],UnsameQ@@Total/@#&&UnsameQ@@Length/@#&]],{n,0,10}]
+%o A358832 (PARI)
+%o A358832 seq(n)={ local(Cache=Map());
+%o A358832   my(g=Vec(-1+1/prod(k=1, n, 1 - y*x^k + O(x*x^n))));
+%o A358832   my(F(m,r,b) = my(key=[m,r,b], z); if(!mapisdefined(Cache,key,&z),
+%o A358832   z = if(r<=0||m==0, r==0, self()(m-1, r, b) + sum(k=1, m, my(c=polcoef(g[m],k)); if(!bittest(b,k)&&c, c*self()(min(m-1,r-m), r-m, bitor(b, 1<<k)))));
+%o A358832   mapput(Cache, key, z)); z);
+%o A358832   vector(n+1, i, F(i-1, i-1, 0))
+%o A358832 } \\ _Andrew Howroyd_, Dec 31 2022
+%Y A358832 This is the case of A271619 with distinct lengths.
+%Y A358832 These multiset partitions are ranked by A326535 /\ A326533.
+%Y A358832 This is the case of A358830 with distinct sums.
+%Y A358832 For constant instead of distinct lengths and sums we have A358833.
+%Y A358832 A063834 counts twice-partitions, strict A296122, row-sums of A321449.
+%Y A358832 A273873 counts strict trees.
+%Y A358832 Cf. A000009, A000219, A001970, A141199, A279375, A279785, A279790, A306319, A358334, A358836.
+%K A358832 nonn
+%O A358832 0,3
+%A A358832 _Gus Wiseman_, Dec 04 2022
+%E A358832 Terms a(21) and beyond from _Andrew Howroyd_, Dec 31 2022

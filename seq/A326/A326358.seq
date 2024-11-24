@@ -1,0 +1,42 @@
+%I A326358 #45 Oct 27 2024 11:38:21
+%S A326358 1,2,3,7,29,376,31746,123805914
+%N A326358 Number of maximal antichains of subsets of {1..n}.
+%C A326358 A set system (set of sets) is an antichain if no element is a subset of any other.
+%H A326358 Denis Bouyssou, Thierry Marchant, and Marc Pirlot, <a href="https://arxiv.org/abs/2410.18443">ELECTRE TRI-nB, pseudo-disjunctive: axiomatic and combinatorial results</a>, arXiv:2410.18443 [cs.DM], 2024. See p. 14.
+%H A326358 Dmitry I. Ignatov, <a href="https://doi.org/10.1007/978-3-031-40960-8_6">A Note on the Number of (Maximal) Antichains in the Lattice of Set Partitions</a>. In: Ojeda-Aciego, M., Sauerwald, K., Jäschke, R. (eds) Graph-Based Representation and Reasoning. ICCS 2023. Lecture Notes in Computer Science(). Springer, Cham.
+%H A326358 Dmitry I. Ignatov, <a href="https://doi.org/10.1134/S1995080223010158">On the Number of Maximal Antichains in Boolean Lattices for n up to 7</a>. Lobachevskii J. Math., 44 (2023), 137-146.
+%F A326358 For n > 0, a(n) = A326359(n) + 1.
+%e A326358 The a(0) = 1 through a(3) = 7 maximal antichains:
+%e A326358   {}  {}   {}      {}
+%e A326358       {1}  {12}    {123}
+%e A326358            {1}{2}  {1}{23}
+%e A326358                    {2}{13}
+%e A326358                    {3}{12}
+%e A326358                    {1}{2}{3}
+%e A326358                    {12}{13}{23}
+%t A326358 stableSets[u_,Q_]:=If[Length[u]==0,{{}},With[{w=First[u]},Join[stableSets[DeleteCases[u,w],Q],Prepend[#,w]&/@stableSets[DeleteCases[u,r_/;r==w||Q[r,w]||Q[w,r]],Q]]]];
+%t A326358 fasmax[y_]:=Complement[y,Union@@(Most[Subsets[#]]&/@y)];
+%t A326358 Table[Length[fasmax[stableSets[Subsets[Range[n]],SubsetQ]]],{n,0,5}]
+%t A326358 (* alternatively *)
+%t A326358 maxachP[n_]:=FindIndependentVertexSet[
+%t A326358   Flatten[Map[Function[s, Map[# \[DirectedEdge] s &, Most[Subsets[s]]]],
+%t A326358     Subsets[Range[n]]]], Infinity, All];
+%t A326358 Table[Length[maxachP[n]],{n,0,6}] (* _Mamuka Jibladze_, Jan 25 2021 *)
+%o A326358 (GAP) LoadPackage("grape");
+%o A326358       maxachP:=function(n) local g,G;
+%o A326358        g:=Graph(Group(()), Combinations([1..n]), function(x, g) return x; end,
+%o A326358           function(x, y) return not IsSubset(x, y) and not IsSubset(y, x); end, true);
+%o A326358        G:=AutGroupGraph(g);
+%o A326358        return Sum(CompleteSubgraphs(NewGroupGraph(G, g), -1, 2),
+%o A326358               function(c) return Length(Orbit(G, c, OnSets)); end);
+%o A326358      end;
+%o A326358        List([0..7],maxachP); # _Mamuka Jibladze_, Jan 26 2021
+%Y A326358 Antichains of sets are A000372.
+%Y A326358 Minimal covering antichains are A046165.
+%Y A326358 Maximal intersecting antichains are A007363.
+%Y A326358 Maximal antichains of nonempty sets are A326359.
+%Y A326358 Cf. A003182, A006126, A006602, A014466, A058891, A261005, A305000, A305001, A305844, A326360, A326361, A326362, A326363.
+%K A326358 nonn,more
+%O A326358 0,2
+%A A326358 _Gus Wiseman_, Jul 01 2019
+%E A326358 a(6)-a(7) from _Mamuka Jibladze_, Jan 26 2021

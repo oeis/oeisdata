@@ -1,0 +1,44 @@
+%I A264034 #31 Jan 20 2023 09:58:06
+%S A264034 1,1,1,1,1,1,0,1,1,1,1,1,0,0,1,1,1,1,1,1,0,1,0,0,0,1,1,1,1,2,1,0,2,1,
+%T A264034 0,0,1,0,0,0,0,1,1,1,1,2,1,1,2,1,0,1,1,1,0,0,0,1,0,0,0,0,0,1,1,1,1,2,
+%U A264034 2,1,2,2,1,1,1,1,1,1,0,1,1,0,0,0,0,1,0,0,0,0,0,0,1,1,1,1,2,2,1,3,2,1
+%N A264034 Triangle read by rows: T(n,k) (n>=0, 0<=k<=A161680(n)) is the number of integer partitions of n with weighted sum k.
+%C A264034 Row sums give A000041.
+%C A264034 The weighted sum is given by the sum of the rows where row i is weighted by i.
+%C A264034 Note that the first part has weight 0. This statistic (zero-based weighted sum) is ranked by A359677, reverse A359674. Also the number of partitions of n with one-based weighted sum n + k. - _Gus Wiseman_, Jan 10 2023
+%H A264034 Alois P. Heinz, <a href="/A264034/b264034.txt">Rows n = 0..50, flattened</a>
+%H A264034 FindStat - Combinatorial Statistic Finder, <a href="http://www.findstat.org/StatisticsDatabase/St000185">Weighted size of a partition</a>
+%F A264034 From _Alois P. Heinz_, Jan 20 2023: (Start)
+%F A264034 max_{k=0..A161680(n)} T(n,k) = A337206(n).
+%F A264034 Sum_{k=0..A161680(n)} k * T(n,k) = A066185(n). (End)
+%e A264034 Triangle T(n,k) begins:
+%e A264034   1;
+%e A264034   1;
+%e A264034   1,1;
+%e A264034   1,1,0,1;
+%e A264034   1,1,1,1,0,0,1;
+%e A264034   1,1,1,1,1,0,1,0,0,0,1;
+%e A264034   1,1,1,2,1,0,2,1,0,0,1,0,0,0,0,1;
+%e A264034   1,1,1,2,1,1,2,1,0,1,1,1,0,0,0,1,0,0,0,0,0,1;
+%e A264034   1,1,1,2,2,1,2,2,1,1,1,1,1,1,0,1,1,0,0,0,0,1,0,0,0,0,0,0,1;
+%e A264034   ...
+%e A264034 The a(15,31) = 5 partitions of 15 with weighted sum 31 are: (6,2,2,1,1,1,1,1), (5,4,1,1,1,1,1,1), (5,2,2,2,2,1,1), (4,3,2,2,2,2), (3,3,3,3,2,1). These are also the partitions of 15 with one-based weighted sum 46. - _Gus Wiseman_, Jan 09 2023
+%p A264034 b:= proc(n, i, w) option remember; expand(
+%p A264034       `if`(n=0, 1, `if`(i<1, 0, b(n, i-1, w)+
+%p A264034       `if`(i>n, 0, x^(w*i)*b(n-i, i, w+1)))))
+%p A264034     end:
+%p A264034 T:= n-> (p-> seq(coeff(p, x, i), i=0..degree(p)))(b(n$2, 0)):
+%p A264034 seq(T(n), n=0..10);  # _Alois P. Heinz_, Nov 01 2015
+%t A264034 b[n_, i_, w_] := b[n, i, w] = Expand[If[n == 0, 1, If[i < 1, 0, b[n, i - 1, w] + If[i > n, 0, x^(w*i)*b[n - i, i, w + 1]]]]]; T[n_] := Function[p, Table[Coefficient[p, x, i], {i, 0, Exponent[p, x]}]][b[n, n, 0]]; Table[T[n], {n, 0, 10}] // Flatten (* _Jean-François Alcover_, Feb 07 2017, after _Alois P. Heinz_ *)
+%t A264034 Table[Length[Select[IntegerPartitions[n],Total[Accumulate[Reverse[#]]]==k&]],{n,0,8},{k,n,n*(n+1)/2}] (* _Gus Wiseman_, Jan 09 2023 *)
+%Y A264034 Row sums are A000041.
+%Y A264034 The version for compositions is A053632, ranked by A124757 (reverse A231204).
+%Y A264034 Row lengths are A152947, or A161680 plus 1.
+%Y A264034 The one-based version is also A264034, if we use k = n..n(n+1)/2.
+%Y A264034 The reverse version A358194 counts partitions by sum of partial sums.
+%Y A264034 A359677 gives zero-based weighted sum of prime indices, reverse A359674.
+%Y A264034 A359678 counts multisets by zero-based weighted sum.
+%Y A264034 Cf. A029931, A066185, A124757, A304818, A318283, A337206, A359042.
+%K A264034 nonn,tabf
+%O A264034 0,30
+%A A264034 _Christian Stump_, Nov 01 2015

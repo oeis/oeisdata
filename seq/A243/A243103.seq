@@ -1,0 +1,66 @@
+%I A243103 #68 Mar 23 2017 11:43:11
+%S A243103 1,2,3,8,5,144,7,64,27,3200,11,124416,13,6272,2025,1024,17,35831808,
+%T A243103 19,1024000,3969,247808,23,859963392,125,346112,729,2809856,29,
+%U A243103 261213880320000000,31,32768,264627,18939904,30625,26748301344768,37,23658496,369603,32768000000,41
+%N A243103 Product of numbers m with 2 <= m <= n whose prime divisors all divide n.
+%C A243103 This sequence is the product of n-regular numbers.
+%C A243103 A number m is said to be "regular" to n or "n-regular" if all the prime factors p of m also divide n.
+%C A243103 The divisor is a special case of a regular m such that m also divides n in addition to all of its prime factors p | n.
+%C A243103 Analogous to A007955 (Product of divisors of n).
+%C A243103 If n is 1 or prime, a(n) = n.
+%C A243103 If n is a prime power, a(n) = A007955(n).
+%C A243103 Note: b-file ends at n = 4619, because a(4620) has more than 1000 decimal digits.
+%C A243103 Product of the numbers 1 <= k <= n such that (floor(n^k/k) - floor((n^k - 1)/k)) = 1. - _Michael De Vlieger_, May 26 2016
+%H A243103 Michael De Vlieger, <a href="/A243103/b243103.txt">Table of n, a(n) for n = 1..4619</a>
+%H A243103 Encyclopedia Britannica, <a href="http://www.britannica.com/EBchecked/topic/496213/regular-number">Regular Number</a> (base-neutral definition)
+%H A243103 Eric W. Weisstein, <a href="http://mathworld.wolfram.com/RegularNumber.html">Regular Number</a> (decimal definition)
+%H A243103 Wikipedia, <a href="http://en.wikipedia.org/wiki/Regular_number">Regular Number</a> (sexagesimal / Hamming number definition)
+%F A243103 a(n) = product of terms of n-th row of irregular triangle A162306(n,k).
+%F A243103 a(n) = Product_{k=1..n} k^( floor(n^k/k)-floor((n^k -1)/k) ). - _Anthony Browne_, Jul 06 2016
+%F A243103 From _Antti Karttunen_, Mar 22 2017: (Start)
+%F A243103 a(n) = Product_{k=2..n, A123275(n,k)=1} k.
+%F A243103 For n >= 1, A046523(a(n)) = A283990(n).
+%F A243103 (End)
+%e A243103 a(12) = 124416 since 1 * 2 * 3 * 4 * 6 * 8 * 9 * 12 = 124416. These numbers are products of prime factors that are the distinct prime divisors of 12 = {2, 3}.
+%e A243103 From _David A. Corneth_, Feb 09 2015: (Start)
+%e A243103 Let p# be the product of primes up to p, A002110. Then
+%e A243103 a(13#) ~= 8.3069582 * 10 ^ 4133
+%e A243103 a(17#) ~= 1.3953000 * 10 ^ 22689
+%e A243103 a(19#) ~= 3.8258936 * 10 ^ 117373
+%e A243103 a(23#) ~= 6.7960327 * 10 ^ 594048
+%e A243103 a(29#) ~= 1.3276817 * 10 ^ 2983168
+%e A243103 a(31#) ~= 2.8152792 * 10 ^ 14493041
+%e A243103 a(37#) ~= 1.9753840 * 10 ^ 69927040
+%e A243103 Up to n = 11# already in the table.
+%e A243103 (End)
+%p A243103 A:= proc(n) local F, S, s, j, p;
+%p A243103   F:= numtheory:-factorset(n);
+%p A243103   S:= {1};
+%p A243103   for p in F do
+%p A243103     S:= {seq(seq(s*p^j, j=0..floor(log[p](n/s))), s=S)}
+%p A243103   od;
+%p A243103   convert(S,`*`)
+%p A243103 end proc:
+%p A243103 seq(A(n), n=1..100); # _Robert Israel_, Feb 09 2015
+%t A243103 regularQ[m_Integer, n_Integer] := Module[{omega = First /@ FactorInteger @ m }, If[Length[Select[omega, Divisible[n, #] &]] == Length[omega], True, False]]; a20140819[n_Integer] := Times @@ Flatten[Position[Thread[regularQ[Range[1, n], n]], True]]; a20140819 /@ Range[41]
+%t A243103 regulars[n_] := Block[{f, a}, f[x_] := First /@ FactorInteger@ x; a = f[n];{1}~Join~Select[Range@ n, SubsetQ[a, f@ #] &]]; Array[Times @@ regulars@ # &, 12] (* _Michael De Vlieger_, Feb 09 2015 *)
+%t A243103 Table[Times @@ Select[Range@ n, (Floor[n^#/#] - Floor[(n^# - 1)/#]) == 1 &], {n, 41}] (* _Michael De Vlieger_, May 26 2016 *)
+%o A243103 (PARI) lista(nn) = {vf = vector(nn, n, Set(factor(n)[,1])); vector(nn, n, prod(i=1, n, if (setintersect(vf[i], vf[n]) == vf[i], i, 1)));} \\ _Michel Marcus_, Aug 23 2014
+%o A243103 (PARI) for(n=1, 100, print1(prod(k=1, n, k^(floor(n^k/k) - floor((n^k - 1)/k))),", ")) \\ _Indranil Ghosh_, Mar 22 2017
+%o A243103 (Python)
+%o A243103 from sympy import primefactors
+%o A243103 def A243103(n):
+%o A243103     y, pf = 1, set(primefactors(n))
+%o A243103     for m in range(2,n+1):
+%o A243103         if set(primefactors(m)) <= pf:
+%o A243103             y *= m
+%o A243103     return y # _Chai Wah Wu_, Aug 28 2014
+%o A243103 (Scheme)
+%o A243103 ;; A naive implementation, code for A123275bi given under A123275:
+%o A243103 (define (A243103 n) (let loop ((k n) (m 1)) (cond ((= 1 k) m) ((= 1 (A123275bi n k)) (loop (- k 1) (* m k))) (else (loop (- k 1) m)))))
+%o A243103 ;; _Antti Karttunen_, Mar 22 2017
+%Y A243103 Cf. A162306 (irregular triangle of regular numbers of n), A010846 (number of regular numbers of n), A244974 (sum of regular numbers of n), A007955, A244052 (record transform of regular numbers of n).
+%Y A243103 Cf. A123275, A283990.
+%K A243103 nonn
+%O A243103 1,2
+%A A243103 _Michael De Vlieger_, Aug 19 2014

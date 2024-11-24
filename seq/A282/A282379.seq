@@ -1,0 +1,38 @@
+%I A282379 #12 Aug 01 2021 03:47:31
+%S A282379 1,1,1,1,2,2,2,3,3,4,5,6,5,9,9,8,11,15,13,17,17,19,24,29,23,33,37,39,
+%T A282379 40,53,48,62,63,71,77,94,81,110,116,122,123,156,152,185,180,200,213,
+%U A282379 259,236,287,298,325,333,404,386,450,457,506,531,615,579,679,721
+%N A282379 Number of representations of n as a sum of products of pairs of positive integers: n = Sum_{k=1..m} i_k*j_k with m >= 0, i_k <= j_k, j_k > j_{k+1} and all factors distinct with the exception that i_k = j_k is allowed.
+%H A282379 Alois P. Heinz, <a href="/A282379/b282379.txt">Table of n, a(n) for n = 0..1000</a>
+%e A282379 a(4) = 2: 1*4 = 2*2.
+%e A282379 a(5) = 2: 1*5 = 2*2+1*1.
+%e A282379 a(6) = 2: 1*6 = 2*3.
+%e A282379 a(7) = 3: 1*7 = 2*3+1*1 = 1*3+2*2.
+%e A282379 a(8) = 3: 1*8 = 2*4 = 1*4+2*2.
+%e A282379 a(9) = 4: 1*9 = 1*5+2*2 = 2*4+1*1 = 3*3.
+%e A282379 a(10) = 5: 1*10 = 1*6+2*2 = 2*5 = 1*4+2*3 = 3*3+1*1.
+%e A282379 a(11) = 6: 1*11 = 1*7+2*2 = 2*5+1*1 = 1*5+2*3 = 2*4+1*3 = 3*3+1*2.
+%e A282379 a(12) = 5: 1*12 = 1*8+2*2 = 2*6 = 1*6+2*3 = 3*4.
+%p A282379 h:= proc(n) option remember;
+%p A282379       n*(n+1)*(2*n+1)/6
+%p A282379     end:
+%p A282379 g:= (n, i, s)-> `if`(n=0, 1, `if`(n>h(i), 0,
+%p A282379                 b(n, i, select(x-> x<=i, s)))):
+%p A282379 b:= proc(n, i, s) option remember; g(n, i-1, s)+
+%p A282379      `if`(i in s, 0, add(`if`(j in s, 0, g(n-i*j,
+%p A282379       min(n-i*j, i-1), s union {j})), j=1..min(i, n/i)))
+%p A282379     end:
+%p A282379 a:= n-> g(n$2, {}):
+%p A282379 seq(a(n), n=0..100);
+%t A282379 h[n_] := h[n] = n(n+1)(2n+1)/6;
+%t A282379 g[n_, i_, s_ ] := If[n == 0, 1, If[n > h[i], 0,
+%t A282379      b[n, i, Select[s, # <= i&]]]];
+%t A282379 b[n_, i_, s_] := b[n, i, s] = g[n, i - 1, s] +
+%t A282379      If[MemberQ[s, i], 0, Sum[If[MemberQ[s, j], 0, g[n - i*j,
+%t A282379      Min[n - i*j, i - 1], s ~Union~ {j}]], {j, 1, Min[i, n/i]}]];
+%t A282379 a[n_] := g[n, n, {}];
+%t A282379 Table[a[n], {n, 0, 100}] (* _Jean-François Alcover_, Aug 01 2021, after _Alois P. Heinz_ *)
+%Y A282379 Cf. A000009, A000330, A066739, A098859, A182269, A182270, A211856, A211857, A212214, A212215, A212216, A212217, A212218, A212219, A276429, A282249.
+%K A282379 nonn
+%O A282379 0,5
+%A A282379 _Alois P. Heinz_, Feb 13 2017

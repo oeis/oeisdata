@@ -1,0 +1,55 @@
+%I A323840 #23 Jul 07 2021 11:14:16
+%S A323840 1,1,1,1,1,3,1,1,1,3,13,15,15,7,1,1,1,3,13,75,165,357,645,927,1095,
+%T A323840 957,627,299,91,15,1,1,1,3,13,75,525,1827,5965,18315,51885,130977,
+%U A323840 304953,646373,1238601,2143065,3331429,4663967,5867703
+%N A323840 Irregular triangle read by rows: T(n,k) is the number of compositions of 2^n into k powers of 2.
+%H A323840 James Rayman, <a href="/A323840/b323840.txt">Rows n = 0..10, flattened</a>
+%H A323840 S. Lehr, J. Shallit and J. Tromp, <a href="http://dx.doi.org/10.1016/0304-3975(95)00234-0">On the vector space of the automatic reals</a>, Theoret. Comput. Sci. 163 (1996), no. 1-2, 193-210. See Table 2.
+%F A323840 T(n, k) = A073266(2^n, k). - _James Rayman_, Mar 30 2021
+%e A323840 The first few rows are:
+%e A323840   1;
+%e A323840   1, 1;
+%e A323840   1, 1, 3,  1;
+%e A323840   1, 1, 3, 13, 15,  15,   7,   1;
+%e A323840   1, 1, 3, 13, 75, 165, 357, 645, 927, 1095, 957, 627, 299, 91, 15, 1;
+%e A323840   ...
+%e A323840 The counts for row 3 arise as follows:
+%e A323840   8 (1)
+%e A323840   = 4+4 (1)
+%e A323840   = 4+2+2 (3)
+%e A323840   = 4+2+1+1 or 2+2+2+2 (12+1=13)
+%e A323840   = 4+1+1+1+1 or 2+2+2+1+1 (5+10=15)
+%e A323840   = 2+2+1+1+1+1 (15)
+%e A323840   = 2+1+1+1+1+1+1 (7)
+%e A323840   = 1+1+1+1+1+1+1+1 (1)
+%p A323840 b:= proc(n) option remember; expand(`if`(n=0, 1,
+%p A323840       add(x*b(n-2^j), j=0..ilog2(n))))
+%p A323840     end:
+%p A323840 T:= n-> (p-> seq(coeff(p, x, i), i=1..2^n))(b(2^n)):
+%p A323840 seq(T(n), n=0..5);  # _Alois P. Heinz_, Mar 31 2021
+%t A323840 b[n_] := b[n] = Expand[If[n == 0, 1,
+%t A323840      Sum[x*b[n - 2^j], {j, 0, Length@IntegerDigits[n, 2]-1}]]];
+%t A323840 T[n_] := With[{p = b[2^n]}, Table[Coefficient[p, x, i], {i, 1, 2^n}]];
+%t A323840 Table[T[n], {n, 0, 5}] // Flatten (* _Jean-François Alcover_, Jul 07 2021, after _Alois P. Heinz_ *)
+%o A323840 (Python)
+%o A323840 from functools import lru_cache
+%o A323840 @lru_cache(maxsize=None)
+%o A323840 def t(n, k):
+%o A323840     if n < k: return 0
+%o A323840     if k == 0: return 1 if n == 0 else 0
+%o A323840     r = 0
+%o A323840     i = 1
+%o A323840     while True:
+%o A323840         if i > n: break
+%o A323840         r += t(n - i, k-1)
+%o A323840         i *= 2
+%o A323840     return r
+%o A323840 def T(n, k): return t(2**n, k) # _James Rayman_, Mar 30 2021
+%Y A323840 The rows are a subset of the rows of A073266.
+%Y A323840 Row sums give A248377.
+%Y A323840 T(n,n) gives A007178 (for n>=1).
+%Y A323840 Cf. A023359.
+%K A323840 nonn,tabf
+%O A323840 0,6
+%A A323840 _N. J. A. Sloane_, Feb 04 2019
+%E A323840 More terms from _James Rayman_, Mar 30 2021

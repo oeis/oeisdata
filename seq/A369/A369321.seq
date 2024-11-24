@@ -1,0 +1,56 @@
+%I A369321 #34 May 25 2024 16:17:00
+%S A369321 1,0,1,0,0,2,0,0,1,5,0,0,0,9,14,0,0,0,5,59,42,0,0,0,1,92,342,132,0,0,
+%T A369321 0,0,75,1073,1863,429,0,0,0,0,35,1882,10145,9794,1430,0,0,0,0,9,2131,
+%U A369321 31345,84977,50380,4862,0,0,0,0,1,1661,64395,417220,658423,255606,16796
+%N A369321 T(n,k) is the number of length-n weak ascent sequences (prefixed with a zero) with k weak ascents, triangle read by rows.
+%C A369321 A weak ascent sequence is a sequence [d(1), d(2), ..., d(n)] where d(1)=0, d(k)>=0, and d(k) <= 1 + asc([d(1), d(2), ..., d(k-1)]) and asc(.) counts the weak ascents d(j) >= d(j-1) of its argument.
+%H A369321 Alois P. Heinz, <a href="/A369321/b369321.txt">Rows n = 0..140, flattened</a>
+%H A369321 Beata Benyi, Anders Claesson, and Mark Dukes, <a href="https://arxiv.org/abs/2111.03159">Weak ascent sequences and related combinatorial structures</a>, arXiv:2111.03159 [math.CO], 2021-2022.
+%F A369321 T(n,n) = A000108(n) (number of length-n weak ascent sequences with maximal number of weak ascents).
+%e A369321 1,
+%e A369321 0, 1,
+%e A369321 0, 0, 2,
+%e A369321 0, 0, 1, 5,
+%e A369321 0, 0, 0, 9, 14,
+%e A369321 0, 0, 0, 5, 59,   42,
+%e A369321 0, 0, 0, 1, 92,  342,    132,
+%e A369321 0, 0, 0, 0, 75, 1073,   1863,     429,
+%e A369321 0, 0, 0, 0, 35, 1882,  10145,    9794,     1430,
+%e A369321 0, 0, 0, 0,  9, 2131,  31345,   84977,    50380,     4862,
+%e A369321 0, 0, 0, 0,  1, 1661,  64395,  417220,   658423,   255606,    16796,
+%e A369321 0, 0, 0, 0,  0,  912,  95477, 1370141,  4818426,  4835924,  1285453,   58786,
+%e A369321 0, 0, 0, 0,  0,  350, 107002, 3291589, 23507705, 50477693, 34184279, 6428798, 208012,
+%e A369321 ...
+%p A369321 b:= proc(n, i, t) option remember; expand(`if`(n=0, 1, add(
+%p A369321       b(n-1, j, t+`if`(j>=i, 1, 0))*`if`(j>=i, x, 1), j=0..t+1)))
+%p A369321     end:
+%p A369321 T:= (n, k)-> coeff(b(n, -1$2), x, k):
+%p A369321 seq(seq(T(n, k), k=0..n), n=0..10);  # _Alois P. Heinz_, Jan 23 2024
+%t A369321 b[n_, i_, t_] := b[n, i, t] = Expand[If[n == 0, 1, Sum[
+%t A369321    b[n - 1, j, t + If[j >= i, 1, 0]]*If[j >= i, x, 1], {j, 0, t + 1}]]];
+%t A369321 T[n_, k_] := Coefficient[b[n, -1, -1], x, k];
+%t A369321 Table[Table[T[n, k], {k, 0, n}], {n, 0, 10}] // Flatten (* _Jean-François Alcover_, May 24 2024, after _Alois P. Heinz_ *)
+%o A369321 (PARI) \\ see formula (5) on page 18 of the Benyi/Claesson/Dukes reference
+%o A369321 N=40;
+%o A369321 M=matrix(N, N, r, c, -1);  \\ memoization
+%o A369321 a(n, k)=
+%o A369321 {
+%o A369321     if ( n==0 && k==0, return(1) );
+%o A369321     if ( k==0, return(0) );
+%o A369321     if ( n==0, return(0) );
+%o A369321     if ( M[n, k] != -1 , return( M[n, k] ) );
+%o A369321     my( s );
+%o A369321     s = sum( i=0, n, sum( j=0, k-1,
+%o A369321          (-1)^j * binomial(k-j, i) * binomial(i, j) * a( n-i, k-j-1 )) );
+%o A369321     M[n, k] = s;
+%o A369321     return( s );
+%o A369321 }
+%o A369321 \\ for (n=0, N, print1( sum(k=1, n, a(n, k)), ", "); ); \\ A336070
+%o A369321 for (n=0, N, for(k=0, n, print1(a(n, k), ", "); ); print(); );
+%o A369321 \\ _Joerg Arndt_, Jan 20 2024
+%Y A369321 Cf. A000108 (main diagonal), A336070 (row sums), A369322 (column sums).
+%Y A369321 T(2n,n) gives A373115.
+%Y A369321 Cf. A137251.
+%K A369321 nonn,tabl
+%O A369321 0,6
+%A A369321 _Joerg Arndt_, Jan 20 2024

@@ -1,0 +1,48 @@
+%I A225926 #11 May 23 2013 13:29:42
+%S A225926 1,2,3,1,2,3,4,1,1,2,3,2,2,3,4,1,2,2,3,2,3,3,4,2,1,2,1,2,2,3,2,1,2,2,
+%T A225926 2,2,3,3,3,2,2,3,2,3,3,4,3,2,1,2,3,2,2,2,3,3,2,2,2,3,3,3,3,1,2,3,3,2,
+%U A225926 3,3,4,2,2,2,3,2,3,3,3,2,1,2,3,3,2,3,4,3,2,2
+%N A225926 Least number of prime powers needed to sum up to n.
+%C A225926 Prime powers: A025475, which includes 1 because it includes the power 0, but excludes power 1.
+%C A225926 Not necessarily distinct prime powers, see example for a(2).
+%C A225926 Terms bigger than 4: a(340473) = a(3881313) = 5, and the next term, if it exists, has index bigger than 2^34.
+%e A225926 2 = 1 + 1, two summands, so a(2) = 2.
+%e A225926 26 = 25 + 1, two summands, so a(26) = 2.
+%o A225926 (C)
+%o A225926 #include <stdio.h>      // GCC -O3
+%o A225926 #define TOP (1ULL<<15)  // ~130 seconds  // (1ULL<<17) is ok
+%o A225926 #define TOP2 (TOP*TOP)
+%o A225926 typedef unsigned long long U64;
+%o A225926 int compare64(const void *p1, const void *p2) {
+%o A225926   if (*(U64*)p1 < *(U64*)p2) return -1;
+%o A225926   return (*(U64*)p1 == *(U64*)p2) ?  0 : 1;
+%o A225926 }
+%o A225926 int main() {
+%o A225926   U64 i, j, k, p, pp=1, pfp=0, *primes, *pwFlat = (U64*)malloc(TOP*2);
+%o A225926   primes = (U64*)malloc(TOP2);
+%o A225926   char *c = (char*)pwFlat, *f = (char*)primes, *ff;
+%o A225926   memset(c, 0, TOP);
+%o A225926   for (primes[0]=2, i=3; i<TOP; i+=2)  if (c[i>>1]==0)
+%o A225926     for (primes[pp++]=i, j=i*i>>1; j<TOP/2; j+=i)  c[j]=1;
+%o A225926   for (pwFlat[pfp++]=1, i = 0; i < pp; ++i)
+%o A225926     for (j=primes[i]*primes[i]; j<TOP2; j*=primes[i]) pwFlat[pfp++]=j;
+%o A225926   qsort(pwFlat, pfp, 8, compare64);
+%o A225926   memset(f, 0, TOP2);
+%o A225926   for (pwFlat[pfp]=TOP2, i=0; (p=pwFlat[i])<TOP2; printf("."), ++i)
+%o A225926     for(f[p]=1, j=0; j<=i && (pp=p+pwFlat[j])<TOP2; ++j)
+%o A225926       for(f[pp]=2,k=0; k<=j && (pfp=pp+pwFlat[k])<TOP2; ++k) f[pfp]=3;
+%o A225926   for (k=1; k < TOP2; k++) {
+%o A225926       if (f[k]==0) {
+%o A225926         for (j=0, ff=&f[k], pp=99; (p=pwFlat[j]) < k; j++)
+%o A225926           if (ff[-p] < pp)  { pp = ff[-p]; if (pp<=3) break; }
+%o A225926         f[k] = pp+1;
+%o A225926       }
+%o A225926       if (k<200) printf("%llu, ", f[k]);
+%o A225926       else if (f[k]>4)  printf("\n%llu at %llu   ", f[k], k);
+%o A225926   }
+%o A225926   return 0;
+%o A225926 }
+%Y A225926 Cf. A025475, A225927.
+%K A225926 nonn
+%O A225926 1,2
+%A A225926 _Alex Ratushnyak_, May 21 2013

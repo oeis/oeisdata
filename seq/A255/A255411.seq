@@ -1,0 +1,42 @@
+%I A255411 #47 Apr 27 2020 02:33:05
+%S A255411 0,4,12,16,18,22,48,52,60,64,66,70,72,76,84,88,90,94,96,100,108,112,
+%T A255411 114,118,240,244,252,256,258,262,288,292,300,304,306,310,312,316,324,
+%U A255411 328,330,334,336,340,348,352,354,358,360,364,372,376,378,382,408,412,420,424,426,430,432,436,444
+%N A255411 Shift factorial base representation of n one digit left (with 0 added to right), increment all nonzero digits by one, then convert back to decimal; Numbers with no digit 1 in their factorial base representation.
+%C A255411 Nonnegative integers such that the number of ones (A257511) in their factorial base representation (A007623) is zero.
+%C A255411 Nonnegative integers such that the least missing nonzero digit (A257079) in their factorial base representation is one.
+%C A255411 a(n) can be also directly computed from n by "shifting left" its factorial base representation (that is, by appending one zero to the right, see A153880) and then incrementing all nonzero digits by one, and then converting the resulting (still valid) factorial base number back to decimal. See the examples.
+%C A255411 The sequences A227130 and A227132 are closed under a(n), in other words, permutation listed as the a(n)-th entry in tables A060117 & A060118 has the same parity as the n-th entry in those same tables.
+%H A255411 Antti Karttunen, <a href="/A255411/b255411.txt">Table of n, a(n) for n = 0..40319</a>
+%e A255411 Factorial base representation (A007623) of 1 is "1", shifting it left yields "10", and when we increment all nonzero digits by one, we get "20", which is the factorial base representation of 4 (as 4 = 2*2! + 0*1!), thus a(1) = 4.
+%e A255411 F.b.r. of 2 is "10", shifting it left yields "100", and "200" is f.b.r. of 12, thus a(2) = 12.
+%e A255411 F.b.r. of 43 is "1301", shifting it left and incrementing all nonzeros by one yields "24020", which is f.b.r of 340, thus a(43) = 340.
+%t A255411 factBaseIntDs[n_] := Module[{m, i, len, dList, currDigit}, i = 1; While[n > i!, i++]; m = n; len = i; dList = Table[0, {len}]; Do[currDigit = 0; While[m >= j!, m = m - j!; currDigit++]; dList[[len - j + 1]] = currDigit, {j, i, 1, -1}]; If[dList[[1]] == 0, dList = Drop[dList, 1]]; dList]; s = Table[FromDigits[factBaseIntDs[n]], {n, 500}]; {0}~Join~Flatten@ Position[s, x_ /; DigitCount[x][[1]] == 0](* _Michael De Vlieger_, Apr 27 2015, after _Alonso del Arte_ at A007623 *)
+%t A255411 Select[Range[0, 444], ! MemberQ[IntegerDigits[#, MixedRadix[Reverse@ Range@ 12]], 1] &] (* _Michael De Vlieger_, May 30 2016, Version 10.2 *)
+%t A255411 r = MixedRadix[Reverse@Range[2, 12]]; Table[FromDigits[Map[If[# == 0, 0, # + 1] &, IntegerDigits[n, r]]~Join~{0}, r], {n, 0, 60}] (* _Michael De Vlieger_, Aug 14 2016, Version 10.2 *)
+%o A255411 (Scheme, with _Antti Karttunen_'s IntSeq-library)
+%o A255411 (define (A255411 n) (let loop ((n n) (z 0) (i 2) (f 2)) (cond ((zero? n) z) (else (let ((d (remainder n i))) (loop (quotient n i) (+ z (* f (+ d (if (zero? d) 0 1)))) (+ 1 i) (* f (+ i 1))))))))
+%o A255411 (define A255411 (MATCHING-POS 0 0 isA255411?)) ;; Slow one.
+%o A255411 (define (isA255411? n) (let loop ((n n) (i 2)) (cond ((zero? n) #t) ((= 1 (modulo n i)) #f) (else (loop (floor->exact (/ n i)) (+ 1 i))))))
+%o A255411 ;; Alternative definitions:
+%o A255411 (define A255411 (ZERO-POS 0 0 A257511))
+%o A255411 (define A255411 (ZERO-POS 0 0 (COMPOSE -1+ A257079)))
+%o A255411 (define A255411 (FIXED-POINTS 0 0 A257080))
+%o A255411 (define A255411 (ZERO-POS 0 0 A257081))
+%o A255411 (Python)
+%o A255411 from sympy import factorial as f
+%o A255411 def a007623(n, p=2): return n if n<p else a007623((n//p), p+1)*10 + n%p
+%o A255411 def a(n):
+%o A255411     x=(str(a007623(n)) + '0')
+%o A255411     y="".join(str(int(i) + 1) if int(i)>0 else '0' for i in x)[::-1]
+%o A255411     return 0 if n==0 else sum(int(y[i])*f(i + 1) for i in range(len(y)))
+%o A255411 print([a(n) for n in range(101)]) # _Indranil Ghosh_, Jun 20 2017
+%Y A255411 Complement: A256450.
+%Y A255411 Positions of ones in A257079, fixed points of A257080, positions of zeros in A257511, A257081 and A257261.
+%Y A255411 Cf. A007623, A227157, A153880, A231720.
+%Y A255411 Cf. A255341, A255342, A255343.
+%Y A255411 Cf. A257262, A257263.
+%Y A255411 Cf. also A227130/A227132, A060117/A060118 and also arrays A257503 & A257505.
+%K A255411 nonn,base
+%O A255411 0,2
+%A A255411 _Antti Karttunen_, Apr 16 2015

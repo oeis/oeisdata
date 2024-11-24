@@ -1,0 +1,62 @@
+%I A352618 #31 Sep 18 2024 03:50:41
+%S A352618 1,4,9,16,25,36,49,64,81,100,144,196,225,256,324,400,441,576,625,729,
+%T A352618 784,900,1024,1225,1296,1600,1764,2025,2304,2401,2500,2916,3136,3600,
+%U A352618 3969,4096,4900,5184,5625,6400,6561,7056,8100,9216,9604,10000,11025,11664,12544,14400
+%N A352618 Squares that are 7-smooth.
+%C A352618 Also, distinct terms appearing in A352598, or terms of the form 4^i * 9^j * 25^k * 49^m for i, j, k, m >= 0.
+%H A352618 Michael De Vlieger, <a href="/A352618/b352618.txt">Table of n, a(n) for n = 1..10000</a>
+%F A352618 a(n) = A002473(n)^2. - _Pontus von Brömssen_, Mar 24 2022
+%F A352618 Sum_{n>=1} 1/a(n) = 1225/768. - _Amiram Eldar_, Mar 24 2022
+%e A352618 49 = 7*7, 81 = (3*3)*(3*3), and 100 = (2*5)*(2*5) are terms.
+%t A352618 Select[Range[120], Max[FactorInteger[#][[;; , 1]]] <= 7 &]^2 (* _Amiram Eldar_, Mar 24 2022 *)
+%t A352618 With[{n = 15000}, Union@ Flatten@ Table[2^(2 a)*3^(2 b)*5^(2 c)*7^(2 d), {a, 0, Log[4, n]}, {b, 0, Log[9, n/(2^(2 a))]}, {c, 0, Log[25, n/(2^(2 a)*3^(2 b))]}, {d, 0, Log[49, n/(2^(2 a)*3^(2 b)*5^(2 c))]}]] (* _Michael De Vlieger_, Mar 26 2022 *)
+%o A352618 (Python)
+%o A352618 from itertools import count, islice
+%o A352618 def agen():
+%o A352618     for i in count(1):
+%o A352618         k = i
+%o A352618         for p in [2, 3, 5, 7]:
+%o A352618             while k%p == 0:
+%o A352618                 k //= p
+%o A352618         if k == 1:
+%o A352618             yield i*i
+%o A352618 print(list(islice(agen(), 50)))
+%o A352618 (Python)
+%o A352618 from sympy import integer_log
+%o A352618 def A352618(n):
+%o A352618     def bisection(f,kmin=0,kmax=1):
+%o A352618         while f(kmax) > kmax: kmax <<= 1
+%o A352618         while kmax-kmin > 1:
+%o A352618             kmid = kmax+kmin>>1
+%o A352618             if f(kmid) <= kmid:
+%o A352618                 kmax = kmid
+%o A352618             else:
+%o A352618                 kmin = kmid
+%o A352618         return kmax
+%o A352618     def f(x):
+%o A352618         c = n+x
+%o A352618         for i in range(integer_log(x,7)[0]+1):
+%o A352618             for j in range(integer_log(m:=x//7**i,5)[0]+1):
+%o A352618                 for k in range(integer_log(r:=m//5**j,3)[0]+1):
+%o A352618                     c -= (r//3**k).bit_length()
+%o A352618         return c
+%o A352618     return bisection(f,n,n)**2 # _Chai Wah Wu_, Sep 17 2024
+%o A352618 (Python) # faster for initial segment of sequence
+%o A352618 import heapq
+%o A352618 from itertools import islice
+%o A352618 from sympy import primerange
+%o A352618 def A352618gen(p=7): # generator of terms
+%o A352618     v, oldv, h, psmooth_primes, = 1, 0, [1], list(primerange(1, p+1))
+%o A352618     while True:
+%o A352618         v = heapq.heappop(h)
+%o A352618         if v != oldv:
+%o A352618             yield v*v
+%o A352618             oldv = v
+%o A352618             for p in psmooth_primes:
+%o A352618                 heapq.heappush(h, v*p)
+%o A352618 print(list(islice(A352618gen(), 65))) # _Michael S. Branicky_, Sep 17 2024
+%Y A352618 Intersection of A000290 and A002473.
+%Y A352618 Cf. A352598.
+%K A352618 nonn
+%O A352618 1,2
+%A A352618 _Michael S. Branicky_, Mar 24 2022

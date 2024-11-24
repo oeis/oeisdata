@@ -1,0 +1,23 @@
+%I A321223 #16 Dec 11 2018 02:48:48
+%S A321223 1,0,1,1,0,1,0,0,1,1,1,1,0,0,1,1,1,1,0,0,1,1,0,1,1,0,2,1,0,0,1,0,1,1,
+%T A321223 0,2,1,2,0,1,0,1,1,1,1,0,1,2,2,0,1,0,0,1,2,1,2,1,1,1,2,0,0,1,0,2,1,1,
+%U A321223 1,2,1,2,1,0,1,1,0,1,1,1,2,1,2,2,1,2,1,1,1,2,1,0,2,1,0,1,1,1,2,2,1,1,3,0,2
+%N A321223 a(n) is the number of recursively self-conjugate partitions of n.
+%C A321223 A recursively self-conjugate partition L has a conjugate L* = L. Further, elimination of the Durfee square and leg (conjugate with the arm) to leave the arm L_1. L_1 likewise has conjugate L_1* = L_1. We continue taking the arm, eliminating the new Durfee square and leg in this manner until the entire partition is processed and all arms are self-conjugate.
+%C A321223 We can define a recursively self-conjugate partition L by placing a series S of squares s_k in position k, whose side-lengths decrease as k increases, in the following manner. We place the first square in the upper left corner, then set 2^(k - 1) squares s_k in all places wherein we have bounds by axis or previous square to the left and top. Thereby we can abbreviate all recursively self-conjugate partitions L by S(L). For example, (5,4,4,4,1) = {4,1}, and (10,9,8,7,6,5,4,3,2,1) = {5,3,1,1}. (See Keith 2011 page 9 Fig. 3.)
+%C A321223 A190900 = positions of 0 in a(n).
+%C A321223 Observation: the graph of this sequence separates into two distinct bands for n greater than approximately 10,000. Values of a(n) for n mod 3 = 0 or 1 tend to be greater than a(n) for n mod 3 = 2. Even within the upper band, we have the mean a(n) for n mod 3 = 0 distinct from the mean a(n) for n mod 3 = 1. See linked graphs. - _Michael De Vlieger_, Dec 10 2018
+%H A321223 Michael De Vlieger, <a href="/A321223/b321223.txt">Table of n, a(n) for n = 1..10000</a>
+%H A321223 Michael De Vlieger, <a href="/A321223/a321223.png">Diagrams of recursively self-conjugate partitions for 1 <= n <= 150.</a>
+%H A321223 Michael De Vlieger, <a href="/A321223/a321223_1.png">Graph of A321223(n) for 1 <= n <= 65536.</a>
+%H A321223 Michael De Vlieger, <a href="/A321223/a321223_2.png">Graph of A321223(n) for 1 <= n <= 65536, color coded mod 3.</a>
+%H A321223 William J. Keith, <a href="http://math.colgate.edu/~integers/vol11a.html">Recursively Self-Conjugate Partitions</a>, Integers 11A, (2011) Article 12.
+%e A321223 a(2) = 0 since neither (2) nor (1,1) is recursively symmetrical.
+%e A321223 a(6) = 1 since the partition (3,2,1) of 6 is recursively symmetrical. S(3,2,1) = {2,1}.
+%e A321223 a(27) = 2 since both (6,6,6,3,3,3) and (6,5,5,5,5,1) are recursively self-conjugate. S(6,6,6,3,3,3) = {3,3}; S(6,5,5,5,5,1) = {5,1}.
+%e A321223 a(103) = 3 since there are 3 recursively self-conjugate partitions of 103: (13,13,13,10,10,10,7,6,6,6,3,3,3), (13,12,12,12,12,8,7,6,5,5,5,5,1), and (13,12,12,10,9,9,9,9,9,4,3,3,1). These can be stated in terms of recursive squares as {7,3,3}, {7,5,1}, and {9,3,1} respectively.
+%t A321223 f[w_] := Block[{k}, k = Total@ w; Total@ Map[Apply[Function[{s, t}, s Array[Boole[t <= # <= s + t - 1] &, k] ], #] &, Apply[Join, Prepend[Table[Function[{v, c}, Map[{w[[k]], # + 1} &, Map[Total[v #] &, Tuples[{0, 1}, {Length@ v}]]]] @@ {Most@ #, ConstantArray[1, Length@ # - 1]} &@ Take[w, k], {k, 2, Length@ w}], {{w[[1]], 1}}]]] ]; g[n_] := Block[{w = {n}, c}, c[x_] := Apply[Times, Most@ x - Reverse@ Accumulate@ Reverse@ Rest@ x]; Reap[Do[Which[And[Length@ w == 2, SameQ @@ w], Sow[w]; Break[], Length@ w == 1, Sow[w]; AppendTo[w, 1], c[w] > 0, Sow[w]; AppendTo[w, 1], True, Sow[w]; w = MapAt[1 + # &, Drop[w, -1], -1] ], {i, Infinity}] ][[-1, 1]] ]; Block[{n = 12, a}, a = Merge[Map[<| #1 -> #2 |> & @@ # &, #], Identity] &@ TakeWhile[Sort@ Map[{Total@ #2, #1, #2} & @@ {#, f[#]} &, Apply[Join, Array[g, n]] ], First@ # <= n^2 &][[All, 1 ;; 2]]; Array[Length[Lookup[a, #] /. k_ /; MissingQ@ k -> {}] &, Length@ a] ]
+%Y A321223 Cf. A190899, A190900.
+%K A321223 nonn,easy
+%O A321223 1,27
+%A A321223 _Michael De Vlieger_, Oct 31 2018

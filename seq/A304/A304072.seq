@@ -1,0 +1,26 @@
+%I A304072 #17 Jul 05 2018 11:05:31
+%S A304072 0,1,3,15,95,848,11043,227978,7915413,482871723,52989880632,
+%T A304072 10588770680260,3880844130502271,2623179650433475894,
+%U A304072 3285998146525888516756,7663037181052161495721168,33407697920116540678510839469,273327584706334343769636571729201
+%N A304072 Number of simple connected graphs with n nodes rooted at one oriented edge.
+%H A304072 Andrew Howroyd, <a href="/A304072/b304072.txt">Table of n, a(n) for n = 1..50</a>
+%F A304072 a(n) + A304073(n) = A304074(n).
+%F A304072 G.f.: R(x)/G(x) where R(x) is the g.f. of A304069 and G(x) is the g.f. of A000088. - _Andrew Howroyd_, May 06 2018
+%e A304072 a(3)=3: one choice of orienting an edge in the triangle graph; two choices of orienting an edge in the linear graph (orientation towards or away from the center node).
+%t A304072 nmax = 20;
+%t A304072 permcount[v_] := Module[{m = 1, s = 0, k = 0, t}, For[i = 1, i <= Length[v], i++, t = v[[i]]; k = If[i > 1 && t == v[[i - 1]], k + 1, 1]; m *= t*k; s += t]; s!/m];
+%t A304072 edges[v_] := Sum[GCD[v[[i]], v[[j]]], {i, 2, Length[v]}, {j, 1, i - 1}] + Total[Quotient[v, 2]];
+%t A304072 a69[n_] := If[n < 2, 0, s = 0; Do[s += permcount[p]*(2^(2*Length[p] + edges[p])), {p, IntegerPartitions[n - 2]}]; s/(n - 2)!];
+%t A304072 a88[n_] := Module[{s = 0}, Do[s += permcount[p]*2^edges[p], {p, IntegerPartitions[n]}]; s/n!];
+%t A304072 gf = Sum[a69[n] x^n, {n, 0, nmax}]/Sum[a88[n] x^n, {n, 0, nmax}]+O[x]^nmax;
+%t A304072 CoefficientList[gf, x] // Rest (* _Jean-François Alcover_, Jul 05 2018, after _Andrew Howroyd_ *)
+%o A304072 (PARI)
+%o A304072 permcount(v) = {my(m=1,s=0,k=0,t); for(i=1,#v,t=v[i]; k=if(i>1&&t==v[i-1],k+1,1); m*=t*k;s+=t); s!/m}
+%o A304072 edges(v) = {sum(i=2, #v, sum(j=1, i-1, gcd(v[i],v[j]))) + sum(i=1, #v, v[i]\2)}
+%o A304072 g(n,r) = {my(s=0); forpart(p=n, s+=permcount(p)*(2^(r*#p+edges(p)))); s/n!}
+%o A304072 seq(n)={concat([0], Vec(Ser(vector(n,n,g(n-1,2)))/Ser(vector(n,n,g(n-1,0)))))} \\ _Andrew Howroyd_, May 06 2018
+%Y A304072 Cf. A000088, A001349 (not rooted), A304069 (not necessarily connected).
+%K A304072 nonn
+%O A304072 1,3
+%A A304072 _Brendan McKay_, May 05 2018
+%E A304072 Terms a(13) and beyond from _Andrew Howroyd_, May 06 2018

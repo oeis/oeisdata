@@ -1,0 +1,49 @@
+%I A352686 #14 Nov 08 2023 15:23:00
+%S A352686 1,1,1,1,2,3,1,3,4,11,1,4,5,14,42,1,5,6,17,51,176,1,6,7,20,60,207,808,
+%T A352686 1,7,8,23,69,238,929,4015,1,8,9,26,78,269,1050,4538,21423,1,9,10,29,
+%U A352686 87,300,1171,5061,23892,122035,1,10,11,32,96,331,1292,5584,26361,134646,738424
+%N A352686 Triangle read by rows. T(n, k) = (n-1)*Gould(k-1) + Bell(k) for n >= 0 and k >= 1, T(n, 0) = 1.
+%F A352686 Given a list T let PS(T) denote the list of partial sums of T. Given two list S and T let [S, T] denote the concatenation of the lists. Further let P[end] denote the last element of the list P. Row n of the triangle T can be computed by the following procedure:
+%F A352686      A = [n], P = [1], R = [1];
+%F A352686      Repeat n times: R = [R, A], P = PS([A, P]), A = [P[end]];
+%F A352686      Return R.
+%e A352686 Triangle starts:
+%e A352686 [0] 1;
+%e A352686 [1] 1, 1;
+%e A352686 [2] 1, 2,  3;
+%e A352686 [3] 1, 3,  4, 11;
+%e A352686 [4] 1, 4,  5, 14, 42;
+%e A352686 [5] 1, 5,  6, 17, 51, 176;
+%e A352686 [6] 1, 6,  7, 20, 60, 207,  808;
+%e A352686 [7] 1, 7,  8, 23, 69, 238,  929, 4015;
+%e A352686 [8] 1, 8,  9, 26, 78, 269, 1050, 4538, 21423;
+%e A352686 [9] 1, 9, 10, 29, 87, 300, 1171, 5061, 23892, 122035;
+%p A352686 Bell := n -> combinat:-bell(n):
+%p A352686 Gould := proc(n) option remember; ifelse(n = 0, 1,
+%p A352686 add(binomial(n, k-1)*Gould(n-k), k = 1..n)) end:
+%p A352686 T := (n, k) -> (n-1)*Gould(k-1) + Bell(k):
+%p A352686 for n from 0 to 9 do seq(T(n,k), k = 0..n) od;
+%p A352686 # Alternative:
+%p A352686 alias(PS = ListTools:-PartialSums):
+%p A352686 A352686Row := proc(n) local a, k, P, R; a := n; P := [1]; R := [1];
+%p A352686 for k from 1 to n do R := [op(R), a]; P := PS([a, op(P)]); a := P[-1] od; R end:
+%p A352686 seq(print(A352686Row(n)), n = 0..9);
+%t A352686 gould[n_] := gould[n] = If[n == 0, 1, Sum[Binomial[n, k+1]*gould[k], {k, 0, n-1}]];
+%t A352686 T[n_, k_] := (n-1) gould[k-1] + BellB[k];
+%t A352686 Table[T[n, k], {n, 0, 10}, {k, 0, n}] // Flatten (* _Jean-François Alcover_, Nov 08 2023, after first Maple program *)
+%o A352686 (Julia)
+%o A352686 function A352686Row(n)
+%o A352686     a = BigInt(n == 0 ? 1 : n)
+%o A352686     P = BigInt[1]; T = BigInt[1]
+%o A352686     for k in 1:n
+%o A352686         T = push!(T, a)
+%o A352686         P = cumsum(pushfirst!(P, a))
+%o A352686         a = P[end]
+%o A352686     end
+%o A352686 T end
+%o A352686 for n in 0:9 println(A352686Row(n)) end
+%Y A352686 Subtriangle of A352682. Main diagonal A352684.
+%Y A352686 Cf. A000110 (Bell), A040027 (Gould).
+%K A352686 nonn,tabl
+%O A352686 0,5
+%A A352686 _Peter Luschny_, Mar 31 2022

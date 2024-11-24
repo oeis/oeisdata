@@ -1,0 +1,34 @@
+%I A264399 #22 Jun 14 2023 17:29:26
+%S A264399 1,1,1,1,3,2,3,5,2,6,4,1,9,6,9,11,2,16,13,1,20,15,7,25,28,3,32,33,11,
+%T A264399 1,40,52,9,54,55,24,2,69,82,25,84,101,40,6,101,148,46,2,136,163,73,13,
+%U A264399 156,239,89,6,202,274,127,23,1,244,364,170,14,306,437,211,46,2
+%N A264399 Triangle read by rows: T(n,k) is the number of partitions of n having k parts with even multiplicities.
+%C A264399 T(n,0) = A055922(n).
+%C A264399 Row sums give A000041. - _Omar E. Pol_, Nov 21 2015
+%H A264399 Alois P. Heinz, <a href="/A264399/b264399.txt">Rows n = 0..1000, flattened</a>
+%F A264399 G.f.: G(t,x) = Product_{j>=1} ((1 + x^j - x^(2j) + tx^(2j))/(1-x^(2j))).
+%e A264399 T(6,1) = 4 because we have [4,1*,1], [3*,3], [2,1*,1,1,1], and [1*,1,1,1,1,1] (parts with even multiplicities are marked).
+%e A264399 Triangle starts:
+%e A264399   1;
+%e A264399   1;
+%e A264399   1, 1;
+%e A264399   3;
+%e A264399   2, 3;
+%e A264399   5, 2;
+%e A264399   6, 4, 1;
+%e A264399   ...
+%p A264399 g := product(1+x^j/(1-x^(2*j))+t*x^(2*j)/(1-x^(2*j)), j = 1 .. 100): gser := simplify(series(g, x = 0, 30)): for n from 0 to 28 do P[n] := sort(coeff(gser, x, n)) end do: for n from 0 to 28 do seq(coeff(P[n], t, j), j = 0 .. degree(P[n])) end do; # yields sequence in triangular form
+%p A264399 # second Maple program:
+%p A264399 b:= proc(n, i) option remember; `if`(n=0, 1, `if`(i<1, 0, add(
+%p A264399       expand(`if`(j>0 and j::even, x, 1)*b(n-i*j, i-1)), j=0..n/i)))
+%p A264399     end:
+%p A264399 T:= n-> (p-> seq(coeff(p, x, i), i=0..degree(p)))(b(n$2)):
+%p A264399 seq(T(n), n=0..30);  # _Alois P. Heinz_, Nov 25 2015
+%t A264399 b[n_, i_] := b[n, i] = If[n==0, 1, If[i<1, 0, Sum[Expand[If[j>0 && EvenQ[ j], x, 1]*b[n-i*j, i-1]], {j, 0, n/i}]]]; T[n_] := Function[p, Table[ Coefficient[p, x, i], {i, 0, Exponent[p, x]}]][b[n, n]]; Table[T[n], {n, 0, 30}] // Flatten (* _Jean-François Alcover_, Dec 25 2015, after _Alois P. Heinz_ *)
+%o A264399 (PARI)
+%o A264399 T(n) = { Vec(prod(k=1, n, (1+x^k-x^(2*k)+y*x^(2*k))/(1-x^(2*k)) + O(x*x^n))) }
+%o A264399 { my(t=T(10)); for(n=1, #t, print(Vecrev(t[n]))); } \\ _Andrew Howroyd_, Dec 22 2017
+%Y A264399 Cf. A000041, A055922, A264398, A264400.
+%K A264399 nonn,look,tabf
+%O A264399 0,5
+%A A264399 _Emeric Deutsch_, Nov 21 2015

@@ -1,0 +1,43 @@
+%I A218459 #84 Oct 03 2023 10:09:15
+%S A218459 1,2,1,3,2,1,1,2,7,1,3,1,1,2,11,1,2,1,2,7,1,3,2,1,1,1,3,2,1,1,3,2,1,2,
+%T A218459 1,3,1,2,23,1,2,1,7,1,1,3,2,3,2,1,1,7,1,2,1,7,1,3,1,1,2,1,2,11,1,1,2,
+%U A218459 1,2,1,1,7,3,1,2,22,1,1,1,1,2,1,7,1,3,2,1,1,1,3,2,19,3,2,2
+%N A218459 a(n) is the smallest positive integer d such that prime(n) = x^2 + dy^2 has a solution (x,y) in integers.
+%C A218459 a(n) = smallest positive integer d such that prime(n) is reducible in the ring Z[sqrt(-d)].
+%C A218459 If prime(n) == 1 or 2 mod 4, then a(n) = 1. If prime(n) == 3 mod 8, then a(n) = 2. If prime(n) == 7 mod 24 then a(n) = 3.
+%C A218459 If prime(n) == 23 mod 24, a(n) >= 7. In particular, the above conditions are if and only if. - _Charles R Greathouse IV_, Oct 31 2012
+%C A218459 a(n) = 7 if and only if prime(n) is 11, 15, or 23 mod 28. - _Charles R Greathouse IV_, Nov 09 2012
+%C A218459 It appears 75% of values are 1 or 2, with the vast majority of the rest prime, though many are duplicates. Conjecture: Odd composite values belong to A176255. - _Bill McEachen_, Sep 03 2023
+%D A218459 Ethan D. Bolker, Elementary Number Theory: An Algebraic Approach. Mineola, New York: Dover Publications (1969, reprinted 2007): p. 68, Theorem 24.5; p. 74, Theorem 25.4.
+%D A218459 David A. Cox, "Primes of the Form x^2 + n y^2", Wiley, 1989, Section 9, "Ring class fields and p = x^2 + n y^2." - From _N. J. A. Sloane_, Dec 26 2012
+%H A218459 Charles R Greathouse IV, <a href="/A218459/b218459.txt">Table of n, a(n) for n = 1..10000</a>
+%H A218459 Alonso del Arte, <a href="/A218459/a218459_1.png">Diagram illustrating first six terms on the complex plane</a>
+%F A218459 a(n) >= A088192(n). - _Charles R Greathouse IV_, Oct 31 2012
+%e A218459 a(1) = 1 because the first prime is 2, which is 1^2 + 1^2.
+%e A218459 a(2) = 2 because the second prime is 3, which is 1^2 + 2*1^2, but not of the form x^2 + y^2 for any integers x, y.
+%e A218459 a(3) = 1 because the third prime is 5, which is 2^2 + 1*1^2.
+%e A218459 a(4) = 3 because the third prime is 7, which is 2^2 + 3*1^2, but not of the form x^2 + y^2 or x^2 + 2y^2 for any integers x, y.
+%t A218459 r[n_, d_] := Reduce[ Prime[n] == x^2 + d*y^2, {x, y}, Integers]; a[n_] := For[d = 1, True, d++, If[r[n, d] =!= False, Return[d] ] ]; Table[a[n], {n, 1, 95}] (* _Jean-François Alcover_, Apr 04 2013 *)
+%o A218459 (PARI) ndv(d, p)=(#bnfisintnorm(bnfinit(y^2+d), p))==0
+%o A218459 forprime(p=2, 500, for(d=1, p, if(!ndv(d, p), print1(d, ", "); break))) \\ _Georgi Guninski_, Oct 27 2012
+%o A218459 (PARI) check(d,p)={
+%o A218459    if(kronecker(-d,p)<0 || #bnfisintnorm(bnfinit('x^2+d),p)==0, return(0));
+%o A218459    for(y=1,sqrtint(p\d),if(issquare(p-d*y^2),return(1)));
+%o A218459    0
+%o A218459 };
+%o A218459 do(p)={
+%o A218459    if(p%24<23,return(if(p%4<3,1,if(p%8==3,2,3))));
+%o A218459    if(kronecker(p,7)>0, return(7));
+%o A218459    if(check(11,p), return(11));
+%o A218459    for(d=19,p,
+%o A218459     if(issquarefree(d) && check(d,p), return(d))
+%o A218459    )
+%o A218459 };
+%o A218459 apply(do, primes(100)) \\ _Charles R Greathouse IV_, Oct 31 2012
+%o A218459 (PARI) A218459(n)={my(p=prime(n),d);while(d++,for(y=1,sqrtint((p-1)\d), issquare(p-d*y^2)&&return(d)))} \\ _M. F. Hasler_, May 05 2013
+%Y A218459 Cf. A088192, A176255.
+%K A218459 nonn,nice
+%O A218459 1,2
+%A A218459 _Alonso del Arte_, Oct 29 2012
+%E A218459 a(76) corrected by _Charles R Greathouse IV_, Nov 13 2012
+%E A218459 Edited by _N. J. A. Sloane_, Dec 07 2012, Dec 26 2012

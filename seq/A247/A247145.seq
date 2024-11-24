@@ -1,0 +1,39 @@
+%I A247145 #34 Mar 20 2023 17:21:33
+%S A247145 6,12,24,28,40,42,56,60,90,120,140,153,216,234,270,290,360,440,496,
+%T A247145 522,568,585,588,672,708,819,924,984,992,1001,1170,1316,1320,1365,
+%U A247145 1431,1780,2016,2184,2295,2296,2299,2464,2466,2655,2832,3100,3344,3420,3627,3724,3948,4320,4336,4416,4680
+%N A247145 Composite numbers such that the product of the number's proper divisors is divisible by the sum of the number's proper divisors.
+%C A247145 Equal to the indices of the zero terms that correspond to composite numbers in A191906.
+%H A247145 Robert Israel, <a href="/A247145/b247145.txt">Table of n, a(n) for n = 1..1203</a>
+%e A247145 12 is on the list because the proper divisors of 12 are [1,2,3,4,6]. The product of these numbers is 144. Their sum is 16. 144 is divisible by 16.
+%p A247145 filter:= proc(n)
+%p A247145        local d,p,s;
+%p A247145      if isprime(n) then return false fi;
+%p A247145      d:= numtheory:-divisors(n) minus {n};
+%p A247145      convert(d,`*`) mod convert(d,`+`) = 0;
+%p A247145 end proc:
+%p A247145 select(filter, [$2..10000]); # _Robert Israel_, Dec 16 2014
+%t A247145 a247145[n_Integer] :=
+%t A247145 Select[Select[Range[n], CompositeQ[#] &],
+%t A247145 Divisible[Times @@ Most@Divisors[#], Plus @@ Most@Divisors[#]] &]; a247145[4680] (* _Michael De Vlieger_, Dec 15 2014 *)
+%t A247145 fQ[n_Integer] := Block[{d = Most@Divisors@n}, Mod[Times @@ d, Plus @@ d] == 0]; Select[Range@4680, ! PrimeQ@# && fQ@# &] (* _Michael De Vlieger_, Dec 19 2014, suggested by _Robert G. Wilson v_ *)
+%o A247145 (Python)
+%o A247145 from functools import reduce
+%o A247145 from operator import mul
+%o A247145 def divs(n):
+%o A247145     for i in range(1, int(n / 2 + 1)):
+%o A247145         if n % i == 0:
+%o A247145             yield i
+%o A247145     yield n
+%o A247145 g = []
+%o A247145 for a in range(2, 100):
+%o A247145     q = list(divs(a))[0:-1]
+%o A247145     if reduce(mul, q, 1) % sum(q) == 0 and len(q) != 1:
+%o A247145         g.append(a)
+%o A247145 print(g)
+%o A247145 (PARI) forcomposite(n=1,10^3,d=divisors(n);p=prod(i=1,#d-1,d[i]);if(!(p%(sigma(n)-n)),print1(n,", "))) \\ _Derek Orr_, Nov 27 2014
+%Y A247145 Cf. A145551.
+%K A247145 nonn,easy
+%O A247145 1,1
+%A A247145 _David Consiglio, Jr._, Nov 20 2014
+%E A247145 More terms from _Derek Orr_, Dec 03 2014

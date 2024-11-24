@@ -1,0 +1,31 @@
+%I A258289 #18 May 01 2022 13:51:30
+%S A258289 1,1,1,3,3,7,9,17,21,43,57,109,157,301,447,895,1307,2663,4207,8463,
+%T A258289 13283,28489,45151,95485,157767,336711,561603,1236963,2061173,4567227,
+%U A258289 7946575,17516101,30324977,69519697,121465499,276609723,496333307,1137900605
+%N A258289 Number of partitions of 1, 2, 3, or more copies of n into distinct parts.
+%F A258289 a(n) = Sum_{k=1..A065033(n)} A258280(n,k).
+%F A258289 a(n) = Sum_{k=1..max(1,ceiling(n/2))} 1/k! * [Product_{i=1..k} x_i^n] Product_{j>0} (1+Sum_{i=1..k} x_i^j).
+%e A258289 a(0) = 1: [].
+%e A258289 a(1) = 1: [1].
+%e A258289 a(2) = 1: [2].
+%e A258289 a(3) = 3: [3], [2,1], [3;2,1].
+%e A258289 a(4) = 3: [4], [3,1], [4;3,1].
+%e A258289 a(5) = 7: [5], [4,1], [3,2], [5;4,1], [5;3,2], [4,1;3,2], [5;4,1;3,2].
+%e A258289 a(7) = 17: [7], [6,1], [5,2], [4,3], [4,2,1], [7;6,1], [7;5,2], [7;4,3], [7;4,2,1], [6,1;5,2], [6,1;4,3], [5,2;4,3], [7;6,1;5,2], [7;6,1;4,3], [7;5,2;4,3], [6,1;5,2;4,3], [7;6,1;5,2;4,3].
+%p A258289 b:= proc() option remember; local m; m:= args[nargs];
+%p A258289      `if`(nargs=1, 1, `if`(args[1]=0, b(args[t] $t=2..nargs),
+%p A258289      `if`(m=0 or add(args[i], i=1..nargs-1)> m*(m+1)/2, 0,
+%p A258289       b(args[t] $t=1..nargs-1, m-1)+add(`if`(args[j]-m<0, 0,
+%p A258289       b(sort([seq(args[i]-`if`(i=j, m, 0), i=1..nargs-1)])[]
+%p A258289       , m-1)), j=1..nargs-1))))
+%p A258289     end:
+%p A258289 a:= n-> add(b(n$k+1)/k!, k=1..max(1, ceil(n/2))):
+%p A258289 seq(a(n), n=0..20);
+%t A258289 disParts[n_] := disParts[n] = Select[IntegerPartitions[n], Length[#] == Length[Union[#]]&];
+%t A258289 T[n_, k_] := Select[Subsets[disParts[n], {k}], Length[Flatten[#]] == Length[Union[Flatten[#]]]&] // Length;
+%t A258289 a[n_] := a[n] = If[n == 0, 1, Sum[T[n, k], {k, 1, Quotient[n+1, 2]}]];
+%t A258289 Table[Print[n, " ", a[n]]; a[n], {n, 0, 16}] (* _Jean-François Alcover_, May 01 2022 *)
+%Y A258289 Cf. A000009, A065033, A258280.
+%K A258289 nonn
+%O A258289 0,4
+%A A258289 _Alois P. Heinz_, May 25 2015

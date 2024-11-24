@@ -1,0 +1,33 @@
+%I A309435 #18 Sep 20 2019 03:27:25
+%S A309435 1,2,3,4,5,2,3,7,8,9,5,2,11,3,4,13,14,15,16,17,18,19,4,5,3,7,2,11,23,
+%T A309435 24,25,26,27,28,29,30,31,32,11,3,34,35,36,37,38,39,40,41,42,43,44,9,5,
+%U A309435 46,47,48,49,50,51,4,13,53,54,55,7,8,57,58,59,60
+%N A309435 Iteratively replace the product of two sequentially chosen consecutive integers with those integers.
+%F A309435 To generate the sequence, start with the integers, A_0={1,2,3,4,5,...}. To generate A_{n+1} calculate x = A_n(n) * A_n(n+1). Replace the next instance of x in A_n (after A_n(n+1)) with A_n(n), A_n(n+1). The limit of this process gives the sequence.
+%e A309435 A_0 = {1,2,3,4,5,...}
+%e A309435 A_0(0) * A_0(1) = 1 * 2 = 2, which is not found after A_0(1), so A_1 = A_0.
+%e A309435 A_1(1) * A_1(2) = 2 * 3 = 6, which *is* found after A_1(2), so A_2 = {1,2,3,4,5,2,3,7,8,...}
+%e A309435 A_2(2) * A_2(3) = 3 * 4 = 12, A_3 = {1,2,3,4,5,2,3,7,8,9,10,11,3,4,13,...}
+%e A309435 A_3(3) * A_3(4) = 4 * 5 = 20, A_4 = {1,2,3,4,5,2,3,7,8,9,10,11,3,4,13,...,19,4,5,21,...}
+%e A309435 A_4(4) * A_4(5) = 5 * 2 = 10, A_5 = {1,2,3,4,5,2,3,7,8,9,5,2,11,3,4,13,...,19,4,5,21,...}
+%t A309435 T = Range[100]; Do[p = T[[i]] T[[i + 1]]; Do[If[T[[j]] == p, T = Join[ T[[;; j-1]], {T[[i]], T[[i+1]]}, T[[j+1 ;;]]]; Break[]], {j, i+2, Length@ T}], {i, Length@T}]; T (* _Giovanni Resta_, Sep 20 2019 *)
+%o A309435 (Kotlin)
+%o A309435 fun generate(len: Int): List<Int> {
+%o A309435     fun gen_inner(len: Int, level: Int): List<Int> {
+%o A309435         if (level < 1) return (1..len).toList()
+%o A309435         val prev = gen_inner(len, level - 1)
+%o A309435         if (level == len) return prev.take(len)
+%o A309435         val (a,b) = prev[level - 1] to prev[level]
+%o A309435         return if (prev.drop(level + 1).contains(a*b)) {
+%o A309435             prev.indexOfFirst { it == a*b }.let { idx ->
+%o A309435                 prev.take(idx) + a + b + prev.drop(idx + 1)
+%o A309435             }
+%o A309435         } else prev
+%o A309435     }
+%o A309435     return gen_inner(len,len)
+%o A309435 }
+%o A309435 (PARI) a = vector(92, k, k); for (n=1, #a, print1 (a[n] ", "); s=a[n]*a[n+1]; for (k=n+2, #a, if (a[k]==s, a=concat([a[1..k-1], a[n..n+1], a[k+1..#a]]); break))) \\ _Rémy Sigrist_, Aug 03 2019
+%Y A309435 This sequence is similar to A309503 except it uses multiplication instead of addition.
+%K A309435 nonn,easy
+%O A309435 1,2
+%A A309435 _Matthew Malone_, Aug 02 2019

@@ -1,0 +1,67 @@
+%I A225822 #32 Jul 24 2023 02:36:48
+%S A225822 7,23,31,39,55,71,87,95,103,119,127,135,151,159,167,183,199,215,223,
+%T A225822 231,247,263,279,287,295,311,327,343,351,359,375,383,391,407,415,423,
+%U A225822 439,455,471,479,487,503,511,519,535,543,551,567,583,599,607,615,631
+%N A225822 Lesser of adjacent odd numbers with different parity of binary weight and both isolated from odd numbers of same parity of binary weight.
+%C A225822 Write the sequence of odious odd numbers above the sequence of evil odd numbers connecting all that are 2 apart:
+%C A225822 1 7 11-13 19-21 25 31 35-37 41 47-49 55 59-61 67-69 73 79-81 87 91-93 97
+%C A225822 3-5  9 15-17 23 27-29 33 39 43-45 51-53 57 63-65 71 75-77 83-85 89 95 99-
+%C A225822 Remove the connected numbers:
+%C A225822 1 7             25 31       41       55             73       87       97
+%C A225822      9       23       33 39             57       71             89  95
+%C A225822 Define these as "isolated".
+%C A225822 The sequence is the smaller of the remaining pairs that are 2 apart.
+%C A225822 The 1 is not a member since there is no change in parity between 1 and 7.
+%C A225822 All of the differences between adjacent numbers in both the evil and odious sequences are either 2, 4 or 6, with 4 being the indicator that a transition in parity occurs. The program provided utilizes that fact to produce the sequence.
+%C A225822 The sequence that includes all numbers along this path is A047522 (numbers congruent to {1,7} mod 8). This is also the same as the odd terms of A199398 (XOR of the first n odd numbers).
+%C A225822 This sequence is similar to A044449 (numbers n such that string 1,3 occurs in the base 4 representation of n but not of n+1), but it contains additional terms. An example is 119. Its base 4 representation is 1313 while the base 4 representation of 120 is 1320. It may be that another workable definition of the sequence is -- numbers n in base 4 representation such that string 1,3 occurs one less time in n+1 than n, but I have not been able to check this.
+%C A225822 The difference between the numbers in the sequence is always either 8 or 16, however there appears to be no recurring repetitions in it. Writing the 8 as a 0 and the 16 as a 1 (or dividing the difference pattern by 2 and subtracting a 1) produces a difference pattern of: 1, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 1, 1... which is an infinite word.
+%C A225822 A similar process writing Even Odious over Even Evils produces 6, 22, 30, 38, 54, 70... which is twice A131323 (Odd numbers n such that the binary expansion ends in an even number of 1's), with all numbers along the path given by A047451 (numbers congruent to  {0,6} mod 8) and yields the same difference pattern which produces the same infinite word.
+%H A225822 Brad Clardy, <a href="/A225822/b225822.txt">Table of n, a(n) for n = 1..1000</a>
+%F A225822 a(n) = 2*A131323(n) + 1.
+%F A225822 a(n) = 4*A079523(n) + 3. - _Charles R Greathouse IV_, Aug 20 2013
+%F A225822 a(n) ~ 12n. (In particular, a(n) = 12n + O(log n).) - _Charles R Greathouse IV_, Aug 20 2013
+%t A225822 2*Select[Range[1, 320, 2], EvenQ[IntegerExponent[# + 1, 2]] &] + 1 (* _Amiram Eldar_, Jul 24 2023 *)
+%o A225822 (Magma)
+%o A225822 //Function Bweight calculates the binary weight of an integer
+%o A225822 Bweight := function(m)
+%o A225822 Bweight:=0;
+%o A225822 adigs := Intseq(m,2);
+%o A225822 for n:= 1 to Ilog2(m)+1 do
+%o A225822   Bweight:=Bweight+adigs[n];
+%o A225822 end for;
+%o A225822 return Bweight;
+%o A225822 end function;
+%o A225822 prevodi:=0;
+%o A225822 currodi:=0;
+%o A225822 m:=0;
+%o A225822 count:=0;
+%o A225822 for n:= 1 to 20000 by 2 do
+%o A225822     m:=m+1;
+%o A225822     if (Bweight(n) mod 2 eq 1) then odious:=true; else odious:=false; end if;
+%o A225822     if (odious) then currodi:=n; end if;
+%o A225822        if (currodi - prevodi eq 4) then
+%o A225822           if (m mod 2 eq 1) then count:=count+1; count,n-2;
+%o A225822              else count:=count+1;count,n-4;
+%o A225822        end if;
+%o A225822     end if;
+%o A225822     if(odious) then prevodi:=currodi; end if;
+%o A225822 end for;
+%o A225822 (PARI) is(n)=n%4==3 && valuation(n\4+1, 2)%2 \\ _Charles R Greathouse IV_, Aug 20 2013
+%o A225822 (Python)
+%o A225822 from itertools import count, islice
+%o A225822 def A225822_gen(startvalue=1): # generator of terms >= startvalue
+%o A225822     return map(lambda m:(m<<1)+1,filter(lambda n:n&1 and not (~(n+1)&n).bit_length()&1,count(max(startvalue,1))))
+%o A225822 A225822__list = list(islice(A225822_gen(),30)) # _Chai Wah Wu_, Jul 09 2022
+%Y A225822 Cf. A001969 (evil numbers), A129771 (odd evil numbers).
+%Y A225822 Cf. A000069 (odious numbers), A092246 (odd odious numbers).
+%Y A225822 Cf. A047522 (numbers congruent to {1,7} mod 8).
+%Y A225822 Cf. A199398 (XOR of first n odd numbers).
+%Y A225822 Cf. A044449 (a subset of this sequence).
+%Y A225822 Cf. A131323 (odd numbers n such that the binary expansion ends in an even number of 1's).
+%Y A225822 Cf. A047451 (numbers congruent to {0,6} mod 8).
+%Y A225822 Cf. A000120 (binary weight of n).
+%Y A225822 Cf. A079523.
+%K A225822 nonn,base,easy
+%O A225822 1,1
+%A A225822 _Brad Clardy_, Jul 30 2013

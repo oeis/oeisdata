@@ -1,0 +1,38 @@
+%I A242533 #19 Oct 25 2018 21:25:52
+%S A242533 1,1,2,36,288,3888,200448,4257792,139511808,11813990400,532754620416
+%N A242533 Number of cyclic arrangements of S={1,2,...,2n} such that the difference of any two neighbors is coprime to their sum.
+%C A242533 a(n)=NPC(2n;S;P) is the count of all neighbor-property cycles for a specific set S of 2n elements and a specific pair-property P. For more details, see the link and A242519.
+%C A242533 Conjecture: in this case it seems that NPC(n;S;P)=0 for all odd n, so only the even ones are listed. This is definitely not the case when the property P is replaced by its negation (see A242534).
+%H A242533 S. Sykora, <a href="http://dx.doi.org/10.3247/SL5Math14.002">On Neighbor-Property Cycles</a>, <a href="http://ebyte.it/library/Library.html#math">Stan's Library</a>, Volume V, 2014.
+%e A242533 For n=4, the only cycle is {1,2,3,4}.
+%e A242533 The two solutions for n=6 are: C_1={1,2,3,4,5,6} and C_2={1,4,3,2,5,6}.
+%t A242533 A242533[n_] := Count[Map[lpf, Map[j1f, Permutations[Range[2, 2 n]]]], 0]/2;
+%t A242533 j1f[x_] := Join[{1}, x, {1}];
+%t A242533 lpf[x_] := Length[Select[cpf[x], ! # &]];
+%t A242533 cpf[x_] := Module[{i},
+%t A242533    Table[CoprimeQ[x[[i]] - x[[i + 1]], x[[i]] + x[[i + 1]]], {i,
+%t A242533      Length[x] - 1}]];
+%t A242533 Join[{1}, Table[A242533[n], {n, 2, 5}]]
+%t A242533 (* OR, a less simple, but more efficient implementation. *)
+%t A242533 A242533[n_, perm_, remain_] := Module[{opt, lr, i, new},
+%t A242533    If[remain == {},
+%t A242533      If[CoprimeQ[First[perm] + Last[perm], First[perm] - Last[perm]],
+%t A242533       ct++];
+%t A242533      Return[ct],
+%t A242533      opt = remain; lr = Length[remain];
+%t A242533      For[i = 1, i <= lr, i++,
+%t A242533       new = First[opt]; opt = Rest[opt];
+%t A242533       If[! CoprimeQ[Last[perm] + new, Last[perm] - new], Continue[]];
+%t A242533       A242533[n, Join[perm, {new}],
+%t A242533        Complement[Range[2, 2 n], perm, {new}]];
+%t A242533       ];
+%t A242533      Return[ct];
+%t A242533      ];
+%t A242533    ];
+%t A242533 Join[{1}, Table[ct = 0; A242533[n, {1}, Range[2, 2 n]]/2, {n, 2, 6}] ](* _Robert Price_, Oct 25 2018 *)
+%o A242533 (C++) See the link.
+%Y A242533 Cf. A242519, A242520, A242521, A242522, A242523, A242524, A242525, A242526, A242527, A242528, A242529, A242530, A242531, A242532, A242534.
+%K A242533 nonn,hard,more
+%O A242533 1,3
+%A A242533 _Stanislav Sykora_, May 30 2014
+%E A242533 a(10)-a(11) from _Fausto A. C. Cariboni_, May 31 2017, Jun 01 2017

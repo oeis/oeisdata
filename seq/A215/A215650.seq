@@ -1,0 +1,67 @@
+%I A215650 #58 Mar 25 2021 10:23:05
+%S A215650 1,2,10,1299,3161965550
+%N A215650 Number of transformation semigroups acting on n points (counting conjugates as distinct); also the number of subsemigroups of the full transformation semigroup T_n.
+%C A215650 The semigroup analog of A005432.
+%C A215650 We apply the categorical viewpoint and consider the empty set as a semigroup.
+%C A215650 The first 4 terms can be calculated by brute force search (see attached program).
+%H A215650 James East, Attila Egri-Nagy, James D. Mitchell, <a href="https://doi.org/10.1007/s00233-017-9869-2">Enumerating Transformation Semigroups</a>, Semigroup Forum 95, 109-125 (2017); arXiv: <a href="https://arxiv.org/abs/1403.0274">1403.0274</a> [math.GR], 2014-2017.
+%o A215650 (GAP)
+%o A215650 ################################################################################
+%o A215650 # GAP 4.5 function implementing a brute force search for submagmas of a magma.
+%o A215650 # (C) 2012 Attila Egri-Nagy www.egri-nagy.hu
+%o A215650 # GAP can be obtained from www.gap-system.org
+%o A215650 ################################################################################
+%o A215650 # The function goes through all the subsets of the given magma (groups,
+%o A215650 # semigroups) and checks whether they form a magma or not.
+%o A215650 # If yes, then the submagma is collected.
+%o A215650 # The function returns the list of all (nonempty) submagmas.
+%o A215650 BruteForceSubMagmaSearch := function(M)
+%o A215650 local bitlist, #the characteristic function of a subset
+%o A215650       i, #an integer to index through the bitlist
+%o A215650       n, #size of the input magma
+%o A215650       elms, #elements of the magma
+%o A215650       gens, #generator set of a submagma
+%o A215650       submagmas, #the submagmas
+%o A215650       duplicates, #for counting how many times we encounter the same submagma
+%o A215650       nonsubmagmas; #counting how many subsets are not submagmas
+%o A215650       # duplicates + nonsubmagmas = 2^n-1
+%o A215650   n := Size(M);
+%o A215650   submagmas := [];
+%o A215650   elms := AsList(M);
+%o A215650   duplicates := 0;
+%o A215650   nonsubmagmas := 0;
+%o A215650   bitlist := BlistList([1..n],[1]); #we start with the first element, the
+%o A215650   #empty set can be added afterwards, if the magma's definition allows it
+%o A215650   repeat
+%o A215650     #constructing a generator set based on the bitlist##########################
+%o A215650     gens := [];
+%o A215650     Perform([1..n],function(x) if bitlist[x] then Add(gens, elms[x]);fi;end);
+%o A215650     #checking whether it is a submagma
+%o A215650 if Size(gens) = Size(Magma(gens)) then
+%o A215650       if gens in submagmas then
+%o A215650         duplicates := duplicates + 1;
+%o A215650       else
+%o A215650         AddSet(submagmas,gens);
+%o A215650       fi;
+%o A215650     else
+%o A215650       nonsubmagmas := nonsubmagmas + 1;
+%o A215650     fi;
+%o A215650     #binary +1 applied to bitlist###############################################
+%o A215650     i := 1;
+%o A215650     while (i<=n) and (bitlist[i]) do
+%o A215650       bitlist[i] := false;
+%o A215650       i := i + 1;
+%o A215650     od;
+%o A215650     if i <= n then bitlist[i] := true;fi;
+%o A215650     ############################################################################
+%o A215650   until SizeBlist(bitlist) = 0;
+%o A215650   Print("#I Submagmas:", Size(submagmas),
+%o A215650         " Duplicates:", duplicates,
+%o A215650         " Nonsubmagmas:", nonsubmagmas,"\n");
+%o A215650   return submagmas;
+%o A215650 end;
+%Y A215650 Cf. A005432, A215651.
+%K A215650 nonn,hard,more,nice
+%O A215650 0,2
+%A A215650 _Attila Egri-Nagy_, Aug 19 2012
+%E A215650 a(4) moved from comments to data by _Andrey Zabolotskiy_, Mar 25 2021

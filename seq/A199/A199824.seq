@@ -1,0 +1,61 @@
+%I A199824 #28 Sep 08 2022 08:46:00
+%S A199824 67,167,587,719,751,769,1129,1163,1531,1913,2099,2153,2543,2819,3049,
+%T A199824 3079,3709,3967,4691,4861,4909,5147,5347,5749,5813,5939,6121,6151,
+%U A199824 6397,6473,6563,6709,6883,6899,6911,7247,7393,7451,7703,7829,7919,8093,8171,8447,8707,8807,8963,9157,9161,9209
+%N A199824 Primes in successive intervals (2^i +1 .. 2^(i+1) -1) i=1,2,3,... such that there are no prime symmetric XOR couples in either the original interval or any recursively halved interval that contains them.
+%C A199824 The MAGMA program provided produces output with each interval delimited by the power of 2 that starts it.
+%C A199824 All of these primes are a sparse subset of isolated primes (the only possible exception would be a twin prime that crosses the interval boundary, but none are known to occur).
+%C A199824 In each interval XOR couples are produced by XORing a number in the interval with 2^i -2 where i is the index used in the interval definition. In recursively halved intervals, i is decremented each time down to i=2.
+%H A199824 Alois P. Heinz, <a href="/A199824/b199824.txt">Table of n, a(n) for n = 1..10000</a>
+%e A199824 In the interval (17 .. 31) i=4 the numbers are coupled symmetrically around the middle of the interval by XORing each with 2^i -2 where i=4 or 14.
+%e A199824 |-------XOR 14-------|
+%e A199824 |  |--------------|  |
+%e A199824 |  |  |--------|  |  |
+%e A199824 |  |  |  |--|  |  |  |
+%e A199824 17 19 21 23 25 27 29 31
+%e A199824 (17,31), (19,29) are prime XOR couples but the prime 23 has a composite couple (23,25).
+%e A199824 23 is in the first half of the interval. XORing each number in the first half of the interval with 2^i -2 where i=3 or 6
+%e A199824 |---XOR 6---|
+%e A199824 |   |---|   |
+%e A199824 17  19  21  23
+%e A199824 (17,23) is a prime XOR couple and all primes in the interval have been coupled, therefore there are no primes with only composite couples in the interval (17 .. 31).
+%e A199824 The first such prime occurs in the interval (65 ..127) and is 67
+%p A199824 q:= (l, p, r)-> r-l=2 or not isprime(l+r-p) and
+%p A199824                 `if`((l+r)/2>p, q(l, p, (l+r)/2), q((l+r)/2, p, r)):
+%p A199824 a:= proc(n) local p, l;
+%p A199824       p:= `if`(n=1, 3, a(n-1));
+%p A199824       do p:= nextprime(p);
+%p A199824          l:= 2^ilog2(p);
+%p A199824          if q(l, p, l+l) then break fi
+%p A199824       od; a(n):=p
+%p A199824     end:
+%p A199824 seq(a(n), n=1..60); # _Alois P. Heinz_, Nov 13 2011
+%t A199824 q[l_, p_, r_] := r - l == 2 || ! PrimeQ[l + r - p] &&
+%t A199824     If[(l + r)/2 > p, q[l, p, (l + r)/2], q[(l + r)/2, p, r]];
+%t A199824 a[n_] := a[n] = Module[{p, l},
+%t A199824     p = If[n == 1, 3, a[n - 1]]; While[True, p = NextPrime[p];
+%t A199824     l = 2^(Length[IntegerDigits[p, 2]]-1); If[q[l, p, l+l], Break[]]]; p];
+%t A199824 Table[a[n], {n, 1, 60}] (* _Jean-François Alcover_, Jul 11 2021, after _Alois P. Heinz_ *)
+%o A199824 (Magma)
+%o A199824 XOR := func<a, b | Seqint([ (adigs[i] + bdigs[i]) mod 2 : i in [1..n]], 2)
+%o A199824       where adigs := Intseq(a, 2, n)
+%o A199824       where bdigs := Intseq(b, 2, n)
+%o A199824       where n := 1 + Ilog2(Max([a, b, 1]))>;
+%o A199824 for i:= 4 to 16 do
+%o A199824     "****", i;
+%o A199824     for j:= 2^(i) +1 to 2^(i+1) -1 by 2 do
+%o A199824         sympair:=0;
+%o A199824         for k:= 2 to i do
+%o A199824             xornum:=2^k -2;
+%o A199824             xorcouple:=XOR(j,xornum);
+%o A199824             if (IsPrime(j) and IsPrime(xorcouple)) then sympair:=1;
+%o A199824                end if;
+%o A199824         end for;
+%o A199824         if ((sympair eq 0) and IsPrime(j)) then j;
+%o A199824            end if;
+%o A199824     end for;
+%o A199824 end for;
+%Y A199824 Cf. A000040.
+%K A199824 nonn
+%O A199824 1,1
+%A A199824 _Brad Clardy_, Nov 11 2011

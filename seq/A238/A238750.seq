@@ -1,0 +1,55 @@
+%I A238750 #26 Aug 27 2021 02:36:20
+%S A238750 1,0,1,0,1,1,0,2,1,1,0,4,3,2,1,0,10,7,5,3,1,0,26,20,14,11,4,1,0,76,56,
+%T A238750 44,31,19,5,1,0,232,182,139,106,69,29,6,1,0,764,589,475,351,265,127,
+%U A238750 41,7,1,0,2620,2088,1658,1303,971,583,209,55,8,1
+%N A238750 Number T(n,k) of standard Young tableaux with n cells and largest value n in row k; triangle T(n,k), n>=0, 0<=k<=n, read by rows.
+%C A238750 Also the number of ballot sequences of length n having last value k.
+%C A238750 Also the number of standard Young tableaux with n cells where the row containing the largest value n has length k.
+%C A238750 Also the number of ballot sequences of length n where the last value has multiplicity k.
+%C A238750 T(0,0) = 1 by convention.
+%C A238750 Columns k=0-2 give: A000007, A000085(n-1), A238124(n-1).
+%C A238750 T(2n,n) gives A246731.
+%C A238750 Row sums give A000085.
+%H A238750 Joerg Arndt and Alois P. Heinz, <a href="/A238750/b238750.txt">Rows n = 0..60, flattened</a>
+%H A238750 Wikipedia, <a href="https://en.wikipedia.org/wiki/Young_tableau">Young tableau</a>
+%e A238750 The 10 tableaux with n=4 cells sorted by the number of the row containing the largest value 4 are:
+%e A238750 :[1 4] [1 2 4] [1 3 4] [1 2 3 4]:[1 2] [1 3] [1 2 3]:[1 2] [1 3]:[1]:
+%e A238750 :[2]   [3]     [2]              :[3 4] [2 4] [4]    :[3]   [2]  :[2]:
+%e A238750 :[3]                            :                   :[4]   [4]  :[3]:
+%e A238750 :                               :                   :           :[4]:
+%e A238750 : --------------1-------------- : --------2-------- : ----3---- : 4 :
+%e A238750 Their corresponding ballot sequences are: [1,2,3,1], [1,1,2,1], [1,2,1,1], [1,1,1,1], [1,1,2,2], [1,2,1,2], [1,1,1,2], [1,1,2,3], [1,2,1,3], [1,2,3,4].  Thus row 4 = [0, 4, 3, 2, 1].
+%e A238750 Triangle T(n,k) begins:
+%e A238750 00:   1;
+%e A238750 01:   0,    1;
+%e A238750 02:   0,    1,    1;
+%e A238750 03:   0,    2,    1,    1;
+%e A238750 04:   0,    4,    3,    2,    1;
+%e A238750 05:   0,   10,    7,    5,    3,   1;
+%e A238750 06:   0,   26,   20,   14,   11,   4,   1;
+%e A238750 07:   0,   76,   56,   44,   31,  19,   5,   1;
+%e A238750 08:   0,  232,  182,  139,  106,  69,  29,   6,  1;
+%e A238750 09:   0,  764,  589,  475,  351, 265, 127,  41,  7,  1;
+%e A238750 10:   0, 2620, 2088, 1658, 1303, 971, 583, 209, 55,  8,  1;
+%p A238750 h:= proc(l) local n; n:=nops(l); add(i, i=l)!/mul(mul(1+l[i]-j+
+%p A238750       add(`if`(l[k]>=j, 1, 0), k=i+1..n), j=1..l[i]), i=1..n) end:
+%p A238750 g:= proc(l) local n; n:=nops(l); `if`(n=0, 1, add(
+%p A238750      `if`(i=n or l[i]>l[i+1], x^i *h(subsop(i=
+%p A238750      `if`(i=n and l[n]=1, NULL, l[i]-1), l)), 0), i=1..n))
+%p A238750     end:
+%p A238750 b:= (n, i, l)-> `if`(n=0 or i=1, g([l[], 1$n]),
+%p A238750      add(b(n-i*j, i-1, [l[], i$j]), j=0..n/i)):
+%p A238750 T:= n-> (p-> seq(coeff(p, x, i), i=0..n))(b(n, n, [])):
+%p A238750 seq(T(n), n=0..12);
+%t A238750 h[l_] := With[{n = Length[l]}, Total[l]!/Product[Product[1+l[[i]]-j+
+%t A238750      Sum[If[l[[k]] >= j, 1, 0], {k, i+1, n}], {j, l[[i]]}], {i, n}]];
+%t A238750 g[l_] := With[{ n = Length[l]}, If[n == 0, 1, Sum[
+%t A238750      If[i == n || l[[i]] > l[[i + 1]], x^i *h[ReplacePart[l, i ->
+%t A238750      If[i == n && l[[n]] == 1, Nothing, l[[i]] - 1]]], 0], {i, n}]]];
+%t A238750 b[n_, i_, l_] := If[n == 0 || i == 1, g[Join[l, Table[1, {n}]]],
+%t A238750      Sum[b[n - i*j, i - 1, Join[l, Table[i, {j}]]], {j, 0, n/i}]];
+%t A238750 T[n_] := CoefficientList[b[n, n, {}], x];
+%t A238750 Table[T[n], {n, 0, 12}] // Flatten (* _Jean-François Alcover_, Aug 27 2021, after Maple code *)
+%K A238750 nonn,tabl
+%O A238750 0,8
+%A A238750 _Joerg Arndt_ and _Alois P. Heinz_, Mar 04 2014

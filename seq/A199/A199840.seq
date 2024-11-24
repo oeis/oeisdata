@@ -1,0 +1,30 @@
+%I A199840 #19 Jan 08 2021 05:33:29
+%S A199840 1,1,1,1,1,1,2,2,2,1,1,1,1,3,5,8,9,12,9,8,5,3,1,1,1,1,3,6,14,24,43,62,
+%T A199840 87,100,110,100,87,62,43,24,14,6,3,1,1,1,1,3,7,18,40,91,180,352,616,
+%U A199840 1006,1483,2036,2522,2891,3012,2891,2522,2036,1483,1006,616,352,180,91,40,18,7,3,1,1
+%N A199840 Triangle read by rows: T(n,k) is the number of 2-multigraphs on n nodes having exactly k edges, with n >= 1 and 0 <= k <= n*(n-1).
+%C A199840 Here a 2-multigraph is an unlabeled graph with at most 2 edges connecting any vertex pair with no self loops allowed.
+%H A199840 Andrew Howroyd, <a href="/A199840/b199840.txt">Table of n, a(n) for n = 1..2680</a> (first 20 rows)
+%e A199840 Triangle begins:
+%e A199840   1;
+%e A199840   1, 1, 1;
+%e A199840   1, 1, 2, 2, 2, 1, 1;
+%e A199840   1, 1, 3, 5, 8, 9, 12, 9, 8, 5, 3, 1, 1;
+%e A199840   ...
+%t A199840 Table[CoefficientList[Expand[PairGroupIndex[SymmetricGroup[n],s] /. Table[s[i]->1+x^i+x^(2i), {i,1,Binomial[n,2]}]], x], {n, 1, 6}]
+%t A199840 (* Second program: *)
+%t A199840 permcount[v_] := Module[{m = 1, s = 0, k = 0, t}, For[i = 1, i <= Length[v], i++, t = v[[i]]; k = If[i > 1 && t == v[[i - 1]], k + 1, 1]; m *= t*k; s += t]; s!/m];
+%t A199840 edges[v_, t_] := Product[g = GCD[v[[i]], v[[j]] ]; t[v[[i]]*v[[j]]/g]^g, {i, 2, Length[v]}, {j, 1, i - 1}]*Product[c = v[[i]]; t[c]^Quotient[c - 1, 2]*If[OddQ[c], 1, t[c/2]], {i, 1, Length[v]}];
+%t A199840 row[n_] := Module[{s=0}, Do[s += permcount[p]*edges[p, 1 + x^# + x^(2#)&], {p, IntegerPartitions[n]}]; s/n!] // Expand // CoefficientList[#, x]&;
+%t A199840 Array[row, 6] // Flatten (* _Jean-François Alcover_, Jan 08 2021, after _Andrew Howroyd_ *)
+%o A199840 (PARI)
+%o A199840 permcount(v) = {my(m=1, s=0, k=0, t); for(i=1, #v, t=v[i]; k=if(i>1&&t==v[i-1], k+1, 1); m*=t*k; s+=t); s!/m}
+%o A199840 edges(v, t) = {prod(i=2, #v, prod(j=1, i-1, my(g=gcd(v[i], v[j])); t(v[i]*v[j]/g)^g )) * prod(i=1, #v, my(c=v[i]); t(c)^((c-1)\2)*if(c%2, 1, t(c/2)))}
+%o A199840 Row(n) = {my(s=0); forpart(p=n, s+=permcount(p)*edges(p, i->1+x^i+(x^2)^i)); Vecrev(s/n!)}
+%o A199840 { for(n=1, 6, print(Row(n))) } \\ _Andrew Howroyd_, Nov 07 2019
+%Y A199840 Row sums are A004102.
+%Y A199840 Cf. A008406.
+%K A199840 nonn,tabf
+%O A199840 1,7
+%A A199840 _Geoffrey Critzer_, Nov 11 2011
+%E A199840 Terms a(46) and beyond from _Andrew Howroyd_, Nov 07 2019

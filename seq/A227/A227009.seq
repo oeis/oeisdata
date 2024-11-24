@@ -1,0 +1,47 @@
+%I A227009 #24 Oct 27 2023 22:06:38
+%S A227009 1,1,1,1,1,0,0,1,1,1,1,1,2,0,0,0,0,1,1,1,1,1,2,1,1,1,0,1,0,0,0,0,0,0,
+%T A227009 1,1,1,1,1,2,2,2,2,3,4,2,2,2,2,1,0,2,0,0,0,0,0,0,0,0,1,1,1,1,1,2,2,2,
+%U A227009 2,3,4,3,3,4,4,4,3,4,3,2,2,2,2,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1
+%N A227009 Irregular triangle read by rows: T(n,k) is the number of partitions of an n X n square lattice into squares that contain k nodes unconnected to any of their neighbors, considering only the number of parts.
+%C A227009 The n-th row contains (n-1)^2 + 1 elements.
+%C A227009 The irregular triangle is shown below.
+%C A227009 \ k 0  1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 ...
+%C A227009 n
+%C A227009 1   1
+%C A227009 2   1  1
+%C A227009 3   1  1  0  0  1
+%C A227009 4   1  1  1  1  2  0  0  0  0  1
+%C A227009 5   1  1  1  1  2  1  1  1  0  1  0  0  0  0  0  0  1
+%C A227009 6   1  1  1  1  2  2  2  2  3  4  2  2  2  2  1  0  2  0  0 ...
+%C A227009 7   1  1  1  1  2  2  2  2  3  4  3  3  4  4  4  3  4  3  2 ...
+%H A227009 Alois P. Heinz, <a href="/A227009/b227009.txt">Rows n = 1..13, flattened</a> (Rows n = 1..7 from Christopher Hunt Gribble)
+%F A227009 It appears that T(n,k) = T(n-1,k), n odd, n > 1 and k = 0..(n-1)^2/4.
+%F A227009 Sum_{k=0..(n-1)^2} T(n,k) = A034295(n).
+%e A227009 For n = 6, there are 3 partitions that contain 8 isolated nodes, so T(6,8) = 3.
+%e A227009 An m X m square contains (m-1)^2 isolated nodes.
+%e A227009 Consider that each partition is composed of ones and zeros where a one represents a node with one or more links to its neighbors and a zero represents a node with no links to its neighbors.  Then the 3 partitions are:
+%e A227009 1 1 1 1 1 1 1    1 1 1 1 1 1 1    1 1 1 1 1 1 1
+%e A227009 1 0 1 0 1 0 1    1 0 0 1 1 0 1    1 0 0 1 0 0 1
+%e A227009 1 1 1 1 1 1 1    1 0 0 1 1 1 1    1 0 0 1 0 0 1
+%e A227009 1 0 1 0 1 0 1    1 1 1 1 1 0 1    1 1 1 1 1 1 1
+%e A227009 1 1 1 1 1 1 1    1 1 1 1 1 1 1    1 1 1 1 1 1 1
+%e A227009 1 0 1 0 1 1 1    1 1 1 0 1 0 1    1 1 1 1 1 1 1
+%e A227009 1 1 1 1 1 1 1    1 1 1 1 1 1 1    1 1 1 1 1 1 1
+%p A227009 b:= proc(n, l) option remember; local i, k, s, t;
+%p A227009       if max(l[])>n then {} elif n=0 or l=[] then {0}
+%p A227009     elif min(l[])>0 then t:=min(l[]); b(n-t, map(h->h-t, l))
+%p A227009     else for k do if l[k]=0 then break fi od; s:={};
+%p A227009          for i from k to nops(l) while l[i]=0 do s:=s union
+%p A227009              map(v->v+x^(1+i-k), b(n, [l[j]$j=1..k-1,
+%p A227009                  1+i-k$j=k..i, l[j]$j=i+1..nops(l)]))
+%p A227009          od; s
+%p A227009       fi
+%p A227009     end:
+%p A227009 T:= n-> (w->seq(coeff(w, z, h), h=0..(n-1)^2))(add(z^add(
+%p A227009     coeff(p, x, i)*(i-1)^2, i=2..degree(p)), p=b(n, [0$n]))):
+%p A227009 seq(T(n), n=1..9);  # _Alois P. Heinz_, Jun 27 2013
+%t A227009 b[n_, l_List] := b[n, l] = Module[{i, k , s, t}, Which[Max[l] > n, {}, n == 0 || l == {}, {0}, Min[l] > 0, t = Min[l]; b[n-t, l-t], True, For[k = 1, k <= Length[l], k++, If[l[[k]] == 0, Break[]]]; s = {}; For[i = k, i <= Length[l] && l[[i]] == 0, i++, s = s ~Union~ Map[# + x^(1+i-k)&, b[n, Join[l[[1 ;; k-1]], Array[1+i-k&, i-k+1], l[[i+1 ;; Length[l]]]]]]]; s]]; T[n_] := Function[w, Table[Coefficient[w, z, h], {h, 0, (n-1)^2}]][Sum[ z^Sum[Coefficient[p, x, i]*(i-1)^2, {i, 2, Exponent[p, x]}], {p, b[n, Array[0&, n]]}]]; Table[T[n], {n, 1, 9}] // Flatten (* _Jean-François Alcover_, Jan 24 2016, after _Alois P. Heinz_ *)
+%Y A227009 Cf. A034295.
+%K A227009 nonn,tabf
+%O A227009 1,13
+%A A227009 _Christopher Hunt Gribble_, Jun 27 2013

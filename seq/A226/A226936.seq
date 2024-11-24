@@ -1,0 +1,42 @@
+%I A226936 #24 Apr 27 2022 08:57:15
+%S A226936 1,4,1,29,4,1,312,69,4,1,5598,1184,153,4,1,176664,40078,4552,373,4,1,
+%T A226936 9966344,2311632,285414,18160,917,4,1,1018924032,241967774,30278272,
+%U A226936 2128226,74368,2321,4,1,190191337356,45914039784,5860964300,411308056,16210982,311784,5933,4,1
+%N A226936 Number T(n,k) of squares of size k^2 in all tilings of an n X n square using integer-sided square tiles; triangle T(n,k), n >= 1, 1 <= k <= n, read by rows.
+%H A226936 Alois P. Heinz, <a href="/A226936/b226936.txt">Rows n = 1..15, flattened</a>
+%F A226936 Sum_{k=1..n} T(n,k) = A226554(n).
+%F A226936 Sum_{k=1..n} k^2 * T(n,k) = n^2 * A045846(n).
+%e A226936 For n=3 there are [29, 4, 1] squares of sizes [1^2, 2^2, 3^3] in all tilings of a 3 X 3 square:
+%e A226936 ._._._.  ._._._.  ._._._.  ._._._.  ._._._.  ._._._.
+%e A226936 |     |  |   |_|  |_|_|_|  |_|   |  |_|_|_|  |_|_|_|
+%e A226936 |     |  |___|_|  |   |_|  |_|___|  |_|   |  |_|_|_|
+%e A226936 |_____|  |_|_|_|  |___|_|  |_|_|_|  |_|___|  |_|_|_|.
+%e A226936 Triangle T(n,k) begins:
+%e A226936 n \ k        1          2         3        4      5     6   7   8
+%e A226936 --:----------------------------------------------------------------
+%e A226936 1 :          1;
+%e A226936 2 :          4,         1;
+%e A226936 3 :         29,         4,        1;
+%e A226936 4 :        312,        69,        4,       1;
+%e A226936 5 :       5598,      1184,      153,       4,     1;
+%e A226936 6 :     176664,     40078,     4552,     373,     4,    1;
+%e A226936 7 :    9966344,   2311632,   285414,   18160,   917,    4,  1;
+%e A226936 8 : 1018924032, 241967774, 30278272, 2128226, 74368, 2321,  4,  1;
+%p A226936 b:= proc(n, l) option remember; local i, k, s, t;
+%p A226936       if max(l[])>n then [0$2] elif n=0 then [1, 0]
+%p A226936     elif min(l[])>0 then t:=min(l[]); b(n-t, map(h->h-t, l))
+%p A226936     else for k do if l[k]=0 then break fi od; s:=[0$2];
+%p A226936          for i from k to nops(l) while l[i]=0 do s:= s+(h->h+
+%p A226936            [0, h[1]*x^(1+i-k)])(b(n, [l[j]$j=1..k-1,
+%p A226936            1+i-k$j=k..i, l[j]$j=i+1..nops(l)])) od; s
+%p A226936       fi
+%p A226936     end:
+%p A226936 T:= n-> seq(coeff(b(n, [0$n])[2],x,k), k=1..n):
+%p A226936 seq(T(n), n=1..10);
+%t A226936 $RecursionLimit = 1000; b[n_, l_List] := b[n, l] = Module[{i, k, s, t}, Which[Max[l] > n, {0, 0}, n == 0, {1, 0}, Min[l] > 0, t = Min[l]; b[n-t, l-t], True, k = Position[l, 0, 1, 1][[1, 1]]; s = {0, 0}; For[i = k, i <= Length[l] && l[[i]] == 0, i++, s = s + Function[h, h + {0, h[[1]]*x^(1+i-k)}][b[n, Join[l[[1 ;; k-1]], Array[1+i-k&, i-k+1], l[[i+1 ;; -1]] ] ] ] ]; s] ]; T[n_] := Table[Coefficient[b[n, Array[0&, n]][[2]], x, k], {k, 1, n}]; Table[T[n], {n, 1, 10}] // Flatten (* _Jean-François Alcover_, Dec 23 2013, translated from Maple *)
+%Y A226936 Row sums give: A226554.
+%Y A226936 Main diagonal and lower diagonals give: A000012, A010709, A226892.
+%Y A226936 Cf. A045846.
+%K A226936 nonn,tabl
+%O A226936 1,2
+%A A226936 _Alois P. Heinz_, Jun 22 2013

@@ -1,0 +1,55 @@
+%I A247012 #27 Mar 19 2023 10:47:38
+%S A247012 6,133,172,841,1005,1603,4258,5299,192901,498906,1633303,5307589,
+%T A247012 16333303,20671542,41673714,42999958,73687923
+%N A247012 Consider the aliquot parts, in ascending order, of a composite number. Take their sum and repeat the process deleting the minimum number and adding the previous sum. The sequence lists the numbers that after some iterations reach a sum equal to the reverse of themselves.
+%C A247012 A072234 is a subset of this sequence.
+%C A247012 a(18) > 2*10^8. - _Tyler Busby_, Mar 19 2023
+%e A247012 Aliquot parts of 1005 are 1, 3, 5, 15, 67, 201 and 335:
+%e A247012   1 + 3 + 5 + 15 + 67 + 201 + 335 = 627;
+%e A247012   3 + 5 + 15 + 67 + 201 + 335 + 627 = 1253;
+%e A247012   5 + 15 + 67 + 201 + 335 + 627 + 1253 = 2503;
+%e A247012   15 + 67 + 201 + 335 + 627 + 1253 + 2503 = 5001 that is the reverse of 1005.
+%e A247012 Aliquot parts of 1603 are 1, 7 and 229:
+%e A247012   1 + 7 + 229 = 237;
+%e A247012   7 + 229 + 237 = 473;
+%e A247012   229 + 237 + 473 = 939;
+%e A247012   237 + 473 + 939 = 1649;
+%e A247012   473 + 939 + 1649 = 3061 that is the reverse of 1603;
+%p A247012 with(numtheory): R:=proc(w) local x,y; x:=w; y:=0;
+%p A247012 while x>0 do y:=10*y+(x mod 10); x:=trunc(x/10); od: y; end:
+%p A247012 P:=proc(q,h) local a,b,c,k,n,t,v; v:=array(1..h);
+%p A247012 for n from 2 to q do if not isprime(n) then
+%p A247012 a:=sort([op(divisors(n))]); b:=nops(a)-1; c:=ilog10(n)+1;
+%p A247012 for k from 1 to b do v[k]:=a[k]; od;
+%p A247012 t:=b+1; v[t]:=add(v[k], k=1..b);
+%p A247012 if R(v[t])=n then print(n); else
+%p A247012 while ilog10(v[t])+1<=c do t:=t+1; v[t]:=add(v[k], k=t-b..t-1);
+%p A247012 if R(v[t])=n then print(n); break; fi; od; fi; fi; od;
+%p A247012 end: P(10^9, 1000);
+%t A247012 A247012 = {};
+%t A247012 For[n = 4, n <= 1000000, n++,
+%t A247012  If[PrimeQ[n], Continue[]];
+%t A247012  r = IntegerReverse[n];
+%t A247012  a = Most[Divisors[n]];
+%t A247012  sum = Total[a];
+%t A247012  While[sum < r, sum = Total[a = Join[Rest[a], {sum}]]];
+%t A247012  If[sum == r, AppendTo[A247012, n]];
+%t A247012 ]; A247012 (* _Robert Price_, Sep 08 2019 *)
+%o A247012 (Python)
+%o A247012 from sympy import isprime, divisors
+%o A247012 A247012_list = []
+%o A247012 for n in range(2,10**9):
+%o A247012 ....m = int(str(n)[::-1])
+%o A247012 ....if not isprime(n):
+%o A247012 ........x = divisors(n)
+%o A247012 ........x.pop()
+%o A247012 ........y = sum(x)
+%o A247012 ........while y < m:
+%o A247012 ............x, y = x[1:]+[y], 2*y-x[0]
+%o A247012 ........if y == m:
+%o A247012 ............A247012_list.append(n) # _Chai Wah Wu_, Sep 12 2014
+%Y A247012 Cf. A072234, A097090, A246544, A247013.
+%K A247012 nonn,base,more
+%O A247012 1,1
+%A A247012 _Paolo P. Lava_, Sep 09 2014
+%E A247012 a(9), a(11)-a(17) from _Chai Wah Wu_, Sep 13 2014

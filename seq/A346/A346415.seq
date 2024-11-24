@@ -1,0 +1,41 @@
+%I A346415 #19 Nov 06 2021 09:48:37
+%S A346415 1,0,1,0,1,1,0,2,3,1,0,3,11,6,1,0,5,35,35,10,1,0,8,115,180,85,15,1,0,
+%T A346415 13,371,910,630,175,21,1,0,21,1203,4494,4445,1750,322,28,1,0,34,3891,
+%U A346415 22049,30282,16275,4158,546,36,1,0,55,12595,107580,202565,144375,49035,8820,870,45,1
+%N A346415 Triangle T(n,k), n>=0, 0<=k<=n, read by rows, where column k is (1/k!) times the k-fold exponential convolution of Fibonacci numbers with themselves.
+%C A346415 The sequence of column k>0 satisfies a linear recurrence with constant coefficients of order k+1.
+%H A346415 Alois P. Heinz, <a href="/A346415/b346415.txt">Rows n = 0..140, flattened</a>
+%e A346415 Triangle T(n,k) begins:
+%e A346415   1;
+%e A346415   0,  1;
+%e A346415   0,  1,     1;
+%e A346415   0,  2,     3,      1;
+%e A346415   0,  3,    11,      6,      1;
+%e A346415   0,  5,    35,     35,     10,      1;
+%e A346415   0,  8,   115,    180,     85,     15,     1;
+%e A346415   0, 13,   371,    910,    630,    175,    21,    1;
+%e A346415   0, 21,  1203,   4494,   4445,   1750,   322,   28,   1;
+%e A346415   0, 34,  3891,  22049,  30282,  16275,  4158,  546,  36,  1;
+%e A346415   0, 55, 12595, 107580, 202565, 144375, 49035, 8820, 870, 45, 1;
+%e A346415   ...
+%p A346415 b:= proc(n) option remember; `if`(n=0, 1, add(expand(x*b(n-j)
+%p A346415       *binomial(n-1, j-1)*(<<0|1>, <1|1>>^j)[1, 2]), j=1..n))
+%p A346415     end:
+%p A346415 T:= n-> (p-> seq(coeff(p, x, i), i=0..n))(b(n)):
+%p A346415 seq(T(n), n=0..12);
+%p A346415 # second Maple program:
+%p A346415 b:= proc(n, k) option remember; `if`(k=0, 0^n, `if`(k=1,
+%p A346415        combinat[fibonacci](n), (q-> add(binomial(n, j)*
+%p A346415        b(j, q)*b(n-j, k-q), j=0..n))(iquo(k, 2))))
+%p A346415     end:
+%p A346415 T:= (n, k)-> b(n, k)/k!:
+%p A346415 seq(seq(T(n, k), k=0..n), n=0..12);
+%t A346415 b[n_, k_] := b[n, k] = If[k == 0, 0^n, If[k == 1, Fibonacci[n], With[{q = Quotient[k, 2]}, Sum[Binomial[n, j] b[j, q] b[n-j, k-q], {j, 0, n}]]]];
+%t A346415 T[n_, k_] := b[n, k]/k!;
+%t A346415 Table[Table[T[n, k], {k, 0, n}], {n, 0, 12}] // Flatten (* _Jean-François Alcover_, Nov 06 2021, after 2nd Maple program *)
+%Y A346415 Columns k=0-4 give: A000007, A000045, A014335, A014337, A014341.
+%Y A346415 T(n+j,n) for j=0-2 give: A000012, A000217, A000914.
+%Y A346415 Row sums give A256180.
+%K A346415 nonn,tabl
+%O A346415 0,8
+%A A346415 _Alois P. Heinz_, Jul 15 2021

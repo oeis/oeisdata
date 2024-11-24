@@ -1,0 +1,48 @@
+%I A307226 #53 Jun 07 2019 11:13:12
+%S A307226 0,0,1,0,1,2,0,1,3,2,0,4,1,3,2,0,4,5,1,3,2,0,4,6,5,1,3,2,7,0,4,6,5,1,
+%T A307226 3,2,7,0,4,6,5,1,3,2,8,7,0,4,6,5,1,3,2,9,8,7,0,4,6,5,1,3,10,2,9,8,7,0,
+%U A307226 4,6,5,1,11,3,10,2,9,8
+%N A307226 Triangle read by rows: drop and bounce.
+%C A307226 Number k starts with 1, 2, 3, ... 'points' and is 'dropped' on the initial value of 0. k then 'bounces' on the numbers already in the sequence according to the following rules:
+%C A307226 - k loses 1 point for each bounce.
+%C A307226 - After the first bounce (i.e., on 0) k moves to the right. If k bounces on a number already in the sequence which has a higher value than k, then the direction reverses. At lower or equal values, k continues to move in the same direction.
+%C A307226 - If k reaches the start or the end of the sequence or has 0 points left, the starting value of k is added to the sequence at that position.
+%e A307226 For k = 4:
+%e A307226 4 points, bounce on 0, move to the right;
+%e A307226 3 points, bounce on 1, move to the right;
+%e A307226 2 points, bounce on 3, reverse direction;
+%e A307226 1 point, bounce on 1, move to the left;
+%e A307226 0 points: k = 4 is inserted between 0 and 1. (Although equal to the next value 0, k has no more points left to bounce over it.)
+%e A307226 The first iterations:
+%e A307226   [0];
+%e A307226   [0, 1];
+%e A307226   [0, 1, 2];
+%e A307226   [0, 1, 3, 2];
+%e A307226   [0, 4, 1, 3, 2];
+%e A307226   [0, 4, 5, 1, 3, 2];
+%e A307226   [0, 4, 6, 5, 1, 3, 2];
+%e A307226   [7, 0, 4, 6, 5, 1, 3, 2];
+%e A307226   [7, 0, 4, 6, 5, 1, 3, 2, 8];
+%e A307226   ...
+%o A307226 (Python)
+%o A307226 seq = [0]
+%o A307226 for k in range (1, 10):
+%o A307226   points = k
+%o A307226   position = seq.index(0)
+%o A307226   direction = 1
+%o A307226   while points > 0 and position >= 0 and position < len(seq):
+%o A307226     if points < seq[position]: direction *= -1
+%o A307226     points -= 1
+%o A307226     position += direction
+%o A307226   else:
+%o A307226     if position < 0: seq.insert(0, k)
+%o A307226     elif position == len(seq): seq.append(k)
+%o A307226     elif points == 0 and direction == 1: seq.insert(position, k)
+%o A307226     else: seq.insert(position - direction, k)
+%o A307226 print(seq)
+%o A307226 (PARI) process(row, n) = {my(pos = 1, dir = 1, m = n); while (m && (pos >= 1) && (pos <= #row), if (m < row[pos], dir = -dir); pos += dir; m--;); if (pos == 0, return (concat(n, row))); if (pos == #row +1, return (concat(row, n))); if (dir == -1, pos ++); my(nrow = vector(#row+1)); for (k=1, pos-1, nrow[k] = row[k];); nrow[pos] = n; for (k = pos+1, #row+1, nrow[k] = row[k-1];); return (nrow);}
+%o A307226 tabl(nn) = {row = [0]; print(row); for (n=1, nn, row = process(row, n); print(row););} \\ _Michel Marcus_, Apr 13 2019
+%Y A307226 Cf. A307326.
+%K A307226 nonn,tabl
+%O A307226 0,6
+%A A307226 _Jan Koornstra_, Mar 31 2019

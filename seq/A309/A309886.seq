@@ -1,0 +1,54 @@
+%I A309886 #49 Jul 15 2022 13:48:06
+%S A309886 2,4,11,27,77,597,2473,9643
+%N A309886 a(n) is the smallest number that cannot be obtained from the first n powers of two {2^0,2^1,...,2^(n-1)} using each power exactly once and the operations +,-,*,/. Parentheses are allowed.
+%C A309886 It is known that a(n) >= 2^n for n >= 1, and a(n) >= 2^n + 2^(n-2) + 1 for n >= 3. Can we extend this to more cases of n? Can we extend this to all n and find a formula for the sequence?
+%C A309886 This is similar to A071314, except there not all powers need to be used, and there intermediate fractions are not allowed to be used. For example, 595 = (1 + 16 + 4/8)*(2 + 32) is valid here, but not there, and that's why a(6) = 597 > A071314(6) = 595, for comparison. Similarly, we have 2471 = (64 - 2 - 4/16)*(8 + 32) + 1 being a unique solution, using intermediate fraction 4/16.
+%C A309886 Notice a(n)-1 can be used as a lower bound for A309885(n).
+%C A309886 For n>=2, the largest number that can be obtained in this manner is given by the following formula: (2^1 + 2^0)*(Product_{k=2..n} 2^k). This product notation is equivalent to the expression: (3/2)*2^(n*(n+1)/2). Thus, for n>=2, this sequence has an upper bound: (3/2)*2^(n*(n+1)/2) + 1. - _Alejandro J. Becerra Jr._, Apr 22 2020
+%F A309886 a(n) >= A071314(n-1). - _Michael S. Branicky_, Jul 15 2022
+%e A309886 a(1) = 2 since we can make 1 using {1}: 1=1 but can't make 2.
+%e A309886 a(2) = 4 since we can make 1,2,3 using {1,2}, but can't make 4:
+%e A309886    1 = 2 - 1
+%e A309886    2 = 2 * 1
+%e A309886    3 = 2 + 1
+%e A309886 a(3) = 11 since we can make 1,...,10 using {1,2,4}, but not 11:
+%e A309886    1 = 4 - (1 + 2)
+%e A309886    2 = 4 - (1 * 2)
+%e A309886    3 = (1 - 2) + 4
+%e A309886    4 = (2 - 1) * 4
+%e A309886    5 = 4 - (1 - 2)
+%e A309886    6 = (1 * 2) + 4
+%e A309886    7 = (1 + 2) + 4
+%e A309886    8 = (1 * 2) * 4
+%e A309886    9 = 1 + (2 * 4)
+%e A309886    10 = (1 + 4) * 2
+%o A309886 (Python)
+%o A309886 from fractions import Fraction
+%o A309886 def a(n):
+%o A309886     R = dict() # index of each reachable subset is [card(s)-1][s]
+%o A309886     for i in range(n): R[i] = dict()
+%o A309886     for i in range(n): R[0][(2**i,)] = {2**i}
+%o A309886     reach = set(2**i for i in range(n))
+%o A309886     for j in range(1, n):
+%o A309886         for i in range((j+1)//2):
+%o A309886             for s1 in R[i]:
+%o A309886                 for s2 in R[j-1-i]:
+%o A309886                     if set(s1) & set(s2) == set():
+%o A309886                         s12 = tuple(sorted(set(s1) | set(s2)))
+%o A309886                         if s12 not in R[len(s12)-1]:
+%o A309886                             R[len(s12)-1][s12] = set()
+%o A309886                         for a in R[i][s1]:
+%o A309886                             for b in R[j-1-i][s2]:
+%o A309886                                 allowed = [a+b, a*b, a-b, b-a]
+%o A309886                                 if a != 0: allowed.append(Fraction(b, a))
+%o A309886                                 if b != 0: allowed.append(Fraction(a, b))
+%o A309886                                 R[len(s12)-1][s12].update(allowed)
+%o A309886                                 reach.update(allowed)
+%o A309886     k = 1 # search the reachable set that uses all numbers
+%o A309886     while k in R[n-1][tuple(2**i for i in range(n))]: k += 1
+%o A309886     return k
+%o A309886 print([a(n) for n in range(1, 6)]) # _Michael S. Branicky_, Jul 15 2022
+%Y A309886 Cf. A071314, A309885.
+%K A309886 nonn,hard,more
+%O A309886 1,1
+%A A309886 _Matej Veselovac_, Aug 21 2019

@@ -1,0 +1,50 @@
+%I A351386 #60 Apr 21 2022 10:55:34
+%S A351386 1,10,100,1001,10010,100101,1001010,10010110,100101101,1001010011,
+%T A351386 10010100110,100101001110,1001010011100,10010100111001,
+%U A351386 100101001110011,1001010011000111,10010100110001110,100101001100011110,1001010011000111100,10010100110001111010,100101001100011110101
+%N A351386 Sequence of balanced, multiplicative binary words, starting with a(1)=1, a(2)=10; for j > 2, if j is a prime, then a(j) is obtained by appending 0 at the end of a(j-1); otherwise, a(j) is obtained by appending a single digit at the end of a(j-1) such that the new word is multiplicative, but if the obtained a(j) is not balanced, then we change the digit at the rightmost possible prime position (and, eventually, some digits at following nonprime positions to maintain multiplicativity) so that a(j) becomes balanced.
+%C A351386 A binary word here is balanced if the numbers of 0's and 1's differ by at most one.
+%C A351386 A binary word here is multiplicative if for all b,c > 1 if at its b-th position is a digit B and at c-th position is C, then at (b*c)-th position is a digit 1 if b=c and 0 otherwise.
+%C A351386 According to Grytczuk (2021), the authorship of the sequence belongs to Krzysztof Rejmer.
+%C A351386 Rejmer conjectures that this process never terminates (see Grytczuk (2021)).
+%C A351386 Every odd term is automatically balanced (since it follows the even term which has the same number of 0's and 1's).
+%C A351386 More naturally can be looked at as a balanced multiplicative sequence of strings of signs - and + (where the multiplication is implied by standard multiplication on integers).
+%C A351386 This sequence was the inspiration for creating the sequence A332603 proposed in Grytczuk et al. (2020).
+%H A351386 Jaroslaw Grytczuk, <a href="https://doi.org/10.1016/j.ejc.2020.103213">From the 1-2-3 conjecture to the Riemann hypothesis</a>, European Journal of Combinatorics 91/1 (2021), 1-10.
+%H A351386 Jaroslaw Grytczuk, Hubert Kordulewski, and Artur Niewiadomski, <a href="https://doi.org/10.37236/9264">Extremal Square-Free Words</a>, Electronic J. Combinatorics, 27 (1), 2020, #1.48.
+%e A351386 a(15) = 100101001110011. To obtain the 16th term we arbitrarily choose a nontrivial decomposition of 16, for example, 2*8. The second (2) digit in a(15) is 0 and the eighth (8) digit is 0, so as the last digit of a(16) we append 1. We obtain a(16) = 1001010011100111, which is not balanced. Changing the 13th digit in a(16) (0 to 1) only decreases balance, so we check the next possible prime: changing the 11th digit (1 to 0) results in a balanced a(16) = 1001010011000111.
+%e A351386 It is sufficient to test just one factorization - multiplicativity of the word guarantees that every factorization gives us the same result.
+%t A351386 a = "1";
+%t A351386 list = {a};
+%t A351386 For[j = 2, j <= 100, j++,
+%t A351386 If[PrimeQ[j] == True, a = a <> "0",
+%t A351386   i = 2; While[IntegerQ[j/i] == False, i++];
+%t A351386   a1 = ToExpression[StringTake[a, {i}]];
+%t A351386   a2 = ToExpression[StringTake[a, {j/i}]];
+%t A351386   If[a1 == a2, b = a <> "1", b = a <> "0"];
+%t A351386   If[Abs[StringCount[b, "0"] - StringCount[b, "1"]] < 2, a = b,
+%t A351386    For[k = j - 1, k >= 2, k = k - 1,
+%t A351386     If[PrimeQ[k] == True,
+%t A351386      c = StringTake[b, k - 1] <>
+%t A351386        ToString[1 - ToExpression[StringTake[b, {k}]]] <>
+%t A351386        StringTake[b, -(j - k)];
+%t A351386      For[l = k + 1, l <= j, l++,
+%t A351386       If[PrimeQ[l] == False,
+%t A351386        li = 2; While[IntegerQ[l/li] == False, li++];
+%t A351386        la1 = ToExpression[StringTake[c, {li}]];
+%t A351386        la2 = ToExpression[StringTake[c, {l/li}]];
+%t A351386        If[la1 == la2,
+%t A351386         c = StringTake[c, l - 1] <> "1" <> StringTake[c, -(j - l)],
+%t A351386         c = StringTake[c, l - 1] <> "0" <> StringTake[c, -(j - l)]]
+%t A351386        ]];
+%t A351386      If[Abs[StringCount[c, "0"] - StringCount[c, "1"]] < 2, a = c;
+%t A351386       Break[]]
+%t A351386      ]
+%t A351386     ]; If[b == c, Print["STOP"]; Break[]]
+%t A351386    ]
+%t A351386   ];
+%t A351386 list = Append[list, a]] ; Print[list]
+%Y A351386 Cf. A332603, A008836.
+%K A351386 nonn
+%O A351386 1,2
+%A A351386 _Bartlomiej Pawlik_, Feb 09 2022
