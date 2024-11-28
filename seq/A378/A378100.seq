@@ -1,0 +1,48 @@
+%I A378100 #22 Nov 27 2024 08:51:18
+%S A378100 0,1,1,4,7,26,61,232,659,2620,8551,35696,129757,568504,2255345,
+%T A378100 10349536,44179711,211799312,962854399,4809701440,23103935021,
+%U A378100 119952692896,605135328337,3257843882624,17175956434375,95680443760576,525079354619951,3020676745975552
+%N A378100 Number of involutions in the symmetric group S_n with at least one fixed point.
+%C A378100 In other words, a(n) is the number of involutions in S_n that are not derangements.
+%F A378100 a(n) = Sum_{k=0..floor(n/2)} n! / ((n-2k)! * 2^k * k!) - (n! / (2^(n/2) * (n/2)!) * (1 - (n mod 2))).
+%F A378100 a(n) = A000085(n) - A123023(n).
+%F A378100 a(n) = A000085(n) for odd n.
+%F A378100 From _Alois P. Heinz_, Nov 24 2024: (Start)
+%F A378100 E.g.f.: exp(x*(2+x)/2)-exp(x^2/2).
+%F A378100 a(n) = Sum_{k=1..n} A099174(n,k). (End)
+%e A378100 a(4) = 7: (1,2)(3)(4), (1,3)(2)(4), (1,4)(2)(3), (1)(2,3)(4), (1)(2,4)(3), (1)(2)(3,4), (1)(2)(3)(4).
+%p A378100 a := proc(n)
+%p A378100     local k, total, deranged;
+%p A378100     total := add(factorial(n)/(factorial(n-2*k)*2^k*factorial(k)), k=0..floor(n/2));
+%p A378100     if mod(n, 2) = 0 then
+%p A378100         deranged := factorial(n)/(2^(n/2)*factorial(n/2));
+%p A378100     else
+%p A378100         deranged := 0;
+%p A378100     end if;
+%p A378100     return total - deranged;
+%p A378100 end proc:
+%p A378100 seq(a(n), n=1..20);
+%p A378100 # second Maple program:
+%p A378100 a:= proc(n) option remember; `if`(n<4, [0, 1$2, 4][n+1],
+%p A378100       a(n-1)+(2*n-3)*a(n-2)-(n-2)*(a(n-3)+(n-3)*a(n-4)))
+%p A378100     end:
+%p A378100 seq(a(n), n=0..27);  # _Alois P. Heinz_, Nov 24 2024
+%t A378100 a[n_] := Module[{total, deranged},
+%t A378100   total = Sum[n! / ((n - 2 k)! * 2^k * k!), {k, 0, Floor[n/2]}];
+%t A378100   deranged = If[EvenQ[n], n! / (2^(n/2) * (n/2)!), 0];
+%t A378100   total - deranged
+%t A378100 ];
+%t A378100 Table[a[n], {n, 1, 20}]
+%o A378100 (Python)
+%o A378100 from math import factorial
+%o A378100 def a(n):
+%o A378100     total = sum(factorial(n) // (factorial(n - 2 * k) * 2**k * factorial(k))
+%o A378100                 for k in range(n // 2 + 1))
+%o A378100     deranged = factorial(n) // (2**(n // 2) * factorial(n // 2)) if n % 2 == 0 else 0
+%o A378100     return total - deranged
+%o A378100 print([a(n) for n in range(1, 21)])
+%o A378100 (PARI) my(x='x+O('x^30)); Vec(serlaplace(exp(x+x^2/2)-exp(x^2/2))) \\ _Joerg Arndt_, Nov 27 2024
+%Y A378100 Cf. A000085 (involutions), A000166 (derangements), A002467 (permutations with a fixed pint), A099174, A123023 (involutions that are derangements).
+%K A378100 nonn,easy,new
+%O A378100 0,4
+%A A378100 _Maniru Ibrahim_, Nov 16 2024
