@@ -1,13 +1,42 @@
-%I A175349 #12 Jul 02 2018 10:13:40
+%I A175349 #23 Nov 28 2024 15:59:49
 %S A175349 4,6,40,39,43,108,113,79,368,466,500,149,361,344,377,53,59,988,542,
 %T A175349 2272,2121,1103,2259,356,609,1253,3304,3434,876,2929,4078,387,393,
 %U A175349 2226,4787,1687,630,2615,1336,5561,2874,5820,382,4033,12608,8391,13506,14276,8931,14662
 %N A175349 a(n) is the smallest positive integer that, when written in binary, contains the binary representations of both the n-th prime and the n-th composite as (possibly overlapping) substrings.
+%H A175349 Robert Israel, <a href="/A175349/b175349.txt">Table of n, a(n) for n = 1..10000</a>
 %e A175349 The 7th prime is 17, which is 10001 in binary. The 7th composite is 14, which is 1110 in binary. The smallest positive integer that, when written in binary, contains these binary representations as substrings is 113, which is 1110001 in binary. a(7) = 113, therefore.
+%p A175349 nextcomp:= proc(c)
+%p A175349   if isprime(c+1) then c+2 else c+1 fi
+%p A175349 end proc:
+%p A175349 f:= proc(p,c)
+%p A175349    local Bp, dp, Bc, dc, m, flag1, flag2, x1, x2;
+%p A175349    Bp:= convert(convert(p,binary),string); dp:= length(Bp);
+%p A175349    Bc:= convert(convert(c,binary),string); dc:= length(Bc);
+%p A175349    if dc < dp and StringTools:-Search(Bc, Bp) <> 0 then return p
+%p A175349    elif dp < dc and StringTools:-Search(Bp, Bc) <> 0 then return c
+%p A175349    fi;
+%p A175349    for m from min(dp,dc) to 1 by -1 do
+%p A175349      flag1:= Bp[1..m] = Bc[-m..-1];
+%p A175349      flag2:= Bc[1..m] = Bp[-m..-1];
+%p A175349      if flag1 then x1:= 2^(dp-m) * c + (p mod 2^(dp-m)) fi;
+%p A175349      if flag2 then x2:= 2^(dc-m) * p + (c mod 2^(dc-m)) fi;
+%p A175349      if flag1 and flag2 then return min(x1,x2)
+%p A175349      elif flag1 then return x1
+%p A175349      elif flag2 then return x2
+%p A175349      fi;
+%p A175349    od;
+%p A175349    min(p*2^dc + c, c*2^dp+p)
+%p A175349 end proc:
+%p A175349 p:= 1: c:= 2: R:= NULL:
+%p A175349 for n from 1 to 100 do
+%p A175349   p:= nextprime(p); c:= nextcomp(c);
+%p A175349   R:= R, f(p,c)
+%p A175349 od:
+%p A175349 R; # _Robert Israel_, Nov 28 2024
 %t A175349 comp[n_] := FixedPoint[n + 1 + PrimePi[#] &, n + 1 + PrimePi[n]]; sub[n_, x_] := MemberQ[Partition[IntegerDigits[n, 2], IntegerLength[x, 2], 1],
 %t A175349 IntegerDigits[x, 2]]; a[n_] := Block[{c = comp[n], p = Prime[n], k}, k = Max[p, c]; While[! sub[k,p] || ! sub[k,c], k++]; k]; Array[a, 50] (* _Giovanni Resta_, Jul 02 2018 *)
-%Y A175349 Cf. A004676, A115454.
-%K A175349 base,nonn
+%Y A175349 Cf. A004676, A115454, A378479.
+%K A175349 base,nonn,look,changed
 %O A175349 1,1
 %A A175349 _Leroy Quet_, Apr 19 2010
 %E A175349 a(9)-a(50) from _Giovanni Resta_, Jul 02 2018

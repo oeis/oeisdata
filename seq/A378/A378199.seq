@@ -1,0 +1,48 @@
+%I A378199 #16 Nov 28 2024 10:55:39
+%S A378199 0,0,1,4,1,26,1,175,365,1513,1,52611,274,426897
+%N A378199 Number of digit patterns of length n such that all integers of that digital type share a common prime factor of a different digital type.
+%C A378199 a(n) gives the number of distinct digit patterns (or digital types, as per A266946) such that all integers of that digital type share a common prime factor of a different digital type.
+%C A378199 The number of remaining digit patterns not counted toward a(n) is given by A376918(n).
+%C A378199 A particular digit pattern of length n is counted toward a(n) if it is not counted toward A376918(n).
+%C A378199 All digital types counted toward a(n) result in composites for any values of the distinct digits in the pattern, without the need to run primality tests on all numbers of that digital type individually.
+%C A378199 The requirement for a divisor of a different digital type only affects reprigits of the form AA..AA and acts to exclude that pattern iff the n-repunit is prime (n in A004023).
+%C A378199 A164864(n) gives the total number of possible digit patterns of length n and is therefore an upper bound for a(n).
+%C A378199 a(n) is nonmonotonic and takes on small values for prime n and large values for n with a large number of nontrivial divisors (A070824). This is a consequence of divisibility rules that are formulated for prime divisors of 10^r-1 or 10^r+1 (where r divides n) in terms of the sum or alternating sum of r-digit blocks, respectively [see S. Shirali, First Steps in Number Theory: A Primer on Divisibility, Universities Press, 2019, pp. 42-49].
+%H A378199 Dmytro S. Inosov and Emil Vlasák, <a href="https://arxiv.org/abs/2410.21427">Cryptarithmically unique terms in integer sequences</a>, arXiv:2410.21427 [math.NT], 2024.
+%F A378199 a(n) = A164864(n) - A376918(n).
+%F A378199 a(n) = A164864(n) - A267013(n) - A377727(n).
+%F A378199 a(n) <= A164864(n).
+%e A378199 For n=2, there are only two possible digit patterns, "AA" and "AB". Neither of them is counted toward a(2) because the common prime factor of all integers with the pattern "AA" is 11, which is a prime repunit and is therefore of the same digital type "AA", whereas integers of the digital type "AB" have no common prime factors. Indeed, AB = 10*A + 1*B, and GCD(10,1)=1.
+%e A378199 For n=3, the repdigit pattern "AAA" is counted toward a(3) because the repunit 111 is not a prime, hence all integers of the digital type "AAA" are divisible by prime factors of 111, which are 3 and 37, both of a different digital type from "AAA".
+%e A378199 Counterexample: The digit pattern "ABA" is not counted toward a(3) because ABA = 101*A + 10*B, and since GCD(101,10) = 1, this digital type has no common prime factors.
+%e A378199 The pattern "ABAB" is counted toward a(4) because it is divisible by 101 for any A > 0 and B >= 0, and 101 has a different digital type from ABAB. Indeed, ABAB = A*1010 + B*101, which is identically divisible by 101. In total there are four 4-digit patterns that are counted: ABBA, AABB, AAAA (all of them divisible by 11) and ABAB (divisible by 101). Therefore, a(4) = 4.
+%e A378199 The pattern "ABCDEFGHIJ" that contains all possible digits exactly once is counted toward a(10) because its sum of digits is 1+2+...+9 = 45, which is divisible by 9. Therefore, all integers with the digital type "ABCDEFGHIJ" share the common prime factor 3.
+%t A378199 MinLength = 1; MaxLength = 12; (* the range of n to calculate a(n) for *)
+%t A378199 (* Function that calculates the the canonical form A358497(n) *)
+%t A378199 A358497[k_] := FromDigits@a358497C[k]
+%t A378199 a358497C = Compile[{{k, _Integer}}, Module[{firstpos = ConstantArray[0, 10],
+%t A378199   digits = IntegerDigits[k], indx = 0}, Table[If[firstpos[[digits[[j]] + 1]] == 0, firstpos[[digits[[j]] + 1]] = Mod[++indx,10]]; firstpos[[digits[[j]] + 1]], {j, Length[digits]}]]];
+%t A378199 (* Function that checks if a common prime factor of a different digital type exists *)
+%t A378199 DivisibilityRulesQ[pat_] := (
+%t A378199   If[Divisible[Length[pat], 10] && Length[Counts[pat]] == 10 &&
+%t A378199      AllTrue[Table[Counts[pat][[i]] == Length[pat]/10, {i, 1, 10}], TrueQ], Return[True]];
+%t A378199   (# != 1) && AnyTrue[Extract[# // FactorInteger, {All, 1}],
+%t A378199      A358497[#] != A358497[pat // FromDigits] &] &[
+%t A378199      Apply[GCD, Total[10^(Position[Reverse[pat], #]-1) // Flatten]& /@
+%t A378199      Mod[Range[CountDistinct[pat]], 10]]]);
+%t A378199 (* Function that generates all patterns that satisfy divisibility rules *)
+%t A378199 Patterns[len_, k_] := (
+%t A378199   Clear[dfs];
+%t A378199   ResultingPatterns = {};
+%t A378199   dfs[number_List] := If[Length[number] == len,
+%t A378199     If[Length[Union[If[# < 10, #, 0] & /@ number]] == k,
+%t A378199       AppendTo[ResultingPatterns, If[# < 10, #, 0] & /@ number]],
+%t A378199     Do[If[i <= 10, dfs[Append[number, i]]], {i, Range[1, Last[Union[number]] + 1]}]];
+%t A378199   dfs[{1}];
+%t A378199   FromDigits /@ Select[ResultingPatterns, DivisibilityRulesQ[#] &]);
+%t A378199 (* Counting the patterns with k distinct digits and their row sums a(n) *)
+%t A378199 Do[Print[{n, #, Sum[#[[m]], {m, 1, Length[#]}]}] &[Table[Length[Patterns[n, j]], {j, 1, Min[10, n]}]], {n, MinLength, MaxLength}];
+%Y A378199 Cf. A164864, A267013, A376918, A377727, A378154
+%K A378199 nonn,base,more,new
+%O A378199 1,4
+%A A378199 _Dmytro Inosov_, Nov 19 2024
