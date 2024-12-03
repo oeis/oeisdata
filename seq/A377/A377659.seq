@@ -1,0 +1,51 @@
+%I A377659 #27 Dec 02 2024 17:20:15
+%S A377659 0,0,0,0,1,5,19,63,195,579,1676,4774,13463,37739,105442,294188,820699,
+%T A377659 2291243,6405310,17937140,50327731,141498983,398666071,1125566111,
+%U A377659 3184339189,9026625285,25636264044,72940663938,207889060481,593474349373,1696848600299,4858687934567
+%N A377659 a(n) = Motzkin(n) - 2^(n - 1 + 0^n) = A001006(n) - A011782(n).
+%C A377659 These are the Motzkin words of length n - 1 over the alphabet 0, 1, 2,... that contain at least one digit greater than 1. See the Sage program below.
+%C A377659 An analogous construction with the Catalan numbers can be found in A125107.
+%F A377659 a(n) = [x^n] (1 - x - (1 - 2*x - 3*x^2)^(1/2)) / (2*x^2) - (1 - x) / (1 - 2*x).
+%F A377659 a(n) = hypergeom([-n/2, -n/2 + 1/2], [2], 4) - 2^(n - 1 + 0^n).
+%e A377659   N:       0, 1, 2, 3, 4,  5,  6,   7,   8,   9, ...
+%e A377659   A001006: 1, 1, 2, 4, 9, 21, 51, 127, 323, 835, ...
+%e A377659   A011782: 1, 1, 2, 4, 8, 16, 32,  64, 128, 256, ...
+%e A377659   a:       0, 0, 0, 0, 1,  5, 19,  63, 195, 579, ...
+%e A377659 .
+%e A377659 For n = 5 the 5 Motzkin words of length 4 that have at least one term > 1 are:
+%e A377659   1221, 1211, 1210, 1121, 0121.
+%e A377659 For n = 6 the 19 Motzkin words of length 5 that have at least one term > 1 are:
+%e A377659   12321, 12221, 12211, 12210, 12121, 12111, 12110, 12101, 12100, 11221, 11211, 11210, 11121, 10121, 01221, 01211, 01210, 01121, 00121.
+%p A377659 gf := (1 - x - (1-2*x-3*x^2)^(1/2)) / (2*x^2) - (1 - x) / (1 - 2*x):
+%p A377659 ser := series(gf, x, 35): seq(coeff(ser, x, n), n = 0..30);
+%p A377659 # Alternative:
+%p A377659 a := n -> hypergeom([-n/2 + 1/2, -n/2], [2], 4) - 2^(n - 1 + 0^n);
+%p A377659 seq(simplify(a(n)), n = 0..29);
+%o A377659 (Python)
+%o A377659 from itertools import islice
+%o A377659 show = lambda f, n: print(list(islice(f(), n)))
+%o A377659 def aGen():
+%o A377659     a, b, n, z = 1, 2, 2, 1
+%o A377659     yield 0
+%o A377659     while True:
+%o A377659         yield b//n - z
+%o A377659         n += 1; z *= 2
+%o A377659         a, b = b, (3*(n-1)*n*a + (2*n-1)*n*b)//((n+1)*(n-1))
+%o A377659 show(aGen, 31)
+%o A377659 (SageMath)
+%o A377659 # Generates Motzkin words (for illustration only).
+%o A377659 def motzkin_words(n):
+%o A377659      return IntegerListsLex(length=n+1, min_slope=-1, max_slope=1,
+%o A377659                 ceiling=[0]+[+oo for i in range(n-1)]+[0])
+%o A377659 def MWList(n, show=True):
+%o A377659     c = 0
+%o A377659     for w in motzkin_words(n):
+%o A377659         if any(p > 1 for p in w):
+%o A377659             c += 1
+%o A377659             if show: print(''.join(map(str, w[1:-1])))
+%o A377659     return c
+%o A377659 for n in range(8): print(f"[{n}] -> {MWList(n)}")
+%Y A377659 Cf. A001006, A011782, A125107.
+%K A377659 nonn,new
+%O A377659 0,6
+%A A377659 _Peter Luschny_, Nov 28 2024
