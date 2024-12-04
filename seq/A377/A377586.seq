@@ -1,13 +1,40 @@
-%I A377586 #22 Nov 16 2024 15:18:02
+%I A377586 #46 Dec 03 2024 20:21:12
 %S A377586 24,13824,53529984,751480602624,27917203599360000,
 %T A377586 2267561150913576960000,354252505303682314076160000,
 %U A377586 97087054992658680467800719360000,43551509948777170973522371396239360000,30293653795894300342540281328749772800000000
 %N A377586 Numbers of directed Hamiltonian paths in the complete 4-partite graph K_{n,n,n,n}.
 %H A377586 Zlatko Damijanic, <a href="/A377586/b377586.txt">Table of n, a(n) for n = 1..117</a>
+%H A377586 L. Q. Eifler, K. B. Reid Jr., and D. P. Roselle, <a href="http://dx.doi.org/10.1007/BF01819761">Sequences with adjacent elements unequal</a>, Aequationes Mathematicae 6 (2-3), 1971; see <a href="http://eudml.org/doc/136198">also</a>.
 %F A377586 a(n) = 24 * n!^4 * A190918(n).
 %F A377586 a(n) = n!^4 * A322093(n,4).
 %t A377586 Table[n!^4 * SeriesCoefficient[1/(1 - Sum[x[i]/(1 + x[i]), {i, 1, 4}]), Sequence @@ Table[{x[i], 0, n}, {i, 1, 4}]], {n, 1, 10}]
+%o A377586 (Python)
+%o A377586 from math import factorial as fact, comb
+%o A377586 from itertools import combinations_with_replacement
+%o A377586 def a(n):
+%o A377586     #  Using modified formula for counting sequences found in Eifler et al.
+%o A377586     result = 0
+%o A377586     fn = fact(n)
+%o A377586     for i, j, k in combinations_with_replacement(range(1, n+1), 3):
+%o A377586         patterns = [(3,0,0)] if i == j == k else \
+%o A377586           [(2,0,1)] if i == j != k else \
+%o A377586           [(1,2,0)] if i != j == k else [(1,1,1)]
+%o A377586         for a, b, c in patterns:
+%o A377586             s = a*i + b*j + c*k
+%o A377586             num = fact(3)
+%o A377586             den = fact(a) * fact(b) * fact(c)
+%o A377586             if a:
+%o A377586                 for _ in range(a): num, den = num * comb(n-1, i-1), den * fact(i)
+%o A377586             if b:
+%o A377586                 for _ in range(b): num, den = num * comb(n-1, j-1), den * fact(j)
+%o A377586             if c:
+%o A377586                 for _ in range(c): num, den = num * comb(n-1, k-1), den * fact(k)
+%o A377586             num *= comb(s + 1, n) * fact(s)
+%o A377586             result += (1 if (3*n - s) % 2 == 0 else -1) * (num // den)
+%o A377586     for _ in range(4): result *= fn
+%o A377586     return result
+%o A377586 print([a(n) for n in range(1,11)]) # _Zlatko Damijanic_, Nov 18 2024
 %Y A377586 Cf. A190918, A234365, A322013, A322093.
-%K A377586 nonn
+%K A377586 nonn,changed
 %O A377586 1,1
 %A A377586 _Zlatko Damijanic_, Nov 02 2024
