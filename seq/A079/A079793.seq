@@ -1,9 +1,34 @@
-%I A079793 #3 Dec 05 2013 19:55:58
+%I A079793 #9 Dec 04 2024 20:38:24
 %S A079793 10,10,100011,1100,10,100110,1001,111000,100000000011111111,10,1001,
 %T A079793 101100,1001,101010,100110,11110000,100011,100000000111111110,110010,
 %U A079793 1100,101010,1100,11010100,111000,1100,101010
-%N A079793 Smallest multiple of n having equal number of ones and zeros.
-%K A079793 base,nonn
+%N A079793 Smallest multiple of n having an equal number of ones and zeros and no other digits.
+%H A079793 Robert Israel, <a href="/A079793/b079793.txt">Table of n, a(n) for n = 1..890</a>
+%p A079793 F:= proc(m)
+%p A079793      uses Optimization;
+%p A079793      local dmax, dmin, dmax0, cons, obj, i, j, x, r, R;
+%p A079793      dmin:= max(padic:-ordp(m,2), padic:-ordp(m,5));
+%p A079793      dmax0:= max(1,2*dmin-1);
+%p A079793      if dmax0::even then dmax0:= dmax0+1 fi;
+%p A079793      for dmax from dmax0 to 38 by 2 do
+%p A079793         x:= 'x':
+%p A079793         x[dmax]:= 1:
+%p A079793         cons:= [add((10^i mod m) * x[i], i=dmin..dmax) = r * m,
+%p A079793                            add(x[i],i=dmin..dmax) = (1+dmax)/2,
+%p A079793                            seq(seq(`if`(10^i mod m = 10^j mod m, x[i] >= x[j],NULL), i=dmin..j-1),j=dmin+1..dmax-1)                   ];
+%p A079793         obj:= add(10^i * x[i],i=dmin..dmax-1);
+%p A079793         if dmax = dmin then
+%p A079793           if dmax = 1 and (10 mod m = 0) then return 10 else next fi fi;
+%p A079793         R:= traperror(Minimize(obj, cons, assume=nonnegint, binaryvariables = [seq(x[i],i=dmin..dmax-1)],depthlimit=100));
+%p A079793         if R = "no feasible integer point found; use feasibilitytolerance option to adjust tolerance" then next
+%p A079793         elif R = lasterror then printf("%s for dmax=%d at m=%d\n",R,dmax,m)
+%p A079793         else return (R[1]+10^dmax) fi
+%p A079793      od;
+%p A079793      FAIL
+%p A079793 end proc:
+%p A079793 map(F, [$1..100]); # _Robert Israel_, Dec 04 2024
+%K A079793 base,nonn,changed
 %O A079793 1,1
 %A A079793 _Amarnath Murthy_, Mar 27 2004
 %E A079793 Corrected and extended by Mark Hudson (mrmarkhudson(AT)hotmail.com), Aug 12 2004
+%E A079793 Name clarified by _Robert Israel_, Dec 03 2024
