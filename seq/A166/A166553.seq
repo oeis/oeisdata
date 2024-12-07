@@ -1,24 +1,47 @@
-%I A166553 #13 Mar 12 2014 16:37:04
+%I A166553 #19 Dec 07 2024 02:24:28
 %S A166553 1,3,3,0,24,12,-30,0,180,60,0,-720,0,1440,360,2520,0,-12600,0,12600,
 %T A166553 2520,0,120960,0,-201600,0,120960,20160,-771120,0,3810240,0,-3175200,
-%U A166553 0,1270080,181440,0,-61689600,0,101606400
-%N A166553 Triangle read by rows: expansion of p(x,t) = -exp(x*t)(2*(1 - 2*exp(t)) - 2*exp(t))/(1 + exp(t)), with coefficient of x^n scaled by multiplication by  (n!*(n + 2)!/4).
+%U A166553 0,1270080,181440,0,-61689600,0,101606400,0,-50803200,0,14515200,1814400
+%N A166553 Triangle read by rows: T(n, k) = [x^k]( (n+2)!*(3*EulerE(n, x+1) - EulerE(n, x))/4 ).
 %C A166553 I think the rows are indexed by t = 0, 1, 2, ..., and in each row we expand the polynomial in powers of x. - _N. J. A. Sloane_, Dec 14 2010
-%C A166553 Row sums are 1, 6, 36, 210, 1080, 5040, 60480, 1315440, 5443200, -558835200, 718502400,...
-%e A166553 {1},
-%e A166553 {3, 3},
-%e A166553 {0, 24, 12},
-%e A166553 {-30, 0, 180, 60},
-%e A166553 {0, -720, 0, 1440, 360},
-%e A166553 {2520, 0, -12600, 0, 12600, 2520},
-%e A166553 {0, 120960, 0, -201600, 0, 120960, 20160},
-%e A166553 {-771120, 0,3810240, 0, -3175200, 0, 1270080, 181440},
-%e A166553 {0, -61689600, 0, 101606400, 0, -50803200, 0, 14515200, 1814400},
-%t A166553 p[t_] = -Exp[x*t](2*(1 - 2*Exp[t]) - 2*Exp[t])/(1 + Exp[t]);
-%t A166553 a = Table[ CoefficientList[(n!*(n + 2)!/4)*SeriesCoefficient[
-%t A166553       Series[p[t], {t, 0, 30}], n], x], {n, 0, 10}];
-%t A166553 Flatten[a]
-%K A166553 sign,tabl
+%C A166553 Former name: Triangle read by rows: expansion of p(x,t) = exp(x*t)*(3*exp(t) - 1)/(exp(t) + 1), with coefficient of x^n scaled by multiplication by  (n!*(n + 2)!/4). - _G. C. Greubel_, Nov 30 2024
+%H A166553 G. C. Greubel, <a href="/A166553/b166553.txt">Rows n = 0..50 of the triangle, flattened</a>
+%F A166553 T(n, k) = [x^k]( p(n, x) ), where p(n, x) = (n!*(n+2)!/2) * [t^n]( exp(x*t)*(3*exp(t) - 1)/(exp(t) + 1) ).
+%F A166553 From _G. C. Greubel_, Nov 30 2024: (Start)
+%F A166553 T(n, k) = [x^k]( (n+2)!*(3*EulerE(n, x+1) - EulerE(n, x))/4 ).
+%F A166553 T(n, k) = [x^k]( (1/2)*(n+2)!*( 3*x^n - 2*Sum_{j=0..n} binomial(n,j)*(EulerE(j)/2^j)*(x - 1/2)^(n-j) ) ).
+%F A166553 T(n, n) = 3*A001715(n+2) = (n+2)!/2.
+%F A166553 T(n, n-1) = 3*A005990(n+1). (End)
+%e A166553 Triangle begins as:
+%e A166553         1;
+%e A166553         3,      3;
+%e A166553         0,     24,      12;
+%e A166553       -30,      0,     180,      60;
+%e A166553         0,   -720,       0,    1440,      360;
+%e A166553      2520,      0,  -12600,       0,    12600,   2520;
+%e A166553         0, 120960,       0, -201600,        0, 120960,   20160;
+%e A166553   -771120,      0, 3810240,       0, -3175200,      0, 1270080, 181440;
+%t A166553 (* first program *)
+%t A166553 p[t_]= Exp[x*t](3*Exp[t] - 1)/(Exp[t] + 1);
+%t A166553 With[{m=12}, Table[(n!*(n+2)!/2)*CoefficientList[SeriesCoefficient[ Series[p[t], {t,0,m+1}], n], x], {n,0,m}]]//Flatten
+%t A166553 (* Second program *)
+%t A166553 f[n_, x_]:= (n+2)!*(3*EulerE[n, x+1] - EulerE[n, x])/4;
+%t A166553 A166553[n_, k_]:= Coefficient[Series[f[n, x], {x,0,n}], x, k];
+%t A166553 Table[A166553[n,k], {n,0,12}, {k,0,n}]//Flatten (* _G. C. Greubel_, Nov 30 2024 *)
+%o A166553 (Magma)
+%o A166553 m:= 13;
+%o A166553 R<x>:=PowerSeriesRing(Integers(), m+1);
+%o A166553 EulerE:= func< n | (2^(n+1)/(n+1))*( Evaluate(BernoulliPolynomial(n+1), 1/2) - 2^(n+1)*Evaluate(BernoulliPolynomial(n+1), 1/4) ) >;
+%o A166553 f:= func< n,x | (Factorial(n+2)/2)*( 3*x^n - 2*(&+[ Binomial(n,j)*(EulerE(j)/2^j)*(x - 1/2)^(n-j): j in [0..n]]) ) >;
+%o A166553 A166553:= func< n,k | Coefficient(R!( f(n,x) ), k) >;
+%o A166553 [A166553(n,k): k in [0..n], n in [0..m]]; // _G. C. Greubel_, Nov 30 2024
+%o A166553 (SageMath)
+%o A166553 def f(n,x): return (factorial(n+2)/2)*( 3*x^n - 2*sum( binomial(n,j)*euler_number(j)*(x-1/2)^(n-j)/2^j for j in range(n+1)) )
+%o A166553 def A166553(n,k): return ( f(n,x) ).series(x,n+1).list()[k]
+%o A166553 print(flatten([[A166553(n,k) for k in range(n+1)] for n in range(14)])) # _G. C. Greubel_, Nov 30 2024
+%Y A166553 Cf. A001715, A005990, A028296.
+%K A166553 sign,tabl,changed
 %O A166553 0,2
 %A A166553 _Roger L. Bagula_, Dec 12 2010
 %E A166553 I rewrote the definition. - _N. J. A. Sloane_, Dec 14 2010
+%E A166553 New name by _G. C. Greubel_, Nov 30 2024
