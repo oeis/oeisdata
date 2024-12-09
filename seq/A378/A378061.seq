@@ -1,0 +1,51 @@
+%I A378061 #19 Dec 08 2024 17:22:02
+%S A378061 1,0,1,3,0,1,0,8,0,1,20,0,15,0,1,0,75,0,24,0,1,175,0,189,0,35,0,1,0,
+%T A378061 784,0,392,0,48,0,1,1764,0,2352,0,720,0,63,0,1,0,8820,0,5760,0,1215,0,
+%U A378061 80,0,1,19404,0,29700,0,12375,0,1925,0,99,0,1
+%N A378061 Triangle read by rows: T(n, k) = binomial(n + 1, (n - k)/2)^2*(k + 1)/(n + 1) if n - k is even, otherwise 0.
+%C A378061 Consider square lattice walks with unit steps in all four directions (NSWE), starting at the origin, ending on the y-axis, and never going below the x-axis. T(n, k) is the number of walks with length n and height k. The number of walks with positive height is A378060, and with nonnegative height is A018224. Walks of odd length can never have an even height, and walks of even length cannot have an odd height. The Python program below generates the walks.
+%H A378061 R. K. Guy, <a href="http://www.cs.uwaterloo.ca/journals/JIS/VOL3/GUY/catwalks.html">Catwalks, sandsteps and Pascal pyramids</a>, J. Integer Sequences, Vol. 3 (2000), Article #00.1.6.
+%e A378061 Triangle starts:
+%e A378061   0  [   1]
+%e A378061   1  [   0,    1]
+%e A378061   2  [   3,    0,    1]
+%e A378061   3  [   0,    8,    0,    1]
+%e A378061   4  [  20,    0,   15,    0,   1]
+%e A378061   5  [   0,   75,    0,   24,   0,    1]
+%e A378061   6  [ 175,    0,  189,    0,  35,    0,  1]
+%e A378061   7  [   0,  784,    0,  392,   0,   48,  0,  1]
+%e A378061   8  [1764,    0, 2352,    0, 720,    0, 63,  0, 1]
+%e A378061   9  [   0, 8820,    0, 5760,   0, 1215,  0, 80, 0, 1]
+%e A378061 .
+%e A378061 The 15 walks with length 4 and height 2 are: 'NNNS', 'NNSN', 'NNWE', 'NNEW', 'NSNN', 'NWNE', 'NWEN', 'NENW', 'NEWN', 'WNNE', 'WNEN', 'WENN', 'ENNW', 'ENWN', 'EWNN'.
+%p A378061 T := (n, k) -> ifelse((n - k)::odd, 0, binomial(n+1, (n-k)/2)^2*(k+1)/(n+1)):
+%p A378061 for n from 0 to 9 do seq(T(n, k), k = 0..n) od;
+%t A378061 T[n_, k_] := If[EvenQ[n-k],Binomial[n + 1, (n - k)/2]^2*(k + 1)/(n + 1), 0]; Table[T[n,k],{n,0,10},{k,0,n}]//Flatten (* _Stefano Spezia_, Dec 08 2024 *)
+%o A378061 (Python)
+%o A378061 # Creates the table by counting the heights of square lattice walks. For illustration only.
+%o A378061 from dataclasses import dataclass
+%o A378061 @dataclass
+%o A378061 class Z: w: str = ""; r: int = 0; i: int = 0
+%o A378061 def Trow(n: int) -> list[int]:
+%o A378061     W = [Z()]
+%o A378061     row = [0] * (n + 1)
+%o A378061     for x in W:
+%o A378061         if len(x.w) == n:
+%o A378061             if x.r == 0: row[x.i] += 1
+%o A378061         else:
+%o A378061             for s in "NSWE":
+%o A378061                 r = i = 0
+%o A378061                 match s:
+%o A378061                     case "W": r = 1
+%o A378061                     case "E": r = -1
+%o A378061                     case "N": i = 1
+%o A378061                     case "S": i = -1
+%o A378061                 if x.i + i >= 0:
+%o A378061                     W.append(Z(x.w + s, x.r + r, x.i + i))
+%o A378061     return row
+%o A378061 for n in range(10): print(f"[{n}] {Trow(n)}")
+%Y A378061 The columns are aerated rows of A378062. See also: A000891, A145600, A145601, A145602, A145603.
+%Y A378061 Cf. A018224 (row sums), A378060.
+%K A378061 nonn,tabl,new
+%O A378061 0,4
+%A A378061 _Peter Luschny_, Dec 07 2024
