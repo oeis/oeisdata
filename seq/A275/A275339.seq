@@ -1,4 +1,4 @@
-%I A275339 #53 Dec 30 2021 00:34:29
+%I A275339 #55 Dec 16 2024 16:03:38
 %S A275339 60,120,440,168,264,840,2448,528,1904,624,1360,2295,816,1632,20128,
 %T A275339 1824,48300,3105,15392,2208,13024,2400,10656,4080,8288,2784,5920,2976,
 %U A275339 3552,9120
@@ -27,6 +27,26 @@
 %t A275339 w[k_] := With[{fi = Power @@@ FactorInteger[k]}, (fi //. {a___, b_, c__, d_, e___} /; AllTrue[{c}, # < b && # < d &] :> {a, b, Sequence @@ Table[ Min[b, d], {Length[{c}]}], d, e}) - fi // Total];
 %t A275339 a[n_] := For[k = 1, True, k++, If[w[k] == n, Return[k]]];
 %t A275339 Array[a, 30] (* _Jean-François Alcover_, Jul 21 2019 *)
-%K A275339 nonn
+%o A275339 (Python)
+%o A275339 from functools import cache
+%o A275339 from sympy import factorint
+%o A275339 @cache
+%o A275339 def WaterCapacity(N: int) -> int:
+%o A275339     if N < 2: return 0
+%o A275339     x: list[int] = [p**e for p, e in factorint(N).items()]
+%o A275339     n = len(x); wc = 0
+%o A275339     left  = [0] * n;  left[0]  = x[0]
+%o A275339     right = [0] * n; right[n-1] = x[n-1]
+%o A275339     for k in range(n): left[k] = max(left[k - 1], x[k])
+%o A275339     for k in range(n - 2, -1, -1): right[k] = max(right[k + 1], x[k])
+%o A275339     for k in range(n): wc += min(left[k], right[k]) - x[k]
+%o A275339     return wc
+%o A275339 def a(n: int) -> int:
+%o A275339     j = 1
+%o A275339     while True:
+%o A275339         if WaterCapacity(j) == n: return j
+%o A275339         j += 1
+%o A275339 print([a(n) for n in range(1, 20)])  # _Peter Luschny_, Dec 16 2024
+%K A275339 nonn,changed
 %O A275339 1,1
 %A A275339 _Peter Luschny_, Aug 03 2016
