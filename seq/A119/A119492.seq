@@ -1,10 +1,38 @@
-%I A119492 #4 Mar 31 2012 14:39:53
+%I A119492 #9 Dec 20 2024 09:22:22
 %S A119492 4,6,8,9,14,15,16,25,27,32,49,51,62,64,81,91,95,121,125,128,159,169,
 %T A119492 243,245,254,256,287,289,343,361,473,512,529,625,679,703,729,841,961,
 %U A119492 1022,1024,1139,1199,1331,1339,1369,1681,1717,1849,1891,2048,2051
 %N A119492 Composites n not dividing binomial(n,k) for any k to which n is not prime.
+%H A119492 Robert Israel, <a href="/A119492/b119492.txt">Table of n, a(n) for n = 1..830</a>
 %e A119492 8 shares factors with 2,4 and 6. bin(8,2)=bin(8,6)=28 and bin(8,4)=70. 8 divides neither 28 nor 70 and is therefore on the list.
+%p A119492 filter:= proc(n) local F,k,flag,t,p,A,nA,B,nB,carries,c,i;
+%p A119492   if isprime(n) then return false fi;
+%p A119492   F:= ifactors(n)[2];
+%p A119492   for k from 2 to n/2 do
+%p A119492     if igcd(k,n) = 1 then next fi;
+%p A119492     flag:= true;
+%p A119492     for t in F do
+%p A119492         p:= t[1];
+%p A119492         A:= convert(k,base,p); nA:= nops(A);
+%p A119492         B:= convert(n-k,base,p); nB:= nops(B);
+%p A119492         if nA < nB then A:= [op(A),0$(nB-nA)] fi;
+%p A119492         carries:= 0; c:= 0;
+%p A119492         for i from 1 to nB do
+%p A119492           if A[i]+B[i]+c >= p then
+%p A119492             carries:= carries+1;
+%p A119492             c:= 1;
+%p A119492           else c:= 0
+%p A119492           fi;
+%p A119492         od;
+%p A119492         if carries < t[2] then flag:= false; break fi;
+%p A119492     od;
+%p A119492     if flag then return false fi;
+%p A119492   od;
+%p A119492   true
+%p A119492 end proc:
+%p A119492 select(filter, [$4..10000]); # _Robert Israel_, Dec 16 2024
 %t A119492 For[a = 1, a < 1001, a++; c = 0; If[PrimeQ[a] == True, Continue[]]; For[b = 1, b < a + 1, b++, If[And[GCD[b, a] != 1, Mod[Binomial[a, b], a] == 0], c = c + 1]]; If[c == 0, Print[a]]]
-%K A119492 nonn
+%Y A119492 Includes A246547.
+%K A119492 nonn,changed
 %O A119492 1,1
 %A A119492 _Neil Fernandez_, May 25 2006
