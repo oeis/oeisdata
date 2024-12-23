@@ -1,8 +1,11 @@
-%I A081517 #13 May 24 2020 01:52:11
+%I A081517 #18 Dec 23 2024 01:52:35
 %S A081517 1,1,2,1,2,4,1,2,3,5,1,2,3,4,7,1,2,3,4,5,8,1,2,3,4,5,6,8,1,2,3,4,5,6,
 %T A081517 7,9,1,2,3,4,5,6,7,8,11,1,2,3,4,5,6,7,8,9,14,1,2,3,4,5,6,7,8,9,10,12,
 %U A081517 1,2,3,4,5,6,7,8,9,10,11,13,1,2,3,4,5,6,7,8,9,10,11,12,19
 %N A081517 Consider the smallest number m which can be expressed as the sum of n distinct numbers coprime to m. Sequence gives triangle (read by rows) of the set of coprime numbers pertaining to m. When there is a choice, use the lexicographically earliest solution.
+%C A081517 For n >= 2, it appears that m is the least prime >= n*(n+1)/2, and row n consists of
+%C A081517 1,2,3,...,n-1 and m - n*(n-1)/2. _Robert Israel_, Dec 22 2024
+%H A081517 Robert Israel, <a href="/A081517/b081517.txt">Table of n, a(n) for n = 1..7260</a> (first 120 rows, flattened)
 %e A081517 Triangle begins:
 %e A081517 1;
 %e A081517 1,2;
@@ -10,9 +13,28 @@
 %e A081517 1,2,3,5;
 %e A081517 1,2,3,4,7;
 %e A081517 1,2,3,4,5,8;
+%p A081517 g:= proc(S,m,n) # lex-first sublist of sorted list S of size n with sum m, or FAIL
+%p A081517     option remember;
+%p A081517     local nS,i,v;
+%p A081517     nS:= nops(S);
+%p A081517     if nS < n or convert(S[1..n],`+`) > m or convert(S[-n .. -1],`+`) < m then return FAIL fi;
+%p A081517     if n = 0 then if m = 0 then return [] else return FAIL fi fi;
+%p A081517     for i from 1 to nS while S[i] <= m do
+%p A081517        v:= procname(S[i+1..-1],m-S[i],n-1);
+%p A081517        if v <> FAIL then return [S[i],op(v)] fi
+%p A081517     od;
+%p A081517     FAIL
+%p A081517 end proc:
+%p A081517 f:= proc(n) local m,v;
+%p A081517    for m from 1 do
+%p A081517      v:= g(select(t -> igcd(t,m) = 1, [$1..m]),m,n);
+%p A081517      if v <> FAIL then return op(v) fi
+%p A081517    od
+%p A081517 end proc:
+%p A081517 for n from 1 to 20 do f(n) od; # _Robert Israel_, Dec 22 2024
 %o A081517 (PARI) row(n) = {my(m=n*(n-1)/2, v); for(k=m+n, oo, v=List([1]); for(i=2, k-m, if(gcd(k, i)==1, listput(v, i))); if(#v>=n, forsubset([#v, n], w, if(sum(i=1, n, v[w[i]])==k, return(vector(n, i, v[w[i]])))))); } \\ _Jinyuan Wang_, May 23 2020
 %Y A081517 Cf. A081515, A081516.
-%K A081517 nonn,tabl
+%K A081517 nonn,tabl,changed
 %O A081517 1,3
 %A A081517 _Amarnath Murthy_, Mar 27 2003
 %E A081517 More terms from _R. J. Mathar_, Mar 23 2007
