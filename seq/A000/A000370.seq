@@ -1,10 +1,11 @@
-%I A000370 M1287 N0494 #49 Nov 02 2024 14:19:14
+%I A000370 M1287 N0494 #74 Jan 12 2025 09:17:29
 %S A000370 1,2,4,14,222,616126,200253952527184,
 %T A000370 263735716028826576482466871188128,
 %U A000370 5609038300883759793482640992086670939164957990135057216103303119630336
 %N A000370 Number of NPN-equivalence classes of Boolean functions of n or fewer variables.
 %C A000370 Number of Boolean functions distinct under complementation/permutation.
 %D A000370 M. A. Harrison, Introduction to Switching and Automata Theory. McGraw Hill, NY, 1965, p. 153.
+%D A000370 M. A. Harrison, The Number of Transitivity Sets of  Boolean Functions. Journal of the Society for Industrial and Applied Mathematics, Vol. 11, No. 3 (Sep., 1963), pp. 806-828
 %D A000370 D. E. Knuth, The Art of Computer Programming, Vol. 4A, Section 7.1.1, p. 79.
 %D A000370 S. Muroga, Threshold Logic and Its Applications. Wiley, NY, 1971, p. 38, Table 2.3.2. - Row 16.
 %D A000370 N. J. A. Sloane, A Handbook of Integer Sequences, Academic Press, 1973 (includes this sequence).
@@ -18,7 +19,20 @@
 %H A000370 Juling Zhang, Guowu Yang, William N. N. Hung, Tian Liu, Xiaoyu Song, Marek A. Perkowski, <a href="https://doi.org/10.1007/s00224-018-9903-0">A Group Algebraic Approach to NPN Classification of Boolean Functions</a>, Theory of Computing Systems (2018), 1-20.
 %H A000370 <a href="/index/Bo#Boolean">Index entries for sequences related to Boolean functions</a>
 %F A000370 a(n) is asymptotic to 2^{2^n} / ( n! * 2^{n+1} ) as n -> oo. This follows from a theorem of Michael Harrison.  See Theorem 3 in Harrison (JACM, 1966). - Eric Bach, Aug 07 2017
-%K A000370 nonn,nice
+%F A000370 a(n) = (A000610(n)+A000616(n)) / 2. - _Gregory Morse_, Dec 23 2024
+%o A000370 (Python)
+%o A000370 def partition_lin(n, d, depth=0):
+%o A000370   if d == depth:
+%o A000370     if n==0: yield ()
+%o A000370   else: yield from (item + (i,) for i in range(n+1) for item in partition_lin(n-i*(depth+1), d, depth=depth+1))
+%o A000370 def get_num_equiv_bool_func(n, sc=False):
+%o A000370   import math, operator, functools
+%o A000370   from sympy import mobius
+%o A000370   def e(k): return sum((1<<d)*mobius(k//d) for d in range(1, k+1) if k % d == 0)//k
+%o A000370   def g(two_k): return sum((1<<(d//2))*mobius(two_k//d) for d in range(1, two_k+1) if two_k % d == 0 and two_k//2 % d != 0)//two_k
+%o A000370   return sum(math.factorial(n)*(1<<n)//functools.reduce(operator.mul, (math.factorial(ji)*(2*(n-i))**ji for i, ji in enumerate(j)), 1)*sum(functools.reduce(operator.mul, (0 if sc and d&1 else 1<<x for d, x in a), 1) for a in ([[(1,1)]] if n==0 else functools.reduce(lambda x, y: [[(math.lcm(p, q), math.gcd(p, q)*ip*jq) for p, ip in a for q, jq in b] for a in x for b in y], ([[(d, e(d)) for d in range(1, i+1) if i % d ==0], [(d, g(d)) for d in range(1, 2*i+1) if 2*i % d == 0 and i % d != 0]] for i in range(1, n+1) for _ in range(j[n-i]))))) for j in partition_lin(n, n))//(math.factorial(n)*(1<<n))
+%o A000370 [(get_num_equiv_bool_func(n)+get_num_equiv_bool_func(n,True))//2 for n in range(0,10)] # _Gregory Morse_, Dec 23 2024
+%K A000370 nonn,nice,changed
 %O A000370 0,2
 %A A000370 _N. J. A. Sloane_
 %E A000370 More terms from _Vladeta Jovovic_, Feb 23 2000
