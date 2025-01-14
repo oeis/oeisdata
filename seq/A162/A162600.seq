@@ -1,11 +1,39 @@
-%I A162600 #9 Aug 01 2015 21:30:53
+%I A162600 #17 Jan 13 2025 08:54:03
 %S A162600 4,6,8,10,9,14,12,15,16,22,18,26,20,21,24,34,27,38,25,28,30,46,32,35,
 %T A162600 36,33,40,58,39,62,42,44,48,45,50,74,52,51,54,82,49,86,55,57,56,94,60,
 %U A162600 63,64,66,65,106,68,70,72,69,76,118,75,122,78,77,80,85,81,134,84,87,88,142
 %N A162600 a(n) = the smallest integer > n that has yet to occur in the sequence, and that is not coprime to n.
 %C A162600 Is this a permutation of the composite integers?
+%H A162600 Robert Israel, <a href="/A162600/b162600.txt">Table of n, a(n) for n = 2..10000</a>
+%p A162600 Cands:= remove(isprime,[$5..1000]): nC:= nops(Cands):
+%p A162600 R:= 4: r:= 4: found:= true:
+%p A162600 for n from 3 while found do
+%p A162600    found:= false;
+%p A162600    for i from 1 to nC+3-n do
+%p A162600      if Cands[i] > n and igcd(n,Cands[i]) > 1 then
+%p A162600        r:= Cands[i];
+%p A162600        R:= R,r;
+%p A162600        Cands:= subsop(i=NULL, Cands);
+%p A162600        found:= true;
+%p A162600        break
+%p A162600      fi;
+%p A162600    od;
+%p A162600 od:
+%p A162600 R; # _Robert Israel_, Jan 12 2025
 %t A162600 g[n_] := g[n] = Block[{k = n + 1, t = Table[ g@i, {i, 2, n - 1}]}, While[ MemberQ[t, k] || GCD[n, k] == 1, k++ ]; k]; Table[ g@n, {n, 2, 71}] (* or *) f[lst_] := Block[{len = 2 + Length@lst}, k = 1 + len; While[ MemberQ[lst, k] || GCD[len, k] == 1, k++ ]; Append[lst, k]]; Nest[f, {}, 70] (* _Robert G. Wilson v_, Aug 17 2009 *)
-%K A162600 nonn
+%o A162600 (Python)
+%o A162600 from math import gcd
+%o A162600 from sympy import isprime
+%o A162600 from itertools import count, islice
+%o A162600 def agen(): # generator of terms
+%o A162600     aset, m = set(), 4
+%o A162600     for n in count(2):
+%o A162600         an = next(k for k in count(max(n+1, m)) if k not in aset and gcd(n, k) > 1)
+%o A162600         aset.add(an)
+%o A162600         while m in aset or isprime(m): m += 1
+%o A162600         yield an
+%o A162600 print(list(islice(agen(), 70))) # _Michael S. Branicky_, Jan 13 2025
+%K A162600 nonn,changed
 %O A162600 2,1
 %A A162600 _Leroy Quet_, Jul 07 2009
 %E A162600 a(17) and further terms from _Robert G. Wilson v_, Aug 17 2009

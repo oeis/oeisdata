@@ -1,12 +1,42 @@
-%I A340799 #9 Sep 08 2022 08:46:26
+%I A340799 #17 Jan 13 2025 11:33:31
 %S A340799 2,5,11,23,47,59,191,167,179,239,5119,359,20479,2111,719,839,1114111,
 %T A340799 1259,786431,3023,2879,15359,348127231,3359,22031,266239,6299,6719,
 %U A340799 22280142847,5039,559419490303,7559,156671,7798783,25919,10079,1168231104511,5505023
 %N A340799 a(n) is the smallest prime p such that p + 1 has 2n divisors.
+%C A340799 The only prime p such that p+1 has an odd number of divisors is 3, because every number with an odd number of divisors is a square. - _Robert Israel_, Jan 12 2025
+%H A340799 Robert Israel, <a href="/A340799/b340799.txt">Table of n, a(n) for n = 1..255</a>
 %F A340799 A000005(a(n) + 1) = 2n.
 %e A340799 a(4) = 23 because 23 is the smallest prime p such that p + 1 has 2*4 divisors; tau(24) = 8.
-%o A340799 (Magma) Ax:=func<n|exists(r){m:m in[1..10^7] | IsPrime(m) and #Divisors(m + 1) eq n*#Divisors(m)}select r else 0>; [Ax(n): n in[1..20]]
+%p A340799 g:= proc(n,k) # lists of integers > k whose product is n
+%p A340799       option remember;
+%p A340799       local F,m;
+%p A340799       if n = 1 then return [[]]
+%p A340799       elif k >= n then return []
+%p A340799       fi;
+%p A340799       F:= select(`>`,numtheory:-divisors(n),k);
+%p A340799       [seq(op(map(t -> [m,op(t)], procname(n/m,m-1))), m=F)]
+%p A340799 end proc:
+%p A340799 children:= proc(t) local m,nt,S,i,qs,t3s,t1s;
+%p A340799     nt:= nops(t[3]);
+%p A340799     S:= select(i -> t[3][i] <> 2, [$1..nt]);
+%p A340799     if S = [] then m:= nt else m:= min(S) fi;
+%p A340799     qs:= [seq(nextprime(t[3][i]),i=1..m)];
+%p A340799     t3s:= [seq(subsop(i = qs[i], t[3]), i = 1..m)];
+%p A340799     t1s:= [seq(t[1]*(qs[i]/t[3][i])^t[2][i], i=1..m)];
+%p A340799     [seq([t1s[i],t[2],t3s[i]],i=1..m)]
+%p A340799 end proc:
+%p A340799 f:= proc(d) local pq,s,t,i; uses priqueue;
+%p A340799   initialize(pq);
+%p A340799   for t in g(2*d,1) do insert([-mul(2^(t[i]-1),i=1..nops(t)),t -~ 1, [2$nops(t)]],pq) od;
+%p A340799   do
+%p A340799      t:= extract(pq);
+%p A340799      if nops(convert(t[3],set)) = nops(t[3]) and isprime(-t[1]-1) then return -t[1]-1 fi;
+%p A340799   for s in children(t) do insert(s,pq) od
+%p A340799   od:
+%p A340799 end proc:
+%p A340799 map(f, [$1..40]); # _Robert Israel_, Jan 12 2025
+%o A340799 (Magma) Ax:=func<n|exists(r){m:m in[1..10^7] | IsPrime(m) and #Divisors(m + 1) eq n*#Divisors(m)}select r else 0>; [Ax(n): n in[1..20]];
 %Y A340799 Cf. A000005 (tau), A003680, A080371.
-%K A340799 nonn
+%K A340799 nonn,look,changed
 %O A340799 1,1
 %A A340799 _Jaroslav Krizek_, Jan 21 2021
