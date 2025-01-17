@@ -1,0 +1,58 @@
+%I A378067 #15 Jan 16 2025 11:30:26
+%S A378067 1,1,2,4,3,3,9,10,6,10,36,25,20,20,25,100,101,55,50,55,101,400,301,
+%T A378067 231,126,126,231,301,1225,1226,742,490,294,490,742,1226,4900,3921,
+%U A378067 3144,1632,1008,1008,1632,3144,3921,15876,15877,10593,7137,3348,2592,3348,7137,10593,15877
+%N A378067 Triangle read by rows: T(n, k) is the number of walks of length n with unit steps in all four directions (NSWE) starting at (0, 0), staying in the upper plane (y >= 0), and ending on the vertical line x = 0 if k = 0, or on the line x = k or x = -(n + 1 - k) if k > 0.
+%F A378067 Sum_{k=1..n} T(n, k) = 2 * A378069(n).
+%e A378067 Triangle starts:
+%e A378067   [0] [    1]
+%e A378067   [1] [    1,     2]
+%e A378067   [2] [    4,     3,     3]
+%e A378067   [3] [    9,    10,     6,   10]
+%e A378067   [4] [   36,    25,    20,   20,   25]
+%e A378067   [5] [  100,   101,    55,   50,   55,  101]
+%e A378067   [6] [  400,   301,   231,  126,  126,  231,  301]
+%e A378067   [7] [ 1225,  1226,   742,  490,  294,  490,  742, 1226]
+%e A378067   [8] [ 4900,  3921,  3144, 1632, 1008, 1008, 1632, 3144,  3921]
+%e A378067   [9] [15876, 15877, 10593, 7137, 3348, 2592, 3348, 7137, 10593, 15877]
+%e A378067 .
+%e A378067 For n = 3 we get the walks depending on the x-coordinate of the endpoint:
+%e A378067 W(x= 3) = {WWW},
+%e A378067 W(x= 2) = {NWW,WNW,WWN},
+%e A378067 W(x= 1) = {NNW,NSW,NWN,NWS,WWE,WEW,EWW,WNN,WNS},
+%e A378067 W(x= 0) = {NNN,NNS,NSN,NWE,NEW,WNE,WEN,ENW,EWN},
+%e A378067 W(x=-1) = {NNE,NEN,ENN,NSE,NES,WEE,ENS,EWE,EEW},
+%e A378067 W(x=-2) = {NEE,ENE,EEN},
+%e A378067 W(x=-3) = {EEE}.
+%e A378067 T(3, 0) = card(W(x=0)) = 9, T(3, 1) = card(W(x=1)) + card(W(x=-3)) = 10,
+%e A378067 T(3, 2) = card(W(x=2)) + card(W(x=-2)) = 6, T(3, 3) = card(W(x=3)) + card(W(x=-1)) = 10.
+%o A378067 (Python)
+%o A378067 from dataclasses import dataclass
+%o A378067 @dataclass
+%o A378067 class Walk:
+%o A378067     s: str = ""
+%o A378067     x: int = 0
+%o A378067     y: int = 0
+%o A378067 def Trow(n: int) -> list[int]:
+%o A378067     W = [Walk()]
+%o A378067     row = [0] * (n + 1)
+%o A378067     for w in W:
+%o A378067         if len(w.s) == n:
+%o A378067             row[w.x] += 1
+%o A378067         else:
+%o A378067             for s in "NSWE":
+%o A378067                 x = y = 0
+%o A378067                 match s:
+%o A378067                     case "W": x =  1
+%o A378067                     case "E": x = -1
+%o A378067                     case "N": y =  1
+%o A378067                     case "S": y = -1
+%o A378067                     case _  : pass
+%o A378067                 if w.y + y >= 0:
+%o A378067                     W.append(Walk(w.s + s, w.x + x, w.y + y))
+%o A378067     return row
+%o A378067 for n in range(10): print(Trow(n))
+%Y A378067 Cf. A018224 (column 0), A001700 (row sums), A378069.
+%K A378067 nonn,tabl,walk,new
+%O A378067 0,3
+%A A378067 _Peter Luschny_, Dec 08 2024

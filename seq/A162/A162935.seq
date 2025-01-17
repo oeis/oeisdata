@@ -1,68 +1,69 @@
-%I A162935 #1 Jun 01 2010 03:00:00
+%I A162935 #6 Jan 16 2025 11:29:40
 %S A162935 1,2,6,12,60,360,2520,27720
 %N A162935 Highly composite numbers (A002182) with property that the next highly composite number is more than 3/2 times greater.
 %C A162935 It can be proved that this sequence is finite, just like A072938, and that there are no further terms.
 %C A162935 This sequence is a subsequence of A162936.
 %H A162935 Jan Behrens, <a href="http://www.magnetkern.de/hcn/hcn-verhaeltnisse-2009-07-18.pdf">Estimation of the ratios of subsequent highly composite numbers</a> (in German)
-%o A162935 (Other) import Data.Ratio
+%o A162935 (Haskell)
+%o A162935 import Data.Ratio
 %o A162935 import Data.Set (Set)
 %o A162935 import qualified Data.Set as Set
 %o A162935 printList :: (Show a) => [a] -> IO()
 %o A162935 printList = putStr . concat . map (\x -> show x ++ "\n")
 %o A162935 isPrime n
-%o A162935 ..| n >= 2 = all isNotDivisor $ takeWhile smallEnough primes
-%o A162935 ..| otherwise = False
-%o A162935 ..where
-%o A162935 ....isNotDivisor d = n `mod` d /= 0
-%o A162935 ....smallEnough d = d^2 <= n
+%o A162935   | n >= 2 = all isNotDivisor $ takeWhile smallEnough primes
+%o A162935   | otherwise = False
+%o A162935   where
+%o A162935     isNotDivisor d = n `mod` d /= 0
+%o A162935     smallEnough d = d^2 <= n
 %o A162935 primes = 2 : filter isPrime [ 2 * n + 1 | n <- [1..] ]
 %o A162935 primeSynthesis = partialSynthesis 1 primes
-%o A162935 ..where
-%o A162935 ....partialSynthesis n _ [] = n
-%o A162935 ....partialSynthesis n (p:ps) (c:cs) = partialSynthesis (n * p^c) ps cs
+%o A162935   where
+%o A162935     partialSynthesis n _ [] = n
+%o A162935     partialSynthesis n (p:ps) (c:cs) = partialSynthesis (n * p^c) ps cs
 %o A162935 primeAnalysis n
-%o A162935 ..| n < 1 = undefined
-%o A162935 ..| n == 1 = []
-%o A162935 ..| n > 1 = reverse $ buildPrimeCounts [0] n
-%o A162935 ..where
-%o A162935 ....buildPrimeCounts (c:cs) n
-%o A162935 ......| n == 1 = (c:cs)
-%o A162935 ......| n `mod` p == 0 = buildPrimeCounts (c+1 : cs) (n `div` p)
-%o A162935 ......| otherwise = buildPrimeCounts (0:c:cs) n
-%o A162935 ......where p = primes !! (length cs)
+%o A162935   | n < 1 = undefined
+%o A162935   | n == 1 = []
+%o A162935   | n > 1 = reverse $ buildPrimeCounts [0] n
+%o A162935   where
+%o A162935     buildPrimeCounts (c:cs) n
+%o A162935       | n == 1 = (c:cs)
+%o A162935       | n `mod` p == 0 = buildPrimeCounts (c+1 : cs) (n `div` p)
+%o A162935       | otherwise = buildPrimeCounts (0:c:cs) n
+%o A162935       where p = primes !! (length cs)
 %o A162935 divisorCount n = product $ map (+1) $ primeAnalysis n
 %o A162935 primorialProducts = resFrom 1
-%o A162935 ..where
-%o A162935 ....resFrom n = resBetween n (4*n - 1) ++ resFrom (4*n)
-%o A162935 ....resBetween start end = Set.toAscList $ Set.fromList $ unorderedList
-%o A162935 ......where
-%o A162935 ........unorderedList = filter (>= start) (1 : build 0 [])
-%o A162935 ........build pos exponents
-%o A162935 ..........| nextNumber <= end = nextNumber : build 0 nextCombination
-%o A162935 ..........| newPrime = []
-%o A162935 ..........| otherwise = build (pos + 1) exponents
-%o A162935 ..........where
-%o A162935 ............newPrime = pos >= length exponents
-%o A162935 ............nextCombination
-%o A162935 ..............| newPrime = replicate (length exponents + 1) 1
-%o A162935 ..............| otherwise = replicate (pos + 1) ((exponents !! pos) + 1)
-%o A162935 ..............................++ drop (pos + 1) exponents
-%o A162935 ............nextNumber = primeSynthesis nextCombination
+%o A162935   where
+%o A162935     resFrom n = resBetween n (4*n - 1) ++ resFrom (4*n)
+%o A162935     resBetween start end = Set.toAscList $ Set.fromList $ unorderedList
+%o A162935       where
+%o A162935         unorderedList = filter (>= start) (1 : build 0 [])
+%o A162935         build pos exponents
+%o A162935           | nextNumber <= end = nextNumber : build 0 nextCombination
+%o A162935           | newPrime = []
+%o A162935           | otherwise = build (pos + 1) exponents
+%o A162935           where
+%o A162935             newPrime = pos >= length exponents
+%o A162935             nextCombination
+%o A162935               | newPrime = replicate (length exponents + 1) 1
+%o A162935               | otherwise = replicate (pos + 1) ((exponents !! pos) + 1)
+%o A162935                               ++ drop (pos + 1) exponents
+%o A162935             nextNumber = primeSynthesis nextCombination
 %o A162935 filterStrictlyMonotonicDivisorCount = filterRest 0
-%o A162935 ..where
-%o A162935 ....filterRest _ [] = []
-%o A162935 ....filterRest lim (num:nums)
-%o A162935 ......| divisorCount num > lim = num : filterRest (divisorCount num) nums
-%o A162935 ......| otherwise = filterRest lim nums
+%o A162935   where
+%o A162935     filterRest _ [] = []
+%o A162935     filterRest lim (num:nums)
+%o A162935       | divisorCount num > lim = num : filterRest (divisorCount num) nums
+%o A162935       | otherwise = filterRest lim nums
 %o A162935 highlyCompositeNumbers
-%o A162935 ..= filterStrictlyMonotonicDivisorCount primorialProducts
+%o A162935   = filterStrictlyMonotonicDivisorCount primorialProducts
 %o A162935 findBigGaps [] = []
 %o A162935 findBigGaps [_] = []
 %o A162935 findBigGaps (x1:x2:xs)
-%o A162935 ..| x1 * 3 < x2 * 2 = (x1,x2) : findBigGaps (x2:xs)
-%o A162935 ..| otherwise = findBigGaps (x2:xs)
+%o A162935   | x1 * 3 < x2 * 2 = (x1, x2) : findBigGaps (x2:xs)
+%o A162935   | otherwise = findBigGaps (x2:xs)
 %o A162935 main = mapM (putStrLn . show . fst) (findBigGaps highlyCompositeNumbers)
 %Y A162935 Cf. A002182, A072938, A162936
-%K A162935 fini,full,nonn
+%K A162935 fini,full,nonn,changed
 %O A162935 1,2
 %A A162935 Jan Behrens (jbe-oeis(AT)magnetkern.de), Jul 17 2009
