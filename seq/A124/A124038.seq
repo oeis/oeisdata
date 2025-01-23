@@ -1,24 +1,33 @@
-%I A124038 #10 Aug 09 2015 01:14:20
+%I A124038 #15 Jan 23 2025 00:17:01
 %S A124038 1,-2,1,-1,-2,1,2,-2,-2,1,1,4,-3,-2,1,-2,3,6,-4,-2,1,-1,-6,6,8,-5,-2,
 %T A124038 1,2,-4,-12,10,10,-6,-2,1,1,8,-10,-20,15,12,-7,-2,1,-2,5,20,-20,-30,
 %U A124038 21,14,-8,-2,1,-1,-10,15,40,-35,-42,28,16,-9,-2,1
-%N A124038 Determinants of tridiagonal matrices in y with upper diagonal y-2: m(n,n,d)=If[ n == m && n > 1 && m > 1, y, If[n == m - 1 || n == m + 1, -1, If[n == m == 1, y - 2, 0]]] Det(m,n,m,d)=P(d,y).
-%C A124038 Matrices modeled on: {{-2 + y, -1, 0}, {-1, y, -1}, {0, -1, y}} The upper y-1 gives the Steinbach polynomials A066170.
-%F A124038 m(n,n,d)=If[ n == m && n > 1 && m > 1, y, If[n == m - 1 || n == m + 1, -1, If[n == m == 1, y - 2, 0]]]; Det(m,n,m,d)=P(d,y)
-%e A124038 Triangular sequence:
-%e A124038 {1},
-%e A124038 {-2, 1},
-%e A124038 {-1, -2, 1},
-%e A124038 {2, -2, -2, 1},
-%e A124038 {1, 4, -3, -2, 1},
-%e A124038 {-2, 3, 6, -4, -2, 1},
-%e A124038 {-1, -6, 6, 8, -5, -2, 1},
-%e A124038 {2, -4, -12,10, 10, -6, -2, 1},
-%e A124038 {1, 8, -10, -20, 15, 12, -7, -2, 1},
-%e A124038 {-2, 5, 20, -20, -30, 21, 14, -8, -2, 1},
-%e A124038 {-1, -10, 15, 40, -35, -42, 28, 16, -9, -2, 1}
-%t A124038 T[n_, m_, d_] := If[ n == m && n >1 && m > 1, y, If[n == m - 1 || n == m + 1, -1,If[n == m == 1, y - 2, 0]]] M[d_] := Table[T[n, m, d], {n, 1, d}, {m, 1, d}]; Table[M[d], {d, 1, 10}]; Table[Det[M[d]], {d, 1, 10}] a = Join[{{1}}, Table[CoefficientList[Table[Det[M[d]], {d, 1, 10}][[d]], y], {d, 1, 10}]]; Flatten[a]
-%o A124038 (Sage)
+%N A124038 Triangle read by rows: T(n, k) = T(n-1, k-1) - T(n-2, k), with T(n, n) = 1, T(n, n-1) = -2.
+%H A124038 G. C. Greubel, <a href="/A124038/b124038.txt">Rows n = 0..50 of the traingle, flattened</a>
+%F A124038 From _G. C. Greubel_, Jan 22 2025: (Start)
+%F A124038 T(n, k) = T(n-1, k-1) - T(n-2, k), with T(n, n) = 1, T(n, n-1) = -2.
+%F A124038 T(n, k) = (-1)^floor((n-k+1)/2)*(1 + (n-k mod 2))*qStirling2(n+1, n-k+1,-1).
+%F A124038 T(2*n, n) = (1/2)*(-1)^floor(n/2)*( (1+(-1)^n)*A005809(n/2) - 2*(1-(-1)^n)* A045721((n-1)/2) ). (End)
+%e A124038 Triangular sequence begins as:
+%e A124038    1;
+%e A124038   -2,   1;
+%e A124038   -1,  -2,   1;
+%e A124038    2,  -2,  -2,   1;
+%e A124038    1,   4,  -3,  -2,   1;
+%e A124038   -2,   3,   6,  -4,  -2,   1;
+%e A124038   -1,  -6,   6,   8,  -5,  -2,  1;
+%e A124038    2,  -4, -12,  10,  10,  -6, -2,  1;
+%e A124038    1,   8, -10, -20,  15,  12, -7, -2,  1;
+%e A124038   -2,   5,  20, -20, -30,  21, 14, -8, -2,  1;
+%e A124038   -1, -10,  15,  40, -35, -42, 28, 16, -9, -2, 1;
+%t A124038 (* First program *)
+%t A124038 t[n_, m_, d_]:= If[n==m && n>1 && m>1, x, If[n==m-1 || n==m+1, -1, If[n==m== 1, x-2, 0]]];
+%t A124038 M[d_]:= Table[t[n,m,d], {n,d}, {m,d}];
+%t A124038 Join[{{1}}, Table[CoefficientList[Table[Det[M[d]], {d,10}][[d]], x], {d,10}]]//Flatten
+%t A124038 (* Second program *)
+%t A124038 T[n_, k_]:= T[n, k] = If[k<0 || k>n, 0, If[k>n-2, k-n+(-1)^(n-k), T[n-1, k- 1] -T[n-2,k]]];
+%t A124038 Table[T[n,k], {n,0,12}, {k,0,n}]//Flatten (* _G. C. Greubel_, Jan 22 2025 *)
+%o A124038 (SageMath)
 %o A124038 @CachedFunction
 %o A124038 def A124038(n,k):
 %o A124038     if n< 0: return 0
@@ -26,7 +35,24 @@
 %o A124038     h = 2*A124038(n-1,k) if n==1 else 0
 %o A124038     return A124038(n-1,k-1) - A124038(n-2,k) - h
 %o A124038 for n in (0..9): [A124038(n,k) for k in (0..n)] # _Peter Luschny_, Nov 20 2012
-%Y A124038 Cf. A066170.
-%K A124038 uned,sign
-%O A124038 1,2
+%o A124038 (SageMath)
+%o A124038 from sage.combinat.q_analogues import q_stirling_number2
+%o A124038 def A124038(n,k): return (1 + ((n-k)%2))*q_stirling_number2(n+1, n-k+1, -1)
+%o A124038 print(flatten([[A124038(n, k) for k in range(n+1)] for n in range(13)])) # _G. C. Greubel_, Jan 22 2025
+%o A124038 (Magma)
+%o A124038 function T(n,k) // T = A124038
+%o A124038   if k lt 0 or k gt n then return 0;
+%o A124038   elif k ge n-2 then return k-n + (-1)^(n+k);
+%o A124038   else return T(n-1,k-1) - T(n-2,k);
+%o A124038   end if;
+%o A124038 end function;
+%o A124038 [T(n,k): k in [0..n], n in [0..12]]; // _G. C. Greubel_, Jan 22 2025
+%Y A124038 Cf. A005809, A045721, A066170.
+%Y A124038 Row reversal of: A374439.
+%Y A124038 Columns are related to: A000034 (k=0), A029578 (k=1), A131259 (k=2).
+%Y A124038 Diagonals are related to: A113679 (k=n-1), A022958 (k=n-2), A005843 (k=n-3), A000217 (k=n-4), -A002378 (k=n-5).
+%Y A124038 Sums include: (-1)^floor((n+1)/2)*A016116 (signed diagonal), A057079 (row), A119910 (signed row), (-1)^n*A130706 (diagonal).
+%K A124038 sign,changed
+%O A124038 0,2
 %A A124038 _Gary W. Adamson_ and _Roger L. Bagula_, Nov 03 2006
+%E A124038 Edited by _G. C. Greubel_, Jan 22 2025
