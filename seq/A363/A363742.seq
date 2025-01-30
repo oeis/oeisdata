@@ -1,13 +1,14 @@
-%I A363742 #8 Aug 16 2023 11:03:50
+%I A363742 #13 Jan 29 2025 17:30:30
 %S A363742 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,
 %T A363742 0,1,0,0,0,1,0,1,0,0,0,0,0,2,0,0,0,0,0,1,0,1,0,0,0,3,0,0,0,1,0,1,0,0,
-%U A363742 0,1,0,4,0,0,0,0,0,1,0,2,0,0,0,4,0,0,0
+%U A363742 0,1,0,4,0,0,0,0,0,1,0,2,0,0,0,4,0,0,0,1,0,3,0,0,0,0,0,7,0,0,0,1,0,1,0,1,0,0,0,4,0,1,0,3,0,1,0,0,0,0,0,7
 %N A363742 Number of integer factorizations of n with different mean, median, and mode.
 %C A363742 An integer factorization of n is a multiset of positive integers > 1 with product n.
 %C A363742 If there are multiple modes, then the mode is automatically considered different from the mean and median; otherwise, we take the unique mode.
 %C A363742 A mode in a multiset is an element that appears at least as many times as each of the others. For example, the modes in {a,a,b,b,b,c,d,d,d} are {b,d}.
 %C A363742 The median of a multiset is either the middle part (for odd length), or the average of the two middle parts (for even length).
 %C A363742 Position of first appearance of n is: 1, 30, 48, 60, 72, 200, 160, 96, ...
+%H A363742 Antti Karttunen, <a href="/A363742/b363742.txt">Table of n, a(n) for n = 1..65537</a>
 %e A363742 The a(n) factorizations for n = 30, 48, 60, 72, 96, 144:
 %e A363742   (2*3*5)  (2*3*8)    (2*5*6)    (2*4*9)    (2*6*8)    (2*8*9)
 %e A363742            (2*2*3*4)  (2*3*10)   (3*4*6)    (3*4*8)    (3*6*8)
@@ -22,6 +23,11 @@
 %t A363742 facs[n_]:=If[n<=1,{{}},Join@@Table[Map[Prepend[#,d]&, Select[facs[n/d],Min@@#>=d&]],{d,Rest[Divisors[n]]}]];
 %t A363742 modes[ms_]:=Select[Union[ms],Count[ms,#]>=Max@@Length/@Split[ms]&];
 %t A363742 Table[Length[Select[facs[n],{Mean[#]}!={Median[#]}!=modes[#]&]],{n,100}]
+%o A363742 (PARI)
+%o A363742 median(lista) = if((#lista)%2, lista[(1+#lista)/2], (lista[#lista/2]+lista[1+(#lista/2)])/2);
+%o A363742 uniqmode(lista) = { my(freqs=Map(),v); for(i=1,#lista,if(!mapisdefined(freqs,lista[i],&v), v = 0); mapput(freqs,lista[i],1+v)); my(keys=Vec(freqs), fr, mc=0, mf=0, isuniq=0); for(i=1,#keys, fr = mapget(freqs,keys[i]); if(fr>=mf, isuniq = (fr>mf); mf = fr; mc = keys[i])); if(!isuniq, -1, mc); }; \\ Returns -1 if not unique mode.
+%o A363742 all_different(facs) = { my(mean=(vecsum(facs)/#facs), med=median(facs), mode=uniqmode(facs)); ((mean!=med) &&  (mean!=mode) && (med!=mode)); };
+%o A363742 A363742(n, m=n, facs=List([])) = if(1==n, (#facs>0 && all_different(Vec(facs))), my(s=0, newfacs); fordiv(n, d, if((d>1)&&(d<=m), newfacs = List(facs); listput(newfacs,d); s += A363742(n/d, d, newfacs))); (s)); \\ _Antti Karttunen_, Jan 29 2025
 %Y A363742 Just (mean) != (median): A359911, complement A359909, partitions A359894.
 %Y A363742 The version for partitions is A363720, equal A363719, ranks A363730.
 %Y A363742 For equal instead of unequal we have A363741.
@@ -29,6 +35,7 @@
 %Y A363742 A316439 counts factorizations by length, A008284 partitions.
 %Y A363742 A363265 counts factorizations with a unique mode.
 %Y A363742 Cf. A089723, A237984, A240219, A326622, A339846, A339890, A359910, A362608, A363725, A363727.
-%K A363742 nonn
+%K A363742 nonn,changed
 %O A363742 1,48
 %A A363742 _Gus Wiseman_, Jun 27 2023
+%E A363742 More terms from _Antti Karttunen_, Jan 29 2025
