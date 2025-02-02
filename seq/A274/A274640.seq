@@ -1,4 +1,4 @@
-%I A274640 #147 Sep 13 2020 02:22:19
+%I A274640 #151 Feb 02 2025 02:08:23
 %S A274640 1,2,3,4,2,3,4,5,6,1,4,6,2,1,6,5,3,1,5,2,6,1,2,4,5,3,7,8,5,4,9,7,8,3,
 %T A274640 10,11,4,7,8,6,3,9,5,7,8,9,10,11,12,6,8,9,11,10,12,13,7,6,10,9,12,13,
 %U A274640 14,15,8,2,9,12,7,10,11,13,14,10,9,6,13,5,3,15,16,7,1,10,13,12,14,11,15,3,8,5,1,12,11,14,7,4,2,16,9,17,1,8,11
@@ -85,6 +85,26 @@
 %t A274640 For[i=1, True, i++, t=b[x  , y+i]; If[t>0, s=Union[s,{t}], Break[]]];
 %t A274640 For[i=1, True, i++, t=b[x  , y-i]; If[t>0, s=Union[s,{t}], Break[]]];
 %t A274640 m = 1; While[MemberQ[s, m], m++]; b[x, y] = m]]; Table[a[n], {n, 0, 1000}] (* _Jean-François Alcover_, Nov 14 2016, after _Alois P. Heinz_ *)
+%o A274640 (Python)
+%o A274640 class Lines: # manage lines in direction d = dx + dy*1j
+%o A274640     def __init__(self, d):
+%o A274640         self.lines={}; self.t = d.real/d.imag if d.imag else None
+%o A274640     def __call__(self, pos): # Return the line through pos in direction d
+%o A274640         index = pos.imag if self.t is None else pos.real - pos.imag*self.t
+%o A274640         if index not in self.lines: self.lines[index] = Values()
+%o A274640         return self.lines[index]
+%o A274640 class Values(set): # the set of used numbers on a given line
+%o A274640     def next(self, n): # return least k >= n not on this line
+%o A274640         return min(m+1 for m in self if m+1 >= n and m+1 not in self
+%o A274640                    ) if n in self else n
+%o A274640 def A274640(): # generator of the sequence, see below for possible usage
+%o A274640     lines = [Lines(d) for d in (1, 1+1j, 1j, 1-1j)]; pos = 0
+%o A274640     for side in range(9**9):
+%o A274640         for _ in range(side//2 + 1):
+%o A274640             n = 1; lines_here = [L(pos) for L in lines]
+%o A274640             while any(n < (n := L.next(n)) for L in lines_here): pass
+%o A274640             yield n; any(L.add(n) for L in lines_here); pos += 1j**side
+%o A274640 [a for a,_ in zip(A274640(),range(99))] # _M. F. Hasler_, Feb 01 2025
 %Y A274640 Cf. A274641 (the same spiral, but starting with 0 not 1), A174344, A274923.
 %Y A274640 The 8 spokes are A274924-A274931.
 %Y A274640 The East-West axis is A275877 (see also A324680), the North-South axis is A276036.
@@ -92,7 +112,7 @@
 %Y A274640 In the same spirit as the infinite Sudoku array A269526.
 %Y A274640 Cf. A324481 (position of first n).
 %Y A274640 Cf. A274821 (the same construction on a hexagonal tiling).
-%K A274640 nonn,nice
+%K A274640 nonn,nice,changed
 %O A274640 0,2
 %A A274640 _Zak Seidov_ and _Kerry Mitchell_, Jun 30 2016
 %E A274640 Corrected and extended by _Alois P. Heinz_, Jul 12 2016
