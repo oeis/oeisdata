@@ -1,16 +1,39 @@
-%I A019507 #15 Nov 02 2023 23:42:22
+%I A019507 #31 Feb 21 2025 09:30:48
 %S A019507 72,240,672,800,2240,4224,5184,6272,9984,14080,17280,33280,39424,
 %T A019507 48384,52224,57600,93184,116736,161280,174080,192000,247808,304128,
-%U A019507 373248,389120,451584,487424,537600,565248,585728,640000,718848
-%N A019507 Droll numbers: sum of even prime divisors equals sum of odd prime divisors.
+%U A019507 373248,389120,451584,487424,537600,565248,585728,640000,718848,1013760,1089536,1244160,1384448
+%N A019507 Droll numbers: numbers > 1 whose sum of even prime factors equals the sum of odd prime factors.
 %H A019507 Donovan Johnson, <a href="/A019507/b019507.txt">Table of n, a(n) for n = 1..1000</a>
-%F A019507 These are numbers k such that A366839(k) = A366840(k). - _Gus Wiseman_, Oct 25 2023
+%H A019507 Giovanni Resta, <a href="https://www.numbersaplenty.com/set/droll_number/">Droll numbers</a>, Numbers Aplenty.
+%F A019507 These are even numbers k such that A366839(k/2) = A366840(k). - _Gus Wiseman_, Oct 25 2023 (corrected Feb 19 2025)
 %e A019507 6272 = 2*2*2*2*2*2*2*7*7 is droll since 2+2+2+2+2+2+2 = 14 = 7+7.
+%p A019507 f:= proc(k, m) # numbers whose sum of prime factors >= m is k; m is prime
+%p A019507    local S,p,j;
+%p A019507    option remember;
+%p A019507    if k = 0 then return [1]
+%p A019507    elif m > k then return []
+%p A019507    fi;
+%p A019507    S:= NULL:
+%p A019507    p:= nextprime(m);
+%p A019507    for j from k by -m to 0 do
+%p A019507      S:= S, op(map(`*`,  procname(j,p) , m^((k-j)/m)))
+%p A019507    od;
+%p A019507    [S]
+%p A019507 end proc:
+%p A019507 g:= proc(N) local m,R;
+%p A019507   R:= NULL;
+%p A019507   for m from 1 while 2^m < N do
+%p A019507    R:= R, op(map(`*`,select(`<=`,f(2*m,3), N/2^m),2^m));
+%p A019507   od;
+%p A019507   sort([R])
+%p A019507 end proc:
+%p A019507 g(10^8); # _Robert Israel_, Feb 20 2025
+%t A019507 Select[Range[2, 2*10^6, 2], First[#] == Total[Rest[#]] & [Times @@@ FactorInteger[#]] &] (* _Paolo Xausa_, Feb 19 2025 *)
 %o A019507 (PARI) isok(n) = {if (n % 2, return (0)); f = factor(n); return (2*f[1,2] == sum(i=2, #f~, f[i,1]*f[i,2]));} \\ _Michel Marcus_, Jun 21 2013
 %Y A019507 For count instead of sum we have A072978.
 %Y A019507 Partitions of this type are counted by A239261, without zero terms A249914.
 %Y A019507 For prime indices instead of factors we have A366748, zeros of A366749.
-%Y A019507 The LHS is A366839, for indices A366531, triangle A113686.
+%Y A019507 The LHS is A366839 with alternating zeros, for indices A366531, triangle A113686.
 %Y A019507 The RHS is A366840, for indices A366528, triangle A113685.
 %Y A019507 A000009 counts partitions into odd parts, ranks A066208.
 %Y A019507 A035363 counts partitions into even parts, ranks A066207.
@@ -18,6 +41,7 @@
 %Y A019507 A257991 counts odd prime indices, even A257992.
 %Y A019507 A300061 lists numbers with even sum of prime indices, odd A300063.
 %Y A019507 Cf. A028260, A045931, A100367, A106529, A195017, A239241, A241638, A325698, A325700, A366533.
-%K A019507 nonn
+%K A019507 nonn,changed
 %O A019507 1,1
 %A A019507 Mario Velucchi (mathchess(AT)velucchi.it)
+%E A019507 Name edited by _Paolo Xausa_, Feb 19 2025
