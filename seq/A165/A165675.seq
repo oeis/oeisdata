@@ -1,4 +1,4 @@
-%I A165675 #33 Jul 03 2022 10:25:47
+%I A165675 #41 Feb 27 2025 09:14:09
 %S A165675 1,1,1,2,3,1,6,11,5,1,24,50,26,7,1,120,274,154,47,9,1,720,1764,1044,
 %T A165675 342,74,11,1,5040,13068,8028,2754,638,107,13,1,40320,109584,69264,
 %U A165675 24552,5944,1066,146,15,1,362880,1026576,663696,241128,60216,11274,1650,191,17,1
@@ -14,25 +14,28 @@
 %F A165675 The rectangular array is given by:
 %F A165675 A(n, k) = (k + 1)!*H(n, k).
 %F A165675 A(n, k) = (k + 1)*((n + k)! / n!)*hypergeom([-k, 1, 1], [2, n + 1], 1). (End)
+%F A165675 From _Werner Schulte_, Feb 26 2025: (Start)
+%F A165675 T(n, k) = n * T(n-1, k) + (n-1)! / (k-1)! for 0 < k < n.
+%F A165675 T(n, k) = (Sum_{i=k..n} 1/i) * n! / (k-1)! for 0 < k <= n.
+%F A165675 Matrix inverse M = T^(-1) is given by: M(n, n) = 1, M(n, n-1) = 1 - 2 * n for n > 0, M(n, n-2) = (n-1)^2 for n > 1, and M(i, j) = 0 otherwise. (End)
 %e A165675 Triangle T(n, k) begins:
-%e A165675 [0]    1;
-%e A165675 [1]    1,     1;
-%e A165675 [2]    2,     3,    1;
-%e A165675 [3]    6,    11,    5,    1;
-%e A165675 [4]   24,    50,   26,    7,   1;
-%e A165675 [5]  120,   274,  154,   47,   9,   1;
-%e A165675 [6]  720,  1764, 1044,  342,  74,  11,  1;
-%e A165675 [7] 5040, 13068, 8028, 2754, 638, 107, 13, 1;
-%e A165675 .
+%e A165675   [0]    1;
+%e A165675   [1]    1,     1;
+%e A165675   [2]    2,     3,    1;
+%e A165675   [3]    6,    11,    5,    1;
+%e A165675   [4]   24,    50,   26,    7,   1;
+%e A165675   [5]  120,   274,  154,   47,   9,   1;
+%e A165675   [6]  720,  1764, 1044,  342,  74,  11,  1;
+%e A165675   [7] 5040, 13068, 8028, 2754, 638, 107, 13, 1;
 %e A165675 Seen as an array (the triangle arises when read by descending antidiagonals):
-%e A165675 [0] 1,  1,   2,    6,    24,    120,     720,     5040, ...
-%e A165675 [1] 1,  3,  11,   50,   274,   1764,   13068,   109584, ...
-%e A165675 [2] 1,  5,  26,  154,  1044,   8028,   69264,   663696, ...
-%e A165675 [3] 1,  7,  47,  342,  2754,  24552,  241128,  2592720, ...
-%e A165675 [4] 1,  9,  74,  638,  5944,  60216,  662640,  7893840, ...
-%e A165675 [5] 1, 11, 107, 1066, 11274, 127860, 1557660, 20355120, ...
-%e A165675 [6] 1, 13, 146, 1650, 19524, 245004, 3272688, 46536624, ...
-%e A165675 [7] 1, 15, 191, 2414, 31594, 434568, 6314664, 97053936, ...
+%e A165675   [0] 1,  1,   2,    6,    24,    120,     720,     5040, ...
+%e A165675   [1] 1,  3,  11,   50,   274,   1764,   13068,   109584, ...
+%e A165675   [2] 1,  5,  26,  154,  1044,   8028,   69264,   663696, ...
+%e A165675   [3] 1,  7,  47,  342,  2754,  24552,  241128,  2592720, ...
+%e A165675   [4] 1,  9,  74,  638,  5944,  60216,  662640,  7893840, ...
+%e A165675   [5] 1, 11, 107, 1066, 11274, 127860, 1557660, 20355120, ...
+%e A165675   [6] 1, 13, 146, 1650, 19524, 245004, 3272688, 46536624, ...
+%e A165675   [7] 1, 15, 191, 2414, 31594, 434568, 6314664, 97053936, ...
 %p A165675 nmax := 8; for n from 0 to nmax do a(n, 0) := n! od: for n from 0 to nmax do a(n, n) := 1 od: for n from 2 to nmax do for m from 1 to n-1 do a(n, m) := (n-m+1)*a(n-1, m) + a(n-1, m-1) od: od: seq(seq(a(n, m), m=0..n), n=0..nmax);
 %p A165675 # _Johannes W. Meijer_, revised Nov 27 2012
 %p A165675 # Shows the array format, using hyperharmonic numbers.
@@ -64,13 +67,25 @@
 %t A165675 (* _Clark Kimberling_, Dec 29 2011 *)
 %t A165675 A[n_, k_] := (k + 1)*((n + k)! / n!)*HypergeometricPFQ[{-k, 1, 1}, {2, n + 1}, 1];
 %t A165675 Table[A[n, k], {n, 0, 7}, {k, 0, 7}] // TableForm (* _Peter Luschny_, Jul 03 2022 *)
+%o A165675 (Python)
+%o A165675 from functools import cache
+%o A165675 @cache
+%o A165675 def Trow(n: int) -> list[int]:
+%o A165675     if n == 0:
+%o A165675         return [1]
+%o A165675     row = Trow(n - 1) + [1]
+%o A165675     for m in range(n - 1, 0, -1):
+%o A165675         row[m] = (n - m + 1) * row[m] + row[m - 1]
+%o A165675     row[0] *= n
+%o A165675     return row
+%o A165675 for n in range(9): print(Trow(n))  # _Peter Luschny_, Feb 27 2025
 %Y A165675 A105954 is the reversal of this triangle.
 %Y A165675 A165674, A138771 and A165680 are related triangles.
 %Y A165675 A080663 equals the third right hand column.
 %Y A165675 A000142 equals the first left hand column.
 %Y A165675 A093345 are the row sums.
 %Y A165675 Columns include A165676, A165677, A165678 and A165679.
-%K A165675 easy,nonn,tabl
+%K A165675 easy,nonn,tabl,changed
 %O A165675 0,4
 %A A165675 _Johannes W. Meijer_, Oct 05 2009
 %E A165675 New name from _Peter Luschny_, Jul 03 2022
