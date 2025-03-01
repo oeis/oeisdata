@@ -1,10 +1,44 @@
-%I A100373 #11 Dec 12 2021 20:10:31
+%I A100373 #17 Feb 28 2025 12:06:35
 %S A100373 4,6,8,9,10,22,30,42,50,62,70,81,90,111,200,314,500,611,700,812,900,
 %T A100373 1111,2000,3111,4000,5111,6000,7111,8000,9111,20000,31111,40000,51111,
 %U A100373 60000,71111,80000,91111,200000,311113,400000,511112,600000,711111
 %N A100373 Lexicographically earliest increasing sequence of composite numbers such that the digits of a(n) do not appear in a(n-1).
+%H A100373 Robert Israel, <a href="/A100373/b100373.txt">Table of n, a(n) for n = 1..7966</a>
+%p A100373 f:= proc(x) local L,S,carry,m,nL,b,d0,Lz,z,i,d;
+%p A100373   L:= convert(x,base,10);
+%p A100373   nL:= nops(L);
+%p A100373   S:= sort(convert({$0..9} minus convert(L,set),list));
+%p A100373   b:= nops(S);
+%p A100373   d0:= min(select(`>`,S,L[-1]));
+%p A100373   if d0 = infinity then
+%p A100373     if S[1] = 0 then Lz:= Vector([0$nL, S[2]])
+%p A100373     else Lz:= Vector([S[1]$(nL+1)])
+%p A100373     fi
+%p A100373   else
+%p A100373     Lz:= Vector([S[1]$(nL-1),d0])
+%p A100373   fi;
+%p A100373   d:= LinearAlgebra:-Dimension(Lz);
+%p A100373   do
+%p A100373     z:= add(Lz[i]*10^(i-1),i=1..d);
+%p A100373     if not isprime(z) then return z fi;
+%p A100373     carry:= true;
+%p A100373     for i from 1 to d while carry do
+%p A100373       if Lz[i] = S[-1] then Lz[i]:= S[1]
+%p A100373       else
+%p A100373         carry:= false; if member(Lz[i],S,'m') then Lz[i]:= S[m+1] fi
+%p A100373       fi
+%p A100373     od;
+%p A100373     if carry then d:= d+1; if S[1] = 0 then Lz(d):= S[2] else Lz(d) := S[1] fi fi
+%p A100373   od;
+%p A100373 end proc:
+%p A100373 R:= 4: r:= 4:
+%p A100373 for i from 2 to 100 do
+%p A100373   r:= f(r);
+%p A100373   R:= R,r
+%p A100373 od:
+%p A100373 R; # _Robert Israel_, Feb 27 2025
 %t A100373 ta={1};Do[s1=IntegerDigits[Part[ta, Length[ta]]]; s2=IntegerDigits[n];If[Equal[Intersection[s1, s2], {}] &&!PrimeQ[n], Print[{Last[ta], n}];ta=Append[ta, n]], {n, 1, 1000000}];ta=Delete[ta, 1]
-%Y A100373 Cf. A002808, A030283-A030290.
-%K A100373 base,nonn
+%Y A100373 Cf. A002808, A030283, A030284, A030285, A030286, A030287, A030288, A030289, A030290.
+%K A100373 base,nonn,changed
 %O A100373 1,1
 %A A100373 _Labos Elemer_, Dec 01 2004
