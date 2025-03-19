@@ -1,4 +1,4 @@
-%I A141243 #46 Feb 16 2025 08:33:08
+%I A141243 #57 Mar 18 2025 16:21:48
 %S A141243 1,2,16,94,1365,55213,3368146,394631712,101693175442,50929053498909,
 %T A141243 48988729226134301,96325314726538906164,375615195988659173454092,
 %U A141243 2933480442104347575000834468,45480806737377995771543610802659,1422902021111889804120495149240353936
@@ -17,9 +17,29 @@
 %t A141243      Expand[b[n, ReplacePart[l, k -> f]] + b[n, g]*x]]];
 %t A141243 a[n_] := Function[p, Sum[Coefficient[p, x, i], {i, 0, Exponent[p, x]}]][ b[n, Array[True &, n*3]]];
 %t A141243 Table[an = a[n]; Print["a(", n, ") = ", an]; an, {n, 0, 10}] (* _Jean-François Alcover_, Mar 29 2016, after _Alois P. Heinz_'s code for A244081 *)
+%o A141243 (PARI) A141243(n=4, s=n^2-1, bad=0)={ while(s && bittest(bad, s), s--);
+%o A141243    if(s < n, 2^(s+1-hammingweight(bad % (2<<s))),
+%o A141243       my(cnt = A141243(n, s-1, bad), x = s%n);
+%o A141243       x > 1 && bad = bitor(bad, 2^(s-n-2)); x < n-2 && bad = bitor(bad, 2^(s-n+2));
+%o A141243       if( s >= 2*n, x && bad = bitor(bad, 2^(s-2*n-1));
+%o A141243               x < n-1 && bad = bitor(bad, 2^(s-2*n+1))
+%o A141243    ); cnt + A141243(n, s-1, bad))} \\ _M. F. Hasler_, Mar 18 2025
+%o A141243 (Python)
+%o A141243 def A141243(n=4, start=(1,1), forbidden=()):
+%o A141243     if start[0] >= n: return 2**sum((n,y+1) not in forbidden for y in range(n))
+%o A141243     nxt = (start[0],start[1]+1) if start[1]<n else (start[0]+1,1)
+%o A141243     cnt = A141243(n, nxt, forbidden)
+%o A141243     if start in forbidden: return cnt
+%o A141243     forbidden = {s for s in forbidden if s >= nxt}
+%o A141243     if start[1]<n-1: forbidden |= {(start[0]+1,start[1]+2)}
+%o A141243     if start[1]>2: forbidden |= {(start[0]+1,start[1]-2)}
+%o A141243     if start[0]<n-1:
+%o A141243         if start[1]<n: forbidden |= {(start[0]+2,start[1]+1)}
+%o A141243         if start[1]>1: forbidden |= {(start[0]+2,start[1]-1)}
+%o A141243     return cnt+A141243(n, nxt, forbidden) # _M. F. Hasler_, Mar 17 2025
 %Y A141243 Cf. A182407, A182408, A201540.
 %Y A141243 Row sums of A244081.
-%K A141243 hard,nonn,nice
+%K A141243 hard,nonn,nice,changed
 %O A141243 0,2
 %A A141243 _Max Alekseyev_, Jun 17 2008
 %E A141243 a(8)-a(13) from _R. H. Hardin_, Aug 25 2008
