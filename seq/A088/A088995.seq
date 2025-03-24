@@ -1,11 +1,12 @@
-%I A088995 #69 Mar 22 2025 19:01:15
+%I A088995 #77 Mar 23 2025 08:47:08
 %S A088995 5,98,1068,1068,127185,2728361,15917834,73482154,961700165,961700165,
 %T A088995 83322853582,1404948108914,7603192018819,167022179253602,
 %U A088995 3550275020220728,5729166542536373,106675272785875442
 %N A088995 Least k > 0 such that the first n digits of 2^k and 5^k are identical.
 %C A088995 The number of matching first digits of 2^n and 5^n increases with n and forms the sequence 3,1,6,2,2,7,7,6,6,... which approaches sqrt(10).
-%C A088995 Numbers are half of the denominator of some convergent to log_10(2). - J. Mulder (jasper.mulder(AT)planet.nl), Feb 03 2010 [This holds only for n < 6, it is wrong from a(6) = 2728361 on: The denominators are ..., 325147, 6107016, ... which would yield the larger solution 3053508 for n = 6. - _M. F. Hasler_, Mar 20 2025]
+%C A088995 Numbers are half of the denominator of some convergent to log_10(2). - J. Mulder (jasper.mulder(AT)planet.nl), Feb 03 2010 [WARNING: This holds only for n < 6, it is wrong from a(6) = 2728361 on: The denominators are ..., 325147, 6107016, ... which would yield the larger solution 3053508 for n = 6. - _M. F. Hasler_, Mar 20 2025]
 %C A088995 _Xianwen Wang_ guesses that if the length of the continued fraction of m/k is h (where m is the difference between the numbers of digits of 2^k and 5^k), the first h-1 items of the continued fractions of m/k and log_10(2.5) agree. But this guess is not true for the similar sequence A359698. - _Zhao Hui Du_, Jun 06 2023
+%C A088995 The terms grow like 10^n, oscillating by a few orders of magnitude around this value. I conjecture that log(a(n)/10^n) = O(log log n). - _M. F. Hasler_, Mar 22 2025
 %H A088995 Zhao Hui Du, <a href="/A088995/b088995.txt">Table of n, a(n) for n = 1..1000</a>
 %H A088995 Zhao Hui Du, <a href="https://zhuanlan.zhihu.com/p/634499178">Chinese page to introduce algorithm for a(n) to prove the guess of _Xianwen Wang_</a>
 %H A088995 T. Sillke, <a href="http://www.mathematik.uni-bielefeld.de/~sillke/PUZZLES/powers-2-5">Powers of 2 and 5 Puzzle</a>
@@ -40,8 +41,18 @@
 %o A088995 def A088995(n):
 %o A088995     T = isqrt(100**n//10); L2,L5,d,e = map(log10,(2,5,T,T+1)); d %= 1; e %= 1
 %o A088995     return next(k for k in range(round(n/L2),1<<63) if d < k*L2%1 < e > k*L5%1 > d)
-%o A088995 [A088995(n)for n in range(1,8)] # _M. F. Hasler_, Mar 18 2025
-%o A088995 (PARI) apply( {A088995(n)=my(L1=log(10), L2=log(2)/L1, L5=1-L2, T=sqrtint(10^(2*n-1)), a=frac(log(T)/L1), b=frac(log(T+1)/L1)); for(k=logint(10^(n-1),2)+1, oo, a<frac(k*L2) && frac(k*L2)<b && a<frac(k*L5) && frac(k*L5)<b && return(k))}, [1..5]) \\ _M. F. Hasler_, Mar 18 2025
+%o A088995 [A088995(n) for n in range(1,8)] # _M. F. Hasler_, Mar 18 2025
+%o A088995 from sympy import S, sqrt, log, frac
+%o A088995 def A088995(n):
+%o A088995     T = 10**n//sqrt(10); L2,L5,a,b = (log(x,10) for x in (2, 5, T, T+1))
+%o A088995     a,b = (frac(x).n(2*n+5) for x in (a,b)); L = 0,1; cf = "continued_fraction"
+%o A088995     for K in S(f"{cf}_convergents({cf}_iterator({L5-L2}))"):
+%o A088995         if a < frac((k := K.denominator)*L2) < b > frac(k*L5) > a:
+%o A088995             for kk in sorted((L[0]+L[1], k-L[1])):
+%o A088995                 if a < frac(kk*L2) < b > frac(kk*L5) > a: return kk
+%o A088995             return k
+%o A088995     L = L[1], k # _M. F. Hasler_, Mar 22 2025
+%o A088995 (PARI) apply( {A088995(n) = localprec(max(2*n+9,38)); my(L1=log(10), L2=log(2)/L1, L5=1-L2, c=contfrac(L5-L2), T=sqrtint(10^(2*n-1)), a=frac(log(T)/L1), b=frac(log(T+1)/L1), t(x)=a<frac(x) && frac(x)<b, cv=contfracpnqn(c,#c)[2,]); for(i=1,#c, (t(L2*c=cv[i]) && t(c*L5)) || next; i>2 && foreach(Set([cv[i-2]+cv[i-1],cv[i]-cv[i-1]]), k, t(L2*k) && t(k*L5) && [c=k, break]); return(c))}, [1..15]) \\ - _M. F. Hasler_, Mar 22 2025
 %Y A088995 Cf. A088935, A010467.
 %K A088995 base,nonn,changed
 %O A088995 1,1
