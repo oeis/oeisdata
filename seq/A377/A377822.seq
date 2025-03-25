@@ -1,0 +1,48 @@
+%I A377822 #21 Mar 24 2025 09:26:20
+%S A377822 1,1,2,3,1,4,2,3,5,1,5,3,2,5,4,7,1,7,4,3,2,5,3,5,8,1,9,5,7,5,2,7,3,4,
+%T A377822 6,10,1,10,6,4,3,5,2,7,8,7,5,7,12,1,12,7,5,7,3,5,2,9,5,3,4,5,8,13,1,
+%U A377822 13,8,5,4,10,8,7,2,9,5,3,7,9,6,8,15,1,15,9,6,9,7,3,8,7,2
+%N A377822 a(n) is the least q>0 such that abs(p^2/q^2 - n)<=1/4 for a suitable integer p.
+%C A377822 Investigating "good enough" rational approximations p/q to the square root of n, where in this case "good enough" means that (p/q)^2 is within 1/4 of n. q = 1 for perfect squares, e.g sqrt(4) = 2/1.
+%C A377822 I chose 1/4 since any smaller margin would exclude 2 from the list, whereas here every natural number should appear eventually. I don't have a proof that every N > 0 does show up, but this seems unlikely to be false.
+%C A377822 Greedy inverse: a(n) =1, 2, 3,... appears first at position n = 0, 2, 3, 5, 8, 34, 15, 24, 26, 35, 91, 48, 63, 160, 80, 99, 101, 120, 300, 143, 168, 413, 195, 224, 226, 255, 651, 288, 323, 1087, 360, 399, 401, 440, 1123,... - _R. J. Mathar_, Mar 24 2025
+%F A377822 a(A000290(k))=1.
+%p A377822 A377822 := proc(n)
+%p A377822     local q,p ;
+%p A377822     for q from 1 do
+%p A377822         for p from floor(sqrt( q^2*n-1/4)) to ceil(sqrt( q^2*n+1/4)) do
+%p A377822             if abs(p^2/q^2-n) <=1/4 then
+%p A377822                 return q ;
+%p A377822             end if;
+%p A377822         end do:
+%p A377822     end do:
+%p A377822 end proc:
+%p A377822 seq(A377822(n),n=0..80) ; # _R. J. Mathar_, Mar 24 2025
+%o A377822 (Python)
+%o A377822 # create a list to hold the first 257 terms
+%o A377822 max_root = 16
+%o A377822 max_int = max_root**2
+%o A377822 squoot = [0] * (max_int + 1)
+%o A377822 # populate all the integer square roots, then hunt for approximations for the rest.
+%o A377822 for n in range(max_root):
+%o A377822     i = n+1
+%o A377822     s = i**2
+%o A377822     squoot[s] = { "p" : i, "q" : 1, "delta" : 0 }
+%o A377822 q = 2
+%o A377822 while squoot.count(0) > 0:
+%o A377822     max_p = q * max_int + 1
+%o A377822     for p in range(q + 1, max_p):
+%o A377822         n = (p / q) ** 2
+%o A377822         n_int = round(n)
+%o A377822         if n_int > max_int:
+%o A377822             q += 1
+%o A377822             break
+%o A377822         if squoot[n_int] == 0 and abs(n - n_int) <= 0.25:
+%o A377822             squoot[n_int] = { "p" : p, "q" : q, "delta" : n - n_int }
+%o A377822 # Print out the sequence:
+%o A377822 print(*[ squoot[n]['q'] for n in range(max_int + 1) ], sep=', ')
+%o A377822 (PARI) a377822(n,tol=1/4) = for(k=1, oo, for(j=k*sqrtint(max(0,n-tol)), k*(sqrtint(n+tol)+1), if(abs(j^2/k^2-n) <= tol, return(k)))) \\ _Hugo Pfoertner_, Nov 09 2024
+%Y A377822 Cf. A002522 (positions of 1's).
+%K A377822 nonn,new
+%O A377822 0,3
+%A A377822 _Eric M. Hillman_, Nov 08 2024
