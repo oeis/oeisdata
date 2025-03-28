@@ -1,4 +1,4 @@
-%I A088995 #85 Mar 24 2025 10:35:01
+%I A088995 #110 Mar 27 2025 23:13:37
 %S A088995 5,98,1068,1068,127185,2728361,15917834,73482154,961700165,961700165,
 %T A088995 83322853582,1404948108914,7603192018819,167022179253602,
 %U A088995 3550275020220728,5729166542536373,106675272785875442,331484151442699072,2330288635428230258177,2330288635428230258177
@@ -9,6 +9,7 @@
 %C A088995 The terms grow like 10^n, oscillating by a few orders of magnitude around this value. I conjecture that log(a(n)/10^n) = O(log log n). - _M. F. Hasler_, Mar 22 2025
 %H A088995 Zhao Hui Du, <a href="/A088995/b088995.txt">Table of n, a(n) for n = 1..1000</a>
 %H A088995 Zhao Hui Du, <a href="https://zhuanlan.zhihu.com/p/634499178">Chinese page to introduce algorithm for a(n) to prove the guess of _Xianwen Wang_</a>
+%H A088995 Robert Munafo, <a href="http://mrob.com/pub/seq/a088995.html">Sequence A88995: The 32 and 3125 Property</a>
 %H A088995 T. Sillke, <a href="http://www.mathematik.uni-bielefeld.de/~sillke/PUZZLES/powers-2-5">Powers of 2 and 5 Puzzle</a>
 %e A088995 a(2) = 98: 2^98 = 316912650057057350374175801344 and 5^98 = 315544362088404722164691426113114491869282574043609201908111572265625.
 %t A088995 L2 = N[ Log[ 10, 2 ], 50 ]; L5 = N[ Log[ 10, 5 ], 50 ]; k = 1; Do[ While[ Take[ RealDigits[ 10^FractionalPart[ L2*k ] ][[ 1 ] ], n ] != Take[ RealDigits[ 10^FractionalPart[ L5*k ] ][[ 1 ] ], n ], k++ ]; Print[ k ], {n, 1, 10} ]
@@ -36,21 +37,21 @@
 %t A088995  bcc[i] = acc[j]; j = i; While[bcc[j] >= bcc[j + 1], j++];
 %t A088995  bcc[i] = Min[bcc[i], bcc[j]]]; bb =
 %t A088995  Rest[Sort[Normal[Reverse[bcc]]]] /. Rule -> List (* _Xianwen Wang_, Jun 02 2023 *)
-%o A088995 (Python)
+%o A088995 (Python) # NOTE: Although sympy's frac() may give incorrect results in some cases, care has been taken to ensure there should be no issue here. - _M. F. Hasler_, Mar 26 2025
 %o A088995 from sympy import S, sqrt, log, frac
 %o A088995 def A088995(n):
-%o A088995     T = 10**n//sqrt(10); L2,L5,a,b = (log(x,10) for x in (2, 5, T, T+1))
-%o A088995     a,b = (frac(x).n(2*n+5) for x in (a,b)); L = []; cf = "continued_fraction"
-%o A088995     test = lambda k: a < frac(k*L2) < b > frac(k*L5) > a
-%o A088995     for K in S(f"{cf}_convergents({cf}_iterator({L5-L2}))"):
-%o A088995         if test(k := K.denominator):
+%o A088995     T = 10**n//sqrt(10); prec = (n+9)/.4; cf = 'continued_fraction'
+%o A088995     L2, L5, a, b = (frac(log(x,10).n(prec)) for x in (2, 5, T, T+1))
+%o A088995     L = []; test = lambda k: a < frac(k*L2) < b > frac(k*L5) > a
+%o A088995     for K in S(f"{cf}_convergents({cf}_iterator(log(5/2,10)))"):
+%o A088995         if test(k := K.q):    # = K.denominator but K.denominator() in old versions
 %o A088995             for step in L[::-1]:
 %o A088995               while test(k - step): k -= step
 %o A088995             return k
-%o A088995         if k > 1: L.append(k) # _M. F. Hasler_, Mar 22 2025
-%o A088995 [A088995(n) for n in range(1,30)] # _M. F. Hasler_, Mar 18 2025, edited Mar 24 2025
-%o A088995 (PARI) apply( {A088995(n) = localprec(max(2*n+9,38)); my(L1=log(10), L2=log(2)/L1, L5=1-L2, c=contfrac(L5-L2), T=sqrtint(10^(2*n-1)), a=log(T)/L1%1, b=log(T+1)/L1%1, d(x)=a<x && x<b, t(k)=d(k*L2%1) && d(k*L5%1), cv=contfracpnqn(c,#c)[2,]); for(i=1,#cv, t(c=cv[i]) && while(i-->3, while(t(c-cv[i]), c-=cv[i]))+return(c))}, [1..15]) \\ - _M. F. Hasler_, Mar 22 2025
-%Y A088995 Cf. A088935, A010467.
+%o A088995         if k > 99: L.append(k) # _M. F. Hasler_, Mar 22 2025, edited Mar 26 2025
+%o A088995 print(first30 := [A088995(n) for n in range(1,30)]) # _M. F. Hasler_, Mar 18 2025, edited Mar 24 2025, Mar 28 2025
+%o A088995 (PARI) apply( {A088995(n) = localprec(max(n/.4,38)); my(L1=log(10), L2=log(2)/L1, L5=1-L2, c=contfrac(L5-L2), T=sqrtint(10^(2*n-1)), a=log(T)/L1%1, b=log(T+1)/L1%1, d(x)=a<x && x<b, t(k)=d(k*L2%1) && d(k*L5%1), cv=contfracpnqn(c,#c)[2,]); for(i=1,#cv, t(c=cv[i]) && while(i-->3, while(t(c-cv[i]), c-=cv[i]))+return(c))}, [1..15]) \\ - _M. F. Hasler_, Mar 22 2025
+%Y A088995 Cf. A088935, A010467, A359698, A073733.
 %K A088995 base,nonn,changed
 %O A088995 1,1
 %A A088995 _Lekraj Beedassy_, Dec 01 2003
