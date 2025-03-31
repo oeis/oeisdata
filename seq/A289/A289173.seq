@@ -1,4 +1,4 @@
-%I A289173 #33 Jul 07 2017 03:26:58
+%I A289173 #38 Mar 30 2025 09:53:23
 %S A289173 2,6,20,60,208,624,2080,6240,18720,58240,176000,529408,1593344,
 %T A289173 4780032,14344192,43040768,129138688,387416064,1162248192,3486777344,
 %U A289173 10460332032,31380996096,94142988288,282428964864,847286894592,2541860683776,7625582051328
@@ -27,8 +27,29 @@
 %t A289173 Table[SelectFirst[Range[3^n - 1, 2^n, -1], PrimeOmega@ # == n &], {n, 18}] (* _Michael De Vlieger_, Jun 27 2017 *)
 %o A289173 (PARI) for (n = 1,26, m = 3^n-1; while(bigomega(m) <> n, m = m-2); print1 (m ","))
 %o A289173 (PARI) a(n)=my(target=n-1); forstep(k=3^n\2,1,-1, if(bigomega(k)==target, return(2*k))) \\ _Charles R Greathouse IV_, Jul 05 2017
+%o A289173 (Python)
+%o A289173 from math import prod, isqrt
+%o A289173 from sympy import primepi, primerange, integer_nthroot
+%o A289173 def A289173(n):
+%o A289173     def bisection(f,kmin=0,kmax=1):
+%o A289173         while f(kmax) > kmax: kmax <<= 1
+%o A289173         kmin = kmax >> 1		
+%o A289173         while kmax-kmin > 1:
+%o A289173             kmid = kmax+kmin>>1
+%o A289173             if f(kmid) <= kmid:
+%o A289173                 kmax = kmid
+%o A289173             else:
+%o A289173                 kmin = kmid
+%o A289173         return kmax
+%o A289173     def almostprimepi(n,k):
+%o A289173         if k==0: return int(n>=1)
+%o A289173         def g(x,a,b,c,m): yield from (((d,) for d in enumerate(primerange(b,isqrt(x//c)+1),a)) if m==2 else (((a2,b2),)+d for a2,b2 in enumerate(primerange(b,integer_nthroot(x//c,m)[0]+1),a) for d in g(x,a2,b2,c*b2,m-1)))
+%o A289173         return int(sum(primepi(n//prod(c[1] for c in a))-a[-1][0] for a in g(n,0,1,1,k)) if k>1 else primepi(n))
+%o A289173     m = almostprimepi(3**n-1,n)
+%o A289173     def f(x): return m+x-almostprimepi(x,n)
+%o A289173     return bisection(f,m,m) # _Chai Wah Wu_, Mar 29 2025
 %Y A289173 Cf. A078843 (where 3^n occurs in n-almost primes).
-%K A289173 nonn
+%K A289173 nonn,changed
 %O A289173 1,1
 %A A289173 _Zak Seidov_, Jun 26 2017
 %E A289173 a(27) from _Jon E. Schoenfield_, Jul 02 2017

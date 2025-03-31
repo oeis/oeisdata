@@ -1,11 +1,40 @@
-%I A276591 #38 Jul 31 2021 04:36:35
+%I A276591 #47 Mar 31 2025 02:08:32
 %S A276591 2,5,11,19,43,151,311,439,823,2551,6007,12919,23159,35447,92791,
 %T A276591 203383,535159,731767,1124983,5253751,6302327,16919159,32647799,
 %U A276591 103426679,160049783,285878903,386542199,1066019447,1468672631,2676632183,5092551287,16366840439,32472967799
 %N A276591 a(n) is the smallest prime p > a(n-1) such that p - a(n-1) is an (n-1)-almost prime; a(1) = 2.
+%H A276591 Chai Wah Wu, <a href="/A276591/b276591.txt">Table of n, a(n) for n = 1..482</a>
 %e A276591 a(2) - a(1) = 5 - 2 = 3, which is prime (a "1-almost prime");
 %e A276591 a(3) - a(2) = 11 - 5 = 6 = 2*3, which is semiprime (2-almost prime).
-%K A276591 nonn
+%o A276591 (Python)
+%o A276591 from itertools import count, islice
+%o A276591 from math import prod, isqrt
+%o A276591 from sympy import primerange, primepi, integer_nthroot, isprime
+%o A276591 def almostprimepi(n,k):
+%o A276591     if k==0: return int(n>=1)
+%o A276591     def g(x,a,b,c,m): yield from (((d,) for d in enumerate(primerange(b,isqrt(x//c)+1),a)) if m==2 else (((a2,b2),)+d for a2,b2 in enumerate(primerange(b,integer_nthroot(x//c,m)[0]+1),a) for d in g(x,a2,b2,c*b2,m-1)))
+%o A276591     return int(sum(primepi(n//prod(c[1] for c in a))-a[-1][0] for a in g(n,0,1,1,k)) if k>1 else primepi(n))
+%o A276591 def A276591_gen(): # generator of terms
+%o A276591     yield (a:=2)
+%o A276591     def bisection(f,kmin=0,kmax=1):
+%o A276591         while f(kmax) > kmax: kmax <<= 1
+%o A276591         kmin = kmax >> 1		
+%o A276591         while kmax-kmin > 1:
+%o A276591             kmid = kmax+kmin>>1
+%o A276591             if f(kmid) <= kmid:
+%o A276591                 kmax = kmid
+%o A276591             else:
+%o A276591                 kmin = kmid
+%o A276591         return kmax
+%o A276591     for i in count(1):
+%o A276591         def f(x): return j+x-almostprimepi(x,i)
+%o A276591         for j in count(1):
+%o A276591             p = bisection(f,j,j)+a
+%o A276591             if isprime(p):
+%o A276591                 yield (a:=p)
+%o A276591                 break
+%o A276591 A276591_list = list(islice(A276591_gen(),30)) # _Chai Wah Wu_, Mar 29 2025
+%K A276591 nonn,changed
 %O A276591 1,1
 %A A276591 _Zak Seidov_, Nov 16 2016
 %E A276591 a(32)-a(33) from _Jinyuan Wang_, Jul 31 2021
