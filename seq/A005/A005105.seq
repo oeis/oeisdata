@@ -1,9 +1,9 @@
-%I A005105 M0665 #81 Mar 27 2024 08:08:18
+%I A005105 M0665 #86 Apr 02 2025 15:17:00
 %S A005105 2,3,5,7,11,17,23,31,47,53,71,107,127,191,383,431,647,863,971,1151,
 %T A005105 2591,4373,6143,6911,8191,8747,13121,15551,23327,27647,62207,73727,
 %U A005105 131071,139967,165887,294911,314927,442367,472391,497663,524287,786431,995327
 %N A005105 Class 1+ primes: primes of the form 2^i*3^j - 1 with i, j >= 0.
-%C A005105 The definition is given by Guy: a prime p is in class 1+ if the only prime divisors of p + 1 are 2 or 3; and p is in class r+ if every prime factor of p + 1 is in some class <= r+ + 1, with equality for at least one prime factor. - _N. J. A. Sloane_, Sep 22 2012
+%C A005105 The definition is given by Guy: a prime p is in class 1+ if the only prime divisors of p + 1 are 2 or 3; and p is in class r+ if every prime factor of p + 1 is in some class <= r+ - 1, with equality for at least one prime factor. - _N. J. A. Sloane_, Sep 22 2012
 %C A005105 See A005109 for the definition of class r- primes.
 %C A005105 Odd terms are primes satisfying p==-1 (mod phi(p+1)). - _Benoit Cloitre_, Feb 22 2002
 %C A005105 These are the primes p for which p+1 is 3-smooth.  Primes for which either p+1 or p-1 have many small factors are more easily proved prime, so most of the largest primes found have this property. - _Michael B. Porter_, Feb 19 2013
@@ -33,8 +33,27 @@
 %o A005105 B:=List(A,i->Elements(Factors(i+1)));;
 %o A005105 C:=List([0..Length(I)],j->List(Combinations(I,j),i->Concatenation([2],i)));;
 %o A005105 A005105:=Concatenation([2],List(Set(Flat(List([1..Length(C)],i->List([1..Length(C[i])],j->Positions(B,C[i][j]))))),i->A[i])); # _Muniru A Asiru_, Sep 28 2017
+%o A005105 (Python)
+%o A005105 from itertools import count, islice
+%o A005105 from sympy import integer_log, isprime
+%o A005105 def A069353(n):
+%o A005105     def bisection(f,kmin=0,kmax=1):
+%o A005105         while f(kmax) > kmax: kmax <<= 1
+%o A005105         kmin = kmax >> 1		
+%o A005105         while kmax-kmin > 1:
+%o A005105             kmid = kmax+kmin>>1
+%o A005105             if f(kmid) <= kmid:
+%o A005105                 kmax = kmid
+%o A005105             else:
+%o A005105                 kmin = kmid
+%o A005105         return kmax
+%o A005105     def f(x): return n+x-sum(((x+1)//3**i).bit_length() for i in range(integer_log(x+1,3)[0]+1))
+%o A005105     return bisection(f,n-1,n-1)
+%o A005105 def A005105_gen(): # generator of terms
+%o A005105     return filter(lambda n:isprime(n), map(A069353,count(1)))
+%o A005105 A005105_list = list(islice(A005105_gen(),30)) # _Chai Wah Wu_, Mar 31 2025
 %Y A005105 Cf. A069353, A069356, A005109, A005108, A019434, A000668, A000040, A003586, A129469.
-%K A005105 nonn
+%K A005105 nonn,changed
 %O A005105 1,1
 %A A005105 _N. J. A. Sloane_, _Simon Plouffe_
 %E A005105 More terms from _Benoit Cloitre_, Feb 22 2002
