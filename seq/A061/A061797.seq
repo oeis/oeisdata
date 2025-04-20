@@ -1,16 +1,38 @@
-%I A061797 #27 Aug 11 2024 14:41:33
+%I A061797 #43 Apr 19 2025 06:16:58
 %S A061797 1,2,1,2,1,4,1,98,1,74,2,2,5,154,49,4,5,38,37,34,1,286,1,36,25,8,77,
 %T A061797 329144,31,16,2,28,25,2,19,196,23,6,17,154,1,542,143,1602,1,148,18,6,
 %U A061797 88,14,4,824,77,8,164572,4,143,1198,8,1154,1,1126,14,962,66,308,1,998
 %N A061797 Smallest k such that k*n has even digits and is a palindrome or becomes a palindrome when 0's are added on the left.
 %C A061797 Every integer n has a multiple of the form 99...9900...00. To see that n has a multiple that's a palindrome (allowing 0's on the left) with even digits, let 9n divide 99...9900...00; then n divides 22...2200...00. - _Dean Hickerson_, Jun 29 2001
 %C A061797 a(81), if it exists, is greater than 5 million. - _Harvey P. Dale_, Dec 19 2021
-%H A061797 Reinhard Zumkeller, <a href="/A061797/b061797.txt">Table of n, a(n) for n = 0..80</a>
-%H A061797 P. De Geest, <a href="https://www.worldofnumbers.com/em36.htm">Smallest multipliers to make a number palindromic</a>.
+%C A061797 A palindrome is divisible by 81 iff its sum of digits is divisible by 81.  Thus a(81) = 688888888628888888886 / 81 = 8504801097146776406, as 688888888868888888886 is the least palindrome with even digits and sum of digits 162. - _Robert Israel_, Apr 17 2025
+%H A061797 Robert Israel, <a href="/A061797/b061797.txt">Table of n, a(n) for n = 0..7000</a> (n = 0 .. 80 from Reinhard Zumkeller)
+%H A061797 Patrick De Geest, <a href="https://www.worldofnumbers.com/won36.htm">Smallest multipliers to make a number palindromic</a>.
 %e A061797 a(12) = 5 since 5*12 = 60 (i.e., "060") is a palindrome.
+%p A061797 epali:= proc(x,d) local L,i;
+%p A061797   L:= convert(x,base,5);
+%p A061797   if d::even then 2*add(L[-i]*(10^(i-1)+10^(d-i)),i=1..d/2)
+%p A061797   else 2*(L[-(d+1)/2]*10^((d-1)/2) + add(L[-i]*(10^(i-1)+10^(d-i)),i=1..(d-1)/2))
+%p A061797   fi
+%p A061797 end proc;
+%p A061797 Agenda:= {$0..80}:
+%p A061797 count:= 0:
+%p A061797 for d from 1 while count < 81 do
+%p A061797   E[d]:= [seq(epali(i,d),i=5^(ceil(d/2)-1) .. 5^ceil(d/2)-1)];
+%p A061797   P:= sort([op(E[d]),seq(op(E[k] *~ 10^(d-k)), k=1..d-1)]);
+%p A061797   for x in P do
+%p A061797     Q:= select(t -> x mod t = 0, Agenda);
+%p A061797     if Q <> {} then
+%p A061797       count:= count + nops(Q);
+%p A061797       for q in Q do R[q]:= x/q od;
+%p A061797       Agenda:= Agenda minus Q;
+%p A061797     fi;
+%p A061797   od;
+%p A061797 od:
+%p A061797 seq(R[i],i=0..80); # _Robert Israel_, Apr 18 2025
 %t A061797 a[n_] := For[k = 1, True, k++, id = IntegerDigits[k*n]; If[AllTrue[id, EvenQ], rid = Reverse[id]; If[id == rid || (id //. {d__, 0} :> {d}) == (rid //. {0, d__} :> {d}), Return[k]]]]; a[0] = 1; Table[a[n], {n, 0, 70}] (* _Jean-François Alcover_, Apr 01 2016 *)
 %t A061797 skpal[n_]:=Module[{k=1},While[Count[IntegerDigits[k n],_?OddQ]>0 || (!PalindromeQ[(k n)/10^IntegerExponent[n k]]),k++];k]; Array[skpal,70,0] (* _Harvey P. Dale_, Dec 19 2021 *)
-%o A061797 (ARIBAS): stop := 500000; for n := 0 to 75 do k := 1; test := true; while test and k < stop do m := omit_trailzeros(n*k); if test := not all_even(m) or m <> int_reverse(m) then inc(k); end; end; if k < stop then write(k," "); else write(-1," "); end; end;
+%o A061797 (ARIBAS) stop := 500000; for n := 0 to 75 do k := 1; test := true; while test and k < stop do m := omit_trailzeros(n*k); if test := not all_even(m) or m <> int_reverse(m) then inc(k); end; end; if k < stop then write(k," "); else write(-1," "); end; end;
 %o A061797 (Haskell)
 %o A061797 a061797 0 = 1
 %o A061797 a061797 n = head [k | k <- [1..], let x = k * n,
@@ -18,7 +40,7 @@
 %o A061797 -- _Reinhard Zumkeller_, Feb 01 2012
 %Y A061797 Cf. A050782, A062293 A061674. Values of k*n are given in A062293.
 %Y A061797 Cf. A014263, A136522, A004151.
-%K A061797 nonn,base,easy,nice
+%K A061797 nonn,base,easy,nice,changed
 %O A061797 0,2
 %A A061797 _Amarnath Murthy_, Jun 17 2001
 %E A061797 More terms from _Klaus Brockhaus_, Jun 27 2001
