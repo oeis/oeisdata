@@ -1,4 +1,4 @@
-%I A124576 #24 Sep 17 2024 20:37:46
+%I A124576 #26 May 20 2025 09:49:40
 %S A124576 1,1,1,2,5,1,7,23,9,1,30,108,60,13,1,138,522,361,113,17,1,660,2587,
 %T A124576 2079,830,182,21,1,3247,13087,11733,5581,1579,267,25,1,16334,67328,
 %U A124576 65600,35636,12164,2672,368,29,1,83662,351246,365364,220308,86964,23220,4173
@@ -16,9 +16,42 @@
 %e A124576 30, 108, 60, 13, 1;
 %e A124576 138, 522, 361, 113, 17, 1;
 %p A124576 with(linalg): m:=proc(i,j) if i=1 and j=1 then 1 elif i=j then 4 elif abs(i-j)=1 then 1 else 0 fi end: for n from 3 to 11 do A[n]:=matrix(n,n,m): B[n]:=multiply(seq(A[n],i=1..n-1)) od: 1; 1,1; for n from 3 to 11 do seq(B[n][1,j],j=1..n) od; # yields sequence in triangular form
+%p A124576 # alternative
+%p A124576 A124576_row := proc(n)
+%p A124576     if n = 0 then
+%p A124576         return [1] ;
+%p A124576     else
+%p A124576         M := Matrix(n,n) ;
+%p A124576         M[1,1] := 1;
+%p A124576         for c from 2 to n do
+%p A124576             if c = 2 then
+%p A124576                 M[1,c] := 1;
+%p A124576             else
+%p A124576                 M[1,c] := 0;
+%p A124576             end if;
+%p A124576         end do:
+%p A124576         for r from 2 to n do
+%p A124576             for c from 1 to n do
+%p A124576                 if r = c then
+%p A124576                     M[r,c] := 4;
+%p A124576                 elif abs(r-c) = 1 then
+%p A124576                     M[r,c] := 1;
+%p A124576                 else
+%p A124576                     M[r,c] := 0;
+%p A124576                 end if;
+%p A124576             end do:
+%p A124576         end do:
+%p A124576         LinearAlgebra[MatrixPower](M,n-1) ;
+%p A124576         return [seq(%[1,r],r=1..n)] ;
+%p A124576     end if;
+%p A124576 end proc:
+%p A124576 for n from 0 to 10 do
+%p A124576     A124576_row(n) ;
+%p A124576     print(%) ;
+%p A124576 end do: # _R. J. Mathar_, May 20 2025
 %t A124576 M[n_] := SparseArray[{{1, 1} -> 1, Band[{2, 2}] -> 4, Band[{1, 2}] -> 1, Band[{2, 1}] -> 1}, {n, n}]; row[1] = {1}; row[n_] := MatrixPower[M[n], n-1] // First // Normal; Table[row[n], {n, 1, 10}] // Flatten (* _Jean-François Alcover_, Jan 09 2014 *)
-%Y A124576 Cf. A124575, A124574, A052179.
-%K A124576 nonn,tabl
+%Y A124576 Cf. A124575, A124574, A052179, A227081 (row sums).
+%K A124576 nonn,tabl,changed
 %O A124576 1,4
 %A A124576 _Gary W. Adamson_ & _Roger L. Bagula_, Nov 05 2006
 %E A124576 Edited by _N. J. A. Sloane_, Dec 04 2006
