@@ -1,11 +1,13 @@
-%I A280407 #48 May 21 2025 18:32:40
+%I A280407 #63 May 28 2025 01:04:39
 %S A280407 1,45,81,233,289,601,625,1113,1153,1785,1681,2761,2401,3577,3505,4665,
 %T A280407 4225,6185,5329,7673,6945,8601,7921,11033,9665,12265,11793,14089,
 %U A280407 12769,18073,14641,19945,17281,20121,20593,23961,21025,25417,24177,29177,25921,35449,28561,36233
 %N A280407 Number of 2 X 2 matrices with all elements in {-n,..,0,..,n} with permanent = determinant * n.
-%H A280407 David Radcliffe, <a href="/A280407/b280407.txt">Table of n, a(n) for n = 0..2000</a> (terms n = 0..155 from Indranil Ghosh).
-%F A280407 a(n) = (4n+1)^2 iff n=0 or n+1 is an odd prime, otherwise a(n) > (4n+1)^2. - _David Radcliffe_, May 21 2025
-%e A280407 For n = 2, few of the possible matrices are [-2,-2,0,0], [-2,-1,0,0], [-2,0,-2,0], [-2,0,-1,0], [-2,0,0,0], [-2,0,1,0], [-2,0,2,0], [1,0,0,0], [1,0,1,0], [1,0,2,0], [1,1,0,0], [1,2,0,0], [2,-2,0,0], [2,-1,0,0], [2,0,-2,0], .... There are 81 possibilities. Here each of the matrices is defined as M = [a,b,c,d] where a = M[1][1], b = M[1][2], c = M[2][1], d = M[2][2]. So for n = 2, a(n)=81.
+%H A280407 David Radcliffe, <a href="/A280407/b280407.txt">Table of n, a(n) for n = 0..10000</a> (terms n = 0..155 from Indranil Ghosh).
+%F A280407 From _David Radcliffe_, May 22 2025: (Start)
+%F A280407 a(n) = (4*n+1)^2 iff n=0 or n+1 is an odd prime, otherwise a(n) > (4*n+1)^2.
+%F A280407 a(n) = 8 * A280391(n) - 8*(2*n+1)^2 + (4*n+1)^2 for n>1. (End)
+%e A280407 For n = 2, few of the possible matrices are [-2,-2,0,0], [-2,-1,0,0], [-2,0,-2,0], [-2,0,-1,0], [-2,0,0,0], [-2,0,1,0], [-2,0,2,0], [1,0,0,0], [1,0,1,0], [1,0,2,0], [1,1,0,0], [1,2,0,0], [2,-2,0,0], [2,-1,0,0], [2,0,-2,0], .... There are 81 possibilities. Here each of the matrices is defined as M = [a,b,c,d] where a = M[1][1], b = M[1][2], c = M[2][1], d = M[2][2]. So for n = 2, a(2)=81.
 %o A280407 (Python)
 %o A280407 def t(n):
 %o A280407     s=0
@@ -18,6 +20,27 @@
 %o A280407     return s
 %o A280407 for i in range(0,156):
 %o A280407     print(t(i))
+%o A280407 (Python)
+%o A280407 import numpy as np
+%o A280407 def a280417(N):
+%o A280407     if N > 0: yield 1
+%o A280407     if N > 1: yield 45
+%o A280407     if N <= 2: return
+%o A280407     prods = np.zeros(N * N, dtype=np.int32)
+%o A280407     prods[1] = 1 # prods[k] counts integer solutions to x*y = k with 1 <= x,y <= n
+%o A280407     for n in range(2, N):
+%o A280407         n_sq = n * n
+%o A280407         prods[n: n_sq: n] += 2
+%o A280407         prods[n_sq] += 1
+%o A280407         dx = (n + 1) // 2 if n % 2 else n + 1
+%o A280407         dy = (n - 1) // 2 if n % 2 else n - 1
+%o A280407         ad = prods[dx : n_sq : dx]
+%o A280407         bc = prods[dy : dy * ad.shape[0] + 1 : dy]
+%o A280407         yield (4 * n + 1) ** 2 + 8 * int(ad @ bc)
+%o A280407         # (4*n+1)**2 = solutions to a*d = b*c = 0 with -n <= a,b <= n.
+%o A280407         # ad @ bc = solutions to (n-1)*a*d = (n+1)*b*c > 0 with 1 <= a,b <= n.
+%o A280407         # Multiply by 8 to account for all consistent sign changes of a,b,c,d.
+%o A280407 print(list(a280417(44))) # _David Radcliffe_, May 22 2025
 %Y A280407 Number of 2 X 2 matrices with all elements in {0,..,n}: A280391 (permanent = determinant * n), A280321 (determinant = permanent * n), A015237 (determinant = permanent) and A016754 (determinant = 2* permanent).
 %K A280407 nonn,changed
 %O A280407 0,2
