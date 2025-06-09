@@ -1,13 +1,38 @@
-%I A006375 M0080 #19 Apr 20 2025 03:48:25
+%I A006375 M0080 #27 Jun 09 2025 00:57:12
 %S A006375 2,1,1,3,2,1,1,2,4,2,1,2,2,1,2,5,2,2,1,3,2,1,1,3,6,2,2,2,2,2,1,3,2,2,
-%T A006375 2,7,3,1,2,4,2,2,1,2,4,1,1,4,6,3,2,3,2,2,2,3,2,2,1,4,2,1,3,8,2,2,1,3,
-%U A006375 2,2
-%N A006375 Number of reduced indefinite binary forms of determinant -n.
+%T A006375 2,7,3,1,2,4,2,2,1,2,4,1,1,4,6,3,2,3,2,2,2,3,2,2,1,4,2,1,3,8,4,2,1,3,
+%U A006375 2,2,1,5,2,2,3,2,2,2,2,5,8,3,1,4,4,1,2,3,2,4,2,2,2,1,2,5
+%N A006375 Number of equivalence classes of cycles (or periods) of reduced indefinite binary quadratic forms of determinant -n (see comments).
+%C A006375 From _Robin Visser_, Jun 05 2025: (Start)
+%C A006375 Let a (classically integral) binary quadratic form f(x,y) = a*x^2 + 2*b*x*y + c*y^2 of determinant -n = a*c-b^2 (or equivalently, of discriminant 4*n = 4*(b^2 - a*c)) be denoted as the triple [a,b,c]. If n is not a square, then we can define a sequence of binary quadratic forms [a_0, b_0, c_0], [a_1, b_1, c_1], [a_2, b_2, c_2], ... by the following recursive definition: Let [a_0, b_0, c_0] = [a, b, c], and for each i >= 0, let [a_{i+1}, b_{i+1}, c_{i+1}] = [c_i, t, (t^2 - n)/c_i] where t is the largest integer such that t = -b_i (mod c_i) and t^2 < n, if such an integer t exists. Otherwise t is the smallest integer (in absolute value) which satisfies t = -b_i (mod c_i), taking t positive in the case of a tie (see Conway--Sloane pg 357).
+%C A006375 Gauss showed that such sequences are eventually periodic, and we denote the cycle of f(x,y) as the set of all forms in the period of this sequence (see also A087048 for a similar definition of cycle).  If n is a square, then this sequence terminates in a form [a_k, b_k, 0], and the definition must be modified slightly (see Conway--Sloane pg 359).  Two binary quadratic forms f(x,y) and g(x,y) are said to be properly equivalent if they have the same cycle.
+%C A006375 This sequence a(n) counts equivalence classes of such cycles of indefinite binary quadratic forms f(x,y) of determinant -n, with respect to a somewhat coarser notion of equivalence than proper equivalence; here the binary forms [a, b, c], [-a, b, -c], [c, b, a], and [-c, b, -a] are all counted as part of the same equivalence class. (End)
 %D A006375 J. H. Conway and N. J. A. Sloane, "Sphere Packings, Lattices and Groups", Springer-Verlag, p. 362.
+%D A006375 C. F. Gauss, Disquisitiones arithmeticae, Yale University Press, New Haven, Conn.-London, 1966.
 %D A006375 N. J. A. Sloane and Simon Plouffe, The Encyclopedia of Integer Sequences, Academic Press, 1995 (includes this sequence).
 %H A006375 Nachum Dershowitz, <a href="https://cs.uwaterloo.ca/journals/JIS/VOL20/Dershowitz/dersh3.html">Touchard's Drunkard</a>, Journal of Integer Sequences, Vol. 20 (2017), #17.1.5.
-%Y A006375 Cf. A006371, A006374.
-%K A006375 nonn,hard
+%e A006375 From _Robin Visser_, Jun 08 2025: (Start)
+%e A006375 For n = 1, every indefinite binary quadratic form of determinant -1 (equivalently discriminant 4) is equivalent to either 2*x*y - y^2 or 2*x*y, thus a(1) = 2.
+%e A006375 For n = 2, every indefinite binary quadratic form of determinant -2 (equivalently discriminant 8) is equivalent to x^2 + 2*x*y - y^2, thus a(2) = 1.
+%e A006375 For n = 3, every indefinite binary quadratic form of determinant -3 (equivalently discriminant 12) is equivalent to x^2 + 2*x*y - 2*y^2, thus a(3) = 1.
+%e A006375 For n = 4, every indefinite binary quadratic form of determinant -4 (equivalently discriminant 16) is equivalent to either x^2 + 2*x*y - 3*y^2, 4*x*y - 2*y^2, or 4*x*y, thus a(4) = 3. (End)
+%o A006375 (SageMath)
+%o A006375 def a(n):
+%o A006375     S = []
+%o A006375     for b in range(1, ceil(sqrt(n))):
+%o A006375         for a in Integer(n-b^2).divisors():
+%o A006375             c = (b^2-n)/a
+%o A006375             F = [BinaryQF(x,2*b,y) for (x,y) in [(a,c),(-a,-c),(c,a),(-c,-a)]]
+%o A006375             if all([(not Q.is_equivalent(t)) for t in S for Q in F]): S.append(F[0])
+%o A006375     if Integer(n).is_square():
+%o A006375         for c in range(-sqrt(n), sqrt(n)+1):
+%o A006375             F = [BinaryQF(x,2*sqrt(n),y) for (x,y) in [(0,c),(0,-c),(c,0),(-c,0)]]
+%o A006375             if all([(not Q.is_equivalent(t)) for t in S for Q in F]): S.append(F[0])
+%o A006375     return len(S)  # _Robin Visser_, Jun 06 2025
+%Y A006375 Cf. A006371, A006374, A082175, A087048, A256945, A307359.
+%K A006375 nonn,hard,changed
 %O A006375 1,1
 %A A006375 _N. J. A. Sloane_.
 %E A006375 Corrected Apr 15 1995
+%E A006375 Name clarified by _Robin Visser_, May 30 2025
+%E A006375 Term a(65) corrected and more terms from _Robin Visser_, Jun 06 2025
