@@ -1,9 +1,37 @@
-%I A365494 #17 Sep 25 2023 09:06:47
-%S A365494 2,19,65,190
+%I A365494 #27 Jun 11 2025 01:01:29
+%S A365494 2,19,65,190,440,1160,2896,7072,16832,40064,90752,208640,476160,
+%T A365494 1082880,2398208,5310464,11694080,25616384,56475648,122388480,
+%U A365494 266010624,575012864,1245446144,2699034624,5779750912,12296650752,26377977856,55855546368,118656860160,255458279424,531669975040
 %N A365494 a(n) is the smallest number which can be represented as the sum of n distinct n-almost primes in exactly n ways, or -1 if no such number exists.
+%H A365494 David A. Corneth, <a href="/A365494/b365494.txt">Table of n, a(n) for n = 1..50</a>
 %H A365494 Eric Weisstein's World of Mathematics, <a href="https://mathworld.wolfram.com/AlmostPrime.html">Almost Prime</a>.
 %e A365494 For n = 2: 19 = 2*2 + 3*5 = 3*3 + 2*5.
+%p A365494 f:= proc(n) uses priqueue; local pq, S, t,x,y,k, i, p, v, R;
+%p A365494      initialize(pq);
+%p A365494      insert([-2^n, 2$n],pq);
+%p A365494      S[0]:= 1:
+%p A365494      for i from 1 to n do S[i]:= 0 od:
+%p A365494      do
+%p A365494        t:= extract(pq);
+%p A365494        x:= -t[1];
+%p A365494        for i from n to 1 by -1 do
+%p A365494          S[i]:= expand(S[i] + S[i-1] * y^x);
+%p A365494        od;
+%p A365494        if type(S[n],`+`) then
+%p A365494          R:= select(t -> degree(t,y) < x and eval(t,y=1) = n, convert(S[n],list));
+%p A365494          if R <> [] then return min(map(t -> degree(t,y),R)) fi;
+%p A365494        fi;
+%p A365494        p:= nextprime(t[-1]);
+%p A365494        for i from n+1 to 2 by -1 while t[i] = t[-1] do
+%p A365494         v:= x*(p/t[-1])^(n+2-i);
+%p A365494         insert([-v, op(t[2..i-1]), p$(n+2-i)], pq)
+%p A365494        od;
+%p A365494      od;
+%p A365494 end proc:
+%p A365494 map(f, [$1..19]); # _Robert Israel_, Jun 10 2025
 %Y A365494 Cf. A091538, A365493.
-%K A365494 nonn,more
+%K A365494 nonn,changed
 %O A365494 1,1
 %A A365494 _Ilya Gutkovskiy_, Sep 07 2023
+%E A365494 a(5)-a(19) from _Robert Israel_, Jun 10 2025
+%E A365494 More terms from _David A. Corneth_, Jun 10 2025
