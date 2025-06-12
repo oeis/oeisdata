@@ -1,10 +1,11 @@
-%I A091538 #24 Apr 08 2025 08:45:41
+%I A091538 #31 Jun 11 2025 12:03:39
 %S A091538 1,0,2,0,3,4,0,5,6,8,0,7,9,12,16,0,11,10,18,24,32,0,13,14,20,36,48,64,
 %T A091538 0,17,15,27,40,72,96,128,0,19,21,28,54,80,144,192,256,0,23,22,30,56,
 %U A091538 108,160,288,384,512,0,29,25,42,60,112,216,320,576,768,1024
 %N A091538 Triangle built from m-primes as columns.
 %C A091538 m-primes (also called m-almost primes) are the numbers which have precisely m prime factors counting multiple factors. 1 is included as 0-prime.
 %C A091538 The number N>=1 appears in column no. m = A001222(N).
+%H A091538 Chai Wah Wu, <a href="/A091538/b091538.txt">Table of n, a(n) for n = 0..10000</a>
 %H A091538 Wolfdieter Lang, <a href="/A091538/a091538.txt">First 11 rows</a>.
 %F A091538 For n>=m>=1: a(n, m)= (n-m+1)-th member in the strictly monotonically increasing sequence of numbers N satisfying: N=product(p(k)^(e_k), k=1..) with p(k) := A000040(k) (k-th prime) such that sum(e_k, k=1..) = m, where the e_k are nonnegative. if m=0 : a(n, 0)=1 if n=0 else 0. If n<m then a(n, m)=0.
 %e A091538 From _Michael De Vlieger_, May 24 2017: (Start)
@@ -35,8 +36,30 @@
 %e A091538 (End)
 %t A091538 With[{nn = 11}, Function[s, Function[t, Table[Function[m, If[m == 1, Boole[k == 1], t[[m, k]]]][n - k + 1], {n, nn}, {k, n, 1, -1}]]@ Map[Position[s, #][[All, 1]] &, Range[0, nn]]]@ PrimeOmega@ Range[2^nn]] (* or *)
 %t A091538 a = {1}; Do[Block[{r = {Prime@ n}}, Do[AppendTo[r, SelectFirst[ Range[a[[-(n - i)]] + 1, 2^n], PrimeOmega@ # == i &]], {i, 2, n - 1}]; a = Join[a, {0}, If[n == 1, {}, r], {2^n}]], {n, 11}]; a (* _Michael De Vlieger_, May 24 2017 *)
+%o A091538 (Python)
+%o A091538 from math import isqrt, comb, prod
+%o A091538 from sympy import prime, primerange, integer_nthroot, primepi
+%o A091538 def A091538(n):
+%o A091538     a = (m:=isqrt(k:=n+1<<1))+(k>m*(m+1))
+%o A091538     r = n-comb(a,2)
+%o A091538     w = a-r
+%o A091538     if r==0: return int(w==1)
+%o A091538     if r==1: return prime(w)
+%o A091538     def bisection(f,kmin=0,kmax=1):
+%o A091538         while f(kmax) > kmax: kmax <<= 1
+%o A091538         kmin = kmax >> 1		
+%o A091538         while kmax-kmin > 1:
+%o A091538             kmid = kmax+kmin>>1
+%o A091538             if f(kmid) <= kmid:
+%o A091538                 kmax = kmid
+%o A091538             else:
+%o A091538                 kmin = kmid
+%o A091538         return kmax
+%o A091538     def g(x,a,b,c,m): yield from (((d,) for d in enumerate(primerange(b,isqrt(x//c)+1),a)) if m==2 else (((a2,b2),)+d for a2,b2 in enumerate(primerange(b,integer_nthroot(x//c,m)[0]+1),a) for d in g(x,a2,b2,c*b2,m-1)))
+%o A091538     def f(x): return int(w+x-sum(primepi(x//prod(c[1] for c in a))-a[-1][0] for a in g(x,0,1,1,r)))
+%o A091538     return bisection(f,w,w) # _Chai Wah Wu_, Jun 11 2025
 %Y A091538 The column sequences (without leading zeros) are: A000007, A000040 (primes), A001358, A014612-4, A046306, A046308, A046310, A046312, A046314, A069272-A069281 for m=0..20, respectively.
 %Y A091538 A078840 is this table with the zeros omitted.
-%K A091538 nonn,easy,tabl
+%K A091538 nonn,easy,tabl,changed
 %O A091538 0,3
 %A A091538 _Wolfdieter Lang_, Feb 13 2004
