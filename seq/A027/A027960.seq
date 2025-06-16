@@ -1,4 +1,4 @@
-%I A027960 #26 Jun 02 2019 00:50:54
+%I A027960 #32 Jun 16 2025 00:41:50
 %S A027960 1,1,3,1,1,3,4,4,1,1,3,4,7,8,5,1,1,3,4,7,11,15,13,6,1,1,3,4,7,11,18,
 %T A027960 26,28,19,7,1,1,3,4,7,11,18,29,44,54,47,26,8,1,1,3,4,7,11,18,29,47,73,
 %U A027960 98,101,73,34,9,1,1,3,4,7,11,18,29,47,76,120,171,199,174,107,43,10,1
@@ -9,6 +9,12 @@
 %H A027960 Nathaniel Johnston, <a href="/A027960/b027960.txt">Table of n, a(n) for n = 0..10000</a>
 %F A027960 T(n, k) = Lucas(k+1) for k <= n, otherwise the (2n-k)th coefficient of the power series for (1+2*x)/{(1-x-x^2)*(1-x)^(k-n)}.
 %F A027960 Recurrence: T(n, 0)=T(n, 2n)=1 for n >= 0; T(n, 1)=3 for n >= 1; and for n >= 2, T(n, k) = T(n-1, k-2) + T(n-1, k-1) for 2 <= k <= 2*n-1.
+%F A027960 From _G. C. Greubel_, Jun 08 2025: (Start)
+%F A027960 T(n, k) = A000032(k+1) - f(n, k)*[k > n], where f(n, k) = Sum_{j=0..k-n-1} binomial(2*n -k+j, j)*A000032(2*(k-n-j)).
+%F A027960 Sum_{k=0..A004396(n+1)} T(n-k, k) = A027975(n).
+%F A027960 Sum_{k=0..n} T(n, k) = A027961(n).
+%F A027960 Sum_{k=0..2*n} T(n, k) = A168616(n+2) + 2.
+%F A027960 Sum_{k=n+1..2*n} (-1)^k*T(n, k) = A075193(n-1), n >= 1. (End)
 %e A027960                            1
 %e A027960                        1,  3,  1
 %e A027960                    1,  3,  4,  4,  1
@@ -19,17 +25,37 @@
 %e A027960   1, 3, 4, 7, 11, 18, 29, 47, 73, 98, 101, 73, 34, 9, 1
 %p A027960 T:=proc(n,k)option remember:if(k=0 or k=2*n)then return 1:elif(k=1)then return 3:else return T(n-1,k-2) + T(n-1,k-1):fi:end:
 %p A027960 for n from 0 to 6 do for k from 0 to 2*n do print(T(n,k));od:od: # _Nathaniel Johnston_, Apr 18 2011
+%t A027960 (* First program *)
 %t A027960 t[_, 0] = 1; t[_, 1] = 3; t[n_, k_] /; (k == 2*n) = 1; t[n_, k_] := t[n, k] = t[n-1, k-2] + t[n-1, k-1]; Table[t[n, k], {n, 0, 8}, {k, 0, 2*n}] // Flatten (* _Jean-François Alcover_, Dec 27 2013 *)
+%t A027960 (* Second program *)
+%t A027960 f[n_, k_]:= f[n,k]= Sum[Binomial[2*n-k+j,j]*LucasL[2*(k-n-j)], {j,0,k-n-1}];
+%t A027960 A027960[n_, k_]:= LucasL[k+1] - f[n,k]*Boole[k>n];
+%t A027960 Table[A027960[n,k], {n,0,12}, {k,0,2*n}]//Flatten (* _G. C. Greubel_, Jun 08 2025 *)
 %o A027960 (PARI) T(r,n)=if(r<0||n>2*r,return(0)); if(n==0||n==2*r,return(1)); if(n==1,3,T(r-1,n-1)+T(r-1,n-2)) /* _Ralf Stephan_, May 04 2005 */
-%o A027960 (Sage)
-%o A027960 def T(n, k):
-%o A027960     if (k<0 or k>2*n): return 0
-%o A027960     elif (k==0 or k==2*n): return 1
-%o A027960     elif (k==1): return 3
+%o A027960 (SageMath)
+%o A027960 @CachedFunction
+%o A027960 def T(n, k): # T = A027960
+%o A027960     if (k>2*n): return 0
+%o A027960     elif (k<n+1): return lucas_number2(k+1, 1,-1)
 %o A027960     else: return T(n-1, k-2) + T(n-1, k-1)
-%o A027960 [[T(n, k) for k in (0..2*n)] for n in (0..12)] # _G. C. Greubel_, Jun 01 2019
-%Y A027960 Central column is the Lucas numbers without initial 2, cf. A000204. Row sums are A036563. Columns in the right half include A027961, A027962, A027963, A027964, A053298. Bisection triangles are in A026998 and A027011.
-%K A027960 nonn,easy,tabf
+%o A027960 [[T(n, k) for k in (0..2*n)] for n in (0..12)] # _G. C. Greubel_, Jun 01 2019; Jun 08 2025
+%o A027960 (Magma)
+%o A027960 function T(n,k) // T = A027960
+%o A027960       if k le n then return Lucas(k+1);
+%o A027960       elif k gt 2*n then return 0;
+%o A027960       else return T(n-1, k-2) + T(n-1, k-1);
+%o A027960       end if;
+%o A027960 end function;
+%o A027960 [T(n,k): k in [0..2*n], n in [0..12]]; // _G. C. Greubel_, Jun 08 2025
+%Y A027960 Central column is the Lucas numbers without initial 2: A000204.
+%Y A027960 Columns in the right half include A027961, A027962, A027963, A027964, A053298.
+%Y A027960 Bisection triangles are in A026998 and A027011.
+%Y A027960 Row sums: A036563, A153881 (alternating sign).
+%Y A027960 Sums include: A023537, A027973, A027974, A027975, A027976, A027978, A027979, A027980, A027981, A027982, A027984, A027985, A027986, A027987, A053298.
+%Y A027960 Diagonals of the form T(n, 2*n-p): A000012 (p=0), A000027 (p=1), A034856 (p=2), A027965 (p=3), A027966 (p=4), A027967 (p=5), A027968 (p=6), A027969 (p=7), A027970 (p=8), A027971 (p=9), A027972 (p=10).
+%Y A027960 Diagonals of the form T(n, n+p): A000032 (p=0), A027961 (p=1), A023537 (p=2), A027963 (p=3), A027964 (p=4), A053298 (p=5), A027002 U A027018 (p=6), A027007 U A027014 (p=7), A027003 U A027019 (p=8).
+%Y A027960 Cf. A000032, A004396, A026998, A027011, A027977, A075193, A168616.
+%K A027960 nonn,easy,tabf,changed
 %O A027960 0,3
 %A A027960 _Clark Kimberling_
 %E A027960 Edited by _Ralf Stephan_, May 04 2005
