@@ -1,15 +1,63 @@
-%I A272070 #23 Jun 13 2025 22:56:15
+%I A272070 #34 Jun 19 2025 00:36:36
 %S A272070 1,1,7,104,3970,431932,137066448,128095791922,355704307903818,
 %T A272070 2952926822418475378,73569487283165427567144,
 %U A272070 5515501712040561162370942752,1246743475892797935712690352483842,850999652841310762943520023896881419780
 %N A272070 Number of ways to quarter a 2n+1 X 2n+1 chessboard with central square removed.
 %C A272070 The chessboard must be dissected into four identical pieces. All solutions have 90-degree rotational symmetry and solutions that differ only by rotation or reflection are considered equivalent.
+%C A272070 The pieces must be polyominoes, without holes. They can't have parts that are only connected through one or more corners: if the piece is larger than one square, each square must share at least one side with some other square of the same piece. - _M. F. Hasler_, Jun 13 2025
+%C A272070 The solutions can be constructed as self-avoiding paths made of horizontal and vertical unit segments, that connect one corner of the central square to some point on the border, also avoiding the 3 other paths obtained by rotation by +-90 and 180 degrees around the center. To avoid counting solutions that are equivalent modulo reflection, it is enough to take the first segment in a fixed direction (e.g., from the upper left corner, always first go up by one unit). - _M. F. Hasler_, Jun 14 2025
 %F A272070 a(n) = A006067(2*n+1).
+%e A272070 For n = 1, we have the 3 X 3 board, with the central square removed.
+%e A272070   In order to split this into four congruent parts, we must use four 2 X 1 tiles.
+%e A272070   Up to reflections, the only solution is :
+%e A272070                                    _____
+%e A272070    A A B    or, in a different    |___| |
+%e A272070    D   B       representation:    | |_|_|
+%e A272070    D C C                          |_|___|
+%e A272070 More generally, without loss of generality (i.e., up to reflections), any solution restricted to this 3 X 3 area squares will always be of that form; the entire set of (equivalent) solutions can be obtained by "growing" the four areas (symmetrically) to fill the entire board.
+%e A272070 Thus, for n = 2, the 7 solutions for the 5 X 5 board are obtained by filling the outer ring with 4 groups of 2n = 4 adjacent identical letters so that they are in contact with a same letter in the "central ring":
+%e A272070    B B B B C   A B B B B   A A B B B   A A A B B   A A A A B   D A A A A   D D A A A
+%e A272070    A A A B C   A A A B C   A A A B B   A A A B B   D A A B B   D A A B B   D A A B A
+%e A272070    A D   B C   A D   B C   A D   B C   D D   B B   D D   B B   D D   B B   D D   B B
+%e A272070    A D C C C   A D C C C   D D C C C   D D C C C   D D C C B   D D C C B   C D C C B
+%e A272070    A D D D D   D D D D C   D D D C C   D D C C C   D C C C C   C C C C B   C C C B B
+%e A272070 (Observe how the groups of four identical letters "travel clockwise" in the outer ring, while the inner ring remains the same. Given that we have 2(n-1) = 2 'A's in the previously outer ring (which always include one in the corner), and we have 2n = 4 'A's to (dis)place in the outer ring, there are 2n+1+2(n-1) = 4n-1 = 7 possibilities here.)
+%e A272070 For n = 3, each of the previous 7 solutions gives rise to 4n-1 = 11 distinct solutions for the 7 X 7 board, by again filling the outer ring with 2n = 6 adjacent identical letters A, B, C and D so that at least one is in contact with one of the 2n-2 = 4 identical letters in the second ring. But this doesn't give all of the 104 solutions for the 7 X 7 board. We can get additional solutions by incrementing/decrementing (A > B > C > D > A) squares in the n=2 ring which couldn't be changed before (because it would have created "disconnected components" which are now connected through the outer ring). For example, "incrementing" the letters in the corners of the 3rd solution for n=2 gives the solution (3,78) depicted below, plus 3 other solutions by rotating the outer ring clockwise.  Similarly, we can increment or also decrement the letter in the corner and/or the next one in the 4th solution for n=2, and, e.g., the fourth letter of the 5th n=2 solution, see solution (3,104) below:
+%e A272070              B B B B C C C              D D D A A A A
+%e A272070   solution   B B A B B C C    solution  D D A A B A A
+%e A272070    (3,78):   B A A A B B C    (3,104):  D A A A B B A
+%e A272070   (from      A A D   B C C    (from     D D D   B B B
+%e A272070   solution   A D D C C C D    solution  C D D C C C B
+%e A272070    (2,3))    A A D D C D D     (2,6)    C C D C C B B
+%e A272070              A A A D D D D              C C C C B B B
 %t A272070 A006067 = Import["https://oeis.org/A006067/b006067.txt", "Table"][[All, 2]];
 %t A272070 a[n_] := A006067[[2n+1]];
 %t A272070 a /@ Range[1, 13] (* _Jean-François Alcover_, Sep 14 2019 *)
+%o A272070 (Python) # program is unoptimized, slow for n > 5, rather for illustration
+%o A272070 def A272070(n, sol=None): # return solution (path) with index sol if given
+%o A272070     if not hasattr(A:=A272070,'sol'): A.sol=[[[]]]
+%o A272070     while n >= len(A.sol):
+%o A272070         L = len(A.sol); width = 2*L+1; A.sol.append(N := [])
+%o A272070         path = [pos := 1+1j]; todo = [pos+2]; steps = 1,1j,-1j,-1
+%o A272070         used = lambda pos: any(pos*s in path for s in steps)
+%o A272070         while todo:
+%o A272070             if pos := todo.pop():
+%o A272070                 if width in (abs(pos.real),abs(pos.imag)):
+%o A272070                     N . append(tuple(path+[pos]))
+%o A272070                 elif go := [p for s in steps if not used(p := pos+2*s)]:
+%o A272070                     path += [pos]; todo += [0]; todo += go
+%o A272070             else: path.pop()
+%o A272070     return len(A.sol[n]) if sol is None else A.sol[n][sol]
+%o A272070 from matplotlib.pyplot import plot,show # only needed for plotting
+%o A272070 def A272070_plot(n, sol): # to plot the solution w/ index sol
+%o A272070     for s in (1, 2*n+1): # outer frame and central square
+%o A272070         plot(*([(s:=-s)if(i-j)&1 else s for i in range(5)]for j in range(2)))
+%o A272070     for i in range(4):
+%o A272070         path = [1j*p for p in path] if i else A272070(n,sol)
+%o A272070         plot([p.real for p in path], [p.imag for p in path])
+%o A272070     show(); return path # _M. F. Hasler_, Jun 14 2025
 %Y A272070 Cf. A006067, A064941, A257952.
 %K A272070 nonn,changed
 %O A272070 0,3
 %A A272070 _Andrew Howroyd_, Apr 19 2016
-%E A272070 a(0)=1 prepended by _M. F. Hasler_, Jun 13 2025
+%E A272070 a(0) = 1 prepended by _M. F. Hasler_, Jun 13 2025
