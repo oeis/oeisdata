@@ -1,20 +1,45 @@
-%I A116674 #12 May 22 2015 05:56:40
+%I A116674 #21 Jun 28 2025 15:48:21
 %S A116674 1,1,2,1,1,2,1,2,2,2,3,1,5,3,4,1,2,7,1,2,8,2,2,10,3,2,11,5,2,13,7,4,
 %T A116674 12,11,1,19,11,1,2,18,17,1,3,20,21,2,2,22,27,3,2,25,32,5,4,24,41,7,2,
 %U A116674 30,46,11,2,31,56,15,2,36,62,22,3,33,80,25,1,2,39,87,36,1,4,38,103,45,2,2,45
 %N A116674 Triangle read by rows: T(n,k) is the number of partitions of n into odd parts and having exactly k distinct parts (n>=1, k>=1).
 %C A116674 Row n has floor(sqrt(n)) terms. Row sums yield A000009. T(n,1)=A001227(n) (n>=1). Sum(k*T(n,k),k>=1)=A038348(n-1) (n>=1).
+%C A116674 Conjecture: Also the number of strict integer partitions of n with k maximal runs of consecutive parts decreasing by 1. - _Gus Wiseman_, Jun 24 2025
 %H A116674 Alois P. Heinz, <a href="/A116674/b116674.txt">Rows n = 1..1000, flattened</a>
 %F A116674 G.f.: product(1+tx^(2j-1)/(1-x^(2j-1)), j=1..infinity).
-%e A116674 T(9,2)=4 because the only partitions of 9 into odd parts and having 2 distinct parts are [7,1,1],[5,1,1,1,1],[3,3,1,1,1] and [3,1,1,1,1,1,1].
-%e A116674 Triangle starts:
-%e A116674 1;
-%e A116674 1;
-%e A116674 2;
-%e A116674 1,1;
-%e A116674 2,1;
-%e A116674 2,2;
-%e A116674 2,3;
+%e A116674 From _Gus Wiseman_, Jun 24 2025: (Start)
+%e A116674 Triangle begins:
+%e A116674    1:  1
+%e A116674    2:  1
+%e A116674    3:  2
+%e A116674    4:  1  1
+%e A116674    5:  2  1
+%e A116674    6:  2  2
+%e A116674    7:  2  3
+%e A116674    8:  1  5
+%e A116674    9:  3  4  1
+%e A116674   10:  2  7  1
+%e A116674   11:  2  8  2
+%e A116674   12:  2 10  3
+%e A116674   13:  2 11  5
+%e A116674   14:  2 13  7
+%e A116674   15:  4 12 11
+%e A116674   16:  1 19 11  1
+%e A116674   17:  2 18 17  1
+%e A116674   18:  3 20 21  2
+%e A116674   19:  2 22 27  3
+%e A116674   20:  2 25 32  5
+%e A116674 Row n = 9 counts the following partitions into odd parts by number of distinct parts:
+%e A116674   (9)                  (7,1,1)          (5,3,1)
+%e A116674   (3,3,3)              (3,3,1,1,1)
+%e A116674   (1,1,1,1,1,1,1,1,1)  (5,1,1,1,1)
+%e A116674                        (3,1,1,1,1,1,1)
+%e A116674 Row n = 9 counts the following strict partitions by number of maximal runs:
+%e A116674   (9)      (6,3)    (5,3,1)
+%e A116674   (5,4)    (7,2)
+%e A116674   (4,3,2)  (8,1)
+%e A116674            (6,2,1)
+%e A116674 (End)
 %p A116674 g:=product(1+t*x^(2*j-1)/(1-x^(2*j-1)),j=1..35): gser:=simplify(series(g,x=0,34)): for n from 1 to 29 do P[n]:=coeff(gser,x^n) od: for n from 1 to 29 do seq(coeff(P[n],t,j),j=1..floor(sqrt(n))) od; # yields sequence in triangular form
 %p A116674 # second Maple program:
 %p A116674 with(numtheory):
@@ -25,7 +50,17 @@
 %p A116674          b(n, iquo(n+1, 2)*2-1)):
 %p A116674 seq(T(n), n=1..30);  # _Alois P. Heinz_, Mar 08 2015
 %t A116674 b[n_, i_] := b[n, i] = Expand[If[n == 0, 1, If[i<1, 0, Sum[b[n-i*j, i-2]*If[j == 0, 1, x], {j, 0, n/i}]]]]; T[n_] := Function[{p}, Table[Coefficient[p, x, i], {i, 1, Exponent[p, x]}]][b[n, Quotient[n+1, 2]*2-1]]; Table[T[n], {n, 1, 30}] // Flatten (* _Jean-François Alcover_, May 22 2015, after _Alois P. Heinz_ *)
-%Y A116674 Cf. A000009, A001227, A038348.
-%K A116674 nonn,tabf,look
+%t A116674 Table[Length[Select[IntegerPartitions[n],OddQ[Times@@#]&&Length[Union[#]]==k&]],{n,1,12},{k,1,Floor[Sqrt[n]]}] (*  _Gus Wiseman_, Jun 24 2025 *)
+%Y A116674 Row sums are A000009, strict case of A000041.
+%Y A116674 Row lengths are A000196.
+%Y A116674 Leading terms are A001227.
+%Y A116674 A007690 counts partitions with no singletons, complement A183558.
+%Y A116674 A034296 counts flat partitions, ranks A066311 or A073491.
+%Y A116674 A047993 counts partitions with max part = length.
+%Y A116674 A152140 counts partitions into odd parts by length.
+%Y A116674 A268193 counts partitions by number of maximal anti-runs, strict A384905.
+%Y A116674 A384881 counts partitions by number of maximal runs.
+%Y A116674 Cf. A008284, A038348, A047966, A089259, A325325, A384178, A384886, A384887.
+%K A116674 nonn,tabf,look,changed
 %O A116674 1,3
 %A A116674 _Emeric Deutsch_, Feb 22 2006
