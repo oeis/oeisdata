@@ -1,13 +1,28 @@
-%I A245564 #39 Feb 04 2022 16:31:15
+%I A245564 #54 Jul 09 2025 15:39:20
 %S A245564 1,2,2,3,2,4,3,5,2,4,4,6,3,6,5,8,2,4,4,6,4,8,6,10,3,6,6,9,5,10,8,13,2,
 %T A245564 4,4,6,4,8,6,10,4,8,8,12,6,12,10,16,3,6,6,9,6,12,9,15,5,10,10,15,8,16,
 %U A245564 13,21,2,4,4,6,4,8,6,10,4,8,8,12,6,12,10,16,4,8,8,12,8,16,12,20,6,12,12,18
 %N A245564 a(n) = Product_{i in row n of A245562} Fibonacci(i+2).
 %C A245564 This is the Run Length Transform of S(n) = Fibonacci(n+2).
 %C A245564 The Run Length Transform of a sequence {S(n), n>=0} is defined to be the sequence {T(n), n>=0} given by T(n) = Product_i S(i), where i runs through the lengths of runs of 1's in the binary expansion of n. E.g. 19 is 10011 in binary, which has two runs of 1's, of lengths 1 and 2. So T(19) = S(1)*S(2). T(0)=1 (the empty product).
-%C A245564 a(n) = Sum_{k=0..n} ({binomial(3k,k)*binomial(n,k)} mod 2). - _Chai Wah Wu_, Oct 19 2016
+%C A245564 Also the number of sparse subsets of the binary indices of n, where a set is sparse iff 1 is not a first difference. The maximal case is A384883. For prime instead of binary indices we have A166469. - _Gus Wiseman_, Jul 05 2025
 %H A245564 Alois P. Heinz, <a href="/A245564/b245564.txt">Table of n, a(n) for n = 0..8191</a>
 %H A245564 Chai Wah Wu, <a href="https://arxiv.org/abs/1610.06166">Sums of products of binomial coefficients mod 2 and run length transforms of sequences</a>, arXiv:1610.06166 [math.CO], 2016.
+%F A245564 a(n) = Sum_{k=0..n} ({binomial(3k,k)*binomial(n,k)} mod 2). - _Chai Wah Wu_, Oct 19 2016
+%e A245564 From _Gus Wiseman_, Jul 05 2025: (Start)
+%e A245564 The binary indices of 11 are {1,2,4}, with sparse subsets {{},{1},{2},{4},{1,4},{2,4}}, so a(11) = 6.
+%e A245564 The maximal runs of binary indices of 11 are ((1,2),(4)), with lengths (2,1), so a(11) = F(2+2)*F(1+2) = 6.
+%e A245564 The a(0) = 1 through a(12) = 3 sparse subsets are:
+%e A245564   0    1    2    3    4    5    6    7    8    9    10    11    12
+%e A245564   ------------------------------------------------------------------
+%e A245564   {}   {}   {}   {}   {}   {}   {}   {}   {}   {}    {}    {}    {}
+%e A245564        {1}  {2}  {1}  {3}  {1}  {2}  {1}  {4}  {1}   {2}   {1}   {3}
+%e A245564                  {2}       {3}  {3}  {2}       {4}   {4}   {2}   {4}
+%e A245564                            {1,3}     {3}       {1,4} {2,4} {4}
+%e A245564                                      {1,3}                 {1,4}
+%e A245564                                                            {2,4}
+%e A245564 The greatest number whose set of binary indices is a member of column n above is A374356(n).
+%e A245564 (End)
 %p A245564 with(combinat); ans:=[];
 %p A245564 for n from 0 to 100 do lis:=[]; t1:=convert(n,base,2); L1:=nops(t1); out1:=1; c:=0;
 %p A245564 for i from 1 to L1 do
@@ -24,12 +39,19 @@
 %p A245564 ans;
 %t A245564 a[n_] := Sum[Mod[Binomial[3k, k] Binomial[n, k], 2], {k, 0, n}];
 %t A245564 a /@ Range[0, 100] (* _Jean-François Alcover_, Feb 29 2020, after _Chai Wah Wu_ *)
+%t A245564 spars[S_]:=Select[Subsets[S],FreeQ[Differences[#],1]&];
+%t A245564 bpe[n_]:=Join@@Position[Reverse[IntegerDigits[n,2]],1];
+%t A245564 Table[Length[spars[bpe[n]]],{n,0,30}] (* _Gus Wiseman_, Jul 05 2025 *)
 %o A245564 (PARI) a(n)=my(s=1,k); while(n, n>>=valuation(n,2); k=valuation(n+1,2); s*=fibonacci(k+2); n>>=k); s \\ _Charles R Greathouse IV_, Oct 21 2016
 %o A245564 (Python)
 %o A245564 # use RLT function from A278159
 %o A245564 from sympy import fibonacci
 %o A245564 def A245564(n): return RLT(n,lambda m: fibonacci(m+2)) # _Chai Wah Wu_, Feb 04 2022
 %Y A245564 Cf. A245562, A000045, A001045, A071053, A245565, A246028.
-%K A245564 nonn,easy
+%Y A245564 A034839 counts subsets by number of maximal runs, strict partitions A116674.
+%Y A245564 A384877 gives lengths of maximal anti-runs of binary indices, firsts A384878.
+%Y A245564 A384893 counts subsets by number of maximal anti-runs, for partitions A268193, A384905.
+%Y A245564 Cf. A000071, A001629, A010049, A053538, A166469, A202023, A202064, A208342, A374356, A384883.
+%K A245564 nonn,easy,changed
 %O A245564 0,2
 %A A245564 _N. J. A. Sloane_, Aug 10 2014; revised Sep 05 2014
