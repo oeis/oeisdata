@@ -1,18 +1,34 @@
-%I A115411 #14 Jul 09 2024 17:11:30
+%I A115411 #28 Jul 11 2025 14:08:37
 %S A115411 7,3,8,4,7,5,6,11,24,12,11,16,14,19,12,23,48,17,10,18,28,31,25,23,36,
 %T A115411 21,40,34,43,29,13,30,47,19,52,36,45,59,34,120,60,41,42,56,67,47,71,
 %U A115411 65,29,72,30,79,53,69,83,168,59,88,60,74,33,96,66,100,28,40,103,76,71,107,85
 %N A115411 a(n) = least k such that semiprime(n) divides k-th triangular number.
-%C A115411 a(n) = MIN[k such that A001358(n) | A000217(k)].
+%H A115411 Robert Israel, <a href="/A115411/b115411.txt">Table of n, a(n) for n = 1..10000</a>
+%F A115411 a(n) = MIN[k such that A001358(n) | A000217(k)].
+%F A115411 From _Robert Israel_, Jul 10 2025: (Start)
+%F A115411 If A001358(n) == 2 (mod 8) then a(n) = A001358(n)/2 - 1.
+%F A115411 If A001358(n) == 6 (mod 8) then a(n) = A001358(n)/2. (End)
 %e A115411 a(1) = 7 because SP(1) = semiprime(1) = 4, Triangular number T(7) = 7*(7+1)/2 = 28 and 7 divides 28.
 %e A115411 a(2) = 3 because SP(2) = 6 | T(3) = 6.
 %e A115411 a(3) = 8 because SP(3) = 9 | T(8) = 36.
 %e A115411 a(9) = 24 because SP(9) = 25 | T(24) = 300.
 %e A115411 a(17) = 48 because SP(17) = 49 | T(48) = 1176.
-%t A115411 a = Select[Range@215, Plus @@ Last /@ FactorInteger@# == 2 &]; f[n_] := Block[{k = 1}, While[ Mod[k(k + 1)/2, a[[n]]] > 0, k++ ]; k]; Array[f, 71] (* _Robert G. Wilson v_ *)
+%p A115411 N:= 300: # for semiprimes <= N
+%p A115411 f:= proc(p,q) local a,b;
+%p A115411        if q = p then p^2-1
+%p A115411        elif q = 2 then if p mod 4 = 1 then p - 1 else p fi
+%p A115411        else min(p*q, chrem([0,-1],[p,q]),chrem([-1,0],[p,q]),chrem([-1,-1],[p,q]))
+%p A115411        fi
+%p A115411 end proc:
+%p A115411 f(2,2):= 7:
+%p A115411 P:= select(isprime,[2,seq(i,i=3..N/2,2)]):
+%p A115411 V:= [seq(seq([P[i]*q,f(P[i],q)],q= select(`<=`,P,min(P[i],N/P[i]))),i=1..nops(P))]:
+%p A115411 V:= sort(V,(a,b) -> a[1]<b[1]):
+%p A115411 V[..,2]; # _Robert Israel_, Jul 09 2025
+%t A115411 a = Select[Range@215, Plus @@ Last /@ FactorInteger@# == 2 &]; f[n_] := Block[{k = 1}, While[ Mod[k(k + 1)/2, a[[n]]] > 0, k++ ]; k]; Array[f, 71] (* _Robert G. Wilson v_, May 01 2006 *)
 %t A115411 Module[{nn=500,trno,smpr,k},trno=Accumulate[Range[nn]];smpr=Select[Range[ nn],PrimeOmega[ #] == 2&];Table[ k= SelectFirst[ trno,Mod[ #,smpr[[n]]]==0&];(Sqrt[8k+1]-1)/2,{n,Length[ smpr]}]] (* _Harvey P. Dale_, Jul 09 2024 *)
 %Y A115411 Cf. A000217, A001358.
-%K A115411 easy,nonn
+%K A115411 easy,nonn,changed
 %O A115411 1,1
 %A A115411 _Jonathan Vos Post_, Mar 08 2006
 %E A115411 More terms from _Robert G. Wilson v_, May 01 2006
