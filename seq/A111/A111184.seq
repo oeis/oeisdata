@@ -1,31 +1,37 @@
-%I A111184 #35 Aug 07 2018 12:15:43
+%I A111184 #57 Jul 26 2025 10:25:58
 %S A111184 1,0,1,0,2,1,0,6,6,1,0,24,34,12,1,0,120,210,110,20,1,0,720,1452,974,
 %T A111184 270,30,1,0,5040,11256,8946,3248,560,42,1,0,40320,97296,87504,38338,
 %U A111184 8792,1036,56,1
 %N A111184 Triangle T(n,k), 0<=k<=n, read by rows, given by [0, 2, 1, 3, 2, 4, 3, 5, 4, 6, 5, 7, 6, ...] DELTA [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, ...] where DELTA is the operator defined in A084938.
 %H A111184 Paul Barry, <a href="https://arxiv.org/abs/1804.06801">A note on number triangles that are almost their own production matrix</a>, arXiv:1804.06801 [math.CO], 2018.
 %H A111184 R. Cori, <a href="http://dx.doi.org/10.1016/j.jcta.2009.02.008">Indecomposable permutations, hypermaps and labeled Dyck paths</a>, J. Comb. Theory A 116 (2009) 1326-1343, end of Section 1.2.2.
-%F A111184 O.g.f. satisfies: A(x,y) = (1 + x^2*A'(x,y)) / (1+x - x*y - x*A(x,y)), where A'(x,y) = d/dx A(x,y). [_Paul D. Hanna_, Jul 31 2011]
-%F A111184 O.g.f. satisfies: A(x,y) = 1 - x * d/dx log(1+x - x*y - x*A(x,y)). [_Paul D. Hanna_, Jul 30 2011]
-%F A111184 Sum_{k, 0<=k<=n} T(n, k) = A003319(n+1).
-%F A111184 Sum_{k, 0<=k<=n} T(n, k)*2^(n-k) = A004208(n).
+%F A111184 O.g.f. satisfies: A(x,y) = (1 + x^2*A'(x,y)) / (1+x - x*y - x*A(x,y)), where A'(x,y) = d/dx A(x,y). - _Paul D. Hanna_, Jul 31 2011
+%F A111184 O.g.f. satisfies: A(x,y) = 1 - x * d/dx log(1+x - x*y - x*A(x,y)). - _Paul D. Hanna_, Jul 30 2011
+%F A111184 Sum_{k=0..n} T(n, k) = A003319(n+1).
+%F A111184 Sum_{k=0..n} T(n, k)*2^(n-k) = A004208(n).
+%F A111184 From _Mikhail Kurkov_, Jul 15 2025: (Start)
+%F A111184 Conjecture 1: Sum_{k=1..n} T(n,k)*q^(k-1) = A111528(q,n) for n > 0, q >= 0.
+%F A111184 Conjecture 2: Sum_{k=1..n} T(n,k)*(-1/q)^(k-1) = R(n,q)/q^(n-1) for n > 0, q > 0 where log(1 + x + q*x*[Sum_{k>=1} R(k,q)*x^k]) = Sum_{k>=1} R(k,q)/k*x^k.
+%F A111184 Conjecture 3: n-th row polynomial is x*v_n for n > 0 where we start with vector v of fixed length m with elements v_i = 1, and for i=1..m-1, j=i+1..m apply A := v_i (at the beginning of each cycle for i) and also apply A := A + v_j, v_j := (j-i+x-1)*v_j + A.
+%F A111184 Here last conjecture provides fast and simple algorithm, that allow to compute sums in the previous conjectures by substituting x = q and x = -1/q respectively. (End)
 %e A111184 Rows begin:
-%e A111184 1;
-%e A111184 0, 1;
-%e A111184 0, 2, 1;
-%e A111184 0, 6, 6, 1;
-%e A111184 0, 24, 34, 12, 1;
-%e A111184 0, 120, 210, 110, 20, 1;
-%e A111184 0, 720, 1452, 974, 270, 30, 1;
-%e A111184 0, 5040, 11256, 8946, 3248, 560, 42, 1;
-%e A111184 0, 40320, 97296, 87504, 38338, 8792, 1036, 56, 1.
+%e A111184   1;
+%e A111184   0,     1;
+%e A111184   0,     2,     1;
+%e A111184   0,     6,     6,     1;
+%e A111184   0,    24,    34,    12,     1;
+%e A111184   0,   120,   210,   110,    20,    1;
+%e A111184   0,   720,  1452,   974,   270,   30,    1;
+%e A111184   0,  5040, 11256,  8946,  3248,  560,   42,  1;
+%e A111184   0, 40320, 97296, 87504, 38338, 8792, 1036, 56, 1;
+%e A111184   ...
 %t A111184 DELTA[r_, s_, m_] := Module[{p, q, t, x, y}, q[k_] := x r[[k+1]] + y s[[k+1]]; p[0, _] = 1; p[_, -1] = 0; p[n_ /; n >= 1, k_ /; k >= 0] := p[n, k] = p[n, k-1] + q[k] p[n-1, k+1] // Expand; t[n_, k_] := Coefficient[p[n, 0], x^(n-k) y^k]; t[0, 0] = p[0, 0]; Table[t[n, k], {n, 0, m}, {k, 0, n}]];
 %t A111184 DELTA[LinearRecurrence[{1, 1, -1}, {0, 2, 1}, 10], Mod[Range[10], 2], 10] // Flatten (* _Jean-François Alcover_, Jul 27 2018 *)
 %o A111184 (PARI) {T(n,k)=local(A=1+x*y);for(i=1,n,A=1-x*deriv(log(1+x-x*y-x*A +x*O(x^n))));polcoeff(polcoeff(A,n,x),k,y)} /* _Paul D. Hanna_ */
 %o A111184 (PARI) {T(n, k)=local(A=1+x*y); for(i=1, n, A=(1 + x^2*A')/(1 + x - x*y - x*A +x*O(x^n))); polcoeff(polcoeff(A, n, x), k, y)} /* _Paul D. Hanna_ */
 %o A111184 /* Print 10 Rows of the triangle: */
 %o A111184 for(n=0,10,for(k=0,n,print1(T(n,k),","));print(""))
-%Y A111184 Cf. A003319, A004208.
-%K A111184 nonn,tabl
+%Y A111184 Cf. A003319, A004208, A111528.
+%K A111184 nonn,tabl,changed
 %O A111184 0,5
 %A A111184 _Philippe Deléham_ and _Paul D. Hanna_, Oct 16 2005
