@@ -1,10 +1,43 @@
-%I A084580 #27 Dec 26 2024 13:29:10
+%I A084580 #40 Jul 30 2025 00:31:50
 %S A084580 1,1,2,1,1,3,2,1,1,1,4,2,1,3,1,2,1,5,1,1,2,1,3,6,1,4,2,1,1,1,2,3,1,7,
 %T A084580 1,2,1,5,1,4,2,1,3,1,8,1,2,1,1,3,2,1,6,1,4,9,1,2,1,5,1,3,2,1,1,1,2,10,
 %U A084580 1,4,3,1,7,2,1,1,1,2,1,3,5,1,11,2,6,1,4,1,2,1,3,1,1,8,2,1,1,12,2,1,3,4,1,1
 %N A084580 Let y = m/GK(k), where m and k vary over the positive integers and GK(k)=log(1+1/(k*(k+2)))/log(2) is the Gauss-Kuzmin distribution of k. Sort the y values by size and number them consecutively by n. This sequence gives the values of k in order by n.
 %C A084580 The geometric mean of the sequence equals Khintchine's constant K=2.685452001 = A002210 since the frequency of the integers agrees with the Gauss-Kuzmin distribution. When considered as a continued fraction, the resulting constant is 0.5815803358828329856145... = A372869 = [0;1,1,2,1,1,3,2,1,1,1,4,2,1,...].
-%C A084580 This can also be defined as the sequence formed by sequentially sampling the Gauss-Kuzmin distribution. - _Jwalin Bhatt_, Nov 28 2024
+%C A084580 This can also be defined as the sequence formed by greedily sampling the Gauss-Kuzmin distribution. - _Jwalin Bhatt_, Nov 28 2024
+%H A084580 Jwalin Bhatt, <a href="/A084580/b084580.txt">Table of n, a(n) for n = 1..10000</a>
+%H A084580 Wikipedia, <a href="https://en.wikipedia.org/wiki/Gauss%E2%80%93Kuzmin_distribution">Gauss Kuzmin distribution</a>
+%e A084580 From _Jwalin Bhatt_, Jul 25 2025: (Start)
+%e A084580 Constructing the sequence by greedily sampling the Gauss-Kuzmin distribution to minimize discrepancy.
+%e A084580 Let p(n) denote the probability of n and c(n) denote the count of occurrences of n so far.
+%e A084580 We take the ratio of the actual occurrences c(n)+1 to the probability and pick the one with the lowest value.
+%e A084580 Since p(n) is monotonic decreasing, we only need to compute c(n) once we see c(n-1).
+%e A084580   | n | (c(1)+1)/p(1) | (c(2)+1)/p(2) | (c(3)+1)/p(3) | choice |
+%e A084580   |---|---------------|---------------|---------------|--------|
+%e A084580   | 1 |     5.884     |       -       |       -       |   1    |
+%e A084580   | 2 |     4.818     |     5.884     |       -       |   1    |
+%e A084580   | 3 |     7.228     |     5.884     |       -       |   2    |
+%e A084580   | 4 |     7.228     |    11.769     |    10.740     |   1    |
+%e A084580   | 5 |     9.637     |    11.769     |    10.740     |   1    |
+%e A084580   | 6 |    12.047     |    11.769     |    10.740     |   3    | (End)
+%t A084580 pdf[k_] := Log[1 + 1/(k*(k + 2))]/Log[2]
+%t A084580 samplePDF[numCoeffs_] := Module[
+%t A084580   {coeffs = {}, counts = {0}, minTime, minIndex, time},
+%t A084580 Do[
+%t A084580     minTime = Infinity;
+%t A084580     Do[
+%t A084580       time = (counts[[i]] + 1)/pdf[i];
+%t A084580       If[time < minTime, minIndex = i; minTime = time],
+%t A084580       {i, 1, Length[counts]}
+%t A084580     ];
+%t A084580     If[minIndex == Length[counts], AppendTo[counts, 0]];
+%t A084580     counts[[minIndex]] += 1;
+%t A084580     AppendTo[coeffs, minIndex],
+%t A084580     {numCoeffs}
+%t A084580   ];
+%t A084580   coeffs
+%t A084580 ]
+%t A084580 A084580 = samplePDF[120]  (* _Jwalin Bhatt_, Jul 25 2025 *)
 %o A084580 (Python)
 %o A084580 import math
 %o A084580 def sample_gauss_kuzmin_distribution(num_coeffs):
@@ -21,7 +54,7 @@
 %o A084580     coeffs.append(min_index)
 %o A084580   return coeffs
 %o A084580 A084580 = sample_gauss_kuzmin_distribution(100) # _Jwalin Bhatt_, Dec 22 2024
-%Y A084580 Cf. A002210, A084576-A084579, A084581-A084587, A372869.
-%K A084580 nonn
+%Y A084580 Cf. A002210, A084576-A084579, A084581-A084587, A372869, A386016.
+%K A084580 nonn,changed
 %O A084580 1,3
 %A A084580 _Paul D. Hanna_, May 31 2003
