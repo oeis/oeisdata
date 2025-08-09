@@ -1,8 +1,8 @@
-%I A003149 M1496 #160 Feb 16 2025 08:32:27
+%I A003149 M1496 #170 Aug 08 2025 14:54:03
 %S A003149 1,2,5,16,64,312,1812,12288,95616,840960,8254080,89441280,1060369920,
 %T A003149 13649610240,189550368000,2824077312000,44927447040000,
 %U A003149 760034451456000,13622700994560000,257872110354432000,5140559166898176000,107637093007589376000,2361827297364885504000
-%N A003149 a(n) = Sum_{k=0..n} k!(n-k)!.
+%N A003149 a(n) = Sum_{k=0..n} k!*(n - k)!.
 %C A003149 From _Michael Somos_, Feb 14 2002: (Start)
 %C A003149 The sequence is the resistance between opposite corners of an (n+1)-dimensional hypercube of unit resistors, multiplied by (n+1)!.
 %C A003149 The resistances for n+1 = 1,2,3,... are 1, 1, 5/6, 2/3, 8/15, 13/30, 151/420, 32/105, 83/315, 73/315, 1433/6930, ... (see A046878/A046879). (End)
@@ -52,6 +52,11 @@
 %F A003149 a(n) = Sum_{k=0..n+1} (-1)^(n-k)*A226158(k)*Stirling1(n+1, k). - _Mélika Tebni_, Feb 22 2022
 %F A003149 E.g.f.: x/((1-x)*(2-x))-(2*log(1-x))/(2-x)^2+1/(1-x). - _Vladimir Kruchinin_, Dec 17 2022
 %p A003149 seq( add(k!*(n-k)!, k=0..n), n=0..20); # _G. C. Greubel_, Dec 29 2019
+%p A003149 # second Maple program:
+%p A003149 a:= proc(n) option remember; `if`(n<2, n+1,
+%p A003149       ((3*n+1)*a(n-1)-n^2*a(n-2))/2)
+%p A003149     end:
+%p A003149 seq(a(n), n=0..22);  # _Alois P. Heinz_, Aug 08 2025
 %t A003149 Table[Sum[k!(n-k)!,{k,0,n}],{n,0,20}] (* _Harvey P. Dale_, Mar 28 2012 *)
 %t A003149 Table[(n+1)!/2^n*Sum[2^k/(k+1),{k,0,n}],{n,0,20}] (* _Vaclav Kotesovec_, Oct 27 2012 *)
 %t A003149 Round@Table[-2 (n+1)! Re[LerchPhi[2, 1, n+2]], {n, 0, 20}] (* _Vladimir Reshetnikov_, Nov 12 2015 *)
@@ -60,13 +65,22 @@
 %t A003149 Table[2*(-1)^n * Sum[(2^k - 1) * StirlingS1[n, k] * BernoulliB[k], {k, 0, n}], {n, 1, 25}] (* _Vaclav Kotesovec_, Oct 04 2022 *)
 %o A003149 (PARI) a(n)=sum(k=0,n,k!*(n-k)!)
 %o A003149 (PARI) a(n)=if(n<0,0,(n+1)!*polcoeff(log(1-x+x^2*O(x^n))/(x/2-1),n+1))
+%o A003149 (PARI) a(n) = my(A = 1, B = 1); for(k=1, n, B *= k; A = (n-k+1)*A + B); A \\ _Mikhail Kurkov_, Aug 08 2025
 %o A003149 (Magma) F:=Factorial; [ (&+[F(k)*F(n-k): k in [0..n]]): n in [0..20]]; // _G. C. Greubel_, Dec 29 2019
 %o A003149 (Sage) f=factorial; [sum(f(k)*f(n-k) for k in (0..n)) for n in (0..20)] # _G. C. Greubel_, Dec 29 2019
 %o A003149 (GAP) F:=Factorial;; List([0..20], n-> Sum([0..n], k-> F(k)*F(n-k)) ); # _G. C. Greubel_, Dec 29 2019
+%o A003149 (Python)
+%o A003149 def a(n: int) -> int:
+%o A003149     if n < 2: return n + 1
+%o A003149     app, ap = 1, 2
+%o A003149     for i in range(2, n + 1):
+%o A003149         app, ap = ap, ((3 * i + 1) * ap - (i * i) * app) >> 1
+%o A003149     return ap
+%o A003149 print([a(n) for n in range(23)])  # _Peter Luschny_, Aug 08 2025
 %Y A003149 Cf. A046825, A046878, A046879.
 %Y A003149 Cf. A052186, A006932, A145878. - _Emeric Deutsch_, Oct 28 2008
 %Y A003149 Cf. A324495, A324496, A324497 (problem similar to the random walks on the hypercube).
-%K A003149 nonn,easy,nice
+%K A003149 nonn,easy,nice,changed
 %O A003149 0,2
 %A A003149 _N. J. A. Sloane_, _Henry Gould_
 %E A003149 More terms from _Michel ten Voorde_, Apr 11 2001
