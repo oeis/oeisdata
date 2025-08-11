@@ -1,0 +1,68 @@
+%I A386626 #9 Aug 10 2025 19:41:10
+%S A386626 7,7,11,13,13,17,19,19,23,23,23,29,31,31,31,31,37,41,43,37,47,43,43,
+%T A386626 53,53,53,59,61,53,61,67,67,71,73,71,59,79,59,83,79,83,89,89,89,89,97,
+%U A386626 89,101,103,101,107,109,109,113,113,113,109,107,113,113,127
+%N A386626 a(n) = denominator q of prime-fraction p/q that minimizes |m/n - p/q|, where p is 1 or prime, q is prime, q < 2n, and 1 <= m <= 2n-1.
+%C A386626 p/q is a closest prime-fraction to m/n in the sense that if s/t is a fraction of primes (or 1/t with t prime) with t<2n, then |m/n - p/q| <= |m/n - s/t|. For n>=4, as m ranges from 1 to 2n-1, there is a prime-fraction p/q (or a fraction 1/q) that minimizes |m/n - p/q|; that q is a(n).
+%e A386626 In the following table, columns 1-4 give values for the closest prime-fraction p/q to m/n. Column 5 shows a comparison: < if p/q < m/n and > if p/q > m/n. Column 6 gives an approximation for the minimal distance |m/n - p/q|.
+%e A386626  n   m    p    q  comp.  min. dist.
+%e A386626  4   1    2    7    >    0.0357143
+%e A386626  5   4    5    7    <    0.0857143
+%e A386626  6   1    2   11    >    0.0151515
+%e A386626  7   6   11   13    <    0.010989
+%e A386626  8   3    5   13    >    0.00961538
+%e A386626  9   1    2   17    >    0.00653595
+%e A386626 10   1    2   19    >    0.00526316
+%e A386626 11   4    7   19    >    0.00478469
+%e A386626 12   1    2   23    >    0.00362319
+%e A386626 13   4    7   23    <    0.00334448
+%e A386626 14   3    5   23    >    0.00310559
+%e A386626 15   1    2   29    >    0.00229885
+%e A386626 16   1    2   31    >    0.00201613
+%e A386626 17   6   11   31    >    0.00189753
+%e A386626 18  11   19   31    >    0.00179211
+%e A386626 19   8   13   31    <    0.00169779
+%e A386626 20   7   13   37    >    0.00135135
+%e A386626 21   1    2   41    >    0.00116144
+%e A386626 22   1    2   43    >    0.00105708
+%e A386626 23  18   29   37    >    0.00117509
+%e A386626 24   1    2   47    >    0.000886525
+%e A386626 25  18   31   43    >    0.000930233
+%e A386626 26   3    5   43    >    0.000894454
+%e A386626 27   1    2   53    >    0.000698812
+%e A386626 28   9   17   53    <    0.000673854
+%e A386626 29   6   11   53    >    0.000650618
+%e A386626 30   1    2   59    >    0.000564972
+%e A386626 31  30   59   61    <    0.000528821
+%e A386626 32   3    5   53    >    0.000589623
+%e A386626 |3/8 - 5/13| = 0.00961538...< |3/8 - s/t| for all other prime-fractions s/t having  t<16.
+%t A386626 ClosestPrimeFraction[m_, n_] :=
+%t A386626  Module[{primes, qList, pList, fractions, distances, minIndex, p, q},
+%t A386626   If[GCD[m, n] != 1, Return[Infinity]];
+%t A386626   qList = Select[Prime[Range[PrimePi[2 n - 1]]], # < 2 n &];
+%t A386626   fractions = Flatten[Table[pList = Join[{1}, Prime[Range[PrimePi[2*n]]]];
+%t A386626      Table[{p, q}, {p, pList}], {q, qList}], 1];
+%t A386626   distances = Abs[N[#[[1]]/#[[2]] - m/n]] & /@ fractions;
+%t A386626   minIndex = First[Position[distances, Min[distances]][[1]]];
+%t A386626   {p, q} = fractions[[minIndex]]; {Min[distances], p, q}]
+%t A386626 MinDistancePrimeFractions[] :=
+%t A386626  Module[{nRange, results, m, n, minDistance, bestM, bestP, bestQ,
+%t A386626    distance, p, q, comparison}, nRange = Range[4, 100];
+%t A386626   results = Table[minDistance = Infinity;
+%t A386626     bestM = 0; bestP = 0; bestQ = 0; comparison = "";
+%t A386626     Do[If[
+%t A386626       GCD[m, n] == 1, {distance, p, q} = ClosestPrimeFraction[m, n];
+%t A386626       If[0 < distance < minDistance, minDistance = distance; bestM = m; bestP = p; bestQ = q;
+%t A386626        comparison = If[N[p/q] < N[m/n], "<", ">"];]], {m, 1, n - 1}];
+%t A386626     {n, bestM, bestP, bestQ, comparison, minDistance}, {n, nRange}];
+%t A386626   results]
+%t A386626 results = MinDistancePrimeFractions[];
+%t A386626 mSequence = results[[All, 2]]; pSequence =
+%t A386626  results[[All, 3]]; qSequence = results[[All, 4]];
+%t A386626 Print[TableForm[results,
+%t A386626    TableHeadings -> {None, {"n", "m", "p", "q", "Comparison",
+%t A386626       "Distance"}}]];
+%Y A386626 Cf. A000040, A385925.
+%K A386626 nonn,frac,new
+%O A386626 4,1
+%A A386626 _Clark Kimberling_, Jul 27 2025
