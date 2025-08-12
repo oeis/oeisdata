@@ -1,18 +1,22 @@
-%I A007055 M1124 #63 Feb 18 2024 22:57:24
+%I A007055 M1124 #74 Aug 12 2025 00:26:28
 %S A007055 1,2,4,8,16,32,52,100,160,260,424,684,1036,1640,2552,3728,5920,8672,
 %T A007055 13408,19420,30136,42736,66840,94164,145900,204632,317776,441764,
 %U A007055 685232,950216,1469632,2031556,3139360,4323888,6675904,9174400,14139496,19398584,29864888,40891040,62882680,85983152
 %N A007055 Let S denote the palindromes in the language {0,1}*; a(n) = number of words of length n in the language SS.
 %C A007055 Number of words in {0,1}* of length n that are rotations of their reversals. - _David W. Wilson_, Jan 01 2012
+%C A007055 a(n) = sum of the orbit sizes of all achiral necklaces (or bracelets) under the action of the cyclic (or dihedral) group. - _Mathieu Gagne_, Jul 29 2025
 %D A007055 N. J. A. Sloane and Simon Plouffe, The Encyclopedia of Integer Sequences, Academic Press, 1995 (includes this sequence).
 %H A007055 Chai Wah Wu, <a href="/A007055/b007055.txt">Table of n, a(n) for n = 0..6617</a>
 %H A007055 Chuan Guo, J. Shallit, and A. M. Shur, <a href="http://arxiv.org/abs/1503.09112">On the Combinatorics of Palindromes and Antipalindromes</a>, arXiv preprint arXiv:1503.09112 [cs.FL], 2015.
 %H A007055 R. Kemp, <a href="http://dx.doi.org/10.1016/0012-365X(82)90123-6">On the number of words in the language {w in Sigma* | w = w^R }^2</a>, Discrete Math., 40 (1982), 225-234.
 %F A007055 a(n) = A187272(n) - Sum_{d|n, d<n} phi(n/d)*a(d). - _Andrew Howroyd_, Mar 29 2016
+%F A007055 a(0)=1; a(n) = Sum_{s|n} s * A056493(s) for n>0. - _Mathieu Gagne_, Jul 29 2025
+%F A007055 a(0)=1; a(n) = Sum_{s|n} s * (Sum_{d|s} mu(d) * A164090(s/d)) for n>0. - _Mathieu Gagne_, Jul 29 2025
 %e A007055 S = {e, 0, 1, 11, 101, 111, 1001, 1111, 10001, 10101, 11011, 11111, 100001, ...}, where e is the empty word.
 %e A007055 SS contains all words in {0,1}* of length <= 5, but at length 6 is missing the 12 words { 001011, 001101, 010011, 010110, 011001, 011010, 100101, 100110, 101001, 101100, 110010, 110100 }.
 %e A007055 In more detail: All words in SS of length 6 have one of the following 6 patterns: abccba, abbacc, aabccb, abcbad, abacdc, abcdcb. This gives a total of 3*(2^3 + 2^4) = 72 = A187272(n) words with some words being counted multiple times as follows: (x6): 000000, 111111; (x3): 010101, 101010; (x2): 001001, 010010, 011011, 100100, 101101, 110110. These are exactly the repetitions of shorter words in SS. Subtracting gives a(6) = 72 - 5*2 - 2*2 - 1*6 = 52.
 %e A007055 For length n=7: All words in SS of length 7 have one of the following 7 patterns: abcdcba, abccbad, abcbadd, abbacdc, abacddc, aabcdcb, abcddcb. This gives a total of 7*2^4 = 112 = A187272(n) words with some words being counted multiple times. In particular, the words 0000000 and 1111111 are counted 7 times each so a(7) = 112 - 6*2 = 100. - Information about examples courtesy of _Andrew Howroyd_, Mar 30 2016
+%e A007055 For n=6, there are 2 achiral necklaces with orbit size s=1, 1 with s=2, 2 with s=3, and 7 with s=6, giving a total of 2*1+1*2+2*3+7*6 = 52. - _Mathieu Gagne_, Jul 29 2025
 %p A007055 # A023900:
 %p A007055 f:=proc(n) local t0,t1,t2; if n=1 then RETURN(1) else
 %p A007055 t0:=1; t1:=ifactors(n); t2:=t1[2]; for i from 1 to nops(t2) do t0:=t0*(1-t2[i][1]); od; RETURN(t0); fi; end;
@@ -26,6 +30,7 @@
 %t A007055 A187272[n_] := A187272[n] = (n/4)*2^(n/2)*((1 + Sqrt[2])^2 + (-1)^n*(1 - Sqrt[2])^2) // Round;
 %t A007055 a[n_ /; n <= 5] := 2^n; a[n_] := a[n] = A187272[n] - Sum[n, EulerPhi[n/d] * a[d], {d, Most[Divisors[n]]}];
 %t A007055 Table[a[n], {n, 0, 41}] (* _Jean-François Alcover_, Oct 08 2017, after _Andrew Howroyd_ *)
+%t A007055 Table[Sum[s * Sum[MoebiusMu[s/d] If[EvenQ[d], 3*2^((d/2) - 1), 2^((d + 1)/2)] , {d, Divisors[s]}], {s, Divisors[n]}], {n, 1, 41}] (* _Mathieu Gagne_, Jul 29 2025 *)
 %o A007055 (Python)
 %o A007055 from functools import lru_cache
 %o A007055 from sympy import totient, proper_divisors
@@ -34,7 +39,7 @@
 %Y A007055 Column 2 of A284873.
 %Y A007055 For the nonempty words in the language S, see A057148 and A006995.
 %Y A007055 Cf. A007056-A007058, A023900, A187272-A187275.
-%K A007055 nonn
+%K A007055 nonn,changed
 %O A007055 0,2
 %A A007055 _N. J. A. Sloane_, _Mira Bernstein_, R. Kemp
 %E A007055 Entry revised by _N. J. A. Sloane_, Mar 07 2011
