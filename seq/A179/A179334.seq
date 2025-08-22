@@ -1,11 +1,48 @@
-%I A179334 #39 Aug 20 2025 14:32:38
+%I A179334 #44 Aug 21 2025 10:00:28
 %S A179334 4,9,16,25,36,49,64,81,100,144,256,289,324,400,529,576,625,1024,1089,
 %T A179334 1225,1369,1600,2209,3249,7396,12544,15129,19321,46656,103684,710649,
 %U A179334 1347921,2178576,4870849,14930496,24990001,33385284,228826129,1568397609,10749957124
 %N A179334 Squares that are the sum of three positive Fibonacci numbers.
 %C A179334 There are infinitely many such numbers, because L_{2n}^2 = F_{4n+1} + F_{4n-1} + F_3 (observation of Ingrid Vukusic). - _Jeffrey Shallit_, Aug 19 2025
-%C A179334 Squares k such that A007895(k) <= 3. - _Robert Israel_, Aug 20 2025
+%C A179334 Squares k > 1 such that A007895(k) <= 3. - _Robert Israel_, Aug 20 2025
+%H A179334 Robert Israel, <a href="/A179334/b179334.txt">Table of n, a(n) for n = 1..100</a>
 %e A179334 a(5) = 36 = 1+1+34 = Fib(1)+Fib(2)+Fib(9).
+%p A179334 phi:= 1/2 + sqrt(5)/2:
+%p A179334 fib:= combinat:-fibonacci:
+%p A179334 invfib := proc(x::posint)
+%p A179334   local q, n;
+%p A179334   q:= evalf((ln(x+1/2) + ln(5)/2)/ln(phi));
+%p A179334   n:= floor(q);
+%p A179334   if fib(n) <= x then
+%p A179334     while fib(n+1) <= x do
+%p A179334       n := n+1
+%p A179334     end do
+%p A179334   else
+%p A179334     while fib(n) > x do
+%p A179334       n := n-1
+%p A179334     end do
+%p A179334   end if;
+%p A179334   n
+%p A179334 end:
+%p A179334 g:= proc(n)  local ct,x,y,R;
+%p A179334   ct:= 0; x:= n^2; R:=NULL;
+%p A179334   while x > 0 do
+%p A179334     y:= invfib(x);
+%p A179334     ct:= ct+1;
+%p A179334     if ct = 4 then return [false, max(n+1,isqrt(fib(R[1])+fib(R[2]) + fib(R[3]+1)))]  fi;
+%p A179334     R:= R, y;
+%p A179334     x:= x - fib(y)
+%p A179334   od;
+%p A179334   if ct < 3 then [true,n+1] else [true, max(n+1,isqrt(fib(R[1])+fib(R[2])+fib(R[3]+1)))] fi
+%p A179334 end proc:
+%p A179334 R:= NULL: count:= 0:
+%p A179334 n:= 2:
+%p A179334 while count < 40 do
+%p A179334   V:= g(n);
+%p A179334   if V[1] then R:= R, n^2; count:= count+1; fi;
+%p A179334   n:= V[2];
+%p A179334 od:
+%p A179334 R; # _Robert Israel_, Aug 20 2025
 %t A179334 f=Fibonacci[Range[40]]; Select[Union[Flatten[Outer[Plus, f, f, f]]], #<f[[-1]]+2 && IntegerQ[Sqrt[#]] &]
 %t A179334 Select[Union[Total/@Tuples[Fibonacci[Range[50]],3]],IntegerQ[Sqrt[ #]]&] (* _Harvey P. Dale_, Apr 29 2015 *)
 %Y A179334 Cf. A000032, A000045, A007895, A081069, A111378, A160238.
