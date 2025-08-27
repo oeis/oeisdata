@@ -1,11 +1,57 @@
-%I A084015 #7 Aug 23 2014 13:07:33
+%I A084015 #16 Aug 26 2025 04:51:38
 %S A084015 9,88,999,8888,59995,897798,9994999,88899888,999999999,9999999990,
 %T A084015 99999799999,889998899988,9999990999999,89999988999998,
-%U A084015 599999989999995,8889999999999888,99999998689999999,899999991199999998
+%U A084015 599999989999995,8889999999999888,99999999199999999,899999991199999998,9999999974799999999,89999999999999999980,999999999969999999999,8999999999999999999998
 %N A084015 Largest n-digit palindromic multiple of n. For n = 10k it is sufficient that the multiple is palindromic with leading zeros ignored. 0 if no such number exists.
 %C A084015 Conjecture: no entry is zero.
+%H A084015 Robert Israel, <a href="/A084015/b084015.txt">Table of n, a(n) for n = 1..323</a>
+%p A084015 pal1:= proc(n) local L,i,d;
+%p A084015    L:= convert(n,base,10);
+%p A084015    d:= nops(L);
+%p A084015    add(L[i]*(10^(d-i)+10^(d+i-1)),i=1..d)
+%p A084015 end proc:
+%p A084015 pal2:= proc(n) local L,i,d;
+%p A084015   L:= convert(n,base,10);
+%p A084015   d:= nops(L);
+%p A084015   add(L[i]*(10^(d-i)+10^(d+i-2)),i=2..d)+10^(d-1)*L[1]
+%p A084015 end proc:
+%p A084015 rev:= proc(n) local L,i;
+%p A084015   L:= convert(n,base,10);
+%p A084015   add(L[-i]*10^(i-1),i=1..nops(L))
+%p A084015 end proc:
+%p A084015 for m from 1 to 9 do A2[m]:= sort(map(rev, select(t -> t mod 10 <> 0,[seq(i,i=10^m .. 10^(m-1),-2^m)])),`>`) od:
+%p A084015 for m from 1 to 4 do A5[m]:= sort(map(rev, select(t -> t mod 10 <> 0,[seq(i,i=10^m .. 10^(m-1),-5^m)])),`>`) od:
+%p A084015 f:= proc(n) local r, m, nr, pal, nr2, a2, a, b, x, a5;
+%p A084015   r:= padic:-ordp(n,10);
+%p A084015   nr:= n-r; m:= n/10^r;
+%p A084015   if nr::even then pal:= pal1 else pal:= pal2 fi;
+%p A084015   nr2:= ceil(nr/2);
+%p A084015   if m::even then
+%p A084015       a2:= padic:-ordp(m,2);
+%p A084015       for a in A2[a2] do
+%p A084015         for b from 10^(nr2-a2)-1 to 0 by -1 do
+%p A084015           x:= pal(10^(nr2-a2)*a + b)*10^r;
+%p A084015           if x mod n = 0 then return x fi
+%p A084015      od od
+%p A084015    elif m mod 5 = 0 then
+%p A084015      a5:= padic:-ordp(m,5);
+%p A084015      for a in A5[a5] do
+%p A084015        for b from 10^(nr2-a5)-1 to 0 by -1 do
+%p A084015          x:= pal(10^(nr2-a5)*a + b)*10^r;
+%p A084015          if x mod n = 0 then return x fi
+%p A084015      od od
+%p A084015   else
+%p A084015     for a from 10^(nr2)-1 to 10^(nr2-1) by -1 do
+%p A084015       x:= pal(a)*10^r;
+%p A084015       if x mod n = 0 then return x fi
+%p A084015     od
+%p A084015   fi;
+%p A084015   0
+%p A084015 end proc:
+%p A084015 msp(f, [$1..100]); # _Robert Israel_, Aug 24 2025
 %Y A084015 Cf. A084013, A084014, A084016.
-%K A084015 base,nonn
+%K A084015 base,nonn,changed
 %O A084015 1,1
 %A A084015 _Amarnath Murthy_ and Meenakshi Srikanth (menakan_s(AT)yahoo.com), May 23 2003
 %E A084015 Corrected and extended by _Ray Chandler_, Jun 08 2003
+%E A084015 a(17) corrected and more terms from _Robert Israel_, Aug 25 2025
