@@ -1,4 +1,4 @@
-%I A104326 #48 Jan 05 2025 19:51:38
+%I A104326 #50 Aug 28 2025 08:14:12
 %S A104326 0,1,10,11,101,110,111,1010,1011,1101,1110,1111,10101,10110,10111,
 %T A104326 11010,11011,11101,11110,11111,101010,101011,101101,101110,101111,
 %U A104326 110101,110110,110111,111010,111011,111101,111110,111111,1010101
@@ -15,11 +15,37 @@
 %e A104326 The largest set here is 8+3+2 or, in base Fibonacci, 10110 so a(13)=10110(fib).
 %e A104326 The Zeckendorf representation would be the smallest set or {13}=100000(fib).
 %p A104326 dualzeckrep:=proc(n)local i,z;z:=zeckrep(n);i:=1; while i<=nops(z)-2 do if z[i]=1 and z[i+1]=0 and z[i+2]=0 then z[i]:=0; z[i+1]:=1;z[i+2]:=1; if i>3 then i:=i-2 fi else i:=i+1 fi od; if z[1]=0 then z:=subsop(1=NULL,z) fi; z end proc: seq(dualzeckrep(n),n=0..20) ;
+%p A104326 # alternative
+%p A104326 A104326 := proc(n)
+%p A104326     local L,itr,rec,i ;
+%p A104326     # first compute the usual Zeckendorf rep as in A014417
+%p A104326     L := convert(A014417(n),base,10) ;
+%p A104326     for itr from 1 do
+%p A104326         rec := false ;
+%p A104326         # try to recombine 001 -> 110
+%p A104326         for i from 3 to nops(L) do
+%p A104326             if op(i,L) = 1 and op(i-1,L) =0 and op(i-2,L) =0 then
+%p A104326                 rec := true ;
+%p A104326                 L := subsop(i=0,L) ;
+%p A104326                 L := subsop(i-1=1,L) ;
+%p A104326                 L := subsop(i-2=1,L) ;
+%p A104326             end if;
+%p A104326         end do:
+%p A104326         if op(-1,L) = 0 then
+%p A104326             L := subsop(-1=NULL,L) ;
+%p A104326         end if;
+%p A104326         if rec = false then
+%p A104326             break ;
+%p A104326         end if;
+%p A104326     end do:
+%p A104326     add( op(i,L)*10^(i-1),i=1..nops(L)) ;
+%p A104326 end proc:
+%p A104326 seq(A104326(n),n=0..20) ; # _R. J. Mathar_, Aug 28 2025
 %t A104326 fb[n_] := Module[{k = Ceiling[Log[GoldenRatio, n*Sqrt[5]]], t = n, fr = {}}, While[k > 1, If[t >= Fibonacci[k], AppendTo[fr, 1]; t = t - Fibonacci[k], AppendTo[fr, 0]]; k--]; fr]; a[n_] := Module[{v = fb[n]}, nv = Length[v]; i = 1; While[i <= nv - 2, If[v[[i]] == 1 && v[[i + 1]] == 0 && v[[i + 2]] == 0, v[[i]] = 0; v[[i + 1]] = 1; v[[i + 2]] = 1; If[i > 2, i -= 3]]; i++]; i = Position[v, _?(# > 0 &)]; If[i == {}, 0, FromDigits[v[[i[[1, 1]] ;; -1]]]]]; Array[a, 34, 0] (* _Amiram Eldar_, Oct 31 2019 after _Robert G. Wilson v_ at A014417 and the Maple code *)
 %t A104326 Map[FromDigits, Select[IntegerString[Range[0, 255], 2], StringFreeQ[#, "00"] &]] (* _Paolo Xausa_, Apr 05 2024 *)
 %Y A104326 Cf. A007088 (binary vectors), A014417, A095791, A104324.
 %Y A104326 A003754 gives the numbers corresponding to the binary digit strings seen here.
-%K A104326 nonn
+%K A104326 nonn,changed
 %O A104326 0,3
 %A A104326 _Ron Knott_, Mar 01 2005
 %E A104326 Index in formula corrected, missing parts of the maple code recovered, and sequence extended by _R. J. Mathar_, Oct 23 2010
