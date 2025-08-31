@@ -1,23 +1,49 @@
-%I A157901 #5 Jun 02 2025 01:26:08
+%I A157901 #14 Aug 30 2025 05:07:20
 %S A157901 1,1,1,2,2,2,2,4,4,4,3,6,10,8,8,3,9,16,24,16,16,4,12,28,40,56,32,32,4,
 %T A157901 16,40,80,96,128,64,64,5,20,60,120,216,224,288,128,128,5,25,80,200,
-%U A157901 336,560,512,640,256,256
+%U A157901 336,560,512,640,256,256,6,30,110,280,616,896,1408,1152,1408,512,512
 %N A157901 Triangle read by rows: A000012 * A157898.
 %C A157901 Multiplication of the lower triangular matrix A157898 from the left by A000012 means: these are partial column sums of A157898.
-%F A157901 Row sums = A105635(n+1).
-%F A157901 T(n,k) = sum_{l=0..n} A000012(n,l)*A157898(l,k).
+%H A157901 G. C. Greubel, <a href="/A157901/b157901.txt">Rows n = 0..50 of the triangle, flattened</a>
+%F A157901 T(n,k) = Sum_{j=0..n} A157898(j,k).
 %e A157901 First few rows of the triangle, n>=0:
-%e A157901 1;
-%e A157901 1, 1;
-%e A157901 2, 2, 2;
-%e A157901 2, 4, 4, 4;
-%e A157901 3, 6, 10, 8, 8;
-%e A157901 3, 9, 16, 24, 16, 16;
-%e A157901 4, 12, 28, 40, 56, 32, 32;
-%e A157901 4, 16, 40, 80, 96, 128, 64, 64;
-%e A157901 5, 20, 60, 120, 216, 224, 288, 128, 128;
-%e A157901 5, 25, 80, 200, 336, 560, 512, 640, 256, 256;
-%K A157901 nonn,tabl
+%e A157901   1;
+%e A157901   1,  1;
+%e A157901   2,  2,  2;
+%e A157901   2,  4,  4,   4;
+%e A157901   3,  6, 10,   8,   8;
+%e A157901   3,  9, 16,  24,  16,  16;
+%e A157901   4, 12, 28,  40,  56,  32,  32;
+%e A157901   4, 16, 40,  80,  96, 128,  64,  64;
+%e A157901   5, 20, 60, 120, 216, 224, 288, 128, 128;
+%e A157901   5, 25, 80, 200, 336, 560, 512, 640, 256, 256;
+%t A157901 t[n_, k_]:= t[n,k]= If[k==0 || k==n, 2^(n-1) +Boole[n==0]/2, 2*t[n-1,k-1] +2*t[n-1,k] - (2 -Boole[n==2])*t[n-2,k-1]]; (* t = A059576 *)
+%t A157901 A157898[n_, k_]:= A157898[n,k]= Sum[(-1)^(n-j)*Binomial[n,j]*t[j,k], {j,k,n}];
+%t A157901 A157901[n_, k_]:= A157901[n,k]= Sum[A157898[j+k,k], {j,0,n-k}];
+%t A157901 Table[A157901[n,k], {n,0,12}, {k,0,n}]//Flatten (* _G. C. Greubel_, Aug 27 2025 *)
+%o A157901 (Magma)
+%o A157901 A011782:= func< n | n eq 0 select 1 else 2^(n-1) >;
+%o A157901 function t(n, k) // t = A059576
+%o A157901   if k eq 0 or k eq n then return A011782(n);
+%o A157901   else return 2*t(n-1, k-1) + 2*t(n-1, k) - (2 - 0^(n-2))*t(n-2, k-1);
+%o A157901   end if; return t;
+%o A157901 end function;
+%o A157901 A157898:= func< n, k | (&+[(-1)^(n-j)*Binomial(n, j)*t(j, k): j in [k..n]]) >;
+%o A157901 A157071:= func< n,k | (&+[A157898(j+k,k): j in [0..n-k]]) >;
+%o A157901 [A157071(n, k): k in [0..n], n in [0..12]]; // _G. C. Greubel_, Aug 27 2025
+%o A157901 (SageMath)
+%o A157901 @CachedFunction
+%o A157901 def t(n, k): # t = A059576
+%o A157901     if (k==0 or k==n): return bool(n==0)/2 + 2^(n-1) # A011782
+%o A157901     else: return 2*t(n-1, k-1) + 2*t(n-1, k) - (2 - 0^(n-2))*t(n-2, k-1)
+%o A157901 def A157898(n, k): return sum((-1)^(n+k-j)*binomial(n, j+k)*t(j+k, k) for j in range(n-k+1))
+%o A157901 def A157071(n,k): return sum(A157898(j+k,k) for j in range(n-k+1))
+%o A157901 print(flatten([[A157071(n,k) for k in range(n+1)] for n in range(10)])) # _G. C. Greubel_, Aug 27 2025
+%Y A157901 Cf. A000012, A105635, A157898.
+%Y A157901 Columns: A004526 (k=0), A002620 (k=1), A006584 (k=2), 4*A096338 (k=3), 8*A177747 (k=4), 16*A299337 (k=5), 32*A178440 (k=6).
+%Y A157901 Sums include: A105635(n+1) (row), A166486(n+1) (alternating sign diagonal), A232801(n+1) (diagonal).
+%K A157901 nonn,tabl,changed
 %O A157901 0,4
 %A A157901 _Gary W. Adamson_ & _Roger L. Bagula_, Mar 08 2009
 %E A157901 Edited by the Associate Editors of the OEIS, Apr 10 2009
+%E A157901 More terms from _G. C. Greubel_, Aug 27 2025
