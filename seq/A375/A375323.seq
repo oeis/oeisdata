@@ -1,14 +1,31 @@
-%I A375323 #15 Oct 11 2024 07:12:52
+%I A375323 #21 Sep 16 2025 13:43:20
 %S A375323 10,19,20,30,37,38,40,46,47,50,57,60,61,66,67,68,70,74,75,76,80,90,91,
 %T A375323 92,94,95,100,101,107,109,110,111,113,114,120,122,127,129,130,131,132,
 %U A375323 133,134,136,138,139,140,141,148,150,152,160,167,169,170,171,180,182
 %N A375323 Natural numbers k for which there exist distinct nonzero naturals a,b,c, such that k = a + b + c and (a + b)*(b + c)*(c + a) is a perfect cube.
 %C A375323 The sequence is inspired by problem 1, Junior Balkan Team Selection Tests - Romania 2023, Brasov, 13.04.2023, (see link).
 %C A375323 If k >= 1 is a term, then for any m >= 1 the number m*k is also a term.
+%H A375323 Robert Israel, <a href="/A375323/b375323.txt">Table of n, a(n) for n = 1..10000</a>
 %H A375323 Junior Balkan Team Selection Tests - Romania 2023, <a href="https://artofproblemsolving.com/community/c3332260">Problems</a>
 %e A375323 10 = 1 + 2 + 7 and (1 + 2)*(2 + 7)*(7 + 1) = 27*8 = 6^3, is a cube, so 10 is a term.
 %e A375323 19 = 1 + 7 + 11 and (1 + 7)*(7 + 11)*(11 + 1) = 8*18*12 = 2^3*6^3 = 12^3, is a cube, so 19 is a term.
 %e A375323 57 = 3 + 7 + 47 and (3 + 7)*(7 + 47)*(47 + 3) = 10*54*50 = 27*1000 = 30^3, is a cube. Also 57 = 3 + 21 + 33 and (3 + 21)*(21 + 33)*(33 + 3) = 24*54*36 = 36^2*36 = 36^3, is a cube.
+%p A375323 g:= proc(q) local R, F, ix, iy, x,y,z,r;
+%p A375323         R:= {}:
+%p A375323         F:= convert(numtheory:-divisors(q),list);
+%p A375323         for ix from 2 to nops(F) do
+%p A375323          x:= F[ix];
+%p A375323          for iy from 1 to ix-1 do
+%p A375323            y:= F[iy];
+%p A375323            z:= q/(x*y);
+%p A375323            if z::integer and nops({x,y,z}) = 3 then
+%p A375323              r:= (x+y+z)/2;
+%p A375323              if r::integer and x + y - z > 0 and x - y + z > 0 and y - x + z > 0 then R:= R union {r} fi
+%p A375323            fi;
+%p A375323         od od;
+%p A375323         R
+%p A375323 end proc:
+%p A375323 select(`<=`, `union`(seq(g(x^3),x=1..200)),200); # _Robert Israel_, Sep 15 2025
 %o A375323 (Magma) [n:n in [1..200]|exists(u){<a,b,n-a-b>:a in [1..n-2],b in [1..n-2]|a lt b and #{a,b,n-a-b} eq 3 and n-a-b gt 0 and IsPower((n-a)*(n-b)*(a+b),3)}];
 %o A375323 (Python)
 %o A375323 from itertools import count, islice
@@ -16,6 +33,6 @@
 %o A375323 def A375323_gen(startvalue=1): # generator of terms >= startvalue
 %o A375323     return (k for k in count(max(startvalue,1)) if any(integer_nthroot(a*(a*(m:=b-k)+b*(m-k)+k**2)-b*k*m,3)[1] for a in range(1,k//3) for b in range(a+1,k-a+1>>1)))
 %o A375323 A375323_list = list(islice(A375323_gen(),58)) # _Chai Wah Wu_, Oct 10 2024
-%K A375323 nonn
+%K A375323 nonn,changed
 %O A375323 1,1
 %A A375323 _Marius A. Burtea_, Sep 15 2024
