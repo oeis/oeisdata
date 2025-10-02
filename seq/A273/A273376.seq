@@ -1,4 +1,4 @@
-%I A273376 #23 Jun 02 2016 16:08:56
+%I A273376 #32 Oct 01 2025 13:09:11
 %S A273376 0,1,2,3,4,5,6,7,8,9,10,11,20,21,22,23,24,25,26,27,12,28,29,13,30,32,
 %T A273376 33,14,34,35,36,37,38,39,40,42,43,44,15,45,46,47,48,49,50,31,52,53,54,
 %U A273376 55,41,56,57,58,59,60,62,63,64,65,66,67,68,69,70,72,73,74,75,51,76,77,78,79,80,82,83,84,85,86,87,88,89,61,90,92,93,94,95,96,97,98,99,200,202,203,204,205,206,201
@@ -10,6 +10,26 @@
 %e A273376 There is k=1 digit between the "1" of [10] and the first "1" of [11] which is 0; there are k=2 digits between the "1" of [10] and the second "1" of [11] which are 0 and 1; there are k=6 digits between the "1" of [10] and the "1" of [21] which are 0,1,1,2,0,2.
 %e A273376 There are k=0 digits between the first "1" of [11] and the second "1" of [11]; there are k=4 digits between the first "1" of [11] and the "1" of [21] which are 1,2,0,2.
 %e A273376 There are k=3 digits between the second "1" of [11] and the "1" of [21] which are 2,0 and 2.
-%K A273376 nonn,base
+%o A273376 (Python)
+%o A273376 from itertools import count, islice
+%o A273376 def newdiffs(s, alen, locs1, diffs1):
+%o A273376     out = set(alen+i-j for i, c in enumerate(s, 1) if c == '1' for j in locs1)
+%o A273376     out |= set(i-j for j in range(len(s)-1) for i in range(j+1, len(s)) if '1' == s[i] == s[j])
+%o A273376     return out
+%o A273376 def agen(): # generator of terms
+%o A273376     an, locs1, diffs1, mink, aset, alen = 0, [], set(), 1, {0}, 1
+%o A273376     while True:
+%o A273376         yield an
+%o A273376         an = next(k for k in count(mink) if k not in aset and ('1' not in (s:=str(k)) or not newdiffs(s, alen, locs1, diffs1)&diffs1))
+%o A273376         stran = str(an)
+%o A273376         if '1' in stran:
+%o A273376             diffs1 |= newdiffs(stran, alen, locs1, diffs1)
+%o A273376             locs1.extend([alen+i for i, c in enumerate(stran, 1) if c == '1'])
+%o A273376         alen += len(stran)
+%o A273376         aset.add(an)
+%o A273376         while mink in aset: mink += 1
+%o A273376 print(list(islice(agen(), 100))) # _Michael S. Branicky_, Oct 01 2025
+%Y A273376 Cf. A273880, A273881, A273882, A273883, A273884, A273885, A273886, A273887, A273888.
+%K A273376 nonn,base,changed
 %O A273376 1,3
 %A A273376 _Eric Angelini_ and _Jean-Marc Falcoz_, May 30 2016

@@ -1,11 +1,31 @@
-%I A273882 #10 Jun 09 2016 08:37:58
+%I A273882 #14 Oct 01 2025 13:08:56
 %S A273882 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,
 %T A273882 26,27,28,29,30,31,32,33,35,34,36,37,38,39,40,41,50,51,42,52,43,53,55,
 %U A273882 56,57,58,59,60,61,62,63,65,45,66,67,68,69,70,54,71,46,72,73,75,76,77,78,79
 %N A273882 Pick any pair of "4" digits in the sequence. Those two "4"s are separated by k digits. This is the lexicographically earliest sequence of distinct terms in which all the resulting values of k are distinct.
 %C A273882 The sequence starts with a(1)=0. It is then always extended with the smallest integer not yet present and not leading to a contradiction (which would mean producing a value of k already seen).
 %H A273882 Eric Angelini, <a href="/A273882/b273882.txt">Table of n, a(n) for n = 1..1011</a>
-%Y A273882 See A273376 for the equivalent sequence dealing with digit-"1" pairs instead of "4"
-%K A273882 nonn,base
+%o A273882 (Python)
+%o A273882 from itertools import count, islice
+%o A273882 def newdiffs(s, alen, locs1, diffs1):
+%o A273882     out = set(alen+i-j for i, c in enumerate(s, 1) if c == '4' for j in locs1)
+%o A273882     out |= set(i-j for j in range(len(s)-1) for i in range(j+1, len(s)) if '4' == s[i] == s[j])
+%o A273882     return out
+%o A273882 def agen(): # generator of terms
+%o A273882     an, locs1, diffs1, mink, aset, alen = 0, [], set(), 1, {0}, 1
+%o A273882     while True:
+%o A273882         yield an
+%o A273882         an = next(k for k in count(mink) if k not in aset and ('4' not in (s:=str(k)) or not newdiffs(s, alen, locs1, diffs1)&diffs1))
+%o A273882         stran = str(an)
+%o A273882         if '4' in stran:
+%o A273882             diffs1 |= newdiffs(stran, alen, locs1, diffs1)
+%o A273882             locs1.extend([alen+i for i, c in enumerate(stran, 1) if c == '4'])
+%o A273882         alen += len(stran)
+%o A273882         aset.add(an)
+%o A273882         while mink in aset: mink += 1
+%o A273882 print(list(islice(agen(), 74))) # _Michael S. Branicky_, Oct 01 2025
+%Y A273882 Cf. A273376 (equivalent with digit "1").
+%Y A273882 Cf. A273880, A273881, A273883, A273884, A273885, A273886, A273887, A273888.
+%K A273882 nonn,base,changed
 %O A273882 1,3
 %A A273882 _Eric Angelini_ and _Jean-Marc Falcoz_, Jun 02 2016
