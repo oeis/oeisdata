@@ -1,15 +1,22 @@
-%I A107106 #23 Jun 11 2023 12:29:52
-%S A107106 1,1,1,2,1,1,6,2,1,1,1,24,6,2,2,1,1,1,120,24,6,4,6,2,1,2,1,1,1,720,
+%I A107106 #28 Oct 03 2025 14:00:44
+%S A107106 1,1,1,1,2,1,1,6,2,1,1,1,24,6,2,2,1,1,1,120,24,6,4,6,2,1,2,1,1,1,720,
 %T A107106 120,24,12,24,6,4,2,6,2,1,2,1,1,1,5040,720,120,48,36,120,24,12,6,4,24,
 %U A107106 6,4,2,1,6,2,1,2,1,1,1,40320,5040,720,240,144,720,120,48,36,24,12,8,120,24,12
-%N A107106 Divide A036039(n) by A036040(n).
-%C A107106 A107107 gives the row sums. - _R. J. Mathar_, Aug 13 2007
+%N A107106 Irregular triangle T(n,k) = A036039(n,k) / A036040(n,k), read by rows, 1 <= k <= A000041(n).
+%C A107106 Rows have A000041(n) entries, with partitions in Abramowitz and Stegun order (A036036).
 %C A107106 This array is the first one (K=1) of a family of partition number arrays called M31(1). For M31(2) see A134133 = M_3(2)/M_3.
-%H A107106 Jean-François Alcover after Wolfdieter Lang, <a href="/A107106/b107106.txt">Table of n, a(n) for n = 1..138</a>
+%H A107106 Andrew Howroyd, <a href="/A107106/b107106.txt">Table of n, a(n) for n = 0..2713</a> (rows 0..20; rows 1..10 from Jean-François Alcover)
 %H A107106 Wolfdieter Lang, <a href="/A107106/a107106.txt">First 10 rows of the array and more</a>.
-%F A107106 a(n) = A036039(n) / A036040(n).
-%e A107106 a(36) = 280/70 = 4.
-%e A107106 As array: [1];[1,1];[2,1,1];[6,2,1,1,1];[24,6,2,2,1,1,1];[120,24,6,4,6,2,1,2,1,1,1];...
+%e A107106 Triangle begins:
+%e A107106   0 | 1;
+%e A107106   1 | 1;
+%e A107106   2 | 1, 1;
+%e A107106   3 | 2, 1, 1;
+%e A107106   4 | 6, 2, 1, 1, 1;
+%e A107106   5 | 24, 6, 2, 2, 1, 1, 1;
+%e A107106   6 | 120, 24, 6, 4, 6, 2, 1, 2, 1, 1, 1;
+%e A107106   7 | 720, 120, 24, 12, 24, 6, 4, 2, 6, 2, 1, 2, 1, 1, 1;
+%e A107106   ...
 %p A107106 sortAbrSteg := proc(L1,L2) local i ; if nops(L1) < nops(L2) then RETURN(true) ; elif nops(L2) < nops(L1) then RETURN(false) ; else for i from 1 to nops(L1) do if op(i,L1) < op(i,L2) then RETURN(false) ; fi ; od ; RETURN(true) ; fi ; end: M2overM3 := proc(L) local n,k,an,resul; n := add(i,i=L) ; resul := 1 ; for k from 1 to n do an := add(1-min(abs(j-k),1),j=L) ; resul := resul* (factorial(k-1))^an ; od ; end: A107106 := proc(n,k) local prts,m ; prts := combinat[partition](n) ; prts := sort(prts, sortAbrSteg) ; if k <= nops(prts) then M2overM3(op(k,prts)) ; else 0 ; fi ; end: for n from 1 to 10 do for k from 1 to combinat[numbpart](n) do a:=A107106(n,k) ; printf("%d,",a) ; od; od ; # _R. J. Mathar_, Aug 13 2007
 %t A107106 aspartitions[n_] := Reverse /@ Sort[Sort /@ IntegerPartitions[n]];
 %t A107106 A036039[n_] := n!/(Times @@ #)& /@ ((#! Range[n]^#)& /@ Function[par, Count[par, #]& /@ Range[n]] /@ aspartitions[n]);
@@ -18,9 +25,14 @@
 %t A107106 T[n_] := A036039[n]/A036040[n];
 %t A107106 Table[T[n], {n, 1, 10}] // Flatten
 %t A107106 (* _Jean-François Alcover_, Jun 10 2023, after _Wouter Meeussen_ in A036039 *)
-%Y A107106 Cf. A107107.
-%K A107106 easy,nonn,tabf
-%O A107106 1,4
+%o A107106 (PARI)
+%o A107106 C(sig)={prod(k=1, #sig, sig[k]!)/vecprod(sig)}
+%o A107106 Row(n)={apply(C, [Vecrev(p) | p<-partitions(n)])}
+%o A107106 { for(n=0, 7, print(Row(n))) } \\ _Andrew Howroyd_, Oct 03 2025
+%Y A107106 Cf. A000041 (row lengths), A036036, A036039, A036040, A107107 (row sums), A134133.
+%K A107106 easy,nonn,tabf,changed
+%O A107106 0,5
 %A A107106 _Alford Arnold_, May 12 2005
 %E A107106 Corrected and extended by _R. J. Mathar_, Aug 13 2007
 %E A107106 a(75) and a(76) swapped (first 36, then 24) by _Wolfdieter Lang_, Sep 22 2008
+%E A107106 a(0)=1 prepended by _Andrew Howroyd_, Oct 03 2025
