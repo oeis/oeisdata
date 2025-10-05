@@ -1,4 +1,4 @@
-%I A211214 #38 Aug 24 2025 01:38:04
+%I A211214 #42 Oct 04 2025 11:43:46
 %S A211214 1,1,4,64,7132,201538000,432345572694417712,
 %T A211214 3987683987354747642922773353963277968,
 %U A211214 678469272874899582559986240285280710364867063489779510427038722229750276832
@@ -10,47 +10,48 @@
 %H A211214 B. D. McKay, I. M. Wanless, <a href="https://doi.org/10.1137/070693874">A census of small latin hypercubes</a>, SIAM J. Discrete Math. 22:2 (2008) 719-736.
 %H A211214 V. N. Potapov, D. S. Krotov, <a href="http://arxiv.org/abs/0912.5453">On the number of n-ary quasigroups of finite order</a>, Discrete Mathematics and Applications, 21:5-6 (2011), 575-586, arXiv:0912.5453.
 %F A211214 a(n) = A211215(n)/(4*6^n).
-%o A211214 (Python 2)
+%o A211214 (Python)
 %o A211214 N=12 # the maximum arity to calculate
-%o A211214 J,K=[[[[]]]],[[[[]]]]
-%o A211214 for n in range(1,N+1):
+%o A211214 J, K=[[[[]]]], [[[[]]]]
+%o A211214 for n in range(1, N+1):
 %o A211214   J+=[[[]]] # create empty J[n][0]
 %o A211214   K+=[[[]]] # create empty K[n][0]
-%o A211214   for i in range(1,n):
+%o A211214   for i in range(1, n):
 %o A211214     J[n]+=[[]] # create empty J[n][i]
 %o A211214     K[n]+=[[]]  # create empty K[n][i]
 %o A211214     if (i<=n-i):
 %o A211214       J[n][i] += J[n-i][i][:]
-%o A211214       K[n][i] += map(lambda K_: [K_[0]+1]+K_[1:], K[n-i][i])
-%o A211214     for j in range(i+1,n-i+1):
-%o A211214       J[n][i] += map(lambda J_: [i]+J_, J[n-i][j])
-%o A211214       K[n][i] += map(lambda K_: [1]+K_, K[n-i][j])
+%o A211214       K[n][i] += [[K_[0]+1]+K_[1:] for K_ in K[n-i][i]]
+%o A211214     for j in range(i+1, n-i+1):
+%o A211214       J[n][i] += [[i]+J_ for J_ in J[n-i][j]]
+%o A211214       K[n][i] += [[1]+K_ for K_ in K[n-i][j]]
 %o A211214   J[n]+=[[[n]]] # create J[n][n]
 %o A211214   K[n]+=[[[1]]] # create K[n][n]
-%o A211214 J = map(lambda Ji:sum(Ji,[]), J); K = map(lambda Ji:sum(Ji,[]), K) # merge groups
+%o A211214 J = [sum(Ji, []) for Ji in J]; K = [sum(Ji, []) for Ji in K] # merge groups
 %o A211214 # now J[n] and K[n] represent a list of partitions of n into positive summands:
 %o A211214 # n=J[n][i][0]*K[n][i][0]+J[n][i][1]*K[n][i][1]+J[n][i][2]*K[n][i][2]+...
 %o A211214 # 0<J[n][i][0]<J[n][i][1]<J[n][i][2]<... -- summands; K[n][i][j]>0 -- multiplicities
-%o A211214 map(lambda Ji:Ji.pop(), J); map(lambda Ki:Ki.pop(), K)  # remove the trivial 1-partitions
+%o A211214 list(map(lambda Ji:Ji.pop(), J)); list(map(lambda Ki:Ki.pop(), K))  # remove the trivial 1-partitions
 %o A211214 #
 %o A211214 import math
-%o A211214 F=map(lambda J1,K1,n:map(lambda J2,K2: reduce(lambda res, JK: res/JK, map(lambda J3,K3:math.factorial(K3)*math.factorial(J3)**K3, J2,K2), math.factorial(n)), J1,K1), J,K,range(N+1))
-%o A211214 # F[n][i] is the number of partitions of an n-set that correspond to the partition J[n][i],K[n][i] of n.
-%o A211214 La=map(lambda n:2L**(2**n-n-1), range(N+1))
-%o A211214 Ras,Ra0,R_0,R_s,P_a,V,T = [0,0L],[0,0L],[0,0L],[0,0L],[0,0L],[1,1L],[4,24L]
-%o A211214 for n in range(2,N+1):
-%o A211214   V+=[0L]; T+=[0L]; P_a+=[0L]; Ras+=[0L]; Ra0+=[0L]; R_0+=[0L]; R_s+=[0L]
+%o A211214 from functools import reduce
+%o A211214 F=list(map(lambda J1, K1, n:list(map(lambda J2, K2: reduce(lambda res, JK: res//JK, list(map(lambda J3, K3:math.factorial(K3)*math.factorial(J3)**K3, J2, K2)), math.factorial(n)), J1, K1)), J, K, list(range(N+1))))
+%o A211214 # F[n][i] is the number of partitions of an n-set that correspond to the partition J[n][i], K[n][i] of n.
+%o A211214 La=[2**(2**n-n-1) for n in range(N+1)]
+%o A211214 Ras, Ra0, R_0, R_s, P_a, V, T = [0, 0], [0, 0], [0, 0], [0, 0], [0, 0], [1, 1], [4, 24]
+%o A211214 for n in range(2, N+1):
+%o A211214   V+=[0]; T+=[0]; P_a+=[0]; Ras+=[0]; Ra0+=[0]; R_0+=[0]; R_s+=[0]
 %o A211214   for i in range(len(K[n])):
-%o A211214     R_0[n],Ra0[n],R_s[n],Ras[n] = map(lambda A,B,C :
-%o A211214       A[n] + reduce(lambda r,t:r*(B[J[n][i][t]]-C*A[J[n][i][t]])**K[n][i][t],range(len(K[n][i])),((1-C)*P_a[sum(K[n][i])]+C)*F[n][i]),
-%o A211214       (R_0,Ra0,R_s,Ras), (V,La,V,La), (0,0,1,1))
+%o A211214     R_0[n], Ra0[n], R_s[n], Ras[n] = list(map(lambda A, B, C :
+%o A211214       A[n] + reduce(lambda r, t:r*(B[J[n][i][t]]-C*A[J[n][i][t]])**K[n][i][t], list(range(len(K[n][i]))), ((1-C)*P_a[sum(K[n][i])]+C)*F[n][i]),
+%o A211214       (R_0, Ra0, R_s, Ras), (V, La, V, La), (0, 0, 1, 1)))
 %o A211214   R_0[n] *= 3
 %o A211214   P_a[n] = La[n] - Ra0[n] - 2*Ras[n]
 %o A211214   V[n] = 3*P_a[n] + R_0[n] + 4*R_s[n]
 %o A211214   T[n] = 4*(6**n)*V[n]
-%o A211214 print "\n Reduced (A211214):", V
-%o A211214 print "\n Total (A211215):", T
+%o A211214 print("\n Reduced (A211214):", V)
+%o A211214 print("\n Total (A211215):", T)
 %Y A211214 Cf. A000315, A098843, A100539, A132205.
-%K A211214 nonn
+%K A211214 nonn,changed
 %O A211214 0,3
 %A A211214 _Denis S. Krotov_ and Vladimir N. Potapov, Apr 06 2012

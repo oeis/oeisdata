@@ -1,11 +1,32 @@
-%I A273888 #10 Dec 27 2023 12:03:35
+%I A273888 #19 Oct 04 2025 10:14:52
 %S A273888 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,
 %T A273888 26,27,28,29,31,30,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,
 %U A273888 49,51,52,53,50,54,55,56,57,58,59,61,62,63,64,65,60,66,67,68,69,71,70,72,73,74,75,76,77,78
 %N A273888 Pick any pair of "0" digits in the sequence. Those two "0"s are separated by k digits. This is the lexicographically earliest sequence of distinct terms in which all the resulting values of k are distinct.
 %C A273888 The sequence starts with a(1)=0. It is then always extended with the smallest integer not yet present and not leading to a contradiction (which would mean producing a value of k already seen).
+%C A273888 See A273376 for the equivalent sequence dealing with digit-"1" pairs instead of "0".
 %H A273888 Eric Angelini, <a href="/A273888/b273888.txt">Table of n, a(n) for n = 1..1011</a>
-%H A273888 See oeis.org/A273376 for the equivalent sequence dealing with digit-"1" pairs instead of "0"
-%K A273888 nonn,base
+%o A273888 (Python)
+%o A273888 from itertools import count, islice
+%o A273888 def newdiffs(s, alen, locs, diffs):
+%o A273888     out = set(alen+i-j for i, c in enumerate(s, 1) if c == '0' for j in locs)
+%o A273888     out |= set(i-j for j in range(len(s)-1) for i in range(j+1, len(s)) if '0' == s[i] == s[j])
+%o A273888     return out
+%o A273888 def agen(): # generator of terms
+%o A273888     an, locs, diffs, mink, aset, alen = 0, [1], set(), 1, {0}, 1
+%o A273888     while True:
+%o A273888         yield an
+%o A273888         an = next(k for k in count(mink) if k not in aset and ('0' not in (s:=str(k)) or not newdiffs(s, alen, locs, diffs)&diffs))
+%o A273888         stran = str(an)
+%o A273888         if '0' in stran:
+%o A273888             diffs |= newdiffs(stran, alen, locs, diffs)
+%o A273888             locs.extend([alen+i for i, c in enumerate(stran, 1) if c == '0'])
+%o A273888         alen += len(stran)
+%o A273888         aset.add(an)
+%o A273888         while mink in aset: mink += 1
+%o A273888 print(list(islice(agen(), 79))) # _Michael S. Branicky_, Oct 01 2025
+%Y A273888 Cf. A273376 (equivalent with digit "1").
+%Y A273888 Cf. A273880, A273881, A273882, A273883, A273884, A273885, A273886, A273887.
+%K A273888 nonn,base,changed
 %O A273888 1,3
 %A A273888 _Eric Angelini_ and _Jean-Marc Falcoz_, Jun 02 2016
