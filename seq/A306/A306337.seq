@@ -1,9 +1,33 @@
-%I A306337 #8 Feb 08 2019 08:39:59
+%I A306337 #22 Oct 08 2025 23:56:01
 %S A306337 2,2,2,4,8,8,8,8,16,16,16,16,22,64,24,32,56,44,28,194,268,32,186,424,
 %T A306337 186,12,390,256,728,1652,26,22,1548
-%N A306337 Number of edges in a graph related to the Kolakoski sequence (A000002).
+%N A306337 Length of the cycle that has maximal fraction of 1's in output labels in the n-th composition of the finite-state transducer that fixes the Kolakoski sequence (A000002).
+%C A306337 From _Andrei Zabolotskii_, Oct 07 2025: (Start)
+%C A306337 The n-th transducer in question is a certain directed graph, denoted by Rao as T^n. It has 2^n vertices, labeled by the strings of 1's and 2's of length n. Each edge has two labels: an input label and an output label. Each vertex has two outgoing edges having input labels 1 and 2.
+%C A306337 The output label of an edge is the n-th string, s_n, from a sequence of strings of 1's and 2's, s_k, such that s_0 is the input label, while for 0 < k <= n, s_{k-1} is the run-length transform of s_k and the first symbol in s_k is the k-th symbol of the source vertex. The target vertex is defined by the condition that the k-th symbol of its label is different from the last symbol of s_k.
+%C A306337 For example, in T^4, consider the vertex 2221 and its outgoing edge with the input label s_0 = 1. Then s_1 = 2, s_2 = 22, s_3 = 2211, the output label is s_4 = 112212, and the target vertex is 1121.
+%C A306337 For any n, if we start in T^n at the vertex of all 1's and follow the path such that the input labels of the edges form the Kolakoski sequence, the concatenation of the output labels will be the Kolakoski sequence again. (End)
 %H A306337 Michael Rao, <a href="https://www.arthy.org/kola/kola.php">Trucs et bidules sur la séquence de Kolakoski</a>, October 1 2012.
+%e A306337 In Rao's graph T^4, there is a cycle 1121 -> 2212 -> 1112 -> 2221 -> 1121, in which the edges have output labels 11, 212211, 2, 112212. Out of 15 symbols in these labels, 8 symbols are 1's. The fraction of 1's, 8/15, is maximal over all cycles in T^4, and this cycle has 4 edges. Thus, a(4) = 4.
+%o A306337 (SageMath)
+%o A306337 def lbl(x):
+%o A306337     return tuple(lbl(y) for y in x) if isinstance(x, tuple) \
+%o A306337     else dict(lbl(y) for y in x.items()) if isinstance(x, dict) \
+%o A306337     else lbl(x.label()) if hasattr(x, 'label') \
+%o A306337     else x[2::2] if isinstance(x, str) else x
+%o A306337 def f1(d, cyc):
+%o A306337     s = ''.join(d[e1][e2] for e1, e2 in zip(cyc, cyc[1:]))
+%o A306337     return Rational((s.count('1'), len(s)))
+%o A306337 t = t1 = Transducer([(1, 2, 1, 1), (1, 2, 2, [1,1]), (2, 1, 1, 2), (2, 1, 2, [2,2])], initial_states=[1,2], final_states=[1,2])
+%o A306337 for n in (1..5):
+%o A306337     if n == 1: a = 2
+%o A306337     else:
+%o A306337         t = t1.composition(t)
+%o A306337         d = lbl(t.digraph().to_dictionary(edge_labels=True))
+%o A306337         a = len(max(DiGraph(d).all_simple_cycles(), key = lambda cyc: f1(d, cyc))) - 1
+%o A306337     print(a) # _Andrei Zabolotskii_, Oct 04 2025
 %Y A306337 Cf. A000002.
-%K A306337 nonn,more
+%K A306337 nonn,more,changed
 %O A306337 1,1
 %A A306337 _Jeffrey Shallit_, Feb 08 2019
+%E A306337 Name edited by _Andrei Zabolotskii_, Oct 04 2025
