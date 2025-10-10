@@ -1,4 +1,4 @@
-%I A309370 #32 Oct 02 2025 14:57:09
+%I A309370 #44 Oct 09 2025 20:49:25
 %S A309370 1,2,3,5,7,12,15
 %N A309370 Maximum size of a Sidon subset of {0,1}^n.
 %C A309370 Define addition on {0,1}^n componentwise (ordinary addition, not addition modulo 2, so the result lies in {0,1,2}^n, not necessarily {0,1}^n). We say a subset of {0,1}^n is Sidon iff the only solutions to a + b = c + d, with a,b,c,d in the set, are the trivial ones: a = c, b = d or a = d, b = c.
@@ -7,10 +7,47 @@
 %C A309370 a(7) >= 24. - _Christian Sievers_, Sep 17 2025
 %H A309370 G. Cohen, S. Litsyn and G. Zémor, <a href="https://doi.org/10.1006/jcta.2000.3127">Binary B_2-Sequences: A New Upper Bound</a>, Journal of Combinatorial Theory, Series A 94 (2001): 152-155.
 %H A309370 B. Lindström, <a href="https://doi.org/10.1016/0022-314X(72)90052-2">On B_2-sequences of vectors</a>, Journal of Number Theory 4 (1972): 261-265.
+%H A309370 Bernt Lindström, Determination of two vectors from the sum, Journal of Combinatorial Theory, Volume 6, Issue 4, May 1969, pp. 402-407.
+%F A309370 Theorem 2 from Lindström (1969) implies that a(n) > 2^(k*n) for any k < 1/2 and large enough n. - _Charles R Greathouse IV_, Oct 03 2025
+%F A309370 Cohen, Litsyn, and Zémor prove that a(n) < 2^(0.57526*n) for large enough n. - _Charles R Greathouse IV_, Oct 03 2025
 %e A309370 When n = 2, the elements of {0,1}^n are (0,0), (0,1), (1,0), (1,1). The entirety of {0,1}^2 is not Sidon, because (0,0) + (1,1) = (0,1) + (1,0). But this is the only nontrivial solution to a + b = c + d in {0,1}^2, so removing any one element results in a Sidon set, so a(2) = 3.
-%e A309370 For n = 3 and n = 4, maximal subsets are (with obvious notation): {000, 001, 010, 100, 111} and {0000, 0001, 0010, 0100, 0111, 1001, 1110}. - _M. F. Hasler_, Oct 02 2025
+%e A309370 For n = 3 and n = 4, maximum size Sidon subsets are (with obvious notation): {000, 001, 010, 100, 111} and {0000, 0001, 0010, 0100, 0111, 1001, 1110}.
+%e A309370 For n = 5, a Sidon subset of maximum size is {00000, 00001, 00110, 01010, 01101, 01111, 10011, 10100, 10111, 11001, 11010, 11100}. - _M. F. Hasler_, Oct 02 2025
 %o A309370 (PARI) /* for illustration -- too slow for n >= 5 */
 %o A309370 A309370(n, show=1)={ my(s=[1,-1,-1,1]~, best); for(L=n,oo, forvec(S=vector(L,i,[2^n,2^(n+1)-1]), forvec( ii=vector(4,i,[1,L]), apply(binary, vecextract(S, ii))*s || next(2), 2); best=S; next(2), 2); break); show && print([binary(v)[2..-1]|v<-best]); #best} \\ _M. F. Hasler_, Oct 02 2025
+%o A309370 (Python)
+%o A309370 def Sidon(S): # check whether S[-1] is b+c-a, a<b<c in S
+%o A309370     if len(S) < 4: return True
+%o A309370     L = 1 << (d := S[-1]).bit_length()-1
+%o A309370     for k,c in enumerate(S[-2:1:-1], 3):
+%o A309370         if c < L: return True # can't write d+a as b+c
+%o A309370         if any(not(d & ~(b|c)) and b^c^d in S[:-j] and not(b&c&~d)
+%o A309370                for j,b in enumerate(S[-k:0:-1], k)): return False
+%o A309370     return True
+%o A309370 def A309370(n, solution = False, debug = False):
+%o A309370     "If solution=True, return a solution set, else just the length."
+%o A309370     if not hasattr(A := A309370, 'sol'): A.sol = [[0]]
+%o A309370     while len(A.sol) <= n: # compute one more solution
+%o A309370         M = 2**len(A.sol)  # largest possible value = M-1 = (1...1)
+%o A309370         A.sol += [S := list(A.sol[-1])] # S = candidate for a larger sol'n
+%o A309370         while S == A.sol[-1]: # try to extend it to a larger solution
+%o A309370             L = len(S := S + [S[-1]]); increment = True
+%o A309370             while increment: # find next candidate of same len
+%o A309370                 i = 1 # "negative" index of element we'll try to increment
+%o A309370                 while i <= L:
+%o A309370                     if S[-i] >= M-i: i += 1 ; continue
+%o A309370                     if i > 1: S[-i:] = range(S[-i]+1, S[-i]+1+i)
+%o A309370                     else: S[-i] += 1
+%o A309370                     while i > 1:
+%o A309370                         if Sidon(S[:-i+1]): i -= 1
+%o A309370                         else: break # go on incrementing at i
+%o A309370                     else: # all smaller initial segments are Sidon
+%o A309370                         if Sidon(S): A.sol[-1] = S; increment = False
+%o A309370                         break # otherwise go on incrementing at i=1
+%o A309370                 else: break # reached the leftmost digit: no solution
+%o A309370             else: # when sol'n with len = a(n) is found, you can interrupt
+%o A309370                 if debug: print("Found sol'n of length", len(S), ":", S)
+%o A309370     return A.sol[n] if solution else len(A.sol[n]) # _M. F. Hasler_, Oct 02 2025
 %K A309370 nonn,hard,more,changed
 %O A309370 0,2
 %A A309370 _Asier Calbet Rípodas_, Aug 02 2019
