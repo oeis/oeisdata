@@ -1,0 +1,41 @@
+%I A384726 #13 Jun 16 2025 16:20:59
+%S A384726 2,35,273,11235,237615,11237835,1123317195,111371237835,
+%T A384726 11132343837615,1113172923477615,111317233377372295,
+%U A384726 11131723677292413195,1113172377671953734135,111317192375336174123715
+%N A384726 a(n) is the least number that is both the product of n distinct primes and the concatenation of n distinct primes.
+%C A384726 a(n) is odd for n >= 2, because a number whose last digit is 2 and second-last is odd is divisible by 4.
+%e A384726 a(4) = 11235 is a term because 11235 is the product of four distinct primes 3, 5, 7, 107 and the concatenation of four distinct primes 11, 2, 3, 5, and no smaller number works.
+%p A384726 cdp:= proc(x, n, S)
+%p A384726   local i,y;
+%p A384726   if n = 1 then return (not(member(x,S)) and isprime(x)) fi;
+%p A384726   for i from 1 to ilog10(x)+2-n do
+%p A384726     y:= x mod 10^i;
+%p A384726     if member(y,S) or not isprime(y) then next fi;
+%p A384726     if procname((x-y)/10^i, n-1, S union {y}) then return true fi;
+%p A384726   od;
+%p A384726   false
+%p A384726 end proc:
+%p A384726 f:= proc(n) uses priqueue; local pq, t, p, x, i, L, v, Lp;
+%p A384726   initialize(pq);
+%p A384726   L:= [seq(ithprime(i), i=2..n+1)];
+%p A384726   v:= convert(L, `*`);
+%p A384726   insert([-v, L], pq);
+%p A384726   do
+%p A384726     t:= extract(pq);
+%p A384726     x:= -t[1];
+%p A384726     if cdp(x,n,{}) then return x fi;
+%p A384726     L:= t[2];
+%p A384726     p:= nextprime(L[-1]);
+%p A384726     for i from n to 1 by -1 do
+%p A384726       if i < n and L[i] <> prevprime(L[i+1]) then break fi;
+%p A384726       Lp:= [op(L[1..i-1]), op(L[i+1..n]), p];
+%p A384726       insert([-convert(Lp, `*`), Lp], pq)
+%p A384726   od od;
+%p A384726 end proc:
+%p A384726 f(1):= 2:
+%p A384726 map(f, [$1..9]);
+%Y A384726 Cf. A083427, A374665.
+%K A384726 nonn,base,more
+%O A384726 1,1
+%A A384726 _Robert Israel_, Jun 08 2025
+%E A384726 a(11)-a(14) from _Jinyuan Wang_, Jun 12 2025

@@ -1,0 +1,70 @@
+%I A386626 #14 Aug 22 2025 15:53:53
+%S A386626 7,7,11,13,13,17,19,19,23,23,23,29,31,31,31,37,37,41,43,37,47,43,43,
+%T A386626 53,53,53,59,61,53,61,67,67,71,73,71,59,79,61,83,79,83,89,89,89,89,97,
+%U A386626 89,101,103,101,107,109,109,113,113,113,109,107,113,113,127
+%N A386626 a(n) = denominator q of prime-fraction p/q that minimizes |m/n - p/q|>0, where p is 1 or prime, q is prime, q < 2n, and 1 <= m <= 2n-1.
+%C A386626 p/q is a closest prime-fraction to m/n in the sense that if s/t is a fraction of primes (or 1/t with t prime) with t<2n, then 0 < |m/n - p/q| <= |m/n - s/t|. For n>=4, as m ranges from 1 to 2n-1, there is a prime-fraction p/q (or a fraction 1/q) that is closest to (without being equal to) m/n; that q is a(n).
+%e A386626 In the following table, columns 1-4 give values for the closest prime-fraction p/q to m/n. Column 5 shows a comparison: < if p/q < m/n and > if p/q > m/n. Column 6 gives an approximation for the minimal distance |m/n - p/q|.
+%e A386626  n   m    p    q  comp.  min. dist.
+%e A386626  4   1    2    7    >    0.0357143
+%e A386626  5   4    5    7    <    0.0857143
+%e A386626  6   1    2   11    >    0.0151515
+%e A386626  7   6   11   13    <    0.010989
+%e A386626  8   3    5   13    >    0.00961538
+%e A386626  9   1    2   17    >    0.00653595
+%e A386626 10   1    2   19    >    0.00526316
+%e A386626 11   4    7   19    >    0.00478469
+%e A386626 12   1    2   23    >    0.00362319
+%e A386626 13   4    7   23    <    0.00334448
+%e A386626 14   3    5   23    >    0.00310559
+%e A386626 15   1    2   29    >    0.00229885
+%e A386626 16   1    2   31    >    0.00201613
+%e A386626 17   6   11   31    >    0.00189753
+%e A386626 18  11   19   31    >    0.00179211
+%e A386626 19   1    2   37    >    0.00142247
+%e A386626 20   7   13   37    >    0.00135135
+%e A386626 21   1    2   41    >    0.00116144
+%e A386626 22   1    2   43    >    0.00105708
+%e A386626 23  18   29   37    >    0.00117509
+%e A386626 24   1    2   47    >    0.000886525
+%e A386626 25  18   31   43    >    0.000930233
+%e A386626 26   3    5   43    >    0.000894454
+%e A386626 27   1    2   53    >    0.000698812
+%e A386626 28   9   17   53    <    0.000673854
+%e A386626 29   6   11   53    >    0.000650618
+%e A386626 30   1    2   59    >    0.000564972
+%e A386626 31  30   59   61    <    0.000528821
+%e A386626 32   3    5   53    >    0.000589623
+%e A386626 |3/8 - 5/13| = 0.00961538...< |3/8 - s/t| for all other prime-fractions s/t having  t<16.
+%t A386626 ClearAll[closestPrimeFractionWithOption];
+%t A386626 (*Minimizes|m/n-p/q|with p,q primes and q<2 n.Option \
+%t A386626 AllowZeroError->True|False controls whether exact hits are allowed.*)
+%t A386626 ClearAll[closestPrimeFractionWithOption];
+%t A386626 closestPrimeFractionWithOption[n_, m_, opts : OptionsPattern[]] /;
+%t A386626  1 <= m <= 2  n - 1 := Module[{allowZero = OptionValue[allowTrueMin], qs, candidates,
+%t A386626  target, tNum, pBig, pLast, pNext, best, err, sgn},
+%t A386626  qs = Prime[Range[PrimePi[2  n - 1]]];
+%t A386626  candidates = Apply[Join, Table[target = (q  m)/n; tNum = PrimePi[target];
+%t A386626  pBig = If[tNum >= 1, Prime[tNum], Nothing]; pLast = Prime[tNum + 1];
+%t A386626  pNext = Which[IntegerQ[target] && PrimeQ[target],
+%t A386626  If[allowZero, {target, pLast}, DeleteMissing[{If[tNum >= 2, Prime[tNum - 1], Nothing],
+%t A386626  pLast}]], True, DeleteMissing[{pBig, pLast}]];
+%t A386626  Map[{#, q, Abs[m/n - #/q]} &, pNext], {q, qs}]];
+%t A386626  candidates = If[allowZero, candidates, Select[candidates, #[[3]] =!= 0 &]];
+%t A386626  If[candidates === {}, "Nothing fits constrants?",
+%t A386626  best = First[SortBy[candidates, {#[[3]] &, #[[2]] &, #[[1]] &}]];
+%t A386626  err = best[[3]];
+%t A386626  sgn = Sign[m/n - best[[1]]/best[[2]]];
+%t A386626  {n, m, best[[1]], best[[2]], err(*,sgn*)}]];
+%t A386626 Options[closestPrimeFractionWithOption] = {allowTrueMin -> True};
+%t A386626 ans = Table[First[SortBy[Map[closestPrimeFractionWithOption[Denominator[#],
+%t A386626 Numerator[#], allowTrueMin -> False] &,
+%t A386626 Select[Range[k], GCD[k, #] == 1 &]/k], #[[5]] &]], {k, 4, 103}]
+%t A386626 a386626 = Map[#[[4]] &, ans]
+%t A386626 Map[1/#[[5]] &, ans]
+%t A386626 (* _Peter J. C. Moses_, Aug 22 2025 *)
+%Y A386626 Cf. A000040, A385925.
+%K A386626 nonn,frac
+%O A386626 4,1
+%A A386626 _Clark Kimberling_, Jul 27 2025
+%E A386626 a(19) and a(41) corrected by _Sean A. Irvine_, Aug 17 2025

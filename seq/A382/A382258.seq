@@ -1,0 +1,73 @@
+%I A382258 #32 May 08 2025 20:51:59
+%S A382258 1,9,14,18,21,25,27,30,34,36,39,42,46,48,51,54,58,60,62,65,68,72,74,
+%T A382258 76,78,81,84,88,90,92,94,97,100,103,107,109,111,113,116,119,122,126,
+%U A382258 128,130,132,134,137,140,143,147,149,151,153,155,157,160,163,166,170,172,174,176,178,180,183,186
+%N A382258 a(n) = last number placed on an infinite square grid at the n-th step, in order to surround the last number placed at the previous step, always using the next larger integer and going counter-clockwise, starting with a 1 at the origin.
+%C A382258 a(0) = 1 is placed at the origin of the empty square grid.
+%C A382258 At each step, the empty spots next to the last number placed are filled going counter-clockwise, choosing the "earliest" starting point that allows one to place the numbers next to each other. At the first step, start with the grid point to the right of the origin. See Example for an illustration.
+%C A382258 It is in principle irrelevant what the grid points are filled with, it only matters which points are filled and which are still empty. Using positive integers allows one to visualize the order in which the grid points are filled, and how many there are: The term a(n) always gives the last and largest number placed on the grid after step n, also equal to the total number of grid points filled after step n.
+%C A382258 Due to rotational symmetry, the sequence wouldn't change if we started, e.g., to the north, at the first step. However, if we started to the north-east, then it would change, since after placing the 8 numbers {2, ..., 9} on step 1, one would only need the 3 numbers {10, 11, 12} at step 2 to completely "surround" the "9" placed to the right of the 1 at the end of the first step, and already surrounded by other numbers to the north and to the south. So this would yield a distinct variant, and a still different variant would result if the "free neighbor grid points" were always filled in the way that would produce the lexicographically earliest sequence (i.e., equivalently, use the least number of numbers in the next step(s)).
+%H A382258 M. F. Hasler, <a href="/A382258/b382258.txt">Table of n, a(n) for n = 0..999</a>, May 08 2025
+%H A382258 M. F. Hasler, in reply to Ali Sada, <a href="https://groups.google.com/g/seqfan/c/ffDqdJf8sEc/m/VMEHzGbqAQAJ">Is this a trivial sequence?</a>, SeqFan google group, Mar 13, 2025
+%e A382258 At the first step, we surround the initial 1 with numbers 2 through 9, starting to the right (or "east"):
+%e A382258        5   4   3
+%e A382258        6   1   2
+%e A382258        7   8   9
+%e A382258 Then, in order to surround the 9, last number placed so far, we use numbers 10 through 14, starting to the south-west of 9 (in order to go counter-clockwise without "interruption"):
+%e A382258        5   4   3
+%e A382258        6   1   2  14
+%e A382258        7   8   9  13
+%e A382258           10  11  12
+%e A382258 On the next step, we have to surround the number 14, starting to the south-east (in order to go counter-clockwise), where now only 4 numbers (15 - 18) are required. And so on.
+%e A382258 After the first 30 steps, the square grid looks as follows:
+%e A382258               79    77    75    73    71    70    69
+%e A382258         82    80    78    76    74    72    68    67    66
+%e A382258   85    83    81    28    26    24    23    22    65    64    63
+%e A382258   86    84    31    29    27    25    21    20    19    62    61
+%e A382258   87    88    32    30     5     4     3    18    17    60    59
+%e A382258   89    90    33    34     6     1     2    14    16    58    57
+%e A382258   91    92    35    36     7     8     9    13    15    54    56
+%e A382258   93    94    37    38    39    10    11    12    51    53    55
+%e A382258                     40    41    42    46    48    50    52
+%e A382258                           43    44    45    47    49
+%o A382258 (PARI)
+%o A382258 neighbors=[1, 1+I, I, I-1, -1, -1-I, -I, 1-I]  /* using the complex plane */
+%o A382258 M.extend={ #M || mapput(M, pos=0, N=1)+return(N); /* uses global vars 'pos' and 'N' */
+%o A382258   n = #free_neighbors = [pos+n | n<-neighbors, !mapisdefined(M,pos+n)];
+%o A382258   /*find where to start*/ distances = abs(free_neighbors[^1] - free_neighbors[^-1]);
+%o A382258   if(1 < #start = select(d -> d>1, distances, 1), print("WARNING: multiple holes"),
+%o A382258     #start || (free_neighbors[2]==pos+1-I && start=[1]), free_neighbors=
+%o A382258       concat(free_neighbors[start[1]+1..-1], free_neighbors[1..start[1]]));
+%o A382258   /*fill in the numbers */ foreach(free_neighbors, n, mapput(M, n, N++));
+%o A382258   /*update position */ pos=free_neighbors[n]; /*return last number filled in*/ N}
+%o A382258 /* to display the grid: */
+%o A382258 M.show={my(m(f)=Set(f(Vec(M))), X=m(real)); foreach(Vecrev(m(imag)), y,
+%o A382258   print(strjoin([iferr(mapget(M,x+I*y),E,"") | x<-X], "\t")))}
+%o A382258 A382258_first(n, show=1, M=Map())=vector(n, i, M.extend)+(show && M.show)
+%o A382258 (Python)
+%o A382258 class A382258:
+%o A382258    pos=0; terms=[1]; grid={0:1}; neighbors=(1, 1+1j, 1j, 1j-1, -1, -1-1j, -1j, 1-1j)
+%o A382258    def __str__(self):
+%o A382258       X=sorted({z.real for z in self.grid})
+%o A382258       return "\n".join("".join(f"{self.grid.get(x+y*1j,'')!s:5}" for x in X)
+%o A382258                        for y in sorted({z.imag for z in self.grid}, reverse=1))
+%o A382258    def __new__(cls, n: int|None = None): # Return a(n) or sequence if no n given.
+%o A382258       a=super().__new__(cls); return a if n is None else a[n]
+%o A382258    def clear(self): "Reset/clear grid."; self.pos=0; self.grid={0:1}; self.terms=[1]
+%o A382258    def __getitem__(self, n: int|slice): # "Return A382258(n)."
+%o A382258       while not len(self.terms)>n: self.extend()
+%o A382258       return self.terms[n]
+%o A382258    def extend(self):
+%o A382258       "Counter-clockwise surround the last placed number on the grid."
+%o A382258       free = [n for d in self.neighbors if not self.grid.get(n := self.pos + d)]
+%o A382258       # absolute value of difference of positions is > 1 iff there's a hole
+%o A382258       holes=(i for i,z in enumerate(free) if abs(free[i-1]-z)>1); N=self.terms[-1]
+%o A382258       if (h:=next(holes, 0)) or len(free)==2 and free[h:=1]==self.pos+1-1j:
+%o A382258          free = free[h:] + free[:h] # start after the first occupied cell
+%o A382258       for pos in free: N += 1; self.grid[pos] = N  # fill in the numbers
+%o A382258       setattr(A382258 if self.grid is A382258.grid else self, 'pos', pos);
+%o A382258       self.terms.append(N) # update terms; return None
+%Y A382258 Cf. A382259 (first differences: number of grid points to fill at the n-th step).
+%K A382258 nonn
+%O A382258 0,2
+%A A382258 _M. F. Hasler_ and _Ali Sada_, Apr 08 2025

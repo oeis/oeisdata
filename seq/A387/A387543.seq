@@ -1,0 +1,52 @@
+%I A387543 #46 Sep 13 2025 14:37:58
+%S A387543 1,1,1,2,1,3,1,4,3,5,1,6,1,7,5,8,1,9,1,10,7,11,1,12,5,13,9,14,1,15,1,
+%T A387543 16,11,17,7,18,1,19,13,20,1,21,1,22,15,23,1,24,7,25,17,26,1,27,11,28,
+%U A387543 19,29,1,30,1,31,21,32,13,33,1,34,23,35,1,36,1,37,25
+%N A387543 a(n) is the size of the largest subset of {1, 2, ..., n} containing n in which any two numbers share a prime factor.
+%C A387543 If n = q_1^k_1 * ... * q_r^k_r (where q_1 < ... < q_r are distinct primes) then the maximum is achieved by, for some 1 <= j <= r, the set of all integers in [1, n] that are a multiple of at least one of {2*q_1, ..., 2*q_j, q_1*...*q_j}. This result was conjectured by Erdős (1992), and proved by Ahlswede and Khachatrian (1996).
+%C A387543 a(n) = A032742(n) for n < 2431, but a(2431) = 256 and A032742(2431) = 221.
+%C A387543 A graph-theoretic framing of the construction is as follows: Start with the vertex set {1, 2, ..., n}. Draw an edge between two vertices a and b if and only if they share at least one prime factor. In this setup, the problem can be phrased as: "Find a maximum clique containing n in the gcd-graph" and a(n) is the size of that clique. The maximum clique is not uniquely determined, for example 4301 has two maximum cliques of length 391 (cf. A387699). - _Peter Luschny_, Sep 08 2025
+%H A387543 David Radcliffe, <a href="/A387543/b387543.txt">Table of n, a(n) for n = 1..10000</a>
+%H A387543 Rudolf Ahlswede and Levon H. Khachatrian, <a href="https://www.math.uni-bielefeld.de/ahlswede/homepage/public/109.pdf">Sets of integers with pairwise common divisor and a factor from a specified set of primes</a>, Acta Arith. (1996), 259-276.
+%H A387543 Thomas Bloom, <a href="https://www.erdosproblems.com/534">Problem 534</a>, Erdős Problems.
+%H A387543 Erdős problems database contributors, <a href="https://github.com/teorth/erdosproblems/blob/main/README.md#table">Erdős problem database</a>, see no. 534.
+%e A387543 For n = 15 the graph-theoretic construction is: Vertices: 1, 2, 3,..., 15. Edges: connect numbers that share a factor > 1. For instance, 9 and 15 are connected (gcd=3), but 8 and 15 are not (gcd=1). The maximum clique containing 15 is {3, 6, 9, 12, 15}. This clique has size 5, so a(15) = 5. (See the illustration in the links.) - _Peter Luschny_, Sep 07 2025
+%t A387543 (* From _Peter Luschny_, Sep 08 2025: (Start) *)
+%t A387543 A387543[n_Integer?Positive] := Module[
+%t A387543     {primes, q = 1, ret = 1, cp, kSet, us, i, j, sub, term},
+%t A387543     If[n == 1, Return[1]];
+%t A387543     primes = FactorInteger[n][[All, 1]];
+%t A387543     Do[ q *= primes[[i]];
+%t A387543         cp = Take[primes, i];
+%t A387543         kSet = Union[2 * cp, {q}];
+%t A387543         us = 0;
+%t A387543         Do[ sub = Subsets[kSet, {j}];
+%t A387543             term = Sum[Floor[(n - 1) / Apply[LCM, s]], {s, sub}];
+%t A387543             us += (-1)^(j - 1) * term;
+%t A387543             , {j, 1, Length[kSet]}
+%t A387543         ];
+%t A387543         ret = Max[ret, 1 + us];
+%t A387543         , {i, 1, Length[primes]}
+%t A387543 ]; ret ]
+%t A387543 Table[A387543[n], {n, 1, 75}]  (* (End) *)
+%o A387543 (Python)
+%o A387543 from sympy import primefactors
+%o A387543 def a(n):
+%o A387543     if n == 1:
+%o A387543         return 1
+%o A387543     if n % 2 == 0:
+%o A387543         return n // 2
+%o A387543     m = (n - 1) // 2
+%o A387543     pf = primefactors(n)
+%o A387543     p = q = pf[0]
+%o A387543     s = m // p
+%o A387543     best = n // p
+%o A387543     for p in pf[1:]:
+%o A387543         s += (m - s) // p
+%o A387543         q *= p
+%o A387543         best = max(best, s - m // q + n // q)
+%o A387543     return best # _David Radcliffe_, Sep 07 2025
+%Y A387543 Cf. A032742, A387698, A387699.
+%K A387543 nonn
+%O A387543 1,4
+%A A387543 _David Radcliffe_, Sep 01 2025

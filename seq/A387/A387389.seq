@@ -1,0 +1,52 @@
+%I A387389 #19 Sep 03 2025 23:51:03
+%S A387389 6,22,32,28,40,38,36,52,50,48,46,66,64,64,62,62,60,58,56,80,80,78,78,
+%T A387389 76,78,76,74,74,72,72,70,70,68,96,66,96,94,96,92,94,92,92,90,92,90,88,
+%U A387389 88,90,86,88,86,86,84,84,84,82,82,82,80,80,110,78,112,114
+%N A387389 a(n) is the smallest positive integer for which there exists a strict partition that can be partitioned into two disjoint subsets with equal sum in n ways.
+%C A387389 Finding ways in which a set can be partitioned into two disjoint subsets with equal sum is often referred to as the "partition search problem".
+%C A387389 All the numbers in the sequence are even because for odd numbers there is no solution to the partition search problem.
+%H A387389 Jesús Bellver Arnau, <a href="/A387389/b387389.txt">Table of n, a(n) for n = 1..100</a>
+%H A387389 Wikipedia, <a href="https://en.wikipedia.org/wiki/Partition_problem">Partition problem</a>.
+%e A387389 a(1) = 6, because S={3,2,1} is a strict partition of 6 and there is a way to partition S into two disjoint subsets of equal sum: {3}={2,1}. It is not possible to do this for any strict partition of integers smaller than 6.
+%e A387389 a(2) = 22, because S={7, 5, 4, 3, 2, 1} is a strict partition of 22 and there are two ways to partition S into two disjoint subsets of equal sum: {7,4}={5,3,2,1} and {7,3,1}={5,4,2}. There are no strict partitions of any smaller number for which this can be done.
+%e A387389 a(3) = 32, because S={11, 6, 5, 4, 3, 2, 1} is a strict partition of 32 and there are three ways to partition S into two disjoint subsets of equal sum: {11,5}={6,4,3,2,1}, {11,4,1}={6,5,3,2} and {11,3,2}={6,5,4,1}. There are no strict partitions of any smaller number for which this can be done.
+%o A387389 (Python)
+%o A387389 def partitions_distinct(n):
+%o A387389     def _build(remaining, max_next):
+%o A387389         if remaining == 0:
+%o A387389             return [[]]
+%o A387389         res = []
+%o A387389         for k in range(min(remaining, max_next), 0, -1):
+%o A387389             for tail in _build(remaining - k, k - 1):
+%o A387389                 res.append([k] + tail)
+%o A387389         return res
+%o A387389     return _build(n, n//2) # The biggest number in the subset can't be bigger than n/2
+%o A387389 def count_half_subsets(partition, n):
+%o A387389     if n % 2:
+%o A387389         return 0
+%o A387389     half = n // 2
+%o A387389     dp = [0] * (half + 1)
+%o A387389     dp[0] = 1
+%o A387389     for x in partition:
+%o A387389         for s in range(half, x - 1, -1):
+%o A387389             dp[s] += dp[s - x]
+%o A387389     return int(dp[half]/2) #-> to not count {X}={Y} and {Y}={X} as two different solutions
+%o A387389 #---- Generate Sequence -----
+%o A387389 max_n = 15 #number of terms
+%o A387389 sequence = []
+%o A387389 for n in range(1, max_n):
+%o A387389     p_N_exists = False
+%o A387389     N=1
+%o A387389     while p_N_exists==False:
+%o A387389         partes = partitions_distinct(2*N)
+%o A387389         for p in partes:
+%o A387389             subsets = count_half_subsets(p, 2*N)
+%o A387389             if subsets == n:
+%o A387389                 sequence.append(2*N)
+%o A387389                 p_N_exists = True
+%o A387389                 break
+%o A387389         N = N+1
+%Y A387389 Cf. A000009, A387388, A083206, A237258, A321452, A305551, A371791.
+%K A387389 nonn
+%O A387389 1,1
+%A A387389 _Jesús Bellver Arnau_, Aug 28 2025

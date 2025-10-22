@@ -1,0 +1,44 @@
+%I A383148 #23 Sep 22 2025 16:01:36
+%S A383148 12,18,20,24,30,40,42,54,56,60,66,78,84,88,90,102,104,114,120,132,138,
+%T A383148 140,168,174,186,196,204,222,224,234,246,252,258,264,270,280,282,308,
+%U A383148 312,318,348,354,360,364,366,368,380,402,414,420,426,438,440,456,464,468,474,476
+%N A383148 k-facile numbers: Numbers m such that the sum of the divisors of m is equal to 2*m+s where s is a product of distinct divisors of m.
+%C A383148 Subsequence of A005101 but seem to be much rarer.
+%H A383148 Charles R Greathouse IV, <a href="/A383148/b383148.txt">Table of n, a(n) for n = 1..10000</a>
+%H A383148 S. Flora Jeba, Anirban Roy, and Manjil P. Saikia, <a href="https://doi.org/10.1007/978-981-97-6798-4_9">On k-Facile Perfect Numbers</a>, Algebra and Its Applications (ICAA-2023), Springer Proc. Math. Stat., Vol. 474 (2025), 111-121.
+%e A383148 The sum of the divisors of 60 is 168, and 168 = 2*60 + 48, and 48 = 4*12 and 4 and 12 are divisors of 60, so 60 is in the sequence.
+%t A383148 q[m_] := Module[{d = Divisors[m], ab}, ab = Total[d] - 2*m; ab > 0 && AnyTrue[Subsets[d], Times @@ # == ab &]]; Select[Range[500], q] (* _Amiram Eldar_, Apr 18 2025 *)
+%o A383148 (SageMath)
+%o A383148 def facile_candidates(n):
+%o A383148     from itertools import combinations
+%o A383148     divs = divisors(n)
+%o A383148     sigma_n = sigma(n, 1)
+%o A383148     candidates = set()
+%o A383148     # Generate all products of distinct combinations of divisors
+%o A383148     for r in range(2, len(divs)+1):  # start from 2-element products to avoid m=n
+%o A383148         for combo in combinations(divs, r):
+%o A383148             product = prod(combo)
+%o A383148             if product < sigma_n:
+%o A383148                 candidates.add(product)
+%o A383148     return sorted(candidates)
+%o A383148 def find_facile_perfects(x):
+%o A383148     result = []
+%o A383148     for n in range(1, x+1):
+%o A383148         sig = sigma(n, 1)
+%o A383148         if sig < 2*n:
+%o A383148             continue
+%o A383148         candidates = facile_candidates(n)
+%o A383148         for m in candidates:
+%o A383148             if sig == 2*n + m:
+%o A383148                 print(n,m)
+%o A383148                 result.append(n)
+%o A383148                 break
+%o A383148     return result
+%o A383148 (PARI) prodDistinctDiv(n, k, f=factor(n))=my(D=divisors([n,f])); helper(D[2..#D], k)
+%o A383148 helper(v,k)=if(k==1, return(1)); v=select(d->k%d==0, v); if(#v<3, if(#v==2, return(v[2]==k || vecprod(v)==k)); return(#v && v[1]==k)); my(u=v[1..#v-1]); helper(u,k) || helper(u,k/v[#v])
+%o A383148 is(n,f=factor(n))=my(t=sigma([n,f])-2*n); t>1 && prodDistinctDiv(n, t, f) \\ _Charles R Greathouse IV_, Apr 24 2025
+%Y A383148 Subsequence of A005101.
+%Y A383148 Cf. A000203, A000396, A181595.
+%K A383148 nonn
+%O A383148 1,1
+%A A383148 _Joshua Zelinsky_, Apr 17 2025

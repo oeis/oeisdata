@@ -1,0 +1,59 @@
+%I A382630 #22 May 05 2025 09:43:12
+%S A382630 0,0,0,0,0,0,0,1,0,1,0,1,0,2,1,1,1,2,0,2,1,2,2,3,0,3,2,2,1,3,1,4,2,3,
+%T A382630 3,3,1,4,3,3,1,4,2,5,3,3,4,5,1,5,3,4,3,5,2,4,3,5,5,6,1,6,5,4,4,5,3,6,
+%U A382630 4,5,3,6,2,7,6,5,5,6,4,7,3,6,6,7,2,6,6,6,4,7,3,7
+%N A382630 a(n) is the number of ways that n can be written as b+c*d, where b, c and d are positive integers and b < c < d.
+%C A382630 24 is the largest number for which a(n) = 0.
+%C A382630 From _David A. Corneth_, Apr 04 2025: (Start)
+%C A382630 As b + c*d = n where b < c < d we have b is at its largest when c = b+1 and d = b+2 and so b <= sqrt(n + 2) - 2.
+%C A382630 Proof: c = b + 1 and d = b + 2 gives b + c*d = b + (b + 1)*(b + 2) = b^2 + 4*b + 2 <= n.
+%C A382630 Adding two to both sides gives b^2 + 4*b + 4 = (b + 2)^2 <= n + 2 and so b <= sqrt(n + 2) - 2.
+%C A382630 Once b is chosen, c*d = n - b and so we can look at divisor pairs (c, d) of n - b having b < c < d. (End)
+%H A382630 Robert Israel, <a href="/A382630/b382630.txt">Table of n, a(n) for n = 0..10000</a>
+%H A382630 Skolornas Matematiktävling, <a href="https://static1.squarespace.com/static/5fe101b108d85d5e817a934a/t/61af3326288f4528f5c5f1f4/1638871847097/Finalloesningar_2122.pdf">Finaltävling i Linköping den 20 november 2021</a> (Swedish)
+%e A382630 13 can be written as 1 + 3 * 4 and as 1 + 2 * 6, so a(13) = 2.
+%p A382630 N:= 100: # for a(0) .. a(N)
+%p A382630 V:= Array(0..N):
+%p A382630 for b from 1 while b + (b+1)*(b+2) <= N do
+%p A382630   for c from b+1 while b + c*(c+1) <= N do
+%p A382630     for d from c+1 do
+%p A382630       x:= b+c*d;
+%p A382630       if x > N then break fi;
+%p A382630       V[x]:= V[x]+1
+%p A382630 od od od:
+%p A382630 convert(V,list); # _Robert Israel_, May 04 2025
+%o A382630 (Python)
+%o A382630 # returns the first 100 terms as a list
+%o A382630 import numpy as np
+%o A382630 terms = 100
+%o A382630 a = np.zeros(terms)
+%o A382630 for d in range(3,terms // 2):
+%o A382630     for c in range(2,d):
+%o A382630         for b in range(1,c):
+%o A382630             val = b + c*d
+%o A382630             if val < terms:
+%o A382630                 a[val] += 1
+%o A382630 print(a)
+%o A382630 (PARI) a(n) = {
+%o A382630 	my(res = 0);
+%o A382630 	for(b = 1, sqrtint(n + 2) - 2,
+%o A382630 		d = divisors(n - b);
+%o A382630 		ind = setsearch(d, b+1, 1 - ((n-b) % (b+1) == 0));
+%o A382630 		res += max(0, #d\2 - ind + 1);	
+%o A382630 	);
+%o A382630 	res
+%o A382630 } \\ _David A. Corneth_, Apr 04 2025
+%o A382630 (PARI) first(n) = {
+%o A382630 	my(res = vector(n));
+%o A382630 	for(b = 1, sqrtint(n + 2),
+%o A382630 		for(c = b + 1, sqrtint(n - b - 1),
+%o A382630 			for(d = c + 1, (n - b) \ c,
+%o A382630 				res[b + c*d]++
+%o A382630 			);
+%o A382630 		);
+%o A382630 	);
+%o A382630 	concat(0, res)
+%o A382630 } \\ _David A. Corneth_, Apr 04 2025
+%K A382630 nonn
+%O A382630 0,14
+%A A382630 _Jonatan Djurachkovitch_, Apr 01 2025

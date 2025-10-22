@@ -1,0 +1,75 @@
+%I A387621 #23 Sep 13 2025 18:10:45
+%S A387621 1,2,3,4,9,8,15,14,5,12,25,6,35,16,21,10,7,18,49,20,63,22,57,11,54,55,
+%T A387621 52,45,46,39,44,27,40,33,38,51,32,17,30,119,26,105,13,102,65,99,50,93,
+%U A387621 34,87,28,81,56,75,58,69,29,66,145,64,135,62,129,31,126,155
+%N A387621 a(n) = n for n <= 3, a(n) = k such that k is not coprime to a(n-2) but k is coprime to a(n-1), with a(m) != k for m < n, looking first for the largest qualifying k < a(n-2), but if no such k exists, looking at the smallest k > a(n-2).
+%C A387621 A version of the Yellowstone sequence A098550 akin to A386482, the latter a sequence that is a variant of the EKG sequence A064413.
+%C A387621 This sequence is motivated by the fact that we find k in the cototient of a(n-2), hence we seek k < a(n-2) and if no such k is available, we seek k > a(n-2).
+%C A387621 Sequence A387731 is also a version of the Yellowstone sequence A098550 akin to A386482 with k first smaller than a(n-1) instead of a(n-2).
+%C A387621 First differs from A387731 for n >= 10; a(4576) = A387731(4576) = 5654.
+%H A387621 Michael De Vlieger, <a href="/A387621/b387621.txt">Table of n, a(n) for n = 1..16384</a>
+%H A387621 Michael De Vlieger, <a href="/A387621/a387621.png">Log log scatterplot of a(n)</a>, n = 1..2^20
+%H A387621 Michael De Vlieger, <a href="/A387621/a387621_1.png">Log log scatterplot of a(n)</a>, n = 1..2^14, showing primes in red, proper prime powers in gold, squarefree composites in green, and numbers neither squarefree nor prime powers in blue and purple, where purple indicates powerful numbers that are not prime powers.
+%H A387621 Michael De Vlieger, <a href="/A387621/a387621.txt">Efficient extensible Mathematica algorithm</a> (efficient for input that is a product of multiple large primes).
+%e A387621 Table of first 16 terms:
+%e A387621   n  a(n)  p-adic valuation:
+%e A387621            2 3 5 7
+%e A387621  --------------------------------------------
+%e A387621   1    1   .
+%e A387621   2    2   1
+%e A387621   3    3   . 1
+%e A387621   4    4   2
+%e A387621   5    9   . 2
+%e A387621   6    8   3
+%e A387621   7   15   . 1 1
+%e A387621   8   14   1 . . 1
+%e A387621   9    5   . . 1
+%e A387621  10   12   2 1
+%e A387621  11   25   . . 2
+%e A387621  12    6   1 1
+%e A387621  13   35   . . 1 1
+%e A387621  14   16   4
+%e A387621  15   21   . 1 . 1
+%e A387621  16   10   1 . 1
+%e A387621 a(4) = 4 because 4 is the smallest candidate k not coprime to a(2) = 2 but is coprime to a(3) = 3. There are no candidates k < 2 that satisfy.
+%e A387621 a(5) = 9 because 9 is the smallest k such that gcd(k,3)>1 and gcd(k,4)=1; there are no candidates k < 3 that satisfy.
+%e A387621 a(6) = 8 because 9 is the least k such that gcd(k,4)>1 and gcd(k,9)=1; there are no candidates k < 4 that satisfy.
+%e A387621 a(7) = 15 because 15 is the least k such that gcd(k,9)>1 and gcd(k,8)=1; 6 and 12 are not in the sequence, but also not coprime to 8.
+%e A387621 a(8) = 14 because 14 is the least k such that gcd(k,8)>1 and gcd(k,15)=1; 6, 10, and 12 are available but are also not coprime to 15.
+%e A387621 a(9) = 5 because 5 is the least k such that gcd(k,15)>1 and gcd(k,14)=1; 6 and 12 are available but even like 14.
+%e A387621 a(10) = 12 because 12 = a(8) - lpf(a(8)) = 14-2 is the least k such that gcd(k,14)>1 and gcd(k,5)=1. It is the very first candidate considered and happened to be available, etc.
+%t A387621 Block[{nn, c, i, j, k},
+%t A387621   nn = 120; c[_] := False; Set[{i, j}, {2, 3}]; c[1] = c[2] = c[3] = True;
+%t A387621   Range[3]~Join~
+%t A387621     Reap[
+%t A387621       Do[k = i - 1;
+%t A387621         While[And[k > 1, Or[c[k], CoprimeQ[i, k], ! CoprimeQ[j, k] ] ], k--];
+%t A387621         If[k == 1, k = i + 1;
+%t A387621           While[Or[c[k], CoprimeQ[i, k], ! CoprimeQ[j, k] ], k++] ];
+%t A387621         Set[{c[k], i, j}, {True, j, Sow[k]}], {n, 4, nn}] ][[-1, 1]] ]
+%o A387621 (Python)
+%o A387621 from math import gcd
+%o A387621 from itertools import count, islice
+%o A387621 def A387621_gen(): # generator of terms
+%o A387621     k,m,mset,c = 2,3, {1,2,3}, 4
+%o A387621     yield from (1,2,3)
+%o A387621     while True:
+%o A387621         for i in range(k-1,c-1,-1):
+%o A387621             if i not in mset and gcd(i,m)==1 and gcd(i,k)>1:
+%o A387621                 yield i
+%o A387621                 break
+%o A387621         else:
+%o A387621             for i in count(max(c,k+1)):
+%o A387621                 if i not in mset and gcd(i,m)==1 and gcd(i,k)>1:
+%o A387621                     yield i
+%o A387621                     break
+%o A387621         k, m = m, i
+%o A387621         mset.add(i)
+%o A387621         while c in mset:
+%o A387621             mset.remove(c)
+%o A387621             c += 1
+%o A387621 A387621_list = list(islice(A387621_gen(),30)) # _Chai Wah Wu_, Sep 10 2025
+%Y A387621 Cf. A051953, A098550, A386482, A387731 (starting with k < a(n-1) instead of a(n-2)).
+%K A387621 nonn
+%O A387621 1,2
+%A A387621 _Michael De Vlieger_, Sep 03 2025

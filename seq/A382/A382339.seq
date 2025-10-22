@@ -1,0 +1,51 @@
+%I A382339 #20 Apr 17 2025 07:03:42
+%S A382339 1,0,2,0,3,3,0,4,6,4,0,5,14,9,5,0,6,22,24,12,6,0,7,37,49,34,15,7,0,8,
+%T A382339 52,92,76,44,18,8,0,9,76,157,162,103,54,21,9,0,10,100,260,302,232,130,
+%U A382339 64,24,10,0,11,135,400,554,468,302,157,74,27,11
+%N A382339 Triangle read by rows: T(n,k) is the number of partitions of a 2-colored set of n objects into exactly k parts with 0 <= k <= n.
+%H A382339 Alois P. Heinz, <a href="/A382339/b382339.txt">Rows n = 0..200, flattened</a>
+%F A382339 T(n,1) = n + 1 for n >= 1.
+%F A382339 T(n,n) = n + 1.
+%F A382339 T(n,k) = A381891(n,k) - A381891(n,k-1) for k >= 1.
+%e A382339 Triangle begins:
+%e A382339  0 : [1]
+%e A382339  1 : [0,  2]
+%e A382339  2 : [0,  3,   3]
+%e A382339  3 : [0,  4,   6,   4]
+%e A382339  4 : [0,  5,  14,   9,   5]
+%e A382339  5 : [0,  6,  22,  24,  12,   6]
+%e A382339  6 : [0,  7,  37,  49,  34,  15,   7]
+%e A382339  7 : [0,  8,  52,  92,  76,  44,  18,   8]
+%e A382339  8 : [0,  9,  76, 157, 162, 103,  54,  21,  9]
+%e A382339  9 : [0, 10, 100, 260, 302, 232, 130,  64, 24, 10]
+%e A382339 10 : [0, 11, 135, 400, 554, 468, 302, 157, 74, 27, 11]
+%e A382339 ...
+%p A382339 b:= proc(n, i) option remember; expand(`if`(n=0 or i=1, (n+1)*x^n,
+%p A382339       add(b(n-i*j, min(n-i*j, i-1))*binomial(i+j, j)*x^j, j=0..n/i)))
+%p A382339     end:
+%p A382339 T:= (n, k)-> coeff(b(n$2), x, k):
+%p A382339 seq(seq(T(n, k), k=0..n), n=0..10);  # _Alois P. Heinz_, Mar 22 2025
+%t A382339 b[n_, i_] := b[n, i] = Expand[If[n == 0 || i == 1, (n + 1)*x^n, Sum[b[n - i*j, Min[n - i*j, i - 1]]*Binomial[i + j, j]*x^j, {j, 0, n/i}]]];
+%t A382339 T[n_, k_] := Coefficient[b[n, n], x, k];
+%t A382339 Table[Table[T[n, k], {k, 0, n}], {n, 0, 10}] // Flatten (* _Jean-François Alcover_, Apr 17 2025, after _Alois P. Heinz_ *)
+%o A382339 (Python)
+%o A382339 from sympy import binomial
+%o A382339 from sympy.utilities.iterables import partitions
+%o A382339 def t_row( n):
+%o A382339     if n == 0 : return [1]
+%o A382339     t = list( [0] * n)
+%o A382339     for p in partitions( n):
+%o A382339         fact = 1
+%o A382339         s = 0
+%o A382339         for k in p :
+%o A382339             s += p[k]
+%o A382339             fact *= binomial( k + p[k], p[k])
+%o A382339         if s > 0 :
+%o A382339             t[s - 1] += fact
+%o A382339     return [0] + t
+%Y A382339 Row sums are A005380.
+%Y A382339 The 1-color case is A008284.
+%Y A382339 Cf. A381891.
+%K A382339 nonn,tabl
+%O A382339 0,3
+%A A382339 _Peter Dolland_, Mar 22 2025

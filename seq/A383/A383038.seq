@@ -1,0 +1,65 @@
+%I A383038 #37 Aug 17 2025 09:48:03
+%S A383038 2,4,6,8,12,14,16,18,20,24,28,30,32,42,48,54,56,60,62,64,72,78,90,96,
+%T A383038 100,110,112,120,124,126,128,132,156,162,180,182,192,210,216,224,234,
+%U A383038 240,248,252,254,256,272,294,306,336,342,380,384,420,448,462,480,486,496,500
+%N A383038 Positive integers which can be expressed in the form b^r - b^s where b, r, and s are positive integers.
+%C A383038 Terms are all even because b^r - b^s == b - b == 0 (mod 2).
+%C A383038 From _David A. Corneth_, Apr 26 2025: (Start)
+%C A383038 By definition, b, s, r and b^r - b^s is positive. Therefore, r > s. If b = 1 then b^r - b^s = 1^r - 1^s = 0 which is excluded by default so b > 1. Suppose we look for terms <= U. Then b is maximal when (s, r) = (1, 2) i.e. b^2 - b <= U. Solving for b gives (sqrt(4*U + 1) + 1) / 2.
+%C A383038 As r > s >= 1, r >= 2.
+%C A383038 Once b is fixed, b^r - b^s is minimal when s = r-1, enabling the largest r.
+%C A383038 So we'd have b^r - b^(r-1) = (b - 1)*(b^(r-1)) <= U. Solving for r gives r <= log(U / (b - 1)) / log(b) + 1.
+%C A383038 Once b and r are fixed we have
+%C A383038 b^r - b^s <= U so b^r - U <= b^s. Solving for s gives log(b^r - U) / log(b) <= s.
+%C A383038 Summarizing we have
+%C A383038 2 <= b <= (sqrt(4*U + 1) + 1) / 2,
+%C A383038 2 <= r <= log(U / (b - 1)) / log(b) + 1,
+%C A383038 log(b^r - U) / log(b) <= s <= r-1. (End)
+%H A383038 Karl-Heinz Hofmann, <a href="/A383038/b383038.txt">Table of n, a(n) for n = 1..10000</a>
+%e A383038 a(6) = 14 = 16 - 2 = 2^4 - 2^1.
+%e A383038 a(9) = 20 = 25 - 5 = 5^2 - 5^1.
+%e A383038 As _David A. Corneth_ said, we know r > s > 0 and b > 1, so r > 1, and the smallest value of b is 2. So b^r - b^s >= b^(r-1) >= 2^(r-1). So to prove 10 is not in the sequence, we only need to check up up to r=4, because for r=5, 2^(s-1) = 2^4 = 16 > 10. This means there are 6 combinations of (r, s) we need to check. We also know b^r - b^s == 0 (mod b) because s > 0, so we only need to check divisors of 10. So with b = 2 and s < r < 5, we get the terms {2, 4, 6, 8, 12, 14}. With b=5 the smallest term is 5^2 - 5^1 = 20, which is bigger than 10. For b>5, b^r - b^s >= b^2 - b > 5^2 - 5, so we don't need to check those values of b.
+%o A383038 (PARI) upto(n) = {n++; my(res = List());
+%o A383038     maxb = ceil((sqrtint(4*n + 1) + 1) / 2);
+%o A383038     for(b = 2, maxb,
+%o A383038         maxr = logint(n\(b-1), b) + 1;
+%o A383038         for(r = 2, maxr,
+%o A383038             mins = max(1, ceil(log(max(b^r - n, 1)) / log(b)));
+%o A383038             mins = min(mins, r-1); \\ min() to fix messed up rounding when b^r - n is a power of b. Also solved by increasing n by 1 initially (n++).
+%o A383038             forstep(s = r-1, mins, -1,
+%o A383038                 c = b^r - b^s;
+%o A383038                 listput(res, c);
+%o A383038             );
+%o A383038         );
+%o A383038     );
+%o A383038     Set(res)
+%o A383038 } \\ _David A. Corneth_, Apr 26 2025
+%o A383038 (Python)
+%o A383038 from sympy import integer_nthroot
+%o A383038 aupto = 500
+%o A383038 b_max, A383038 = (i := integer_nthroot(aupto,2))[0] + 2 - i[1], set()
+%o A383038 for b in range(2, b_max):
+%o A383038     r, s = 2, 1
+%o A383038     while (br:=b**r) - b**s <= aupto:
+%o A383038         while s > 0 and (res := br - b**s) <= aupto: A383038.add(res); s -= 1
+%o A383038         r += 1
+%o A383038         s = r - 1
+%o A383038 print(sorted(A383038)) # _Karl-Heinz Hofmann_, Apr 29 2025
+%o A383038 (Julia)
+%o A383038 function A383038List(limit::Int)
+%o A383038     res = Set{Int}()
+%o A383038     for b in 2:floor(Int, sqrt(limit)) + 2
+%o A383038         for r in 2:limit
+%o A383038             valr = b^(r-1) * (b-1)
+%o A383038             valr > limit && break
+%o A383038             br = b^r
+%o A383038             for s in 1:r-1
+%o A383038                 val = br - b^s
+%o A383038                 val > 0 && val <= limit && push!(res, val)
+%o A383038     end end end
+%o A383038     sort(collect(res)) end
+%o A383038 println(A383038List(500))  # _Peter Luschny_, Aug 17 2025
+%Y A383038 The terms of the case b=2 are in A043569.
+%K A383038 nonn
+%O A383038 1,1
+%A A383038 _Boas Bakker_, Apr 13 2025

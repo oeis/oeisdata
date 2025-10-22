@@ -1,0 +1,30 @@
+%I A385185 #55 Sep 08 2025 00:39:13
+%S A385185 1,2,2,8,4,16,24,144,36,164,192,1168,976,5688,10656,91392,11424,67032,
+%T A385185 61840,403568,258956,1589080,2520324,22646880,10898976,67039504,
+%U A385185 93326800,819193248,924489888,7399407552,16309883520,187499658240,11718728640,96818811456,71979698880
+%N A385185 Number of permutations of 0..n-1 which are binary Gray codes.
+%C A385185 In a binary Gray code, the binary expansions of any two consecutive terms differ at a single bit position.
+%C A385185 When n is odd, the binary weights of n and the first term in the permutation must have opposite parity, since otherwise it's not possible to step through all of 0,...,n-1.
+%F A385185 a(2^n) = A091299(n).
+%F A385185 a(2^n+1) = a(2^n)/2^(n-1) for n > 0. - _Andrew Howroyd_, Aug 04 2025
+%e A385185 For n=5, the a(5) = 4 possible permutations which are Gray codes are
+%e A385185   1 3 2 0 4
+%e A385185   2 3 1 0 4
+%e A385185   4 0 1 3 2
+%e A385185   4 0 2 3 1
+%e A385185 For n=8, a(8) = 144 includes 0 1 3 2 6 4 5 7 which is lexicographically smallest, and also includes the binary reflected Graycode 0 1 3 2 6 7 5 4.
+%o A385185 (MATLAB)
+%o A385185 function N = Gcode(L); H = hmap; N = 0; unused = uint8([0: L-1]); for i = 1:length(unused); g = unused(i); u = unused; u(i) = []; gray(g, u); end
+%o A385185 function gray(g, u); curidx = g(end) + 1; d = H(curidx,:); if isscalar(u); if d(u+1); N = N + 1; end; else for j = 1: length(u); r = u(j); if d(r+1); nextg = [g r]; nextu = u; nextu(j) = []; gray(nextg, nextu); end; end; end; end
+%o A385185 function map = hmap; map = false(L, L); S = uint8([0:L-1]); [X,Y] = meshgrid(S); X = X(:); Y = Y(:);
+%o A385185 xb = de2bi(X); yb = de2bi(Y); for k = 1:L^2; v = sum(bitxor(xb(k,:), yb(k,:))); if v == 1; map(k) = true; end; end; end; end
+%o A385185 (PARI)
+%o A385185 f(i, r, s) = if(s, foreach(v[i], x, if(bitand(r, 1<<x), f(x, bitxor(r, 1<<x), s-1))), c++);
+%o A385185 g(i, j, r, s) = if(s, my(t); foreach(v[i], x, if(bitand(r, 1<<x), t=bitxor(r, 1<<x); f(x, t, s-1); foreach(v[j], y, if(bitand(t, 1<<y), g(x, y, bitxor(t, 1<<y), s-2))))); foreach(v[j], y, if(bitand(r, 1<<y), f(y, bitxor(r, 1<<y), s-1))), c++);
+%o A385185 a(n) = if(n>1, c=0; v=vector(n, i, List([])); my(t); for(i=2, n, for(j=1, i-1, t=bitxor(i-1, j-1); if(!bitand(t, t-1), listput(v[i], j); listput(v[j], i)))); t=2^(n+1)-4; f(1, t, n-1); for(i=2, #v[1], for(j=1, i-1, g(v[1][i], v[1][j], t-2^v[1][i]-2^v[1][j], n-3))); 2*c, 1); \\ _Jinyuan Wang_, Sep 07 2025
+%Y A385185 Cf. A091299, A350784 (when beginning with 0).
+%K A385185 nonn
+%O A385185 1,2
+%A A385185 _Ross Drewe_, Aug 03 2025
+%E A385185 a(27)-a(33) from _Andrew Howroyd_, Aug 04 2025
+%E A385185 a(34)-a(35) from _Jinyuan Wang_, Sep 06 2025

@@ -1,0 +1,56 @@
+%I A388655 #47 Oct 06 2025 23:58:15
+%S A388655 0,1,1,5,2,5,1,1,5,1,1,5,2,5,1,1,5,2,5,1,1,5,2,5,2,5,1,1,5,2,5,1,1,5,
+%T A388655 1,1,5,2,5,1,1,5,2,5,2,5,1,1,5,1,1,5,2,5,1,1,5,2,5,2,5,1,1,5,2,5,1,1,
+%U A388655 5,2,5,1,1,5,1,1,5,2,5,1,1,5,2,5,2,5,1,1,5,1,1,5,2,5,1,1,5,2,5,1,1
+%N A388655 Continued fraction expansion of 6*Sum_{k>=0} 12^(-2^k).
+%C A388655 All sums of the form:
+%C A388655 Sum_{k>=1} 1 / Product_{j=0..k-1} m_j^(2^(k-1-j)), m_0=2, m_j>=2 in N,
+%C A388655 have the continued fraction expansion form of A157196 (Cloitre's self describing sequence) in blocks of '1, 1' and '2', and those blocks interleave terms of the form m_j - 1 that occur in ruler order, i.e., m_(v2(j)+1) - 1, where v2 is the 2-adic valuation.
+%C A388655 m_j can be any integer or function that's output or value is an integer greater than or equal to 2. If it is a constant, the order is the degenerate case, it will repeat forever.
+%C A388655 Examples, all m_0=2:
+%C A388655 m_j = binomial(2^(j+1), 2^j) = [0; 1, 1, 5, 2, 69, 1, 1, 5, 1, 1, 12869, 2, 5, 1, 1, 69...] = A387398 - 1.
+%C A388655 m_j = 4*j+2 = [0; 1, 1, 5, 2, 9, 1, 1, 5, 1, 1, 13, 2, 5, 1, 1, 9, 2, 5, 1, 1, 17, 2, 5, 2, 9...].
+%C A388655 m_j = 70 = [0; 1, 1, 69, 2, 69, 1, 1, 69, 1, 1, 69, 2, 69, 1, 1, 69, 2, 69, 1, 1, 69, 2, 69, 2, 69, 1, 1, 69, 2,...].
+%C A388655 m_j = 2*3^j = [0; 1, 1, 5, 2, 17, 1, 1, 5, 1, 1, 53, 2, 5, 1, 1, 17, 2, 5, 1, 1, 161, 2, 5, 2, 17,...].
+%C A388655 m_j = 2 = [0; 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 2,...] = A006466 - 1.
+%C A388655 m_j = 2*prime(j+1) = [0; 1, 1, 5, 2, 9, 1, 1, 5, 1, 1, 13, 2, 5, 1, 1, 9, 2, 5, 1, 1, 21, 2, 5, 2, 9,...].
+%C A388655 m_j = 2026 = [0; 1, 1, 2025, 2, 2025, 1, 1, 2025, 1, 1, 2025, 2, 2025, 1, 1, 2025, 2, 2025, 1, 1, 2025, 2, 2025, 2, 2025,...].
+%C A388655 Of course setting m_j = 1 does not give Cloitre's A157196 interleaved, as it violates the criteria by being less than 2, but recovers the famous A007400 = [0; 1, 4, 2, 4, 4, 6, 4, 2, 4, 6, 2, 4, 6, 4, 4, 2, 4, 6, 2, 4, 4,...].
+%C A388655 Setting m_j = 6 gives this sequence.
+%H A388655 Daniel Hoyt, <a href="/A388655/b388655.txt">Table of n, a(n) for n = 0..999</a>
+%H A388655 Daniel Hoyt, <a href="https://doi.org/10.5281/zenodo.16990656">Proof of the continued fraction formula.</a>, Zenodo, 2025, pp 5-6.
+%F A388655 This sequence is an interleaving of the blocks of '1, 1' and '2' in A157196, and the number 5.
+%e A388655 0.541956032472600912653924602601... = 0 + 1/(1 + 1/(1 + 1/(5 + 1/(2 + ...)))).
+%o A388655 (PARI)
+%o A388655 contfrac(suminf(k=1, 1/prod(j=0, k-1, (if(j, 6, 2))^(2^(k-1-j)))) )
+%o A388655 (Python)
+%o A388655 def A388655(n):
+%o A388655     if n < 0: raise ValueError("n>=0")
+%o A388655     if n == 0: return 0
+%o A388655     s=[1, 1]; h=2; p=0; idx=0; r=1
+%o A388655     while True:
+%o A388655         while len(s) < p+2:
+%o A388655             t = 2 if (h & 1) == 0 else 1
+%o A388655             s += [t]*((s[h-1]*2)//t); h += 1
+%o A388655         if s[p]==2:
+%o A388655             p+=1; idx+=1
+%o A388655             if idx==n: return 2
+%o A388655             K=((r & -r).bit_length()-1)+1
+%o A388655             idx+=1
+%o A388655             if idx==n: return int(5)
+%o A388655         elif p+1<len(s) and s[p]==1 and s[p+1]==1:
+%o A388655             p+=2; idx+=1
+%o A388655             if idx==n: return 1
+%o A388655             idx+=1
+%o A388655             if idx==n: return 1
+%o A388655             K=((r & -r).bit_length()-1)+1
+%o A388655             idx+=1
+%o A388655             if idx==n: return int(5)
+%o A388655         else:
+%o A388655             continue
+%o A388655         r+=1
+%Y A388655 Cf. A006466, A007400, A014577, A157196, A387398.
+%Y A388655 Cf. A388852 (decimal expansion).
+%K A388655 nonn,cofr
+%O A388655 0,4
+%A A388655 _Daniel Hoyt_, Sep 19 2025

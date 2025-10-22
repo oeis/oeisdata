@@ -1,0 +1,62 @@
+%I A385925 #12 Jul 22 2025 16:04:48
+%S A385925 2,3,3,5,5,7,7,7,7,11,11,13,13,11,13,17,13,19,17,19,19,23,23,19,23,19,
+%T A385925 23,29,23,31,29,29,31,23,31,37,37,31,31,41,37,43,41,43,43,47,47,47,41,
+%U A385925 47,43,53,47,41,53,47,47,59,59,61,61,61,53,59,59,67,61
+%N A385925 a(n) = denominator q of prime-fraction p/q that minimizes |m/n - p/q| with m/n != p/q, where p is 1 or prime, q is prime, q < n, and 1 <= m <= n-1.
+%C A385925 p/q is a closest prime-fraction to m/n, without p/q = m/n, in the sense that if s/t is a fraction of primes (or 1/t with t prime) with t<n, then |m/n - p/q| <= |m/n - s/t|. For n>=3, as m ranges from 1 to n-1, there is a prime-fraction p/q (or a fraction 1/q) that minimizes |m/n - p/q|; that q is a(n). This sequence is comparable to A007917; however, for example, a(16) = 11, but A007917(16)=13.
+%e A385925 In the following table, columns 1-4 give values for the closest prime-fraction p/q to m/n. Column 5 shows a comparison: < if p/q < m/n and > if p/q > m/n. Column 6 gives an approximation for the minimal distance |m/n - p/q|.
+%e A385925   n	m	p	 q     comp. 	min. dist.
+%e A385925   3	1	1	 2	>	0.166667
+%e A385925   4	1	1	 3	>	0.0833333
+%e A385925   5	2	1	 3	<	0.0666667
+%e A385925   6	1	1	 5	>	0.0333333
+%e A385925   7	3	2	 5	<	0.0285714
+%e A385925   8	1	1	 7	>	0.0178571
+%e A385925   9	4	3	 7	<	0.015873
+%e A385925  10	3	2	 7	<	0.0142857
+%e A385925  11	3	2	 7	>	0.012987
+%e A385925  12	1	1	11	>	0.00757576
+%e A385925  13	6	5	11	<	0.00699301
+%e A385925  14	1	1	13	>	0.00549451
+%e A385925  15	8	7	13	>	0.00512821
+%e A385925  16	3	2	11	<	0.00568182
+%e A385925  17	4	3	13	<	0.00452489
+%e A385925  18	1	1	17	>	0.00326797
+%e A385925  19	3	2	13	<	0.00404858
+%e A385925  20	1	1	19	>	0.00263158
+%e A385925  21      16      13	17	>	0.00280112
+%e A385925  22      15      13	19	>	0.00239234
+%e A385925  23	6	5	19	>	0.00228833
+%e A385925  24	1	1	23	>	0.00181159
+%e A385925  25      12      11	23	<	0.00173913
+%e A385925  26      15      11	19	>	0.00202429
+%e A385925  27      20      17	23	<	0.00161031
+%e A385925  28      25      17	19	>	0.0018797
+%e A385925  29      24      19	23	<	0.00149925
+%e A385925 |3/16 - 2/11| = 0.0056818...< |3/16 - s/t| for all other prime-fractions s/t having  t<16.
+%t A385925 ClosestPrimeFraction[m_, n_] :=
+%t A385925  Module[{primes, qList, pList, fractions, distances, minIndex, p, q},
+%t A385925   If[GCD[m, n] != 1, Return[Infinity]];
+%t A385925   qList = Select[Prime[Range[PrimePi[n - 1]]], # < n &];
+%t A385925   fractions = Flatten[Table[pList = Join[{1}, Prime[Range[PrimePi[2*n]]]];
+%t A385925   Table[{p, q}, {p, pList}], {q, qList}], 1];
+%t A385925   distances = Abs[N[#[[1]]/#[[2]] - m/n]] & /@ fractions;
+%t A385925   minIndex = First[Position[distances, Min[distances]][[1]]];
+%t A385925   {p, q} = fractions[[minIndex]]; {Min[distances], p, q}]
+%t A385925 MinDistancePrimeFractions[] :=
+%t A385925  Module[{nRange, results, m, n, minDistance, bestM, bestP, bestQ,
+%t A385925  distance, p, q, comparison}, nRange = Range[3, 100];
+%t A385925  results = Table[minDistance = Infinity;
+%t A385925  bestM = 0; bestP = 0; bestQ = 0; comparison = "";
+%t A385925  Do[If[GCD[m, n] == 1, {distance, p, q} = ClosestPrimeFraction[m, n];
+%t A385925  If[distance < minDistance, minDistance = distance;
+%t A385925  bestM = m; bestP = p; bestQ = q;
+%t A385925  comparison = If[N[p/q] < N[m/n], "<", ">"];]], {m, 1, n - 1}];
+%t A385925  {n, bestM, bestP, bestQ, comparison, minDistance}, {n, nRange}]; results]
+%t A385925 results = MinDistancePrimeFractions[];
+%t A385925 mSequence = results[[All, 2]]; pSequence = results[[All, 3]]; qSequence = results[[All, 4]];
+%t A385925 Print[TableForm[results, TableHeadings -> {None, {"n", "m", "p", "q", "Comparison", "Distance"}}]];
+%Y A385925 Cf. A000040, A007917, A385926, A385927.
+%K A385925 nonn,frac
+%O A385925 3,1
+%A A385925 _Clark Kimberling_, Jul 13 2025

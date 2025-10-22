@@ -1,0 +1,42 @@
+%I A386363 #19 Jul 23 2025 02:05:14
+%S A386363 1,0,1,0,1,1,0,1,2,2,0,2,6,8,8,0,8,32,50,56,56,0,56,280,480,608,640,
+%T A386363 640,0,640,3840,6880,9280,10680,10960,10960,0,10960,76720,140800,
+%U A386363 196480,237760,260800,264640,264640,0,264640,2117120,3942720,5607040,6982400,7968000,8505040,8581760,8581760
+%N A386363 Variation of triangle of Entringer numbers (A008281) read by rows: T(n, k) = T(n, k-1) + (n-2)*T(n-1, n-k) for 1 < k <= n, T(n, 1) = T(n-1, n-1) for n > 0, T(n, 0) = 0^n.
+%H A386363 Paolo Xausa, <a href="/A386363/b386363.txt">Table of n, a(n) for n = 0..11475</a> (rows 0..150 of triangle, flattened).
+%e A386363 Triangle begins:
+%e A386363   1;
+%e A386363   0,     1;
+%e A386363   0,     1,     1;
+%e A386363   0,     1,     2,      2;
+%e A386363   0,     2,     6,      8,      8;
+%e A386363   0,     8,    32,     50,     56,     56;
+%e A386363   0,    56,   280,    480,    608,    640,    640;
+%e A386363   0,   640,  3840,   6880,   9280,  10680,  10960,  10960;
+%e A386363   0, 10960, 76720, 140800, 196480, 237760, 260800, 264640, 264640;
+%p A386363 T := proc(n, k) option remember; ifelse(k = 0, 0^n, ifelse(k = 1, T(n-1, n-1), T(n, k-1) + (n - 2)*T(n-1, n-k))) end: seq(seq(T(n, k), k = 0..n), n = 0..9); # _Peter Luschny_, Jul 19 2025
+%t A386363 A386363[n_, k_] := A386363[n, k] = Switch[k, 0, Boole[n == 0], 1, A386363[n-1, n-1], _, A386363[n, k-1] + (n-2)*A386363[n-1, n-k]];
+%t A386363 Table[A386363[n, k], {n, 0, 10}, {k, 0, n}] (* _Paolo Xausa_, Jul 21 2025 *)
+%o A386363 (PARI) rows_upto(n) = {my(v1, v2, v3);
+%o A386363 v1 = vector(n+1, i, 0); v1[1] = 1;
+%o A386363 v2 = vector(n+1, i, 0); v2[1] = [1];
+%o A386363 for(i=1, n, v3 = v1; v1[1] = 0; v1[2] = v3[i];
+%o A386363 for(j=2, i, v1[j+1] = v1[j] + (i-2)*v3[i-j+1]);
+%o A386363 v2[i+1] = vector(i+1, j, v1[j])); v2}
+%o A386363 (Python)
+%o A386363 from functools import cache
+%o A386363 @cache
+%o A386363 def seidel(n: int)-> list[int]:
+%o A386363     if n == 0: return [1]
+%o A386363     rowA = seidel(n - 1)
+%o A386363     row = [0] + seidel(n - 1)
+%o A386363     row[1] = row[n]
+%o A386363     for k in range(2, n + 1):
+%o A386363         row[k] = row[k - 1] + (n - 2) * rowA[n - k]
+%o A386363     return row
+%o A386363 def A386363row(n: int) -> list[int]: return seidel(n)
+%o A386363 for n in range(10): print(A386363row(n))  # _Peter Luschny_, Jul 20 2025
+%Y A386363 Cf. A008281, A386381 (main diagonal).
+%K A386363 nonn,tabl
+%O A386363 0,9
+%A A386363 _Mikhail Kurkov_, Jul 19 2025

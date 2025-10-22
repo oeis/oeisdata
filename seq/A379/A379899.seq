@@ -1,0 +1,48 @@
+%I A379899 #24 Jan 14 2025 01:53:54
+%S A379899 2,3,7,11,5,13,17,29,37,41,53,19,23,31,43,47,59,67,71,79,83,103,107,
+%T A379899 127,131,139,151,163,167,179,61,73,89,97,101,109,113,137,149,157,173,
+%U A379899 181,193,197,229,233,241,257,269,277,281,293,313,317,337,349,353,373
+%N A379899 a(1) = 2. For n > 1, a(n) = smallest prime factor of c=a(n-1)+4 that is not in {a(1), ..., a(n-1)}; if all prime factors of c are in {a(1), ..., a(n-1)}, then we try the next value of c, which is c+4; and so on.
+%C A379899 The following are some statistics about how many terms of the sequence are required, so that the first k primes are included:
+%C A379899 - The first 10^2 terms include the first 95 primes.
+%C A379899 - The first 10^3 terms include the first 697 primes.
+%C A379899 - The first 10^4 terms include the first 6783 primes.
+%C A379899 - The first 10^5 terms include the first 98563 primes.
+%C A379899 Conjecture: this sequence is a permutation of the primes.
+%H A379899 Robert C. Lyons, <a href="/A379899/b379899.txt">Table of n, a(n) for n = 1..10000</a>
+%e A379899 a(2) is 3 because the prime factors of c=a(1)+4 (i.e., 6) are 2 and 3, and 2 already appears in the sequence as a(1).
+%e A379899 a(6) is 13 because the only prime factor of c=a(5)+4 (i.e., 9) is 3 which already appears in the sequence as a(2). The next value of c (i.e., c+4) is 13, which is prime and does not already appear in the sequence.
+%p A379899 b:= proc(n) option remember; `if`(n<1, {}, b(n-1) union {a(n)}) end:
+%p A379899 a:= proc(n) option remember; local c, p; p:= infinity;
+%p A379899       for c from a(n-1)+4 by 4 while p=infinity do
+%p A379899         p:= min(numtheory[factorset](c) minus b(n-1)) od; p
+%p A379899     end: a(1):=2:
+%p A379899 seq(a(n), n=1..200);  # _Alois P. Heinz_, Jan 11 2025
+%t A379899 nn = 120; c[_] := True; j = 2; s = 4; c[2] = False;
+%t A379899 Reap[Do[m = j + s;
+%t A379899   While[k = SelectFirst[FactorInteger[m][[All, 1]], c];
+%t A379899     ! IntegerQ[k], m += s];
+%t A379899 c[k] = False; j = Sow[k], {nn}] ][[-1, 1]] (* _Michael De Vlieger_, Jan 11 2025 *)
+%o A379899 (Python)
+%o A379899 from sympy import primefactors
+%o A379899 seq = [2]
+%o A379899 seq_set = set(seq)
+%o A379899 max_seq_len=100
+%o A379899 while len(seq) <= max_seq_len:
+%o A379899     c = seq[-1]
+%o A379899     done = False
+%o A379899     while not done:
+%o A379899         c = c + 4
+%o A379899         factors = primefactors(c)
+%o A379899         for factor in factors:
+%o A379899             if factor not in seq_set:
+%o A379899                 seq.append(factor)
+%o A379899                 seq_set.add(factor)
+%o A379899                 done = True
+%o A379899                 break
+%o A379899 print(seq)
+%Y A379899 Cf. A031439, A072268, A131200, A174162, A379652, A379648, A379775, A379776, A379783.
+%Y A379899 Cf. A379784, A379900, A380075, A380076.
+%K A379899 nonn
+%O A379899 1,1
+%A A379899 _Robert C. Lyons_, Jan 05 2025

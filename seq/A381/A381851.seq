@@ -1,0 +1,33 @@
+%I A381851 #27 May 29 2025 00:54:24
+%S A381851 10,20,40,80,224,448,2176,24640,98816,287744,3771392,5637632,6508544,
+%T A381851 323903488,1126252544,7698939904,20511260672,249460531200,
+%U A381851 857557762048,582799458304,11797582053376,24614476447744,591901367468032,1314105503776768,5988418763882496
+%N A381851 a(n) is the least number k such that both k and k - s have n prime divisors, counted with multiplicity, where s is the sum of the decimal digits of k.
+%C A381851 k - s is always divisible by 9, so a(1) does not exist.
+%C A381851 a(n) <= A383665(n) if A383665(n) exists.
+%F A381851 A001222(a(n)) = A001222(A066568(a(n))) = n
+%e A381851 a(4) = 40 because 40 has sum of digits 4, both 40 = 2^3 * 5 and 40 - 4 = 36 = 2^2 * 3^2 have 4 prime divisors, counted with multiplicity, and no number < 40 works.
+%p A381851 f:= proc(n) uses priqueue; local pq, t,x,s,p,i;
+%p A381851       initialize(pq);
+%p A381851       insert([-2^n, 2$n], pq);
+%p A381851       do
+%p A381851         t:= extract(pq);
+%p A381851         x:= -t[1];
+%p A381851         s:= convert(convert(x,base,10),`+`);
+%p A381851         if numtheory:-bigomega(x-s) = n then return x fi;
+%p A381851         p:= nextprime(t[-1]);
+%p A381851         for i from n+1 to 2 by -1 while t[i] = t[-1] do
+%p A381851           insert([t[1]*(p/t[-1])^(n+2-i), op(t[2..i-1]), p$(n+2-i)], pq)
+%p A381851         od;
+%p A381851       od;
+%p A381851 end proc:
+%p A381851 map(f, [$2..21]);
+%o A381851 (PARI)
+%o A381851 generate(A, B, n, k) = A=max(A, 2^n); (f(m, p, n) = my(list=List()); if(n==1, forprime(q=max(p, ceil(A/m)), B\m, my(s=sumdigits(m*q)); if(m*q > s && bigomega(m*q-s) == k, listput(list, m*q))), forprime(q=p, sqrtnint(B\m, n), list=concat(list, f(m*q, q, n-1)))); list); vecsort(Vec(f(1, 2, n)));
+%o A381851 a(n) = my(x=2^n, y=2*x); while(1, my(v=generate(x, y, n, n)); if(#v >= 1, return(v[1])); x=y+1; y=2*x); \\ _Daniel Suteu_, May 24 2025
+%Y A381851 Cf. A001222, A066568, A007953, A383665, A382996.
+%K A381851 nonn,base,hard
+%O A381851 2,1
+%A A381851 _Robert Israel_, May 06 2025
+%E A381851 a(22)-a(23) from _Michael S. Branicky_, May 07 2025
+%E A381851 a(24)-a(26) from _Daniel Suteu_, May 24 2025

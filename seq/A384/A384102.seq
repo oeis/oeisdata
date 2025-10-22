@@ -1,0 +1,33 @@
+%I A384102 #17 Jul 24 2025 05:27:36
+%S A384102 0,0,0,-1,0,1,0,1,-2,0,2,0,-2,-3,2,3,0,0,-4,-2,4,3,0,2,0,5,-4,2,4,0,
+%T A384102 -3,0,0,-5,3,5,-3,0,-8,0,3,-4,6,-9,0,4,0,-3,-10,-4,10,0,-5,3,-8,11,5,
+%U A384102 0,-12,3,12,-9,-5,-6,-4,13,5,6,-10,0,4,0,-4,-15,-7,-6,0,11,4,6,16,-5,-12,-17,12,-8,0,-4,-7,8,18,-5,7,-19,0,4,-9,5,-6
+%N A384102 Least x in absolute value, such that there exists y, |x| >= |y| > 0, such that n = |6xy + x + y|, or 0 if no such x exists. Choose x > 0 if x and -x are both possible.
+%C A384102 (6n-1, 6n+1) are twin primes iff a(n) = 0, that is, if there are no nonzero integers x, y such that n = |6xy + x + y|. (These n are listed in A002822, the complement is A067611.)
+%C A384102 a(n) <= (6*n-1)/5, with equality if 6*n+1 is prime and 6*n-1 is 5 times a prime. - _Robert Israel_, Jul 21 2025
+%H A384102 Robert Israel, <a href="/A384102/b384102.txt">Table of n, a(n) for n = 1..10000</a>
+%e A384102 For n = 1, 2 and 3, there are no nonzero x,y such that n = |6xy + x + y|, and (6n-1, 6n+1) = (5, 7), (11, 13) and (17, 19) are indeed twin primes.
+%e A384102 For n = 4 we have x = y = -1 such that |6xy + x + y| = |6 - 1 - 1| = 4 and (23, 25) is indeed not a twin prime pair.
+%p A384102 f:= proc(n) local V, C, t, m,v, r;
+%p A384102        V:= numtheory:-divisors(6*n+1) minus {1,6*n+1};
+%p A384102        C:= map(u -> `if`(u mod 6 = 1,  [(u-1)/6, ((6*n+1)/u - 1)/6], [(-u-1)/6, (-(6*n+1)/u - 1)/6]), V);
+%p A384102        V:= numtheory:-divisors(6*n-1) minus {1,6*n-1};
+%p A384102        C:= C union map(u -> `if`(u mod 6 = 1, [(u-1)/6, ((-6*n+1)/u - 1)/6], [(-u-1)/6, ((-6*n+1)/u - 1)/6]), V);
+%p A384102        C:= select(t -> abs(t[1]) >= abs(t[2]), C)[..,1];
+%p A384102        if C = {} then return 0 fi;
+%p A384102        m:= infinity;
+%p A384102        for t in C do
+%p A384102          if abs(t) < m then m:= abs(t); r:= t;
+%p A384102          elif abs(t) = m and t > 0 then r:= t
+%p A384102          fi
+%p A384102        od;
+%p A384102        r
+%p A384102  end proc:
+%p A384102 map(f, [$1..100]); # _Robert Israel_, Jul 21 2025
+%o A384102 (PARI) {A384102(n)=for(x=1,n\/5, my(p=6*x+1, q=6*x-1, r=if((n-x)%p==0, (n-x)\p, (n+x)%p==0, (n+x)\p, (n-x)%q==0, (x-n)\q, (n+x)%q==0,-(n+x)\q)); r && abs(r) <= x && return(sign(r)*x))}
+%Y A384102 Cf. A384103 (the corresponding y-values).
+%Y A384102 Cf. A002822 (indices of zeros: n such that 6n-1 and 6n+1 are twin primes).
+%Y A384102 Cf. A077800 (list of twin primes), A060461, A171696 (none among 6n+-1 is prime), A067611 (n = 6xy +- x +- y: 6n-1 or 6n+1 is composite).
+%K A384102 sign,look
+%O A384102 1,9
+%A A384102 _M. F. Hasler_, Jun 20 2025

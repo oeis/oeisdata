@@ -1,0 +1,48 @@
+%I A379761 #20 Jan 17 2025 07:02:24
+%S A379761 7,3,3,31,389,1021,2243,1831,5849,15361,9887,3877,4157,919,22637,
+%T A379761 14449,27617,80221,5039,51043,14009,126079,24443,68311,49193,47059,
+%U A379761 13049,253681,271409,221227,138869,116953,146297,21841,1211549,322501,212633,281791,216071,1901749,38747,116437
+%N A379761 Beginning with 7, least prime such that concatenation of first n terms and its digit reversal both are primes.
+%H A379761 J.W.L. (Jan) Eerland, <a href="/A379761/b379761.txt">Table of n, a(n) for n = 1..100</a>
+%e A379761 31 is a term because the concatenation of {7,3,3,31} and {13,3,3,7} are respectively 73331 and 13337 which are both prime.
+%e A379761 2243 is a term because the concatenation of {7,3,3,31,389,1021,2243} and {3422,1201,983,13,3,3,7} are respectively 7333138910212243 and 3422120198313337 which are both prime.
+%p A379761 rev:= proc(n) local L,i;
+%p A379761   L:= convert(n,base,10);
+%p A379761   add(L[-i]*10^(i-1),i=1..nops(L))
+%p A379761 end proc:
+%p A379761 tcat:= proc(a,b)
+%p A379761   a*10^(1+ilog10(b))+b
+%p A379761 end proc:
+%p A379761 A:= 7: x:= 7:
+%p A379761 for i from 1 to 50 do
+%p A379761    p:= 2:
+%p A379761    do
+%p A379761      p:= nextprime(p);
+%p A379761      y:= tcat(x,p);
+%p A379761      if isprime(y) and isprime(rev(y)) then
+%p A379761           A:= A,p;
+%p A379761           x:= y;
+%p A379761           break
+%p A379761      fi;
+%p A379761    od
+%p A379761 od:
+%p A379761 A; # after _Robert Israel_ in A113584
+%t A379761 w={7};Do[k=1;q=Monitor[Parallelize[While[True,If[PrimeQ[FromDigits[Join@@IntegerDigits/@Reverse[IntegerDigits[FromDigits[Join@@IntegerDigits/@Append[w,Prime[k]]]]]]]&&PrimeQ[FromDigits[Join@@IntegerDigits/@Append[w,Prime[k]]]],Break[]];k++];Prime[k]],{i,k}];w=Append[w,q],{i,2,50}];w
+%o A379761 (Python)
+%o A379761 from itertools import count, islice
+%o A379761 from gmpy2 import digits, is_prime, mpz, next_prime
+%o A379761 def agen(): # generator of terms
+%o A379761     s, r, an = "", "", 7
+%o A379761     while True:
+%o A379761         yield int(an)
+%o A379761         d = digits(an)
+%o A379761         s, r, p, sp = s+d, d[::-1]+r, 3, "3"
+%o A379761         while not is_prime(mpz(s+sp)) or not is_prime(mpz(sp[::-1]+r)):
+%o A379761             p = next_prime(p)
+%o A379761             sp = digits(p)
+%o A379761         an = p
+%o A379761 print(list(islice(agen(), 40))) # _Michael S. Branicky_, Jan 02 2025
+%Y A379761 Cf. A111382, A111383, A113584, A379354, A379355.
+%K A379761 base,nonn
+%O A379761 1,1
+%A A379761 _J.W.L. (Jan) Eerland_, Jan 02 2025

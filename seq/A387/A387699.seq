@@ -1,0 +1,42 @@
+%I A387699 #35 Sep 11 2025 06:59:38
+%S A387699 4301,7657,47311,73117,98923,99541,129301,145483,237367,506801,520421,
+%T A387699 804287,1088153,1242989,1294033,1347737,1681691,1891279,2275229,
+%U A387699 2764177,3085771,3187117,4008331,4509973,4675793,5559943,5724631,5871437,6085553,7358377,7615997,8847157
+%N A387699 Numbers k with more than one maximum clique containing k in the gcd-graph of {1, 2, ..., k}.
+%C A387699 We define the set V = {1, 2, 3, ..., n} as a graph, where the numbers represent the vertices, and edges connect numbers that share a common prime factor. We refer to this graph as the gcd-graph of {1, ..., n}. A clique in this graph is a subset of V in which any two numbers share at least one prime factor. We are particularly interested in 'maximum cliques', which are the largest cliques by size that contain n. The sizes of these maximum cliques are documented in A387543. The gcd-graph of n may have multiple maximum cliques of equal size containing n, but no larger one. Numbers that have more than one such maximum clique are the subject of the present sequence.
+%H A387699 Peter Luschny, <a href="/A387699/b387699.txt">Table of n, a(n) for n = 1..3000</a>
+%H A387699 Rudolf Ahlswede and Levon H. Khachatrian, <a href="https://www.math.uni-bielefeld.de/ahlswede/homepage/public/109.pdf">Sets of integers with pairwise common divisor and a factor from a specified set of primes</a>, Acta Arith. (1996), 259-276.
+%H A387699 Thomas Bloom, <a href="https://www.erdosproblems.com/534">Problem 534</a>, Erdős Problems.
+%H A387699 Peter Luschny, <a href="/A387699/a387699.txt">Python implementation</a>.
+%H A387699 Wikipedia, <a href="https://en.wikipedia.org/wiki/Clique_problem">Clique problem</a>.
+%e A387699 Proof that 4301 is a term in this sequence: Starting point is the prime factorization of 4301 = 11 * 17 * 23. The following construction outlines the basic structure of a (now proved) conjecture by Erdős (see links).
+%e A387699   Set S0 = {m <= 4301 : 11 | m}, size = 4301/11 = 391.
+%e A387699   Set S1 = {m <= 4301 : 22 | m}, size = 195.
+%e A387699   Set S2 = {m <= 4301 : 34 | m}, size = 126.
+%e A387699   Set S3 = {m <= 4301 : 46 | m}, size = 93.
+%e A387699   Set T0 = S1 U S2 U S3 U {4301}, size = 391.
+%e A387699   S0 != T0 because 11 is in S0 but not in T0, both S0 and T0 have size 391 and are a clique (every two elements share a prime factor), and no larger clique that contains 4301 exists.
+%t A387699 maximumClique[n_Integer?Positive] := Module[
+%t A387699   {primes, q = 1, l, counts, us, cp, kSet, j, sub, term},
+%t A387699   primes = FactorInteger[n][[All, 1]];
+%t A387699   If[primes === {}, Return[0]];
+%t A387699   counts = Table[
+%t A387699     q *= primes[[i]];
+%t A387699     cp = Take[primes, i];
+%t A387699     kSet = Union[2*cp, {q}];
+%t A387699     us = Sum[
+%t A387699       Sum[Floor[(n - 1)/LCM @@ s],
+%t A387699         {s, Subsets[kSet, {j}]}] * (-1)^(j - 1),
+%t A387699       {j, 1, Length[kSet]}];
+%t A387699     1 + us, {i, Length[primes]}];
+%t A387699   With[{maxL = Max[counts]},
+%t A387699     If[Count[counts, maxL] > 1, n, 0]]]
+%t A387699 A387699List[start_, len_] := Select[
+%t A387699   ParallelTable[maximumClique[n],
+%t A387699   {n, start, start + len - 1}], # =!= 0 & ]
+%t A387699 A387699List[1, 10000000]
+%o A387699 (Python) # See links.
+%Y A387699 Cf. A387543.
+%K A387699 nonn
+%O A387699 1,1
+%A A387699 _Peter Luschny_, Sep 08 2025

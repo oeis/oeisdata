@@ -1,0 +1,60 @@
+%I A388724 #12 Oct 06 2025 11:25:31
+%S A388724 0,0,0,0,0,1,0,0,0,1,0,0,0,0,1,0,0,0,1,0,1,0,0,0,1,1,0,1,0,0,0,0,1,1,
+%T A388724 0,1,0,0,0,0,1,1,1,0,1,0,0,0,0,1,1,1,1,0,1,0,0,0,0,2,2,1,1,1,0,1,0,0,
+%U A388724 0,0,1,2,2,1,1,1,0,1
+%N A388724 Triangle read by rows where T(n,k) is the number of strictly superdiagonal reversed integer partitions of n with maximum k.
+%C A388724 A sequence (y_1, ..., y_k) is strictly superdiagonal iff y_i > i for all i = 1..k.
+%H A388724 John Tyler Rascoe, <a href="/A388724/b388724.txt">Rows n = 0..100, flattened</a>
+%F A388724 Conjecture: Column sums are A000245.
+%F A388724 G.f.: A(q,t) = Sum_{m>0} P(m,q,t) where P(m,q,t) = 1 for m =< 0, P(m,q,t) = Pr(m,q,t) * t * q^m/(1 - t*q^m) for m > 0, Pr(m,q,t) = Sum_{j=1..m} q^((j/2)*(-j+2*m+3)-1) * t^j * Ca(j-1,q) * P(m-j,q,t), and Ca(n,q) is the n-th row polynomial of A227543. - _John Tyler Rascoe_, Oct 04 2025
+%e A388724 Row n = 16 counts the following partitions for k = 5..9:
+%e A388724   (2,4,5,5)  (4,6,6)    (2,7,7)    (8,8)    (7,9)
+%e A388724   (3,3,5,5)  (5,5,6)    (3,6,7)    (2,6,8)  (2,5,9)
+%e A388724   (3,4,4,5)  (2,3,5,6)  (4,5,7)    (3,5,8)  (3,4,9)
+%e A388724              (2,4,4,6)  (2,3,4,7)  (4,4,8)
+%e A388724              (3,3,4,6)
+%e A388724 Triangle begins:
+%e A388724   0
+%e A388724   0  0
+%e A388724   0  0  1
+%e A388724   0  0  0  1
+%e A388724   0  0  0  0  1
+%e A388724   0  0  0  1  0  1
+%e A388724   0  0  0  1  1  0  1
+%e A388724   0  0  0  0  1  1  0  1
+%e A388724   0  0  0  0  1  1  1  0  1
+%e A388724   0  0  0  0  1  1  1  1  0  1
+%e A388724   0  0  0  0  2  2  1  1  1  0  1
+%e A388724   0  0  0  0  1  2  2  1  1  1  0  1
+%e A388724   0  0  0  0  1  2  3  2  1  1  1  0  1
+%e A388724   0  0  0  0  0  2  2  3  2  1  1  1  0  1
+%e A388724   0  0  0  0  0  2  3  3  3  2  1  1  1  0  1
+%e A388724   0  0  0  0  0  4  3  3  3  3  2  1  1  1  0  1
+%e A388724   0  0  0  0  0  3  5  4  4  3  3  2  1  1  1  0  1
+%e A388724   0  0  0  0  0  3  5  6  4  4  3  3  2  1  1  1  0  1
+%e A388724   0  0  0  0  0  2  6  6  7  5  4  3  3  2  1  1  1  0  1
+%e A388724   0  0  0  0  0  1  4  8  7  7  5  4  3  3  2  1  1  1  0  1
+%e A388724   0  0  0  0  0  1  5  7  9  8  8  5  4  3  3  2  1  1  1  0  1
+%t A388724 suppstrQ[mset_]:=And@@Table[mset[[i]]>i,{i,Length[mset]}];
+%t A388724 Table[Length[Select[Reverse/@IntegerPartitions[n],Max@@#==k&&suppstrQ[#]&]],{n,0,15},{k,0,n}]
+%o A388724 (PARI)
+%o A388724 tri(n) = {(n*(n+1)/2)}
+%o A388724 b(n) = {floor(1/2+sqrt(2*n))}
+%o A388724 C(q, n) = {c = if(n<=1, return(1)); return(sum(i=0, n-1, C(q, i) * C(q, n-1-i) * q^((i+1)*(n-1 -i))));}
+%o A388724 Ca(n) = {polrecip(C(q,n))}
+%o A388724 A388724_q(rowmax) = {my(N = rowmax+1,pl= vector(b(N),i,1)); for(m=1,b(N), my(g = sum(j=1,m, q^(tri(j)+j*(m-j)+j-1) * t^j *Ca(j-1) * if(j<m,pl[m-j]/(1-t*q^(m-j)),1))); pl[m]=g); my(f = sum(m=1,b(N), t*q^m* pl[m]/(1-t*q^m))  + O('q^(N+1))); vector(N, n, if(n==2,[0,0],Vecrev(polcoeff(f, n-1))))} \\ _John Tyler Rascoe_, Oct 04 2025
+%Y A388724 Row sums are A238394 (complement A238395), non-strictly A238873.
+%Y A388724 The subdiagonal version is A387880.
+%Y A388724 The non-strictly version is A388713.
+%Y A388724 A000041 counts integer partitions, strict A000009.
+%Y A388724 A001522 counts partitions with a diagonal, complement A064428.
+%Y A388724 A003106 counts strictly superdiagonal partitions, strict A237979, ranks A352830.
+%Y A388724 A003114 counts superdiagonal partitions, complement A387118, strict partitions A025157.
+%Y A388724 A114088 counts partitions by excedances.
+%Y A388724 A115720 and A115994 count partitions by their Durfee square.
+%Y A388724 A352833 counts partitions by fixed points, reversed partitions A238352.
+%Y A388724 A370592 counts choosable partitions (ranks A368100), complement A370593 (ranks A355529).
+%Y A388724 Cf. A000700, A052335, A052337, A227543, A238875, A352828, A370585, A388710, A388711.
+%K A388724 nonn,tabl
+%O A388724 0,60
+%A A388724 _Gus Wiseman_, Sep 24 2025

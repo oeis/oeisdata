@@ -1,0 +1,38 @@
+%I A385741 #47 Jul 19 2025 17:50:15
+%S A385741 1,2,4,8,16,14,28,38,31,8,16,32,28,56,49,62,52,68,28,56,76,62,79,122,
+%T A385741 91,92,112,8,16,32,28,56,76,80,124,140,28,56,103,80,142,158,145,146,
+%U A385741 184,62,124,158,100,146,184,188,232,230,28,56,76,80,151,158,136,236
+%N A385741 a(n) = Sum_{k=0..n} (binomial(n, k) mod 9).
+%C A385741 Sum of n-th row of Pascal's triangle mod 9, A095143.
+%H A385741 Chai Wah Wu, <a href="/A385741/b385741.txt">Table of n, a(n) for n = 0..10000</a>
+%H A385741 James G. Huard, Blair K. Spearman, and Kenneth S. Williams, <a href="http://doi.org/10.4064/aa-78-4-331-349">Pascal's triangle (mod 9)</a>, Acta Arithmetica, 78 (1997), 331-349.
+%t A385741 a[n_]:=Sum[Mod[Binomial[n,k],9],{k,0,n}];Table[a[n],{n,0,61}] (* _James C. McMahon_, Jul 10 2025 *)
+%o A385741 (Python)
+%o A385741 from gmpy2 import digits
+%o A385741 import re, sympy
+%o A385741 from sympy import S, I, sqrt, simplify, Rational
+%o A385741 def A385741(n):
+%o A385741     s = digits(n,3)
+%o A385741     n1 = s.count('1')
+%o A385741     n2 = s.count('2')
+%o A385741     n01 = s.count('10')
+%o A385741     n02 = s.count('20')
+%o A385741     n11 = len(re.findall('(?=11)',s))
+%o A385741     n12 = s.count('21')
+%o A385741     n121 = len(re.findall('(?=121)',s))
+%o A385741     n122 = s.count('221')
+%o A385741     n21 = s.count('12')
+%o A385741     n22 = len(re.findall('(?=22)',s))
+%o A385741     x1 = (3*(3**n2*(12*n01+(n02<<4)+3*n11+(n12<<2))-(n01+n12<<2)+(n02<<4)+n11)<<n1)>>3
+%o A385741     beta = S.Half*(I*sqrt(3)-1)
+%o A385741     def ind2(t): return (0,0,1,0,2,5,0,4,3)[t]
+%o A385741     def X(t): return beta**(ind2(t)-n11-n12+n121-n122)*(2-beta)**(n21-n121)*(3+beta)**(n2-n12-n21-n22+n121+n122)
+%o A385741     def Y(t): return beta**(n11-ind2(t))*(1-beta)**(n21-n121)*(2+beta)**(n2-n21-n22)*(1+2*beta)**n121
+%o A385741     def f(t): return ((3**n2<<n1)+((1<<n1) if (t+1)%3 else -(1<<n1))+((-1 if (not (t+1)%3)+n11+n122&1 else 1)<<n1-n11+n122+1)*sympy.re(X(t))+((not n122)*(-1 if n11&1 else 1)*3**(n22-n122)<<n1-n11+1)*sympy.re(Y(t)))*Rational(1,6)
+%o A385741     x2 = simplify(sum(i*f(i) for i in (1,2,4,5,7,8)))
+%o A385741     return int(x1+x2)
+%o A385741 (PARI) a(n) = sum(k=0, n, binomial(n, k) % 9); \\ _Michel Marcus_, Jul 10 2025
+%Y A385741 Cf. A001316, A051638, A384715, A385285.
+%K A385741 nonn
+%O A385741 0,2
+%A A385741 _Chai Wah Wu_, Jul 09 2025

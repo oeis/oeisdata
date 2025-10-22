@@ -1,0 +1,47 @@
+%I A383779 #28 May 17 2025 01:48:50
+%S A383779 2,3,5,7,11,13,17,19,41,43,47,61,67,83,89,97,211,223,227,229,241,251,
+%T A383779 257,263,269,271,277,281,283,307,331,337,347,349,353,359,367,383,389,
+%U A383779 397,503,509,521,523,541,547,557,563,569,571,577,587,701,709,727,743,751,757,761,769,773,787
+%N A383779 Primes where successively deleting the least significant digit yields a sequence that alternates between a prime and a nonprime at every step until a single-digit number remains.
+%C A383779 Is this sequence infinite?
+%C A383779 Likely no, see A383780 and comment there. - _Michael S. Branicky_, May 11 2025
+%C A383779 From _Michael S. Branicky_, May 16 2025: (Start)
+%C A383779 Sequence is finite with 3356513448 terms (cf. A383780).
+%C A383779 Last term: 70123916363515199416199518301698321195339012727994799190371992151279729974757397909992327936943877127375781091143 (End)
+%H A383779 Michael S. Branicky, <a href="/A383779/b383779.txt">Table of n, a(n) for n = 1..20000</a>
+%H A383779 Michael S. Branicky, <a href="/A383779/a383779.txt">Largest even-length (= 108 digits) then odd-length (= 113 digits) terms</a>
+%e A383779 211 is a term since 211 is a prime, 21 is a nonprime, and 2 is a prime;
+%e A383779 23 is not a term since 23 and 2 are both prime.
+%t A383779 Unprotect[CompositeQ]; CompositeQ[1]:=True; Protect[CompositeQ]; Q[n_]:=And[AllTrue[FromDigits/@Table[Take[IntegerDigits[n], i], {i,IntegerLength[n],1,-2}], PrimeQ], AllTrue[FromDigits/@Table[Take[IntegerDigits[n], i], {i,IntegerLength[n]-1,1,-2}],CompositeQ]]; Select[Prime[Range[140]], Q]
+%o A383779 (Python)
+%o A383779 from gmpy2 import is_prime, mpz
+%o A383779 from itertools import count, islice
+%o A383779 def agen():
+%o A383779     olst, elst = [2, 3, 5, 7], [11, 13, 17, 19, 41, 43, 47, 61, 67, 83, 89, 97]
+%o A383779     yield from olst + elst
+%o A383779     for n in count(1):
+%o A383779         olst2, elst2 = [], []
+%o A383779         for o in olst:
+%o A383779             for i in range(1, 100, 2):
+%o A383779                 t = 100*o + i
+%o A383779                 if is_prime(t) and not is_prime(t//10):
+%o A383779                     olst2.append(t)
+%o A383779         yield from olst2
+%o A383779         for e in elst:
+%o A383779             for i in range(100):
+%o A383779                 t = 100*e + i
+%o A383779                 if is_prime(t) and not is_prime(t//10):
+%o A383779                     elst2.append(t)
+%o A383779         yield from elst2
+%o A383779         olst, elst = olst2, elst2
+%o A383779 print(list(islice(agen(), 70))) # _Michael S. Branicky_, May 11 2025
+%o A383779 (Python) # predicate test useful for large n (cf. a-file of largest terms)
+%o A383779 from gmpy2 import digits, is_prime, mpz
+%o A383779 def ok(n):
+%o A383779     s = digits(n)
+%o A383779     return is_prime(n) and all(int(is_prime(mpz(s[:-i]))) == 1-i&1 for i in range(1, len(s)))
+%o A383779     # _Michael S. Branicky_, May 16 2025
+%Y A383779 Cf. A024770, A069090, A383780, A383781.
+%K A383779 nonn,base,fini
+%O A383779 1,1
+%A A383779 _Stefano Spezia_, May 09 2025

@@ -1,0 +1,33 @@
+%I A383856 #27 Jun 16 2025 18:30:38
+%S A383856 1,1,1,1,1,1,1,1,2,4
+%N A383856 Dimension in which a random vector of length n has the highest probability to fall into a single hypercube with side length of 10.
+%C A383856 Conjecture: a(11)..a(16) are 5, 6, 8, 9, 11, 12 with at least 99.7% confidence (based on numerical simulation discussed below).
+%C A383856 Let L be the ratio of vector length to side length of a hypercube. If L <= 1 the probability P that a vector with random start and random orientation falls completely inside one hypercube can be calculated with one integral, e.g. in case of four dimensions: P_4(L) = (8/Pi^2)*Integral_{0..Pi/2} Integral_{0..Pi/2} Integral_{0..Pi/2} (1 - L * cos(x) * cos(y) * cos(z)) * (1 - L * sin(x) * cos(y) * cos(z)) * (1 - L * sin(y) * cos(z)) * (1 - L * sin(z)) * cos(y) * cos^2(z) dx dy dz = 1 - 16*L/(3*Pi) + 3*L^2/Pi - 32*L^3/(15*Pi^2) + L^4/(6*Pi^2). If L > 1, the probability needs to be integrated over multiple parts which leads to elliptical integrals in the case of three dimensions. Therefore for L > 1, numerical simulations were applied (see Python code below).
+%e A383856 The probability P_1(0.9) that a one-dimensional vector of length 9 with a random start point does not cross the grid lines spaced by 10 units equals 1 - L = 10% (L=9/10). The probability P_2(0.9) that a two-dimensional vector of the same length with a random start point and a random orientation does not cross the lines of a 10 X 10 grid equals (2/Pi) * Integral_{0..Pi/2} (1 - L * cos(x)) * (1 - L * sin(x)) dx = 1 - L*(4-L)/Pi = 11.2%. The probability P_3(0.9) that a random three-dimensional vector of the same length does not cross the lines of a 10 X 10 X 10 grid equals (2/Pi) * Integral_{0..Pi/2} Integral_{0..Pi/2} (1 - L * cos(x) * cos(y)) * (1 - L * sin(x) * cos(y)) * (1 - L * sin(y)) * cos(y) dx dy = 1 - 1.5 L + 2 L^2/Pi - L^3/(4*Pi) = 10.7%.
+%e A383856 The highest probability not to cross any grid line is in case of a two-dimensional vector and therefore a(9) = 2.
+%o A383856 (Python)
+%o A383856 def random_point_on_sphere(dim):
+%o A383856     vec = abs(np.random.normal(0, 1, dim))  # Sample from standard normal (only positive values)
+%o A383856     vec /= np.linalg.norm(vec)      # Normalize to unit length
+%o A383856     return vec
+%o A383856 L = 1.3  # pencil length, relative to hypercube side length
+%o A383856 nsample = 100000000
+%o A383856 for dim in range(7,10): # explore only dimensions which are interesting for length L
+%o A383856     count = 0
+%o A383856     for i in range(nsample):
+%o A383856         x0 = np.random.random(dim)  # start point of pencil
+%o A383856         pencil = L*random_point_on_sphere(dim)
+%o A383856         k=0
+%o A383856         while x0[k] + pencil[k] <= 1: # check dimension k if grid line is crossed
+%o A383856             if k == n-1:
+%o A383856                 count += 1
+%o A383856                 break
+%o A383856             else:
+%o A383856                 k += 1
+%o A383856     print(dim, count)
+%o A383856 p = count/nsample
+%o A383856 # if the difference in the counts is smaller than the confidence interval, repeat with a larger nsample
+%o A383856 print("Half-width of 99% confidence interval:", 2.58*sqrt(nsample*p*(1-p)))
+%K A383856 nonn,more,hard
+%O A383856 1,9
+%A A383856 _Ruediger Jehn_, May 12 2025

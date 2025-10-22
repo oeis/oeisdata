@@ -1,0 +1,70 @@
+%I A384870 #43 Jun 22 2025 23:42:55
+%S A384870 1,2,4,5,8,11,15,19,21,28,30,37,42,45,45
+%N A384870 The largest k such that the set {1^n, 2^n, ..., k^n} has uniquely distinct subset sums.
+%C A384870 a(15) >= 49. - _David A. Corneth_, Jun 16 2025
+%H A384870 David A. Corneth, <a href="/A384870/a384870.gp.txt">PARI program</a>
+%F A384870 1/(2^(1/n)-1) + 1 <= a(n) <= e^(-LambertW(-1, -log(2)/(n+1))). - _Yifan Xie_, Jun 16 2025
+%e A384870 For n=2, the set {1^2, 2^2, 3^2, 4^2} = {1, 4, 9, 16} has uniquely distinct subset sums.
+%e A384870 However, adding 5^2 = 25 introduces a duplicate sum: 9 + 16 = 25.
+%e A384870 Thus, the largest k that satisfies the subset sum uniqueness condition is 4, meaning a(2)=4.
+%p A384870 A := proc(n)
+%p A384870     local k, S, T, subsetsum;
+%p A384870     k := 1;
+%p A384870     while true do
+%p A384870         S := {seq(i^n, i=1..k)};
+%p A384870         T := combinat[powerset](S);
+%p A384870         subsetsum := map(x -> add(x), T);
+%p A384870         if numelems(subsetsum) = numelems(T) then
+%p A384870             k := k + 1;
+%p A384870         else
+%p A384870             return k - 1;
+%p A384870         end if;
+%p A384870     end do;
+%p A384870 end proc;
+%t A384870 A[n_] := Module[{k = 1, S, subsetSums},
+%t A384870   While[True,
+%t A384870     S = Table[i^n, {i, 1, k}];
+%t A384870     subsetSums = Total /@ Subsets[S];
+%t A384870     If[Length[subsetSums] == Length[DeleteDuplicates[subsetSums]], k++, Return[k - 1]];
+%t A384870   ]
+%t A384870 ]
+%o A384870 (Python)
+%o A384870 def a(n):
+%o A384870     k = 1
+%o A384870     while True:
+%o A384870         powers = [(i + 1) ** n for i in range(k)]
+%o A384870         subset_sums = set()
+%o A384870         all_unique = True
+%o A384870         for mask in range(1 << k):
+%o A384870             total = sum(powers[i] for i in range(k) if mask & (1 << i))
+%o A384870             if total in subset_sums:
+%o A384870                 all_unique = False
+%o A384870                 break
+%o A384870             subset_sums.add(total)
+%o A384870         if not all_unique:
+%o A384870             return k - 1
+%o A384870         k += 1
+%o A384870 print([a(n) for n in range(9)])
+%o A384870 (Python)
+%o A384870 from itertools import chain, combinations, count
+%o A384870 def powerset(s):
+%o A384870     return chain.from_iterable(combinations(s, r) for r in range(len(s)+1))
+%o A384870 def a(n):
+%o A384870     s, sums = {1}, {1}
+%o A384870     for k in count(2):
+%o A384870         t = k**n
+%o A384870         newsums = set(sum(ss)+t for ss in powerset(s))
+%o A384870         if newsums & sums:
+%o A384870             return k-1
+%o A384870         s, sums = s|{t}, s|newsums
+%o A384870 print([a(n) for n in range(9)]) # _Michael S. Branicky_, Jun 14 2025
+%o A384870 (PARI) isok(k,n) = my(list=List()); forsubset(k, s, listput(list, sum(i=1, #s, s[i]^n));); if (#Set(list) != #list, return(0)); 1;
+%o A384870 a(n) = for (k=1, oo, if (!isok(k,n), return(k-1));); \\ _Michel Marcus_, Jun 14 2025
+%o A384870 (PARI) \\ See Corneth link
+%Y A384870 Cf. A000124, A208531, A332101.
+%K A384870 nonn,hard,more
+%O A384870 0,2
+%A A384870 _Yuto Tsujino_, Jun 11 2025
+%E A384870 a(9)-a(10) from _Michael S. Branicky_, Jun 13 2025
+%E A384870 a(11) from _Jinyuan Wang_, Jun 14 2025
+%E A384870 a(12)-a(14) from _David A. Corneth_, Jun 16 2025

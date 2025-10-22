@@ -1,0 +1,47 @@
+%I A387080 #14 Sep 13 2025 18:10:35
+%S A387080 1,3,6,4,2,8,10,5,15,12,9,18,16,14,7,21,24,22,20,25,30,28,26,13,39,36,
+%T A387080 34,32,38,19,57,54,52,50,48,46,44,42,40,35,45,33,27,51,17,68,66,64,62,
+%U A387080 60,58,56,49,63,69,23,92,90,88,86,84,82,80,78,76,74,72,70
+%N A387080 a(1)=1, a(2)=3; thereafter a(n) is either the greatest number k < a(n-1) not already used such that gcd(k, a(n-1)) > 1, or if no such k exists then a(n) is the smallest number k > a(n-1) not already used such that gcd(k, a(n-1)) > 1.
+%C A387080 This is a variant of A386482 that begins with 1,3 instead of 1,2.
+%H A387080 Michael De Vlieger, <a href="/A387080/b387080.txt">Table of n, a(n) for n = 1..10000</a>
+%H A387080 Michael De Vlieger, <a href="/A387080/a387080.png">Log log scatterplot of a(n)</a>, n = 1..2^20.
+%H A387080 Michael De Vlieger, <a href="/A387080/a387080_2.png">Log log scatterplot of a(n) in red and A386482(n) in blue</a>, n = 1..2^20.
+%H A387080 Michael De Vlieger, <a href="/A387080/a387080_1.png">Log log scatterplot of a(n)</a>, n = 1..2^16, showing primes in red, proper prime powers in gold, squarefree composites in green, and numbers neither squarefree nor prime powers in blue and purple, where the latter represents powerful numbers that are not prime powers.
+%t A387080 Block[{c, j, k, m, p, r, nn},
+%t A387080   nn = 2^12; c[_] := False; m[_] := 1; j = 2; c[1] = c[2] = True; r = 1;
+%t A387080   {1}~Join~Monitor[Most@ Reap[Do[
+%t A387080     If[PrimePowerQ[j],
+%t A387080       Set[{p, k, m}, {#1, #1^(#2 - 1), #1^(#2 - 1)}] & @@
+%t A387080         FactorInteger[j][[1]]; While[And[c[k*p], k != 0], k--];
+%t A387080         If[k == 0, k = m; While[c[k*p], k++]]; k *= p,
+%t A387080       k = j - 1; While[And[Or[c[k], CoprimeQ[j, k]], k != 1], k--];
+%t A387080         If[k == 1, k += j; While[Or[c[k], CoprimeQ[j, k] ], k++] ] ];
+%t A387080     If[Mod[j, 2] == Mod[k, 2], r++, Sow[r]; r = 1];
+%t A387080     Set[{c[k], j}, {True, k}], {n, 3, nn}] ][[-1, 1]], n] ]
+%o A387080 (Python)
+%o A387080 from math import gcd
+%o A387080 from itertools import count, islice
+%o A387080 def A387080_gen(): # generator of terms
+%o A387080     m, mset, c = 3, {1,3}, 2
+%o A387080     yield from (1,3)
+%o A387080     while True:
+%o A387080         for i in range(m-1,c-1,-1):
+%o A387080             if i not in mset and gcd(i,m)>1:
+%o A387080                 yield i
+%o A387080                 break
+%o A387080         else:
+%o A387080             for i in count(max(c,m+1)):
+%o A387080                 if i not in mset and gcd(i,m)>1:
+%o A387080                     yield i
+%o A387080                     break
+%o A387080         m = i
+%o A387080         mset.add(i)
+%o A387080         while c in mset:
+%o A387080             mset.remove(c)
+%o A387080             c += 1
+%o A387080 A387080_list = list(islice(A387080_gen(),30)) # _Chai Wah Wu_, Sep 10 2025
+%Y A387080 Cf. A386482.
+%K A387080 nonn
+%O A387080 1,2
+%A A387080 _Geoffrey Caveney_ and _Michael De Vlieger_, Aug 16 2025

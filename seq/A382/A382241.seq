@@ -1,0 +1,55 @@
+%I A382241 #14 Mar 26 2025 15:27:50
+%S A382241 1,0,4,0,10,20,0,20,60,80,0,35,170,270,305,0,56,396,816,1016,1072,0,
+%T A382241 84,868,2238,3188,3538,3622,0,120,1716,5616,9196,10996,11556,11676,0,
+%U A382241 165,3235,13140,24975,32400,35445,36285,36450,0,220,5720,28900,63680,90700,104060,108820,110020,110240
+%N A382241 Triangle read by rows: T(n,k) is the number of partitions of a 4-colored set of n objects into at most k parts with 0 <= k <= n.
+%C A382241 Two unrestricted unary predicates on the n objects mean four colors: The intersection, the both differences, and the complement of the union.
+%C A382241 The 1-color case is Euler's table A026820.
+%C A382241 The 2-color case is A381891.
+%C A382241 The 3-color case is A382045.
+%F A382241 T(n,1) = binomial(n + 3, 3) = A000292(n + 1) for n >= 1.
+%e A382241 Triangle starts:
+%e A382241  0 : [1]
+%e A382241  1 : [0,   4]
+%e A382241  2 : [0,  10,   20]
+%e A382241  3 : [0,  20,   60,    80]
+%e A382241  4 : [0,  35,  170,   270,    305]
+%e A382241  5 : [0,  56,  396,   816,   1016,   1072]
+%e A382241  6 : [0,  84,  868,  2238,   3188,   3538,   3622]
+%e A382241  7 : [0, 120, 1716,  5616,   9196,  10996,  11556,  11676]
+%e A382241  8 : [0, 165, 3235, 13140,  24975,  32400,  35445,  36285,  36450]
+%e A382241  9 : [0, 220, 5720, 28900,  63680,  90700, 104060, 108820, 110020, 110240]
+%e A382241 10 : [0, 286, 9752, 60232, 154262, 242254, 294140, 315980, 323000, 324650, 324936]
+%e A382241 ...
+%p A382241 b:= proc(n, i) option remember; expand(`if`(n=0, 1, `if`(i<1, 0, add(
+%p A382241       b(n-i*j, min(n-i*j, i-1))*binomial(i*(i^2+6*i+11)/6+j, j)*x^j, j=0..n/i))))
+%p A382241     end:
+%p A382241 T:= proc(n, k) option remember;
+%p A382241      `if`(k<0, 0, T(n, k-1)+coeff(b(n$2), x, k))
+%p A382241     end:
+%p A382241 seq(seq(T(n, k), k=0..n), n=0..10);  # _Alois P. Heinz_, Mar 19 2025
+%o A382241 (Python)
+%o A382241 from sympy import binomial
+%o A382241 from sympy.utilities.iterables import partitions
+%o A382241 from sympy.combinatorics.partitions import IntegerPartition
+%o A382241 colors = 4 - 1   # the number of colors - 1
+%o A382241 def a382241_row( n):
+%o A382241     if n == 0 : return [1]
+%o A382241     t = list( [0] * n)
+%o A382241     for p in partitions( n):
+%o A382241         p = IntegerPartition( p).as_dict()
+%o A382241         fact = 1
+%o A382241         s = 0
+%o A382241         for k in p :
+%o A382241             s += p[k]
+%o A382241             fact *= binomial( binomial( k + colors, colors) + p[k] - 1, p[k])
+%o A382241         if s > 0 :
+%o A382241             t[s - 1] += fact
+%o A382241     for i in range( n - 1):
+%o A382241         t[i+1] += t[i]
+%o A382241     return [0] + t
+%Y A382241 Main diagonal gives A255050.
+%Y A382241 Cf. A026820, A381891, A382045, A000292.
+%K A382241 nonn,tabl
+%O A382241 0,3
+%A A382241 _Peter Dolland_, Mar 19 2025

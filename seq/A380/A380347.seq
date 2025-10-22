@@ -1,0 +1,34 @@
+%I A380347 #22 Jan 26 2025 14:42:13
+%S A380347 1,3,7,9,27,17,23,13,31,53,73,47,29,21,33,19,37,41,11,57,63,77,51,101,
+%T A380347 59,67,151,93,109,49,39,79,81,91,181,107,161,43,163,71,83,87,69,113,
+%U A380347 89,61,131,157,233,133,137,139,203,179,117,143,171,207,241,121,159
+%N A380347 a(1) = 1, a(2) = 3; thereafter, a(n) is the smallest nonnegative integer not yet in the sequence such that both a(n-2) + a(n-1) + a(n) and their concatenation are primes.
+%C A380347 Of course, more than 3 terms in a row can satisfy the requirement:
+%C A380347 1 + 3 + 7 + 9 + 27 = 47 is prime like 137927;
+%C A380347 3 + 7 + 9 + 27 + 17 + 23 + 13 + 31 + 53 + 73 + 47 + 29 + 21 = 353 is prime like 37927172313315373472921; etc.
+%e A380347 181 + 107 + 161 = 449 is prime like 181107161.
+%p A380347 P:=proc(q) local a,n,ok,t,v; v:=[1,3];
+%p A380347 for n from 1 to q do for t from 5 by 2 do if numboccur(v,t)=0 then
+%p A380347 a:=v[nops(v)]*10^length(t)+t; a:=v[nops(v)-1]*10^length(a)+a;
+%p A380347 if isprime(v[nops(v)-1]+v[nops(v)]+t) and isprime(a) then v:=[op(v),t]; break; fi; fi; od;
+%p A380347 od; op(v); end: P(59);
+%t A380347 s={1,3};Do[i=1;Until[PrimeQ[i+s[[-1]]+s[[-2]]]&&PrimeQ[FromDigits[Join[IntegerDigits[s[[-2]]],IntegerDigits[s[[-1]]],IntegerDigits[i]]]&&!MemberQ[s,i]],i++];AppendTo[s,i],{n,59}];s (* _James C. McMahon_, Jan 26 2025 *)
+%o A380347 (Python)
+%o A380347 from sympy import isprime
+%o A380347 from itertools import count, islice
+%o A380347 def agen(): # generator of terms
+%o A380347     yield 1
+%o A380347     an1, an, aset, m = 1, 3, {1}, 7
+%o A380347     for n in count(2):
+%o A380347         yield an
+%o A380347         aset.add(an)
+%o A380347         s2, str2 = an1 + an, str(an1) + str(an)
+%o A380347         k = next(j for j in count(m, 2) if j not in aset and j%10 != 5 and isprime(s2+j) and isprime(int(str2+str(j))))
+%o A380347         an1, an = an, k
+%o A380347         while m in aset or m%2 == 5: m += 2
+%o A380347 print(list(islice(agen(), 61))) # _Michael S. Branicky_, Jan 22 2025
+%o A380347 (PARI) F(n)={if (n==1, return(1)); my(s=[1,3]); n--; while(n--,for(x=1,+oo,for(b=1,#s,if(x==s[b],next(2))); if(ispseudoprime(s[#s-1]+s[#s]+x),if(ispseudoprime(fromdigits(concat([Vec(digits(s[#s-1])),Vec(digits(s[#s])),Vec(digits(x))]))),s=concat(s,[x]);break()))));s} \\ Computes first n terms. - _R. J. Cano_, Jan 22 2025
+%Y A380347 Cf. A000040.
+%K A380347 nonn,base,easy
+%O A380347 1,2
+%A A380347 _Paolo P. Lava_, Jan 22 2025

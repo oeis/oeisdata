@@ -1,0 +1,47 @@
+%I A380870 #12 Apr 12 2025 12:42:53
+%S A380870 0,0,0,0,0,0,0,0,0,1,0,0,0,0,3,0,0,2,0,1,4,6,0,0,0,8,0,1,0,1,0,0,3,3,
+%T A380870 7,2,0,13,0,1,0,4,0,7,6,6,0,1,0,15,14,8,0,13,3,0,15,23,0,1,0,0,5,0,5,
+%U A380870 7,0,3,9,12,0,2,0,30,18,14,10,6,0,3,0,14,0
+%N A380870 a(n) = A381798(n) - A361373(n) - 1.
+%C A380870 a(n) = cardinality of the intersection of A024619 and row n of A381799.
+%C A380870 Let S(n,p) = {p^m : p | n, m = 1..floor(log_p n)}. Therefore S(10,2) = {1,2,4,8} and S(30,3) = {1,3,9,27}. Then U({S(n,p) : p|n}) = row n of A377485.
+%C A380870 Let T(n,p) = {p^m (mod n) : p | n} the set of prime divisor power residues r (mod n) == p^m, p | n. Thus T(10,2) = {1,2,4,8,6} and T(30,3) = {1,3,9,27,21}. Then U({T(n,p) : p|n}) = row n of A381799.
+%H A380870 Michael De Vlieger, <a href="/A380870/b380870.txt">Table of n, a(n) for n = 1..16384</a>
+%F A380870 Let Q(n) = {1} joined to row n > 1 of A377485 and let R(n) = row n of A381799.
+%F A380870 a(n) = card(U(Q(n) \ R(n))).
+%F A380870 a(p^m) = 0 for prime power p^m, m >= 0.
+%F A380870 a(n) = 0 for n in A381750.
+%e A380870 Table of n, a(n), and H(n) = intersection of row n of A381799 with A024619.
+%e A380870  n   facs(n)   a(n)  H(n)
+%e A380870 --------------------------------------------
+%e A380870  6   2 * 3       0   -
+%e A380870 10   2 * 5       1   {6}
+%e A380870 12   2^2 * 3     0   -
+%e A380870 14   2 * 7       0   -
+%e A380870 15   3 * 5       3   {6, 10, 12}
+%e A380870 18   2 * 3^2     2   {10, 14}
+%e A380870 20   2^2 * 5     1   {12}
+%e A380870 21   3 * 7       4   {6, 12, 15, 18}
+%e A380870 22   2 * 11      6   {6, 10, 12, 14, 18, 20}
+%e A380870 24   2^3 * 3     0   -
+%e A380870 30   2 * 3 * 5   1   {21}
+%e A380870 .
+%e A380870 a(6) = 0 since Q(6) = R(6) = {1,2,3,4}, i.e., all terms in row 6 of A381799 are powers of primes.
+%e A380870 a(10) = 1 since Q(10) = {1,2,4,5,8} but R(10) = {1,2,4,5,6,8}; the latter set contains 1 term (i.e., 6) that is not a member of the former set.
+%e A380870 a(14) = 0 since R(14) = {1,2,4,7,8} are all powers of primes.
+%e A380870 a(15) = 3 since R(15) = {1,3,5,6,9,10,12} has 3 terms {6,10,12} that are not powers of primes.
+%e A380870 a(18) = 2 since R(18) = {1,2,3,4,8,9,10,14,16} has 2 terms {6,10} that are not powers of primes, etc.
+%t A380870 f[x_, p_] := Block[{m = 2, r, c},
+%t A380870   Which[
+%t A380870     PrimePowerQ[x],
+%t A380870     Join[{0}, #1^Range[0, #2 - 1]] & @@ FactorInteger[x][[1]],
+%t A380870     PowerMod[p, m, x] == p, {1, p},
+%t A380870     True, c[_] := False;
+%t A380870     c[1] = c[p] = True; {1, p}~Join~
+%t A380870       Reap[While[r = PowerMod[p, m, x]; ! c[r], Sow[r];
+%t A380870         c[r] = True; m++] ][[-1, 1]] ] ]
+%t A380870 Table[Count[Union@ Flatten@ Map[f[n, #] &, FactorInteger[n][[All, 1]] ], _?(And[# > 1, ! PrimePowerQ[#]] &)], {n, 120}]
+%Y A380870 Cf. A000961, A024619, A361373, A377485, A381750, A381798, A381799.
+%K A380870 nonn
+%O A380870 1,15
+%A A380870 _Michael De Vlieger_, Apr 08 2025

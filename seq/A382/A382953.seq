@@ -1,0 +1,23 @@
+%I A382953 #12 Apr 12 2025 12:46:37
+%S A382953 16,30,48,54,64,70,72,84,96,120,126,128,144,160,162,180,192,198,210,
+%T A382953 216,240,243,250,252,256,264,270,280,286,288,300,308,320,324,330,336,
+%U A382953 360,378,384,390,396,400,420,432,440,448,462,468,480,486,495,504,510,512
+%N A382953 Numbers with at least one factorization for which the factors can be partitioned into 2 or more distinct subsets with equal sums.
+%C A382953 Here "distinct" means that no partition contains the same subset of factors, e.g. 4 is not a term because {2} == {2}.
+%C A382953 Because 2 + 2 = 2 * 2 = 4, many terms have multiple instances that differ only by factors {2, 2} vs. {4}, except in some cases where such substitutions would create indistinct subsets, e.g. while 16 is a term for partition set {{2, 2}, {4}}, {{2, 2}, {2, 2}} and {{4}, {4}} do not count as additional instances.
+%C A382953 For primes p and integers x >= 0, p^(p+2+2x) and p^(2p+3+x) are terms.
+%C A382953 For integers x and y >= 0, (4x+4)^(y+2) and (4x+6)^(y+3) are terms.
+%C A382953 First few terms with record counts of instances: 16 (1 instance), 48 (2), 120 (3), 240 (6), 576 (8), 720 (9), 768 (12).
+%C A382953 If k is a term, then 4k is also a term. - _Ivan N. Ianakiev_, Apr 10 2025
+%e A382953 a(1) = 16: 2 * 2 * 4 = 16 and 2 + 2 = 4.
+%e A382953 a(2) = 30: 2 * 3 * 5 = 30 and 2 + 3 = 5.
+%e A382953 a(3) = 48: 2 * 2 * 2 * 6 = 48 and 2 + 2 + 2 = 6, and also 2 * 4 * 6 = 48 and 2 + 4 = 6.
+%e A382953 a(5) = 64: 2 * 2 * 2 * 2 * 4 = 64 and 2 + 2 + 2 = 2 + 4.
+%e A382953 a(39) = 384: 2 * 2 * 2 * 2 * 4 * 6 = 384 and 2 + 2 + 2 = 2 + 4 = 6 (plus 4 other instances).
+%t A382953 ok[n_]:=Catch@ Block[{t, d=Divisors@n,f}, f[y_]:=Block[{L={}, r}, r[x_,m_,c_]:= If[x==1, AppendTo[L,c], r[x/#, #, Append[c,#]]& /@ Select[ Divisors@x, #>=m&];]; f[y,2,{}]; L]; Do[t=Plus@@@ s[d[[i]]]; If[d[[i]]^2!=n, Intersection[t, Plus@@@ s[n/d[[i]]]] != {} && Throw@True, Sort@t != Union@t && Throw@True],{i, 2, Ceiling[ Length@d/2]}]; False]; Select[Range@ 512,ok] (* _Giovanni Resta_, Apr 10 2025 *)
+%o A382953 (PARI) a382953_count(x, f=List())={my(r=x/if(#f, vecprod(Vec(f)), 1)); if(#f && r==1, my(c=0, s=vecsum(Vec(f)), d=divisors(s)); for(i=2, #d, my(z=s/d[i]); if(z<vecmax(Vec(f)), break); c+=a382953_part(Vec(matreduce(Vec(f))), z)); return(c)); my(d, c=0); fordiv(r, d, if(#f, if(d<f[#f], next), d==1 && x>1, next); listput(f, d); c+=a382953_count(x, f); listpop(f)); return(c)}
+%o A382953 a382953_part(f, z, rvs=0, v=List())={my(c=0); if(#v==#f[2], if(sum(i=1, #v, f[1][i]*v[i])<z, return(0)); /* vs = vector signature for distinctiveness test */ my(vs=prod(i=1, #v, prime(i)^v[i])); if(vs<=rvs, return(0)); rvs=vs; my(f2=f); for(i=1, #f2[2], f2[2][i]-=v[i]); return(if(vecsum(f2[2])==0, 1, a382953_part(f2, z, rvs)))); for(i=0, f[2][#v+1], listput(v, i); if(sum(i=1, #v, f[1][i]*v[i])<=z, c+=a382953_part(f, z, rvs, v)); listpop(v); 0); return(c)}
+%Y A382953 Cf. A083207, A322657, A255265 (subsequence).
+%K A382953 nonn
+%O A382953 1,1
+%A A382953 _Charles L. Hohn_, Apr 09 2025

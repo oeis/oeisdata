@@ -1,0 +1,41 @@
+%I A378511 #45 Dec 21 2024 11:08:04
+%S A378511 1,0,1,1,4,1,20,1,48,85,142,1,1136,131,1780,6184,9920,1,75434,1,
+%T A378511 124468,369142,429508,1,4797008,416966,6114994,22482400,28867896,
+%U A378511 111651,306153842,384525,507438240,1483501078,1242075014,743845629,19710473036,34300,17721793660
+%N A378511 Number of partitions of the repunit A002275(n) into two mutually complementary binary vectors having a common divisor > 1 in base 10.
+%C A378511 Two binary vectors of length n are mutually complementary if they are obtained from each other by inverting all the individual digits (1->0 and 0->1). The sum of any two mutually complementary binary vectors of length n is a repunit of the same length, A002275(n).
+%C A378511 a(n) is the number of distinct unordered pairs of mutually complementary binary vectors of length n that have a common divisor > 1 as integers in base 10.
+%C A378511 a(n) is the number of terms m in A007088 of length n that are not coprime with their 1's complement, A002275(n) - m, as integers in base 10.
+%C A378511 Equivalently, m from A007088 is counted toward a(A055642(m)) iff GCD(m, A002275(A055642(m)) - m) > 1. Therefore a(n) is the base-10 analog of A378514.
+%C A378511 a(n) is the sum of the first two columns, T(n,1) + T(n,2), in the triangle A378761.
+%C A378511 For any n > 1, a(n) > 0 because the trivial partition A002275(n) = A002275(n) + 0 always counts toward a(n): GCD(A002275(n), 0) = A002275(n) > 1.
+%C A378511 a(n) is nonmonotonic and tends to show minima for prime n, yet there are terms where n is prime yet a(n) > 1, for example a(13) = 131.
+%C A378511 The sequence of indices n such that a(n) = 1 is a supersequence of A004023 (indices of prime repunits).
+%F A378511 a(n) <= A000325(n-1) = 2^(n-1) - n + 1;
+%F A378511 a(A004023(n)) = 1.
+%e A378511 a(1) = 0 because there is only one pair {1, 0} of mutually complementary binary vectors of length 1, and GCD(1, 0) = 1.
+%e A378511 a(2) = 1 because out of 2 possible pairs of binary vectors of length 2, which are {10, 01} and {11, 00}, only the latter has a common divisor q > 1: q = GCD(11, 0) = 11, whereas the former is coprime, GCD(10, 1) = 1.
+%e A378511 a(4) = 4 because out of the 8 possible pairs of mutually complementary binary vectors, exactly 4 are not coprime:
+%e A378511   {1000,0111}: GCD(1000, 111) = 1;
+%e A378511   {1001,0110}: GCD(1001, 110) = 11;
+%e A378511   {1010,0101}: GCD(1010, 101) = 101;
+%e A378511   {1011,0100}: GCD(1011, 100) = 1;
+%e A378511   {1100,0011}: GCD(1100, 11) = 11;
+%e A378511   {1101,0010}: GCD(1101, 10) = 1;
+%e A378511   {1110,0001}: GCD(1101, 10) = 1;
+%e A378511   {1111,0000}: GCD(1111, 0) = 1111.
+%e A378511 The pair {1100010011110, 0011101100001} is counted toward a(13) because in base 10, GCD(1100010011110, 11101100001) = 53. In total, there are 131 such pairs of length 13 that share common prime factors of either 53 or 79. This exemplifies the smallest prime n such that a(n) > 1.
+%e A378511 a(317) = 1 because 317 is a term in A004023. Indeed, if any partition of the repunit R_317 into a sum of mutually complementary binary vectors except {R_317, 0} had a nontrivial common divisor q, then the repunit itself would be divisible by q < R_317, which contradicts the fact that R_317 is prime.
+%t A378511 CountNonCoprimes10[n_] := (Repunit = (10^n - 1)/9; Result = 0; Do[If[!CoprimeQ[#, Repunit-#]
+%t A378511   &[FromDigits[IntegerDigits[i, 2]]], Result++], {i, 2^(n-1), 2^n-1}]; Result);
+%t A378511 Table[CountNonCoprimes10[n], {n, 0, 25}]
+%t A378511 (* Alternative version of the code that uses ParallelSum *)
+%t A378511 SubCountNonCoprimes10[n_, k_, totk_] := (Result = 0;  Do[If[!CoprimeQ[#, Repunit-#]
+%t A378511   &[FromDigits[IntegerDigits[i, 2]]], Result++], {i, #[[k]], #[[k+1]]-1}]
+%t A378511   &[Round[Subdivide[2^(n-1), 2^n, totk]]]; Result);
+%t A378511 CountNonCoprimes10[n_] := (Repunit = (10^n-1)/9; ParallelSum[SubCountNonCoprimes10[n, k, $KernelCount], {k, $KernelCount}, ProgressReporting -> False]);
+%t A378511 Table[CountNonCoprimes10[n], {n, 0, 25}]
+%Y A378511 Cf. A002275, A004023, A007088, A378154, A378514, A378761.
+%K A378511 nonn,base
+%O A378511 0,5
+%A A378511 _Dmytro Inosov_, Nov 29 2024

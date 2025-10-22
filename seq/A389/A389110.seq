@@ -1,0 +1,47 @@
+%I A389110 #37 Oct 21 2025 08:52:48
+%S A389110 1,17,38,67,104,148,200,260,327,402,485,575,673,779,892,1013,1142,
+%T A389110 1278,1423,1574,1734,1901,2076,2258,2449,2647,2852,3066,3286,3515,
+%U A389110 3751,3995,4247,4507,4774,5048,5331,5621,5919,6224,6537,6858,7187,7523,7867,8218,8578
+%N A389110 Least m such that the two-sided exact 95% Clopper-Pearson binomial confidence interval has worst-case width <= 1/n.
+%C A389110 For X ~ Bin(m,p) and k = 0..m, let [L(m,k), U(m,k)] be the two-sided exact Clopper-Pearson (CP) 95% interval for p. Let W(m) = max_{0<=k<=m} (U(m,k) - L(m,k)). Then a(n) = min{ m >= 1 : W(m) <= 1/n }.
+%C A389110 As m increases, W(m) is nonincreasing (hence a(n) is well-defined). Individual widths U(m,k) - L(m,k) may show small nonmonotonicities in m due to discreteness.
+%C A389110 The maximum width typically occurs near k ~ m/2.
+%C A389110 Clopper-Pearson intervals are conservative, that is, the coverage is at least the nominal 95%.
+%C A389110 An upper bound from Hoeffding's inequality is a(n) <= ceiling(2*log(40)*n^2).
+%C A389110 A tighter but heuristic bound using a continuity-corrected normal approximation with z = z(0.975) = 1.959963984... = A220510 is N_cc(n) = ceiling(4 / (-z + sqrt(z^2 + 4/n))^2), which is usually within a few units (often 1 to 3) of a(n) for small n (empirically).
+%C A389110 As n -> infinity, a(n) ~ z(0.975)^2 * n^2, where z(0.975)^2 = 3.841458820694....
+%C A389110 a(n) <= A182868(n) = 4*n^2 + n - 1 for 1 <= n <= 48 with equality at n = 2..5. Conjecture: this strict inequality holds for all n >= 6.
+%H A389110 Pablo Cadena-Urzúa, <a href="/A389110/b389110.txt">Table of n, a(n) for n = 1..80</a>
+%H A389110 L. D. Brown, T. T. Cai, and A. DasGupta, <a href="https://doi.org/10.1214/ss/1009213286">Interval estimation for a binomial proportion</a>, Statistical Science 16 (2001), 101-133.
+%H A389110 C. J. Clopper and E. S. Pearson, <a href="https://www.jstor.org/stable/2331986">The use of confidence or fiducial limits illustrated in the case of the binomial</a>, Biometrika 26 (1934), 404-413.
+%F A389110 a(n) = min{ m >= 1 : W(m) <= 1/n } where W(m) = max_{0<=k<=m} (U(m,k) - L(m,k)) with L(m,k) = I^(-1)(k, m-k+1; 0.025) and U(m,k) = I^(-1)(k+1, m-k; 0.975) for 0 < k < m, where I^(-1)(a,b; q) is the inverse regularized incomplete beta function.
+%F A389110 Extremes: L(m,0) = 0,  U(m,0) = 1 - (0.025)^(1/m);  L(m,m) = (0.025)^(1/m),  U(m,m) = 1.
+%F A389110 As n -> infinity, a(n)/n^2 -> z(0.975)^2.
+%e A389110 First terms (95% level): a(1) = 1, a(2) = 17, ..., a(15) = 892.
+%e A389110 For n = 10, a(10) = 402; with m = 402 trials the worst-case 95% CP width is <= 0.1.
+%t A389110 (* --- Clopper-Pearson 95% (two-sided) --- *)
+%t A389110 cpL[m_, k_] := If[k == 0, 0., N@InverseBetaRegularized[k, m - k + 1, 0.025]];
+%t A389110 cpU[m_, k_] := If[k == m, 1., N@InverseBetaRegularized[k + 1, m - k, 0.975]];
+%t A389110 cpWidth[m_Integer?NonNegative] := Module[{ks, Ls, Us},
+%t A389110   ks = Range[0, m];
+%t A389110   Ls = cpL[m, #] & /@ ks;
+%t A389110   Us = cpU[m, #] & /@ ks;
+%t A389110   Max[Us - Ls]
+%t A389110 ];
+%t A389110 (* z = z_{0.975} and continuity-corrected normal bound *)
+%t A389110 z = InverseCDF[NormalDistribution[], 0.975];
+%t A389110 Ncc[n_Integer?Positive] := Ceiling[ 4./(-z + Sqrt[z^2 + 4./n])^2 ];
+%t A389110 (* Sequence: smallest m with W(m) <= 1/n *)
+%t A389110 a[n_Integer?Positive] := Module[{m = Ncc[n]},
+%t A389110   (* Ensure the condition in case Ncc underestimates *)
+%t A389110   While[cpWidth[m] > 1./n, m++];
+%t A389110   (* Minimize: step down while it still holds *)
+%t A389110   While[m > 1 && cpWidth[m - 1] <= 1./n, m--];
+%t A389110   m
+%t A389110 ];
+%t A389110 (* Example: first 80 terms *)
+%t A389110 Table[a[n], {n, 1, 80}]
+%Y A389110 Cf. A182868, A220510.
+%K A389110 nonn,new
+%O A389110 1,2
+%A A389110 _Pablo Cadena-Urzúa_, Sep 23 2025

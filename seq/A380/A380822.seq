@@ -1,0 +1,41 @@
+%I A380822 #17 May 08 2025 16:57:04
+%S A380822 1,0,1,1,0,1,1,1,0,1,0,3,1,0,1,2,1,4,1,0,1,3,3,3,5,1,0,1,2,10,5,4,6,1,
+%T A380822 0,1,5,9,17,8,5,7,1,0,1,8,16,22,26,10,6,8,1,0,1,10,35,33,37,37,12,7,9,
+%U A380822 1,0,1,19,44,80,59,56,48,14,8,10,1,0,1
+%N A380822 Triangle read by rows: T(n,k) is the number of compositions of n with k pairs of equal adjacent parts and all parts in standard order.
+%C A380822 A composition with parts in standard order satisfies the condition that for any part p > 1, the part p - 1 has already appeared. All compositions of this kind have first part 1.
+%H A380822 Alois P. Heinz, <a href="/A380822/b380822.txt">Rows n = 1..200, flattened</a>
+%F A380822 G.f.: Sum_{i>0} G(i) where G(k) = G(k-1) * x*k * (1 + 1/(1 - Sum_{j=1..k} ( x^j/(1 - (z-1)*x^j) )) * Sum_{j=1..k} ( z^[j=k] * x^j/(1 - (z-1)*x^j) )) and G(0) = 1.
+%e A380822 Triangle begins:
+%e A380822      k=0   1   2   3   4  5  6  7  8  9
+%e A380822  n=1  [1],
+%e A380822  n=2  [0,  1],
+%e A380822  n=3  [1,  0,  1],
+%e A380822  n=4  [1,  1,  0,  1],
+%e A380822  n=5  [0,  3,  1,  0,  1],
+%e A380822  n=6  [2,  1,  4,  1,  0, 1],
+%e A380822  n=7  [3,  3,  3,  5,  1, 0, 1],
+%e A380822  n=8  [2, 10,  5,  4,  6, 1, 0, 1],
+%e A380822  n=9  [5,  9, 17,  8,  5, 7, 1, 0, 1],
+%e A380822  n=10 [8, 16, 22, 26, 10, 6, 8, 1, 0, 1],
+%e A380822 ...
+%e A380822 Row n = 6 counts:
+%e A380822  T(6,0) = 2: (1,2,1,2), (1,2,3).
+%e A380822  T(6,1) = 1: (1,2,2,1).
+%e A380822  T(6,2) = 4: (1,1,1,2,1), (1,1,2,1,1), (1,1,2,2), (1,2,1,1,1).
+%e A380822  T(6,3) = 1: (1,1,1,1,2).
+%e A380822  T(6,4) = 0: .
+%e A380822  T(6,5) = 1: (1,1,1,1,1,1).
+%p A380822 b:= proc(n, l, i) option remember; expand(`if`(n=0, 1, add(
+%p A380822       `if`(j=l, x, 1)*b(n-j, j, max(i, j)), j=1..min(n, i+1))))
+%p A380822     end:
+%p A380822 T:= (n, k)-> coeff(b(n, 0$2), x, k):
+%p A380822 seq(seq(T(n, k), k=0..n-1), n=1..12);  # _Alois P. Heinz_, May 08 2025
+%o A380822 (PARI)
+%o A380822 G(k,N) = {my(x='x+O('x^N)); if(k<1,1, G(k-1,N) * x^k * (1 + (1/(1 - sum(j=1,k, x^j/(1-(z-1)*x^j)))) * sum(j=1,k, z^(if(j==k,1,0)) * x^j/(1-(z-1)*x^j))))}
+%o A380822 T_xz(max_row) = {my(N = max_row+1, x='x+O('x^N), h = sum(i=1,N/2+1, G(i,N))); vector(N-1, n, Vecrev(polcoeff(h, n)))}
+%o A380822 T_xz(10)
+%Y A380822 Cf. A000110, A003242, A047998, A106356, A107429, A126347, A278984, A383253 (row sums).
+%K A380822 nonn,easy,tabl
+%O A380822 1,12
+%A A380822 _John Tyler Rascoe_, May 08 2025

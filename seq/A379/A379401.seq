@@ -1,0 +1,59 @@
+%I A379401 #10 Mar 31 2025 07:00:16
+%S A379401 1,2,10,3,12,17,4,16,22,56,5,19,33,75,57,6,24,38,97,134,98,7,37,41,
+%T A379401 115,165,274,109,8,40,48,162,181,299,275,166,9,47,55,180,220,466,318,
+%U A379401 276,241,11,52,68,201,273,554,467,363,279,256,13,59,92,264,294
+%N A379401 Rectangular array, read by descending antidiagonals: the Type 1 runlength index array of A039701 (primes mod 3); see Comments.
+%C A379401 We begin with a definition of Type 1 runlength array, U(s), of a sequence s:
+%C A379401 Suppose s is a sequence (finite or infinite), and define rows of U(s) as follows:
+%C A379401 (row 0) = s
+%C A379401 (row 1) = sequence of 1st terms of runs in (row 0); c(1) = complement of (row 1) in (row 0)
+%C A379401 For n>=2,
+%C A379401 (row n) = sequence of 1st terms of runs in c(n-1); c(n) = complement of (row n) in (row n-1),
+%C A379401 where the process stops if and when c(n) is empty for some n.
+%C A379401 ***
+%C A379401 The corresponding Type 1 runlength index array, UI(s) is now contructed from U(s) in two steps:
+%C A379401 (1) Let U*(s) be the array obtaining by repeating the construction of U(s) using (n,s(n)) in place of s(n).
+%C A379401 (2) Then UI(s) results by retaining only n in U*.
+%C A379401 Thus, loosely speaking, (row n) of UI(s) shows the indices in s of the numbers in (row n) of U(s).
+%C A379401 The array UI(s) includes every positive integer exactly once.
+%C A379401 ***
+%C A379401 Regarding the present array, each row of U(s) splits an increasing sequence of primes according to remainder modulo 3; e.g., in row 2, the remainders of primes in positions 10,12,16,19,24,37 are 2,1,2,1,2,1,2,1, respectively.
+%e A379401 Corner:
+%e A379401       1    2    3     4    5      6     7     8     9    11    13    14
+%e A379401      10   12   16    19   24     37    40    47    52    59    72    74
+%e A379401      17   22   33    38   41     48    55    68    92   101   104   112
+%e A379401      56   75   97   115   162   180   201   264   293   328   359   440
+%e A379401      57  134  165   181   220   273   294   341   360   451   545   623
+%e A379401      98  274  299   466   554   624   661   742   786   836   898   941
+%e A379401     109  275  318   467   555   631   704   749   823   839   903  1046
+%e A379401     166  276  363   500   600   758   824   856   912  1059  1176  1212
+%e A379401     241  279  364   505   601   861   913  1076  1177  1229  1258  1368
+%e A379401     256  510  608   866   964  1077  1180  1533  1645  2006  2156  2215
+%e A379401     421  521  709  1088  1181  2007  2163  2248  2551  2690  2919  3138
+%e A379401     424  522  710  1089  1184  2008  2174  2785  2920  3141  3466  3938
+%e A379401 Starting with s = A039701, we have for U*(s):
+%e A379401 (row 1) = ((1,1), (2,0), (3,2), (4,2), (5,2), (6,1), (7,2), (8,1), (9,2), ...)
+%e A379401 c(1) = ((10,2), (12,1), (16,2), (17,2), (14,1), (17,1), (19,1), (22,1), (24,2), ...)
+%e A379401 (row 2) = ((10,2), (12,1), (16,2), (19,1), (24,2), (23,1), (27,2), (29,1), (36,2), ...)
+%e A379401 c(2) = ((17,2), (22,1), (33,2), ...)
+%e A379401 (row 3) = ((17,2), (22,1), ...)
+%e A379401 so that UI(s) has
+%e A379401 (row 1) = (1,2,3,4,5,6,7,8,9,11,13, ...)
+%e A379401 (row 2) = (10,12,16.19,24, ...)
+%e A379401 (row 3) = (17,22,33,...)
+%t A379401 r[seq_] := seq[[Flatten[Position[Prepend[Differences[seq[[All, 1]]], 1], _?(# != 0 &)]], 2]];  (* Type 1 *)
+%t A379401 row[0] = Mod[Prime[Range[4000]], 3];(* A039701 *)
+%t A379401 row[0] = Transpose[{#, Range[Length[#]]}] &[row[0]];
+%t A379401 k = 0; Quiet[While[Head[row[k]] === List, row[k + 1] = row[0][[r[
+%t A379401      SortBy[Apply[Complement, Map[row[#] &, Range[0, k]]], #[[2]] &]]]]; k++]];
+%t A379401 m = Map[Map[#[[2]] &, row[#]] &, Range[k - 1]];
+%t A379401 p[n_] := Take[m[[n]], 12]
+%t A379401 t = Table[p[n], {n, 1, 12}]
+%t A379401 Grid[t]  (* array *)
+%t A379401 w[n_, k_] := t[[n]][[k]];
+%t A379401 Table[w[n - k + 1, k], {n, 12}, {k, n, 1, -1}] // Flatten  (* sequence *)
+%t A379401 (* _Peter J. C. Moses_, Dec 04 2024 *)
+%Y A379401 Cf. A000040, A039701, A379046, A379402, A379403, A379404.
+%K A379401 nonn,tabl
+%O A379401 1,2
+%A A379401 _Clark Kimberling_, Jan 15 2025

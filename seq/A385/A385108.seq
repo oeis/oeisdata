@@ -1,0 +1,90 @@
+%I A385108 #31 Jun 29 2025 22:57:21
+%S A385108 1,1,4,1,10,10,1,31,31,19,1,109,109,64,31,1,409,409,235,109,46,1,1585,
+%T A385108 1585,901,409,166,64,1,6241,6241,3529,1585,631,235,85,1,24769,24769,
+%U A385108 13969,6241,2461,901,316,109,1,98689,98689,55585,24769,9721,3529,1219,409,136
+%N A385108 Triangle a(n,k) read by antidiagonals: a(n,k) is the number of dots in the k-augmented centered triangle of order n, k>=0, n>=1.
+%C A385108 The k-augmented centered triangular numbers a(n,k) count the number of dots in the k-augmented centered triangle of order n. The order, n, refers to the number of exact dots along each side of the base equilateral triangle in the initial unaugmented centered triangle.  For k=0, the configuration is simply this base triangle.  It would be a single dot for n=1 or for n>=2, a central dot surrounded by dots so that each side contains exactly n dots.  For k>=1, the k-augmented centered triangle of order n is recursively constructed by taking a (k-1)-augmented centered triangle of order n and attaching one congruent copy on each side.  Each copy shares a whole side with the central triangle.  Any overlapping dots that occur along the shared sides and vertices are counted only once.  This recursive construction generalizes the classic centered triangular numbers.  As k increases, it produces more complex and symmetric triangular patterns.
+%C A385108 For k=0, a(n,0) gives the centered triangular numbers (A005448).
+%C A385108 For k=1, a(n,1) matches A085473.
+%C A385108 When k=2, a(n,1) matches the truncated hex numbers A381424.
+%C A385108 The rows appear to be new for all k>=3.
+%C A385108 For geometric illustrations, see the linked images.
+%H A385108 Noel B. Lacpao, <a href="/A385108/b385108.txt">Table of n, a(n) for n = 1..1000</a>
+%H A385108 Noel B. Lacpao, <a href="/A385108/a385108_1.txt">Summary Table for n=1..50,k=0..3</a>
+%H A385108 Noel B. Lacpao, <a href="/A385108/a385108_2.png">Geometric_Illustration for n=3,k=2</a>
+%H A385108 Noel B. Lacpao, <a href="/A385108/a385108_3.png">Geometric_Illustration for n=3,k=3</a>
+%F A385108 a(n,k) = 4^k * (3*n^2-3*n+2) / 2 - 3*n * Sum_{j=1..k} 4^(k-j) * 2^(j-1) + 3 * Sum_{j=1..k} 4^(k-j) * (2^(j-1)-1).
+%F A385108 a(n,k) = 4 * a(n,k-1) - 3 * (2^(k-1) * n - (2^(k-1)-1)).
+%F A385108 G.f. for fixed k: G_k(x) = (A_kx(x+1) + B_kx(1-x) + C_kx(1-x)^2) / (1-x)^3, where a(n,k)=A_kn^2 + B_kn + C_k.
+%e A385108 For n=1, any k:
+%e A385108 a(1,k) = 4^k*(3*1^2-3*1+2)/2 - 3*1*Sum_{j=1..k} 4^(k-j)*2^(j-1) + 3*Sum_{j=1..k} 4^{k-j}*(2^{j-1}-1)
+%e A385108        = 4^k*1 - 3*Sum_{j=1..k} 4^(k-j)*2^(j-1) + 3*Sum_{j=1..k} 4^(k-j)*2^(j-1) - 3*Sum_{j=1..k} 4^(k-j)
+%e A385108        = 4^k-3*Sum_{j=1..k} 4^(k-j)
+%e A385108        = 4^k-3*(4^k-1)/3
+%e A385108        = 4^k-4^k+1
+%e A385108        = 1.
+%e A385108 For n=2,k=0:
+%e A385108 a(2,0) = 4^0*(3*2^2-3*2+2)/2
+%e A385108        = 8/2
+%e A385108        = 4.
+%e A385108 For n=3, k=2:
+%e A385108 a(3,2) = 4^2*(3*3^2-3*3+2)/2 - 3*3*Sum_{j=1..2} 4^(2-j)*2^(j-1) + 3*Sum_{j=1..22} 4^(2-j)*(2^(j-1)-1)
+%e A385108        = 16*20/2-9*6+3*1
+%e A385108        = 109.
+%e A385108 Square array begins:
+%e A385108    1,   1,    1,    1,     1,     1,      1,       1, ...
+%e A385108    4,  10,   31,  109,   409,  1585,   6241,   24769, ...
+%e A385108   10,  31,  109,  409,  1585,  6241,  24769,   98689, ...
+%e A385108   19,  64,  235,  901,  3529, 13969,  55585,  221761, ...
+%e A385108   31, 109,  409, 1585,  6241, 24769,  98689,  393985, ...
+%e A385108   46, 166,  631, 2461,  9721, 38641, 154081,  615361, ...
+%e A385108   64, 235,  901, 3529, 13969, 55585, 221761,  885889, ...
+%e A385108   85, 316, 1219, 4789, 18985, 75601, 301729, 1205569, ...
+%p A385108 a := proc(n, k)
+%p A385108    local S1, S2, j;
+%p A385108    S1 := add(4^(k-j)*2^(j-1), j=1..k);
+%p A385108    S2 := add(4^(k-j)*(2^(j-1)-1), j=1..k);
+%p A385108    return 4^k*(3*n^2 - 3*n + 2)/2 - 3*n*S1 + 3*S2;
+%p A385108 end proc:
+%p A385108 seq(seq(a(n,d-n), n=1..d), d=1..10);
+%t A385108 a[n_, k_] := Module[{S1, S2},
+%t A385108   S1 = Sum[4^(k - j) * 2^(j - 1), {j, 1, k}];
+%t A385108   S2 = Sum[4^(k - j) * (2^(j - 1) - 1), {j, 1, k}];
+%t A385108   4^k * (3 n^2 - 3 n + 2)/2 - 3 n * S1 + 3 * S2
+%t A385108 ];
+%t A385108 Table[a[n, k], {n, 1, 5}, {k, 0, 5}]
+%t A385108 TableForm[Table[a[n, k], {n, 1, 5}, {k, 0, 5}]]
+%o A385108 (Python)
+%o A385108 def a(n, k):
+%o A385108      return 4**k*(3*n**2-3*n+2)//2-3*n*sum(4**(k-j)*2**(j-1) for j in range(1,k+1))+ 3*sum(4**(k-j)*(2**(j-1)-1) for j in range(1,k+1))
+%o A385108 for n in range(1, 10):
+%o A385108      row = [a(n, k)
+%o A385108 for k in range(0, 10)]
+%o A385108      print(row)
+%o A385108 (Python)
+%o A385108 # For the antidiagonal terms.
+%o A385108 def a(n,k):
+%o A385108     term1 = 4**k * (3*n**2 - 3*n + 2) // 2
+%o A385108     if k == 0:
+%o A385108         return term1
+%o A385108     return term1 - 3*n*sum([4**(k-j) * 2**(j-1) for j in range(1, k+1)]) + 3*sum([4**(k-j) * (2**(j-1) - 1) for j in range(1, k+1)])
+%o A385108 def antidiagonal_sequence(num_terms):
+%o A385108     terms = []
+%o A385108     diag = 0
+%o A385108     while len(terms) < num_terms:
+%o A385108         for n in range(1, diag+2):
+%o A385108             k = diag - (n-1)
+%o A385108             if k < 0:
+%o A385108                 continue
+%o A385108             terms.append(a(n, k))
+%o A385108             if len(terms) == num_terms:
+%o A385108                 break
+%o A385108         diag += 1
+%o A385108     return terms
+%o A385108 N = 55
+%o A385108 seq = antidiagonal_sequence(N)
+%o A385108 print(', '.join(str(x) for x in seq))
+%Y A385108 Cf. A005448, A085473, A381424.
+%K A385108 nonn,easy,tabl
+%O A385108 1,3
+%A A385108 _Noel B. Lacpao_, Jun 18 2025

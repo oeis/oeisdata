@@ -1,0 +1,46 @@
+%I A381886 #21 Apr 04 2025 13:56:16
+%S A381886 1,0,1,0,2,1,0,3,1,1,0,4,3,1,1,0,5,3,1,1,1,0,6,4,2,1,1,1,0,7,4,2,1,1,
+%T A381886 1,1,0,8,7,2,2,1,1,1,1,0,9,7,4,2,1,1,1,1,1,0,10,8,4,2,2,1,1,1,1,1,0,
+%U A381886 11,8,4,2,2,1,1,1,1,1,1,0,12,10,5,3,2,2,1,1,1,1,1,1
+%N A381886 Triangle read by rows: T(n, k) = Sum_{j=1..floor(log[k](n))} floor(n / k^j) if k >= 2, T(n, 1) = n, T(n, 0) = 0^n.
+%H A381886 Jeffrey C. Lagarias and Wijit Yangjit, <a href="https://arxiv.org/abs/2310.12949">The factorial function and generalizations, extended</a>, arXiv:2310.12949 [math.NT], 2023.
+%H A381886 A. M. Oller-Marcen and J. Maria Grau, <a href="https://cs.uwaterloo.ca/journals/JIS/VOL14/Oller/oller3.html">On the Base-b Expansion of the Number of Trailing Zeros of b^k!</a>, J. Int. Seq. 14 (2011) 11.6.8.
+%F A381886 T(n, k) = Sum_{j=1..n} valuation(j, k) for n >= 2.
+%e A381886 Triangle starts:
+%e A381886   [ 0] 1;
+%e A381886   [ 1] 0,  1;
+%e A381886   [ 2] 0,  2,  1;
+%e A381886   [ 3] 0,  3,  1, 1;
+%e A381886   [ 4] 0,  4,  3, 1, 1;
+%e A381886   [ 5] 0,  5,  3, 1, 1, 1;
+%e A381886   [ 6] 0,  6,  4, 2, 1, 1, 1;
+%e A381886   [ 7] 0,  7,  4, 2, 1, 1, 1, 1;
+%e A381886   [ 8] 0,  8,  7, 2, 2, 1, 1, 1, 1;
+%e A381886   [ 9] 0,  9,  7, 4, 2, 1, 1, 1, 1, 1;
+%e A381886   [10] 0, 10,  8, 4, 2, 2, 1, 1, 1, 1, 1;
+%e A381886   [11] 0, 11,  8, 4, 2, 2, 1, 1, 1, 1, 1, 1;
+%e A381886   [12] 0, 12, 10, 5, 3, 2, 2, 1, 1, 1, 1, 1, 1;
+%p A381886 T := (n, b) -> local i; ifelse(b = 0, b^n, ifelse(b = 1, n, add(iquo(n, b^i), i = 1..floor(log(n, b))))): seq(seq(T(n, b), b = 0..n), n = 0..12);
+%p A381886 # Alternative:
+%p A381886 T := (n, k) -> local j; ifelse(k = 0, k^n, ifelse(k = 1, n, add(padic:-ordp(j, k), j = 1..n))): for n from 0 to 12 do seq(T(n, k), k = 0..n) od;
+%t A381886 T[n_, 0] := If[n == 0, 1, 0]; T[n_, 1] := n;
+%t A381886 T[n_, k_] := Last@Accumulate[IntegerExponent[Range[n], k]];
+%t A381886 Table[T[n, k], {n, 0, 12}, {k, 0, n}] // MatrixForm
+%t A381886 (* Alternative: *)
+%t A381886 T[n_, k_] := Sum[Floor[n/k^j], {j, Floor[Log[k, n]]}]; T[n_, 1] := n; T[n_, 0] := 0^n; T[0, 0] = 1; Flatten@ Table[T[n, k], {n, 0, 12}, {k, 0, n}] (* _Michael De Vlieger_, Apr 03 2025 *)
+%o A381886 (Python)
+%o A381886 from math import log
+%o A381886 def T(n: int, b: int) -> int:
+%o A381886     return (b**n if b == 0 else n if b == 1 else
+%o A381886         sum(n // (b**i) for i in range(1, 1 + int(log(n, b)))))
+%o A381886 print([[T(n, b) for b in range(n+1)] for n in range(12)])
+%o A381886 (SageMath)
+%o A381886 def T(n, b): return (b^n if b == 0 else n if b == 1 else sum(valuation(j, b) for j in (1..n)))
+%o A381886 print(flatten([[T(n, b) for b in range(n+1)] for n in srange(13)]))
+%o A381886 (PARI) T(n,k) = if (n==0, 1, if (n==1, k, if (k==0, 0, if (k==1, n, sum(j=1, n, valuation(j, k))))));
+%o A381886 row(n) = vector(n+1, k, T(n,k-1)); \\ _Michel Marcus_, Apr 04 2025
+%Y A381886 Cf. A011371 (column 2), A054861 (column 3), A054893 (column 4), A027868 (column 5), A054895 (column 6), A054896 (column 7), A054897 (column 8), A054898 (column 9), A078651 (row sums).
+%Y A381886 Cf. A078632, A078567, A153216, A366471.
+%K A381886 nonn,tabl
+%O A381886 0,5
+%A A381886 _Peter Luschny_, Apr 03 2025

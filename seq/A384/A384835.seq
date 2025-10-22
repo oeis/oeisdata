@@ -1,0 +1,47 @@
+%I A384835 #41 Jul 05 2025 00:23:34
+%S A384835 1,1,1,2,2,1,2,3,3,2,4,3,6,1,5,4,7,2,3,10,6,7,2,15,12,5,18,1,18,5,21,
+%T A384835 4,24,5,27,4,11,24,30,7,32,9,33,8,31,12,36,7,43,2,32,15,43,8,50,9,63,
+%U A384835 2,66,25,79,20,99,10,57,64,82,63,63,88,56,99,148,27
+%N A384835 The exponents (j, k) of the numbers 2^j*3^k that are averages of twin primes, with both j and k > 0, in the order of their sum, and then by j.
+%C A384835 These are the (j,k) exponents of the numbers 2^j*3^k that are averages of twin primes, ordered by j+k, j. They are remarkable in structure because except for the first pair (2^1*3^1), j+k is always an odd number. I have proof of this, and the reason it is not the case for the first pair is that 6-1=5 is the only number divisible by 5 that is prime.
+%H A384835 Ken Clements, <a href="/A384835/b384835.txt">Table of n, a(n) for n = 1..162</a>
+%e A384835 2^a(1) * 3^a(2) = 6.
+%e A384835 2^a(3) * 3^a(4) = 18.
+%e A384835 2^a(5) * 3^a(6) = 12.
+%e A384835 2^a(7) * 3^a(8) = 108.
+%e A384835 2^a(9) * 3^a(10) = 72.
+%t A384835 seq[max_] := Flatten@ Transpose[IntegerExponent[Select[Flatten[Table[2^j*3^(m-j), {m, 2, max}, {j, 1, m-1}]], And @@ PrimeQ[# + {-1, 1}] &], #] & /@ {2, 3}]; seq[200] (* _Amiram Eldar_, Jun 26 2025 *)
+%o A384835 (Python)
+%o A384835 from sympy import isprime
+%o A384835 def is_TP_pi_2(j, k):
+%o A384835     N = 2**j * 3**k
+%o A384835     return isprime(N-1) and isprime(N+1)
+%o A384835 def aupto(limit):
+%o A384835     result = [1, 1]
+%o A384835     for exponent_sum in range(3, limit+1, 2):
+%o A384835         for j in range(1, exponent_sum):
+%o A384835              k = exponent_sum - j
+%o A384835              if is_TP_pi_2(j, k):
+%o A384835                   result.append(j)
+%o A384835                   result.append(k)
+%o A384835     return result
+%o A384835 print(aupto(10_000))
+%o A384835 (Python)
+%o A384835 import heapq
+%o A384835 from gmpy2 import is_prime
+%o A384835 from itertools import islice
+%o A384835 def agen(): # generator of terms
+%o A384835     v, oldv, h = 1, 0, [(2, 1, 1, 6)]
+%o A384835     while True:
+%o A384835         s, e2, e3, v = heapq.heappop(h)
+%o A384835         if v != oldv:
+%o A384835             if is_prime(v-1) and is_prime(v+1):
+%o A384835                 yield from (e2, e3)
+%o A384835             oldv = v
+%o A384835             heapq.heappush(h, (s+1, e2+1, e3, 2*v))
+%o A384835             heapq.heappush(h, (s+1, e2, e3+1, 3*v))
+%o A384835 print(list(islice(agen(), 70))) # _Michael S. Branicky_, Jun 26 2025
+%Y A384835 Cf. A027856, A384639 (ordered by value of 2^j*3^k).
+%K A384835 nonn,tabf
+%O A384835 1,4
+%A A384835 _Ken Clements_, Jun 10 2025

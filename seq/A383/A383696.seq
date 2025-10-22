@@ -1,0 +1,23 @@
+%I A383696 #8 May 07 2025 10:50:28
+%S A383696 476985600,815673600,1018886400,1177862400,1493049600,2014214400,
+%T A383696 2373638400,2712326400,3756614400,3863865600,4744454400,5218617600,
+%U A383696 6234681600,7928121600,9824774400,10502150400,12669753600,14227718400,15040569600,17614598400,19443513600,22356230400
+%N A383696 Primitive exponential infinitary abundant numbers that are not primitive exponential unitary abundant: the powerful terms of A383695.
+%C A383696 For squarefree numbers k, eusigma(k) = eisigma(k) = k, where eusigma is the sum of exponential unitary divisors function (A322857), and eisigma is the sum of exponential infinitary divisors function (A361175). Thus, if m is a term (eisigma(m) > 2*m >= eusigma(m)) and k is a squarefree number coprime to m, then eusigma(k*m) = eusigma(k) * eusigma(m) = k * eusigma(m) <= 2*k*m, and eisigma(k*m) = eisigma(k) * eisigma(m) = k * eisigma(m) > 2*k*m, so k*m is an exponential infinitary abundant number that is not exponential unitary abundant (A383695). Therefore, the sequence A383695 can be generated from this sequence by multiplying with coprime squarefree numbers.
+%H A383696 Amiram Eldar, <a href="/A383696/b383696.txt">Table of n, a(n) for n = 1..10000</a>
+%t A383696 idivs[1] = {1}; idivs[n_] := Sort @ Flatten @ Outer[Times, Sequence @@ (FactorInteger[n] /. {p_, e_Integer} :> p^Select[Range[0, e], BitOr[e, #] == e &])];
+%t A383696 fi[p_, e_] := Total[p^idivs[e]]; fu[p_, e_] := DivisorSum[e, p^# &, CoprimeQ[#, e/#] &];
+%t A383696 q[n_] := Module[{fct = FactorInteger[n]}, Times @@ fu @@@ fct <= 2*n < Times @@ fi @@@ fct];
+%t A383696 pows[max_] := Union[Flatten[Table[i^2*j^3, {j, 1, Surd[max, 3]}, {i, 1, Sqrt[max/j^3]}]]];
+%t A383696 seqA383696[max_] := Select[pows[max], q]; seqA383696[10^10]
+%o A383696 (PARI) isidiv(d, f) = {if (d==1, return (1)); for (k=1, #f~, bne = binary(f[k, 2]); bde = binary(valuation(d, f[k, 1])); if (#bde < #bne, bde = concat(vector(#bne-#bde), bde)); for (j=1, #bne, if (! bne[j] && bde[j], return (0)); ); ); return (1); } \\ _Michel Marcus_ at A077609
+%o A383696 fi(p, e) = sumdiv(e, d, if(isidiv(d, factor(e)), p^d, 0));
+%o A383696 fu(p, e) = sumdiv(e, d, if(gcd(d, e/d)==1, p^d));
+%o A383696 isprim(k) = {my(f = factor(k)); prod(i = 1, #f~, fu(f[i, 1], f[i, 2])) <= 2*k && prod(i = 1, #f~, fi(f[i, 1], f[i, 2])) > 2*k;}
+%o A383696 listpows(lim) = my(v = List(), t); for(m = 1, sqrtnint(lim\1, 3), t=m^3; for(n = 1, sqrtint(lim\t), listput(v, t*n^2))); Set(v) \\ _Charles R Greathouse IV_ at A001694
+%o A383696 listA383696(lim) = select(x -> isprim(x), listpows(lim));
+%Y A383696 Intersection of A001694 and A383695.
+%Y A383696 Cf. A005117, A322857, A361175.
+%K A383696 nonn
+%O A383696 1,1
+%A A383696 _Amiram Eldar_, May 06 2025

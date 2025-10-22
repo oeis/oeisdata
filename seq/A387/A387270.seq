@@ -1,0 +1,49 @@
+%I A387270 #36 Sep 10 2025 09:54:43
+%S A387270 6,28,54,120,220,230,438,496,888,924,966,1756,1766,1846,2016,3510,
+%T A387270 3568,3704,3868,3974,7032,7068,7110,7388,7398,7734,8128,14044,14054,
+%U A387270 14134,14304,14774,14832,15480,15900,16134,28086,28144,28280,28444,28550,29560,29596,29638
+%N A387270 Numbers whose binary expansion consists of alternating runs of 1's and 0's where each run of 0's is exactly one shorter than the preceding run of 1's, and the expansion ends with a 0-run.
+%C A387270 Can also be defined as "Even numbers whose binary expansion is a concatenation of one or more blocks of the form 1^k 0^{k-1} with k >= 2 (i.e., alternating 1- and 0-runs where each 0-run is exactly one shorter than the preceding 1-run, and the expansion ends with a 0-run)".
+%C A387270 Let the binary expansion of n (without leading zeros) have alternating runs of 1's and 0's and end in a 0-run. Then n is in the sequence iff, reading from the most significant bit, it can be written as a concatenation of blocks (1^{k_1} 0^{k_1-1})(1^{k_2} 0^{k_2-1})...(1^{k_t} 0^{k_t-1}) with t >= 1 and all k_i >= 2.
+%C A387270 Equivalently, reading from the least significant bit, the trailing 0-run has length r_1 >= 1, the following 1-run has length r_1+1, then a 0-run of length r_2 >= 1, a 1-run of length r_2+1, etc., until the bits exhaust.
+%C A387270 Every term is even because the expansion ends with a 0-run, hence the least significant bit is 0.
+%C A387270 The single-block numbers 1^k 0^{k-1} are in the sequence for every k >= 2, so there are infinitely many terms.
+%C A387270 The numbers with exactly one block 1^k 0^{k-1} are 2^{k-1} (2^k - 1) (for k >= 2), which is A006516 (shifted to start at 1 rather than 0). In particular, when 2^k - 1 is prime, these are the even perfect numbers (A000396).
+%C A387270 If L is the bit-length of n, then L is the sum of the odd integers (2*k_i - 1) contributed by each block. Thus, the number of terms of bit-length exactly L equals the number of compositions of L into odd parts >= 3, which is A000931 evaluated at L.
+%C A387270 Let v_2(n) be the 2-adic valuation (trailing zero count). Set n_0 = n. For i >= 0, let r_i = v_2(n_i) (so r_i >= 1), and define m_i = n_i / 2^{r_i}. The current block is valid iff m_i == 2^{r_i+1} - 1 (mod 2^{r_i+1}), i.e., after removing the trailing r_i zeros, the next r_i+1 low bits are all 1's. Then remove the entire block 1^{r_i+1} 0^{r_i} by n_{i+1} = floor(n_i / 2^{r_i+1 (equivalently, n_{i+1} = floor(m_i / 2^{r_i+1})). Continue until n_t = 0.
+%C A387270 The set of binary strings here is { 1^k 0^{k-1} : k >= 2 }^+. (Compare with A166751, where each 0-run equals the preceding 1-run, not one shorter.)
+%H A387270 Ahmet Caglar Saygili, <a href="/A387270/b387270.txt">Table of n, a(n) for n = 1..10000</a>
+%F A387270 If the blocks (from most significant to least significant) have 1-run lengths k_1,...,k_t with k_i >= 2, then letting S_i = Sum_{j=i+1..t} (2*k_j - 1) (total length of blocks to the right of block i), we have a = Sum_{i=1..t} 2^{S_i + (k_i - 1)} * (2^{k_i} - 1). (Each block contributes 1^{k_i} 0^{k_i-1} = (2^{k_i} - 1) * 2^{k_i-1}, shifted left by S_i bits.)
+%e A387270 220 = 11011100_2 is a term. Its runs are 11,0,111,00 and the adjacent pairs have lengths (2,1) and (3,2), where the 0-run length equals the preceding 1-run length minus 1 for each pair.
+%t A387270 ok[n_]:=Module[{L, m},L=Length/@ Split[IntegerDigits[n, 2]];m = Length[L];EvenQ[m] && AllTrue[Range[1, m/2],L[[2*#-1]]-1==L[[2*#]] &]];Select[Range[0,29999],ok] (* _James C. McMahon_, Sep 10 2025 *)
+%o A387270 (Julia)
+%o A387270 function ok(n::Integer)::Bool
+%o A387270     n > 0 || return false
+%o A387270     x = n
+%o A387270     while x > 0
+%o A387270         z = 0
+%o A387270         while (x & 1) == 0
+%o A387270             z += 1
+%o A387270             x >>= 1
+%o A387270         end
+%o A387270         z == 0 && return false
+%o A387270         o = 0
+%o A387270         while (x & 1) == 1
+%o A387270             o += 1
+%o A387270             x >>= 1
+%o A387270         end
+%o A387270         o == z + 1 || return false
+%o A387270     end
+%o A387270     true
+%o A387270 end
+%o A387270 [k for k in 0:10^5 if ok(k)]
+%o A387270 (Python)
+%o A387270 from itertools import groupby
+%o A387270 def ok(n):
+%o A387270     L = [len(list(g)) for k, g in groupby(bin(n)[2:])]
+%o A387270     return (m:=len(L))&1 == 0 and all(L[2*j]-1 == L[2*j+1] for j in range(m>>1))
+%o A387270 print([k for k in range(30000) if ok(k)]) # _Michael S. Branicky_, Aug 26 2025
+%Y A387270 Cf. A000396, A000931, A006516, A166751, A387269.
+%K A387270 base,nonn,easy
+%O A387270 1,1
+%A A387270 _Ahmet Caglar Saygili_, Aug 24 2025

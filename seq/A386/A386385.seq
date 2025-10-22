@@ -1,0 +1,50 @@
+%I A386385 #48 Aug 27 2025 01:04:28
+%S A386385 2,1,1,2,1,1,2,2,1,1,2,1,1,1,1,2,2,1,1,2,1,1,1,1,2,1,1,2,1,1,2,2,1,1,
+%T A386385 1,1,2,1,1,2,2,1,1,2,1,1,2,1,1,1,1,2,1,1,2,2,1,1,2,1,1,1,1,2,2,1,1,2,
+%U A386385 1,1,2,1,1,1,1,2,1,1,2,2,1,1,1,1,2,1,1,2,2,1,1,2,1,1,2,1,1,1,1,2,1,1,2,2,1
+%N A386385 Period-32 block rewriting of A157196 (blocks 11 and 2): for block index i, keep if i mod 32 in {3,4,11,12,15,16,19,20,27,28}, else swap 11<->2.
+%C A386385 The runs of '2', and '1,1' are interleaved in the continued fraction expansion of Sum_{k>=0} (-1)^k/(k!)! (A386384).
+%C A386385 Parse A157196 into blocks A = 11 and B = 2, and index the blocks i = 0,1,2,.... For each block i, keep it when i mod 32 in {3, 4, 11, 12, 15, 16, 19, 20, 27, 28}; otherwise swap A <-> B (i.e, swap 1,1 <-> 2) at all other i. Finally expand blocks by A -> 1,1 and B -> 2.
+%C A386385 We index the blocks starting at i=0. "Keep" residues are {3,4,11,12,15,16,19,20,27,28} (mod 32); at all other residues we swap (11) <-> (2). After that, expand by (11)->1,1 and (2)->2.
+%C A386385 Each block is handled independently by its own i mod 32.
+%H A386385 Daniel Hoyt, <a href="/A386385/b386385.txt">Table of n, a(n) for n = 0..1000</a>
+%H A386385 Daniel Hoyt, <a href="https://doi.org/10.5281/zenodo.16897568">Justification for the explicit formula and program provided.</a>
+%e A386385 Starting from A157196 parsed as (11)(2)(11)(11)(2)(11)(2)... = ABAABAB...
+%e A386385 i=0: (11), residue 0 not in keep set -> swap to (2)  -> output 2.
+%e A386385 i=1: (2),  residue 1 not in keep set -> swap to (11) -> output 1, 1.
+%e A386385 i=2: (11), residue 2 not in keep set -> swap to (2)  -> output 2.
+%e A386385 i=3: (11), residue 3 is in keep set  -> keep (11)    -> output 1, 1.
+%e A386385 i=4: (2),  residue 4 is in keep set  -> keep (2)     -> output 2.
+%e A386385 i=5: (11), residue 5 not in keep set -> swap to (2)  -> output 2.
+%e A386385 i=6: (2),  residue 6 not in keep set -> swap to (11) -> output 1, 1.
+%e A386385 Concatenating: 2, 1, 1, 2, 1, 1, 2, 2, 1, 1, ...
+%o A386385 (Python)
+%o A386385 def a386385(n):
+%o A386385     m=n+1
+%o A386385     if m<=0: raise ValueError("n>=0")
+%o A386385     M=0x18199818
+%o A386385     def run(N,mode):
+%o A386385         s=[1,1];h=2;p=0;k=0;c=0;y='B'
+%o A386385         def g(u):
+%o A386385             nonlocal s,h
+%o A386385             while len(s)<u:
+%o A386385                 t=2 if (h&1)==0 else 1
+%o A386385                 s+= [t]*((s[h-1]*2)//t); h+=1
+%o A386385         while k<N:
+%o A386385             g(p+2)
+%o A386385             if s[p]==2: xb='B'; p+=1
+%o A386385             elif p+1<len(s) and s[p]==1 and s[p+1]==1: xb='A'; p+=2
+%o A386385             else: g(p+2); continue
+%o A386385             y = xb if ((M>>(k&31))&1) else ('A' if xb=='B' else 'B')
+%o A386385             c += 2 if y=='A' else 1; k+=1
+%o A386385         return c if mode==0 else y
+%o A386385     lo,hi=0,m
+%o A386385     while lo<hi:
+%o A386385         md=(lo+hi)//2
+%o A386385         if run(md,0)>=m: hi=md
+%o A386385         else: lo=md+1
+%o A386385     return 2 if run(lo,1)=='B' else 1
+%Y A386385 Cf. A157196, A386384.
+%K A386385 nonn
+%O A386385 0,1
+%A A386385 _Daniel Hoyt_, Aug 17 2025

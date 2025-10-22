@@ -1,0 +1,58 @@
+%I A380890 #10 Feb 10 2025 04:57:58
+%S A380890 1,1,2,1,2,4,1,3,5,7,1,3,7,9,12,1,5,14,18,21,24,1,5,19,29,35,38,42,1,
+%T A380890 8,35,56,71,77,81,85,1,10,60,100,133,148,156,160,165,1,15,107,192,264,
+%U A380890 297,317,325,330,335,1,19,187,361,511,586,630,650,660,665,671,1,31,352,714,1041,1206,1306,1350,1375,1385,1391,1397
+%N A380890 Triangle T(n,k) read by rows: the number of graphs with n nodes which are enriched cycles (necklaces) and the elements in the cycle are marked linear chains up to length k.
+%C A380890 The number of marked/rooted linear chains (linear trees) with up to k nodes has the generating function x+ x^2 +2*x^3 +2*x^4 + 3*x^5 +3*x^6+...+floor((k+1)/2)*x^k, a truncated version of A110654. [The node in the chain that is marked can be at the end of the chain, penultimate node etc up to the middle node, which gives floor((k+1)/2) ways; marking any of the other nodes does not generate more marked chains because the entire chain can be flipped over.] A multiset of such marked chains defines an "enriched" necklace if m marked nodes are arranged in a circle and a chord is wired through these nodes. That chord is the only cycle in the graph. The total number n of nodes in that graph is the sum over the individual chain lengths of the m chains.
+%C A380890 In Bower's nomenclatures the columns approach the CIK transform of A110654 for k->oo: 1, 2, 4, 7, 12, 24, 42, 85, 165, 335, 671, 1397,...
+%C A380890 If the total number of nodes n is fixed, the number of graphs T(n,k) stays constant in the rows at k>n, because chains longer than n are never used due to the limit imposed on n.
+%C A380890 The book of Bona (edt.) shows on page 1002 a graph with a cycle constructed with 5 linear chains up to length k=4 (1 chain of length 1, 2 chains of length 2, 1 chain of length 3, 1 chain of length 4) and n=12 nodes in total. It seems the "pointed operation" there creates more chains than enumeration of rooted linear trees here.
+%H A380890 Miklos Bona, editor, <a href="https://doi.org/10.1201/b18255">Handbook of Enumerative Combinatorics</a>, CRC Press, 2015, pages 1001-1002.
+%H A380890 C. G. Bower, <a href="/transforms2.html">Transforms (2)</a>
+%H A380890 <a href="/index/Ne#necklaces">Index entries for sequences related to necklaces</a>
+%e A380890 The full array starts
+%e A380890    1    1    1    1    1    1    1    1    1    1    1    1
+%e A380890    1    2    2    2    2    2    2    2    2    2    2    2
+%e A380890    1    2    4    4    4    4    4    4    4    4    4    4
+%e A380890    1    3    5    7    7    7    7    7    7    7    7    7
+%e A380890    1    3    7    9   12   12   12   12   12   12   12   12
+%e A380890    1    5   14   18   21   24   24   24   24   24   24   24
+%e A380890    1    5   19   29   35   38   42   42   42   42   42   42
+%e A380890    1    8   35   56   71   77   81   85   85   85   85   85
+%e A380890    1   10   60  100  133  148  156  160  165  165  165  165
+%e A380890    1   15  107  192  264  297  317  325  330  335  335  335
+%e A380890    1   19  187  361  511  586  630  650  660  665  671  671
+%e A380890    1   31  352  714 1041 1206 1306 1350 1375 1385 1391 1397
+%e A380890 The sequence gathers only the non-trivial lower left triangle up to the diagonal.
+%e A380890 T(1,k)=1 means whatever the set of variable-length linear chains is, if the total number of nodes is 1 only the linear chain of length 1 (ring of a single element) is a necklace.
+%e A380890 T(n,1)=1 means the only available element in the necklace are simple (marked) nodes. To generate a enriched necklace with n nodes in total can only be done by putting that node n times repeated on a circle.
+%e A380890 T(4,3)=5 means the available chains up to length k=3 are x, x-o, x-o-o and o-x-o; x denotes the marked node. The 5 cycles/necklaces with n=4 nodes are: [x]-[x]-[x]-[x], [x]-[x]-[x-o], [x-o]-[x-o], [x]-[x-o-o], and [x]-[o-x-o], where [...] is the a linear node in the circle.
+%p A380890 # Generating function of a marked linear chain
+%p A380890 # (=rooted linear tree) up to n nodes.
+%p A380890 # Essentially a truncated (polynomial) version of A110654.
+%p A380890 # @param n Number of nodes
+%p A380890 # @param x free variable in the o.g.f.
+%p A380890 gLinChain := proc(n,x)
+%p A380890     add(floor((i+1)/2) *x^i,i=1..n) ;
+%p A380890 end proc:
+%p A380890 # k: max element in each chain
+%p A380890 # n: number of total nodes in graph
+%p A380890 A380890 := proc(n,k)
+%p A380890     local x,g ,cidx,d,gd,ncyc;
+%p A380890     # number of possible elements in the cycle
+%p A380890     g := gLinChain(k,x) ;
+%p A380890     # wrap g into the Polya cycle index of the cyclic group C_ncyc
+%p A380890     cidx := 0 ;
+%p A380890     for ncyc from 1 to n do
+%p A380890         for d in numtheory[divisors](ncyc) do
+%p A380890             gd := subs(x=x^d,g) ;
+%p A380890             cidx := cidx+1/ncyc*numtheory[phi](d)*gd^(ncyc/d) ;
+%p A380890         end do:
+%p A380890     end do:
+%p A380890     coeff(cidx,x^n) ;
+%p A380890 end proc:
+%p A380890 seq(seq(A380890(n,k),k=1..n),n=1..12) ;
+%Y A380890 Cf. A322059, A000358 (column k=2, binary necklace).
+%K A380890 nonn,tabl
+%O A380890 1,3
+%A A380890 _R. J. Mathar_, Feb 07 2025

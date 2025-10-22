@@ -1,0 +1,47 @@
+%I A389000 #70 Oct 06 2025 11:23:05
+%S A389000 1,2,3,13,19,24,149,583,9,19,74,264,2236,1999,1374,19499,299833,99,
+%T A389000 199,767,9417,812083,199999,63087,1994999,99483667,999,1999,16697,
+%U A389000 768108,113578114,19999999,2424867,88898999,69999835714,9999,19999,196967,38455167,8943142063
+%N A389000 Smallest k such that the sums of digits of k and k^2 in base 10 are both divisible by n or a(n) = -1 if no such k exists.
+%C A389000 Terms are no multiple of 10. - _David A. Corneth_, Sep 22 2025
+%C A389000 From _David A. Corneth_, Sep 25 2025: (Start)
+%C A389000 a(44) <= 94857676958167.
+%C A389000 For all k we have digsum(k^2) == digsum(k)^2 (mod 9)  (cf. A007953 for digsum).
+%C A389000 For n = 44. If digsum(a(44)) = 44 == 8 (mod 9) then digsum(a(44)^2) == digsum(a(44))^2 == 8^2 == 1 (mod 9). The smallest number that is 1 (mod 9) and 0 (mod 44) is 352. then digitsum of k^2 is at least 352 and k^2 has at least ceil(352/9) = 40 digits. But with the upper bound on a(44) that is impossible.
+%C A389000 Search can be restricted via last digits of candidate numbers. If a number has m digits then we can define a "loss" of some k with m digits via 9*m - digsum(k). We can than set an upper bound on a loss. For example if a(44) has 14 digits and digsum 88 then the loss is 9*14 - 88 = 38. Similarly if a(44)^2 has 28 digits and digsum 220 then loss is 32. This constrains the search based on last digits.
+%C A389000 Does digsum(a(n))/n only depend on n mod 9? In first 43 terms it does. (End)
+%C A389000 a(47) = 2897687. a(48) = 1377671187, a(51) = 2754991833. - _Chai Wah Wu_, Oct 02 2025
+%C A389000 a(44) = 94857676958167 (confirmed), a(49) = 2233356191833, a(50) = 199999999999. - _Giovanni Resta_, Oct 02 2025
+%H A389000 Chai Wah Wu, <a href="/A389000/b389000.txt">Table of n, a(n) for n = 1..52</a> (see comments for the attribution of terms beyond a(43))
+%H A389000 Barney Maunder-Taylor, <a href="https://aperiodical.com/2024/12/a-new-sequence/">A New Sequence!</a>
+%F A389000 a(9*m) = 10^m - 1. a(9*m + 1) = 2*10^m - 1 for m >= 1. - _David A. Corneth_, Sep 25 2025
+%F A389000 Conjecture: a(9*m+5) = 2*10^(2*m+1)-1 for m >= 0. - _Chai Wah Wu_, Oct 01 2025
+%e A389000 For n = 4, a(4) = 13 as 1+3 mod 4 = 0 and 13^2 = 169 and 1+6+9 mod 4 = 0.
+%o A389000 (Haskell) import Data.Char
+%o A389000 a n = head [k | k <- [1..], sum (map digitToInt (show k)) `mod` n ==0, sum (map digitToInt (show (k^2))) `mod` n ==0]
+%o A389000 list n = [a k | k <- [1..n]]
+%o A389000 (Python)
+%o A389000 from itertools import count
+%o A389000 from collections import Counter
+%o A389000 from sympy.utilities.iterables import partitions, multiset_permutations
+%o A389000 def A389000(n):
+%o A389000     for l in count(n//9+bool(n%9)):
+%o A389000         m, c = n, 10**l
+%o A389000         while m<=9*l:
+%o A389000             for s,p in partitions(m,m=l,k=9,size=True):
+%o A389000                 p[0] = l-s
+%o A389000                 for q in multiset_permutations(sorted(Counter(p).elements())):
+%o A389000                     if q[0]:
+%o A389000                         k = int(''.join(str(d) for d in q))
+%o A389000                         if k>=c:
+%o A389000                             break
+%o A389000                         if not sum(int(d) for d in str(k**2))%n:
+%o A389000                             c = min(c,k)
+%o A389000                             break
+%o A389000             m += n
+%o A389000         if c<10**l: return c # _Chai Wah Wu_, Sep 22 2025
+%Y A389000 Cf. A007953, A389004.
+%K A389000 nonn,base
+%O A389000 1,2
+%A A389000 _Arjun Maneesh Agarwal_, Sep 22 2025
+%E A389000 a(35) onwards from _Chai Wah Wu_, Sep 22 2025

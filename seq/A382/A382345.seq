@@ -1,0 +1,60 @@
+%I A382345 #33 Apr 07 2025 09:26:11
+%S A382345 1,2,0,3,2,0,4,4,2,0,5,6,7,2,0,6,8,12,8,2,0,7,10,17,18,11,2,0,8,12,22,
+%T A382345 28,26,12,2,0,9,14,27,38,46,34,15,2,0,10,16,32,48,66,64,46,16,2,0,11,
+%U A382345 18,37,58,86,100,94,56,19,2,0,12,20,42,68,106,136,152,124,70,20,2,0
+%N A382345 Square array A(n,k), n>=0, k>=0, read by antidiagonals downwards, where n unlabeled objects are distributed into k containers of two kinds. Containers may be left empty.
+%H A382345 Alois P. Heinz, <a href="/A382345/b382345.txt">Antidiagonals n = 0..200, flattened</a>
+%F A382345 A(0,k) = k + 1.
+%F A382345 A(1,k) = 2*k.
+%F A382345 A(2,k+1) = 2 + 5 * k.
+%F A382345 A(n,1) = 2.
+%F A382345 A(n,k) = Sum_{i=0..k} (k + 1 - i) * A382342(n,i) for k <= n.
+%F A382345 A(n,n+k) = A(n,n) + k * A000712(n).
+%F A382345 A(n,k) = A382342(n,k) + 2 * A(n,k-1) - A(n,k-2) for 2 <= k <= n.
+%F A382345 A(n,k) = A382342(n+k,k). - _Alois P. Heinz_, Mar 31 2025
+%e A382345 Array starts:
+%e A382345  0 : [1, 2,  3,   4,   5,   6,   7,    8,    9,   10,   11]
+%e A382345  1 : [0, 2,  4,   6,   8,  10,  12,   14,   16,   18,   20]
+%e A382345  2 : [0, 2,  7,  12,  17,  22,  27,   32,   37,   42,   47]
+%e A382345  3 : [0, 2,  8,  18,  28,  38,  48,   58,   68,   78,   88]
+%e A382345  4 : [0, 2, 11,  26,  46,  66,  86,  106,  126,  146,  166]
+%e A382345  5 : [0, 2, 12,  34,  64, 100, 136,  172,  208,  244,  280]
+%e A382345  6 : [0, 2, 15,  46,  94, 152, 217,  282,  347,  412,  477]
+%e A382345  7 : [0, 2, 16,  56, 124, 214, 316,  426,  536,  646,  756]
+%e A382345  8 : [0, 2, 19,  70, 167, 302, 464,  640,  825, 1010, 1195]
+%e A382345  9 : [0, 2, 20,  84, 212, 406, 648,  922, 1212, 1512, 1812]
+%e A382345 10 : [0, 2, 23, 100, 271, 542, 899, 1314, 1766, 2236, 2717]
+%e A382345 ...
+%p A382345 b:= proc(n, i) option remember; expand(`if`(n=0, 1, `if`(i<1, 0,
+%p A382345       add(x^j*b(n-i*j, min(n-i*j, i-1))*(j+1), j=0..n/i))))
+%p A382345     end:
+%p A382345 A:= (n, k)-> coeff(b(n+k$2), x, k):
+%p A382345 seq(seq(A(n, d-n), n=0..d), d=0..11);  # _Alois P. Heinz_, Mar 29 2025
+%t A382345 b[n_, i_] := b[n, i] = Expand[If[n == 0, 1, If[i < 1, 0,
+%t A382345    Sum[x^j*b[n - i*j, Min[n - i*j, i - 1]]*(j + 1), {j, 0, n/i}]]]];
+%t A382345 A[n_, k_] := Coefficient[b[n + k, n + k], x, k];
+%t A382345 Table[Table[A[n, d - n], {n, 0, d}], {d, 0, 11}] // Flatten (* _Jean-François Alcover_, Apr 07 2025, after _Alois P. Heinz_ *)
+%o A382345 (Python)
+%o A382345 from sympy.utilities.iterables import partitions
+%o A382345 def a_row(n, length=11) -> list[int]:
+%o A382345     if n == 0 : return list(range(1, length + 1))
+%o A382345     t = [0] * length
+%o A382345     for p in partitions(n):
+%o A382345         fact = 1
+%o A382345         s = 0
+%o A382345         for k in p :
+%o A382345             s += p[k]
+%o A382345             fact *= p[k] + 1
+%o A382345         if s > 0 :
+%o A382345             t[s] += fact
+%o A382345     for i in range(1, length - 1):
+%o A382345         t[i+1] += t[i] * 2 - t[i-1]
+%o A382345     return t
+%o A382345 for n in range(11): print(a_row(n))
+%Y A382345 Antidiagonal sums give A000712.
+%Y A382345 Alternating antidiagonal sums give A073252.
+%Y A382345 Without empty containers: A381895.
+%Y A382345 Cf. A382342.
+%K A382345 nonn,tabl
+%O A382345 0,2
+%A A382345 _Peter Dolland_, Mar 29 2025

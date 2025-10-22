@@ -1,0 +1,58 @@
+%I A381349 #26 Feb 26 2025 12:57:02
+%S A381349 1,1,2,1,3,4,1,6,9,10,1,10,22,26,27,1,20,54,73,78,79,1,36,163,249,269,
+%T A381349 275,276,1,72,447,791,915,942,949,950,1,135,1350,3136,3776,3899,3934,
+%U A381349 3942,3943,1,272,4088,11315,14849,15650,15811,15855,15864,15865
+%N A381349 Triangle read by rows: T(n,k) is the number of distinct tuples E each corresponding to some k-ary word W = (w_1, ..., w_n), where E is a tuple (e_1, ..., e_{n-1}) with e_i being the number of pairs of equal letters (w_j,w_k) in W such that j + i = k.
+%C A381349 Two different words of the same length can have the same corresponding E tuple.
+%H A381349 Michael S. Branicky, <a href="/A381349/b381349.txt">Table of n, a(n) for n = 1..78</a> (terms through row 12)
+%H A381349 Michael S. Branicky, <a href="/A381349/a381349.py.txt">Python Program</a>
+%F A381349 T(n,k) = T(n,n) for k > n.
+%F A381349 From _Michael S. Branicky_, Feb 25 2025: (Start)
+%F A381349 T(n,   2) = A006606(n).
+%F A381349 T(n, n-1) = T(n, n-2) + n-1, arising from E's of permutations of 1, ..., n-2, n-1, n-1.
+%F A381349 T(n,   n) = T(n, n-1) + 1, arising from E(1, ... , n) = (0, ..., 0). (End)
+%e A381349 Triangle begins:
+%e A381349     k=1   2    3    4    5    6    7
+%e A381349   n=1 1;
+%e A381349   n=2 1,  2;
+%e A381349   n=3 1,  3,   4;
+%e A381349   n=4 1,  6,   9,  10;
+%e A381349   n=5 1, 10,  22,  26,  27;
+%e A381349   n=6 1, 20,  54,  73,  78,  79;
+%e A381349   n=7 1, 36, 163, 249, 269, 275, 276;
+%e A381349   ...
+%e A381349 Considering the pairs of equal letters in W = (1,3,3,1) there is 1 pair with no letters between them, 0 pairs with a single letter between them, and 1 pair seperated by two letters, giving E = (1,0,1).
+%e A381349 T(4,2) = 6 counts the following values of E each listed with a corresponding word:
+%e A381349      E        W
+%e A381349   (3,2,1) (1,1,1,1)
+%e A381349   (2,1,0) (1,1,1,2)
+%e A381349   (2,0,0) (1,1,2,2)
+%e A381349   (1,0,1) (1,2,2,1)
+%e A381349   (1,1,1) (2,1,2,2)
+%e A381349   (0,2,0) (2,1,2,1)
+%o A381349 (Python)
+%o A381349 from itertools import combinations_with_replacement, permutations
+%o A381349 def pairs(m): return tuple([sum(1 for j in range(len(m)-i) if m[j] == m[j+i]) for i in range(1,len(m))])
+%o A381349 def A381349(n,k):
+%o A381349     S = set()
+%o A381349     for y in combinations_with_replacement(range(1,k+1),n-1):
+%o A381349         S.update(z for z in permutations((1,)+y))
+%o A381349     return len({pairs(i) for i in S})
+%o A381349 (Python) # see links for a different algorithm
+%o A381349 from sympy.utilities.iterables import multiset_permutations
+%o A381349 from itertools import combinations, combinations_with_replacement
+%o A381349 def E(w):
+%o A381349     return tuple(sum(1 for j, k in combinations(range(len(w)), 2) if w[j] == w[k] and j+i == k) for i in range(len(w)))
+%o A381349 def row(n): # generator of row n
+%o A381349     v, S = 0, set()
+%o A381349     for k in range(1, n+1):
+%o A381349         for c in combinations_with_replacement(range(1, k+1), n-k):
+%o A381349             if len(c) > 0 and c[0] == 2: break
+%o A381349             S.update(E(e) for e in multiset_permutations(tuple(range(1, k+1))+c))
+%o A381349         yield len(S)
+%o A381349 print([e for n in range(1, 9) for e in row(n)]) # _Michael S. Branicky_, Feb 26 2025
+%Y A381349 Cf. A000312, (empirical column k=2) A006606, A120910, A226873.
+%K A381349 nonn,tabl
+%O A381349 1,3
+%A A381349 _John Tyler Rascoe_, Feb 21 2025
+%E A381349 a(37) and beyond from _Michael S. Branicky_, Feb 25 2025

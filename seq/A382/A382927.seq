@@ -1,0 +1,53 @@
+%I A382927 #53 May 13 2025 15:09:31
+%S A382927 2,181,151,131,101,11,17471,16661,16561,16361,16061,15551,15451,14741,
+%T A382927 14341,13931,13831,13331,12821,12721,12421,11411,11311,10601,10501,
+%U A382927 10301,1884881,1883881,1881881,1880881,1879781,1878781,1876781,1865681,1856581,1853581,1851581
+%N A382927 Smallest beginning of a sequence of exactly n consecutive palindromic primes, all ending with the same digit.
+%H A382927 Robert Israel, <a href="/A382927/b382927.txt">Table of n, a(n) for n = 1..10000</a>
+%e A382927 a(6) = 11, because 11 initiates a sequence of exactly six consecutive palindromic primes: 11, 101, 131, 151, 181 and 191, each ending in the same digit 1.
+%p A382927 # with A002385 e.g. from the b-file for that sequence
+%p A382927 R:= NULL:
+%p A382927 d:= 2: count:= 1: m:= 1;
+%p A382927 for i from 2 while m < 100 do
+%p A382927   dp:= A002385[i] mod 10;
+%p A382927   if d = dp then count:= count+1
+%p A382927   else
+%p A382927     d:= dp;
+%p A382927     if count >= m then
+%p A382927       R:= R, seq(A002385[i-j],j=m..count);
+%p A382927       m:= count+1;
+%p A382927     fi;
+%p A382927     count:= 1;
+%p A382927   fi
+%p A382927 od:
+%p A382927 R; # _Robert Israel_, May 13 2025
+%o A382927 (Python)
+%o A382927 from sympy import isprime
+%o A382927 from itertools import count, islice, product
+%o A382927 def palprimes(): # generator of palprimes
+%o A382927     yield from [2, 3, 5, 7, 11]
+%o A382927     for d in count(3, 2):
+%o A382927         for last in "1379":
+%o A382927             for p in product("0123456789", repeat=d//2-1):
+%o A382927                 left = "".join(p)
+%o A382927                 for mid in [[""], "0123456789"][d&1]:
+%o A382927                     t = int(last + left + mid + left[::-1] + last)
+%o A382927                     if isprime(t):
+%o A382927                         yield t
+%o A382927 def agen(): # generator of terms
+%o A382927     adict, n, lastdigit, vlst = dict(), 1, 0, [2]
+%o A382927     for p in palprimes():
+%o A382927         if p%10 == lastdigit:
+%o A382927             vlst.append(p)
+%o A382927         else:
+%o A382927             if len(vlst) >= n:
+%o A382927                 for i in range(n, len(vlst)+1):
+%o A382927                     if i not in adict:
+%o A382927                         adict[i] = vlst[-i]
+%o A382927                 while n in adict: yield adict[n]; n += 1
+%o A382927             lastdigit, vlst = p%10, [p]
+%o A382927 print(list(islice(agen(), 40))) # _Michael S. Branicky_, Apr 13 2025
+%Y A382927 Cf. A002385, A054681.
+%K A382927 nonn,base
+%O A382927 1,1
+%A A382927 _Jean-Marc Rebert_, Apr 13 2025

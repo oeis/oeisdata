@@ -1,0 +1,61 @@
+%I A381977 #18 Apr 01 2025 23:07:44
+%S A381977 0,0,0,0,0,3,3,5,0,0,0,12,18,19,21,27,35,36,57,20,45,25,71,75,65,88,
+%T A381977 90,110,137,81,120,135,42,162,150,180,204,215,252,165,230,252,282,208,
+%U A381977 270,315,341,357,402,290,375,400,440,441,340,481,513,530,587,456
+%N A381977 Number of edge intersections in the divisibility circle graph of n (base 10).
+%C A381977 Definition:
+%C A381977 For each integer n, construct a divisibility circle graph as follows:
+%C A381977 - Place the numbers 0 to n-1 evenly around a circle.
+%C A381977 - For each number k between 0 and n-1, draw a chord from k to 10k mod n.
+%C A381977 - Count the intersections among all the chords.
+%C A381977 Notes:
+%C A381977 - Two edges (a,f(a)) and (b,f(b)) are considered to intersect if their segments are only partially contained within the other.
+%C A381977 - Edges are undirected, and intersections are counted once (i.e., duplicates from symmetric pairs are removed).
+%H A381977 Gil Moses, <a href="/A381977/b381977.txt">Table of n, a(n) for n = 1..2000</a>
+%H A381977 James Grime, <a href="https://www.youtube.com/watch?v=Ki-M1DJIZsk">Solving Seven</a>, Numberphile video.
+%e A381977 For n=7, the segments are 0->0, 1->3, 2->6, 3->2, 4->5, 5->1, 6->4.
+%e A381977 When drawing these chords in a circle, 3 intersections occur: 1->3 and 2->6, 5->1 and 6->4, 2->6 and 5->1.
+%o A381977 (Python)
+%o A381977 import sys
+%o A381977 base_multiplier = 10
+%o A381977 def list_intersections(n):
+%o A381977     """
+%o A381977     Computes the number of valid intersections based on range intersections.
+%o A381977     Before checking intersections, ensures that each range is stored in ascending order
+%o A381977     to avoid duplicate counting.
+%o A381977     """
+%o A381977     # Generate remainder pairs using the base multiplier
+%o A381977     table = [(i, (base_multiplier * i) % n) for i in range(n)]
+%o A381977     # Ensure each range is stored in ascending order and remove duplicates
+%o A381977     unique_ranges = set((min(num, rem), max(num, rem)) for num, rem in table)
+%o A381977     sorted_table = list(unique_ranges)  # Convert back to a list for processing
+%o A381977     intersections = []
+%o A381977     # Check for valid intersections
+%o A381977     for i in range(len(sorted_table)):
+%o A381977         num1, rem1 = sorted_table[i]
+%o A381977         for j in range(i):
+%o A381977             num2, rem2 = sorted_table[j]
+%o A381977             # Find intersection range
+%o A381977             intersection_start = max(num1, num2)
+%o A381977             intersection_end = min(rem1, rem2)
+%o A381977             intersection_length = max(0, intersection_end - intersection_start)
+%o A381977             # Compute the lengths of the two ranges
+%o A381977             range1_length = rem1 - num1
+%o A381977             range2_length = rem2 - num2
+%o A381977             # An intersection occurs if the intersection is smaller than the smallest range and > 0
+%o A381977             if 0 < intersection_length < min(range1_length, range2_length):
+%o A381977                 intersections.append(((num2, rem2), (num1, rem1)))
+%o A381977     return len(intersections)
+%o A381977 # Define range of n values
+%o A381977 n_values = list(range(1, 100))
+%o A381977 intersections_values = []  # Stores intersections count for each n
+%o A381977 for n in n_values:
+%o A381977     # Compute intersections using the deduplicated method
+%o A381977     intersections = list_intersections(n)
+%o A381977     intersections_values.append(intersections)
+%o A381977 # Output only intersection numbers for OEIS submission
+%o A381977 for value in intersections_values:
+%o A381977     print(value)
+%K A381977 nonn
+%O A381977 1,6
+%A A381977 _Gil Moses_, Mar 11 2025

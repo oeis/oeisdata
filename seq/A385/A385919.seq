@@ -1,0 +1,48 @@
+%I A385919 #46 Aug 05 2025 18:00:56
+%S A385919 1,1,6,6930,12257280,526915620,1132835421602062347
+%N A385919 Number of non-isomorphic round-robin tournament schedules for 2*n players, where the order of rounds does not matter.
+%C A385919 A round-robin tournament schedule with 2*n players consists of 2*n-1 rounds, where in each round the players are divided into n disjoint pairs, and every player plays against every other player exactly once.
+%C A385919 Also the number of non-isomorphic 1-factorizations of the complete graph K_{2n}. We count 1-factorizations of the complete graph K_{2n} up to isomorphism, where 'isomorphism' means that two factorizations are considered the same if one can be transformed into the other by:
+%C A385919 (1) relabeling the vertices (i.e., permuting the players), and
+%C A385919 (2) reordering the rounds (i.e., permuting the 1-factors).
+%C A385919 This is equivalent to counting round-robin tournament schedules where players are unlabeled and the order of the rounds is irrelevant.
+%C A385919 Number of ways to partition the edge set of K_{2n} into 2n-1 perfect matchings (1-factors), up to isomorphism. Also the number of non-isomorphic 1-factorizations of the complete graph K_{2n}.
+%D A385919 Colbourn and Dinitz, CRC Handbook of Combinatorial Designs, 2nd ed. (2006), entry on 1 factorizations of complete graphs.
+%H A385919 Petteri Kaski and Patric R. J. Östergård, <a href="https://doi.org/10.48550/arXiv.0801.0202 ">There are 1132835421602062347 nonisomorphic one-factorizations of K_14</a>, arXiv:0801.0202 [math.CO], 2007.
+%H A385919 Hilko Koning, <a href="/A385919/a385919.txt">Non-isomorphic 1-factorizations of K_6</a> (6 labeled players, 5 rounds each).
+%H A385919 Brendan D. McKay and Ian M. Wanless, <a href="https://cs.anu.edu.au/~bdm/papers/k12of.pdf">There are 526915620 nonisomorphic one-factorizations of K_12</a>.
+%H A385919 Wikipedia, <a href="https://en.wikipedia.org/wiki/1-factorization">1-factorization</a>.
+%H A385919 R. M. Wilson, <a href="https://www.jstor.org/stable/2041094">Decompositions of complete graphs into subgraphs isomorphic to a given graph</a>, Congressus Numerantium 15 (1976), pp. 647-659.
+%e A385919 a(1) = 1: one match between two players.
+%e A385919 a(2) = 1: three matches (A-B, C-D, etc) organized into three rounds. All factorizations are isomorphic.
+%e A385919 a(3) = 6: The 15 edges of K_6 can be partitioned into 5 rounds of 3 matches in 6 non-isomorphic ways.
+%t A385919 (* n=4 is extremely memory- and CPU-intensive. The Mathematica approach is theoretically correct but utterly infeasible for n >= 4 *)
+%t A385919 ClearAll[nonIsomorphic1Factorizations];
+%t A385919 nonIsomorphic1Factorizations[n_Integer?Positive] :=
+%t A385919   Module[{vertices = Range[2 n], edges, matchings, factorizations,
+%t A385919     perms, canonical, relabel, isIsomorphicQ, nonIsomorphicList = {}},
+%t A385919     edges = Subsets[vertices, {2}];
+%t A385919    matchings =
+%t A385919     Select[Subsets[edges, {n}], DuplicateFreeQ[Flatten[#]] &];
+%t A385919    factorizations =
+%t A385919     Select[Subsets[matchings, {2 n - 1}], DuplicateFreeQ[Join @@ #] &];
+%t A385919    canonical[fact_] := Sort[Sort /@ fact];
+%t A385919    perms = Permutations[vertices];
+%t A385919    relabel[fact_, perm_] :=
+%t A385919     Sort[Sort /@ (Sort /@
+%t A385919           Replace[#, {a_, b_} :>
+%t A385919             Sort[{perm[[a]], perm[[b]]}], {2}] & /@ fact)];
+%t A385919    isIsomorphicQ[f1_, f2_] :=
+%t A385919     MemberQ[relabel[f1, #] & /@ perms, canonical[f2]];
+%t A385919    Do[If[NoneTrue[nonIsomorphicList, isIsomorphicQ[fact, #] &],
+%t A385919      AppendTo[nonIsomorphicList, fact]], {fact, factorizations}];
+%t A385919    nonIsomorphicList];
+%t A385919 (*Display the number of non-isomorphic 1-factorizations for K_{2n} for n=1 to 5*)
+%t A385919 Table[With[{list = nonIsomorphic1Factorizations[n]},
+%t A385919   Print["n = ", n, " \[RightArrow] ", Length[list],
+%t A385919    " non-isomorphic 1-factorizations of K_", 2 n];
+%t A385919   Length[list]], {n, 1, 5}]
+%Y A385919 Cf. A000085 (number of involutive permutations), A000569 (number of 1-factorizations of K_{2n}, not up to isomorphism).
+%K A385919 nonn,more
+%O A385919 1,3
+%A A385919 Peter Boonstra and _Hilko Koning_, Jul 25 2025

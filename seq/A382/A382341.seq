@@ -1,0 +1,53 @@
+%I A382341 #12 Apr 17 2025 07:04:54
+%S A382341 1,0,4,0,10,10,0,20,40,20,0,35,135,100,35,0,56,340,420,200,56,0,84,
+%T A382341 784,1370,950,350,84,0,120,1596,3900,3580,1800,560,120,0,165,3070,
+%U A382341 9905,11835,7425,3045,840,165,0,220,5500,23180,34780,27020,13360,4760,1200,220
+%N A382341 Triangle read by rows: T(n,k) is the number of partitions of a 4-colored set of n objects into exactly k parts with 0 <= k <= n.
+%F A382341 T(n,1) = binomial(n + 3, 3) = A000292(n + 1) for n >= 1.
+%F A382341 T(n,n) = binomial(n + 3, 3) = A000292(n + 1).
+%F A382341 T(n,k) = A382241(n,k) - A382241(n,k-1) for k >= 1.
+%e A382341 Triangle starts:
+%e A382341  0 : [1]
+%e A382341  1 : [0,   4]
+%e A382341  2 : [0,  10,   10]
+%e A382341  3 : [0,  20,   40,    20]
+%e A382341  4 : [0,  35,  135,   100,    35]
+%e A382341  5 : [0,  56,  340,   420,   200,    56]
+%e A382341  6 : [0,  84,  784,  1370,   950,   350,    84]
+%e A382341  7 : [0, 120, 1596,  3900,  3580,  1800,   560,   120]
+%e A382341  8 : [0, 165, 3070,  9905, 11835,  7425,  3045,   840,  165]
+%e A382341  9 : [0, 220, 5500, 23180, 34780, 27020, 13360,  4760, 1200,  220]
+%e A382341 10 : [0, 286, 9466, 50480, 94030, 87992, 51886, 21840, 7020, 1650, 286]
+%e A382341 ...
+%p A382341 b:= proc(n, i) option remember; expand(`if`(n=0, 1, `if`(i<1, 0, add(
+%p A382341       b(n-i*j, min(n-i*j, i-1))*binomial(i*(i^2+6*i+11)/6+j, j)*x^j, j=0..n/i))))
+%p A382341     end:
+%p A382341 T:= (n, k)-> coeff(b(n$2), x, k):
+%p A382341 seq(seq(T(n, k), k=0..n), n=0..10);  # _Alois P. Heinz_, Mar 22 2025
+%t A382341 b[n_, i_] := b[n, i] = Expand[If[n == 0, 1, If[i < 1, 0, Sum[b[n - i*j, Min[n - i*j, i - 1]]*Binomial[i*(i^2 + 6*i + 11)/6 + j, j]*x^j, {j, 0, n/i}]]]];
+%t A382341 T[n_, k_] := Coefficient[b[n, n], x, k];
+%t A382341 Table[Table[T[n, k], {k, 0, n}], {n, 0, 10}] // Flatten (* _Jean-François Alcover_, Apr 17 2025, after _Alois P. Heinz_ *)
+%o A382341 (Python)
+%o A382341 from sympy import binomial
+%o A382341 from sympy.utilities.iterables import partitions
+%o A382341 colors = 4 - 1   # the number of colors - 1
+%o A382341 def t_row( n):
+%o A382341     if n == 0 : return [1]
+%o A382341     t = list( [0] * n)
+%o A382341     for p in partitions( n):
+%o A382341         fact = 1
+%o A382341         s = 0
+%o A382341         for k in p :
+%o A382341             s += p[k]
+%o A382341             fact *= binomial( binomial( k + colors, colors) + p[k] - 1, p[k])
+%o A382341         if s > 0 :
+%o A382341             t[s - 1] += fact
+%o A382341     return [0] + t
+%Y A382341 Row sums are A255050.
+%Y A382341 The 1-color case is A008284.
+%Y A382341 The 2-color case is A382339.
+%Y A382341 The 3-color case is A382340.
+%Y A382341 Cf. A382241.
+%K A382341 nonn,tabl
+%O A382341 0,3
+%A A382341 _Peter Dolland_, Mar 22 2025

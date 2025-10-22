@@ -1,0 +1,110 @@
+%I A381083 #8 Feb 13 2025 08:33:32
+%S A381083 1,1,2,2,3,4,1,4,6,2,30,56,30,4,18,40,28,6,15,40,36,12,1,30,92,100,44,
+%T A381083 6,180,624,812,480,120,8,150,504,632,350,72,2970,10880,15642,11008,
+%U A381083 3780,504,1620,6688,11090,9378,4224,952,84,1782,7400,12312,10400,4634,1008,80,3960,19312,38958,41768,25376,8570,1446,90,22275,113792,244829,287904,200805,84280,20583,2656,140,23760,122400,265734,315120,220944,92466,22120,2700,128
+%N A381083 Brent's irregular triangle T[r,k] related to Hardy-Littlewood constants of prime gaps 2r.
+%H A381083 R. J. Mathar, <a href="/A381083/b381083.txt">Table of n, a(n) for n = 1..125</a>
+%H A381083 Richard P. Brent, <a href="https://maths-people.anu.edu.au/~brent/pd/rpb021t.pdf">Tables of T[r,k] and A[r,k]</a>, (1970) [unpublished].
+%H A381083 Richard P. Brent, <a href="https://dx.doi.org/10.1090/S0025-5718-1974-0330017-X">The distribution of small gaps between successive primes</a>, Mathematics of Computation 28 (1974), 315-324. <a href="https://doi.org/10.2307/2005842">JSTOR 2005842</a>
+%e A381083 Triangle starts
+%e A381083 1
+%e A381083 1 ;
+%e A381083 2 2 ;
+%e A381083 3 4 1 ;
+%e A381083 4 6 2 ;
+%e A381083 30 56 30 4 ;
+%e A381083 18 40 28 6 ;
+%e A381083 15 40 36 12 1 ;
+%e A381083 30 92 100 44 6 ;
+%e A381083 180 624 812 480 120 8 ;
+%e A381083 150 504 632 350 72 ;
+%e A381083 2970 10880 15642 11008 3780 504 ;
+%e A381083 1620 6688 11090 9378 4224 952 84 ;
+%e A381083 1782 7400 12312 10400 4634 1008 80 ;
+%e A381083 3960 19312 38958 41768 25376 8570 1446 90 ;
+%e A381083 22275 113792 244829 287904 200805 84280 20583 2656 140 ;
+%e A381083 23760 122400 265734 315120 220944 92466 22120 2700 128 ;
+%p A381083 # Generate a list of lists where each
+%p A381083 # sublist has k distinct elements, all elements are larger than kmin,
+%p A381083 # all elements smaller than r. Number of sublists is the
+%p A381083 # usual binomial(r-kmin,k).
+%p A381083 seleLrec := proc(k,r,kmin)
+%p A381083     local Lout,ki,Lloc,subl ;
+%p A381083     Lout := [] ;
+%p A381083     # no solutions if kmin+k is too large compared with r
+%p A381083     if kmin+k <= r and k > 0 then
+%p A381083         for ki from kmin to r-k do
+%p A381083             # recurse assuming that ki is heading new sublists
+%p A381083             if k = 1 then
+%p A381083                 Lout := [op(Lout),[ki]] ;
+%p A381083             else
+%p A381083                 Lloc := procname(k-1,r,ki+1) ;
+%p A381083                 for subl in Lloc do
+%p A381083                     #prepend ki
+%p A381083                     Lout := [op(Lout),[ki,op(subl)]] ;
+%p A381083                 end do:
+%p A381083             end if;
+%p A381083         end do:
+%p A381083     end if;
+%p A381083     Lout ;
+%p A381083 end proc:
+%p A381083 # generate a list of lists where each
+%p A381083 # list starts with 0 and has k-1 more elements
+%p A381083 # (distinct, sorted) all < r.
+%p A381083 seleL := proc(k,r)
+%p A381083     local Lout,subl ;
+%p A381083     Lout := [] ;
+%p A381083     subl := seleLrec(k-1,r,1) ;
+%p A381083     if k = 1 then
+%p A381083         Lout := [[0]] ;
+%p A381083     else
+%p A381083         for L in subl do
+%p A381083             # prepend 0
+%p A381083             [0,op(L)] ;
+%p A381083             Lout := [op(Lout),%] ;
+%p A381083         end do:
+%p A381083     end if;
+%p A381083     Lout ;
+%p A381083 end proc:
+%p A381083 # @param L list of distinct nonneg. integers
+%p A381083 # @param r a number larger than all elements in L
+%p A381083 # @param q odd prime
+%p A381083 # @return The number of distinct residues of 0, L[1], L[2],...,r modulo p
+%p A381083 wr := proc(L::list,r::integer,q::integer)
+%p A381083     local mset,m ;
+%p A381083     mset := {0} ;
+%p A381083     for m in L do
+%p A381083         mset := mset union { modp(m,q) } ;
+%p A381083     end do:
+%p A381083     mset := mset union { modp(r,q) } ;
+%p A381083     nops(mset) ;
+%p A381083 end proc:
+%p A381083 # Brent Math Comp 28 (125) (1973) p 316 eq (10) sum over all m-tuples and products over q
+%p A381083 T := proc(r,k)
+%p A381083     local a,mL,qprod,i,q ;
+%p A381083     a := 0 ;
+%p A381083     # k-1 numbers m0=0<m1<..<m_{k-1} < r
+%p A381083     for mL in seleL(k,r) do
+%p A381083         qprod := 1 ;
+%p A381083         for i from 2 do
+%p A381083             q := ithprime(i) ;
+%p A381083             if q > r+1 then
+%p A381083                 break ;
+%p A381083             end if;
+%p A381083             qprod := qprod*(q-wr(mL,r,q)) ;
+%p A381083         end do:
+%p A381083         a := a+qprod ;
+%p A381083     end do:
+%p A381083     a ;
+%p A381083 end proc:
+%p A381083 # short table of first 12 rows
+%p A381083 for r from 1 to 12 do
+%p A381083     for k from 1  to r do
+%p A381083         printf("%d ",T(r,k)) ;
+%p A381083     end do:
+%p A381083     printf("\n") ;
+%p A381083 end do:
+%Y A381083 Columns: A381084 (k=1), A381085 (k=2), A381086 (k=3).
+%K A381083 nonn,tabf
+%O A381083 1,3
+%A A381083 _R. J. Mathar_, Feb 13 2025

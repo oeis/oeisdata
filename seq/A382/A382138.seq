@@ -1,0 +1,56 @@
+%I A382138 #24 Apr 19 2025 18:06:30
+%S A382138 0,0,0,0,0,1,0,0,0,1,0,2,0,1,1,0,0,3,0,2,1,1,0,4,0,1,0,2,0,8,0,0,1,1,
+%T A382138 1,5,0,1,1,3,0,10,0,2,3,1,0,6,0,5,1,2,0,9,1,4,1,1,0,16,0,1,2,0,1,14,0,
+%U A382138 2,1,12,0,8,0,1,5,2,1,16,0,5,0,1,0,19,1
+%N A382138 a(n) = A381800(n) - A381798(n).
+%C A382138 Number of residue classes r (mod n) of k such that rad(k) | n that are not residue classes q (mod n) of p^m, p | n.
+%C A382138 Let S(n) = row n of A381799 and let T(n) = row n of A381801. Let V(n,p) = {p^m mod n : m >= 0}. Then S(n) = U_{p|n} V(n,p).
+%H A382138 Michael De Vlieger, <a href="/A382138/b382138.txt">Table of n, a(n) for n = 1..10000</a>
+%H A382138 Michael De Vlieger, <a href="/A382138/a382138.png">Graph of terms k in row n of A381801 not in row n of A381799</a>, n = 1..60.
+%F A382138 a(p^m) = 0 for prime p and m >= 0.
+%F A382138 a(n) >= 1 for n in A024619, since residue 0 (mod n) is in T(n) is not in any V(n,p) and thus also not in S(n), because n is not a prime power.
+%e A382138     n  a(n)  T(n) \ S(n)
+%e A382138   ----------------------------------------------
+%e A382138     6    1   {0}
+%e A382138    10    1   {0}
+%e A382138    12    2   {0,6}
+%e A382138    18    3   {0,6,12}
+%e A382138    20    2   {0,10}
+%e A382138    24    4   {0,6,12,18}
+%e A382138    28    2   {0,14}
+%e A382138    30    8   {0,6,10,12,15,18,20,24}
+%e A382138    36    5   {0,6,12,18,24}
+%e A382138    72    8   {0,6,12,18,24,36,48,54}
+%e A382138   100    7   {0,10,20,40,50,60,80}
+%e A382138   108   12   {0,6,12,18,24,36,48,54,60,72,84,96}
+%e A382138   144   11   {0,6,12,18,24,36,48,54,72,96,108}
+%e A382138   210   70   {0,6,10,12,14,15,18,20,..,200,204}
+%e A382138 .
+%e A382138 a(2) = 0 since T(2) = S(2) = V(2,2) = {0,1}.
+%e A382138 a(4) = 0 since T(4) = S(4) = V(4,2) = {0,1,2}.
+%e A382138 a(6) = 1 since T(6) = {0,1,2,3,4} but S(6) = {1,2,4} U {1,3}.
+%e A382138 a(12) = 2 since T(12) = {0,1,2,3,4,6,8,9} but S(12) = {1,2,4,8} U {1,3,9}.
+%e A382138 a(16) = 0 since T(16) = S(16) = V(16,2) = {0,1,2,4,8}.
+%e A382138 a(18) = 3 since T(18) = {0,1,2,3,4,6,8,9,10,12,14,16} but S(18) = {1,2,4,8,16,14,10} U {1,3,9}. The numbers {0,6,12} do not appear in S(18).
+%e A382138 a(30) = 8 since T(30) = {0,1,2,3,4,5,6,8,9,10,12,15,16,18,20,21,24,25,27}, but S(30) = {1,2,4,8,16} U {1,3,9,27,21} U {1,5,25}. The numbers {0,6,12,18,24} do not appear in S(30), etc.
+%t A382138 f[x_, p_] := Block[{m = 2, r, c},
+%t A382138   Which[PrimePowerQ[x],
+%t A382138     Join[{0}, #1^Range[0, #2 - 1]] & @@ FactorInteger[x][[1]],
+%t A382138     PowerMod[p, m, x] == p, {1, p}, True, c[_] := False;
+%t A382138   c[1] = c[p] = True; {1, p}~Join~
+%t A382138   Reap[While[r = PowerMod[p, m, x]; ! c[r], Sow[r];
+%t A382138     c[r] = True; m++]][[-1, 1]]]];
+%t A382138 g[x_] := Block[{c, ff, m, r, p, s, w},
+%t A382138   c[_] := True; ff = FactorInteger[x][[All, 1]]; w = Length[ff]; s = {1};
+%t A382138     Do[Set[p[i], ff[[i]]], {i, w}];
+%t A382138     Do[Set[s, Union@ Flatten@ Join[s, #[[-1, 1]]]] &@ Reap@
+%t A382138     Do[m = s[[j]];
+%t A382138       While[Sow@ Set[r, Mod[m*p[i], x]];
+%t A382138         c[r], c[r] = False; m *= p[i]],
+%t A382138       {j, Length[s]}], {i, w}];
+%t A382138     Length[s] ];
+%t A382138 {0}~Join~Table[g[n] - CountDistinct@ Flatten@ Map[f[n, #] &, FactorInteger[n][[All, 1]] ], {n, 2, 120}]
+%Y A382138 Cf. A000961, A024619, A381798, A381799, A381800, A381801.
+%K A382138 nonn
+%O A382138 1,12
+%A A382138 _Michael De Vlieger_, Apr 12 2025

@@ -1,0 +1,72 @@
+%I A381975 #38 Jul 01 2025 08:28:36
+%S A381975 1,1,2,9,58,459,4370,48999,632884,9254473,151155362,2727862751
+%N A381975 Number of ways for n competitors to rank in a competition in which each match has 4 possible outcomes in which each competitor gains 0, 1, 2 or 3 points.
+%C A381975 Also, the number of maps f:{1, 2, ..., n} -> {1, 2, ..., n} such that f(f(f(x))) >= x for all 1 <= x <= n.
+%C A381975 When this definition is changed to f(f(x)), then the result would be the Fubini numbers (A000670).
+%t A381975 CheckCondition[f_, n_] := AllTrue[Range[n], (f[[f[[f[[#]]]]]] >= # &)]
+%t A381975 validMappingsDFS[n_, f_, x_] := Module[{i, f2, count},
+%t A381975   If[x > n,
+%t A381975     If[CheckCondition[f, n], 1, 0],
+%t A381975     count = 0;
+%t A381975     For[i = 1, i <= n, i++,
+%t A381975       f2 = f; f2[[x]] = i;  (* Assign mapping for f[x] *)
+%t A381975       count += validMappingsDFS[n, f2, x + 1];  (* Explore further *)
+%t A381975     ];
+%t A381975     count
+%t A381975   ]
+%t A381975 ]
+%t A381975 A381975[n_] := validMappingsDFS[n, ConstantArray[0, n], 1]
+%t A381975 Table[A381975[n], {n, 0, 6}]
+%o A381975 (C++)
+%o A381975 bool checkCondition(const vector<int>& f, int n) {
+%o A381975     for (int x = 1; x <= n; ++x) {
+%o A381975         int f3 = f[f[f[x]]];
+%o A381975         if (f3 < x)
+%o A381975             return false;
+%o A381975     }
+%o A381975     return true;
+%o A381975 }
+%o A381975 int validMappingsDFS(int n, vector<int>& f, int x) {
+%o A381975     if (x > n)
+%o A381975         return checkCondition(f, n) ? 1 : 0;
+%o A381975     int count = 0;
+%o A381975     for (int i = 1; i <= n; ++i) {
+%o A381975         f[x] = i;
+%o A381975         count += validMappingsDFS(n, f, x + 1);
+%o A381975     }
+%o A381975     return count; // Return total valid mappings
+%o A381975 }
+%o A381975 int countValidMappings(int n) {
+%o A381975     vector<int> f(n + 1);
+%o A381975     return validMappingsDFS(n, f, 1);
+%o A381975 }
+%o A381975 (R)
+%o A381975 validMappings <- function(n) {
+%o A381975   checkCondition <- function(f, n) all(sapply(1:n, function(x) f[f[f[x]]] >= x))
+%o A381975   validMappingsDFS <- function(n, f, x) {
+%o A381975     if (x > n) return(ifelse(checkCondition(f, n), 1, 0))
+%o A381975     sum(sapply(1:n, function(i) { f[x] <- i; validMappingsDFS(n, f, x + 1) }))
+%o A381975   }
+%o A381975   validMappingsDFS(n, rep(0, n), 1)
+%o A381975 }
+%o A381975 (Python)
+%o A381975 def validMappings(n):
+%o A381975     def checkCondition(f, n):
+%o A381975         return all(f[f[f[x]]] >= x for x in range(1, n+1))
+%o A381975     def validMappingsDFS(n, f, x):
+%o A381975         if x > n:
+%o A381975             return 1 if checkCondition(f, n) else 0
+%o A381975         return sum(validMappingsDFS(n, f[:x] + [i] + f[x+1:], x+1) for i in range(1, n+1))
+%o A381975     return validMappingsDFS(n, [0] * (n+1), 1)
+%o A381975 (Haskell)
+%o A381975 validMappings :: Int -> Int
+%o A381975 validMappings n = validMappingsDFS n [0] 1 where
+%o A381975   checkCondition f = all (\x -> f !! (f !! (f !! (x-1)) - 1) - 1 >= x) [1..n]
+%o A381975   validMappingsDFS n f x
+%o A381975     | x > n = if checkCondition f then 1 else 0
+%o A381975     | otherwise = sum [validMappingsDFS n (take (x-1) f ++ [i] ++ drop x f) (x+1) | i <- [1..n]]
+%Y A381975 Cf. A000142, A000312, A000670, A001470.
+%K A381975 nonn,more
+%O A381975 0,3
+%A A381975 _SiYang Hu_, May 06 2025
+%E A381975 a(11) from _Sean A. Irvine_, May 13 2025

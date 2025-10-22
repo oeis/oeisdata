@@ -1,0 +1,57 @@
+%I A382522 #14 Aug 07 2025 08:55:30
+%S A382522 1,4,0,10,4,0,20,16,4,0,35,40,26,4,0,56,80,80,32,4,0,84,140,180,124,
+%T A382522 42,4,0,120,224,340,320,184,48,4,0,165,336,574,660,535,248,58,4,0,220,
+%U A382522 480,896,1184,1200,800,332,64,4,0,286,660,1320,1932,2284,1956,1176,416,74,4,0
+%N A382522 Square array A(n,k), n>=0, k>=0, read by antidiagonals downwards, where n unlabeled objects are distributed into k containers of four kinds. Containers may be left empty.
+%F A382522 A(0,k) = binomial(k + 3, 3) = A000292(k + 1).
+%F A382522 A(1,k) = 4 * binomial(k + 2, 3).
+%F A382522 A(n,1) = 4.
+%F A382522 A(n,k) = Sum_{i=0..k} binomial(k + 3 - i, 3) * A382344(n,i) for k <= n.
+%F A382522 A(n,k) = A382344(n+k,k).
+%e A382522 Array starts:
+%e A382522  0 : [1, 4, 10,  20,   35,    56,    84,   120,    165,    220,    286]
+%e A382522  1 : [0, 4, 16,  40,   80,   140,   224,   336,    480,    660,    880]
+%e A382522  2 : [0, 4, 26,  80,  180,   340,   574,   896,   1320,   1860,   2530]
+%e A382522  3 : [0, 4, 32, 124,  320,   660,  1184,  1932,   2944,   4260,   5920]
+%e A382522  4 : [0, 4, 42, 184,  535,  1200,  2284,  3892,   6129,   9100,  12910]
+%e A382522  5 : [0, 4, 48, 248,  800,  1956,  3968,  7088,  11568,  17660,  25616]
+%e A382522  6 : [0, 4, 58, 332, 1176,  3080,  6618, 12364,  20892,  32776,  48590]
+%e A382522  7 : [0, 4, 64, 416, 1616,  4560, 10368, 20280,  35536,  57376,  87040]
+%e A382522  8 : [0, 4, 74, 520, 2187,  6580, 15778, 32196,  58414,  97012, 150570]
+%e A382522  9 : [0, 4, 80, 628, 2848,  9140, 23088, 49172,  92352, 157808, 250720]
+%e A382522 10 : [0, 4, 90, 752, 3660, 12440, 33002, 73188, 142160, 249740, 406036]
+%e A382522 ...
+%p A382522 b:= proc(n, i) option remember; expand(`if`(n=0, 1, `if`(i<1, 0,
+%p A382522       add(x^j*b(n-i*j, min(n-i*j, i-1))*binomial(j+3, 3), j=0..n/i))))
+%p A382522     end:
+%p A382522 A:= (n, k)-> coeff(b(n+k$2), x, k):
+%p A382522 seq(seq(A(n, d-n), n=0..d), d=0..10);  # _Alois P. Heinz_, Mar 31 2025
+%t A382522 b[n_, i_] := b[n, i] = Expand[If[n == 0, 1, If[i < 1, 0, Sum[x^j*b[n-i*j, Min[n-i*j, i-1]]*Binomial[j+3, 3], {j, 0, n/i}]]]];
+%t A382522 A[n_, k_] := Coefficient[b[n+k, n+k], x, k];
+%t A382522 Table[Table[A[n, d-n], {n, 0, d}], {d, 0, 10}] // Flatten (* _Jean-François Alcover_, Aug 07 2025, after _Alois P. Heinz_ *)
+%o A382522 (Python)
+%o A382522 from sympy import binomial
+%o A382522 from sympy.utilities.iterables import partitions
+%o A382522 def a_row(n, length=11) :
+%o A382522     if n == 0 : return [ binomial( k + 3, 3) for k in range( length) ]
+%o A382522     t = list( [0] * length)
+%o A382522     for p in partitions( n):
+%o A382522         fact = 1
+%o A382522         s = 0
+%o A382522         for k in p :
+%o A382522             s += p[k]
+%o A382522             fact *= binomial( 3 + p[k], 3)
+%o A382522         if s > 0 :
+%o A382522             t[s] += fact
+%o A382522     a = list( [0] * length)
+%o A382522     for i in range( 1, length):
+%o A382522         for j in range( i, 0, -1):
+%o A382522             a[i] += t[j] * binomial( i - j + 3, 3)
+%o A382522     return a
+%o A382522 for n in range(11): print(a_row(n))
+%Y A382522 Antidiagonal sums give A023003.
+%Y A382522 Without empty containers: A382041.
+%Y A382522 Cf. A382344, A000292, 2 kinds: A382345, 3 kinds: A382521.
+%K A382522 nonn,tabl
+%O A382522 0,2
+%A A382522 _Peter Dolland_, Mar 31 2025

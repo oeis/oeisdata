@@ -1,0 +1,31 @@
+%I A382881 #18 Apr 29 2025 16:52:51
+%S A382881 1,0,1,0,-1,1,0,-1,0,1,0,1,-2,0,1,0,-1,0,0,0,1,0,1,-1,-1,0,0,1,0,-1,0,
+%T A382881 0,0,0,0,1,0,1,-1,0,-1,0,0,0,1,0,1,0,-2,0,0,0,0,0,1,0,1,-1,0,0,-1,0,0,
+%U A382881 0,0,1,0,-1,0,0,0,0,0,0,0,0,0,1,0,0,1,0,-1,0,-1,0,0,0,0,0,1
+%N A382881 Triangle read by rows: T(n, k) = -Sum_{d|n, d<n} V(n, d)*T(d, k) for k >= 1, T(n, 0) = 0^n, T(n, n) = 1, where V(n, d) = 1 if d = 1 otherwise valuation(n, d).
+%C A382881 See the comments in A382883.
+%F A382881 T is the matrix inverse of A382944.
+%e A382881 Triangle start:
+%e A382881   [0] 1;
+%e A382881   [1] 0,  1;
+%e A382881   [2] 0, -1,  1;
+%e A382881   [3] 0, -1,  0,  1;
+%e A382881   [4] 0,  1, -2,  0,  1;
+%e A382881   [5] 0, -1,  0,  0,  0, 1;
+%e A382881   [6] 0,  1, -1, -1,  0, 0, 1;
+%e A382881   [7] 0, -1,  0,  0,  0, 0, 0, 1;
+%e A382881   [8] 0,  1, -1,  0, -1, 0, 0, 0, 1;
+%e A382881   [9] 0,  1,  0, -2,  0, 0, 0, 0, 0, 1;
+%p A382881 A382881 := proc(n, k) option remember; if n = k then 1 elif k = 0 then 0^n else -add(ifelse(j = 1, 1, padic:-ordp(n, j))*A382881(j, k), j in NumberTheory:-Divisors(n) minus {n}) fi end: seq(seq(A382881(n, k), k = 0..n), n = 0..9);
+%t A382881 V[n_, e_] := If[e == 1, 1, IntegerExponent[n, e]]; T[n_, 0] := T[n, 0] = Boole[n == 0]; T[n_, n_] := T[n, n] = 1; T[n_, k_] := T[n, k] = -DivisorSum[n, V[n, #] * T[#, k] &, # < n &]; Table[T[n, k], {n, 0, 12}, {k, 0, n}] // Flatten (* _Amiram Eldar_, Apr 29 2025 *)
+%o A382881 (SageMath)
+%o A382881 @cached_function
+%o A382881 def T(n, k):
+%o A382881     if n == k: return 1
+%o A382881     if k == 0: return 0^n
+%o A382881     return -sum((1 if j == 1 else valuation(n, j))*T(j, k) for j in divisors(n)[:-1])
+%o A382881 for n in range(20): print([T(n, k) for k in srange(n + 1)])
+%Y A382881 Cf. A382944, A382883 (column 1), A019590 (with offset 0 the row sums).
+%K A382881 sign,tabl
+%O A382881 0,13
+%A A382881 _Peter Luschny_, Apr 09 2025

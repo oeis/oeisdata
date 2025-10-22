@@ -1,0 +1,37 @@
+%I A389379 #16 Oct 09 2025 15:05:56
+%S A389379 4176,6534,32106,32205,35172,36918,39027,41208,41760,41820,47891,
+%T A389379 47891,48972,49142,49637,50456,50456,52248,52746,53442,53628,54182,
+%U A389379 56103,57321,58413,59403,59843,60345,60705,60743,60819,62511,65340,68445,69714,70545,70644,72576,73986
+%N A389379 First component A of the pairs (A, B), listed in increasing order, such that the multiset of digits of A union the multiset of digits of B equals the multiset of digits of A^2 and the multiset of digits of B^2, for some B >= A. Note that terms may be repeated.
+%C A389379 The corresponding sequence B is A389390.
+%e A389379 A = 4176,B = 8793.
+%e A389379 Multiset(4176) + Multiset(8793) = {1,4,6,7,3,7,8,9}.
+%e A389379 Multiset(4176^2 = 17438976) = {1,7,4,3,8,9,7,6}.
+%e A389379 Multiset(8793^2 = 77316849) = {7,7,3,1,6,8,4,9}.
+%e A389379 All three multisets are {1,3,4,6,7,7,8,9}.
+%t A389379 comp[n_] := If[Min[ DigitCount[n^2] - DigitCount[n]] < 0, {}, Block[{q, co,}, q = Sort@ IntegerDigits[n^2]; co = Join @@ (ConstantArray[First@ #, Max[ Last@#, 0]] & /@ (Tally[q] /. (Tally[ IntegerDigits@ n] /. {w_, h_Integer} :> {w,k_} -> {w,k-h}))); n + 0 Select[FromDigits /@ Permutations@ co, # >= n && Sort@ IntegerDigits[#^2] == q &]]]; Join @@ (comp /@ Range[74000]) (* _Giovanni Resta_, Oct 02 2025 *)
+%o A389379 (Python)
+%o A389379 from collections import Counter
+%o A389379 from itertools import count, islice, permutations
+%o A389379 from sympy.utilities.iterables import multiset_permutations
+%o A389379 def AB_gen(): # generator of terms
+%o A389379     for A in count(1):
+%o A389379         msA, msA2, msB, bigger = Counter(str(A)), Counter(str(A**2)), [], True
+%o A389379         if set(msA) - set(msA2): continue
+%o A389379         for e in sorted(msA2):
+%o A389379             if msA2[e] < msA[e]:
+%o A389379                 bigger = False
+%o A389379                 break
+%o A389379             msB.extend([e]*(msA2[e]-msA[e]))
+%o A389379         if not bigger or msB == []: continue
+%o A389379         for mp in multiset_permutations(msB):
+%o A389379             B = int("".join(map(str, mp)))
+%o A389379             if B < A: continue
+%o A389379             msB2 = Counter(str(B**2))
+%o A389379             if msA2 == msB2:
+%o A389379                 yield A, B
+%o A389379 print([A for A, B in islice(AB_gen(), 39)]) # _Michael S. Branicky_, Oct 02 2025
+%Y A389379 Cf. A389390.
+%K A389379 nonn,base,new
+%O A389379 1,1
+%A A389379 _Yuto Tsujino_, Oct 02 2025

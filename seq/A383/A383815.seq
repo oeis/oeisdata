@@ -1,0 +1,37 @@
+%I A383815 #18 Jun 11 2025 00:56:15
+%S A383815 313,373,797,11311,13331,13931,17971,19991,31013,35353,36263,36563,
+%T A383815 38783,71317,79397,97379,98389,1129211,1196911,1611161,1793971,
+%U A383815 1982891,3106013,3166613,3193913,3236323,3288823,3304033,3319133,3329233,3365633,3417143,3447443,3449443,3515153,3670763
+%N A383815 Palindromic primes in A380943.
+%C A383815 A380943 requires that primes, p_n, written in decimal representation by the concatenation of primes p and q such that the concatenation of q and p also forms a prime.
+%C A383815 Intersection of A002385 and A380943.
+%e A383815 The palindromic prime 313 is formed by the concatenation of the primes 31 and 3, which reversed, also form the prime 331. The palindromic prime 13931 is formed by the concatenation of 139 and 31; 31139 is also prime.
+%p A383815 rev:= proc(n) local L,i;
+%p A383815    L:= convert(n,base,10);
+%p A383815    add(L[-i]*10^(i-1),i=1..nops(L))
+%p A383815 end proc:
+%p A383815 tcat:= proc(x,y) y + 10^(ilog10(y)+1)*x end proc:
+%p A383815 filter:= proc(z) local i,x,y;
+%p A383815   if not isprime(z) then return false fi;
+%p A383815   for i from 1 to ilog10(z) do
+%p A383815     x:= z mod 10^i;
+%p A383815     if x < 10^(i-1) then next fi;
+%p A383815     y:= (z-x)/10^i;
+%p A383815     if isprime(x) and isprime(y) and isprime(tcat(x,y)) then return true fi;
+%p A383815   od;
+%p A383815   false
+%p A383815 end proc:
+%p A383815 N:= 7: # for terms of up to 7 digits
+%p A383815 R:= NULL:
+%p A383815 for d from 1 to (N-1)/2 do
+%p A383815   for x from 10^(d-1) to 10^d-1 do
+%p A383815     for y from 0 to 9 do
+%p A383815       z:= rev(x) + 10^d * y + 10^(d+1)*x;
+%p A383815       if filter(z) then R:= R,z fi
+%p A383815 od od od:
+%p A383815 R;  # _Robert Israel_, Jun 08 2025
+%t A383815 f[n_] := Block[{cnt = 0, id = IntegerDigits@ n, k = 1, len, p, q, qp}, len = Length@ id; While[k < len, p = Take[id, k]; q = Take[id, -len + k]; qp = FromDigits[Join[q, p]]; If[ PrimeQ@ FromDigits@ p && PrimeQ@ FromDigits@ q && PrimeQ@ qp && IntegerLength@ qp == len, cnt++]; k++]; cnt]; fQ[n_] := Reverse[idn = IntegerDigits@ n] == idn && f@ n > 0; Select[ Prime@ Range@ 264000, fQ]
+%Y A383815 Cf. A000040, A002385, A105184, A380943, A383810, A383811, A383812, A383813.
+%K A383815 base,nonn
+%O A383815 1,1
+%A A383815 _James C. McMahon_ and _Robert G. Wilson v_, Jun 06 2025

@@ -1,0 +1,42 @@
+%I A384705 #37 Sep 13 2025 06:39:37
+%S A384705 1,3,11,38,135,475,1681,5875,20641,71956,250448,869332,3015496,
+%T A384705 10440429,36105303
+%N A384705 Number of binary shuffle squares of length 2n with prefix 0, that can be obtained from a unique binary word of length n.
+%C A384705 A shuffle square is a word obtained by self-shuffle (i.e. by mixing two copies of the same word, keeping the order of letters from each copy). For example, the shuffle square "tuteurer" can be obtained by self-shuffling the word "tuer" (tu-t-e-u-r-er). The word 0011 is a shuffle square, while 0110 is not.
+%H A384705 D. Datko and Bartlomiej Pawlik, <a href="https://doi.org/10.3390/sym17020305">Roots of Binary Shuffle Squares</a>, Symmetry 17/2: 305 (2025).
+%e A384705 a(4) = 38 since there are exactly 41 binary shuffle squares of length 8 starting with 0, however three of them can be obtained from more than one binary word:
+%e A384705   00100100 can be obtained from 0010 (e.g., 001-001-0-0) and from 0100 (e.g., 0-0-100-100);
+%e A384705   00101011 from 0011 (001-0-1-011) and from 0101 (0-0-10-101-1);
+%e A384705   00110011 from 0011 (e.g., 0011-0011) and form 0101 (e.g., 0-0-1-1-0-0-1-1).
+%o A384705 (Python)
+%o A384705 from collections import Counter
+%o A384705 from itertools import combinations, combinations_with_replacement as cwr
+%o A384705 from sympy.utilities.iterables import multiset_permutations as mp
+%o A384705 def self_shuffles(w):
+%o A384705     sswset, n = set(), len(w)
+%o A384705     set2n, ssw = set(range(2*n)), [0 for i in range(2*n)]
+%o A384705     for s in combinations(list(range(2*n)), n):
+%o A384705         nots = sorted(set2n-set(s))
+%o A384705         for i, c in enumerate(w): ssw[s[i]] = ssw[nots[i]] = c
+%o A384705         sswset.add("".join(ssw))
+%o A384705     return sswset
+%o A384705 def a(n):
+%o A384705     if n == 0: return 1
+%o A384705     u = 0
+%o A384705     for w in cwr("10", n-1):          # "base" or "sorted" roots
+%o A384705         c = Counter()
+%o A384705         for pw in mp(w):              # iterate over permutations of these
+%o A384705             pw = "0" + "".join(pw)    # enforce prefix 0
+%o A384705             sspw = self_shuffles(pw)  # build self_shuffles from these roots
+%o A384705             c.update(sspw)
+%o A384705         u += sum(1 for x in c if c[x] == 1)  # count results w/unique roots
+%o A384705     return u
+%o A384705 print([a(n) for n in range(1, 10)]) # _Michael S. Branicky_, Jun 17 2025
+%Y A384705 Cf. A191755 (number of all binary shuffle squares with length 2n).
+%K A384705 nonn,hard,more
+%O A384705 1,2
+%A A384705 _Bartlomiej Pawlik_, Jun 07 2025
+%E A384705 a(10)-a(12) corrected by _Michael S. Branicky_, Jun 15 2025
+%E A384705 a(13) from _Michael S. Branicky_, Jun 17 2025
+%E A384705 a(14) from _Sean A. Irvine_, Jun 24 2025
+%E A384705 a(15) from _Michael S. Branicky_, Sep 08 2025

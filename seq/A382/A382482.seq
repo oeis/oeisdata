@@ -1,0 +1,70 @@
+%I A382482 #30 Oct 21 2025 15:39:15
+%S A382482 1,2,2,3,4,2,5,6,5,5,4,7,6,5,8,9,8,5,10,11,11,4,13,13,12,15,6,12,7,13,
+%T A382482 8,14,17,16,7,19,16,19,21,18,8,23,20,20,7,21,8,22,25,22,11,27,22,11,
+%U A382482 29,24,24,12,23,14,24,31,16,26,33,26,28,16,26,30,35,19,25,37,32,22,23
+%N A382482 a(1) = 1. Let a(n) be the most recently defined term. At each step, check for an undefined term with index < n. If such a term exists, then where i is the earliest such index, set a(i) = a(n) - (n - i). If no such term exists, then where i is the first undefined index >= n + a(n), set a(i) = the smallest integer not yet used.
+%C A382482 The sequence starts at 1 and is defined by two alternating rules:
+%C A382482  (1) Where there are undefined terms that appear earlier in the sequence than the most recently defined term, populate the earliest undefined term by taking the most recently defined term and subtracting the difference between their indexes.
+%C A382482  (2) Otherwise, move ahead a distance equal to the value of the most recently defined term and populate the first undefined term on or after that index with the smallest unused positive integer.
+%C A382482 The sequence calculates terms in a non-sequential order, and so the n-th term of the sequence is generally not the n-th term to be calculated.
+%C A382482 The sequence is infinite, but for any calculated length greater than nine terms (1, 2, 2, 3, 4, 2, 5, 6, 5), there will be undefined terms occurring before further defined terms; the sequence leaves gaps as part of its generation. These gaps will eventually get filled if generation continues, although new gaps will always exist.
+%C A382482 The scatter plot is of interest, especially when looking at the first 1000 to 2000 terms. There are two distinct lines from the origin (illustrating the back filling and forward jumping nature of the sequence), but each of these lines occasionally splits into two separate lines before converging again, in a non-uniform manner and unrelated to each other.
+%H A382482 Sameer Khan, <a href="/A382482/b382482.txt">Table of n, a(n) for n = 1..10000</a>
+%H A382482 Sameer Khan, <a href="/A382482/a382482.png">Scatterplot for 1000 terms</a>
+%e A382482 In the examples, missing terms are denoted by the "_" character and the most recently defined term is denoted as a(n).
+%e A382482 Starting at n = 1 and a(1) = 1, the next n is therefore 1 + 1 = 2, with a(2) = 2 (the smallest unused positive integer):
+%e A382482 n    1 2
+%e A382482 a(n) 1 2
+%e A382482 There are no missing terms, so using n = 2 and a(2) = 2, the next n is 2 + 2 = 4, with a(4) = 3:
+%e A382482 n    1 2 3 4
+%e A382482 a(n) 1 2 _ 3
+%e A382482 There is now a single missing term at index 3, so that is the next n. It is 1 step back from the previous n, so a(3) = 3 - 1 = 2.
+%e A382482 n    1 2 3 4
+%e A382482 a(n) 1 2 2 3
+%e A382482 There are no missing terms, so using n = 3 and a(3) = 2, the next n is 3 + 2 = 5, with a(5) = 4:
+%e A382482 n    1 2 3 4 5
+%e A382482 a(n) 1 2 2 3 4
+%e A382482 There are no missing terms, so using n = 5 and a(5) = 4, the next n is 5 + 4 = 9, with a(9) = 5:
+%e A382482 n    1 2 3 4 5 6 7 8 9
+%e A382482 a(n) 1 2 2 3 4 _ _ _ 5
+%e A382482 There are now missing terms, the earliest of which being at index 6, so that is the next n. It is 3 steps back from the previous n, so a(6) = 5 - 3 = 2:
+%e A382482 n    1 2 3 4 5 6 7 8 9
+%e A382482 a(n) 1 2 2 3 4 2 _ _ 5
+%t A382482 Block[{a, c, i, j, n, u, v, nn}, nn = 120; c[_] := False; a[_] := 0; j = v = a[1] = 1; i = n = u = 2; Do[If[i < j, Set[{a[i], c[v - j + i], j}, {v - j + i, True, i}]; v = a[i], n = j + v; While[a[n] != 0, n++]; Set[{a[n], c[u], j}, {u, True, n}]; v = a[n]]; While[c[u], u++]; While[a[i] > 0, i++], nn]; Array[a, i - 1] ] (* _Michael De Vlieger_, Oct 18 2025 *)
+%o A382482 (Python)
+%o A382482 def aupto(requiredTerms):
+%o A382482     sequence = [None] * (requiredTerms*2)
+%o A382482     k, v = 0, 1
+%o A382482     max = 0
+%o A382482     while True:
+%o A382482         sequence[k] = v
+%o A382482         if (v > max):
+%o A382482             max = v
+%o A382482         u = sequence.index(None)
+%o A382482         if u >= requiredTerms:
+%o A382482             break
+%o A382482         elif u < k:
+%o A382482             # advance backward, and decrement v by that much too
+%o A382482             d = k - u
+%o A382482             (k, v) = (k - d, v - d)
+%o A382482         else:
+%o A382482             # skip forward v, then advance to the next unfilled position
+%o A382482             (k, v) = (sequence.index(None, k + v), max + 1)
+%o A382482     return sequence[:requiredTerms]
+%o A382482 print(aupto(100))
+%o A382482 (Python)
+%o A382482 def A382482(n):
+%o A382482     if not hasattr(A:=A382482, 'U'): A.terms=[1]; A.L=1; A.U=A.N=2
+%o A382482     while n >= len(A.terms) or not A.terms[n-1]:
+%o A382482        if A.U < A.L: A.terms[A.U-1], A.L = A.terms[A.L-1] + A.U-A.L, A.U
+%o A382482        else:
+%o A382482             A.L += next(i for i in range(A.terms[A.L-1], max(A.terms)+1)
+%o A382482                         if A.L+i > len(A.terms) or not A.terms[A.L+i-1])
+%o A382482             if A.L > len(A.terms): A.terms += [0]*(A.L - len(A.terms))
+%o A382482             while A.N in A.terms: A.N += 1
+%o A382482             A.terms[A.L-1] = A.N
+%o A382482        while A.U <= len(A.terms) and A.terms[A.U-1]: A.U += 1
+%o A382482     return A.terms[n-1] # _M. F. Hasler_, Oct 21 2025
+%K A382482 look,nonn,easy,changed
+%O A382482 1,2
+%A A382482 _Sameer Khan_, Mar 28 2025

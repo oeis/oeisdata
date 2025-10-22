@@ -1,0 +1,45 @@
+%I A378964 #11 Dec 12 2024 15:19:04
+%S A378964 13,17,31,41,29,73,37,41,61,89,53,73,61,151,109,73,157,97,101,89,109,
+%T A378964 97,101,241,109,113,157,137,-1,241,149,137,157,257,149,193,157,367,
+%U A378964 181,281,173,193,181,421,229,193,197,241,317,499,229,233,-1,241,229,233,277,241,-1,409,269,257,277
+%N A378964 a(n) is the least prime of the form p^2 + n*q^2 where p and q are primes, or -1 if there are none.
+%C A378964 Green and Sawhney (see link) proved that there are infinitely many such primes if n == 0 or 4 (mod 6).
+%C A378964 If n is odd, p or q must be 2.
+%C A378964 If n == 2 (mod 3), p or q must be 3.
+%C A378964 Thus if n == 5 (mod 6), the only possible primes of this form are 9 + 4 n and 4 + 9 n.
+%H A378964 Robert Israel, <a href="/A378964/b378964.txt">Table of n, a(n) for n = 1..10000</a>
+%H A378964 B. Green and M. Sawhney, <a href="https://arxiv.org/abs/2410.04189">Primes of the form p^2 + n q^2</a>, arXiv:2410.04189 [math.NT], 2024.
+%e A378964 a(6) = 73 because 73 = 7^2 + 6 * 2^2 is the least prime of the form p^2 + 6 * q^2.
+%p A378964 f:= proc(n) uses priqueue;
+%p A378964     local pq, p, t;
+%p A378964     if n mod 6 = 5 then
+%p A378964       if isprime(3^2 + n * 2^2) then return 3^2 + n*2^2
+%p A378964       elif isprime(2^2 + n*3^2) then return 2^2 + n*3^2
+%p A378964       else return -1
+%p A378964     fi fi;
+%p A378964     initialize(pq);
+%p A378964     insert([-9 - 4*n,3,2],pq);
+%p A378964     insert([-4 - 9*n,2,3],pq);
+%p A378964     if n mod 3 = 2 then
+%p A378964       do
+%p A378964         t:= extract(pq);
+%p A378964         if isprime(-t[1]) then return -t[1] fi;
+%p A378964         if t[2] = 3 then p:= nextprime(t[3]); if p = 3 then p:= 5 fi; insert([-9 - n*p^2,3,p],pq) fi;
+%p A378964         if t[3] = 3 then p:= nextprime(t[2]); if p = 3 then p:= 5 fi; insert([-p^2 - n*9,p,3],pq) fi;
+%p A378964       od
+%p A378964     else
+%p A378964       do
+%p A378964         t:= extract(pq);
+%p A378964         if isprime(-t[1]) then return -t[1] fi;
+%p A378964         if t[3] = 2  then p:= nextprime(t[2]); insert([-p^2 - n*4  , p, 2],pq) fi;
+%p A378964         if t[2] = 2 or n::even then
+%p A378964           p:= nextprime(t[3]); insert([-t[2]^2 - n*p^2,t[2],p],pq)
+%p A378964         fi;
+%p A378964       od
+%p A378964     fi
+%p A378964 end proc:
+%p A378964 map(f, [$1..200]);
+%Y A378964 Cf. A111199 (a(n) = 9+4*n).
+%K A378964 sign,look
+%O A378964 1,1
+%A A378964 _Robert Israel_, Dec 12 2024

@@ -1,0 +1,51 @@
+%I A382883 #50 Jun 17 2025 02:57:38
+%S A382883 1,-1,-1,1,-1,1,-1,1,1,1,-1,0,-1,1,1,0,-1,0,-1,0,1,1,-1,0,1,1,1,0,-1,
+%T A382883 -1,-1,1,1,1,1,-1,-1,1,1,0,-1,-1,-1,0,0,1,-1,0,1,0,1,0,-1,0,1,0,1,1,
+%U A382883 -1,0,-1,1,0,-1,1,-1,-1,0,1,-1,-1,0,-1,1,0,0,1
+%N A382883 a(n) = A382881(n, 1) = -Sum_{d|n, 1<d} A382881(n, d) for n >= 2, otherwise n.
+%C A382883 Divisibility theory starts with the divisibility triangle A113704 and its inverse, the Möbius triangle A363914, whose first column represents the Möbius function A008683. This theory considers divisibility without taking the multiplicity of divisors into account.
+%C A382883 The theory that considers the multiplicity of divisors is based on the extended valuation triangle A382944 and its inverse A382881, whose first column is the analog of the Möbius function and is given by the present sequence.
+%C A382883 Just as the values of the Möbius function (0, 1, -1, not 0) lead to the decomposition (A013929, A030229, A030059, and A005117), the present sequence leads to the decomposition (A382943, A383016, A383017, and A383106).
+%C A382883 The summatory function of this sequence is A382942, which is the counterpart of Mertens's function A002321. A382940 = a*A000027 is the counterpart of A055615, and A382941 is the counterpart of the exponential von Mangoldt function A014963.
+%C A382883 Similar to the Möbius function, this sequence can be used as a transformation. Under this transformation, A000012 is mapped to A383104 and A000027 to A383124. The Dirichlet inverse of a is A383210. See the SageMath notebook for some details.
+%H A382883 Friedjof Tellkamp, <a href="/A382883/b382883.txt">Table of n, a(n) for n = 1..10000</a>
+%H A382883 T. M. Apostol, <a href="https://link.springer.com/book/10.1007/978-1-4757-5579-4">Introduction to Analytic Number Theory</a>, Springer-Verlag, 1976.
+%H A382883 Peter Luschny, <a href="https://github.com/PeterLuschny/Gists/blob/main/MoebiusCompanion.ipynb">Möbius's Companion</a>, a SageMath Jupyter notebook, April 2025.
+%F A382883 a(n) = -Sum_{d|n, d<n} V(n, d)*a(d) if n >= 2 otherwise n, where V(n, d) = 1 if d = 1 otherwise valuation(n, d).
+%F A382883 a(n) = -Sum_{d|n, 1<d} A382881(n, d) for n >= 2, otherwise n.
+%F A382883 a(n) * A008683(n) = A008966(n).
+%F A382883 Sum_{d|n} a(n/d) = A383104(n).
+%F A382883 Sum_{d|n} a(d)*(n/d) = A383124(n).
+%F A382883 {k | a(k) = 0} = A382943.
+%F A382883 {k | a(k) != 0} = A383106.
+%F A382883 {k | a(k) = 1} = A383016.
+%F A382883 {k | a(k) = -1} = A383017.
+%F A382883 {k | a(k) != Moebius(k)} = A383105.
+%F A382883 {k | a(k) = 1 and Moebius(k) = 0} = A383103.
+%F A382883 {k | a(k) = -1 and Moebius(k) = 0} = A383018.
+%F A382883 a(p) = -1 for p prime.
+%F A382883 Conjecture: a(n) = 0 if the prime factorization of n contains different exponents (A059404).
+%F A382883 Conjecture: a(n) = 1 if n has the form p^e where both p and e are prime numbers (A053810).
+%F A382883 From _Friedjof Tellkamp_, Jun 07 2025: (Start)
+%F A382883 The above two conjectures are true. Sketch of proof (where mu=A008683 and omega=A001221):
+%F A382883 Sum_{k=1..n} floor(n/k)*mu(k) = 1 (Apostol, p. 66), thus mu(n) = 1 - Sum_{k=1..n-1} floor(n/k)*mu(k).
+%F A382883 a(p^e) = -Sum_{i=0..e-1} V(p^e, p^i)*a(p^i) = -1 - Sum_{i=1..e-1} floor(e/i)*a(p^i). Hence, a(p^e) = -mu(e).
+%F A382883 By induction: a((p_1*p_2*...*p_k)^e) = (-1)^omega(n)*mu(e) and a(p1^e1*...*p_k^e_k) = 0 if any two exponents differ.
+%F A382883 a(n) = A384667(n) * (-1)^omega(n) * mu(A072776(n)).
+%F A382883 Dirichlet g.f.: 1 + Sum_{k>=1} mu(k)*(1/zeta(k*s)-1). (End)
+%F A382883 From _Friedjof Tellkamp_, Jun 15 2025: (Start)
+%F A382883 a(n) = A383575(n) - A383576(n).
+%F A382883 Sum_{n>=1} |a(n)|/n^s = 1 + Sum_{k>=1} mu(k)^2 * (zeta(k*s)/zeta(2*k*s) - 1). (End)
+%p A382883 A382883 := proc(n) option remember; local j; ifelse(n < 2, n, -add(ifelse(j = 1, 1, padic:-ordp(n, j))*A382883(j, k), j in NumberTheory:-Divisors(n) minus {n})) end: seq(A382883(n), n = 1..77);
+%t A382883 V[n_, e_] := If[e == 1, 1, IntegerExponent[n, e]]; a[n_] := a[n] = -DivisorSum[n, V[n, #] * a[#] &, # < n &]; a[1] = 1; Array[a, 100] (* _Amiram Eldar_, Apr 29 2025 *)
+%t A382883 a[n_] := (fi=FactorInteger[n]; Boole[Equal@@fi[[All, 2]]] * (-1)^PrimeNu[n] * MoebiusMu[fi[[1, 2]]]); Array[a, 1000] (* _Friedjof Tellkamp_, Jun 07 2025 *)
+%o A382883 (SageMath)
+%o A382883 @cached_function
+%o A382883 def A382883(n): return n if n < 2 else -sum((1 if j == 1 else valuation(n, j))*A382883(j) for j in divisors(n)[:-1])
+%o A382883 print([A382883 (n) for n in srange(1, 80)])
+%Y A382883 Cf. A382881, A382940, A382941, A382942, A382943, A382944, A383016, A383017, A383018, A363914, A383104, A383105, A383106, A383123, A383124, A383210, A383211.
+%Y A382883 Cf. A002321, A008683, A008966, A053810, A059404, A113704, A363914.
+%Y A382883 Cf. A001221, A072774, A072776, A383575, A383576, A384667.
+%K A382883 sign
+%O A382883 1
+%A A382883 _Peter Luschny_, Apr 09 2025

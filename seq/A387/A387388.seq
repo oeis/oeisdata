@@ -1,0 +1,48 @@
+%I A387388 #22 Sep 03 2025 23:49:46
+%S A387388 0,0,1,1,1,1,1,1,1,1,2,2,2,4,4,4,4,7,6,6,6,6,11,11,10,10,10,19,18,18,
+%T A387388 18,17,35,33,32,32,31,31,62,60,58,57,57,55,56,108,105,103,101,100,100,
+%U A387388 99,195,191,187,184,182,181,180,361,352,344,340,336,333
+%N A387388 a(n) is the maximum number of ways in which any strict partition of 2n can be partitioned into two disjoint subsets of equal sum.
+%C A387388 Finding the number of ways in which a set can be partitioned into two disjoint subsets with equal sum is often referred to as the "partition search problem".
+%C A387388 The sequence is defined for partitions of 2n because for odd numbers there are no solutions.
+%H A387388 Jesús Bellver Arnau, <a href="/A387388/b387388.txt">Table of n, a(n) for n = 1..80</a>
+%H A387388 Wikipedia, <a href="https://en.wikipedia.org/wiki/Partition_problem">Partition problem</a>.
+%e A387388 a(2) = 0, because strict partitions of 4 are {4} and {3,1}. None of these partitions can be partitioned into two disjoint subsets of equal sum.
+%e A387388 a(3) = 1, because strict partitions of 6 are {6}, {5,1}, {4,2} and {3,2,1}. There is one way to partition {3,2,1} into two disjoint subsets of equal sum: {3}={2,1}. For the other partitions, this cannot be done.
+%e A387388 a(11) = 2, because among the 89 strict partitions of 22 there is {7, 5, 4, 3, 2, 1}. There are two ways to partition {7, 5, 4, 3, 2, 1} into two disjoint subsets of equal sum: {7,4}={5,3,2,1} and {7,3,1}={5,4,2}. And this cannot be done in three ways for any strict partition of 22.
+%o A387388 (Python)
+%o A387388 def partitions_distinct(n):
+%o A387388     def _build(remaining, max_next):
+%o A387388         if remaining == 0:
+%o A387388             return [[]]
+%o A387388         res = []
+%o A387388         for k in range(min(remaining, max_next), 0, -1):
+%o A387388             for tail in _build(remaining - k, k - 1):
+%o A387388                 res.append([k] + tail)
+%o A387388         return res
+%o A387388     return _build(n, n//2) # The biggest number in the subset can't be bigger than n/2
+%o A387388 def count_half_subsets(partition, n):
+%o A387388     if n % 2:
+%o A387388         return 0
+%o A387388     half = n // 2
+%o A387388     dp = [0] * (half + 1)
+%o A387388     dp[0] = 1
+%o A387388     for x in partition:
+%o A387388         for s in range(half, x - 1, -1):
+%o A387388             dp[s] += dp[s - x]
+%o A387388     return int(dp[half]/2) #-> to not count {X}={Y} and {Y}={X} as two different solutions
+%o A387388 #---- Generate Sequence -----
+%o A387388 sequence = []
+%o A387388 max_n=25  #number of terms
+%o A387388 for N in range(1, max_n):
+%o A387388     parts = partitions_distinct(2*N)
+%o A387388     max_sols = 0
+%o A387388     for p in parts:
+%o A387388         subsets = count_half_subsets(p, 2*N)
+%o A387388         if subsets > max_sols:
+%o A387388             max_sols = subsets
+%o A387388     sequence.append(max_sols)
+%Y A387388 Cf. A000009, A387388, A083206, A237258, A321452, A305551, A371791.
+%K A387388 nonn
+%O A387388 1,11
+%A A387388 _Jesús Bellver Arnau_, Aug 28 2025

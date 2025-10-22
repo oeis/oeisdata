@@ -1,0 +1,41 @@
+%I A385895 #12 Jul 24 2025 10:52:25
+%S A385895 1,0,1,0,1,1,0,1,3,3,0,3,9,11,11,0,11,33,51,57,57,0,57,171,273,339,
+%T A385895 361,361,0,361,1083,1761,2307,2649,2763,2763,0,2763,8289,13587,18201,
+%U A385895 21723,23889,24611,24611,0,24611,73833,121611,165057,201459,228633,245211,250737,250737
+%N A385895 Table read by rows: T(n, k) = T(n, k-1) + m * T(n-1, n-k) for k > 1, T(n, 1) = T(n-1, n-1), and T(n, 0) = 0^n, for m = 2.
+%C A385895 The sequence extends the generalized Euler numbers A001586 to a regular table by a parametrized Seidel transformation (see the Python program) that for the case m = 1 leads to the Euler-Bernoulli numbers A008281.
+%e A385895 Triangle begins:
+%e A385895   [0] 1;
+%e A385895   [1] 0,    1;
+%e A385895   [2] 0,    1,    1;
+%e A385895   [3] 0,    1,    3,     3;
+%e A385895   [4] 0,    3,    9,    11,    11;
+%e A385895   [5] 0,   11,   33,    51,    57,    57;
+%e A385895   [6] 0,   57,  171,   273,   339,   361,   361;
+%e A385895   [7] 0,  361, 1083,  1761,  2307,  2649,  2763,  2763;
+%e A385895   [8] 0, 2763, 8289, 13587, 18201, 21723, 23889, 24611, 24611;
+%p A385895 T := proc(n, k) option remember; ifelse(k = 0, 0^n, ifelse(k = 1, T(n-1, n-1), T(n, k-1) + 2*T(n-1, n-k))) end: seq(seq(T(n, k), k = 0..n), n = 0..9);
+%t A385895 T[n_, k_] := T[n, k] =
+%t A385895   Which[
+%t A385895     k == 0, Boole[n == 0],
+%t A385895     k == 1, T[n - 1, n - 1],
+%t A385895     True, T[n, k - 1] + 2*T[n - 1, n - k]
+%t A385895   ];
+%t A385895 Table[T[n, k], {n, 0, 8}, {k, 0, n}] // Flatten
+%o A385895 (Python)
+%o A385895 from functools import cache
+%o A385895 @cache
+%o A385895 def seidel(n: int, m: int) -> list[int]:
+%o A385895     if n == 0: return [1]
+%o A385895     rowA = seidel(n - 1, m)
+%o A385895     row = [0] + rowA
+%o A385895     row[1] = row[n]
+%o A385895     for k in range(2, n + 1):
+%o A385895         row[k] = row[k - 1] + m * rowA[n - k]
+%o A385895     return row
+%o A385895 def A385895row(n: int) -> list[int]: return seidel(n, 2)
+%o A385895 for n in range(9): print(A385895row(n))
+%Y A385895 Cf. A001586 (main diagonal), A123110 (m=0), A008281 (m=1), this sequence (m=2).
+%K A385895 nonn,tabl
+%O A385895 0,9
+%A A385895 _Peter Luschny_, Jul 20 2025

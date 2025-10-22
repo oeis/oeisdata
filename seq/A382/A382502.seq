@@ -1,0 +1,46 @@
+%I A382502 #19 Apr 07 2025 08:09:53
+%S A382502 1,1,1,2,3,1,2,3,4,5,6,7,8,1,9,2,3,4,5,6,1,10,7,8,11,9,12,7,10,5,13,
+%T A382502 12,14,4,6,15,16,11,17,8,18,2,3,9,5,18,1,19,14,5,15,4,20,21,13,12,22,
+%U A382502 23,24,2,21,11,25,8,26,16,20,3,27,17,12,28,29,30,31
+%N A382502 Lexicographically earliest sequence of positive integers such that no two subsequences {a(j), a(j+k), a(j+2k)} and {a(i), a(i+m), a(i+2m)} with different k and m values are the same.
+%C A382502 In other words, each unique subsequence of the form {a(j), a(j+k), a(j+2k)} (j, k >= 1) occurs with only one k value (or index spacing).
+%C A382502 Note that a candidate term is sometimes denied because it would create a scenario in which a future term is inevitably the third term in two identical subsequences with different k values. See example.
+%H A382502 Pontus von Brömssen, <a href="/A382502/b382502.txt">Table of n, a(n) for n = 1..10000</a>
+%e A382502 To find a(4), we first try 1. If we allowed a(4) = 1, then the subsequences at i = 1,3,5 and i = 3,4,5 would be the same since they both begin 1,1 and their final index is i=5. Since these two subsequences have distinct k values, they cannot be the same, so a(4) cannot be 1. a(4) = 2 as this creates only one new subsequence, and does not create a scenario where a future value will necessarily contradict the definition.
+%o A382502 (Python)
+%o A382502 from itertools import count
+%o A382502 def A382502_generator():
+%o A382502     a_list = []
+%o A382502     spacings = {} # spacings[t] is the spacing (k) used by the triple t.
+%o A382502     pairs = {} # pairs[i] is a set of pairs (x,y) such that there exist j and k>0 with a(j)=x, a(j+k)=y, and i=j+2k.
+%o A382502     for n in count():
+%o A382502         for a in count(1):
+%o A382502             ok = True
+%o A382502             spacings_new = {}
+%o A382502             for k in range(1,n//2+1):
+%o A382502                 t = a_list[n-2*k],a_list[n-k],a
+%o A382502                 if t in spacings and k != spacings[t] or t in spacings_new:
+%o A382502                     ok = False
+%o A382502                     break
+%o A382502                 spacings_new[t] = k
+%o A382502             if not ok: continue
+%o A382502             pairs_new = []
+%o A382502             for i,a0 in enumerate(reversed(a_list),n+1):
+%o A382502                 p = (a0,a)
+%o A382502                 if i <= 2*(n-1) and p in pairs[i]:
+%o A382502                     ok = False
+%o A382502                     break
+%o A382502                 pairs_new.append(p)
+%o A382502             if ok: break
+%o A382502         yield a
+%o A382502         a_list.append(a)
+%o A382502         spacings.update(spacings_new)
+%o A382502         if n >= 3: del pairs[n+1]
+%o A382502         for i,p in enumerate(pairs_new[1:],n+2):
+%o A382502             if i <= 2*(n-1): pairs[i].add(p)
+%o A382502             else: pairs[i] = {p} # _Pontus von Brömssen_, Apr 01 2025
+%Y A382502 Cf. A364057, A382501.
+%K A382502 nonn
+%O A382502 1,4
+%A A382502 _Neal Gersh Tolunsky_, Mar 29 2025
+%E A382502 More terms from _Pontus von Brömssen_, Mar 30 2025

@@ -1,0 +1,32 @@
+%I A384842 #9 Jun 11 2025 01:01:43
+%S A384842 2,24,75,211,522,1332,3588,8900,20552,48304,118768,256864,558272,
+%T A384842 1564608,2863360
+%N A384842 a(n) is the n-th number which can be represented as the sum of n distinct n-almost primes in exactly n ways, or -1 if fewer than n such numbers exist.
+%e A384842 For n = 2, the first number that is the sum of two distinct semiprimes in exactly two ways is A365494(2) = 19, and the second is a(2) = 24 = 9 + 15 = 10 + 14.
+%p A384842 f:= proc(n) uses priqueue; local pq, S, t, x, y, k, i, p, v, R;
+%p A384842      initialize(pq);
+%p A384842      insert([-2^n, 2$n], pq);
+%p A384842      S[0]:= 1:
+%p A384842      for i from 1 to n do S[i]:= 0 od:
+%p A384842      do
+%p A384842        t:= extract(pq);
+%p A384842        x:= -t[1];
+%p A384842        for i from n to 1 by -1 do
+%p A384842          S[i]:= expand(S[i] + S[i-1] * y^x);
+%p A384842        od;
+%p A384842        if type(S[n], `+`) then
+%p A384842          R:= select(t -> degree(t, y) < x and eval(t, y=1) = n, convert(S[n], list));
+%p A384842          if nops(R) >= n then R:= sort(map(t -> degree(t,y), R)); return R[n] fi;
+%p A384842        fi;
+%p A384842        p:= nextprime(t[-1]);
+%p A384842        for i from n+1 to 2 by -1 while t[i] = t[-1] do
+%p A384842         v:= x*(p/t[-1])^(n+2-i);
+%p A384842         insert([-v, op(t[2..i-1]), p$(n+2-i)], pq)
+%p A384842        od;
+%p A384842      od;
+%p A384842 end proc:
+%p A384842 map(f, [$1..15]);
+%Y A384842 Cf. A091538, A365494.
+%K A384842 nonn,more
+%O A384842 1,1
+%A A384842 _Robert Israel_, Jun 10 2025

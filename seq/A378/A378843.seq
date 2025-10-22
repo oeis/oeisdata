@@ -1,0 +1,30 @@
+%I A378843 #15 Dec 16 2024 02:15:11
+%S A378843 1,1,1,1,0,1,7,1,0,0,1,1,24,1,1,1,0,1,0,1,0,1,1,1,0,0,1,0,0,1,151,1,0,
+%T A378843 1,1,1,0,1,1,1,0,1,31,1,0,0,1,1,0,0,0,1,0,1,0,1,0,1,1,1,864,1,1,0,0,1,
+%U A378843 127,1,0,1,1,1,0,1,1,0,0,1,7,1,0
+%N A378843 Number of compositions (ordered partitions) of n into distinct squarefree divisors of n.
+%C A378843 From _Robert Israel_, Dec 15 2024: (Start)
+%C A378843 If n is squarefree, a(n) >= 1, as [n] is a composition.
+%C A378843 If n = b * c where b and c are coprime and c is squarefree, then a(n) >= a(b), as for any composition C of b into distinct squarefree divisors, multiplying each element of C by c gives a composition of n into distinct squarefree divisors. (End)
+%H A378843 Robert Israel, <a href="/A378843/b378843.txt">Table of n, a(n) for n = 0..10000</a>
+%e A378843 a(6) = 7 because we have [6], [3, 2, 1], [3, 1, 2], [2, 3, 1], [2, 1, 3], [1, 3, 2] and [1, 2, 3].
+%e A378843 a(12) = 24 because we have [6, 3, 2, 1] and 4! = 24 permutations.
+%p A378843 ptns:= proc(S,n) option remember;
+%p A378843   # subsets of S with sum n
+%p A378843   local m,s;
+%p A378843   if convert(S,`+`) < n then return {} fi;
+%p A378843   if n = 0 then return {{}} fi;
+%p A378843   s:= max(S);
+%p A378843   if s > n then return procname(select(`<=`,S,n),n) fi;
+%p A378843   map(t -> t union {s}, procname(S minus {s},n-s)) union procname(S minus {s}, n)
+%p A378843   end proc:
+%p A378843 sfd:= proc(n) map(convert,combinat:-powerset(numtheory:-factorset(n)),`*`) end proc:
+%p A378843 f:= proc(n) local t;
+%p A378843      add((nops(t))!, t = ptns(sfd(n),n))
+%p A378843 end proc:
+%p A378843 map(f, [$0..100]); # _Robert Israel_, Dec 15 2024
+%t A378843 a[n_] := Module[{d = Select[Divisors[n], SquareFreeQ]}, Total[(Length /@ Select[Subsets[d], Total[#] == n &])!]]; a[0] = 1; Array[a, 100, 0] (* _Amiram Eldar_, Dec 10 2024 *)
+%Y A378843 Cf. A005117, A087188, A225244, A225245, A284464, A331846, A331927.
+%K A378843 nonn
+%O A378843 0,7
+%A A378843 _Ilya Gutkovskiy_, Dec 09 2024

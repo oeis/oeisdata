@@ -1,0 +1,53 @@
+%I A382344 #12 Aug 07 2025 08:55:36
+%S A382344 1,0,4,0,4,10,0,4,16,20,0,4,26,40,35,0,4,32,80,80,56,0,4,42,124,180,
+%T A382344 140,84,0,4,48,184,320,340,224,120,0,4,58,248,535,660,574,336,165,0,4,
+%U A382344 64,332,800,1200,1184,896,480,220,0,4,74,416,1176,1956,2284,1932,1320,660,286
+%N A382344 Triangle read by rows: T(n, k) is the number of partitions of n into k parts where 0 <= k <= n, and each part is one of 4 kinds.
+%F A382344 T(n,n) = binomial(n + 3, 3) = A000292(n + 1).
+%F A382344 T(n,1) = 4 for n >= 1.
+%F A382344 T(n,k) = A382041(n,k) - A382041(n,k-1) for 1 <= k <= n.
+%F A382344 Sum_{k=0..n} (-1)^k * T(n,k) = A022599(n). - _Alois P. Heinz_, Mar 28 2025
+%e A382344 Triangle starts:
+%e A382344  0 : [1]
+%e A382344  1 : [0, 4]
+%e A382344  2 : [0, 4, 10]
+%e A382344  3 : [0, 4, 16,  20]
+%e A382344  4 : [0, 4, 26,  40,   35]
+%e A382344  5 : [0, 4, 32,  80,   80,   56]
+%e A382344  6 : [0, 4, 42, 124,  180,  140,   84]
+%e A382344  7 : [0, 4, 48, 184,  320,  340,  224,  120]
+%e A382344  8 : [0, 4, 58, 248,  535,  660,  574,  336,  165]
+%e A382344  9 : [0, 4, 64, 332,  800, 1200, 1184,  896,  480, 220]
+%e A382344 10 : [0, 4, 74, 416, 1176, 1956, 2284, 1932, 1320, 660, 286]
+%e A382344 ...
+%p A382344 b:= proc(n, i) option remember; expand(`if`(n=0, 1, `if`(i<1, 0,
+%p A382344       add(x^j*b(n-i*j, min(n-i*j, i-1))*binomial(j+3, 3), j=0..n/i))))
+%p A382344     end:
+%p A382344 T:= (n, k)-> coeff(b(n$2), x, k):
+%p A382344 seq(seq(T(n, k), k=0..n), n=0..10);  # _Alois P. Heinz_, Mar 28 2025
+%t A382344 b[n_, i_] := b[n, i] = Expand[If[n == 0, 1, If[i < 1, 0, Sum[x^j*b[n-i*j, Min[n-i*j, i-1]]*Binomial[j+3, 3], {j, 0, n/i}]]]];
+%t A382344 T[n_, k_] := Coefficient[b[n, n], x, k];
+%t A382344 Table[Table[T[n, k], {k, 0, n}], {n, 0, 10}] // Flatten (* _Jean-François Alcover_, Aug 07 2025, after _Alois P. Heinz_ *)
+%o A382344 (Python)
+%o A382344 from sympy import binomial
+%o A382344 from sympy.utilities.iterables import partitions
+%o A382344 kinds = 4 - 1   # the number of part kinds - 1
+%o A382344 def t_row( n):
+%o A382344     if n == 0 : return [1]
+%o A382344     t = list( [0] * n)
+%o A382344     for p in partitions( n):
+%o A382344         fact = 1
+%o A382344         s = 0
+%o A382344         for k in p :
+%o A382344             s += p[k]
+%o A382344             fact *= binomial( kinds + p[k], kinds)
+%o A382344         if s > 0 :
+%o A382344             t[s - 1] += fact
+%o A382344     return [0] + t
+%Y A382344 Main diagonal gives A000292(n+1).
+%Y A382344 Row sums give A023003.
+%Y A382344 Cf. A008284 (1-kind), A382342 (2-kind), A382343 (3-kind).
+%Y A382344 Cf. A022599, A382041.
+%K A382344 nonn,tabl
+%O A382344 0,3
+%A A382344 _Peter Dolland_, Mar 28 2025

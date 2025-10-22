@@ -1,0 +1,69 @@
+%I A383353 #20 May 08 2025 03:16:39
+%S A383353 1,2,0,3,4,0,4,8,6,0,5,12,22,8,0,6,16,38,40,10,0,7,20,54,92,73,12,0,8,
+%T A383353 24,70,144,196,112,14,0,9,28,86,196,354,376,172,16,0,10,32,102,248,
+%U A383353 512,760,678,240,18,0,11,36,118,300,670,1200,1554,1136,335,20,0
+%N A383353 Square array A(n,k), n>=0, k>=0, read by antidiagonals downwards, where n 2-colored objects are distributed into k containers of two kinds. Containers may be left empty.
+%H A383353 Alois P. Heinz, <a href="/A383353/b383353.txt">Rows n = 0..200, flattened</a>
+%F A383353 A(0,k) = k + 1.
+%F A383353 A(1,k) = 4*k.
+%F A383353 A(2,k+1) = 6 + 16 * k.
+%F A383353 A(n,1) = 2 + 2 * n.
+%F A383353 A(n,n+k) = A(n,n) + k * A383352(n,n).
+%F A383353 A(n,k) = Sum_{i=0..k} (k + 1 - i) * A383351(n,i) for 0 <= k <= n.
+%F A383353 Sum_{k=0..n} (-1)^k*T(n-k,k) = A278710(n). - _Alois P. Heinz_, May 05 2025
+%e A383353 Array starts:
+%e A383353  0 : [1,  2,   3,    4,     5,     6,     7,      8,      9,     10,     11, ...]
+%e A383353  1 : [0,  4,   8,   12,    16,    20,    24,     28,     32,     36,     40, ...]
+%e A383353  2 : [0,  6,  22,   38,    54,    70,    86,    102,    118,    134,    150, ...]
+%e A383353  3 : [0,  8,  40,   92,   144,   196,   248,    300,    352,    404,    456, ...]
+%e A383353  4 : [0, 10,  73,  196,   354,   512,   670,    828,    986,   1144,   1302, ...]
+%e A383353  5 : [0, 12, 112,  376,   760,  1200,  1640,   2080,   2520,   2960,   3400, ...]
+%e A383353  6 : [0, 14, 172,  678,  1554,  2640,  3810,   4980,   6150,   7320,   8490, ...]
+%e A383353  7 : [0, 16, 240, 1136,  2936,  5436,  8272,  11228,  14184,  17140,  20096, ...]
+%e A383353  8 : [0, 18, 335, 1826,  5315, 10674, 17216,  24262,  31473,  38684,  45895, ...]
+%e A383353  9 : [0, 20, 440, 2812,  9136, 19984, 34192,  50248,  67024,  84020, 101016, ...]
+%e A383353 10 : [0, 22, 578, 4186, 15188, 36024, 65512, 100488, 138188, 176878, 215854, ...]
+%e A383353 ...
+%p A383353 b:= proc(n, i) option remember; expand(`if`(n=0 or i=1, (n+1)*x^n,
+%p A383353       add(b(n-i*j, min(n-i*j, i-1))*binomial(i+j, j)*x^j, j=0..n/i)))
+%p A383353     end:
+%p A383353 g:= proc(n, k) option remember;
+%p A383353       `if`(k<0, 0, g(n, k-1)+coeff(b(n$2), x, k))
+%p A383353     end:
+%p A383353 A:= (n, k)-> add(add(g(j, h)*g(n-j, k-h), h=0..k), j=0..n):
+%p A383353 seq(seq(A(n, d-n), n=0..d), d=0..10);  # _Alois P. Heinz_, May 05 2025
+%o A383353 (Python)
+%o A383353 from sympy import binomial
+%o A383353 from sympy.utilities.iterables import partitions
+%o A383353 def calc_w( k , m):
+%o A383353     s = 0
+%o A383353     for p in partitions( m, m=k+1):
+%o A383353         fact = 1
+%o A383353         j = k + 1
+%o A383353         for x in p :
+%o A383353             fact *= binomial( j, p[x]) * (x + 1) ** p[x]
+%o A383353             j -= p[x]
+%o A383353         s += fact
+%o A383353     return s
+%o A383353 def a_row( n, length=11):
+%o A383353     if n == 0 : return [ k + 1 for k in range( length) ]
+%o A383353     t = list( [0] * length)
+%o A383353     for p in partitions( n):
+%o A383353         fact = 1
+%o A383353         s = 0
+%o A383353         for k in p :
+%o A383353             s += p[k]
+%o A383353             fact *= calc_w( k, p[k])
+%o A383353         if s > 0 :
+%o A383353             t[s - 1] += fact
+%o A383353     t = [0] + t
+%o A383353     for i in range( 1, length):
+%o A383353         t[i+1] += t[i] * 2 - t[i - 1]
+%o A383353     return t
+%Y A383353 Antidiagonal sums give A161870.
+%Y A383353 Cf. A383351, A383352.
+%Y A383353 Cf. A382345 (1-color), A381891 (1-kind), A026820 (1-color, 1-kind).
+%Y A383353 Cf. A278710.
+%K A383353 nonn,tabl
+%O A383353 0,2
+%A A383353 _Peter Dolland_, Apr 24 2025

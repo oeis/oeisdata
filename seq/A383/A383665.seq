@@ -1,0 +1,31 @@
+%I A383665 #17 May 29 2025 00:54:04
+%S A383665 15,102,204,408,3078,14496,88448,128768,6857312,111411968,844844000,
+%T A383665 6059394048,13384999936,948305874880,6373064359936,186505184249928
+%N A383665 a(n) is the least number k such that k, k - s and k + s all have n prime divisors, counted with multiplicity, where s is the sum of the decimal digits of k.
+%C A383665 k - s is always divisible by 9, so a(1) does not exist, and a(2) = 15 is the only semiprime k such that k, k - s and k + s are all semiprimes.
+%F A383665 A001222(a(n)) = A001222(A062028(a(n))) = A001222(A066568(a(n))) = n.
+%e A383665 a(4) = 204 because 204 has digit sum 6, 204 - 6 = 198 = 2 * 3^2 * 11, 204 = 2^2 * 3 * 17 and 204 + 6 = 210 = 2 * 3 * 5 * 7 all have 4 prime divisors, counted with multiplicity, and 204 is the least number that works.
+%p A383665 f:= proc(n) uses priqueue; local pq, t,x,s,p,i;
+%p A383665       initialize(pq);
+%p A383665       insert([-2^n, 2$n], pq);
+%p A383665       do
+%p A383665         t:= extract(pq);
+%p A383665         x:= -t[1];
+%p A383665         s:= convert(convert(x,base,10),`+`);
+%p A383665         if numtheory:-bigomega(x-s) = n and numtheory:-bigomega(x+s) = n then return x fi;
+%p A383665         p:= nextprime(t[-1]);
+%p A383665         for i from n+1 to 2 by -1 while t[i] = t[-1] do
+%p A383665           insert([t[1]*(p/t[-1])^(n+2-i), op(t[2..i-1]), p$(n+2-i)], pq)
+%p A383665         od;
+%p A383665       od;
+%p A383665 end proc:
+%p A383665 map(f, [$2..14]);
+%o A383665 (PARI)
+%o A383665 generate(A, B, n, k) = A=max(A, 2^n); (f(m, p, n) = my(list=List()); if(n==1, forprime(q=max(p, ceil(A/m)), B\m, my(s=sumdigits(m*q)); if(bigomega(m*q+s) == k && bigomega(m*q-s) == k, listput(list, m*q))), forprime(q=p, sqrtnint(B\m, n), list=concat(list, f(m*q, q, n-1)))); list); vecsort(Vec(f(1, 2, n)));
+%o A383665 a(n) = my(x=2^n, y=2*x); while(1, my(v=generate(x, y, n, n)); if(#v >= 1, return(v[1])); x=y+1; y=2*x); \\ _Daniel Suteu_, May 24 2025
+%Y A383665 Cf. A001222, A007953, A062028, A066568, A381851, A382996.
+%K A383665 nonn,base,hard,more
+%O A383665 2,1
+%A A383665 _Zak Seidov_ and _Robert Israel_, May 04 2025
+%E A383665 a(15) from _Michael S. Branicky_, May 08 2025
+%E A383665 a(16)-a(17) from _Daniel Suteu_, May 24 2025

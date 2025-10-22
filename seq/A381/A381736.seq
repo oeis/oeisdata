@@ -1,0 +1,44 @@
+%I A381736 #45 Apr 22 2025 06:32:24
+%S A381736 30,70,105,154,165,182,195,231,273,286,357,374,385,399,418,429,442,
+%T A381736 455,494,561,595,598,627,646,663,665,715,741,759,782,805,874,897,935,
+%U A381736 957,969,986,1001,1015,1023,1045,1054,1085,1102,1105,1131,1173,1178,1209
+%N A381736 Integers k = p*q*r, where p < q < r are distinct primes and p*q > r.
+%C A381736 These are squarefree 3-almost-primes, called sphenic numbers, that are greater than the square of the largest of its prime factors. As all sphenic numbers are, by definition, less than the cube of their largest prime factor, numbers in this sequence satisfy r^2 < k < r^3, where k = p*q*r, p < q < r.
+%H A381736 Robert Israel, <a href="/A381736/b381736.txt">Table of n, a(n) for n = 1..10000</a>
+%H A381736 Matthew Goers, <a href="/A381736/a381736.txt">Factors of Terms</a>
+%e A381736 30 = 2*3*5 and 2*3 > 5, so 30 is in the sequence.
+%e A381736 70 = 2*5*7 and 2*5 > 7, so 70 is in the sequence.
+%e A381736 110 = 2*5*11 but 2*5 < 11, so 110 is not in the sequence.
+%p A381736 N:= 2000: # for terms < N
+%p A381736 P:= select(isprime, [2,seq(i,i=3..isqrt(N),2)]):
+%p A381736 R:= NULL:
+%p A381736 for k from 1 to nops(P) do
+%p A381736   for i from 1 to k-2 while P[i]*P[i+1]*P[k] < N do
+%p A381736      jmin:= max(i+1,ListTools:-BinaryPlace(P,P[k]/P[i])+1);
+%p A381736      jmax:= min(k-1,ListTools:-BinaryPlace(P,N/(P[i]*P[k])));
+%p A381736      R:= R, seq(P[i]*P[j]*P[k],j=jmin .. jmax);
+%p A381736 od od:
+%p A381736 sort([R]); # _Robert Israel_, Mar 28 2025
+%t A381736 q[n_] := Module[{f = FactorInteger[n]}, f[[;; , 2]] == {1, 1, 1} && f[[1, 1]]*f[[2, 1]] > f[[3, 1]]]; Select[Range[1500], q] (* _Amiram Eldar_, Mar 20 2025 *)
+%o A381736 (PARI) is_a381736(n) = my(F=factor(n)); omega(F)==3 && bigomega(F)==3 && F[1,1]*F[2,1]>F[3,1] \\ _Hugo Pfoertner_, Mar 08 2025
+%o A381736 (Python)
+%o A381736 from math import isqrt
+%o A381736 from sympy import primepi, primerange, integer_nthroot
+%o A381736 def A381736(n):
+%o A381736     def bisection(f,kmin=0,kmax=1):
+%o A381736         while f(kmax) > kmax: kmax <<= 1
+%o A381736         kmin = kmax >> 1
+%o A381736         while kmax-kmin > 1:
+%o A381736             kmid = kmax+kmin>>1
+%o A381736             if f(kmid) <= kmid:
+%o A381736                 kmax = kmid
+%o A381736             else:
+%o A381736                 kmin = kmid
+%o A381736         return kmax
+%o A381736     def f(x): return n+x-sum(primepi(min(x//(p*q),p*q-1))-b for a,p in enumerate(primerange(integer_nthroot(x,3)[0]+1),1) for b,q in enumerate(primerange(p+1,isqrt(x//p)+1),a+1))
+%o A381736     return bisection(f,n,n) # _Chai Wah Wu_, Mar 28 2025
+%Y A381736 Intersection of A007304 (sphenic numbers) and A164596.
+%Y A381736 Cf. A382022.
+%K A381736 nonn
+%O A381736 1,1
+%A A381736 _Matthew Goers_, Mar 05 2025

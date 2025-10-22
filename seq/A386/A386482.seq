@@ -1,0 +1,76 @@
+%I A386482 #63 Sep 07 2025 07:29:04
+%S A386482 1,2,4,6,3,9,12,10,8,14,7,21,18,16,20,15,5,25,30,28,26,24,22,11,33,27,
+%T A386482 36,34,32,38,19,57,54,52,50,48,46,44,42,40,35,45,39,13,65,60,58,56,49,
+%U A386482 63,51,17,68,66,64,62,31,93,90,88,86,84,82,80,78,76,74,72,70,55,75,69,23,92,94,47,141,138,136,134,132,130,128
+%N A386482 a(1)=1, a(2)=2; thereafter a(n) is either the greatest number k < a(n-1) not already used such that gcd(k, a(n-1)) > 1, or if no such k exists then a(n) is the smallest number k > a(n-1) not already used such that gcd(k, a(n-1)) > 1.
+%C A386482 Similar to the EKG sequence A064413, but whereas in that sequence a(n) is chosen to be as small as possible, here the primary goal is to choose a(n) to be less than a(n-1) and as close to it as possible. This sequence first differs from the EKG sequence at n = 8, where a(8) = k = 10 is closer to a(7) = 12 than A064413(8) = 8 is.
+%C A386482 A significant difference from the EKG sequence is that the primes do not appear in their natural order. Also, it is not always true that a prime p is preceded by 2*p when it first appears. 4k+3 primes appear to be preceded by smaller multiples than 4k+1 primes.
+%C A386482 It is conjectured that every positive number appears.
+%C A386482 It is interesting to study what happens if the first two terms are taken to be 1,s, with s >= 2, or if the first s terms are taken to be 1,2,3,...,s, with s >= 2. Call two such sequences equivalent if they eventually merge. The 1,3 and 1,2,3 sequences merge with each other after half-a-dozen terms. But at present we do not know if they merge with the 1,2 sequence.
+%C A386482 It appears that many sequences that start 1,s and 1,2,3,...,s with small s merge with one of the sequences 1,2 or 1,2,3 or 1,2,3,...,11.
+%C A386482 [The preceding comments are from _Geoffrey Caveney_'s emails.]
+%C A386482 From _Michael De Vlieger_, Aug 15 2025: (Start)
+%C A386482 There are long runs of terms with the same parity in this sequence. For example, beginning at a(481) = 948, there are 100 consecutive even terms. Starting with a(730076) = 1026330, there are 100869 consecutive even terms, followed by 36709 consecutive odd terms. Runs of even terms tend to be longer than those of odd.
+%C A386482 There are long runs of first differences of -2 and -6 in this sequence, and that there appear to be three phases. The predominant (A) phase has a(n) = a(n-1)-2, the second (B) phase has a(n) = a(n-1)-6, and then there is a turbulent (C) phase [C] with varied differences.
+%C A386482 Generally the even runs correspond to differences a(n)-a(n-1) = 2 and feature square-free terms separated by an odd number of terms in A126706. Phase [C] tends to be largely odd squarefree semiprimes and includes prime powers. (End)
+%D A386482 Geoffrey Caveney, Emails to N. J. A. Sloane, Aug 13 2025 - Aug 15 2025.
+%H A386482 Rémy Sigrist, <a href="/A386482/b386482.txt">Table of n, a(n) for n = 1..10000</a>
+%H A386482 Rémy Sigrist, <a href="/A386482/a386482.gp.txt">PARI program</a>
+%H A386482 Michael De Vlieger, <a href="/A386482/a386482.png">Log log scatterplot of a(n)</a>, n = 1..2^20.
+%H A386482 Michael De Vlieger, <a href="/A386482/a386482_1.png">Log log scatterplot of a(n)</a>, n = 1..2^16, showing primes in red, proper prime powers in gold, squarefree composites in green, and numbers that are neither squarefree nor prime powers in blue and purple, where purple represents powerful numbers that are not prime powers.
+%p A386482 A386482 := proc(n)
+%p A386482     local k,kused,i ;
+%p A386482     option remember ;
+%p A386482     if n <= 2 then
+%p A386482         n;
+%p A386482     else
+%p A386482         for k from procname(n-1)-1 to 1 by -1 do
+%p A386482             kused := false;
+%p A386482             for i from 1 to n-1 do
+%p A386482                 if procname(i) = k then
+%p A386482                     kused := true ;
+%p A386482                     break;
+%p A386482                 end if;
+%p A386482             end do:
+%p A386482             if not kused and igcd(k,procname(n-1)) > 1 then
+%p A386482                 return k;
+%p A386482             end if;
+%p A386482         end do:
+%p A386482         for k from procname(n-1)+1 do
+%p A386482             kused := false;
+%p A386482             for i from 1 to n-1 do
+%p A386482                 if procname(i) = k then
+%p A386482                     kused := true ;
+%p A386482                     break;
+%p A386482                 end if;
+%p A386482             end do:
+%p A386482             if not kused and igcd(k,procname(n-1)) > 1 then
+%p A386482                 return k;
+%p A386482             end if;
+%p A386482         end do:
+%p A386482     end if;
+%p A386482 end proc:
+%p A386482 seq(A386482(n),n=1..100) ; # _R. J. Mathar_, Sep 07 2025
+%t A386482 aList[n_] := Module[{an = 2, aset = <|2 -> True|>, m}, Reap[Sow[1]; Sow[an];
+%t A386482 Do[m = SelectFirst[Range[an - 1, 2, -1], ! KeyExistsQ[aset, #] && GCD[#, an] > 1 & ];
+%t A386482 If[MissingQ[m], m = NestWhile[# + 1 &, an + 1, !(! KeyExistsQ[aset, #] && GCD[#, an] > 1) & ]];
+%t A386482 aset[m] = True; an = m; Sow[an], {n - 2}]][[2, 1]]]; aList[83]  (* _Peter Luschny_, Aug 15 2025 *)
+%o A386482 (PARI) \\ See Links section.
+%o A386482 (Python)
+%o A386482 from math import gcd
+%o A386482 from itertools import count, islice
+%o A386482 def A386482_gen(): # generator of terms
+%o A386482     yield 1
+%o A386482     an, aset = 2, {2}
+%o A386482     while True:
+%o A386482         yield an
+%o A386482         m = next((k for k in range(an-1, 1, -1) if k not in aset and gcd(k, an) > 1), False)
+%o A386482         if not m: m = next(k for k in count(an+1) if k not in aset and gcd(k, an) > 1)
+%o A386482         an = m
+%o A386482         aset.add(an)
+%o A386482 print(list(islice(A386482_gen(), 83))) # _Michael S. Branicky_, Aug 15 2025
+%Y A386482 Cf. A064413 (EKG), A387072 (inverse), A387073 (record high points), A387074 (indices of record high points), A387075 (first differences), A387076 (primes in order of appearance), A387077 (indices of primes), A387078 (run lengths of consecutive odd and even terms), A387080 (variant that begins with 1,3).
+%Y A386482 See also A386483, A386484, A387087-A387090.
+%K A386482 nonn,look
+%O A386482 1,2
+%A A386482 _N. J. A. Sloane_, Aug 15 2025, based on email messages from _Geoffrey Caveney_

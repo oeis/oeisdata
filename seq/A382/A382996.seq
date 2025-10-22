@@ -1,0 +1,32 @@
+%I A382996 #43 May 29 2025 00:54:14
+%S A382996 11,15,18,81,243,486,2976,25488,128768,396864,911232,8820864,69940224,
+%T A382996 118462464,1171768320,1756943946,11753349120,272313556992,
+%U A382996 491737042890,2374758457344,9766784434176,22675979501496,269744252387328,1546075329527736,6138628058382336
+%N A382996 a(n) is the least number k such that both k and k + s have n prime divisors, counted with multiplicity, where s is the sum of the decimal digits of k.
+%C A382996 a(n) <= A383665(n) if A383665(n) exists.
+%F A382996 A001222(a(n)) = A001222(A062028(a(n))) = n.
+%e A382996 a(4) = 81 because 81 has sum of digits 9, both 81 = 3^4 and 81 + 9 = 90 = 2 * 3^2 * 5 have 4 prime divisors, counted with multiplicity, and no number smaller than 81 works.
+%p A382996 f:= proc(n) uses priqueue; local pq, t,x,s,p,i;
+%p A382996       initialize(pq);
+%p A382996       insert([-2^n, 2$n], pq);
+%p A382996       do
+%p A382996         t:= extract(pq);
+%p A382996         x:= -t[1];
+%p A382996         s:= convert(convert(x,base,10),`+`);
+%p A382996         if numtheory:-bigomega(x+s) = n then return x fi;
+%p A382996         p:= nextprime(t[-1]);
+%p A382996         for i from n+1 to 2 by -1 while t[i] = t[-1] do
+%p A382996           insert([t[1]*(p/t[-1])^(n+2-i), op(t[2..i-1]), p$(n+2-i)], pq)
+%p A382996         od;
+%p A382996       od;
+%p A382996 end proc:
+%p A382996 map(f, [$1..20]);
+%o A382996 (PARI)
+%o A382996 generate(A, B, n, k) = A=max(A, 2^n); (f(m, p, n) = my(list=List()); if(n==1, forprime(q=max(p, ceil(A/m)), B\m, if(bigomega(m*q+sumdigits(m*q)) == k, listput(list, m*q))), forprime(q=p, sqrtnint(B\m, n), list=concat(list, f(m*q, q, n-1)))); list); vecsort(Vec(f(1, 2, n)));
+%o A382996 a(n) = my(x=2^n, y=2*x); while(1, my(v=generate(x, y, n, n)); if(#v >= 1, return(v[1])); x=y+1; y=2*x); \\ _Daniel Suteu_, May 24 2025
+%Y A382996 Cf. A001222, A007953, A062028, A381851, A383665.
+%K A382996 nonn,base,hard
+%O A382996 1,1
+%A A382996 _Robert Israel_, May 06 2025
+%E A382996 a(21)-a(22) from _Michael S. Branicky_, May 08 2025
+%E A382996 a(23)-a(25) from _Daniel Suteu_, May 24 2025

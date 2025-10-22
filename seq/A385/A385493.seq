@@ -1,0 +1,63 @@
+%I A385493 #14 Jul 20 2025 19:57:54
+%S A385493 1,1,1,6,9,4,4,5,14,12,17,5,8,19,15,34,20,21,19,77,52,29,58,39,27,27,
+%T A385493 68,31,27,27,27,70,49,129,83,43,153,40,82,128,60,457,436,79,99,71,71,
+%U A385493 178,125,281,121,121,94,231,94,94,385,122,94,94,175,306,156
+%N A385493 Number of distinct states in Conway's Game of Life acting on a (2n+1) X (2n+1) toroidal grid starting with (x,y) turned on if and only if x-n + (y-n)*i is a Gaussian prime.
+%e A385493 For a(3), the sequence of Conway's Game of Life is
+%e A385493  | . o . o . o . | . o . o . o . | . o . . . o . |
+%e A385493  | o . o . o . o | o . . . . . o | o o o o o o o |
+%e A385493  | . o o . o o . | . . o . o . . | . o . . . o . |
+%e A385493  | o . . . . . o | o . . . . . o | . o . . . o . |
+%e A385493  | . o o . o o . | . . o . o . . | . o . . . o . |
+%e A385493  | o . o . o . o | o . . . . . o | o o o o o o o |
+%e A385493  | . o . o . o . | . o . o . o . | . o . . . o . |
+%e A385493   (generation 1)  (generation 2)  (generation 3)
+%e A385493  | . . . o . . . | . . o o o . . | . o . . . o . |
+%e A385493  | . . . o . . . | . . o o o . . | o . . . . . o |
+%e A385493  | . . . o . . . | o o . o . o o | . . . . . . . |
+%e A385493  | o o o . o o o | o o o . o o o | . . . . . . . |
+%e A385493  | . . . o . . . | o o . o . o o | . . . . . . . |
+%e A385493  | . . . o . . . | . . o o o . . | o . . . . . o |
+%e A385493  | . . . o . . . | . . o o o . . | . o . . . o . |
+%e A385493   (generation 4)  (generation 5)  (generation 6)
+%e A385493 Every generation after 6 is identical to generation 6, so this sequence has 6 unique states. Thus, a(3) = 6.
+%o A385493 (Python)
+%o A385493 import torch
+%o A385493 import numpy as np
+%o A385493 def prime_mask(limit):
+%o A385493     is_prime = torch.ones(limit + 1, dtype=torch.bool)
+%o A385493     is_prime[:2] = False
+%o A385493     for i in range(2, int(limit**0.5) + 1):
+%o A385493         if is_prime[i]:
+%o A385493             is_prime[i*i : limit+1 : i] = False
+%o A385493     return is_prime
+%o A385493 def Gauss_primes(N):
+%o A385493     A, B = torch.meshgrid(torch.arange(-N, N+1), torch.arange(-N, N+1))
+%o A385493     norm = A**2 + B**2
+%o A385493     is_prime = prime_mask(2*N**2)
+%o A385493     mask = (A != 0) & (B != 0) & is_prime[norm]
+%o A385493     axis_mask = ((A == 0) ^ (B == 0))
+%o A385493     axis_val = (A + B).abs()
+%o A385493     axis_mask &= is_prime[axis_val] & ((axis_val % 4) == 3)
+%o A385493     return mask | axis_mask
+%o A385493 def update(G):
+%o A385493     shifts = [(1,0),(1,1),(0,1),(-1,1),(-1,0),(-1,-1),(0,-1),(1,-1)]
+%o A385493     neighbors = sum(torch.roll(G, shifts=shift, dims=(0,1)) for shift in shifts)
+%o A385493     return (G & ((neighbors == 2) | (neighbors == 3))) | (~G & (neighbors == 3))
+%o A385493 def a(n):
+%o A385493     if n == 0 or n == 1:
+%o A385493         return 1
+%o A385493     G = Gauss_primes(n).to("cuda").to(torch.uint8)
+%o A385493     seen, step = set(), 0
+%o A385493     while True:
+%o A385493         flat = G.flatten().to("cpu").numpy()
+%o A385493         key = bytes(np.packbits(flat))
+%o A385493         if key in seen:
+%o A385493             return step
+%o A385493         seen.add(key)
+%o A385493         G = update(G)
+%o A385493         step += 1
+%Y A385493 Cf. A055025.
+%K A385493 nonn
+%O A385493 0,4
+%A A385493 _Luke Bennet_, Jun 30 2025

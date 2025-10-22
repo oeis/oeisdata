@@ -1,0 +1,50 @@
+%I A388302 #61 Sep 24 2025 00:44:36
+%S A388302 1,1,2,2,2,2,4,6,7,6,9,9,9,12,14,12,15,16,17,18,19,19,20,21,22,24,24,
+%T A388302 24,27,27,29,30,30,32,34,33,34,34,37,37,38,38,39,41,41,41,44,45,46,46,
+%U A388302 48,48,50,50,52,53,53,53,56,56,56,58,62,62,64,64,64,64,66,66,68,68,68,70,71,72,73,72
+%N A388302 a(n) = is the smallest m >= 1 such that n! = b_1*...*b_t with b_1 < ... < b_t and m = b_t - b_1.
+%C A388302 Empirical observation: while generating this sequence, it seems like searching for factors around a window of (n!)^(1/k), where 2 <= k <= n will find likely matches. This is due to the geometric mean of k factors being near (n!)^(1/k). No proof if this heuristic method guarantees finding valid factors, or a numerical lower bound on the window width.
+%C A388302 From _David A. Corneth_, Sep 17 2025: (Start)
+%C A388302 When m = 0 is allowed we would have a(n) = 0 for all n and we could define a(1).
+%C A388302 As m >= 1, t > 1 and so b_1*b_t <= n! and so b_1 < sqrt(n!) (< as for n >= 2 we have n! is never a square).
+%C A388302 More generally b_1 < (n!)^(1/t).
+%C A388302 a(n) <= min(A061057(n), n-2) for n>=3 where upper bound n-2 comes from t = n-1, b_1 = 2, b_t = n. (End)
+%D A388302 P. Erdős and R. Graham, Old and new problems and results in combinatorial number theory. Monographies de L'Enseignement Mathématique (1980), p. 76.
+%H A388302 Thomas Bloom, <a href="https://www.erdosproblems.com/393">Problem 393</a>, Erdős Problems.
+%H A388302 David A. Corneth, <a href="/A388302/a388302.gp.txt">PARI program</a>
+%H A388302 David A. Corneth, <a href="/A388302/a388302_1.gp.txt">List of tuples multiplying to n! and giving a(n) for n = 2..79</a>
+%H A388302 Charlie Liou, <a href="https://github.com/swrlly/erdos393/blob/main/geometric_mean_heuristic.py">Python program using geometric mean heuristic</a>
+%H A388302 Erdős problems database contributors, <a href="https://github.com/teorth/erdosproblems/issues/92">Issue 92</a> linking Erdős problems to the OEIS.
+%e A388302 For n = 3, a(3) = 1 because 3! = 2*3 and 3 - 2 = 1.
+%e A388302 For n = 8, a(8) = 4 with two solutions:
+%e A388302   8! = 32*35*36, 36-32 = 4
+%e A388302   8! = 12*14*15*16, 16-12 = 4.
+%t A388302 gens[m_,x_]:=Join[{x},#,{x+m}]&/@Subsets[x+Range[1,m-1]]
+%t A388302 decode[s_,t_]:=If[Length[t]==0,t,s/.t]
+%t A388302 process[nf_,s_,x_]:=decode[s,Solve[Times@@s==nf,x,Integers]]
+%t A388302 do[n_,m_]:=Flatten[process[n!,#,x]&/@gens[m,x],1]
+%t A388302 do[n_]:=Module[{m,d},For[m=1,True,m++,d=do[n,m];If[Length[d]>0,Return[d]]]]
+%t A388302 (* From Boris Alexeev (Erdős problems database contributor to Issue 92) who computed a(21)-a(22) *)
+%o A388302 (Python)
+%o A388302 from math import prod, factorial
+%o A388302 from sympy.ntheory import factorint
+%o A388302 from sympy.utilities.iterables import multiset_partitions
+%o A388302 def a(n):
+%o A388302     prime_factors = [factors for prime in [[i for _ in range(j)] for i, j in factorint(factorial(n)).items()] for factors in prime]
+%o A388302     best_m = float('inf')
+%o A388302     for partition in multiset_partitions(prime_factors):
+%o A388302         factors = sorted([prod(group) for group in partition])
+%o A388302         if len(factors) != len(set(factors)): continue
+%o A388302         test_m = factors[-1] - factors[0]
+%o A388302         if test_m < best_m and len(factors) >= 2: best_m = test_m
+%o A388302     return best_m
+%o A388302 print([a(n) for n in range(3, 13)])
+%o A388302 (PARI) \\ See also David A. Corneth link
+%o A388302 R(r,m,u)={my(t=r, e=logint(r,m+1)); if(e>1 && sqrtnint(r,e)<u, fordiv(r, d, my(d2=r/d); if(d>d2 && d2>m && u>d2, t=min(t,self()(d,d2,u))))); t}
+%o A388302 a(n)={my(r=n!, t=r-1); fordiv(r, d, my(d2=r/d); if(d>d2, t=min(t,R(d,d2,d2+t)-d2))); t} \\ _Andrew Howroyd_, Sep 16 2025
+%Y A388302 Cf. A061057, A082119.
+%K A388302 nonn
+%O A388302 2,3
+%A A388302 _Charlie Liou_, Sep 16 2025
+%E A388302 a(23)-a(40) from _Andrew Howroyd_, Sep 16 2025
+%E A388302 a(41)-a(79) from _David A. Corneth_, Sep 19 2025

@@ -1,0 +1,47 @@
+%I A382898 #9 Apr 15 2025 04:00:01
+%S A382898 13,151,227,2083,887,79,2963,1579,6287,1321,6719,54919,26699,8647,
+%T A382898 4229,3919,102161,42433,1667,192193,11633,186343,47339,3259,65963,
+%U A382898 14293,29717,61297,28493,231367,43793,145021,566441,475903,92381,80473,139967,882061,72893,709279,6053,114487,1179389,204331,203351,139831,396239,205327,501173,951589
+%N A382898 Beginning with 13, least prime such that concatenation of first n terms and its digit reversal both are primes.
+%H A382898 J.W.L. (Jan) Eerland, <a href="/A382898/b382898.txt">Table of n, a(n) for n = 1..150</a>
+%p A382898 rev:= proc(n) local L,i;
+%p A382898   L:= convert(n,base,10);
+%p A382898   add(L[-i]*10^(i-1),i=1..nops(L))
+%p A382898 end proc:
+%p A382898 tcat:= proc(a,b)
+%p A382898   a*10^(1+ilog10(b))+b
+%p A382898 end proc:
+%p A382898 A:= 13: x:= 13:
+%p A382898 for i from 1 to 50 do
+%p A382898    p:= 2:
+%p A382898    do
+%p A382898      p:= nextprime(p);
+%p A382898      y:= tcat(x,p);
+%p A382898      if isprime(y) and isprime(rev(y)) then
+%p A382898           A:= A,p;
+%p A382898           x:= y;
+%p A382898           break
+%p A382898      fi;
+%p A382898    od
+%p A382898 od:
+%p A382898 A; # after _Robert Israel_ in A113584
+%t A382898 w={13};Do[k=1;q=Monitor[Parallelize[While[True,If[PrimeQ[FromDigits[Join@@IntegerDigits/@Reverse[IntegerDigits[FromDigits[Join@@IntegerDigits/@Append[w,Prime[k]]]]]]]&&PrimeQ[FromDigits[Join@@IntegerDigits/@Append[w,Prime[k]]]],Break[]];k++];Prime[k]],{i,k}];w=Append[w,q],{i,2,50}];w
+%o A382898 (Python)
+%o A382898 from itertools import count, islice
+%o A382898 from gmpy2 import digits, is_prime, mpz, next_prime
+%o A382898 def agen(): # generator of terms
+%o A382898     s, r, an = "", "", 13
+%o A382898     while True:
+%o A382898         yield int(an)
+%o A382898         d = digits(an)
+%o A382898         s, r, p, sp = s+d, d[::-1]+r, 3, "3"
+%o A382898         while not is_prime(mpz(s+sp)) or not is_prime(mpz(sp[::-1]+r)):
+%o A382898             p = next_prime(p)
+%o A382898             sp = digits(p)
+%o A382898         an = p
+%o A382898 print(list(islice(agen(), 40))) # after _Michael S. Branicky_ in A113584
+%Y A382898 Cf. A113584 (same for 3), A379761 (same for 7), A380227 (same for 11).
+%Y A382898 Cf. A111382, A111383, A379354, A379355.
+%K A382898 base,nonn
+%O A382898 1,1
+%A A382898 _J.W.L. (Jan) Eerland_, Apr 08 2025

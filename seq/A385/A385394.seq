@@ -1,0 +1,71 @@
+%I A385394 #27 Jun 30 2025 21:53:02
+%S A385394 1,1,2,2,8,4,8,4,8,8,6,6,10,8,5,4,8,8,10,8,12,6,11,6,10,10,11,7,9,7,7,
+%T A385394 4,8,8,10,8,16,12,15,10,12,12,9,9,13,11,10,6,10,10,13,11,15,11,11,7,9,
+%U A385394 9,10,7,11,7,7,4,8,8,10,8,16,12,15,10,16,16,15,13
+%N A385394 a(n) = (Sum_{k=0..n} (binomial(n, k) mod 8)) / 2^bitcount(n).
+%H A385394 Peter Luschny, <a href="/A385394/a385394.c.txt">C Implementation</a>.
+%F A385394 a(n) = A385285(n) / 2^A000120(n).
+%F A385394 a(n) = A385285(n) / A001316(n).
+%p A385394 a := n -> local j; add(modp(binomial(n, j), 8), j=0..n) / 2^add(convert(n, base, 2)): seq(a(n), n = 0..75);
+%t A385394 Table[Sum[Mod[Binomial[n, k], 8], {k, 0, n}]/2^DigitCount[n, 2, 1], {n, 0, 80}]
+%t A385394 (* _Michael De Vlieger_, Jun 27 2025 *)
+%t A385394 pca[L_] := DigitCount[BitAnd @@ L, 2, 1]
+%t A385394 A385394[n_] := Module[{s, n1, n2, n3, np, n1p, b100, b10, b110, b11, b1111, b101, b1100, m11, c},
+%t A385394 If[n == 0, Return[1]];
+%t A385394 n1 = BitShiftRight[n, 1]; n2 = BitShiftRight[n, 2]; n3 = BitShiftRight[n, 3];
+%t A385394 np = BitNot[n]; n1p = BitNot[n1];
+%t A385394 b1111 = pca[{n, n1, n2, n3}]; b11 = pca[{n, n1}]; b101 = pca[{n, n2, n1p}]; b100 = pca[{np, n2, n1p}]; b110 = pca[{n2, n1, np}]; b10 = pca[{n1, np}]; b1100 = pca[{n3, n2, n1p, np}];
+%t A385394 s = "0" <> IntegerString[n, 2]; m11  = StringCount[s, "0110"];
+%t A385394 c = BitShiftLeft[b100, 2] + b110 + BitShiftRight[b10 (b10 - 1), 1];
+%t A385394 c += Switch[b11,
+%t A385394   0, b10 + BitShiftLeft[b100, 1],
+%t A385394   1, BitShiftLeft[b10 - b1100, 1] + b110,
+%t A385394   _, BitShiftLeft[b10, 1] ];
+%t A385394 c += Which[
+%t A385394   b1111 == 0 && b11 == 0 && b101 == 0, 1,
+%t A385394   b1111 == 0 && b11 == 0 && b101 != 0, 3,
+%t A385394   StringEndsQ[s, "0111"], 4,
+%t A385394   b1111 == 0 && b101 == 0 && m11 == 0 && b11 != 0, 2,
+%t A385394   True, 4]; c]
+%t A385394 Array[A385394, 76, 0]  (* After _Chai Wah Wu_, _Peter Luschny_, Jun 29 2025 *)
+%o A385394 (PARI) a(n) = sum(k=0, n, binomial(n, k) % 8) / 2^hammingweight(n); \\ _Michel Marcus_, Jun 28 2025
+%o A385394 (Python)
+%o A385394 def A385394(n):
+%o A385394     if n==0: return 1
+%o A385394     s = '0'+bin(n)[2:]
+%o A385394     n1 = n>>1
+%o A385394     n2 = n1>>1
+%o A385394     n3 = n2>>1
+%o A385394     np = ~n
+%o A385394     n1p = ~n1
+%o A385394     n1111 = (n3&n2&n1&n).bit_count()
+%o A385394     n11 = (n1&n).bit_count()
+%o A385394     n101 = (n2&n1p&n).bit_count()
+%o A385394     n100 = (n2&n1p&np).bit_count()
+%o A385394     n110 = (n2&n1&np).bit_count()
+%o A385394     n10 = (n1&np).bit_count()
+%o A385394     n1100 = (n3&n2&n1p&np).bit_count()
+%o A385394     m11 = s.count('0110')
+%o A385394     m111 = s.endswith('0111')
+%o A385394     c = (n100<<2)+n110+(n10*(n10-1)>>1)
+%o A385394     if n11==0:
+%o A385394         c += n10+(n100<<1)
+%o A385394     elif n11==1:
+%o A385394         c += (n10-n1100<<1)+n110
+%o A385394     else:
+%o A385394         c += n10<<1
+%o A385394     if not (n1111 or n11 or n101):
+%o A385394         c += 1
+%o A385394     elif not (n1111 or n11) and n101:
+%o A385394         c += 3
+%o A385394     elif m111:
+%o A385394         c += 4
+%o A385394     elif not (n1111 or n101 or m11) and n11:
+%o A385394         c += 2
+%o A385394     else:
+%o A385394         c += 4
+%o A385394     return c # _Chai Wah Wu_, Jun 28 2025
+%Y A385394 Cf. A000120, A001316, A385285, A385393.
+%K A385394 nonn
+%O A385394 0,3
+%A A385394 _Peter Luschny_, Jun 27 2025

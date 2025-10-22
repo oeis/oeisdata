@@ -1,0 +1,58 @@
+%I A386441 #21 Jul 31 2025 16:56:33
+%S A386441 1,1,1,1,2,1,1,3,3,1,1,4,6,4,1,1,5,10,10,5,1,1,6,15,20,15,6,1,1,7,21,
+%T A386441 8,8,21,7,1,1,8,1,2,16,2,1,8,1,1,9,9,3,18,18,3,9,9,1,1,10,18,12,21,9,
+%U A386441 21,12,18,10,1,1,11,1,3,6,3,3,6,3,1,11,1,1,12,12,4,9,9,6,9,9,4,12,12,1,1,13,24,16,13,18,15,15,18,13,16,24,13,1
+%N A386441 Triangle, read by rows, formed by reading Pascal's triangle (A007318) mod 27.
+%H A386441 Chai Wah Wu, <a href="/A386441/b386441.txt">Table of n, a(n) for n = 0..10010</a> (rows 0 to 140, flattened)
+%H A386441 Kenneth S. Davis and William A. Webb, <a href="https://doi.org/10.1016/S0195-6698(13)80122-9">Lucas' Theorem for Prime Powers</a>, Europ. J. Combinatorics, Vol. 11, No. 3 (1990), 229-233.
+%F A386441 T(i, j) = binomial(i, j) mod 27.
+%e A386441 Triangle begins:
+%e A386441                1;
+%e A386441              1,  1;
+%e A386441            1,  2,  1;
+%e A386441          1,  3,  3,  1;
+%e A386441        1,  4,  6,  4,  1;
+%e A386441      1,  5,  10,  10,  5,  1;
+%e A386441    1,  6,  15,  20,  15,  6,  1;
+%e A386441  1,  7,  21,  8,   8,  21,  7,  1;
+%e A386441   ...
+%t A386441 T[i_,j_]:=Mod[Binomial[i,j],27]; Table[T[n,k],{n,0,13},{k,0,n}]//Flatten (* _Stefano Spezia_, Jul 22 2025 *)
+%o A386441 (Python)
+%o A386441 from math import isqrt, comb
+%o A386441 from sympy import multiplicity
+%o A386441 from gmpy2 import digits
+%o A386441 def A386441(n):
+%o A386441     def g1(s,w,e):
+%o A386441         c, d = 1, 0
+%o A386441         if len(s) == 0: return c, d
+%o A386441         a, b = int(s,3), int(w,3)
+%o A386441         if a>=b:
+%o A386441             k = comb(a,b)%27
+%o A386441             j = multiplicity(3,k)
+%o A386441             d += j*e
+%o A386441             k = k//3**j
+%o A386441             c = c*pow(k,e,27)%27
+%o A386441         else:
+%o A386441             if int(s[0:1],3)<int(w[0:1],3): d += e
+%o A386441             c0, d0 = g1(s[1:],w[1:],e)
+%o A386441             c = c*c0%27
+%o A386441             d += d0
+%o A386441         return c, d
+%o A386441     g = (m:=isqrt(f:=n+1<<1))-(f<=m*(m+1))
+%o A386441     k = n-comb(g+1,2)
+%o A386441     s, w = digits(g,3), digits(k,3)
+%o A386441     if sum(int(d) for d in w)+sum(int(d) for d in digits(g-k,3))-sum(int(d) for d in s)>4: return 0
+%o A386441     s = s.zfill(3)
+%o A386441     w = w.zfill(l:=len(s))
+%o A386441     c, d = g1(s[:3],w[:3],1)
+%o A386441     for i in range(1,l-2):
+%o A386441         c0, d0 = g1(s[i:i+3],w[i:i+3],1)
+%o A386441         c1, d1 = g1(s[i:i+2],w[i:i+2],-1)
+%o A386441         c = c*c0*c1%27
+%o A386441         d += d0+d1
+%o A386441     return c*3**d%27
+%Y A386441 Cf. A007318, A047999, A083093, A034931, A095140, A095141, A095142, A034930, A008975, A095143, A095144, A095145, A034932.
+%Y A386441 Sequences based on the triangles formed by reading Pascal's triangle mod m: A047999 (m = 2), A083093 (m = 3), A034931 (m = 4), A095140 (m = 5), A095141 (m = 6), A095142 (m = 7), A034930 (m = 8), A095143 (m = 9), A008975 (m = 10), A095144 (m = 11), A095145 (m = 12), A275198 (m = 14), A034932 (m = 16).
+%K A386441 nonn,tabl,easy
+%O A386441 0,5
+%A A386441 _Chai Wah Wu_, Jul 21 2025

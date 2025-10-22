@@ -1,0 +1,52 @@
+%I A384308 #45 Jun 04 2025 11:07:19
+%S A384308 3,2,9,10,11,6,7,4,5,12,13,14,15,8,27,28,29,30,31,16,17,18,19,20,21,
+%T A384308 22,23,24,25,26,81,82,83,42,43,44,45,46,47,36,37,38,39,40,41,84,85,86,
+%U A384308 87,88,89,60,61,62,63,32,33,34,35,48,49,50,51,52,53,54,55,56,57,58,59,90,91,92,93,94,95,72,73,74,75
+%N A384308 a(1) = 3; for n > 1, a(n) is the smallest number that has not appeared before and has the same set of prime divisors as a(n-1) + 1.
+%C A384308 Theorem 1: {a(n)} is a permutation of the positive integers greater than 1.
+%C A384308 Proof: Suppose the smallest positive integer greater than 1 that does not appear in this sequence is m, whose set of prime divisors is {p1, p2, ..., pk}. Since there are infinitely many numbers with this set of prime divisors, we know that either all of them appear or none of them appear. Since m is the smallest among them, we know that m = p1*p2*...*pk. Therefore, p1*p2*...*pk - 1 does not appear, a contradiction, implying that all integers greater than one appear in {a(n)}. Since there are no repetitions by the definition, we have proven that {a(n)} is a permutation of the positive integers greater than 1.
+%C A384308 From _Yifan Xie_, May 26 2025: (Start)
+%C A384308 Theorem 2: The parity of a(n) is the same as the parity of n.
+%C A384308 Proof: Since a(1) is odd, we only need to prove that an odd term is immediately followed by an even term, and an even term is immediately followed by an odd term. If a(n-1) is odd, the set of prime divisors of a(n-1) + 1 contains 2, so a(n) is even; If a(n-1) and a(n) are both even, the set of prime divisors of a(n-1) + 1 does not contain 2, so a(n)/2 is a smaller candidate for a(n), a contradiction. (End)
+%H A384308 Michael S. Branicky, <a href="/A384308/b384308.txt">Table of n, a(n) for n = 1..10000</a>
+%e A384308 For a(5) = 11, 11 + 1 = 12, its set of prime divisors is {2, 3}. The smallest number with the same set of prime divisors that has not appeared before is 6, so a(6) = 6.
+%p A384308 N:= 1000:# for terms before the first term > N
+%p A384308 for i from 2 to N do
+%p A384308   S:= numtheory:-factorset(i);
+%p A384308   if assigned(V[S]) then V[S]:= V[S] union {i}
+%p A384308   else V[S]:= {i}
+%p A384308   fi
+%p A384308 od:
+%p A384308 R:= 3: r:= 3: V[{3}]:= V[{3}] minus {3}:
+%p A384308 while r < N do
+%p A384308   S:= numtheory:-factorset(r+1);
+%p A384308   if V[S] = {} then break fi;
+%p A384308   r:= min(V[S]);
+%p A384308   V[S]:= V[S] minus {r};
+%p A384308   R:= R, r;
+%p A384308 od:
+%p A384308 R; # _Robert Israel_, May 25 2025
+%t A384308 s={3};Do[i=2;While[MemberQ[s,i]||First/@FactorInteger[i]!=First/@FactorInteger[s[[-1]]+1],i++];AppendTo[s,i],{n,2,81}];s (* _James C. McMahon_, Jun 04 2025 *)
+%o A384308 (Python)
+%o A384308 import heapq
+%o A384308 from math import prod
+%o A384308 from sympy import factorint
+%o A384308 from itertools import islice
+%o A384308 def bgen(pset): # generator of terms with set of prime divisors = pset
+%o A384308     h = [prod(pset)]
+%o A384308     while True:
+%o A384308         v = heapq.heappop(h)
+%o A384308         yield v
+%o A384308         for p in pset:
+%o A384308             heapq.heappush(h, v*p)
+%o A384308 def agen(): # generator of terms
+%o A384308     an, aset = 3, set()
+%o A384308     while True:
+%o A384308         yield an
+%o A384308         aset.add(an)
+%o A384308         an = next(m for m in bgen(set(factorint(an+1))) if m not in aset)
+%o A384308 print(list(islice(agen(), 81))) # _Michael S. Branicky_, May 25 2025
+%Y A384308 Similar to A064413 and A257218.
+%K A384308 nonn
+%O A384308 1,1
+%A A384308 _SiYang Hu_, May 25 2025

@@ -1,0 +1,47 @@
+%I A380856 #39 Feb 18 2025 07:29:13
+%S A380856 0,1,2,3,4,5,6,7,8,10,9,11,12,14,13,15,16,18,20,22,17,19,21,23,24,26,
+%T A380856 28,30,25,27,29,31,32,33,36,37,40,41,44,45,34,35,38,39,42,43,46,47,48,
+%U A380856 49,52,53,56,57,60,61,50,51,54,55,58,59,62,63,64,65,66,67,72
+%N A380856 In the binary expansion of n, arrange bits row-wise in a binary tree which is complete except for the last row and then read those bits in pre-order.
+%C A380856 The formed tree is a max-heap when n is in A335040, also is strict if n is in A053738 and not strict if n is in A053754.
+%C A380856 The re-ordering of the bits depends only on the bit length of n (cf. A379905), and the two most significant bits are always fixed.
+%C A380856 If the remaining bits are all 0's or all 1's then re-ordering them is no change so that fixed points a(n) = n include n = 2^k or 2^k-1.
+%H A380856 Alois P. Heinz, <a href="/A380856/b380856.txt">Table of n, a(n) for n = 0..32768</a>
+%H A380856 Wikipedia, <a href="https://en.wikipedia.org/wiki/Heap_(data_structure)">Heap (data structure)</a>
+%H A380856 Wikipedia, <a href="https://en.wikipedia.org/wiki/Tree_traversal#Pre-order,_NLR">Tree traversal: Pre-order</a>
+%H A380856 <a href="/index/Per#IntegerPermutation">Index entries for sequences that are permutations of the natural numbers</a>
+%e A380856 For n = 65537, its binary expansion 10000000000000001 is arranged by rows in the following tree
+%e A380856             ______1______
+%e A380856            /             \
+%e A380856         __0__           __0__
+%e A380856        /     \         /     \
+%e A380856       0       0       0       0
+%e A380856      / \     / \     / \     / \
+%e A380856     0   0   0   0   0   0   0   0
+%e A380856    / \
+%e A380856   0   1
+%e A380856 Reading this in pre-order is binary 10000100000000000 so that a(65537) = 67584.
+%p A380856 a:= proc(n) uses Bits; local b, l; b, l:= i->
+%p A380856       `if`(i>nops(l), [], [b(2*i+1)[], b(2*i)[], l[-i]]),
+%p A380856        Split(n); Join(b(1))
+%p A380856     end:
+%p A380856 seq(a(n), n=0..68);  # _Alois P. Heinz_, Feb 06 2025
+%t A380856 a[n_Integer] := Module[{res = {}, data, len},
+%t A380856   data = IntegerDigits[n, 2];
+%t A380856   len = Length[data];
+%t A380856   Which[
+%t A380856    MemberQ[{0, 1, 2}, n], n,
+%t A380856    True,
+%t A380856    DepthFirstScan[TreeGraph[Table[Floor[j/2] -> j, {j, 2, len}]],
+%t A380856     1, {"PrevisitVertex" -> (AppendTo[res, #] &)}];
+%t A380856    FromDigits[data[[res]], 2]]]; a /@ Range[0, 68]
+%t A380856  (* _Shenghui Yang_, Feb 14 2025 *)
+%o A380856 (Python)
+%o A380856 from binarytree import Node, build
+%o A380856 a = lambda n: int("".join([node.value for node in build(bin(n)[2:]).preorder]),2)
+%o A380856 print([a(n) for n in range(1, 69)])
+%Y A380856 Cf. A000079, A000225, A007283, A053738, A053754, A335040, A379905.
+%Y A380856 Cf. A378496 (inverse permutation).
+%K A380856 nonn,look,base
+%O A380856 0,3
+%A A380856 _Darío Clavijo_, Feb 06 2025

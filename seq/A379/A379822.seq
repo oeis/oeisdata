@@ -1,0 +1,66 @@
+%I A379822 #28 May 29 2025 06:08:58
+%S A379822 1,2,2,6,5,5,20,16,12,16,70,57,36,36,57,252,211,130,90,130,211,924,
+%T A379822 793,507,286,286,507,793,3432,3004,2016,1092,728,1092,2016,3004,12870,
+%U A379822 11441,8024,4488,2380,2380,4488,8024,11441,48620,43759,31842,18717,9384,6120,9384,18717,31842,43759
+%N A379822 Triangle read by rows: T(n, k) is the number of walks of length n on the Z X Z grid with unit steps in all four directions (NSWE) starting at (0, 0), and ending on the vertical line x = 0 if k = 0, or on the line x = k or x = -(n + 1 - k) if k > 0.
+%H A379822 Paolo Xausa, <a href="/A379822/b379822.txt">Table of n, a(n) for n = 0..11475</a> (rows 0..150 of triangle, flattened).
+%H A379822 Alin Bostan, <a href="https://www-apr.lip6.fr/sem-comb-slides/IHP-bostan.pdf">Computer Algebra for Lattice Path Combinatorics</a>, Séminaire de Combinatoire Philippe Flajolet, Institut Henri Poincaré, March 28, 2013.
+%H A379822 Alin Bostan and Manuel Kauers, <a href="https://arxiv.org/abs/0811.2899">Automatic Classification of Restricted Lattice Walks</a>, arXiv:0811.2899 [math.CO], 2008-2009; Discrete Mathematics & Theoretical Computer Science, DMTCS Proceedings vol. AK, (FPSAC 2009).
+%H A379822 R. K. Guy, <a href="http://www.cs.uwaterloo.ca/journals/JIS/VOL3/GUY/catwalks.html">Catwalks, sandsteps and Pascal pyramids</a>, J. Integer Sequences, Vol. 3 (2000), Article #00.1.6.
+%F A379822 T(n, k) = binomial(2*n, n - k) + binomial(2*n, k - 1).
+%F A379822 Sum_{k=1..n} T(n, k) = A068551(n).
+%e A379822   [0] [    1]
+%e A379822   [1] [    2,     2]
+%e A379822   [2] [    6,     5,     5]
+%e A379822   [3] [   20,    16,    12,    16]
+%e A379822   [4] [   70,    57,    36,    36,   57]
+%e A379822   [5] [  252,   211,   130,    90,  130,  211]
+%e A379822   [6] [  924,   793,   507,   286,  286,  507,  793]
+%e A379822   [7] [ 3432,  3004,  2016,  1092,  728, 1092, 2016,  3004]
+%e A379822   [8] [12870, 11441,  8024,  4488, 2380, 2380, 4488,  8024, 11441]
+%e A379822   [9] [48620, 43759, 31842, 18717, 9384, 6120, 9384, 18717, 31842, 43759]
+%e A379822 .
+%e A379822 For n = 3 we get the walks depending on the x-coordinate of the endpoint:
+%e A379822 W(x= 3) = {WWW},
+%e A379822 W(x= 2) = {NWW,WWN,WNW,SWW,WSW,WWS},
+%e A379822 W(x= 1) = {NNW,NWN,WNN,NSW,NWS,SWN,SNW,WWE,WEW,EWW,WNS,WSN,SWS,SSW,WSS},
+%e A379822 W(x= 0) = {NNN,NNS,NSN,NWE,NEW,SNN,EWN,WNE,WEN,ENW,SNS,SSN,SWE,SEW,WSE,WES,ESW,EWS,NSS,SSS},
+%e A379822 W(x=-1) = {NNE,ENN,NEN,NSE,NES,SNE,SEN,WEE,ENS,ESN,EWE,EEW,SSE,SES,ESS},
+%e A379822 W(x=-2) = {NEE,SEE,ENE,ESE,EEN,EES},
+%e A379822 W(x=-3) = {EEE}.
+%e A379822 T(3, 0) = card(W(x=0)) = 20, T(3, 1) = card(W(x=1)) + card(W(x=-3)) = 16,
+%e A379822 T(3, 2) = card(W(x=2)) + card(W(x=-2)) = 12, T(3, 3) = card(W(x=3)) + card(W(x=-1)) = 16.
+%p A379822 T := (n, k) -> binomial(2*n, n - k) + binomial(2*n, k - 1):
+%p A379822 seq(print(seq(T(n, k), k = 0..n)), n = 0..9);
+%t A379822 A379822[n_, k_] := Binomial[2*n, n - k] + Binomial[2*n, k - 1];
+%t A379822 Table[A379822[n, k], {n, 0, 10}, {k, 0, n}] (* _Paolo Xausa_, May 29 2025 *)
+%o A379822 (Python)
+%o A379822 from dataclasses import dataclass
+%o A379822 @dataclass
+%o A379822 class Walk:
+%o A379822     s: str = ""
+%o A379822     x: int = 0
+%o A379822     y: int = 0
+%o A379822 def Trow(n: int) -> list[int]:
+%o A379822     W = [Walk()]
+%o A379822     row = [0] * (n + 1)
+%o A379822     for w in W:
+%o A379822         if len(w.s) == n:
+%o A379822             row[w.x] += 1
+%o A379822         else:
+%o A379822             for s in "NSWE":
+%o A379822                 x = y = 0
+%o A379822                 match s:
+%o A379822                     case "W": x =  1
+%o A379822                     case "E": x = -1
+%o A379822                     case "N": y =  1
+%o A379822                     case "S": y = -1
+%o A379822                     case _  : pass
+%o A379822                 W.append(Walk(w.s + s, w.x + x, w.y + y))
+%o A379822     return row
+%o A379822 for n in range(10): print(Trow(n))
+%Y A379822 Related triangles: A052174 (first quadrant), A378067 (upper plane), this triangle (whole plane).
+%Y A379822 Cf. A000984 (column 0), A323229 (column 1 and main diagonal), A000302 (row sums), A068551 (row sum without column 0), A283799 (row minimum).
+%K A379822 nonn,tabl,walk
+%O A379822 0,2
+%A A379822 _Peter Luschny_, Jan 16 2025

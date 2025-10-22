@@ -1,0 +1,57 @@
+%I A382045 #18 Apr 01 2025 19:58:03
+%S A382045 1,0,3,0,6,12,0,10,28,38,0,15,66,102,117,0,21,126,249,309,330,0,28,
+%T A382045 236,562,788,878,906,0,36,396,1167,1845,2205,2331,2367,0,45,651,2292,
+%U A382045 4128,5289,5814,5982,6027,0,55,1001,4272,8703,12106,13881,14602,14818,14873,0,66,1512,7608,17634,26616,32088,34608,35556,35826,35892
+%N A382045 Triangle read by rows: T(n,k) is the number of partitions of a 3-colored set of n objects into at most k parts with 0 <= k <= n.
+%C A382045 The 1-color case is Euler's table A026820.
+%C A382045 The 2-color case is A381891.
+%H A382045 Alois P. Heinz, <a href="/A382045/b382045.txt">Rows n = 0..150, flattened</a>
+%F A382045 T(n,1) = binomial(n + 2, 2) = A000217(n + 1) for n >= 1.
+%e A382045 Triangle starts:
+%e A382045  0 : [1]
+%e A382045  1 : [0,  3]
+%e A382045  2 : [0,  6,   12]
+%e A382045  3 : [0, 10,   28,   38]
+%e A382045  4 : [0, 15,   66,  102,   117]
+%e A382045  5 : [0, 21,  126,  249,   309,   330]
+%e A382045  6 : [0, 28,  236,  562,   788,   878,   906]
+%e A382045  7 : [0, 36,  396, 1167,  1845,  2205,  2331,  2367]
+%e A382045  8 : [0, 45,  651, 2292,  4128,  5289,  5814,  5982,  6027]
+%e A382045  9 : [0, 55, 1001, 4272,  8703, 12106, 13881, 14602, 14818, 14873]
+%e A382045 10 : [0, 66, 1512, 7608, 17634, 26616, 32088, 34608, 35556, 35826, 35892]
+%e A382045 ...
+%p A382045 b:= proc(n, i) option remember; expand(`if`(n=0, 1, `if`(i<1, 0, add(
+%p A382045       b(n-i*j, min(n-i*j, i-1))*binomial(i*(i+3)/2+j, j)*x^j, j=0..n/i))))
+%p A382045     end:
+%p A382045 T:= proc(n, k) option remember;
+%p A382045      `if`(k<0, 0, T(n, k-1)+coeff(b(n$2), x, k))
+%p A382045     end:
+%p A382045 seq(seq(T(n, k), k=0..n), n=0..10);  # _Alois P. Heinz_, Mar 13 2025
+%t A382045 b[n_, i_] := b[n, i] = Expand[If[n == 0, 1, If[i < 1, 0, Sum[b[n - i*j, Min[n - i*j, i - 1]]*Binomial[i*(i + 3)/2 + j, j]*x^j, {j, 0, n/i}]]]];
+%t A382045 T[n_, k_] := T[n, k] = If[k < 0, 0, T[n, k-1] + Coefficient[b[n, n], x, k]];
+%t A382045 Table[Table[T[n, k], {k, 0, n}], {n, 0, 10}] // Flatten (* _Jean-François Alcover_, Mar 21 2025, after _Alois P. Heinz_ *)
+%o A382045 (Python)
+%o A382045 from sympy import binomial
+%o A382045 from sympy.utilities.iterables import partitions
+%o A382045 from sympy.combinatorics.partitions import IntegerPartition
+%o A382045 colors = 3 - 1   # the number of colors - 1
+%o A382045 def t_row( n):
+%o A382045     if n == 0 : return [1]
+%o A382045     t = list( [0] * n)
+%o A382045     for p in partitions( n):
+%o A382045         p = IntegerPartition( p).as_dict()
+%o A382045         fact = 1
+%o A382045         s = 0
+%o A382045         for k in p :
+%o A382045             s += p[k]
+%o A382045             fact *= binomial( binomial( k + colors, colors) + p[k] - 1, p[k])
+%o A382045         if s > 0 :
+%o A382045             t[s - 1] += fact
+%o A382045     for i in range( n - 1):
+%o A382045         t[i+1] += t[i]
+%o A382045     return [0] + t
+%Y A382045 Main diagonal gives A217093.
+%Y A382045 Cf. A026820, A381891, A000217.
+%K A382045 nonn,tabl
+%O A382045 0,3
+%A A382045 _Peter Dolland_, Mar 13 2025

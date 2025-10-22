@@ -1,0 +1,51 @@
+%I A385170 #35 Jul 02 2025 17:33:02
+%S A385170 1,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4,4,4,4,
+%T A385170 4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,
+%U A385170 4,4,4,4,4,4,4,4,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5
+%N A385170 a(n) is the integer part of the reciprocal of the distance of x_n from its nearest integer, where x_n is the n-th extrema of gamma(x).
+%C A385170 For n>=1, the nearest integer is -n and x_n drifts slowly towards it so that a(n) is a slowly increasing function of n.
+%C A385170 a(n) = k occurs for the first time at n = A374856(k).
+%C A385170 a(n) approximately equals floor(Pi/arctan(Pi/log(n))).
+%C A385170 The corresponding gamma function value y_n = gamma(x_n) decreases in absolute value and A377506 captures its reciprocal (with a round).
+%H A385170 Jwalin Bhatt, <a href="/A385170/b385170.txt">Table of n, a(n) for n = 0..10000</a>
+%H A385170 Wikipedia, <a href="https://en.wikipedia.org/wiki/Gamma_function#Minima_and_maxima">Gamma Extrema</a>
+%H A385170 Wikipedia, <a href="https://en.wikipedia.org/wiki/Digamma_function#Roots_of_the_digamma_function">Digamma Roots</a>
+%e A385170 For n=10, x_10 = -9.702672... (A256687) and its nearest integer is -10 which is distance d = -9.702672... - (-10) = 0.297... away and a(n) = floor(1/d) = 3.
+%t A385170 a[n_] := Module[
+%t A385170 {bounds, gammaExtrema, fractionalPart, intReci},
+%t A385170 bounds = {-n - 1 + 1/(n + 3), -n - 0.5};
+%t A385170 gammaExtrema = x /. FindRoot[PolyGamma[0, x + 1] == 0, {x, Sequence @@ bounds}];
+%t A385170 gammaExtrema = -Abs[gammaExtrema];
+%t A385170 fractionalPart = Mod[gammaExtrema, 1];
+%t A385170 Floor[1 / fractionalPart]
+%t A385170 ]
+%o A385170 (Python)
+%o A385170 from gmpy2 import mpq, get_context, digamma, sign, is_nan, RoundUp, RoundDown
+%o A385170 def apply_on_interval(func, interval):
+%o A385170     ctx.round = RoundUp
+%o A385170     rounded_up = func(interval[0])
+%o A385170     ctx.round = RoundDown
+%o A385170     rounded_down = func(interval[1])
+%o A385170     return rounded_down, rounded_up
+%o A385170 def digamma_sign_near_int(i, f):
+%o A385170     while True:
+%o A385170         d, u = apply_on_interval(lambda x: digamma(i + 1/x), [f, f])
+%o A385170         sign_d = sign(d)
+%o A385170         if not(is_nan(d)) and not(is_nan(u)) and (sign_d == sign(u)):
+%o A385170             return sign_d
+%o A385170         ctx.precision += 1
+%o A385170 def generate_sequence(n):
+%o A385170     i, f, seq = -1, mpq('2'), [1]
+%o A385170     while len(seq) < n:
+%o A385170         if digamma_sign_near_int(i, f) != -1:
+%o A385170             f += 1
+%o A385170         seq.append(int(f)-1)
+%o A385170         i -= 1
+%o A385170     return seq
+%o A385170 ctx = get_context()
+%o A385170 ctx.precision = 2
+%o A385170 A385170 = generate_sequence(101)
+%Y A385170 Cf. A256687, A374856, A377506.
+%K A385170 nonn
+%O A385170 0,2
+%A A385170 _Jwalin Bhatt_, Jun 20 2025

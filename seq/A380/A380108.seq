@@ -1,0 +1,43 @@
+%I A380108 #32 Feb 02 2025 08:48:53
+%S A380108 1,2,3,6,10,18,29,48,75,118,179,272,403,596,865,1252,1786,2538,3566,
+%T A380108 4990,6918,9552,13086,17856,24205,32684,43881,58698,78125,103618,
+%U A380108 136820,180064,236031,308432,401585,521340,674579,870446,1119786,1436798,1838405,2346480,2987204
+%N A380108 Number of distinct partitions of length n binary strings into maximal constant substrings up to permutation.
+%C A380108 Equivalently, a(n) is the number of partitions of n into parts of two kinds where the number of parts of each kind differ by at most one.
+%H A380108 Alois P. Heinz, <a href="/A380108/b380108.txt">Table of n, a(n) for n = 0..1000</a>
+%F A380108 G.f.: Sum_{k>=0} ([y^k] P(x,y))*([y^k] (1 + 2*y)*P(x,y)), where P(x,y) = Product_{k>=1} 1/(1 - y*x^k). - _Andrew Howroyd_, Jan 12 2025
+%e A380108 For n = 3, the partitions are (000), (111), (00, 1), (0, 11), (0, 0, 1), (0, 1, 1).
+%p A380108 g:= (n, i, t)-> `if`(t>1+n, 0, `if`(n=0, 1, b(n, i, t))):
+%p A380108 b:= proc(n, i, t) option remember; add(add(g(n-i*j,
+%p A380108       min(n-i*j, i-1), abs(t+2*h-j)), h=0..j), j=`if`(i=1, n, 0..n/i))
+%p A380108     end:
+%p A380108 a:= n-> g(n$2, 0):
+%p A380108 seq(a(n), n=0..42);  # _Alois P. Heinz_, Jan 15 2025
+%t A380108 g[n_, i_, t_] := If[t > 1+n, 0, If[n == 0, 1, b[n, i, t]]];
+%t A380108 b[n_, i_, t_] := b[n, i, t] = Sum[Sum[g[n-i*j,
+%t A380108    Min[n-i*j, i-1], Abs[t+2*h-j]], {h, 0, j}], {j, If[i == 1, n, 0], n/i}];
+%t A380108 a[n_] := g[n, n, 0];
+%t A380108 Table[a[n], {n, 0, 42}] (* _Jean-François Alcover_, Feb 02 2025, after _Alois P. Heinz_ *)
+%o A380108 (Python)
+%o A380108 n = 0
+%o A380108 while True:
+%o A380108     m = set()
+%o A380108     for i in range(2**n):
+%o A380108         t = bin(i)[2:]
+%o A380108         t = '0' * (n - len(t)) + t + '2'
+%o A380108         l = []
+%o A380108         s = 0
+%o A380108         for j in range(1, n + 1):
+%o A380108             if t[j] != t[j - 1]:
+%o A380108                 l.append(t[s:j])
+%o A380108                 s = j
+%o A380108         l.sort()
+%o A380108         l = tuple(l)
+%o A380108         m.add(l)
+%o A380108     print(len(m), end=' ')
+%o A380108     n += 1
+%o A380108 (PARI) seq(n)={my(p=1/prod(k=1, n, 1-y*x^k + O(x*x^n))); Vec(sum(k=0, n\2, polcoef(p, k, y)*(2*polcoef(p, k+1, y) + polcoef(p, k, y))))} \\ _Andrew Howroyd_, Jan 12 2025
+%Y A380108 Cf. A000712, A114921, A342528.
+%K A380108 nonn
+%O A380108 0,2
+%A A380108 _Yaroslav Deryavko_, Jan 12 2025

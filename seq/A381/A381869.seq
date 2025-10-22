@@ -1,0 +1,33 @@
+%I A381869 #26 May 11 2025 11:53:36
+%S A381869 13,11,7,7,13,17,7,17,37,3,7,41,7,7,11,11,11,11,11,13,11,13,11,7,7,17,
+%T A381869 7,43,41,3,3,13,11,7,13,19,7,11,11,29,7,43,3,7,11,13,23,29,3,7,7,11,
+%U A381869 11,11,19,13,5,5,13,37,17,3,3,7,17,17,3,11,19,13,3,7,23
+%N A381869 Smallest starting prime for which the sum of 2*n consecutive primes is 0 modulo 10, or -1 if no such prime exists.
+%H A381869 Robert Israel, <a href="/A381869/b381869.txt">Table of n, a(n) for n = 1..10000</a>
+%e A381869 a(1) = 13, because 13 and 17 are 2*1 = 2 consecutive primes such that 13 + 17 = 20 and 20 modulo 10 = 0, and no smaller prime has this property.
+%p A381869 P:= select(isprime,[2,seq(i,i=3..10^6,2)]):
+%p A381869 S:= ListTools:-PartialSums(P):
+%p A381869 f:= proc(n) local j,t;
+%p A381869   for j from 1 do
+%p A381869     if S[2*n+j] - S[j] mod 10 = 0 then return P[j+1] fi
+%p A381869   od
+%p A381869 end proc:
+%p A381869 map(f, [$1..100]); # _Robert Israel_, May 08 2025
+%t A381869 Do[i=1;Until[Mod[Total[Prime[Range[i,i+2*n-1]]],10]==0,i++];a[n]=Prime[i],{n,73}];Array[a,73] (* _James C. McMahon_, Mar 23 2025 *)
+%o A381869 (PARI) isok(p, n) = my(i=primepi(p), q=prime(2*n+i-1)); vecsum(apply(x->Mod(x,10), primes([p, q]))) == 0;
+%o A381869 a(n) = my(p=3); while (!isok(p, n), p=nextprime(p+1)); p; \\ _Michel Marcus_, Mar 09 2025
+%o A381869 (Python)
+%o A381869 from sympy import nextprime, prime, sieve
+%o A381869 def a(n):
+%o A381869     plst = list(sieve.primerange(3, prime(2*n+1)+1))
+%o A381869     s = sum(plst)
+%o A381869     while s%10:
+%o A381869         q = nextprime(plst[-1])
+%o A381869         s += (q-plst[0])
+%o A381869         plst = plst[1:] + [q]
+%o A381869     return plst[0]
+%o A381869 print([a(n) for n in range(1, 74)]) # _Michael S. Branicky_, Mar 09 2025
+%Y A381869 Cf. A007652, A111324.
+%K A381869 nonn
+%O A381869 1,1
+%A A381869 _Jean-Marc Rebert_, Mar 09 2025

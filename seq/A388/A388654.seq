@@ -1,0 +1,62 @@
+%I A388654 #42 Sep 25 2025 04:49:06
+%S A388654 4,8,9,16,18,24,25,27,32,36,48,49,50,54,64,72,75,81,98,100,108,120,
+%T A388654 121,125,128,144,147,150,162,168,169,196,200,216,225,242,243,245,250,
+%U A388654 256,288,289,294,300,324,338,343,360,361,363,375,392,400,432,441,450,484,486,490,500
+%N A388654 Elements of an interval of natural numbers whose product is divisible by the square of the largest prime factor.
+%C A388654 Contains A070003 as a subsequence (because single-element intervals are permitted); the two sequences are conjectured by Erdős and Graham to have the same asymptotic growth (Erdős problem #380). The complement of that subsequence in this sequence is A387054.
+%C A388654 Intervals with this property were called "bad" by Erdős and Graham. Using Bertrand's postulate, one can show that a bad interval [N, N+H] must obey H <= N.
+%H A388654 Pontus von Brömssen, <a href="/A388654/b388654.txt">Table of n, a(n) for n = 1..10000</a>
+%H A388654 Thomas Bloom, <a href="https://www.erdosproblems.com/380">Problem 380</a>, Erdős Problems.
+%H A388654 P. Erdős and R. L. Graham, <a href="https://old.renyi.hu/~p_erdos/1976-25.pdf">On products of factorials</a>, Bull. Inst. Math. Acad. Sinica 4 (1976), pp. 337-355.
+%H A388654 P. Erdős and R. L. Graham, <a href="https://fanchung.ucsd.edu/ron/papers/80_11_number_theory.pdf">Old and new problems and results in combinatorial number theory</a>, Monographies de L'Enseignement Mathématique (1980).
+%H A388654 Peter Luschny, <a href="https://oeis.org/A389100/a389100.txt">Python implementation</a>.
+%e A388654 24 and 25 are in the sequence, because the interval [24, 25] is bad: 24*25 is divisible by the square of the largest prime factor, which in this case is 5.
+%e A388654 27 is in the sequence because the singleton interval [27,27] is bad: 27 is divisible by the square of the largest prime factor 3.
+%t A388654 nn = 500; s = Array[FactorInteger[#][[-1, 1]] &, nn + Floor@ Log2[nn]]; k = 1; Rest@ Union@ Flatten@ Reap[While[Set[t, Select[Partition[Range[nn], k, 1], Divisible[#2, Max[s[[#1 ;; #1 + k - 1] ]]^2] & @@ {First[#], Times @@ #} &]]; Length[t] > 0, Sow[t] k++]][[-1, 1]] (* _Michael De Vlieger_, Sep 22 2025 *)
+%o A388654 (Python)
+%o A388654 from collections import defaultdict
+%o A388654 def spf_sieve(n):
+%o A388654     spf = list(range(n+1))
+%o A388654     for i in range(2, int(n**0.5)+1):
+%o A388654         if spf[i] == i:  # prime
+%o A388654             step = i
+%o A388654             start = i*i
+%o A388654             for j in range(start, n+1, step):
+%o A388654                 if spf[j] == j:
+%o A388654                     spf[j] = i
+%o A388654     return spf
+%o A388654 def factorize(x, spf):
+%o A388654     fac = defaultdict(int)
+%o A388654     while x > 1:
+%o A388654         p = spf[x]
+%o A388654         fac[p] += 1
+%o A388654         x //= p
+%o A388654     return fac
+%o A388654 def bad_numbers_and_intervals(limit):
+%o A388654     """Return (bad_numbers_sorted, bad_intervals, spf) up to `limit`."""
+%o A388654     spf = spf_sieve(2*limit)
+%o A388654     bad_nums = set()
+%o A388654     bad_intervals = []
+%o A388654     for N in range(1, limit+1):
+%o A388654         counts = defaultdict(int)
+%o A388654         maxp = 0
+%o A388654         for H in range(0, N+1):
+%o A388654             k = N + H
+%o A388654             if k > 1:
+%o A388654                 for p, e in factorize(k, spf).items():
+%o A388654                     counts[p] += e
+%o A388654                     if p > maxp:
+%o A388654                         maxp = p
+%o A388654             is_bad = (maxp > 0 and counts[maxp] >= 2)
+%o A388654             if is_bad:
+%o A388654                 for m in range(N, N+H+1):
+%o A388654                     if m <= limit:
+%o A388654                         bad_nums.add(m)
+%o A388654                 bad_intervals.append((N, N+H))
+%o A388654     return sorted(bad_nums), bad_intervals, spf
+%Y A388654 Disjoint union of A070003 and A387054.
+%Y A388654 Cf. A388850 (initial term of first bad interval of width n).
+%Y A388654 Cf. A389100 (terms of non-singleton intervals).
+%K A388654 nonn
+%O A388654 1,1
+%A A388654 _Terence Tao_, Sep 19 2025

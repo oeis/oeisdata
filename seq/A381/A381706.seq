@@ -1,0 +1,70 @@
+%I A381706 #65 Mar 15 2025 10:22:51
+%S A381706 1,1,1,1,1,1,1,1,1,4,1,1,4,1,1,1,1,1,1,5,5,1,1,11,11,1,1,11,11,1,1,1,
+%T A381706 1,1,1,1,6,6,6,1,1,16,26,16,1,1,26,66,26,1,1,26,66,26,1,1,1,1,1,1,1,1,
+%U A381706 7,7,7,7,1,1,22,37,37,22,1,1,42,137,137,42,1
+%N A381706 Three-dimensional array of the number b(n, k, i) of permutations of k chosen numbers in {1,2,...,n} with i-1 descents, n >= 1, 1 <= k <= n, 1 <= i <= n.
+%C A381706 For n >= 1, 0 <= k <= n-2, and 0 <= i <= n-1, b(n+1, k+1, i+1) is the (2i)th Betti number of the prepermutohedral variety X_k obtained by k iterated blowups of projective space P^n.
+%H A381706 Timothy Y. Chow, <a href="/A381706/b381706.txt">Table of n, a(n) for n = 1..385</a>
+%H A381706 Timothy Chow et al., <a href="https://mathoverflow.net/q/489302">A new generalization of Eulerian numbers</a>, MathOverflow, 2025.
+%H A381706 J.-L. Lin, <a href="https://doi.org/10.37236/11680">The geometry and combinatorics of some Hessenberg varieties related to the permutohedral variety</a>, The Electronic Journal of Combinatorics, Volume 31, Issue 3 (2024), Research Paper #P3.17.
+%F A381706 Explicit formula for b(n, k, i) is given in MO link and PARI code below. - _Max Alekseyev_, Mar 14 2025
+%F A381706 The recurrence b(n,k,i) = b(n,k-1,i) + (n choose k) Sum_{i=d-n+k}^{d-1} b(k-1,k-2,j) was conjectured by Ron Fertig and proved by Alex R. Miller.
+%F A381706 b(n, n, k) equals the Eulerian number T(n, k) of A008292.
+%F A381706 If n > 1 then b(n, n-1, k) also equals the Eulerian number T(n, k) of A008292.
+%F A381706 Sum_{i} b(n, k, i) equals the falling factorial A068424.
+%F A381706 Empirically, Sum_{k} b(n, k, i) seems to equal A381888.
+%e A381706 For n = 4 and k = 2, there are 12 permutations of 2 chosen numbers in {1,2,3,4}; the number of descents is defined to be the number of descents in the permutation of the chosen numbers, plus the number of non-chosen numbers greater than the first chosen number. For example, 32 has 2 descents because 3 is greater than 2 and 4 (a non-chosen number) is greater than 3. The four other permutations of 2 chosen numbers with 2 descents are 31, 12, 13, 14.
+%e A381706 The sequence is most naturally viewed as a sequence of squares of size 1x1, 2x2, 3x3, 4x4, etc.
+%e A381706   1               [E(1)]
+%e A381706   1  1
+%e A381706   1  1            [E(2)]
+%e A381706   1  1  1
+%e A381706   1  4  1
+%e A381706   1  4  1         [E(3)]
+%e A381706   1  1  1  1
+%e A381706   1  5  5  1
+%e A381706   1 11 11  1
+%e A381706   1 11 11  1      [E(4)]
+%e A381706   1  1  1  1  1
+%e A381706   1  6  6  6  1
+%e A381706   1 16 26 16  1
+%e A381706   1 26 66 26  1
+%e A381706   1 26 66 26  1   [E(5)]
+%e A381706   ...
+%e A381706 [E(n)] refers to row n of A008292.
+%p A381706 beta := proc(n, k)
+%p A381706    local b, p, plist, descents, s, i, r, R:
+%p A381706    r := 1..n; R := {`$`(r)};
+%p A381706    b := Array(r, fill=0);
+%p A381706    plist := combinat:-permute(n, k):
+%p A381706    for p in plist do
+%p A381706       descents := 1:
+%p A381706       s := R minus {op(p)}:
+%p A381706       for i in s do
+%p A381706          if i > p[1] then descents := descents + 1 end if:
+%p A381706       end do:
+%p A381706       for i to k-1 do
+%p A381706          if p[i] > p[i+1] then descents := descents + 1 end if:
+%p A381706       end do:
+%p A381706       b[descents] := b[descents] + 1:
+%p A381706    end do:
+%p A381706    return b
+%p A381706 end proc:
+%p A381706 for n from 1 to 5 do seq(beta(n, k), k = 1..n) end do;
+%p A381706 # After _Max Alekseyev_'s PARI program:
+%p A381706 b := (n, k, i) -> local p, t, j; add(add(binomial(n - p, t) * binomial(p - 1, n - k - t) * add(binomial(k, j)*(-1)^j*(i - t - j)^(n - t - p) * (i - 1 - t - j)^(k - n - 1 + t + p), j = 0..i-1-t), t = n+1-k-p..i-1), p = 1..n): seq(seq(seq(b(n, k, j), j = 1..n), k = 1..n), n = 1..6);  # _Peter Luschny_, Mar 15 2025
+%o A381706 (SageMath)
+%o A381706 def beta(n: int, k: int) -> list[int]:
+%o A381706     b = [0]*n
+%o A381706     for p in Permutations(n, k):
+%o A381706         descents = sum(int(not i in p and i > p[0]) for i in (1..n))
+%o A381706         descents += sum(int(p[i-1] > p[i]) for i in (1..k-1))
+%o A381706         b[descents] += 1
+%o A381706     return b
+%o A381706 def Trow(n) -> list[int]: return flatten([beta(n, k) for k in (1..n)])
+%o A381706 for n in (1..6): print(f"{n}: ", Trow(n))  # _Peter Luschny_, Mar 11 2025
+%o A381706 (PARI) { b(n,k,i) = sum(p=1, n, sum(t=n+1-k-p,i-1, my(l=n+1-t-p); binomial(n-p,t) * binomial(p-1,n-k-t) * sum(j=0,i-1-t, binomial(k,j) * (-1)^j * (i-t-j)^(l-1) * (i-1-t-j)^(k-l) )) ); } \\ _Max Alekseyev_, Mar 14 2025
+%Y A381706 Cf. A008292, A068424, A091044, A381888.
+%K A381706 nonn,tabf
+%O A381706 1,10
+%A A381706 _Timothy Y. Chow_, Mar 04 2025

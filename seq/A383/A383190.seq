@@ -1,0 +1,76 @@
+%I A383190 #20 Apr 23 2025 10:35:15
+%S A383190 0,1,3,4,5,6,7,22,2,11,8,9,10,27,14,13,18,17,15,16,19,20,21,44,23,46,
+%T A383190 12,29,24,25,33,34,39,40,45,76,28,53,32,31,38,37,26,51,35,36,41,42,43,
+%U A383190 74,47,78,52,85,60,59,68,67,61,62,69,70,75,114,77,116,30,55,48,49,54,87,58,57,66,65
+%N A383190 a(2n) and a(2n+1) are the square spiral numbers of the position on which the (n+1)th domino is placed, when tiling the plane by placing the dominos always as near as possible to the origin and so that no two dominos share a long side. Inverse permutation of A383191.
+%C A383190 "As near as possible to the origin" means that one end of the domino is placed on the free grid point nearest to the origin for the Euclidean distance, and in case of a tie, earliest counter-clockwise, starting to the right. (I.e., on the complex plane, the lexico-earliest (|z|, arg z) with 0 <= arg z < tau = 6.283185...) The other end of the domino will be placed on a free grid point to the north, south, east or west of the first end, also nearest possible to the origin, but so that the domino is not side-by-side sharing a long side with another domino. Each domino is represented by two consecutive integers (2n, 2n+1): (0, 1), (2, 3), etc.
+%C A383190 The sequence is obtained by listing the "square spiral number" (cf. A316328) corresponding to the position of the number n (i.e., the first half of the (n/2+1)th domino for even n, and the second half of the (n+1)/2-th domino for odd n.
+%C A383190 This sequence is a permutation of the nonnegative integers.
+%C A383190 The inverse permutation A383191 is obtained by reading these integers along the plane filling square spiral, starting at the origin, then one step to the right, then one step up, etc.
+%H A383190 <a href="/index/Do#domino">OEIS Index of sequences related to dominoes</a>
+%e A383190 The first domino (0, 1) is placed on the origin and the square to its right.
+%e A383190 The second domino (2, 3) is placed above the origin (nearest free point coming first counter-clockwise), oriented to the left (since going to the right would make it side-by-side with the first domino, which is forbidden).
+%e A383190 Then the third domino (4, 5) is placed left to the origin, going downwards (using the free point closest to the origin).
+%e A383190 The fourth domino (6, 7) is placed below the origin, going downwards (since going to the right would make it parallel to the first domino).
+%e A383190 Then the free points nearest to the origin are to its lower right and to its upper right. The upper right is preferred since it comes first counter-clockwise (starting to the right). The domino (8, 9) is placed sidewards, again because the other end upwards) would come later in counter-clockwise sense.
+%e A383190 Then the domino (10, 11) is placed to the lower right, also sideways because vertically it would be side-by-side with (6, 7).
+%e A383190 The first 16 dominoes are placed as follows, where the numbers (2n-2, 2n-1) represent the two ends of the n-th domino, and t
+%e A383190 |
+%e A383190 |    19==18  14==15  26==27
+%e A383190 |
+%e A383190 |    17   3===2   8===9           The sequence is obtained by listing the square
+%e A383190 |    ||                           spiral number corresponding to the position of
+%e A383190 |    16   4   0===1  12==13       the numbers 0, 1, 2, 3...: 0 for 0, 1 for 1,
+%e A383190 |         ‖                       3 (square spiral number for position (x=0, y=1)
+%e A383190 |    20   5   6  10==11           where 2 is placed, 4 for the position of 3,
+%e A383190 |    ||       ‖                   5, 6, 7 for the position of 4, 5, 6; then
+%e A383190 |    21  22   7  24  28==29       22 for the position (x=0, y=-2) of 7, 2 for 8, ...
+%e A383190 |        ||      ||
+%e A383190 |        23      25
+%e A383190 |
+%e A383190 We see that all dominoes in the upper right half plane are placed horizontally, and in the lower left half they are placed vertically.
+%o A383190 (Python)
+%o A383190 class A383190: # use A383190(n) or a=A383190(); a[n]; print(a); for x in a: ...
+%o A383190     border, grid, terms = {0}, {}, []
+%o A383190     neighbors = (1, 1+1j, 1j, 1j-1, -1, -1-1j, -1j, 1-1j)
+%o A383190     def __str__(self): #"ASCII representation of (filled part of) the plane."
+%o A383190         X = sorted({z.real for z in self.grid}); L = len(str(len(self.terms)))+1
+%o A383190         return "\n".join("".join(f"{self.grid.get(x+y*1j,'')!s:{L}}" for x in X)
+%o A383190                          for y in sorted({z.imag for z in self.grid}, reverse=1))
+%o A383190     def __new__(cls, n: int | None = None) -> int | object:
+%o A383190         """Return a(n) or the sequence object if no n is given."""
+%o A383190         return super().__new__(cls) if n is None else super().__new__(cls)(n)
+%o A383190     def __call__(self, n: int | None = None) -> int | object:
+%o A383190         """Return a(n) or the sequence object if no n is given."""
+%o A383190         return self if n is None else self.extend(upto=n) or self.terms[n]
+%o A383190     def __getitem__(self, n: int | slice) -> int | list:
+%o A383190         return self(n) if isinstance(n, int) else [self(n) for n in
+%o A383190             range(*n.indices(max(len(self.terms), abs(n.stop or 0))))]
+%o A383190     def extend(self, upto=None):
+%o A383190         "Place new domino(s) on the grid, as 'close' as possible to the origin."
+%o A383190         while len(self.terms) <= (upto or (upto := len(self.terms))):
+%o A383190             self.fill(pos := min(self.border, key = self.distance))
+%o A383190             self.fill(self.second(pos))
+%o A383190     def distance(self, pos):
+%o A383190         "Return (abs(pos), arg(pos)), where 0 <= arg < τ = 2π."
+%o A383190         return abs(pos), atan2(pos.imag, pos.real) % tau
+%o A383190     def fill(self, pos):
+%o A383190         """Fill the next available number into grid[pos], increment, and
+%o A383190         update border = {free cells that are neighbor to a filled cell}."""
+%o A383190         self.grid[pos] = len(self.terms); self.border.remove(pos)
+%o A383190         self.border |= {pos+N for N in self.neighbors if pos+N not in self.grid}
+%o A383190         self.terms += [int(4*y**2-y-x if (y:=pos.imag)>=abs(x:=pos.real) else
+%o A383190          4*x**2-x-y if -x>=abs(y) else (4*y-3)*y+x if -y>=abs(x) else(4*x-3)*x+y)]
+%o A383190     def second(self,pos):
+%o A383190         """Find the second cell adjacent to 'pos' so that the domino is oriented
+%o A383190         according the rules (closest to origin but no domino side-by-side)."""
+%o A383190         return min((pos+dir for dir in(1, 1j, -1, -1j) if pos+dir not in self.grid
+%o A383190             and all(self.grid.get(p+dir, -1) != self.grid.get(p, -1) ^ 1
+%o A383190                     for p in (pos+1j*dir, pos-1j*dir) ) ), key = self.distance)
+%o A383190 from math import atan2, tau
+%o A383190 print(A383190()[:50])
+%o A383190 print(A383190()) # displays the grid filled so far
+%Y A383190 Cf. A383191 (inverse permutation), A316328 (knight tour with illustration of the square spiral), A174344 (square spiral, but clockwise).
+%K A383190 nonn
+%O A383190 0,3
+%A A383190 _M. F. Hasler_, Apr 18 2025

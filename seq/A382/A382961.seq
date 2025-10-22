@@ -1,0 +1,31 @@
+%I A382961 #32 Sep 01 2025 18:32:41
+%S A382961 1,1,2,1,1,3,1,1,2,1,1,1,1,2,1,1,4,1,1,2,1,1,1,3,1,1,2,1,1,1,2,1,1,1,
+%T A382961 5,1,1,2,1,1,1,2,1,1,3,1,1,2,1,1,1,1,2,1,1,1,3,1,2,1,1,1,1,2,1,1,4,1,
+%U A382961 1,2,1,1,1,3,1,1,2,1,1,1,2,1,1,1,2,1,1,1,3,1,1,2,1,1,1,6,1,1,2,1,1,1,2,1,1,1,3,1,2,1,1,1,4,1,1,2,1,1,1,2
+%N A382961 A sequence constructed by greedily sampling the logarithmic distribution for parameter value 1/2 so as to minimize discrepancy.
+%C A382961 The geometric mean approaches A381898 = exp(-PolyLog'(1,1/2)/log(2)) in the limit.
+%C A382961 The logarithmic distribution PDF is p(i) = 1/(log(2)*(2^i)*i).
+%H A382961 Jwalin Bhatt, <a href="/A382961/b382961.txt">Table of n, a(n) for n = 1..10000</a>
+%H A382961 Wikipedia, <a href="https://en.wikipedia.org/wiki/Logarithmic_distribution">Logarithmic distribution</a>
+%e A382961 Let p(k) denote the probability of k and c(k) denote the number of occurrences of k among the first n-1 terms; then the expected number of occurrences of k among n random terms is given by n*p(k).
+%e A382961 We subtract the actual occurrences c(k) from the expected occurrences and pick the one with the highest value.
+%e A382961 | n | n*p(1) - c(1) | n*p(2) - c(2) | n*p(3) - c(3) | choice |
+%e A382961 |---|---------------|---------------|---------------|--------|
+%e A382961 | 1 |     0.721     |       -       |       -       |   1    |
+%e A382961 | 2 |     0.442     |     0.360     |       -       |   1    |
+%e A382961 | 3 |     0.164     |     0.541     |       -       |   2    |
+%e A382961 | 4 |     0.885     |    -0.278     |     0.240     |   1    |
+%e A382961 | 5 |     0.606     |    -0.098     |     0.300     |   1    |
+%e A382961 | 6 |     0.328     |     0.082     |     0.360     |   3    |
+%t A382961 probCountDiff[j_, k_, count_] := k/(Log[2]*(2^j)*j) - Lookup[count, j, 0]
+%t A382961 samplePDF[n_] := Module[{coeffs, unreachedVal, counts, k, probCountDiffs, mostProbable},
+%t A382961   coeffs = ConstantArray[0, n]; unreachedVal = 1; counts = <||>;
+%t A382961   Do[probCountDiffs = Table[probCountDiff[i, k, counts], {i, 1, unreachedVal}];
+%t A382961     mostProbable = First@FirstPosition[probCountDiffs, Max[probCountDiffs]];
+%t A382961     If[mostProbable == unreachedVal, unreachedVal++]; coeffs[[k]] = mostProbable;
+%t A382961     counts[mostProbable] = Lookup[counts, mostProbable, 0] + 1; , {k, 1, n}]; coeffs]
+%t A382961 A382961 = samplePDF[120]
+%Y A382961 Cf. A381617, A381898, A381900, A383238.
+%K A382961 nonn
+%O A382961 1,3
+%A A382961 _Jwalin Bhatt_, Apr 10 2025

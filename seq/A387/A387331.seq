@@ -1,0 +1,46 @@
+%I A387331 #17 Sep 03 2025 18:46:34
+%S A387331 2,1,4,1,2,2,4,0,2,1,6,1,4,2,4,0,26,1,22,3,10,3,6,0,4,2,6,1,2,2,12,0,
+%T A387331 2,13,6,1,4,11,14,0,2,5,4,15,4,3,14,0,4,2,12,1,2,3,12,0,26,1,12,1,58,
+%U A387331 6,6,0,2,1,4,9,2,3,12,0,4,2,38,25,50,7,4,0,2
+%N A387331 Least k such that n*k + 1 is a prime > 2 with 2 as a primitive root; a(n) = 0 if no such k exists.
+%C A387331 If n is a multiple of 8 then a(n) = 0.
+%C A387331 Proof: If n = 8*m, then any prime p = n*k+1 satisfies p == 1 (mod 8). Thus 2 is a quadratic residue modulo p, so ord_p(2) | (p-1)/2 and cannot equal p-1.
+%C A387331 Computations show that for 1 <= n <= 2000 with 8 !| n, a(n) > 0. This agrees with Artin's conjecture: for each n with 8 !| n there should be infinitely many primes p == 1 (mod n) with 2 as a primitive root.
+%D A387331 E. Artin, Collected Papers, Addison-Wesley, 1965.
+%H A387331 Pablo Cadena-Urzua, <a href="/A387331/b387331.txt">Table of n, a(n) for n = 1..2000</a>
+%F A387331 a(n) = 0 if n == 0 (mod 8).
+%F A387331 Otherwise, a(n) = min { k >= 1 : p = n*k+1 is prime > 2 and ord_p(2) = p-1 }.
+%e A387331 a(1) = 2 since 1*2+1 = 3 is prime and 2 generates (Z/3Z)^*.
+%e A387331 a(2) = 1 since 2*1+1 = 3 is prime and 2 is a primitive root modulo 3.
+%e A387331 a(3) = 4 since 3*4+1 = 13 is prime and ord_13(2) = 12.
+%e A387331 a(8) = 0 because every 8*k+1 == 1 (mod 8).
+%p A387331 a := proc(n) local k, p;
+%p A387331   if n mod 8 = 0 then return 0 fi;
+%p A387331   for k from 1 do
+%p A387331     p := n*k+1;
+%p A387331     if isprime(p) and p>2 then
+%p A387331       if order(Mod(2, p)) = p-1 then return k fi;
+%p A387331     fi;
+%p A387331   od;
+%p A387331 end;
+%t A387331 a[n_] := If[Mod[n, 8]==0, 0, Module[{k=1, p, fac}, While[True,
+%t A387331   p=n*k+1;
+%t A387331   If[p>2 && PrimeQ[p], fac=FactorInteger[p-1][[All, 1]];
+%t A387331   If[And@@(PowerMod[2, (p-1)/#, p]!=1&/@fac), Return[k]]];
+%t A387331   k++]]]
+%o A387331 (Python)
+%o A387331 from sympy import isprime, factorint
+%o A387331 def is_primitive_root_base2(p):
+%o A387331     phi = p-1
+%o A387331     return all(pow(2, phi//q, p)!=1 for q in factorint(phi))
+%o A387331 def a(n, kmax=10**7):
+%o A387331     if n%8==0: return 0
+%o A387331     for k in range(1, kmax+1):
+%o A387331         p = n*k+1
+%o A387331         if p>2 and isprime(p) and is_primitive_root_base2(p):
+%o A387331             return k
+%o A387331     return 0
+%Y A387331 Cf. A001122, A005596.
+%K A387331 nonn
+%O A387331 1,1
+%A A387331 _Pablo Cadena-Urzúa_, Aug 26 2025
