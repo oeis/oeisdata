@@ -1,0 +1,35 @@
+%I A389881 #33 Oct 25 2025 21:11:42
+%S A389881 3,4,6,8,10,9,14,12,18,5,22,15,26,7,20,24,34,21,38,16,27,2,46,28,30,
+%T A389881 13,33,32,58,25,62,36,11,17,40,39,74,19,42,44,82,35,86,48,50,23,94,45,
+%U A389881 56,55,54,64,106,51,60,49,66,29,118,52,122,31,57,68,70,69,134
+%N A389881 a(1) = 3; thereafter, a(n) is the smallest number k that hasn't been used such that gcd(k, n) > gcd(k, a(n-1)), and k != n.
+%C A389881 Every natural number excluding 1 appears to be in this sequence.
+%C A389881 Starting this sequence with 1, 2, or any other even number immediately terminates the sequence, hence why 3 is the starting term.
+%C A389881 It has not been proven that this sequence is finite or infinite, but it can be finite if and only if a(n-1) = K*n, where K is a whole number > 1. If this happens, then a(n) cannot be any number, because the best you can do is gcd(a(n), n) = gcd(a(n), a(n-1)), but gcd(a(n), n) has to be greater, not equal.
+%C A389881 a(n) exists for n <= 10^6. - _Michael S. Branicky_, Oct 19 2025
+%C A389881 From _Michael De Vlieger_, Oct 20 2025: (Start)
+%C A389881 Apart from a(1) = 3 and a(33) = 11, primes seem confined to n == +-2 (mod 12), e.g., a(10) = 5, a(14) = 7, a(22) = 2, etc. Additionally, for prime p, a(n) = 2*p appears to be confined to n that is coprime to 12, apart from a(2) = 4 and a(3) = 6.
+%C A389881 Scatterplot shows that the sequence resolves into several major trajectories after about a hundred terms. Aside from some early primes appearing out of order, a prominent trajectory of primes p appears late, while a trajectory of 2*p appears early. Other composites appear in a central trajectory that features some detail "rays" that include a few (but not most) terms of the form m*p for m >= 4.
+%C A389881 Let j, k be adjacent terms. Oftentimes j and k are coprime, and a bit less often, j and k share a factor, but each has a factor that does not divide the other. Exceptions include (j,k) = (4,6), (12,18), (32,16), and generally, many (j,k) pairs where one is a proper prime power. (End)
+%H A389881 Michael De Vlieger, <a href="/A389881/b389881.txt">Table of n, a(n) for n = 1..10000</a>
+%H A389881 Michael De Vlieger, <a href="/A389881/a389881.png">Log log scatterplot of a(n)</a>, n = 1..2^16, showing primes in red, proper prime powers in gold, squarefree composites in green, and numbers neither squarefree nor prime powers in blue and magenta, where magenta signifies powerful numbers that are not prime powers.
+%H A389881 Michael De Vlieger, <a href="/A389881/a389881_1.png">Annotated plot of a(n) at (x,y) = (x mod(36), -floor(n/36))</a>, n = 1..1296, using same color function. Shows primes arranged such that n == +-2 (mod 12).
+%H A389881 Michael De Vlieger, <a href="/A389881/a389881_2.png">Plot a(n) at (x,y) = (x mod(144), -floor(n/144))</a>, n = 1..20736, using same color function. Shows primes arranged such that n == +-2 (mod 12).
+%e A389881 For n = 12, a(n) = 15 because the gcd(15, 12) = 3 which is greater than gcd(15, 22) = 1. There is no smaller number that satisfies this condition because 3, 4, 8 and 9 have already been used, and any other even number would have the gcd(2*k, 12) = gcd(2*k, 22).
+%t A389881 Block[{c, j, k, u}, c[_] := False; u = 2; j = 3; c[j] = True; {j}~Join~Reap[Do[k = u; While[Or[c[k], Nand[k != n, GCD[k, n] > GCD[j, k]]], k++]; Set[{c[k], j}, {True, Sow[k]}]; If[k == u, While[c[u], u++]], {n, 2, 120}] ][[-1, 1]], {n, k}] ] (* _Michael De Vlieger_, Oct 20 2025 *)
+%o A389881 (Python)
+%o A389881 from math import gcd
+%o A389881 from itertools import count, islice
+%o A389881 def agen(): # generator of terms
+%o A389881     an, aset, m = 3, {3}, 2
+%o A389881     for n in count(2):
+%o A389881         yield an
+%o A389881         an = next(k for k in count(m) if k != n and k not in aset and gcd(k, n) > gcd(k, an))
+%o A389881         while m in aset: m += 1
+%o A389881         aset.add(an)
+%o A389881 print(list(islice(agen(), 67))) # _Michael S. Branicky_, Oct 18 2025
+%o A389881 (PARI) seq(n)={my(a=vector(n), M=Map(), p=3); a[1]=p; for(n=2, #a, mapput(M,p,1); for(k=1, oo, if(k!=n && !mapisdefined(M,k) && gcd(k,n) > gcd(k,p), a[n]=k; p=k; break))); a} \\ _Andrew Howroyd_, Oct 18 2025
+%K A389881 nonn,new
+%O A389881 1,1
+%A A389881 _Rhys Feltman_, Oct 18 2025
+%E A389881 Terms corrected by _Michael S. Branicky_, Oct 18 2025
