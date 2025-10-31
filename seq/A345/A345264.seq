@@ -1,12 +1,30 @@
-%I A345264 #3 Jun 12 2021 14:13:15
+%I A345264 #13 Oct 31 2025 00:09:46
 %S A345264 1,3,4,4,6,12,8,4,6,18,12,16,14,24,24,4,18,18,20,24,32,36,24,16,10,42,
 %T A345264 6,32,30,72,32,4,48,54,48,24,38,60,56,24,42,96,44,48,36,72,48,16,14,
 %U A345264 30,72,56,54,18,72,32,80,90,60,96,62,96,48,4,84,144,68,72,96,144,72,24
 %N A345264 a(n) = Sum_{d|n} rad(d) * mu(n/d)^2.
 %C A345264 If p is prime, a(p) = Sum_{d|p} rad(d) * mu(p/d)^2 = 1*1 + p*1 = p + 1.
+%H A345264 Robert Israel, <a href="/A345264/b345264.txt">Table of n, a(n) for n = 1..10000</a>
+%F A345264 From _Amiram Eldar_, Oct 30 2025: (Start)
+%F A345264 Multiplicative with a(p) = p + 1, and a(p^e) = 2*p for e >= 2.
+%F A345264 Dirichlet g.f.: (zeta(s)^2/zeta(2*s)) * Product_{p prime} (1 + 1/p^(s-1) - 1/p^s).
+%F A345264 Sum_{k=1..n} a(k) ~ c * n^2 / 2, where c = zeta(2) * Product_{p prime} (1 - 1/p^2 + 1/p^3 - 2/p^4 + 1/p^5) = 1.07062376419273610054... . (End)
 %e A345264 a(8) = Sum_{d|8} rad(d) * mu(8/d)^2 = 1*0 + 2*0 + 2*1 + 2*1 = 4.
+%p A345264 f:= proc(n) local F,F1,F2,w,t,S,J,J1,i;
+%p A345264   F:= ifactors(n)[2]; w:= nops(F);
+%p A345264   F1:= F[..,1]; F2:= F[..,2]; J1:= select(i -> F2[i]>1, {$1..w});
+%p A345264   t:= 0;
+%p A345264   for S in combinat:-powerset({$1..w}) do
+%p A345264     J:= S union J1;
+%p A345264     t:= t + mul(F1[i],i=J);
+%p A345264   od;
+%p A345264   t;
+%p A345264 end proc:
+%p A345264 map(f, [$1..100]); # _Robert Israel_, Oct 30 2025
 %t A345264 Table[Sum[(1 - Ceiling[n/i] + Floor[n/i]) MoebiusMu[n/i]^2 Product[k^((PrimePi[k] - PrimePi[k - 1]) (1 - Ceiling[i/k] + Floor[i/k])), {k, i}], {i, n}], {n, 100}]
+%t A345264 f[p_, e_] := If[e == 1, p+1, 2*p]; a[1] = 1; a[n_] := Times @@ f @@@ FactorInteger[n]; Array[a, 100] (* _Amiram Eldar_, Oct 30 2025 *)
+%o A345264 (PARI) a(n) = {my(f = factor(n)); prod(i = 1, #f~, if(f[i,2] == 1, f[i,1]+1, 2*f[i,1]));} \\ _Amiram Eldar_, Oct 30 2025
 %Y A345264 Cf. A007947 (rad).
-%K A345264 nonn
+%K A345264 nonn,mult,easy,changed
 %O A345264 1,2
 %A A345264 _Wesley Ivan Hurt_, Jun 12 2021

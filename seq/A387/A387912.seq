@@ -1,0 +1,55 @@
+%I A387912 #37 Oct 30 2025 15:38:48
+%S A387912 1,1,2,2,1,8,18,10,5,1,26,120,142,117,42,14,1,80,720,1480,1789,1130,
+%T A387912 596,168,42,1,242,4122,13680,23205,20940,14817,6936,2781,660,132,1,
+%U A387912 728,23058,119042,276749,332830,296805,185306,97922,37796,12430,2574,429,1,2186,127440,1001022,3142289,4873500,5315887,4102472,2642389,1329328,577005,192478,54197,10010,1430
+%N A387912 Triangle read by rows: T(n,k) is the number of 3-dimensional balanced ballot paths of 3n steps such that the height is exactly k, 2 <= k <= 2*n.
+%C A387912 For point x (x_1,x_2,x_3) in the 3-dimensional lattice, we define the height of x as h_3(x) := 2x_1 - x_2 - x_3. The 3-dimensional balanced ballot path (multidimensional Dyck path), is a sequence of 3*n steps with initial point (0,0,0) and ending at (n,n,n) satisfying that each step is a standard unit vector and each point of the path satisfies x_1 >= x_2 >= x_3. T(n,k) is the number of 3-dimensional balanced ballot paths of 3*n steps such that the largest height reached by any point in the path is equal to k; i.e. for at least one intermediate point h(x) = k, but for no points h(x) > k.
+%H A387912 Sean A. Irvine, <a href="/A387912/b387912.txt">Table of n, a(n) for n = 1..10000</a> (rows 1..100 flattened)
+%e A387912 Triangle begins:
+%e A387912   1;
+%e A387912   1,   2,     2;
+%e A387912   1,   8,    18,     10,      5;
+%e A387912   1,  26,   120,    142,    117,     42,     14;
+%e A387912   1,  80,   720,   1480,   1789,   1130,    596,    168,    42;
+%e A387912   1, 242,  4122,  13680,  23205,  20940,   6936,   2781,   660,   132;
+%e A387912   1, 728, 23058, 119042, 276749, 332830, 296805, 185306, 97922, 37796, 12430, 2574, 429;
+%e A387912   ...
+%o A387912 (Python)
+%o A387912 from functools import lru_cache
+%o A387912 # change values for the endpoint t=(n,n,n) and the height bound bd=k
+%o A387912 t = (5, 5, 5)
+%o A387912 bd = 5
+%o A387912 def ht(t):
+%o A387912     """Height function h(x0, x1, x2) = 2*x0 - x1 - x2."""
+%o A387912     return 2 * t[0] - t[1] - t[2]
+%o A387912 @lru_cache(maxsize=None)
+%o A387912 def altern(x0, x1, x2, bd):
+%o A387912     """
+%o A387912     Number of 3D ballot paths from (0,0,0) to (x0,x1,x2)
+%o A387912     with the constraints:
+%o A387912       - x0 >= x1 >= x2 at all times (ballot condition)
+%o A387912       - height <= bd when stepping in x1 or x2
+%o A387912     """
+%o A387912     if (x0, x1, x2) == (0, 0, 0):
+%o A387912         return 1
+%o A387912     count = 0
+%o A387912     if x0 > 0 and x0 - 1 >= x1:
+%o A387912         count += altern(x0 - 1, x1, x2, bd)
+%o A387912     if x1 > 0 and x1 - 1 >= x2 and ht((x0, x1 - 1, x2)) <= bd:
+%o A387912         count += altern(x0, x1 - 1, x2, bd)
+%o A387912     # step along x2 (height cap)
+%o A387912     if x2 > 0 and ht((x0, x1, x2 - 1)) <= bd:
+%o A387912         count += altern(x0, x1, x2 - 1, bd)
+%o A387912     return count
+%o A387912 @lru_cache(maxsize=None)
+%o A387912 def exact_height(x0, x1, x2, bd):
+%o A387912     if bd < 0:
+%o A387912         return 0
+%o A387912     return altern(x0, x1, x2, bd) - altern(x0, x1, x2, bd - 1)
+%o A387912 print(exact_height(*t, bd))
+%Y A387912 Row sums are A005789.
+%Y A387912 Rightmost terms are A000108 (final term), A024483 (penultimate term).
+%Y A387912 Columns k=2..3 are A000012, A024023.
+%K A387912 nonn,tabf,new
+%O A387912 1,3
+%A A387912 _Dimana Pramatarova_ and _Ryota Inagaki_, Oct 11 2025

@@ -1,16 +1,28 @@
-%I A345261 #10 May 15 2025 19:15:04
+%I A345261 #27 Oct 30 2025 19:41:10
 %S A345261 1,5,10,13,26,50,50,29,37,130,122,130,170,250,260,61,290,185,362,338,
 %T A345261 500,610,530,290,151,850,118,650,842,1300,962,125,1220,1450,1300,481,
 %U A345261 1370,1810,1700,754,1682,2500,1850,1586,962,2650,2210,610,393,755,2900,2210,2810,590
 %N A345261 a(n) = Sum_{d|n} d * rad(d).
 %C A345261 If p is prime, a(p) = Sum_{p|d} d * rad(d) = 1*1 + p*p = p^2 + 1.
 %C A345261 Inverse Möbius transform of n * rad(n). - _Wesley Ivan Hurt_, Mar 31 2025
+%H A345261 Robert Israel, <a href="/A345261/b345261.txt">Table of n, a(n) for n = 1..10000</a>
 %F A345261 a(prime(n)) = A066872(n). - _Michel Marcus_, Jun 12 2021
+%F A345261 From _Amiram Eldar_, Oct 30 2025: (Start)
+%F A345261 Multiplicative with a(p^e) = (p^(e+2) - 1)/(p - 1) - p.
+%F A345261 Dirichlet g.f.: zeta(s) * zeta(s-1) * Product_{p prime} (1 + 1/p^(s-2) - 1/p^(s-1)).
+%F A345261 Sum_{k=1..n} a(k) ~ c * n^3 / 3, where c = zeta(2) * zeta(3) * Product_{p prime} (1 - 2/p^2 + 1/p^3) = A013661 * A002117 * A065464 = 0.84677961058798544766... . (End)
 %e A345261 a(10) = Sum_{d|10} d * rad(d) = 1*1 + 2*2 + 5*5 + 10*10 = 1 + 4 + 25 + 100 = 130.
+%p A345261 f:= proc(n) local F,t;
+%p A345261   F:= ifactors(n)[2];
+%p A345261   mul(1 + t[1]^2*(t[1]^t[2]-1)/(t[1]-1), t = F)
+%p A345261 end proc:
+%p A345261 map(f, [$1..100]); # _Robert Israel_, Oct 30 2025
 %t A345261 Table[Sum[i (1 - Ceiling[n/i] + Floor[n/i]) Product[k^((PrimePi[k] - PrimePi[k - 1]) (1 - Ceiling[i/k] + Floor[i/k])), {k, i}], {i, n}], {n, 80}]
-%o A345261 (PARI) rad(n) = factorback(factorint(n)[, 1]);
-%o A345261 a(n) = sumdiv(n, d, d*rad(d)); \\ _Michel Marcus_, Jun 12 2021
+%t A345261 f[p_, e_] := (p^(e + 2) - 1)/(p - 1) - p; a[1] = 1; a[n_] := Times @@ f @@@ FactorInteger[n]; Array[a, 100] (* _Amiram Eldar_, Oct 30 2025 *)
+%o A345261 (PARI) a(n) = sumdiv(n, d, d*factorback(factorint(d)[, 1])); \\ _Michel Marcus_, Oct 30 2025
+%o A345261 (PARI) a(n) = {my(f = factor(n), p, e); prod(i = 1, #f~, p = f[i, 1]; e = f[i, 2]; (p^(e+2) - 1)/(p - 1) - p);} \\ _Amiram Eldar_, Oct 30 2025
 %Y A345261 Cf. A007947 (rad), A066872, A345263.
-%K A345261 nonn
+%Y A345261 Cf. A002117, A013661, A065464.
+%K A345261 nonn,mult,easy,changed
 %O A345261 1,2
 %A A345261 _Wesley Ivan Hurt_, Jun 12 2021
