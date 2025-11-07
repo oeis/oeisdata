@@ -1,4 +1,4 @@
-%I A251683 #50 Feb 16 2025 08:33:24
+%I A251683 #55 Nov 06 2025 11:40:37
 %S A251683 1,1,1,1,1,1,1,2,1,1,2,1,1,1,1,2,1,1,4,3,1,1,2,1,2,1,3,3,1,1,1,4,3,1,
 %T A251683 1,4,3,1,2,1,2,1,1,6,9,4,1,1,1,2,1,2,1,1,4,3,1,1,6,6,1,1,4,6,4,1,1,2,
 %U A251683 1,2,1,2,1,7,12,6,1,1,2,1,2,1,6,9,4
@@ -48,7 +48,7 @@
 %p A251683 b:= proc(n) option remember; expand(x*(1+
 %p A251683       add(b(n/d), d=divisors(n) minus {1, n})))
 %p A251683     end:
-%p A251683 T:= n-> (p-> seq(coeff(p, x, i), i=1..degree(p)))(b(n)):
+%p A251683 T:= n-> (p-> seq(coeff(p, x, i), i=1..degree(p)))(b(n)): A251683 := T;
 %p A251683 seq(T(n), n=1..100);  # _Alois P. Heinz_, Dec 07 2014
 %t A251683 f[1] = {{}};
 %t A251683 f[n_] := f[n] =
@@ -63,6 +63,20 @@
 %t A251683 b[n_] := b[n] = x(1+Sum[b[n/d], {d, Divisors[n]~Complement~{1, n}}]);
 %t A251683 T[n_] := CoefficientList[b[n]/x, x];
 %t A251683 Array[T, 100] // Flatten (* _Jean-François Alcover_, Nov 17 2020, after _Alois P. Heinz_ *)
+%o A251683 (Python)
+%o A251683 import sympy as sp
+%o A251683 x = sp.Symbol('x')
+%o A251683 b_cache : dict[int, sp.Poly] = {}
+%o A251683 def b(n: int) -> sp.Poly:
+%o A251683     if n in b_cache: return b_cache[n]
+%o A251683     divs = [d for d in sp.divisors(n) if d not in (1, n)]
+%o A251683     expr = x * (1 + sum(b(n // d) for d in divs))
+%o A251683     b_cache[n] = sp.expand(expr)
+%o A251683     return b_cache[n]
+%o A251683 def A251683_row(n: int) -> list[int]:
+%o A251683     poly = sp.Poly(b(n) / x, x)
+%o A251683     return poly.all_coeffs()[::-1]
+%o A251683 print(sp.flatten([A251683_row(n) for n in range(1, 41)]))  # _Peter Luschny_, Nov 06 2025
 %Y A251683 Cf. A008683, A070824, A200221, A254577.
 %Y A251683 A008480 gives rows ends.
 %Y A251683 A086436 gives row lengths.
@@ -80,6 +94,6 @@
 %Y A251683 A337071 counts strict chains of divisors starting with n!.
 %Y A251683 A337256 counts strict chains of divisors of n.
 %Y A251683 Cf. A001221, A002033, A124010, A167865, A337070, A337105.
-%K A251683 nonn,tabf
+%K A251683 nonn,tabf,changed
 %O A251683 1,8
 %A A251683 _Geoffrey Critzer_, Dec 06 2014

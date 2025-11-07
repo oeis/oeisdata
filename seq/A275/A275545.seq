@@ -1,7 +1,7 @@
-%I A275545 #39 Aug 01 2025 19:10:55
+%I A275545 #44 Nov 06 2025 20:18:50
 %S A275545 0,0,0,0,1,1,2,4,8,16,34,67,137,272,540,1061,2074,4022,7763,14914,
-%T A275545 28556,54499,103729,196945,373201,705964,1333413,2515298,4739834,
-%U A275545 8926089
+%T A275545 28556,54499,103729,196945,373201,705964,1333413,2515260,4739233,
+%U A275545 8920743,16777115,31528565,59210998,111133894,208481988,390926281,732738303,1372938692,2571695808
 %N A275545 Number of new duplicate terms at a given iteration of the Collatz (or 3x+1) map starting with 0.
 %C A275545 If one considers an algebraic approach to the Collatz conjecture, the tree of outcomes of the "Half Or Triple Plus One" process starting with a natural number n:
 %C A275545   i
@@ -21,6 +21,7 @@
 %C A275545 This sequence is composed of the number of new duplicates of possible constant terms at each iteration i. "New duplicates" refers to two identical constant terms appearing in the current iteration i, that have not appeared in any previous one j < i (because every duplicate in x_i yields two duplicates in x_(i+1), these are not counted).
 %C A275545 This sequence is related to A275544, if one sequence is known it is possible to work out the other (see formula).
 %C A275545 An empirical observation suggests that the same sequence of numbers arises if we analogously consider the 3n-1 problem (the Collatz conjecture can be referred to as the 3n+1 problem).
+%H A275545 Michael S. Branicky, <a href="/A275545/b275545.txt">Table of n, a(n) for n = 0..44</a>
 %H A275545 Wikipedia, <a href="https://en.wikipedia.org/wiki/Collatz_conjecture">Collatz conjecture</a>
 %F A275545 a(n) = 2*A275544(n-1) - A275544(n), for n>=1.
 %e A275545 a(3) = 0 since all the members of x_3 are distinct.
@@ -29,20 +30,22 @@
 %t A275545 Do[s = Join[3 s + 1, s/2]; Print[n]; b[n] = s // Union // Length, {n, 1, nmax}];
 %t A275545 a[n_] := If[n == 0, 0, 2 b[n - 1] - b[n]];
 %t A275545 a /@ Range[0, nmax] (* _Jean-François Alcover_, Nov 16 2019 *)
-%o A275545 (Python)
-%o A275545 x = [0]
-%o A275545 n = 20
-%o A275545 for i in range(n):
-%o A275545     x_tmp = []
-%o A275545     for s in x:
-%o A275545         x_tmp.append(3*s+1)
-%o A275545         x_tmp.append(s*0.5)
-%o A275545     x = x_tmp
-%o A275545     length_tmp = len(x)
-%o A275545     x = list(set(x))
-%o A275545     print(length_tmp-len(x))
 %o A275545 (PARI) first(n)=my(v=vector(n),u=[0],t); for(i=1,n, t=2*#u; u=Set(concat(vector(#u,j,3*u[j]+1),u/2)); v[i]=t-#u); concat(0, v) \\ _Charles R Greathouse IV_, Aug 05 2016
+%o A275545 (Python)
+%o A275545 from gmpy2 import mpq
+%o A275545 from itertools import count, islice
+%o A275545 def agen(): # generator of terms
+%o A275545     reach = {0}
+%o A275545     yield 0
+%o A275545     for n in count(1):
+%o A275545         shell = [3*q+1 for q in reach]
+%o A275545         shell += [q*mpq(1, 2) for q in reach]
+%o A275545         shell_set = set(shell)
+%o A275545         yield len(shell) - len(shell_set)
+%o A275545         reach |= shell_set
+%o A275545 print(list(islice(agen(), 20))) # _Michael S. Branicky_, Nov 06 2025
 %Y A275545 Cf. A275544.
-%K A275545 nonn,more
+%K A275545 nonn,changed
 %O A275545 0,7
 %A A275545 _Rok Cestnik_, Aug 01 2016
+%E A275545 a(27)-a(29) corrected and a(30) onward using b-file at A275544 by _Michael S. Branicky_, Nov 06 2025
