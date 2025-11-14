@@ -1,0 +1,36 @@
+%I A390211 #16 Nov 13 2025 20:12:29
+%S A390211 1,3,5,7,9,11,15,17,19,21,23,31,33,35,37,39,43,47,63,65,67,69,71,73,
+%T A390211 75,79,85,87,95,127,129,131,133,135,137,139,143,147,151,155,159,171,
+%U A390211 175,191,255,257,259,261,263,267,271,273,275,277,279,287,293,295
+%N A390211 Canonical coin systems; numbers k where the positions of 1-bits in the binary expansion of k give the coin denominations of a canonical coin system.
+%C A390211 A canonical coin system is a coin system for the change-making problem where the greedy solution always uses the optimal number of coins.
+%C A390211 You can confirm whether a coin system is canonical by checking whether the greedy algorithm is optimal for c_3 + 1 < t < c_{k-1} + c_k, where c is the list of coin denominations sorted in ascending order, and k is the number of coins.
+%C A390211 The positions of 1-bits in the binary expansion of a(n) represent the coin denominations of a canonical coin system; the least significant bit has value 1.
+%C A390211 a(n) must be odd, since canonical coin systems must include a coin of value 1.
+%C A390211 For all k, if a coin system contains 1, k-1, and k, in order to be canonical it must also contain all numbers on the range 2 through k-2. If it does not, one can construct a counterexample to its canonicity by using t=(k-1)+m, where 2 < m < k and m is in the coin system, but m-1 is not in the coin system.
+%H A390211 Heath Davison Lunt, <a href="/A390211/b390211.txt">Table of n, a(n) for n = 1..10000</a>
+%H A390211 D. Kozen and S. Zaks, <a href="https://doi.org/10.1016/0304-3975(94)90134-1">Optimal Bounds for the Change-Making Problem</a>, Theoretical Computer Science, 123 (1994), 377-385.
+%F A390211 a(n) = 2^k - 1 iff a(n - 1) = 2^(k-1) + 2^(k-2) - 1 for k>2.
+%e A390211 1->1_2->[1], for all t, the only solution uses t ones, therefore canonical, so 1 is included.
+%e A390211 2->10_2->[2], take t=1, there exists no solution, therefore not canonical, so 2 is excluded.
+%e A390211 11->1011_2->[1, 2, 4], all 1 <= t < 2+4 are optimal, therefore canonical, so 11 is included.
+%e A390211 27->11101_2->[1, 3, 4, 5], take t=7, optimal is 4+3, greedy produces 5+1+1, therefore not canonical, so 27 is excluded.
+%e A390211 41->101001_2->[1,4,6], take t=8, optimal is 4+4, greedy produces 6+1+1, therefore not canonical, so 41 is excluded.
+%e A390211 a(18) = 47 = 101111_2 = 2^5 + 2^4 - 1, so a(19) = 2^6 - 1 = 111111_2 = 63.
+%o A390211 (Haskell)
+%o A390211 isA390211 1 = True
+%o A390211 isA390211 x = odd x && isCanonical (reverse (coinsFromBinary 1 x))
+%o A390211   where
+%o A390211     coinsFromBinary _ 0 = []
+%o A390211     coinsFromBinary k x = [k | x `rem` 2 == 1] ++ coinsFromBinary (k + 1) (x `quot` 2)
+%o A390211     isCanonical coins = and (take ((\(x : y : _) -> x + y) coins) (zipWith (==) greedy optimal))
+%o A390211       where
+%o A390211         optimal = 0 : map (\x -> 1 + minimum [optimal !! (x - c) | c <- coins, c <= x]) [1 ..]
+%o A390211         greedy = 0 : map (\x -> 1 + (greedy !! (x - head (dropWhile (> x) coins)))) [1 ..]
+%o A390211 a390211 n = a390211_list !! (n - 1)
+%o A390211 a390211_list = 1 : filter isA390211 (candidates 0b1011 0b1111 3)
+%o A390211   where
+%o A390211     candidates jumpFrom jumpTo x = [x, x + 2 .. jumpFrom - 2] ++ jumpFrom : candidates (jumpFrom * 2 + 1) (jumpTo * 2 + 1) jumpTo
+%K A390211 nonn,base,look,new
+%O A390211 1,2
+%A A390211 _Heath Davison Lunt_, Oct 29 2025
