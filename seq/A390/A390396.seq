@@ -1,0 +1,56 @@
+%I A390396 #17 Nov 15 2025 16:10:38
+%S A390396 1,2,4,7,10,13,18,21,24,27,30,33,38,41,44,47,50,53,58,61,64,67,73,78,
+%T A390396 81,87,90,93,98,101,104,107,110,113,118,121,124,127,133,138,141,144,
+%U A390396 149,155,158,161,172,175,178,181,184,192,195,198,201,204,209,215,218,221,224,229,235
+%N A390396 Least positive integer not the sum, product or power of any previous pair of distinct terms.
+%H A390396 Michael S. Branicky, <a href="/A390396/b390396.txt">Table of n, a(n) for n = 1..10000</a>
+%F A390396 a(n+1) > a(n) for all n > 1 since 1 is a term and hence a(n) is in the set of products and a(n+1) >= a(n) by construction. - _Michael S. Branicky_, Nov 13 2025
+%o A390396 (Python)
+%o A390396 from itertools import combinations
+%o A390396 def generate_sequence(n_terms):
+%o A390396     sequence = [1]
+%o A390396     while len(sequence) < n_terms:
+%o A390396         sums = set()
+%o A390396         prods = set()
+%o A390396         powers = set()
+%o A390396         for a, b in combinations(sequence, 2):
+%o A390396             sums.add(a + b)
+%o A390396             prods.add(a * b)
+%o A390396             try:
+%o A390396                 powers.add(a ** b)
+%o A390396             except OverflowError:
+%o A390396                 pass
+%o A390396             try:
+%o A390396                 powers.add(b ** a)
+%o A390396             except OverflowError:
+%o A390396                 pass
+%o A390396         forbidden = sums.union(prods).union(powers)
+%o A390396         candidate = 1
+%o A390396         while candidate in sequence or candidate in forbidden:
+%o A390396             candidate += 1
+%o A390396         sequence.append(candidate)
+%o A390396     return sequence
+%o A390396 seq = generate_sequence(15)
+%o A390396 (Python)
+%o A390396 from math import isqrt
+%o A390396 from itertools import count
+%o A390396 def aupto(limit):
+%o A390396     alst, an, aset, sums, prds, pows, r = [], 1, {1}, {1}, {1}, set(), isqrt(limit)+1
+%o A390396     while an <= limit:
+%o A390396         alst.append(an)
+%o A390396         aset.add(an)
+%o A390396         an = next(k for k in count(an+1) if all(k not in S for S in [sums, prds, pows]))
+%o A390396         sums |= {t for s in aset if (t:= an+s) <= limit}
+%o A390396         prds |= {t for p in aset if (t:= an*p) <= limit}
+%o A390396         for p in aset:
+%o A390396             if an > r or (t:=an**p) > limit: break
+%o A390396             pows.add(t)
+%o A390396         for p in aset:
+%o A390396             if p > r or (t:=p**an) > limit: break
+%o A390396             pows.add(t)
+%o A390396     return alst
+%o A390396 print(aupto(300)) # _Michael S. Branicky_, Nov 08 2025
+%Y A390396 Cf. A066512.
+%K A390396 nonn,new
+%O A390396 1,2
+%A A390396 _Marc Morgenegg_, Nov 04 2025
