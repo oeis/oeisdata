@@ -1,0 +1,54 @@
+%I A389357 #11 Nov 16 2025 13:37:30
+%S A389357 1,7,149,2161,53089,1187803,62566171,126420629,34676275663,
+%T A389357 1327006348769,762860964413,35274884855393,1417459086247517,
+%U A389357 8539282786885727,994152675906323707,61839074498178353459,1984721470514398782313,27861319566938771335907,4133713434815611021027361,8286341865806624403560347
+%N A389357 Numerators E(n) in the closed form of the integral J(2n+1) = Integral_{x=0..Pi/2} x * cos(x)^(2n+1) dx = binomial(2n+1,n)/2^(2n+2) * Pi - E(n)/F(n).
+%C A389357 Appears in the exact evaluation of integrals with odd powers of cosine.
+%C A389357 Companion denominators are sequence F(n).
+%C A389357 For example, J(5) = 252/2^13 * Pi - 21/100 so E(5)=21, F(5)=100.
+%F A389357 a(n) = numerator(R(n)) where R(n) = E(n)/F(n) = (1/2^(2*n)) * Sum_{1 <= j <= 2n+1, j odd} binomial(2*n+1,(2*n+1-j)/2)/j^2.
+%F A389357 J(2*n+1) = (2*n)!!/(2*n+1)!! * Pi/2 - R(n).
+%F A389357 Proof for odd powers J(2n+1) = Integral_{0..Pi/2} x*cos(x)^(2n+1) dx.
+%F A389357 1) Expand cos(x)^(2n+1) = ( (e^{ix}+e^{-ix})/2 )^(2n+1); only odd harmonics survive.
+%F A389357 2) Integrate termwise: Integral_{0..Pi/2} x*cos(jx) dx = (Pi/2)*sin(jPi/2)/j - 1/j^2, valid for odd j.
+%F A389357 3) Summing gives J(2n+1) = (2n)!!/(2n+1)!! * Pi/2 - (1/2^(2n)) * Sum_{j odd<=2n+1} binomial(2n+1,(2n+1-j)/2)/j^2.
+%F A389357 4) Writing the rational sum in lowest terms as E(n)/F(n) with gcd(E,F)=1 yields J(2n+1) = (2n)!!/(2n+1)!! * Pi/2 - E(n)/F(n).
+%e A389357 n=3: J(7) = 8/35 * Pi - 2161/3675, so E(3)=2161, F(3)=3675.
+%o A389357 (Python)
+%o A389357 # generates sequence and numerical validation between the numerical integration using high-precision quadrature and the closed form formula.
+%o A389357 import mpmath as mp
+%o A389357 from math import comb
+%o A389357 from fractions import Fraction
+%o A389357 mp.mp.dps = 80
+%o A389357 eps = mp.mpf('1e-12')
+%o A389357 def factorial2(n):
+%o A389357     if n <= 0: return 1
+%o A389357     res = 1
+%o A389357     for k in range(n,0,-2): res *= k
+%o A389357     return mp.mpf(res)
+%o A389357 def R_frac(n):
+%o A389357     s = Fraction(0,1)
+%o A389357     for j in range(1,2*n+2,2):  # odd j
+%o A389357         s += Fraction(comb(2*n+1,(2*n+1-j)//2), j*j)
+%o A389357     return s / 2**(2*n)
+%o A389357 def E(n): return R_frac(n).numerator
+%o A389357 def F(n): return R_frac(n).denominator
+%o A389357 # Numeric integral
+%o A389357 def J_numeric(n):
+%o A389357     f = lambda x: x * mp.cos(x)**(2*n+1)
+%o A389357     return mp.quad(f, [0, mp.pi/2])
+%o A389357 # Closed form
+%o A389357 def J_formula(n):
+%o A389357     coeff = factorial2(2*n) / factorial2(2*n+1) * mp.pi/2
+%o A389357     return coeff - mp.mpf(E(n)) / mp.mpf(F(n))
+%o A389357 print([E(k) for k in range(1,20)])
+%o A389357 for n in [1,2,3,5,7]:
+%o A389357     val_num = J_numeric(n)
+%o A389357     val_form = J_formula(n)
+%o A389357     err = abs(val_num - val_form)
+%o A389357     match = err < 10*eps
+%o A389357     print(f"n={n}: match={match}, error={err}")
+%Y A389357 Cf. A000984 (central binomial coefficients), A389342 and A387583 for sequences C(n) and D(n) for even case, F(n) denominators for odd case.
+%K A389357 nonn,frac,new
+%O A389357 0,2
+%A A389357 _Patrick Demichel_, Oct 01 2025
