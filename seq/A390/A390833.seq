@@ -1,0 +1,74 @@
+%I A390833 #20 Nov 22 2025 17:13:50
+%S A390833 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,8,0,0,0,0,0,0,0,0,0,0,0,0,82,82,
+%T A390833 0,0,0,0,0,52,744,864,744,52,0,0,0,0,396,6378,18784,18784,6378,396,0,
+%U A390833 0,0,0,560,31088,622868,3318960,622868,31088,560,0,0
+%N A390833 Array read by antidiagonals: A(k, n) is the number of (undirected) Hamiltonian paths on the k X n knight graph.
+%C A390833 A Knight graph K_{k, n} (for k, n integers) is the set of squares of a k X n chessboard, where two vertices are adjacent if a knight's move in chess connects the corresponding squares.
+%C A390833 A Hamiltonian path in a finite graph G = (V, E) is a sequence of distinct vertices v_1, ..., v_{|V|} such that (v_i, v_{i+1}) is in E for all 1 <= i < |V|.
+%C A390833 An undirected Hamiltonian path is an equivalence class under reversal of the path; i.e., v_1, ..., v_{|V|} and v_{|V|}, ..., v_1 are considered equivalent.
+%D A390833 Donald E. Knuth, Selected papers on fun and games, ch. 42. Long and Skinny Knight's Tours, The University of Chicago Press, 2011.
+%D A390833 Donald E. Knuth, Hamiltonian paths and cycles, Prefascicle 8a of The Art of Computer Programming (work in progress, 2025).
+%H A390833 Alfred James Brown, <a href="https://doi.org/10.31979/etd.e7ra-46ny">Knight's Tours and Zeta Functions, 2017, Master's Theses.
+%H A390833 Leonhard Euler, <a href="https://scholarlycommons.pacific.edu/euler-works/309/">Solution d'une question curieuse que ne paroit soumise à aucune analyse</a>, 1766. Euler Archive - All Works, 309. [Caveat: In §43 Euler makes a mistake.]
+%H A390833 Peter Luschny, <a href="https://github.com/PeterLuschny/Gists/blob/main/KnightTours.ipynb">Illustrating Knight's Tours</a>, a SageMath notebook.
+%H A390833 Eric Weisstein's World of Mathematics, <a href="https://mathworld.wolfram.com/HamiltonianPath.html">Hamiltonian Path</a>.
+%H A390833 Eric Weisstein's World of Mathematics, <a href="https://mathworld.wolfram.com/KnightGraph.html">Knight Graph</a>.
+%H A390833 Wikipedia, <a href="https://en.wikipedia.org/wiki/Knight&#39;s_tour">Knight's tour</a>.
+%H A390833 <a href="/index/Gra#graphs">Index entries for sequences related to graphs, Hamiltonian</a>
+%e A390833 Array begins:
+%e A390833   [k\n] 1  2    3       4          5              6                 7
+%e A390833   ------------------------------------------------------------------------
+%e A390833    [1]  0, 0,   0,      0,         0,             0,                0, ...  A000004
+%e A390833    [2]  0, 0,   0,      0,         0,             0,                0, ...  A000004
+%e A390833    [3]  0, 0,   0,      8,         0,             0,               52, ...  A169696
+%e A390833    [4]  0, 0,   8,      0,        82,           744,             6378, ...  A079137
+%e A390833    [5]  0, 0,   0,     82,       864,         18784,           622868, ...  A083386
+%e A390833    [6]  0, 0,   0,    744,     18784,       3318960,        389969466, ...  A306281
+%e A390833    [7]  0, 0,  52,   6378,    622868,     389969466,      82787609160, ...  A306283
+%e A390833    [8]  0, 0, 396,  31088,  18061054,   24964893804,   20666425060328, ...  A389760
+%e A390833 .
+%e A390833 Seen as a triangle:
+%e A390833   [ 1] 0;
+%e A390833   [ 2] 0, 0;
+%e A390833   [ 3] 0, 0,  0;
+%e A390833   [ 4] 0, 0,  0,   0;
+%e A390833   [ 5] 0, 0,  0,   0,   0;
+%e A390833   [ 6] 0, 0,  8,   8,   0,   0;
+%e A390833   [ 7] 0, 0,  0,   0,   0,   0,  0;
+%e A390833   [ 8] 0, 0,  0,  82,  82,   0,  0, 0;
+%e A390833   [ 9] 0, 0, 52, 744, 864, 744, 52, 0, 0;
+%e A390833 .
+%e A390833 A knight's tour on the squares 1-12 of a 3 X 4 board in linear numbering:
+%e A390833   1 -> 7 -> 9 -> 2 -> 8 -> 10 -> 3 -> 12 -> 6 -> 4 -> 11 -> 5.
+%e A390833 The same tour in coordinate notation:
+%e A390833   a1 -> c2 -> a3 -> b1 -> d2 -> b3 -> c1 -> d3 -> b2 -> d1 -> c3 -> a2.
+%e A390833 A knight's tour on the squares 1-12 of a 4 X 3 board:
+%e A390833   1 -> 8 -> 3 -> 4 -> 11 -> 6 -> 7 -> 12 -> 5 -> 10 -> 9 -> 2.
+%e A390833   a1 -> b3 -> c1 -> a2 -> b4 -> c2 -> a3 -> c4 -> b2 -> a4 -> c3 -> b1.
+%o A390833 (SageMath)
+%o A390833 # The function shown outlines the general method, but is only effective for small k and n. The computation by brute-force is unusable for larger boards, but linear time algorithms exist.
+%o A390833 def hamiltonian_paths(G: Graph):
+%o A390833     n = G.num_verts()
+%o A390833     vertices = list(G.vertices())
+%o A390833     def backtrack(path, visited):
+%o A390833         if len(path) == n:
+%o A390833             yield path
+%o A390833             return
+%o A390833         for v in G.neighbors(path[-1]):
+%o A390833             if v not in visited:
+%o A390833                 yield from backtrack(path + [v], visited | {v})
+%o A390833     for v in vertices:
+%o A390833         yield from backtrack([v], {v})
+%o A390833 def knight_hamiltonian_paths(k: int, n: int):
+%o A390833     G = graphs.KnightGraph([k, n])
+%o A390833     for path in hamiltonian_paths(G):
+%o A390833         if path[0] < path[-1]:
+%o A390833             yield path
+%o A390833 def A(k: int, n: int) -> int:
+%o A390833     return sum(1 for _ in knight_hamiltonian_paths(k, n))
+%o A390833 print("(3, 4) -> ", A(3, 4)); print("(5, 4) -> ", A(5, 4)); print("(3, 7) -> ", A(3, 7))
+%Y A390833 Rows: A000004, A169696, A079137, A083386, A306281, A306283, A389760.
+%Y A390833 Cf. A308131 (main diagonal), A165134, A389758, A332307 (grid graph), A333580.
+%K A390833 nonn,tabl,hard,new
+%O A390833 1,18
+%A A390833 _Peter Luschny_, Nov 21 2025
