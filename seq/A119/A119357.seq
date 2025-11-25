@@ -1,9 +1,9 @@
-%I A119357 #9 Jan 02 2022 09:50:04
+%I A119357 #13 Nov 24 2025 10:35:59
 %S A119357 6,12,18,20,24,28,30,36,40,42,45,48,54,56,60,63,66,70,72,78,80,84,88,
 %T A119357 90,96,99,100,102,104,105,108,110,112,114,117,120,126,130,132,135,138,
 %U A119357 140,144,150,154,156,160,162,165,168,170,174,176,180,182,186,189,192,195
-%N A119357 Numbers k such that the number of distinct nonzero sums of distinct divisors of k is less than 2^tau(k) - 1 (the largest number of possible distinct sums, tau(k) being the number of divisors of k (A000005)).
-%C A119357 Equivalently, numbers k for which there exist two distinct subsets of the set of divisors of k having the same sum.
+%N A119357 Numbers k for which there exist two distinct subsets of the set of divisors of k having the same sum.
+%C A119357 Equivalently, numbers k such that the number of distinct nonzero sums of distinct divisors of k is less than 2^tau(k) - 1 (the largest number of possible distinct sums, tau(k) being the number of divisors of k (A000005)).
 %C A119357 The sequence is closed with respect to multiplication by positive integers (i.e. any multiple of any term in the sequence is in the sequence). The primitive entries of the sequence, i.e. those that are not multiples of other terms of the sequence, are given in A119425 (the first five are 6,20,28,45 and 63).
 %C A119357 The number of distinct sums of distinct divisors of n are given in A119347 and the actual sums are given in row n of the triangle A119348.
 %C A119357 Subsequence of A051774 (_Max Alekseyev_).
@@ -11,8 +11,22 @@
 %e A119357 6 is in the sequence because from the divisors of 6, namely 1,2,3,6, we can form by addition 12 sums (1,2,3,...,12) and 12 < 2^tau(6)-1=2^4-1=15.
 %e A119357 Sequence contains, for example, all multiples of 6 (1+2=3), all multiples of 20 (1+4=5), all multiples of 28 (1+2+4=7), all multiples of 63 (1+9=3+7).
 %p A119357 with(numtheory): with(linalg): s:=proc(n) local dl,t:dl:=convert(divisors(n),list): t:=tau(n): nops({seq(innerprod(dl,convert(2^t+i,base,2)[1..t]),i=1..2^t-1)}) end: a:=proc(n) if s(n)<2^tau(n)-1 then n else fi end: seq(a(n),n=1..230);
+%p A119357 # Alternative:
+%p A119357 isA119357 := proc(n); local divs, dp, d, j;
+%p A119357   if n = 0 then return false fi;
+%p A119357   divs := sort([seq(d, d=NumberTheory:-Divisors(n))]);
+%p A119357   dp := Array(0..n, fill=0);
+%p A119357   dp[0] := 1; j := 0;
+%p A119357   for d in divs do
+%p A119357     for j from n to d by -1 do
+%p A119357         dp[j] := dp[j] + dp[j - d];
+%p A119357         if dp[j] > 1 then return true fi;
+%p A119357     od;
+%p A119357   od;
+%p A119357 false end:
+%p A119357 select(isA119357, [seq(0..200)]);  # _Peter Luschny_, Nov 24 2025
 %t A119357 q[n_] := Module[{d = Divisors[n], x}, Max[CoefficientList[Series[Product[1 + x^d[[i]], {i, Length[d]}], {x, 0, Total[d]}], x]] > 1]; Select[Range[200], q] (* _Amiram Eldar_, Jan 02 2022 *)
 %Y A119357 Cf. A000005, A051774, A119347, A119348, A119425.
-%K A119357 nonn
+%K A119357 nonn,changed
 %O A119357 1,1
 %A A119357 _Emeric Deutsch_, May 18 2006
