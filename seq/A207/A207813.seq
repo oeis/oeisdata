@@ -1,4 +1,4 @@
-%I A207813 #14 Oct 02 2024 13:22:56
+%I A207813 #18 Nov 27 2025 22:55:57
 %S A207813 2,4,9,17,19,25,27,30,40,43,46,53,56,59,61,67,69,72,77,82,85,93,95,98,
 %T A207813 101,103,108,111,114,119,124,129,135,137,140,150,153,161,166,169,171,
 %U A207813 177,179,182,187,195,197,205,208,211,213,218,224,229,237,239
@@ -8,6 +8,7 @@
 %C A207813 where F=A000045 (Fibonacci numbers), c(k-2)=1, and for j=0,1,...,k-3, there are two restrictions on coefficients: c(j) is 0 or 1, and c(j)c(j+1)=0; viz., no two consecutive Fibonacci numbers appear. The Zeckendorf polynomial Z(n,x) is introduced here as
 %C A207813 c(k-2)x^(k-2) + c(k-3)x^(k-3) + ... + c(1)x + c(0).
 %C A207813 The name refers to irreducibility over the field of rational numbers.
+%H A207813 Robert Israel, <a href="/A207813/b207813.txt">Table of n, a(n) for n = 1..10000</a>
 %e A207813 n   k    Z(n)   Z(n,x)       irreducible
 %e A207813 1   2       1   1            no
 %e A207813 2   3      10   x            yes
@@ -18,6 +19,25 @@
 %e A207813 7   5    1010   x^3 + x      no
 %e A207813 8   5   10000   x^4          no
 %e A207813 9   5   10001   x^4 + 1      yes
+%p A207813 fib:= combinat:-fibonacci:
+%p A207813 invfib := proc(x)
+%p A207813 local n;
+%p A207813       n := floor(ln(1/2*(2*x+1)*sqrt(5))/ln(1/2+1/2*sqrt(5)));
+%p A207813       if x < fib(n) then
+%p A207813           n-1
+%p A207813        elif fib(n+1) <= x then
+%p A207813           n+1
+%p A207813        else
+%p A207813           n
+%p A207813        end if
+%p A207813 end proc:
+%p A207813 zeckpoly:= proc(n, z) option remember; local t;
+%p A207813     if n = 0 then 0
+%p A207813     else t:= invfib(n);
+%p A207813         z^(t-2) + procname(n - fib(t), z)
+%p A207813     fi
+%p A207813 end proc:
+%p A207813 select(n -> irreduc(zeckpoly(n,z)), [$1..400]); # _Robert Israel_, Nov 27 2025
 %t A207813 fb[n_] := Block[{k = Ceiling[Log[GoldenRatio, n*Sqrt[5]]],
 %t A207813  t = n, fr = {}}, While[k > 1, If[t >= Fibonacci[k],
 %t A207813  AppendTo[fr, 1]; t = t - Fibonacci[k],
@@ -29,6 +49,6 @@
 %t A207813 u = {}; Do[n++; If[IrreduciblePolynomialQ[p[n, x]],
 %t A207813   AppendTo[u, n]], {n, 300}]; u     (* A207813 *)
 %Y A207813 Cf. A206073, A206074.
-%K A207813 nonn,base
+%K A207813 nonn,base,changed
 %O A207813 1,1
 %A A207813 _Clark Kimberling_, Feb 20 2012
