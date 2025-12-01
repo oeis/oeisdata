@@ -1,10 +1,11 @@
-%I A387946 #27 Nov 25 2025 14:31:38
+%I A387946 #35 Nov 30 2025 14:28:52
 %S A387946 1,7,20,23,59,90,119,191,193,287,362,395,615,839,970,1079,1129,1439,
 %T A387946 1679,1931,2282,2390,2391,3015,3479,3959,4150,4619,4969,5039,5615,
 %U A387946 6395,7215,7370,8447,9599,10199,10811,11447,12095,12602,14111,14976,16379,16969,17679,18767,20423,20594,22199,23399
 %N A387946 Numbers of the form Product_{k=i..j} prime(k) - Sum_{k=i..j} prime(k) where i < j.
 %C A387946 Do any terms arise in more than one way?
 %C A387946 Are any terms other than 1 squares?
+%C A387946 In first 10^9 terms, none arising in more than one way and no further squares. - _Michael S. Branicky_, Nov 30 2025
 %H A387946 Robert Israel, <a href="/A387946/b387946.txt">Table of n, a(n) for n = 1..10000</a>
 %e A387946 a(4) = 23 is a term because prime(3) = 5, prime(4) = 7 and 23 = 5 * 7 - (5 + 7).
 %p A387946 N:= 1000; P:= select(isprime, [2,seq(i,i=3..N,2)]): nP:= nops(P):
@@ -20,6 +21,27 @@
 %p A387946   od
 %p A387946 od;
 %p A387946 sort(convert(R,list));
+%o A387946 (Python)
+%o A387946 import heapq
+%o A387946 from itertools import islice
+%o A387946 from sympy import isprime, sieve
+%o A387946 def agen(): # generator of terms
+%o A387946     pp, ss, nextcount, alst, oldv = 6, 5, 3, [], -1
+%o A387946     h = [(pp-ss, pp, ss, 1, 2)]
+%o A387946     while True:
+%o A387946         (v, p, s, i, j) = heapq.heappop(h)
+%o A387946         if v > oldv:
+%o A387946             yield v
+%o A387946         oldv = v
+%o A387946         if v >= pp-ss:
+%o A387946             pp *= sieve[nextcount]
+%o A387946             ss += sieve[nextcount]
+%o A387946             heapq.heappush(h, (pp-ss, pp, ss, 1, nextcount))
+%o A387946             nextcount += 1
+%o A387946         p //= sieve[i]; s -= sieve[i]; i += 1; j += 1; p *= sieve[j]; s += sieve[j]
+%o A387946         heapq.heappush(h, (p-s, p, s, i, j))
+%o A387946     return alst
+%o A387946 print(list(islice(agen(), 51))) # _Michael S. Branicky_, Nov 30 2025
 %Y A387946 Cf. A050936, A097889.
 %K A387946 nonn,new
 %O A387946 1,2
