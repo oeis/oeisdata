@@ -1,0 +1,72 @@
+%I A390861 #23 Dec 01 2025 17:55:46
+%S A390861 1,2,5,18,81,442,2849,21183,178376,1677788,17437921,198505996,
+%T A390861 2456669031,32843762236,471744856737,7244925526496,118471795048422,
+%U A390861 2055165116862846,37696854473921647,728982325139672429,14823029329557666620,316175793546630521791,7059100431574864712679
+%N A390861 Sum of maximum depths over all increasing rooted trees with n nodes.
+%C A390861 For each increasing rooted tree with nodes 0,1,...,n-1 (where node 0 is the root and each node i>0 has a parent < i), the maximum depth is computed, and a(n) is the sum of these maximum depths over all such trees. The total number of such trees is (n-1)!.
+%F A390861 a(n) = Sum_{k=1..n-1} (k+1)*A179454(n-1, k) for n >= 2. - _Jason Yuen_, Nov 25 2025
+%e A390861 For n=3, there are 2 trees:
+%e A390861 Tree 1: 0->1, 0->2 (depths: 1,2,2; max depth=2)
+%e A390861 Tree 2: 0->1, 1->2 (depths: 1,2,3; max depth=3)
+%e A390861 Sum = 2 + 3 = 5, so a(3)=5.
+%o A390861 (C++) // DFS enumeration:
+%o A390861 #include <iostream>
+%o A390861 using u32 = unsigned;
+%o A390861 using u64 = unsigned long long;
+%o A390861 u32 n, dep[30] = {1}, pa[30];
+%o A390861 u64 ans;
+%o A390861 void dfs(u32 i) {
+%o A390861   if (i == n) {
+%o A390861     u32 cur = 0;
+%o A390861     for (u32 i = 0; i < n; ++i)
+%o A390861       if (cur < dep[i])
+%o A390861         cur = dep[i];
+%o A390861     ans += cur;
+%o A390861     return;
+%o A390861   }
+%o A390861   for (u32 p = 0; p < i; ++p) pa[i] = p, dep[i] = dep[p] + 1, dfs(i + 1);
+%o A390861 }
+%o A390861 int main() {
+%o A390861   for (n = 1; n < 14; ++n) {
+%o A390861     ans = 0;
+%o A390861     dfs(1);
+%o A390861     std::cout << ans << '\n';
+%o A390861   }
+%o A390861 }
+%o A390861 (Python) # Dynamic Programming:
+%o A390861 import math
+%o A390861 from fractions import Fraction
+%o A390861 def A390861_first(N):
+%o A390861     C = [[0] * (N + 1) for _ in range(N + 1)]
+%o A390861     for i in range(N + 1):
+%o A390861         C[i][0] = 1
+%o A390861         for j in range(1, i + 1):
+%o A390861             C[i][j] = C[i - 1][j] + C[i - 1][j - 1]
+%o A390861     g = [[Fraction(0) for _ in range(N + 1)] for _ in range(N + 1)]
+%o A390861     for i in range(N + 1):
+%o A390861         g[0][i] = Fraction(1)
+%o A390861     for i in range(1, N + 1):
+%o A390861         for k in range(1, N + 1):
+%o A390861             total = Fraction(0)
+%o A390861             for j in range(1, i + 1):
+%o A390861                 total += g[j - 1][k - 1] * g[i - j][k]
+%o A390861             if i > 0:
+%o A390861                 g[i][k] = total / i
+%o A390861             else:
+%o A390861                 g[i][k] = total
+%o A390861     results = []
+%o A390861     for n in range(1, N + 1):
+%o A390861         ans = Fraction(0)
+%o A390861         for d in range(1, n + 1):
+%o A390861             term = g[n - 1][d - 1]
+%o A390861             if d >= 2:
+%o A390861                 term -= g[n - 1][d - 2]
+%o A390861             ans += term * d
+%o A390861         ans *= math.factorial(n - 1)
+%o A390861         results.append(int(ans))
+%o A390861     return results
+%o A390861 print(A390861_first(120))
+%Y A390861 Cf. A179454.
+%K A390861 nonn,new
+%O A390861 1,2
+%A A390861 _Jiang Chenyang_, Nov 22 2025
