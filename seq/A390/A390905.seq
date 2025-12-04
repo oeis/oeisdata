@@ -1,4 +1,4 @@
-%I A390905 #6 Dec 02 2025 05:24:15
+%I A390905 #13 Dec 03 2025 15:44:45
 %S A390905 216,1000,1296,1728,2744,3375,5832,7776,8000,9261,10000,10648,13824,
 %T A390905 17576,20736,21952,27000,35937,38416,39304,42875,46656,50625,54872,
 %U A390905 59319,64000,74088,85184,91125,97336,100000,104976,110592,125000,132651,140608,157464,160000
@@ -27,7 +27,22 @@
 %e A390905 10    9261 = 21^3 = s(7)  = 3^3 * 7^3
 %e A390905 11   10000 = 10^4 = s(8)  = 2^4 * 5^4
 %e A390905 17   27000 = 30^3 = s(11) = 2^3 * 3^3 * 5^3
-%t A390905 nn = 160000; mm = Sqrt[nn]; i = 1; k = 3; MapIndexed[Set[S[First[#2]], #1] &, Complement[Select[Range[mm], Not @* PrimePowerQ], Union@ Flatten@ Table[a^2*b^3, {b, Surd[mm, 3]}, {a, Sqrt[mm/b^3] } ] ] ]; Union@ Reap[While[j = k; While[S[i]^j < nn, Sow[S[i]^j]; j++]; j > k, i++] ][[-1, 1]]
+%t A390905 nn = 2^41; Union@ Flatten@ Table[n = a^5*b^4*c^3; Set[{k, m, r}, {#1, #2, If[FreeQ[#3/#2, 1], GCD @@ (#3/#2), 0]} & @@ {Length[#], GCD @@ #, #}] &[FactorInteger[n][[;; , -1]] ]; If[And[k > 1, m > 1], If[r != 1, n, Nothing], Nothing], {c, Surd[nn, 3]}, {b, Surd[nn/(c^3), 4]}, {a, Surd[nn/(b^4*c^3), 5] } ]
+%o A390905 (Python)
+%o A390905 from math import isqrt
+%o A390905 from sympy import integer_nthroot, primepi, factorint
+%o A390905 from oeis_sequences.OEISsequences import bisection, squarefreepi
+%o A390905 def A390905(n):
+%o A390905     def g(x):
+%o A390905         c, l, j = x-squarefreepi(integer_nthroot(x,3)[0])-primepi(x), 0, isqrt(x)
+%o A390905         while j>1:
+%o A390905             k2 = integer_nthroot(x//j**2,3)[0]+1
+%o A390905             w = squarefreepi(k2-1)
+%o A390905             c += j*(l-w)
+%o A390905             l, j = w, isqrt(x//k2**3)
+%o A390905         return c+l
+%o A390905     def f(x): return n+x-sum(g(integer_nthroot(x, k)[0]) for k in range(2,x.bit_length()))+(y:=isqrt(x))-sum(isqrt(y//k**3) for k in range(1, integer_nthroot(y, 3)[0]+1) if all(d<=1 for d in factorint(k).values()))-primepi(y)
+%o A390905     return bisection(f,n,n) # _Chai Wah Wu_, Dec 02 2025
 %Y A390905 Cf. A002808, A036966, A076467, A052485, A126706, A286708, A246549, A383394, A387254, A387255, A388304, A388549, A389065, A390823.
 %K A390905 nonn,easy,new
 %O A390905 1,1

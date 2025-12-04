@@ -1,4 +1,4 @@
-%I A389551 #28 Nov 23 2025 03:49:04
+%I A389551 #33 Dec 03 2025 17:54:57
 %S A389551 432,648,864,1728,1944,2000,2592,3456,3888,4000,5000,5184,5488,5832,
 %T A389551 6912,8000,10125,10368,10976,11664,13824,15552,16000,16875,17496,
 %U A389551 19208,20000,20736,21296,21952,23328,25000,27648,27783,30375,31104,32000,34992,35152,40000
@@ -28,8 +28,31 @@
 %e A389551 17   10125 = 3^4 * 5^3        = r(13)
 %e A389551 46   54000 = 2^4 * 3^3 * 5^3  = r(37)
 %t A389551 With[{nn = 40000}, Union@ Flatten@ Table[If[! PrimePowerQ[#], If[CountDistinct[FactorInteger[#][[;;,-1]] ]>1, #, Nothing], Nothing] &[a^5 * b^4 * c^3], {c, Surd[nn, 3]}, {b,Surd[nn/(c^3), 4]}, {a, Surd[nn/(b^4 * c^3), 5] } ] ]
+%o A389551 (Python)
+%o A389551 from math import isqrt, gcd
+%o A389551 from sympy import integer_nthroot, mobius, factorint
+%o A389551 from oeis_sequences.OEISsequences import bisection, squarefreepi
+%o A389551 def A389551(n):
+%o A389551     def g(x):
+%o A389551         c, l = squarefreepi(integer_nthroot(x,3)[0])+sum(mobius(k)*(integer_nthroot(x, k)[0]-1) for k in range(2, x.bit_length()))-1, 0
+%o A389551         j = isqrt(x)
+%o A389551         while j>1:
+%o A389551             k2 = integer_nthroot(x//j**2,3)[0]+1
+%o A389551             w = squarefreepi(k2-1)
+%o A389551             c += j*(w-l)
+%o A389551             l, j = w, isqrt(x//k2**3)
+%o A389551         return c-l
+%o A389551     def f(x):
+%o A389551         c = n+1+x+sum(squarefreepi(integer_nthroot(x,k)[0])-1 for k in range(3, x.bit_length()))
+%o A389551         for w in range(1,integer_nthroot(x,5)[0]+1):
+%o A389551             if all(d<=1 for d in factorint(w).values()):
+%o A389551                 for y in range(1,integer_nthroot(z:=x//w**5,4)[0]+1):
+%o A389551                     if gcd(w,y)==1 and all(d<=1 for d in factorint(y).values()):
+%o A389551                         c -= integer_nthroot(z//y**4,3)[0]
+%o A389551         return c
+%o A389551     return bisection(f,n,n) # _Chai Wah Wu_, Dec 02 2025
 %Y A389551 Cf. A001597, A001694, A036966, A072777, A126706, A131605, A286708, A359280, A383394, A388293, A388549, A389558, A390540.
 %Y A389551 Cf. A065483, A082020, A368250.
-%K A389551 nonn,easy,new
+%K A389551 nonn,easy,changed
 %O A389551 1,1
 %A A389551 _Michael De Vlieger_, Nov 17 2025

@@ -1,4 +1,4 @@
-%I A388549 #7 Sep 24 2025 22:25:46
+%I A388549 #12 Dec 03 2025 17:55:01
 %S A388549 1728,5832,8000,13824,20736,21952,64000,85184,91125,104976,110592,
 %T A388549 125000,140608,157464,160000,175616,216000,248832,250047,314432,
 %U A388549 331776,421875,438976,512000,592704,614656,681472,729000,778688,884736,941192,970299,1124864,1404928
@@ -22,7 +22,25 @@
 %e A388549 25   592704 = 2^6 *  3^3 * 7^3
 %e A388549 28   729000 = 2^3 *  3^6 * 5^3
 %t A388549 nn = 2^21; i = 1; k = 2; MapIndexed[Set[S[First[#2]], #1] &, Select[Range@ Sqrt[nn], 1 == Min[#] < Max[#] &@ FactorInteger[#][[All, -1]] &] ]; Union@ Reap[While[j = 3; While[S[i]^j < nn, Sow[S[i]^j]; j++]; j > 3, k++; i++] ][[-1, 1]]
+%o A388549 (Python)
+%o A388549 from math import isqrt
+%o A388549 from sympy import integer_nthroot, mobius, factorint
+%o A388549 from oeis_sequences.OEISsequences import bisection, squarefreepi
+%o A388549 def A388549(n):
+%o A388549     def g(x):
+%o A388549         c, l = squarefreepi(integer_nthroot(x,3)[0])+sum(mobius(k)*(integer_nthroot(x, k)[0]-1) for k in range(2, x.bit_length()))-2, 0
+%o A388549         j = isqrt(x)
+%o A388549         while j>1:
+%o A388549             k2 = integer_nthroot(x//j**2,3)[0]+1
+%o A388549             w = squarefreepi(k2-1)
+%o A388549             c += j*(w-l)
+%o A388549             l, j = w, isqrt(x//k2**3)
+%o A388549         return c-l
+%o A388549     def f(x):
+%o A388549         z = isqrt(x)
+%o A388549         return n+2+x+g(z)+sum(mobius(k)*((w:=integer_nthroot(x,k)[0])-1)+squarefreepi(w)+g(w) for k in range(3, x.bit_length()))-sum(isqrt(z//k**3) for k in range(1, integer_nthroot(z, 3)[0]+1) if all(d<=1 for d in factorint(k).values()))
+%o A388549     return bisection(f,n,n) # _Chai Wah Wu_, Dec 02 2025
 %Y A388549 Cf. A036966, A246549, A332785, A383394, A386762, A388293, A388304.
-%K A388549 nonn,easy
+%K A388549 nonn,easy,changed
 %O A388549 1,1
 %A A388549 _Michael De Vlieger_, Sep 21 2025
