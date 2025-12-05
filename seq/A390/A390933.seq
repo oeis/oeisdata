@@ -1,0 +1,47 @@
+%I A390933 #11 Dec 04 2025 15:44:03
+%S A390933 7,23,59,191,193,839,1129,1439,1931,4969,5039,8447,11447,23399,26891,
+%T A390933 29989,36479,41579,46619,57119,59999,77279,110879,163199,215353,
+%U A390933 232307,323759,370871,392761,414731,470579,521267,566999,606791,664199,678971,776159,824459,835379,879839,919631,1183739
+%N A390933 Primes that are (product minus sum) of a sequence of consecutive primes.
+%C A390933 Primes of the form Product_{k=i..j} prime(k) - Sum_{k=i..j} prime(k).
+%C A390933 j - i is always odd.
+%H A390933 Robert Israel, <a href="/A390933/b390933.txt">Table of n, a(n) for n = 1..10000</a>
+%e A390933 a(7) = 1129 is a term because 3, 5, 7, 11 are consecutive primes and 1129 = 3*5*7*11 - (3+5+7+11) is prime.
+%p A390933 N:= 2000; P:= select(isprime, [2, seq(i, i=3..N, 2)]): nP:= nops(P):
+%p A390933 M:= P[-2]^2-1:
+%p A390933 R:= {}:
+%p A390933 for i from 1 to nP do
+%p A390933   p:= P[i]; s:= P[i];
+%p A390933   for j from i+1 to nP do
+%p A390933     p:= p * P[j]; s:= s + P[j];
+%p A390933     v:= p-s;
+%p A390933     if v > M then break fi;
+%p A390933     if isprime(v) then R:= R union {v}; Q[v]:= [i,j] fi;
+%p A390933   od
+%p A390933 od:
+%p A390933 sort(convert(R, list));
+%o A390933 (Python)
+%o A390933 import heapq
+%o A390933 from itertools import islice
+%o A390933 from sympy import isprime, sieve
+%o A390933 def agen(): # generator of terms
+%o A390933     pp, ss, nextcount, alst, oldv = 6, 5, 3, [], -1
+%o A390933     h = [(pp-ss, pp, ss, 1, 2)]
+%o A390933     while True:
+%o A390933         (v, pr, sm, s, l) = heapq.heappop(h)
+%o A390933         if v > oldv and isprime(v):
+%o A390933             yield v
+%o A390933         oldv = v
+%o A390933         if v >= pp-ss:
+%o A390933             pp *= sieve[nextcount]
+%o A390933             ss += sieve[nextcount]
+%o A390933             heapq.heappush(h, (pp-ss, pp, ss, 1, nextcount))
+%o A390933             nextcount += 1
+%o A390933         pr //= sieve[s]; sm -= sieve[s]; s += 1; l += 1; pr *= sieve[l]; sm += sieve[l]
+%o A390933         heapq.heappush(h, (pr-sm, pr, sm, s, l))
+%o A390933     return alst
+%o A390933 print(list(islice(agen(), 42))) # _Michael S. Branicky_, Nov 30 2025
+%Y A390933 Primes in A387946. Contains A096345, A390916 and A390935. Cf. A391078.
+%K A390933 nonn,new
+%O A390933 1,1
+%A A390933 _Will Gosnell_ and _Robert Israel_, Nov 24 2025
