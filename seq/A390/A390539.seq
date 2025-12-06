@@ -1,4 +1,4 @@
-%I A390539 #18 Nov 18 2025 06:38:43
+%I A390539 #22 Dec 05 2025 23:38:26
 %S A390539 72,108,200,288,392,500,675,800,968,972,1125,1152,1323,1352,1372,1568,
 %T A390539 1800,2312,2700,2888,3087,3200,3267,3528,3872,4232,4500,4563,4608,
 %U A390539 5292,5324,5400,5408,6075,6125,6272,6728,7200,7688,7803,8575,8712,8748,8788,9000,9248
@@ -18,8 +18,29 @@
 %p A390539 end proc:
 %p A390539 select(filter, [$1..10000]); # _Robert Israel_, Nov 16 2025
 %t A390539 With[{nn = 10^4}, Select[Rest@ Union@ Flatten@ Table[a^2*b^3, {b, Surd[nn, 3]}, {a, Sqrt[nn/b^3]}], And[Min[#] < 3, GCD @@ # == 1] &[FactorInteger[#][[;; , -1]] ] &]]
+%o A390539 (Python)
+%o A390539 from math import isqrt, gcd
+%o A390539 from sympy import integer_nthroot, factorint
+%o A390539 from oeis_sequences.OEISsequences import bisection, squarefreepi
+%o A390539 def A390539(n):
+%o A390539     def f(x):
+%o A390539         c, l = n+x, 0
+%o A390539         j = z = isqrt(x)
+%o A390539         while j>1:
+%o A390539             k2 = integer_nthroot(x//j**2,3)[0]+1
+%o A390539             w = squarefreepi(k2-1)
+%o A390539             c -= j*(w-l)
+%o A390539             l, j = w, isqrt(x//k2**3)
+%o A390539         c += l+z-squarefreepi(integer_nthroot(x,3)[0])-sum(isqrt(z//k**3) for k in range(1, integer_nthroot(z, 3)[0]+1) if all(d<=1 for d in factorint(k).values()))
+%o A390539         for w in range(1,integer_nthroot(x,5)[0]+1):
+%o A390539             if all(d<=1 for d in factorint(w).values()):
+%o A390539                 for y in range(1,integer_nthroot(z:=x//w**5,4)[0]+1):
+%o A390539                     if gcd(w,y)==1 and all(d<=1 for d in factorint(y).values()):
+%o A390539                         c += integer_nthroot(z//y**4,3)[0]
+%o A390539         return c
+%o A390539     return bisection(f,n,n) # _Chai Wah Wu_, Dec 04 2025
 %Y A390539 Cf. A001694, A013929, A024619, A036966, A052486, A126706, A286708, A362147, A388293.
 %Y A390539 Cf. A000290, A013661, A065483, A082695, A325240, A374291.
-%K A390539 nonn,easy
+%K A390539 nonn,easy,changed
 %O A390539 1,1
 %A A390539 _Michael De Vlieger_, Nov 16 2025
