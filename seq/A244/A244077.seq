@@ -1,21 +1,33 @@
-%I A244077 #9 Jun 24 2014 05:48:10
+%I A244077 #33 Dec 07 2025 10:39:31
 %S A244077 23,29,31,37,53,59,71,73,79,113,131,137,139,173,179,191,193,197,199,
-%T A244077 6437,8339,14473,60827,95611,107813
-%N A244077 Consider a number of k digits n = d_(k)*10^(k-1) + d_(k-1)*10^(k-2) + … + d_(2)*10 + d_(1). Sequence lists the numbers n such that n’ = Sum_{i=1..k-1}{Sum_{j=1..i}{d_(k-j+1)*10^(i-j)}}’, where n’ is the arithmetic derivative of n (see example below).
+%T A244077 6437,8339,14473,60827,95611,107813,321773,495407,1154383,3001331,
+%U A244077 5707209,6208373,12898591,13481347,18895997,29223791,39111253,99058793,175113571,317624885
+%N A244077 Integers m such that m' = Sum_{i=1..k-1} (Sum_{j=1..i} d_(k-j+1)*10^(i-j))', where m' is the arithmetic derivative of m and the digits of m are given by d_(k)*10^(k-1) + d_(k-1)*10^(k-2) + ... + d_(2)*10 + d_(1).
 %C A244077 From 23 to 199 only primes, then composites.
-%e A244077 If n = 14473, starting from the most significant digit, let us cut the number into the set {1, 14, 144, 1447}. We have:
-%e A244077 1’ = 0;
-%e A244077 14’ = 9;
-%e A244077 144’ = 384;
-%e A244077 1447’ = 1.
-%e A244077 Finally, 0 + 9 + 384 + 1 = 14473’ = 394.
+%e A244077 If m = 14473, let us cut the number into the set {1, 14, 144, 1447}. We have:
+%e A244077   1' = 0;
+%e A244077   14' = 9;
+%e A244077   144' = 384;
+%e A244077   1447' = 1.
+%e A244077 Finally, 0 + 9 + 384 + 1 = 14473' = 394.
 %p A244077 with(numtheory); P:=proc(q) local a,c,k,n,p;
 %p A244077 for n from 10 to q do
 %p A244077 a:=0; k:=1; while trunc(n/10^k)>0 do c:=trunc(n/10^k);
 %p A244077 a:=a+c*add(op(2,p)/op(1,p),p=ifactors(c)[2]); k:=k+1; od;
 %p A244077 if a=n*add(op(2,p)/op(1,p),p=ifactors(n)[2]) then print(n);
 %p A244077 fi; od; end: P(10^10);
+%o A244077 (PARI) ad(n) = vecsum([n/f[1]*f[2]|f<-factor(n+!n)~]); \\ A003415
+%o A244077 isok(k) = my(d=digits(k)); if (#d>1, sum(i=1, #d-1, ad(fromdigits(Vec(d, i)))) == ad(k)); \\ _Michel Marcus_, Dec 05 2025
+%o A244077 (Python)
+%o A244077 from sympy import factorint
+%o A244077 from functools import cache
+%o A244077 @cache
+%o A244077 def ad(n): return 0 if n < 2 else sum(e*n//p for p, e in factorint(n).items())
+%o A244077 def ok(n): return len(s:=str(n)) > 1 and ad(n) == sum(ad(int(s[:k])) for k in range(1, len(s)))
+%o A244077 print([k for k in range(10**5) if ok(k)]) # _Michael S. Branicky_, Dec 05 2025
 %Y A244077 Cf. A003415, A240894-A240903, A241207, A241502, A241503, A244068, A244069, A244078.
-%K A244077 nonn,more,base
+%K A244077 nonn,base,changed
 %O A244077 1,1
 %A A244077 _Paolo P. Lava_, Jun 19 2014
+%E A244077 a(26)-a(37) and new name from _Michel Marcus_, Dec 05 2025
+%E A244077 a(38)-a(39) from _Michael S. Branicky_, Dec 05 2025

@@ -1,0 +1,48 @@
+%I A391078 #17 Dec 07 2025 05:57:33
+%S A391078 11,23,47,167,227,251,359,479,719,1181,1847,2111,2591,3719,6719,7559,
+%T A391078 8819,10607,12539,14591,19319,27551,29231,30071,31319,51071,53819,
+%U A391078 68111,97967,149759,155219,172199,177239,195359,199799,234239,273527,305783,314711,339863,356399,379451,417311,423791
+%N A391078 Primes that are (product + sum) of a sequence of consecutive primes.
+%C A391078 Is 23 the only term in common with A390933, i.e. a prime that is both (product - sum) of a sequence of consecutive primes and (product + sum) of a sequence of consecutive primes?
+%C A391078 No other term in common for n <= 10^8. - _Michael S. Branicky_, Dec 01 2025
+%H A391078 Robert Israel, <a href="/A391078/b391078.txt">Table of n, a(n) for n = 1..10000</a>
+%e A391078 a(3) = 47 is a term because 47 = 5*7 + 5 + 7 is prime, where 5 and 7 are consecutive primes.
+%p A391078 N:= 1000: # for terms <= N^2
+%p A391078 P:= select(isprime, [2, seq(i, i=3..N, 2)]): nP:= nops(P):
+%p A391078 M:= N^2:
+%p A391078 R:= {}:
+%p A391078 for i from 1 to nP do
+%p A391078   p:= P[i]; s:= P[i];
+%p A391078   for j from i+1 to nP do
+%p A391078     p:= p * P[j]; s:= s + P[j];
+%p A391078     v:= p+s;
+%p A391078     if v > M then break fi;
+%p A391078     if isprime(v) then R:= R union {v} fi;
+%p A391078   od
+%p A391078 od:
+%p A391078 sort(convert(R, list));
+%o A391078 (Python)
+%o A391078 import heapq
+%o A391078 from itertools import islice
+%o A391078 from sympy import isprime, sieve
+%o A391078 def agen(): # generator of terms
+%o A391078     pp, ss, nextcount, alst, oldv = 6, 5, 3, [], -1
+%o A391078     h = [(pp+ss, pp, ss, 1, 2)]
+%o A391078     while True:
+%o A391078         (v, pr, sm, s, l) = heapq.heappop(h)
+%o A391078         if v > oldv and isprime(v):
+%o A391078             yield v
+%o A391078         oldv = v
+%o A391078         if v >= pp:
+%o A391078             pp *= sieve[nextcount]
+%o A391078             ss += sieve[nextcount]
+%o A391078             heapq.heappush(h, (pp+ss, pp, ss, 1, nextcount))
+%o A391078             nextcount += 1
+%o A391078         pr //= sieve[s]; sm -= sieve[s]; s += 1; l += 1; pr *= sieve[l]; sm += sieve[l]
+%o A391078         heapq.heappush(h, (pr+sm, pr, sm, s, l))
+%o A391078     return alst
+%o A391078 print(list(islice(agen(), 44))) # _Michael S. Branicky_, Nov 30 2025
+%Y A391078 Cf. A387590, A390933.
+%K A391078 nonn,new
+%O A391078 1,1
+%A A391078 _Will Gosnell_ and _Robert Israel_, Nov 27 2025
