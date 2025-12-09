@@ -1,12 +1,36 @@
-%I A082379 #20 Jul 21 2021 09:55:37
+%I A082379 #25 Dec 08 2025 08:59:43
 %S A082379 1,2,4,6,10,14,20,24,30,40,48,56,64,76,82,92,106,124,142,152,172,192,
 %T A082379 210,220,234,256,284,308,314,332,356,372,392,420,456,488,524,560,588,
 %U A082379 608,640,684,736,764,796,832,874,892,912,948,994,1020,1060,1112,1184
 %N A082379 Number of length-n 7/3-power-free words over the alphabet {0,1}.
+%H A082379 Michael S. Branicky, <a href="/A082379/b082379.txt">Table of n, a(n) for n = 0..732</a>
 %H A082379 Juhani Karhumäki and Jeffrey Shallit, <a href="https://arxiv.org/abs/math/0304095">Polynomial versus exponential growth in repetition-free binary words</a>, arXiv:math/0304095 [math.CO], April 7 2003.
 %H A082379 Juhani Karhumäki and Jeffrey Shallit, <a href="https://doi.org/10.1016/j.jcta.2003.12.004">Polynomial versus exponential growth in repetition-free binary words</a>, Journal of Combinatorial Theory, Series A 105 (2004) 335-347.
+%o A082379 (Python)
+%o A082379 from fractions import Fraction
+%o A082379 from functools import lru_cache
+%o A082379 from itertools import count, islice, product
+%o A082379 def period(x):
+%o A082379     for p in range(1, len(x)):
+%o A082379         if all(x[i] == x[i+p] for i in range(len(x)-p)):
+%o A082379             return p
+%o A082379     return len(x)
+%o A082379 def exp(x):
+%o A082379     return Fraction(len(x), period(x))
+%o A082379 @lru_cache(maxsize=None)
+%o A082379 def cexp(x):
+%o A082379     if len(x) == 1: return 1
+%o A082379     return max(exp(x), cexp(x[:-1]), cexp(x[1:]))
+%o A082379 def agen(): # generator of 7/3-power-free terms
+%o A082379     yield 1
+%o A082379     stfs = set("0")
+%o A082379     for n in count(1):
+%o A082379         yield 2*len(stfs)
+%o A082379         stfsnew = set(s+i for s in stfs for i in "01" if cexp(s+i) < Fraction(7, 3))
+%o A082379         stfs = stfsnew
+%o A082379 print(list(islice(agen(), 60))) # _Michael S. Branicky_, Dec 08 2025
 %Y A082379 Cf. A038952, A028445, A007777, A082380.
-%K A082379 nonn
+%K A082379 nonn,changed
 %O A082379 0,2
 %A A082379 _Ralf Stephan_, Apr 10 2003
 %E A082379 Name changed by _Jeffrey Shallit_, Sep 26 2014
