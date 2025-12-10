@@ -1,0 +1,44 @@
+%I A388070 #28 Dec 09 2025 08:27:21
+%S A388070 1,2,4,8,11,26,44,89,165,337,638,1292,2521,5044,9931,19859,39355,
+%T A388070 78462,155970,311161,619221,1234838,2460906,4907970,9785136,19521409,
+%U A388070 38938072,77691126,155017553,309366167,617411372,1232376700,2459999546,4910988849,9804596467
+%N A388070 Number of compositions of n where the gcd of the parts equals the median of the parts.
+%C A388070 For even-length compositions, the median is defined as the lower-middle element of the sorted parts.
+%C A388070 a(n) = Sum_{d|n} A391398(n/d). This is because any composition with gcd = median = d can be reduced by dividing all parts by d to obtain a primitive composition of n/d.
+%C A388070 Equivalently, compositions where at least half the parts equal the smallest part and all parts are multiples of the smallest part.
+%H A388070 Alois P. Heinz, <a href="/A388070/b388070.txt">Table of n, a(n) for n = 1..2000</a>
+%F A388070 a(n) = Sum_{d|n} A391398(d).
+%e A388070 a(5) = 11 because the compositions of 5 where gcd = median are: gcd = median = 1: [1,1,1,1,1], [1,1,1,2], [1,1,2,1], [1,2,1,1], [2,1,1,1], [1,1,3], [1,3,1], [3,1,1], [1,4], [4,1] gcd = median = 5: [5]
+%e A388070 a(6) = 26 = A391398(6) + A391398(3) + A391398(2) + A391398(1) = 21 + 3 + 1 + 1, summing over divisors of 6.
+%p A388070 b:= proc(n, c) option remember; `if`(-c>n, 0, `if`(n=0, 1,
+%p A388070       add(b(n-j, c+`if`(j=1, 1, -1)), j=1..n)))
+%p A388070     end:
+%p A388070 a:= n-> add(b(d, 0), d=numtheory[divisors](n)):
+%p A388070 seq(a(n), n=1..35);  # _Alois P. Heinz_, Dec 08 2025
+%o A388070 (Python)
+%o A388070 from math import gcd
+%o A388070 from functools import reduce
+%o A388070 def a(n):
+%o A388070     def comps(n):
+%o A388070         if n == 0:
+%o A388070             yield []
+%o A388070             return
+%o A388070         for i in range(1, n + 1):
+%o A388070             for c in comps(n - i):
+%o A388070                 yield [i] + c
+%o A388070     count = 0
+%o A388070     for c in comps(n):
+%o A388070         if not c:
+%o A388070             continue
+%o A388070         s = sorted(c)
+%o A388070         k = len(s)
+%o A388070         med = s[k // 2] if k % 2 else s[k // 2 - 1]
+%o A388070         if reduce(gcd, c) == med:
+%o A388070             count += 1
+%o A388070     return count
+%o A388070 print([a(n) for n in range(1, 26)])
+%Y A388070 Cf. A391398 (primitive case: gcd = median = 1), A011782, A130711, A130709.
+%K A388070 nonn,new
+%O A388070 1,2
+%A A388070 _Austen M. Fletcher_, Dec 08 2025
+%E A388070 a(27)-a(35) from _Alois P. Heinz_, Dec 08 2025
