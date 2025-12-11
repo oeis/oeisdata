@@ -1,0 +1,43 @@
+%I A391194 #32 Dec 10 2025 14:24:37
+%S A391194 1,2,10,69,539,4582,41043,381871,3653619,35722529,355337667,
+%T A391194 3584596437,36585243851,377093026829,3919668442947,41040746434409,
+%U A391194 432460606632889,4582630227918659,48803039818609349,522051179425268272,5606844654847831303,60436088613724552467,653585828251080034845
+%N A391194 Number of ternary trees with n internal nodes labeled 1 or 2; nodes labeled 1 have three linearly ordered children, but nodes labeled 2 have three children which are reversible (the first and third children may be transposed but the middle child must remain in place).
+%C A391194 More precisely, for nodes labeled 2, the first child must be greater than or equal to the third child in lex order.  Lex order on trees is defined as follows: (1) A tree with fewer internal nodes precedes a tree with more internal nodes.  (2) Suppose S and T are trees with the same number of internal nodes.  Let d(S) and d(T) be the words from the alphabet {1,2,X} (X = leaf) obtained by depth-first traversal.  Then S precedes T if and only if d(S) precedes d(T) in lex order with 1 < 2 < X.
+%C A391194 The sequence may also be interpreted as the number of normal forms for association types of nonassociative monomials in two ternary operations: the first operation has no symmetry, but the second operation has reversal symmetry: (a,b,c) = (c,b,a), so we may assume that a >= c in lex order of association types.  The index starts at 0 and counts the number of operations in each term (called the weight).  Hence the first entry in the sequence (with index 0) is 1, corresponding to a single argument (indeterminate) X with no operations (and weight 0).
+%F A391194 G.f.: A(x) satisfies A(x) = 1 + x*A(x)*(3*A(x)^2 + A(x^2))/2. - _Andrew Howroyd_, Dec 02 2025
+%e A391194 For index 2, the 10 nonassociative ternary monomials are
+%e A391194   [X, X, [X, X, X, 1], 1],
+%e A391194   [X, X, [X, X, X, 2], 1],
+%e A391194   [X, [X, X, X, 1], X, 1],
+%e A391194   [X, [X, X, X, 2], X, 1],
+%e A391194   [[X, X, X, 1], X, X, 1],
+%e A391194   [[X, X, X, 2], X, X, 1],
+%e A391194   [X, [X, X, X, 1], X, 2],
+%e A391194   [X, [X, X, X, 2], X, 2],
+%e A391194   [[X, X, X, 1], X, X, 2],
+%e A391194   [[X, X, X, 2], X, X, 2],
+%e A391194 where X is a generic argument symbol, and the last entry in each sublist indicates either operation 1 with no symmetry or operation 2 with reversal symmetry.
+%p A391194 maxweight := 25:
+%p A391194 # procedure to compute compositions of w into 3 parts allowing 0 as a part
+%p A391194 comp3 := proc( w )
+%p A391194 return [ seq( [ c[1]-1, c[2]-1, c[3]-1 ], c in combinat[composition]( w+3, 3 ) ) ]
+%p A391194 end:
+%p A391194 TT := table():
+%p A391194 TT[0] := 1:
+%p A391194 for w to maxweight do
+%p A391194   TT[w] := 0:
+%p A391194   # operation 1: without symmetry
+%p A391194   for c in comp3( w-1 ) do TT[w] := TT[w] + TT[c[1]]*TT[c[2]]*TT[c[3]] od:
+%p A391194   # operation 2: with reversal symmetry
+%p A391194   for c in comp3( w-1 ) do
+%p A391194     if c[1] > c[3] then TT[w] := TT[w] + TT[c[1]]*TT[c[2]]*TT[c[3]] fi:
+%p A391194     if c[1] = c[3] then TT[w] := TT[w] + binomial(TT[c[1]]+1,2)*TT[c[2]] fi
+%p A391194   od
+%p A391194 od:
+%p A391194 seq(TT[n],n=0..maxweight);
+%o A391194 (PARI) seq(n)={my(p=1+O(x)); for(n=1, n, p = 1 + x*p*(3*p^2 + subst(p,x,x^2))/2); Vec(p)} \\ _Andrew Howroyd_, Dec 02 2025
+%Y A391194 Cf. A226909, A268172, A268163.
+%K A391194 nonn,easy,new
+%O A391194 0,2
+%A A391194 _Murray R. Bremner_, Dec 02 2025

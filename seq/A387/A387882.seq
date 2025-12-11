@@ -1,0 +1,44 @@
+%I A387882 #47 Dec 10 2025 09:00:13
+%S A387882 1,144,169,10044,13468,10069,1003468,1000069,10002456,11234689,
+%T A387882 10234467,100012669,100012444,102344899,102245679,100124469,102234789,
+%U A387882 100345689,102344569,100024569,1001223459,102345678,1001234569,1000123569,1002344679,1001234689
+%N A387882 a(n) is the smallest k > 0 such that exactly n distinct permutations of the digits of k, all having the same number of digits as k, are perfect squares (no leading zeros allowed).
+%C A387882 a(2n) <= 10^(2n) + 44. Proof. Consider the number m = 12*10^(n - 1). There are a total of 2*n permutations of m that have the same number of digits as m, where each of them satisfies that its square is composed of (2n + 1) digits, which are: 1, 4, 4, and (2n - 2)'s zeros. In this way, we have generated 2*n perfect squares that share all their digits.
+%H A387882 Michael S. Branicky, <a href="/A387882/b387882.txt">Table of n, a(n) for n = 1..10000</a>
+%e A387882 n|    k    | [permutations of k that are perfect squares]
+%e A387882 1|    1    | [1]
+%e A387882 2|   144   | [144, 441]
+%e A387882 3|   169   | [169, 196, 961]
+%e A387882 4|  10044  | [10404, 14400, 40401, 44100]
+%e A387882 5|  13468  | [16384, 31684, 36481, 38416, 43681]
+%e A387882 6|  10069  | [10609, 16900, 19600, 61009, 90601, 96100]
+%e A387882 7| 1003468 | [1638400, 3168400, 3648100, 3806401, 3841600, 4036081, 4368100]
+%e A387882 8| 1000069 | [1006009, 1060900, 1690000, 1960000, 6100900, 9006001, 9060100, 9610000]
+%o A387882 (PARI) upto(n) = {my(d=digits(n), qd=#d, maxn=10^qd-1, maxi=sqrtint(maxn), m=Map(), res=[] ); for(i=1, maxi, c=i^2; s=A328447(c); if(mapisdefined(m,s), q=mapget(m,s); mapput(m,s,q+1); ,mapput(m,s,1))); foreach(m,item,if(item[1][2]>#res,res=concat(res,vector(item[1][2]-#res,i,oo)););res[item[1][2]]=min(res[item[1][2]],item[1][1]););res}
+%o A387882 A328447(n)={if(n=vecsort(digits(n)), n[1]|| for(k=2, #n, n[k]&&[n[1]=n[k], n[k]=0, break])); fromdigits(n)} \\ (A328447 from M. F. Hasler, Oct 15 2019)
+%o A387882 \\ _David A. Corneth_, Dec 09 2025
+%o A387882 (Python)
+%o A387882 from math import isqrt
+%o A387882 from collections import Counter
+%o A387882 from itertools import count, islice
+%o A387882 def b(s): # A328447 for string input
+%o A387882     t = "".join(sorted(s)).strip("0")
+%o A387882     return int(t[0]+"0"*s.count("0")+t[1:])
+%o A387882 def agen():
+%o A387882     adict, n, pcdict, digs = dict(), 1, Counter(), -1
+%o A387882     for d in count(1):
+%o A387882         pcdict = Counter()
+%o A387882         for m in range(isqrt(10**(d-1)-1)+1, isqrt(10**d-1)+1):
+%o A387882             pcdict[b(str(m*m))] += 1
+%o A387882         if pcdict:
+%o A387882             vals = set(pcdict.values())
+%o A387882             for i in range(n, max(vals)+1):
+%o A387882                 if i in vals:
+%o A387882                     adict[i] = next(k for k in sorted(pcdict) if pcdict[k] == i)
+%o A387882                     while n in adict: yield adict[n]; n += 1
+%o A387882 print(list(islice(agen(), 30))) # _Michael S. Branicky_, Dec 09 2025
+%Y A387882 Cf. A000290, A128993, A179239, A328447.
+%K A387882 nonn,base,new
+%O A387882 1,2
+%A A387882 _Gonzalo Martínez_, Dec 08 2025
+%E A387882 a(7), a(9), a(14)-a(18), a(23), a(26) corrected by _Michael S. Branicky_, Dec 08 2025
