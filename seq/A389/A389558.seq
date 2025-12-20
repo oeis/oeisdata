@@ -1,4 +1,4 @@
-%I A389558 #23 Nov 23 2025 03:49:07
+%I A389558 #28 Dec 19 2025 12:40:40
 %S A389558 72,108,144,200,288,324,392,400,500,576,675,784,800,968,972,1125,1152,
 %T A389558 1323,1352,1372,1568,1600,1800,1936,2025,2304,2312,2500,2700,2704,
 %U A389558 2888,2916,3087,3136,3200,3267,3528,3600,3872,3969,4232,4500,4563,4608,4624,5292,5324
@@ -29,8 +29,36 @@
 %e A389558 11    675   3^3 * 5^2        = s(7)
 %e A389558 23   1800 = 2^3 * 3^2 * 5^2  = s(17)
 %t A389558 With[{nn = 5400}, Select[Rest@ Union@ Flatten@ Table[a^2 * b^3, {b, Surd[nn, 3]}, {a, Sqrt[nn/b^3]}], And[Length[#] > 1, CountDistinct[#] > 1, AnyTrue[#, # < 3 &] ] &[FactorInteger[#][[;; , -1]] ] &] ]
+%o A389558 (Python)
+%o A389558 from math import isqrt, gcd
+%o A389558 from sympy import integer_nthroot, factorint
+%o A389558 from oeis_sequences.OEISsequences import bisection, squarefreepi
+%o A389558 def A389558(n):
+%o A389558     def f(x):
+%o A389558         c, l = n+x-1, 0
+%o A389558         j = z = isqrt(x)
+%o A389558         while j>1:
+%o A389558             k2 = integer_nthroot(x//j**2,3)[0]+1
+%o A389558             w = squarefreepi(k2-1)
+%o A389558             c -= j*(w-l)
+%o A389558             l, j = w, isqrt(x//k2**3)
+%o A389558         c += l-squarefreepi(integer_nthroot(x,3)[0])-sum(isqrt(z//k**3) for k in range(1, integer_nthroot(z, 3)[0]+1) if all(d<=1 for d in factorint(k).values()))
+%o A389558         j, l = isqrt(z), 0
+%o A389558         while j>1:
+%o A389558             k2 = integer_nthroot(z//j**2,3)[0]+1
+%o A389558             w = squarefreepi(k2-1)
+%o A389558             c += j*(w-l)
+%o A389558             l, j = w, isqrt(z//k2**3)
+%o A389558         c += -l+squarefreepi(integer_nthroot(z,3)[0])+squarefreepi(z)
+%o A389558         for w in range(1,integer_nthroot(x,5)[0]+1):
+%o A389558             if all(d<=1 for d in factorint(w).values()):
+%o A389558                 for y in range(1,integer_nthroot(z:=x//w**5,4)[0]+1):
+%o A389558                     if gcd(w,y)==1 and all(d<=1 for d in factorint(y).values()):
+%o A389558                         c += integer_nthroot(z//y**4,3)[0]
+%o A389558         return c
+%o A389558     return bisection(f,n,n) # _Chai Wah Wu_, Dec 18 2025
 %Y A389558 Cf. A000290, A001597, A001694, A036966, A062503, A126706, A131605, A286708, A325240, A359280, A362147, A389551, A389947, A390539.
 %Y A389558 Cf. A065483, A082020, A082695.
-%K A389558 nonn,easy
+%K A389558 nonn,easy,changed
 %O A389558 1,1
 %A A389558 _Michael De Vlieger_, Nov 17 2025
