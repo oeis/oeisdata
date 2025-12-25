@@ -1,14 +1,37 @@
-%I A074857 #10 Jan 31 2025 23:45:05
+%I A074857 #18 Dec 24 2025 04:22:33
 %S A074857 2,3,17,19,23,31,37,43,53,59,137,139,151,157,179,181,191,197,199,211,
 %T A074857 307,317,337,347,367,397,599,1423,1433,1453,1483,1493,1523,1543,1583,
 %U A074857 1613,1693,1723,1733,1753,1759,1777,1783,1787,1789,1801,1811,1823,1831,1847
 %N A074857 Primes p such that all p-pal for p/2 < pal < p are nonprime, where pal is a palindrome.
+%C A074857 Includes all primes p from 1.8 * 10^d to 2 * 10^d such that p - 2 is not a palindrome. - _Robert Israel_, Dec 23 2025
+%H A074857 Robert Israel, <a href="/A074857/b074857.txt">Table of n, a(n) for n = 1..10000</a>
 %e A074857 59 is in the sequence because the palindromes between 29 and 59 are 33,44,55 and 59-55 = 4, 59-44 = 15, 59-33 = 26, all composite.
 %e A074857 From _Sean A. Irvine_, Jan 31 2025: (Start)
 %e A074857 2 is in the sequence because there are no palindromes between 1 and 2.
 %e A074857 3 is in the sequence because the only palindrome between 3/2 and 3 is 2 and 3-2=1 is not prime.
 %e A074857 23 is in the sequence because the only palindrome between 23/2 and 23 is 22 and 23-22=1 is not prime. (End)
-%K A074857 base,nonn
+%p A074857 N:=4; # for terms up to 10^N
+%p A074857 digrev:= proc(n) local L,i;
+%p A074857   L:= convert(n,base,10);
+%p A074857   add(L[-i]*10^(i-1),i=1..nops(L))
+%p A074857 end proc:
+%p A074857 Pals:= $0..9:
+%p A074857 for d from 2 to N do
+%p A074857   if d::even then
+%p A074857     m:= d/2;
+%p A074857     Pals:= Pals, seq(n*10^m + digrev(n), n=10^(m-1)..10^m-1);
+%p A074857   else
+%p A074857     m:= (d-1)/2;
+%p A074857     Pals:= Pals, seq(seq(n*10^(m+1)+y*10^m+digrev(n), y=0..9), n=10^(m-1)..10^m-1);
+%p A074857   fi
+%p A074857 od:
+%p A074857 Pals:=[Pals]:
+%p A074857 filter:= proc(p) uses ListTools;
+%p A074857   isprime(p) and not ormap(isprime,
+%p A074857      p -~ Pals[BinaryPlace(Pals, p/2)+1 .. BinaryPlace(Pals,p)])
+%p A074857 end proc:
+%p A074857 select(filter, [2,seq(i,i=3..10^N,2)]); # _Robert Israel_, Dec 23 2025
+%K A074857 base,nonn,look,changed
 %O A074857 1,1
 %A A074857 _Jason Earls_, Sep 11 2002
 %E A074857 Missing 3 inserted by _Sean A. Irvine_, Jan 31 2025
