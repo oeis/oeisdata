@@ -1,4 +1,4 @@
-%I A360407 #9 Feb 08 2023 14:47:05
+%I A360407 #27 Dec 31 2025 22:20:26
 %S A360407 0,0,1,0,3,4,1,2,5,0,15,10,25,20,5,6,21,16,1,26,11,12,27,22,7,2,17,18,
 %T A360407 3,28,13,8,23,24,9,4,19,14,29,0,105,70,175,140,35,126,21,196,91,56,
 %U A360407 161,42,147,112,7,182,77,168,63,28,133,98,203,84,189,154,49
@@ -6,7 +6,9 @@
 %C A360407 When computing T(n, k), we pad the primorial base expansion of k with leading zeros so as to have n digits.
 %C A360407 The Chinese remainder theorem ensures that this sequence is well defined and provides a way to compute it.
 %C A360407 The n-th row is a permutation of 0..A002110(n)-1.
+%C A360407 Each row is the inverse permutation of the corresponding row of A391930, thus this sequence can be also computed by using triangular table A240673. See page 9 of Schmitt paper and the second PARI-program. - _Antti Karttunen_, Dec 30 2025
 %H A360407 Rémy Sigrist, <a href="/A360407/b360407.txt">Table of n, a(n) for n = 0..2558</a>
+%H A360407 Matthias Schmitt, <a href="https://arxiv.org/abs/1404.0706">A function to calculate all relative prime numbers up to the product of the first n primes</a>, arXiv:1404.0706 [math.NT] (see function g on page 9).
 %H A360407 Wikipedia, <a href="http://en.wikipedia.org/wiki/Chinese_remainder_theorem">Chinese remainder theorem</a>
 %H A360407 <a href="/index/Pri#primorialbase">Index entries for sequences related to primorial base</a>
 %F A360407 T(n, 0) = 0.
@@ -21,8 +23,19 @@
 %e A360407                   7, 2, 17, 18, 3, 28, 13, 8, 23, 24, 9, 4, 19, 14, 29;
 %e A360407     ...
 %o A360407 (PARI) T(n,k) = { my (t=Mod(0,1)); if (n, forprime (p=2, prime(n), t=chinese(t, Mod(k, p)); k\=p)); lift(t) }
+%o A360407 (PARI)
+%o A360407 \\ The sequence can be computed also with this program, utilizing triangle A240673:
+%o A360407 n_rows = 5;
+%o A360407 A002110(n) = prod(i=1,n,prime(i));
+%o A360407 A143293(n) = { if(n==0, return(1)); my(P=1, s=1); forprime(p=2, prime(n), s+=P*=p); s; };
+%o A360407 A240673_tr(n, k) = { my(val = prod(j=1, n, prime(j))/prime(k)); val * lift(1/Mod(val, prime(k))); };
+%o A360407 A360407_tr(n, k) = { my(p=1); (sum(i=1, n, k = k\p; p = nextprime(1+p); A240673_tr(n, i)*(k%p)) % A002110(n)); };
+%o A360407 A360407_list(rows_up_to) = { my(v = vector(A143293(rows_up_to)-1), j=0); for(row=1,rows_up_to, for(k=0, A002110(row)-1, j++; v[j] = A360407_tr(row, k))); (v); };
+%o A360407 v360407 = A360407_list(rows_up_to);
+%o A360407 A360407(n) = if(n<=1, 0, v360407[n]); \\ _Antti Karttunen_, Dec 31 2025
 %Y A360407 See A343404 for a similar sequence.
-%Y A360407 Cf. A002110, A057588, A070826.
-%K A360407 nonn,base,tabf
+%Y A360407 Cf. A002110, A049345, A057588, A070826, A240673.
+%Y A360407 Cf. A391930 for triangle with the inverse rows.
+%K A360407 nonn,base,tabf,look,changed
 %O A360407 0,5
 %A A360407 _Rémy Sigrist_, Feb 06 2023
