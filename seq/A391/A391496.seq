@@ -1,0 +1,34 @@
+%I A391496 #60 Jan 01 2026 15:24:42
+%S A391496 1,2,21,75,675,3195,22707,189375,363051,2035075,5409459,8714795,
+%T A391496 78840203,143367875,120435875,598942539
+%N A391496 a(n) is the smallest k which has exactly 2*n divisors d such that tau(k) = tau(k/d + d).
+%C A391496 It is known that tau(square) is odd, tau(nonsquare) is even. For a square k, we find (k/d + d), for example, for 1 we get 2, for 4, 4; for 9, 6; for 25, 10; ... Then the only solution to the original equation is k = 4 with d = 2.
+%e A391496 a(3) = 75 because for k = 75 which has tau = 6 and 2*n = 6 divisors: (1 and 75), (3 and 25), (5 and 15);
+%e A391496 a(4) = 675 because for k = 675 which has tau = 12 and 2*n = 8 divisors: (3 and 225), (5 and 135), (9 and 75), (15 and 45).
+%t A391496 a[n_]:=Module[{k=1},While[Length[Select[Divisors[k],DivisorSigma[0,k]==DivisorSigma[0,k/#+#] &]]!=2n,k++]; k]; Array[a,8] (* _Stefano Spezia_, Dec 11 2025 *)
+%o A391496 (Magma) [Min([k: k in [1..23000] | #[d: d in Divisors(k) | #Divisors(k) eq #Divisors((k div d) + d)] eq 2*n]): n in [0..6]];
+%o A391496 (PARI) a(n) = my(k=1); while (sumdiv(k, d, numdiv(k) == numdiv(k/d + d)) != 2*n, k++); k; \\ _Michel Marcus_, Dec 11 2025
+%o A391496 (Python)
+%o A391496 from functools import lru_cache
+%o A391496 from itertools import count, islice
+%o A391496 from sympy import divisor_count, divisors
+%o A391496 @lru_cache(maxsize=10**8)
+%o A391496 def tau(k): return divisor_count(k)
+%o A391496 def f(k, minv=0):
+%o A391496     tauk = tau(k)
+%o A391496     if tauk < minv: return -1
+%o A391496     return sum(1 for d in divisors(k) if tauk == tau(k//d+d))
+%o A391496 def agen():
+%o A391496     n, adict = 0, {0:1, 2:2}
+%o A391496     for k in count(3, 2):
+%o A391496         v = f(k, minv=2*n)
+%o A391496         if v not in adict:
+%o A391496             adict[v] = k
+%o A391496             while 2*n in adict: yield adict[2*n]; n += 1
+%o A391496 print(list(islice(agen(), 9))) # _Michael S. Branicky_, Dec 14 2025
+%Y A391496 Cf. A000005.
+%K A391496 nonn,more,new
+%O A391496 0,2
+%A A391496 _Juri-Stepan Gerasimov_, Dec 10 2025
+%E A391496 a(11)-a(12) from _Michel Marcus_, Dec 11 2025
+%E A391496 a(13)-a(15) from _Michael S. Branicky_, Dec 13 2025
