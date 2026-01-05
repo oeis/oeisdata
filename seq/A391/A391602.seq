@@ -1,0 +1,64 @@
+%I A391602 #40 Jan 04 2026 17:16:36
+%S A391602 633555,80061344,1109496723125
+%N A391602 a(n) is the largest number m such that A391449(m) = n.
+%C A391602 For each nonnegative integer d, this sequence gives the largest value of m where the difference delta(m) = pi(gpf(m*(m+1))) - omega(m*(m+1)) equals d, given pi() is the prime counting function (A000720), gpf is the greatest prime factor (A006530), and omega counts distinct prime factors (A001221).
+%C A391602 After m = a(d), all subsequent values of m have delta(m) > d. These represent critical transition points where consecutive smooth number pairs become increasingly rare.
+%C A391602 The sequence illustrates double exponential growth driven by the Hardy-Ramanujan theorem: as omega(m) typically grows as log(log(m)), imposing a tight constraint between omega and the prime index forces m to grow as exp(exp(d)).
+%C A391602 It is proved that each a(n) must exist (be finite) because the growth rate of pi(gpf(m*(m+1))) exceeds that of omega(m*(m+1)) asymptotically. However, no constructive bound is known for determining when the search can be terminated.
+%C A391602 a(0) through a(2) computationally verified to m = 2*10^14 (A141399 verified a(0) to 2.29*10^25). We conjecture this is sufficient to justify the finality of a(0) and a(1), and likely the finality of a(2). See the distribution of delta values by running the Octave_Deltas.c program at the attached link.
+%C A391602 Conjecture: All polynomial generator functions of order 2 or greater, G(n), with integer roots, and that are not perfect powers, are bounded in pi-complete numbers (A055932). Consequences: Since primorials are pi-complete by definition and verification shows no primorial products m*(m+1) for 715 <= m <= 633555, this suggests (714, 715) is the last pair of consecutive integers with primorial product. For Brocard's equation n! + 1 = m^2, since factorials are pi-complete and n! = (m-1)*(m+1), note that for odd m, (m-1)*(m+1) = 4*k*(k+1) where k = (m-1)/2, and delta(4*k*(k+1)) = delta(k*(k+1)) (multiplying by 4 just adds more powers of 2). Thus pi-complete (m-1)*(m+1) requires delta(k*(k+1)) = 0. Since a(0) = 633555 is the last k with delta(k*(k+1)) = 0, the bound m <= 1267111 (the final term of A194099) closes the search for solutions to Brocard's equation.
+%H A391602 Ken Clements, <a href="/A391602/a391602_1.c.txt">Delta Distributions by Octave</a>
+%e A391602 a(0) = 633555 because when:
+%e A391602   m = 633555 = 3^3 * 5 * 13 * 19^2 and
+%e A391602   m+1 = 633556 = 2^2 * 7 * 11^3 * 17,
+%e A391602   the combined product has gpf = 19 with pi(19) = 8 and omega = 8.
+%e A391602   Thus d = 8 - 8 = 0.
+%e A391602   This is the last m where delta achieves 0 (pi-complete).
+%e A391602 a(1) = 80061344 because when:
+%e A391602   m = 80061344 = 2^5 * 11^2 * 23 * 29 * 31 and
+%e A391602   m+1 = 80061345 = 3^3 * 5 * 7^4 * 13 * 19,
+%e A391602   the combined product has gpf = 31 with pi(31) = 11 and omega = 10.
+%e A391602   Thus d = 11 - 10 = 1. This is the last m where the minimum d drops to 1.
+%e A391602 a(2) = 1109496723125 because when:
+%e A391602   m = 1109496723125 = 5^4 * 7 * 17 * 19^2 * 31^2 * 43 and
+%e A391602   m+1 = 1109496723126 = 2 * 3 * 11^2 * 23 * 29^2 * 41^2 * 47,
+%e A391602   the combined product highest prime index pi(47) = 15, with distinct primes = 13.
+%e A391602   Thus d = 2, and this is the last m currently found where the minimum d drops to 2.
+%o A391602 (Python, with numpy and numba)
+%o A391602 """ Note: This code is an example. Because the search range is so large, it is only practical to run as multiple parallel threads, each taking a part of the search space. The parallelization is not shown here. """
+%o A391602 from sympy import primerange
+%o A391602 import numpy as np
+%o A391602 from numba import njit
+%o A391602 delta_limit, m_range = 3, 10_000_000_000_000
+%o A391602 primes = np.array([0] + list(primerange(2, 100)))
+%o A391602 @njit(cache=True)
+%o A391602 def fast_po(m): # Return a fast Pidx and omega if they are small numbers
+%o A391602     Pidx, omega = 0, 0
+%o A391602     for i in range (1, 26):
+%o A391602         p = primes[i]
+%o A391602         if p > m:
+%o A391602             return 99999, 0
+%o A391602         div_hit = 1
+%o A391602         while m % p == 0:
+%o A391602             omega += div_hit
+%o A391602             div_hit = 0
+%o A391602             Pidx = i
+%o A391602             m //= p
+%o A391602             if m == 1:
+%o A391602                 return Pidx, omega
+%o A391602     return 99999, 0
+%o A391602 delta_min = [0] * delta_limit
+%o A391602 Pidx_m, omega_m = 0, 0
+%o A391602 for m in range(1, m_range+1):
+%o A391602     Pidx_p1, omega_p1 = fast_po(m+1)
+%o A391602     omega_product = omega_m + omega_p1
+%o A391602     Pidx_product = max(Pidx_m, Pidx_p1)
+%o A391602     Pidx_m, omega_m = Pidx_p1, omega_p1
+%o A391602     delta = Pidx_product - omega_product
+%o A391602     if delta < delta_limit:
+%o A391602         delta_min[delta] = m
+%o A391602 print(f"Final m = {m:,} and minimum deltas were at m = {delta_min}")
+%Y A391602 Cf. A391449, A252489, A059957, A055932, A141399, A002378, A391885, A391970.
+%K A391602 nonn,hard,bref,more,new
+%O A391602 0,1
+%A A391602 _Ken Clements_, Dec 13 2025
