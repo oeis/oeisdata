@@ -1,0 +1,35 @@
+%I A391929 #43 Jan 05 2026 23:24:57
+%S A391929 1,2,2,10,10,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,
+%T A391929 22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,
+%U A391929 22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22,22
+%N A391929 Number of fixed points on row n of triangle A391930.
+%C A391929 The first n with a(n) > 22 is at n = A341805(4)+1 = 9823713, where a(9823713) = 2*prime(9823713) = 352156586, because the row 9823713 of A391928 is an ascending run of terms 0, 1, 2, 3, ..., prime(9823713)-1. See _Jeppe Stig Nielsen_'s Feb 20 2021 comment in A079276.
+%H A391929 Rémy Sigrist, <a href="/A343405/a343405.png">Illustration of the terms of A343405</a> (term a(n)-1 essentially gives the width of that tree at depth n)
+%H A391929 <a href="/index/Pri#primorialbase">Index entries for sequences related to primorial base</a>.
+%F A391929 a(0) = 1, a(1) = 2, and for n > 1, if A002110(n-1)-1 is a multiple of prime(n), then a(n) = 2*prime(n), otherwise a(n) = a(n-1).
+%F A391929 a(n) = Sum_{k=0 .. A002110(n)-1} [k == A360407(n, k)], where [ ] is the Iverson bracket.
+%F A391929 a(n) = Sum_{k=0 .. A002110(n)-1} [k == (Sum_{i=1..n} ((k mod prime(i)) * A002110(i-1)))].
+%e A391929 On row 3 of A391930 (and equally on row 3 of A360407) the fixed points are 0, 5, 6, 11, 12, 17, 18, 23, 24, 29, therefore a(3) = 10.
+%e A391929 On row 4 of A391930 the fixed points are: 0, 36, 65, 72, 101, 108, 137, 144, 173, 209, therefore a(4) = 10.
+%e A391929 On row 5 the fixed points are: 0, 209, 210, 419, 420, 629, 630, 839, 840, 1049, 1050, 1259, 1260, 1469, 1470, 1679, 1680, 1889, 1890, 2099, 2100, 2309, therefore a(5) = 22.
+%e A391929 On row 6 the fixed points are: 0, 1469, 2939, 4200, 5670, 7140, 8609, 10079, 11340, 12810, 14280, 15749, 17219, 18689, 19950, 21420, 22889, 24359, 25829, 27090, 28560, 30029, therefore a(6) = 22.
+%e A391929 On row 10 the fixed points are: 0, 75741330, 92099070, 869259720, 1306416510, 1400639309, 1568479710, 2194157699, 2631314489, 2782797150, 2799154890, 3670538339, 3686896079, 3838378740, 4275535530, 4901213519, 5069053920, 5163276719, 5600433509, 6377594159, 6393951899, 6469693229, therefore a(10) = 22.
+%o A391929 (PARI)
+%o A391929 \\ Slow program:
+%o A391929 A002110(n) = prod(i=1,n,prime(i));
+%o A391929 is_fixed_point_of_A391930_row(n, k) = { my(orgk=k); for(i=1,n,if(((orgk-k)%prime(i))!=0, return(0)); k \= prime(i)); (1); };
+%o A391929 A391929(n) = sum(k=0, A002110(n)-1, is_fixed_point_of_A391930_row(n, k));
+%o A391929 (PARI)
+%o A391929 \\ Use this for obtaining the actual fixed points:
+%o A391929 memo_fp_lists = Map();
+%o A391929 A002110(n) = prod(i=1,n,prime(i));
+%o A391929 A391930_fp_lists(n) = { my(v); if(mapisdefined(memo_fp_lists,n,&v), v, v = if(!n, [0], my(prev_fps = A391930_fp_lists(n-1), new_fps = List([]), w = A002110(n-1)); for(i=1,#prev_fps,if((w%prime(n))>1, listput(new_fps,prev_fps[i] + w*lift(Mod(prev_fps[i]/(1-w), prime(n)))), for(d=0,prime(n)-1,if(d==((prev_fps[i]+(d*w))%prime(n)), listput(new_fps,(prev_fps[i]+(d*w))))))); Vec(new_fps)); mapput(memo_fp_lists,n,v); (v)); };
+%o A391929 A391929(n) = #A391930_fp_lists(n);
+%o A391929 (PARI)
+%o A391929 \\ And this for computing just their count:
+%o A391929 A002110(n) = prod(i=1,n,prime(i));
+%o A391929 A391929(n) = if(n<2, 1+n, if(!((A002110(n-1)-1)%prime(n)), 2*prime(n), A391929(n-1)));
+%Y A391929 Cf. A002110, A079276, A341805, A343405, A360407, A391928, A391930.
+%K A391929 nonn,new
+%O A391929 0,2
+%A A391929 _Antti Karttunen_, Jan 03 2026
