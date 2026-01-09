@@ -1,0 +1,39 @@
+%I A390488 #27 Jan 08 2026 16:50:54
+%S A390488 1,1,1,2,2,3,4,4,5,6,8,8,9,10,13,14,17,18,21,22,26,28,35,38,44,48,56,
+%T A390488 59,70,75,86,96,111,120,141,155,177,196,222,243,277,305,342,381,430,
+%U A390488 473,535,595,665,740,828,916,1026,1137,1265,1402,1562,1726,1920,2123
+%N A390488 Number of partitions of n into distinct parts where each part is at most the sum of the previous two.
+%C A390488 All partitions with at most two parts automatically satisfy the condition; the restriction applies only from the third part onward. Sequence is nondecreasing.
+%F A390488 a(n) = number of distinct partitions lambda of n such that lambda_i <= lambda_{i-1} + lambda_{i-2} for all i >= 3.
+%e A390488 For n = 6, the distinct partitions are (6), (1,5), (2,4), (1,2,3). All satisfy lambda_3 <= lambda_2 + lambda_1, so a(6) = 4.
+%e A390488 For n = 7, the distinct partitions are (7), (1,6), (2,5), (3,4), (1,2,4); the last partition is disallowed because 4 > 2 + 1. Thus a(7) = 4.
+%p A390488 b:= proc(n, x, y, i) option remember; `if`(n=0, 1,
+%p A390488      `if`(i>n or i>x+y, 0, b(n-i, y, i, i+1)+b(n, x, y, i+1)))
+%p A390488     end:
+%p A390488 a:= n->  b(n$3, 1):
+%p A390488 seq(a(n), n=0..80);  # _Alois P. Heinz_, Jan 04 2026
+%t A390488 goodQ[p_] := And @@ Table[p[[i]] <= p[[i-1]] + p[[i-2]], {i, 3, Length[p]}];
+%t A390488 a[n_] := Length @ Select[IntegerPartitions[n, All, All, True], goodQ];
+%t A390488 Table[a[n], {n, 0, 50}]
+%o A390488 (Python)
+%o A390488 def partitions_distinct(n, max_part):
+%o A390488     if n == 0:
+%o A390488         yield ()
+%o A390488         return
+%o A390488     if max_part == 0 or n < 0:
+%o A390488         return
+%o A390488     if max_part <= n:
+%o A390488         for p in partitions_distinct(n-max_part, max_part-1):
+%o A390488             yield p + (max_part,)
+%o A390488     yield from partitions_distinct(n, max_part-1)
+%o A390488 def good(p):
+%o A390488     return all(p[i] <= p[i-1] + p[i-2] for i in range(2, len(p)))
+%o A390488 def a(n):
+%o A390488     if n == 0:
+%o A390488         return 1
+%o A390488     return sum(1 for p in partitions_distinct(n, n) if good(p))
+%o A390488 print([a(n) for n in range(0, 51)])
+%Y A390488 Cf. A000009, A000045, A000837.
+%K A390488 nonn,new
+%O A390488 0,4
+%A A390488 _James Morgan_, Dec 05 2025
