@@ -1,0 +1,52 @@
+%I A390360 #45 Jan 12 2026 14:53:13
+%S A390360 1,2,1200,4009024,51487228672
+%N A390360 Number of inequivalent chord diagrams on 8n + 2 points with 4n + 1 chords of distinct lengths 1, 2, ..., 4n + 1.
+%C A390360 This sequence counts the number of "Cyclic Skolem Sequences" of order M = 4n + 1 under dihedral equivalence. They correspond to pairings of 2M points on a circle where the set of chord lengths is exactly {1, 2, ..., M}.
+%C A390360 Each solution is encoded as a string of length 2M containing the symbols 0, 1, ..., M-1 exactly twice. The defining rule is that the two occurrences of symbol k are separated by exactly k characters along the shorter arc of the circle.
+%C A390360 Canonicalization: Solutions are considered equivalent under rotation and reflection (dihedral group action). To determine the count, a solution fixes the "0-chord" (length 1, symbol '0') at the beginning of the string (forcing the prefix "00") and adopts the lexicographically smaller of the two mirror images.
+%C A390360 The condition M == 0 or 1 (mod 4) is necessary for existence. This entry covers the case M == 1 (mod 4).
+%C A390360 a(n) = KCounterFast(4*n + 1) where KCounterFast is the GAP function defined in the Program section.
+%H A390360 Paul Sampson, <a href="https://github.com/applutan/cyclic-skolem-sequences">Cyclic Skolem Sequences</a> (GitHub)
+%H A390360 Paul Sampson, <a href="https://github.com/applutan/cyclic-skolem-sequences/tree/main/A390360_Odd">Canonical solutions for 4n+1 chords</a>
+%e A390360 For n=1 (corresponding to M = 5 chords, 10 vertices), there are 2 unique solutions. One is the sequence "0032412134". We interpret the "gap" for each symbol cyclically. Symbol '0': At indices 0, 1. Separation is 0 characters. Symbol '1': At indices 5, 7. Separation is 1 character ('2'). Symbol '2': At indices 3, 6. Separation is 2 characters ('41'). Symbol '3': At indices 2, 8. Linear separation is 5; cyclic wrap separation is 3. Matches symbol '3'. Symbol '4': At indices 4, 9. Separation is 4 characters ('1213').
+%o A390360 (GAP)
+%o A390360 # Counts inequivalent chord diagrams for OEIS A390360
+%o A390360 # Note: This is a reference implementation. For large N (e.g. N >= 13),
+%o A390360 # memory usage for OrbitsDomain becomes prohibitive.
+%o A390360 KCounterFast := function(n)
+%o A390360     local nvx, sols, dhg, Backtrack;
+%o A390360     nvx := 2*n;
+%o A390360     sols := [];
+%o A390360     Backtrack := function(mus, mln, cps, fnd)
+%o A390360         local x, y, l;
+%o A390360         if fnd = n then
+%o A390360             Add(sols, Set(cps));
+%o A390360             return;
+%o A390360         fi;
+%o A390360         x := Position(mus, false);
+%o A390360         for y in [x+1 .. nvx] do
+%o A390360             if mus[y] = false then
+%o A390360                 l := Minimum(y - x, nvx - (y - x));
+%o A390360                 if mln[l] = false then
+%o A390360                     mus[x] := true; mus[y] := true;
+%o A390360                     mln[l] := true;
+%o A390360                     Add(cps, Set([x,y]));
+%o A390360                     Backtrack(mus, mln, cps, fnd + 1);
+%o A390360                     Remove(cps);
+%o A390360                     mln[l] := false;
+%o A390360                     mus[y] := false; mus[x] := false;
+%o A390360                 fi;
+%o A390360             fi;
+%o A390360         od;
+%o A390360     end;
+%o A390360     Backtrack(ListWithIdenticalEntries(nvx, false), ListWithIdenticalEntries(n, false), [], 0);
+%o A390360     if IsEmpty(sols) then return 0; fi;
+%o A390360     dhg := Group(PermList(Concatenation([2..nvx], [1])), Product(List([1..n], i -> (i, nvx-i+1))));
+%o A390360     return Size(OrbitsDomain(dhg, sols, OnSetsSets));
+%o A390360 end;
+%o A390360 # Wrapper for index n (counting 4n+1 chords):
+%o A390360 a := n -> KCounterFast(4*n + 1);
+%Y A390360 Cf. A392247.
+%K A390360 nonn,more,new
+%O A390360 0,2
+%A A390360 _Paul Sampson_, Jan 04 2026

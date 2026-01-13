@@ -1,36 +1,22 @@
-%I A323785 #61 May 30 2024 15:54:26
+%I A323785 #67 Jan 13 2026 03:03:20
 %S A323785 1,2,3,4,5,6,7,9,9,10,11,12,13,14,15,16,17,16,19,20,21,22,23,27,32,26,
 %T A323785 27,28,29,30,31,32,33,34,35,32,37,38,39,45,41,42,43,44,45,46,47,48,
 %U A323785 128,32,51,52,53,54,55,63,57,58,59,60,61,62,63,32,65,66,67
 %N A323785 Iteratively swap prime factors of n with their exponent (unless the exponent is 1), until a cycle is reached, and then record the largest term in the cycle.
 %H A323785 Gabriel Antonius, <a href="/A323785/b323785.txt">Table of n, a(n) for n = 1..10000</a>
 %e A323785 For n=196, the iterative procedure evolves as follows: 196 = 2^2 * 7^2 --> 2^2 * 2^7 = 2^9 --> 9^2 = 3^4 --> 4^3 = 2^6 --> 6^2 = 3^2 * 2^2 --> 2^3 * 2^2 = 2^5 --> 5^2 --> 2^5 = 32.
-%e A323785 Since the iterative procedure stabilizes in the cycle 2^5=32 <--> 5^2=25, of length 2, the largest ,member of which is 32, we get a(196)=32.
+%e A323785 Since the iterative procedure stabilizes in the cycle 2^5=32 <--> 5^2=25, of length 2, the largest member of which is 32, we get a(196)=32.
 %t A323785 p[x_, y_] := If[y > 1, y^x, x^y]; f[n_] := Times @@ (p[First[#], Last[#]] & /@ FactorInteger[n]); a[n_] := Module[{k = n, s = {k}}, While[! MemberQ[s, (k = f[k])], AppendTo[s, k]]; ind = Position[s, _?(# == k &)][[1, 1]]; Max[s[[ind ;; -1]]]]; Array[a, 57] (* _Amiram Eldar_, Sep 02 2019 *)
 %o A323785 (Python)
+%o A323785 from sympy import factorint, prod
 %o A323785 def a(n):
 %o A323785     np = swap_prime_factors_with_exponents(n)
 %o A323785     npp = swap_prime_factors_with_exponents(np)
 %o A323785     return max(n, np) if n == npp else a(npp)
 %o A323785 def swap_prime_factors_with_exponents(n):
-%o A323785     np = 1
-%o A323785     for p in primes:
-%o A323785         q = 0
-%o A323785         while n % p == 0:
-%o A323785             q += 1
-%o A323785             n = n // p
-%o A323785         if q > 1: np *= q ** p
-%o A323785         if q == 1: np *= p
-%o A323785     if n > 1: np *= n
-%o A323785     return np
-%o A323785 N = 200
-%o A323785 primes = []
-%o A323785 for n in range(2, int(N ** (1/2)) + 1):
-%o A323785     if all(n % p > 0 for p in primes):
-%o A323785         primes.append(n)
-%o A323785 for n in range(1,N+1):
-%o A323785     print(n, a(n))
+%o A323785     return prod([(e**p if e > 1 else p) for p, e in factorint(n).items()])
+%o A323785 print([a(n) for n in range(1, 70)]) # simplified by _Jason Yuen_, Jan 12 2026
 %Y A323785 Cf. A008477.
-%K A323785 nonn
+%K A323785 nonn,changed
 %O A323785 1,2
 %A A323785 _Gabriel Antonius_, Aug 31 2019
