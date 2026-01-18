@@ -1,0 +1,51 @@
+%I A392038 #59 Jan 17 2026 17:23:15
+%S A392038 2,1,4,13,15,25,31,25,47,57,60
+%N A392038 Least number k such that n can be represented as a linear combination of 1^n, 2^n, ..., k^n with coefficients +-1 only.
+%C A392038 n and 1^n + 2^n +...+ k^n must have the same parity. - _David A. Corneth_, Jan 01 2026
+%e A392038 0 =   1^0 - 2^0. So a(0) = 2.
+%e A392038 1 =   1^1. So a(1) = 1.
+%e A392038 2 = - 1^2 - 2^2 - 3^2 + 4^2. So a(2) = 4.
+%e A392038 3 = - 1^3 - 2^3 - 3^3 - 4^3 - 5^3 + 6^3 - 7^3 - 8^3 + 9^3 + 10^3 - 11^3 - 12^3 + 13^3. So a(3) = 13.
+%e A392038 4 =   1^4 + 2^4 + 3^4 + 4^4 + 5^4 - 6^4 - 7^4 - 8^4 + 9^4 - 10^4 + 11^4 - 12^4 + 13^4 + 14^4 - 15^4. So a(4) = 15.
+%e A392038 5 = - 1^5 + 2^5 - 3^5 + 4^5 + 5^5 - 6^5 + 7^5 + 8^5 - 9^5 - 10^5 + 11^5 + 12^5 - 13^5 - 14^5 - 15^5 + 16^5 - 17^5 - 18^5 - 19^5 - 20^5 - 21^5 + 22^5 + 23^5 - 24^5 + 25^5. So a(5) = 25.
+%e A392038 6 =   1^6 + 2^6 + 3^6 - 4^6 + 5^6 + 6^6 - 7^6 - 8^6 + 9^6 - 10^6 + 11^6 - 12^6 + 13^6 - 14^6 + 15^6 - 16^6 + 17^6 - 18^6 - 19^6 - 20^6 + 21^6 - 22^6 - 23^6 - 24^6 - 25^6 + 26^6 + 27^6 + 28^6 - 29^6 - 30^6 + 31^6. So a(6) = 31.
+%e A392038 7 = - 1^7 - 2^7 + 3^7 - 4^7 - 5^7 + 6^7 - 7^7 + 8^7 + 9^7 - 10^7 + 11^7 + 12^7 - 13^7 - 14^7 + 15^7 - 16^7 + 17^7 + 18^7 - 19^7 + 20^7 - 21^7 + 22^7 - 23^7 - 24^7 + 25^7. So a(7) = 25. So a(7) = 25.
+%e A392038 8 = 1^8 - 2^8 - 3^8 - 4^8 - 5^8 + 6^8 + 7^8 - 8^8 + 9^8 + 10^8 + 11^8 + 12^8 + 13^8 - 14^8 - 15^8 - 16^8 - 17^8 - 18^8 + 19^8 - 20^8 + 21^8 - 22^8 + 23^8 + 24^8 + 25^8 + 26^8 + 27^8 + 28^8 + 29^8 - 30^8 + 31^8 - 32^8 + 33^8 - 34^8 + 35^8 + 36^8 + 37^8 - 38^8 + 39^8 + 40^8 - 41^8 + 42^8 - 43^8 + 44^8 - 45^8 + 46^8 - 47^8. So a(8) = 47.
+%e A392038 And no lesser numbers have this property.
+%o A392038 (PARI) find(n,k)={my(table=vector(k,i,i^n),box=vector(k-1,i,[0,1]));if(ceil(k/2) % 2!=n%2,return(0));box=concat(box,[[1,1]]);forvec(X=box,my(X=Vec(X),v=vector(k,i,if(X[i],table[i],-table[i])));my(s=vecsum(v));if(abs(s)==n,my(Y=vector(k,i,if(X[i],1,-1)));if(s<0,Y=-Y);return(Y)));0}
+%o A392038 a(n)={my(k=1,u=[]);while(#u==0,u=find(n,k);k++);k--;return(k)}
+%o A392038 (Python)
+%o A392038 from itertools import product
+%o A392038 def a(n):
+%o A392038     if n == 0:
+%o A392038         return 2  # 1^0 - 2^0 = 0
+%o A392038     def mitm(n, k):
+%o A392038         u = [i**n for i in range(1, k+1)]
+%o A392038         m = k//2
+%o A392038         A, B = u[:m], u[m:]
+%o A392038         SA = {}
+%o A392038         for sgn in product((1,-1), repeat=len(A)):
+%o A392038             SA[sum(sgn[i]*A[i] for i in range(len(A)))] = True
+%o A392038         for sgn in product((1,-1), repeat=len(B)):
+%o A392038             if n - sum(sgn[i]*B[i] for i in range(len(B))) in SA:
+%o A392038                 return True
+%o A392038         return False
+%o A392038     k = 1
+%o A392038     while not mitm(n, k):
+%o A392038         k += 1
+%o A392038     return k
+%o A392038 print([a(n) for n in range(9)])
+%o A392038 (Python)
+%o A392038 from itertools import count
+%o A392038 from functools import cache
+%o A392038 @cache
+%o A392038 def b(nn, n, i):
+%o A392038     m = sum(j**nn for j in range(1, i+1))
+%o A392038     return n <= m and (n==m or b(nn, n+i**nn, i-1) or b(nn, abs(n-i**nn), i-1))
+%o A392038 def a(n): return next(k for k in count(1) if b(n, n, k))
+%o A392038 print([a(n) for n in range(9)]) # _Michael S. Branicky_, Jan 07 2026
+%Y A392038 Cf. A019568, A126908, A231015, A392025.
+%K A392038 nonn,more,new
+%O A392038 0,1
+%A A392038 _Jean-Marc Rebert_, Dec 29 2025
+%E A392038 a(9)-a(10) from _Michael S. Branicky_, Jan 12 2026
