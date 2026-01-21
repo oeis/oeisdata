@@ -1,0 +1,62 @@
+%I A392361 #20 Jan 20 2026 20:59:41
+%S A392361 3,3,3,4,3,5,3,3,4,3,3,3,5,3,3,3,3,4,3,6,3,3,4,3,6,3,5,3,3,3,3,3,4,3,
+%T A392361 3,3,4,3,3,3,6,3,3,3,5,3,4,3,6,3,3,4,3,5,3,3,3,3,3,3,4,3,3,6,3,4,3,3,
+%U A392361 3,3,7,3,5,3,3,4,3,3,3,4,3,3,7,6,3,3,5,3,8,3,3,4,3,3,5,3,4,3,3
+%N A392361 a(n) is the minimum number of proper divisors of the semiperfect number k = A005835(n) that sum to k.
+%C A392361 a(n) <= A390834(n), with equality if and only if A005835(n) is in A064771.
+%C A392361 a(n) >= 3, with equality if and only if A005835(n) is a multiple of 6.
+%C A392361 a(m) <= a(n) if A005835(m) is a multiple of A005835(n).
+%H A392361 Robert Israel, <a href="/A392361/b392361.txt">Table of n, a(n) for n = 1..10000</a>
+%e A392361 A005835(34) = 144 = 24 + 48 + 72, and {24, 48, 72} is the smallest set of proper divisors of 144 that sums to 144, so a(34) = 3.
+%p A392361 issum:= proc(n, S) option remember; local m, Sp, v; # return a subset of S summing to n
+%p A392361   Sp:= select(`<=`, S, n);
+%p A392361   if n > convert(Sp, `+`) then return false fi;
+%p A392361   if member(n, Sp) then return {n} fi;
+%p A392361   m:= max(Sp); Sp:= Sp minus {m};
+%p A392361   v:= procname(n-m, Sp);
+%p A392361   if v <> false then return v union {m} fi;
+%p A392361   procname(n, Sp)
+%p A392361 end proc:
+%p A392361 issumle:= proc(n, S, k) option remember; local m, Sp, v;
+%p A392361   if k = 0 then return false fi;
+%p A392361   Sp:= select(`<=`,S,n);
+%p A392361   if n > convert(Sp,`+`) then return false fi;
+%p A392361   if member(n, Sp) then return {n} fi;
+%p A392361   m:= max(Sp); Sp:= Sp minus {m};
+%p A392361   v:= procname(n-m,Sp,k-1);
+%p A392361   if v <> false then return v union {m} fi;
+%p A392361   procname(n, Sp, k)
+%p A392361 end proc:
+%p A392361 f:= proc(n) local DD, v, k, kp;
+%p A392361     if n mod 6 = 0 then return 3 fi;
+%p A392361     DD:= numtheory:-divisors(n) minus {n};
+%p A392361     v:= issum(n,DD);
+%p A392361     if v = false then return NULL fi;
+%p A392361     k:= nops(v);
+%p A392361     do
+%p A392361       v:= issumle(n,DD,k-1);
+%p A392361       if v = false then return k fi;
+%p A392361       k:= nops(v)
+%p A392361     od;
+%p A392361 end proc:
+%p A392361 map(f, [$2..500]);
+%o A392361 (Python)
+%o A392361 from sympy import proper_divisors
+%o A392361 def min_divs(n: int) -> int:
+%o A392361     if n <= 1: return -1
+%o A392361     dp = {0: 0}
+%o A392361     for d in proper_divisors(n):
+%o A392361         n_dp = dp.copy()
+%o A392361         for s, count in dp.items():
+%o A392361             n_sum = s + d
+%o A392361             if n_sum <= n:
+%o A392361                 n_count = count + 1
+%o A392361                 if n_sum not in n_dp or n_count < n_dp[n_sum]:
+%o A392361                     n_dp[n_sum] = n_count
+%o A392361         dp = n_dp
+%o A392361     return dp.get(n, -1)
+%o A392361 print([a for n in range(1, 500) if (a := min_divs(n)) > 0]) # _Peter Luschny_, Jan 08 2026
+%Y A392361 Cf. A005835, A064771, A389712, A390834.
+%K A392361 nonn,new
+%O A392361 1,1
+%A A392361 _Robert Israel_, Jan 08 2026
