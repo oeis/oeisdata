@@ -1,0 +1,44 @@
+%I A392648 #17 Jan 22 2026 08:14:54
+%S A392648 24,30,36,48,54,60,66,72,80,84,90,96,108,112,120,126,132,140,144,150,
+%T A392648 156,160,162,168,180,192,198,200,204,210,216,220,224,228,234,240,252,
+%U A392648 260,264,270,276,280,288,294,300,306,308,312,320,324,330,336,340,342,348
+%N A392648 Numbers k such that there exist at least two distinct subsets s1 and s2 of {1 < d < k: d | k}, such that Sum(s1) = Sum(s2) = k.
+%H A392648 Alois P. Heinz, <a href="/A392648/b392648.txt">Table of n, a(n) for n = 1..20000</a>
+%e A392648 Witnesses for the first few terms:
+%e A392648   24 -> [[2, 4, 6, 12], [4, 8, 12]]
+%e A392648   30 -> [[2, 3, 10, 15], [5, 10, 15]]
+%e A392648   36 -> [[2, 3, 4, 6, 9, 12], [2, 3, 4, 9, 18]]
+%e A392648   48 -> [[2, 4, 6, 8, 12, 16], [2, 4, 6, 12, 24]]
+%e A392648   54 -> [[3, 6, 18, 27], [9, 18, 27]]
+%e A392648   60 -> [[2, 3, 4, 5, 6, 10, 30], [2, 3, 4, 6, 10, 15, 20]]
+%e A392648   66 -> [[2, 3, 6, 22, 33], [11, 22, 33]]
+%e A392648   72 -> [[2, 3, 4, 6, 9, 12, 36], [2, 3, 4, 9, 12, 18, 24]]
+%e A392648   80 -> [[2, 4, 8, 10, 16, 40], [2, 8, 10, 20, 40]]
+%e A392648   84 -> [[2, 3, 4, 7, 12, 14, 42], [2, 3, 4, 12, 14, 21, 28]]
+%e A392648   90 -> [[2, 3, 6, 9, 10, 15, 45], [2, 3, 10, 30, 45]]
+%e A392648   96 -> [[2, 4, 6, 8, 12, 16, 48], [2, 4, 6, 12, 16, 24, 32]]
+%e A392648 The first odd term is 945 -> [[3, 7, 21, 27, 35, 45, 63, 105, 135, 189, 315], [7, 9, 15, 27, 35, 45, 63, 105, 135, 189, 315]].
+%p A392648 q:= proc(n) option remember; local b, l, ll:
+%p A392648       l, b:= sort([(numtheory[divisors](n) minus {1, n})[]]),
+%p A392648       proc(m, i) option remember; `if`(m=0, 1, `if`(i<1 or ll[i]<m, 0,
+%p A392648         (t-> t+`if`(t>1, 0, `if`(l[i]>m, 0, b(m-l[i], i-1))))(b(m, i-1))))
+%p A392648       end; ll:= ListTools[PartialSums](l); is(b(n, nops(l))>1)
+%p A392648     end:
+%p A392648 select(q, [$1..1000])[];  # _Alois P. Heinz_, Jan 22 2026
+%o A392648 (Python)
+%o A392648 from sympy import divisors
+%o A392648 def isA392648(n: int) -> int:
+%o A392648     if n == 0: return False
+%o A392648     divs = divisors(n)[1:-1]
+%o A392648     dp = [0] * (n + 1)
+%o A392648     dp[0] = 1
+%o A392648     for d in divs:
+%o A392648         for j in range(n, d - 1, -1):
+%o A392648             dp[j] += dp[j - d]
+%o A392648     return dp[n] > 1
+%o A392648 print([n for n in range(350) if isA392648(n)])
+%o A392648 (PARI) isok(k) = my(d=setminus(divisors(k), Set([1, k]))); forsubset(#d, s, my(x=sum(i=1,#s,d[s[i]])); if (x==k, forsubset(#d, t, if((s!=t) && (sum(i=1,#t,d[t[i]]) == k), return(1))))); \\ _Michel Marcus_, Jan 22 2026
+%Y A392648 Cf. A070824, A136446.
+%K A392648 nonn,new
+%O A392648 1,1
+%A A392648 _Peter Luschny_, Jan 18 2026
