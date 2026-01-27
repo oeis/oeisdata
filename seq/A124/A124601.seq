@@ -1,10 +1,36 @@
-%I A124601 #7 Mar 09 2015 04:47:32
+%I A124601 #15 Jan 26 2026 07:22:42
 %S A124601 -1,1,1,1,-1,23,14,7,8,-1,2,3,5,7,4,15,-1,2,11,25,5,26,6,7,17,-1,6,2,
 %T A124601 4,5,13,16,17,24,7,3,-1,15,2,26,41,5,57,23,12,25,11,13,17,-1,4,2,3,5,
 %U A124601 22,3,6,32,3,4,12,3,12,11,-1,24,2,2,6,12,22,5,7,12,19,25,3,14,4,5,7
 %N A124601 Position of the first 1 in the decimal expansion of the square root of n, or -1 if 1 never appears.
+%H A124601 Robert Israel, <a href="/A124601/b124601.txt">Table of n, a(n) for n = 0..10000</a>
 %e A124601 For n=5, the concatenated digits of sqrt(5) are 223606797749978969640917366... The digit 1 first occurs in the 23rd position of this string of digits. So 23 is the 6th entry in the table counting from the 0th entry.
-%o A124601 (PARI) digitpos(n,m) = /* m-th digit in sqrt expansions */ { local(x,y,r,dot); default(realprecision,1000); for(x=0,n, r = sqrt(x); if(issquare(x), y=find(Str(floor(r)),m), y=find(Str(r),m); dot=find(Str(r),"."); if(dot < y, y--); ); if(y, print1(y","),print1(-1",") ) ) } find(str,match) = /* Revised 2007 */ { local(lnm,lns,tstr,vstr,x,j); vstr=Vec(Str(str)); match=Str(match); lns=length(str); lnm=length(match); for(x=1,lns-lnm+1, tstr=""; for(j=x,x+lnm-1, tstr=concat(tstr,vstr[j]); ); if(match==tstr,return(x)) ); return(0); }
-%K A124601 base,easy,sign
+%p A124601 f:= proc(n) local x,s,j,k;
+%p A124601       if issqr(n) then
+%p A124601          s:= convert(sqrt(n),base,10);
+%p A124601          for j from 1 to nops(s) do
+%p A124601            if s[-j] = 1 then return j fi
+%p A124601          od;
+%p A124601          return -1
+%p A124601       fi;
+%p A124601       x:= n/100^ilog[100](n);
+%p A124601       s:= floor(sqrt(x));
+%p A124601       if s = 1 then return 1 fi;
+%p A124601       for j from 2 do
+%p A124601         x:= 100*x;
+%p A124601         for k from 1 to 10 do
+%p A124601           if (10*s+k)^2 > x then
+%p A124601             if k = 2 then return j fi;
+%p A124601             s:= 10*s+k-1;
+%p A124601             break
+%p A124601           fi;
+%p A124601         od;
+%p A124601       od
+%p A124601 end proc;
+%p A124601 map(f, [$0..100]); # _Robert Israel_, Jan 25 2026
+%o A124601 (PARI)
+%o A124601 finddig(n,x)={my(d=digits(n)); for(i=1, #d, if(d[i]==x, return(i))); -1}
+%o A124601 a(n) = {if(issquare(n), finddig(sqrtint(n),1), my(m=2, z=-1); while(z<0, z=finddig(sqrtint(n*100^m), 1); m*=2); z)} \\ _Andrew Howroyd_, Jan 25 2026
+%K A124601 base,easy,sign,changed
 %O A124601 0,6
 %A A124601 _Cino Hilliard_, Dec 22 2006, corrected Jul 18 2007

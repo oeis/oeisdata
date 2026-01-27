@@ -1,4 +1,4 @@
-%I A281181 #63 Dec 20 2025 09:37:58
+%I A281181 #78 Jan 26 2026 22:28:44
 %S A281181 1,1,13,493,37369,4732249,901188997,240798388357,85948640603761,
 %T A281181 39504564917358001,22726779729476308093,15998009117983994065693,
 %U A281181 13526765851190230940840809,13528070218935445806530640649,15795819619923464298050697616117,21294937666865806704402646632389557,32828500597549179599563478551377297121,57385924456400269824204023290894357442401,112904615348383588847189789579363784912180973
@@ -8,6 +8,8 @@
 %C A281181 a(n) mod 9 = 1, followed by period 3: repeat [1, 4, 7]. See A100402. See also A281280, A281182, A281183, A281184 (1, followed by 3's).
 %C A281181 a(n+p) - a(n) is a multiple of 12. (End)
 %H A281181 Paul D. Hanna, <a href="/A281181/b281181.txt">Table of n, a(n) for n = 0..100</a>
+%H A281181 Peter Bala, <a href="/A281181/a281181.pdf">The method of Graves for computing inverse functions</a>.
+%H A281181 Diego Dominici, <a href="https://doi.org/10.1155/S0161171203303291">Nested derivatives: a simple method for computing series expansions of inverse functions</a>, Int. Jour. of Mathematics and Mathematical Sciences, Vol. 2003, Issue 58, pp. 3699-3715. arXiv:math/0501052v2 [math.CA], 2005.
 %F A281181 E.g.f. C(x) = d/dx Series_Reversion( Integral sqrt(1 - x^2) dx ).
 %F A281181 E.g.f. C(x) = d/dx Series_Reversion( ( x*sqrt(1 - x^2) + asin(x) )/2 ).
 %F A281181 E.g.f. C(x) = ( d/dx Series_Reversion( Integral cos(x)^2 dx ) )^(1/2).
@@ -42,6 +44,12 @@
 %F A281181 T(x)^2 + 1/C(x)^2 = 1. Cf. tanh(x)^2 + 1/cosh(x)^2 = 1.
 %F A281181 d/dx( Series_Reversion(T(x)) ) = sqrt(1 - x^2). Cf. d/dx( Series_Reversion(tanh(x)) ) = 1/(1 - x^2).
 %F A281181 T(x) = Series_Reversion( (x*sqrt(1 - x^2) + arcsin(x))/2 ). (End)
+%F A281181 From _Peter Bala_, Jan 26 2026: (Start)
+%F A281181 C(x) = sec( Series_Reversion(x/2 + sin(2*x)/4) ).
+%F A281181 For n >= 1, define f(n, x) = d/dx( 1/sqrt(1 - x^2) * f(n-1, x) ) with f(0, x) = 1. Then
+%F A281181 a(n) = f(2*n, 0) (apply Dominici, Theorem 4.1, to C(x) = d/dx Series_Reversion( Integral sqrt(1 - x^2) dx )).
+%F A281181 More generally, for n >= 1, define f_k(n, x) = d/dx( 1/sqrt(1 - x^2) * f(n-1, x) ) with f_k(0, x) = 1/(1 - x^2)^(k/2). Then f_k(2*n, 0) gives the coefficients of C(x)^(k+1).
+%F A281181 For n >= 1, define g(n, x) = (sec(x))^2 * d/dx(g(n-1, x)) with g(0, x) = sec(x). Then a(n) = g(2*n, 0). (End)
 %e A281181 E.g.f.: C(x) = 1 + x^2/2! + 13*x^4/4! + 493*x^6/6! + 37369*x^8/8! + 4732249*x^10/10! + 901188997*x^12/12! + 240798388357*x^14/14! + 85948640603761*x^16/16! + 39504564917358001*x^18/18! + 22726779729476308093*x^20/20! +...
 %e A281181 such that
 %e A281181 (1) C(x) = cosh( Integral C(x)^3 dx ),
@@ -61,12 +69,14 @@
 %e A281181 Also, C(x)^3 = d/dx Series_Reversion( Integral 1/cosh(x)^3 dx ).
 %e A281181 C(x)^4 = 1 + 4*x^2/2! + 88*x^4/4! + 4672*x^6/6! + 454144*x^8/8! + 70084096*x^10/10! + 15728822272*x^12/12! + 4836914249728*x^14/14! + 1952137912385536*x^16/16! + 1000749157519458304*x^18/18! +...+ A281180(n+1)*x^(2*n)/(2*n)! +...
 %e A281181 where C(x)^4 = d/dx S(x).
+%p A281181 f := proc(n, x) option remember; if n = 0 then 1 else simplify( diff(1/sqrt(1-x^2)*f(n-1,x), x) ) end if; end proc:
+%p A281181 seq( eval(f(2*n, x), x = 0), n = 0..20 ); # _Peter Bala_, Dec 22 2025
 %t A281181 nMax = 30; m = maxExponent = 2*nMax; a[n_] := Module[{S = x, C = 1}, For[i = 1, i <= n, i++, S = Integrate[C^4 + x*O[x]^m // Normal, x] + O[x]^m // Normal; C = 1 + Integrate[S*C^3 + O[x]^m // Normal, x]] + O[x]^m // Normal; (2*n)!*Coefficient[C, x, 2*n]]; Table[an = a[n]; Print["a(", n, ") = ", an]; an, {n, 0, nMax}] (* _Jean-François Alcover_, Jan 20 2017, adapted from PARI *)
 %t A281181 nmax = 20; Table[(CoefficientList[Sqrt[D[InverseSeries[Series[(2*x + Sin[2*x])/4, {x, 0, 2*nmax - 1}], x], x]], x] * Range[0, 2*nmax - 2]!)[[2*n - 1]], {n, 1, nmax}] (* _Vaclav Kotesovec_, Sep 02 2017 *)
 %o A281181 (PARI) {a(n) = my(S=x,C=1); for(i=0,n, S = intformal( C^4 +x*O(x^(2*n))); C = 1 + intformal( S*C^3 ) ); (2*n)!*polcoeff(C,2*n)}
 %o A281181 for(n=0,30,print1(a(n),", "))
-%Y A281181 Cf. A281180 (S), A281182 (C+S), A281183 (C^2), A281184 (C^3), A001148, A100402, A122553, A281427, A281428.
-%K A281181 nonn,easy
+%Y A281181 Cf. A281180 (S), A281182 (C+S), A281183 (C^2), A281184 (C^3), A001148, A100402, A122553, A281427, A281428, A281435, A281436.
+%K A281181 nonn,easy,changed
 %O A281181 0,3
 %A A281181 _Paul D. Hanna_, Jan 16 2017
 %E A281181 Name simplified by _Paul D. Hanna_, Jan 22 2017
