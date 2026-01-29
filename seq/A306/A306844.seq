@@ -1,8 +1,10 @@
-%I A306844 #14 Jun 20 2020 02:04:43
+%I A306844 #22 Jan 28 2026 11:51:04
 %S A306844 1,1,2,3,7,14,36,83,212,532,1379,3577,9444,25019,66943,179994,487031,
-%T A306844 1323706,3614622,9907911
+%T A306844 1323706,3614622,9907911,27258492,75234056,208273924,578141227,
+%U A306844 1608902054,4487770552,12544890518,35137366032,98600552639,277167751387,780389017456,2200596234698
 %N A306844 Number of anti-transitive rooted trees with n nodes.
 %C A306844 A rooted tree is anti-transitive if the subbranches are disjoint from the branches, i.e., no branch of a branch is a branch.
+%H A306844 Robert P. P. McKone, <a href="/A306844/b306844.txt">Table of n, a(n) for n = 1..63</a>
 %H A306844 Gus Wiseman, <a href="/A306844/a306844.png">The a(7) = 36 anti-transitive rooted trees</a>.
 %H A306844 Gus Wiseman, <a href="/A306844/a306844_1.png">The a(10) = 532 anti-transitive rooted trees</a>.
 %e A306844 The a(1) = 1 through a(6) = 14 anti-transitive rooted trees:
@@ -22,9 +24,18 @@
 %e A306844                                      (((((o)))))
 %t A306844 rtall[n_]:=Union[Sort/@Join@@(Tuples[rtall/@#]&/@IntegerPartitions[n-1])];
 %t A306844 Table[Length[Select[rtall[n],Intersection[Union@@#,#]=={}&]],{n,10}]
+%o A306844 (PARI)
+%o A306844 an = 0; ax = 'x; axp = 0; at = 0; att = 0; aa = 0; ar = 0;
+%o A306844 base(F, sh) = {my(bv = Vec(att * F)); my(C = 1, m, M, iv, j); for(m=1, an-1, if(ar[m], C *= binomial(bv[m], ar[m]))); if(!C, return()); M = an - 1 - sh; if(M < 0, return()); iv = Vec( 1/(F + O(ax^(M+1))) ); for(j=0, M, aa[1 + sh + j] += C * iv[j+1]);};
+%o A306844 step(k, rem, F, sh) = {my(maxr = min(rem\k, at[k])); my(v, Fv = F, xk = axp[k]); for(v=0, maxr, ar[k] = v; rec(k+1, rem - k*v, Fv, sh + k*v); if(v < maxr, Fv -= xk*Fv);); ar[k] = 0;};
+%o A306844 rec(k, rem, F, sh) = {if(k == an, base(F, sh), step(k, rem, F, sh));};
+%o A306844 A(N) = {my(n = N, x = 'x); my(t = vector(n), s = vector(n)); my(k, m, acc, T); if(n==1, return([1])); an = n; ax = x; axp = vector(n-1, i, x^i); t[1] = 1; for(m=1, n, s[m] = 1); for(k=2, n, acc = 0; for(m=1, k-1, acc += s[m]*t[k-m]); t[k] = acc/(k-1); forstep(m=k, n, k, s[m] += k*t[k]);); at = t; T = O(x^(n+1)); for(k=1, n, T += t[k]*x^k); att = T; aa = vector(n); ar = vector(n-1); rec(1, n-1, 1 + 0*x, 0); aa};
+%o A306844 a(n) = A(n)[n];
+%o A306844 print1(A(32)) \\ _Robert P. P. McKone_, Jan 27 2026
 %Y A306844 Cf. A276625, A279861, A279861, A290689, A290760, A304360.
 %Y A306844 Cf. A324694, A324695, A324738, A324741, A324743, A324751, A324754, A324756, A324758, A324759, A324764.
-%K A306844 nonn,more
+%K A306844 nonn,changed
 %O A306844 1,3
 %A A306844 _Gus Wiseman_, Mar 13 2019
 %E A306844 a(16)-a(20) from _Jinyuan Wang_, Jun 20 2020
+%E A306844 a(21)-a(63) from _Robert P. P. McKone_, Jan 27 2026

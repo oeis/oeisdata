@@ -1,14 +1,24 @@
-%I A290689 #32 Nov 18 2024 08:55:25
+%I A290689 #40 Jan 28 2026 11:50:47
 %S A290689 1,1,1,2,3,5,8,13,21,34,55,88,143,229,370,592,955,1527,2457,3929,6304,
-%T A290689 10081
+%T A290689 10081,16147,25802,41265,65912,105279,168043,268164,427739,682026,
+%U A290689 1087180,1732295,2759660,4394579,6996857,11136152,17721389,28192021,44842171,71307030
 %N A290689 Number of transitive rooted trees with n nodes.
 %C A290689 A rooted tree is transitive if every proper terminal subtree is also a branch of the root. First differs from A206139 at a(13) = 143.
 %C A290689 Regarding the notation, a rooted tree is a finite multiset of rooted trees. For example, the rooted tree (o(o)(oo)) is short for {{},{{}},{{},{}}}. Each "o" is a leaf. Each pair of parentheses corresponds to a non-leaf node (such as the root). Its contents "(...)" represent a branch. - _Gus Wiseman_, Nov 16 2024
+%H A290689 Robert P. P. McKone, <a href="/A290689/b290689.txt">Table of n, a(n) for n = 1..68</a>
 %H A290689 Robert P. P. McKone, <a href="/A290689/a290689.txt">The transitive rooted trees with n=1 to n=22 nodes</a>.
 %e A290689 The a(7) = 8 7-node transitive rooted trees are: (o(oooo)), (oo(ooo)), (o(o)((o))), (o(o)(oo)), (ooo(oo)), (oo(o)(o)), (oooo(o)), (oooooo).
 %t A290689 nn=18;
 %t A290689 rtall[n_]:=If[n===1,{{}},Module[{cas},Union[Sort/@Join@@(Tuples[rtall/@#]&/@IntegerPartitions[n-1])]]];
 %t A290689 Table[Length[Select[rtall[n],Complement[Union@@#,#]==={}&]],{n,nn}]
+%o A290689 (PARI)
+%o A290689 an = 0; ax = 'x; axp = 0; at = 0; att = 0; aa = 0; ar = 0;
+%o A290689 base(F, sh) = {my(bv = Vec(ax/(F + O(ax^an)))); my(C = 1, m, M, iv, j); for(m=1, an-1, if(ar[m], C *= binomial(bv[m], ar[m]))); if(!C, return()); M = an - 1 - sh; if(M < 0, return()); iv = Vec( 1/(F + O(ax^(M+1))) ); for(j=0, M, aa[1 + sh + j] += C * iv[j+1]);};
+%o A290689 step(k, rem, F, sh) = {my(maxr = min(rem\k, at[k])); my(v, Fv = F, xk = axp[k]); for(v=0, maxr, ar[k] = v; rec(k+1, rem - k*v, Fv, sh + k*v); if(v < maxr, Fv -= xk*Fv);); ar[k] = 0;};
+%o A290689 rec(k, rem, F, sh) = {if(k == an, base(F, sh), step(k, rem, F, sh));};
+%o A290689 A(N) = {my(n = N, x = 'x); my(t = vector(n), s = vector(n)); my(k, m, acc, T); if(n==1, return([1])); an = n; ax = x; axp = vector(n-1, i, x^i); t[1] = 1; for(m=1, n, s[m] = 1); for(k=2, n, acc = 0; for(m=1, k-1, acc += s[m]*t[k-m]); t[k] = acc/(k-1); forstep(m=k, n, k, s[m] += k*t[k]);); at = t; T = O(x^(n+1)); for(k=1, n, T += t[k]*x^k); att = T; aa = vector(n); ar = vector(n-1); rec(1, n-1, 1 + 0*x, 0); aa};
+%o A290689 a(n) = A(n)[n];
+%o A290689 print1(A(41)) \\ _Robert P. P. McKone_, Jan 28 2026
 %Y A290689 The restriction to identity trees (A004111) is A279861, ranks A290760.
 %Y A290689 These trees are ranked by A290822.
 %Y A290689 The anti-transitive version is A306844, ranks A324758.
@@ -16,8 +26,9 @@
 %Y A290689 A version for integer partitions is A324753, for subsets A324736.
 %Y A290689 The ordered version is A358453, ranks A358457, undirected A358454.
 %Y A290689 Cf. A000081, A001192, A001678, A324770, A324969, A325705, A358455, A358460.
-%K A290689 nonn,more
+%K A290689 nonn,changed
 %O A290689 1,4
 %A A290689 _Gus Wiseman_, Oct 19 2017
 %E A290689 a(20) from _Robert Price_, Sep 13 2018
 %E A290689 a(21)-a(22) from _Robert P. P. McKone_, Dec 16 2023
+%E A290689 a(23)-a(68) from _Robert P. P. McKone_, Jan 28 2026
