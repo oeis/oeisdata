@@ -1,13 +1,53 @@
-%I A321319 #10 Nov 04 2018 20:36:12
+%I A321319 #25 Jan 30 2026 11:58:02
 %S A321319 1,1,2,1,2,2,4,1,2,2,4,2,4,4,4,1,2,2,4,2,4,4,4,2,4,4,4,4,4,4,16,1,2,2,
 %T A321319 4,2,4,4,4,2,4,4,4,4,4,4,8,2,4,4,4,4,4,4,8,4,4,4,8,4,8,8,8,1,2,2,4,2,
 %U A321319 4,4,4,2,4,4,4,4,4,4,8,2,4,4,4,4,4,4
 %N A321319 Smallest power of 2 obtainable by partitioning the binary representation of n into consecutive blocks and then summing.
-%H A321319 E. Berlekamp, J. Buhler, <a href="http://www.msri.org/attachments/media/news/emissary/EmissaryFall2011.pdf">Puzzle 6</a>, Puzzles column, Emissary Fall (2011) 9.
+%H A321319 Robert Israel, <a href="/A321319/b321319.txt">Table of n, a(n) for n = 1..10000</a>
+%H A321319 E. Berlekamp and J. Buhler, <a href="http://www.msri.org/attachments/media/news/emissary/EmissaryFall2011.pdf">Puzzle 6</a>, Puzzles column, Emissary Fall (2011) 9.
 %H A321319 Steve Butler, Ron Graham, and Richard Stong, <a href="http://www.math.ucsd.edu/~ronspubs/mis_17_bases.pdf">Collapsing numbers in bases 2, 3, and beyond</a>, in The Proceedings of the Gathering for Gardner 10 (2012).
 %H A321319 Steve Butler, Ron Graham, and Richard Strong, <a href="http://orion.math.iastate.edu/butler/papers/16_03_insert_and_add.pdf">Inserting plus signs and adding</a>, Amer. Math. Monthly 123 (3) (2016), 274-279.
-%e A321319 For n = 13, we can partition its binary representation as follows (showing partition and sum of terms): (1101):13, (1)(101):6, (11)(01):4, (110)(1):7, (1)(1)(01):3, (1)(10)(1):4, (11)(0)(1):4, (1)(1)(0)(1):3.  Thus the smallest power of 2 is 4.
+%e A321319 For n = 13, we can partition its binary representation as follows (showing partition and sum of terms): (1101):13, (1)(101):6, (11)(01):4, (110)(1):7, (1)(1)(01):3, (1)(10)(1):4, (11)(0)(1):4, (1)(1)(0)(1):3. Thus the smallest power of 2 is 4.
+%p A321319 g:= proc(n) option remember; local i,R;
+%p A321319      R:= {n};
+%p A321319      for i from 1 to ilog2(n) do
+%p A321319        R:= R union (procname(floor(n/2^i)) +~ (n mod 2^i));
+%p A321319      od;
+%p A321319      R;
+%p A321319 end proc:g(0):= 0: g(1):= 1:
+%p A321319 f:= proc(n) local x;
+%p A321319   for x in sort(convert(g(n),list)) do
+%p A321319     if x = 2^padic:-ordp(x,2) then
+%p A321319       return x
+%p A321319     fi
+%p A321319   od;
+%p A321319   -1
+%p A321319 end proc:
+%p A321319 map(f, [$1..100]); # _Robert Israel_, Jan 30 2026
+%t A321319 sumInt[LL_] := Total[(FromDigits[#1, 2] & ) /@ LL];
+%t A321319 BGS[{{1}, {1}, {1}, {1}, {1}}] = {{1}, {1, 1, 1, 1}};
+%t A321319 BGS[{{1}, {1}, {1}, {1}, {1}, {0}}] = {{1, 1}, {1, 1}, {1, 0}};
+%t A321319 BGS[L_ /; Total[Flatten[L]] == 5] := (p =
+%t A321319  Position[Range[Length[L]-2], x_Integer /; L[[x+{0,1}]]==={{1},{0}},{1},1][[1,1]];
+%t A321319    Join[L[[1 ;; p - 1]], {L[[p + {0, 1, 2}, 1]]},
+%t A321319     L[[p + 3 ;; Length[L]]]]);
+%t A321319 tripleMerge[L_,pow_]:=(
+%t A321319       p=Position[Range[Length[L]-2],x_Integer/;L[[x]]==={1},{1},1];
+%t A321319    If[p === {}, L,
+%t A321319    p = p[[1, 1]]; J = Join[L[[1 ;; p - 1]], {L[[p + {0, 1, 2}, 1]]},
+%t A321319       L[[p+3;;Length[L]]]]; If[sumInt[J] <= pow, J, L]]);
+%t A321319 doubleMerge[L_, pow_] := (
+%t A321319    p=Position[Range[Length[L]-1], x_Integer/;L[[x]] === {1}, {1},1];
+%t A321319    If[p === {}, L, p = p[[1, 1]];
+%t A321319      J = Join[L[[1 ;; p - 1]], {L[[p + {0, 1}, 1]]},
+%t A321319      L[[p + 2 ;; Length[L]]]]; If[sumInt[J] <= pow, J, L]]);
+%t A321319 BGS[L_ /; Total[Flatten[L]] != 5] := (old = L;
+%t A321319    pow = 2^Ceiling[Log2[Total[Flatten[L]]]];
+%t A321319    While[new = tripleMerge[old, pow]; new =!= old, old = new];
+%t A321319        While[new = doubleMerge[old, pow]; new =!= old, old = new];
+%t A321319    new);
+%t A321319 sumInt[BGS[List /@ IntegerDigits[#, 2]]] & /@ Range[86] (* _Stan Wagon_, Jan 25 2026 *)
 %Y A321319 Cf. A321318, A321320, A321321.
-%K A321319 nonn
+%K A321319 nonn,changed
 %O A321319 1,3
 %A A321319 _Jeffrey Shallit_, Nov 04 2018
