@@ -1,6 +1,7 @@
-%I A318185 #5 Aug 22 2018 08:32:56
+%I A318185 #11 Feb 01 2026 22:42:53
 %S A318185 1,1,1,2,3,5,7,12,17,28,41,65,96,150,221,342,506,771,1142,1731,2561,
-%T A318185 3855,5702,8538,12620,18817,27774,41276,60850,90139
+%T A318185 3855,5702,8538,12620,18817,27774,41276,60850,90139,132720,196092,
+%U A318185 288321,425001,624049
 %N A318185 Number of totally transitive rooted trees with n nodes.
 %C A318185 A rooted tree is totally transitive if every branch of the root is totally transitive and every branch of a branch of the root is also a branch of the root. Unlike transitive rooted trees (A290689), every terminal subtree of a totally transitive rooted tree is itself totally transitive.
 %e A318185 The a(8) = 12 totally transitive rooted trees:
@@ -36,7 +37,14 @@
 %e A318185   (oooooooo)
 %t A318185 totra[n_]:=totra[n]=If[n==1,{{}},Join@@Table[Select[Union[Sort/@Tuples[totra/@c]],Complement[Union@@#,#]=={}&],{c,IntegerPartitions[n-1]}]];
 %t A318185 Table[Length[totra[n]],{n,20}]
+%o A318185 (PARI)
+%o A318185 transitiveQ(t) = {my(S = Set(t), U = Set([]), i); for(i=1, #S, if(#S[i], U = setunion(U, Set(S[i])));); return(#setminus(U, S) == 0);};
+%o A318185 allmultisets_by_sizes(tt, parts) = {my(r = #parts, bounds = vector(r), L = List()); my(i, sz, len, idx, acc); for(i=1, r, sz = parts[i]; len = #tt[sz]; if(len == 0, return([])); bounds[i] = [1, len];); forvec(idx = bounds, acc = vector(r, i, tt[parts[i]][ idx[i] ]); listput(L, vecsort(acc)); ); return(Set(Vec(L)));};
+%o A318185 A(N) = {my(n = N); if(n == 1, return([1])); my(tt = vector(n), k, parts, cand, good, i); tt[1] = [ [] ]; for(k=2, n, good = List(); forpart(parts = k-1, cand = allmultisets_by_sizes(tt, parts); for(i=1, #cand, if(transitiveQ(cand[i]), listput(good, cand[i])););); tt[k] = Set(Vec(good));); return(vector(n, k, #tt[k]));};
+%o A318185 a(n) = A(n)[n];
+%o A318185 print1(A(24)); \\ _Robert P. P. McKone_, Jan 28 2026
 %Y A318185 Cf. A000081, A001678, A004111, A279861, A290689, A290760, A290822, A318186, A318187.
-%K A318185 nonn,more
+%K A318185 nonn,more,changed
 %O A318185 1,4
 %A A318185 _Gus Wiseman_, Aug 20 2018
+%E A318185 a(31)-a(35) from _Robert P. P. McKone_, Jan 28 2026
