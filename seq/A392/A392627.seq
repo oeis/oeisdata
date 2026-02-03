@@ -1,0 +1,54 @@
+%I A392627 #42 Feb 02 2026 20:19:03
+%S A392627 1,1,1,1,1,2,2,1,3,1,1,3,3,3,8,3,1,6,6,1,1,4,4,6,15,6,4,20,20,4,1,10,
+%T A392627 20,10,1,1,5,5,10,24,10,10,45,45,10,5,40,75,40,5,1,15,50,50,15,1,1,6,
+%U A392627 6,15,35,15,20,84,84,20,15,105,189,105,15,6,70,210,210,70,6,1,21,105,175,105,21,1
+%N A392627 Tetrahedron read by slices read by antidiagonals: T(n,i,j) is the number of paths from (0,0,0) to (n,i,j) consisting of moves {(1,0,0), (1,1,0), (1,0,1), (1,1,1)} that remain confined to i+j<=n at each step.
+%H A392627 Paolo Xausa, <a href="/A392627/b392627.txt">Table of n, a(n) for n = 0..12340</a> (slices 0..40, flattened).
+%H A392627 Richard K. Guy, <a href="https://cs.uwaterloo.ca/journals/JIS/VOL3/GUY/catwalks.html">Catwalks, sandsteps and Pascal pyramids</a>, J. Integer Sequences, Vol. 3 (2000), Article #00.1.6.
+%H A392627 Math Stackexchange, <a href="https://math.stackexchange.com/q/552655">Probability that between two Bernoulli sequences, one will get 'ahead' and remain there to sequence end</a>, 2013 (see 2025 answer by sequence author).
+%F A392627 O.g.f.: (1 - y*h(x*y,z/y))/(1 - x*(1+y)*(1+z)) = 1/(1 - x*(1+y+z) - x*y*h(x*y,z/y)), where h(x,y) is the o.g.f. of A001263.
+%F A392627 O.g.f. is algebraic with 1 + (x*(2+y+z)-1)*f + x*(x*(1+y)*(1+z)-1)*f^2 = 0.
+%F A392627 T(n,i,j) = C(n,i)*C(n,j) - C(n,i-1)*C(n,j-1).
+%F A392627 T(n,i,j) = C(n,i)*C(n,j) - Sum_{m=1..n, k=1..m} C(m-1,k-1) * C(m,k-1) * C(n-m,i-k) * C(n-m,j-m-1+k)/k (assuming C is analytically continued to 0 outside each row, this formula is 0 outside the triangle instead of being conjoined to a negative version).
+%F A392627 T(n,0,k) = T(n,k,0) = C(n,k).
+%F A392627 T(n,k,n-k) = C(n,k) * C(n+1,k)/(k+1) = A001263(n+1,k+1) (triagonal surface is Narayana triangle).
+%F A392627 Slice sums: Sum_{i,j} T(n,i,j) = C(2*n+1,n) = A001700(n).
+%F A392627 Antidiagonal sums: Sum_{e=0..d} T(n,d-e,e) = C(2n+1,k) * 2 * (n-k+1) / (2n-k+2) = A050166(n,d).
+%F A392627 Diagonal sums: Sum_{e} T(n,n-d+e,e) = C(n,floor(d/2)) * C(n,ceiling(d/2)) = A247644(n+1,d+1).
+%F A392627 Center of mass of n-th slice is (A000531(n+1) = A296769(n))/A001700(n) = n+1 - 4^n/C(2*n+1,n) = (n+1)/2 - sqrt(Pi*n)/4 + O(1/sqrt(n)).
+%e A392627 Slices n = 0..6:
+%e A392627 .
+%e A392627   1       1 1        1 2 1       1 3 3 1
+%e A392627           1          2 3         3 8 6
+%e A392627                      1           3 6
+%e A392627                                  1
+%e A392627 .
+%e A392627   1  4  6  4 1       1  5 10 10  5 1
+%e A392627   4 15 20 10         5 24 45 40 15
+%e A392627   6 20 20           10 45 75 50
+%e A392627   4 10              10 40 50
+%e A392627   1                  5 15
+%e A392627                      1
+%e A392627 .
+%e A392627    1   6  15  20  15  6 1
+%e A392627    6  35  84 105  70 21
+%e A392627   15  84 189 210 105
+%e A392627   20 105 210 175
+%e A392627   15  70 105
+%e A392627    6  21
+%e A392627    1
+%t A392627 A392627[n_, i_, j_] := Det[Binomial[n, {{i, i-1}, {j-1, j}}]];
+%t A392627 Table[A392627[n, i-j, j], {n, 0, 6}, {i, 0, n}, {j, 0, i}] (* _Paolo Xausa_, Feb 02 2026 *)
+%o A392627 (Python)
+%o A392627 l=6
+%o A392627 T=[[[1]]]
+%o A392627 t=lambda n,i,j: int(i>=0<=j<=n-i) and T[n][i][j]
+%o A392627 for n in range(1,l+1): T.append([[t(n-1,i,j)+t(n-1,i-1,j)+t(n-1,i,j-1)+t(n-1,i-1,j-1) for j in range(n-i+1)] for i in range(n+1)])
+%o A392627 print([T[n][d-e][e] for n in range(l+1) for d in range(n+1) for e in range(d+1)])
+%o A392627 (Python) # single term
+%o A392627 from math import comb as C
+%o A392627 T=lambda n,i,j: C(n,i)*C(n,j) - sum(C(m-1,k-1)*C(m,k-1)*C(n-m,i-k)*C(n-m,j-m-1+k)//k for m in range(1,n+1) for k in range(max(1,m+1-j),min(m,i)+1))
+%Y A392627 Cf. A001263, A050166, A247644.
+%K A392627 nonn,look,tabf,new
+%O A392627 0,6
+%A A392627 _Natalia L. Skirrow_, Jan 17 2026

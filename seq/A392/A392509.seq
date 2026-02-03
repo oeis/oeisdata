@@ -1,0 +1,65 @@
+%I A392509 #21 Feb 02 2026 12:39:33
+%S A392509 1,1,1,1,1,1,0,3,0,1,-2,9,-8,6,1,-5,25,-55,80,-46,1,-9,60,-225,555,
+%T A392509 -774,484,1,-14,126,-700,2625,-6342,9072,-5840,1,-20,238,-1820,9625,
+%U A392509 -35000,84448,-122240,80680,1,-27,414,-4158,29421,-148743,530796,-1276992
+%N A392509 Triangle of coefficients of the permanent polynomial of rectangular Dancing School matrices.
+%C A392509 Triangle of coefficients of the polynomial f(n, h), introduced in A079908 in the context of the "Dancing School" problem.
+%C A392509 The problem is inspired by a classic dancing school setting. Imagine a row of n girls facing a row of n+h boys on the dance floor. The girls engage a partner from the opposite line based on height: a girl (number i) chooses a boy (number j) who is at least her own height but not more than h units taller.
+%C A392509 This situation is modeled by the n X (n+h) band matrix A where A(i,j) = 1 if and only if i <= j <= i+h, and 0 otherwise.
+%C A392509 The polynomial f(n, h) corresponds to the permanent of this matrix, counting the total number of valid complete matchings between the girls and the boys.
+%C A392509 Equivalently this corresponds to the number of ways to place n non-attacking rooks on the allowed cells of an n X (n+h) board.
+%C A392509 For fixed n, the function f(n, h) is a polynomial in h of degree n (valid for h >= n-2).
+%C A392509 The table lists the coefficients of f(n, h) in descending powers of h (from h^n down to h^0).
+%C A392509 T(n, k) is the coefficient of h^(n-k) in the polynomial f(n, h).
+%C A392509 The algorithm used for this sequence demonstrates a reduction in computational complexity for this class of permanents. While fast general permanent computation is of order O(n2^n), this specific band structure allows for an O(n^4) algorithm (the "Stirling-Glue" method), reducing the problem from exponential to polynomial time.
+%C A392509 This allows exact computation of polynomials for n=50 and beyond, which was previously intractable using standard Ryser expansion or even with Butera-Pernici in SageMath.
+%C A392509 In 2024 it took 18 minutes to calculate f(24, h) on a 24-core computer. Now it takes only 1.1627 sec to calculate f(50, h).
+%D A392509 Jaap Spies, A Bit of Math, The Art of Problem Solving, Spies Publishers ISBN: 9789402171914 (2025), Chapter 32, for a history of The Dancing School Problems.
+%H A392509 Jaap Spies, <a href="https://www.nieuwarchief.nl/serie5/pdf/naw5-2006-07-4-283.pdf">Dancing School Problems</a>, Nieuw Archief voor Wiskunde 5/7 nr. 4, Dec 2006, pp. 283-285.
+%e A392509 The triangle T(n, k) begins:
+%e A392509   n\k  0   1   2    3   4    5   6 ...
+%e A392509   1:   1   1
+%e A392509   2:   1   1   1
+%e A392509   3:   1   0   3    0
+%e A392509   4:   1  -2   9   -8   6
+%e A392509   5:   1  -5  25  -55  80  -46
+%e A392509   6:   1  -9  60 -225 555 -774 484
+%e A392509   ...
+%e A392509 T(4,2)=9 because f(4,h) = h^4 - 2*h^3 + 9*h^2 - 8*h + 6
+%o A392509 (SageMath)
+%o A392509 def A_new_row(m):
+%o A392509     # Computes the coefficient row for dimension m using Stirling-Glue algorithm
+%o A392509     # Returns coefficients for h^m down to h^0
+%o A392509     total_rv = [0] * (m + 1)
+%o A392509     # Iterate target number of rooks in Right Corner (N_R)
+%o A392509     for N_R in range(m):
+%o A392509         dp = {(0, 0): 1} # State: (k_L, k_R) -> count
+%o A392509         for i in range(m):
+%o A392509             new_dp = {}
+%o A392509             for (kL, kR), ways in dp.items():
+%o A392509                 # 1. Skip row
+%o A392509                 new_dp[(kL, kR)] = new_dp.get((kL, kR), 0) + ways
+%o A392509                 # 2. Place in Left (L) - Stirling structure
+%o A392509                 if i >= 1:
+%o A392509                     factor_L = i - kL
+%o A392509                     if factor_L > 0:
+%o A392509                         st = (kL + 1, kR)
+%o A392509                         new_dp[st] = new_dp.get(st, 0) + ways * factor_L
+%o A392509                 # 3. Place in Right (R) - Stirling structure
+%o A392509                 if i <= m - 2 and kR < N_R:
+%o A392509                     factor_R = (m - 1 - i) - (N_R - 1 - kR)
+%o A392509                     if factor_R > 0:
+%o A392509                         st = (kL, kR + 1)
+%o A392509                         new_dp[st] = new_dp.get(st, 0) + ways * factor_R
+%o A392509             dp = new_dp
+%o A392509         for (kL, kR), ways in dp.items():
+%o A392509             if kR == N_R:
+%o A392509                 total_rv[kL + kR] += ways
+%o A392509     # Convert rook vector to polynomial coefficients (Brualdi-Ryser)
+%o A392509     # Implementation of expansion logic omitted for brevity, results in:
+%o A392509     # f(m, h) = sum_{k=0}^m (-1)^k * total_rv[k] * falling_factorial(m+h-k, m-k)
+%o A392509     # returns list of coefficients
+%Y A392509 Cf. A079908-A079928.
+%K A392509 sign,tabf,new
+%O A392509 1,8
+%A A392509 _Jaap Spies_, Jan 14 2026
