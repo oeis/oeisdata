@@ -1,20 +1,32 @@
-%I A185105 #39 Jun 02 2021 05:16:21
+%I A185105 #57 Feb 12 2026 14:22:20
 %S A185105 1,3,1,12,5,1,60,27,8,1,360,168,59,12,1,2520,1200,463,119,17,1,20160,
 %T A185105 9720,3978,1177,221,23,1,181440,88200,37566,12217,2724,382,30,1,
 %U A185105 1814400,887040,388728,135302,34009,5780,622,38,1,19958400,9797760,4385592,1606446,441383,86029,11378,964,47,1
 %N A185105 Number T(n,k) of entries in the k-th cycles of all permutations of {1,2,..,n}; each cycle is written with the smallest element first and cycles are arranged in increasing order of their first elements.
 %C A185105 Row sums are n!*n = A001563(n) (see example).
-%C A185105 For fixed k>=1, A185105(n,k) ~ n!*n/2^k. - _Vaclav Kotesovec_, Apr 25 2017
+%C A185105 From _Natalia L. Skirrow_, Feb 03 2026: (Start)
+%C A185105 Generate a random permutation of [n], then iterate over elements in a random order and observe each one's containing cycle. T(n,k) is n! times the expected number of elements in the k-th distinct cycle observed. Orders of iteration correspond with renumbering nodes and applying the definition. This can be performed in reverse to generate uniform random permutations one cycle at a time, in which T(n,k) measures the k-th cycle generated.
+%C A185105 The probability of the k-th cycle having length l is |Stirling1(l; n, k+l-1)| * (l-1)! / n!, where |Stirling1(r; n, k)| is an r-Stirling number; thus, T(n,k) = Sum_{l=1..n-k+1} l!*|Stirling1(l; n, k+l-1)|.
+%C A185105 n-th row has center of mass 2 - H_n/n and variance 2 - (H_n^2*(1+1/n) + H_n - H^(2)_n)/n, where H^{(2)}_n = Sum_{k=1..n} 1/k^2 is a second-order harmonic number. (End)
 %H A185105 Alois P. Heinz, <a href="/A185105/b185105.txt">Rows n = 1..141, flattened</a>
+%H A185105 Andrei Z. Broder, <a href="https://doi.org/10.1016/0012-365X(84)90161-4">The r-Stirling numbers</a>. (1984). Discrete Mathematics, vol. 49, iss. 3, pp. 241-259.
+%H A185105 Natalia L. Skirrow, <a href="/wiki/User:Natalia_L._Skirrow/a_little-known_permutation_generator">a little-known permutation generator</a>
 %H A185105 Wikipedia, <a href="https://en.wikipedia.org/wiki/Permutation">Permutation</a>
+%F A185105 For fixed k>=1, T(n,k) ~ n!*n/2^k. - _Vaclav Kotesovec_, Apr 25 2017
+%F A185105 From _Natalia L. Skirrow_, Feb 03 2026: (Start)
+%F A185105 E.g.f.: (1/(1-x)^2 - 1/(1-x)^y) * y/(2-y).
+%F A185105 n-th row o.g.f.: ((n+1)! - Pochhammer[y,n]) * y/(2-y).
+%F A185105 T(n,k) = Sum_{i=k..n} |Stirling1(i-1,k-1)| * (n+1)! / (i+1)!.
+%F A185105 T(n,k) = (n+1)!/2^k - Sum_{i=1..k} |Stirling1(n,k-i)| / 2^i. [Refining Kotesovec's asymptotic to ~ (n+1)!/2^k * (1 + O(polylog(n)/n^2)).]
+%F A185105 T(n+1,k) = n*T(n,k) + T(n,k-1).
+%F A185105 T(n+1,k+1) = Sum_{l=0..n-k} (n! / (n-l)!) * T(n-l,k). (End)
 %e A185105 The six permutations of n=3 in ordered cycle form are:
-%e A185105 { {1}, {2}, {3}    }
-%e A185105 { {1}, {2, 3}, {}  }
-%e A185105 { {1, 2}, {3}, {}  }
-%e A185105 { {1, 2, 3}, {}, {}}
-%e A185105 { {1, 3, 2}, {}, {}}
-%e A185105 { {1, 3}, {2}, {}  }
-%e A185105 .
+%e A185105   { {1}, {2}, {3}    }
+%e A185105   { {1}, {2, 3}, {}  }
+%e A185105   { {1, 2}, {3}, {}  }
+%e A185105   { {1, 2, 3}, {}, {}}
+%e A185105   { {1, 3, 2}, {}, {}}
+%e A185105   { {1, 3}, {2}, {}  }
 %e A185105 The lengths of the cycles in position k=1 sum to 12, those of the cycles in position k=2 sum to 5 and those of the cycles in position k=3 sum to 1.
 %e A185105 Triangle begins:
 %e A185105        1;
@@ -37,10 +49,14 @@
 %t A185105 b[n_, i_] := b[n, i] = Expand[If[n==0, 1, Sum[Function[p, p + Coefficient[ p, x, 0]*j*x^i][b[n-j, i+1]]*Binomial[n-1, j-1]*(j-1)!, {j, 1, n}]]];
 %t A185105 T[n_] := Function[p, Table[Coefficient[p, x, i], {i, 1, n}]][b[n, 1]];
 %t A185105 Array[T, 12] // Flatten (* _Jean-François Alcover_, May 30 2018, after _Alois P. Heinz_ *)
+%o A185105 (Python)
+%o A185105 from math import factorial as fact
+%o A185105 from sympy.functions.combinatorial.numbers import stirling
+%o A185105 A185105=lambda n,k: sum(fact(n+1)//fact(i+1)*stirling(i-1,k-1,kind=1) for i in range(k,n+1)) # _Natalia L. Skirrow_, Feb 03 2026
 %Y A185105 Columns k=1-10 give: A001710(n+1), A138772, A159324(n-1)/2 or A285231, A285232, A285233, A285234, A285235, A285236, A285237, A285238.
 %Y A185105 T(2n,n) gives A285239.
 %Y A185105 Cf. A000142, A001563, A270236, A284816, A285439.
-%K A185105 nonn,tabl
+%K A185105 nonn,tabl,changed
 %O A185105 1,2
 %A A185105 _Wouter Meeussen_, Dec 26 2012
 %E A185105 More terms from _Alois P. Heinz_, Apr 15 2017
