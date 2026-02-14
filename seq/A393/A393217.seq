@@ -1,4 +1,4 @@
-%I A393217 #24 Feb 13 2026 02:42:13
+%I A393217 #39 Feb 13 2026 23:26:51
 %S A393217 8,9,49,64,81,128,343,361,529,2187,100000,524288,6436343,8388608,
 %T A393217 9765625,10000000,282475249,289254654976
 %N A393217 Perfect powers m^k, with m, k > 1, such that no digit of m^k is present in k^m.
@@ -9,6 +9,27 @@
 %e A393217 Since the digits of 4^3 = 64 do not appear in 3^4 = 81, 64 is a term. Although 64 is also 2^6 which does not work because of 6^2 = 36.
 %o A393217 (PARI) isok(x) = my(s=Set(digits(x)), y, d, m); if (y=ispower(x,,&k), fordiv(y, d, if (d>1, ispower(x,d,&m); if (!#setintersect(s, Set(digits(d^m))), return(1))))); \\ _Michel Marcus_, Feb 08 2026
 %o A393217 (PARI) list(lim)=my(v=List(vector(sqrtint(lim\=1), n, n^2))); v = select(isok, v); for(e=3, logint(lim, 2), for(n=2, sqrtnint(lim, e), if (isok(n^e), listput(v, n^e)))); Set(v); \\ _Michel Marcus_, Feb 08 2026
+%o A393217 (Python)
+%o A393217 from math import gcd
+%o A393217 from itertools import count, islice
+%o A393217 from sympy import mobius, integer_nthroot, divisors, factorint
+%o A393217 from oeis_sequences.OEISsequences import bisection
+%o A393217 def A393217_gen():
+%o A393217     w = 1
+%o A393217     def f(x): return int(n-1+x+sum(mobius(k)*(integer_nthroot(x,k)[0]-1) for k in range(2,x.bit_length())))
+%o A393217     for n in count(2):
+%o A393217         w = bisection(f,w,w)
+%o A393217         fs = factorint(w)
+%o A393217         k = gcd(*fs.values())
+%o A393217         s = set(str(w))
+%o A393217         if len(s) < 10:
+%o A393217             for d in divisors(k):
+%o A393217                 if d>1:
+%o A393217                     m = integer_nthroot(w,d)[0]
+%o A393217                     if s.isdisjoint(set(str(d**m))):
+%o A393217                         yield w
+%o A393217                         break
+%o A393217 A393217_list = list(islice(A393217_gen(),15)) # _Chai Wah Wu_, Feb 13 2026
 %Y A393217 Cf. A029783, A389849.
 %Y A393217 Subsequence of A001597.
 %K A393217 nonn,base,more,new
