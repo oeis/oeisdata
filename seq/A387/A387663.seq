@@ -1,4 +1,4 @@
-%I A387663 #29 Oct 15 2025 17:04:54
+%I A387663 #32 Feb 15 2026 23:16:26
 %S A387663 0,0,-1,1,0,-2,5,-4,1,0,-24,62,-63,33,-9,1,0,-516,1522,-1830,1195,
 %T A387663 -470,114,-16,1,0,-19440,61764,-82610,62380,-29805,9485,-2040,290,-25,
 %U A387663 1,0,-1114560,3756048,-5433032,4536304,-2464010,925047,-247502,47665,-6540,615
@@ -6,6 +6,7 @@
 %F A387663 T(n,k) = [m^k] n! Sum_{s=0..n} Sum_{t=0..n} binomial(m,s) * binomial(m-s,t) * Sum_{i=0..s} Sum_{j=0..t} (-1)^(i+j) * binomial(s,i) * binomial(t,j) * binomial((s-i)*(t-j), n).
 %F A387663 A052296(m,n) = Sum_{k=0..2*n} T(n,k) m^k / n!.
 %F A387663 A092552(n) = -Sum_{i=1..n} S2(n,i)*T(i,1).
+%F A387663 T(n,k) = Sum_{i=k/2..n} Sum_{s=0..i} Sum_{t=0..i} (-1)^(n-k-i+s+t) * S1(n, i) * S1(s+t, k) * S2(i, s) * S2(i, t), where S1(n,k) = A132393 and S2(n,k) = A008277 are the Stirling numbers of the first and second kind, respectively. - _Eytan Chong_, Feb 11 2026
 %e A387663 Triangle begins:
 %e A387663   0;
 %e A387663   0, -1, 1;
@@ -16,20 +17,16 @@
 %t A387663 T[n_,k_]:= SeriesCoefficient[ n! Sum[Sum[Binomial[m,s]Binomial[m-s,t] Sum[Sum[ (-1)^(i+j) Binomial[s,i]Binomial[t,j]Binomial[(s-i)(t-j), n],{j,0,t}],{i,0,s}],{t,0,n}],{s,0,n}],{m,0,k}]; Table[T[n,k],{n,5},{k,0,2n}]//Flatten (* _Stefano Spezia_, Oct 04 2025 *)
 %o A387663 (Python)
 %o A387663 import sympy as sp
-%o A387663 def T(n, k):
-%o A387663   m = sp.symbols('m', integer=True)
+%o A387663 from sympy.functions.combinatorial import numbers
+%o A387663 def T(n,k):
 %o A387663   sum = 0
-%o A387663   for S in range(1, n+1):
-%o A387663     for T in range(1, n+1):
-%o A387663       inner_sum = 0
-%o A387663       for I in range(0, S+1):
-%o A387663         for J in range(0, T+1):
-%o A387663           inner_sum += (-1)**(I+J) * sp.binomial(S, I) * sp.binomial(T, J) * sp.binomial((S-I)*(T-J), n)
-%o A387663       sum += sp.binomial(m, S) * sp.binomial(m-S, T) * inner_sum
-%o A387663   coeffs = sp.Poly(sp.simplify(sum * sp.factorial(n)), m).all_coeffs()
-%o A387663   coeffs.reverse()
-%o A387663   print(coeffs[k])
+%o A387663   for i in range(sp.ceiling(k/2), n+1):
+%o A387663     for s in range(0, i+1):
+%o A387663       for t in range(0, i+1):
+%o A387663         if (s + t >= k):
+%o A387663           sum += numbers.stirling(n, i, signed=True) * numbers.stirling(s+t, k, signed=True) * numbers.stirling(i, s) * numbers.stirling(i, t)
+%o A387663   return sum # _Eytan Chong_, Feb 12 2026
 %Y A387663 Cf. A052296, A092552.
-%K A387663 tabf,sign
+%K A387663 tabf,sign,changed
 %O A387663 0,6
 %A A387663 _Eytan Chong_, Oct 04 2025
