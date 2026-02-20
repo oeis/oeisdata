@@ -1,0 +1,51 @@
+%I A393417 #26 Feb 19 2026 17:19:42
+%S A393417 2,3,5,41,45667,79,1370321,1114577,184661011,4178329
+%N A393417 a(n) = p is the smallest prime number, such that the sequence of 2n+1 consecutive prime numbers modulo n starting with p mod n is palindromic.
+%C A393417 An estimate of the average position of length 2*n+1 is phi(n)^n.
+%C A393417 A block of odd length is called palindromic if the residues read the same from left to right and from right to left. For example, for n = 3, the block of 7 prime numbers [5,7,11,13,17] gives the residues modulo 3 [2,1,2,1,2,1,2], which is a palindrome.
+%e A393417 *---*------*-------------*--------------------------------------*
+%e A393417 | n |    k |   prime(k)  | [prime(k), ..., prime(k+2n)] (mod n) |
+%e A393417 *---*------*-------------*--------------------------------------*
+%e A393417 | 1 |    1 |           2 | [0,0,0]  (mod 1)                     |
+%e A393417 | 2 |    2 |           3 | [1,1,1,1,1] (mod 2)                  |
+%e A393417 | 3 |    3 |           5 | [2,1,2,1,2,1,2] (mod 3)              |
+%e A393417 | 4 |   13 |          41 | [1,3,3,1,3,1,3,3,1] (mod 4)          |
+%e A393417 | 5 | 4732 |       45667 | [2,3 2,1,2,2,2,1,2,3,2] (mod 5)      |
+%e A393417 | 6 |   22 |          79 | [1,5,5,1,5,1,5,1,5,1,5,5,1 (mod 6)   |
+%p A393417 # Function to find the first palindrome modulo n
+%p A393417 #  if the program prints "FAIL",increase the maximum value kmax.
+%p A393417 with(ListTools):
+%p A393417 FindLineU_simple := proc(n, P, kmax)
+%p A393417     local R, k, i, ok;
+%p A393417     R := [seq(P[i] mod n, i=1..kmax+2*n)];
+%p A393417      for k from 1 to kmax do
+%p A393417         ok := true;
+%p A393417         for i from 0 to n do
+%p A393417             if R[k+i] <> R[k+2*n-i] then
+%p A393417                 ok := false;
+%p A393417                 break;
+%p A393417             end if;
+%p A393417         end do;
+%p A393417         if ok then
+%p A393417             return k, [seq(R[k+i], i=0..2*n)];
+%p A393417         end if;
+%p A393417     end do;
+%p A393417     return FAIL;
+%p A393417 end proc:
+%p A393417 # Display for n=3n=1..8
+%p A393417 TrianglePal_1to8 := proc(kmax)
+%p A393417     local P, n, res;
+%p A393417     # Generate enough prime numbers
+%p A393417     P := [seq(ithprime(i), i=1..kmax+16)];  # 2*8=16 pour le plus grand palindrome
+%p A393417     for n from 1 to 8 do
+%p A393417         res := FindLineU_simple(n, P, kmax);
+%p A393417         print(n, res);
+%p A393417     end do;
+%p A393417 end proc:TrianglePal_1to8(10^5);
+%o A393417 (PARI) ispal(v) = for (i=1, #v\2, if (v[i] != v[#v-i+1], return(0))); 1;	
+%o A393417 a(n) = my(v=Vecrev(primes(2*n+1)), p=prime(2*n+1)); v = apply(x->(x%n), v); while (!ispal(v), p=nextprime(p+1); v=concat(p % n, v); v=Vec(v, 2*n+1)); for(i=1, 2*n, p=precprime(p-1)); p; \\ _Michel Marcus_, Feb 15 2026
+%Y A393417 Cf. A393342.
+%K A393417 nonn,hard,more,new
+%O A393417 1,1
+%A A393417 _Michel Lagneau_, Feb 14 2026
+%E A393417 a(9)-a(10) from _Michel Marcus_, Feb 15 2026
