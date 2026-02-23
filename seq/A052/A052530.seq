@@ -1,4 +1,4 @@
-%I A052530 #143 Nov 26 2025 15:59:36
+%I A052530 #146 Feb 22 2026 13:34:22
 %S A052530 0,2,8,30,112,418,1560,5822,21728,81090,302632,1129438,4215120,
 %T A052530 15731042,58709048,219105150,817711552,3051741058,11389252680,
 %U A052530 42505269662,158631825968,592022034210,2209456310872,8245803209278,30773756526240
@@ -11,6 +11,7 @@
 %C A052530 a(n+1) is the number of spanning trees of the graph P_n, where P_n is a 2 X n grid with two additional vertices, u and v, where u is adjacent to (1,1) and (2,1), and v is adjacent to (1,n) and (2,n). - _Kevin Long_, May 04 2018
 %C A052530 a(n) is also the output of Tesler's formula for the number of perfect matchings of an m X n Mobius band where m is even and n is odd, specialized to m=2. (The twist is on the length-n side.) - _Sarah-Marie Belcastro_, Feb 15 2022
 %C A052530 In general, values of x and y which satisfy (x^2 + y^2)/(x*y + 1) = k^2 are any two adjacent terms of a second-order recurrence with initial terms 0 and k and signature (k^2,-1). This can also be expressed as a first-order recurrence a(n+1) = (k^2*a(n) + sqrt((k^4-4)*a(n)^2 + 4*k^2))/2, n > 1. - _Gary Detlefs_, Feb 27 2024
+%C A052530 This sequence can be uniquely extended to satisfy the linear recurrence by a(n) = -a(-n) for all n in Z. - _Michael Somos_, Feb 22 2026
 %H A052530 T. D. Noe, <a href="/A052530/b052530.txt">Table of n, a(n) for n = 0..200</a>
 %H A052530 K. Andersen, L. Carbone, and D. Penta, <a href="https://pdfs.semanticscholar.org/8f0c/c3e68d388185129a56ed73b5d21224659300.pdf">Kac-Moody Fibonacci sequences, hyperbolic golden ratios, and real quadratic fields</a>, Journal of Number Theory and Combinatorics, Vol 2, No. 3 pp 245-278, 2011. See Section 9.
 %H A052530 Hacène Belbachir, Soumeya Merwa Tebtoub, and László Németh, <a href="https://cs.uwaterloo.ca/journals/JIS/VOL23/Nemeth/nemeth7.html">Ellipse Chains and Associated Sequences</a>, J. Int. Seq., Vol. 23 (2020), Article 20.8.5.
@@ -40,6 +41,7 @@
 %F A052530 E.g.f.: (exp((2 + sqrt(3))*x) - exp((2 - sqrt(3))*x))/sqrt(3). - _Franck Maminirina Ramaharo_, Nov 12 2018
 %F A052530 a(n+1) = 2*a(n) + sqrt(3*a(n)^2 + 4), n > 1. - _Gary Detlefs_, Feb 27 2024
 %e A052530 Colored compositions. a(2) = 8: There are two compositions of 4 into even parts, namely 4 and 2 + 2. Using primes to indicate the coloring of parts, the 8 colored compositions are 4, 4', 4'', 4''', 2 + 2, 2 + 2', 2' + 2 and 2' + 2'. - _Peter Bala_, Sep 17 2013
+%e A052530 G.f. = 2*x + 8*x^2 + 30*x^3 + 112*x^4 + 418*x^5 + 1560*x^6 + ... - _Michael Somos_, Feb 22 2026
 %p A052530 spec := [S,{S=Sequence(Prod(Union(Z,Z),Sequence(Z),Sequence(Z)))},unlabeled]: seq(combstruct[count](spec, size=n), n=0..20);
 %p A052530 s := sqrt(3): a := n -> ((2-s)^n-(s+2)^n)/(s*(s-2)*(s+2)):
 %p A052530 seq(simplify(a(n)), n=0..24); # _Peter Luschny_, Apr 28 2020
@@ -47,10 +49,12 @@
 %t A052530 NestList[2 # + Sqrt[4 + 3 #^2]&, 0, 200] (* _Zak Seidov_, Mar 31 2011 *)
 %t A052530 LinearRecurrence[{4, -1}, {0, 2}, 25] (* _T. D. Noe_, Jan 09 2012 *)
 %t A052530 CoefficientList[Series[2x/(1-4x+x^2),{x,0,30}],x] (* _Harvey P. Dale_, May 31 2023 *)
+%t A052530 a[ n_] := ChebyshevU[n-1, 2]*2; (* _Michael Somos_, Feb 22 2026 *)
 %o A052530 (PARI) { polya002(p,c,m) = local(v,w,j,a); w=0; print1(w,", "); v=c; print1(v,", "); j=1; while(j<=m,a=p*c^2*v-w; print1(a,", "); w=v; v=a; j++) };
 %o A052530 polya002(1,2,25)
 %o A052530 (PARI) my(x='x+O('x^30)); concat([0], Vec(2*x/(1-4*x+x^2))) \\ _G. C. Greubel_, Feb 25 2019
 %o A052530 (PARI) first(n) = n = max(n, 2); my(res = vector(n)); res[1] = 0; res[2] = 2; for(i = 3, n, res[i] = 4 * res[i-1] - res[i-2]); res \\ _David A. Corneth_, Apr 28 2020
+%o A052530 (PARI) {a(n) = polchebyshev(n-1, 2, 2)*2}; /* _Michael Somos_, Feb 22 2026 */
 %o A052530 (Haskell)
 %o A052530 a052530 n = a052530_list !! n
 %o A052530 a052530_list =
@@ -60,7 +64,7 @@
 %o A052530 (SageMath) (2*x/(1-4*x+x^2)).series(x, 30).coefficients(x, sparse=False) # _G. C. Greubel_, Feb 25 2019
 %Y A052530 Cf. A001353, A007913, A003699, A217233.
 %Y A052530 Cf. A052529, A095263.
-%K A052530 nonn,easy,nice
+%K A052530 nonn,easy,nice,changed
 %O A052530 0,2
 %A A052530 _INRIA Encyclopedia of Combinatorial Structures_, Jan 25 2000
 %E A052530 More terms from _James Sellers_, Jun 06 2000
