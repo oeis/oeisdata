@@ -1,0 +1,38 @@
+%I A393546 #10 Feb 24 2026 20:29:25
+%S A393546 0,1,3,3,4,6,7,8,8,10,11,11,12,12,15,16,17,18,19,20,20,22,23,23,25,26,
+%T A393546 27,28,29,30,32,32,33,35,36,36,38,39,40,41,41,43,43,45,45,47,48,49,50,
+%U A393546 51,52,52,54,55,56,57,59,60,61,61,62,63,64,66,67,68,69
+%N A393546 Number of decimal places which are known after n terms of the continued fraction for the bronze ratio.
+%C A393546 The convergent given by n continued fraction terms is c(n) = A006190(n+1)/A006190(n).
+%C A393546 Further continued fraction terms are taken to be unknown and the worst case (maximum absolute difference) is a single additional 1 and so at worst c(n+1).
+%C A393546 a(n) is therefore the length of agreement between c(n) and c(n+1).
+%C A393546 n/a(n) > 1/(2*log_10((3+sqrt(13))/2)) due to the size of abs(c(n) - c(n+1)) and this is expected to be the limit, but proving that depends on not having runs of consecutive equal terms long enough to push the ratio to some higher constant infinitely often.
+%C A393546 Consecutive equal terms occur when c(n) and c(n+1) span a run of 0 digits or 9 digits in the silver ratio and only several more continued fraction terms can narrow that interval enough to be sure whether 0's or 9's.
+%H A393546 Jwalin Bhatt, <a href="/A393546/b393546.txt">Table of n, a(n) for n = 1..10000</a>
+%e A393546 For n=7, the continued fraction of 7 terms is c(n) = [3; 3,3,3,3,3,3] = 3927/1189 and the worst case continuation is c(n+1) = 5116/1549,
+%e A393546 3927/1189 = 3.302775 44...
+%e A393546 5116/1549 = 3.302775 98...
+%e A393546             ^ ^^^^^^ a(7) = 7 places agree
+%o A393546 (Python)
+%o A393546 from sympy import floor
+%o A393546 from functools import cache
+%o A393546 from fractions import Fraction
+%o A393546 from os.path import commonprefix
+%o A393546 def reliable_digits_from_frac(bound1, bound2, prec):
+%o A393546     order = 10**prec
+%o A393546     trunc_bound1 = floor(bound1*order) / order
+%o A393546     trunc_bound2 = floor(bound2*order) / order
+%o A393546     return commonprefix([f'{trunc_bound1:.{prec}f}', f'{trunc_bound2:.{prec}f}'])
+%o A393546 @cache
+%o A393546 def bronze_fibo(n): return n if n < 2 else 3*bronze_fibo(n-1) + bronze_fibo(n-2)
+%o A393546 @cache
+%o A393546 def faase(n): return 1 if n < 2 else 3*faase(n-1) + faase(n-2)
+%o A393546 def a(n):
+%o A393546     bound1 = Fraction(bronze_fibo(n+1), bronze_fibo(n))
+%o A393546     bound2 = Fraction(faase(n+1), faase(n))
+%o A393546     rel_digits = reliable_digits_from_frac(bound1, bound2, int(1.04*n))
+%o A393546     return len(rel_digits) - 1 if rel_digits else 0
+%Y A393546 Cf. A003688, A006190, A098316.
+%K A393546 nonn,new
+%O A393546 1,3
+%A A393546 _Jwalin Bhatt_, Feb 20 2026
