@@ -1,0 +1,52 @@
+%I A393342 #38 Feb 25 2026 14:14:15
+%S A393342 2,3,2,5,347,113,3331,1327,8423,26423,1078967,2887,146520859,26592563,
+%T A393342 136963907,588585923
+%N A393342 a(n) is the smallest prime number p, such that the sequence of n consecutive prime numbers modulo n starting with p is a palindromic.
+%C A393342 A block of odd length is called palindromic if the residues read the same from left to right and from right to left. For example, for q = 3, the block of 3 prime numbers [5, 7, 11] gives the residues modulo 3 [2, 1, 2], which is a palindrome.
+%e A393342   n   a(n)           prime numbers                  modulo n
+%e A393342   ------------------------------------------------------------------
+%e A393342   1     2   [2]                                   [0]
+%e A393342   2     3   [3,5]                                 [1,1]
+%e A393342   3     2   [2,3,5]                               [2,0,2]
+%e A393342   4     5   [5,7,11,13]                           [1,3,3,1]
+%e A393342   5   347   [347,349,353,359,367]                 [2,4,3,4,2]|
+%e A393342   6   113   [113,127,131,137,139,149]             [5,1,5,5,5,1,5]
+%e A393342   7  3331   [3331,3343,3347,3359,3361,3371,3373]  [6,4,1,6,1,4,6]
+%e A393342   ...
+%p A393342 FindLineU_fast := proc(n)
+%p A393342     local q, L, P, R, p, i, ok;
+%p A393342     q := n;
+%p A393342     L := n;
+%p A393342     P := [];
+%p A393342     R := [];
+%p A393342     p := 2;
+%p A393342     while true do
+%p A393342         P := [op(P), p];
+%p A393342         R := [op(R), p mod q];
+%p A393342         if nops(P) > L then
+%p A393342             P := P[2..-1];
+%p A393342             R := R[2..-1];
+%p A393342         end if;
+%p A393342         if nops(P) = L then
+%p A393342             ok := true;
+%p A393342             for i from 1 to n+1 do
+%p A393342                 if R[i] <> R[L-i+1] then
+%p A393342                     ok := false;
+%p A393342                     break;
+%p A393342                 end if;
+%p A393342             end do;
+%p A393342             if ok then
+%p A393342                 return P[1], P, R;
+%p A393342             end if;
+%p A393342         end if;
+%p A393342         p := nextprime(p);
+%p A393342     end do;
+%p A393342 end proc:
+%p A393342 FindLineU_fast(3);
+%o A393342 (PARI) ispal(v) = for (i=1, #v\2, if (v[i] != v[#v-i+1], return(0))); 1;	
+%o A393342 a(n) = my(v=Vecrev(primes(n)), p=prime(n)); v = apply(x->(x%n), v); while (!ispal(v), p=nextprime(p+1); v=concat(p % n, v); v=Vec(v, n)); for(i=1, n-1, p=precprime(p-1)); p; \\ _Michel Marcus_, Feb 21 2026
+%Y A393342 Cf. A000040, A039701, A039703, A039705, A038194, A039709, A039711, A039713, A393417.
+%K A393342 nonn,hard,more,new
+%O A393342 1,1
+%A A393342 _Michel Lagneau_, Feb 12 2026
+%E A393342 a(16) from _Sean A. Irvine_, Feb 25 2026
