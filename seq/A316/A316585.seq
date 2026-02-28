@@ -1,9 +1,11 @@
-%I A316585 #45 Feb 26 2026 12:26:45
+%I A316585 #60 Feb 27 2026 08:41:07
 %S A316585 1,1,1,2,2,3,3,6,7,12,12,21,23,39,43,74,81,138,151,257,281,479,525,
 %T A316585 895,981,1671,1830,3116,3414,5813,6370,10847,11887,20239,22177,37758,
 %U A316585 41375,70442,77193,131425,144020,245197,268693,457451,501288,853446,935235,1592242,1744834,2970580,3255261
 %N A316585 Number of ways to stack n triangles symmetrically (pointing upwards or downwards depending on row parity).
-%H A316585 Seiichi Manyama, <a href="/A316585/b316585.txt">Table of n, a(n) for n = 0..1000</a>
+%H A316585 Seiichi Manyama, <a href="/A316585/b316585.txt">Table of n, a(n) for n = 0..5000</a>
+%F A316585 G.f.: A(q) = ( 1 + Sum_{k>=1} (1 + q^(2*k)) * Product_{j=1..k} R_j(q) )/(1 - q*R_1(q)), where R_k(q) is defined by the continued fraction:
+%F A316585 R_k(q) = q^(2*k-1)/(1 - q^(4*k) - q^(4*k+2)/(1 - q^(4*k+4) - q^(4*k+6)/(1 - q^(4*k+8) - q^(4*k+10)/(1 - q^(4*k+12) - q^(4*k+14)/(1 ...))))). - _Seiichi Manyama_, Feb 27 2026
 %e A316585 a(9) = 12.
 %e A316585     *   *   *   *   *   *   *   *   *
 %e A316585    / \ / \ / \ / \ / \ / \ / \ / \ / \
@@ -106,6 +108,20 @@
 %t A316585 True, Motzk[x - 1, y, twoar - 2y]];
 %t A316585 A316585[twoar_] := Module[{a, x, y}, a = 0; For[x = 0, x <= twoar , x++, For[y = 0, y <= x, y++, a = a + Motzk[x, y, twoar]]]; a];
 %t A316585 Table[A316585[n], {n, 0, 50}] (* _Jean-François Alcover_, Nov 08 2023, after _R. J. Mathar_ *)
+%o A316585 (PARI)
+%o A316585 lista(nn) = {
+%o A316585   my(q='q+O('q^(nn+1)), A=1, R=vector(nn+1), prodR=1, tmp=0);
+%o A316585   forstep(k=nn, 1, -1,
+%o A316585     tmp = q^(2*k-1)/(1 - q^(4*k) - q^(2*k+1)*tmp);
+%o A316585     R[k] = tmp;
+%o A316585   );
+%o A316585   for(k=1, nn,
+%o A316585     prodR *= R[k];
+%o A316585     if(valuation(prodR, 'q) > nn, break);
+%o A316585     A += (1 + q^(2*k))*prodR;
+%o A316585   );
+%o A316585   Vec(A/(1 - q*R[1]));
+%o A316585 }; \\ _Seiichi Manyama_, Feb 27 2026
 %Y A316585 Cf. A224704, A316384.
 %K A316585 nonn,changed
 %O A316585 0,4

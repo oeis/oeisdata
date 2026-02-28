@@ -1,0 +1,43 @@
+%I A390229 #12 Feb 27 2026 15:52:38
+%S A390229 1,4,12,60,840,9240,120120,6126120,116396280,2677114440,77636318760,
+%T A390229 9626903526240,356195430470880,14604012649306080,627972543920161440,
+%U A390229 29514709564247587680,4692838820715366441120,276877490422206620026080,16889526915754603821590880,1131598303355558456046588960
+%N A390229 a(n) is the least positive integer k with exactly n distinct prime factors such that, for every prime power p^e in the canonical prime factorization of k, (p + e) divides k.
+%C A390229 Minimal k has the smallest n distinct prime factors: k = Product_{i = 1 .. n} prime(i)^e_i. Using any larger prime cannot reduce k, because the divisibility constraints force the other exponents to be at least as large as before, while the larger prime base makes the product no smaller. Choosing the minimal exponents e_i >= 1 that satisfy all (prime(i) + e_i) dividing k gives the minimal k.
+%H A390229 Felix Huber, <a href="/A390229/b390229.txt">Table of n, a(n) for n = 0..345</a>
+%e A390229 a(4) = 840 = 2^3*3^1*5^1*7^1 is the least k with exactly 4 distinct prime factors such that (2 + 3) = 5, (3 + 1) = 4, (5 + 1) = 6, and (7 + 1) = 8 all divide 840.
+%p A390229 with(NumberTheory):
+%p A390229 A390229 := proc(n) option remember;
+%p A390229     local c, p, m, e, i, j, q, t, r, s;
+%p A390229     if n = 0 then return 1 fi;
+%p A390229     p := []; s := 2; while nops(p) < n do p := [op(p), s]; s := nextprime(s) end do;
+%p A390229     m := table(); for i to n do m[p[i]] := i end do;
+%p A390229     e := Array(1 .. n, 'fill = 1');
+%p A390229     do
+%p A390229         c := false;
+%p A390229         for i to n do
+%p A390229             do
+%p A390229                 q := p[i] + e[i];
+%p A390229                 t := ifactors(q)[2];
+%p A390229                 s := true;
+%p A390229                 for r in t do if r[1] > p[n] then s := false; break end if end do;
+%p A390229                 if not s then
+%p A390229                     e[i] := e[i] + 1; c := true; next
+%p A390229                 end if;
+%p A390229                 s := true;
+%p A390229                 for r in t do
+%p A390229                     j := m[r[1]];
+%p A390229                     if e[j] < r[2] then e[j] := r[2]; c := true; s := false end if
+%p A390229                 end do;
+%p A390229                 if s then break end if
+%p A390229             end do
+%p A390229         end do;
+%p A390229         if not c then break end if
+%p A390229     end do;
+%p A390229     mul(p[i]^e[i], i = 1 .. n)
+%p A390229 end proc:
+%p A390229 seq(A390229(n), n = 0 .. 19);
+%Y A390229 Cf. A000040, A002110, A033950, A392819.
+%K A390229 nonn,new
+%O A390229 0,2
+%A A390229 _Felix Huber_, Feb 23 2026
