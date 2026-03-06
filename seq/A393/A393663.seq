@@ -1,0 +1,56 @@
+%I A393663 #15 Mar 05 2026 16:31:35
+%S A393663 1,1,1,2,1,1,1,2,1,3,1,1,2,1,1,1,2,1,1,1,3,2,1,1,4,1,1,2,1,1,1,2,1,3,
+%T A393663 1,1,2,1,1,1,2,1,1,1,3,2,1,1,1,4,1,2,1,1,5,1,2,1,3,1,1,2,1,1,1,2,1,1,
+%U A393663 1,3,2,1,1,1,1,2,1,4,1,1,2,3,1,1,1,2,1
+%N A393663 A sequence constructed by greedily sampling the discrete probability distribution p(k)=zeta(k+1)-1 to minimize ratio discrepancy.
+%C A393663 The geometric mean approaches Product_{k>=2} k^(zeta(k+1)-1) = 1.40665264499... in the limit.
+%H A393663 Jwalin Bhatt, <a href="/A393663/b393663.txt">Table of n, a(n) for n = 1..10000</a>
+%H A393663 William J. Keith, <a href="https://math.colgate.edu/~integers/k19/k19.Abstract.html">Sequences of Density zeta(K) - 1</a>, INTEGERS, Vol. 10 (2010), Article #A19, pp. 233-241. Also <a href="https://arxiv.org/abs/0905.3765">arXiv preprint</a>, arXiv:0905.3765 [math.NT], 2009 and <a href="http://www.math.drexel.edu/~keith/ZetaKMinusOne.pdf">author's copy</a>.
+%e A393663 Let p(k) denote the probability of k and c(k) denote the count of occurrences of k so far.
+%e A393663 We take the ratio of the actual occurrences c(k)+1 to the probability and pick the one with the lowest value.
+%e A393663 Since p(k) is monotonic decreasing, we only need to compute c(k) once we see c(k-1).
+%e A393663 | n | (c(1)+1)/p(1) | (c(2)+1)/p(2) | (c(3)+1)/p(3) | choice |
+%e A393663 |---|---------------|---------------|---------------|--------|
+%e A393663 | 1 |     1.550     |       -       |       -       |   1    |
+%e A393663 | 2 |     3.101     |     4.949     |       -       |   1    |
+%e A393663 | 3 |     4.651     |     4.949     |       -       |   1    |
+%e A393663 | 4 |     6.202     |     4.949     |       -       |   2    |
+%e A393663 | 5 |     6.202     |     9.898     |    12.147     |   1    |
+%t A393663 pdf[i_] := Zeta[i+1] -1
+%t A393663 samplePDF[numCoeffs_] := Module[
+%t A393663   {coeffs = {}, counts = {0}, minTime, minIndex, time},
+%t A393663 Do[
+%t A393663     minTime = Infinity;
+%t A393663     Do[
+%t A393663       time = (counts[[i]] + 1)/pdf[i];
+%t A393663       If[time < minTime, minIndex = i; minTime = time],
+%t A393663       {i, 1, Length[counts]}
+%t A393663     ];
+%t A393663     If[minIndex == Length[counts], AppendTo[counts, 0]];
+%t A393663     counts[[minIndex]] += 1;
+%t A393663     AppendTo[coeffs, minIndex],
+%t A393663     {numCoeffs}
+%t A393663   ];
+%t A393663   coeffs
+%t A393663 ]
+%t A393663 A393663 = samplePDF[120]
+%o A393663 (Python)
+%o A393663 from sympy import oo, zeta
+%o A393663 def sample_zeta_distribution(num_coeffs):
+%o A393663   coeffs, counts = [], [0]
+%o A393663   for _ in range(num_coeffs):
+%o A393663     min_time = oo
+%o A393663     for i, count in enumerate(counts, start=1):
+%o A393663       time = (count+1) / ((zeta(i+1))-1)
+%o A393663       if time < min_time:
+%o A393663         min_index, min_time = i, time
+%o A393663     if min_index == len(counts):
+%o A393663       counts.append(0)
+%o A393663     counts[min_index-1] += 1
+%o A393663     coeffs.append(min_index)
+%o A393663   return coeffs
+%o A393663 A393663 = sample_zeta_distribution(120)
+%Y A393663 Cf. A381617, A386016.
+%K A393663 nonn,new
+%O A393663 1,4
+%A A393663 _Jwalin Bhatt_, Feb 24 2026
