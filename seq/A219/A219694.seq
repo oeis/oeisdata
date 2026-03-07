@@ -1,19 +1,32 @@
-%I A219694 #15 May 22 2016 13:11:31
+%I A219694 #32 Mar 06 2026 11:42:04
 %S A219694 1,2,2,6,12,9,24,72,96,64,120,480,900,1000,625,720,3600,8640,12960,
 %T A219694 12960,7776,5040,30240,88200,164640,216090,201684,117649,40320,282240,
 %U A219694 967680,2150400,3440640,4128768,3670016,2097152,362880,2903040,11430720,29393280,55112400,79361856,89282088,76527504,43046721
 %N A219694 Triangular array read by rows:  T(n,k) is the number of functions f:{1,2,...,n} -> {1,2,...,n} that have exactly k nonrecurrent elements; n>=1, 0<=k<=n-1.
 %C A219694 x in {1,2,...,n} is a recurrent element if there is some k such that f^k(x) = x where f^k(x) denotes iterated functional composition. In other words, a recurrent element is in a cycle of the functional digraph.  An element that is not recurrent is a nonrecurrent element.
 %H A219694 Alois P. Heinz, <a href="/A219694/b219694.txt">Rows n = 1..141, flattened</a>
-%F A219694 E.g.f.: 1/(1-x*exp(A(x,y))), where A(x,y) = Sum_{n>=1} n^(n-1)*(y*x)^n/n!.
+%H A219694 Philippe Flajolet, Peter J. Grabner, Peter Kirschenhofer, and Helmut Prodinger, <a href="https://doi.org/10.1016/0377-0427(93)E0258-N">On Ramanujan's Q-function</a>, Journal of Computational and Applied Mathematics, vol. 58, iss. 1 (1995-03-20), pp. 103-116.
+%F A219694 E.g.f.: 1/(1-x*exp(A(x*y))), where A(x) = Sum_{n>=1} n^(n-1)*x^n/n! is Euler's tree function.
+%F A219694 From _Natalia L. Skirrow_, Mar 03 2026: (Start)
+%F A219694 T(n,k) = A066324(n,n-k) = (n-k)*n^k*(n-1)!/k!.
+%F A219694 Let Q(n) = Sum_{k=1..n} n!/((n-k)!*n^k) ~ sqrt(Pi*n/2) (Ramanujan's Q function).
+%F A219694 With all sums ranging over k=0..n-1:
+%F A219694 Sum T(n,k)        = A000312(n) = n^n.
+%F A219694 Sum T(n,k)*k      = A219706(n) = n^n*(n-Q(n)) = Sum T(n,k)*C(n-k,2).
+%F A219694 Sum T(n,k)*(k+1)  = A369071(n) = n^n*(n-Q(n)+1).
+%F A219694 Sum T(n,k)*C(k,2) = n^(n+1)*((n+1)/2-Q(n)).
+%F A219694 Sum T(n,k)*(-1)^k = A277458(n)*(-1)^(n-1).
+%F A219694 n-th row has mean n - Q(n) and variance 2*n - Q(n)*(1+Q(n)) ~ (2-Pi/2)*n. (End)
 %e A219694 T(2,1) = 2 because we have 1->1 2->1; and 1->2 2->2.
-%e A219694 :    1;
-%e A219694 :    2,     2;
-%e A219694 :    6,    12,     9;
-%e A219694 :   24,    72,    96,     64;
-%e A219694 :  120,   480,   900,   1000,    625;
-%e A219694 :  720,  3600,  8640,  12960,  12960,   7776;
-%e A219694 : 5040, 30240, 88200, 164640, 216090, 201684, 117649;
+%e A219694   n\k  0     1     2      3      4      5      6
+%e A219694   -+--------------------------------------------
+%e A219694   1|   1     .     .      .      .      .      .
+%e A219694   2|   2     2     .      .      .      .      .
+%e A219694   3|   6    12     9      .      .      .      .
+%e A219694   4|  24    72    96     64      .      .      .
+%e A219694   5| 120   480   900   1000    625      .      .
+%e A219694   6| 720  3600  8640  12960  12960   7776      .
+%e A219694   7|5040 30240 88200 164640 216090 201684 117649
 %p A219694 b:= proc(n) option remember; `if`(n=0, 1, add(
 %p A219694       (j-1)!*b(n-j)*binomial(n-1, j-1), j=1..n))
 %p A219694     end:
@@ -21,7 +34,22 @@
 %p A219694     b(j)*(x*n)^(n-j)*binomial(n-1, j-1), j=0..n)):
 %p A219694 seq(T(n), n=1..10);  # _Alois P. Heinz_, May 22 2016
 %t A219694 nn=8;f[list_]:=Select[list,#>0&];t=Sum[n^(n-1)x^n y^n/n!,{n,1,nn}];Drop[Map[f,Range[0,nn]!CoefficientList[Series[1/(1-x Exp[t]),{x,0,nn}],{x,y}]],1]//Grid
-%Y A219694 Cf. A216971.
-%K A219694 nonn,tabl
+%o A219694 (Python)
+%o A219694 from math import factorial as fact
+%o A219694 A219694=lambda n,k: fact(n-1)//fact(k)*(n-k)*n**k # _Natalia L. Skirrow_, Mar 03 2026
+%o A219694 (Python)
+%o A219694 from functools import lru_cache
+%o A219694 @lru_cache(maxsize=None)
+%o A219694 def T(n: int, k: int) -> int:
+%o A219694     if n == 1: return 1
+%o A219694     if k == 0: return n * T(n - 1, 0)
+%o A219694     numer = (n ** k) * (n - 1) * T(n - 1, k - 1)
+%o A219694     denom = ((n - 1) ** (k - 1)) * k
+%o A219694     return numer // denom
+%o A219694 for n in range(1, 8): print([T(n, k) for k in range(n)]) # _Peter Luschny_, Mar 05 2026
+%Y A219694 Cf. A000312, A063169, A219706, A007778, A262970.
+%Y A219694 Cf. A066324 (row reversals).
+%Y A219694 Cf. A216971 (counts nonrecurrent preimages of recurrent nodes).
+%K A219694 nonn,tabl,easy,changed
 %O A219694 1,2
 %A A219694 _Geoffrey Critzer_, Nov 25 2012
