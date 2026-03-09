@@ -1,0 +1,49 @@
+%I A393084 #29 Mar 08 2026 19:01:24
+%S A393084 479,18839,43391,67679,76871,94079,117071,135479,139991,151871,154991,
+%T A393084 159791,189311,201359,248639,253679,308999,336599,379319,405599,
+%U A393084 418751,432359,435191,463031,485831,506999,507599,537599,558599,593951,607991,627911,634079,659831,680759
+%N A393084 Primes p such that c(p) - tau(p) is divisible by 120, where c(n) are coefficients of Klein's j-invariant and tau(n) are values of the Ramanujan tau function.
+%C A393084 Primes p such that A000521(p) - A000594(p) is divisible by 120.
+%C A393084 Let j(q)=q^(-1)+744+Sum_{n>=1} c(n) q^n and Delta(q)=Sum_{n>=1} tau(n) q^n = q*Prod_{m>=1} (1-q^m)^24.
+%C A393084 Implementation note: to test membership it suffices to compute c(p) (mod 720) and tau(p) (mod 720), then check (c(p)-tau(p)) (mod 120). One may use j(q)=E4(q)^3/Delta(q) and E4(q)=1+240*(...) to get j(q) congruent to 1/Delta(q) (mod 720).
+%H A393084 Daniyar Supiyev, <a href="/A393084/b393084.txt">Table of n, a(n) for n = 1..3506</a>
+%H A393084 Wikipedia, <a href="https://en.wikipedia.org/wiki/J-invariant">Klein modular invariant (j-invariant)</a>.
+%H A393084 Wikipedia, <a href="https://en.wikipedia.org/wiki/Ramanujan_tau_function">Ramanujan tau function</a>.
+%e A393084 p=479 is in the sequence because (c(p)-tau(p)) mod 720 = 240, hence c(p)-tau(p) is congruent to 0 (mod 120) but not congruent to 0 (mod 720).
+%e A393084 The first prime with c(p)-tau(p) congruent to 0 (mod 720) is p=18839.
+%o A393084 (PARI)
+%o A393084 \\ phase primes up to N: primes p with (c(p)-tau(p)) == 0 (mod step),
+%o A393084 \\ where c(n) is from j(q) and tau(n) from Delta(q).
+%o A393084 \\ We compute everything mod 720 via:
+%o A393084 \\   Delta(q) = q * prod_{n>=1} (1-q^n)^24 = q * pow24(q)
+%o A393084 \\   1/Delta(q) = q^-1 * invpow(q), where invpow(q) = 1/pow24(q)
+%o A393084 \\ Justification: j(q)=E4(q)^3/Delta(q) and E4(q)=1+240*(...) => E4(q)^3 == 1 (mod 720), so j(q) == 1/Delta(q) (mod 720).
+%o A393084 \\ Then (mod 720) we can take c(p) as coeff_{q^p} (1/Delta), i.e. polcoeff(invpow, p+1),
+%o A393084 \\ and tau(p) as coeff_{q^p} Delta, i.e. polcoeff(pow24, p-1).
+%o A393084 phase_primes_upto(N, step)=
+%o A393084 {
+%o A393084   my(m=720, x='x, K, g, pow24, invpow, out=List(), k, s, p1, p2, p, tau, c);
+%o A393084   K = floor((sqrt(24*(N+1)+1)+1)/6)+2; \\ enough for pentagonal exponents <= N+1
+%o A393084   \\ g(q)=prod_{n>=1}(1-q^n) via Euler pentagonal theorem
+%o A393084   g = 1 + O(x^(N+2));
+%o A393084   for(k=1, K,
+%o A393084     s = if(k%2, -1, 1);
+%o A393084     p1 = k*(3*k-1)/2;
+%o A393084     p2 = k*(3*k+1)/2;
+%o A393084     if(p1<=N+1, g += s*x^p1);
+%o A393084     if(p2<=N+1, g += s*x^p2)
+%o A393084   );
+%o A393084   g = Mod(g,m);
+%o A393084   pow24 = g^24;      \\ prod (1-q^n)^24  (this is Delta(q)/q)
+%o A393084   invpow = 1/pow24;  \\ prod (1-q^n)^(-24) (this is q/Delta(q))
+%o A393084   forprime(p=5, N,
+%o A393084     tau = polcoeff(pow24, p-1);
+%o A393084     c   = polcoeff(invpow, p+1);
+%o A393084     if(Mod(c - tau, m) % step == 0, listput(out, p))
+%o A393084   );
+%o A393084   Vec(out);
+%o A393084 }
+%Y A393084 Cf. A000040, A000521, A000594.
+%K A393084 nonn,new
+%O A393084 1,1
+%A A393084 _Daniyar Supiyev_, Mar 01 2026
