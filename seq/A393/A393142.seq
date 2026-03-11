@@ -1,0 +1,49 @@
+%I A393142 #8 Mar 10 2026 05:29:27
+%S A393142 1,0,1,0,1,1,0,1,2,5,0,1,4,15,34,0,1,8,45,136,329,0,1,16,135,544,1645,
+%T A393142 4056,0,1,32,405,2176,8225,24336,60997,0,1,64,1215,8704,41125,146016,
+%U A393142 426979,1082320,0,1,128,3645,34816,205625,876096,2988853,8658560,22137201
+%N A393142 Triangle read by rows. T(n, k) = k^(n-1)*hypergeom([1, 1 - k], [], 1/k) for k > 0; T(n, 0) = 0^n.
+%F A393142 T(n, k) = (-1)^(k + 1) * k^(n - k) * Gamma(k, -k) / exp(k) for k > 0.
+%F A393142 T(n, k) = (-1)^(n + 1) * Sum_{i=1..k}((-k)^(n - i) * (k - 1)! / (k - i)!) for k > 0.
+%e A393142 Triangle starts:
+%e A393142   [0] [1]
+%e A393142   [1] [0, 1]
+%e A393142   [2] [0, 1,   1]
+%e A393142   [3] [0, 1,   2,    5]
+%e A393142   [4] [0, 1,   4,   15,    34]
+%e A393142   [5] [0, 1,   8,   45,   136,    329]
+%e A393142   [6] [0, 1,  16,  135,   544,   1645,   4056]
+%e A393142   [7] [0, 1,  32,  405,  2176,   8225,  24336,   60997]
+%e A393142   [8] [0, 1,  64, 1215,  8704,  41125, 146016,  426979, 1082320]
+%e A393142   [9] [0, 1, 128, 3645, 34816, 205625, 876096, 2988853, 8658560, 22137201]
+%p A393142 T := (n, k) -> local i; ifelse(n = 0, 1, -(-1)^n * add((-k)^(n-i) * pochhammer(k-i+1, i-1), i = 1..k)): seq(print(seq(T(n, k), k = 0..n)), n = 0..9);
+%t A393142 T[n_, k_] = If[k == 0, Boole[k == n], k^(n-1)*HypergeometricPFQ[{1, 1 - k}, {},  1/k]];
+%t A393142 Table[T[n, k], {n, 0, 9}, {k, 0, n}] // MatrixForm
+%o A393142 (Python)
+%o A393142 from math import perm
+%o A393142 def T(n: int, k: int) -> int:
+%o A393142     if k == 0: return k**n
+%o A393142     return (-1)**(n+1) * sum((-k)**(n-i) * perm(k-1, i-1) for i in range(1, k+1))
+%o A393142 (Python)  # efficient iterative variant
+%o A393142 def T(n: int, k: int) -> int:
+%o A393142     if k == 0: return 1 if n == 0 else 0
+%o A393142     q, p = 1, 1
+%o A393142     for m in range(1, k):
+%o A393142         p *= -k
+%o A393142         q = p + m * q
+%o A393142     nk = 1
+%o A393142     for _ in range(n - k): nk *= k
+%o A393142     sign = 1 if k % 2 == 1 else -1
+%o A393142     return sign * nk * q
+%o A393142 for n in range(10): print([T(n, k) for k in range(0, n+1)])
+%o A393142 (Python)  # extreme edition
+%o A393142 from mpmath import mp, gammainc, exp, nint
+%o A393142 def T(n: int, k: int) -> int:
+%o A393142     if k == 0: return k**n
+%o A393142     mp.dps = 50
+%o A393142     val = (-1)**(k+1) * k**(n-k) * gammainc(k, -k) / exp(k)
+%o A393142     return int(nint(val))
+%Y A393142 Cf. A133297, A001865, A394078 (row sums).
+%K A393142 nonn,tabl,new
+%O A393142 0,9
+%A A393142 _Peter Luschny_, Mar 09 2026
