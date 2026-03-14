@@ -1,4 +1,4 @@
-%I A329726 #31 Feb 16 2025 08:33:58
+%I A329726 #44 Mar 13 2026 10:27:21
 %S A329726 2,4,6,2,10,12,2,16,18,2,22,4,2,28,30,2,2,36,2,40,42,4,46,6,2,52,2,2,
 %T A329726 58,60,2,8,66,2,70,72,2,2,78,2,82,8,2,88,18,2,2,96,2,100,102,8,106,
 %U A329726 108,2,112,2,4,2,10,2,4,126,2,130,18,2,136,138,2,2,8,2
@@ -6,14 +6,21 @@
 %C A329726 Number of bases b, 1 <= b <= 2*n, such that GCD(b, 2*n+1) = 1 and b^n == (b / 2*n+1) (mod 2*n+1), where (b / 2*n+1) is a Jacobi symbol.
 %C A329726 If 2*n+1 is composite then it is the number of bases b, 1 <= b <= 2*n, in which 2*n+1 is an Euler-Jacobi pseudoprime.
 %C A329726 Differs from A071294 from n = 22.
+%C A329726 From _Jianing Song_, Mar 12 2026: (Start)
+%C A329726 For odd composite k, we have a((k-1)/2) <= phi(k)/2, where equality holds if and only if N is an absolute Euler pseudoprime (A033181).
+%C A329726 According to the formula, a((k-1)/2) == 2 (mod 4) if and only if k falls into one of these categories:
+%C A329726 (a) k == 3 (mod 4);
+%C A329726 (b) k is a power of a prime congruent to 3 modulo 4;
+%C A329726 (c) k = p^a*q^b, p == q == 3 (mod 4), a and b odd.
+%C A329726 In all three cases, we have a((k-1)/2) = 2 * Product_{prime p|k} (gcd(p-1,k-1)/2). (End)
 %D A329726 Paulo Ribenboim, The Little Book of Bigger Primes, 2nd ed., Springer-Verlag, New York, 2004, p. 96.
 %H A329726 Amiram Eldar, <a href="/A329726/b329726.txt">Table of n, a(n) for n = 1..10000</a>
 %H A329726 Louis Monier, <a href="https://doi.org/10.1016/0304-3975(80)90007-9">Evaluation and comparison of two efficient primality testing algorithms</a>, Theoretical Computer Science, Vol. 11 (1980), pp. 97-108.
 %H A329726 Eric Weisstein's World of Mathematics, <a href="https://mathworld.wolfram.com/Euler-JacobiPseudoprime.html">Euler-Jacobi Pseudoprime</a>.
 %H A329726 Wikipedia, <a href="https://en.wikipedia.org/wiki/Euler-Jacobi_pseudoprime">Euler-Jacobi pseudoprime</a>.
 %H A329726 Wikipedia, <a href="https://en.wikipedia.org/wiki/Solovay%E2%80%93Strassen_primality_test">Solovay-Strassen primality test</a>.
-%F A329726 a(n) = delta(n) * Product_{p|n} gcd((n-1)/2, p-1), where delta(n) = 2 if nu(n-1, 2) = min_{p|n} nu(p-1, 2), 1/2 if there is a prime p|n such that nu(p, n) is odd and nu(p-1, 2) < nu(n-1, 2), and 1 otherwise, where nu(n, p) is the exponent of the highest power of p dividing n.
-%F A329726 a(p) = p-1 for prime p.
+%F A329726 For odd n>1, a((n-1)/2) = delta(n) * Product_{p|n} gcd((n-1)/2, p-1), where delta(n) = 2 if nu(n-1, 2) = min_{p|n} nu(p-1, 2), 1/2 if there is a prime p|n such that nu(p, n) is odd and nu(p-1, 2) < nu(n-1, 2), and 1 otherwise, where nu(n, p) is the exponent of the highest power of p dividing n. [This is Proposition 3 in the link of Louis Monier. - _Jianing Song_, Mar 12 2026]
+%F A329726 a((p-1)/2) = p-1 for prime p. [Both formulas corrected by _Jianing Song_, Mar 12 2026]
 %e A329726 a(1) = 2 since there are 2 bases b in which 2*1 + 1 = 3 is an Euler-Jacobi pseudoprime: b = 1 since GCD(1, 3) = 1 and 1^1 == (1 / 3) == 1 (mod 3), and b = 2 since GCD(2, 3) = 1 and 2^1 == (2 / 3) == -1 (mod 3).
 %t A329726 v[n_] := Min[IntegerExponent[#, 2]& /@ (FactorInteger[n][[;;, 1]] - 1)];
 %t A329726 pQ[n_, p_] := OddQ[IntegerExponent[n, p]] && IntegerExponent[p-1, 2] < IntegerExponent[n-1, 2];
@@ -21,7 +28,10 @@
 %t A329726 delta[n_] := If[IntegerExponent[n-1, 2] == v[n], 2, If[psQ[n], 1/2, 1]];
 %t A329726 a[n_] := delta[n] * Module[{p = FactorInteger[n][[;;, 1]]}, Product[GCD[(n-1)/2, p[[k]]-1], {k, 1, Length[p]}]];
 %t A329726 Table[a[n], {n, 3, 147, 2}]
-%Y A329726 Cf. A006093, A007324, A007814, A047713, A063994, A071294.
-%K A329726 nonn
+%o A329726 (PARI) delta(n,f) = my(s=valuation(n-1,2), r=#f~, small_val=0); for(i=1, r, if(valuation(f[i,1]-1,2)<s, small_val=1; if(f[i,2]%2==1, return(1/2)))); if(small_val, return(1), return(2)) \\ calculate delta(n) given the factorization of n
+%o A329726 a(n) = my(N=2*n+1, f=factor(N), r=#f~); delta(N,f)*prod(i=1, r, gcd((N-1)/2,f[i,1]-1)) \\ _Jianing Song_, Mar 12 2026
+%Y A329726 Cf. A006093, A007324, A007814, A047713, A063994.
+%Y A329726 Cf. A071294 (for strong pseudoprimes), A033181 (k=2*m+1 with maximal a(m)/phi(k)), A394182 (k=2*m+1 with a(m)=2).
+%K A329726 nonn,changed
 %O A329726 1,1
 %A A329726 _Amiram Eldar_, Nov 20 2019
