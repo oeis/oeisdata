@@ -1,0 +1,56 @@
+%I A393747 #50 Mar 15 2026 15:50:45
+%S A393747 1,1,4,1,25,16,1,196,221,44,1,1764,2976,1161,104,1,17424,40105,24972,
+%T A393747 4786,228,1,184041,544720,483586,155664,17178,480,1,2044900,7469749,
+%U A393747 8806728,4182954,809816,56498,988,1,23639044,103415104,154247368,99773072,29330594,3732896,175243,2008,1
+%N A393747 Triangle read by rows: T(n, k) is the number of 3-dimensional balanced ballot paths of length 3n with exactly k semisymmetric peaks for 0 <= k < n if n >=1 and for k=0 if n=0.
+%C A393747 A 3-dimensional balanced ballot path is a sequence of 3*n steps starting at (0, 0, 0) and ending at (n, n, n), such that each step is a standard unit vector (i.e. is either (1, 0, 0), (0, 1, 0), or (0, 0, 1), and each intermediate point of the path satisfies x_1 >= x_2 >= x_3.
+%C A393747 For any 3-dimensional balanced ballot path P, a semisymmetric peak is defined to be any step in P equal to (1, 0, 0) that is immediately followed by a step equal to (0, 0, 1).
+%C A393747 T(n, k) counts 3-dimensional balanced ballot paths with 3n steps and exactly k semisymmetric peaks.
+%H A393747 Alois P. Heinz, <a href="/A393747/b393747.txt">Rows n = 0..141, flattened</a>
+%e A393747 Triangle begins:
+%e A393747          1;
+%e A393747          1;
+%e A393747          4,         1;
+%e A393747         25,        16,         1;
+%e A393747        196,       221,        44,        1;
+%e A393747       1764,      2976,      1161,      104,        1;
+%e A393747      17424,     40105,     24972,     4786,      228,       1;
+%e A393747     184041,    544720,    483586,   155664,    17178,     480,      1;
+%e A393747    2044900,   7469749,   8806728,  4182954,   809816,   56498,    988,    1;
+%e A393747   23639044, 103415104, 154247368, 99773072, 29330594, 3732896, 175243, 2008, 1;
+%e A393747   ...
+%o A393747 (Python)
+%o A393747 from functools import lru_cache
+%o A393747 @lru_cache(None)
+%o A393747 def count_paths_with_k_peaks(x_rem, y_rem, z_rem, x_used, y_used, z_used, last_char, k_needed):
+%o A393747     if x_rem == 0 and y_rem == 0 and z_rem == 0:
+%o A393747         return 1 if k_needed == 0 else 0
+%o A393747     if not (x_used >= y_used >= z_used):
+%o A393747         return 0
+%o A393747     if k_needed < 0:
+%o A393747         return 0
+%o A393747     total = 0
+%o A393747     if x_rem > 0:
+%o A393747         total += count_paths_with_k_peaks(x_rem - 1, y_rem, z_rem,
+%o A393747                                   x_used + 1, y_used, z_used,
+%o A393747                                   0, k_needed)
+%o A393747     if y_rem > 0 and x_used >= y_used + 1:
+%o A393747         total += count_paths_with_k_peaks(x_rem, y_rem - 1, z_rem,
+%o A393747                                   x_used, y_used + 1, z_used,
+%o A393747                                   1, k_needed)
+%o A393747     if z_rem > 0 and y_used >= z_used + 1:
+%o A393747         used = 1 if last_char == 0 else 0
+%o A393747         total += count_paths_with_k_peaks(x_rem, y_rem, z_rem - 1, x_used, y_used, z_used + 1, 2, k_needed - used)
+%o A393747     return total
+%o A393747 print(count_paths_with_k_peaks(0, 0, 0, 0, 0, 0, -1, 0))
+%o A393747 for n in range(1, 10):
+%o A393747     result = ""
+%o A393747     for k in range(0, n):
+%o A393747         result = result + str(count_paths_with_k_peaks(n, n, n, 0, 0, 0, -1, k)) +","
+%o A393747     print(result)
+%Y A393747 Cf. A393571, A387936.
+%Y A393747 Row sums are A005789.
+%Y A393747 First column is A001246.
+%K A393747 nonn,tabf,new
+%O A393747 0,3
+%A A393747 _Dimana Pramatarova_ and _Ryota Inagaki_, Feb 26 2026
