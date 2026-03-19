@@ -1,0 +1,59 @@
+%I A393817 #36 Mar 18 2026 16:19:24
+%S A393817 1,3,6,5,72,60,18,7,660,556920,770,1008,985320,339660,34320,9,1670760,
+%T A393817 15300,61261200,1244880,6284880,3006556993440,199767760920,15048,
+%U A393817 26466884524080,61710920040,1163962800,3661447149360,50821170440040,205980334560,3262313854800,11,168473954880
+%N A393817 Return time for an n X n picture by the baker's map.
+%C A393817 The baker's map is defined on [0,n-1]^2 by baker(i,j). Define (i1,j1) = ([i/2], 2*j + i mod 2). If j1 < n then baker(i,j) = (i1,j1); otherwise baker(i,j) = (n-1-i1, 2*n - 1 - j1).
+%C A393817 a(n) is the smallest k so that baker^k(i,j) = (i,j) for each (i,j).
+%D A393817 Jean-Paul Delahaye, Jeux finis et infinis, Seuil, coll. Science ouverte, chap. 5 (Le retour surprise d'une image), p. 129-160.
+%H A393817 Jean-Paul Delahaye and Philippe Mathieu, <a href="https://www.cristal.univ-lille.fr/profil/jdelahay/pls/048.pdf">Images brouillées, Images retrouvées</a>, Pour la Science, no 242,‎ décembre 1997, p. 102-106.
+%H A393817 Wikipedia, <a href="https://en.wikipedia.org/wiki/Baker%27s_map">Baker's map</a>.
+%F A393817 a(2^k) = 2*k + 1.
+%e A393817 For n = 2:
+%e A393817   a b
+%e A393817   c d
+%e A393817 becomes
+%e A393817   a c
+%e A393817   d b
+%e A393817 then
+%e A393817   a d
+%e A393817   b c
+%e A393817 then
+%e A393817   a b
+%e A393817   c d
+%e A393817 so a(2) = 3.
+%p A393817 baker:=proc(i,j,n) local i1,j1: i1:=iquo(i,2);j1:=2*j+irem(i,2); if j1<n then [i1,j1] else [n-1-i1,2*n-1-j1] fi end:
+%p A393817 pixelperiod:=proc(i,j,n) local U,m: U:=baker(i,j,n) : for m while not(U=[i,j]) do U:=baker(U[1],U[2],n) od : return(m) end:
+%p A393817 U:=NULL:for n to 20 do period:=1:for i from 0 to n-1 do for j from 0 to n-1 do per:=pixelperiod(i,j,n): period:=lcm(period,per) od od:U:=U,period od:U;
+%o A393817 (Python)
+%o A393817 from math import lcm
+%o A393817 def baker(i, j, n):
+%o A393817     i1 = i // 2
+%o A393817     j1 = 2 * j + (i % 2)
+%o A393817     if j1 < n:
+%o A393817         return [i1, j1]
+%o A393817     else:
+%o A393817         return [n - 1 - i1, 2 * n - 1 - j1]
+%o A393817 def pixelperiod(i, j, n):
+%o A393817     U = baker(i, j, n)
+%o A393817     m = 1
+%o A393817     while U != [i, j]:
+%o A393817         U = baker(U[0], U[1], n)
+%o A393817         m += 1
+%o A393817     return m
+%o A393817 U = []
+%o A393817 for n in range(1,33):
+%o A393817     period = 1
+%o A393817     for i in range(n):
+%o A393817         for j in range(n):
+%o A393817             per = pixelperiod(i, j, n)
+%o A393817             period = lcm(period, per)
+%o A393817     U.append(period)
+%o A393817 print(U)
+%o A393817 (PARI) baker(i, j, n) = my(i1 = i\2, j1 = 2*j + (i % 2)); if (j1 < n, [i1, j1], [n - 1 - i1, 2*n - 1 - j1]);
+%o A393817 pixelp(i, j, n) = my(U = baker(i, j, n), m = 1); while (U != [i, j], U = baker(U[1], U[2], n); m ++); m;
+%o A393817 a(n) = my(period = 1); for (i=0, n-1, for (j=0, n-1, period = lcm(period, pixelp(i, j, n);););); period; \\ _Michel Marcus_, Mar 05 2026
+%K A393817 nonn,new
+%O A393817 1,2
+%A A393817 _Robert FERREOL_, Mar 01 2026
+%E A393817 More terms from _Michel Marcus_, Mar 05 2026

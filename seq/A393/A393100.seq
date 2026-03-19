@@ -1,0 +1,61 @@
+%I A393100 #35 Mar 18 2026 23:03:08
+%S A393100 1,1,2,1,1,1,3,2,1,1,1,4,2,1,1,3,1,2,1,5,1,1,2,1,3,1,6,4,2,1,1,1,2,1,
+%T A393100 7,1,3,1,2,1,1,5,1,4,2,8,1,3,1,1,2,1,1,9,1,2,3,1,6,1,4,2,1,1,1,5,10,2,
+%U A393100 1,3,1,1,2,1,1,7,1,4,2,11,3,1,1,1,2,1
+%N A393100 A sequence constructed by greedily sampling the probability distribution given by 1/log_2(i+1) - 1/log_2(i+2) to minimize ratio discrepancy.
+%C A393100 The pdf used here is a simple example of a heavy log tail distribution. It can be seen as a discrete analog of the the log-Cauchy distribution. As a consequence of the heavy tail, the mean and the geometric mean of this sequence diverge to infinity.
+%C A393100 A general family of these distributions is given by 1/log_2(i+1)^p - 1/log_2(i+2)^p where p>0.
+%C A393100 Properties change sharply at p=1, the mean remains infinite for all p but the geometric mean becomes finite for p>1 and infinite for p<=1.
+%C A393100 The Fisher information is always finite and given by Sum_{i=1..inf} ((ln(log_2(i+2))/(log_2(i+2))^p - ln(log_2(i+1))/(log_2(i+1))^p)^2) / (1/(log_2(i+1))^p - 1/(log_2(i+2))^p).
+%H A393100 Jwalin Bhatt, <a href="/A393100/b393100.txt">Table of n, a(n) for n = 1..10000</a>
+%H A393100 Wikipedia, <a href="https://en.wikipedia.org/wiki/Log-Cauchy_distribution">Log-Cauchy distribution</a>
+%e A393100 Let p(k) denote the probability of k and c(k) denote the count of occurrences of k so far.
+%e A393100 We take the ratio of the actual occurrences c(k)+1 to the probability and pick the one with the lowest value.
+%e A393100 Since p(k) is monotonic decreasing, we only need to compute c(k) once we see c(k-1).
+%e A393100 | n | (c(1)+1)/p(1) | (c(2)+1)/p(2) | (c(3)+1)/p(3) | choice |
+%e A393100 |---|---------------|---------------|---------------|--------|
+%e A393100 | 1 |     2.709     |       -       |       -       |   1    |
+%e A393100 | 2 |     5.419     |     7.637     |       -       |   1    |
+%e A393100 | 3 |     8.128     |     7.637     |       -       |   2    |
+%e A393100 | 4 |     8.128     |    15.275     |    14.425     |   1    |
+%e A393100 | 5 |    10.838     |    15.275     |    14.425     |   1    |
+%t A393100 pdf[i_] := 1/Log2[i+1] - 1/Log2[i+2]
+%t A393100 samplePDF[numCoeffs_] := Module[
+%t A393100   {coeffs = {}, counts = {0}, minTime, minIndex, time},
+%t A393100 Do[
+%t A393100     minTime = Infinity;
+%t A393100     Do[
+%t A393100       time = (counts[[i]] + 1)/pdf[i];
+%t A393100       If[time < minTime, minIndex = i; minTime = time],
+%t A393100       {i, 1, Length[counts]}
+%t A393100     ];
+%t A393100     If[minIndex == Length[counts], AppendTo[counts, 0]];
+%t A393100     counts[[minIndex]] += 1;
+%t A393100     AppendTo[coeffs, minIndex],
+%t A393100     {numCoeffs}
+%t A393100   ];
+%t A393100   coeffs
+%t A393100 ]
+%t A393100 A393100 = samplePDF[120]
+%o A393100 (Python)
+%o A393100 from mpmath import iv
+%o A393100 def pdf(k):
+%o A393100     return 1/iv.log(k+1,2) - 1/iv.log(k+2,2)
+%o A393100 def sample_log_tail_distribution(num_coeffs):
+%o A393100   coeffs, counts = [], [0]
+%o A393100   for _ in range(num_coeffs):
+%o A393100     min_time = iv.inf
+%o A393100     for i, count in enumerate(counts, start=1):
+%o A393100       time = (count+1) / pdf(i)
+%o A393100       if time < min_time:
+%o A393100         min_index, min_time = i, time
+%o A393100     if min_index == len(counts):
+%o A393100       counts.append(0)
+%o A393100     counts[min_index-1] += 1
+%o A393100     coeffs.append(min_index)
+%o A393100   return coeffs
+%o A393100 A393100 = sample_log_tail_distribution(120)
+%Y A393100 Cf. A084580, A386016, A393161, A393663.
+%K A393100 nonn,new
+%O A393100 1,3
+%A A393100 _Jwalin Bhatt_, Mar 09 2026
