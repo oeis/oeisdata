@@ -1,9 +1,9 @@
-%I A393603 #7 Feb 25 2026 11:25:02
+%I A393603 #18 Mar 21 2026 10:05:51
 %S A393603 1,2,3,4,5,6,7,8,9,14,15,20,24,25,27,32,35,48,49,63,80,125,128,224,
 %T A393603 243,512,675,864,1024,1715,2025,2400,2401,3087,3125,3969,4374,5103,
 %U A393603 6125,10935,15552,16807,19600,32768,64827,117649,250000,320000,388962,455625,588245
 %N A393603 Lesser of two consecutive 7-smooth numbers that are coprime.
-%H A393603 Michael De Vlieger, <a href="/A393603/b393603.txt">Table of n, a(n) for n = 1..234</a>
+%H A393603 Michael S. Branicky, <a href="/A393603/b393603.txt">Table of n, a(n) for n = 1..298</a> (terms 1..234 from Michael De Vlieger, 235..255 from Chai Wah Wu)
 %e A393603 Let s = A002473 and b = A393604.
 %e A393603 Table of n, b(n), and a(n) for select n:
 %e A393603  n          a(n)           b(n)
@@ -18,8 +18,30 @@
 %e A393603 12   s(16) = 20 = 2^2 * 5   21 = 3   * 7
 %e A393603 13   s(18) = 24 = 2^3 * 3   25 = 5^2
 %e A393603 17   s(24) = 35 = 5   * 7   36 = 2^2 * 3^2
+%p A393603 M:= 10^10: # for terms where the next 7-smooth number <= M
+%p A393603 with(priqueue):
+%p A393603 initialize(pq):
+%p A393603 insert([-1,0,0,0,0],pq): prev:= [FAIL,0,0,0,0]: R:= NULL: count:= 0:
+%p A393603 while pq[0] <> 0 do
+%p A393603   t:= extract(pq);
+%p A393603   if andmap(i -> t[i]*prev[i]=0, [$2..5]) and prev[1] <> FAIL then
+%p A393603      R:= R, -prev[1]; count:= count+1;
+%p A393603   fi;
+%p A393603   prev:= t;
+%p A393603   if t[1]*7 > -M then insert([t[1]*7,t[2],t[3],t[4],t[5]+1],pq) fi;
+%p A393603   for k from 5 to 3 by -1 while t[k] = 0 do
+%p A393603     v:= t[1]*[2,3,5][k-2];
+%p A393603     if v > -M then insert([v,seq(t[i],i=2..k-2),t[k-1]+1,0$(6-k)],pq) fi;
+%p A393603   od;
+%p A393603 od:
+%p A393603 R; # _Robert Israel_, Mar 19 2026
 %t A393603 s = Block[{nn = 600000}, Flatten@ Table[2^a * 3^b * 5^c * 7^d, {a, 0, nn}, {b, 0, Log[3, nn/2^a]}, {c, 0, Log[5, n/(2^a * 3^b)]}, {d, 0, Log[7, n/(2^a * 3^b * 5^c)] } ] ]; Select[Partition[s, 2, 1], CoprimeQ @@ # &][[All, 1]]
+%o A393603 (Python) # uses code/imports in A002473
+%o A393603 from math import gcd
+%o A393603 from itertools import count, islice, pairwise
+%o A393603 def agen(): yield from (l for l, g in pairwise(A002473gen()) if gcd(l, g) == 1)
+%o A393603 print(list(islice(agen(), 51))) # _Michael S. Branicky_, Mar 21 2026
 %Y A393603 Cf. A002473, A353576, A393604.
-%K A393603 nonn
+%K A393603 nonn,changed
 %O A393603 1,2
 %A A393603 _Michael De Vlieger_, Feb 24 2026
