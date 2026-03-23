@@ -1,4 +1,4 @@
-%I A025487 #171 Mar 18 2026 03:48:54
+%I A025487 #177 Mar 22 2026 14:24:15
 %S A025487 1,2,4,6,8,12,16,24,30,32,36,48,60,64,72,96,120,128,144,180,192,210,
 %T A025487 216,240,256,288,360,384,420,432,480,512,576,720,768,840,864,900,960,
 %U A025487 1024,1080,1152,1260,1296,1440,1536,1680,1728,1800,1920,2048,2160,2304,2310
@@ -11,9 +11,9 @@
 %C A025487 The prime signature corresponding to a(n) is given in row n of A124832. - _M. F. Hasler_, Jul 17 2019
 %H A025487 Franklin T. Adams-Watters, <a href="/A025487/b025487.txt">Table of n, a(n) for n = 1..10001</a> (first 291 terms from Will Nicholes)
 %H A025487 M. Abramowitz and I. A. Stegun, eds., <a href="http://www.convertit.com/Go/ConvertIt/Reference/AMS55.ASP">Handbook of Mathematical Functions</a>, National Bureau of Standards, Applied Math. Series 55, Tenth Printing, 1972.
+%H A025487 Asaf Cohen Antonir and Asaf Shapira, <a href="https://arxiv.org/abs/2207.09410">An Elementary Proof of a Theorem of Hardy and Ramanujan</a> (2022). arXiv:2207.09410 [math.NT]
 %H A025487 Kevin Broughan, <a href="https://doi.org/10.1017/9781108178228">Equivalents of the Riemann Hypothesis, Vol. 1: Arithmetic Equivalents</a>, Cambridge University Press, 2017. See section 8.2, "Hardy-Ramanujan Numbers".
 %H A025487 YoungJu Choie, Nicolas Lichiardopol, Pieter Moree and Patrick Solé, <a href="https://doi.org/10.5802/jtnb.591">On Robin's criterion for the Riemann hypothesis</a>, Journal de théorie des nombres de Bordeaux, Vol. 19, No. 2 (2007), pp. 357-372. See section 5, p. 367.
-%H A025487 Asaf Cohen Antonir and Asaf Shapira, <a href="https://arxiv.org/abs/2207.09410">An Elementary Proof of a Theorem of Hardy and Ramanujan</a> (2022). arXiv:2207.09410 [math.NT]
 %H A025487 Michael De Vlieger, <a href="/A025487/a025487.png">Relations of A025487 to A002110, A002182, and A002201</a>.
 %H A025487 Steven R. Finch, <a href="https://arxiv.org/abs/2001.00578">Errata and Addenda to Mathematical Constants</a>, arXiv:2001.00578 [math.HO], 2020, pp. 9-10.
 %H A025487 G. H. Hardy and S. Ramanujan, <a href="http://www.imsc.res.in/~rao/ramanujan/CamUnivCpapers/Cpaper34/page1.htm">Asymptotic formulae for the distribution of integers of various types</a>, Proc. London Math. Soc, Ser. 2, Vol. 16 (1917), pp. 112-132. Also published in the book Collected Papers of Srinivasa Ramanujan, Chelsea, 1962, pages 245-261.
@@ -117,6 +117,41 @@
 %o A025487 nmax = 2^floor(log(N,2))
 %o A025487 sorted([j for j in (prod(sharp_primorial(t[0])^t[1] for k, t in enumerate(factor(n))) for n in (1..nmax)) if j <= N])
 %o A025487 # _Giuseppe Coppoletta_, Jan 26 2015
+%o A025487 (Python)
+%o A025487 from itertools import count
+%o A025487 from functools import lru_cache
+%o A025487 from sympy import prime, integer_log, primorial
+%o A025487 from oeis_sequences.OEISsequences import bisection
+%o A025487 def A025487(n):
+%o A025487     @lru_cache(maxsize=None)
+%o A025487     def g(x, m, j): return sum(g(x//(prime(m)**i), m-1, i) for i in range(j,integer_log(x, prime(m))[0]+1)) if m-1 else max(0,x.bit_length()-j)
+%o A025487     def f(x):
+%o A025487         c = n-1+x
+%o A025487         for k in count(1):
+%o A025487             if primorial(k)>x:
+%o A025487                 break
+%o A025487             c -= g(x,k,1)
+%o A025487         return c
+%o A025487     return bisection(f,n,n) # _Chai Wah Wu_, Mar 21 2026
+%o A025487 (Python)
+%o A025487 from heapq import heappop, heappush
+%o A025487 from sympy import prevprime, nextprime, factorint
+%o A025487 def A025487_gen(): # generator of terms if first n terms of sequence is desired
+%o A025487     h, hset = [1], {1}
+%o A025487     while True:
+%o A025487         yield (m:=heappop(h))
+%o A025487         ps = factorint(m)
+%o A025487         for p in ps:
+%o A025487             if p == 2 or ps[prevprime(p)]>ps[p]:
+%o A025487                 mp = m*p
+%o A025487                 if mp not in hset:
+%o A025487                     heappush(h,mp)
+%o A025487                     hset.add(mp)
+%o A025487         mp = m*nextprime(max(ps.keys(),default=1))
+%o A025487         if mp not in hset:
+%o A025487             heappush(h,mp)
+%o A025487             hset.add(mp)
+%o A025487 A025487_list = list(islice(A025487_gen(),40)) # _Chai Wah Wu_, Mar 21 2026
 %Y A025487 Subsequence of A055932, A191743, and A324583.
 %Y A025487 Cf. A025488, A051282, A036041, A051466, A061394, A124832, A161360, A166469, A181815, A181817, A283980, A306802, A322584, A322585 (characteristic function), A329897, A329898, A329899, A329900, A329904, A330683.
 %Y A025487 Cf. A085089, A101296 (left inverses).

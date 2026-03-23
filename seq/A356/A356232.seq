@@ -1,4 +1,4 @@
-%I A356232 #8 Aug 27 2022 21:30:27
+%I A356232 #18 Mar 22 2026 15:10:58
 %S A356232 1,2,4,8,10,16,20,32,40,50,64,80,100,110,128,160,200,220,250,256,320,
 %T A356232 400,440,500,512,550,640,800,880,1000,1024,1100,1210,1250,1280,1600,
 %U A356232 1760,1870,2000,2048,2200,2420,2500,2560,2750,3200,3520,3740,4000,4096,4400
@@ -31,6 +31,39 @@
 %t A356232 primeMS[n_]:=If[n==1,{},Flatten[Cases[FactorInteger[n],{p_,k_}:>Table[PrimePi[p],{k}]]]];
 %t A356232 normQ[m_]:=Or[m=={},Union[m]==Range[Max[m]]];
 %t A356232 Select[Range[1000],normQ[(primeMS[#]+1)/2]&]
+%o A356232 (Python)
+%o A356232 from itertools import count
+%o A356232 from functools import lru_cache
+%o A356232 from sympy import prime, integer_log
+%o A356232 from oeis_sequences.OEISsequences import bisection
+%o A356232 def A356232(n):
+%o A356232     @lru_cache(maxsize=None)
+%o A356232     def g(x, m): return sum(g(x//(prime((m<<1)+1)**i), m-1) for i in range(1,integer_log(x, prime((m<<1)+1))[0]+1)) if m else x.bit_length()-1
+%o A356232     def f(x):
+%o A356232         c, p = n-1+x, 1
+%o A356232         for k in count(0):
+%o A356232             p *= prime((k<<1)+1)
+%o A356232             if p>x:
+%o A356232                 break
+%o A356232             c -= g(x,k)
+%o A356232         return c
+%o A356232     return bisection(f,n,n) # _Chai Wah Wu_, Mar 21 2026
+%o A356232 (Python)
+%o A356232 from heapq import heappop, heappush
+%o A356232 from sympy import primefactors, nextprime
+%o A356232 def A356232_gen(): # generator of terms if first n terms of sequence is desired
+%o A356232     h, hset = [2], {2}
+%o A356232     yield 1
+%o A356232     while True:
+%o A356232         yield (m:=heappop(h))
+%o A356232         ps = primefactors(m)
+%o A356232         ps.append(nextprime(max(ps),2))
+%o A356232         for p in ps:
+%o A356232             mp = m*p
+%o A356232             if mp not in hset:
+%o A356232                 heappush(h,mp)
+%o A356232                 hset.add(mp)
+%o A356232 A356232_list = list(islice(A356232_gen(),40)) # _Chai Wah Wu_, Mar 21 2026
 %Y A356232 The partitions with these Heinz numbers are counted by A053251.
 %Y A356232 This is the odd restriction of A055932.
 %Y A356232 A subset of A066208 (numbers with all odd prime indices).
@@ -49,6 +82,6 @@
 %Y A356232 A056239 adds up the prime indices, row sums of A112798.
 %Y A356232 A073491 lists numbers with gapless prime indices, complement A073492.
 %Y A356232 Cf. A000005, A001222, A061395, A073493, A132747, A137921, A193829, A286470, A356224, A356237.
-%K A356232 nonn
+%K A356232 nonn,changed
 %O A356232 1,2
 %A A356232 _Gus Wiseman_, Aug 20 2022
