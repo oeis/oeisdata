@@ -1,0 +1,46 @@
+%I A394401 #9 Mar 23 2026 21:58:37
+%S A394401 1,2,3,1,4,1,5,6,1,2,7,1,8,9,1,10,1,2,3,1,11,12,1,13,2,1,4,1,14,15,1,
+%T A394401 3,2,1,16,1,17,5,1,2,18,1,19,1,20,3,1,2,21,1,4,1,6,22,1,2,23,1,24,3,1,
+%U A394401 25,1,2,7,1,26,27,1,2,1,5,4,1,3,28,1,2,1,29
+%N A394401 A sequence constructed by greedily sampling the probability distribution given by 1/log_2(i+1) - 1/log_2(i+2) to minimize discrepancy.
+%C A394401 The pdf used here is a simple example of a heavy log tail distribution. It can be seen as a discrete analog of the the log-Cauchy distribution. As a consequence of the heavy tail, the mean and the geometric mean of this sequence diverge to infinity.
+%C A394401 A general family of these distributions is given by 1/log_2(i+1)^p - 1/log_2(i+2)^p where p>0.
+%C A394401 Properties change sharply at p=1, the mean remains infinite for all p but the geometric mean becomes finite for p>1 and infinite for p<=1.
+%C A394401 The Fisher information is always finite and given by Sum_{i=1..inf} ((ln(log_2(i+2))/(log_2(i+2))^p - ln(log_2(i+1))/(log_2(i+1))^p)^2) / (1/(log_2(i+1))^p - 1/(log_2(i+2))^p).
+%H A394401 Jwalin Bhatt, <a href="/A394401/b394401.txt">Table of n, a(n) for n = 1..10000</a>
+%H A394401 Wikipedia, <a href="https://en.wikipedia.org/wiki/Log-Cauchy_distribution">Log-Cauchy distribution</a>
+%e A394401 Let p(k) denote the probability of k and c(k) denote the number of occurrences of k among the first n-1 terms; then the expected number of occurrences of k among n random terms is given by n*p(k).
+%e A394401 We subtract the actual occurrences c(k) from the expected occurrences and pick the one with the highest value.
+%e A394401 | n | n*p(1) - c(1) | n*p(2) - c(2) | n*p(3) - c(3) | n*p(4) - c(4) | choice |
+%e A394401 |---|---------------|---------------|---------------|---------------|--------|
+%e A394401 | 1 |     0.369     |       -       |       -       |       -       |   1    |
+%e A394401 | 2 |    -0.261     |     0.261     |       -       |       -       |   2    |
+%e A394401 | 3 |     0.107     |    -0.607     |     0.207     |       -       |   3    |
+%e A394401 | 4 |     0.476     |    -0.476     |    -0.722     |     0.175     |   1    |
+%e A394401 | 5 |    -0.154     |    -0.345     |    -0.653     |     0.219     |   4    |
+%t A394401 probCountDiff[j_, k_, count_] := k*(1/Log2[j+1] - 1/Log2[j+2]) - Lookup[count, j, 0]
+%t A394401 samplePDF[n_] := Module[{coeffs, unreachedVal, counts, k, probCountDiffs, mostProbable},
+%t A394401   coeffs = ConstantArray[0, n]; unreachedVal = 1; counts = <||>;
+%t A394401   Do[probCountDiffs = Table[probCountDiff[i, k, counts], {i, 1, unreachedVal}];
+%t A394401     mostProbable = First@FirstPosition[probCountDiffs, Max[probCountDiffs]];
+%t A394401     If[mostProbable == unreachedVal, unreachedVal++]; coeffs[[k]] = mostProbable;
+%t A394401     counts[mostProbable] = Lookup[counts, mostProbable, 0] + 1; , {k, 1, n}]; coeffs]
+%t A394401 A394401 = samplePDF[120]
+%o A394401 (Python)
+%o A394401 from mpmath import iv
+%o A394401 def prob_count_diff(j, k, count):
+%o A394401     return  k*(1/iv.log(j+1, 2) - 1/iv.log(j+2, 2)) - count
+%o A394401 def sample_log_tail_distribution(num_coeffs):
+%o A394401     coeffs, unreached_val, counts = [], 1, {}
+%o A394401     for k in range(1, num_coeffs+1):
+%o A394401         prob_count_diffs = [prob_count_diff(i, k, counts.get(i, 0)) for i in range(1, unreached_val+1)]
+%o A394401         most_probable = prob_count_diffs.index(max(prob_count_diffs)) + 1
+%o A394401         unreached_val += most_probable == unreached_val
+%o A394401         coeffs.append(most_probable)
+%o A394401         counts[most_probable] = counts.get(most_probable, 0) + 1
+%o A394401     return coeffs
+%o A394401 A394401 = sample_log_tail_distribution(120)
+%Y A394401 Cf. A386904, A393100, A393793.
+%K A394401 nonn,new
+%O A394401 1,2
+%A A394401 _Jwalin Bhatt_, Mar 19 2026

@@ -1,4 +1,4 @@
-%I A056808 #13 Jun 26 2025 07:59:33
+%I A056808 #17 Mar 24 2026 00:17:09
 %S A056808 18,54,90,108,150,162,270,300,324,450,486,540,600,630,648,750,810,972,
 %T A056808 1050,1200,1350,1458,1470,1500,1620,1890,1944,2100,2250,2400,2430,
 %U A056808 2700,2916,2940,3000,3150,3240,3750,3780,3888,4050,4200,4374,4410,4500,4800
@@ -8,8 +8,26 @@
 %F A056808 Sum_{n>=1} 1/a(n) = A345974 - A161360 = 0.15229524564163275059... . - _Amiram Eldar_, Jun 26 2025
 %e A056808 18 = 2*3*3 and all prime divisors are consecutive primes but the least prime signature is 12 = 2*2*3; so a(1) = 18.
 %t A056808 With[{nn = 4800}, Select[Range[2, nn], And[#1 != Times @@ MapIndexed[Prime[First@ #2]^#1 &, Sort[#3, Greater]], Last[#2] == Prime@ Length[#2]] & @@ Apply[Join, {{#1}, Transpose@ #2}] & @@ {#, FactorInteger[#]} &] ] (* _Michael De Vlieger_, Feb 06 2020 *)
+%o A056808 (Python)
+%o A056808 from itertools import count
+%o A056808 from functools import lru_cache
+%o A056808 from sympy import prime, integer_log, primorial
+%o A056808 from oeis_sequences.OEISsequences import bisection
+%o A056808 def A056808(n):
+%o A056808     @lru_cache(maxsize=None)
+%o A056808     def g(x, m, j): return sum(g(x//(prime(m)**i), m-1, i) for i in range(j,integer_log(x, prime(m))[0]+1)) if m-1 else max(0,x.bit_length()-j)
+%o A056808     @lru_cache(maxsize=None)
+%o A056808     def h(x, m): return sum(h(x//(prime(m)**i), m-1) for i in range(1,integer_log(x, prime(m))[0]+1)) if m-1 else x.bit_length()-1
+%o A056808     def f(x):
+%o A056808         c = n+x
+%o A056808         for k in count(1):
+%o A056808             if primorial(k)>x:
+%o A056808                 break
+%o A056808             c -= h(x,k)-g(x,k,1)
+%o A056808         return c
+%o A056808     return bisection(f,n,n) # _Chai Wah Wu_, Mar 23 2026
 %Y A056808 Cf. A025487, A055932, A057335, A161360, A335485, A345974.
-%K A056808 easy,nonn
+%K A056808 easy,nonn,changed
 %O A056808 1,1
 %A A056808 _Alford Arnold_, Aug 22 2000
 %E A056808 More terms from Larry Reeves (larryr(AT)acm.org), Nov 28 2000

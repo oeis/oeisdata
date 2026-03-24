@@ -1,4 +1,4 @@
-%I A133808 #10 Apr 14 2015 11:40:25
+%I A133808 #15 Mar 24 2026 00:16:02
 %S A133808 1,2,4,6,8,16,18,30,32,36,54,64,108,128,150,162,210,216,256,324,450,
 %T A133808 486,512,648,750,900,972,1024,1296,1458,1470,1944,2048,2250,2310,2916,
 %U A133808 3750,3888,4096,4374,4500,5832,6750,7350,7776,8192,8748,10290,11250
@@ -17,8 +17,43 @@
 %o A133808              where q = a151800 p
 %o A133808                    ((y, p, e), s') = deleteFindMin s
 %o A133808 -- _Reinhard Zumkeller_, Apr 13 2015
+%o A133808 (Python)
+%o A133808 from functools import lru_cache
+%o A133808 from itertools import count
+%o A133808 from sympy import prime, integer_log, primorial
+%o A133808 from oeis_sequences.OEISsequences import bisection
+%o A133808 def A133808(n):
+%o A133808     @lru_cache(maxsize=None)
+%o A133808     def g(x, m, j): return sum(g(x//(prime(m)**i), m-1, i) for i in range(1,min(j,integer_log(x, prime(m))[0])+1)) if m-1 else min(j,x.bit_length()-1)
+%o A133808     def f(x):
+%o A133808         c = n-1+x
+%o A133808         for k in count(1):
+%o A133808             if primorial(k)>x:
+%o A133808                 break
+%o A133808             c -= g(x,k,integer_log(x,prime(k))[0])
+%o A133808         return c
+%o A133808     return bisection(f,n,n) # _Chai Wah Wu_, Mar 23 2026
+%o A133808 (Python)
+%o A133808 from heapq import heappop, heappush
+%o A133808 from sympy import factorint, nextprime
+%o A133808 def A133808_gen(): # generator of terms if the first n terms are desired
+%o A133808     h, hset = [1], {1}
+%o A133808     while True:
+%o A133808         yield (m:=heappop(h))
+%o A133808         ps = factorint(m)
+%o A133808         for p in ps:
+%o A133808             if p == max(ps) or ps[nextprime(p)]>ps[p]:
+%o A133808                 mp = m*p
+%o A133808                 if mp not in hset:
+%o A133808                     heappush(h,mp)
+%o A133808                     hset.add(mp)
+%o A133808         mp = 2 if m==1 else m*nextprime(a:=max(ps.keys()))**ps[a]
+%o A133808         if mp not in hset:
+%o A133808             heappush(h,mp)
+%o A133808             hset.add(mp)
+%o A133808 A133808_list = list(islice(A133808_gen(),40)) # _Chai Wah Wu_, Mar 23 2026
 %Y A133808 Cf. A025487, A087980, A073491, A133809-A133813.
 %Y A133808 Cf. A027748, A124010, A151800, A000040.
-%K A133808 nonn
+%K A133808 nonn,changed
 %O A133808 1,2
 %A A133808 _Olivier Gérard_, Sep 23 2007

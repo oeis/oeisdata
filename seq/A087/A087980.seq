@@ -1,4 +1,4 @@
-%I A087980 #26 Feb 15 2024 13:52:17
+%I A087980 #30 Mar 24 2026 00:16:15
 %S A087980 1,2,4,8,12,16,24,32,48,64,72,96,128,144,192,256,288,360,384,432,512,
 %T A087980 576,720,768,864,1024,1152,1440,1536,1728,2048,2160,2304,2592,2880,
 %U A087980 3072,3456,4096,4320,4608,5184,5760,6144,6912,8192,8640,9216,10368,10800
@@ -23,12 +23,54 @@
 %o A087980 -- _Reinhard Zumkeller_, Apr 13 2015
 %o A087980 (PARI) is(n)=my(e=valuation(n,2),t); n>>=e; forprime(p=3,, t=valuation(n,p); if(t==0, return(n==1)); if(t>=e, return(0)); e=t; n/=p^e) \\ _Charles R Greathouse IV_, Jun 25 2017
 %o A087980 (PARI) list(lim)=my(v=[],u=powers(2,logint(lim\=1,2)),w,p=2,t); forprime(q=3,, w=List(); for(i=1,#u, t=u[i]; for(e=1,valuation(u[i],p)-1, t*=q; if(t>lim, break); listput(w,t))); v=concat(v,Vec(u)); if(#w==0, break); u=w; p=q); Set(v) \\ _Charles R Greathouse IV_, Jun 25 2017
+%o A087980 (Python)
+%o A087980 from math import prod
+%o A087980 from itertools import count
+%o A087980 from functools import lru_cache
+%o A087980 from sympy import prime, integer_log
+%o A087980 from oeis_sequences.OEISsequences import bisection
+%o A087980 def A087980(n):
+%o A087980     @lru_cache(maxsize=None)
+%o A087980     def A006939(n): return prod(prime(k)**(n-k+1) for k in range(1,n+1))
+%o A087980     @lru_cache(maxsize=None)
+%o A087980     def g(x, m, j): return sum(g(x//(prime(m)**i), m-1, i) for i in range(j+1,integer_log(x, prime(m))[0]+1)) if m-1 else max(0,x.bit_length()-1-j)
+%o A087980     def f(x):
+%o A087980         c = n-1+x
+%o A087980         for k in count(1):
+%o A087980             if A006939(k)>x:
+%o A087980                 break
+%o A087980             c -= g(x,k,0)
+%o A087980         return c
+%o A087980     return bisection(f,n,n) # _Chai Wah Wu_, Mar 23 2026
+%o A087980 (Python)
+%o A087980 from heapq import heappop, heappush
+%o A087980 from sympy import factorint, prevprime, nextprime
+%o A087980 def A087980_gen(): # generator of terms if the first n terms are desired
+%o A087980     h, hset = [1], {1}
+%o A087980     while True:
+%o A087980         yield (m:=heappop(h))
+%o A087980         ps = factorint(m)
+%o A087980         for p in ps:
+%o A087980             if p == 2 or ps[prevprime(p)]>ps[p]+1:
+%o A087980                 mp = m*p
+%o A087980                 if mp not in hset:
+%o A087980                     heappush(h,mp)
+%o A087980                     hset.add(mp)
+%o A087980         if m==1:
+%o A087980             heappush(h,2)
+%o A087980             hset.add(2)
+%o A087980         elif ps[a:=max(ps.keys())] > 1:
+%o A087980             mp = m*nextprime(a)
+%o A087980             if mp not in hset:
+%o A087980                 heappush(h,mp)
+%o A087980                 hset.add(mp)
+%o A087980 A087980_list =  list(islice(A087980_gen(),100)) # _Chai Wah Wu_, Mar 23 2026
 %Y A087980 The weak (weakly decreasing) version is A025487.
 %Y A087980 The weak opposite (weakly increasing) version is A133808.
 %Y A087980 The opposite (strictly increasing) version is A133809.
 %Y A087980 For strictly decreasing prime signature we have A304686.
 %Y A087980 Cf. A000009, A000040, A002110, A027748, A055932, A124010, A133813, A317791, A328524, A357864.
-%K A087980 easy,nice,nonn
+%K A087980 easy,nice,nonn,changed
 %O A087980 1,2
 %A A087980 _Rainer Rosenthal_, Oct 27 2003
 %E A087980 Edited by _Franklin T. Adams-Watters_, Apr 25 2006
