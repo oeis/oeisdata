@@ -1,0 +1,63 @@
+%I A393161 #41 Mar 24 2026 17:24:25
+%S A393161 1,2,3,1,4,2,3,1,5,2,1,3,4,1,2,3,6,1,2,5,4,1,3,2,1,3,4,1,2,5,1,3,7,2,
+%T A393161 1,4,3,2,6,1,2,3,1,5,4,1,2,3,1,2,4,3,1,5,2,1,3,6,4,1,2,3,1,2,5,1,4,3,
+%U A393161 8,7,2,1,3,2,1,4,5,1,3,2,6,1,2,4,3,1,2
+%N A393161 A sequence constructed by greedily sampling the Hermite distribution, with both parameters as 1, to minimize ratio discrepancy. The distribution indexing is adjusted to be strictly decreasing and support all positive integers.
+%C A393161 The original distribution, which supports all integers including 0, is given by PDF p(k) = (Sum_{i=0..floor(k/2)} 1/(i!*(k-2*i)!)) / e^2 = 2F0([-k/2, (1-k)/2], [], 4) / (e^2 * k!). It has p(0)=p(1)=1/e^2 which is less than p(2). From p(2) onwards it is strictly decreasing hence we can shift and adjust the distribution to only consider that.
+%C A393161 The Hermite distribution used here is conditioned on being >=2, and then subtracting 1.
+%C A393161 The distribution is given by PDF p(k) = (Sum_{i=0..ceiling(k/2)} 1/(i!*(k+1-2*i)!)) / (e^2-2) = 2F0([-(k+1)/2, -k/2], [], 4) / ((e^2 - 2)*(k+1)!).
+%C A393161 The arithmetic mean approaches Sum_{k>=1} k * p(k) = 2.9278062629... in the limit.
+%C A393161 The geometric mean approaches Product_{k>=2} k ^ p(k) = 2.38445049699... in the limit.
+%H A393161 Jwalin Bhatt, <a href="/A393161/b393161.txt">Table of n, a(n) for n = 1..10000</a>
+%H A393161 Wikipedia, <a href="https://en.wikipedia.org/wiki/Hermite_distribution">Hermite distribution</a>.
+%e A393161 Let p(k) denote the probability of k and c(k) denote the count of occurrences of k so far.
+%e A393161 We take the ratio of the actual occurrences c(k)+1 to the probability and pick the one with the lowest value. In case of ties pick the smallest k.
+%e A393161 Since p(k) is monotonic decreasing, we only need to compute c(k) once we see c(k-1).
+%e A393161 | n | (c(1)+1)/p(1) | (c(2)+1)/p(2) | (c(3)+1)/p(3) | (c(4)+1)/p(4) | choice |
+%e A393161 |---|---------------|---------------|---------------|---------------|--------|
+%e A393161 | 1 |     3.592     |       -       |       -       |       -       |   1    |
+%e A393161 | 2 |     7.185     |     4.619     |       -       |       -       |   2    |
+%e A393161 | 3 |     7.185     |     9.238     |     5.173     |       -       |   3    |
+%e A393161 | 4 |     7.185     |     9.238     |    10.346     |     7.983     |   1    |
+%e A393161 | 5 |    10.778     |     9.238     |    10.346     |     7.983     |   4    |
+%t A393161 pdf[i_] := HypergeometricPFQ[{-(i+1)/2, -i/2}, {}, 4] / (i+1)!
+%t A393161 samplePDF[numCoeffs_] := Module[
+%t A393161   {coeffs = {}, counts = {0}, minTime, minIndex, time},
+%t A393161 Do[
+%t A393161     minTime = Infinity;
+%t A393161     Do[
+%t A393161       time = (counts[[i]] + 1)/pdf[i];
+%t A393161       If[time < minTime, minIndex = i; minTime = time],
+%t A393161       {i, 1, Length[counts]}
+%t A393161     ];
+%t A393161     If[minIndex == Length[counts], AppendTo[counts, 0]];
+%t A393161     counts[[minIndex]] += 1;
+%t A393161     AppendTo[coeffs, minIndex],
+%t A393161     {numCoeffs}
+%t A393161   ];
+%t A393161   coeffs
+%t A393161 ]
+%t A393161 A393161 = samplePDF[120]
+%o A393161 (Python)
+%o A393161 from math import factorial
+%o A393161 from fractions import Fraction
+%o A393161 def hermite(k):
+%o A393161     return sum(Fraction(1, (factorial(i)*factorial(k+1-2*i))) for i in range(1+(k+1)//2))
+%o A393161 def sample_hermite_distribution(num_coeffs):
+%o A393161   coeffs, counts = [], [0]
+%o A393161   for _ in range(num_coeffs):
+%o A393161     min_time = float('infinity')
+%o A393161     for i, count in enumerate(counts, start=1):
+%o A393161       time = (count+1) / hermite(i)
+%o A393161       if time < min_time:
+%o A393161         min_index, min_time = i, time
+%o A393161     if min_index == len(counts):
+%o A393161       counts.append(0)
+%o A393161     counts[min_index-1] += 1
+%o A393161     coeffs.append(min_index)
+%o A393161   return coeffs
+%o A393161 A393161 = sample_hermite_distribution(120)
+%Y A393161 Cf. A072334, A386016, A393100, A393663.
+%K A393161 nonn,new
+%O A393161 1,2
+%A A393161 _Jwalin Bhatt_, Mar 03 2026

@@ -1,4 +1,4 @@
-%I A097211 #13 Jul 27 2024 09:41:49
+%I A097211 #17 Mar 25 2026 00:00:07
 %S A097211 1,2,4,10,8,44,16,184,218,32,400,752,3748,64,3392,3040,61064,128,
 %T A097211 27904,253808,12224,64594,57856,981520,256,226304,16450240,49024,
 %U A097211 16700300,954368,15722528,512,1822720,1055953664,196352,4278006328,15499264
@@ -7,8 +7,26 @@
 %C A097211 Sequence is a rearrangement of A097210 unless two or more members of A025487 are LCMs of an identical number of sets of distinct positive integers.
 %H A097211 Amiram Eldar, <a href="/A097211/b097211.txt">Table of n, a(n) for n = 1..2534</a>
 %t A097211 f[n_] := Block[{d = Divisors[n]}, Plus @@ (MoebiusMu[n/d](2^DivisorSigma[0, d] - 1))]; PrimeExponents[n_] := Flatten[ Table[ # [[2]], {1}] & /@ FactorInteger[n]]; lpe = {}; ln = {1}; Do[pe = Sort[PrimeExponents[n]]; If[ Position[lpe, pe] == {}, AppendTo[lpe, pe]; AppendTo[ln, f[n]]], {n, 1000}]; ln (* _Robert G. Wilson v_, Aug 14 2004 *)
+%o A097211 (Python)
+%o A097211 from functools import lru_cache
+%o A097211 from itertools import count
+%o A097211 from sympy import prime, integer_log, primorial, mobius, divisor_count, divisors
+%o A097211 from oeis_sequences.OEISsequences import bisection
+%o A097211 def A097211(n):
+%o A097211     if n == 1: return 1
+%o A097211     @lru_cache(maxsize=None)
+%o A097211     def g(x, m, j): return sum(g(x//(prime(m)**i), m-1, i) for i in range(j,integer_log(x, prime(m))[0]+1)) if m-1 else max(0,x.bit_length()-j)
+%o A097211     def f(x):
+%o A097211         c = n-1+x
+%o A097211         for k in count(1):
+%o A097211             if primorial(k)>x:
+%o A097211                 break
+%o A097211             c -= g(x,k,1)
+%o A097211         return c
+%o A097211     m = bisection(f,n,n)
+%o A097211     return sum(mobius(m//d)<<divisor_count(d) for d in divisors(m,generator=True)) # _Chai Wah Wu_, Mar 24 2026
 %Y A097211 Cf. A025487, A076078, A097210.
-%K A097211 nonn
+%K A097211 nonn,changed
 %O A097211 1,2
 %A A097211 _Matthew Vandermast_, Aug 09 2004
 %E A097211 Second comment edited by _Matthew Vandermast_, Oct 21 2008
