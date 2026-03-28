@@ -1,4 +1,4 @@
-%I A346407 #4 Jul 17 2021 11:22:13
+%I A346407 #8 Mar 27 2026 22:04:25
 %S A346407 1,2,4,6,13,29,36,55,112,223,264,514,956,1749,2345,2847,5005,8567,
 %T A346407 9507,16073,26792,43730,70482,88969,140871,221370,342958,368588,
 %U A346407 565510,859401,1290994,1927925,2128165,3142980,4616207,6754033,9810997,14133201,20230329,28744301
@@ -9,8 +9,19 @@
 %e A346407 A138534(2) = A025487(2) = 2, so a(2) = 2.
 %e A346407 A138534(3) = A025487(4) = 6, so a(3) = 4.
 %t A346407 lps = Cases[Import["https://oeis.org/A025487/b025487.txt", "Table"], {_, _}][[;; , 2]]; s = {}; lcms = Union @ Table[LCM @@ Range[n], {n, 1, 31}]; Do[p = Position[lps, lcms[[n]]]; If[p == {}, Break[]]; AppendTo[s, p[[1, 1]]], {n, 1, Length[lcms]}]; s
+%o A346407 (Python)
+%o A346407 from itertools import takewhile, count
+%o A346407 from functools import lru_cache
+%o A346407 from sympy import prime, integer_log, primepi, integer_nthroot, primerange, primorial
+%o A346407 def A346407(n):
+%o A346407     @lru_cache(maxsize=None)
+%o A346407     def g(x, m, j): return sum(g(x//(prime(m)**i), m-1, i) for i in range(j,integer_log(x, prime(m))[0]+1)) if m-1 else max(0,x.bit_length()-j)
+%o A346407     def f(x): return int(n+x-1-sum(primepi(integer_nthroot(x,k)[0]) for k in range(1,x.bit_length())))
+%o A346407     m = iterfun(f,n)
+%o A346407     r = prod(p**integer_log(m, p)[0] for p in primerange(m+1))
+%o A346407     return 1+sum(g(r,k,1) for k in takewhile(lambda x:primorial(x)<=r,count(1))) # _Chai Wah Wu_, Mar 26 2026
 %Y A346407 Cf. A003418, A051451, A025487.
 %Y A346407 Similar sequences: A098718, A098719, A293635, A306802, A346043.
-%K A346407 nonn
+%K A346407 nonn,changed
 %O A346407 1,2
 %A A346407 _Amiram Eldar_, Jul 15 2021

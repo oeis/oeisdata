@@ -1,12 +1,29 @@
-%I A099992 #10 Jun 02 2025 00:19:49
+%I A099992 #14 Mar 27 2026 22:04:33
 %S A099992 1,4,8,16,30,36,60,72,120,144,192,216,256,360,420,480,576,768,864,960,
 %T A099992 1080,1260,1440,1680,1800,2048,2304,2520,2880,3360,3600,4096,4608,
 %U A099992 5040,5400,6144,6480,6912,7560,7776,8640,9240,10368,11520,12600,13440,13860
 %N A099992 Bisection of A025487.
 %C A099992 A025487: least integer of each prime signature; also products of primorial numbers A002110. - _Robert G. Wilson v_, Dec 14 2005
 %t A099992 PrimeExponents[n_] := Last /@ FactorInteger@n; lpe = {}; ln = {1}; Do[ pe = Sort@PrimeExponents@n; If[FreeQ[lpe, pe], AppendTo[lpe, pe]; AppendTo[ln, n]], {n, 15000}]; ln[[2# - 1]] & /@ Range@(Length@ln/2) (* _Robert G. Wilson v_ *)
+%o A099992 (Python)
+%o A099992 from itertools import count
+%o A099992 from functools import lru_cache
+%o A099992 from sympy import prime, integer_log
+%o A099992 from oeis_sequences.OEISsequences import bisection
+%o A099992 def A099992(n):
+%o A099992     @lru_cache(maxsize=None)
+%o A099992     def g(x, m, j): return sum(g(x//(prime(m)**i), m-1, i) for i in range(j,integer_log(x, prime(m))[0]+1)) if m-1 else max(0,x.bit_length()-j)
+%o A099992     def f(x):
+%o A099992         c, p = (n-1<<1)+x, 1
+%o A099992         for k in count(1):
+%o A099992             p *= prime(k)
+%o A099992             if p>x:
+%o A099992                 break
+%o A099992             c -= g(x,k,1)
+%o A099992         return c
+%o A099992     return bisection(f,(n<<1)-1,(n<<1)-1) # _Chai Wah Wu_, Mar 26 2026
 %Y A099992 Cf. A099993.
-%K A099992 nonn,easy
+%K A099992 nonn,easy,changed
 %O A099992 1,2
 %A A099992 _N. J. A. Sloane_, Nov 20 2004
 %E A099992 More terms from _Robert G. Wilson v_, Dec 14 2005
