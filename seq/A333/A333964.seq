@@ -1,4 +1,4 @@
-%I A333964 #17 Feb 18 2021 02:32:44
+%I A333964 #25 Mar 28 2026 23:22:14
 %S A333964 1,2,4,6,8,12,16,24,30,32,36,48,60,64,72,96,120,128,144,180,192,210,
 %T A333964 216,240,256,288,360,384,420,432,480,512,576,720,768,840,864,900,960,
 %U A333964 1024,1080,1152,1260,1296,1440,1536,1680,1728,1800,1920,2048,2160,2304,2520,2592
@@ -6,8 +6,38 @@
 %H A333964 Amiram Eldar, <a href="/A333964/b333964.txt">Table of n, a(n) for n = 1..10000</a>
 %F A333964 Sum_{n>=1} 1/a(n) = 15120/6061. - _Amiram Eldar_, Feb 18 2021
 %t A333964 mx = 2600; Select[Sort[Flatten[Table[2^i*6^j*30^k*210^m, {i, 0, Log[2, mx]}, {j, 0, Log[6, mx]}, {k, 0, Log[30, mx]}, {m, 0, Log[210, mx]}]]], # <= mx &] (* _Amiram Eldar_, Apr 24 2020 after _Robert G. Wilson v_ at A279537 *)
+%o A333964 (Python)
+%o A333964 from functools import lru_cache
+%o A333964 from sympy import prime, integer_log
+%o A333964 from oeis_sequences.OEISsequences import bisection
+%o A333964 def A333964(n):
+%o A333964     @lru_cache(maxsize=None)
+%o A333964     def g(x, m, j): return sum(g(x//(prime(m)**i), m-1, i) for i in range(j,integer_log(x, prime(m))[0]+1)) if m-1 else max(0,x.bit_length()-j)
+%o A333964     def f(x): return n-1+x-sum(g(x,k,1) for k in range(1,5))
+%o A333964     return bisection(f,n,n) # _Chai Wah Wu_, Mar 27 2026
+%o A333964 (Python)
+%o A333964 from itertools import islice
+%o A333964 from heapq import heappop, heappush
+%o A333964 from sympy import factorint, prevprime, nextprime
+%o A333964 def A333964_gen(): # generator of terms if the first n terms are desired.
+%o A333964     h, hset = [1], {1}
+%o A333964     while True:
+%o A333964         yield (m:=heappop(h))
+%o A333964         ps = factorint(m)
+%o A333964         for p in ps:
+%o A333964             if p == 2 or ps[prevprime(p)]>ps[p]:
+%o A333964                 mp = m*p
+%o A333964                 if mp not in hset:
+%o A333964                     heappush(h,mp)
+%o A333964                     hset.add(mp)
+%o A333964         if len(ps)<4:
+%o A333964             mp = m*nextprime(max(ps.keys(),default=1))
+%o A333964             if mp not in hset:
+%o A333964                 heappush(h,mp)
+%o A333964                 hset.add(mp)
+%o A333964 A333964_list = list(islice(A333964_gen(),40)) # _Chai Wah Wu_, Mar 27 2026
 %Y A333964 Intersection of A025487 and A002473.
 %Y A333964 Cf. A025610, A279537.
-%K A333964 nonn
+%K A333964 nonn,changed
 %O A333964 1,2
 %A A333964 _David A. Corneth_, Apr 20 2020
