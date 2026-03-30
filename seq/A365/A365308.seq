@@ -1,4 +1,4 @@
-%I A365308 #57 Mar 10 2024 04:19:48
+%I A365308 #61 Mar 29 2026 08:58:56
 %S A365308 36,216,900,1296,7776,27000,44100,46656,279936,810000,1679616,5336100,
 %T A365308 9261000,10077696,24300000,60466176,362797056,729000000,901800900,
 %U A365308 1944810000,2176782336,12326391000,13060694016,21870000000,78364164096,260620460100,408410100000,470184984576
@@ -12,7 +12,43 @@
 %F A365308 Sum_{n>=1} 1/a(n) = Sum_{k>=2} 1/(P(k)*(P(k)-1)) = 0.03450573145072369022... . - _Amiram Eldar_, Mar 10 2024
 %e A365308 Terms less than 10^4 include P(2)^2 = 36, P(2)^3 = 216, P(2)^4 = 1296, P(2)^5 = 7776, and P(3)^2 = 900.
 %t A365308 nn = 2^39; k = 2; P = 6; Union@ Reap[While[j = 2; While[P^j < nn, Sow[P^j]; j++]; j > 2, k++; P *= Prime[k]] ][[-1, 1]]
+%o A365308 (Python)
+%o A365308 from itertools import count
+%o A365308 from sympy import prime, integer_nthroot, integer_log
+%o A365308 from oeis_sequences.OEISsequences import bisection
+%o A365308 def A365308(n):
+%o A365308     def g(x):
+%o A365308         c = 2
+%o A365308         for i in count(2):
+%o A365308             c *= prime(i)
+%o A365308             if c>x:
+%o A365308                 return  0 if i<3 else i-1
+%o A365308     def f(x): return n-1+x-sum(g(integer_nthroot(x,k)[0]) for k in range(2,integer_log(x,6)[0]+1))
+%o A365308     return bisection(f,n,n)
+%o A365308 (Python)
+%o A365308 from math import prod
+%o A365308 from itertools import islice
+%o A365308 from heapq import heappop, heappush
+%o A365308 from sympy import nextprime, factorint
+%o A365308 def A365308_gen(): # generator of terms if the first n terms are desired.
+%o A365308     h, hset = [1], {1}
+%o A365308     while True:
+%o A365308         yield (m:=heappop(h))
+%o A365308         ps = factorint(m)
+%o A365308         if m==1:
+%o A365308             heappush(h,36)
+%o A365308             hset.add(36)
+%o A365308         else:
+%o A365308             mp = m*prod(ps.keys())
+%o A365308             if mp not in hset:
+%o A365308                 heappush(h,mp)
+%o A365308                 hset.add(mp)
+%o A365308             mp = m*nextprime(p:=max(ps.keys()))**ps[p]
+%o A365308             if mp not in hset:
+%o A365308                 heappush(h,mp)
+%o A365308                 hset.add(mp)
+%o A365308 A365308_list = list(islice(A365308_gen(),50)) # _Chai Wah Wu_, Mar 28 2026
 %Y A365308 Cf. A000079, A002110, A100778, A126706, A286708, A303606, A322793, A325374.
-%K A365308 nonn,easy
+%K A365308 nonn,easy,changed
 %O A365308 1,1
 %A A365308 _Michael De Vlieger_, Oct 02 2023

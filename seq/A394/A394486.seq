@@ -1,0 +1,53 @@
+%I A394486 #16 Mar 29 2026 15:55:35
+%S A394486 1,2,8,64,192,4960,15360
+%N A394486 Number of horizontally symmetric reduced Latin squares of order 2n representing groups.
+%C A394486 The sum of symmetric elements a[i, j] and a[i, n+1-j] in a horizontally symmetric reduced Latin square of order n is constant and equal to n+1 for all pairs of elements (with rows and columns numbered from 1 to n and element values from 1 to n), based on the definition given in A287649 by Eduard I. Vatutin. We restrict consideration to reduced Latin squares representing groups, that is, having the associative property. Horizontal symmetry is of interest in the Latin stable marriage problem restricted to groups, because the even-sized maximal examples given in A351413 have these properties, as do the lower bounds preference profiles specified in A005154 and A065982.
+%H A394486 A. T. Benjamin, C. Converse, and H. A. Krieger, <a href="https://doi.org/10.1016/0166-218X(95)80006-P">Note. How do I marry thee? Let me count the ways</a>, Discrete Appl. Math. 59 (1995) 285-292 (Section 3 defines vertical reflection relation).
+%H A394486 E. G. Thurber, <a href="https://doi.org/10.1016/S0012-365X(01)00194-7">Concerning the maximum number of stable matchings in the stable marriage problem</a>, Discrete Math., 248 (2002), 195-219 (Section 10).
+%e A394486 For order 4, the a(2)=2 solutions are:
+%e A394486   1234...1234
+%e A394486   2143...2413
+%e A394486   3412...3142
+%e A394486   4321...4321
+%e A394486 For order 6, 4 of the a(3)=8 solutions represent the cyclic group:
+%e A394486   123456    123456    123456    123456
+%e A394486   231645    236145    241635    246135
+%e A394486   312564    365214    315264    362514
+%e A394486   465213    412563    462513    415263
+%e A394486   546132    541632    536142    531642
+%e A394486   654321    654321    654321    654321
+%e A394486 and 4 represent the dihedral group:
+%e A394486   123456    123456    123456    123456
+%e A394486   214365    214365    231645    246135
+%e A394486   351624    365214    312564    351624
+%e A394486   462513    456123    456123    415263
+%e A394486   536142    541632    564312    564312
+%e A394486   645231    632541    645231    632541
+%e A394486 For order 6, the example shown in A351413 with 48 stable matchings is:
+%e A394486   123456
+%e A394486   214365
+%e A394486   365214
+%e A394486   456123
+%e A394486   541632
+%e A394486   632541
+%o A394486 (MiniZinc)
+%o A394486 int: n = 14;  %reduced Latin squares of even-size order n with horizonal symmetry
+%o A394486 % 1, 2, 8, 64, 192, 4960, 15360
+%o A394486 set of int: Elements = 1..n;
+%o A394486 array[Elements, Elements] of var Elements: L;  % the Latin square
+%o A394486 include "alldifferent.mzn";
+%o A394486 constraint forall(i in Elements) (  % Latin square constraint
+%o A394486     alldifferent([L[i, j] | j in Elements]) /\
+%o A394486     alldifferent([L[j, i] | j in Elements]));
+%o A394486 constraint forall(i in Elements) (  % reduced form
+%o A394486     L[1, i] = i /\
+%o A394486     L[i, 1] = i);
+%o A394486 constraint forall(i, j, k in Elements) ( % group; associativity: (a * b) * c = a * (b * c)
+%o A394486     L[L[i, j], k] = L[i, L[j, k]]);
+%o A394486 constraint forall(r in Elements, i in 1..n div 2) ( % horizontal symmetry
+%o A394486     L[r, i] + L[r, n + 1 - i] = n + 1);
+%o A394486 solve :: int_search([L[i, j] | i, j in Elements], input_order, indomain_min) satisfy;
+%Y A394486 Cf. A394485, A287649, A287650, A351413, A005154, A065982, A336412, A058161, A246137, A000315.
+%K A394486 nonn,more,new
+%O A394486 1,2
+%A A394486 _Dan Eilers_, Mar 22 2026

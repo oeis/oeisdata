@@ -1,4 +1,4 @@
-%I A100778 #31 Sep 26 2023 01:57:38
+%I A100778 #36 Mar 29 2026 08:59:08
 %S A100778 1,2,4,6,8,16,30,32,36,64,128,210,216,256,512,900,1024,1296,2048,2310,
 %T A100778 4096,7776,8192,16384,27000,30030,32768,44100,46656,65536,131072,
 %U A100778 262144,279936,510510,524288,810000,1048576,1679616,2097152,4194304,5336100
@@ -15,8 +15,44 @@
 %e A100778 216 is a term as 216 = (2*3)^3. 243 is not a term as 32 represents that prime signature.
 %t A100778 unintQ[n_]:=And[SameQ@@Last/@FactorInteger[n],Length[FactorInteger[n]]==PrimePi[FactorInteger[n][[-1,1]]]];
 %t A100778 Select[Range[1000],unintQ] (* _Gus Wiseman_, Dec 26 2018 *)
+%o A100778 (Python)
+%o A100778 from itertools import count
+%o A100778 from sympy import prime, integer_nthroot
+%o A100778 from oeis_sequences.OEISsequences import bisection
+%o A100778 def A100778(n):
+%o A100778     def g(x):
+%o A100778         c = 1
+%o A100778         for i in count(1):
+%o A100778             c *= prime(i)
+%o A100778             if c>x:
+%o A100778                 return i-1
+%o A100778     def f(x): return n-1+x-sum(g(integer_nthroot(x,k)[0]) for k in range(1,x.bit_length()))
+%o A100778     return bisection(f,n,n) # _Chai Wah Wu_, Mar 28 2026
+%o A100778 (Python)
+%o A100778 from itertools import islice
+%o A100778 from math import prod
+%o A100778 from heapq import heappop, heappush
+%o A100778 from sympy import factorint, nextprime
+%o A100778 def A100778_gen(): # generator of terms if the first n terms are desired.
+%o A100778     h, hset = [1], {1}
+%o A100778     while True:
+%o A100778         yield (m:=heappop(h))
+%o A100778         ps = factorint(m)
+%o A100778         if m==1:
+%o A100778             heappush(h,2)
+%o A100778             hset.add(2)
+%o A100778         else:
+%o A100778             mp = m*prod(ps.keys())
+%o A100778             if mp not in hset:
+%o A100778                 heappush(h,mp)
+%o A100778                 hset.add(mp)
+%o A100778             mp = m*nextprime(p:=max(ps.keys()))**ps[p]
+%o A100778             if mp not in hset:
+%o A100778                 heappush(h,mp)
+%o A100778                 hset.add(mp)
+%o A100778 A100778_list = list(islice(A100778_gen(),50)) # _Chai Wah Wu_, Mar 28 2026
 %Y A100778 Cf. A000961, A001597, A002110, A007947, A025487, A046523, A055932, A056239, A057588, A072774, A072777, A112798, A304250, A319169, A322792, A322793.
-%K A100778 easy,nonn
+%K A100778 easy,nonn,changed
 %O A100778 1,2
 %A A100778 _Amarnath Murthy_, Nov 28 2004
 %E A100778 More terms and simpler definition from _Ray Chandler_, Nov 29 2004

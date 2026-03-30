@@ -1,0 +1,41 @@
+%I A392091 #60 Mar 29 2026 15:02:45
+%S A392091 1,3,5,1,8,2,11,4,15,6,19,8,1,23,11,2,27,15,3,32,19,4,37,23,6,43,27,8,
+%T A392091 49,32,10,55,38,12,61,44,14,1,68,50,16,2,75,56,19,3,83,62,22,4,91,68,
+%U A392091 26,5,99,75,30,6,107,83,34,7,116,91,38,8,125,99,42,10
+%N A392091 Triangle read by rows: row n gives T(n,k) = Sum_{j=1..n} #{m <= j : A001222(m)=k} for k=1..floor(log_2(n)).
+%C A392091 Triangle read by rows, beginning with n=2. Row n lists the cumulative counts of the k-almost-prime layers (with multiplicity), and its alternating sum yields A380049(n). The first column equals A046992(n).
+%F A392091 T(n,k) = Sum_{j=1..n} #{m <= j : A001222(m)=k}.
+%F A392091 T(n,k) = Sum_{m=2..n, A001222(m)=k} (n-m+1).
+%F A392091 For n>=2, A380049(n) = Sum_{k>=1} (-1)^(k+1) * T(n,k).
+%e A392091 Triangle begins:
+%e A392091   1;
+%e A392091   3;
+%e A392091   5,1;
+%e A392091   8,2;
+%e A392091   11,4;
+%e A392091   15,6;
+%e A392091   19,8,1;
+%e A392091   23,11,2;
+%e A392091   ...
+%e A392091 For n=8 the row is 19,8,1, and 19 - 8 + 1 = 12 = A380049(8).
+%e A392091 For n=16 the row is 61,44,14,1.
+%t A392091 omega[n_] := Total[Last /@ FactorInteger[n]];
+%t A392091 row[n_] := Table[
+%t A392091   Total[(n - # + 1) & /@ Select[Range[2, n], omega[#] == k &]],
+%t A392091   {k, 1, Floor[Log[2, n]]}
+%t A392091 ];
+%t A392091 Flatten[Table[row[n], {n, 2, 24}]]
+%o A392091 (PARI) row(n) = vector(logint(n, 2), k, sum(m = 2, n, if(bigomega(m) == k, n - m + 1, 0)));
+%o A392091 A(N) = {
+%o A392091   my(v = List());
+%o A392091   for(n = 2, N,
+%o A392091     for(k = 1, logint(n, 2),
+%o A392091       listput(v, sum(m = 2, n, if(bigomega(m) == k, n - m + 1, 0)))
+%o A392091     )
+%o A392091   );
+%o A392091   Vec(v)
+%o A392091 }
+%Y A392091 Cf. A001222, A046992 (first column), A072203, A380049.
+%K A392091 nonn,tabf,new
+%O A392091 2,2
+%A A392091 _Tsuyoshi Hanatate_, Mar 22 2026
