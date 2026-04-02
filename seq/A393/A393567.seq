@@ -1,0 +1,53 @@
+%I A393567 #22 Apr 01 2026 22:16:55
+%S A393567 1,0,1,-3,8,-20,52,-134,342,-877,2254,-5783,14836,-38076,97712,
+%T A393567 -250738,643436,-1651170,4237168,-10873260,27902576,-71602589,
+%U A393567 183743960,-471517110,1209990193,-3105033096,7968023710,-20447254552,52471005784,-134649198974
+%N A393567 Coefficients of the formal power series quotient of the '5th-order' mock theta function f_0(q) by the 3rd-order mock theta function f(q).
+%C A393567 This is the coefficient sequence a(n) defined by A(q) = f_0(q)/f(q), where f_0(q) = Sum_{n>=0} q^(n^2)/(-q;q)_n and f(q) = Sum_{n>=0} q^(n^2)/(-q;q)_n^2.
+%C A393567 Here (-q;q)_n = Product_{k=1..n} (1 + q^k). Since f(q) has constant term 1, the quotient is well-defined as a formal power series over the rationals.
+%D A393567 George E. Andrews and Frank G. Garvan, Ramanujan's "lost" notebook VI: The mock theta conjectures, Adv. Math. 73 (1989), 242-255.
+%D A393567 Srinivasa Ramanujan, Collected Papers, Chelsea, New York, 1962, pp. 354-355.
+%D A393567 George N. Watson, The final problem: an account of the mock theta functions, J. London Math. Soc. 11 (1936), 55-80.
+%F A393567 G.f.: Sum_{n>=0} a(n)*q^n = (Sum_{n>=0} q^(n^2)/(-q;q)_n) / (Sum_{n>=0} q^(n^2)/(-q;q)_n^2).
+%F A393567 a(0)=1 and for n>=1, a(n) = A053256(n) - Sum_{k=1..n} A000025(k)*a(n-k).
+%e A393567 A(q) = 1 + q^2 - 3*q^3 + 8*q^4 - 20*q^5 + 52*q^6 - 134*q^7 + ...
+%e A393567 Hence a(0)=1, a(1)=0, a(2)=1, a(3)=-3, a(4)=8.
+%o A393567 (Python)
+%o A393567 from fractions import Fraction
+%o A393567 def conv(a, b, N):
+%o A393567     c = [Fraction(0)] * (N + 1)
+%o A393567     for i, ai in enumerate(a):
+%o A393567         if ai == 0:
+%o A393567             continue
+%o A393567         for j, bj in enumerate(b[:N + 1 - i]):
+%o A393567             c[i + j] += ai * bj
+%o A393567     return c
+%o A393567 def invfac(k, p, N):
+%o A393567     c = [Fraction(0)] * (N + 1)
+%o A393567     j = 0
+%o A393567     while j * k <= N:
+%o A393567         c[j * k] = Fraction(((-1) ** j) * (j + 1 if p == 2 else 1))
+%o A393567         j += 1
+%o A393567     return c
+%o A393567 def mock(N, p):
+%o A393567     s = [Fraction(0)] * (N + 1)
+%o A393567     d = [Fraction(1)] + [Fraction(0)] * N
+%o A393567     n = 0
+%o A393567     while n * n <= N:
+%o A393567         for i, u in enumerate(d[:N + 1 - n * n]):
+%o A393567             s[n * n + i] += u
+%o A393567         n += 1
+%o A393567         d = conv(d, invfac(n, p, N), N)
+%o A393567     return s
+%o A393567 def div(num, den, N):
+%o A393567     a = [Fraction(0)] * (N + 1)
+%o A393567     for n in range(N + 1):
+%o A393567         t = num[n] - sum(den[k] * a[n - k] for k in range(1, n + 1))
+%o A393567         a[n] = t / den[0]
+%o A393567     return a
+%o A393567 N = 29
+%o A393567 print([int(x) for x in div(mock(N, 1), mock(N, 2), N)])
+%Y A393567 Cf. A000025, A053256.
+%K A393567 sign,new
+%O A393567 0,4
+%A A393567 _Joesph Daniel Burke III_, Mar 27 2026
