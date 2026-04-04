@@ -1,9 +1,9 @@
-%I A373515 #17 Jun 12 2024 17:23:33
+%I A373515 #23 Apr 03 2026 19:04:41
 %S A373515 2,6,18,30,54,90,150,162,210,270,450,486,630,750,810,1050,1350,1458,
 %T A373515 1470,1890,2250,2310,2430,3150,3750,4050,4374,4410,5250,5670,6750,
 %U A373515 6930,7290,7350,9450,10290,11250,11550,12150,13122,13230,15750,16170,17010,18750,20250
 %N A373515 Numbers k, divisible by 2 but not by 4, such that rad(k) is primorial.
-%C A373515 Intersection of A055932 and A016825. In other words, numbers k congruent to 2 (mod 4) such that the squarefree kernel of k is a term in A002110.  A term m in A055932 is in this sequence iff m/2 is an odd number.
+%C A373515 Intersection of A055932 and A016825. In other words, numbers k congruent to 2 (mod 4) such that the squarefree kernel of k is a term in A002110. A term m in A055932 is in this sequence iff m/2 is an odd number.
 %C A373515 If x, y are terms in this sequence then x*y is not. All primorial numbers >= 2 are terms.
 %C A373515 For i >= 1, primorial A002110(i) is a term in this sequence, since primorials are squarefree. - _Michael De Vlieger_, Jun 08 2024
 %H A373515 Michael De Vlieger, <a href="/A373515/b373515.txt">Table of n, a(n) for n = 1..10000</a>
@@ -12,7 +12,44 @@
 %t A373515 Select[Range[2, 25000, 4], Or[# == {2}, Union@ Differences@ PrimePi[#] == {1}] &@
 %t A373515 FactorInteger[#][[All, 1]] &] (* _Michael De Vlieger_, Jun 08 2024 *)
 %o A373515 (PARI) lista(kmax) = {my(f); forstep(k = 2, kmax, 4, f = factor(k); if(primepi(f[#f~, 1]) == #f~, print1(k, ", ")));} \\ _Amiram Eldar_, Jun 08 2024
+%o A373515 (Python)
+%o A373515 from functools import lru_cache
+%o A373515 from itertools import count
+%o A373515 from sympy import prime, integer_log
+%o A373515 from oeis_sequences.OEISsequences import bisection
+%o A373515 def A373515(n):
+%o A373515     @lru_cache(maxsize=None)
+%o A373515     def g(x, m): return sum(g(x//(prime(m)**i), m-1) for i in range(1,integer_log(x, prime(m))[0]+1)) if m-1 else x.bit_length()>1
+%o A373515     def f(x):
+%o A373515         c, p = n+x, 1
+%o A373515         for k in count(1):
+%o A373515             p *= prime(k)
+%o A373515             if p>x:
+%o A373515                 break
+%o A373515             c -= g(x,k)
+%o A373515         return c
+%o A373515     return bisection(f,n,n) # _Chai Wah Wu_, Apr 02 2026
+%o A373515 (Python)
+%o A373515 from itertools import islice
+%o A373515 from heapq import heappop, heappush
+%o A373515 from sympy import nextprime
+%o A373515 def A373515_gen(): # generator of terms
+%o A373515     h, hset = [(2,tuple())], {2}
+%o A373515     while True:
+%o A373515         m, ps = heappop(h)
+%o A373515         yield m
+%o A373515         for p in ps:
+%o A373515             mp = m*p
+%o A373515             if mp not in hset:
+%o A373515                 heappush(h,(mp,ps))
+%o A373515                 hset.add(mp)
+%o A373515         q = nextprime(max(ps,default=2))
+%o A373515         mp = m*q
+%o A373515         if mp not in hset:
+%o A373515             heappush(h,(mp,(ps+(q,))))
+%o A373515             hset.add(mp)
+%o A373515 A373515_list = list(islice(A373515_gen(),46)) # _Chai Wah Wu_, Apr 02 2026
 %Y A373515 Cf. A002110, A007947, A016825, A055932, A080404.
-%K A373515 nonn
+%K A373515 nonn,changed
 %O A373515 1,1
 %A A373515 _David James Sycamore_, Jun 07 2024
