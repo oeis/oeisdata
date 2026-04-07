@@ -1,4 +1,4 @@
-%I A145108 #6 Apr 14 2015 11:41:02
+%I A145108 #16 Apr 06 2026 22:47:25
 %S A145108 4,8,16,32,64,108,128,256,324,512,648,972,1024,1944,2048,2916,3888,
 %T A145108 4096,5832,8192,8748,11664,16384,17496,23328,26244,32768,34992,52488,
 %U A145108 65536,67500,69984,78732,104976,131072,139968,157464,209952,236196,262144
@@ -10,8 +10,54 @@
 %o A145108 a145108 n = a145108_list !! (n-1)
 %o A145108 a145108_list = filter ((== 0) . (`mod` 4)) a133809_list
 %o A145108 -- _Reinhard Zumkeller_, Apr 14 2015
+%o A145108 (Python)
+%o A145108 from math import prod
+%o A145108 from itertools import count
+%o A145108 from functools import lru_cache
+%o A145108 from sympy import prime, integer_log
+%o A145108 from oeis_sequences.OEISsequences import bisection
+%o A145108 def A145108(n):
+%o A145108     @lru_cache(maxsize=None)
+%o A145108     def h(n): return prod(prime(k)**(k+1) for k in range(1,n+1))
+%o A145108     @lru_cache(maxsize=None)
+%o A145108     def g(x, m, j): return sum(g(x//(prime(m)**i), m-1, i) for i in range(1,min(j-1,integer_log(x, prime(m))[0])+1)) if m-1 else max(0,min(j,x.bit_length())-2)
+%o A145108     def f(x):
+%o A145108         c = n+x
+%o A145108         for k in count(1):
+%o A145108             if h(k)>x:
+%o A145108                 break
+%o A145108             c -= g(x,k,integer_log(x,prime(k))[0]+1)
+%o A145108         return c
+%o A145108     return bisection(f,n,n) # _Chai Wah Wu_, Apr 04 2026
+%o A145108 (Python)
+%o A145108 from itertools import islice
+%o A145108 from heapq import heappop, heappush
+%o A145108 from sympy import nextprime
+%o A145108 def A145108_gen(): # generator of terms if the first n terms are desired.
+%o A145108     h, hset = [(4,{2:2})], {4}
+%o A145108     while True:
+%o A145108         m, ps = heappop(h)
+%o A145108         yield m
+%o A145108         pf = sorted(ps.keys())
+%o A145108         l = len(pf)
+%o A145108         for i, p in enumerate(pf):
+%o A145108             if i == l-1 or ps[pf[i+1]]>ps[p]+1:
+%o A145108                 mp = m*p
+%o A145108                 pt = ps.copy()
+%o A145108                 pt[p]+=1
+%o A145108                 if mp not in hset:
+%o A145108                     heappush(h,(mp,pt))
+%o A145108                     hset.add(mp)
+%o A145108         q = nextprime(p)
+%o A145108         pt = ps.copy()
+%o A145108         pt[q]=pt[p]+1
+%o A145108         mp = m*q**pt[q]
+%o A145108         if mp not in hset:
+%o A145108             heappush(h,(mp,pt))
+%o A145108             hset.add(mp)
+%o A145108 A145108_list = list(islice(A145108_gen(),40)) # _Chai Wah Wu_, Apr 04 2026
 %Y A145108 Cf. A025487, A087980, A073491, A133808, A133809, A133810, A133811, A133812, A133813.
 %Y A145108 Cf. A008586.
-%K A145108 nonn
+%K A145108 nonn,changed
 %O A145108 1,1
 %A A145108 _Reikku Kulon_, Oct 02 2008
