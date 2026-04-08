@@ -1,0 +1,51 @@
+%I A394733 #19 Apr 07 2026 22:30:45
+%S A394733 1,2,3,4,5,1,2,3,1,6,2,4,1,3,7,2,1,5,3,1,4,2,3,1,2,8,1,4,3,5,2,1,6,3,
+%T A394733 1,2,4,1,3,2,5,1,4,2,3,1,9,2,1,3,6,4,1,2,5,3,1,7,2,1,3,4,2,1,3,5,1,2,
+%U A394733 4,3,1,2,6,1,3,4,2,1,5,3,1,2,4,1,3,2,5,1
+%N A394733 A sequence constructed by greedily sampling the Hermite distribution, with both parameters as 1, to minimize discrepancy. The distribution indexing is adjusted to be strictly decreasing and support all positive integers.
+%C A394733 The original distribution, which supports all integers including 0, is given by PDF p(k) = (Sum_{i=0..floor(k/2)} 1/(i!*(k-2*i)!)) / e^2 = 2F0([-k/2, (1-k)/2], [], 4) / (e^2 * k!). It has p(0)=p(1)=1/e^2 which is less than p(2). From p(2) onwards it is strictly decreasing hence we can shift and adjust the distribution to only consider that.
+%C A394733 The Hermite distribution used here is conditioned on being >=2, and then subtracting 1.
+%C A394733 The distribution is given by PDF p(k) = (Sum_{i=0..ceiling(k/2)} 1/(i!*(k+1-2*i)!)) / (e^2-2) = 2F0([-(k+1)/2, -k/2], [], 4) / ((e^2 - 2)*(k+1)!).
+%C A394733 The arithmetic mean approaches Sum_{k>=1} k * p(k) = 2.9278062629... in the limit.
+%C A394733 The geometric mean approaches Product_{k>=2} k ^ p(k) = 2.38445049699... in the limit.
+%H A394733 Jwalin Bhatt, <a href="/A394733/b394733.txt">Table of n, a(n) for n = 1..10000</a>
+%H A394733 Wikipedia, <a href="https://en.wikipedia.org/wiki/Hermite_distribution">Hermite distribution</a>.
+%e A394733 Let p(k) denote the probability of k and c(k) denote the number of occurrences of k among the first n-1 terms; then the expected number of occurrences of k among n random terms is given by n*p(k).
+%e A394733 We subtract the actual occurrences c(k) from the expected occurrences and pick the one with the highest value. Let f(k) = n*p(k) - c(k).
+%e A394733 | n |  f(1)  |  f(2)  |  f(3)  |  f(4)  |  f(5)  |  f(6)  | choice |
+%e A394733 |---|--------|--------|--------|--------|--------|--------|--------|
+%e A394733 | 1 |  0.278 |    -   |    -   |    -   |    -   |    -   |   1    |
+%e A394733 | 2 | -0.443 |  0.432 |    -   |    -   |    -   |    -   |   2    |
+%e A394733 | 3 | -0.164 | -0.350 |  0.579 |    -   |    -   |    -   |   3    |
+%e A394733 | 4 |  0.113 | -0.134 | -0.226 |  0.501 |    -   |    -   |   4    |
+%e A394733 | 5 |  0.391 |  0.082 | -0.033 | -0.373 |  0.426 |    -   |   5    |
+%e A394733 | 6 |  0.670 |  0.298 |  0.159 | -0.248 | -0.488 |  0.287 |   1    |
+%e A394733 | 7 | -0.051 |  0.515 |  0.353 | -0.123 | -0.402 |  0.335 |   2    |
+%t A394733 probCountDiff[j_, k_, count_]:= k*HypergeometricPFQ[{-(j+1)/2, -j/2}, {}, 4]/((E^2-2)*(j+1)!) - Lookup[count, j, 0]
+%t A394733 samplePDF[n_] := Module[{coeffs, unreachedVal, counts, k, probCountDiffs, mostProbable},
+%t A394733   coeffs = ConstantArray[0, n]; unreachedVal = 1; counts = <||>;
+%t A394733   Do[probCountDiffs = Table[probCountDiff[i, k, counts], {i, 1, unreachedVal}];
+%t A394733     mostProbable = First@FirstPosition[probCountDiffs, Max[probCountDiffs]];
+%t A394733     If[mostProbable == unreachedVal, unreachedVal++]; coeffs[[k]] = mostProbable;
+%t A394733     counts[mostProbable] = Lookup[counts, mostProbable, 0] + 1, {k, 1, n}]; coeffs]
+%t A394733 A394733 = samplePDF[120]
+%o A394733 (Python)
+%o A394733 from mpmath import iv
+%o A394733 from math import factorial
+%o A394733 def prob_count_diff(j, k, count):
+%o A394733     hermite = sum((iv.mpf(1) / (factorial(i)*factorial(j+1-2*i))) for i in range(1+(j+1)//2)) / (iv.exp(2)-2)
+%o A394733     return k*hermite - count
+%o A394733 def sample_hermite_distribution(num_coeffs):
+%o A394733     coeffs, unreached_val, counts = [], 1, {}
+%o A394733     for k in range(1, num_coeffs+1):
+%o A394733         prob_count_diffs = [prob_count_diff(i, k, counts.get(i, 0)) for i in range(1, unreached_val+1)]
+%o A394733         most_probable = prob_count_diffs.index(max(prob_count_diffs)) + 1
+%o A394733         unreached_val += most_probable == unreached_val
+%o A394733         coeffs.append(most_probable)
+%o A394733         counts[most_probable] = counts.get(most_probable, 0) + 1
+%o A394733     return coeffs
+%o A394733 A394733 = sample_hermite_distribution(120)
+%Y A394733 Cf. A381617, A382961, A383899, A393161, A394758.
+%K A394733 nonn,new
+%O A394733 1,2
+%A A394733 _Jwalin Bhatt_, Mar 30 2026

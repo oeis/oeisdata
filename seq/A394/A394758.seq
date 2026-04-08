@@ -1,0 +1,47 @@
+%I A394758 #15 Apr 07 2026 22:38:14
+%S A394758 2,3,4,0,1,5,6,2,3,4,0,1,2,7,5,3,2,4,0,1,8,3,2,6,4,0,1,2,5,3,4,2,0,1,
+%T A394758 3,9,2,5,4,6,0,1,3,2,7,4,2,3,0,1,5,2,4,3,0,1,2,6,5,3,4,2,0,1,10,3,2,4,
+%U A394758 7,0,1,2,5,3,6,4,2,0,1,3,8,2,4,5,0,1,3
+%N A394758 A sequence constructed by greedily sampling the Hermite distribution, with both parameters as 1, to minimize discrepancy.
+%C A394758 The distribution is given by the PDF p(k) = (Sum_{i=0..floor(k/2)} 1/(i!*(k-2*i)!)) / e^2 = 2F0([-k/2, (1-k)/2], [], 4) / (e^2 * k!). It has p(0)=p(1)=1/e^2 which is less than p(2). From p(2) onwards it is strictly decreasing.
+%C A394758 The arithmetic mean approaches Sum_{k>=1} k * p(k) = 3 in the limit.
+%H A394758 Jwalin Bhatt, <a href="/A394758/b394758.txt">Table of n, a(n) for n = 1..10000</a>
+%H A394758 Wikipedia, <a href="https://en.wikipedia.org/wiki/Hermite_distribution">Hermite distribution</a>.
+%e A394758 Let p(k) denote the probability of k and c(k) denote the number of occurrences of k among the first n-1 terms; then the expected number of occurrences of k among n random terms is given by n*p(k).
+%e A394758 We subtract the actual occurrences c(k) from the expected occurrences and pick the one with the highest value. Let f(k) = n*p(k) - c(k).
+%e A394758 | n |  f(0)  |  f(1)  |  f(2)  |  f(3)  |  f(4)  |  f(5)  | choice |
+%e A394758 |---|--------|--------|--------|--------|--------|--------|--------|
+%e A394758 | 1 |  0.135 |  0.135 |  0.203 |    -   |    -   |    -   |   2    |
+%e A394758 | 2 |  0.270 |  0.270 | -0.593 |  0.315 |    -   |    -   |   3    |
+%e A394758 | 3 |  0.406 |  0.406 | -0.390 | -0.526 |  0.422 |    -   |   4    |
+%e A394758 | 4 |  0.541 |  0.541 | -0.187 | -0.368 | -0.436 |  0.365 |   0    |
+%e A394758 | 5 | -0.323 |  0.676 |  0.015 | -0.210 | -0.295 |  0.456 |   1    |
+%e A394758 | 6 | -0.187 | -0.187 |  0.218 | -0.052 | -0.154 |  0.548 |   5    |
+%t A394758 probCountDiff[j_, k_, count_]:= k*HypergeometricPFQ[{(1-j)/2, -j/2}, {}, 4]/(E^2*j!) - Lookup[count, j, 0]
+%t A394758 samplePDF[n_] := Module[{coeffs, unreachedVal, counts, k, probCountDiffs, mostProbable},
+%t A394758   coeffs = ConstantArray[0, n]; unreachedVal = 2; counts = <||>;
+%t A394758   Do[probCountDiffs = Table[probCountDiff[i, k, counts], {i, 0, unreachedVal}];
+%t A394758     mostProbable = Position[probCountDiffs, Max[probCountDiffs], {1}, 1][[1, 1]] - 1;
+%t A394758     If[mostProbable == unreachedVal, unreachedVal++]; coeffs[[k]] = mostProbable;
+%t A394758     counts[mostProbable] = Lookup[counts, mostProbable, 0] + 1, {k, 1, n}]; coeffs]
+%t A394758 A394758 = samplePDF[120]
+%o A394758 (Python)
+%o A394758 from mpmath import iv
+%o A394758 from math import factorial
+%o A394758 def prob_count_diff(j, k, count):
+%o A394758     hermite = sum((iv.mpf(1) / (factorial(i)*factorial(j-2*i))) for i in range(1+j//2)) / iv.exp(2)
+%o A394758     return k*hermite - count
+%o A394758 def sample_hermite_distribution(num_coeffs):
+%o A394758     coeffs, unreached_val, counts = [], 2, {}
+%o A394758     for k in range(1, num_coeffs+1):
+%o A394758         prob_count_diffs = [prob_count_diff(i, k, counts.get(i, 0)) for i in range(unreached_val+1)]
+%o A394758         most_probable = prob_count_diffs.index(max(prob_count_diffs))
+%o A394758         unreached_val += most_probable == unreached_val
+%o A394758         coeffs.append(most_probable)
+%o A394758         counts[most_probable] = counts.get(most_probable, 0) + 1
+%o A394758     return coeffs
+%o A394758 A394758 = sample_hermite_distribution(120)
+%Y A394758 Cf. A381617, A382961, A383899, A394562, A394733.
+%K A394758 nonn,new
+%O A394758 1,1
+%A A394758 _Jwalin Bhatt_, Mar 31 2026
