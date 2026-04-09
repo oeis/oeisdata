@@ -1,8 +1,12 @@
-%I A394824 #6 Apr 03 2026 10:59:55
+%I A394824 #11 Apr 08 2026 10:35:26
 %S A394824 1,1,1,4,3,1,27,17,5,1,256,142,38,7,1,3125,1569,389,67,9,1,46656,
 %T A394824 21576,5016,816,104,11,1,823543,355081,78077,12085,1471,149,13,1,
 %U A394824 16777216,6805296,1424560,210968,24648,2402,202,15,1,387420489,148869153,29818917,4243743,477789,44961,3657,263,17,1
 %N A394824 Triangle read by rows: T(n, k) = n^(n - k) * hypergeom([k, k-n], [], -1/n) for n > 0, T(0, 0) = 1.
+%F A394824 From _Peter Luschny_, Apr 08 2026: (Start)
+%F A394824 T(n, k) = (2*k + 1)*T(n, k+1) + (k+1)*(n - k - 1)*T(n, k+2).
+%F A394824 Let egf(x, y) = exp(x * (1 + y) * exp(y / (1 + y))) / (1 + y), then
+%F A394824 T(n, k) = n! * (n-k)! * [x^n * y^(n-k)] egf(x, y).  (End)
 %e A394824 Triangle starts:
 %e A394824   [0]         1;
 %e A394824   [1]         1,       1;
@@ -15,8 +19,28 @@
 %e A394824   [8]  16777216, 6805296, 1424560, 210968, 24648, 2402, 202, 15, 1;
 %p A394824 T := (n, k) -> ifelse(n = 0, 1, hypergeom([k, k - n], [], -1/n) * n^(n - k)):
 %p A394824 for n from 0 to 9 do seq(simplify(T(n, k)), k = 0..n) od;
+%p A394824 # Alternative:
+%p A394824 T := proc(n, k) option remember;
+%p A394824     if k = n then return 1 fi;
+%p A394824     if k > n or n < 0 or k < 0 then return 0 fi;
+%p A394824     (2*k + 1)*T(n, k+1) + (k+1)*(n - k - 1)*T(n, k+2) end:
+%p A394824 for n from 0 to 8 do seq(T(n, k), k = 0..n) od;
+%p A394824 # Alternative:
+%p A394824 egf := exp(x * (1 + y) * exp(y / (1 + y))) / (1 + y):
+%p A394824 T := proc(n, k) local row, M; M := n - k;
+%p A394824     row := n! * coeff(series(egf, x, n + 1), x, n);
+%p A394824     return M! * coeff(series(row, y, M + 1), y, M);
+%p A394824 end:
+%p A394824 for n from 0 to 8 do seq(T(n, k), k = 0..n) od;
 %t A394824 T[0, 0] = 1; T[n_, m_] = n^(n - m) HypergeometricPFQ[{m - n, m}, {}, -n^(-1)]
 %t A394824 Table[T[n, m], {n, 0, 8}, {m, 0, n}] // MatrixForm
+%o A394824 (Python)
+%o A394824 def A394824row(n) -> list[int]:
+%o A394824     row = [0] * (n + 1); row[n] = 1
+%o A394824     for k in range(n, 0, -1):
+%o A394824         row[k - 1] = (2 * k - 1) * row[k] + k * (n - k) * (row[k + 1] if k + 1 <= n else 0)
+%o A394824     return row
+%o A394824 for n in range(0, 9): print(A394824row(n))  # _Peter Luschny_, Apr 08 2026
 %Y A394824 Cf. A000312 (column 0), A001865 (column 1).
 %K A394824 nonn,tabl,new
 %O A394824 0,4
