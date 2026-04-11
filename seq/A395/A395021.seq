@@ -1,0 +1,61 @@
+%I A395021 #15 Apr 10 2026 15:10:15
+%S A395021 1,1,1,1,0,1,1,1,2,1,1,0,5,0,1,1,1,10,5,3,1,1,0,21,0,14,0,1,1,1,42,21,
+%T A395021 42,14,4,1,1,0,85,0,147,0,30,0,1,1,1,170,85,441,147,120,30,5,1,1,0,
+%U A395021 341,0,1408,0,627,0,55,0,1,1,1,682,341,4224,1408,2508,627,275,55,6,1
+%N A395021 Triangle read by rows: T(n, k) = (n! / k!) * [x^n] ( (2*sinh(x/2))^k * (exp(x/2))^(k mod 2) ).
+%C A395021 T(n, k) represents the normalized central finite differences f^k_i / k! of the power sequence f(j) = j^n with alternating indices i in {1/2, 0}.
+%C A395021 The n-th row of this triangle is extracted from the central symmetry axis of the finite difference table of the sequence m^n. Following the standard notation f^k_i, the terms are selected using alternating indices: i = 1/2 for odd k and i = 0 for even k. All values are normalized by dividing by k! to yield the integer coefficients.
+%C A395021 Odd-indexed columns correspond to the array A394582.
+%F A395021 T(n, k) = (1/k!) * Sum_{j=0..k} (-1)^j * binomial(k, j) * (floor((k+1)/2) - j)^n.
+%F A395021 T(n, k) = [x^n] (x^k + (k mod 2) * ((k+1)/2) * x^(k+1)) / Product_{j=1..floor((k+1)/2)} (1 - j^2 * x^2).
+%F A395021 Boundary conditions: T(n, 1) = 1, T(n, n) = 1.
+%F A395021 Recursive rules for 1 < k < n:
+%F A395021 If k is even and n is odd:  T(n, k) = 0.
+%F A395021 If k is even and n is even: T(n, k) = 2 * T(n, k-1) / k.
+%F A395021 If k is odd  and n is even: T(n, k) = T(n-1, k) * (k+1) / 2.
+%F A395021 If k is odd  and n is odd:  T(n, k) = T(n-1, k) * (k+1) / 2 + T(n-1, k-2) * 2 / (k-1).
+%e A395021 Triangle begins:
+%e A395021   n=1:  1;
+%e A395021   n=2:  1,  1;
+%e A395021   n=3:  1,  0,    1;
+%e A395021   n=4:  1,  1,    2,   1;
+%e A395021   n=5:  1,  0,    5,   0,    1;
+%e A395021   n=6:  1,  1,   10,   5,    3,    1;
+%e A395021   n=7:  1,  0,   21,   0,   14,    0,    1;
+%e A395021   n=8:  1,  1,   42,  21,   42,   14,    4,   1;
+%e A395021   n=9:  1,  0,   85,   0,  147,    0,   30,   0,  1;
+%e A395021   n=10: 1,  1,  170,  85,  441,  147,  120,  30,  5,  1;
+%p A395021 egf_col := k -> (exp(x/2) - exp(-x/2))^k * exp(x/2)^(k mod 2):
+%p A395021 ser_col := k -> series(egf_col(k), x, 12):
+%p A395021 T := (n, k) -> coeff(ser_col(k), x, n) * n! / k!:
+%p A395021 for n from 1 to 10 do seq(T(n, k), k = 1..n) od;  # _Peter Luschny_, Apr 10 2026
+%o A395021 (Python)
+%o A395021 from functools import cache
+%o A395021 @cache
+%o A395021 def T(n, k):
+%o A395021     if k == 1 or k == n:
+%o A395021         return 1
+%o A395021     if k < 1 or k > n:
+%o A395021         return 0
+%o A395021     if k % 2 == 0:
+%o A395021         if n % 2 != 0:
+%o A395021             return 0
+%o A395021         else:
+%o A395021             return (2 * T(n, k-1)) // k
+%o A395021     else:
+%o A395021         if n % 2 == 0:
+%o A395021             return T(n-1, k) * (k + 1) // 2
+%o A395021         else:
+%o A395021             term1 = T(n-1, k) * (k + 1) // 2
+%o A395021             term2 = T(n-1, k-2) * 2 // (k - 1)
+%o A395021             return term1 + term2
+%o A395021 all_data = []
+%o A395021 for n in range(1, 13):
+%o A395021     row = [T(n, k) for k in range(1, n + 1)]
+%o A395021     all_data.extend(row)
+%o A395021     print(f"[{n:>2}]", " ".join(f"{value:>4}" for value in row))
+%o A395021 print(", ".join(map(str, all_data)))
+%Y A395021 Cf. A394813 (even columns), A394582, A008957, A395022 (row sums).
+%K A395021 nonn,tabl,easy,new
+%O A395021 1,9
+%A A395021 _Husiev Andrii Alekseevich_, Apr 10 2026
