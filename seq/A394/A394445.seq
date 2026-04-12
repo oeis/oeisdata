@@ -1,0 +1,35 @@
+%I A394445 #21 Apr 11 2026 18:30:32
+%S A394445 9,9,15,20,25,31,49,41,54,61,77,85,104,113,135,145,170,181,209,221,
+%T A394445 252,265,299,313,350,365,405,421,464,481,527,545,594,613,665,685,740,
+%U A394445 761,819,841,902,925,989
+%N A394445 a(n) is the minimum k such that every 2-coloring of {1, ..., k} contains a monochromatic solution to x + y = n*z with x, y, z pairwise distinct.
+%C A394445 These are "distinct-variable" 2-color Rado numbers for the equation x + y = n*z. The standard (non-distinct) 2-color Rado numbers, where variables may repeat, are n*(n+1)/2 for n >= 4 (Burr and Loo, see A100542). For n=1 this is the Schur equation x+y=z with distinct variables, giving the weak Schur number WS(2)+1 = 9 (cf. A072842). For n=2 this is x+y=2*z with distinct variables, equivalent to 3-term arithmetic progressions, giving the van der Waerden number W(3;2) = 9. The sequence is not monotone: a(7) = 49 > a(8) = 41.
+%D A394445 S. A. Burr and S. P. Loo, On Rado numbers II, unpublished manuscript, c. 1992.
+%D A394445 H. Harborth and S. Maasberg, All two-color Rado numbers for a(x+y)=bz, Discrete Math., 197/198 (1999), 397-407.
+%D A394445 S. Jones and D. Schaal, Two-color Rado numbers for x+y+c=kz, Discrete Math., 289 (2004), 63-69.
+%H A394445 Alex Towell, <a href="https://zenodo.org/record/19372727">Rado Numbers for x+y=kz: Computation, Closed-Form Formula, and Complete Proof</a>, Zenodo, 2026.
+%F A394445 For n >= 8, a(n) = n*(n+3)/2 if n is odd, a(n) = (n^2 + 2*n + 2)/2 if n is even.
+%e A394445 a(3) = 15 because every 2-coloring of {1, ..., 15} contains a monochromatic solution to x+y=3z with x, y, z distinct, but the 2-coloring {2, 5, 8, 9, 11, 12, 14} red, {1, 3, 4, 6, 7, 10, 13} blue of {1, ..., 14} avoids all monochromatic solutions.
+%o A394445 (Python)
+%o A394445 from pysat.solvers import Solver
+%o A394445 def a(n, max_N=2000):
+%o A394445     for N in range(1, max_N):
+%o A394445         sols = []
+%o A394445         for z in range(1, N+1):
+%o A394445             for x in range(1, N+1):
+%o A394445                 y = n*z - x
+%o A394445                 if 1 <= y <= N and len({x, y, z}) == 3:
+%o A394445                     sols.append((x, y, z))
+%o A394445         with Solver(name="cd195") as s:
+%o A394445             for i in range(1, N+1):
+%o A394445                 s.add_clause([2*i-1, 2*i])
+%o A394445                 s.add_clause([-(2*i-1), -(2*i)])
+%o A394445             for x, y, z in sols:
+%o A394445                 for v in [lambda i: 2*i-1, lambda i: 2*i]:
+%o A394445                     s.add_clause([-v(x), -v(y), -v(z)])
+%o A394445             if not s.solve():
+%o A394445                 return N
+%Y A394445 Cf. A100542 (non-distinct variant), A072842 (weak Schur numbers), A003071 (Schur numbers).
+%K A394445 nonn,new
+%O A394445 1,1
+%A A394445 _Alex Towell_, Mar 20 2026
