@@ -1,0 +1,53 @@
+%I A395080 #21 Apr 12 2026 16:35:50
+%S A395080 1,1,1,1,3,1,1,5,12,1,1,7,33,55,1,1,9,64,249,273,1,1,11,105,667,2033,
+%T A395080 1428,1,1,13,156,1393,7513,17485,7752,1,1,15,217,2511,19953,89092,
+%U A395080 156033,43263,1,1,17,288,4105,43601,300729,1095832,1431281,246675,1
+%N A395080 Array read by ascending antidiagonals: The generating function A(x) of row n satisfies the functional equation A(x) = (x*A(x) + 1) * (n*x*A(x) + 1)^2.
+%C A395080 The array provides variations of the 'ternary tree' problem (A001764) in that it adds n different 'colors' to two of the three edges (say the middle and the right one).
+%H A395080 Paolo Xausa, <a href="/A395080/b395080.txt">Table of n, a(n) for n = 0..11324</a> (first 150 antidiagonals, flattened).
+%F A395080 A(n, k) = Sum_{j=0..k} n^j * binomial(k, j) * binomial(2*k + 2, j) / (j + 1).
+%F A395080 If we replace n with x on the right-hand side of the above formula, we obtain a family of polynomials p_k(x) of degree k whose coefficients are given at A108767 (seen as 0-based). These polynomials can be viewed as a generalization of the Fuss-Narayana polynomials, which extend the analysis from the binary case to the ternary case, taking into account the specific color structure of the edges present in our context.
+%F A395080 Proposition: A(n, k) - 1 is divisible by n for all n > 0 and k >= 0. Proof: A(n, k) is a polynomial in n, A(n, k) = c_0 + c_1*n + ... + c_k*n^k. The coefficients are integers given by the formula above, and clearly c_0 = 1. But then we can factor out n and write A(n, k) - 1 = A(n, k) - c_0 = n*(c_1 + c_2*n + ... + c_k*n^(k-1)).
+%F A395080 The generating function for the n-th row is (1 / x) * inverse(x / ((1 + x) * (1 + n*x)^2)).
+%F A395080 A(n, k) = hypergeom([-k, -2*(k + 1)], [2], n).
+%F A395080 A(n, k) = JacobiP(2*k + 2, 1, -3*k - 4, 1 - 2*n)/(2*k + 3).
+%e A395080 Array begins:
+%e A395080   [0]  1,  1,   1,    1,      1,       1,        1,          1, ... [A000007]
+%e A395080   [1]  1,  3,  12,   55,    273,    1428,     7752,      43263, ... [A001764]
+%e A395080   [2]  1,  5,  33,  249,   2033,   17485,   156033,    1431281, ... [A034015]
+%e A395080   [3]  1,  7,  64,  667,   7513,   89092,  1095832,   13852195, ... [A371404]
+%e A395080   [4]  1,  9, 105, 1393,  19953,  300729,  4699929,   75473505, ...
+%e A395080   [5]  1, 11, 156, 2511,  43601,  796276, 15075336,  293215031, ...
+%e A395080   [6]  1, 13, 217, 4105,  83713, 1794853, 39884617,  910409233, ...
+%e A395080   [7]  1, 15, 288, 6259, 146553, 3606660, 91976088, 2409056091, ...
+%p A395080 A := (n, k) -> hypergeom([-k, -2*(k + 1)], [2], n):
+%p A395080 for n from 0 to 7 do seq(simplify(A(n, k)), k = 0..7) od;
+%t A395080 A395080[n_, k_] := Hypergeometric2F1[-k, -2*(k+1), 2, n];
+%t A395080 Table[A395080[n-k, k], {n, 0, 10}, {k, 0, n}] (* _Paolo Xausa_, Apr 12 2026 *)
+%o A395080 (SageMath)
+%o A395080 from sage.rings.lazy_series_ring import LazyPowerSeriesRing
+%o A395080 def A(n: int, terms: int) -> list[int]:
+%o A395080     L.<x> = LazyPowerSeriesRing(ZZ)
+%o A395080     A = L.undefined()
+%o A395080     A.define((x*A + 1) * (n*x*A + 1)^2)
+%o A395080     return A[:terms]
+%o A395080 for n in range(8): print(A(n, 8))
+%o A395080 (SageMath)
+%o A395080 def A_byrev(n: int, terms: int) -> list[int]:
+%o A395080     R.<x> = PowerSeriesRing(ZZ, default_prec=terms+1)
+%o A395080     f = x / ((1 + x) * (1 + n*x)^2)
+%o A395080     A = (f.reverse()) / x
+%o A395080     return A.list()
+%o A395080 for n in range(8): print(A_byrev(n, 7))
+%o A395080 (Python)
+%o A395080 from math import comb as binomial
+%o A395080 def A(n: int, k: int) -> int:
+%o A395080     return sum((n**j) * binomial(k, j) * binomial(2*k + 2, j) // (j + 1)
+%o A395080            for j in range(k + 1))
+%o A395080 for n in range(8): print([A(n, k) for k in range(8)])
+%Y A395080 Rows, n >= 0: A000007, A001764, A034015, A371404.
+%Y A395080 Columns, k >= 0: A000007, A005408, A051624, A395031.
+%Y A395080 Cf. A108767 (coefficients of the column generating polynomials), A395079 (main diagonal), A291534, A003168.
+%K A395080 nonn,tabl,new
+%O A395080 0,5
+%A A395080 _Peter Luschny_, Apr 11 2026
