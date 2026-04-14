@@ -1,4 +1,4 @@
-%I A030212 #81 Sep 22 2025 16:00:29
+%I A030212 #87 Apr 13 2026 10:48:59
 %S A030212 1,-4,0,16,-14,0,0,-64,81,56,0,0,-238,0,0,256,322,-324,0,-224,0,0,0,0,
 %T A030212 -429,952,0,0,82,0,0,-1024,0,-1288,0,1296,2162,0,0,896,-3038,0,0,0,
 %U A030212 -1134,0,0,0,2401,1716,0,-3808,2482,0,0,0,0,-328,0,0,-6958,0,0,4096,3332,0,0,5152,0,0
@@ -12,7 +12,7 @@
 %H A030212 J. W. L. Glaisher, <a href="https://books.google.com/books?id=bLs9AQAAMAAJ&amp;pg=RA1-PA1">On the representations of a number as the sum of two, four, six, eight, ten, and twelve squares</a>, Quart. J. Math. 38 (1907), 1-62 (see p. 34).
 %H A030212 M. Koike, <a href="http://projecteuclid.org/euclid.nmj/1118787564">On McKay's conjecture</a>, Nagoya Math. J., 95 (1984), 85-89.
 %H A030212 LMFDB, <a href="http://www.lmfdb.org/ModularForm/GL2/Q/holomorphic/4/5/b/a/">Newform orbit 4.5.b.a</a>.
-%H A030212 Y. Martin, <a href="http://dx.doi.org/10.1090/S0002-9947-96-01743-6">Multiplicative eta-quotients</a>, Trans. Amer. Math. Soc. 348 (1996), no. 12, 4825-4856, see page 4852 Table I.
+%H A030212 Y. Martin, <a href="https://doi.org/10.1090/S0002-9947-96-01743-6">Multiplicative eta-quotients</a>, Trans. Amer. Math. Soc. 348 (1996), no. 12, 4825-4856, see page 4852 Table I.
 %H A030212 K. Ono, S. Robins and P. T. Wahl, <a href="http://www.mathcs.emory.edu/~ono/publications-cv/pdfs/006.pdf">On the representation of integers as sums of triangular numbers</a>, Aequationes mathematicae, August 1995, Volume 50, Issue 1-2, pp 73-94. Case k=10, called F(tau).
 %H A030212 M. Rogers, J.G. Wan, and I. J. Zucker, <a href="http://arXiv.org/abs/1303.2259">Moments of Elliptic Integrals and Critical L-Values</a>, arXiv:1303.2259 [math.NT], 2013.
 %H A030212 Shobhit, <a href="http://math.stackexchange.com/questions/483708/">How to prove that eta(q^4)^14/eta(q^8)^4 = 4eta(q^2)^4eta(q^4)^2eta(q^8)^4 + eta(q)^4eta(q^2)^2eta(q^4)^4?</a>
@@ -41,14 +41,20 @@
 %e A030212 a(8) = (2 + 2i)^4 = -64,
 %e A030212 a(9) = (3 + 0i)^4 = 81,
 %e A030212 a(10) = (1 + 3i)^4 + (3 + 1i)^4 = 28 - 96i + 28 + 96i = 56 (End)
+%p A030212 b:= proc(n) option remember; `if`(n=0, 1, -add(add([10, 4, 6, 4]
+%p A030212       [1+irem(d, 4)]*d, d=numtheory[divisors](j))*b(n-j), j=1..n)/n)
+%p A030212     end:
+%p A030212 a:= n-> b(n-1):
+%p A030212 seq(a(n), n=1..70);  # _Alois P. Heinz_, Apr 13 2026
 %t A030212 If[SquaresR[2,#]==0,0,1/4 Plus@@((x+I y)^4/.{ToRules[Reduce[x^2+y^2==#,{x,y},Integers]]})] &/@Range[70] (* _Ant King_, Nov 10 2012 *)
 %t A030212 a[ n_] := SeriesCoefficient[ q (QPochhammer[ q]^2 QPochhammer[ q^2] QPochhammer[ q^4]^2)^2, {q, 0, n}]; (* _Michael Somos_, May 28 2013 *)
 %o A030212 (PARI) {a(n) = my(A); if( n<1, 0, n--; A = x * O(x^n); polcoeff( (eta(x + A) * eta(x^4 + A))^4 * eta(x^2 + A)^2, n))}; /* _Michael Somos_, Jul 17 2004 */
 %o A030212 (PARI) {a(n) = local(r); if( n<1, 0, r = sqrtint(n); sum( x=-r, r, sum( y=-r, r, if( x^2 + y^2 == n, (x + I*y)^4) )) / 4 )}; /* _Michael Somos_, Sep 12 2005 */
 %o A030212 (PARI) {a(n) = my(A, p, e, x, y, z, a0, a1); if( n<0, 0, A = factor(n); prod( k=1, matsize(A)[1], [p, e] = A[k,]; if( p==2, (-4)^e, p%4 == 3, if( e%2, 0, p^(2*e)), forstep( i=0, sqrtint(p), 2, if( issquare( p - i^2, &y), x = i; break)); a0 = 1; a1 = x = real( (x + I*y)^4 ) * 2; for( i=2, e, y = x*a1 - p^4*a0; a0=a1; a1=y); a1))) }; /* _Michael Somos_, Nov 18 2014 */
+%o A030212 (PARI) A030212(n) = if (n%4 == 3, return(0)); my(f = factor(n)); my(res=1);for(i = 1, #f~,my(p = f[i, 1]);my(e = f[i, 2]); res *= if(p == 2,(-4)^e, p%4 == 3, if (e%2 == 1, return(0)); p^(2*e), my(xy = qfbsolve(Qfb(1,0,1), p));my(x2 = xy[1]^2, y2 = xy[2]^2);my(ap = 2 * (x2^2 - 6*x2*y2 + y2^2));my(v0 = 1, v1 = ap, v2);for(k = 2, e,v2 = ap * v1 - p^4 * v0;v0 = v1;v1 = v2); v1)); res; \\ _Daniel Suteu_, Apr 13 2026
 %o A030212 (SageMath) CuspForms( Gamma1(4), 5, prec=71).0; # _Michael Somos_, May 28 2013
 %o A030212 (Magma) Basis( CuspForms( Gamma1(4), 5), 71) [1]; /* _Michael Somos_, May 27 2014 */
 %Y A030212 Cf. A002607, A215472, A247067.
-%K A030212 sign,mult
+%K A030212 sign,mult,changed
 %O A030212 1,2
 %A A030212 _N. J. A. Sloane_
