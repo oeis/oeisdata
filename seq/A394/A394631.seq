@@ -1,0 +1,48 @@
+%I A394631 #36 Apr 15 2026 00:42:13
+%S A394631 0,0,0,0,5,7,11,17,97,1039,36263,3259,39709,866933,35423,3031753,
+%T A394631 5096093,48403801,356621,175412201,412348007,21346609621,6346879667,
+%U A394631 20672173567,530162989751,3171480143291,12668537396563,2758911322275671,107887054397597,7542952250624423
+%N A394631 Least prime p such that p^2 + n! is again the square of a prime, or 0 if no such prime exists.
+%C A394631 Upon the observation that 5^2 + 4! = 7^2, and similarly for 7^2 + 5! and 11^2 + 6!, cf. Examples, it is natural to ask whether for all n >= 4, there are primes p, q such that q^2 - p^2 = n!.
+%H A394631 David A. Corneth, <a href="/A394631/a394631.gp.txt">PARI program</a>
+%e A394631 For 0! = 1, there are no two primes p, q such that p^2 + 1 = q^2, therefore a(0) = 0.
+%e A394631 Similarly, for n = 1, 2 and 3, with n! = 1, 2 and 6, there are no two primes p, q such that p^2 + n! = q^2, therefore a(n) = 0 for n = 1, 2 and 3.
+%e A394631 For n = 4, we have the primes p = 5 and q = 7 such that 5^2 + 4! = 25 + 24 = 49 = 7^2, so a(4) = 5.
+%e A394631 For n = 5, we have 7^2 + 5! = 13^2, so a(5) = 7.
+%e A394631 For n = 6, we have 11^2 + 6! = 29^2, so a(6) = 11.
+%o A394631 (PARI) apply( {A394631(n,f=n!)=n>3&&forprime(p=3,oo,issquare(p^2+f,&q)&& isprime(q)&& return(p))}, [0..16]) \\ For illustration; for n >> 20 use the following:
+%o A394631 (PARI) A394631(n, f = n!, best = oo, P = 1) = { if(P==1, n<4 && return(0);
+%o A394631   P = [p^sum(k=1,logint(n,p), n\p^k) | p <- primes([2,n])];
+%o A394631   n = P[1]\2; P=P[^1]); my(q=f\n, p=abs(q-n)\2);
+%o A394631   p < best && isprime(p) && isprime((q+n)\2) && best = p;
+%o A394631   if(2*n < best && #P, best = A394631(n, f, best, P[^1]);
+%o A394631     A394631(n*P[1], f, best, P[^1]) , best)}
+%o A394631 (PARI) \\ See Corneth link
+%o A394631 (PARI) a(n)=if(n<4,return(0));my(N=n!,L=List());fordiv(vecprod(primes([3,n])),d,my(U=2*gcd(d^n,N));my(p=(N/U+U)/2,q=abs(N/U-U)/2); if(ispseudoprime(q)&&ispseudoprime(p), listput(L, [p, q]))); vecsort(Vec(L))[1][2]; \\ _Daniel Suteu_, Apr 10 2026
+%o A394631 (Python)
+%o A394631 import math, heapq
+%o A394631 from bisect import bisect_right
+%o A394631 from sympy import factorint, isprime
+%o A394631 def A394631(n): # quite fast up to n ~ 35 at least
+%o A394631     f = math.factorial(n); A = [1]; B = [1]
+%o A394631     for C in sorted(([p**i for i in range(p==2, v+(p>2))]
+%o A394631           for p, v in factorint(f).items()), key=len, reverse=1):
+%o A394631         T = A if len(A) < len(B) else B
+%o A394631         T[:] = [x * y for x in T for y in C]
+%o A394631     A.sort(); B.sort(); s = math.isqrt(f)
+%o A394631     h = [(-a * B[j-1], i, j-1) for i, a in enumerate(A)
+%o A394631          if (j := bisect_right(B, s // a))]
+%o A394631     heapq.heapify(h)
+%o A394631     while h:
+%o A394631         d, i, j = heapq.heappop(h)
+%o A394631         p = (d - f // d) // 2
+%o A394631         if isprime(p) and isprime(p - d): return p
+%o A394631         if j > 0: heapq.heappush(h, (-A[i] * B[j-1], i, j-1))
+%o A394631     return 0
+%Y A394631 Cf. A001248 (squares of primes), A000142 (factorial), A124865 (differences of squares of primes).
+%Y A394631 See A394632 for the primes q = sqrt(a(n)^2 + n!), A394630 for primepi(a(n)).
+%Y A394631 See A394629 for the total number of primes {p, q} s.t. q^2 - p^2 = n!.
+%K A394631 nonn,new
+%O A394631 0,5
+%A A394631 _M. F. Hasler_, Apr 04 2026
+%E A394631 More terms from _David A. Corneth_, Apr 04 2026
