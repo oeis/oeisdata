@@ -1,10 +1,14 @@
-%I A230386 #22 Dec 23 2024 14:53:43
-%S A230386 0,8,31,64,191,1797,18463
+%I A230386 #61 Apr 16 2026 22:55:09
+%S A230386 0,8,31,64,191,1797,11999,180263
 %N A230386 Least sum of a set of n evil numbers (A001969) such that any two or more add to an odious number (A000069).
 %C A230386 Row sums of A230385: see there for the corresponding sets. See A230387 for a "dual" version.
-%C A230386 Is this sequence finite, or is there for any n at least one admissible set of n evil numbers, i.e., such that any sum of two or more elements add up to an odious number?
+%C A230386 Is this sequence finite, or is there for any n at least one admissible set of n evil numbers; i.e., such that any sum of two or more elements add up to an odious number?
 %C A230386 By definition, this is a subsequence of the odious numbers A000069.
-%H A230386 M. F. Hasler, in reply to V. Shevelev, <a href="https://web.archive.org/web/*/http://list.seqfan.eu/oldermail/seqfan/2013-October/011785.html">Peculiar sets of evil numbers (Cf. A001969)</a>, SeqFan list, Oct 17 2013
+%C A230386 From _Brendan J. Dee_, Apr 11 2026: (Start)
+%C A230386 This sequence is infinite: for every n >= 1 there are infinitely many admissible sets. The following example shows that a set can be constructed by generating numbers of sufficient bit length so that any carries are confined and cannot interfere across bit positions.
+%C A230386 For n=10, we can construct the admissible set: {39335582261627482034321941888000, 39335582261627482034321941856287, 39335582261627482034321909382175, 39335582261627482034288655891487, 39335582261627482000237081426975, 39335582261627447131424829766687, 39335582261591741467679129631775, 39335582225029141792082191481887, 39335544784927073980817525996575, 39297206120409635245800069037087}; the migrating 10-bit zero gap is visible in hexadecimal: 0x1f07c1f07c1f07c1f07c1f07c00, 0x1f07c1f07c1f07c1f07c1f0001f, 0x1f07c1f07c1f07c1f07c0007c1f, 0x1f07c1f07c1f07c1f0001f07c1f, 0x1f07c1f07c1f07c0007c1f07c1f, 0x1f07c1f07c1f0001f07c1f07c1f, 0x1f07c1f07c0007c1f07c1f07c1f, 0x1f07c1f0001f07c1f07c1f07c1f, 0x1f07c0007c1f07c1f07c1f07c1f, 0x1f0001f07c1f07c1f07c1f07c1f.
+%C A230386 (End)
+%H A230386 M. F. Hasler, in reply to Vladimir Shevelev, <a href="https://web.archive.org/web/*/http://list.seqfan.eu/oldermail/seqfan/2013-October/011785.html">Peculiar sets of evil numbers (Cf. A001969)</a>, SeqFan list, Oct 17 2013
 %e A230386 The table A230385 reads
 %e A230386 n=1: {0} with sum = 0,
 %e A230386 n=2: {3, 5} with sum = 8,
@@ -13,10 +17,17 @@
 %e A230386 n=5: {33, 34, 36, 40, 48} with sum = 191,
 %e A230386 n=6: {257, 264, 278, 288, 326, 384} with sum = 1797.
 %e A230386 For example, for n=4, all 11 numbers 5+9=14, 5+17=22, 5+33=38, 9+17=26, 9+33=42, 17+33=50, 5+9+17=31, 5+9+33=47, 5+17+33=55, 9+17+33=59, 5+9+17+33=64 are odious.
-%e A230386 n=7: {801, 802, 804, 808, 816, 4896, 9536} with sum = 18463.
+%e A230386 From _Brendan J. Dee_, Apr 11 2026: (Start)
+%e A230386 n=7: {768, 1440, 1953, 1954, 1956, 1960, 1968} with sum = 11999.
+%e A230386 n=8: {12, 16471, 16982, 17494, 18518, 20566, 24662, 65558} with sum = 180263. (End)
 %o A230386 (PARI) (is_A69=n->bittest(hammingweight(n),0)); A1969=select(n->!is_A69(n), vector(1600,n,n)) /* no 0 here! */; A230386(n,m=9e9)={ local(v=vector(n,i,i), ve=vector(n,i,A1969[i]), t=0, s=vector(n,i,if(i>1,A230386(i-1))), S(v)=sum(j=1,#v,v[j]), ok(e)=!forstep(i=3,2^#e-1,2, is_A69( S( vecextract( e,i )))||return), inc(i)=for(j=1,n-i,v[j]=j); for(j=n-i+1,n-1, v[j]++<v[j+1] && return(ve[j]=A1969[v[j]]); ve[j]=A1969[v[j]=j])/*end for*/; ve[n]=A1969[v[n]++])/*end local()*/; while( s[n]+ve[n]<m, for(i=2,n, s[n-i+1]+sum(j=n-i+1,n,ve[j]) < m && ok(vecextract(ve,2^n-2^(n-i))) && next; inc(i); next(2)); m>S(ve) && /*print*/([m=S(ve),ve]); inc(n));m} /* This code is very fast up to n=5 and much too slow for n>5. */
-%K A230386 nonn,more,hard
+%o A230386 (Python)
+%o A230386 from itertools import combinations # ok() just checks whether a set is OK
+%o A230386 odious = lambda x: x.bit_count()&1
+%o A230386 ok = lambda S: not any(map(odious, S)) and all(odious(sum(s)) for k in range(2, len(S)+1) for s in combinations(S,k)) # _M. F. Hasler_, Apr 10 2026
+%K A230386 nonn,more,hard,changed
 %O A230386 1,2
 %A A230386 _Vladimir Shevelev_ and _M. F. Hasler_, Oct 17 2013
 %E A230386 a(6) added by _M. F. Hasler_, Oct 18 2013
 %E A230386 a(7) from _Donovan Johnson_, Oct 27 2013
+%E A230386 a(7) corrected and a(8) added by _Brendan J. Dee_, Apr 07 2026
