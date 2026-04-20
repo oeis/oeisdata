@@ -1,4 +1,4 @@
-%I A055932 #103 Aug 07 2025 20:25:53
+%I A055932 #120 Apr 19 2026 16:01:27
 %S A055932 1,2,4,6,8,12,16,18,24,30,32,36,48,54,60,64,72,90,96,108,120,128,144,
 %T A055932 150,162,180,192,210,216,240,256,270,288,300,324,360,384,420,432,450,
 %U A055932 480,486,512,540,576,600,630,648,720,750,768,810,840,864,900,960,972
@@ -24,9 +24,19 @@
 %F A055932 Sum_{n>=1} 1/a(n) = Sum_{n>=0} 1/A005867(n) = 2.648101... (A345974). - _Amiram Eldar_, Jun 26 2025
 %e A055932 60 is included because 60 = 2^2 * 3 * 5 and 2, 3 and 5 are consecutive primes beginning at 2.
 %e A055932 Sequence A057335 begins
-%e A055932 1..2..4..6..8..12..18..30..16..24..36..60..54..90..150..210... which is equal to
-%e A055932 1..2..2..3..2...3...3...5...2...3...3...5...3...5....5....7... times
-%e A055932 1..1..2..2..4...4...6...6...8...8..12..12..18..18...30...30...
+%e A055932   1..2..4..6..8..12..18..30..16..24..36..60..54..90..150..210... which is equal to
+%e A055932   1..2..2..3..2...3...3...5...2...3...3...5...3...5....5....7... times
+%e A055932   1..1..2..2..4...4...6...6...8...8..12..12..18..18...30...30...
+%e A055932 From _David A. Corneth_, Jan 24 2026: (Start)
+%e A055932 150 is in the sequence as follows:
+%e A055932 150 is not 1 so we need to investigate more.
+%e A055932 2 is a divisor of 150, so it could still be that 150 is in the sequence. We divide out all factors of 2 and get 75. The next prime larger than 2 is 3.
+%e A055932 3 is a divisor of 75. It could still be that 150 is in the sequence. We divide out all factors of 3 and get 25. The next prime larger than 3 is 5.
+%e A055932 5 is a divisor of 25. It could still be that 150 is in the sequence. We divide out all factors of 5 and get 1. As we get 1, 150 is in the sequence.
+%e A055932 20 is not in the sequence as follows:
+%e A055932 20 is not 1 so we need to investigate more.
+%e A055932 2 is a divisor of 20, so it could still be that 20 is in the sequence. We divide out all factors of 2 and get 5. The next prime larger than 2 is 3.
+%e A055932 3 is no divisor of 5. 5 is not 1, therefore 20 is not in the sequence. (End)
 %p A055932 isA055932 := proc(n)
 %p A055932     local s,p ;
 %p A055932     s := numtheory[factorset](n) ;
@@ -46,19 +56,47 @@
 %t A055932 cpQ[n_]:=Module[{f=Transpose[FactorInteger[n]][[1]]},f=={1}||f==Prime[ Range[Length[f]]]]; Select[Range[1000],cpQ] (* _Harvey P. Dale_, Jul 14 2012 *)
 %o A055932 (PARI) is(n)=my(f=factor(n)[,1]~);f==primes(#f) \\ _Charles R Greathouse IV_, Aug 22 2011
 %o A055932 (PARI) list(lim,p=2)=my(v=[1],q=nextprime(p+1),t=1);while((t*=p)<=lim,v=concat(v,t*list(lim\t,q))); vecsort(v) \\ _Charles R Greathouse IV_, Oct 02 2012
+%o A055932 (PARI) is(n) = {if(n == 1, return(1)); forprime(p = 2, oo, v = valuation(n, p); if(v == 0, return(0)); n\=p^v; if(n==1, return(1)))} \\ _David A. Corneth_, Jan 24 2026
 %o A055932 (Magma) [1] cat [k:k in[2..1000 by 2]|forall{i:i in [1..#PrimeDivisors(k)-1]|NextPrime(pd[i]) in pd where pd is PrimeDivisors(k)}]; // _Marius A. Burtea_, Feb 01 2020
 %o A055932 (Python)
-%o A055932 from itertools import count, islice
-%o A055932 from sympy import primepi, primefactors
-%o A055932 def A055932_gen(startvalue=1): # generator of terms >= startvalue
-%o A055932     for k in count(max(startvalue,1)):
-%o A055932         p = list(map(primepi,primefactors(k)))
-%o A055932         if k==1 or (min(p)==1 and max(p)==len(p)):
-%o A055932             yield k
-%o A055932 A055932_list = list(islice(A055932_gen(),40)) # _Chai Wah Wu_, Aug 07 2025
+%o A055932 from functools import lru_cache
+%o A055932 from itertools import count
+%o A055932 from sympy import prime, integer_log, primorial
+%o A055932 from oeis_sequences.OEISsequences import bisection
+%o A055932 def A055932(n):
+%o A055932     @lru_cache(maxsize=None)
+%o A055932     def g(x, m): return sum(g(x//(prime(m)**i), m-1) for i in range(1,integer_log(x, prime(m))[0]+1)) if m-1 else x.bit_length()-1
+%o A055932     def f(x):
+%o A055932         c = n-1+x
+%o A055932         for k in count(1):
+%o A055932             if primorial(k)>x:
+%o A055932                 break
+%o A055932             c -= g(x,k)
+%o A055932         return c
+%o A055932     return bisection(f,n,n) # _Chai Wah Wu_, Mar 19 2026
+%o A055932 (Python)
+%o A055932 from itertools import islice
+%o A055932 from heapq import heappop, heappush
+%o A055932 from sympy import nextprime
+%o A055932 def A055932_gen(): # generator of terms if the first n terms are desired.
+%o A055932     h, hset = [(1,(1,))], {1}
+%o A055932     while True:
+%o A055932         m, ps = heappop(h)
+%o A055932         yield m
+%o A055932         for p in ps:
+%o A055932             mp = m*p
+%o A055932             if mp not in hset:
+%o A055932                 heappush(h,(mp,ps))
+%o A055932                 hset.add(mp)
+%o A055932         q = nextprime(max(ps,default=1))
+%o A055932         mp = m*q
+%o A055932         if mp not in hset:
+%o A055932             heappush(h,(mp,(ps+(q,))))
+%o A055932             hset.add(mp)
+%o A055932 A055932_list = list(islice(A055932_gen(),40)) # _Chai Wah Wu_, Apr 01 2026
 %Y A055932 Cf. A057335 (permuted), A056808, A025487, A007947, A002110, A080404, A034386, A106177, A124829, A124830, A124831, A124833, A080259 (complement), A215366.
 %Y A055932 Cf. A005867, A324939, A345974.
-%K A055932 easy,nonn
+%K A055932 nonn,easy,changed
 %O A055932 1,2
 %A A055932 _Leroy Quet_, Jul 17 2000
 %E A055932 Edited by _Daniel Forgues_, Jan 24 2011
