@@ -1,4 +1,4 @@
-%I A393167 #68 Apr 16 2026 09:59:16
+%I A393167 #73 Apr 20 2026 18:02:00
 %S A393167 1,1,2,1,3,2,4,4,1,5,5,6,2,6,8,9,4,7,11,6,13,1,14,7,8,15,10,17,2,18,
 %T A393167 12,9,20,15,22,4,23,18,19,10,20,25,6,26,23,28,8,29,26,27,11,28,31,1,
 %U A393167 11,32,33,34,14,35,36,38,12,40,38,2,18,39,44,45,41,22,47
@@ -29,6 +29,27 @@
 %t A393167 fQ[x_] := Or[x == 1, Times @@ MapIndexed[Prime[First[#2]]^#1 &, ReverseSort[FactorInteger[x][[All, -1]] ] ] == x]; rad[x_] := rad[x] = Times @@ FactorInteger[x][[All, 1]]; Map[(r = rad[#]; Count[Range[#], _?(rad[#] == r &)]) &, Select[Range[2^13], fQ] ]
 %t A393167 (* Alternative: load function f from A025487 and theta from the Mathematica link in A369609, then: *)
 %t A393167 Map[theta[-#] &, Union@ Flatten@ f[6]]
+%o A393167 (Python)
+%o A393167 from itertools import count
+%o A393167 from functools import lru_cache
+%o A393167 from sympy import prime, integer_log, primefactors
+%o A393167 from oeis_sequences.OEISsequences import bisection
+%o A393167 def A393167(n):
+%o A393167     if n == 1: return 1
+%o A393167     @lru_cache(maxsize=None)
+%o A393167     def g1(x, m, j): return sum(g1(x//(prime(m)**i), m-1, i) for i in range(j,integer_log(x, prime(m))[0]+1)) if m-1 else max(0,x.bit_length()-j)
+%o A393167     def f(x):
+%o A393167         c, p = n-1+x, 1
+%o A393167         for k in count(1):
+%o A393167             p *= prime(k)
+%o A393167             if p>x:
+%o A393167                 break
+%o A393167             c -= g1(x,k,1)
+%o A393167         return c
+%o A393167     ps = tuple(sorted(primefactors(k:=bisection(f,n,n))))
+%o A393167     @lru_cache(maxsize=None)
+%o A393167     def g2(x,m): return 0 if x == 1 else sum(g2(x//ps[m]**i,m-1) for i in range(1,integer_log(x,ps[m])[0]+1)) if m else integer_log(x,ps[0])[0]
+%o A393167     return g2(k,len(ps)-1) # _Chai Wah Wu_, Apr 16 2026
 %Y A393167 Cf. A002110, A007947, A008479, A025487, A025488 (index of powers of primes in A025487), A098719 (index of squarefree terms in A025487), A364225 (number of m <= s(n) with rad(m) | s(n)), A369609.
 %K A393167 nonn,look,new
 %O A393167 1,3

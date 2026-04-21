@@ -1,7 +1,41 @@
-%I A094859 #1 Sep 22 2004 03:00:00
-%S A094859 1,2,3,4,6,10
+%I A094859 #16 Apr 21 2026 00:44:23
+%S A094859 1,2,3,4,6,10,14,24,36,58
 %N A094859 Maximal number of longest common subsequences between any two ternary strings of length n (Version 2).
-%C A094859 Same as A094858 but now we can use an alphabet of size 3.
-%K A094859 nonn,more
+%C A094859 Same as A094858 but now we use an alphabet of size 3.
+%e A094859 From _M. F. Hasler_, Apr 12 2026: (Start)
+%e A094859 For length n = 1, we have LCS(X, Y) = { X } if Y = X or else { '' }, so a(1) = 1.
+%e A094859 We always have LCS(X, X) = { X }, and LCS(X, Y) = { '' } if X and Y have no common digit. So we can WLOG restrict ourselves to X < Y, X having initial digit 0, first nonzero digit 1, and at least one digit in common with Y.
+%e A094859 For length n = 2, we have LCS(01, 10) = { 0, 1 }, and no other X, Y can give more LCS, so a(2) = 2.
+%e A094859 For n = 3, we have LCS(012, 210) = { 0, 1, 2 }, and no other X, Y can give more LCS, so a(3) = 3.
+%e A094859 For n = 4, we have LCS(0110, 1001) = { 00, 01, 10, 11 }, and no other X, Y give more LCS, so a(4) = 4.
+%e A094859 For n = 5, we have LCS(01201, 10210) = { 010, 020, 021, 101, 120, 121 }, and no other X, Y give more LCS, so a(5) = 6.
+%e A094859 For n = 6, we have the maximum number of LCS for LCS(012012, 210210) = { 010, 020, 021, 101, 102, 120, 121, 201, 202, 212 }, so a(6) = 10.
+%e A094859 For n = 7, we have a maximum of 14 LCS for LCS(0120120, 1021021) = { 0101, 0102, 0121, 0201, 0202, 0210, 0212, 1010, 1012, 1020, 1201, 1202, 1210, 1212 }, so a(7) = 14. (End)
+%o A094859 (Python)
+%o A094859 import numpy as np; from numba import njit # and add @njit decorators below
+%o A094859 def lcs_count(X, Y): # here assumed of same length
+%o A094859     n = len(X); C,L = np.ones(s:=(n+1,n+1), int), np.zeros(s,int)
+%o A094859     for i in range(n):
+%o A094859         for j in range(n):
+%o A094859             if X[i] != Y[j]:
+%o A094859                 L[i+1, j+1] = max(L[i, j+1], L[i+1, j]); ways = 0
+%o A094859                 if L[i+1, j+1] == L[i, j+1]: ways += C[i, j+1]
+%o A094859                 if L[i+1, j+1] == L[i+1, j]: ways += C[i+1, j]
+%o A094859                 if L[i+1, j+1] == L[i, j]: ways -= C[i, j]
+%o A094859                 C[i+1, j+1] = ways
+%o A094859             else: C[i+1, j+1] = C[i, j]; L[i+1, j+1] = L[i, j] + 1
+%o A094859     return C[n, n]
+%o A094859 def ternary(val, n):
+%o A094859     digits = np.zeros(n, dtype=np.int8); i = 0
+%o A094859     while val: val, digits[i] = divmod(val, 3); i += 1
+%o A094859     return digits
+%o A094859 # To use with @njit (which seemingly doesn't like max(...)), code below must
+%o A094859 # be rewritten using for loops and "if max_count < count: max_count = count".
+%o A094859 def A094859(n): return max(max(lcs_count(X, ternary(y, n))
+%o A094859     for y in range(max(3**(n-1), x+1), 3**n) if (y-x)%3) for t in range(n)
+%o A094859     for x in range(3**t, 2*3**t) if len(X := ternary(x, n)))
+%o A094859 # _M. F. Hasler_, Apr 13 2026
+%K A094859 nonn,more,changed
 %O A094859 1,2
 %A A094859 Guenter Stertenbrink (Sterten(AT)aol.com), Jun 14 2004
+%E A094859 a(7)-a(10) from _M. F. Hasler_, Apr 13 2026
