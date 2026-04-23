@@ -1,0 +1,51 @@
+%I A394340 #23 Apr 22 2026 16:38:12
+%S A394340 1,2,6,22,92,402,1832,8453,39640,186296,881147,4162866,19721230,
+%T A394340 93250730,441549914,2086950250,9872284420,46627034590,220354970198,
+%U A394340 1040000436047,4910777435839,23162527440081,109292500313185,515214985932766
+%N A394340 Number of self-avoiding walks on the cubic lattice with the first three orthogonal steps specified (see Comments).
+%C A394340 The first step is in the +x direction, the first orthogonal step is in the +y direction, and the first step orthogonal to both x and y is in the +z direction.
+%C A394340 Any walk on a cubic lattice (A001412) can be rotated and reflected such that these properties are satisfied. This provably represents an approximate 48-fold reduction in number (useful for exhaustively computing properties of the walks) and is analogous to A046171 on the square lattice.
+%F A394340 a(n) = (A001412(n) + 24*A046171(n) + 18) / 48.
+%e A394340 There are 30 SAWs of length 2 (6 straight and 24 bent), but they can all be rotated such that the first step is in the +x direction, reducing the count to 5. Of these 5, one is straight and four are bent. The four bent walks can all be rotated such that their second step is in the +y direction, leaving the count at 2.
+%o A394340 (Python)
+%o A394340 import numpy as np
+%o A394340 from copy import copy
+%o A394340 nmax=10
+%o A394340 count=[1, 2]
+%o A394340 allwalks=[]
+%o A394340 lap=lambda f,*l: list(map(f,*l))
+%o A394340 allwalks.append(np.array([1, 0, 0]))
+%o A394340 allwalks.append(np.array([[[1, 0, 0], [1, 1, 0]], [[1, 0, 0], [2, 0, 0]]]))
+%o A394340 for n in range(2, nmax):
+%o A394340     template=allwalks[n-1]
+%o A394340     counter=0
+%o A394340     walks=[]
+%o A394340     for t in template:
+%o A394340         prewalk=np.array(t, dtype=int)
+%o A394340         ytrig=np.max(prewalk[:, 1])>0
+%o A394340         ztrig=np.max(prewalk[:, 2])>0
+%o A394340         grid=np.zeros([2*nmax+2]*3)
+%o A394340         prewalk+=nmax+1
+%o A394340         grid[*3*[nmax+1]]=1
+%o A394340         for j in range(n):
+%o A394340             grid[prewalk[j, 0], prewalk[j, 1], prewalk[j, 2]]=1
+%o A394340         opts=[]
+%o A394340         ep=[prewalk[-1, 0], prewalk[-1, 1], prewalk[-1, 2]]
+%o A394340         for i in range(6):
+%o A394340             epp=copy(ep)
+%o A394340             epp[i//2]+=(-1)**i
+%o A394340             if grid[*epp]==0 and (i<3 or ytrig and (i<5 or ztrig)):
+%o A394340                 opts.append(epp)
+%o A394340         for o in opts:
+%o A394340             counter+=1
+%o A394340             walk=np.zeros([n+1, 3])
+%o A394340             walk[0:-1, :]=prewalk-[nmax+1]*3
+%o A394340             walk[-1, :]=np.array(o)-[nmax+1]*3
+%o A394340             walks.append(walk)
+%o A394340     allwalks.append(walks)
+%o A394340     count.append(counter)
+%o A394340 print(count)
+%Y A394340 Cf. A046171, A001412, A078717.
+%K A394340 nonn,walk,new
+%O A394340 1,2
+%A A394340 _Alex Klotz_, Mar 17 2026
