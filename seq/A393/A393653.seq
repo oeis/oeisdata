@@ -1,0 +1,52 @@
+%I A393653 #26 Apr 24 2026 00:22:16
+%S A393653 19,132,248,361,477,507,590,620,736,965,1023,1139,1252,1368,1481,1511,
+%T A393653 1597,1627,1740,1856,2143,2259,2372,2402,2488,2518,2631,2747,2860,
+%U A393653 2976,3034,3263,3379,3409,3492,3522,3638,3751,3867,3980,4154,4383,4413,4499,4529,4642,4758,4871,4901,4987,5045,5274,5304
+%N A393653 ISBN-10 numbers with the same check digit upon conversion to ISBN-13.
+%C A393653 ISBN-10 is the original format for International Standard Book Numbers (ISBNs), and ISBN-13 is the new, preferred format. Both formats include a check digit at the end, and both formats include dashes or spaces in the human-readable text, not just for readability but to distinguish the meaning of the elements: prefix (ISBN-13 only), registration group number, registrant number, publication number and check digit.
+%C A393653 The prefix (only in ISBN-13) must be three digits, and the check digit is always only a single digit. But the other elements vary in length, though in such a way that the complete number comprises ten or thirteen digits, for ISBN-10 and ISBN-13 respectively. The prefixes and registration group numbers are assigned by the International ISBN Agency. The affiliate agencies assign numbers to the publishers within the registration groups prescribed by the International ISBN Agency.
+%C A393653 Because millions of books had already been published with ISBN-10 numbers prior to the introduction of ISBN-13, and thousands are still in public libraries, it was not feasible to simply abandon ISBN-10 numbers.
+%C A393653 For that reason, a method was devised to convert ISBN-10 numbers to ISBN-13 in a way that always preserves nine of the original ISBN-10 digits. But the check digit needs to be recalculated, because ISBN-10 uses a strange formula (see Formulas below) that sometimes gives 10 (represented as "X") for the check digit, whereas ISBN-13 only uses base 10 digits in the barcodes.
+%C A393653 The conversion method starts by discarding the ISBN-10 check digit. Then the prefix 978 is prepended to the nine preserved digits, and the check digit is then calculated according to the ISBN-13 formula for check digits (see Formulas below).
+%C A393653 For example, N. J. A. Sloane's Handbook of Integer Sequences was published in 1973 with ISBN-10 number 0-12-648550-X. This converts to the ISBN-13 number 978-0-12-648550-9.
+%C A393653 Sometimes it happens that the check digit remains the same, though clearly this can't happen when the ISBN-10 check digit is X. For example, Calculus Made Easy by Sylvanus P. Thompson and Martin Gardner was published as a hardcover in 1998 with ISBN 0-312-18548-0. Converted to ISBN-13, its check digit is also 0, and so we have 978-0-312-18548-0.
+%C A393653 99999-99-81-6 is the largest term of this sequence. Note that registration group 99999 is unallocated as of 2026, and therefore that ISBN does not currently correspond to any published book, nor any book scheduled to be published any time soon.
+%H A393653 Bowker, <a href="https://www.isbn.org/ISBN_converter">ISBN Converter Tool</a>
+%H A393653 Free ISBN Publishing Resources, <a href="https://freeisbn.com/check-digit/">Free ISBN Check Digit Calculator</a> (works for both ISBN-10 and ISBN-13).
+%H A393653 International ISBN Agency, <a href="https://www.isbn-international.org/sites/default/files/ISBN%20Manual%202012%20-corr.pdf">ISBN Users' Manual</a>
+%F A393653 The ISBN-10 check digit (A114433) is calculated by the formula sum_(i = 0)^8 d_i * (9 - i) mod 11, where d_0 is the least significant base 10 digit of the nine assigned digits and d_8 is the most significant base 10 digit of the nine assigned digits. For example, for Sloane's Handbook, the number is 0-12-648550, so we see that 0 * 1 + 1 * 2 + 2 * 3 + 6 * 4 + 4 * 5 + 8 * 6 + 5 * 7 + 5 * 8 + 0 * 9 = 175, and 175 = 10 mod 11. Hence the full ISBN-10 for that book is 0-12-648550-X.
+%F A393653 The ISBN-13 check digit (A237042) is calculated based on the intermediate result of the formula ch = sum_(i = 0)^11 d_i * (1 + 2 * delta(i mod 2, 0)) mod 10, where d_0 is the least significant digit, d_11 is the most significant digit of the prefix (currently 9 is the only possible value) of the nine assigned digits and delta(x, y) is the Kronecker delta function which gives 1 if x = y and 0 otherwise. In other words, the digits are alternately multiplied by 3 and 1, starting with 3 for the least significant digit. The 978 prefix contributes 38 to the intermediate result and the 979 prefix contributes 39.
+%F A393653 If this intermediate formula gives 0, that's the check digit. Otherwise, the check digit is 10 - ch. Or, alternatively, the check digit is -ch mod 10, with the caveat that in most programming languages the Mod function can give negative numbers, e.g., -9 when we expect 1. For example, for Sloane's Handbook, the number is 978-0-12-648550, so we see that 9 * 1 + 7 * 3 + 8 * 1 + 0 * 3 + 1 * 1 + 2 * 3 + 6 * 1 + 4 * 3 + 8 * 1 + 5 * 3 + 5 * 1 + 0 * 3 = 91 and 91 = 1 mod 10. Since that's not 0, we still have to reckon 10 - 1 = 9. Or alternatively -91 = 9 mod 10. Hence the full ISBN-13 for that book is 978-0-12-648550-9.
+%F A393653 If ch = A114433(n) = A237042(978000000000 + n), then 10n + ch is in this sequence.
+%e A393653 590 is in the sequence because the ISBN-10 number 0-00-000059-0 converts to ISBN-13 number 978-0-00-000059-0, which also has check digit 0.
+%e A393653 604 and 612 correspond to the valid ISBN-10 numbers 0-00-000060-4 and 0-00-000061-2, but they convert to the ISBN-13 numbers 978-0-00-000060-6 and 978-0-00-000061-3 respectively, so therefore 604 and 612 are not in the sequence.
+%e A393653 The other numbers in the range 591 to 619 don't correspond to valid ISBN-10 numbers, so they're not considered for this sequence at all.
+%o A393653 (Scala) def reckonISBN10CheckDigit(noCheck: Int): Byte = {
+%o A393653   var curr = noCheck; var sum = 0; var index = 9
+%o A393653   while (index > 0) {
+%o A393653     val digit = curr % 10; sum += (digit * index)
+%o A393653     curr /= 10; index -= 1
+%o A393653   }
+%o A393653   (sum % 11).toByte
+%o A393653 }
+%o A393653 def reckonISBN13CheckDigit(noCheck: Long): Byte = {
+%o A393653   var curr = noCheck; var sum = 0L; var multiplier = 3
+%o A393653   while (curr > 0) {
+%o A393653     val digit = curr % 10; sum += (digit * multiplier); curr /= 10
+%o A393653     if (multiplier == 3) multiplier = 1 else multiplier = 3
+%o A393653   }
+%o A393653   val ch = (sum % 10).toByte
+%o A393653   if (ch == 0) 0 else (10 - ch).toByte
+%o A393653 }
+%o A393653 (0 to 499).filter(
+%o A393653   n => reckonISBN10CheckDigit(n) == reckonISBN13CheckDigit(978000000000L + n)
+%o A393653 ).map(n => 10 * n + reckonISBN10CheckDigit(n))
+%o A393653 (Python)
+%o A393653 def A114433(n): return sum((i+1)*int(s) for i, s in enumerate(str(n).zfill(9)))%11
+%o A393653 def A237042(n): return -sum(int(s)*(3 if i&1 else 1) for i, s in enumerate(str(n)[::-1], 1))%10
+%o A393653 def ok(n): return n%10 == A114433(n//10) == A237042(978000000000 + n//10)
+%o A393653 print([k for k in range(5500) if ok(k)]) # _Michael S. Branicky_, Apr 19 2026
+%Y A393653 Cf. A114433 (ISBN-10 check digits), A237042 (UPC check digits), A231963 (concatenate n with UPC check digit).
+%K A393653 nonn,fini,new
+%O A393653 1,1
+%A A393653 _Alonso del Arte_, Feb 24 2026
