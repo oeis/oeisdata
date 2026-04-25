@@ -1,0 +1,36 @@
+%I A395377 #15 Apr 24 2026 14:08:16
+%S A395377 1,1,3,11,61,415,3345,31427,340675,4116811,55720683,824183715,
+%T A395377 13373853905,233866939405,4428702535059,89350926814601,
+%U A395377 1933003918341879
+%N A395377 Number of ordered set partitions of {1..n} having pairwise distinct block sums.
+%C A395377 An ordered set partition of {1..n} is a sequence (B_1,...,B_k) of nonempty disjoint subsets whose union is {1..n}. If s(B) = Sum_{x in B} x, then a(n) counts those partitions for which the values s(B_i) are pairwise distinct.
+%C A395377 Equivalently, this counts ordered set partitions for which the map B -> s(B) is injective.
+%C A395377 This is a refinement of the Fubini numbers A000670 obtained by imposing an additive distinctness constraint on block sums. Let T(n,k) be the number of set partitions of {1..n} into k blocks with pairwise distinct block sums; then a(n) = Sum_{k=0..n} k!*T(n,k). This can be viewed as counting ordered set partitions avoiding collisions among block sums.
+%F A395377 a(n) = Sum_{k=0..n} k! * A395416(n,k), where A395416(n,k) is the number of set partitions of {1..n} into k blocks with pairwise distinct block sums.
+%e A395377 For n = 3, there are 13 ordered set partitions; the only ones with equal block sums are 12|3 and 3|12, hence a(3) = 11.
+%e A395377 For n = 4, T(4,1)=1, T(4,2)=6, T(4,3)=4, T(4,4)=1, hence a(4) = 1!*1 + 2!*6 + 3!*4 + 4!*1 = 61.
+%o A395377 (Python)
+%o A395377 from functools import lru_cache
+%o A395377 def a(n):
+%o A395377     subsum = [0] * (1 << n)
+%o A395377     for mask in range(1, 1 << n):
+%o A395377         b = mask & -mask
+%o A395377         subsum[mask] = subsum[mask ^ b] + b.bit_length()
+%o A395377     @lru_cache(None)
+%o A395377     def F(mask, used):
+%o A395377         if mask == 0:
+%o A395377             return 1
+%o A395377         total = 0
+%o A395377         sub = mask
+%o A395377         while sub:
+%o A395377             s = subsum[sub]
+%o A395377             if s not in used:
+%o A395377                 total += F(mask ^ sub, used + (s,))
+%o A395377             sub = (sub - 1) & mask
+%o A395377         return total
+%o A395377     return F((1 << n) - 1, ())
+%Y A395377 Cf. A000670, A275780, A395416.
+%K A395377 nonn,more,new
+%O A395377 0,3
+%A A395377 _Pablo Cadena-Urzúa_, Apr 20 2026
+%E A395377 a(16) from _Alois P. Heinz_, Apr 21 2026

@@ -1,7 +1,7 @@
-%I A339453 #48 Mar 25 2025 13:29:09
+%I A339453 #53 Apr 24 2026 14:06:27
 %S A339453 1,2,3,4,5,12,13,14,15,18,19,26,27,30,53,54,55,100,101,180,203,210,
 %T A339453 211,378,379,382,383,1092,1093,2020,2021,2022,3933,3956,6473,10226,
-%U A339453 10227,10266,10561,20948,20949
+%U A339453 10227,10266,10561,20948,20949,40986,40987,42698,85425,85476,85477,170990,170991,171104
 %N A339453 Number of subsets of {1..n} whose harmonic mean is an integer.
 %C A339453 For terms listed in the Data section: a(p^k) = a(p^k-1) + 1, where p prime (empirical observation). - _Ilya Gutkovskiy_, Dec 06 2020
 %C A339453 From _Chai Wah Wu_, Dec 14 2020: (Start)
@@ -15,6 +15,7 @@
 %C A339453 Thus {p^k} is the only subset of {1,2,..,p^k} that includes p^k and have an integral Harmonic mean.
 %C A339453 This concludes the proof.
 %C A339453 (End)
+%H A339453 Martin Fuller, <a href="/A339453/b339453.txt">Table of n, a(n) for n = 1..75</a>
 %H A339453 Eric W. Weisstein's World of Mathematics, <a href="https://mathworld.wolfram.com/HarmonicMean.html">Harmonic Mean</a>
 %F A339453 a(n) >= a(n-1)+1. For prime p, a(p^k) = a(p^k-1)+1. - _Chai Wah Wu_, Dec 14 2020
 %F A339453 a(n) = A357411(n) + A357412(n). - _Max Alekseyev_, Feb 26 2025
@@ -36,11 +37,22 @@
 %o A339453 def A339453(n):
 %o A339453     m = lcm(*range(2,n+1))
 %o A339453     return sum(1 for i in range(1,n+1) for d in combinations((m//i for i in range(1,n+1)),i) if m*i % sum(d) == 0) # _Chai Wah Wu_, Dec 02 2021
+%o A339453 (PARI) gppf(n)=if(abs(n)>1, vecmax(apply(pe->pe[1]^pe[2], Col(factor(n)))), n);
+%o A339453 N(s,k,v,m)={
+%o A339453   /* number of ways to sum to s using k distinct reciprocals from v[1..m] */
+%o A339453   /* v must be in ascending order of greatest prime-power factor gppf() */
+%o A339453   if(k==1, return(if(numerator(s)==1, sum(i=1, m, v[i]==denominator(s)))));
+%o A339453   my(r=0, f=gppf(denominator(s)));
+%o A339453   forstep(i=m, k, -1, if(gppf(v[i]) < f, break); if(s > 1/v[i], r += N(s - 1/v[i], k-1, v, i-1)));
+%o A339453   r};
+%o A339453 a(n)=my(v=vecsort([1..n], gppf)); n+sum(k=2, n, sum(j=2, n-1, N(k/j, k, v, n)));
+%o A339453 \\ _Martin Fuller_, Apr 24 2026
 %Y A339453 Cf. A002944, A003418, A051293, A067540, A246655, A326027, A339454.
-%K A339453 nonn,more
+%K A339453 nonn,changed
 %O A339453 1,2
 %A A339453 _Ilya Gutkovskiy_, Dec 05 2020
 %E A339453 a(23)-a(29) from _Michael S. Branicky_, Dec 06 2020
 %E A339453 a(30)-a(35) from _Chai Wah Wu_, Dec 08 2020
 %E A339453 a(36)-a(39) from _Chai Wah Wu_, Dec 11 2020
 %E A339453 a(40)-a(41) from _Chai Wah Wu_, Dec 19 2020
+%E A339453 a(42) onward from _Martin Fuller_, Apr 24 2026

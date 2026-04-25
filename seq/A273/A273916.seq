@@ -1,4 +1,4 @@
-%I A273916 #55 Nov 05 2025 15:22:34
+%I A273916 #59 Apr 25 2026 00:40:34
 %S A273916 0,4,7,9,11,12,12,14,15,16,16,18,19,20,22,24
 %N A273916 The Bingo-4 problem: minimal number of stones that must be placed on an infinite square grid to produce n groups of exactly 4 stones each. Groups consist of adjacent stones in a horizontal, vertical or diagonal line.
 %C A273916 You are permitted to put 5 or more adjacent stones in a line, but cannot count them as a group.
@@ -14,8 +14,21 @@
 %e A273916    . O . .     (2) the second column,
 %e A273916    O O . .     (3) the antidiagonal.
 %e A273916 See the link for more examples. (End)
+%o A273916 (Python)
+%o A273916 import pulp as P
+%o A273916 D=[(0,1),(1,0),(1,1),(1,-1)]
+%o A273916 def a(n,W=7,H=7,t=300):
+%o A273916     p=P.LpProblem()
+%o A273916     X={(r,c):P.LpVariable(f"x{r}_{c}",cat="Binary")for r in range(H)for c in range(W)}
+%o A273916     L=[([(r+k*d,c+k*e)for k in range(4)],(r-d,c-e),(r+4*d,c+4*e))for r in range(H)for c in range(W)for d,e in D if all(0<=r+k*d<H and 0<=c+k*e<W for k in range(4))]
+%o A273916     G=[P.LpVariable(f"g{i}",cat="Binary")for i in range(len(L))]
+%o A273916     p+=sum(X.values());p+=sum(G)>=n
+%o A273916     for (C,q,z),g in zip(L,G):[p.__iadd__(g<=X[c])for c in C]+[p.__iadd__(g+X[k]<=1)for k in(q,z)if k in X]
+%o A273916     p.solve(P.PULP_CBC_CMD(msg=0,timeLimit=t))
+%o A273916     return int(p.objective.value())
+%o A273916 [print(a(n)) for n in range(7)]; # _Nicholas Stefan Georgescu_, Apr 23 2026
 %Y A273916 See also the 4-trees-in-a-row orchard problem, A006065.
-%K A273916 nonn,more,nice
+%K A273916 nonn,more,nice,changed
 %O A273916 0,2
 %A A273916 _Jiangshan Sun_, _Jason Y.S. Chiu_, _Hong-Chang Wang_, Jun 03 2016
 %E A273916 Edited by _N. J. A. Sloane_, Jul 29 2016
