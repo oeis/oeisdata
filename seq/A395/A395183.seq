@@ -1,9 +1,26 @@
-%I A395183 #26 Apr 23 2026 18:29:40
+%I A395183 #35 Apr 25 2026 10:15:55
 %S A395183 0,101,51,34,26,21,17,15,13,12,101,19,9,8,22,7,13,6,6,11,51,5,14,9,17,
 %T A395183 42,4,4,11,7,34,13,19,91,3,3,3,11,8,13,26,5,12,7,7,9,11,15,21,41,21,2,
 %U A395183 2,2,2,11,9,158,7,12,17,5,13,8,11,16,91,3,3,3,15
 %N A395183 a(n) is the least positive integer k such that k*n has a decimal expansion with exactly two nonzero digits with one or more zeros between them and any number of trailing zeros. If no such number exists, then a(n) = 0.
 %C A395183 a(111) is the first unproven term (see zeros in linked a-file). - _Michael S. Branicky_, Apr 15 2026
+%C A395183 From _Chai Wah Wu_, Apr 24 2026: (Start)
+%C A395183 If a(n) = 0, then a(m*n) = 0 for all m.
+%C A395183 If a(n) > 0, then a(n)*n is a number of the form (10^a*b+c)*10^d, where 1<=b,c<=9, d>=0 and a>=2. Since (10^a*b+c)*10^d == 0 (mod n), the existence of such a number can be determined by checking a finite number of values of a and d. In particular a < n+2, d < n suffices. When gcd(n,10) = 1, this can be reduced to d=0 and a<k+3, where k is the multiplicative order of 10 mod n.
+%C A395183 This method can be used to show that a(111) = a(123) = a(159) = a(189) = a(239) = ... = 0. In particular, all the zeros in the a-file a395183_1.txt are correct except for the following cases with terms of more than 1000 digits.
+%C A395183 a(3833) = (5*10^1441+9)/3833
+%C A395183 a(5939) = (9*10^1461+5)/5939
+%C A395183 a(6337) = (7*10^1161+5)/6337
+%C A395183 a(6661) = (7*10^1125+8)/6661
+%C A395183 a(6869) = (7*10^1944+9)/6869
+%C A395183 a(6967) = (8*10^1780+5)/6967
+%C A395183 a(7666) = (5*10^1442+90)/7666
+%C A395183 a(7691) = (9*10^1427+5)/7691
+%C A395183 a(8339) = (3*10^1444+8)/8339
+%C A395183 a(8413) = (1*10^1439+9)/8413
+%C A395183 a(8831) = (7*10^1564+8)/8831
+%C A395183 a(8993) = (6*10^1274+5)/8993
+%C A395183 a(9353) = (5*10^1112+6)/9353 (End)
 %H A395183 Michael S. Branicky, <a href="/A395183/b395183.txt">Table of n, a(n) for n = 0..110</a>
 %H A395183 Michael S. Branicky, <a href="/A395183/a395183_1.txt">Table of n, a(n) for n = 0..10000</a> (terms where a(n) has more than 1000 digits, if it exists, are entered as 0)
 %e A395183 a(9) = 12 because 12*9 = 108 where we have a zero between two nonzero digits.
@@ -19,6 +36,33 @@
 %o A395183 def a(n):
 %o A395183     return next(m//n for m in bgen() if m%n == 0) if n else 0
 %o A395183 print([a(n) for n in range(111)])
+%o A395183 (Python)
+%o A395183 from math import gcd
+%o A395183 from itertools import product
+%o A395183 from sympy import multiplicity, n_order
+%o A395183 def A395183(n):
+%o A395183     if n<2: return 101*n
+%o A395183     m2, m5 = (~n & n-1).bit_length(), multiplicity(5,n)
+%o A395183     k = n//5**m5>>m2
+%o A395183     r = n_order(10,k) if k>1 else 1
+%o A395183     if gcd(10,n)>1:
+%o A395183         alist = [range(2,r+max(m2,m5)+2),range(1,10),range(1,10)]
+%o A395183         for d in product(*alist):
+%o A395183             for a in range(d[0]-1):
+%o A395183                 b = d[0]-a
+%o A395183                 if not (pow(10,b,n)*d[1]+d[2])*pow(10,a,n)%n:
+%o A395183                     return (10**b*d[1]+d[2])*10**a//n
+%o A395183     else:
+%o A395183         alist = [range(r),range(1,10),range(1,10)]
+%o A395183         for d in product(*alist):
+%o A395183             if not (pow(10,d[0],k)*d[1]+d[2])%k:
+%o A395183                 t = d[0]
+%o A395183                 if r<=2:
+%o A395183                     while t<2:
+%o A395183                         t += r
+%o A395183                 if t>1:
+%o A395183                     return (10**t*d[1]+d[2])//n
+%o A395183     return 0 # _Chai Wah Wu_, Apr 24 2026
 %K A395183 nonn,base,new
 %O A395183 0,2
 %A A395183 _Michael S. Branicky_ and _Ali Sada_, Apr 15 2026
