@@ -1,4 +1,4 @@
-%I A386912 #57 Aug 19 2025 12:28:08
+%I A386912 #60 Apr 27 2026 01:22:48
 %S A386912 1,2,6,16,60,192,672,2048,8640,30720,118272,393216,1597440,5505024,
 %T A386912 20643840,67108864,300810240,1132462080,4602200064,16106127360,
 %U A386912 68702699520,248034361344,972407439360,3298534883328,14495514624000,53601191854080
@@ -15,16 +15,15 @@
 %p A386912       a(f)*n*a(n-f))(min(b, n-b/2)))(2^ilog2(n-1)))
 %p A386912     end:
 %p A386912 seq(a(n), n=1..26);  # _Alois P. Heinz_, Aug 18 2025
-%t A386912 q[n_, i_] := Module[{factor, ki}, factor = FactorInteger[i];
-%t A386912   ki = Ceiling[Log2[i]];
-%t A386912   If[(i == 1 || i == n), Return[n/i],
-%t A386912    If[(Length[factor] == 1 && factor[[1]][[1]] == 2),
-%t A386912      If[(Mod[n, i] == 0 || Mod[n, i] >= 2^(ki - 1)),
-%t A386912       Return[Floor[n/i]], Return[Floor[n/i] - 1]],
-%t A386912      If[Mod[n - i, 2^(ki - 1)] == 0, Return[1], Return[0]]];
+%t A386912 q[n_, i_] := Module[{eki = 2^(Ceiling[Log2[i]]-1)},
+%t A386912   If[i == 1 || i == n, n/i,
+%t A386912    If[MatchQ[FactorInteger[i], {{2, _}}],
+%t A386912      If[Mod[n, i] == 0 || Mod[n, i] >= eki,
+%t A386912       Floor[n/i], Floor[n/i] - 1],
+%t A386912      Boole[Mod[n - i, eki] == 0]]
 %t A386912    ]];
-%t A386912 a[n_] := Product[i^q[n, i], {i, 2, n}]; alist = {};
-%t A386912 For[n = 1, n <= 300, n++, AppendTo[alist, a[n]]]; Print[alist]
+%t A386912 a[n_] := Product[i^q[n, i], {i, 2, n}];
+%t A386912 Table[a[n], {n, 50}]
 %t A386912 (* Alternative, after _Alois P. Heinz_: *)
 %t A386912 A386912[n_] := A386912[n] = If[n == 1, 1, n*A386912[#]*A386912[n - #]] & [Min[#, n - #/2] & [2^(BitLength[n - 1] - 1)]]; Array[A386912, 30] (* _Paolo Xausa_, Aug 19 2025 *)
 %o A386912 (Python)
@@ -37,6 +36,6 @@
 %o A386912     return a(f) * n * a(n - f)
 %o A386912 print([a(n) for n in range(1, 27)])  # after _Alois P. Heinz_, _Peter Luschny_, Aug 19 2025
 %Y A386912 Cf. A132862.
-%K A386912 nonn
+%K A386912 nonn,changed
 %O A386912 1,2
 %A A386912 _Mareike Fischer_, Aug 07 2025
