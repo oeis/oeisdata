@@ -1,0 +1,51 @@
+%I A395379 #47 Apr 28 2026 00:52:15
+%S A395379 15,408,16838,167649,4140037,9474308,74874018,102945521,527810589,
+%T A395379 2859439915,2098740462,13633995047,19976100632,15333179080,
+%U A395379 46445400546,130987140051,255274374202,126415848050,560858856747,579824938579,371808136740,1546366165352,1496392986944
+%N A395379 a(1) = 15; for n > 1, a(n) is the number of integers k in [prime(n-1)^7..prime(n)^7-1] with exactly 8 divisors.
+%C A395379 For n > 1, a(n) is the number of integers in [prime(n-1)^7 .. prime(n)^7 - 1] with prime signature [7], [3,1] or [1,1,1]. - _Robert Israel_, Apr 21 2026
+%H A395379 Chai Wah Wu, <a href="/A395379/b395379.txt">Table of n, a(n) for n = 1..31</a>
+%e A395379 a(1) = 15 because [1..127] contains 15 numbers 24, 30, 40, 42, 54, 56, 66, 70, 78, 88, 102, 104, 105, 110, 114 with exactly 8 divisors;
+%e A395379 a(2) = 408 because [128..2186] contains 408 numbers 128, 130, 135, ..., 2185 with exactly 8 divisors;
+%e A395379 a(3) = 16838 because [2187..78124] contains 16838 numbers 2187, 2193, 2198, ..., 78118 with exactly 8 divisors.
+%p A395379 f:= proc(n) local t,a,b,p,q, rmin, rmax;
+%p A395379  t:= 1;
+%p A395379  b:= ithprime(n)^7-1; a:= ithprime(n-1)^7;
+%p A395379  p:= 1:
+%p A395379  do
+%p A395379    p:= nextprime(p);
+%p A395379    if p^3 >= b then break fi;
+%p A395379    q:= p;
+%p A395379    do
+%p A395379      q:= nextprime(q);
+%p A395379      if p*q^2 >= b then break fi;
+%p A395379      rmin:= max(q,a/(p*q)); rmax:= b/(p*q);
+%p A395379      t:= t + NumberTheory:-pi(rmax) - NumberTheory:-pi(rmin);
+%p A395379    od;
+%p A395379    t:= t + NumberTheory:-pi(b/p^3) - NumberTheory:-pi(a/p^3);
+%p A395379    if a < p^4 and p^4 <= b then t:= t - 1 fi;
+%p A395379  od;
+%p A395379  t
+%p A395379 end proc:
+%p A395379 f(1):= 15:
+%p A395379 map(f, [$1..9]);  # _Robert Israel_, Apr 21 2026
+%o A395379 (Magma) [15] cat [#[k: k in [NthPrime(n-1)^7..NthPrime(n)^7-1] | #Divisors(k) eq 8]: n in [2..4]];
+%o A395379 (PARI) a(n) = my(nb=0, ka); if (n==1, ka=1, ka=prime(n-1)^7); forfactored(k=ka,prime(n)^7-1, if (numdiv(k[2])==8, nb++)); nb; \\ _Michel Marcus_, Apr 21 2026
+%o A395379 (Python)
+%o A395379 from math import isqrt
+%o A395379 from sympy import prime, integer_nthroot, primepi, primerange
+%o A395379 def A395379(n):
+%o A395379     if n == 1: return 15
+%o A395379     def f(x):
+%o A395379         p = prime(x)**7
+%o A395379         q = integer_nthroot(p,3)[0]+1
+%o A395379         return int(sum(primepi(p//(k*m))-b for a,k in enumerate(primerange(q),1) for b,m in enumerate(primerange(k+1,isqrt(p//k)+1),a+1))+sum(primepi(p//r**3) for r in primerange(q))-primepi(integer_nthroot(p,4)[0]))
+%o A395379     return 1+f(n)-f(n-1) # _Chai Wah Wu_, Apr 21 2026
+%Y A395379 Cf. A000005, A030626, A092759, A390951.
+%K A395379 nonn,new
+%O A395379 1,1
+%A A395379 _Juri-Stepan Gerasimov_, Apr 20 2026
+%E A395379 a(5)-a(9) from _Michel Marcus_, Apr 21 2026
+%E A395379 a(10) from _Robert Israel_, Apr 21 2026
+%E A395379 a(11)-a(22) from _Chai Wah Wu_, Apr 21 2026
+%E A395379 a(23) from _Daniel Suteu_, Apr 22 2026
