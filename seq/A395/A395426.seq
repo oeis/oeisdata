@@ -1,0 +1,65 @@
+%I A395426 #26 Apr 29 2026 00:41:14
+%S A395426 2,3,11,5,45,401,9,185,3393,57857,17,753,27905,954369,31522817,33,
+%T A395426 3041,226305,15499265,1024458753,66605547521,65,12225,1822721,
+%U A395426 249823233,33034338305
+%N A395426 Triangle read by rows where T(n,k) is the number of distinct n X k (n >= k) Braille patterns up to translations.
+%C A395426 T(2,2) = 11 means that there are ten nonempty patterns occupying the upper four dot positions that can be unambiguously read in a standalone position. This is known as the "decade" and is employed in the standard braille to denote alphabets from a to j, or numbers 1-9 and 0.
+%C A395426 T(3,2) = 45 means that there are 44 nonempty patterns that can be unambiguously read in a standalone position. This fact prevented Ishikawa Kuraji, the creator of Japanese braille, from accommodating all 48 kana syllables into translation-safe patterns.
+%C A395426 It appears that T(n,k) = 2^(n*k) - 2^(n*(k-1)) - 2^((n-1)*k) + 2^((n-1)*(k-1)) + 1.
+%H A395426 Hiroshi Asa, <a href="https://www.dinf.ne.jp/doc/japanese/prdl/jsrd/norma/n351/n351001.html">Evidence that the creator of Japanese braille struggled that T(3,2) - 1 = 44 is not enough to accommodate the 48 kana syllables</a> (in Japanese).
+%F A395426 T(n,1) = 2^(n-1) + 1.
+%F A395426 T(n,n) = A162677(n) + 1.
+%e A395426 Triangle T(n,k) begins:
+%e A395426    n\k 1    2      3        4          5           6 ...
+%e A395426    1   2
+%e A395426    2   3   11
+%e A395426    3   5   45    401
+%e A395426    4   9  185   3393    57857
+%e A395426    5  17  753  27905   954369   31522817
+%e A395426    6  33 3041 226305 15499265 1024458753 66605547521
+%e A395426    ...
+%e A395426 When k = 1, then either the bits are all 0, or the bits can be right-shifted to give an odd integer. Hence T(n,1) = 2^(n-1) + 1.
+%o A395426 (Rust)
+%o A395426 fn translate(pattern: u64, n: usize, k: usize, dr: i32, dc: i32) -> Option<u64> {
+%o A395426     let mut result = 0u64;
+%o A395426     for r in 0..n {
+%o A395426         for c in 0..k {
+%o A395426             let bit = r * k + c;
+%o A395426             if (pattern >> bit) & 1 == 1 {
+%o A395426                 let nr = r as i32 + dr;
+%o A395426                 let nc = c as i32 + dc;
+%o A395426                 if nr < 0 || nr >= n as i32 || nc < 0 || nc >= k as i32 {
+%o A395426                     return None;
+%o A395426                 }
+%o A395426                 result |= 1u64 << (nr as usize * k + nc as usize);
+%o A395426             }
+%o A395426         }
+%o A395426     }
+%o A395426     Some(result)
+%o A395426 }
+%o A395426 fn T(n: usize, k: usize) -> u64 {
+%o A395426     assert!(n * k <= 64, "n*k must be <= 64 to fit in a u64");
+%o A395426     let total = 1u64 << (n * k);
+%o A395426     let mut count = 0u64;
+%o A395426     'patterns: for pattern in 0u64..total {
+%o A395426         for dr in -(n as i32 - 1)..=(n as i32 - 1) {
+%o A395426             for dc in -(k as i32 - 1)..=(k as i32 - 1) {
+%o A395426                 if dr == 0 && dc == 0 {
+%o A395426                     continue;
+%o A395426                 }
+%o A395426                 if let Some(translated) = translate(pattern, n, k, dr, dc) {
+%o A395426                     if translated < pattern {
+%o A395426                         continue 'patterns;
+%o A395426                     }
+%o A395426                 }
+%o A395426             }
+%o A395426         }
+%o A395426         count += 1;
+%o A395426     }
+%o A395426     count
+%o A395426 }
+%Y A395426 Cf. A162677.
+%K A395426 nonn,tabl,more,new
+%O A395426 1,1
+%A A395426 _Hirotaka Sato_, Apr 22 2026
+%E A395426 a(22)-a(26) from _Sean A. Irvine_, Apr 27 2026
