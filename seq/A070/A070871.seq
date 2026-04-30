@@ -1,11 +1,23 @@
-%I A070871 #18 May 05 2023 12:30:37
+%I A070871 #48 Apr 29 2026 15:16:21
 %S A070871 1,2,2,3,6,6,3,4,12,15,10,10,15,12,4,5,20,28,21,24,40,35,14,14,35,40,
 %T A070871 24,21,28,20,5,6,30,45,36,44,77,70,30,33,88,104,65,60,84,63,18,18,63,
 %U A070871 84,60,65,104,88,33,30,70,77,44,36,45,30,6,7,42,66
 %N A070871 a(n) = A002487(n) * A002487(n+1) (Conway's alimentary function).
+%C A070871 Irregular triangle read by rows. The n-th row, containing 2^(n-1) elements, consists of the reciprocals of the first differences of the sequence formed by combining the first n levels of the Stern-Brocot tree, that is, the reciprocals of the first differences of A049455(n,k) / A049456(n,k) for k = 0, .., 2^(n-1). - _William P. Orrick_, Apr 25 2026
 %H A070871 Indranil Ghosh, <a href="/A070871/b070871.txt">Table of n, a(n) for n = 1..16384</a>
 %H A070871 Robert G. Wilson v, <a href="/A070871/a070871.jpg">Plot of first 4096 terms</a>
 %F A070871 Sum of reciprocals of k-th "chunk" (between two entries k) = 1 (for example for the third chunk, 1/3 + 1/6 + 1/6 + 1/3 = 1).
+%F A070871 Sum of the n-th row equals A052913(n-1). - _William P. Orrick_, Apr 25 2026
+%F A070871 Apart from c = 0, the entries in column c grow quadratically. The k-th entry in column c > 0, where k = 1 indexes the first appearance of an entry in that column, is given by a(c) * (k+1) * (k+2) - a(c+2^(floor(log_2(c)))) * (k+1) + a(c-2^(floor(log_2(c)))) * (k+2). The k-th entry in column 0 is k. - _William P. Orrick_, Apr 28 2026
+%e A070871 From _William P. Orrick_, Apr 25 2026: (Start)
+%e A070871 Array begins
+%e A070871   1;
+%e A070871   2,  2;
+%e A070871   3,  6,  6,  3;
+%e A070871   4, 12, 15, 10, 10, 15, 12,  4;
+%e A070871   5, 20, 28, 21, 24, 40, 35, 14, 14, 35, 40, 24, 21, 28, 20,  5;
+%e A070871   ...
+%e A070871 n = 3. The elements of the Stern-Brocot tree up to the third level, in left to right order, are 0/1, 1/3, 1/2, 2/3, 1/1. The first differences are 1/3, 1/6, 1/6, 1/3, whose reciprocals are 3, 6, 6, 3. (End)
 %p A070871 b:= proc(n) option remember; `if`(n<2, n,
 %p A070871      (q-> b(q)+(n-2*q)*b(n-q))(iquo(n, 2)))
 %p A070871     end:
@@ -18,7 +30,34 @@
 %o A070871 (Python)
 %o A070871 from functools import reduce
 %o A070871 def A070871(n): return sum(reduce(lambda x,y:(x[0],x[0]+x[1]) if int(y) else (x[0]+x[1],x[1]),bin(n)[-1:2:-1],(1,0)))*sum(reduce(lambda x,y:(x[0],x[0]+x[1]) if int(y) else (x[0]+x[1],x[1]),bin(n+1)[-1:2:-1],(1,0))) # _Chai Wah Wu_, May 05 2023
-%Y A070871 Cf. A002487, A070872-A070874.
-%K A070871 nonn
+%o A070871 (PARI) a(n)= my(t=[0, 1]); foreach(binary(n), b, t[2-b]+=t[2-!b]); t[1]*t[2]; \\ _Ruud H.G. van Tol_, Apr 26 2026
+%o A070871 (SageMath)
+%o A070871 def A070871(n):
+%o A070871     curN = Integer(n)
+%o A070871     indList = []
+%o A070871     rNext = curN.nbits()
+%o A070871     while curN > 0:
+%o A070871         r = rNext
+%o A070871         c = curN - 2^(r-1)
+%o A070871         if c > 0:
+%o A070871             rNext = c.nbits()
+%o A070871             j = r - rNext
+%o A070871             indList.append(j)
+%o A070871         else:
+%o A070871             co2 = r
+%o A070871             co1 = co2 + 1
+%o A070871             co0 = 0
+%o A070871         curN = c
+%o A070871     for i in range(len(indList)-1,-1,-1):
+%o A070871         j = indList[i]
+%o A070871         newCo2 = co2 * (j+1) * (j+2) - co1 * (j+1) + co0 * (j+2)
+%o A070871         newCo1 = newCo2 + co2 * (2*j+4) - co1 + co0
+%o A070871         co0 = co2
+%o A070871         co2 = newCo2
+%o A070871         co1 = newCo1
+%o A070871     return(co2)         # _William P. Orrick_, Apr 28 2026
+%Y A070871 Cf. A002487, A049455, A049456, A070872, A070873, A070874, A070924, A070926, A071883.
+%Y A070871 Sequences related to iterating the map n -> a(n): A071884, A071885, A071886, A071887.
+%K A070871 nonn,tabf,easy,look,changed
 %O A070871 1,2
 %A A070871 _N. J. A. Sloane_, May 19 2002
