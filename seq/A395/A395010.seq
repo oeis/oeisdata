@@ -1,0 +1,46 @@
+%I A395010 #32 May 01 2026 16:59:53
+%S A395010 0,1,3,11,27,76,189,501,1250,3204,8029,20331,50961,128220,321195,
+%T A395010 805518,2015789,5045221,12613135,31527094,78749696,196649839,
+%U A395010 490840911,1224808251,3055280097,7619502751,18997222918,47354462725,118016060834,294064182773
+%N A395010 Sum of total path lengths over all unlabeled rooted unordered unary-binary trees with n nodes, where the root has exactly one child (except for n=1, where the tree is a single node with total path length 0), internal nodes have 1 or 2 children, and left/right are indistinguishable.
+%C A395010 For n=1, the unique tree is a single node; its total path length is 0.
+%C A395010 For n >= 2, a(n) is the sum, over all isomorphism classes of such trees with n nodes, of the sum of the depths of all nodes.
+%C A395010 a(n) / A001190(n) gives the expected total path length for a uniformly random tree in this class (for n >= 2).
+%C A395010 This expected value can be used to validate Monte Carlo and MCMC samplers for unlabeled trees.
+%F A395010 a(1) = 0. For n >= 2, a(n) = C(n-1), where C(1) = 1, and for m >= 2: C(m) = C(m-1) + Sum_{i=1..floor((m-1)/2)} F(i, m-1-i), with F(i,j) = W(i)*C(j) + W(j)*C(i) if i < j, F(i,i) = C(i)*(W(i)+1), and W(n) = A001190(n+1).
+%e A395010 a(1) = 0: the unique tree with one node has total path length 0.
+%e A395010 a(4) = 11: the two trees with 4 nodes have total path lengths 6 and 5.
+%o A395010 (Python)
+%o A395010 from functools import lru_cache
+%o A395010 @lru_cache(maxsize=None)
+%o A395010 def A001190(n):
+%o A395010     if n <= 1: return n
+%o A395010     m = n//2 + n % 2
+%o A395010     return sum(A001190(i+1)*A001190(n-1-i) for i in range(m-1)) + (1 - n % 2)*A001190(m)*(A001190(m)+1)//2 # _Chai Wah Wu_, Jan 14 2022
+%o A395010 def a(n_max):
+%o A395010     W = [0]*(n_max+2)
+%o A395010     for m in range(1, n_max):
+%o A395010         W[m] = A001190(m+1)
+%o A395010     B = [0]*(n_max+2)
+%o A395010     C = [0]*(n_max+2)
+%o A395010     C[1] = 1
+%o A395010     for m in range(2, n_max):
+%o A395010         total = C[m-1]
+%o A395010         for i in range(1, (m-1)//2+1):
+%o A395010             j = m-1-i
+%o A395010             if i < j:
+%o A395010                 total += W[i]*C[j] + W[j]*C[i]
+%o A395010             else:
+%o A395010                 total += C[i]*(W[i]+1)
+%o A395010         B[m] = total
+%o A395010         C[m] = B[m] + m*W[m]
+%o A395010     a = [0]*(n_max+1)
+%o A395010     a[1] = 0
+%o A395010     for N in range(2, n_max+1):
+%o A395010         m = N-1
+%o A395010         a[N] = C[m]
+%o A395010     return a[1:]
+%Y A395010 Cf. A001190 (number of trees), A036774 (labeled case).
+%K A395010 nonn,new
+%O A395010 1,3
+%A A395010 _Vladimiro Miranda_ and _Henrique Evora_, Apr 09 2026

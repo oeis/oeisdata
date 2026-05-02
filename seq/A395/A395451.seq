@@ -1,0 +1,40 @@
+%I A395451 #9 May 01 2026 18:23:30
+%S A395451 1,0,-2,0,-6,8,0,-24,12,-48,0,-120,48,72,-48,384,0,-720,240,144,-192,
+%T A395451 -144,288,-3840,0,-5040,1440,720,1152,-960,-288,-1296,1152,576,-2304,
+%U A395451 46080,0,-40320,10080,4320,2880,-5760,-1440,-2304,-1728,5760,1152,2592,-9216,-3456,23040,-645120
+%N A395451 Irregular triangle read by rows: the coefficients of the integer partitions of n in A334439 order.
+%C A395451 The coefficients correspond to partitions sorted first by sum, then by length, and finally reverse-lexicographically (A334439).
+%C A395451 The coefficients are for example used in the computation of Lagrange inversion (A395450).
+%F A395451 T(n, p) = (-1)^length(p) * Product_{(v, c) in p} c! * ((v + 1)!)^c, where p is a partition of n, and v a part of p occurring c times.
+%e A395451 Triangle starts:
+%e A395451   [0] [1]
+%e A395451   [1] [0,    -2]
+%e A395451   [2] [0,    -6,    8]
+%e A395451   [3] [0,   -24,   12, -48]
+%e A395451   [4] [0,  -120,   48,  72,  -48,  384]
+%e A395451   [5] [0,  -720,  240, 144, -192, -144,  288, -3840]
+%e A395451   [6] [0, -5040, 1440, 720, 1152, -960, -288, -1296, 1152, 576, -2304, 46080]
+%e A395451 .
+%e A395451 T(6, [3, 1, 1, 1]) = (-1)^4 * (1! * (3 + 1)!^1) * (3! * (1 + 1)!^3) = 1152.
+%o A395451 (SageMath)
+%o A395451 def PartitionCoefficient(part, weight) -> int:
+%o A395451     coeff = -1 if len(part) % 2 else 1
+%o A395451     # p.to_exp() returns a list of multiplicities where the
+%o A395451     # n-th entry (0-indexed) is the count of the part (n+1).
+%o A395451     for val, cnt in enumerate(part.to_exp(), 1):
+%o A395451         if cnt > 0: coeff *= weight[cnt] * (weight[val + 1] ** cnt)
+%o A395451     return coeff
+%o A395451 def Trow(n: int) -> list[int]:
+%o A395451     if n == 0: return [1]
+%o A395451     F = [1] * (2 * n + 1) # precomputed list of factorials F.
+%o A395451     for k in range(1, 2 * n + 1): F[k] = F[k - 1] * k
+%o A395451     row = [0]
+%o A395451     for j in range(1, n + 1):
+%o A395451         for p in Partitions(n, length=j):
+%o A395451             row.append(PartitionCoefficient(p, F))
+%o A395451     return row
+%o A395451 for n in range(10): print(Trow(n))
+%Y A395451 Cf. A000165 (main diagonal), A334439, A395450.
+%K A395451 sign,tabf,new
+%O A395451 0,3
+%A A395451 _Peter Luschny_, Apr 29 2026
