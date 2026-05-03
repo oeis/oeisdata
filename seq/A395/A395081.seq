@@ -1,0 +1,40 @@
+%I A395081 #6 May 02 2026 14:09:34
+%S A395081 0,0,1,1,2,1,1,2,3,1,1,1,2,1,1,3,4,1,1,1,3,1,2,2,1,2,2,1,1,4,5,1,1,1,
+%T A395081 4,1,2,1,3,1,1,2,3,1,1,1,2,2,1,3,2,1,1,5,6,1,1,1,5,1,2,1,4,1,3,2,1,2,
+%U A395081 4,1,1,1,2,1,3,1,2,3,1,3,3,1,1,2,2,2,1,4,2,1,1,6
+%N A395081 Triangle read by rows: Flat run-length-encoded partition representations where the partitions of n are sorted first by length, and then reverse-lexicographically (A334439).
+%C A395081 Each partition lambda is represented as a flat list [v_1, m_1, v_2, m_2, ...] where v_i is the part value and m_i is its multiplicity. The empty partition is for n = 0 represented as [0, 0] to maintain a consistent flat list format.
+%e A395081   [0] [0, 0]
+%e A395081   [1] [1, 1]
+%e A395081   [2] [2, 1, 1, 2]
+%e A395081   [3] [3, 1, 1, 1, 2, 1, 1, 3]
+%e A395081   [4] [4, 1, 1, 1, 3, 1, 2, 2, 1, 2, 2, 1, 1, 4]
+%e A395081   [5] [5, 1, 1, 1, 4, 1, 2, 1, 3, 1, 1, 2, 3, 1, 1, 1, 2, 2, 1, 3, 2, 1, 1, 5]
+%o A395081 (Python)
+%o A395081 def A395081(n: int) -> list[list[int]]:
+%o A395081     """ Returns a list of lists, where each inner list is a flat representation:
+%o A395081     [value_1, multiplicity_1, value_2, multiplicity_2, ...] """
+%o A395081     def gen(n, i):  # Generator
+%o A395081         if n == 0: yield []
+%o A395081         elif i == 1: yield [1, n]
+%o A395081         else:
+%o A395081             if n >= i:
+%o A395081                 for p in gen(n - i, min(n - i, i)):
+%o A395081                     if p and p[-2] == i:
+%o A395081                         new_p = list(p)
+%o A395081                         new_p[-1] += 1
+%o A395081                         yield new_p
+%o A395081                     else:
+%o A395081                         yield p + [i, 1]
+%o A395081             yield from gen(n, i - 1)
+%o A395081     if n == 0: return [[0, 0]] # [0, 0] represents [] by convention
+%o A395081     partitions = list(gen(n, n))
+%o A395081     # Sort by length: length is sum of multiplicities (every second element)
+%o A395081     partitions.sort(key=lambda p: sum(p[1::2]))
+%o A395081     return partitions
+%o A395081 row = lambda n: [p for parts in A395081(n) for p in parts] # flatten
+%o A395081 for n in range(8): print([n], row(n))
+%Y A395081 Cf. A334439.
+%K A395081 nonn,tabf,new
+%O A395081 0,5
+%A A395081 _Peter Luschny_, May 02 2026
