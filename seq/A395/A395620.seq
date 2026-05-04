@@ -1,0 +1,37 @@
+%I A395620 #55 May 03 2026 12:28:37
+%S A395620 1,0,1,3,6,46,220,1540,0,96640,1003308,11577332,150147292,1804726032,
+%T A395620 24933668616,403256334824,5514533512944,96303188068728,
+%U A395620 1748437769928368,34553805131115392,670580814038650976,14155521644833590976,323811356025442369136,7129269277696485742416
+%N A395620 a(n) is the number of permutations of {1,2,...,n} such that for every k >= 1, the prefix sum p1 + p2 + ... + pk is never a perfect square.
+%C A395620 This sequence counts permutations where no positive prefix sum is a perfect square.
+%C A395620 The constraint is prefix-dependent, so early choices restrict all later valid permutations. In particular, square numbers are forbidden cumulative values, so the number of valid permutations grows slower than n! due to early elimination where prefix sums hit square numbers.
+%H A395620 Michael S. Branicky, <a href="/A395620/b395620.txt">Table of n, a(n) for n = 0..27</a>
+%F A395620 a(n) = dp(empty set, 0) where dp(S, s) be the number of ways to extend a partial permutation where S is the set of used elements and s is the current prefix sum and dp(S, s) = sum over all x not in S such that s + x is not a perfect square, of dp(S U {x}, s + x).
+%F A395620 a(k) = 0 for A000217(k) > 0 in A001110. - _Michael S. Branicky_, May 01 2026
+%e A395620 To calculate a(2), we consider all permutations of the set {1,2} and check if the sum of each prefix is ever a perfect square.
+%e A395620   {1,2} -> prefix sums are 1, 3 (not valid since 1 is a perfect square),
+%e A395620   {2,1} -> prefix sums are 2, 3 (no prefix sum is a perfect square).
+%e A395620 Since 1 permutation is valid (no prefix sum is a perfect square), we have a(2) = 1.
+%p A395620 b:= proc(s, p) option remember; `if`(s={}, 1, add(
+%p A395620       `if`(issqr(p+j), 0, b(s minus {j}, p+j)), j=s))
+%p A395620     end:
+%p A395620 a:= n-> b({$1..n},0):
+%p A395620 seq(a(n), n=0..15);  # _Alois P. Heinz_, May 02 2026
+%o A395620 (Python)
+%o A395620 from functools import cache
+%o A395620 def a(n):
+%o A395620     @cache
+%o A395620     def c(t, s): # count satisfying permutations where items in t must be placed and sum is s
+%o A395620         if s in squares: return 0
+%o A395620         if len(t) == 0: return 1
+%o A395620         S = set(t)
+%o A395620         return sum(c(tuple(sorted(S-{i})), s+i) for i in t)
+%o A395620     squares = set(i**2 for i in range(1, n+1))
+%o A395620     if n == 0 or sum(range(1, n+1)) in squares: return int(n == 0)
+%o A395620     return c(tuple(range(1, n+1)), 0)
+%o A395620 print([a(n) for n in range(18)]) # _Michael S. Branicky_, May 01 2026
+%Y A395620 Cf. A000142, A000217, A000290, A001110, A291504.
+%K A395620 nonn,new
+%O A395620 0,4
+%A A395620 _Edoardo Andrioli_, May 01 2026
+%E A395620 a(0) inserted, a(6) corrected and a(7) onward from _Michael S. Branicky_, May 01 2026
