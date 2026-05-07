@@ -1,7 +1,7 @@
-%I A005264 M3096 #113 Mar 02 2026 10:57:15
+%I A005264 M3096 #119 May 06 2026 08:37:19
 %S A005264 1,3,22,262,4336,91984,2381408,72800928,2566606784,102515201984,
 %T A005264 4575271116032,225649908491264,12187240730230528,715392567595403520,
-%U A005264 45349581052869924352,3087516727770990992896,224691760916830871873536
+%U A005264 45349581052869924352,3087516727770990992896,224691760916830871873536,17406010163637184225490944,1430047520046948331002540032
 %N A005264 Number of labeled rooted Greg trees with n nodes.
 %C A005264 A rooted Greg tree can be described as a rooted tree with 2-colored nodes where only the black nodes are counted and labeled and the white nodes have at least 2 children. - _Christian G. Bower_, Nov 15 1999
 %D A005264 N. J. A. Sloane and Simon Plouffe, The Encyclopedia of Integer Sequences, Academic Press, 1995 (includes this sequence).
@@ -37,14 +37,19 @@
 %F A005264 a(n) ~ n^(n-1) / (sqrt(2) * exp(n/2) * (2-exp(1/2))^(n-1/2)). - _Vaclav Kotesovec_, Jul 09 2013
 %F A005264 E.g.f.: -W(-(1+x)*exp(-1/2)/2)-1/2 where W is the Lambert W function. - _Robert Israel_, Mar 28 2017
 %e A005264 G.f. = x + 3*x^2 + 22*x^3 + 262*x^4 + 4336*x^5 + 91984*x^6 + 2381408*x^7 + ...
-%p A005264 T := proc(n,k) option remember; if k=0 and (n=0 or n=1) then return(1) fi; if k<0 or k>n then return(0) fi;
-%p A005264 (n-1)*T(n-1,k-1)+(3*n-k-4)*T(n-1,k)-(k+1)*T(n-1,k+1) end:
+%p A005264 T := proc(n,k) option remember; if k=0 and (n=0 or n=1) then return(1) fi; if k<0 or k>n then return(0) fi; (n-1)*T(n-1,k-1)+(3*n-k-4)*T(n-1,k)-(k+1)*T(n-1,k+1) end:
 %p A005264 A005264 := proc(n) add(T(n,k)*(-1)^k*2^(n-k-1), k=0..n-1) end;
 %p A005264 seq(A005264(n),n=1..17); # _Peter Luschny_, Nov 10 2012
+%p A005264 # Alternative: see the footer of the page for Sloane's 'Transforms'.
+%p A005264 with(gfun): with(ListTools): read transforms:
+%p A005264 o := [seq(2*n - 1, n = 1..19)]:
+%p A005264 a := [seq(-(-1)^c[1]*c[2], c in Enumerate(REVEGF(o)))];
+%p A005264 # after _Michael Somos_, _Peter Luschny_, May 04 2026
 %t A005264 max = 17; f[x_] := -1/2 - ProductLog[-E^(-1/2)*(x + 1)/2]; Rest[ CoefficientList[ Series[ f[x], {x, 0, max}], x]*Range[0, max]!] (* _Jean-François Alcover_, May 23 2012, after Peter Bala *)
 %t A005264 a[ n_] := If[ n < 1, 0, n! SeriesCoefficient[ InverseSeries[ Series[ Exp[-x] (1 + 2 x) - 1, {x, 0, n}]], n]]; (* _Michael Somos_, Jun 07 2012 *)
 %o A005264 (PARI) {a(n) = local(A); if( n<1, 0, for( k= 1, n, A += x * O(x^k); A = truncate( (1 + x) * exp(A) - 1 - A) ); n! * polcoeff( A, n))}; /* _Michael Somos_, Apr 02 2007 */
 %o A005264 (PARI) {a(n) = if( n<1, 0, n! * polcoeff( serreverse( exp( -x + x * O(x^n) ) * (1 + 2*x) - 1), n))}; /* _Michael Somos_, Mar 26 2011 */
+%o A005264 (PARI) a(n) = { my(A, v1 = vector(n, i, 0)); v1[1] = 1; for(i=2, n, A = 1; v1[i] = sum(j=1, i-1, A *= (i-n-j)/j; ((1-n)*A - (i-n)*A/(j+1)) * v1[i-j] * (2*j+1)) / (i-1)); v1[n] } \\ _Mikhail Kurkov_, May 04 2026
 %o A005264 (Maxima) a(n):=if n=1 then 1 else sum((n+k-1)!*sum(1/(k-j)!*sum(1/(l!*(j-l)!)*sum(((-1)^(i+l)*l^i*binomial(l,n+j-i-1)*2^(n+j-i-1))/i!,i,0,n+j-1),l,1,j),j,1,k),k,1,n-1); /* _Vladimir Kruchinin_, May 04 2012 */
 %o A005264 (SageMath)
 %o A005264 @CachedFunction
@@ -56,6 +61,6 @@
 %o A005264 [A005264(n) for n in (1..17)]  # _Peter Luschny_, Nov 10 2012
 %Y A005264 Inverse Stirling transform of A005172 (hence corrected and extended). - _John W. Layman_
 %Y A005264 Cf. A005263, A048159, A048160, A052300, A052301, A052302, A052303, A157142.
-%K A005264 nonn,nice,easy
+%K A005264 nonn,nice,easy,changed
 %O A005264 1,2
 %A A005264 _N. J. A. Sloane_
