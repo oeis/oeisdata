@@ -1,13 +1,13 @@
-%I A354794 #57 Apr 23 2026 04:04:29
+%I A354794 #73 May 09 2026 02:05:48
 %S A354794 1,0,1,0,1,1,0,4,3,1,0,27,19,6,1,0,256,175,55,10,1,0,3125,2101,660,
 %T A354794 125,15,1,0,46656,31031,9751,1890,245,21,1,0,823543,543607,170898,
 %U A354794 33621,4550,434,28,1,0,16777216,11012415,3463615,688506,95781,9702,714,36,1
 %N A354794 Triangle read by rows. The Bell transform of the sequence {m^m | m >= 0}.
 %C A354794 For the definition of the Bell transform see A264428. The Bell transform of {(-m)^m | m >= 0} is A039621. The numbers A039621(n, k) are known as the Lehmer-Comtet numbers of 2nd kind. We think it is more natural to use Bell_{n, k}({m^m}) as the basis for the definition (and let the triangle start at (0, 0)).
-%C A354794 T(n+1,k) is the number of partitions of 2*n-k labeled balls into a set of n subsets, by allocating the first n-k into their own subsets, then distributing the n remaining balls such that the n-k remaining subsets are nonempty. - _Natalia L. Skirrow_, Jan 03 2026
+%C A354794 T(n+1, k) is the number of partitions of 2*n-k labeled balls into a set of n subsets, by allocating the first n-k into their own subsets, then distributing the n remaining balls such that the n-k remaining subsets are nonempty. - _Natalia L. Skirrow_, Jan 03 2026
 %D A354794 Louis Comtet, Advanced Combinatorics. Reidel, Dordrecht, 1974, p. 139-140.
 %H A354794 Andrei Z. Broder, <a href="https://doi.org/10.1016/0012-365X(84)90161-4">The r-Stirling numbers</a>, Discrete Mathematics vol. 49 iss. 3 pp. 241-259, 1984.
-%H A354794 D. H. Lehmer, <a href="http://dx.doi.org/10.1216/RMJ-1985-15-2-461">Numbers Associated with Stirling Numbers and x^x</a>, Rocky Mountain J. Math., 15(2) 1985, pp. 461-475.
+%H A354794 D. H. Lehmer, <a href="https://doi.org/10.1216/RMJ-1985-15-2-461">Numbers Associated with Stirling Numbers and x^x</a>, Rocky Mountain J. Math., 15(2) 1985, pp. 461-475.
 %H A354794 Peter Luschny, <a href="https://oeis.org/wiki/User:Peter_Luschny/BellTransform">The Bell transform</a>.
 %H A354794 Peter Luschny, <a href="https://github.com/PeterLuschny/Gists/blob/main/BellTransformation.ipynb">Examples of the Bell transform, a SageMath notebook</a>.
 %H A354794 Math StackExchange, <a href="https://math.stackexchange.com/q/5088310">Is there a way to simplify this closed form for Stirling numbers of the second kind?</a>, 2025.
@@ -28,6 +28,10 @@
 %F A354794 T(n, k) = k * T(n, k+1) + T(n-1, k-1) + (n-k-1) * T(n-1, k) with T(n, 0) = 0^n, T(n, k) = 0 for k < 0 or k > n.
 %F A354794 T(n, k) = Sum_{j=0..n-k} binomial(n+j-1, k-1) * A075856(n-k, j).
 %F A354794 T(n+1, k+1) = Sum_{j=k..n} T(n, j) * A291978(j, k). (End)
+%F A354794 From _Peter Luschny_, May 08 2026: (Start)
+%F A354794 T(n, k) = (n!/k!) * [z^n] (1 - exp(-T(z)))^k where T(z) is the Cayley tree EGF (A000169).
+%F A354794 The row polynomials P(n, x) are given by Sum_{n>=0} P(n, x) * z^n/n! = exp(x*(1 - exp(W(-z)))) where W denotes Lambert's W function.
+%F A354794 P(n + 1, x) = x * Sum_{k=0..n) binomial(n, k) * k^k * P(n - k, x) = x * Sum_{k=0..n) A395701(n, k) * P(n - k, x) is a recurrence for the row polynomials starting with P(0, x) = 1. From this recurrence the recurrence of the coefficients given above by _Mikhail Kurkov_ can be derived. (End)
 %e A354794 Triangle T(n, k) begins:
 %e A354794   [0] 1;
 %e A354794   [1] 0,        1;
@@ -49,6 +53,11 @@
 %p A354794    if k < 0 or n < 0 then 0 elif k = 0 then 1 else
 %p A354794    m*R(n, k-1, m) + R(n-1, k, m+1) fi end:
 %p A354794 A039621 := (n, k) -> ifelse(n = 0, 1, R(k-1, n-k, n-k)):
+%p A354794 # Alternative: using the EGF.
+%p A354794 N := 9: x := 'x': z := 'z': T := series(-LambertW(-z), z, N + 1):
+%p A354794 F := exp(x*(1 - exp(-T))): EGF := series(F, z, N+1):
+%p A354794 A354794row := n -> local k; seq(coeff(simplify(coeff(EGF, z, n) * n!), x, k), k = 0..n):
+%p A354794 seq(A354794row(n), n = 0..N);  # _Peter Luschny_, May 08 2026
 %t A354794 Unprotect[Power]; Power[0, 0] = 1; pow[n_] := n^n;
 %t A354794 R = Range[0, 9]; T[n_, k_] := BellY[n, k, pow[R]];
 %t A354794 Table[T[n, k], {n, R}, {k, 0, n}] // Flatten
@@ -61,8 +70,26 @@
 %o A354794     return m * t(n, k - 1, m) + t(n - 1, k, m + 1)
 %o A354794 def A354794(n, k): return t(k - 1, n - k, n - k) if n != k else 1
 %o A354794 for n in range(9): print([A354794(n, k) for k in range(n + 1)])
-%Y A354794 Cf. A264428, A039621 (signed variant), A195979 (row sums), A000312 (column 1), A045531 (column 2), A281596 (column 3), A281595 (column 4), A000217 (diagonal 1), A215862 (diagonal 2), A354795 (matrix inverse), A137452 (Abel).
-%Y A354794 Cf. A075856, A291978, A395345, A394439.
-%K A354794 nonn,tabl
+%o A354794 (PARI) inverse_bell_matrix_row(n,f) = { my(A, v1 = vector(n-1, i, f(i)), v2 = vector(n, i, 0)); v2[1] = 1; for(i=2, n, A = 1; v2[i] = sum(j=1, i-1, A *= -(i-n-j)/j; ((1-n)*A - (i-n)*A/(j+1)) * v2[i-j] * v1[j]) / (i-1)); Vecrev(v2) }
+%o A354794 row(n) = if(n==0, [1], concat(0, inverse_bell_matrix_row(n,x->-(x-1)!))) \\ _Mikhail Kurkov_, May 08 2026
+%o A354794 (PARI)  \\ using function bell_matrix from A264428
+%o A354794 bell_matrix(n -> n^n, 9) \\ _Peter Luschny_, May 07 2026
+%o A354794 (SageMath)
+%o A354794 def A354794triangle(size: int) -> list[list[int]]:
+%o A354794     R.<x> = PolynomialRing(ZZ)
+%o A354794     mm = [1] + [m^m for m in range(1, size+1)]
+%o A354794     P = [R(1)]
+%o A354794     for n in range(size):
+%o A354794         Qrow = [0]*(n + 1)  # A395701
+%o A354794         binom = 1
+%o A354794         for m in range(n+1):
+%o A354794             if m > 0: binom = binom * (n - m + 1) // m
+%o A354794             Qrow[m] = binom * mm[m]
+%o A354794         P.append(x * sum(Qrow[m] * P[n-m] for m in range(n+1)))
+%o A354794     return [p.list() for p in P]
+%o A354794 for row in A354794triangle(9): print(row)  # _Peter Luschny_, May 08 2026
+%Y A354794 Cf. A264428, A039621 (signed variant), A195979 (row sums), A000312 (column 1), A045531 (column 2), A281596 (column 3), A281595 (column 4), A000217 (diagonal 1), A215862 (diagonal 2), A354795 (matrix inverse), A137452 (Abel), A000169 (Euler/Cayley's tree function).
+%Y A354794 Cf. A075856, A291978, A395345, A394439, A395701.
+%K A354794 nonn,tabl,changed
 %O A354794 0,8
 %A A354794 _Peter Luschny_, Jun 09 2022
