@@ -1,0 +1,47 @@
+%I A394183 #10 May 10 2026 22:44:27
+%S A394183 4,7,11,13,21,23,36,35,55,47,78,59,105,81,136,108,171,139,210
+%N A394183 Maximum number of steps before halting among all 2-state 2-symbol Turing machines on an n-cell circular tape, over all binary starting tapes and starting head positions.
+%C A394183 There are two working states A and B, one halt state H, and two symbols 0 and 1. For each pair (state, symbol), a transition writes 0 or 1, moves left or right on the circular tape, and enters A, B, or H, giving 12^4 = 20736 transition tables. The initial state is A. The maximum is taken over all transition tables, all binary starting tapes of length n, and all starting head positions.
+%C A394183 By circular rotation symmetry it suffices to check starting head position 0 and all 2^n binary tapes.
+%C A394183 A nonhalting run is detected once a running configuration (state, head position, tape contents) repeats. There are n*2^(n+1) running configurations, so every halting run halts within that many steps.
+%C A394183 Terms a(1) through a(19) were verified by exhaustive enumeration.
+%C A394183 The tape cells are arranged cyclically: a move from cell i goes to i-1 or i+1 modulo n. Thus for n = 1 both moves return to the same cell, for n = 2 both left and right moves go to the other cell, and for n >= 3 the cells form the cycle graph C_n.
+%F A394183 Empirically, for odd n = 5, 7, ..., 19, a(n) = (n+1)*(n+2)/2.
+%e A394183 For n = 1, all 20736 transition tables and 2 starting tapes are checked; the maximum halting time is 4.
+%e A394183 For n = 19, 20736*2^19 = 10871635968 runs were checked. The maximum halting time is a(19) = 210; 7728597856 runs halt and 3143038112 runs loop.
+%o A394183 (Python)
+%o A394183 def A(n):
+%o A394183     def decode(m):
+%o A394183         T = []
+%o A394183         for _ in range(4):
+%o A394183             c = m % 12
+%o A394183             m //= 12
+%o A394183             T.append((c % 2, 1 if (c // 2) % 2 else -1, c // 4))
+%o A394183         return T
+%o A394183     best = 0
+%o A394183     step_limit = n * (1 << (n + 1))
+%o A394183     # By circular symmetry it suffices to start the head at position 0.
+%o A394183     for m in range(12**4):
+%o A394183         T = decode(m)
+%o A394183         for tape0 in range(1 << n):
+%o A394183             tape = tape0
+%o A394183             pos = 0
+%o A394183             state = 0
+%o A394183             steps = 0
+%o A394183             while state != 2 and steps < step_limit:
+%o A394183                 sym = (tape >> pos) & 1
+%o A394183                 write, move, state = T[2*state + sym]
+%o A394183                 if write:
+%o A394183                     tape |= 1 << pos
+%o A394183                 else:
+%o A394183                     tape &= ~(1 << pos)
+%o A394183                 pos = (pos + move) % n
+%o A394183                 steps += 1
+%o A394183             if state == 2 and steps > best:
+%o A394183                 best = steps
+%o A394183     return best
+%o A394183 print([A(n) for n in range(1, 5)])
+%Y A394183 Cf. A386859.
+%K A394183 nonn,hard,more,new
+%O A394183 1,1
+%A A394183 _Reed Silverstein_, May 04 2026

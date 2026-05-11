@@ -1,4 +1,4 @@
-%I A354794 #79 May 09 2026 13:35:35
+%I A354794 #89 May 11 2026 01:14:50
 %S A354794 1,0,1,0,1,1,0,4,3,1,0,27,19,6,1,0,256,175,55,10,1,0,3125,2101,660,
 %T A354794 125,15,1,0,46656,31031,9751,1890,245,21,1,0,823543,543607,170898,
 %U A354794 33621,4550,434,28,1,0,16777216,11012415,3463615,688506,95781,9702,714,36,1
@@ -31,7 +31,10 @@
 %F A354794 From _Peter Luschny_, May 08 2026: (Start)
 %F A354794 T(n, k) = (n!/k!) * [z^n] (1 - exp(-T(z)))^k where T(z) is the Cayley tree EGF (A000169).
 %F A354794 The row polynomials P(n, x) are given by Sum_{n>=0} P(n, x) * z^n/n! = exp(x*(1 - exp(W(-z)))) where W denotes Lambert's W function.
-%F A354794 P(n + 1, x) = x * Sum_{k=0..n) binomial(n, k) * k^k * P(n - k, x) = x * Sum_{k=0..n) A395701(n, k) * P(n - k, x) is a recurrence for the row polynomials starting with P(0, x) = 1. From this recurrence the recurrence of the coefficients given above by _Mikhail Kurkov_ can be derived. (End)
+%F A354794 P(n + 1, x) = x * Sum_{k=0..n) binomial(n, k) * k^k * P(n - k, x) = x * Sum_{k=0..n) A395701(n, k) * P(n - k, x) is a recurrence for the row polynomials starting with P(0, x) = 1. From this recurrence the recurrence of the coefficients given above by _Mikhail Kurkov_ can be derived.(End)
+%F A354794 From _Peter Luschny_, May 10 2026: (Start)
+%F A354794 The rows of the array T(n + k, k) are given by linear recurrences with recurrence coefficients RCrow(n) = [(-1)^(j + 1)*binomial(2*n + 1, j), j = 1..2*n+1].
+%F A354794 (Sum_{k=0..n} A395929(n, k) * x^k) / (1 - x)^(2*n + 1) is the generating function of the n-th row of the array A. (See A395908 for the case n = 3.) (End)
 %e A354794 Triangle T(n, k) begins:
 %e A354794   [0] 1;
 %e A354794   [1] 0,        1;
@@ -43,6 +46,16 @@
 %e A354794   [7] 0,    46656,    31031,    9751,   1890,   245,   21,   1;
 %e A354794   [8] 0,   823543,   543607,  170898,  33621,  4550,  434,  28,  1;
 %e A354794   [9] 0, 16777216, 11012415, 3463615, 688506, 95781, 9702, 714, 36, 1;
+%e A354794 .
+%e A354794 Seen as an array A(n, k) = T(n + k, k):
+%e A354794   [0]  1,     1,      1,       1,        1,        1, ... A000012
+%e A354794   [1]  0,     1,      3,       6,       10,       15, ... A000217
+%e A354794   [2]  0,     4,     19,      55,      125,      245, ... A215862
+%e A354794   [3]  0,    27,    175,     660,     1890,     4550, ... A395908
+%e A354794   [4]  0,   256,   2101,    9751,    33621,    95781, ...
+%e A354794   [5]  0,  3125,  31031,  170898,   688506,  2263065, ...
+%e A354794   [6]  0, 46656, 543607, 3463615, 15958405, 59411605, ...
+%e A354794         A000312,A045531, A281596,  A281595
 %p A354794 T := (n, k) -> if n = k then 1 else
 %p A354794 add((-1)^j*(n-j-1)^(n-1)/(j!*(k-1-j)!), j = 0.. k-1) fi:
 %p A354794 seq(seq(T(n, k), k = 0..n), n = 0..9);
@@ -70,10 +83,24 @@
 %o A354794     return m * t(n, k - 1, m) + t(n - 1, k, m + 1)
 %o A354794 def A354794(n, k): return t(k - 1, n - k, n - k) if n != k else 1
 %o A354794 for n in range(9): print([A354794(n, k) for k in range(n + 1)])
-%o A354794 (PARI) inverse_bell_matrix_row(n,f) = { my(A, v1 = vector(n-1, i, f(i)), v2 = vector(n, i, 0)); v2[1] = 1; for(i=2, n, A = 1; v2[i] = sum(j=1, i-1, A *= -(i-n-j)/j; ((1-n)*A - (i-n)*A/(j+1)) * v2[i-j] * v1[j]) / (i-1)); Vecrev(v2) }
-%o A354794 row(n) = if(n==0, [1], concat(0, inverse_bell_matrix_row(n,x->-(x-1)!))) \\ _Mikhail Kurkov_, May 08 2026
+%o A354794 (Python)
+%o A354794 from math import factorial
+%o A354794 def ArrayRow(n: int, size: int) -> list[int]:
+%o A354794     if size <= 0: return []
+%o A354794     row = [1 if n == 0 else 0]
+%o A354794     for k in range(1, size):
+%o A354794         total = 0; comb = 1
+%o A354794         for j in range(k):
+%o A354794             term = comb * pow(n + k - j - 1, n + k - 1)
+%o A354794             total += term if j % 2 == 0 else -term
+%o A354794             comb = comb * (k - 1 - j) // (j + 1)
+%o A354794         row.append(total // factorial(k - 1))
+%o A354794     return row
+%o A354794 for n in range(8): print([n], ArrayRow(n, 9))  # _Peter Luschny_, May 10 2026
 %o A354794 (PARI)  \\ using function bell_matrix from A264428
 %o A354794 bell_matrix(n -> n^n, 9) \\ _Peter Luschny_, May 07 2026
+%o A354794 (PARI) inverse_bell_matrix_row(n,f) = { my(A, v1 = vector(n-1, i, f(i)), v2 = vector(n, i, 0)); v2[1] = 1; for(i=2, n, A = 1; v2[i] = sum(j=1, i-1, A *= -(i-n-j)/j; ((1-n)*A - (i-n)*A/(j+1)) * v2[i-j] * v1[j]) / (i-1)); Vecrev(v2) }
+%o A354794 row(n) = if(n==0, [1], concat(0, inverse_bell_matrix_row(n,x->-(x-1)!))) \\ _Mikhail Kurkov_, May 08 2026
 %o A354794 (PARI) bell_matrix_column(n, k, f) = { my(A, v1 = vector(n-1, i, f(i)), v2 = vector(n, i, 0)); v2[1] = 1; for(i=2, n, A = 1; v2[i] = sum(j=1, i-1, A *= (i+k-j)/j; ((k+1)*A - (i+k)*A/(j+1)) * v2[i-j] * v1[j]) / (i-1)); v2 } \\ computes first n elements of the k-th column starting from the first nonzero element (equals 1)
 %o A354794 column(n,k) = bell_matrix_column(n, k, x->x^x) \\ _Mikhail Kurkov_, May 09 2026
 %o A354794 (SageMath)
@@ -90,8 +117,8 @@
 %o A354794         P.append(x * sum(Qrow[m] * P[n-m] for m in range(n+1)))
 %o A354794     return [p.list() for p in P]
 %o A354794 for row in A354794triangle(9): print(row)  # _Peter Luschny_, May 08 2026
-%Y A354794 Cf. A264428, A039621 (signed variant), A195979 (row sums), A000312 (column 1), A045531 (column 2), A281596 (column 3), A281595 (column 4), A000217 (diagonal 1), A215862 (diagonal 2), A354795 (matrix inverse), A137452 (Abel), A000169 (Euler/Cayley's tree function).
-%Y A354794 Cf. A075856, A291978, A395345, A394439, A395701.
+%Y A354794 Cf. A264428, A039621 (signed variant), A195979 (row sums), A000312 (column 1), A045531 (column 2), A281596 (column 3), A281595 (column 4), A000217 (row 1), A215862 (row 2), A395908 (row 3), A354795 (matrix inverse), A137452 (Abel), A000169 (Euler/Cayley's tree function).
+%Y A354794 Cf. A075856, A291978, A395345, A394439, A395701, A395929, A395908.
 %K A354794 nonn,tabl,changed
 %O A354794 0,8
 %A A354794 _Peter Luschny_, Jun 09 2022
