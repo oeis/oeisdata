@@ -1,0 +1,45 @@
+%I A395177 #14 May 11 2026 19:29:19
+%S A395177 2,21,52,68,135,198,155,385,294,469,488,648,819,497,744,999,970,1250,
+%T A395177 776,1485,1793,1692,1143,1570,2013,2460,2431,1610,2899,2145,2700,2702,
+%U A395177 3263,3318,3822,2189,3705,3523,4365,4048,4880,2892,3679,4494,5584,5325,5355,6160
+%N A395177 a(n) is the Frobenius number for the primitive Pythagorean triple (A046086(n), A046087(n), A020882(n)).
+%H A395177 Felix Huber, <a href="/A395177/b395177.txt">Table of n, a(n) for n = 1..2000</a>
+%F A395177 a(n) = A380697(2^(A046086(n)-2)+2^(A046087(n)-2)+2^(A020882(n)-2)). - _Pontus von Brömssen_, May 06 2026
+%e A395177 a(2) = F(5, 12, 13) = 21: 21 is not representable because 21, 21 - 12 = 9, and 21 - 13 = 8 are not multiples of 5; but the consecutive integers 22 = 12 + 2*5, 23 = 13 + 2*5, 24 = 2*12, 25 = 5*5, and 26 = 2*13 are representable, hence all n >= 22 are representable.
+%p A395177 f := proc(n, k, m) option remember;
+%p A395177     local b, d, i, p, q, r, s, v, w;
+%p A395177     r := irem(k, n);
+%p A395177     s := irem(m, n);
+%p A395177     d := Vector(n, 'fill = infinity'); d[1] := -1;
+%p A395177     b := Vector(n, 'fill = false');
+%p A395177     for i to n do
+%p A395177         p := 0; q := infinity;
+%p A395177         for v to n do
+%p A395177             if not b[v] and d[v] < q then p := v; q := d[v] end if
+%p A395177         end do;
+%p A395177         if p = 0 then break end if;
+%p A395177         b[p] := true;
+%p A395177         v := 1 + irem(p - 1 + r, n); d[v] := min(d[v], q + k);
+%p A395177         w := 1 + irem(p - 1 + s, n); d[w] := min(d[w], q + m);
+%p A395177     end do;
+%p A395177     max(seq(d[v], v = 1 .. n)) - (n - 1)
+%p A395177 end proc:
+%p A395177 A395177List := proc(N) # All terms with Hypotenuse <= N
+%p A395177     option remember;
+%p A395177     local l, u, v, x, y;
+%p A395177     l := [];
+%p A395177     for x from 2 to floor(sqrt(N)) do
+%p A395177         for y to min(x - 1, floor(sqrt(N - x^2))) do
+%p A395177             if gcd(x, y) = 1 and is(x - y, odd) then
+%p A395177                 u := 2*x*y; v := x^2 - y^2;
+%p A395177                 l := [op(l), [x^2 + y^2, max(u, v), min(u, v)]]
+%p A395177             end if
+%p A395177         end do
+%p A395177     end do;
+%p A395177     map(z -> f(op(z)), sort(l, (i, j)-> i[1] < j[1] or (i[1] = j[1] and i[2] < j[2])));
+%p A395177 end proc:
+%p A395177 A395177List(305);
+%Y A395177 Cf. A020882, A046086, A046087, A069755, A069758, A069762, A079326, A138989, A380442, A380697, A394178.
+%K A395177 nonn,new
+%O A395177 1,1
+%A A395177 _Felix Huber_, May 05 2026

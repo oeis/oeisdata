@@ -1,0 +1,41 @@
+%I A395929 #9 May 11 2026 03:34:50
+%S A395929 1,0,1,0,4,-1,0,27,-14,2,0,256,-203,58,-6,0,3125,-3344,1432,-292,24,0,
+%T A395929 46656,-62921,35892,-10860,1748,-120,0,823543,-1340730,955110,-382120,
+%U A395929 90780,-12168,720,0,16777216,-32009911,27340950,-13582930,4248040,-837996,96696,-5040
+%N A395929 Triangle read by rows: T(n, k) = Sum_{r=1..k} binomial(2*n + 1, k - r) * Sum_{j=0..r-1} (-1)^(k - r + j) * (n + r - 1 - j)^(n + r - 1)/(j! * (r - 1 - j)!) for k > 0, and T(n, 0) = 0^n.
+%F A395929 (Sum_{k=0..n} T(n, k) * x^k) / (1 - x)^(2*n + 1) is the generating function of row n of array A354794. Sequence A395908 shows the case n = 3.
+%e A395929 Triangle starts:
+%e A395929   [0]  1;
+%e A395929   [1]  0,      1;
+%e A395929   [2]  0,      4,       -1;
+%e A395929   [3]  0,     27,      -14,      2;
+%e A395929   [4]  0,    256,     -203,     58,      -6;
+%e A395929   [5]  0,   3125,    -3344,   1432,    -292,    24;
+%e A395929   [6]  0,  46656,   -62921,  35892,  -10860,  1748,   -120;
+%e A395929   [7]  0, 823543, -1340730, 955110, -382120, 90780, -12168, 720;
+%p A395929 T := (n, k) -> local r, j; ifelse(n=0, 1, add(binomial(2*n+1, k-r) * add((-1)^(k-r+j) * (n+r-1-j)^(n+r-1) / (j!*(r-1-j)!), j = 0..r-1), r = 1..k)): seq(print(seq(T(n, k), k = 0..n)), n = 0..8);
+%o A395929 (Python)
+%o A395929 def Trow(n: int) -> list[int]:
+%o A395929     if n == 0: return [1]
+%o A395929     row = [0] * (n + 1)
+%o A395929     fact = 1
+%o A395929     for k in range(1, n + 1):
+%o A395929         if k > 1: fact *= (k - 1)
+%o A395929         total = 0; binom = 1
+%o A395929         for j in range(k):
+%o A395929             term = binom * pow(n + k - 1 - j, n + k - 1)
+%o A395929             total += term if j % 2 == 0 else -term
+%o A395929             binom = binom * (k - 1 - j) // (j + 1)
+%o A395929         sk = total // fact
+%o A395929         coeff = 1
+%o A395929         for t in range(k, n + 1):
+%o A395929             row[t] += coeff * sk
+%o A395929             shift = t - k + 1
+%o A395929             if t < n:
+%o A395929                 coeff = -coeff * (2 * (n + 1) - shift) // shift
+%o A395929     return row
+%o A395929 for n in range(10): print([n], Trow(n))
+%Y A395929 Cf. A000312 (column 1), A001147 (row sums), A354794, A395908.
+%K A395929 sign,tabl,new
+%O A395929 0,5
+%A A395929 _Peter Luschny_, May 10 2026
