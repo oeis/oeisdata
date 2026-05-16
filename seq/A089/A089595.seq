@@ -1,4 +1,4 @@
-%I A089595 #9 Dec 16 2023 13:10:54
+%I A089595 #18 May 15 2026 10:14:56
 %S A089595 1,0,1,-1,1,1,-3,0,2,1,-2,-1,1,3,1,-7,-1,1,2,4,1,-5,-4,0,3,3,5,1,-8,
 %T A089595 -3,-1,1,5,4,6,1,-3,-5,-1,2,2,7,5,7,1,-13,-2,-2,1,5,3,9,6,8,1,-10,-9,
 %U A089595 -1,1,3,8,4,11,7,9,1,-17,-7,-5,0,4,5,11,5,13,8,10,1,-7,-12,-4,-1,1,7,7,14,6,15,9,11,1,-18,-5,-7,-1,3,2,10,9,17,7
@@ -7,12 +7,57 @@
 %F A089595 T(n, 2*k) = T(n-1, k) = T(n, k) - A002487(k).
 %F A089595 T(n, 2*k+1) = T(n, 2*k) + T(n, 2*k+2); T(0, 0)=1, T(0, 1)=0.
 %F A089595 The k-th column is an arithmetic progression with : T(n, k) = T(0, k) + n* A002487(k).
-%e A089595 row n=0 : 1, 0, -1, -3, -2, -7, -5, -8, -3, -13, -10, -17, -7, -18, -11, ...
-%e A089595 row n=1 : 1, 1, 0, -1, -1, -4, -3, -5, -2, -9, -7, -12, -5, -13, ...
-%e A089595 row n=2 : 1, 2, 1, 1, 0, -1, -1, -2, -1, -5, -4, -7, -3, ...
-%e A089595 row n=3 : 1, 3, 2, 3, 1, 2, 1, 1, 0, -1, -1, -2, -1, ...
-%e A089595 row n=4 : 1, 4, 3, 5, 2, 5, 3, 4, 1, 3, 2, 3, 1, ...
+%F A089595 From _William P. Orrick_, May 14 2026: (Begin)
+%F A089595 Negation of row n = 0 is A156140.
+%F A089595 Negation of row n = 1 is A321154.
+%F A089595 T(n, 2^n - j) = -T(n, 2^n + j) = A002487(j) for n >= 0, 0 <= j <= 2^n.
+%F A089595 T(n, k) = 1 if k = 0; T(n, k) = T(r, c) * (n - r + 2) - T(r+1, c), where r = floor(log_2(k)), c = n - 2^(r - 1), if k > 0. (End)
+%e A089595 Table array begins
+%e A089595   row n=0 : 1, 0, -1, -3, -2, -7, -5, -8, -3, -13, -10, -17, -7, -18, -11, ...
+%e A089595   row n=1 : 1, 1, 0, -1, -1, -4, -3, -5, -2, -9, -7, -12, -5, -13, ...
+%e A089595   row n=2 : 1, 2, 1, 1, 0, -1, -1, -2, -1, -5, -4, -7, -3, ...
+%e A089595   row n=3 : 1, 3, 2, 3, 1, 2, 1, 1, 0, -1, -1, -2, -1, ...
+%e A089595   row n=4 : 1, 4, 3, 5, 2, 5, 3, 4, 1, 3, 2, 3, 1, ...
+%e A089595   ...
+%e A089595 From _William P. Orrick_, May 14 2026: (Start)
+%e A089595 Negations of rows may be read off from the denominators of region labels in horizontal transections of the topograph as presented below. In every transection the sequence of numerators is A002487.
+%e A089595        |_____________________________________________________________________________
+%e A089595        |
+%e A089595        A                              1/2
+%e A089595        |_________________________________________________________________
+%e A089595        |                                                                 |
+%e A089595        B                      1/1                                        |
+%e A089595        |_____________________________________                     _______|_______
+%e A089595        |                                     |                   |               |
+%e A089595        C              1/0                    |                   |      2/3      |
+%e A089595 0/(-1) |__________________              _____|______          ___|___         ___|___
+%e A089595        |                  |            |            |        |       |       |       |
+%e A089595        D       1/(-1)     |            |     2/1    |        |  3/4  |       |  3/5  |
+%e A089595        |________     _____|_____    ___|___      ___|___   __|__   __|__     |       |
+%e A089595        |        |   |           |  |       |    |       | |     | |     |
+%e A089595        E 1/(-2) |   |   2/(-1)  |  |  3/1  |    |  3/2  | | 4/5 | | 5/7 |
+%e A089595        |___     |   |           |  |       |    |       | |     | |     |
+%e A089595        |   |
+%e A089595   The horizontal transection at the point marked C contains denominators -1, 0, 1, 3, 2, ..., which is the negation of row 0. Similarly, horizontal transections at D and E give negations of rows 1 and 2. The table may be extended upward, that is, to negative indices n. The horizontal transections at points B and A give negations of rows n = -1 and  = -2, with terms -1, 1, 2, 5, 3, 10, ... and -1, 2, 3, 7, 4, 13, .... This extension is compatible with the recurrence on rows and with the arithmetic progression property of columns. (End)
+%o A089595 (SageMath)
+%o A089595 def T(rw,cl):              # Works for all integer rw.
+%o A089595     curCl = Integer(cl)
+%o A089595     curRw = Integer(rw)
+%o A089595     indList = []
+%o A089595     while curCl > 0:
+%o A089595         nextRw = curCl.nbits()
+%o A089595         indList.append(curRw - nextRw)
+%o A089595         curCl = curCl - 2^(nextRw-1)
+%o A089595         curRw = nextRw
+%o A089595     co1 = 1
+%o A089595     co0 = 1
+%o A089595     for i in range(len(indList)-1,-1,-1):
+%o A089595         newCo1 = co1 * (indList[i]+2) - co0
+%o A089595         co0 = newCo1 + co1
+%o A089595         co1 = newCo1
+%o A089595     return(co1)            # _William P. Orrick_, May 14 2026
 %Y A089595 Cf. A049456, A070878, A070879, A049455, A002487.
-%K A089595 sign,tabl
+%Y A089595 Negations of rows: A156140, A321154.
+%K A089595 sign,tabl,changed
 %O A089595 0,7
 %A A089595 _Philippe Deléham_, Dec 30 2003

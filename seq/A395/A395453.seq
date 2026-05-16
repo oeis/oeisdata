@@ -1,0 +1,53 @@
+%I A395453 #30 May 15 2026 03:45:52
+%S A395453 1,0,-1,0,-1,2,0,-1,5,-5,0,-1,6,3,-21,14,0,-1,7,7,-28,-28,84,-42,0,-1,
+%T A395453 8,8,4,-36,-72,-12,120,180,-330,132,0,-1,9,9,9,-45,-90,-45,-45,165,
+%U A395453 495,165,-495,-990,1287,-429
+%N A395453 Triangle of the Lagrange inversion coefficients for ordinary formal power series, indexed by partitions in A334439 order.
+%C A395453 The terms T(n, lambda) are the coefficients of the compositional inverse g of f, where g(f(x)) = x, for the formal power series f(x) = Sum_{j>=1} a_j * x^j with a_1 = 1. Here, lambda is a partition index, and the partitions lambda |- n follow the sum-length-revlex ordering defined in A334439. The coefficients are given by T(n, lambda) = (-1)^k * (n + k)! / ((n + 1)! * Product_{v} m_v!), where k is the number of parts and m_v is the multiplicity of part v. The empty partition is included, with T(0, []) = 1. For n >= 1, each row begins with a zero column representing the absence of a constant term in the inversion, so T(n, []) = 0.
+%C A395453 With these notations, the Lagrange inversion formula in its ordinary form relates the coefficient of the inverse to the sum over partitions of a fixed length k. The contribution of all partitions of n with exactly k parts to the (n+1)-th coefficient of g(x) is:
+%C A395453   [x^(n+1)] g(x) (restricted to length k) = Sum_{lambda in P(n, k)} T(n, lambda) Product_{i=1..k} a_{lambda_i + 1} where P(n, k) = {lambda |- n and length(lambda) = k}.
+%C A395453 Summing the right-hand side over all partition lengths (k = 1 to n) yields the full coefficient of the inverse series
+%C A395453   [x^(n+1)] g(x) = Sum_{lambda |- n} T(n, lambda) Product_{i >= 1} a_{lambda_i + 1}.
+%C A395453 For example, choosing a_j = 1 for all j >= 1 gives f(x) = Sum_{j>=1} x^j = x / (1 - x). The compositional inverse is g(x) = x / (1 + x) = Sum_{n>=0} (-1)^n x^(n+1). So Product a_{lambda_i+1} = 1 for every partition, yielding the row sum identity Sum_{lambda |- n} T(n, lambda) = (-1)^n.
+%C A395453 The coefficients refine the Schröder triangle A086810. Let S(n, k) = Sum_{j} T(n, j), where the sum collects the partitions of the same length (adjacent terms with equal sign in the table below), then S(n, k) = (-1)^k*A086810(n, k). The triangle A086810 in turn refines the little Schröder numbers A001003, the counts of Schröder trees.
+%H A395453 Peter Luschny, <a href="/A395453/b395453.txt">Table of n, a(n) for n = 0..9320</a>, rows 0..25.
+%H A395453 Ira M. Gessel, <a href="https://doi.org/10.48550/arXiv.1609.05988">Lagrange inversion</a>, arXiv:1609.05988 [math.CO], Journal of Combinatorial Theory, Series A, vol 144, 212-249 (2016).
+%H A395453 Josef Hofbauer, <a href="https://www.mat.univie.ac.at/~slc/">Lagrange-Inversion</a>, Séminaire Lotharingien de Combinatoire, 6, B06a, (1982).
+%H A395453 Joseph Louis Lagrange, <a href="https://gdz.sub.uni-goettingen.de/id/PPN308900308?tify=%7B%22pages%22%3A%5B11%5D%2C%22view%22%3A%22info%22%7D">Nouvelle méthode pour résoudre les équations littérales par le moyen des séries</a>, Mémoires de l'Académie Royale des Sciences et Belles-Lettres de Berlin, vol. 24, pages 251-326; and Oeuvres complète, tome 3, Paris (1867), pp. 5-73.
+%H A395453 Peter Luschny, <a href="/A395453/a395453.py.txt">Python implementation</a>.
+%H A395453 D. Merlini, R. Sprugnoli and M. C. Verri, <a href="https://labdisia.disia.unifi.it/merlini/papers/LagrangeInversion.pdf">Lagrange Inversion: When and How</a>, Acta Appl Math 94, 233-249 (2006).
+%H A395453 Benjamin Sambale, <a href="https://arxiv.org/abs/2205.00879v6">An invitation to formal power series</a>, arXiv:2205.00879 [math.HO], Jahresbericht der Deutschen Mathematiker-Vereinigung (2022) 125:3-69.
+%H A395453 David E. Speyer, <a href="https://mathoverflow.net/questions/32099/">What is Lagrange Inversion good for?</a>, MathOverflow 2010.
+%H A395453 Wikipedia, <a href="https://en.wikipedia.org/wiki/Fa%C3%A0_di_Bruno&#39;s_formula">Faà di Bruno's formula</a>.
+%e A395453 Triangle starts:
+%e A395453   [0] [1]
+%e A395453   [1] [0, -1]
+%e A395453   [2] [0, -1, 2]
+%e A395453   [3] [0, -1, 5, -5]
+%e A395453   [4] [0, -1, 6,  3, -21,  14]
+%e A395453   [5] [0, -1, 7,  7, -28, -28,  84, -42]
+%e A395453   [6] [0, -1, 8,  8,   4, -36, -72, -12, 120, 180, -330, 132]
+%e A395453   [7] [0, -1, 9,  9,   9, -45, -90, -45, -45, 165,  495, 165, -495, -990, 1287, -429]
+%t A395453 Trow[n_] := Module[{F, row, sign, numer, denom, j},
+%t A395453   If[n == 0, Return[{1}]];
+%t A395453   F = FoldList[Times, 1, Range[2 n]];
+%t A395453   row = {0}; (* Convention *)
+%t A395453   Do[
+%t A395453     sign = If[OddQ[j], -1, 1];
+%t A395453     numer = F[[n + j + 1]]; (* This is (n+j)! *)
+%t A395453     Do[
+%t A395453       denom = F[[n + 2]] * Times @@ (F[[#[[2]] + 1]] & /@ Tally[p]);
+%t A395453       AppendTo[row, sign * (numer/denom)],
+%t A395453       {p, IntegerPartitions[n, {j}]}
+%t A395453     ],
+%t A395453     {j, 1, n}
+%t A395453   ];
+%t A395453 row ];
+%t A395453 Do[Print[Trow[n]], {n, 0, 9}];
+%o A395453 (Python) # See the Links.
+%Y A395453 A111785 is a variant without column 0 and a different order of partitions.
+%Y A395453 Cf. A395450 (exponential series), A334439 (partition order), A000108 (main diagonal), A002054 (subdiagonal), A033999 (row sums), A001003 (alternating row sums), A000041 (row length).
+%Y A395453 Cf. A086810 (Schröder trees), A001003.
+%K A395453 sign,tabf,new
+%O A395453 0,6
+%A A395453 _Peter Luschny_, May 02 2026

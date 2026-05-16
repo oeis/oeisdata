@@ -1,0 +1,48 @@
+%I A392323 #24 May 15 2026 17:07:06
+%S A392323 1,16,81,278,1365,7164,33858,161307,791722,3859473,18702843,90938441,
+%T A392323 442661923,2152542098,10466805572,50911253507,247627502461,
+%U A392323 1204355990572,5857651237681,28490444424887,138570638922700,673973346779694,3278051222866134,15943689810017260
+%N A392323 Number of ways to place non-attacking knights on a 4 X n chessboard.
+%C A392323 a(n) is the number of independent vertex sets in the 4 X n knight graph (including the empty set).
+%C A392323 a(4) = 1365 = A141243(4), since a 4 X 4 board is square.
+%C A392323 Computed via column-by-column transfer matrix DP: state encodes the row-occupation patterns of the previous two columns, and a new column placement is valid iff for every occupied row r in the new column, neither r +- 2 (in the previous column, knight move with column distance 1) nor r +- 1 (in column two steps back, knight move with column distance 2) is occupied.
+%H A392323 Eric Weisstein's World of Mathematics, <a href="https://mathworld.wolfram.com/KnightGraph.html">Knight Graph</a>
+%H A392323 Eric Weisstein's World of Mathematics, <a href="https://mathworld.wolfram.com/IndependentVertexSet.html">Independent Vertex Set</a>
+%H A392323 <a href="/index/Rec#order_21">Index entries for linear recurrences with constant coefficients</a>, signature (7,-10,13,-66,-109,318,263,258,-317,-1641,54,899,-227,535,293,-169,140,14,-92,-12,12).
+%F A392323 The growth rate is a(n)/a(n-1) -> lambda ~ 4.86377059012..., the largest real root of the reciprocal of the characteristic polynomial of the recurrence.
+%F A392323 G.f.: -(12*x^20 -104*x^18 -78*x^17 +154*x^16 -17*x^15 +96*x^14 +784*x^13 +370*x^12 +676*x^11 +896*x^10 -1574*x^9 -1811*x^8 +22*x^7 +518*x^6 +501*x^5 +87*x^4 -142*x^3 -21*x^2 +9*x +1) / (12*x^21 -12*x^20 -92*x^19 +14*x^18 +140*x^17 -169*x^16 +293*x^15 +535*x^14 -227*x^13 +899*x^12 +54*x^11 -1641*x^10 -317*x^9 +258*x^8 +263*x^7 +318*x^6 -109*x^5 -66*x^4 +13*x^3 -10*x^2 +7*x -1).
+%e A392323 For n = 1: the 4 X 1 board admits no knight moves (board too narrow), so every subset of the 4 cells is independent, giving a(1) = 2^4 = 16.
+%e A392323 For n = 2: the 4 X 2 board has 4 knight-attack pairs and the resulting graph is a disjoint union of 4 edges, giving a(2) = 3^4 = 81 independent sets.
+%o A392323 (Python)
+%o A392323 def T4(N):
+%o A392323     M = 4
+%o A392323     valid = list(range(1 << M))
+%o A392323     def conf_prev(s, prev):
+%o A392323         for r in range(M):
+%o A392323             if s & (1 << r):
+%o A392323                 if r-2 >= 0 and (prev & (1 << (r-2))): return True
+%o A392323                 if r+2 < M and (prev & (1 << (r+2))): return True
+%o A392323         return False
+%o A392323     def conf_pprev(s, pprev):
+%o A392323         for r in range(M):
+%o A392323             if s & (1 << r):
+%o A392323                 if r-1 >= 0 and (pprev & (1 << (r-1))): return True
+%o A392323                 if r+1 < M and (pprev & (1 << (r+1))): return True
+%o A392323         return False
+%o A392323     state = {(0, 0): 1}
+%o A392323     out = []
+%o A392323     for col in range(1, N+1):
+%o A392323         new_state = {}
+%o A392323         for (pp, p), cnt in state.items():
+%o A392323             for s in valid:
+%o A392323                 if conf_prev(s, p) or conf_pprev(s, pp): continue
+%o A392323                 key = (p, s)
+%o A392323                 new_state[key] = new_state.get(key, 0) + cnt
+%o A392323         state = new_state
+%o A392323         out.append(sum(state.values()))
+%o A392323     return out
+%o A392323 print(T4(20))
+%Y A392323 Cf. A141243 (n X n diagonal), A189145 (2 X n), A321251 (3 X n), A030978 (maximum independent set size on n X n board), A244081 (triangle: placements by number of knights), A394505.
+%K A392323 nonn,easy,new
+%O A392323 0,2
+%A A392323 _Sijie Wu_, May 06 2026
