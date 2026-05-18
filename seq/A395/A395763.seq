@@ -1,0 +1,51 @@
+%I A395763 #17 May 17 2026 21:51:45
+%S A395763 2,130144,293760,1705264,1977120,2201280,6082560,7012096,15467520
+%N A395763 Integers x such that there exist two integers 0<x<=y and z>0 such that sigma(x)*psi(x) = sigma(y)*psi(y) = x^2 + y^2 + z^2.
+%C A395763 The numbers x, y and z form a sigma*psi-quadratic triple.
+%H A395763 S. I. Dimitrov, <a href="https://hal.science/hal-05303937">On σψ-quadratic k-tuples and related generalizations</a>, hal-05303937, 2025.
+%e A395763 (293760, 369792, 774144) is such a triple because sigma(293760) * psi(293760) = sigma(369792) * psi(369792) = 1101600 * 746496 = 293760^2 + 369792^2 + 774144^2.
+%o A395763 (Python)
+%o A395763 from sympy import divisors, factorint
+%o A395763 from functools import lru_cache
+%o A395763 from multiprocessing import Pool, cpu_count
+%o A395763 from collections import defaultdict
+%o A395763 from itertools import combinations_with_replacement
+%o A395763 from math import isqrt
+%o A395763 from fractions import Fraction
+%o A395763 @lru_cache(maxsize=None)
+%o A395763 def sigma(n: int) -> int:
+%o A395763     return sum(divisors(n))
+%o A395763 @lru_cache(maxsize=None)
+%o A395763 def dedekind_psi(n: int) -> Fraction:
+%o A395763     factors = factorint(n)
+%o A395763     result = Fraction(n)
+%o A395763     for p in factors:
+%o A395763         result *= Fraction(p + 1, p)
+%o A395763     return result
+%o A395763 def process_n(n):
+%o A395763     return n, sigma(n) * dedekind_psi(n)
+%o A395763 def find_xyz_triplets(start, end):
+%o A395763     with Pool(cpu_count()) as pool:
+%o A395763         results = pool.map(process_n, range(start, end + 1))
+%o A395763     groups = defaultdict(list)
+%o A395763     for n, f in results:
+%o A395763         groups[f].append(n)
+%o A395763     triplets = []
+%o A395763     for fval, nums in groups.items():
+%o A395763         for x, y in combinations_with_replacement(nums, 2):
+%o A395763             rhs_frac = fval - x*x - y*y
+%o A395763             if rhs_frac.denominator == 1 and rhs_frac.numerator >= 0:
+%o A395763                 z = isqrt(rhs_frac.numerator)
+%o A395763                 if z*z == rhs_frac.numerator:
+%o A395763                     triplets.append((x, y, z))
+%o A395763     return triplets
+%o A395763 if __name__ == "__main__":
+%o A395763     start = 1
+%o A395763     end = 1000000
+%o A395763     xyz_triplets = find_xyz_triplets(start, end)
+%o A395763     for triplet in xyz_triplets:
+%o A395763         print(triplet)
+%Y A395763 Cf. A000203, A000408, A001615, A385356, A395670.
+%K A395763 nonn,hard,more,new
+%O A395763 1,1
+%A A395763 _S. I. Dimitrov_, May 05 2026

@@ -1,0 +1,45 @@
+%I A395933 #17 May 17 2026 17:14:31
+%S A395933 2,4,2,8,12,22,30,48,74,124,200,326,522,844,1362,2208,3572,5782,9350,
+%T A395933 15128,24474,39604,64080,103686,167762,271444,439202,710648,1149852,
+%U A395933 1860502,3010350,4870848,7881194,12752044,20633240,33385286,54018522,87403804,141422322,228826128
+%N A395933 Number of fixed points of the longest-run operator with radius 2 on binary configurations of the cycle graph C_n.
+%C A395933 Each configuration is x in {0,1}^n on the cycle graph C_n. At each synchronous update step, vertex i inspects the window (x_{i-2}, x_{i-1}, x_i, x_{i+1}, x_{i+2}) with indices mod n. The vertex adopts the value (0 or 1) of the longest contiguous run in this 5-element window; ties leave the state unchanged. a(n) counts the configurations that are fixed points of this operator.
+%C A395933 a(n) = Tr(T^n), where T is the 16 X 16 transfer matrix on the state space {0,1}^4 of consecutive 4-bit windows whose transitions are restricted to those that keep the central vertex stable under the longest-run rule.
+%C A395933 The characteristic polynomial of T is x^10 * (x-1) * (x+1) * (x^2-x-1) * (x^2-x+1), so the minimal annihilator of (a(n)) is x^6 - 2*x^5 + 2*x^3 - 2*x^2 + 1 = (x^2-x-1) * (x^2-x+1) * (x^2-1). The factors (x^2-x-1) and (x^2-x+1) also appear in the characteristic polynomial of A007039 (majority-rule fixed points on C_n), so both transfer matrices share phi = (1+sqrt(5))/2 as dominant eigenvalue and a(n) ~ c * phi^n.
+%C A395933 Within this family, radii 0 and 1 are degenerate: every configuration is a fixed point, giving 2^n. Radius 2 is the smallest radius producing nontrivial dynamics.
+%H A395933 Remco Havenaar, <a href="/A395933/b395933.txt">Table of n, a(n) for n = 1..300</a>
+%H A395933 Z. Agur, A. S. Fraenkel, and S. T. Klein, <a href="https://doi.org/10.1016/0012-365X(88)90005-2">The number of fixed points of the majority rule</a>, Discr. Math., 70 (1988), 295-302.
+%H A395933 <a href="/index/Rec#order_06">Index entries for linear recurrences with constant coefficients</a>, signature (2,0,-2,2,0,-1).
+%F A395933 a(n) = 2*a(n-1) - 2*a(n-3) + 2*a(n-4) - a(n-6) for n >= 7.
+%F A395933 G.f.: x*(2 - 6*x^2 + 8*x^3 - 6*x^5) / (1 - 2*x + 2*x^3 - 2*x^4 + x^6).
+%F A395933 Characteristic polynomial of the recurrence: x^6 - 2*x^5 + 2*x^3 - 2*x^2 + 1 = (x^2-x-1) * (x^2-x+1) * (x^2-1).
+%F A395933 a(n) ~ c * phi^n where phi = (1+sqrt(5))/2.
+%e A395933 a(1) = 2: the two single-vertex configurations (0) and (1) are trivially fixed.
+%e A395933 a(3) = 2: only the all-0 and all-1 configurations are fixed on C_3.
+%e A395933 a(4) = 8: the 8 fixed points on C_4 are (0,0,0,0), (1,1,1,1), (1,1,0,0), (0,1,1,0), (0,0,1,1), (1,0,0,1), (1,0,1,0), (0,1,0,1).
+%o A395933 (Python)
+%o A395933 def a(n):
+%o A395933     def update(x):
+%o A395933         k = len(x); new = [0]*k
+%o A395933         for i in range(k):
+%o A395933             w = [x[(i+d) % k] for d in range(-2, 3)]
+%o A395933             best = {0:0, 1:0}; cv, cl = w[0], 1; best[cv] = 1
+%o A395933             for j in range(1, 5):
+%o A395933                 if w[j] == cv: cl += 1
+%o A395933                 else: cv = w[j]; cl = 1
+%o A395933                 best[cv] = max(best[cv], cl)
+%o A395933             if best[1] > best[0]: new[i] = 1
+%o A395933             elif best[0] > best[1]: new[i] = 0
+%o A395933             else: new[i] = x[i]
+%o A395933         return new
+%o A395933     count = 0
+%o A395933     for s in range(1 << n):
+%o A395933         x = [(s >> i) & 1 for i in range(n)]
+%o A395933         if x == update(x): count += 1
+%o A395933     return count
+%o A395933 print([a(n) for n in range(1, 15)])
+%Y A395933 Cf. A007039 (majority-rule fixed points on C_n; characteristic polynomial shares factors (x^2-x-1)*(x^2-x+1)).
+%Y A395933 Cf. A000204 (Lucas numbers; same dominant root phi).
+%K A395933 nonn,easy,new
+%O A395933 1,1
+%A A395933 _Remco Havenaar_, May 10 2026
