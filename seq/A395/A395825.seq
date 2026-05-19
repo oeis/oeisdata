@@ -1,0 +1,58 @@
+%I A395825 #16 May 18 2026 18:56:55
+%S A395825 6,90,96,408,486,738,15520,18000,27954,28512,35096,43488,52864,90624,
+%T A395825 114144,143072,154314,177888,185856,189952,246304,247776,251520,
+%U A395825 280696,316128,337504,340480,380240,438880,440960,444384,460416,478176,629376,650528,715008,767520,996864,1139584,1295712
+%N A395825 Integers x such that there exist three integers 0<x<=y<=z and t>0 such that sigma(x)*psi(x) = sigma(y)*psi(y) = sigma(z)*psi(z) = x^2 + y^2 + z^2 + t^2.
+%C A395825 The numbers x, y, z and t form a sigma*psi-quadratic quadruple.
+%H A395825 S. I. Dimitrov, <a href="https://hal.science/hal-05303937">On σψ-quadratic k-tuples and related generalizations</a>, hal-05303937, 2025.
+%e A395825 (114144, 134240, 152608, 149920) is such a quadruple because sigma(114144) * psi(114144) = sigma(134240) * psi(134240) = sigma(152608) * psi(152608) = 317520 * 241920 = 114144^2 + 134240^2 + 152608^2 + 149920^2.
+%o A395825 (Python)
+%o A395825 from sympy import factorint
+%o A395825 from functools import lru_cache
+%o A395825 from multiprocessing import Pool, cpu_count
+%o A395825 from collections import defaultdict
+%o A395825 from itertools import combinations_with_replacement
+%o A395825 from math import isqrt
+%o A395825 from fractions import Fraction
+%o A395825 @lru_cache(maxsize=None)
+%o A395825 def sigma(n: int) -> int:
+%o A395825     factors = factorint(n)
+%o A395825     result = 1
+%o A395825     for p, a in factors.items():
+%o A395825         result *= (p**(a + 1) - 1) // (p - 1)
+%o A395825     return result
+%o A395825 @lru_cache(maxsize=None)
+%o A395825 def dedekind_psi(n: int) -> Fraction:
+%o A395825     factors = factorint(n)
+%o A395825     result = Fraction(n, 1)
+%o A395825     for p in factors:
+%o A395825         result *= Fraction(p + 1, p)
+%o A395825     return result
+%o A395825 def process_n(n):
+%o A395825     return n, int(sigma(n) * dedekind_psi(n))
+%o A395825 def find_xyzt_quads(start, end):
+%o A395825     with Pool(cpu_count()) as pool:
+%o A395825         results = pool.map(process_n, range(start, end + 1))
+%o A395825     groups = defaultdict(list)
+%o A395825     for n, f in results:
+%o A395825         groups[f].append(n)
+%o A395825     quads = []
+%o A395825     for fval, nums in groups.items():
+%o A395825         nums.sort()
+%o A395825         for x, y, z in combinations_with_replacement(nums, 3):
+%o A395825             rhs = fval - x*x - y*y - z*z
+%o A395825             if rhs >= 0:
+%o A395825                 t = isqrt(rhs)
+%o A395825                 if t*t == rhs:
+%o A395825                     quads.append((x, y, z, t))
+%o A395825     return quads
+%o A395825 if __name__ == "__main__":
+%o A395825     start = 1
+%o A395825     end = 1000
+%o A395825     xyzt_quads = find_xyzt_quads(start, end)
+%o A395825     for quad in xyzt_quads:
+%o A395825         print(f"({quad[0]}, {quad[1]}, {quad[2]}, {quad[3]})")
+%Y A395825 Cf. A000203, A000414, A001615, A385531, A391289, A395670, A395763.
+%K A395825 nonn,new
+%O A395825 1,1
+%A A395825 _S. I. Dimitrov_, May 07 2026

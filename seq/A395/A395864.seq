@@ -1,0 +1,94 @@
+%I A395864 #18 May 18 2026 10:10:52
+%S A395864 1,1,2,6,34,342,6408
+%N A395864 Number of not-necessarily-reduced pipe dreams that represent the identity permutation.
+%C A395864 "Not-necessarily-reduced pipe dreams" in the sense of Moriah Elkin's paper below, proposition 5.5.
+%H A395864 Nantel Bergeron and Sara Billey, <a href="https://doi.org/10.1080/10586458.1993.10504567">RC-Graphs and Schubert Polynomials</a>, Experimental Mathematics, Vol. 2, No. 4 (1993), pp. 257-269; <a href="https://projecteuclid.org/journals/experimental-mathematics/volume-2/issue-4/RC-graphs-and-Schubert-polynomials/em/1048516036.full">Project Euclid link</a>.
+%H A395864 Moriah Elkin, <a href="https://doi.org/10.48550/arXiv.2511.17723">Three Formulas for CSM Classes of Open Quiver Loci</a>, arXiv:2511.17723 [math.CO], 2025-2026.
+%e A395864 For n = 4, the not-necessarily-reduced pipe dreams that represent the identity permutation are shown below.
+%e A395864 In this visualization, 1 represents a cross, and 0 represents a bump. There are 6 total.
+%e A395864   [0 0 0 0]  [0 1 0 0]  [0 0 1 0]  [0 0 1 0]  [0 0 0 0]  [0 1 1 0]
+%e A395864   [0 0 0 0]  [1 0 0 0]  [0 1 0 0]  [0 0 0 0]  [0 1 0 0]  [1 0 0 0]
+%e A395864   [0 0 0 0]  [0 0 0 0]  [0 0 0 0]  [1 0 0 0]  [1 0 0 0]  [1 0 0 0]
+%e A395864   [0 0 0 0], [0 0 0 0], [0 0 0 0], [0 0 0 0], [0 0 0 0], [0 0 0 0]
+%o A395864 (SageMath)
+%o A395864 from itertools import combinations
+%o A395864 from sage.all import *
+%o A395864 def mats(n):
+%o A395864     """
+%o A395864     Generate all n x n matrices with entries in {0,1}
+%o A395864     such that all 1s occur strictly above the antidiagonal.
+%o A395864     """
+%o A395864     # Positions strictly above the antidiagonal:
+%o A395864     # i + j < n - 1
+%o A395864     positions = [
+%o A395864         (i, j)
+%o A395864         for i in range(n)
+%o A395864         for j in range(n)
+%o A395864         if i + j < n - 1
+%o A395864     ]
+%o A395864     mats = []
+%o A395864     # For every subset of allowed positions
+%o A395864     for r in range(len(positions) + 1):
+%o A395864         for subset in combinations(positions, r):
+%o A395864             M = matrix(ZZ, n, n)
+%o A395864             for (i, j) in subset:
+%o A395864                 M[i, j] = 1
+%o A395864             mats.append(M)
+%o A395864     return mats
+%o A395864 def diag_pos(n):
+%o A395864     """
+%o A395864     Return positions above the antidiagonal
+%o A395864     ordered by diagonals i-j = const,
+%o A395864     with diagonals listed from top-right
+%o A395864     to bottom-left.
+%o A395864     Within each diagonal, positions are read
+%o A395864     from top to bottom.
+%o A395864     """
+%o A395864     pos = []
+%o A395864     # Possible values of i-j
+%o A395864     # start at the top-right corner and move toward bottom-left
+%o A395864     for d in range(-(n - 2), n - 1):
+%o A395864         diag = []
+%o A395864         for i in range(n):
+%o A395864             j = i - d
+%o A395864             if (
+%o A395864                 0 <= j < n and
+%o A395864                 i + j < n - 1
+%o A395864             ):
+%o A395864                 diag.append((i, j))
+%o A395864         pos.extend(diag)
+%o A395864     return pos
+%o A395864 def mat_to_perm(M):
+%o A395864     """
+%o A395864     Associate a permutation to M.
+%o A395864     At position (i,j), associate the simple transposition
+%o A395864         s_{i+j+1} = (i+j+1, i+j+2)
+%o A395864     in Sage's 1-based convention.
+%o A395864     Read entries in diagonal order from top-right
+%o A395864     to bottom-left. Whenever an entry is 1,
+%o A395864     left-multiply by the corresponding simple transposition.
+%o A395864     """
+%o A395864     n = M.nrows()
+%o A395864     W = SymmetricGroup(n)
+%o A395864     w = W.one()
+%o A395864     for (i, j) in diag_pos(n):
+%o A395864         if M[i, j] == 1:
+%o A395864             k = i + j + 1
+%o A395864             s = W.simple_reflection(k)
+%o A395864             w = s * w
+%o A395864     return w
+%o A395864 def count_id_PDs(n):
+%o A395864     counter = 0
+%o A395864     for M in mats(n):
+%o A395864         if mat_to_perm(M) == SymmetricGroup(n).one():
+%o A395864             counter +=1
+%o A395864     return counter
+%o A395864 def id_PD_seq(n):
+%o A395864     '''
+%o A395864     Prints the sequence of the number of not-necessarily-reduced pipe dreams from 1 to n
+%o A395864     '''
+%o A395864     for i in range(1,n+1):
+%o A395864         print(count_id_PDs(i))
+%K A395864 nonn,hard,more,new
+%O A395864 1,3
+%A A395864 _Ariella Petersen_, May 07 2026
