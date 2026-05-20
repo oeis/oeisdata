@@ -1,0 +1,45 @@
+%I A395983 #17 May 19 2026 18:43:35
+%S A395983 23,37,67,113,157,173,233,263,277,317,389,409,509,577,631,719,751,887,
+%T A395983 1039,1109,1129,1223,1237,1283,1297,1307,1327,1423,1447,1511,1543,
+%U A395983 1559,1613,1693,1709,1733,1847,1889,1913,2003,2099,2137,2179,2273,2333,2357,2399,2423
+%N A395983 Surviving primes in the strict greedy gap sieve.
+%C A395983 The "Shielded Primes" Sieve by Angelos Ormpelidis: The sieve operates on the sequence of prime numbers by processing original prime gap sizes in strict ascending order (1, 2, 4, 6, 8...). At each gap size g, the currently surviving sequence is scanned left to right. If two currently adjacent primes were separated by g in the original prime sequence, both are eliminated. A prime survives permanently if both of its original neighbors are eliminated by smaller gaps before the sieve reaches its own adjacent gaps, effectively breaking the original pairs and "shielding" the prime from elimination (See Rivera's link).
+%H A395983 Pontus von Brömssen, <a href="/A395983/b395983.txt">Table of n, a(n) for n = 1..10000</a>
+%H A395983 Carlos Rivera, <a href="https://www.primepuzzles.net/conjectures/conj_111.htm">Conjecture 111. The density approaches at the constant 1/e^2</a>, The Prime Puzzles & Problems Connection.
+%e A395983 We take the first k primes and we are scanning the prime gaps: The sequence begins with 23.
+%e A395983 At gap 1, the pair (2, 3) is eliminated.
+%e A395983 At gap 2, all original twin primes (e.g., 5 and 7, 11 and 13, 17 and 19) are eliminated.
+%e A395983 At gap 4, the first original cousin pair is (7, 11), but both were eliminated at gap 2. The next is (13, 17), also eliminated. The next is (19, 23). Because 19 was eliminated at gap 2, the pair is broken. 23 is mathematically shielded and cannot be eliminated. Because its right-side neighbor (29) was also eliminated at gap 2, 23 is permanently shielded and survives the sieve.
+%t A395983 (* This program applies the sieve to the first 1000 primes *)
+%t A395983 ls=Prime@Range@1000; gaps=Sort@DeleteDuplicates@Differences@ls;
+%t A395983 Do[ls=Reap[i=1;len=Length@ls;While[i<len,If[ls[[i+1]]-ls[[i]]==g&&NextPrime[ls[[i]]]==ls[[i+1]],i+=2,Sow[ls[[i]]];i++;]];If[i==len,Sow[ls[[i]]]]][[2]];ls=First@ls,{g,gaps}];ls
+%o A395983 (Python)
+%o A395983 from itertools import islice
+%o A395983 from collections import defaultdict
+%o A395983 from sympy import primerange
+%o A395983 def A395983_generator():
+%o A395983     # If the twin prime conjecture is false, this program will get stuck at the last twin prime pair.
+%o A395983     primes = primerange(5,float('inf'))
+%o A395983     while True:
+%o A395983         P = []
+%o A395983         p0 = float('inf')
+%o A395983         I = defaultdict(list)
+%o A395983         for i,p in enumerate(primes):
+%o A395983             g = p-p0
+%o A395983             if g == 2: break
+%o A395983             P.append(p)
+%o A395983             if i: I[g].append(i-1)
+%o A395983             p0 = p
+%o A395983         deleted = [False]*len(P)
+%o A395983         deleted[-1] = True
+%o A395983         for g in range(4,max(I,default=0)+1,2):
+%o A395983             for i in I[g]:
+%o A395983                 if not deleted[i] and not deleted[i+1]:
+%o A395983                   deleted[i:i+2] = True,True
+%o A395983         for p,d in zip(P,deleted):
+%o A395983             if not d: yield p
+%o A395983 print(list(islice(A395983_generator(),48))) # _Pontus von Brömssen_, May 15 2026
+%Y A395983 Cf. A000040, A001223.
+%K A395983 nonn,new
+%O A395983 1,1
+%A A395983 _Giorgos Kalogeropoulos_, May 13 2026

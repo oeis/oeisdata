@@ -1,0 +1,65 @@
+%I A396200 #25 May 19 2026 14:26:53
+%S A396200 1,3,3,7,4,7,15,11,11,15,31,26,16,26,31,63,57,42,42,57,63,127,120,99,
+%T A396200 64,99,120,127,255,247,219,163,163,219,247,255,511,502,466,382,256,
+%U A396200 382,466,502,511,1023,1013,968,848,638,638,848,968,1013,1023
+%N A396200 Triangle read by rows: T(n, k) = Sum_{i=0..n} binomial(2*i, i) * binomial(n - 2*i, k - i).
+%C A396200 Unfortunately, there is no uniform definition of the binomial coefficient across mathematical software packages. On one side stand Maple, Mathematica, and PARI; on the other, Python, SageMath, and Sympy. The suspicion that this discrepancy has led to undetected errors cannot be dismissed, particularly in cases where code has been translated from one camp to the other. The triangle given here can serve as an example how easily a naive approach can lead to errors. For example, using Sympy's binomial function evaluates T(n, k) to A054143(n, k).
+%C A396200 A definition of the binomial coefficients for Python that matches the behavior of Maple, Mathematica, and PARI is proposed in the Program section below.
+%H A396200 Peter Luschny, <a href="https://oeis.org/wiki/User:Peter_Luschny/ExtensionsOfTheBinomial">Extensions of the Binomial</a>.
+%F A396200 For a recurrence see the first Python function.
+%F A396200 T(n, k) = [x^k] [t^n] (2/((-1 + 2*t)*(2*t*x - 1)) + 1/(sqrt(-4*t^2*x + 1)*(t*x + t - 1))).
+%F A396200 From _Natalia L. Skirrow_, May 19 2026: (Start)
+%F A396200 T(n, k) = 2^(n + 1) - A204621(n, k).
+%F A396200 T(n, k) = 2^(n + 1) - binomial(n, k)*hypergeom([1/2, -k, k-n], [(1 - n)/2, -n/2], 1).
+%F A396200 Let m = max(k, n-k), then:
+%F A396200 T(n, k) = Sum_{i=0..m} C(n+1, i).
+%F A396200 T(n, k) = Sum_{i=0..m} C(2*i, i)*C(n-2*i, k-i) (using the extension in the Prog section).
+%F A396200 T(n, k) = Sum_{i=0..m} C(ceiling(n/2)-m+2*j, j)*C(floor(n/2)+m-2*j, m-j).
+%F A396200 Letting m = min(k, n-k) instead produces A204621. (End)
+%e A396200 Triangle starts:
+%e A396200   [0]     1;
+%e A396200   [1]     3,    3;
+%e A396200   [2]     7,    4,   7;
+%e A396200   [3]    15,   11,  11,  15;
+%e A396200   [4]    31,   26,  16,  26,  31;
+%e A396200   [5]    63,   57,  42,  42,  57,  63;
+%e A396200   [6]   127,  120,  99,  64,  99, 120, 127;
+%e A396200   [7]   255,  247, 219, 163, 163, 219, 247, 255;
+%e A396200   [8]   511,  502, 466, 382, 256, 382, 466, 502,  511;
+%e A396200   [9]  1023, 1013, 968, 848, 638, 638, 848, 968, 1013, 1023;
+%p A396200 T := (n, k) -> local i; add(binomial(2*i, i)*binomial(n-2*i, k-i), i = 0..n):
+%p A396200 seq(seq(T(n, k), k = 0..n), n = 0..9);
+%p A396200 # Alternative: hypergeometric formula
+%p A396200 T := (n, k) -> 2^(n + 1) - binomial(n, k)*hypergeom([1/2, -k, k-n], [(1 - n)/2, -n/2], 1): seq(print(seq(simplify(T(n, k)), k = 0..n)), n = 0..9);
+%p A396200 # Alternative: g.f. of row polynomials
+%p A396200 MAX := 9: G := 2/((1 - 2*t)*(1 - 2*t*x)) - 1/((1 - (1 + x)*t)*sqrt(1 - 4 * x *t^2)):
+%p A396200 ser := series(G, t, MAX + 1): tcoef := n -> simplify(coeff(ser, t, n)):
+%p A396200 row := n -> local k; [seq(coeff(tcoef(n), x, k), k = 0..n)]: seq(row(n), n = 0..MAX);
+%t A396200 T[n_, k_] := Module[{i}, Sum[Binomial[2 i, i] Binomial[n - 2 i, k - i], {i, 0, n}]]
+%t A396200 Table[T[n, k], {n, 0, 9}, {k, 0, n}]
+%o A396200 (PARI)
+%o A396200 T(n, k) = sum(i = 0, n, binomial(2*i, i) * binomial(n - 2*i, k - i));
+%o A396200 print_row(n) = print("n = ", n, ": ", vector(n + 1, k, T(n, k - 1)));
+%o A396200 for(n = 0, 9, print_row(n))
+%o A396200 (Python)  # recurrence
+%o A396200 def T(n: int, k: int) -> int:
+%o A396200     if n == 0: return 1
+%o A396200     if k == 0 or k == n: return 2*T(n-1, 0) + 1
+%o A396200     if n == 2*k: return T(n-1, 0) + 1
+%o A396200     return T(n-1, k-1) + T(n-1, k)
+%o A396200 for n in range(10): print([n], [T(n, k) for k in range(n + 1)])
+%o A396200 (Python)
+%o A396200 from math import factorial as F
+%o A396200 def binomial(n: int, k: int) -> int:
+%o A396200     if k == 0 or k == n: return 1
+%o A396200     if 0 <= k <= n: return F(n) // (F(k) * F(n - k))
+%o A396200     if k <= n <  0: return F(-k - 1) // (F(n - k) * F(-1 - n)) * (-1) ** (n - k)
+%o A396200     if n < 0 <=  k: return F(-n - 1 + k) // (F(k) * F(-n - 1)) * (-1) ** k
+%o A396200     return 0
+%o A396200 def T(n, k): return sum(binomial(2 * i, i) * binomial(n - 2 * i, k - i) for i in range(n + 1))
+%o A396200 for n in range(10): print([n], [T(n, k) for k in range(n + 1)])
+%Y A396200 Cf. A000225 (T(n, 0) and T(n, n)), A396199 (row sums), A396198 (bisection of alternating row sums), A027306 (middle terms), A000302 (central terms).
+%Y A396200 Cf. A000295, A032443, A054143, A204621.
+%K A396200 nonn,tabl,new
+%O A396200 0,2
+%A A396200 _Peter Luschny_, May 18 2026
