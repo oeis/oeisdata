@@ -1,4 +1,4 @@
-%I A395975 #12 May 18 2026 06:23:54
+%I A395975 #16 May 20 2026 15:34:46
 %S A395975 1,0,1,0,-2,1,0,5,-5,1,0,-17,24,-9,1,0,84,-140,70,-14,1,0,-612,1090,
 %T A395975 -620,160,-20,1,0,6369,-11592,6930,-1995,315,-27,1,0,-90365,165480,
 %U A395975 -100562,30170,-5250,560,-35,1,0,1676378,-3074808,1877568,-571032,103026,-12012,924,-44,1
@@ -6,6 +6,7 @@
 %C A395975 The rebased triangle A126216 has offset (n=0, k=0) with a unit column [1, 0, 0,..] adjoined on the left. The rows start: [1], [0, 1], [0, 2, 1], [0, 5, 5, 1], ...
 %F A395975 T(n, k) = Sum_{j=k..n} (-1)^(n-j) * binomial(n-1, j-1) * A103364(j, k).
 %F A395975 T(n, k) = Sum_{j=0..n-k} (-1)^(n-k-j) * binomial(n-1, k+j-1) * A103364(k+j, k).
+%F A395975 T(n, k) = -Sum_{j=k+1..n} T(n, j) * binomial(j-1, k-1) * binomial(2*j-k+1, j-k+1) / (j + 1), with boundary value 1 for n = k.
 %e A395975 Triangle starts:
 %e A395975   [0]  1;
 %e A395975   [1]  0,      1;
@@ -20,6 +21,10 @@
 %p A395975 W := (n, k) -> ifelse(n = 0, n^k, binomial(n-2, n-k)*binomial(2*n-k, n-k+1)/n):
 %p A395975 V := MatrixInverse(Matrix(MAX+1, MAX+1, W)):
 %p A395975 for n from 0 to MAX do seq(V[n+1][k+1], k = 0..n) od;
+%p A395975 # Alternative:
+%p A395975 T := proc(n, k) option remember; local j; if k = n then return 1 fi;
+%p A395975 -add(T(n, j)* binomial(j-1, k-1) * binomial(2*j-k+1, j-k+1)/(j+1), j = k+1..n) end:
+%p A395975 seq(print(seq(T(n, k), k = 0..n)), n = 0..8);
 %t A395975 R[n_, x_] := Hypergeometric2F1[1 - n, -n, 2, x];
 %t A395975 M[nmax_] := Table[ If[k == 0, If[n == 0, 1, 0],
 %t A395975     Coefficient[R[n, x], x, k - 1] ], {n, 0, nmax}, {k, 0, nmax} ];
@@ -28,17 +33,20 @@
 %t A395975     Sum[ (-1)^(n - j) * Binomial[n - 1, j - 1] * H[j, k], {j, k, n} ] ];
 %t A395975 Table[ Table[A395975[n, k], {k, 0, n}], {n, 0, 8} ]
 %o A395975 (Python)
-%o A395975 def A395975(n: int, k: int) -> int:
-%o A395975     if k == n: return 1
-%o A395975     if k == 0: return 0
-%o A395975     s = 0; cnj = 1
-%o A395975     for j in range(1, n + 1):
-%o A395975         sgn = -1 if ((n - j) & 1) else 1
-%o A395975         if j >= k:
-%o A395975            s += sgn * cnj * A103364(j, k)
-%o A395975         if j < n: cnj = cnj * (n - j) // j
-%o A395975     return s
-%o A395975 for n in range(10): print([A395975(n, k) for k in range(n + 1)])
+%o A395975 def A395975row(n: int) -> list[int]:
+%o A395975     if n == 0: return [1]
+%o A395975     row = [0] * (n + 1); row[n] = 1
+%o A395975     for k in range(n - 1, 0, -1):
+%o A395975         total = 0
+%o A395975         W = (k * (k + 3)) // 2
+%o A395975         for j in range(k + 1, n + 1):
+%o A395975             total += row[j] * W
+%o A395975             num = j * (2 * j - k + 3) * (2 * j - k + 2)
+%o A395975             den = (j - k + 1) * (j - k + 2) * (j + 2)
+%o A395975             W = (W * num) // den
+%o A395975         row[k] = -total
+%o A395975     return row
+%o A395975 for n in range(9): print([n], A395975row(n))
 %Y A395975 Cf. A126216, A103364, A165326 (row sums), A395974 (column 1).
 %K A395975 sign,tabl,new
 %O A395975 0,5
