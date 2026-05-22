@@ -1,0 +1,48 @@
+%I A396083 #10 May 21 2026 18:58:18
+%S A396083 6,7,15,28,29,48,50,52,53,60,61,62,85,96,97,106,107,117,126,127,133,
+%T A396083 182,196,197,204,218,230,235,236,242,253,266,268,269,294,295,300,315,
+%U A396083 330,331,338,342,344,352,353,375,378,379,396,397,398,412,416,447,451,452
+%N A396083 Numbers k whose orbit under k -> |sigma(k) - 2*k| reaches 0.
+%C A396083 Let f(k) = abs(sigma(k) - 2*k), where sigma(k) is the sum of the positive divisors of k. This sequence consists of all positive integers k whose forward orbit k, f(k), f(f(k)), ... eventually reaches 0.
+%C A396083 f(k) = 0 iff k is a perfect number (A000396). Hence 0 is the unique absorbing (terminal) state.
+%C A396083 The only fixed points of f are k = 1 and the triperfect numbers (A005820), since f(k) = k iff sigma(k) is in {k, 3*k} and sigma(k) > k for k > 1. The preimages of 1 are exactly the powers of 2 (A000079).
+%C A396083 No nontrivial cycles (cycles of length > 1) are known.
+%C A396083 Except for numbers in A023197 (those with sigma(k) >= 3*k), the following holds: if f(k) is already a term of the sequence, then k is also a term.
+%C A396083 Consecutive terms occur when a term k is followed by a prime k + 1, since every prime p satisfies p is a term iff p - 1 is a term. Triple runs occur when this prime step is followed by a 2p-step: k is a term, k + 1 is prime, and k + 2 = 2*p with f(p) = 3.
+%H A396083 Felix Huber, <a href="/A396083/b396083.txt">Table of n, a(n) for n = 1..10000</a>
+%F A396083 Disjoint from A000079, A005820 and A396084.
+%F A396083 p is a term <=> if p - 1 is a term (p prime).
+%F A396083 2*p is a term <=> p - 3 is a term (p prime).
+%e A396083 15 is a term since 15 -> 6 -> 0.
+%e A396083 61 is a term since 61 -> 60 -> 48 -> 28 -> 0.
+%e A396083 62 is a term since 62 -> 28 -> 0.
+%e A396083 1260 is a term since 1260 -> 1848 -> 2064 -> 1328 -> 52 -> 6 -> 0.
+%p A396083 g := proc(n) option remember; NumberTheory:-sigma(n) end proc:
+%p A396083 f := proc(n) option remember; abs(g(n) - 2*n) end proc:
+%p A396083 r := table():
+%p A396083 h := proc(l, v) global r; local i; for i in l do r[i] := v end do end proc:
+%p A396083 q := proc(n) option remember; global r; local d, l;
+%p A396083     d := n; l := [];
+%p A396083     while true do
+%p A396083         if d = 0 then h(l, true); return true
+%p A396083         elif d = 1 or g(d) = 3*d then h(l, false); return false
+%p A396083         elif assigned(r[d]) then h(l, r[d]); return r[d]
+%p A396083         elif member(d, l) then h(l, false); return false
+%p A396083         else l := [op(l), d]; d := f(d)
+%p A396083         end if
+%p A396083     end do
+%p A396083 end proc:
+%p A396083 A396083 := proc(n) option remember; local k, p;
+%p A396083     if n = 1 then return 6 end if;
+%p A396083     p := A(n - 1);
+%p A396083     for k from p + 1 do
+%p A396083         if q(k) then return k end if
+%p A396083     end do
+%p A396083 end proc:
+%p A396083 seq(A396083(n), n = 1 .. 56);
+%t A396083 q[k_] := Module[{s}, s[0] = 0; s[n_] := Abs[DivisorSigma[1, n] - 2*n]; NestWhile[s, k, UnsameQ, All] == 0]; Select[Range[500], q] (* _Amiram Eldar_, May 18 2026 *)
+%Y A396083 Supersequence of A000396.
+%Y A396083 Cf. A000079, A000203, A001065, A005820, A023197, A033879, A033880, A396084.
+%K A396083 nonn,new
+%O A396083 1,1
+%A A396083 _Felix Huber_, May 18 2026

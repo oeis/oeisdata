@@ -1,7 +1,7 @@
-%I A097610 #110 Nov 05 2025 15:22:03
+%I A097610 #116 May 21 2026 15:38:55
 %S A097610 1,0,1,1,0,1,0,3,0,1,2,0,6,0,1,0,10,0,10,0,1,5,0,30,0,15,0,1,0,35,0,
 %T A097610 70,0,21,0,1,14,0,140,0,140,0,28,0,1,0,126,0,420,0,252,0,36,0,1,42,0,
-%U A097610 630,0,1050,0,420,0,45,0,1,0,462,0,2310,0,2310,0,660,0,55,0,1,132,0,2772,0
+%U A097610 630,0,1050,0,420,0,45,0,1,0,462,0,2310,0,2310,0,660,0,55,0,1,132,0,2772,0,6930,0,4620,0,990,0,66,0,1
 %N A097610 Triangle read by rows: T(n,k) is number of Motzkin paths of length n and having k horizontal steps.
 %C A097610 Row sums are the Motzkin numbers (A001006). Column 0 gives the aerated Catalan numbers (A000108).
 %C A097610 Let P_n(x) = Sum_{k=0..n} T(n,k)*x^k. P_0(x) = 1, P_1(x) = x, P_n(x) = x*P_(n-1)(x) + Sum_{j=0..n-2} P_j(x)*P_(n-2-j)(x); essentially the same as A124027. - _Philippe Deléham_, Oct 03 2007
@@ -64,14 +64,16 @@
 %F A097610 The two are the nontrivial zeros of the elliptic curve in Legendre normal form y^2 = z (z-z1)(z-z2), (see Landweber et al., p. 14, Ellingsrud, and A121448), and the zeros for the Riccati equation z' = (z - z1)(z - z2), associated to soliton solutions of the KdV equation (see Copeland link).
 %F A097610 (End)
 %F A097610 Comparing the shifted o.g.f. S(x) = x / (1 - h_1 x + h_2 x^2) for the bivariate Chebyshev polynomials S_n(h_1,h_2) of A049310 with the shifted o.g.f. H(x) = x / ((1 - a x)(1 - b x)) for the complete homogeneous symmetric polynomials H_n(a,b) = (a^(n+1)-b^(n+1)) / (a - b) shows that S_n(h_1,h_2) = H_n(a,b) for h_1 = a + b and h_2 = ab and, conversely, a = (h_1 + sqrt(h_1^2 - 4 h_2)) / 2 and b = (h_1 - sqrt(h_1^2 - 4 h_2)) / 2. The compositional inverse about the origin of S(x) gives a bivariate o.g.f. for signed Motzkin polynomials M_n(h_1,h_2) of this entry, and that of H(x) gives one for signed Narayana polynomials N_n(a,b) of A001263, thereby relating the bivariate Motzkin and Narayana polynomials by the indeterminate transformations. E.g., M_2(h_1,h_2) = h_2 + h_1^2 = ab + (a + b)^2 = a^2 + 3 ab + b^2 = N_2(a,b). - _Tom Copeland_, Jan 27 2024
+%F A097610 Sum_{k=0..n} k * T(n,k) = A005717(n). - _Alois P. Heinz_, May 21 2026
 %e A097610 Triangle begins:
-%e A097610 1;
-%e A097610 0,  1;
-%e A097610 1,  0,  1;
-%e A097610 0,  3,  0,  1;
-%e A097610 2,  0,  6,  0,  1;
-%e A097610 0, 10,  0, 10,  0,  1;
-%e A097610 5,  0, 30,  0, 15,  0,  1;
+%e A097610   1;
+%e A097610   0,  1;
+%e A097610   1,  0,  1;
+%e A097610   0,  3,  0,  1;
+%e A097610   2,  0,  6,  0,  1;
+%e A097610   0, 10,  0, 10,  0,  1;
+%e A097610   5,  0, 30,  0, 15,  0,  1;
+%e A097610   ...
 %e A097610 Row n has n+1 terms.
 %e A097610 T(4,2)=6 because we have HHUD, HUDH, UDHH, HUHD, UHDH, UHHD, where U=(1,1), D=(1,-1) and H=(1,0).
 %p A097610 G:=(1-t*z-sqrt(1-2*t*z+t^2*z^2-4*z^2))/2/z^2:
@@ -83,9 +85,17 @@
 %t A097610 T[n_,k_]:=If[n>=k&&EvenQ[n-k],n!/(k!((n-k)/2)!((n-k)/2+1)!),0];
 %t A097610 Flatten[Table[T[n,k],{n,0,20},{k,0,n}]] (* _Peter J. C. Moses_, Apr 06 2013 *)
 %t A097610 T[n_,k_] := If[OddQ[n - k], 0, Binomial[n, k] CatalanNumber[(n - k)/2]]; (* _Peter Luschny_, Jun 06 2018 *)
-%Y A097610 Cf. A001006, A000108. A124027 is an essentially identical triangle.
-%Y A097610 Cf. A011973, A049310, A055151, A060693, A180874, A121448, A125181, A126120, A134264, A145271, A238390.
-%Y A097610 Cf. A001263.
-%K A097610 nonn,tabl
+%o A097610 (Python)
+%o A097610 def A097610row(n: int) -> list[int]:
+%o A097610     row = [0] * (n + 1); row[n] = 1
+%o A097610     for k in range(n, 1, -2):
+%o A097610         num = 4 * k * (k - 1)
+%o A097610         den = (n - k + 2) * (n - k + 4)
+%o A097610         row[k - 2] = (row[k] * num) // den
+%o A097610     return row
+%o A097610 for n in range(10): print([n], A097610row(n))  # _Peter Luschny_, May 21 2026
+%Y A097610 A124027 is an essentially identical triangle.
+%Y A097610 Cf. A001006, A000108, A005717, A011973, A049310, A055151, A060693, A180874, A121448, A125181, A126120, A134264, A145271, A238390, A001263.
+%K A097610 nonn,tabl,changed
 %O A097610 0,8
 %A A097610 _Emeric Deutsch_, Aug 30 2004
