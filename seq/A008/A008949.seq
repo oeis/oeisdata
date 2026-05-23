@@ -1,4 +1,4 @@
-%I A008949 #205 May 13 2026 09:15:23
+%I A008949 #216 May 22 2026 19:41:17
 %S A008949 1,1,2,1,3,4,1,4,7,8,1,5,11,15,16,1,6,16,26,31,32,1,7,22,42,57,63,64,
 %T A008949 1,8,29,64,99,120,127,128,1,9,37,93,163,219,247,255,256,1,10,46,130,
 %U A008949 256,382,466,502,511,512,1,11,56,176,386,638,848,968,1013,1023,1024,1,12,67,232,562,1024,1486,1816,1981,2036,2047,2048
@@ -19,6 +19,7 @@
 %H A008949 Stefan Forcey, <a href="https://arxiv.org/abs/2504.11461">Counting plane arrangements via oriented matroids</a>, arXiv:2504.11461 [math.HO], 2025. See p. 18.
 %H A008949 Rob Johnson, <a href="https://web.archive.org/web/20140822210215/http://www.whim.org/nebula/math/spacediv.html">Dividing Space</a>.
 %H A008949 Norman Lindquist and Gerard Sierksma, <a href="https://doi.org/10.1016/0097-3165(81)90015-7">Extensions of set partitions</a>, Journal of Combinatorial Theory, Series A 31.2 (1981): 190-198. See Table I.
+%H A008949 Peter Luschny, <a href="https://oeis.org/wiki/User:Peter_Luschny/ExtensionsOfTheBinomial">Extensions of the Binomial</a>
 %H A008949 Denis Neiter and Amsha Proag, <a href="https://cs.uwaterloo.ca/journals/JIS/VOL19/Proag/proag3.html">Links Between Sums Over Paths in Bernoulli's Triangles and the Fibonacci Numbers</a>, Journal of Integer Sequences, Vol. 19 (2016), Article 16.8.3.
 %H A008949 Dennis P. Walsh, <a href="https://web.archive.org/web/20221127162153/https://capone.mtsu.edu/dwalsh/subcount.pdf">A note on counting subsets of restricted size</a>.
 %H A008949 Wikipedia, <a href="https://en.wikipedia.org/wiki/Bernoulli%27s_triangle">Bernoulli's triangle</a>.
@@ -26,14 +27,14 @@
 %F A008949 From partial sums across rows of Pascal triangle A007318.
 %F A008949 T(n, 0) = 1, T(n, n) = 2^n, T(n, k) = T(n-1, k-1) + T(n-1, k), 0 < k < n.
 %F A008949 G.f.: (1 - x*y)/((1 - y - x*y)*(1 - 2*x*y)). - Antonio Gonzalez (gonfer00(AT)gmail.com), Sep 08 2009
-%F A008949 T(2n,n) = A032443(n). - _Philippe Deléham_, Sep 16 2009
-%F A008949 T(n,k) = 2 T(n-1,k-1) + binomial(n-1,k) = 2 T(n-1,k) - binomial(n-1,k). - _M. F. Hasler_, May 30 2010
-%F A008949 T(n,k) = binomial(n,n-k)* 2F1(1, -k; n+1-k; -1). - _Olivier Gérard_, Aug 02 2012
+%F A008949 T(2*n, n) = A032443(n). - _Philippe Deléham_, Sep 16 2009
+%F A008949 T(n, k) = 2*T(n-1, k-1) + binomial(n-1, k) = 2*T(n-1, k) - binomial(n-1, k). - _M. F. Hasler_, May 30 2010
+%F A008949 T(n, k) = binomial(n, n-k) * hypergeom([1, -k], [n+1-k], -1). - _Olivier Gérard_, Aug 02 2012
 %F A008949 For a closed-form formula for arbitrary left and right borders of Pascal like triangle see A228196. - _Boris Putievskiy_, Aug 18 2013
-%F A008949 T(n,floor(n/2)) = A027306(n). - _Reinhard Zumkeller_, Nov 14 2014
-%F A008949 T(n,n) = 2^n, otherwise for 0 <= k <= n-1, T(n,k) = 2^n - T(n,n-k-1). - _Bob Selcoe_, Mar 30 2017
-%F A008949 For fixed j >= 0, lim_{n -> oo} T(n+1,n-j+1)/T(n,n-j) = 2. - _Bob Selcoe_, Apr 03 2017
-%F A008949 T(n,k) = Sum_{j=0..k} C(n+j-k-1,j)*2^(k-j). - _Dennis P. Walsh_, Sep 25 2017
+%F A008949 T(n, floor(n/2)) = A027306(n). - _Reinhard Zumkeller_, Nov 14 2014
+%F A008949 T(n, n) = 2^n, otherwise for 0 <= k <= n-1, T(n, k) = 2^n - T(n, n-k-1). - _Bob Selcoe_, Mar 30 2017
+%F A008949 For fixed j >= 0, lim_{n->oo} T(n+1, n-j+1)/T(n, n-j) = 2. - _Bob Selcoe_, Apr 03 2017
+%F A008949 T(n, k) = Sum_{j=0..k} C(n+j-k-1, j)*2^(k-j). - _Dennis P. Walsh_, Sep 25 2017
 %e A008949 Triangle begins:
 %e A008949   1;
 %e A008949   1,  2;
@@ -65,13 +66,20 @@
 %o A008949 (GAP) T:=Flat(List([0..11],n->List([0..n],k->Sum([0..k],j->Binomial(n+j-k-1,j)*2^(k-j))))); # _Muniru A Asiru_, Nov 25 2018
 %o A008949 (Magma) [[(&+[Binomial(n,j): j in [0..k]]): k in [0..n]]: n in [0..12]]; // _G. C. Greubel_, Nov 25 2018
 %o A008949 (SageMath) [[sum(binomial(n,j) for j in range(k+1)) for k in range(n+1)] for n in range(12)] # _G. C. Greubel_, Nov 25 2018
+%o A008949 (Python)
+%o A008949 def Trow(n: int) -> list[int]:
+%o A008949     row = [0] * (n + 1)
+%o A008949     s, c = 0, 1
+%o A008949     for k in range(n + 1):
+%o A008949         s += c
+%o A008949         row[k] = s
+%o A008949         if k < n: c = c * (n - k) // (k + 1)
+%o A008949     return row
+%o A008949 for n in range(9): print(Trow(n))  # _Peter Luschny_, May 18 2026
+%Y A008949 T(n, k) = A055248(n, n - k).
 %Y A008949 Diagonals are given by A000079, A000225, A000295, A002662, A002663, A002664, A035038-A035042.
-%Y A008949 Columns are given by A000012, A000027, A000124, A000125, A000127, A006261, A008859, A008860, A008861, A008862, A008863. - _Ken Shirriff_, Jun 28 2011
-%Y A008949 Row sums sequence is A001792.
-%Y A008949 T(n, m)= A055248(n, n-m).
-%Y A008949 Cf. A110555, A007318, A000346, A171886, A228196, A228576.
-%Y A008949 Cf. also A027306, A249111, A163866, A261363.
-%Y A008949 Cf. A000071, A001924
+%Y A008949 Columns are given by A000012, A000027, A000124, A000125, A000127, A006261, A008859, A008860, A008861, A008862, A008863.
+%Y A008949 Cf. A001792 (row sums), A110555, A007318, A000346, A171886, A228196, A228576, A027306, A249111, A163866, A261363, A000071, A001924, A204621.
 %K A008949 tabl,nonn,easy,nice,changed
 %O A008949 0,3
 %A A008949 _N. J. A. Sloane_
