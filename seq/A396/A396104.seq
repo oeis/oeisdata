@@ -1,0 +1,50 @@
+%I A396104 #15 May 24 2026 21:17:29
+%S A396104 1,2,2,4,6,12,14,28,32,52,86,122,208,318,452,818,1128,1776,3050,4066,
+%T A396104 6784,10770,15362,25896,38452,58410,99312,136322,221892,363270,504390,
+%U A396104 847036,1291274,1910238,3245506,4592666,7255954,12247170,16553472,27660568,43542664,62581414,105810966
+%N A396104 First differences of A396086, the number of dyadic intervals of length 2^(-n) that intersect the classical middle-third Cantor set.
+%C A396104 Equivalently, a(n) gives the increase from level n to level n+1 in the number of dyadic intervals intersecting the classical middle-third Cantor set.
+%F A396104 a(n) = A396086(n+1) - A396086(n).
+%e A396104 Since A396086 begins 1,2,4,6,10,16,28,..., we have a(0)=2-1=1, a(1)=4-2=2, a(2)=6-4=2, a(3)=10-6=4, a(4)=16-10=6.
+%o A396104 (Python)
+%o A396104 from fractions import Fraction
+%o A396104 from math import ceil, floor, log
+%o A396104 def cantor_stage(k):
+%o A396104     intervals = [(Fraction(0), Fraction(1))]
+%o A396104     for _ in range(k):
+%o A396104         new_intervals = []
+%o A396104         for a, b in intervals:
+%o A396104             new_intervals.append((a, (2*a + b)/3))
+%o A396104             new_intervals.append((((a + 2*b)/3), b))
+%o A396104         intervals = new_intervals
+%o A396104     return intervals
+%o A396104 def cells_hit(n, interval):
+%o A396104     u, v = interval
+%o A396104     t = 2**n
+%o A396104     L = max(0, ceil(t*u - 1))
+%o A396104     R = min(t - 1, floor(t*v))
+%o A396104     if L <= R:
+%o A396104         return (L, R)
+%o A396104     return None
+%o A396104 def Nfun(n):
+%o A396104     k = ceil(n*log(2, 3)) + 2
+%o A396104     stage = cantor_stage(k)
+%o A396104     ranges = [r for r in (cells_hit(n, I) for I in stage) if r is not None]
+%o A396104     ranges.sort()
+%o A396104     merged = []
+%o A396104     curL, curR = ranges[0]
+%o A396104     for L, R in ranges[1:]:
+%o A396104         if L <= curR + 1:
+%o A396104             curR = max(curR, R)
+%o A396104         else:
+%o A396104             merged.append((curL, curR))
+%o A396104             curL, curR = L, R
+%o A396104     merged.append((curL, curR))
+%o A396104     return sum(R - L + 1 for L, R in merged)
+%o A396104 def a(n):
+%o A396104     return Nfun(n+1) - Nfun(n)
+%o A396104 print([a(n) for n in range(43)])
+%Y A396104 Cf. A396086.
+%K A396104 nonn,new
+%O A396104 0,2
+%A A396104 _Patrick Bini_, May 17 2026

@@ -1,0 +1,53 @@
+%I A395029 #32 May 25 2026 00:17:41
+%S A395029 6,22,68,222,722,2344,7618,24754,80436,261374,849322,2759832,8967946,
+%T A395029 29140922,94692068,307697462,999848562,3248961304,10557348338,
+%U A395029 34305611394,111474485396,362231144974,1177053223642,3824779593112,12428443032186,40385646399722,131231275784068
+%N A395029 Number of {0,1}-labelings of the ladder graph L_n that are unchanged when every vertex updates to the majority of itself and its neighbors, keeping its value on a tie.
+%C A395029 The ladder graph L_n has 2*n vertices: n on a top rail and n on a bottom rail, with n rungs connecting them vertically. Corner vertices have 2 neighbors; interior vertices have 3 neighbors. At each vertex, count the 1's among the vertex itself and its neighbors: if 1's outnumber 0's the vertex must be 1; if 0's outnumber 1's the vertex must be 0; on a tie (only possible at interior vertices, where the closed neighborhood has size 4) the vertex keeps its current value. A labeling is a fixed point when every vertex simultaneously satisfies this condition.
+%C A395029 This is the degree-3 analog of A007039.
+%C A395029 The sequence can be computed by a transfer-matrix method. Index the state by the pair of values on two consecutive rungs, so there are 16 states. Define a 16 X 16 matrix T whose entry from state (a, b) to state (b, c) is 1 exactly when fixing the rung values a and c forces the middle rung b to be stable under the majority rule at both of its interior vertices, and 0 otherwise. With boundary vectors L and R that encode stability at the two degree-2 corner rungs, a(n) = L^T * T^(n-2) * R for n >= 2. The matrix T has rank 8; the characteristic polynomial of its 8-dimensional active block is (x^2 + 2)*(x^2 - x + 1)*(x^4 - 3*x^3 - x^2 + 2), and the part driven by the boundary vectors isolates exactly the degree-4 Pisot factor.
+%D A395029 Z. Agur, A. S. Fraenkel, S. T. Klein, The number of fixed points of the majority rule, Discrete Math. 70 (1988), 295-302.
+%H A395029 <a href="/index/Rec#order_04">Index entries for linear recurrences with constant coefficients</a>, signature (3,1,0,-2).
+%F A395029 a(n) = 3*a(n-1) + a(n-2) - 2*a(n-4) for n >= 6, with a(2) = 6, a(3) = 22, a(4) = 68, a(5) = 222.
+%F A395029 Characteristic polynomial: x^4 - 3*x^3 - x^2 + 2 (irreducible over Q).
+%F A395029 G.f.: 2*x^2*(3 + 2*x - 2*x^2 - 2*x^3) / (1 - 3*x - x^2 + 2*x^4).
+%F A395029 a(n) ~ c * beta^n with beta = 3.24945339453503... (dominant root of x^4 - 3*x^3 - x^2 + 2) and c = 0.61284211...
+%e A395029 For n = 2 the ladder L_2 is the 4-cycle:
+%e A395029     v1 --- v2     (top rail)
+%e A395029     |       |
+%e A395029     v3 --- v4     (bottom rail)
+%e A395029 Each vertex has degree 2, so its closed neighborhood (itself plus its two neighbors) has size 3, and ties cannot occur. Take the labeling (v1, v2, v3, v4) = (0, 0, 1, 1). At v1 the closed neighborhood is {v1, v2, v3} with values {0, 0, 1}, majority is 0, and v1 = 0, so v1 is stable. v2: {v2, v1, v4} = {0, 0, 1}, majority 0, v2 = 0, stable. v3: {v3, v4, v1} = {1, 1, 0}, majority 1, v3 = 1, stable. v4: {v4, v3, v2} = {1, 1, 0}, majority 1, v4 = 1, stable. Hence (0, 0, 1, 1) is a fixed point. The six fixed labelings of L_2 are (0,0,0,0), (1,1,1,1), (1,1,0,0), (0,0,1,1), (1,0,1,0), and (0,1,0,1).
+%e A395029 For n = 3 the ladder L_3 has six vertices arranged as a 2-by-3 grid:
+%e A395029     v1 --- v2 --- v3     (top rail)
+%e A395029     |       |      |
+%e A395029     v4 --- v5 --- v6     (bottom rail)
+%e A395029 The four corners (v1, v3, v4, v6) have degree 2; the two interior vertices (v2, v5) have degree 3. At v2 or v5 the closed neighborhood contains 4 values, so a 2-2 split between 0's and 1's is a tie, in which case the rule keeps the current value. For example, the labeling (v1, v2, v3, v4, v5, v6) = (1, 1, 0, 1, 0, 0) is a fixed point: at v2 the closed neighborhood {v2, v1, v3, v5} has values {1, 1, 0, 0}, a 2-2 tie, so v2 keeps its value 1; at v5 the closed neighborhood {v5, v2, v4, v6} has values {0, 1, 1, 0}, again a 2-2 tie, so v5 keeps its value 0; the four corner vertices each have a strict majority. In total there are 22 fixed labelings out of 2^6 = 64.
+%t A395029 LinearRecurrence[{3, 1, 0, -2}, {6, 22, 68, 222}, 30]
+%o A395029 (Python)
+%o A395029 def a(n):
+%o A395029     # Exhaustive fixed-point count on ladder L_n under closed-nbhd majority.
+%o A395029     # Top rail: 0..n-1, bottom rail: n..2n-1, rungs i <-> i+n.
+%o A395029     adj = {i: [] for i in range(2*n)}
+%o A395029     for i in range(n):
+%o A395029         if i < n - 1:
+%o A395029             adj[i] += [i+1]; adj[i+1] += [i]
+%o A395029             adj[i+n] += [i+n+1]; adj[i+n+1] += [i+n]
+%o A395029         adj[i] += [i+n]; adj[i+n] += [i]
+%o A395029     count = 0
+%o A395029     for m in range(1 << (2*n)):
+%o A395029         ok = True
+%o A395029         for v in range(2*n):
+%o A395029             s = ((m >> v) & 1) + sum((m >> u) & 1 for u in adj[v])
+%o A395029             size = 1 + len(adj[v])
+%o A395029             cur = (m >> v) & 1
+%o A395029             nxt = 1 if 2*s > size else (0 if 2*s < size else cur)
+%o A395029             if nxt != cur:
+%o A395029                 ok = False; break
+%o A395029         if ok:
+%o A395029             count += 1
+%o A395029     return count
+%o A395029 print([a(n) for n in range(2, 10)])
+%Y A395029 Cf. A007039, A006355.
+%K A395029 nonn,new
+%O A395029 2,1
+%A A395029 _Remco Havenaar_, May 08 2026

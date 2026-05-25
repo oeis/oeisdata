@@ -1,11 +1,44 @@
-%I A083439 #10 Jun 10 2018 11:32:33
+%I A083439 #20 May 24 2026 11:07:43
 %S A083439 3,7,19,13,61,151,31,139,67,37,79,193,163,127,157,97,43,103,307,367,
 %T A083439 457,643,73,277,223,229,373,199,109,313,211,271,241,421,181,283,397,
 %U A083439 337,349,331,577,523,463,613,439,541,571,433,787,547,661,769,487,601,823,709
 %N A083439 a(1) = 3; then a(n+1) = smallest prime not already in the sequence such that the concatenations a(n)a(n+1) and a(n+1)a(n) are both primes.
+%C A083439 From _Robert Israel_, May 24 2026: (Start)
+%C A083439 a(n) == 1 (mod 6) for n > 1.
+%C A083439 Conjecture: every prime == 1 (mod 6) occurs in the sequence. (End)
+%H A083439 Robert Israel, <a href="/A083439/b083439.txt">Table of n, a(n) for n = 1..10000</a>
+%p A083439 tcat:= proc(a,b) a*10^(1+ilog10(b))+b end proc:
+%p A083439 Cands:= select(isprime,[seq(i,i=7..10^3,6)]):
+%p A083439 R:= 3: p:= 3: nC:= nops(Cands):
+%p A083439 for count from 2 to 100 do
+%p A083439   flag:= true;
+%p A083439   for j from 1 to nC do
+%p A083439     if isprime(tcat(p,Cands[j])) and isprime(tcat(Cands[j],p)) then
+%p A083439       flag:= false; p:= Cands[j]; Cands:= subsop(j=NULL,Cands); R:= R,p; nC:= nC-1; break
+%p A083439     fi;
+%p A083439   od;
+%p A083439   if flag then break fi;
+%p A083439 od:
+%p A083439 R; # _Robert Israel_, May 24 2026
 %o A083439 (PARI) { p=3; S=Set(); while(!setsearch(S,p), S=setunion(S,Set([p])); print1(p,", "); forprime(q=2,10^4, if(setsearch(S,q),next); if( isprime(eval(concat(Str(p),Str(q)))) && isprime(eval(concat(Str(q),Str(p)))), p=q; break))) } \\ _Max Alekseyev_, Apr 24 2009
+%o A083439 (Python)
+%o A083439 from itertools import islice
+%o A083439 from sympy import isprime, nextprime
+%o A083439 def agen(): # generator of terms
+%o A083439     an, nextp, seen = 3, 7, set()
+%o A083439     while True:
+%o A083439         yield an
+%o A083439         seen.add(an)
+%o A083439         while nextp%6 != 1 or nextp in seen:
+%o A083439             nextp = nextprime(nextp)
+%o A083439         k, san = nextp, str(an)
+%o A083439         while k%6 != 1 or k in seen or not isprime(int(san+(sk:=str(k)))) or not isprime(int(sk+san)):
+%o A083439             k = nextprime(k)
+%o A083439         an = k
+%o A083439 print(list(islice(agen(), 56))) # _Michael S. Branicky_, May 24 2026
 %Y A083439 Cf. A073641, A075609.
-%K A083439 base,nonn
-%O A083439 3,1
+%K A083439 base,nonn,changed
+%O A083439 1,1
 %A A083439 _Amarnath Murthy_ and Meenakshi Srikanth (menakan_s(AT)yahoo.com), Apr 30 2003
 %E A083439 Corrected and extended by _Max Alekseyev_, Apr 24 2009
+%E A083439 Offset corrected by _Robert Israel_, May 24 2026

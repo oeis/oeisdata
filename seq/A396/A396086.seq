@@ -1,0 +1,53 @@
+%I A396086 #17 May 24 2026 19:02:44
+%S A396086 1,2,4,6,10,16,28,42,70,102,154,240,362,570,888,1340,2158,3286,5062,
+%T A396086 8112,12178,18962,29732,45094,70990,109442,167852,267164,403486,
+%U A396086 625378,988648,1493038,2340074,3631348,5541586,8787092
+%N A396086 Number of dyadic intervals of length 2^(-n) that intersect the classical middle-third Cantor set.
+%C A396086 Let C be the classical middle-third Cantor set in [0,1]. Then a(n) is the number of dyadic intervals [m/2^n,(m+1)/2^n], with 0 <= m < 2^n, that intersect C.
+%C A396086 Equivalently, a(n) is the number of level-n dyadic subintervals of [0,1] whose intersection with C is nonempty.
+%C A396086 This is a dyadic covering-count sequence for the classical Cantor set.
+%F A396086 a(n) = #{m : 0 <= m < 2^n and [m/2^n,(m+1)/2^n] meets C}, where C is the classical middle-third Cantor set.
+%e A396086 a(0) = 1 because [0,1] intersects the Cantor set.
+%e A396086 a(1) = 2 because both dyadic intervals [0,1/2] and [1/2,1] intersect the Cantor set.
+%e A396086 a(2) = 4 because all four dyadic intervals of length 1/4 intersect the Cantor set.
+%e A396086 a(3) = 6 because among the 8 dyadic intervals of length 1/8, exactly 6 intersect the Cantor set.
+%o A396086 (Python)
+%o A396086 from fractions import Fraction
+%o A396086 from math import ceil, floor, log
+%o A396086 def cantor_stage(k):
+%o A396086     intervals = [(Fraction(0), Fraction(1))]
+%o A396086     for _ in range(k):
+%o A396086         new_intervals = []
+%o A396086         for a, b in intervals:
+%o A396086             new_intervals.append((a, (2*a + b)/3))
+%o A396086             new_intervals.append((((a + 2*b)/3), b))
+%o A396086         intervals = new_intervals
+%o A396086     return intervals
+%o A396086 def cells_hit(n, interval):
+%o A396086     u, v = interval
+%o A396086     t = 2**n
+%o A396086     L = max(0, ceil(t*u - 1))
+%o A396086     R = min(t - 1, floor(t*v))
+%o A396086     if L <= R:
+%o A396086         return (L, R)
+%o A396086     return None
+%o A396086 def a(n):
+%o A396086     k = ceil(n*log(2, 3)) + 2
+%o A396086     stage = cantor_stage(k)
+%o A396086     ranges = [r for r in (cells_hit(n, I) for I in stage) if r is not None]
+%o A396086     ranges.sort()
+%o A396086     merged = []
+%o A396086     curL, curR = ranges[0]
+%o A396086     for L, R in ranges[1:]:
+%o A396086         if L <= curR + 1:
+%o A396086             curR = max(curR, R)
+%o A396086         else:
+%o A396086             merged.append((curL, curR))
+%o A396086             curL, curR = L, R
+%o A396086     merged.append((curL, curR))
+%o A396086     return sum(R - L + 1 for L, R in merged)
+%o A396086 print([a(n) for n in range(36)])
+%Y A396086 Cf. A396104.
+%K A396086 nonn,new
+%O A396086 0,2
+%A A396086 _Patrick Bini_, May 16 2026

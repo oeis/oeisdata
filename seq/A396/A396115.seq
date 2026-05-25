@@ -1,15 +1,36 @@
-%I A396115 #23 May 23 2026 17:02:51
+%I A396115 #31 May 25 2026 00:50:22
 %S A396115 1,2,1,7,61,1932,141961,28616232,14835905701,20274223678327,
 %T A396115 72347321822391001,676560511993808919302,16557761623387534111504801,
 %U A396115 1061047233926922264334773774782,177999626303093264515509668491829161,78178603961589153039675223631587252222807
 %N A396115 a(n) = F((n-1)*(n+1))/(F(n-1)*F(n+1)), where F(n) is the n-th Fibonacci number A000045(n).
 %H A396115 Alois P. Heinz, <a href="/A396115/b396115.txt">Table of n, a(n) for n = 0..70</a>
+%H A396115 Wikipedia, <a href="https://en.wikipedia.org/wiki/Cassini_and_Catalan_identities">Cassini and Catalan identities</a>.
 %F A396115 a(n) = F((n-1)*(n+1))/(F(n-1)*F(n+1)) with F(n) = (phi^n - (1-phi)^n)/sqrt(5) and phi = (1 + sqrt(5))/2 = A001622. a(1) = 2 is found by taking the limit of the quotient for n->1.
-%F A396115 a(n) = a(-n), this follows from the definition above.
+%F A396115 a(n) = a(-n), this follows from the extension above.
 %F A396115 a(n) mod 2 = A093719(n+3).
 %F A396115 a(n) mod 5 = A000034(n).
+%F A396115 From _Peter Luschny_, May 24 2026: (Start)
+%F A396115 a(n) = F(n^2 - 1) / (F(n)^2 + (-1)^n).
+%F A396115 a(n) = (phi^(n^2 - 1) - psi^(n^2 - 1))*sqrt(5)/(((phi^n - psi^n)^2 + 5*(-1)^n)) where phi = (1 + sqrt(5))/2 and psi = 1 - phi, for n != 1. (End)
 %p A396115 a:= n-> `if`(abs(n)=1, 2, (f->f((n-1)*(n+1))/(f(n-1)*f(n+1)))(k->(<<0|1>, <1|1>>^k)[1, 2])):
 %p A396115 seq(a(n), n=0..15);
+%p A396115 # Alternative: uses only two Fibonacci evaluations per call.
+%p A396115 f := combinat:-fibonacci: a := n -> local h; if abs(n) = 1 then 2 else
+%p A396115 h := f(n); f(n * n - 1) / (h * h + ifelse(n::odd, -1, 1)) fi:
+%p A396115 seq(a(n), n = 0..15); # _Peter Luschny_, May 24 2026
+%o A396115 (Python)
+%o A396115 def fibp(n: int) -> tuple[int, int]:
+%o A396115     if n == 0: return (0, 1)
+%o A396115     a, b = fibp(n >> 1)
+%o A396115     c = a * (2 * b - a)
+%o A396115     d = a * a + b * b
+%o A396115     return (d, c + d) if (n & 1) else (c, d)
+%o A396115 def a(n: int) -> int:
+%o A396115     if n < 2: return n + 1
+%o A396115     f = fibp(n)[0]
+%o A396115     ff = fibp(n * n - 1)[0]
+%o A396115     return ff // (f * f + (-1 if n & 1 else 1))
+%o A396115 A = [a(n) for n in range(17)]; print(A)  # _Peter Luschny_, May 24 2026
 %Y A396115 Cf. A000034, A000045, A001622, A002163, A051294, A059929, A093719, A103624, A205505, A396233.
 %K A396115 nonn,easy,new
 %O A396115 0,2
