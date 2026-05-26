@@ -1,0 +1,41 @@
+%I A394456 #34 May 25 2026 20:04:36
+%S A394456 3,5,9,57,65,147,155,315,387,395,807,917,1305,1695,1757,1995,3615,
+%T A394456 4137,4335,4655,4875,4917,4965,5439,5985,6315,6827,6897,6905,7125,
+%U A394456 7127,7875,8177,9135,9275,9435
+%N A394456 Odd integers k such that k+2 is prime and the sequence of primes congruent to 2 modulo k is strictly stable under iterated absolute differences (all leading entries equal k).
+%C A394456 All terms are currently conjectural.
+%C A394456 A number k is included if: (i) k is odd, (ii) k+2 is prime, (iii) letting P be the increasing sequence of primes p == 2 (mod k), the triangle formed by iterated absolute differences of P has all leading entries equal to k.
+%C A394456 This defines a "strictly stable" condition reminiscent of Gilbreath-type phenomena.
+%F A394456 Let P = (p_1, p_2, ...) be primes with p_i == 2 (mod k).
+%F A394456 Define rows: R^{(0)} = P, R^{(m+1)}_i = |R^{(m)}_{i+1} - R^{(m)}_i|.
+%F A394456 Then k is included if for all m >= 1, R^{(m)}_1 = k.
+%e A394456 For k = 3: primes == 2 mod 3 are: 2, 5, 11, 17, 23, 29, 41, 47, 53, 59, ...
+%e A394456 First absolute differences are: 3, 6, 6, 6, 6, 12, 6, 6, 6, ...
+%e A394456 Then they are: 3, 0, 0, 0, 6, 6, 0, 0, ...
+%e A394456 Then: 3, 0, 0, 6, 0, 6, 0, 6, 6, ...
+%e A394456 Then: 3, 0, 6, 6, 6, 6, 6, 0, ...
+%e A394456 ...
+%e A394456 The leading entries remain 3, so k=3 is a term.
+%t A394456 CheckStrictStability[k_, limit_] := Module[{primes, diffs, rowFirsts, \
+%t A394456 currentSeq, isStable}, primes = Select[Prime[Range[PrimePi[limit]]],
+%t A394456       Mod[#, k] == 2 &];
+%t A394456     If[Length[primes] < 5 || primes[[2]] ≠ k + 2, Return[False]];
+%t A394456     currentSeq = primes;
+%t A394456     rowFirsts = {};
+%t A394456     While[Length[currentSeq] > 1, currentSeq = Abs[
+%t A394456     Drop[currentSeq, 1] - Drop[currentSeq, -1]];
+%t A394456       AppendTo[rowFirsts, First[currentSeq]];
+%t A394456       If[First[currentSeq] ≠ k, Return[False]];];
+%t A394456     Return[And @@ Thread[rowFirsts == k]];]
+%t A394456 startK = 3;
+%t A394456 endK = 500000;
+%t A394456 searchLimit = 1000000;
+%t A394456 results = {};
+%t A394456 Do[If[OddQ[k] && PrimeQ[k + 2],
+%t A394456        If[CheckStrictStability[
+%t A394456         k, searchLimit], AppendTo[results, k];]], {k, startK, endK, 2}];
+%t A394456 Print[results];
+%Y A394456 Subsequence of A040976.
+%K A394456 nonn,hard,more,new
+%O A394456 1,1
+%A A394456 _Li Dong_, May 04 2026
