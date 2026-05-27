@@ -1,15 +1,15 @@
-%I A265759 #19 Dec 29 2015 04:20:16
+%I A265759 #32 May 26 2026 17:44:54
 %S A265759 3,2,5,13,11,19,17,31,29,43,41,61,59,73,71,103,101,109,107,139,137,
 %T A265759 151,149,181,179,193,191,199,197,229,227,241,239,271,269,283,281,313,
 %U A265759 311,349,347,421,419,433,431,463,461,523,521,571,569,601,599,619,617
 %N A265759 Numerators of primes-only best approximates (POBAs) to 1; see Comments.
-%C A265759 Suppose that x > 0. A fraction p/q of primes is a primes-only best approximate (POBA), and we write "p/q in B(x)", if 0 < |x - p/q| < |x - u/v| for all primes u and v such that v < q. Note that for some choices of x, there are values of q for which there are two POBAs. In these cases, the greater is placed first; e.g., B(3) = (7/2, 5/2, 17/5, 13/5, 23/7, 19/7, ...).
+%C A265759 Suppose that x > 0. A fraction p/q of primes is a primes-only best approximate (POBA), and we write "p/q in B(x)", if 0 < |x - p/q| < |x - u/v| for all primes u and v such that v < q, and |x - p/q| <= |x - p'/q| for all primes p'. For some choices of [rational] x, there are values of q for which there are two POBAs. In these cases, the greater is placed first; e.g., B(3) = (7/2, 5/2, 17/5, 13/5, 23/7, 19/7, ...). [Corrected and edited by _M. F. Hasler_, May 18 2026]
 %C A265759 See A265772 and A265774 for definitions of lower POBA and upper POBA. In the following guide, for example, A001359/A006512 represents (conjecturally in some cases) the Lower POBAs p(n)/q(n) to 1, where p = A001359 and q = A006512 except for first terms in some cases. Every POBA is either a lower POBA or an upper POBA.
 %C A265759 x        Lower POBA       Upper POBA       POBA
 %C A265759 1        A001359/A006512  A006512/A001359  A265759/A265760
 %C A265759 3/2      A104163/A158708  A162336/A158709  A265761/A222565
 %C A265759 2        A005383/A005382  A005385/A005384  A079149/A120628
-%C A265759 3        A091180/A088878  A094525/A023208  A265763/A265764
+%C A265759 3        A091180/A088878  A094524/A023208  A265763/A265764
 %C A265759 4        A162857/A062737  A090866/A023212  A265765/A120639
 %C A265759 5        A265766/A158318  A265767/A023217  A265768/A265769
 %C A265759 6        A227756/A158015  A051644/A007693  A265770/A265771
@@ -21,7 +21,10 @@
 %C A265759 1/tau    A265799/A265798  A265797/A265796  A265806/A265807
 %C A265759 pi       A265808/A265809  A265810/A265811  A265812/A265813
 %C A265759 e        A265814/A265815  A265816/A265817  A265818/A265819
+%C A265759 Note that the definitions in the first remark explicitly exclude p = x*q, which would give |x - p/q| = 0. That is, if for given q (and rational x), p = x*q is prime, the "approximation" p/q must be ignored, and only larger and/or smaller primes p may be considered, see EXAMPLE. - _M. F. Hasler_, May 19 2026
+%F A265759 a(2n) = A006512(n+1), a(2n+1) = a(2n) - 2 = A001359(n+1), for all n >= 2; i.e., after the three initial terms, the sequence lists twin primes > 7 with the larger of each pair coming first. - _M. F. Hasler_, May 19 2026
 %e A265759 The POBAs for 1 start with 3/2, 2/3, 5/7, 13/11, 11/13, 19/17, 17/19, 31/29, 29/31, 43/41, 41/43, 61/59, 59/61. For example, if p and q are primes and q > 13, then 11/13 is closer to 1 than p/q is.
+%e A265759 Indeed, for x = 1, we cannot use p = q = 2 (which would yield x - p/q = 0 and end the sequence of approximations), but have to use the next best prime p = 3; thereafter, for q = 3, we may not use p = 3 but have to use p = 2 instead. Then, for q = 5, we have the equally good p = 7 (7/5 = 1.4) and p = 3 (3/5 = 0.6), but both are worse than the previous approximation 2/3 = 0.666..., so we skip them and turn to q = 7 where p = 5 gives the better p/q = 0.7142857... We see that from that point on, the sequence of POBAs is p/q, q'/p', p'/q', q"/p", p"/q", ... with twin prime pairs (p, q = p+2). - _M. F. Hasler_, May 19 2026
 %t A265759 x = 1; z = 200; p[k_] := p[k] = Prime[k];
 %t A265759 t = Table[Max[Table[NextPrime[x*p[k], -1]/p[k], {k, 1, n}]], {n, 1, z}];
 %t A265759 d = DeleteDuplicates[t]; tL = Select[d, # > 0 &] (* lower POBA *)
@@ -36,7 +39,10 @@
 %t A265759 Denominator[tU] (* A001359 *)
 %t A265759 Numerator[y]    (* A265759 *)
 %t A265759 Denominator[y]  (* A265760 *)
-%Y A265759 Cf. A000040, A001359, A006512, A265759, A265760.
-%K A265759 nonn,frac
+%o A265759 (PARI) A265759_first(N)=apply(numerator, POBA(1, N))
+%o A265759 POBA(x=1, N=20, best=9, L=List())={ forprime(q=2,, my(p=x*q, pL=precprime(p-!frac(p)), dL=p-pL, pR=nextprime(p+!frac(p)), dR=pR-p); min(dR, dL) < best*q || next; dL==dR && listput(L, pR/q); listput(L, if(dR < dL, pR, pL)/q); #L < N || break; best=abs(L[#L]-x)); Vec(L)} \\ _M. F. Hasler_, May 18 2026
+%o A265759 (Python) A265759_first = lambda N: [q for (p,q),i in zip(POBA(1),range(N))] # see A265812 for POBA(). - _M. F. Hasler_, May 18 2026
+%Y A265759 Cf. A000040, A001359, A006512, A265760 (denominators), A265818/A265819 (same for e).
+%K A265759 nonn,frac,changed
 %O A265759 1,1
 %A A265759 _Clark Kimberling_, Dec 15 2015
