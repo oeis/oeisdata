@@ -1,14 +1,16 @@
-%I A260850 #31 Jun 27 2025 02:24:11
+%I A260850 #38 May 31 2026 22:04:34
 %S A260850 1,2,6,24,120,20,140,1120,10080,1008,11088,924,12012,858,1430,22880,
 %T A260850 388960,1750320,33256080,1662804,3879876,176358,4056234,10816624,
 %U A260850 270415600,10400600,280816200,10029150,290845350,9694845,300540195,9617286240,35263382880
 %N A260850 Lexicographically earliest sequence such that for any n>1, n=u*v, where u/v = a(n)/a(n-1) in reduced form.
+%C A260850 a(n) is obtained from a(n - 1) by multiplying by the product of all prime powers p^e of n whose exponent e exceeds the exponent of p in a(n - 1), and dividing by the product of the remaining prime powers of n. - _Felix Huber_, May 27 2026
 %H A260850 Paul Tek, <a href="/A260850/b260850.txt">Table of n, a(n) for n = 1..3365</a>
 %H A260850 Paul Tek, <a href="/A260850/a260850.txt">PARI program for this sequence</a>
 %H A260850 Michael De Vlieger, <a href="/A260850/a260850.png">Plot p(i)^m(i) | a(n) at (x,y) = (n,i)</a>, n = 1..2048, 3X vertical exaggeration, with a color function showing m(i) = 1 in black, m(i) = 2 in red, ..., largest m(i) in the dataset in magenta.
 %H A260850 Michael De Vlieger, <a href="/A260850/a260850_1.txt">Prime Power Decomposition of a(n)</a>, n = 1..1000.
 %F A260850 a(p) = p*a(p-1) for any prime p.
 %F A260850 a(n) = A008336(n+1) for n = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 21, 22, 23; are there other indices with this property?
+%F A260850 a(1) = 1. For n > 1, write n = Product_{i = 1 .. k} p_i^e_i. Then a(n) = a(n - 1)*Product_{i = 1 .. k} p_i^{v_i*e_i}, where v_i = +1 if e_i > v_{p_i} (a(n - 1)), and v_i = -1 otherwise. - _Felix Huber_, May 27 2026
 %e A260850 From _Michael De Vlieger_, Apr 12 2024: (Start)
 %e A260850 Table showing exponents m of prime powers p^m | a(n), n = 1..20, with "." representing p < gpf(n) does not divide a(n):
 %e A260850                        1111
@@ -34,6 +36,20 @@
 %e A260850    18    1750320   421.111
 %e A260850    19   33256080   421.1111
 %e A260850    20    1662804   22..1111 (End)
+%p A260850 A260850List := proc(N)
+%p A260850     local a, b, i, n, p;
+%p A260850     a := Vector(1 .. N);
+%p A260850     b := 1;
+%p A260850     for n from 1 to N do
+%p A260850         for i in ifactors(n)[2] do
+%p A260850             p := i[1]^i[2];
+%p A260850             b := `if`(b mod p = 0, b/p, b*p);
+%p A260850         end do;
+%p A260850         a[n] := b;
+%p A260850     end do;
+%p A260850     convert(a, list);
+%p A260850 end proc:
+%p A260850 A260850List(100); # _Felix Huber_, May 27 2026
 %t A260850 nn = 35; p[_] := 0; r = 0;
 %t A260850 Do[(Map[If[p[#1] < #2,
 %t A260850       p[#1] += #2,
@@ -44,6 +60,6 @@
 %t A260850 Array[a, nn] (* _Michael De Vlieger_, Apr 12 2024 *)
 %o A260850 (PARI) \\ See Links section.
 %Y A260850 Cf. A008336, A370974 (sorted version).
-%K A260850 nonn
+%K A260850 nonn,changed
 %O A260850 1,2
 %A A260850 _Paul Tek_, Aug 01 2015

@@ -1,0 +1,37 @@
+%I A395493 #23 May 28 2026 22:03:22
+%S A395493 1,6,258,62741,72137699,356612826084,7146137621219723,
+%T A395493 556983247769141192388,163738881245258156011991945,
+%U A395493 177275143473620927081039509553940,693522704165389775924553269084028511919
+%N A395493 Number of tilings of the n X n square by exactly n (potentially different) fixed polyominoes.
+%C A395493 Computed by a Simpath-style frontier dynamic program (Knuth, TAOCP 4B 7.1.4) that sweeps the board cell by cell and commits each grid edge as either inside a polyomino or on a polyomino boundary; boundary edges go into a Forbidden-Pair Set so the two adjacent tiles can never later be merged, making every n-polyomino tiling correspond to exactly one decision sequence. Cross-validated for n <= 7 against an independent ZDD-based count using the Graphillion library (Inoue et al., 2016).
+%H A395493 Takeru Inoue, Hiroaki Iwashita, Jun Kawahara, and Shin-ichi Minato, <a href="https://doi.org/10.1007/s10009-014-0352-z">Graphillion: software library for very large sets of labeled graphs</a>, Int J Softw Tools Technol Transfer 18, 57-66 (2016).
+%e A395493 a(2) = 6. Each partition is shown as a 2 X 2 grid where the digit in each cell labels its polyomino (1 for the polyomino containing the top-left cell, 2 for the other):
+%e A395493    1 2   1 2   1 1   1 1   1 1   1 2
+%e A395493    2 2   1 1   2 1   1 2   2 2   1 2
+%e A395493 The first four are singleton + L-tromino partitions (one per corner as the singleton). The fifth splits the board into top and bottom rows; the sixth splits into left and right columns. The two diagonal pairings {(0,0),(1,1)} | {(0,1),(1,0)} are excluded because diagonal cells share only a corner, not an edge, so neither part is connected.
+%o A395493 (SageMath)
+%o A395493 def a(n):
+%o A395493    G = graphs.Grid2dGraph(n, n)
+%o A395493    V = list(G.vertices(sort=True))
+%o A395493    return sum(1 for P in SetPartitions(V, n)
+%o A395493       if all(G.subgraph(B).is_connected() for B in P))
+%o A395493 (Python)
+%o A395493 from graphillion import GraphSet
+%o A395493 def a(n):
+%o A395493    if n == 1:
+%o A395493       return 1
+%o A395493    edges = []
+%o A395493    for r in range(n):
+%o A395493       for c in range(n):
+%o A395493          v = r * n + c
+%o A395493          if c + 1 < n:
+%o A395493             edges.append((v, v + 1))
+%o A395493          if r + 1 < n:
+%o A395493             edges.append((v, v + n))
+%o A395493    GraphSet.set_universe(edges)
+%o A395493    return GraphSet.partitions(num_comp_lb=n, num_comp_ub=n).len()
+%Y A395493 A172477 is the equal-size variant: number of dissections of an n X n square into exactly n polyominoes of size n. This sequence drops the equal-size constraint.
+%Y A395493 A145835 is the unconstrained-k umbrella: partitions of an n X n grid into any number of orthogonally-connected parts. This sequence is the "exactly n parts" slice (so a(n) <= A145835(n); equality at n = 1).
+%K A395493 nonn,more,new
+%O A395493 1,2
+%A A395493 _Michael Spiegel_, Apr 25 2026

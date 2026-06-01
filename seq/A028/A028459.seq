@@ -1,10 +1,46 @@
-%I A028459 #8 Nov 23 2025 13:35:23
+%I A028459 #16 May 31 2026 00:59:46
 %S A028459 1,29,10082,1806059,387692373,79727046876,16625358222661,
 %T A028459 3457730603494265,720015359158627776,149916811809805555003,
 %U A028459 31218852023490816278025,6501135563145633946274820,1353847711415498081767856265,281937394302518125069427284433
 %N A028459 Number of perfect matchings in graph P_{2} X C_{7} X P_{n}.
 %D A028459 Per Hakan Lundow, Computation of matching polynomials and the number of 1-factors in polygraphs, Research report, No 12, 1996, Department of Math., Umea University, Sweden.
+%H A028459 Steven Kotlarz, <a href="/A028459/b028459.txt">Table of n, a(n) for n = 0..429</a>
 %H A028459 Per Hakan Lundow, <a href="https://web.archive.org/web/20171118074340/http://www.theophys.kth.se/~phl/Text/1factors2.pdf">Enumeration of matchings in polygraphs</a>, 1998.
-%K A028459 nonn
+%H A028459 Steven Kotlarz, <a href="/A028459/a028459.txt">Order-310 linear recurrence coefficients</a>
+%F A028459 a(n) = Sum_{j=1..310} c(j)*a(n-j), where the coefficients c(j) are given in the linked recurrence file (empirical). - _Steven Kotlarz_, May 30 2026
+%o A028459 (Python)
+%o A028459 # Number of perfect matchings in P_2 X C_7 X P_n, by cylindrical transfer matrix.
+%o A028459 def A028459(n):
+%o A028459     P, C = 2, 7
+%o A028459     NV = P*C
+%o A028459     E = [(p*C+c, p*C+(c+1)%C) for p in range(P) for c in range(C)] + \
+%o A028459         [(c, C+c) for c in range(C)]
+%o A028459     def layer(inc):
+%o A028459         out = {}
+%o A028459         def rec(v, used, og):
+%o A028459             if v == NV:
+%o A028459                 out[og] = out.get(og, 0) + 1; return
+%o A028459             if (used>>v)&1: rec(v+1, used, og); return
+%o A028459             if (inc>>v)&1:  rec(v+1, used|(1<<v), og); return
+%o A028459             rec(v+1, used|(1<<v), og|(1<<v))
+%o A028459             for a, b in E:
+%o A028459                 w = b if a==v else a if b==v else -1
+%o A028459                 if w>v and not (used>>w)&1 and not (inc>>w)&1:
+%o A028459                     rec(v+1, used|(1<<v)|(1<<w), og)
+%o A028459         rec(0, 0, 0)
+%o A028459         return out
+%o A028459     if n == 0: return 1
+%o A028459     vec = {0: 1}
+%o A028459     for _ in range(n):
+%o A028459         nv = {}
+%o A028459         for s, cnt in vec.items():
+%o A028459             for o, w in layer(s).items():
+%o A028459                 nv[o] = nv.get(o, 0) + cnt*w
+%o A028459         vec = nv
+%o A028459     return vec.get(0, 0)
+%o A028459 print([A028459(n) for n in range(14)])
+%o A028459 # _Steven Kotlarz_, May 30 2026
+%Y A028459 Cf. A028453, A028454.
+%K A028459 nonn,changed
 %O A028459 0,2
 %A A028459 _Per H. Lundow_
