@@ -1,0 +1,59 @@
+%I A396491 #16 Jun 01 2026 17:27:48
+%S A396491 20,6760,244322,2703376,17196520,80513160,306614070
+%N A396491 Number of unsatisfiable 3-SAT formulas with n variables and 5 clauses in the multiset clause model.
+%C A396491 Clauses are multisets of 3 literals chosen from {x_1, ..., x_n, not x_1, ..., not x_n}; repeated literals inside a clause are allowed. A formula is a multiset of 5 such clauses, so repeated clauses are also allowed.
+%C A396491 This is the m=5 column of A396351.
+%C A396491 For fixed m, the corresponding column is expected to be a polynomial in n, since an m-clause formula involves only finitely many literal positions. The polynomial in the Formula section was obtained by interpolation from the listed terms and should be treated as conjectural unless independently verified.
+%D A396491 Stephen A. Cook, The complexity of theorem-proving procedures, Proceedings of the Third Annual ACM Symposium on Theory of Computing, 1971, 151-158.
+%F A396491 Conjecture: a(n) = (129332*n^6 - 2237100*n^5 + 16427761*n^4 - 63136975*n^3 + 130884126*n^2 - 135887564*n + 53820480)/3.
+%t A396491 ClearAll[combinationsWithReplacement, clauses, litValue, unsat, a]
+%t A396491 combinationsWithReplacement[list_, k_] :=
+%t A396491   list[[#]] & /@ Select[Tuples[Range[Length[list]], k], OrderedQ]
+%t A396491 clauses[n_] := combinationsWithReplacement[Join[Range[-n, -1], Range[1, n]], 3]
+%t A396491 litValue[lit_, assignment_] := Module[{val},
+%t A396491   val = BitGet[assignment, Abs[lit] - 1];
+%t A396491   If[lit > 0, val, 1 - val]
+%t A396491 ]
+%t A396491 unsat[n_, formula_] :=
+%t A396491   ! AnyTrue[
+%t A396491     Range[0, 2^n - 1],
+%t A396491     Function[assignment,
+%t A396491       AllTrue[
+%t A396491         formula,
+%t A396491         Function[clause, AnyTrue[clause, litValue[#, assignment] == 1 &]]
+%t A396491       ]
+%t A396491     ]
+%t A396491   ]
+%t A396491 a[n_] := Module[{cl = clauses[n]},
+%t A396491   Count[
+%t A396491     combinationsWithReplacement[Range[Length[cl]], 5],
+%t A396491     idxs_ /; unsat[n, cl[[idxs]]]
+%t A396491   ]
+%t A396491 ]
+%t A396491 Table[a[n], {n, 1, 7}]
+%o A396491 (Python)
+%o A396491 from itertools import combinations_with_replacement
+%o A396491 def clauses(n):
+%o A396491     lits = list(range(-n, 0)) + list(range(1, n+1))
+%o A396491     return list(combinations_with_replacement(lits, 3))
+%o A396491 def lit_value(lit, a):
+%o A396491     v = abs(lit)-1
+%o A396491     val = (a >> v) & 1
+%o A396491     return val if lit > 0 else 1-val
+%o A396491 def unsat(n, formula):
+%o A396491     for a in range(1 << n):
+%o A396491         if all(any(lit_value(lit, a) for lit in clause) for clause in formula):
+%o A396491             return False
+%o A396491     return True
+%o A396491 def a(n):
+%o A396491     cl = clauses(n)
+%o A396491     s = 0
+%o A396491     for idxs in combinations_with_replacement(range(len(cl)), 5):
+%o A396491         if unsat(n, [cl[i] for i in idxs]):
+%o A396491             s += 1
+%o A396491     return s
+%o A396491 print([a(n) for n in range(1, 8)])
+%Y A396491 Cf. A396351, A396353, A396354.
+%K A396491 nonn,more,new
+%O A396491 1,1
+%A A396491 _Ramin Mohammadi Masoudi_, May 28 2026
