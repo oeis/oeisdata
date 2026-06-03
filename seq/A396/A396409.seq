@@ -1,0 +1,56 @@
+%I A396409 #20 Jun 02 2026 22:28:42
+%S A396409 0,0,1,0,3,1,2,0,5,3,4,1,6,2,3,0,7,5,6,3,8,4,5,1,10,6,7,2,9,3,4,0,9,7,
+%T A396409 8,5,10,6,7,3,12,8,9,4,11,5,6,1,14,10,11,6,13,7,8,2,15,9,10,3,12,4,5,
+%U A396409 0,11,9,10,7,12,8,9,5,14,10,11,6,13,7,8,3,16,12,13,8,15,9,10,4,17,11,12,5
+%N A396409 Number of iterations of x -> x XOR 2^A000120(x) from x = n to reach a number of the form 2^m-1.
+%C A396409 A number x with n 1s has at most two preimages: x XOR 2^(n-1) if the (n-1)-th bit of x is 1, and x XOR 2^(n+1) if (n+1)-th bit of x is 0.
+%C A396409 The directed graph induced on the natural numbers by this mapping is a binary tree, with a root at infinity and a 'stem' of numbers of the form 2^m-1. This sequence measures the distance to the stem.
+%C A396409 Compare this to A326730 (from x -> x XOR 2^(A000120(x)-1)), measuring distance to 0 (which all elements eventually hit); this map acts on 2*n as A326730's acts on n.
+%C A396409 The maximum a(n) for n in the range [0..2^l] is binomial(l,2), achieved by n=A233411(l).
+%C A396409 Sum_{n=0..2^l-1} a(n)   = 2^(l-2)*(l^2 - 3*l + 4) - 1.
+%C A396409 Sum_{n=0..2^l-1} a(n)^2 = 2^(l-4)*(3*l^4 - 14*l^3 + 57*l^2 - 166*l + 240)/3 - 5.
+%C A396409 Thus, the waiting time for an n uniformly sampled in [0..2^l) has expectation l*(l-3)/4 + 1 - 1/2^l, and variance l*(l+1)*(l+1/2)/12 - 2*l + 4 + O(l^2/2^l).
+%C A396409 If n is written as the binary word 1^(o_0) 0^(z_0) 1^(o_1) ... (ignoring the last run of trailing 1s for odd n), then (with O_i = Sum_{j=0..i} o_j), a(n) = Sum_i 2*O_i*z_i - o_i.
+%F A396409 a(2*n+1) = a(n), a(2*n) = a(n) + wt(n) + wt(n+1) - 1 = a(n) + 2*wt(n) - val2(n+1), where wt=A000120 and val2=A007814 (val2(n+1) is n's number of trailing 1s in binary).
+%F A396409 a(2*n) = A326730(n).
+%e A396409 Tree of numbers up to 63:
+%e A396409 63<-31<-15<- 7<- 3<- 1<- 0<- 2<- 6<- 4
+%e A396409          |   |   |   |           \--14<-10<-8<-12
+%e A396409          |   |   |   |               \--30<-22<-18<-16<-20<-28<-24
+%e A396409          |   |   |   |                   |       \--26
+%e A396409          |   |   |   |                   \--62<-46<-38<-34<-32<-36<-44<-40
+%e A396409          |   |   |   |                               |   |           \--60<-52<-48<-56
+%e A396409          |   |   |   |                               |   \--42<-58<-50
+%e A396409          |   |   |   |                               \--54
+%e A396409          |   |   |   \-- 5<-13<- 9
+%e A396409          |   |   |           \--29<-21<-17<-25
+%e A396409          |   |   |               \--61<-45<-37<-33<-41<-57<-49
+%e A396409          |   |   |                           \--53
+%e A396409          |   |   \--11<-27<-19
+%e A396409          |   |           \--59<-43<-35<-51
+%e A396409          |   \--23<-55<-39
+%e A396409          \--47
+%e A396409 67 follows the path 67->75->91->123->59->27->11->3, so has distance 7 from the stem.
+%e A396409 326730_10 = 1001111110001001010_2, whose run-length sequences are o = 1,6,1,1,1 and z = 2,3,2,1,1 with O = 1,7,8,9,10, so a(326730) = Sum_i 2*O_i*z_i-o_i = 2*1*2-1 + 2*7*3-6 + 2*8*2-1 + 2*9*1-1 + 2*10*1-1 = 106.
+%o A396409 (Python) #demonstration of sequence definition
+%o A396409 Y=lambda f: (lambda g: g(g))(lambda x: f(lambda *a: x(x)(*a))) #Y combinator
+%o A396409 A396409=Y(lambda f: lambda t: lambda x: f(t+1)(x^1<<x.bit_count()) if x&x+1 else t)(0)
+%o A396409 (Python)
+%o A396409 from itertools import groupby
+%o A396409 trailing1s=lambda n: (~(n+1)&n).bit_length()
+%o A396409 def A396409(n): # iterates over runs
+%o A396409     bits=bin(n>>trailing1s(n))[2:]
+%o A396409     onesSeen=0
+%o A396409     steps=0
+%o A396409     for val, grp in groupby(bits):
+%o A396409         l = sum(1 for b in grp)
+%o A396409         if val=='1': onesSeen += l
+%o A396409         steps += l*(2*onesSeen if val=='0' else -1)
+%o A396409     return steps
+%o A396409 (Python) # alternative:
+%o A396409 trailing1s=lambda n: (~(n+1)&n).bit_length()
+%o A396409 A396409=lambda n: n and A396409(n>>1)+(~n&1 and (n.bit_count()*2-trailing1s(n>>1)))
+%Y A396409 Cf. A000120, A007814, A326730.
+%K A396409 nonn,new
+%O A396409 0,5
+%A A396409 _Natalia L. Skirrow_, May 24 2026

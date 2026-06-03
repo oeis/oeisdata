@@ -1,0 +1,72 @@
+%I A395951 #38 Jun 02 2026 18:20:19
+%S A395951 2,6,4,8,10,12,14,16
+%N A395951 Fix-ordered complementary factors of prime(m-1)+1 where m belongs to set where denominators in the expression m!/(prime(m-1)+1) for m > 1 are not integers.
+%C A395951 For m >= 3, let n_m = prime(m-1) + 1.
+%C A395951 Write n_m = L_m * R_m, where L_m is the largest prime factor of n_m. Consider only indices satisfying L_m > m. For N >= 1, define R(N) = {R_m : 3 <= m <= N, L_m > m}. Sort the distinct values of R(N) by decreasing frequency. The resulting ordering stabilizes experimentally as N increases. The stabilized sequence begins: 2,3,4,8,6,12,10,14,15,18.
+%H A395951 Alexander R. Povolotsky, <a href="https://arxiv.org/abs/2605.08256">Frequency-Ordered Ratio Families Arising from the Factorization of p_{m-1}+1</a>, arXiv:2605.08256 [math.NT], 2026.
+%e A395951 For m = 13: prime(12) + 1 = 37 + 1 = 38 = 2*19. Hence L_13 = 19, R_13 = 2. Since 19 > 13, this index is included. Thus R = 2 is a term.
+%t A395951 max = 2000000;
+%t A395951 rValues = Table[
+%t A395951 n = Prime[m - 1] + 1;
+%t A395951 f = FactorInteger[n];
+%t A395951 L = Max[f[[All, 1]]];
+%t A395951 If[L > m, n/L, Nothing],
+%t A395951 {m, 3, max}
+%t A395951 ];
+%t A395951 sortedR = Keys @ ReverseSortBy[Counts[rValues], Last];
+%t A395951 Take[sortedR, 50]
+%o A395951 (Python)
+%o A395951 from sympy import prime, factorint
+%o A395951 from collections import Counter
+%o A395951 def generate_primes_up_to_n(n):
+%o A395951     """Fast prime sieve to avoid calling prime() thousands of times."""
+%o A395951     sieve = [True] * (n + 1)
+%o A395951     for p in range(2, int(n**0.5) + 1):
+%o A395951         if sieve[p]:
+%o A395951             for i in range(p*p, n + 1, p):
+%o A395951                 sieve[i] = False
+%o A395951     return [p for p in range(2, n + 1) if sieve[p]]
+%o A395951 def get_lpf(num):
+%o A395951     """Returns the Largest Prime Factor (LPF) of a number."""
+%o A395951     if num < 2:
+%o A395951         return 0
+%o A395951     d = 2
+%o A395951     max_p = 2
+%o A395951     while d * d <= num:
+%o A395951         if num % d == 0:
+%o A395951             max_p = d
+%o A395951             while num % d == 0:
+%o A395951                 num //= d
+%o A395951         d += 1
+%o A395951     if num > 1:
+%o A395951         max_p = num
+%o A395951     return max_p
+%o A395951 def generate_A395951_sequence(N):
+%o A395951     # We need the first N-1 primes
+%o A395951     # Est. upper bound for the N-th prime using n*log(n) + n*log(log(n))
+%o A395951     import math
+%o A395951     if N < 6:
+%o A395951         estimated_max_prime = 15
+%o A395951     else:
+%o A395951         estimated_max_prime = int(N * (math.log(N) + math.log(math.log(N))))
+%o A395951     primes_list = generate_primes_up_to_n(estimated_max_prime)[:N]
+%o A395951     r_values = []
+%o A395951     # Paper specifies m >= 3
+%o A395951     for m in range(3, N + 1):
+%o A395951         n_m = primes_list[m - 2] + 1  # p_{m-1} + 1
+%o A395951         L_m = get_lpf(n_m)             # Largest prime factor
+%o A395951         if L_m > m:                    # Condition from OEIS A223881
+%o A395951             R_m = n_m // L_m
+%o A395951             r_values.append(R_m)
+%o A395951     # Count frequencies
+%o A395951     counts = Counter(r_values)
+%o A395951     # Sort by decreasing frequency, then by R_m value ascending
+%o A395951     sorted_r = sorted(counts.items(), key=lambda x: (-x[1], x[0]))
+%o A395951     return [item[0] for item in sorted_r]
+%o A395951 # Verify the output up to N = 2000000
+%o A395951 verified_sequence = generate_A395951_sequence(50000)
+%o A395951 print(verified_sequence[:36])
+%Y A395951 Cf. A223881.
+%K A395951 nonn,hard,more,new
+%O A395951 1,1
+%A A395951 _Alexander R. Povolotsky_, May 11 2026

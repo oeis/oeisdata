@@ -1,0 +1,51 @@
+%I A396505 #17 Jun 02 2026 23:15:09
+%S A396505 1,2,1,1,3,1,1,2,1,1,4,1,1,2,1,1,5,1,1,2,1,3,1,1,1,2,1,1,6,1,1,2,1,1,
+%T A396505 3,1,1,2,1,4,1,1,7,1,2,1,1,1,3,1,2,1,1,1,2,1,1,8,1,1,2,1,1,3,1,1,2,1,
+%U A396505 1,4,1,5,1,1,2,1,1,3,1,1,2,1,1,9,1,2,1
+%N A396505 A sequence constructed by greedily sampling the probability distribution given by log_2(1+1/i)^2 - log_2(1+1/(i+1))^2 to minimize discrepancy.
+%C A396505 The probability mass function used here is a simple example of a power-law tail distribution. The p=1 case of the family below is the Gauss-Kuzmin distribution. As a consequence of the lighter tail, both the arithmetic mean and the geometric mean of this sequence are finite.
+%C A396505 A general family of these distributions is given by log_2(1+1/i)^p - log_2(1+1/(i+1))^p where p>0. The p=1 case is the Gauss-Kuzmin distribution (A084580).
+%C A396505 Properties change sharply at p=1, the geometric mean remains finite for all p but the arithmetic mean becomes finite for p>1 and infinite for p<=1.
+%C A396505 | mean       | 0 < p <= 1 | p > 1  |
+%C A396505 | ---------- | ---------- | ------ |
+%C A396505 | arithmetic |     oo     | finite |
+%C A396505 | geometric  |   finite   | finite |
+%C A396505 The arithmetic mean equals Sum_{i>=1} log_2(1+1/i)^2 = 2.0338912546... and for general power p in the family above, it equals Sum_{i>=1} log_2(1+1/i)^p.
+%C A396505 The geometric mean equals Product_{i>=1} (1+1/i)^(log_2(1+1/(i+1))^2) = 1.469227314899... and for general power p in the family above it equals Product_{i>=1} (1+1/i)^(log_2(1+1/(i+1))^p).
+%C A396505 The Fisher information is always finite and given by Sum_{i>=1} ((ln(log_2(1+1/i))*(log_2(1+1/i))^p - ln(log_2(1+1/(i+1)))*(log_2(1+1/(i+1)))^p)^2) / ((log_2(1+1/i))^p - (log_2(1+1/(i+1)))^p).
+%H A396505 Jwalin Bhatt, <a href="/A396505/b396505.txt">Table of n, a(n) for n = 1..10000</a>
+%e A396505 Let p(k) denote the probability of k and c(k) denote the number of occurrences of k among the first n-1 terms; then the expected number of occurrences of k among n random terms is given by n*p(k).
+%e A396505 We subtract the actual occurrences c(k) from the expected occurrences and pick the one with the highest value.
+%e A396505 | n | n*p(1) - c(1) | n*p(2) - c(2) | n*p(3) - c(3) | choice |
+%e A396505 |---|---------------|---------------|---------------|--------|
+%e A396505 | 1 |     0.657     |       -       |       -       |   1    |
+%e A396505 | 2 |     0.315     |     0.339     |       -       |   2    |
+%e A396505 | 3 |     0.973     |    -0.490     |     0.205     |   1    |
+%e A396505 | 4 |     0.631     |    -0.320     |     0.274     |   1    |
+%e A396505 | 5 |     0.289     |    -0.150     |     0.343     |   3    |
+%t A396505 probCountDiff[j_, k_, count_] := k*(Log2[1+1/j]^2 - Log2[1+1/(j+1)]^2) - Lookup[count, j, 0]
+%t A396505 samplePDF[n_] := Module[{coeffs, unreachedVal, counts, k, probCountDiffs, mostProbable},
+%t A396505   coeffs = ConstantArray[0, n]; unreachedVal = 1; counts = <||>;
+%t A396505   Do[probCountDiffs = Table[probCountDiff[i, k, counts], {i, 1, unreachedVal}];
+%t A396505     mostProbable = First@FirstPosition[probCountDiffs, Max[probCountDiffs]];
+%t A396505     If[mostProbable == unreachedVal, unreachedVal++]; coeffs[[k]] = mostProbable;
+%t A396505     counts[mostProbable] = Lookup[counts, mostProbable, 0] + 1; , {k, 1, n}]; coeffs]
+%t A396505 A396505 = samplePDF[120]
+%o A396505 (Python)
+%o A396505 from mpmath import iv
+%o A396505 def prob_count_diff(j, k, count):
+%o A396505     return k*(iv.log(1+1/j,2)**2 - iv.log(1+1/(j+1),2)**2) - count
+%o A396505 def sample_log_tail_distribution(num_coeffs):
+%o A396505     coeffs, unreached_val, counts = [], 1, {}
+%o A396505     for k in range(1, num_coeffs+1):
+%o A396505         prob_count_diffs = [prob_count_diff(i, k, counts.get(i, 0)) for i in range(1, unreached_val+1)]
+%o A396505         most_probable = prob_count_diffs.index(max(prob_count_diffs)) + 1
+%o A396505         unreached_val += most_probable == unreached_val
+%o A396505         coeffs.append(most_probable)
+%o A396505         counts[most_probable] = counts.get(most_probable, 0) + 1
+%o A396505     return coeffs
+%o A396505 A396505 = sample_log_tail_distribution(120)
+%Y A396505 Cf. A084580, A393100, A394401, A396405, A394370.
+%K A396505 nonn,new
+%O A396505 1,2
+%A A396505 _Jwalin Bhatt_, May 28 2026
