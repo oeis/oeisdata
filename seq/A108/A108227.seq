@@ -1,25 +1,30 @@
-%I A108227 #37 Dec 10 2024 10:26:18
-%S A108227 3,5,9,18,31,46,67,91,122,158,194,238,284,334,392,456,522,591,668,749,
-%T A108227 835,929,1028,1133,1242,1352,1469,1594,1727,1869,2019,2163,2315,2471,
-%U A108227 2636,2802,2977,3157,3342,3534,3731,3933,4145,4358,4581,4811
+%I A108227 #64 Jun 07 2026 09:16:14
+%S A108227 3,5,9,18,31,46,67,91,122,157,194,238,284,334,392,455,522,591,668,748,
+%T A108227 834,929,1028,1133,1241,1352,1469,1594,1727,1869,2019,2163,2315,2471,
+%U A108227 2636,2802,2977,3156,3341,3534,3731,3933,4145,4358,4581,4811,5053,5293,5531,5777
 %N A108227 a(n) is the least number of prime factors for any abundant number with p_n (the n-th prime) as its least factor.
-%C A108227 If we replace "abundant" in the definition with "non-deficient", we get the same sequence with an initial 2 instead of 3, barring an astronomically unlikely coincidence with some as-yet-undiscovered odd perfect number. [This is sequence A107705. - _M. F. Hasler_, Jun 14 2017]
-%C A108227 It appears that all terms >= 5 correspond to the odd primitive abundant numbers (A006038) which are products of consecutive primes (cf. A285993), i.e., of the form N = Product_{0<=i<r} prime(n+i) for some r, which turns out to be r = a(n). - _M. F. Hasler_, May 08 2017
+%C A108227 If we replace "abundant" in the definition with "nondeficient", we get the same sequence with an initial 2 instead of 3, barring an astronomically unlikely coincidence with some as-yet-undiscovered odd perfect number. [This is sequence A107705. - _M. F. Hasler_, Jun 14 2017]
+%C A108227 It appears that all terms >= 5 correspond to the odd primitive abundant numbers (A006038) which are products of consecutive primes (cf. A285993), i.e., of the form N = Product_{0<=i<r} prime(n+i) for some r, which turns out to be r = a(n). - _M. F. Hasler_, May 08 2017 [NOTE: As we see from n = 10, this is NOT true: see EXAMPLE! - _M. F. Hasler_, Jun 05 2026]
 %C A108227 From _Jianing Song_, Apr 21 2021: (Start)
-%C A108227 Let x_1 < x_2 < ... < x_k < ... be the numbers of the form p of p^2 + p, where p is a prime >= prime(n). Then a(n) is the smallest N such that Product_{i=1..N} (1 + 1/x_i) > 2. See my link below for a proof.
+%C A108227 Let x_1 < x_2 < ... < x_k < ... be the numbers of the form p or p^2 + p, where p is a prime >= prime(n). Then a(n) is the smallest N such that Product_{i=1..N} (1 + 1/x_i) > 2. See my link below for a proof.
 %C A108227 For example, for n = 3, we have {x_1, x_2, ..., x_k, ...} = {5, 7, 11, 13, 17, 19, 23, 29, 5^2 + 5, ...}, we have Product_{i=1..8} (1 + 1/x_i) < 2 and Product_{i=1..9} (1 + 1/x_i) > 2, so a(3) = 9. (End)
-%H A108227 Amiram Eldar, <a href="/A108227/b108227.txt">Table of n, a(n) for n = 1..500</a>
-%H A108227 Jianing Song, <a href="/A108227/a108227_1.pdf">Notes for A108227</a>
-%F A108227 a(n) = A007684(n)-n+1, for n>1. A007741(n) = Product_{0<=i<a(n)} prime(n+i). - _M. F. Hasler_, Jun 15 2017
+%H A108227 Amiram Eldar, <a href="/A108227/b108227.txt">Table of n, a(n) for n = 1..500</a> (corrected by Amiram Eldar, May 09 2026)
+%H A108227 Jianing Song, <a href="/A108227/a108227_1.pdf">Notes for A108227</a>.
+%F A108227 a(n) <= A001222(A047802(n-1)). - _M. F. Hasler_, Jun 05 2026
 %e A108227 a(2) = 5 since 945 = 3^3*5*7 is an abundant number with p_2 = 3 as its smallest prime factor, and no such number exists with fewer than 5 prime factors.
-%o A108227 (PARI) A108227(n, s=1+1/prime(n))=for(a=1, 9e9, if(2<s*=1+1/prime(n+a),return(a+1))) \\ _M. F. Hasler_, Jun 15 2017
+%e A108227 For n = 10, let k = 29 * A002110(165) / A002110(9), where A002110(m) is the product of the first m primes. k has 165-9+1 = 157 prime factors (counting repetitions) with least prime factor = prime(10) = 29, and sigma(k)/k = 2.00000935..., so k is abundant. There is no abundant number with least prime factor = 29 and fewer than 157 prime factors, so a(10) = 157. - _Peter Munn_, May 09 2026
+%t A108227 formQ[p_, q_] := If[q >= p && PrimeQ[q], True, If[IntegerQ[Sqrt[4*q + 1]], Module[{r = (Floor[Sqrt[4*q + 1]] - 1)/2}, r >= p && PrimeQ[r]], False]];
+%t A108227 a[n_] := Module[{prod = 1, sum = 0, p = Prime[n], i}, i = p; While[prod <= 2, If[formQ[p, i], prod *= (1 + 1/i); sum++]; i++]; sum];
+%t A108227 Array[a, 50] (* _Amiram Eldar_, May 09 2026, after _Jianing Song_ *)
+%o A108227 (PARI) apply( {A108227(n)=my(p=prime(n), s=1+1/p); while(2>=s*=1+1/p=nextprime(p+1), ); n=#p=primes([prime(n), p]); p=Mat([p~, [1|p<-p]~]); for(i=1, n, while(p[i, 1]^(p[i, 2]+2)\(p[i, 1]-1) <= p[n, 1], p[i, 2]++; n--); sigma(p[1..n-1,], -1)>2 && n--; (i<n && p[i, 2]>1)||break); vecsum(p[1..n, 2])}, [1..40]) \\ _M. F. Hasler_, Jun 05 2026, replacing earlier incorrect code from Jun 15 2017
 %o A108227 (PARI) isform(k,q) = my(p=prime(k)); if(isprime(q) && (q>=p), 1, if(issquare(4*q+1), my(r=(sqrtint(4*q+1)-1)/2); isprime(r) && (r>=p), 0))
 %o A108227 a(n) = my(Prod=1, Sum=0); for(i=prime(n), oo, if(isform(n,i), Prod *= (1+1/i); Sum++); if(Prod>2, return(Sum))) \\ _Jianing Song_, Apr 21 2021
-%Y A108227 Cf. A000040, A005101, A006038, A001222.
-%Y A108227 Cf. A107705.
+%Y A108227 Cf. A000040, A000203, A005101, A006038, A001222 (Omega, bigomega), A002110 (primorial numbers), A047802.
+%Y A108227 Cf. A107705 (similar for nondeficient numbers, essentially the same).
 %Y A108227 Cf. A007707 (~ A007684), A007708, A007741.
 %Y A108227 Cf. A001276 (least number of prime factors for a (p_n)-rough abundant number, counted without multiplicity).
-%K A108227 nonn
+%K A108227 nonn,changed
 %O A108227 1,1
 %A A108227 _Hugo van der Sanden_, Jun 17 2005
-%E A108227 Data corrected by _Amiram Eldar_, Aug 08 2019
+%E A108227 Data aligned with 2017 PARI program output by _Amiram Eldar_, Aug 08 2019
+%E A108227 Original data restored by _Amiram Eldar_, May 09 2026

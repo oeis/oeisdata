@@ -1,0 +1,45 @@
+%I A396052 #66 Jun 07 2026 23:07:17
+%S A396052 399,1089,1875,2709,3879,4791,5655,8091,9279,12411,13875,14421,16449,
+%T A396052 17571,18231,22305,23631,31251,36015,40239,44685,45555,47295,53091,
+%U A396052 56811,62301,83871,87555,88659,91371,91461,97929,100359,107349,108879,111429,115875,117501,118689,139941,140421,141669,143241
+%N A396052 Composite numbers in the odds-only Ulam spiral such that all its four orthogonal neighbors are prime: isolated composites.
+%C A396052 The odds-only Ulam spiral is defined with the following conventions: number k=1 (center) is at (x,y)=(0,0), 3 is at (1,0) starting shell s=1, 5 is at (1,1). Thus the spiral turns counterclockwise and the transitions from shell s to s+1 occur at the south-east diagonal.
+%C A396052 Note that on the odds-only Ulam spiral any number k has two neighbors on the same shell s and two cross-shell. On the diagonals both cross-shell neighbors are at s+1, elsewhere they are at s-1 and s+1. The same-shell neighbors are always k-2 and k+2, except when k is the first or last member of the shell. If k is the first member of the shell s, at (s,-s+1), k+2 is same-shell and k-2 is at s-1. If k is the last member, at (s,s), k-2 is same-shell and k+2 is at s+1.
+%C A396052 Theorem: All terms of the sequence are divisible by 3. Proof: any number k has neighbors k-2 and k+2. For an isolated composite both these neighbors are prime, hence not divisible by 3. Since exactly one of {k-2, k, k+2} is == 0 (mod 3), it must be k.
+%C A396052 Theorem: 2 of the primes enclosing the isolated composite form a cousin prime pair. Proof: If k is an isolated composite on the odds-only Ulam spiral, k-2 and k+2 are its prime neighbors. k-2 and k+2 are at distance 4, hence cousin primes. Note that k-1 and k+1 are even and k is composite by definition.
+%H A396052 Paul Steendijk, <a href="/A396052/b396052.txt">Table of n, a(n) for n = 1..10000</a>
+%H A396052 David A. Corneth, <a href="/A396052/a396052_1.gp.txt">PARI program</a>
+%H A396052 David A. Corneth, <a href="/A396052/a396052_4.png">Part of spiral with terms in it highlighted</a>
+%H A396052 Paul Steendijk, <a href="/A396052/a396052_1.png">Fig 1 - Isolated composites 60 shells</a>
+%H A396052 Paul Steendijk, <a href="/A396052/a396052_2.png">Fig 2 - Isolated composites 30000 shells - resampled in blocks of 30x30 cells</a>
+%H A396052 Paul Steendijk, <a href="/A396052/a396052.txt">Short explanation of fig 1 and fig 2</a>
+%F A396052 Number k at (x,y) is located at shell s=max(|x|,|y|). Shell s has 8*s members. The diagonals (|x|=|y|) define 4 sectors: east (-x<y<=x), north (-y<=x<y), west (x<=y<-x), and south (y<x<=-y). Defined per sector, east: k(x,y)=1+8*x^2-6*x+2*y; north: k(x,y)=1+8*y^2-2*y-2*x; west: k(x,y)=1+8*x^2-2*x-2*y; south: k(x,y)=1+8*y^2-6*y+2*x. Note that sector definitions include their downstream diagonal (east sector includes north-east diagonal, etc.).
+%e A396052 a(1)=399 at (-7,4) in west sector. Orthogonal neighbors (see comments for calculations) are k(-8,4)=521, k(-6,4)=293, k(-7,3)=401, k(-7,5)=397, all prime.
+%t A396052 (* 1) Brute force method that checks all composites on the odds-only spiral. *)
+%t A396052 spiralVal[x_,y_]:=Which[x==0&&y==0,1,-x<y&&y<=x,1+8x^2-6x+2y,-y<=x&&x<y,1+8y^2-2y-2x,x<=y&&y<-x,1+8x^2-2x-2y,True,1+8y^2-6y+2x]
+%t A396052 isIsolComp[x_,y_]:=With[{k=spiralVal[x,y]},k>1&&!PrimeQ[k]&&PrimeQ[spiralVal[x,y-1]]&&PrimeQ[spiralVal[x,y+1]]&&PrimeQ[spiralVal[x-1,y]]&&PrimeQ[spiralVal[x+1,y]]]
+%t A396052 shellCells[s_]:=Join[Table[{s,y},{y,-s+1,s}],Table[{x,s},{x,s-1,-s,-1}],Table[{-s,y},{y,s-1,-s,-1}],Table[{x,-s},{x,-s+1,s}]]
+%t A396052 IsolComp[nMax_]:=Module[{r={},s=0},While[Length[r]<nMax,s++;r=Join[r,Map[spiralVal@@#&,Select[shellCells[s],isIsolComp@@#&]]]];Take[r,nMax]]
+%t A396052 IsolComp[43]
+%t A396052 (* Alternative: 2) More efficient strategy using that only odd multiples of 3 are candidates and a cousin prime is required. *)
+%t A396052 spiralVal[x_,y_]:=Which[x==0&&y==0,1,-x<y&&y<=x,1+8x^2-6x+2y,-y<=x&&x<y,1+8y^2-2y-2x,x<=y&&y<-x,1+8x^2-2x-2y,True,1+8y^2-6y+2x]
+%t A396052 spiralCoords[k_Integer?OddQ]:=Module[{i=(k+1)/2,s,o},If[k==1,Return[{0,0}]];s=(IntegerPart[Sqrt[i-1]]+1)/2;If[(2s-1)^2+1>i,s=s-1];o=i-(2s-1)^2-1;Which[o<2s,{s,o-s+1},o<4s,{3s-1-o,s},o<6s,{-s,5s-1-o},True,{o-7s+1,-s}]]
+%t A396052 Select[Range[9,150000,6],PrimeQ[#-2]&&PrimeQ[#+2]&&With[{xy=spiralCoords[#]},AllTrue[spiralVal@@@Map[xy+#&,{{1,0},{-1,0},{0,1},{0,-1}}],PrimeQ]]&]
+%o A396052 (PARI) \\ See Corneth link
+%o A396052 (PARI)
+%o A396052 \\ Brute force method that checks all composites on the odds-only spiral.
+%o A396052 spiralVal(x,y)=if(x==0&&y==0,1,if(-x<y&&y<=x,1+8*x^2-6*x+2*y,if(-y<=x&&x<y,1+8*y^2-2*y-2*x,if(x<=y&&y<-x,1+8*x^2-2*x-2*y,1+8*y^2-6*y+2*x))));
+%o A396052 isIsolComp(x,y)=my(k=spiralVal(x,y));k>1&&!isprime(k)&&isprime(spiralVal(x,y-1))&&isprime(spiralVal(x,y+1))&&isprime(spiralVal(x-1,y))&&isprime(spiralVal(x+1,y));
+%o A396052 {IsolComp(nMax)=my(r=List(),s=0);while(#r<nMax,s++;for(y=-s+1,s,if(isIsolComp(s,y),listput(r,spiralVal(s,y))));forstep(x=s-1,-s,-1,if(isIsolComp(x,s),listput(r,spiralVal(x,s))));forstep(y=s-1,-s,-1,if(isIsolComp(-s,y),listput(r,spiralVal(-s,y))));for(x=-s+1,s,if(isIsolComp(x,-s),listput(r,spiralVal(x,-s)))));Vec(r)[1..nMax]};
+%o A396052 IsolComp(43)
+%o A396052 (PARI)
+%o A396052 \\ More efficient strategy using that only odd multiples of 3 are candidates and a cousin prime is required.
+%o A396052 spiralVal(x,y)=if(x==0&&y==0,1,if(-x<y&&y<=x,1+8*x^2-6*x+2*y,if(-y<=x&&x<y,1+8*y^2-2*y-2*x,if(x<=y&&y<-x,1+8*x^2-2*x-2*y,1+8*y^2-6*y+2*x))));
+%o A396052 spiralCoords(k)=my(i=(k+1)/2,s,o);if(k==1,return([0,0]));s=(sqrtint(i-1)+1)\2;if((2*s-1)^2+1>i,s=s-1);o=i-(2*s-1)^2-1;if(o<2*s,[s,o-s+1],if(o<4*s,[3*s-1-o,s],if(o<6*s,[-s,5*s-1-o],[o-7*s+1,-s])));
+%o A396052 isIsland(k)=my(xy=spiralCoords(k));isprime(spiralVal(xy[1]+1,xy[2]))&&isprime(spiralVal(xy[1]-1,xy[2]))&&isprime(spiralVal(xy[1],xy[2]+1))&&isprime(spiralVal(xy[1],xy[2]-1));
+%o A396052 {my(r=List());forstep(j=3,150000,6,if(!isprime(j)&&isprime(j-2)&&isprime(j+2)&&isIsland(j),listput(r,j)));Vec(r)}
+%Y A396052 Cf. A023200, A094343, A046132, A094343, A167607.
+%Y A396052 Subsequence of A087679.
+%K A396052 nonn,new
+%O A396052 1,1
+%A A396052 _Paul Steendijk_, May 14 2026

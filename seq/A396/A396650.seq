@@ -1,0 +1,72 @@
+%I A396650 #38 Jun 07 2026 07:26:56
+%S A396650 1,0,3,1,0,-3,0,2,0,3,1,0,-5,0,-3,0,1,0,8,0,3,1,0,-6,0,-11,0,-3,0,0,0,
+%T A396650 14,0,14,0,3,1,0,-6,0,-25,0,-17,0,-3,0,-1,0,20,0,39,0,20,0,3,1,0,-5,0,
+%U A396650 -45,0,-56,0,-23,0,-3,0,-2,0,25,0,84,0,76,0,26,0,3
+%N A396650 Triangle read by rows: the coefficients of the polynomials P(n, x) = -x * P(n-1, x) + P(n-2, x), where P(0, x) = 1 and P(1, x) = 3*x, ordered by ascending powers.
+%C A396650 Define F(t, x) = (phi(x)^(-t) - (-phi(x))^t) / (2*phi(x) - x) and L(t, x) = (phi(x)^(-t) + (-phi(x))^t), where phi(x) = (x + sqrt(x^2 + 4))/2. On this page and in A396651, we examine LF(t, x) = (1/2) * L(t, x) + (7/2)*x*F(t, x). In expanded form this leads to a generalized Binet-type representation:
+%C A396650   LF(t, x) = ((3*x + phi(x))*phi(x)^(-t) + (-phi(x))^t*(-4*x + phi(x)))/(2*phi(x) - x).
+%C A396650 We dub this linear combination of the Lucas and the Fibonacci polynomials the Lucanacci polynomials, and LF(t, 1) the Lucanacci function. The coefficients of the polynomials LF(-n, x) are for n >= 0 on the present page and for LF(n, x) in A396651.
+%C A396650 The Lucanacci function yields the sequences LF(n, 1) = A396201(n) and LF(-n, 1) = A000285(n) for n >= 0, which are the row sums of the corresponding triangles of coefficients.
+%H A396650 Peter Luschny, <a href="/A396650/a396650.png">Illustration of the A396650 polynomials</a>.
+%F A396650 T(n, k) are the coefficients of P(n, x) = U(n, -x/2) + 4*x*U(n - 1, -x/2), where U(n, x) are the Chebyshev U polynomials.
+%F A396650 The connection with the Lucas and Fibonacci polynomials:
+%F A396650 P(n, x) = (-1)^n*(Lucas(n, x) - 7*x*Fibonacci(n, x)) / 2.
+%F A396650 The Binet representation of the polynomials:
+%F A396650 P(n, x) = mu(x)*phi(-x)^n + (1-mu(x))*(-x-phi(-x))^n, where phi(x) = (x + sqrt(x^2+4))/2, and mu(x) = (1 + 7*x/sqrt(x^2+4))/2. Note that phi(1) = A001622, and mu(1) = A189961.
+%F A396650 G.f.: (1 + 4*x*y) / (1 + x*y - y^2).
+%F A396650 E.g.f.: exp(-x*y/2)*(cosh(h*y) + g*sinh(h*y)), where h = phi(x) - x/2, and g = 2*mu(x) - 1. Notice that the only difference between this and the EGF of A396651 is the minus sign in the leading exponential factor.
+%F A396650 T(n, k) = 0 if n - k is odd, T(0, 0 ) = 1, T(n, n) = (-1)^(n + 1)*3 for n > 0, and otherwise T(n, k) = (-1)^n*(n - 7*k)*binomial((n + k)/2 - 1, k) / (n - k). (See  A396649.)
+%F A396650 Sum_{k=0..n} T(n, k) = A396201(n).
+%e A396650 Table starts:
+%e A396650    0:   1;
+%e A396650    1:   0,   3;
+%e A396650    2:   1,   0,  -3;
+%e A396650    3:   0,   2,   0,   3;
+%e A396650    4:   1,   0,  -5,   0,  -3;
+%e A396650    5:   0,   1,   0,   8,   0,   3;
+%e A396650    6:   1,   0,  -6,   0, -11,   0,  -3;
+%e A396650    7:   0,   0,   0,  14,   0,  14,   0,   3;
+%e A396650    8:   1,   0,  -6,   0, -25,   0, -17,   0,  -3;
+%e A396650    9:   0,  -1,   0,  20,   0,  39,   0,  20,   0,   3;
+%e A396650   10:   1,   0,  -5,   0, -45,   0, -56,   0, -23,   0,  -3;
+%e A396650   11:   0,  -2,   0,  25,   0,  84,   0,  76,   0,  26,   0,   3;
+%p A396650 flat := ListTools:-FlattenOnce:
+%p A396650 PolyTriangle := proc(len, start, pos) local c,i,a,b,row;
+%p A396650 c := [[1], [0, start]];
+%p A396650 for i from 3 to len do
+%p A396650   a := flat([op([0]), c[i-1]]); b := flat([c[i-2], op([0, 0])]);
+%p A396650   if pos then row := zip((x, y) -> y + x, a, b);
+%p A396650          else row := zip((x, y) -> y - x, a, b) fi;
+%p A396650   c := [op(c), row]; od; c end:
+%p A396650 # Using the above template function:
+%p A396650 A396650poly := n -> PolyTriangle(n, 3, false):
+%p A396650 for row in A396650poly(12) do lprint(row) od;
+%p A396650 # Alternative:
+%p A396650 A396650poly := proc(n, x) option remember;
+%p A396650 if n = 0 then 1 elif n = 1 then 3*x else -x*procname(n-1, x) + procname(n-2, x) fi end:
+%p A396650 Trow := n -> local k; seq(coeff(A396650poly(n, x), x, k), k = 0..n):
+%p A396650 seq(print(Trow(n)), n = 0..11);
+%t A396650 P[0] = 1; P[1] = 3 x; P[n_] := P[n] = Expand[-x P[n - 1] + P[n - 2]];
+%t A396650 Table[CoefficientList[P[n], x], {n, 0, 11}]
+%t A396650 (* Alternative: Chebyshev polynomials.*)
+%t A396650 P[n_, x_] := Expand[I^n * ChebyshevU[n, (I*x)/2] + 4*x * I^(n - 1) * ChebyshevU[n - 1, (I*x)/2]]
+%t A396650 Table[CoefficientList[P[n, x], x], {n, 0, 11}]
+%t A396650 (* Alternative: The Lucas/Fibonacci connection. *)
+%t A396650 P[n_, x_] := (-1)^n * (LucasL[n, x] - 7 x Fibonacci[n, x]) / 2
+%t A396650 Table[CoefficientList[P[n, x], x], {n, 0, 11}]
+%o A396650 (Python)
+%o A396650 def PolyTriangle(len: int, start: int, pos: bool) -> list[list[int]]:
+%o A396650     c = [[1], [0, start]]
+%o A396650     for i in range(2, len):
+%o A396650         row1 = [0] + c[i-1] if pos else [0] + [-v for v in c[i-1]]
+%o A396650         row2 = c[i-2] + [0, 0]
+%o A396650         row = [t1 + t2 for t1, t2 in zip(row1, row2)]
+%o A396650         c.append(row)
+%o A396650     return c
+%o A396650 A396650poly = lambda n: PolyTriangle(n, 3, False)
+%o A396650 for row in A396650poly(12): print(row)
+%Y A396650 Cf. A396201 (row sums), A396649, A396651, A168561, A114525, A001622, A189961.
+%Y A396650 Diagonals, |T(n + m, n)|, n >= 0, modulo offset: A122553 (m=0), A016789 (m=2), A095794 (m=4), A005564 (m=6), A059302 (m=8).
+%K A396650 sign,tabl,easy,new
+%O A396650 0,3
+%A A396650 _Peter Luschny_, Jun 01 2026
