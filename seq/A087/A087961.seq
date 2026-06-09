@@ -1,10 +1,40 @@
-%I A087961 #3 Mar 30 2012 18:36:39
+%I A087961 #25 Jun 09 2026 02:50:29
 %S A087961 1,1,-1,10,-159,3816,-125375,5309088,-278224975,17527766896,
 %T A087961 -1298909663199,111339963135600,-10892621058454487,
-%U A087961 1203078692663183064,-148666849777064966815,20397978159874089501496
-%N A087961 Satisfies f(x*f(x)) = exp(x), where f(x)=sum(n=0,infinity, a(n)*x^n/n!).
-%e A087961 f(x) = 1 +1x -1x^2/2! +10x^3/3! -159x^4/4! +3816x^5/5! -125375x^6/6! +-...
-%e A087961 where f(x*f(x)) = exp(x).
-%K A087961 sign
+%U A087961 1203078692663183064,-148666849777064966815,20397978159874089501496,-3087359633660559214050975,512588028351488053625232480
+%N A087961 E.g.f. f(x) satisfies f(x*f(x)) = exp(x).
+%H A087961 Peter Luschny, <a href="/A087961/b087961.txt">Table of n, a(n) for n = 0..282</a>.
+%F A087961 From _Seiichi Manyama_, Jun 08 2026: (Start)
+%F A087961 Let a(n,k) = n! * [x^n] f(x)^k.
+%F A087961 a(n,k) = k^n - Sum_{j=1..n-1} binomial(n,j) * a(j,k) * a(n-j,j). (End)
+%e A087961 E.g.f.: f(x) = Sum_{n>=0} a(n)*x^n/n! = 1 +1x -1x^2/2! +10x^3/3! -159x^4/4! +3816x^5/5! -125375x^6/6! +-... satisfies f(x*f(x)) = exp(x).
+%t A087961 n = 18;
+%t A087961 f[x_] := Sum[a[i]x^i/i!, {i,0,n-1}];
+%t A087961 Solve[CoefficientList[f[x f[x]] - Exp[x] + O[x]^n, x] == ConstantArray[0,n], a/@Range[0,n-1]][[1,;;,2]] (* _Andrei Zabolotskii_, Jun 08 2026 *)
+%o A087961 (SageMath)
+%o A087961 from sage.all import QQ, ZZ, PowerSeriesRing, factorial
+%o A087961 def aList(n: int) -> list[int]:
+%o A087961     S = PowerSeriesRing(QQ, 'x', default_prec=n + 1)
+%o A087961     x = S.gen()
+%o A087961     exp_x = x.exp()
+%o A087961     coeffs = []
+%o A087961     for k in range(n):
+%o A087961         def coeff_at_k(trial):
+%o A087961             f = S([(coeffs + [trial] + [0]*(n-len(coeffs)-1))[i] / factorial(i) for i in range(n)], prec=n + 1)
+%o A087961             g = x * f
+%o A087961             gp = S(1)
+%o A087961             ck = 0
+%o A087961             for i in range(k + 1):
+%o A087961                 ck += f[i] * gp[k]
+%o A087961                 gp = (gp * g).truncate(k + 1)
+%o A087961             return ck
+%o A087961         c0 = coeff_at_k(0)
+%o A087961         c1 = coeff_at_k(1)
+%o A087961         coeffs.append((exp_x[k] - c0) / (c1 - c0))
+%o A087961     return [ZZ(c) for c in coeffs]
+%o A087961 print(aList(18))  # _Peter Luschny_, Jun 09 2026
+%Y A087961 Cf. A087962, A140054, A144681, A184011.
+%K A087961 sign,changed
 %O A087961 0,4
 %A A087961 _Paul D. Hanna_, Sep 18 2003
+%E A087961 a(17)-a(18) from _Andrei Zabolotskii_, Jun 08 2026

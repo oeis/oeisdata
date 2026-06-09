@@ -1,0 +1,44 @@
+%I A396695 #14 Jun 08 2026 23:55:16
+%S A396695 6,7,4,0,3,6,1,8,3,1,9,3,6,9,6,1,3,9,9,3,6,6,6,0,0,0,7,5,7,6,5,0,8,4,
+%T A396695 5,5,7,8,0,6,4,5,6,8,8,3,6,2,0,7,8,9,9,4,2,4,4,6,7,4,1,7,5,4,8,8,3,8,
+%U A396695 8,1,7,4,0,1,7
+%N A396695 Decimal expansion of the spectral radius of the matrix L[p_i, p_j] = 1/lcm(p_i, p_j), indexed over all primes p_i, p_j.
+%C A396695 L is the infinite real symmetric matrix indexed by primes with L[p,q] = 1/lcm(p,q), decomposing as L = D + v*v^T, where v_p = 1/p and D = diag((p-1)/p^2)_p.
+%C A396695 L is compact and positive definite on l^2; lambda_inf is its spectral radius. The finite truncations L_n (first n primes) satisfy rho(L_n) -> lambda_inf monotonically from below; see EXAMPLE.
+%C A396695 Conjecture (numerical evidence): lambda_max(W_N')/N -> lambda_inf, where W_N'[i,j] = floor(N/lcm(p_i,p_j)) for primes p_i, p_j <= N.
+%D A396695 H. J. S. Smith, On the value of a certain arithmetical determinant, Proc. London Math. Soc. s1-7 (1875), 208-212.
+%H A396695 Alessandro Munari, <a href="/A396695/b396695.txt">Table of n, a(n) for n = 0..499</a>
+%H A396695 Keith Bourque and Steve Ligh, <a href="https://doi.org/10.1016/0024-3795(92)90042-9">On GCD and LCM matrices</a>, Linear Algebra and its Applications, Volume 174, 1992, pp. 65-74.
+%H A396695 Shaofang Hong, <a href="https://doi.org/10.1006/jabr.1998.7844">On the Bourque-Ligh Conjecture of Least Common Multiple Matrices</a>, Journal of Algebra, Volume 218, Issue 1, 1999, pp. 216-228.
+%F A396695 Equals the unique solution x in (1/4, oo) of Sum_{p prime} 1/(x*p^2 - p + 1) = 1.
+%e A396695 lambda_inf = 0.67403618319369613993666000757650845578064568836207...
+%e A396695 rho(L_5) = 0.65821735..., rho(L_1000) = 0.67402774... (monotone from below).
+%e A396695 h(2/3) = 1.01673... > 1, h(3/4) = 0.85509... < 1, so lambda_inf in (2/3, 3/4), where h(x) = Sum_{p prime} 1/(x*p^2 - p + 1).
+%t A396695 Block[{$MaxExtraPrecision=300}, RealDigits[x/.FindRoot[
+%t A396695   Sum[(1/x)^(j+1)*Sum[Binomial[j,m]*(-1)^(j-m)*PrimeZetaP[2j+2-m],{m,0,j}],
+%t A396695   {j,0,200}]==1,{x,2/3,3/4},WorkingPrecision->110],10,75][[1]]]
+%o A396695 (Python)
+%o A396695 # Newton-Raphson for Sum_{p prime} 1/(x*p^2-p+1) = 1; tail via prime zeta.
+%o A396695 from math import comb
+%o A396695 from mpmath import mp, mpf, primezeta
+%o A396695 from sympy import primerange
+%o A396695 mp.dps = 75; K, P = 15, 10**5
+%o A396695 ps = list(primerange(2, P+1))
+%o A396695 pzt = {s: primezeta(s)-sum(mpf(p)**(-s) for p in ps) for s in range(2, 2*K+2)}
+%o A396695 pl = [(mpf(p), mpf(p)**2) for p in ps]
+%o A396695 def fdf(x):
+%o A396695     h, d, xk = sum(1/(x*q-p+1) for p,q in pl), -sum(q/(x*q-p+1)**2 for p,q in pl), mpf(1)
+%o A396695     for k in range(K):
+%o A396695         xk *= x; c = sum((-1)**(k-j)*comb(k,j)*pzt[2*k+2-j] for j in range(k+1))
+%o A396695         h += c/xk; d -= (k+1)*c/(xk*x)
+%o A396695     return h-1, d
+%o A396695 x = mpf('0.75')
+%o A396695 for _ in range(60):
+%o A396695     r, dr = fdf(x); x -= r/dr
+%o A396695     if abs(r/dr) < mpf(10)**-55: break
+%o A396695 print(x)
+%o A396695 (PARI) solve(x=0.6, 0.7, sumeulerrat(1/(x*p^2-p+1))-1) \\ _Hugo Pfoertner_, Jun 04 2026
+%Y A396695 Cf. A085548 (D=0 degenerate case, Sum_{p prime} 1/p^2), A013661.
+%K A396695 cons,nonn,new
+%O A396695 0,1
+%A A396695 _Alessandro Munari_, Jun 02 2026
