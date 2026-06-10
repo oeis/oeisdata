@@ -1,0 +1,61 @@
+%I A396406 #21 Jun 09 2026 19:12:47
+%S A396406 1,3,5,8,13,21,34,55,89,144,225,351,554,875,1345,2066,3203,4971,7574,
+%T A396406 11543,17683,27108,41067,62263,94622,143881,217101,327832,495443,
+%U A396406 749195,1127236,1697179,2554961,3848384,5777651,8679441,13031206,19574659,29338781
+%N A396406 Number of distinct affine isometries at word-length n in the side-reflection group of a right triangle in the plane with positive unequal rational legs; conjectured to be independent of the triangle.
+%C A396406 Let T be a right triangle in Q^2 with positive unequal legs a, b, and right angle at vertex V_2. Let R_0, R_1, R_2 be reflections across its three sides, and W = <R_0, R_1, R_2>. Then a(n) is the number of distinct elements rho_T(w) in Aff(R^2) at minimal W-word-length n.
+%C A396406 The values shown were computed by exact-rational BFS on the (3, 4, 5) triangle to depth 38. Independently reproduced on (5, 12, 13), (7, 24, 25), and (1, 2, sqrt(5)) through depth 22.
+%C A396406 Conjecture: a(n) is independent of T for all right triangles with positive unequal rational legs. The linked manuscript (Bonfioli 2026, preprint) proves this T-independence through depth 22 (machine-certified in Lean 4, symbolically over Q(a,b)); the all-depths statement is left there as an open conjecture.
+%C A396406 The isosceles case (a = b) gives a strictly smaller, genuinely different sequence: 1, 3, 5, 8, 11, 13, 16, ... from depth 4 onward, due to an extra leg-swap symmetry in the stabilizer.
+%C A396406 For 1 <= n <= 9, a(n) = A000045(n+3) (Fibonacci). The first deviation from the Steinberg upper bound F(n+3) occurs at n = 10: a(10) = 225 = F(13) - 8, accounted for by eight explicit length-10 affine relations symbolically verified in Q(a, b).
+%C A396406 Empirically a(n+1)/a(n) is near 1.50 at the computed depths (about 1.497 at depth 42); the exact asymptotic ratio and the algebraic nature of the generating function are open. No linear recurrence of order <= 19 over Q is consistent with the data.
+%H A396406 V. Bonfioli, <a href="https://github.com/ElVec1o/pythagorean-reflection-sequence">The Universal Right-Triangle Reflection Sequence (Unequal Legs)</a>, 2026.
+%H A396406 V. Bonfioli, <a href="https://doi.org/10.5281/zenodo.20370090">Code, paper, and verification data</a>, Zenodo, 2026.
+%H A396406 V. Bonfioli, <a href="https://github.com/ElVec1o/pythagorean-reflection-sequence/tree/main/code/rust_bfs">Rust program</a> (disk-streaming BFS implementation used to compute a(0) through a(38)).
+%H A396406 S. Isola and R. Piergallini, <a href="https://arxiv.org/abs/1405.1881">On the generic triangle group</a>, arXiv:1405.1881 [math.MG], 2014-2015.
+%F A396406 a(n) = A000045(n+3) for 1 <= n <= 9.
+%F A396406 a(n) <= [t^n] (1+t)^2/(1-t-t^2) for all n >= 0 (Steinberg upper bound), with strict inequality for n >= 10.
+%o A396406 (Python)
+%o A396406 # BFS on the side-reflection group of a right triangle with positive
+%o A396406 # unequal rational legs, in exact rational arithmetic. By the
+%o A396406 # universality theorem the choice of legs (a, b) with a != b is
+%o A396406 # immaterial; we use (a, b) = (1, 2).
+%o A396406 from fractions import Fraction
+%o A396406 def A_2D_universal(d_max=20):
+%o A396406     O, I = Fraction(0), Fraction(1)
+%o A396406     V = [(O, O), (I, O), (O, I + I)]
+%o A396406     sides = [(0, 1), (1, 2), (2, 0)]
+%o A396406     def reflection(p0, p1):
+%o A396406         dx, dy = p1[0] - p0[0], p1[1] - p0[1]
+%o A396406         L = dx*dx + dy*dy
+%o A396406         a = (dx*dx - dy*dy) / L
+%o A396406         b = 2*dx*dy / L
+%o A396406         d = -a
+%o A396406         tx = (1 - a)*p0[0] - b*p0[1]
+%o A396406         ty = -b*p0[0] + (1 - d)*p0[1]
+%o A396406         return (a, b, b, d, tx, ty)
+%o A396406     def compose(M, N):
+%o A396406         a1, b1, c1, d1, tx1, ty1 = M
+%o A396406         a2, b2, c2, d2, tx2, ty2 = N
+%o A396406         return (a1*a2 + b1*c2, a1*b2 + b1*d2,
+%o A396406                 c1*a2 + d1*c2, c1*b2 + d1*d2,
+%o A396406                 a1*tx2 + b1*ty2 + tx1,
+%o A396406                 c1*tx2 + d1*ty2 + ty1)
+%o A396406     gens = [reflection(V[i], V[j]) for i, j in sides]
+%o A396406     identity = (I, O, O, I, O, O)
+%o A396406     seen = {identity}; frontier = {identity}; seq = [1]
+%o A396406     for _ in range(d_max):
+%o A396406         new = set()
+%o A396406         for M in frontier:
+%o A396406             for g in gens:
+%o A396406                 N = compose(g, M)
+%o A396406                 if N not in seen:
+%o A396406                     new.add(N); seen.add(N)
+%o A396406         seq.append(len(new)); frontier = new
+%o A396406     return seq
+%o A396406 (Rust) // See Links
+%Y A396406 Cf. A000045 (Fibonacci; equals a(n) for 1 <= n <= 9).
+%Y A396406 Cf. A008576 (coordination sequence for planar net 4.8.8; coincides with the orbit-growth sequence of the isosceles right triangle, which is strictly smaller than a(n) for n >= 4 due to an extra leg-swap stabilizer).
+%K A396406 nonn,hard,more,new
+%O A396406 0,2
+%A A396406 _Vico Bonfioli_, May 24 2026
