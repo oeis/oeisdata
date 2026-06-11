@@ -1,9 +1,26 @@
-%I A281003 #14 May 31 2019 05:36:18
+%I A281003 #35 Jun 10 2026 12:11:23
 %S A281003 1,0,0,1,6,28,252,4726,150324,8308928,817860888,144938364368,
 %T A281003 46784208920560,27789645300385184,30630702203393521120,
-%U A281003 63070163901389334212336,243902725979609232729020320,1779250465648201682685291759744
+%U A281003 63070163901389334212336,243902725979609232729020320,1779250465648201682685291759744,24573606327342936731127537076234432,644555105774777757765906931481707781376
 %N A281003 a(n) is the number of unlabeled simple graphs with n vertices that have no automorphisms of odd parity.
+%H A281003 Peter Luschny, <a href="/A281003/b281003.txt">Table of n, a(n) for n = 1..87</a>
 %H A281003 Brendan McKay, <a href="http://users.cecs.anu.edu.au/~bdm/data/graphs.html">Isoclasses of simple graphs</a>
+%p A281003 with(Iterator):
+%p A281003 zee:=proc(L,n) local i;
+%p A281003  mul(i^L[i]*L[i]!, i=1..n)
+%p A281003 end proc:
+%p A281003 E:=proc(L,n) local i,j;
+%p A281003  1/2*add(add(igcd(i,j)*L[i]*L[j], i=1..n), j=1..n)
+%p A281003   -1/2*add((i mod 2)*L[i], i=1..n)
+%p A281003 end proc:
+%p A281003 sgn:=proc(L,n) local i;
+%p A281003   (-1)^(add(L[2*i], i=1..n/2) mod 2)
+%p A281003 end proc:
+%p A281003 A281003:= proc(n) local P,p;
+%p A281003 	P:=PartitionPartCount(n);
+%p A281003 	add(2^E(p,n)*sgn(p,n)/zee(p,n), p=P)
+%p A281003 end proc:
+%p A281003 seq(A281003(n), n=1..20); # _Ira M. Gessel_, Jun 09 2026
 %t A281003 (* This assumes you have Brendan McKay's files listing isoclasses of simple graphs (see link), and starts from a(2), as there is no graph1.g6 *)
 %t A281003 Table[
 %t A281003 Length@ Select[
@@ -15,7 +32,27 @@
 %t A281003    ],
 %t A281003 {i, 2, 9}
 %t A281003 ]
-%K A281003 nonn
+%o A281003 (SageMath)  # After Ira M. Gessel.
+%o A281003 from sage.all import QQ, ZZ, Partitions, factorial, gcd
+%o A281003 def A281003(n: int) -> int:
+%o A281003     ans = QQ(0)
+%o A281003     for p in Partitions(n):
+%o A281003         p_dict = p.to_exp_dict()
+%o A281003         parts_items = sorted(p_dict.items())
+%o A281003         z = 1; e = 0; neg = False
+%o A281003         for part, cnt in parts_items:
+%o A281003             z *= (part ** cnt) * factorial(cnt)
+%o A281003             if part & 1 == 0 and cnt & 1 != 0: neg = not neg
+%o A281003             if part & 1 != 0: e -= cnt
+%o A281003             e += part * (cnt * cnt)
+%o A281003             for b_part, b_cnt in parts_items:
+%o A281003                 if b_part >= part: break
+%o A281003                 e += 2 * gcd(part, b_part) * cnt * b_cnt
+%o A281003         h = 2 ** (e // 2) / z
+%o A281003         ans = ans - h if neg else ans + h
+%o A281003     return ZZ(ans)
+%o A281003 print([A281003(n) for n in range(1, 21)])  # _Peter Luschny_, Jun 10 2026
+%K A281003 nonn,changed
 %O A281003 1,5
 %A A281003 _Mariano Suárez-Álvarez_, Jan 12 2017
 %E A281003 More terms from _Ira M. Gessel_, May 30 2019
