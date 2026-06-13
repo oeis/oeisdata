@@ -1,13 +1,17 @@
-%I A193098 #14 Jun 10 2026 01:07:00
+%I A193098 #30 Jun 12 2026 22:26:06
 %S A193098 1,1,3,18,171,2283,39942,874944,23243829,731486637,26782956144,
 %T A193098 1124838704976,53567894139165,2865318598843281,170774893724336223,
-%U A193098 11264050942430761881,817374450539598433587,64917115563124199691834
-%N A193098 E.g.f. A(x) satisfies: A'(x) = 1 + A(A(A(x))).
+%U A193098 11264050942430761881,817374450539598433587,64917115563124199691834,5617251388736163332375058,527402832002868013617703068
+%N A193098 E.g.f. A(x) satisfies A'(x) = 1 + A(A(A(x))), with A(0) = 0.
 %H A193098 Paul D. Hanna, <a href="/A193098/b193098.txt">Table of n, a(n) for n = 1..200</a>
 %F A193098 E.g.f. A(x) = Sum_{n>=1} a(n)*x^n/n! satisfies the following formulas, in which the constant of integration is zero where applicable.
 %F A193098 (1) A'(x) = 1 + A(A(A(x))).
 %F A193098 (2) A(x) = x + Integral A(A(A(x))) dx.
 %F A193098 (3) A(x) = Series_Reversion( Integral 1/(1 + A(A(x))) dx ). - _Paul D. Hanna_, Jun 09 2026
+%F A193098 From _Seiichi Manyama_, Jun 12 2026: (Start)
+%F A193098 E.g.f. A(x) satisfies A'(x) = 1 + A^l(x), where A^l(x) denotes the l-th iterate of A, with A(0) = 0.
+%F A193098 Let a(n,k,l) = n! * [x^n] A^k(x), where A^k(x) is the k-th iterate of A.
+%F A193098 a(n,0,l) = 0^(n-1) and a(n,k,l) = a(n,k-1,l) + Sum_{j=1..n-1} binomial(n-1,j) * a(j,k+l-1,l) * a(n-j,k-1,l) for k > 0. (End)
 %e A193098 E.g.f.: A(x) = x + x^2/2! + 3*x^3/3! + 18*x^4/4! + 171*x^5/5! + 2283*x^6/6! + ...
 %e A193098 Related expansions.
 %e A193098 The second iteration of A(x) begins
@@ -20,7 +24,20 @@
 %o A193098 A = intformal(1 + subst(A, x, subst(A, x, A))) +x*O(x^n) ); n!*polcoef(EGF=A, n)}
 %o A193098 {upto(n) = a(n); Vec(serlaplace(EGF))}
 %o A193098 upto(25) \\ program revised by _Paul D. Hanna_, Jun 09 2026
-%Y A193098 Cf. A001028, A193099, A193100, A179420.
+%o A193098 (PARI)
+%o A193098 a_vector(n, k=1, l=3) = {
+%o A193098   my(k_limit(row)=k+(n-row)*l, A=vector(n, row, vector(k_limit(row)+1)));
+%o A193098   for(col=0, k_limit(1), A[1][col+1]=1);
+%o A193098   for(row=2, n, A[row][1]=0);
+%o A193098   for(row=2, n,
+%o A193098     for(col=1, k_limit(row),
+%o A193098       A[row][col+1]=A[row][col]+sum(j=1, row-1, binomial(row-1, j)*A[j][col+l]*A[row-j][col]);
+%o A193098     );
+%o A193098   );
+%o A193098   vector(n, row, A[row][k+1])
+%o A193098 }; \\ _Seiichi Manyama_, Jun 12 2026
+%Y A193098 Column k=1 of A396971.
+%Y A193098 Cf. A001028, A193099, A193100, A179420, A395269.
 %K A193098 nonn,changed
 %O A193098 1,3
 %A A193098 _Paul D. Hanna_, Jul 15 2011

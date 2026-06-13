@@ -1,0 +1,72 @@
+%I A396435 #37 Jun 12 2026 18:03:59
+%S A396435 1,4,2,12,15,8,10,50,36,40,90,122,182,599,1634,672,1724,813,2385,5644,
+%T A396435 6272,3108,18742,21424,19413,44095,50127,23315,62294,51296,225188,
+%U A396435 703002,390670,1146972,831619,2190380
+%N A396435 a(n) is the unique integer k in [0, p-1] such that 3^((M-1)/p) is congruent to 2^k modulo M = 2^p - 1 is the n-the Mersenne prime.
+%C A396435 In elementary terms, a(n) is the exponent m in [0, p-1] with 3^((M-1)/p) == 2^m (mod M), where (M-1)/p = (2^p-2)/p and M = 2^p-1 is prime.
+%C A396435 Equivalently it is the base-2 discrete logarithm of 3^((M-1)/p) in the order-p subgroup of (Z/M)*. This is canonical, not arbitrary: 2 has order exactly p modulo M (2^p == 1 but 2^d != 1 for 0 < d < p), so <2> = {1, 2, ..., 2^(p-1)} IS that subgroup; and since (Z/M)* is cyclic of order M-1 = p*((M-1)/p), the ((M-1)/p)-th power map carries it onto <2>, so 3^((M-1)/p) -- indeed a^((M-1)/p) for any a coprime to M -- lies in <2>. This sequence takes a = 3, the smallest base above 2.
+%C A396435 The analogous projection to the order-2 subgroup is the classical fact 3^((M-1)/2) == -1 (mod M): 3 is a quadratic nonresidue modulo every Mersenne prime, by quadratic reciprocity (M == 1 (mod 3) and (M-1)/2 is odd).
+%D A396435 K. Ireland and M. Rosen, A Classical Introduction to Modern Number Theory, 2nd ed., GTM 84, Springer, 1990, Proposition 9.1.4, pp. 110-111.
+%F A396435 a(n) is the unique k with 0 <= k < p and 3^((M-1)/p) == 2^k (mod M), where p = A000043(n+1) and M = A000668(n+1).
+%F A396435 For p >= 5, a(n) == 2*L (mod p), where L is the unique integer in [0, p-1] with 2^L == (1-w)^((M-1)/p) (mod M) and w is a primitive cube root of unity in (Z/M)* (L is independent of the choice of w). This follows from the factorization 3 = -w^2*(1-w)^2 in the ring of Eisenstein integers Z[w].
+%e A396435 For n = 1: p = 3, M = 7. We have 3^((7-1)/3) = 3^2 == 2 (mod 7). Since 2^1 = 2, we get a(1) = 1.
+%e A396435 For n = 2: p = 5, M = 31. We have 3^((31-1)/5) = 3^6 == 16 (mod 31). Since 2^4 = 16, we get a(2) = 4.
+%e A396435 For n = 3: p = 7, M = 127. We have 3^((127-1)/7) = 3^18 == 4 (mod 127). Since 2^2 = 4, we get a(3) = 2.
+%e A396435 For n = 4: p = 13, M = 8191. We have 3^((8191-1)/13) = 3^630 == 4096 (mod 8191). Since 2^12 = 4096, we get a(4) = 12.
+%t A396435 m3[p_] := Module[{M = 2^p - 1, nR, target, val = 1, k = 0},
+%t A396435   If[! PrimeQ[M], Return[Null]];
+%t A396435   nR = (M - 1)/p; target = PowerMod[3, nR, M];
+%t A396435   While[val =!= target && k < p, val = Mod[2 val, M]; k++]; k];
+%t A396435 (* baby-step/giant-step: O(sqrt p) search; reproduces the full DATA *)
+%t A396435 m3BSGS[p_] := Module[{M = 2^p - 1, nR, target, s, baby, v = 1, step, g, res = Null},
+%t A396435   If[! PrimeQ[M], Return[Null]];
+%t A396435   nR = (M - 1)/p; target = PowerMod[3, nR, M]; s = Floor[Sqrt[p]] + 1;
+%t A396435   baby = Association[]; Do[baby[v] = j; v = Mod[2 v, M], {j, 0, s - 1}];
+%t A396435   step = PowerMod[2, -s, M]; g = target;
+%t A396435   Do[If[KeyExistsQ[baby, g] && 0 <= i s + baby[g] < p,
+%t A396435        res = i s + baby[g]; Break[]];
+%t A396435      g = Mod[g step, M], {i, 0, s}];
+%t A396435   res];
+%t A396435 Table[m3BSGS[MersennePrimeExponent[n + 1]], {n, 1, 20}]
+%o A396435 (PARI) m3(p) = {my(M = 2^p - 1, nR = (M-1)/p, t = Mod(3,M)^nR, v = Mod(1,M));
+%o A396435   for(k = 0, p-1, if(v == t, return(k)); v *= 2); }
+%o A396435 \\ v was taken from A000043
+%o A396435 my(v = [3, 5, 7, 13, 17, 19, 31, 61, 89, 107, 127, 521, 607, 1279, 2203, 2281, 3217, 4253, 4423, 9689, 9941, 11213, 19937, 21701, 23209, 44497, 86243, 110503, 132049, 216091]); for(i = 1, #v, print1(m3(v[i]), ", "))
+%o A396435 (Python)
+%o A396435 from sympy import isprime
+%o A396435 def m3(p):
+%o A396435     M = 2**p - 1
+%o A396435     assert isprime(M)
+%o A396435     nR = (M - 1) // p
+%o A396435     target = pow(3, nR, M)
+%o A396435     val = 1
+%o A396435     for k in range(p):
+%o A396435         if val == target:
+%o A396435             return k
+%o A396435         val = (val * 2) % M
+%o A396435 (Python)  # baby-step/giant-step, for large p (e.g. p >= 10^5)
+%o A396435 from sympy import isprime
+%o A396435 import math, gmpy2
+%o A396435 from gmpy2 import mpz, powmod, invert
+%o A396435 def m3_bsgs(p):
+%o A396435     M = mpz(2)**p - 1
+%o A396435     assert isprime(int(M))
+%o A396435     nR = (M - 1) // p
+%o A396435     target = powmod(mpz(3), nR, M)
+%o A396435     s = int(math.isqrt(p)) + 1
+%o A396435     baby = {}; v = mpz(1)
+%o A396435     for j in range(s):
+%o A396435         baby[int(v)] = j; v = (v * 2) % M
+%o A396435     step = invert(powmod(mpz(2), s, M), M)
+%o A396435     g = target
+%o A396435     for i in range(s):
+%o A396435         if int(g) in baby:
+%o A396435             k = i * s + baby[int(g)]
+%o A396435             if 0 <= k < p:
+%o A396435                 return k
+%o A396435         g = (g * step) % M
+%o A396435     return None
+%Y A396435 Cf. A000043 (Mersenne prime exponents), A000668 (Mersenne primes), A066408 (Eisenstein-Mersenne primes).
+%K A396435 nonn,hard,more,new
+%O A396435 1,2
+%A A396435 _Michael C.H. Lin_, May 26 2026
