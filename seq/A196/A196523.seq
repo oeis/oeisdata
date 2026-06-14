@@ -1,14 +1,18 @@
-%I A196523 #22 Dec 01 2024 09:21:28
+%I A196523 #30 Jun 13 2026 09:32:51
 %S A196523 1,1,4,28,262,2944,37666,532276,8151322,133562194,2320621222,
 %T A196523 42475263136,814932467836,16326188799508,340479903535258,
 %U A196523 7373196169450312,165453350568966163,3840489521467649158,92072430090995120044,2276807696679096394552
-%N A196523 G.f. satisfies A(x) = x + x*A(A(A(A(x)))).
+%N A196523 G.f. A(x) satisfies A(x) = x + x*A(A(A(A(x)))).
 %C A196523 Conjecture: a(n) == 1 (mod 3) for n >= 1. - _Paul D. Hanna_, Dec 01 2024
 %H A196523 Paul D. Hanna, <a href="/A196523/b196523.txt">Table of n, a(n) for n = 1..400</a>
 %F A196523 G.f.: A(x) = A(A(x))/(1 + A(A(A(A(A(x)))))).
 %F A196523 G.f.: A(x) = Series_Reversion[ x/(1 + A(A(A(x)))) ].
 %F A196523 G.f.: A(x) = x*F(x,1) where F(x,n) satisfies: F(x,n) = F(x,n-1)*(1 + x*F(x,n+3)) for n>0 with F(x,0)=1; further, x*F(x,n) is the n-th iteration of A(x).
 %F A196523 G.f. satisfies: A(x) = Sum_{n>=0} Product_{k=0..n} A_{3*k}(x), where A_n(x) denotes the n-th iteration of A(x) with A_0(x)=x.
+%F A196523 From _Seiichi Manyama_, Jun 13 2026: (Start)
+%F A196523 G.f. A(x) satisfies A(x) = x*(1 + A^l(x)), where A^l(x) denotes the l-th iterate of A.
+%F A196523 Let a(n,k,l) = [x^n] A^k(x), where A^k(x) is the k-th iterate of A.
+%F A196523 a(n,0,l) = 0^(n-1) and a(n,k,l) = a(n,k-1,l) + Sum_{j=1..n-1} a(j,k+l-1,l) * a(n-j,k-1,l) for k > 0. (End)
 %e A196523 G.f.: A(x) = x + x^2 + 4*x^3 + 28*x^4 + 262*x^5 + 2944*x^6 + 37666*x^7 +...
 %e A196523 Given g.f. A(x), A(x)/x is the unique solution to variable A in the infinite system of simultaneous equations:
 %e A196523 A = 1 + x*D;
@@ -19,12 +23,12 @@
 %e A196523 The solution to the variables in the system of equations are:
 %e A196523 A=A(x)/x, B=A(A(x))/x, C=A(A(A(x)))/x, D=A(A(A(A(x))))/x, etc.,
 %e A196523 where iterations begin:
-%e A196523 A(x) = x + x^2 + 4*x^3 + 28*x^4 + 262*x^5 + 2944*x^6 + 37666*x^7 +...
-%e A196523 A(A(x)) = x + 2*x^2 + 10*x^3 + 77*x^4 + 760*x^5 + 8846*x^6 + 116140*x^7 +...
-%e A196523 A(A(A(x))) = x + 3*x^2 + 18*x^3 + 153*x^4 + 1608*x^5 + 19566*x^6 +...
-%e A196523 A(A(A(A(x)))) = x + 4*x^2 + 28*x^3 + 262*x^4 + 2944*x^5 + 37666*x^6 +...
-%e A196523 A(A(A(A(A(x))))) = x + 5*x^2 + 40*x^3 + 410*x^4 + 4930*x^5 + 66530*x^6 +...
-%e A196523 A(A(A(A(A(A(x)))))) = x + 6*x^2 + 54*x^3 + 603*x^4 + 7752*x^5 + 110484*x^6 +...
+%e A196523                  A(x) = x +   x^2 +  4*x^3 +  28*x^4 +  262*x^5 +   2944*x^6 + ...
+%e A196523               A(A(x)) = x + 2*x^2 + 10*x^3 +  77*x^4 +  760*x^5 +   8846*x^6 + ...
+%e A196523            A(A(A(x))) = x + 3*x^2 + 18*x^3 + 153*x^4 + 1608*x^5 +  19566*x^6 + ...
+%e A196523         A(A(A(A(x)))) = x + 4*x^2 + 28*x^3 + 262*x^4 + 2944*x^5 +  37666*x^6 + ...
+%e A196523      A(A(A(A(A(x))))) = x + 5*x^2 + 40*x^3 + 410*x^4 + 4930*x^5 +  66530*x^6 + ...
+%e A196523   A(A(A(A(A(A(x)))))) = x + 6*x^2 + 54*x^3 + 603*x^4 + 7752*x^5 + 110484*x^6 + ...
 %e A196523 ALTERNATE GENERATING METHOD.
 %e A196523 The g.f. A(x) equals the sum of products of {3*k}-iterations of A(x):
 %e A196523 A(x) = x + x*A_3(x) + x*A_3(x)*A_6(x) + x*A_3(x)*A_6(x)*A_9(x) + x*A_3(x)*A_6(x)*A_9(x)*A_12(x) +...+ Product_{k=0..n} A_{3*k}(x) +...
@@ -40,7 +44,20 @@
 %o A196523 /* A(x) results from nested iterations of shifted series: */
 %o A196523 (PARI) {a(n)=local(A=x); for(i=1,n, A=x+x*ITERATE(4,A, n)); polcoeff(A, n)}
 %o A196523 (PARI) {a(n)=local(A=x); for(i=1,n, A=x+x*sum(m=1,n,prod(k=1,m,ITERATE(3*k,A,n)))); polcoeff(A, n)}
-%Y A196523 Cf. A030266, A091713.
-%K A196523 nonn
+%o A196523 (PARI)
+%o A196523 a_vector(n, k=1, l=4) = {
+%o A196523   my(k_limit(row)=k+(n-row)*(l-1), A=vector(n, row, vector(k_limit(row)+1)));
+%o A196523   for(col=0, k_limit(1), A[1][col+1]=1);
+%o A196523   for(row=2, n, A[row][1]=0);
+%o A196523   for(row=2, n,
+%o A196523     for(col=1, k_limit(row),
+%o A196523       A[row][col+1]=A[row][col]+sum(j=1, row-1, A[j][col+l]*A[row-j][col]);
+%o A196523     );
+%o A196523   );
+%o A196523   vector(n, row, A[row][k+1])
+%o A196523 }; \\ _Seiichi Manyama_, Jun 13 2026
+%Y A196523 Cf. A030266, A091713, A378575, A378576.
+%Y A196523 Cf. A193099.
+%K A196523 nonn,changed
 %O A196523 1,3
 %A A196523 _Paul D. Hanna_, Oct 03 2011

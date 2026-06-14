@@ -1,0 +1,45 @@
+%I A396883 #23 Jun 13 2026 18:48:11
+%S A396883 1,1,2,1,2,3,4,6,10,14,24,35,60,89,154,231,402,609,1064,1625,2848,
+%T A396883 4379,7694,11898,20948,32554,57414,89607,158266,247941,438468,689206,
+%U A396883 1220146,1923614,3408760,5388481,9556816,15143811,26878862,42686328,75815840,120645364
+%N A396883 Number of symmetric Donaghey-primitive Dyck n-paths.
+%C A396883 Here symmetric means invariant under reflection in a vertical line; in Dyck-word notation this is the reverse-complement map; i.e., reverse the word and interchange U and D.
+%C A396883 A005554 counts Donaghey's primitive class of Dyck n-paths: Dyck paths containing no DUDU and no subpath UUPDD where P is a nonempty Dyck path. This sequence counts the symmetric paths in that class. Equivalently, this is the intersection of the class counted by A005554 with the symmetric Dyck paths counted by A001405. In Donaghey's terminology these are primitive elements of Catalan families; the word "primitive" here does not mean indecomposable Dyck path.
+%C A396883 In the second g.f. formula, P(x) is the g.f. for Donaghey-primitive Dyck paths with the empty path adjoined; B(x) is obtained by stripping the optional initial and final UD factors in the Donaghey-primitive decomposition, with the +x correcting the exceptional path UD; H(x) accounts for choosing equal endpoint factors and a mirrored pair of middle words.
+%H A396883 Vjeran Crnjak, <a href="/A396883/b396883.txt">Table of n, a(n) for n = 0..1000</a>
+%H A396883 Robert Donaghey, <a href="https://doi.org/10.1016/0095-8956(80)90045-3">Automorphisms on Catalan trees and bracketing</a>, J. Combin. Theory, Series B, 29 (1980), 75-90.
+%F A396883 G.f.: (2*x^4 + 2*x^3 + x^2 - sqrt(1 - 2*x^2 - 3*x^4) + 1)/(x*(x^2 + 2*x + sqrt(1 - 2*x^2 - 3*x^4) - 1)).
+%F A396883 G.f.: (H(x) + x + x^2)/(1 + x - x*H(x)), where H(x) = (1+x^2)*B(x^2), B(x) = (P(x)+x)/(1+x)^2, P(x) = 1 + (x+x^2)*M(x), and M(x) is the g.f. for the Motzkin numbers A001006.
+%F A396883 a(n) ~ sqrt(2) * (5 + 3*sqrt(3) + (-5 + 3*sqrt(3))*(-1)^n) * 3^(n/2) / (sqrt(Pi) * n^(3/2)). - _Vaclav Kotesovec_, Jun 09 2026
+%e A396883 For n = 3, A005554 counts the three Donaghey-primitive Dyck paths UUDUDD, UUDDUD, UDUUDD; only UUDUDD is symmetric, so a(3) = 1.
+%e A396883 For n = 4, the two symmetric Donaghey-primitive Dyck paths are UUDDUUDD and UDUUDDUD, so a(4) = 2.
+%o A396883 (Python)
+%o A396883 def A396883(N):
+%o A396883     M = max(N, 2)
+%o A396883     p = [0] * (M + 1)  # Donaghey-primitive paths, empty path adjoined.
+%o A396883     q = [0] * (M + 1)  # Central primitive subpaths.
+%o A396883     b = [0] * (M + 1)  # Middle words after stripping optional initial and final UD.
+%o A396883     c = [0] * (M + 1)  # Symmetric central components.
+%o A396883     r = [0] * (M + 1)  # This sequence.
+%o A396883     p[0], p[1], p[2] = 1, 1, 2
+%o A396883     b[0], b[2] = 1, 1
+%o A396883     q[2], c[2] = 1, 1
+%o A396883     r[0], r[1], r[2] = 1, 1, 2
+%o A396883     for n in range(3, N + 1):
+%o A396883         q[n] = p[n - 1] - q[n - 1]
+%o A396883         b[n] = sum(q[k] * b[n - k] for k in range(2, n + 1))
+%o A396883         p[n] = b[n] + 2 * b[n - 1] + b[n - 2]
+%o A396883         c[n] = r[n - 1] - c[n - 1]
+%o A396883         r[n] = sum(
+%o A396883             b[left] * (1 if n - 2 * e - 2 * left == 0 else c[n - 2 * e - 2 * left])
+%o A396883             for e in (0, 1)
+%o A396883             for left in range((n - 2 * e) // 2 + 1)
+%o A396883             if n - 2 * e - 2 * left != 1
+%o A396883         )
+%o A396883     return r[: N + 1]
+%o A396883 if __name__ == "__main__":
+%o A396883     print(A396883(41))
+%Y A396883 Cf. A005554, A001405, A001006, A000108.
+%K A396883 nonn,new
+%O A396883 0,3
+%A A396883 _Vjeran Crnjak_, Jun 09 2026

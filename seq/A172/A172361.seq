@@ -1,11 +1,31 @@
-%I A172361 #19 Mar 14 2026 14:23:12
+%I A172361 #58 Jun 13 2026 09:43:13
 %S A172361 1,0,3,6,38,160,905,4830,28308,166992,1024758,6389460,40724244,
 %T A172361 263385408,1728855843,11484066594,77130790880,523010474272,
 %U A172361 3577392455780,24659960867256,171191809159176,1196062991373120,8405598880928158,59390108287965884,421702103951853232
-%N A172361 Number of walks within N^2 (the first quadrant of Z^2) starting and ending at (0,0), and consisting of n steps taken from {(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)}.
+%N A172361 Number of walks within N^2 (the first quadrant of Z^2) starting and ending at (0,0), and consisting of n steps taken from {(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)} (king moves).
+%C A172361 From _Natalia L. Skirrow_, May 30 2026: (Start)
+%C A172361 In the formula "Sum_{i,j=0..floor(n/2), i+j>=n/2} ...", i counts move-pairs on the horizontal axis while j counts vertical move-pairs.
+%C A172361 The C(n,n-2*i,n-2*j) = n! / ((n-2*i)! * (n-2*j)! * (2*(i+j)-n)!) puts the n-2*i moves with no horizontal part and n-2*j with no vertical part on distinct turns, and A000108(i) * A000108(j) counts the directions (Dyck paths in the x and y axis).
+%C A172361 a(p) is divisible by p if p is an odd prime; the horizontal and vertical parts' timings can be cyclically shifted while leaving the paths (in this example, ++-- on the x axis, +-+- on the y) invariant to form equivalence classes of p each.
+%C A172361  (+,+),(+, ),(-,-),(-,+),( ,-)
+%C A172361  ( ,+),(+,-),(+, ),(-,+),(-,-)
+%C A172361  (+,+),( ,-),(+,+),(-, ),(-,-)
+%C A172361  (+,+),(+,-),( ,+),(-,-),(-, )
+%C A172361  (+, ),(+,+),(-,-),( ,+),(-,-)
+%C A172361 (End)
 %H A172361 Alois P. Heinz, <a href="/A172361/b172361.txt">Table of n, a(n) for n = 0..1000</a>
-%H A172361 M. Bousquet-Mélou and M. Mishna, 2008. Walks with small steps in the quarter plane, <a href="https://arxiv.org/abs/0810.4387">ArXiv 0810.4387</a>.
-%F A172361 G.f.: (1-2*t)*Int(hypergeom([1/2, 1/2], [2], 16*t*(t+1)/(1+4*t)^2 /(1-2*t)^2, t)/t^2 - 1/t.  - _Mark van Hoeij_, Oct 31 2012
+%H A172361 M. Bousquet-Mélou and M. Mishna, <a href="https://arxiv.org/abs/0810.4387">Walks with small steps in the quarter plane</a>, arXiv:0810.4387 [math.CO], 2008-2009.
+%H A172361 Natalia L. Skirrow, <a href="https://oeis.org/wiki/User:Natalia_L._Skirrow/chessboards">chessboards</a>.
+%F A172361 G.f.: (1-2*t)*Integral(hypergeom([1/2, 1/2], [2], 16*t*(t+1)/(1+4*t)^2 /(1-2*t)^2, t)/t^2 - 1/t.  - _Mark van Hoeij_, Oct 31 2012
+%F A172361 D-finite with (n+1)*(n+2)^2*(3*n-1)*a(n) = (n-1)*(n+1)*(9*n*(n+1)+4)*a(n-1) + 4*(n-1)*(3*n-2)*(9*n^2+5*n-1)*a(n-2) + 32*n*(n-1)*(n-2)*(3*n+2)*a(n-3). - _Alois P. Heinz_, Oct 31 2012
+%F A172361 From _Natalia L. Skirrow_, May 30 2026: (Start)
+%F A172361 a(n) = 4*Integral_{u,v=0..1} (sin(Pi*u)*sin(Pi*v))^2 * ((1+2*cos(Pi*u))*(1+2*cos(Pi*v))-1)^n du dv.
+%F A172361 a(n) = Sum_{i,j=0..floor(n/2), i+j>=n/2} C(n,n-2*i,n-2*j) * A000108(i) * A000108(j), where C(n,k,j-k) = C(n,j)*C(j,k) is a trinomial coefficient.
+%F A172361 G.f.: Integral_{t=0..1} sin(Pi*t)^2*( 1+x*(1-u)-sqrt((1+x-3*x*u)*(1+x+x*u)) )/(x*u)^2 dt, where u=1+2*cos(Pi*t).
+%F A172361 a(n) ~ 2^(3*n+7)/(27*Pi*n^3) * (1 - 5/n + 307/(18*n^2) - 12020/(243*n^3) + ...).
+%F A172361 a(n) = Sum_{k=0..n} (-1)^(n-k) * C(n,k) * A001006(k)^2.
+%F A172361 That is, this sequence is A133053's inverse binomial transform.
+%F A172361 (End)
 %p A172361 b:= proc(n, l) option remember; `if`(min(l[])<0 or n<max(l[]), 0,
 %p A172361       `if`(n=0, 1, add(b(n-1, l-d), d=[[-1, -1], [-1, 0], [-1, 1],
 %p A172361                         [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]])))
@@ -14,13 +34,19 @@
 %p A172361 seq(a(n), n=0..30);  # _Alois P. Heinz_, Jul 22 2012
 %p A172361 # Alternative:
 %p A172361 a:= proc(n) option remember; `if`(n<4, [1, 0, 3, 6][n+1],
-%p A172361       ((n-1)*(n+1)*(9*n^2+9*n+4) *a(n-1)
-%p A172361       +4*(3*n-2)*(n-1)*(9*n^2+5*n-1) *a(n-2)
-%p A172361       +32*n*(n-1)*(n-2)*(3*n+2) *a(n-3))/ ((n+1)*(3*n-1)*(n+2)^2))
+%p A172361       ((9*n^2+9*n+4) *a(n-1)
+%p A172361        + ((3*n-2)*(9*n^2+5*n-1) *a(n-2)
+%p A172361           + 8*n*(n-2)*(3*n+2) *a(n-3))*4/(n+1)
+%p A172361       )*(n-1)/ ((3*n-1)*(n+2)^2))
 %p A172361     end:
 %p A172361 seq(a(n), n=0..30);  # _Alois P. Heinz_, Oct 31 2012
 %t A172361 aux[i_Integer, j_Integer, n_Integer] := Which[Min[i, j, n] < 0 || Max[i, j] > n, 0, n == 0,KroneckerDelta[i, j, n], True, aux[i, j, n] = aux[ -1 + i, -1 + j, -1 + n] + aux[ -1 + i, j, -1 + n] + aux[ -1 + i, 1 + j, -1 + n] + aux[i, -1 + j, -1 + n] + aux[i, 1 + j, -1 + n] + aux[1 + i, -1 + j, -1 + n] + aux[1 + i, j, -1 + n] + aux[1 + i, 1 + j, -1 + n]]; Table[aux[0, 0, n], {n, 0, 25}]
-%Y A172361 Cf. A025596.
-%K A172361 nonn,easy
+%t A172361 (* Alternative: *)
+%t A172361 RecurrenceTable[{(n+1)*(n+2)^2*(3*n-1)*a[n] == (n-1)*(n+1)*(9*n*(n+1)+4)*a[n-1] + 4*(n-1)*(3*n-2)*(9*n^2+5*n-1)*a[n-2] + 32*n*(n-1)*(n-2)*(3*n+2)*a[n-3], a[0]==1, a[1]==0, a[2]==3}, a, {n,0,25}] (* _Vaclav Kotesovec_, Jun 02 2026, after _Alois Heinz_ *)
+%o A172361 (Python)
+%o A172361 a = lru_cache(None)(lambda n: (1,0,3)[n] if n < 3 else (n-1)*( (9*n*(n+1)+4)*a(n-1) + 4*( (3*n-2)*(9*n**2+5*n-1)*a(n-2) + 8*n*(n-2)*(3*n+2)*a(n-3) )//(n+1) )//(n+2)**2//(3*n-1))
+%o A172361 # _Natalia L. Skirrow_, May 30 2026; after _Alois P. Heinz_
+%Y A172361 Cf. A000108, A001006, A025596 (8 X 8 version), A133053, A151331 (version without needing to return to corner).
+%K A172361 nonn,easy,changed
 %O A172361 0,3
 %A A172361 _Manuel Kauers_, Feb 01 2010
