@@ -1,16 +1,61 @@
-%I A005933 M5430 #22 Jun 12 2026 19:03:51
+%I A005933 M5430 #26 Jun 15 2026 00:57:26
 %S A005933 1,0,272,256,3058,2048,11232,7168,32848,16384,67936,32512,139040,
 %T A005933 59392,217408,95232,385266,147456,528752,226048,819424,315392,1075040,
 %U A005933 429056,1572192,589824,1888672,756736,2719616,964608,3159616,1251328,4244048,1523712,4957888
 %N A005933 Theta series of laminated lattice LAMBDA_9.
+%C A005933 The g.f. identity in the Formula section is proven: multiplying both sides by theta_3(q)^3, where theta_3(q) = A2^5/(A1^2*A4^2) is the theta series of sqrt(2)Z in this q^(norm/2) convention, turns both sides into modular forms of weight 6 on Gamma_0(16) with trivial character (the left side is the theta series of the even 12-dimensional lattice LAMBDA_9 + sqrt(2)Z^3 of determinant 4096, by Schoeneberg's theorem; each right-side term by Ligozat's criteria), and the two sides agree for all n <= 20000 (b-file) as well as for n <= 100 by direct lattice-vector enumeration from the Nebe-Sloane Gram matrix, far beyond the Sturm bound of 96 for Gamma_1(16). - _Steven Kotlarz_, Jun 13 2026
 %D A005933 J. H. Conway and N. J. A. Sloane, "Sphere Packings, Lattices and Groups", Springer-Verlag, p. 157.
 %D A005933 N. J. A. Sloane and Simon Plouffe, The Encyclopedia of Integer Sequences, Academic Press, 1995 (includes this sequence).
 %H A005933 Andy Huchala, <a href="/A005933/b005933.txt">Table of n, a(n) for n = 0..20000</a>
-%e A005933 G.f.: 1 + 272*q^4 + 256*q^6 + ...
+%F A005933 G.f.: 9*A2^12*A4^10/(A1^8*A8^3*A16^2) - 6*A2^7*A4^10*A8^2/(A1^6*A16^4) - 28*q*A2^11*A8^10/(A1^6*A4^2*A16^4) + 40*q^2*A2^11*A8^4/A1^6 + 62*A2^2*A4^10*A8^7/(A1^4*A16^6) - 256*q^5*A2^10*A8^5*A16^6/(A1^4*A4^8) - 64*A4^10*A8^12/(A1^2*A2^3*A16^8) - 128*q*A4^12*A8^11/(A2^8*A16^6), where A_k = Product_{m>=1} (1 - q^(k*m)). - _Steven Kotlarz_, Jun 13 2026
+%e A005933 G.f.: 1 + 272*q^2 + 256*q^3 + 3058*q^4 + 2048*q^5 + ...
+%e A005933 The theta series itself is 1 + 272*x^4 + 256*x^6 + 3058*x^8 + ...; i.e., a(n) is the number of lattice vectors of squared norm 2*n.
 %o A005933 (Magma)
 %o A005933 L := Lattice("Lambda", 9);
 %o A005933 B := Basis(ThetaSeriesModularFormSpace(L),20);
 %o A005933 Coefficients(B[1]+272*B[3]+256*B[4]+3058*B[5]+2048*B[6]+11232*B[7]+7168*B[8]+32848*B[9]+16384*B[10]); // _Andy Huchala_, Jun 16 2021
+%o A005933 (PARI) T=102; q='q+O('q^T); E1=eta('q+O('q^T)); E2=eta('q^2+O('q^T)); E4=eta('q^4+O('q^T)); E8=eta('q^8+O('q^T)); E16=eta('q^16+O('q^T)); Vec((9*E2^12*E4^10/(E1^8*E8^3*E16^2) - 6*E2^7*E4^10*E8^2/(E1^6*E16^4) - 28*q*E2^11*E8^10/(E1^6*E4^2*E16^4) + 40*q^2*E2^11*E8^4/E1^6 + 62*E2^2*E4^10*E8^7/(E1^4*E16^6) - 256*q^5*E2^10*E8^5*E16^6/(E1^4*E4^8) - 64*E4^10*E8^12/(E1^2*E2^3*E16^8) - 128*q*E4^12*E8^11/(E2^8*E16^6))+O('q^T)) \\ _Steven Kotlarz_, Jun 13 2026
+%o A005933 (Python)
+%o A005933 def A005933_list(T):
+%o A005933     def euler(d):  # Product_{n>=1} (1-q^(d*n)), pentagonal number theorem
+%o A005933         e = [0]*T; e[0] = 1; k = 1
+%o A005933         while k*(3*k-1)//2*d < T:
+%o A005933             s = -1 if k % 2 else 1
+%o A005933             for g in (k*(3*k-1)//2*d, k*(3*k+1)//2*d):
+%o A005933                 if g < T: e[g] += s
+%o A005933             k += 1
+%o A005933         return e
+%o A005933     def mul(a, b):
+%o A005933         c = [0]*T
+%o A005933         for i, ai in enumerate(a):
+%o A005933             if ai:
+%o A005933                 for j in range(T-i):
+%o A005933                     if b[j]: c[i+j] += ai*b[j]
+%o A005933         return c
+%o A005933     def inv(a):
+%o A005933         c = [0]*T; c[0] = 1
+%o A005933         for n in range(1, T): c[n] = -sum(a[k]*c[n-k] for k in range(1, n+1))
+%o A005933         return c
+%o A005933     def pw(a, e):
+%o A005933         if e < 0: a, e = inv(a), -e
+%o A005933         r = [0]*T; r[0] = 1
+%o A005933         while e:
+%o A005933             if e & 1: r = mul(r, a)
+%o A005933             a = mul(a, a); e >>= 1
+%o A005933         return r
+%o A005933     E = {d: euler(d) for d in (1, 2, 4, 8, 16)}
+%o A005933     terms = [(9, 0, {1:-8, 2:12, 4:10, 8:-3, 16:-2}), (-6, 0, {1:-6, 2:7, 4:10, 8:2, 16:-4}),
+%o A005933         (-28, 1, {1:-6, 2:11, 4:-2, 8:10, 16:-4}), (40, 2, {1:-6, 2:11, 8:4}),
+%o A005933         (62, 0, {1:-4, 2:2, 4:10, 8:7, 16:-6}), (-256, 5, {1:-4, 2:10, 4:-8, 8:5, 16:6}),
+%o A005933         (-64, 0, {1:-2, 2:-3, 4:10, 8:12, 16:-8}), (-128, 1, {2:-8, 4:12, 8:11, 16:-6})]
+%o A005933     total = [0]*T
+%o A005933     for c, lead, rd in terms:
+%o A005933         f = [0]*T; f[0] = 1
+%o A005933         for d, r in rd.items(): f = mul(f, pw(E[d], r))
+%o A005933         for i in range(T - lead): total[i + lead] += c*f[i]
+%o A005933     return total
+%o A005933 print(A005933_list(26)) # _Steven Kotlarz_, Jun 13 2026
+%Y A005933 Cf. A006909.
 %K A005933 nonn,changed
 %O A005933 0,3
 %A A005933 _N. J. A. Sloane_
