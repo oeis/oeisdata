@@ -1,0 +1,44 @@
+%I A396827 #4 Jun 15 2026 18:36:33
+%S A396827 0,0,0,0,0,0,1,1,3,8,10,20,28,39,61,76,109,123,185,290,335,456,572,
+%T A396827 684,1155,1358,1727,2594,3198,3889,5896,7326,9074,12666,16969,19748,
+%U A396827 27781,34978,44495,56886,73483,92701,117725,149213,185560,235605,298898,369935,474841
+%N A396827 a(n) is the number of distinct primitive integer-sided triangles (x, y, z) with sopfr(x) = sopfr(y) = sopfr(z) = n, where sopfr is A001414.
+%C A396827 Let S(n) be the set of positive integers m with sopfr(m) = n; then |S(n)| = A000607(n), and a(n) counts the primitive triangles formed by elements of S(n). Primitive means gcd(x, y, z) = 1.
+%C A396827 In contrast to the corresponding primitive-to-total triangle ratio for fixed perimeter, namely A024162(n)/A005044(n-6), the ratio A396827(n)/A396826(n) appears to decrease rapidly with n. This suggests that elements of the same sopfr-layer often share small prime factors.
+%C A396827 The first primitive Heronian example occurs for n = 54: (629, 13195, 13320).
+%F A396827 a(n) = Sum_{k=0..n} A046675(k)*A396826(n-k).
+%F A396827 0 <= a(n) <= A396826(n).
+%e A396827 a(7) = 1 since the only primitive triangle with sopfr equal to 7 is (7, 10, 12), where sopfr(7) = sopfr(10) = sopfr(12) = 7.
+%e A396827 a(10) = 8 since the numbers with sopfr equal to 10 are 21, 25, 30, 32 and 36, and the primitive triangles formed from them are (21, 25, 30), (21, 25, 32), (21, 25, 36), (21, 30, 32), (21, 32, 36), (25, 30, 32), (25, 30, 36), and (25, 32, 36).
+%p A396827 # This program uses Moebius inversion to recover the primitive triangle counts from A396826.
+%p A396827 m := proc(N)
+%p A396827     local s, t, u, v, w;
+%p A396827     s := Array(0 .. N, 'fill' = 0); s[0] := 1; t := [];
+%p A396827     for u from 2 to N do
+%p A396827         if isprime(u) then t := [op(t), u] end if;
+%p A396827     end do;
+%p A396827     for u to nops(t) do
+%p A396827         v := t[u];
+%p A396827         for w from N by -1 to v do
+%p A396827             s[w] := s[w] - s[w - v];
+%p A396827         end do;
+%p A396827     end do;
+%p A396827     [seq(s[u], u = 0 .. N)];
+%p A396827 end proc:
+%p A396827 A396827List := proc(N)
+%p A396827     local s, t, u, v, w, x;
+%p A396827     s := m(N); t := [0, op(A396826List(N))]; w := [];
+%p A396827     for u from 1 to N do
+%p A396827         v := 0;
+%p A396827         for x from 0 to u do
+%p A396827             v := v + s[x + 1]*t[u - x + 1];
+%p A396827         end do;
+%p A396827         w := [op(w), v];
+%p A396827     end do;
+%p A396827     w;
+%p A396827 end proc:
+%p A396827 A396827List(49);
+%Y A396827 Cf. A000607, A001414, A005044, A024162, A046675, A396826.
+%K A396827 nonn,new
+%O A396827 1,9
+%A A396827 _Felix Huber_, Jun 11 2026
