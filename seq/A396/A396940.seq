@@ -1,0 +1,58 @@
+%I A396940 #30 Jun 18 2026 22:12:22
+%S A396940 0,0,1,1,0,0,1,2,1,2,0,2,0,1,0,1,2,3,1,0,3,2,2,3,0,1,3,2,1,0,0,1,2,3,
+%T A396940 4,1,0,3,4,2,2,3,4,0,1,3,4,1,2,0,4,2,0,1,3,0,1,2,3,4,5,1,0,3,2,5,4,2,
+%U A396940 3,4,5,0,1,3,2,5,4,1,0,4,5,0,1,2,3,5,4,1,0,3,2,0,1,2,3,4,5
+%N A396940 Lexicographically earliest Latin squares of increasing order, read by rows.
+%C A396940 This is a flattened series of matrices.
+%C A396940 Definition: Let S(n) be the set of all n X n Latin squares using a set X of n symbols which has a strict total order <. We shall represent X with {0, ..., n-1}.
+%C A396940 Define a strict total order <' on S(n) from the symbol ordering: A <' B iff exists i,j in N_0: ( A_{i,j} < B_{i,j} & forall j'< j: A_{i,j'} = B_{i,j'} & forall i'< i: A_{i',\*} = B_{i',\*}) where A_{i,j} is zero-indexed matrix notation denoting the symbol at the i-th row and j-th column of the Latin square A, and A_{i,*} denotes the i-th row of A.
+%C A396940 Then we define the lexicographically-minimal Latin square (LLS) of order n as the smallest element of (S(n), <').
+%C A396940 In other words, the LLS of order n is the first square among Latin squares of that order in an ordering where squares are compared by reading entries left-to-right, top-to-bottom (i.e., row 1 col 1, row 1 col 2, ..., row 2 col 1, ...).
+%C A396940 It is simple to prove the existence of exactly one LLS for each order. The trivial algorithm to find it uses backtracking.
+%C A396940 LLS of order n is an abelian group iff n = 2^a * 3^b with a >= 0 and b in {0,1}, otherwise it is a loop.
+%C A396940 The fastest program developed so far, based on extending the Latin square by using a flow network, has complexity around O(n^4.10) for odd n, calculating all entries of LLS(101) in 2 seconds.
+%C A396940 LLS of order 2^n are regular and their items are predictable with the formula LLS(n)_{i,j} = i XOR j. They are upper left submatrices of the infinite case A280172 (subtracting 1 from all its entries). This formula is why I chose to zero-index the rows and columns and cell symbols, as otherwise it is not so nice. More generally, even LLS can be derived from the LLS of half their order: LLS(n*2^k)_{i,j} = 2^k*LLS(n)_{i//2^k, j//2^k} + (i XOR j) mod 2^k.
+%C A396940 The more significant bits are derived from the smaller LLS and the less significant bits are derived from the indices. In other words the cells of the LLS(n) correspond to 2 X 2 blocks in LLS(2n).
+%C A396940 The odd squares appear to be irregular, other than for this: By the Latin square extension theorem, one does not need to backtrack across row boundaries, therefore the first row is always 0,1,...,n-1. It is somewhat harder to prove (using Konig's edge coloring theorem) that the first column is also always 0,1,...,n-1. It is observed that the irregularity extends from the right edge leftwards as one goes down the rows - cells roughly in an upper left triangle are regular; i.e., their values are equal to the corresponding cells in the next bigger LLS of order 2^n.
+%H A396940 Matous Moravec, <a href="/A396940/b396940.txt">Table of n, a(n) for n = 1..10000</a>
+%e A396940 For order 1, row 1 is:
+%e A396940   0
+%e A396940 For order 2, rows 2 and 3 are:
+%e A396940   0 1
+%e A396940   1 0
+%e A396940 For order 3, rows 4 to 6 are:
+%e A396940   0 1 2
+%e A396940   1 2 0
+%e A396940   2 0 1
+%o A396940 (Python)
+%o A396940 import sys
+%o A396940 def fill_matrix(n: int) -> list[list[int]]:
+%o A396940     col_used = [set() for _ in range(n)]
+%o A396940     grid = []
+%o A396940     for i in range(n):
+%o A396940         row: list[int | None] = [None] * n
+%o A396940         used_in_row: set[int] = set()
+%o A396940         def backtrack(j: int) -> bool:
+%o A396940             if j == n:
+%o A396940                 return True
+%o A396940             for v in range(n):
+%o A396940                 if v not in used_in_row and v not in col_used[j]:
+%o A396940                     row[j] = v
+%o A396940                     used_in_row.add(v)
+%o A396940                     if backtrack(j + 1):
+%o A396940                         return True
+%o A396940                     used_in_row.remove(v)
+%o A396940                     row[j] = None
+%o A396940             return False
+%o A396940         backtrack(0)
+%o A396940         grid.append(row)
+%o A396940         for j, v in enumerate(row):
+%o A396940             col_used[j].add(v)
+%o A396940     return grid
+%o A396940 n = int(sys.argv[1])
+%o A396940 for order in range(1, n + 1):
+%o A396940     print(fill_matrix(order))
+%Y A396940 Cf. A280172 (infinite case).
+%K A396940 nonn,tabf,new
+%O A396940 1,8
+%A A396940 _Matouš Moravec_, Jun 10 2026
