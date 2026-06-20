@@ -1,0 +1,46 @@
+%I A397219 #33 Jun 19 2026 13:10:22
+%S A397219 2,4,6,8,10,12,14,16,18,3,7,28,20,15,9,21,35,30,5,45,24,27,42,40,25,
+%T A397219 50,36,22,33,39,26,60,55,44,32,34,11,66,48,38,70,77,56,46,52,88,99,51,
+%U A397219 54,58,84,49,98,62,64,68,72,57,63,78,74,112,91,104,76,80,17,102
+%N A397219 Pascal-like triangle read by rows: top entry is 2; thereafter fill in entries left to right, top to bottom, with smallest number m that is not yet in the sequence and has a common factor with any earlier entry that is adjacent to it in the triangle.
+%C A397219 The formal definition is as follows:
+%C A397219 Denote the triangle by [T(n,k), n >= 0, 0 <= k <= n].  Then T(0,0)=2;
+%C A397219 for n>0, T(n,0) = smallest unused number m such that GCD(m,T(n-1,0)) > 1;
+%C A397219 for n>0 and 1<=k<=n-1, T(n,k) = smallest unused number m such that GCD(m,T(n-1,k-1)) > 1, GCD(m,T(n-1,k))>1, and GCD(m, T(n,k-1))>1; and
+%C A397219 for n>0, T(n,n) = smallest unused number m such that GCD(m,T(n-1,n-1)) > 1  and GCD(m, T(n,n-1))>1.
+%C A397219 This is a kind of hybrid of the EKG sequence and Pascal's triangle.
+%C A397219 It is conjectured that every number greater than 1 appears (cf. A397218).
+%H A397219 Michael S. Branicky, <a href="/A397219/b397219.txt">Table of n, a(n) for n = 1..20000</a>
+%e A397219 Triangle begins:
+%e A397219                        2,
+%e A397219                      4, 6,
+%e A397219                    8, 10, 12,
+%e A397219                  14, 16, 18, 3,
+%e A397219                 7, 28, 20, 15, 9,
+%e A397219               21, 35, 30, 5, 45, 24,
+%e A397219             27, 42, 40, 25, 50, 36, 22,
+%e A397219           33, 39, 26, 60, 55, 44, 32, 34,
+%e A397219         11, 66, 48, 38, 70, 77, 56, 46, 52,
+%e A397219 ...
+%t A397219 Block[{c, k, t, u, rows}, rows = 12; c[_] := False; t[_, _] := 1; t[0, 0] = 2; c[2] = True; u = 3; {t[0, 0]}~Join~Reap[Do[k = u; Which[j == 0, While[Or[c[k], CoprimeQ[t[i - 1, 0], k] ], k++], j == i, While[Or[c[k], AnyTrue[{t[i, j - 1], t[i - 1, j - 1]}, CoprimeQ[#, k] &] ], k++], True, While[Or[c[k], AnyTrue[{t[i, j - 1], t[i - 1, j], t[i - 1, j - 1]}, CoprimeQ[#, k] &]], k++]]; Sow[Set[t[i, j], k] ]; c[k] = True; If[k == u, While[c[u], u++] ], {i, rows}, {j, 0, i}] ][[-1, 1]] ] (* _Michael De Vlieger_, Jun 19 2026 *)
+%o A397219 (Python)
+%o A397219 from math import gcd
+%o A397219 from itertools import count, islice
+%o A397219 def A397219_gen():
+%o A397219     T, m, am, aset = {(0,0): 2}, 3, 2, set()
+%o A397219     for n in count(1):
+%o A397219         for k in range(n+1):
+%o A397219             yield am
+%o A397219             aset.add(am)
+%o A397219             if k == 0: neighs = {T[n-1,0]}
+%o A397219             elif 1 <= k < n: neighs = {T[n-1,k-1], T[n-1,k], T[n,k-1]}
+%o A397219             else: neighs = {T[n-1,k-1], T[n,k-1]}
+%o A397219             am = next(k for k in count(m) if k not in aset and all(gcd(v, k)>1 for v in neighs))
+%o A397219             T[n, k] = am
+%o A397219 print(list(islice(A397219_gen(), 68))) # _Michael S. Branicky_, Jun 19 2026
+%Y A397219 Cf. A064413 (EKG), A007318 (Pascal), A397218.
+%Y A397219 For leading diagonal see A397169.
+%K A397219 nonn,tabl,new
+%O A397219 1,1
+%A A397219 _Scott R. Shannon_, Jun 19 2026
+%E A397219 Edited by _N. J. A. Sloane_, Jun 19 2026

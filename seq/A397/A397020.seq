@@ -1,0 +1,44 @@
+%I A397020 #12 Jun 19 2026 17:31:29
+%S A397020 1,17,378,13064,479572,18512556,733980532
+%N A397020 Number of free polyominoes with 4n cells that can be tiled by n copies of the T-tetromino; equivalently, the number of n-fold multiples of the T-tetromino, counted up to rotation and reflection.
+%C A397020 In the divisibility language of Polyomino Number Theory (Cibulis, Liu, and Wainwright), a polyomino assembled from n copies of a polyomino P is an n-fold multiple of P. This sequence counts the distinct free n-fold multiples of the T-tetromino. The pieces may be placed in any of their orientations; copies must meet edge to edge and may not overlap.
+%H A397020 A. Cibulis, A. Liu, and B. Wainwright, <a href="http://www.paulsalomon.com/uploads/2/8/3/3/28331113/polyomino_number_theory_(i).pdf">Polyomino Number Theory I</a>, Crux Mathematicorum 28(3) (2002), 147-150.
+%H A397020 Solomon W. Golomb, <a href="https://www.jstor.org/stable/2320673">Normed Division Domains</a>, The American Mathematical Monthly, Vol. 88, No. 9 (Nov., 1981), pp. 680-686.
+%H A397020 Haoyang Xu, <a href="/A397020/a397020.png">Illustration of a(1) and a(2)</a>
+%e A397020 a(1) = 1 (the T-tetromino itself). a(2) = 17: two T-tetrominoes joined edge to edge form 17 distinct free octominoes.
+%o A397020 (Python)
+%o A397020 def _norm(s):
+%o A397020     mx = min(x for x, y in s); my = min(y for x, y in s)
+%o A397020     return frozenset((x - mx, y - my) for x, y in s)
+%o A397020 def _orients(s):
+%o A397020     out = set(); c = _norm(s)
+%o A397020     for _ in range(4):
+%o A397020         out.add(c)
+%o A397020         out.add(_norm(frozenset((-x, y) for x, y in c)))
+%o A397020         c = _norm(frozenset((-y, x) for x, y in c))
+%o A397020     return out
+%o A397020 def _canon(s):
+%o A397020     return min(tuple(sorted(o)) for o in _orients(s))
+%o A397020 def a(n, piece=frozenset({(0,0),(1,0),(2,0),(1,1)})):
+%o A397020     states = {frozenset(_canon(list(_orients(piece))[0]))}
+%o A397020     O = list(_orients(piece))
+%o A397020     for _ in range(n - 1):
+%o A397020         nxt = set()
+%o A397020         for st in states:
+%o A397020             xs = [x for x, y in st]; ys = [y for x, y in st]
+%o A397020             for o in O:
+%o A397020                 ox = [p[0] for p in o]; oy = [p[1] for p in o]
+%o A397020                 for dx in range(min(xs)-max(ox)-1, max(xs)-min(ox)+2):
+%o A397020                     for dy in range(min(ys)-max(oy)-1, max(ys)-min(oy)+2):
+%o A397020                         t = frozenset((p[0]+dx, p[1]+dy) for p in o)
+%o A397020                         if t & st: continue
+%o A397020                         if any((x+1,y) in st or (x-1,y) in st or (x,y+1) in st or (x,y-1) in st for x,y in t):
+%o A397020                             nxt.add(st | t)
+%o A397020         states = {frozenset(k) for k in {_canon(s) for s in nxt}}
+%o A397020     return len(states)
+%o A397020 print([a(n) for n in range(1, 6)])  # 1, 17, 378, 13064, 479572
+%o A397020 # larger terms by the parallel hash-sharded on-disk method. _Haoyang Xu_
+%Y A397020 Cf. A390620 (O-column, free polynars), A000105 (free polyominoes); A397019 (I), A397021 (L), A397022 (S), A397023 (A390620 - A000105).
+%K A397020 nonn,more,new
+%O A397020 1,2
+%A A397020 _Haoyang Xu_, Jun 13 2026

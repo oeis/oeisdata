@@ -1,0 +1,65 @@
+%I A397218 #19 Jun 19 2026 16:13:30
+%S A397218 1,2,4,6,8,10,3,12,14,16,9,15,18,20,22,21,24,27,30,26,28,7,42,33,36,
+%T A397218 32,34,38,35,49,63,39,48,40,44,46,5,70,56,54,45,50,52,58,60,25,55,66,
+%U A397218 62,72,75,65,78,64,68,80,85,90,74,76,57,95,100,82,84,51,86,102
+%N A397218 Essentially the same as A397219, except insert an initial 1 and modify the definition accordingly.
+%C A397218 See A397219.
+%C A397218 It is conjectured that this is a permutation of the positive integers.
+%H A397218 Michael S. Branicky, <a href="/A397218/b397218.txt">Table of n, a(n) for n = 1..20000</a>
+%e A397218 Triangle begins:
+%e A397218                1,
+%e A397218               2, 4,
+%e A397218             6, 8, 10,
+%e A397218           3, 12, 14, 16,
+%e A397218         9, 15, 18, 20, 22,
+%e A397218       21, 24, 27, 30, 26, 28,
+%e A397218      7, 42, 33, 36, 32, 34, 38,
+%e A397218   35, 49, 63, 39, 48, 40, 44, 46,
+%e A397218  5, 70, 56, 54, 45, 50, 52, 58, 60,
+%e A397218 ...
+%p A397218 A397218List := proc(L) local aset, prow, crow, ret, m, n, k, nach, am, v, found;
+%p A397218 if L = 1 then return [1] fi;
+%p A397218 aset := table(); aset[1] := true; ret := [1]; prow := [1]; m := 2;
+%p A397218 for n from 1 while nops(ret) < L do
+%p A397218     crow := [];
+%p A397218     for k from 0 to n do
+%p A397218         nach := if k = 0 then [prow[1]]
+%p A397218         elif k < n then [prow[k], prow[k+1], crow[k]]
+%p A397218         else [prow[k], crow[k]] fi;
+%p A397218         while assigned(aset[m]) do m := m + 1 od; am := m;
+%p A397218         do found := true;
+%p A397218            if not assigned(aset[am]) then
+%p A397218               for v in nach do if v <> 1 and igcd(v, am) = 1
+%p A397218                   then found := false; break fi od;
+%p A397218            else found := false fi;
+%p A397218            if not found then am := am + 1 fi;
+%p A397218         until found;
+%p A397218         ret := [op(ret), am];
+%p A397218         if nops(ret) = L then return ret fi;
+%p A397218         crow := [op(crow), am];
+%p A397218         aset[am] := true;
+%p A397218     od;
+%p A397218     prow := crow;
+%p A397218 od; ret end:
+%p A397218 A397218List(500);  # after _Michael S. Branicky_,  _Peter Luschny_, Jun 19 2026
+%t A397218 Block[{c, k, t, u, rows}, rows = 12; c[_] := False; t[_, _] := 1; Set[{t[0, 0], t[1, 0], t[1, 1]}, 2^Range[0, 2]]; Map[Set[c[#], True] &, 2^Range[0, 2]]; u = 3; {t[0, 0], t[1, 0], t[1, 1]}~Join~Reap[Do[k = u; Which[j == 0, While[Or[c[k], CoprimeQ[t[i - 1, 0], k]], k++], j == i, While[Or[c[k], AnyTrue[{t[i, j - 1], t[i - 1, j - 1]}, CoprimeQ[#, k] &] ], k++], True, While[Or[c[k], AnyTrue[{t[i, j - 1], t[i - 1, j], t[i - 1, j - 1]}, CoprimeQ[#, k] &]], k++] ]; Sow[Set[t[i, j], k] ]; c[k] = True; If[k == u, While[c[u], u++]], {i, 2, rows}, {j, 0, i}] ][[-1, 1]] ] (* _Michael De Vlieger_, Jun 19 2026 *)
+%o A397218 (Python)
+%o A397218 from math import gcd
+%o A397218 from itertools import count, islice
+%o A397218 def A397218_gen():
+%o A397218     T, m, am, aset = {(0,0): 1}, 2, 1, set()
+%o A397218     for n in count(1):
+%o A397218         for k in range(n+1):
+%o A397218             yield am
+%o A397218             aset.add(am)
+%o A397218             if k == 0: neighs = {T[n-1,0]}
+%o A397218             elif 1 <= k < n: neighs = {T[n-1,k-1], T[n-1,k], T[n,k-1]}
+%o A397218             else: neighs = {T[n-1,k-1], T[n,k-1]}
+%o A397218             am = next(k for k in count(m) if k not in aset and all(v==1 or gcd(v, k)>1 for v in neighs))
+%o A397218             T[n, k] = am
+%o A397218 print(list(islice(A397218_gen(), 68))) # _Michael S. Branicky_, Jun 19 2026
+%Y A397218 Cf. A064413, A007318, A397219.
+%K A397218 nonn,tabl,new
+%O A397218 1,2
+%A A397218 _Scott R. Shannon_, Jun 19 2026
+%E A397218 Edited by _N. J. A. Sloane_, Jun 19 2026
