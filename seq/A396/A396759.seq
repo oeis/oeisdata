@@ -1,0 +1,45 @@
+%I A396759 #21 Jun 20 2026 05:46:25
+%S A396759 9,8,8,7,6,2,5,8,5,8,3,7,2,4,7,7,0,4,8,9,9,7,8,2,9,5,5,6,5,8,9,9,1,6,
+%T A396759 3,1,0,4,0,5,6,1,5,2,7,6,2,6,2,4,3,5,2,9,4,1,7,6,8,4,0,6,1,8,2,7,3,1,
+%U A396759 0,7,1,2,7,1,3,8,9,0,7,4,4,0,6,8,2,8,7,9,3,4,6,7,5,7,3,1,1,7,0,7,7,2,0,0,9,6
+%N A396759 Decimal expansion of Sum_{p prime} (p*log(p) - (p-1)*log(p-1))/(p^2-1).
+%C A396759 This constant arises as the mean totient entropy: C = Sum_{p prime} ((p-1)/p) * Sum_{k>=1} H(p^k)/p^k, where H(n) is the Shannon entropy of the vector (phi(d)/n) over the divisors d of n.
+%C A396759 The closed form per prime is ((p-1)/p) * Sum_{k>=1} H(p^k)/p^k = (p*log(p) - (p-1)*log(p-1))/(p^2-1), which yields the summation in the name.
+%C A396759 H(n) = -Sum_{d|n} (phi(d)/n)*log(phi(d)/n) is the Shannon entropy of the totient probability vector (phi(d)/n)_{d|n}, which is a valid distribution by Gauss's identity Sum_{d|n} phi(d) = n. H is additive over coprime arguments: H(m*n) = H(m) + H(n) for gcd(m,n) = 1.
+%C A396759 Note that Sum_{n>=2} (n*log(n) - (n-1)*log(n-1))/(n^2-1) = 1.624921184802744462678229746049583756369909472251563629561539831817636349031823... - _Vaclav Kotesovec_, Jun 15 2026
+%H A396759 Vladimir Khomyakov, <a href="https://doi.org/10.5281/zenodo.20533024">The Mean Totient Entropy: A New Number-Theoretic Constant and its Dirichlet-Type Representation over the Primes</a>, Zenodo, 2026.
+%H A396759 Wikipedia, <a href="https://en.wikipedia.org/wiki/Prime_zeta_function">Prime zeta function</a>
+%F A396759 Equals Sum_{s>=2} (a(s)*S(s) + b(s)*P(s)), where P(s) = Sum_{p prime} p^(-s) is the prime zeta function, S(s) = -P'(s) = Sum_{p prime} log(p)*p^(-s), a(s) = (1+(-1)^s)/2, and b(s) = 1/(s-1) - Sum_{m=1..s-2} (-1)^(s-m)/m.
+%F A396759 Equals Sum_{p prime} (p*log(p) - (p-1)*log(p-1))/(p^2-1).
+%e A396759 0.988762585837247704899782955658991631040561527626...
+%t A396759 $MaxExtraPrecision = 1000; Do[Print[N[Sum[(-(1 + (-1)^s)/2)*Derivative[1][PrimeZetaP][s] + (1/(s - 1) - LerchPhi[-1, 1, -1 + s] + (-1)^s*Log[2]) * PrimeZetaP[s], {s, 2, m}], 110]], {m, 100, 1000, 100}] (* _Vaclav Kotesovec_, Jun 15 2026 *)
+%o A396759 (Python) # via mpmath; C = Sum_{p} (p*log(p)-(p-1)*log(p-1))/(p^2-1) with analytic prime-zeta tail
+%o A396759 from mpmath import mp, mpf, log, primezeta, zeta, nstr
+%o A396759 import sympy
+%o A396759 mp.dps = 130
+%o A396759 Psplit = 10**5
+%o A396759 sp = list(sympy.primerange(2, Psplit+1))
+%o A396759 mu = sympy.mobius
+%o A396759 C_small = sum((mpf(p)-1)/mpf(p)*(mpf(p)*log(mpf(p))-(mpf(p)-1)*log(mpf(p)-1))/(mpf(p)**2-1) for p in sp)
+%o A396759 def Sfull(s):
+%o A396759     o=mp.dps; mp.dps=o+40
+%o A396759     t=mpf(0); n=1
+%o A396759     while True:
+%o A396759         m=mu(n)
+%o A396759         if m: t+=m*(zeta(n*s,derivative=1)/zeta(n*s))
+%o A396759         if mpf(2)**(-n*s)<mpf(10)**(-150): break
+%o A396759         n+=1
+%o A396759     mp.dps=o; return -t
+%o A396759 def Ptail(s): return primezeta(s)-sum(mpf(1)/mpf(p)**s for p in sp)
+%o A396759 def Stail(s): return Sfull(s)-sum(log(mpf(p))/mpf(p)**s for p in sp)
+%o A396759 def L2(s): return mpf(0) if s<3 else -sum(mpf((-1)**(s-m))/m for m in range(1,s-1))
+%o A396759 C_tail=mpf(0)
+%o A396759 for s in range(2,261):
+%o A396759     a=mpf(1) if s%2==0 else mpf(0); b=mpf(1)/(s-1)+L2(s)
+%o A396759     C_tail+=b*Ptail(s)+(a*Stail(s) if a else mpf(0))
+%o A396759 print(nstr(C_small+C_tail,110))
+%Y A396759 Cf. A085548 (prime zeta P(2)), A085541 (prime zeta P(3)), A397097.
+%K A396759 nonn,cons,new
+%O A396759 0,1
+%A A396759 _Vladimir Khomyakov_, Jun 04 2026
+%E A396759 More terms from _Vaclav Kotesovec_, Jun 15 2026
