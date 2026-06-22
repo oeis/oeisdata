@@ -1,0 +1,51 @@
+%I A397070 #11 Jun 21 2026 22:17:49
+%S A397070 8,10,18,25,26,34,45,58,65,74,82,85,98,106,117,122,125,145,146,153,
+%T A397070 169,178,185,194,202,205,218,221,226,242,245,261,265,274,289,298,305,
+%U A397070 314,333,346,362,365,369,377,386,394,441,445,458,466,477,481,482,485,493,505,514,533,538,545,549,554,562,565,586
+%N A397070 Norms of multiplicatively perfect Gaussian integers (Gaussian integers having exactly four divisors up to associates).
+%C A397070 A Gaussian integer z is multiplicatively perfect if the product of its divisors (up to associates) equals z^2. As in the rational case, the product of the divisors of z equals z^(d(z)/2) up to a unit, where d(z) is the number of divisors of z up to associates; hence z is multiplicatively perfect iff d(z) = 4. This is the analog in Z[i] of A007422.
+%C A397070 d(z) = 4 holds iff z is a product of two non-associate Gaussian primes, or the cube of a Gaussian prime. A positive integer n appears here iff some Gaussian integer of norm n has this form.
+%C A397070 Membership depends only on the factorization of n: n must be a sum of two squares, i.e., every prime == 3 (mod 4) divides n to an even power. For example, 14 = 2*7 is not a term because 7 == 3 (mod 4) is inert in Z[i], so no Gaussian integer has norm 14.
+%C A397070 A single norm can arise from a multiplicatively perfect Gaussian integer even when other Gaussian integers of that norm are not; e.g. 25 = N(5) with 5 = (2+i)(2-i) (four divisors), although N((2+i)^2) = 25 has only three divisors.
+%D A397070 J. Sándor, On multiplicatively perfect numbers, J. Inequal. Pure Appl. Math. 2 (2001), no. 1, Article 3, 6 pp.
+%H A397070 Karan Sharma, <a href="/A397070/a397070.txt">Table of n, a(n) for n = 1..1000</a>
+%F A397070 n is a term iff exactly one of the following holds, with p, p' == 1 (mod 4) and q, q' == 3 (mod 4) prime:
+%F A397070 (1) n = 8;
+%F A397070 (2) n = p^2 or n = p^3;
+%F A397070 (3) n = q^6;
+%F A397070 (4) n = 2p;
+%F A397070 (5) n = 2q^2;
+%F A397070 (6) n = pp' with p != p';
+%F A397070 (7) n = pq^2;
+%F A397070 (8) n = q^2*q'^2 with q != q'.
+%e A397070 8 = N(2+2i): 2+2i = (1+i)^3 up to a unit, a Gaussian prime cube; its divisors up to associates are 1, 1+i, (1+i)^2, (1+i)^3, and their product is (2+2i)^2.
+%e A397070 10 = N(1+3i): 1+3i = (1+i)(2+i), a product of two non-associate Gaussian primes; divisors 1, 1+i, 2+i, 1+3i.
+%e A397070 25 = N(5): 5 = (2+i)(2-i), a product of two non-associate Gaussian primes; divisors 1, 2+i, 2-i, 5.
+%t A397070 isokQ[n_] := Module[{f = FactorInteger[n], opts},
+%t A397070   If[AnyTrue[f, Mod[#[[1]], 4] == 3 && OddQ[#[[2]]] &], Return[False]];
+%t A397070   opts = Table[Which[
+%t A397070      p[[1]] == 2, {p[[2]] + 1},
+%t A397070      Mod[p[[1]], 4] == 3, {p[[2]]/2 + 1},
+%t A397070      True, Union@Table[(a + 1) (p[[2]] - a + 1), {a, 0, p[[2]]}]], {p, f}];
+%t A397070   MemberQ[Times @@@ Tuples[opts], 4]];
+%t A397070 Select[Range[2, 600], isokQ]
+%o A397070 (Python)
+%o A397070 from sympy import factorint
+%o A397070 from itertools import product
+%o A397070 import math
+%o A397070 def isok(n):
+%o A397070     sets = []
+%o A397070     for p, e in factorint(n).items():
+%o A397070         if p % 4 == 3:
+%o A397070             if e % 2: return False        # not a Gaussian norm
+%o A397070             sets.append({e//2 + 1})
+%o A397070         elif p == 2:
+%o A397070             sets.append({e + 1})
+%o A397070         else:                              # p == 1 (mod 4)
+%o A397070             sets.append({(a+1)*(e-a+1) for a in range(e+1)})
+%o A397070     return bool(sets) and any(math.prod(c) == 4 for c in product(*sets))
+%o A397070 print([n for n in range(2, 600) if isok(n)])
+%Y A397070 Cf. A007422 (multiplicatively perfect numbers in Z), A007955, A000005, A001481 (norms of Gaussian integers), A055025 (norms of Gaussian primes).
+%K A397070 nonn,easy,new
+%O A397070 1,1
+%A A397070 _Karan Sharma_, Jun 15 2026

@@ -1,0 +1,86 @@
+%I A395742 #33 Jun 21 2026 19:40:21
+%S A395742 2,6,60,2520,55440,720720,367567200,6983776800,321253732800,
+%T A395742 65214507758400,6064949221531200,448806242393308800,
+%U A395742 18401055938125660800,791245405339403414400,37188534050951960476800,9854961523502269526352000,581442729886633902054768000,780296143507862696557498656000
+%N A395742 Superior highly composite numbers (A002201) where a new prime factor is introduced for the first time.
+%C A395742 This sequence is the subsequence of superior highly composite numbers (A002201) where a new prime factor is introduced for the first time. Because superior highly composite numbers are primorial-regular and their prime factors are added strictly in increasing order, a(n) is the first superior highly composite number to be divisible by the n-th prime.
+%H A395742 James McKay, <a href="/A395742/b395742.txt">Table of n, a(n) for n = 1..343</a>
+%H A395742 Wikipedia, <a href="https://en.wikipedia.org/wiki/Superior_highly_composite_number">Superior highly composite number</a>.
+%F A395742 a(n) = min { x in A002201 : A001221(x) = n }.
+%e A395742 a(1) = 2 because it is the first superior highly composite number with 1 distinct prime factor (2).
+%e A395742 a(2) = 6 because it is the first superior highly composite number with 2 distinct prime factors (2 and 3).
+%e A395742 a(3) = 60 because the preceding superior highly composite numbers (2, 6, 12) have at most 2 distinct prime factors, making 60 (2^2 * 3 * 5) the first to have 3 distinct prime factors.
+%p A395742 # Assuming shcnList is a pre-defined list of Superior Highly Composite Numbers
+%p A395742 with(NumberTheory):
+%p A395742 result := [];
+%p A395742 seen := 0;
+%p A395742 for x in shcnList do
+%p A395742     d := NumberOfPrimeFactors(x, 'distinct');
+%p A395742     if d > seen then
+%p A395742         result := [op(result), x];
+%p A395742         seen := d;
+%p A395742     fi;
+%p A395742 od:
+%p A395742 print(result);
+%t A395742 (* Selects the first SHCN for each unique count of distinct prime factors *)
+%t A395742 shcnList = Import["https://oeis.org/A002201/b002201.txt", "Data"][[All, -1]]; DeleteDuplicatesBy[shcnList, PrimeNu]
+%o A395742 (Python)
+%o A395742 import urllib.request
+%o A395742 def get_prime_factors(n):
+%o A395742     """Efficiently finds unique prime factors of n."""
+%o A395742     factors = set()
+%o A395742     if n % 2 == 0:
+%o A395742         factors.add(2)
+%o A395742         while n % 2 == 0:
+%o A395742             n //= 2
+%o A395742     d = 3
+%o A395742     while d * d <= n:
+%o A395742         if n % d == 0:
+%o A395742             factors.add(d)
+%o A395742             while n % d == 0:
+%o A395742                 n //= d
+%o A395742         d += 2
+%o A395742     if n > 1:
+%o A395742         factors.add(n)
+%o A395742     return factors
+%o A395742 def main():
+%o A395742     url = "https://oeis.org/A002201/b002201.txt"
+%o A395742     output_filename = "b395742.txt"
+%o A395742     print(f"Fetching data from {url}...")
+%o A395742     try:
+%o A395742         req = urllib.request.Request(
+%o A395742             url,
+%o A395742             headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'}
+%o A395742         )
+%o A395742         with urllib.request.urlopen(req) as response:
+%o A395742             lines = response.read().decode('utf-8').splitlines()
+%o A395742     except Exception as e:
+%o A395742         print(f"Error fetching the file: {e}")
+%o A395742         return
+%o A395742     seen_primes = set()
+%o A395742     output_index = 1  # Sequential numbering starting at 1
+%o A395742     print(f"Writing strict OEIS-compliant b-file to {output_filename}...")
+%o A395742     # 'newline="\n"' forces Unix LF endings. 'encoding="utf-8"' writes without BOM.
+%o A395742     with open(output_filename, 'w', encoding='utf-8', newline='\n') as f:
+%o A395742         for line in lines:
+%o A395742             line = line.strip()
+%o A395742             if not line or line.startswith('#'):
+%o A395742                 continue
+%o A395742             parts = line.split()
+%o A395742             if len(parts) != 2:
+%o A395742                 continue
+%o A395742             value = int(parts[1])
+%o A395742             factors = get_prime_factors(value)
+%o A395742             new_primes = factors - seen_primes
+%o A395742             if new_primes:
+%o A395742                 # Format: "index value\n" (Strictly no trailing spaces or comments)
+%o A395742                 f.write(f"{output_index} {value}\n")
+%o A395742                 seen_primes.update(new_primes)
+%o A395742                 output_index += 1
+%o A395742     print(f"Done! '{output_filename}' has been created with {output_index - 1} terms.")
+%o A395742 if __name__ == "__main__":
+%o A395742     main()
+%Y A395742 Subsequence of A002201. Cf. A000040, A000705, A001221, A006530.
+%K A395742 nonn,new
+%O A395742 1,1
+%A A395742 _James McKay_, Jun 08 2026

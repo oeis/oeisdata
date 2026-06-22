@@ -1,18 +1,50 @@
-%I A384229 #43 Aug 27 2025 22:52:01
+%I A384229 #73 Jun 22 2026 02:29:55
 %S A384229 1,4,10,64,128,416,2416,32768,21248,74752,733696,5300224,31418368,
 %T A384229 115552256,106977280,637534208,1267793920,4766040064,85425520640,
 %U A384229 3234139734016,1535025086464,5843921666048,128230272008192,1961561493078016,2348839113588736,9016382767235072
 %N A384229 Numerators of the expected number of steps to hit the opposite corner by simple random walk on the n-cube.
+%C A384229 From _Natalia L. Skirrow_, Jun 12 2026: (Start)
+%C A384229 The Ehrenfest model is typically described in terms of fleas jumping between two houses, A and B, with one uniformly selected flea jumping each turn. In state k of the Markov chain, there are k fleas in house A and n-k in house B.
+%C A384229 From state k, the probability of transitioning to state k + 1 is p(k) = 1 - k/n, while the probability of transitioning to state k - 1 is q(k) = k/n.
+%C A384229 Labeling each flea with an axis of the hypercube, state k corresponds with C(n, k) vertices, so it has a probability mass function P(k) = C(n, k)/2^n in the stationary distribution.
+%C A384229 Since the chain is ergodic, state k waits an expected 1/P(k) = 2^n/C(n, k) turns before returning to itself.
+%C A384229 So E(n+1) is also Sum_{k=0..n} Expectation(# turns to return to state k).
+%C A384229 For j > i, the expected waiting time spent in state l before hitting state j starting from state i is W(l) = P(l)*Sum_{k=max(i,l)..j-1} 1/(P(k)*p(k)), so the total time spent is Sum_{l=0..j-1} W(l) = Sum_{k=i..j-1} ( Sum_{l=0..k} C(n, l) )/C(n-1, k).
+%C A384229 (End)
+%H A384229 Natalia L. Skirrow, <a href="https://oeis.org/wiki/User:Natalia_L._Skirrow/an_introduction_to_Stirling_numbers/more_on_Faulhabernoulli_and_Gregory">more on Faulhabernoulli and Gregory</a>.
 %H A384229 Wikipedia, <a href="https://en.wikipedia.org/wiki/Ehrenfest_model">Ehrenfest model</a>.
 %H A384229 Wikipedia, <a href="https://en.wikipedia.org/wiki/Hypercube">Hypercube</a>.
-%F A384229 a(n) = numerator(2^(n-1) * Sum_{i=0..n-1} 1/binomial(n-1,i)).
+%H A384229 Wikipedia, <a href="https://en.wikipedia.org/wiki/Trigonometric_integral#Hyperbolic_sine_integral">Trigonometric integral § Hyperbolic sine integral</a>.
+%F A384229 a(n) = numerator(E(n)) where E(n) = 2^(n-1) * Sum_{i=0..n-1} 1/binomial(n-1,i).
+%F A384229 From _Natalia L. Skirrow_, Jun 12 2026: (Start)
+%F A384229 E(n) = Sum_{k=0..n-1} ( Sum_{l=0..k} C(n,l) )/C(n-1,k). (See comment.)
+%F A384229 Lemma: 1/(n*C(n-1,k)) = Sum_{j=0..k} (-1)^(k-j)*C(k,j)/(n-j) = [x^n] log(1/(1-x)) * (x-1)^k.
+%F A384229 Hence,
+%F A384229 E(n) = n*2^(n-1) * [x^n] log(1/(1-x)) * (1-(x-1)^n)/(1-(x-1));
+%F A384229      = n*Sum_{k=1..n} 2^(k-1)/k = (n/2) * Integral_{t=0..2} (1-t^n)/(1-t);
+%F A384229      = 2^(n-1)*Sum_{j=0..n-1} 2^(-j)/(1-j/n);
+%F A384229      = 2^(n-1)*Sum_{p>=0} (1/n^p)*Sum_{j=0..n-1} j^p/2^j.
+%F A384229 By summing over all j>=0, we have the formal asymptotic series E(n)/2^n ~ Sum_{k>=0} A000670(k)/n^k (see Benoit Cloitre's 2002 formula on A000670); this improves up to k=K(n) then begins to diverge, where (from logarithmically differentiating A000670's asymptotic expansion) K(n) ~ n*log(2).
+%F A384229 From the Stirling transform on the summands (cf. Skirrow link), this becomes:
+%F A384229 E(n)/2^n ~ 1 + Sum_{k>=1} 2^(k-1)/C(n+k,k), which begins diverging at K(n) ~ n - 1/2.
+%F A384229 a(n) = A108866(n) * n/(2*gcd(n,A229726(floor(n/2)))).
+%F A384229 O.g.f. of E(n)/n: log(1/(1-2*x)) / (2*(1-x)).
+%F A384229 O.g.f. of E(n): ( 1 + 1/(1-2*x) + log(1/(1-2*x)) )*x/(2*(1-x)^2).
+%F A384229 Let Shi(x) = Integral_{t=0..x} sinh(t)/t = e^x*Integral_{u=-1..1} (e^(x*u)-1)/(2*u).
+%F A384229 E.g.f. of E(n)/n: e^x*Shi(x).
+%F A384229 E.g.f. of E(n): e^x*(sinh(x) + x*Shi(x)).
+%F A384229 (End)
 %e A384229 1, 4, 10, 64/3, 128/3, 416/5, 2416/15, 32768/105, 21248/35, 74752/63, ...
 %p A384229 t := n -> 2^(n-1)*add(1/binomial(n-1,i), i=0..n-1):
 %p A384229 a := n -> numer(t(n)):
 %p A384229 seq(a(n), n=1..34);
 %t A384229 t[n_] := 2^(n - 1) Sum[1/Binomial[n - 1, i], {i, 0, n - 1}] // Together;
-%t A384229 a[n_] := Numerator[t[n]];
-%t A384229 Array[a, 34]
+%t A384229 a[n_] := Numerator[t[n]]; Array[a, 34]
+%t A384229 (* Alternative: *)
+%t A384229 aTable[max_] := Module[{sum = 0}, Table[sum += (2^n)/n; Numerator[n*sum / 2], {n, 1, max}]];
+%t A384229 aTable[26]  (* _Natalia L. Skirrow_, Jun 12 2026 *)
+%t A384229 (* Alternative: *)
+%t A384229 a[n_] := Numerator[-n*(2^n*LerchPhi[2, 1, 1 + n] + I*Pi/2)] (* _Natalia L. Skirrow_, Jun 12 2026 *)
 %o A384229 (MATLAB)
 %o A384229 function p = cube_hit_num(N)
 %o A384229     p = sym(zeros(1,N));
@@ -26,7 +58,12 @@
 %o A384229         p(n) = pn;
 %o A384229     end
 %o A384229 end
+%o A384229 (Python)
+%o A384229 from fractions import Fraction as frac
+%o A384229 A384229 = lambda n: sum(frac(n<<k,k+1) for k in range(n)).numerator
+%o A384229 # _Natalia L. Skirrow_, Jun 12 2026
 %Y A384229 Cf. A387183 (denominators).
-%K A384229 nonn,frac
+%Y A384229 Cf. A000670, A108866(n)/A229726(floor(n/2)) (fractions).
+%K A384229 nonn,frac,changed
 %O A384229 1,2
 %A A384229 _Joost de Winter_, Aug 19 2025
