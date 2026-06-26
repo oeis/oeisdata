@@ -1,0 +1,71 @@
+%I A396989 #12 Jun 25 2026 22:01:51
+%S A396989 0,3,0,60,0,5250,16800,876960,11340000,272820240,7604150400,
+%T A396989 198183585600,6253468341120,213080122054800,7513083254476800,
+%U A396989 299602025154432000,12707100361859904000,570246429438154909440,27224755348605534720000,1367528535787609677081600
+%N A396989 Number of labeled trees on n vertices in which the number of vertices of degree 1 equals the graph diameter.
+%C A396989 Here diameter is measured in edges, and a leaf means a vertex of degree 1.
+%C A396989 The offset is 2 because the one-vertex tree has a convention-dependent leaf count.
+%C A396989 a(5)=60: the only qualifying unlabeled tree has degree sequence (3,2,1,1,1), with 3 leaves and diameter 3; it has automorphism group of order 2, giving 5!/2 = 60 labeled trees.
+%D A396989 F. Harary and E. M. Palmer, Graphical Enumeration, Academic Press, New York, 1973, Ch. 3.
+%D A396989 J. W. Moon, Counting Labelled Trees, Canadian Mathematical Congress, Montreal, 1970, Secs. 1.1, 3.7, 4.2, 7.4.
+%F A396989 Let R_{-1}(x,u)=0 and, for h >= 0, define R_h(x,u) = x*(u + exp(R_{h-1}(x,u)) - 1). Here R_h is the exponential generating function for rooted labeled trees of height at most h, with u marking leaves.
+%F A396989 For r >= 0, let F_{2r+1}(x,u) = (1/2)*(R_r(x,u) - R_{r-1}(x,u))^2.
+%F A396989 For r >= 1, let F_{2r}(x,u) = x*(exp(R_{r-1}(x,u)) - exp(R_{r-2}(x,u)) - (R_{r-1}(x,u) - R_{r-2}(x,u))*exp(R_{r-2}(x,u))).
+%F A396989 Then a(n) = n!*Sum_{d=1..n-1} [x^n u^d] F_d(x,u). This formula is proved by decomposing a tree at its unique center: a central edge when d is odd, and a central vertex when d is even.
+%e A396989 For n=2, the unique labeled tree has 2 leaves and diameter 1, so a(2)=0.
+%e A396989 For n=3, every labeled tree is a path on 3 vertices, with 2 leaves and diameter 2. By Cayley's formula there are 3^(3-2)=3 such trees, so a(3)=3.
+%e A396989 For n=4, the two possible unlabeled tree shapes are the path P_4, with 2 leaves and diameter 3, and the star K_{1,3}, with 3 leaves and diameter 2. Hence no labeled tree qualifies, so a(4)=0.
+%e A396989 For n=5, the only qualifying unlabeled tree has degree sequence (3,2,1,1,1), with 3 leaves and diameter 3. Its automorphism group has order 2, so it gives 5!/2 = 60 labeled trees. Hence a(5)=60.
+%o A396989 (Python)
+%o A396989 from itertools import product
+%o A396989 from collections import deque
+%o A396989 from bisect import insort
+%o A396989 def tree_from_prufer(n, code):
+%o A396989     deg = [1] * n
+%o A396989     for x in code:
+%o A396989         deg[x] += 1
+%o A396989     leaves = [i for i in range(n) if deg[i] == 1]
+%o A396989     leaves.sort()
+%o A396989     adj = [[] for _ in range(n)]
+%o A396989     for x in code:
+%o A396989         y = leaves.pop(0)
+%o A396989         adj[x].append(y)
+%o A396989         adj[y].append(x)
+%o A396989         deg[x] -= 1
+%o A396989         deg[y] -= 1
+%o A396989         if deg[x] == 1:
+%o A396989             insort(leaves, x)
+%o A396989     if n >= 2:
+%o A396989         x, y = leaves
+%o A396989         adj[x].append(y)
+%o A396989         adj[y].append(x)
+%o A396989     return adj
+%o A396989 def farthest(adj, s):
+%o A396989     q = deque([s])
+%o A396989     dist = [-1] * len(adj)
+%o A396989     dist[s] = 0
+%o A396989     while q:
+%o A396989         v = q.popleft()
+%o A396989         for w in adj[v]:
+%o A396989             if dist[w] < 0:
+%o A396989                 dist[w] = dist[v] + 1
+%o A396989                 q.append(w)
+%o A396989     v = max(range(len(adj)), key=lambda i: dist[i])
+%o A396989     return v, dist[v]
+%o A396989 def diameter(adj):
+%o A396989     v, _ = farthest(adj, 0)
+%o A396989     _, d = farthest(adj, v)
+%o A396989     return d
+%o A396989 def A(n):
+%o A396989     ans = 0
+%o A396989     for code in product(range(n), repeat=n-2):
+%o A396989         adj = tree_from_prufer(n, code)
+%o A396989         leaves = sum(1 for v in range(n) if len(adj[v]) == 1)
+%o A396989         if leaves == diameter(adj):
+%o A396989             ans += 1
+%o A396989     return ans
+%o A396989 print([A(n) for n in range(2, 9)])
+%Y A396989 Cf. A000272, A055314, A001852, A000554, A000555.
+%K A396989 nonn,new
+%O A396989 2,2
+%A A396989 _Shreyhaan Sarkar_, Jun 12 2026

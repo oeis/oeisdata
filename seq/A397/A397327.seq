@@ -1,0 +1,75 @@
+%I A397327 #21 Jun 25 2026 15:05:46
+%S A397327 1,1,1,1,4,4,1,5,2,1,27,27,9,1,37,21,3,12,3,1,256,256,96,16,1,369,244,
+%T A397327 54,4,151,60,6,22,4,1,3125,3125,1250,250,25,1,4651,3355,910,110,5,
+%U A397327 2190,1085,180,10,425,130,10,35,5,1,46656,46656,19440,4320,540,36,1
+%N A397327 Irregular triangle read by rows: the coefficients of the tree polynomials P(n, k, x) = (1/k!) * Delta^{x, k} (n + x)^n.
+%C A397327 These polynomials are referred to as 'tree polynomials', with their coefficients forming the 'Lambert-Abel-Newton triangle'. The term 'tree polynomials' arises because, for x = 1 and k = 0, they yield (n + 1)^n, corresponding to the sequence A000169. This connection to Lambert is established by the tree-function T(z) = -W(-z), which provides the analytical foundation for this family. The association with Abel is due to their polynomial shift structure, specifically (n + x)^n, while the link to Newton is based on the natural representation of these polynomials in terms of normalized forward differences.
+%C A397327 The polynomials evaluated at x = -1, 0, 1/2, 1 are A397331, A397048, A397329 (normalized), and A397333, respectively.
+%H A397327 Peter Luschny, <a href="/A397327/a397327.txt">Mathematica implementation using Riordan array</a>.
+%F A397327 P(n, k, x) = (1/k!) * Sum_{j=0..k}((-1)^(k - j) * binomial(k, j) * (n + x + j)^n).
+%F A397327 P(n, k, x) = P(n - 1, k - 1, x) + (x + n + 2 * k) * P(n - 1, k, x) + (x + n + k) * (k + 1) * P(n - 1, k + 1, x) and P(n, n) = 1; if k < 0 or k > n then P(n, k, x) = 0.
+%F A397327 Using an exponential Riordan array R(g, f)_{n, k} = (n! / k!) * [z^n](g(z), f(z)^k) with g(z) = exp(alpha*t(z))/(1 - t(z)), f(z) = exp(t(z)) - 1, where t(z) = -W(-z) and W is Lambert's function, and alpha is a fixed parameter.
+%e A397327 The sequence is divided into subtriangles, the first of which are:
+%e A397327 .
+%e A397327   ~    1;                         : 1
+%e A397327   ~    1,    1;                   : 2
+%e A397327        1;                         : 1
+%e A397327   ~    4,    4,    1;             : 9
+%e A397327        5,    2;                   : 7
+%e A397327        1;                         : 1
+%e A397327   ~   27,   27,    9,   1;        : 64
+%e A397327       37,   21,    3;             : 61
+%e A397327       12,    3;                   : 15
+%e A397327        1;                         : 1
+%e A397327   ~  256,  256,   96,  16,  1;    : 625
+%e A397327      369,  244,   54,   4;        : 671
+%e A397327      151,   60,    6;             : 217
+%e A397327       22,    4;                   : 26
+%e A397327        1;                         : 1
+%e A397327   ~ 3125, 3125, 1250, 250, 25, 1; : 7776
+%e A397327     4651, 3355,  910, 110,  5;    : 9031
+%e A397327     2190, 1085,  180,  10;        : 3465
+%e A397327      425,  130,   10;             : 565
+%e A397327       35,    5;                   : 40
+%e A397327        1;                         : 1
+%e A397327 .
+%e A397327 The upper-left corners of the triangles: A000312.
+%e A397327 The first columns of the triangles: A397048.
+%e A397327 The first rows of the triangles: A071207.
+%e A397327 The main antidiagonals of the triangles: A007318 (Pascal).
+%e A397327 The row sums: A397333.
+%e A397327 .
+%e A397327 The triangle of the polynomials starts:
+%e A397327   0:  1;
+%e A397327   1:  1 + x    , 1;
+%e A397327   2: (2 + x)^2 , 5 + 2*x                      , 1;
+%e A397327   3: (3 + x)^3 , 37 + 21*x + 3*x^2            , 3*(4 + x)          , 1;
+%e A397327   4: (4 + x)^4 , 369 + 244*x + 54*x^2 + 4*x^3 , 151 + 60*x + 6*x^2 , 22 + 4*x, 1;
+%e A397327 .
+%e A397327 See the Mathematica function that computes the polynomials directly via forward differences.
+%p A397327 P := proc(n, k, x) if n = k then return 1 fi; if k < 0 or k > n then return 0 fi;
+%p A397327     P(n-1, k-1, x) + (x + n + 2*k) * P(n-1, k, x) + (x + n + k) * (k + 1) * P(n-1, k+1, x) end:
+%p A397327 for n from 0 to 6 do for k from 0 to n do x := 'x';
+%p A397327     lprint([n, k], seq(coeff(expand(P(n, k, x)), x, j), j = 0..n-k)) od od;
+%t A397327 P[n_, k_, x_] := DifferenceDelta[(n + x)^n, {x, k}] / k!;
+%t A397327 For[r = 0, r < 6, r++, Print[
+%t A397327     CoefficientList[#, x] & /@ Table[P[r, k, x], {k, 0, r}]
+%t A397327 // Flatten ]]
+%t A397327 (* Alternative: see Links for a commented implementation with the Riordan array operator. *)
+%o A397327 (SageMath)
+%o A397327 R.<y> = PolynomialRing(QQ)
+%o A397327 S.<x> = PolynomialRing(R)
+%o A397327 def C_row(n):
+%o A397327     f = (n + x + y)^n
+%o A397327     row = []
+%o A397327     for k in range(n + 1):
+%o A397327         q = R(f(x=0))
+%o A397327         row.append(q.coefficients(sparse=False))
+%o A397327         if k < n: f = (f(x=x+1) - f)/(k + 1)
+%o A397327     return flatten(row)
+%o A397327 for n in range(7): print(C_row(n))
+%Y A397327 Cf. A000312, A007318, A071207, A397048, A000169.
+%Y A397327 Cf. A397331 (x=-1), A397048 (x=0), A397329 (x=1/2), A397333 (x=1).
+%K A397327 nonn,tabf,new
+%O A397327 0,5
+%A A397327 _Peter Luschny_, Jun 22 2026
