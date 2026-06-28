@@ -1,0 +1,64 @@
+%I A397262 #9 Jun 27 2026 18:17:47
+%S A397262 1,3,11,15,139,143,171,175,255,32907,32911,32939,32943,33023,34955,
+%T A397262 34959,34987,34991,35071,36015,41135,43691,43695,43775,65535,
+%U A397262 2147516555,2147516559,2147516587,2147516591,2147516671,2147518603,2147518607,2147518635,2147518639,2147518719,2147519663
+%N A397262 Table whose n-th row lists the A000112(n) inequivalent unlabeled acyclic transitive digraphs or unlabeled n-posets, as smallest representative of the corresponding topology.
+%C A397262 As in A101620, each topology (here, the set of upper ideals of the partial order) is encoded as bitmap where the nonzero bits correspond to the open subsets, i.e., the elements of the topology. [Bits 0 through 2^n-1 correspond in the obvious way to each of the possible subsets of n.]
+%C A397262 Since any topology always contains the empty set {} and the full set n = {0, 1, ..., n-1}, corresponding to bits 0 and 2^n-1, all numbers in row n have at least these two bits set. However, non-separable topologies, like {{}, {0,1}} which would be coded as 9 = 2^0 + 2^3, are listed in A101620, but not in A397255 nor in this table. (They correspond to preorders that are not antisymmetric.)
+%C A397262 In contrast to A397255, we list here only one representative for equivalent digraphs, namely the one with the smallest bitmap (corresponding to the lexicographically earliest adjacency matrix). While 13 = 2^0 + 2^2 + 2^3 ~ {{}, {1}, {0,1}} is listed in row 3 of A397255, it is omitted here since the graph is equivalent to that of 11 = 2^0 + 2^1 + 2^3 ~ {{}, {0}, {0,1}}.
+%F A397262 T(n,1) = Sum_{k=0..n} 2^(2^k-1); T(n, A000112(n)) = 2^2^n - 1.
+%e A397262 The first few rows are as follows:
+%e A397262   n  | topologies represented as bitmask of the included subsets
+%e A397262 -----+--------------------------------------------------------------------
+%e A397262   0  | 1.       - Here, 1 = 2^0 represents tau = {{}}.
+%e A397262   1  | 3.       - Here, 3 = 2^0 + 2^1 represents tau = {{}, {0}}.
+%e A397262   2  | 11, 15.  - Here 11 = 2^0 + 2^1 + 2^3 ~ tau = {{}, {0}, {0,1}}.
+%e A397262   3  | 139, 143, 171, 175, 255. (Where 139 ~ {{}, {0}, {0,1}, {0,1,2}}.)
+%e A397262   4  | 32907, 32911, 32939, 32943, 33023, 34955, 34959, 34987,
+%e A397262      |    34991, 35071, 36015, 41135, 43691, 43695, 43775, 65535.
+%e A397262   5  | 2147516555, 2147516559, 2147516587, 2147516591, ..., 4294967295.
+%e A397262  ... | ...
+%e A397262 Each row has A000112(n) elements, starting with Sum_{k=0..n} 2^(2^k-1) and ending with 2^2^n-1.
+%o A397262 (Python)
+%o A397262 import functools, itertools, networkx as nx
+%o A397262 @functools.cache
+%o A397262 def bits(r: int) -> tuple[int]:# return tuple of indices of nonzero bits
+%o A397262     bit_list = []
+%o A397262     while r: bit_list.append((r & -r).bit_length() - 1); r &= r - 1
+%o A397262     return tuple(bit_list)
+%o A397262 @functools.cache # return list of adjacency matrices (tuples of bitmaps of rows)
+%o A397262 def unlabeled_posets(n: int) -> list[tuple[int]]:
+%o A397262     if n < 2: return [(1,)if n else()]
+%o A397262     matrices = []; N = n-1; bit_N = 1<<N; graphs_by_hash = {}
+%o A397262     for P in unlabeled_posets(N):
+%o A397262         preds = [0] * N
+%o A397262         for i,row in enumerate(P):
+%o A397262             for j in bits(row): preds[j] |= 1 << i
+%o A397262         for A in itertools.product((0, 1, 2), repeat=N):
+%o A397262             D_mask = sum([1 << i for i,a in enumerate(A) if a==1])
+%o A397262             U_mask = sum([1 << i for i,a in enumerate(A) if a==2])
+%o A397262             if any(a==1 and (p & ~D_mask or U_mask & ~r) or
+%o A397262                    a==2 and r & ~U_mask for a,r,p in zip(A,P,preds)): continue
+%o A397262             P_new = [r|bit_N if a == 1 else r for a,r in zip(A,P)]
+%o A397262             P_new.append(U_mask | bit_N); matrices.append(tuple(P_new))
+%o A397262     for M in matrices: # now: isomorphism pruning
+%o A397262         G = nx.DiGraph((i,j) for i,row in enumerate(M) for j in bits(row))
+%o A397262         if (g_hash := nx.weisfeiler_lehman_graph_hash(G)) in graphs_by_hash:
+%o A397262            try: # if there's an isomorphic graph, retain the "smaller" M
+%o A397262               i,Mc = next((i,Mc) for i,(Gc,Mc) in enumerate(graphs_by_hash[g_hash])
+%o A397262                           if nx.is_isomorphic(G, Gc)) # none => StopIteration
+%o A397262               if M < Mc: graphs_by_hash[g_hash][i] = (G,M)
+%o A397262            except StopIteration: graphs_by_hash[g_hash].append((G,M))
+%o A397262         else: graphs_by_hash[g_hash] = [(G,M)] # new hash => not equivalent
+%o A397262     return [M for group in graphs_by_hash.values() for G,M in group]
+%o A397262 def topology(R):
+%o A397262     n = len(R); T = 1; O_list = [0] * 2**n
+%o A397262     for i in range(n):
+%o A397262         for s in range(bit := 1 << i):
+%o A397262             O_list[s | bit] = O_list[s] | R[i]; T |= 1 << O_list[s | bit]
+%o A397262     return T
+%o A397262 A397262_row=lambda n: sorted(topology(R) for R in unlabeled_posets(n)) # _M. F. Hasler_, Jun 20 2026
+%Y A397262 Cf. A000112 (row lengths), A397255 (similar for labeled posets), A001035 (# n-posets), A101620 (similar for preorders), A000798 (# preorders on n).
+%K A397262 nonn,tabf,new
+%O A397262 0,2
+%A A397262 _M. F. Hasler_, Jun 20 2026
