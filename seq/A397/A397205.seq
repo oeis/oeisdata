@@ -1,0 +1,54 @@
+%I A397205 #13 Jun 29 2026 00:55:53
+%S A397205 1,2,4,6,9,12,16,20,25,28,35,40,48,50,55,60,72,78,91,98,105,105,120,
+%T A397205 128,144,144,153,162,180,190,210,220,231,231,242
+%N A397205 Maximum value of |S|*|T| over subsets S,T of {1,...,n} such that the products s*t are pairwise distinct with s in S and t in T.
+%C A397205 Here S and T range over subsets of [n] = {1,...,n}. The condition is that the map S X T -> positive integers, (s,t) -> s*t, is injective.
+%C A397205 This sequence is related to Erdos Problems #490.
+%C A397205 At most 1 element of {1,...n} can be in both S and T. This implies that |S|+|T|<=n+1 and thus the simple upper bound a(n) <= floor((n+1)^2/4) = A002620(n+1). Szemeredi (1976) proved the optimal asymptotic upper bound: a(n) < C*n^2/log(n). - _Chai Wah Wu_, Jun 28 2026
+%H A397205 T. F. Bloom, <a href="https://www.erdosproblems.com/490">Erdos Problems #490</a>.
+%H A397205 P. Erdos and A. Szemeredi, <a href="https://doi.org/10.1017/S144678870001925X">On multiplicative representations of integers</a>, Journal of the Australian Mathematical Society, 21 (1976), 418-427.
+%H A397205 E. Szemerédi, <a href="https://doi.org/10.1016/0022-314X(76)90003-2">On a problem of P. Erdös</a>, Journal of Number Theory, 8 (1976), no. 3, pp. 264-270.
+%H A397205 Kenta Kitamura, <a href="https://github.com/KitaKen1/product-distinct-pairs-erdos490">Exact value table and verification code for this sequence</a>.
+%H A397205 Kenta Kitamura, <a href="https://kitaken1.github.io/product-distinct-pairs-erdos490/">Visual dashboard for the displayed witnesses</a>.
+%e A397205 a(6) = 12. For example, take S = {1,2,3,4} and T = {1,5,6}. The products are 1, 2, 3, 4, 5, 6, 10, 12, 15, 18, 20, 24, all distinct. Thus this pair gives |S|*|T| = 4*3 = 12; the upper-bound search shows that no larger value is possible for n = 6.
+%o A397205 (Python)
+%o A397205 from itertools import combinations
+%o A397205 def product_distinct(A, B):
+%o A397205     products = [a*b for a in A for b in B]
+%o A397205     return len(products) == len(set(products))
+%o A397205 def a(n):
+%o A397205     S = range(1, n+1)
+%o A397205     subsets = [c for r in range(n+1) for c in combinations(S, r)]
+%o A397205     best = 0
+%o A397205     for A in subsets:
+%o A397205         for B in subsets:
+%o A397205             value = len(A)*len(B)
+%o A397205             if value > best and product_distinct(A, B):
+%o A397205                 best = value
+%o A397205     return best
+%o A397205 (Python)
+%o A397205 from itertools import combinations
+%o A397205 def A397205(n):
+%o A397205     if n == 1: return 1
+%o A397205     c, M = 0, set(range(1,n+1))
+%o A397205     for l in range(1,(n>>1)+2):
+%o A397205         for Sset in combinations(M,l):
+%o A397205             for m in range(max(l-1,c//l),n-l+1):
+%o A397205                 K = M-set(Sset)
+%o A397205                 for T in combinations(K,m):
+%o A397205                     ST = set([s*t for s in Sset for t in T])
+%o A397205                     if len(ST) == l*m:
+%o A397205                         c = max(c,l*m)
+%o A397205                         for s in Sset:
+%o A397205                             if all(s*u not in ST for u in Sset):
+%o A397205                                 if c<l*(m+1):
+%o A397205                                     c=l*(m+1)
+%o A397205                                     break
+%o A397205                         else:
+%o A397205                             continue
+%o A397205                         break
+%o A397205     return c # _Chai Wah Wu_, Jun 28 2026
+%Y A397205 A002620.
+%K A397205 nonn,hard,more,new
+%O A397205 1,2
+%A A397205 _Kenta Kitamura_, Jun 18 2026

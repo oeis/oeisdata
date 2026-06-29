@@ -1,0 +1,45 @@
+%I A397379 #11 Jun 28 2026 22:53:28
+%S A397379 1,1,2,3,6,9,17,29,51,87,151,258,446,769,1328,2294,3965,6847,11822,
+%T A397379 20398,35183,60670,104613,180377,311026,536329,924879,1594959,2750535,
+%U A397379 4743294,8179643,14105161,24322672,41940663,72318904,124699002,215016188,370748449
+%N A397379 Number of compositions (c_1,...,c_k) of n such that gcd(c_i,i)=1 for all i.
+%C A397379 The empty composition is counted for n = 0. For n > 0, a(n) counts all compositions of n in which the i-th part is relatively prime to i. Thus the first part is unrestricted, the second part must be odd, the third part must not be divisible by 3, and so on.
+%F A397379 a(n) = Sum_{k=0..n} T(n,k) where T(n,k) = Sum_{1<=m<=n, gcd(m,k) = 1} T(n-m,k-1) with T(0,0) = 1.
+%F A397379 G.f.: 1 + Sum_{k>=1} Product_{i=1..k} F_i(x), where F_i(x) = Sum_{m>=1, gcd(m,i)=1} x^m = Sum_{1<=r<=i, gcd(r,i)=1} x^r / (1-x^i) = Sum_{d|i} mu(d) * x^d / (1-x^d).
+%e A397379 a(4) = 6, the valid compositions are (4), (3,1), (1,3), (2,1,1), (1,1,2), and (1,1,1,1).
+%p A397379 T := proc(n,k) option remember; local m,s;
+%p A397379 if n = 0 and k = 0 then return 1; end if;
+%p A397379 if n < 0 or k < 0 or n < k or k = 0 then return 0; end if;
+%p A397379 s := 0;
+%p A397379 for m from 1 to n do
+%p A397379 if igcd(m,k) = 1 then s := s + T(n-m,k-1); end if;
+%p A397379 end do;
+%p A397379 return s;
+%p A397379 end proc:
+%p A397379 a := n -> add(T(n,k), k=0..n):
+%p A397379 seq(a(n), n=0..40);
+%t A397379 Clear[T, a]
+%t A397379 T[0, 0] = 1;
+%t A397379 T[n_Integer, k_Integer] /; n < 0 || k < 0 || n < k := 0;
+%t A397379 T[n_Integer?Positive, 0] := 0;
+%t A397379 T[n_Integer?NonNegative, k_Integer?Positive] /; n >= k :=
+%t A397379 T[n, k] = Sum[If[CoprimeQ[m, k], T[n - m, k - 1], 0], {m, 1, n}];
+%t A397379 a[n_Integer?NonNegative] := Sum[T[n, k], {k, 0, n}];
+%t A397379 Table[a[n], {n, 0, 40}]
+%o A397379 (Python)
+%o A397379 from functools import cache
+%o A397379 from math import gcd
+%o A397379 @cache
+%o A397379 def T(n, k):
+%o A397379     if n == 0 and k == 0:
+%o A397379         return 1
+%o A397379     if n < 0 or k < 0 or n < k or k == 0:
+%o A397379         return 0
+%o A397379     return sum(T(n-m, k-1) for m in range(1, n+1) if gcd(m, k) == 1)
+%o A397379 def a(n):
+%o A397379     return sum(T(n, k) for k in range(n+1))
+%o A397379 print([a(n) for n in range(41)])
+%Y A397379 Cf. A000740.
+%K A397379 nonn,new
+%O A397379 0,3
+%A A397379 _Keanu L. Dean_, Jun 23 2026

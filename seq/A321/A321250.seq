@@ -1,14 +1,44 @@
-%I A321250 #28 Feb 16 2025 08:33:57
-%S A321250 1,2,6,42,220,3644,62272,1794762,83280570,6210321492
+%I A321250 #40 Jun 28 2026 09:52:55
+%S A321250 1,2,6,42,220,3644,62272,1794762,83280570,6210321492,682849731586
 %N A321250 Number of maximal independent vertex sets in the n X n torus grid graph.
 %H A321250 Eric Weisstein's World of Mathematics, <a href="https://mathworld.wolfram.com/MaximalIndependentVertexSet.html">Maximal Independent Vertex Set</a>.
 %H A321250 Eric Weisstein's World of Mathematics, <a href="https://mathworld.wolfram.com/TorusGridGraph.html">Torus Grid Graph</a>.
 %t A321250 Table[Length@FindIndependentVertexSet[GraphProduct[CycleGraph[n], CycleGraph[n], "Cartesian"], Infinity, All], {n, 3, 8}] (* _Eric W. Weisstein_, Jan 26 2024 *)
 %o A321250 (Python)
 %o A321250 from networkx import find_cliques, complement, cartesian_product, cycle_graph
-%o A321250 def A321250(n): return sum(1 for c in find_cliques(complement(cartesian_product(cycle_graph(n),cycle_graph(n))))) # _Chai Wah Wu_, Jan 11 2024
+%o A321250 def A321250(n): return sum(1 for c in find_cliques(complement(cartesian_product(cycle_graph(n), cycle_graph(n))))) # _Chai Wah Wu_, Jan 11 2024
+%o A321250 (Python)
+%o A321250 # Transfer matrix on the torus C_n X C_n
+%o A321250 # State = ordered pair of adjacent, disjoint column patterns; a(n) = trace(T^n).
+%o A321250 import numpy as np, scipy.sparse as sp
+%o A321250 def A321250(n):
+%o A321250     if n < 3:
+%o A321250         return [1, 1, 2][n]
+%o A321250     full = (1 << n) - 1
+%o A321250     up   = lambda x: ((x << 1) | (x >> (n - 1))) & full   # vertical neighbor up (cyclic)
+%o A321250     down = lambda x: ((x >> 1) | (x << (n - 1))) & full   # vertical neighbor down (cyclic)
+%o A321250     columns  = [x for x in range(full + 1) if x & up(x) == 0]        # vertically-independent columns
+%o A321250     self_dom = {x: (up(x) | down(x)) & ~x & full for x in columns}   # rows a column dominates itself
+%o A321250     states   = [(a, b) for a in columns for b in columns if a & b == 0]
+%o A321250     index    = {s: i for i, s in enumerate(states)}
+%o A321250     src, dst = [], []
+%o A321250     for (left, mid) in states:
+%o A321250         need_right = full & ~mid & ~(self_dom[mid] | left)          # unchosen rows of mid still undominated
+%o A321250         for right in columns:
+%o A321250             if mid & right == 0 and need_right & ~right == 0:       # disjoint; right finishes domination
+%o A321250                 src.append(index[(left, mid)]); dst.append(index[(mid, right)])
+%o A321250     N = len(states)
+%o A321250     T = sp.csr_matrix((np.ones(len(src), np.int64), (src, dst)), shape=(N, N))
+%o A321250     power, base, k = sp.identity(N, np.int64, format='csr'), T, n
+%o A321250     while k:
+%o A321250         if k & 1: power = power @ base
+%o A321250         k >>= 1
+%o A321250         if k: base = base @ base
+%o A321250     return int(power.diagonal().sum()) # a(n) = trace(T^n)
+%o A321250   # _Jash Doshi_, Jun 23 2026
 %Y A321250 Cf. A027683.
-%K A321250 nonn,more
+%K A321250 nonn,more,changed
 %O A321250 1,2
 %A A321250 _Eric W. Weisstein_, Nov 01 2018
 %E A321250 a(1), a(2), and a(10) from _Andrew Howroyd_, Nov 01 2018
+%E A321250 a(11) from _Jash Doshi_, Jun 23 2026

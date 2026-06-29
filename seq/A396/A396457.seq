@@ -1,0 +1,40 @@
+%I A396457 #33 Jun 28 2026 18:01:28
+%S A396457 1,2,1,5,6,1,10,25,8,1,20,90,50,14,1,38,300,280,145,22,1,71,954,1475,
+%T A396457 1330,365,36,1,130,2939,7472,11420,5390,970,58,1,235,8850,36836,94066,
+%U A396457 74660,23220,2525,94,1,420,26195,178000,752979,993058,520995,97730,6625,152,1
+%N A396457 Triangle T(n, k) of convolved numbers of k-sections of the Fibonacci sequence at the first convolution order, for n >= 1 and 1 <= k <= n, read by rows.
+%C A396457 This triangle forms an inter-sectional cross-slice of the family of matrices of convolved k-sections of the Fibonacci sequence. The row index n represents the element position, while the column index k represents the Fibonacci section parameter.
+%C A396457 The table is constructed by gathering the terms where the convolution order is fixed at s = 1. The columns of this triangle aggregate properties across different k-sections studied in our previous records. The first column (k=1) represents the standard convolutions of the base Fibonacci sequence (A001629). The second column (k=2) represents the convolution of A001906(n) for n >= 1 (even-indexed Fibonacci numbers) with itself (A001871). The third column (k=3) corresponds directly to A395431.
+%H A396457 D. Dmytryshyn, D. Gray, V. Khamitov, and Alex Stokolos, <a href="https://arxiv.org/abs/2603.08636">Convolved numbers of k-section of the Fibonacci sequence: properties, consequences</a>, arXiv:2603.08636 [math.CA], 2026; see also <a href="https://doi.org/10.15276/hait.09.2026.09">alternate link</a>, Herald of Advanced Information Technology, 9, pp. 129-139 (2026).
+%F A396457 T(n, k) = A(n-k+1, k, 1) for n >= 1 and 1 <= k <= n, where for odd k: A(n, k, s) = (-i)^(n-1) * GegenbauerC(n-1, 1+s, i * L(k) / 2), for even k: A(n, k, s) = GegenbauerC(n-1, 1+s, L(k) / 2), where i is the imaginary unit, s=1 and L(k) is the k-th Lucas number.
+%F A396457 T(n, k) = A(n-k+1, k, 1) for n >= 1 and 1 <= k <= n, where A(n, k, s) is defined as follows:
+%F A396457 A(n, k, 1) = Sum_{j=0..floor((n-1)/2)} (-1)^(j*(k-1)) * (n-j) * binomial(n-1-j, j) * A000032(k)^(n-1-2j), or
+%F A396457 A(n, k, 1) = A000032(k) * n/(n-1) * A(n-1, k, 1) + (-1)^(k+1) * (n+1)/(n-1) * A(n-2, k, 1) for n >= 3, with A(1, k, 1) = 1 and A(2, k, 1) = 2*A000032(k).
+%e A396457 The triangle starts:
+%e A396457        k=1   k=2   k=3   k=4   k=5   k=6
+%e A396457   n=1:  1;
+%e A396457   n=2:  2,    1;
+%e A396457   n=3:  5,    6,    1;
+%e A396457   n=4: 10,   25,    8,    1;
+%e A396457   n=5: 20,   90,   50,   14,    1;
+%e A396457   n=6: 38,  300,  280,  145,   22,    1;
+%e A396457 T(4, 2) = A(3, 2, 1) = GegenbauerC(2, 2, L_2/2) = GegenbauerC(2, 2, 3/2) = 25.
+%e A396457 We can also compute this term in two ways using A000032(2) = 3:
+%e A396457 1) Using the explicit sum (with n=3, k=2):
+%e A396457 j=0: (-1)^(0*(2-1)) * (3-0) * binomial(3-1-0, 0) * 3^(3-1-2*0) = 1 * 3 * 1 * 9 = 27,
+%e A396457 j=1: (-1)^(1*(2-1)) * (3-1) * binomial(3-1-1, 1) * 3^(3-1-2*1) = -1 * 2 * 1 * 1 = -2.
+%e A396457 Total: 27 + (-2) = 25.
+%e A396457 2) Using the non-stationary recurrence (with n=3, k=2):
+%e A396457 x_0 = 0, x_1 = 1, x_2 = 3 * 2/(2-1) * x_1 - (2+1)/(2-1) * x_0 = 6 - 0 = 6, x_3 = 3 * 3/(3-1) * x_2 - (3+1)/(3-1) * x_1 = 3 * (3/2) * 6 - 2 * 1 = 27 - 2 = 25.
+%p A396457 A_sum := proc(n, k) local Lk, j; Lk := round((1/2 + 1/2*sqrt(5))^k + (1/2 - 1/2*sqrt(5))^k); sum((-1)^(j*(k - 1))*(n - j)*binomial(n - 1 - j, j)*Lk^(n - 1 - 2*j), j = 0 .. floor(1/2*n - 1/2)); end proc;
+%p A396457 for n to 10 do
+%p A396457 seq(A_sum(n - k + 1, k), k = 1 .. n);
+%p A396457 end do;
+%p A396457 A_rec := proc(n, k) local Lk, x, j; if n = 1 then return 1; end if; Lk := round((1/2 + 1/2*sqrt(5))^k + (1/2 - 1/2*sqrt(5))^k); if n = 2 then return 2*Lk; end if; x := array(1 .. n); x[1] := 1; x[2] := 2*Lk; for j from 3 to n do x[j] := j*Lk*x[j - 1]/(j - 1) + (-1)^(k + 1)*(j + 1)*x[j - 2]/(j - 1); end do; return x[n]; end proc;
+%p A396457 for n to 10 do
+%p A396457     seq(A_rec(n - k + 1, k), k = 1 .. n);
+%p A396457 end do;
+%Y A396457 Cf. A001629, A001871, A395431, A395902, A393329, A396358.
+%K A396457 nonn,tabl,new
+%O A396457 1,2
+%A A396457 _Alex Stokolos_, May 26 2026
