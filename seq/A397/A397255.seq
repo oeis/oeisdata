@@ -1,0 +1,47 @@
+%I A397255 #17 Jul 02 2026 00:50:23
+%S A397255 1,3,11,13,15,139,141,143,163,171,175,177,179,187,197,205,207,209,213,
+%T A397255 221,241,243,245,255,32907,32909,32911,32931,32939,32943,32945,32947,
+%U A397255 32955,32965,32973,32975,32977,32981,32989,33009,33011,33013,33023,34827,34829,34831,34955,34957
+%N A397255 Table whose n-th row lists the A001035(n) partial orders, or T_0 topologies, on a set of n elements.
+%C A397255 As in A101620, each topology (here, the set of upper ideals of the partial order) is encoded as bitmask where the nonzero bits correspond to the open subsets, elements of the topology. [Bits 0 through 2^n-1 correspond in the obvious way to each of the possible subsets of n.]
+%C A397255 Since any topology always contains the empty set {} and the full set n = [0, 1, ..., n-1}, corresponding to bits 0 and 2^n-1, all numbers in row n have at least these two bits set. However, non-separable topologies like {{}, {0,1}} corresponding to 9 = 2^0 + 2^3, which are listed in A101620, are not listed in this table. (They correspond to preorders that are not antisymmetric.)
+%e A397255 The first few rows are as follows:
+%e A397255   n  | row n: T0 topologies of n, represented as bitmask of the included subsets
+%e A397255 -----+--------------------------------------------------------------------------
+%e A397255   0  | 1.          - Here, 1 = 2^0 represents tau = {{}}.
+%e A397255   1  | 3.          - Here, 3 = 2^0 + 2^1 represents tau = {{}, {0}}.
+%e A397255   2  | 11, 13, 15. - Here 11 = 2^0 + 2^1 + 2^3 ~> tau = {{}, {0}, {0,1}}.
+%e A397255   3  | 139, 141, 143, 163, 171, 175, 177, 179, 187, 197,
+%e A397255      |      205, 207, 209, 213, 221, 241, 243, 245, 255.
+%e A397255   4  | 32907, 32909, ..., 65535; where 32907 = 2^0 + 2^1 + 2^3 + 2^7 + 2^15.
+%e A397255  ... | ...
+%o A397255 (Python)
+%o A397255 import functools, itertools
+%o A397255 @functools.cache
+%o A397255 def posets(n):
+%o A397255     if n < 2: return[(1,) if n else ()]
+%o A397255     POSETS = []; N = n-1; bit_N = 1<<N
+%o A397255     for P in posets(N):
+%o A397255         preds = [0] * N
+%o A397255         for i in range(N):
+%o A397255             for j in range(N):
+%o A397255                 if (P[i] >> j) & 1: preds[j] |= 1 << i
+%o A397255         for A in itertools.product((0, 1, 2), repeat=N):
+%o A397255             D_mask = sum(1 << i for i,a in enumerate(A) if a == 1)
+%o A397255             U_mask = sum(1 << i for i,a in enumerate(A) if a == 2)
+%o A397255             if any(a == 1 and (p & ~D_mask or U_mask & ~r) or
+%o A397255                    a == 2 and r & ~U_mask for a,p,r in zip(A,preds,P)): continue
+%o A397255             P_new = [r|bit_N if a==1 else r for a,r in zip(A,P)]
+%o A397255             P_new.append(bit_N | U_mask); POSETS.append(tuple(P_new))
+%o A397255     return POSETS
+%o A397255 def topology(R):
+%o A397255     T = 1; n = len(R); OL = [0] * 2**n
+%o A397255     for i in range(n):
+%o A397255         for s in range(bit := 1 << i):
+%o A397255             OL[s | bit] = OL[s] | R[i]; T |= 1 << OL[s | bit]
+%o A397255     return T
+%o A397255 A397255_row=lambda n: sorted(topology(R) for R in posets(n)) # _M. F. Hasler_, Jun 19 2026
+%Y A397255 Cf. A001035 (row lengths), A101620 (similar for preorders), A000798.
+%K A397255 nonn,tabf,new
+%O A397255 0,2
+%A A397255 _M. F. Hasler_, Jun 19 2026

@@ -1,0 +1,49 @@
+%I A396966 #16 Jul 01 2026 18:25:54
+%S A396966 0,0,0,0,1,3,8,19,42,91,194,409,855,1776,3671,7556,15503,31728,64792,
+%T A396966 132078,268851,546573,1109966,2251983,4565217,9247805,18721167,
+%U A396966 37876608,76591006,154800875,312734168,631538769,1274854556,2572583127,5189642813,10465841373
+%N A396966 a(n) is the number of obstruction residues modulo 2^n for the Collatz-type 3n-1 map T(x) = (3x-1)/2^A007814(3x-1).
+%C A396966 Iterating the maps 3x-1 and 3x-3 backwards (predecessors), most odd residues mod 2^n occur as common predecessors of both maps. For a structured exceptional set, however, this is never the case (at mod 64, for instance, it consists of 19, 27, 59).
+%C A396966 The linked manuscript calls these excluded classes "obstruction residues" (they block the otherwise complete joint reachability) and defines them by the precise algebraic criterion below. a(n) is the number of these classes mod 2^n.
+%C A396966 The criterion tests each odd r > 1 by a small parallel computation.
+%C A396966 First one forms a partner number m for r: take r-1 and halve it until an odd number remains. The number of these halvings is v = A007814(r-1) (the 2-adic valuation of r-1), and the result is m = (r-1)/2^v.
+%C A396966 Now one runs r and m together, step by step, through the same map: multiply by 3, subtract 1, and then cancel all factors of 2 -- exactly the 3x-1 reduction. Both tracks are considered modulo a power of 2: the r-track modulo 2^n, the m-track modulo 2^(n-v). Here n is the level of the residue class (the modulus exponent, the same n as in a(n)). It must satisfy n > v so that 2^(n-v) remains a proper modulus.
+%C A396966 At each step one records a simple linear relation between the two tracks: the m-side is always c*(r-side) + d, with two rational numbers c and d. How many factors of 2 drop out on each side determines how c and d are adjusted for the next step.
+%C A396966 As soon as one of the two tracks has used up its modulus, the computation ends -- after at most n steps. r is an obstruction residue exactly when the final values give 3*d + c = 1. The complete computation can be inspected in the program below.
+%C A396966 By the conjugation theorem of the manuscript, the same counts a(n) arise for every map (3x+b)/2^A007814(3x+b) with b odd; in particular, the classical 3x+1 map, not only the defining 3x-1.
+%C A396966 a(n)/2^n is strictly increasing; lim_{n->oo} a(n)/2^n = c_W exists. The lower bound c_W >= 7556/65536 = 0.11553955... is proved (from a(16) = 7556); the exact value of c_W is an open problem.
+%H A396966 Jakob Stemberger, <a href="https://doi.org/10.5281/zenodo.20356496">Obstruction residues for the 3n-1 map: full factor complexity, positive density, and a constructive lift</a>, Zenodo.
+%H A396966 Jakob Stemberger, <a href="https://github.com/yaccob/collatz/tree/main/manuscripts/obstruction_residues/code">Enumeration code (Python and Rust)</a>.
+%e A396966 a(5) = 1: O_5 = {27}.
+%e A396966 a(6) = 3: O_6 = {19, 27, 59} (the new atom 19 and the two lifts 27, 59 of 27 in O_5).
+%e A396966 a(7) = 8: O_7 = {19, 27, 59, 79, 83, 91, 99, 123}.
+%o A396966 (Python)
+%o A396966 from fractions import Fraction
+%o A396966 def v2(n):
+%o A396966     n=abs(n); k=0
+%o A396966     while n and n%2==0: n//=2; k+=1
+%o A396966     return k
+%o A396966 def is_obstruction(r,L):
+%o A396966     if r%2==0: return False
+%o A396966     v=v2(r-1)
+%o A396966     if v<=0 or v>=L: return False
+%o A396966     aK,bK=r,1<<L
+%o A396966     aI,bI=(r-1)>>v,1<<(L-v)
+%o A396966     c=Fraction(1,1<<v); d=Fraction(-1,1<<v)
+%o A396966     while True:
+%o A396966         AK=3*aK-1; vK=v2(AK); vbK=v2(bK)
+%o A396966         AI=3*aI-1; vI=v2(AI); vbI=v2(bI)
+%o A396966         if vK>=vbK or vI>=vbI:
+%o A396966             return 3*d+c==1
+%o A396966         c0=c
+%o A396966         c=c0*Fraction(1<<vK,1<<vI)
+%o A396966         d=(3*d+c0-1)/Fraction(1<<vI)
+%o A396966         aK=AK>>vK; bK=(3*bK)>>vK
+%o A396966         aI=AI>>vI; bI=(3*bI)>>vI
+%o A396966 def a(n): return sum(1 for r in range(1,1<<n,2) if is_obstruction(r,n)) if n>=5 else 0
+%o A396966 print([a(n) for n in range(1,17)])  # a(1..16) in ~2 seconds; for higher terms use the Rust enumerator (see Links)
+%o A396966 # -> [0,0,0,0,1,3,8,19,42,91,194,409,855,1776,3671,7556]
+%Y A396966 Cf. A006370, A006577, A007814, A394480 (a different residue-mod-2^n family for 3x+1).
+%K A396966 nonn,new
+%O A396966 1,6
+%A A396966 _Jakob Stemberger_, Jun 11 2026
