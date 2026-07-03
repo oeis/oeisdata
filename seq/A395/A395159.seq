@@ -1,0 +1,51 @@
+%I A395159 #66 Jul 02 2026 19:16:56
+%S A395159 1,1,2,2,2,2,1,2,2,1,2,2,1,1,2,2,1,2,2,2,2,1,2,2,1,1,2,2,2,2,1,2,2,1,
+%T A395159 1,2,2,1,2,2,1,2,2,2,2,1,2,2,1,1,2,2,2,2,1,2,2,1,2,2,1,1,2,2,1,2,2,2,
+%U A395159 2,1,1,2,2,1,2,2,2,2,1,2,2,1,1,2,2,1,2
+%N A395159 a(n) = 2*(sum of elements of n-th run)/(length of n-th run)^2 using 1 and 2 starting with 1,1.
+%C A395159 Equivalently, a(n) = 2*(common value of n-th run)/(length of n-th run) using 1 and 2 starting with 1,1.
+%C A395159 A self-describing paperfolding sequence obtained from the regular paperfolding sequence. It is the dual of A157196, having the opposite limiting ratio of 1's to 2's, and can be formed from its run lengths r(n) = A379704(n) by omitting r(2), and expanding r(1), r(3), r(4), r(5), ... into alternating runs of 1 and 2.
+%C A395159 A paperfolding construction: Use the binary alphabet (1, 22), where the symbol "1" stands for a single 1 and "22" stands for two consecutive 2's. For a word W, let rev(W) be W reversed. Let revendflip(W) be rev(W) with both its first and last symbols flipped (1 <-> 22). Let + be used for concatenation.
+%C A395159 Seed: A_0 = 11.
+%C A395159 Recursive step: A_{k+1} = A_k + revendflip(A_k).
+%C A395159 Examples:
+%C A395159   A_0 = 11
+%C A395159   A_1 = 112222                      (rev(11)=11; flip first 1->22 and last 1->22; append 2222)
+%C A395159   A_2 = 112222122122                (rev(112222)=222211; flip first 22->1 and last 1->22; append 122122)
+%C A395159   A_3 = 112222122122112212222122    (and so on)
+%C A395159 The limit of A_k is this sequence.
+%C A395159 To demonstrate the relationship between A157196, A395159, and the regular paperfolding sequence A014577: write A157196 in pieces 11 and 2, and write A395159 in pieces 1 and 22. Omit the first piece from each sequence, namely the initial 11 from A157196 and the initial 1 from A395159. Then pair the remaining pieces:
+%C A395159     A157196:  2 | 11 | 11 | 2 | 11 | 2 | 11 | 2 | 2 | 11 | ...
+%C A395159     A395159:  1 | 22 | 22 | 1 | 22 | 1 | 22 | 1 | 1 | 22 | ...
+%C A395159 Read single digits as "repeat the previous bit", and double digits as "change the previous bit". Starting with bit 1 gives 1,1,0,1,1,0,0,1,1,1,0,0,1,0,0,1,... which is A014577.
+%H A395159 Daniel Hoyt, <a href="https://a395159.netlify.app/">Visualization showing the relationship between this sequence, the dual A157196, and the regular paperfolding sequence through the dragon fractal</a>.
+%e A395159 The maximal runs are
+%e A395159     11 | 2222 | 1 | 22 | 1 | 22 | 11 | 22 | 1 | 2222 | ...
+%e A395159 Let S be the sum of the elements of the n-th run, and L be the length of the n-th run. Then, for these runs, the values 2*S/L^2 are 1, 1, 2, 2, 2, 2, 1, 2, 2, 1, ... which are the terms of the sequence.
+%o A395159 (Python)
+%o A395159 #a(n), b(n), and c(n) are three equivalent ways to generate this sequence.
+%o A395159 def a(n): #Demonstrating a(n) = 2*(common value of n-th run)/(length of n-th run)
+%o A395159  s=[1, 1]; r=2
+%o A395159  while len(s)<n:
+%o A395159   v=2-r%2; s+=[v]*int(2*v/s[r-1]); r+=1
+%o A395159  return s[:n]
+%o A395159 def b(n): #Demonstrating b(n) = 2*(sum of elements of n-th run)/(length of n-th run)^2
+%o A395159  s=[1, 1]; r=2
+%o A395159  while len(s)<n:
+%o A395159   v=2-r%2; L=1
+%o A395159   while True:
+%o A395159    S=sum([v]*L); N=2*S; D=L**2; q=int(N/D)
+%o A395159    if q==s[r-1] and q*D==N: break
+%o A395159    L+=1
+%o A395159   s+=[v]*L; r+=1
+%o A395159  return s[:n]
+%o A395159 def c(n): #Demonstrating the folding construction.
+%o A395159  w=[1,1]
+%o A395159  k=0 if n<=2 else (((n+5)//6)-1).bit_length()+1
+%o A395159  for _ in range(k):
+%o A395159   r=w[::-1];r[0]=3-r[0];r[-1]=3-r[-1];w+=r
+%o A395159  return [y for x in w for y in [x]*x][:n]
+%Y A395159 Cf. A000002, A014577, A157196, A379704.
+%K A395159 nonn,new
+%O A395159 1,3
+%A A395159 _Daniel Hoyt_, Jun 18 2026

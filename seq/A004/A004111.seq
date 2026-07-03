@@ -1,4 +1,4 @@
-%I A004111 M0796 #122 May 30 2026 16:39:47
+%I A004111 M0796 #133 Jul 02 2026 15:18:08
 %S A004111 0,1,1,1,2,3,6,12,25,52,113,247,548,1226,2770,6299,14426,33209,76851,
 %T A004111 178618,416848,976296,2294224,5407384,12780394,30283120,71924647,
 %U A004111 171196956,408310668,975662480,2335443077,5599508648,13446130438,32334837886,77863375126,187737500013,453203435319,1095295264857,2649957419351
@@ -24,6 +24,7 @@
 %H A004111 P. Leroux and B. Miloudi, <a href="/A000081/a000081_2.pdf">Généralisations de la formule d'Otter</a>, Ann. Sci. Math. Québec, Vol. 16, No. 1, pp. 53-80, 1992. (Annotated scanned copy)
 %H A004111 T. Motzkin, <a href="https://doi.org/10.1090/S0002-9904-1945-08486-9">The hypersurface cross ratio</a>, Bull. Amer. Math. Soc., 51 (1945), 976-984.
 %H A004111 T. S. Motzkin, <a href="https://doi.org/10.1090/S0002-9904-1948-09002-4 ">Relations between hypersurface cross ratios and a combinatorial formula for partitions of a polygon, for permanent preponderance and for non-associative products</a>, Bull. Amer. Math. Soc., 54 (1948), 352-360.
+%H A004111 Marko Riedel, <a href="/A004111/a004111_2.pdf">The cycle index of the set operator in the enumeration of identity trees.</a>
 %H A004111 N. J. A. Sloane, <a href="/A004111/a004111_1.pdf">Sketch showing trees with 2 through 6 nodes</a>.
 %H A004111 <a href="/index/Ro#rooted">Index entries for sequences related to rooted trees</a>
 %F A004111 Recurrence: a(n+1) = (1/n) * Sum_{k=1..n} ( Sum_{d|k} (-1)^(k/d+1) d*a(d) ) * a(n-k+1). - Mitchell Harris, Dec 02 2004
@@ -51,7 +52,9 @@
 %p A004111     end:
 %p A004111 seq(a(n), n=0..50);  # _Alois P. Heinz_, Jul 15 2014
 %t A004111 s[ n_, k_ ] := s[ n, k ]=a[ n+1-k ]+If[ n<2k, 0, -s[ n-k, k ] ]; a[ 1 ]=1; a[ n_ ] := a[ n ]=Sum[ a[ i ]s[ n-1, i ]i, {i, 1, n-1} ]/(n-1); Table[ a[ i ], {i, 1, 30} ] (* _Robert A. Russell_ *)
+%t A004111 (* Alternative: *)
 %t A004111 a[ n_] := If[ n < 2, Boole[n == 1], Nest[ CoefficientList[ Normal[ Times @@ (Table[1 + x^k, {k, Length@#}]^#) + x O[x]^Length@#], x] &, {}, n - 1][[n]]]; (* _Michael Somos_, Jul 10 2014 *)
+%t A004111 (* Alternative: *)
 %t A004111 a[n_] := a[n] = Sum[a[n-k]*Sum[a[d]*d*(-1)^(k/d+1),{d, Divisors[k]}], {k, 1, n-1}]/(n-1); a[0]=0; a[1]=1; Table[a[n], {n, 0, 40}] (* _Jean-François Alcover_, Feb 02 2015 *)
 %o A004111 (Haskell)
 %o A004111 import Data.List (genericIndex)
@@ -68,9 +71,26 @@
 %o A004111 for (n=1, N, A[n+1] = 1/n * sum(k=1, n, sumdiv(k, d, (-1)^(k/d+1) * d * A[d]) * A[n-k+1] ) );
 %o A004111 concat([0], A)
 %o A004111 \\ _Joerg Arndt_, Jul 10 2014
+%o A004111 (Python)
+%o A004111 def A004111List(n_max: int) -> list[int]:
+%o A004111     if n_max  < 0: return []
+%o A004111     if n_max == 0: return [0]
+%o A004111     A = [0] * (n_max + 1); A[1] = 1
+%o A004111     for n in range(1, n_max):
+%o A004111         total = 0
+%o A004111         for k in range(1, n + 1):
+%o A004111             div_sum = 0
+%o A004111             for d in range(1, k + 1):
+%o A004111                 if k % d == 0:
+%o A004111                     sign = 1 if (k // d + 1) % 2 == 0 else -1
+%o A004111                     div_sum += sign * d * A[d]
+%o A004111             total += div_sum * A[n - k + 1]
+%o A004111         A[n + 1] = total // n
+%o A004111     return [0] + A[1:]
+%o A004111 A = A004111List(38); print(A)  # _Peter Luschny_, Jul 02 2026
 %Y A004111 Cf. A000009, A000081, A000220, A196118, A196154, A196161, A227819.
 %Y A004111 Cf. A027750, A035056, A246169.
 %Y A004111 Column k=1 of A255517, A316074, A316101, A318757.
-%K A004111 nonn,easy,nice,eigen
+%K A004111 nonn,easy,nice,eigen,changed
 %O A004111 0,5
 %A A004111 _N. J. A. Sloane_

@@ -1,0 +1,61 @@
+%I A395518 #60 Jul 03 2026 00:47:24
+%S A395518 5,5,0,6,5,3,0,1,1,2,7,2,8,4,2,9,6,3,5,7,7,9,7,1,7,5,7,0,7,0,4,5,2,1,
+%T A395518 4,4,0,6,9,8,4,7,9,5,9,1,8,5,4,5,0,1,1,3,7,3,7,5,3,0,1,5,4,5,0,8,1,2,
+%U A395518 8,6,6
+%N A395518 Decimal expansion of lim_{N->oo} Integral_{x=0..1} Product_{p prime, p <= N} (1 - x^p) dx.
+%C A395518 Let I_N = Integral_{x=0..1} Product_{p prime, p <= N} (1 - x^p) dx. The sequence I_N is decreasing in N and bounded below by 0, hence converges; this sequence gives the decimal expansion of Lambda = lim_{N -> oo} I_N.
+%C A395518 This is the prime-support member of the family of product integrals Integral_{x=0..1} Product_{n in S} (1 - x^n) dx over exponent sets S. The all-exponent member S = {1,2,3,...} is A258232, proposed by Sandham (1954) and evaluated in closed form by Mulcrone (1956); the even-exponent member S = {2,4,6,...} is A258408. Unlike those cases, no closed form for the prime-support member is known.
+%C A395518 19/36 <= Lambda <= 133/240; in particular Lambda > 1/2. The lower bound is the elementary sandwich Lambda >= Integral_{x=0..1} (1-x^2)*(1-x^3) dx - Integral_{x=0..1} x^5*(1-x^3) dx = 7/12 - 1/18 = 19/36.
+%C A395518 Lambda is the infimum of Integral_{x=0..1} Product_{n in A} (1 - x^n) dx over all finite divisibility antichains A (finite subsets of {2,3,...} no element of which divides another); the prime truncations {p prime : p <= N} form a minimizing sequence.
+%C A395518 The truncations I_N decrease to Lambda from above, with 0 <= I_N - Lambda <= Sum_{p prime, p > N} 2/((p+1)*(p+3)).
+%H A395518 Alejandro Radisic, <a href="https://github.com/alerad/productinvariants/blob/f05e1e238e25280a3fce706449c64ee5ff2da3c9/ProductInvariants/Certified/LambdaHighPrecision.lean#L172">Lean certification of the digit bounds (theorem Lambda_bounds_2003)</a>.
+%H A395518 Alejandro Radisic, <a href="https://github.com/alerad/productinvariants/blob/f05e1e238e25280a3fce706449c64ee5ff2da3c9/ProductInvariants/Finite/Antichain.lean#L488">Lean proof that Lambda is the infimum over finite divisibility antichains (theorem lambda_eq_iInf_finiteAntichain)</a>.
+%H A395518 Alejandro Radisic, <a href="https://zenodo.org/records/20855052">Product-Integral Invariants of Exponent Sets: Phase Geometry, Classical Benchmark Supports, and the Prime-Indexed Limit</a>
+%H A395518 H. F. Sandham, <a href="https://doi.org/10.2307/2307339">Problem 4614</a>, The American Mathematical Monthly, Vol. 61, No. 10 (1954), p. 718; <a href="https://doi.org/10.2307/2306451">Definite Integral of an Infinite Product</a>, Solution to Problem 4614 by T. F. Mulcrone, ibid., Vol. 63, No. 2 (1956), pp. 127-128.
+%F A395518 Equals lim_{N -> infinity} Integral_{x=0..1} Product_{p prime, p <= N} (1 - x^p) dx.
+%F A395518 Equals lim_{N -> oo} Sum_{n>=0} c_N(n)/(n+1), where Product_{p prime, p <= N} (1 - x^p) = Sum_{n>=0} c_N(n)*x^n; the partial products converge coefficientwise to A046675.
+%F A395518 Equals lim_{N -> oo} Sum_{n>=0} (-1)^n * b_N(n) * 2/((n+1)*(n+3)), where b_N(n) is the number of subsets of the odd primes <= N with sum n.
+%F A395518 Equals lim_{k -> oo} Sum_{d | A002110(k)} mu(d)/(1 + A008472(d)).
+%e A395518 0.55065301127284296357797175...
+%t A395518 nmax = 200; p = 1; Monitor[q = Table[p = Expand[p*(1 - x^Prime[n])]; Total[CoefficientList[p, x] / Range[1, Exponent[p, x] + 1]], {n, 1, nmax}];, n]; N[Table[q[[n]], {n, nmax - 5, nmax}], 80] (* _Vaclav Kotesovec_, Jun 19 2026 *)
+%o A395518 (Python)
+%o A395518 from fractions import Fraction
+%o A395518 from math import isqrt
+%o A395518 N, m, MAX_DIGITS = 2003, 2005, 60
+%o A395518 def is_prime(n):
+%o A395518     if n < 2: return False
+%o A395518     if n == 2: return True
+%o A395518     if n % 2 == 0: return False
+%o A395518     for d in range(3, isqrt(n) + 1, 2):
+%o A395518         if n % d == 0: return False
+%o A395518     return True
+%o A395518 def mul_one_minus(poly, e):
+%o A395518     out = poly + [0]*e
+%o A395518     for i, c in enumerate(poly):
+%o A395518         out[i+e] -= c
+%o A395518     return out
+%o A395518 def phase_poly(exps):
+%o A395518     poly = [1]
+%o A395518     for e in exps:
+%o A395518         poly = mul_one_minus(poly, e)
+%o A395518     return poly
+%o A395518 def integral(poly, shift=0):
+%o A395518     return sum((Fraction(c, i + shift + 1) for i, c in enumerate(poly) if c), Fraction(0))
+%o A395518 def floor_frac(q):
+%o A395518     return q.numerator // q.denominator
+%o A395518 primes = [n for n in range(2, N+1) if is_prime(n)]
+%o A395518 upper = integral(phase_poly(primes))
+%o A395518 lower = upper - integral(phase_poly([p for p in primes if p != 2]), m)
+%o A395518 D = 0
+%o A395518 for d in range(MAX_DIGITS + 1):
+%o A395518     if floor_frac(lower * 10**d) == floor_frac(upper * 10**d):
+%o A395518         D = d
+%o A395518     else:
+%o A395518         break
+%o A395518 q = floor_frac(lower * 10**D)
+%o A395518 print([int(c) for c in str(q).zfill(D)])
+%Y A395518 Cf. A000040, A000586, A000607, A002110, A008472, A010051, A046675, A258232, A258408, A298602, A298948, A350514.
+%K A395518 cons,nonn,more,new
+%O A395518 0,1
+%A A395518 _Alejandro Radisic_, May 25 2026
+%E A395518 More digits from _Vaclav Kotesovec_, Jun 19 2026 and Jun 24 2026
