@@ -1,16 +1,49 @@
-%I A372600 #27 Oct 30 2024 12:18:23
+%I A372600 #48 Jul 04 2026 09:56:58
 %S A372600 2,13,23,113,131,137,1013,1031,1279,1237,1973,6173,10139,10193,10391,
 %T A372600 10739,10937,12739,12379,36137,100937,101693,102931,102397,103913,
 %U A372600 106319,106937,109379,123479,123973,125791,123719,361973,852937,1006937,1019731,1023173,1021973,1024379,1027319
-%N A372600 Least prime whose decimal representation has n distinct substrings which are also prime.
+%N A372600 Least prime whose decimal representation has n distinct subsequences which are also prime.
 %C A372600 First occurrence n of pi(a(n)) in A039994: 1, 6, 9, 30, 32, 33, 170, 173, 207, 203, 298, 804, ..., .
 %H A372600 Robert G. Wilson v, <a href="/A372600/b372600.txt">Table of n, a(n) for n = 1..688</a>
 %e A372600 A039994(1) = 1, is the first occurrence of 1 which is the index of the prime 2;
 %e A372600 A039994(6) = 2, is the first occurrence of 2 and 6 is the index of the prime 13;
 %e A372600 A039994(9) = 3, is the first occurrence of 3 and 9 is the index of the prime 23;
 %e A372600 A039994(30) = 4, is the first occurrence of 4 and 30 is the index of the prime 113; etc.
+%p A372600 f:= proc(n) local d,L,S;
+%p A372600   L:= convert(n,base,10); d:= nops(L);
+%p A372600   S:= convert(map(t -> L[t],combinat[powerset]([$1..d])),set);
+%p A372600   nops(select(isprime,map(proc(t) local i; add(t[i]*10^(i-1),i=1..nops(t)) end proc, S)))
+%p A372600 end proc:
+%p A372600 V:= Vector(50): count:= 0:
+%p A372600 p:= 1:
+%p A372600 while count < 50 do
+%p A372600   p:= nextprime(p);
+%p A372600   v:= f(p);
+%p A372600   if v <= 50 and V[v] = 0 then V[v]:= p; count:= count+1 fi;
+%p A372600 od:
+%p A372600 convert(V,list); # _Robert Israel_, Jul 01 2026
 %t A372600 f[p_] := Count[ PrimeQ[ Union[ FromDigits@# & /@ Rest@ Subsets[ IntegerDigits@ p]]], True]; t[_] := 0; p = 2; While[p < 10000001, a = f@ p; If[ t[a] == 0, t[a] = p]; p = NextPrime@ p]; t /@ Range@ 56
-%Y A372600 Cf. A039994.
-%K A372600 base,nonn
+%o A372600 (Python)
+%o A372600 from sympy import isprime, nextprime
+%o A372600 from itertools import chain, combinations as C, islice
+%o A372600 def powerset(s): # nonempty subsets of s
+%o A372600     return chain.from_iterable(C(s, r) for r in range(1, len(s)+1))
+%o A372600 def f(n):
+%o A372600     ss = set(int("".join(s)) for s in powerset(str(n)))
+%o A372600     return sum(1 for k in ss if isprime(k))
+%o A372600 def agen(): # generator of terms
+%o A372600     adict, p, n = dict(), 2, 1
+%o A372600     while True:
+%o A372600         v = f(p)
+%o A372600         if v not in adict:
+%o A372600             adict[v] = p
+%o A372600             while n in adict:
+%o A372600                 yield adict[n]
+%o A372600                 n += 1
+%o A372600         p = nextprime(p)
+%o A372600 print(list(islice(agen(), 40))) # _Michael S. Branicky_, Jul 01 2026
+%Y A372600 Cf. A039994, A079790, A232580.
+%K A372600 base,nonn,changed
 %O A372600 1,1
 %A A372600 _Robert G. Wilson v_, May 06 2024
+%E A372600 Definition corrected by _Robert Israel_, Jul 01 2026
