@@ -1,0 +1,69 @@
+%I A395528 #24 Jul 05 2026 23:42:44
+%S A395528 1,0,1,0,1,0,2,0,2,1,0,2,4,0,2,9,0,2,21,0,2,45,0,2,102,2,0,2,220,13,0,
+%T A395528 2,459,90,0,2,884,415,0,2,1607,1550,0,2,2758,4981,0,2,4544,14774,0,2,
+%U A395528 7210,41415,2,0,2,11119,112726,20,0,2,16718,300998,237
+%N A395528 Triangle read by rows: T(n,k) is the number of unlabeled trees with n vertices and burning number k, for k = 1..ceiling(sqrt(n)).
+%C A395528 The row sums for n = 1..23 are A000055(1)..A000055(23). If every tree with n vertices has burning number <= ceiling(sqrt(n)), as predicted by the graph burning conjecture for connected graphs, then all row sums are A000055.
+%C A395528 T(n,2) = 2 for n >= 4. The two trees are the star K_{1,n-1} and the tree obtained from K_{1,n-2} by attaching a pendant vertex to one leaf.
+%C A395528 The rightmost term in row n is T(n,ceiling(sqrt(n))), the number of unlabeled trees with n vertices whose burning number attains the conjectured upper bound ceiling(sqrt(n)).
+%H A395528 Sean A. Irvine, <a href="/A395528/b395528.txt">Table of n, a(n) for n = 1..85</a> (rows 1..23 flattened)
+%H A395528 S. Bessy, A. Bonato, J. Janssen, D. Rautenbach, and E. Roshanbin, <a href="https://doi.org/10.1016/j.dam.2017.07.016">Burning a graph is hard</a>, Discrete Applied Mathematics 232 (2017), 73-87.
+%H A395528 A. Bonato, J. Janssen, and E. Roshanbin, <a href="https://arxiv.org/abs/1507.06524">How to burn a graph</a>, Internet Mathematics 12 (2016), 85-100.
+%H A395528 E. J. T. Leong, K. A. Sim, and W. C. Teh, <a href="https://arxiv.org/abs/2504.20427">Extremal Trees With Prescribed Burning Numbers</a>, arXiv:2504.20427 [math.CO], 2025.
+%H A395528 Eric W. Weisstein's World of Mathematics, <a href="https://mathworld.wolfram.com/BurningNumber.html">Burning Number</a>.
+%F A395528 T(1,1) = 1; T(n,1) = 0 for n>1; T(n,2) = 2 for n>=4.
+%F A395528 Conjecture: Sum_{k=1..ceiling(sqrt(n))} T(n,k) = A000055(n).
+%e A395528 Triangle begins:
+%e A395528   1;
+%e A395528   0, 1;
+%e A395528   0, 1;
+%e A395528   0, 2;
+%e A395528   0, 2, 1;
+%e A395528   0, 2, 4;
+%e A395528   0, 2, 9;
+%e A395528   0, 2, 21;
+%e A395528   0, 2, 45;
+%e A395528   0, 2, 102, 2;
+%e A395528   ...
+%e A395528 For n = 5 there are three unlabeled trees. The path P_5 has burning number 3, while the star K_{1,4} and the tree with degree sequence (3,2,1,1,1) have burning number 2. Hence row 5 is 0, 2, 1.
+%o A395528 (Python)
+%o A395528 from collections import Counter
+%o A395528 from math import isqrt
+%o A395528 from networkx import nonisomorphic_trees, all_pairs_shortest_path_length
+%o A395528 def burning_number(G):
+%o A395528     nodes = list(G)
+%o A395528     n = len(nodes)
+%o A395528     dist = dict(all_pairs_shortest_path_length(G))
+%o A395528     def cover(uncovered, radii, memo):
+%o A395528         if not uncovered:
+%o A395528             return True
+%o A395528         if not radii:
+%o A395528             return False
+%o A395528         key = (uncovered, radii)
+%o A395528         if key in memo:
+%o A395528             return memo[key]
+%o A395528         u = next(iter(uncovered))
+%o A395528         for r in sorted(radii, reverse=True):
+%o A395528             rest = tuple(sorted(set(radii) - {r}))
+%o A395528             for c in nodes:
+%o A395528                 if dist[c].get(u, n) <= r:
+%o A395528                     ball = frozenset(v for v, d in dist[c].items() if d <= r)
+%o A395528                     if cover(uncovered - ball, rest, memo):
+%o A395528                         memo[key] = True
+%o A395528                         return True
+%o A395528         memo[key] = False
+%o A395528         return False
+%o A395528     full = frozenset(nodes)
+%o A395528     for k in range(1, n + 1):
+%o A395528         if cover(full, tuple(range(k)), {}):
+%o A395528             return k
+%o A395528 def row(n):
+%o A395528     c = Counter(burning_number(T) for T in nonisomorphic_trees(n))
+%o A395528     return [c.get(k, 0) for k in range(1, isqrt(n - 1) + 2)]
+%o A395528 for n in range(1, 19):
+%o A395528     print(row(n))
+%Y A395528 Cf. A000055, A263322, A369278, A369279, A369280.
+%K A395528 nonn,tabf,new
+%O A395528 1,7
+%A A395528 _Nevan Torres_, May 30 2026
+%E A395528 More terms from _Sean A. Irvine_, Jul 05 2026
