@@ -1,17 +1,61 @@
-%I A101620 #5 Mar 29 2014 13:57:19
+%I A101620 #41 Jul 07 2026 18:55:12
 %S A101620 1,3,9,11,13,15,129,131,133,137,139,141,143,145,153,161,163,165,171,
-%T A101620 175,177,179,187,193,195,197,205,207,209,213,221,241,243,245,255
-%N A101620 Decimal encoding of digraph topologies.
+%T A101620 175,177,179,187,193,195,197,205,207,209,213,221,241,243,245,255,
+%U A101620 32769,32771,32773,32777,32779,32781,32783,32785,32801,32803,32817,32819,32833,32837,32849,32853
+%N A101620 Digraph topologies, represented through the number whose nonzero bits correspond to the open sets in the topology.
 %C A101620 The sequence encodes labeled digraph topologies as described by and counted in A000798.
+%C A101620 The topologies are represented as ("binary") numbers where a nonzero bit means the respective subset of n is an element of the topology, where the subsets are again represented by the numbers whose nonzero bits correspond to the elements that are in the subset. (For the n-set, we can take n = {0, 1, ..., n-1}.)
+%C A101620 Since the empty set (represented by 0) and the complete set (represented by 2^n-1) must be element of any topology on n, all numbers in the n-th row of the table have bit 0 and bit 2^n-1 set, i.e., they lie between 2^0 + 2^(2^n-1) and 2^(2^n) - 1 inclusive, except for row n = 0 where 0 and 2^n-1 are the same, so the row starts and ends with 2^0 = 2^(2^n-1) = 2^(2^n)-1 = 1. - _M. F. Hasler_, Jun 18 2026
+%F A101620 T(n, 1) = 2^(2^n-1) + [n>0]; T(n, A000798(n)) = 2^2^n - 1. - _M. F. Hasler_, Jun 21 2026
 %e A101620 Let a = 2, b = 4, c = 16, d = 256, ...
 %e A101620 a(19) = 171 because we can map { }, a, ab, ac, abc to 1 + 2 + 8 + 32 + 128
-%e A101620 Viewed as an array the table begins
-%e A101620 1
-%e A101620 3
-%e A101620 9 11 13 15
-%e A101620 129 131 133 137 139 141 143 145 153 161 163 165 171 175 177 ...
-%e A101620 with respectively 1 1 4 29 355 ... (A000798) entries on each row.
-%Y A101620 Cf. A000798, A001035, A001930, A074486.
-%K A101620 more,nonn,tabf,base
-%O A101620 1,2
+%e A101620 Viewed as an array the table begins:
+%e A101620 row n | topologies of n (represented as bitmask of the included subsets)
+%e A101620 ------+-----------------------------------------------------------------
+%e A101620    0  | 1  --  Here, 1 = 2^0 represents tau = {{}}.
+%e A101620    1  | 3  --  Here, 3 = 2^0 + 2^1 represents tau = {{}, {0}}.
+%e A101620    2  | 9, 11, 13, 15 : Here 9 = 2^0 + 2^3 represents tau = {{}, {0,1}}.
+%e A101620    3  | 129, 131, 133, 137, 139, 141, 143, 145, 153, 161, 163, 165, 171, 175, 177,
+%e A101620       |      179, 187, 193, 195, 197, 205, 207, 209, 213, 221, 241, 243, 245, 255
+%e A101620    4  | 32769, 32771, ..., 65535, where 32769 = 2^0 + 2^15 ~ {{}, {0,1,2,3}}.
+%e A101620   ... | ...
+%e A101620 with respectively 1, 1, 4, 29, 355, ... (A000798) entries on each row.
+%o A101620 (PARI)
+%o A101620 is_A101620(n)={my(e,b); n%2 && hammingweight(1+e=exponent(n))==1 && !foreach(b=[k|k<-[1..e-1],bittest(n,k)], k, foreach(b, j, j<k||break; (bittest(n,bitand(k,j)) && bittest(n, bitor(k,j)))|| return))}
+%o A101620 row(n)=select(is_A101620, [2^(2^n-1)..2^2^n-1]) \\ For illustration only -- not practical for n >= 5. - _M. F. Hasler_, Jun 18 2026
+%o A101620 (Python)
+%o A101620 import functools, itertools
+%o A101620 @functools.cache
+%o A101620 def bits(r: int) -> tuple[int]: # return tuple of indices of nonzero bits
+%o A101620     bit_list = []
+%o A101620     while r: bit_list.append((r & -r).bit_length() - 1); r &= r-1
+%o A101620     return tuple(bit_list)
+%o A101620 @functools.cache
+%o A101620 def preorders(n: int) -> list[tuple[int]]:
+%o A101620     if n < 2: return [(1,)if n else()]
+%o A101620     matrices = []; N = n-1; bit_N = 1<<N
+%o A101620     for P in preorders(N):
+%o A101620         preds = [0] * N
+%o A101620         for i,row in enumerate(P):
+%o A101620             for j in bits(row): preds[j] |= 1 << i
+%o A101620         for A in itertools.product((0, 1, 2, 3), repeat=N):
+%o A101620             D_mask = sum([1 << i for i,a in enumerate(A) if a&1])
+%o A101620             U_mask = sum([1 << i for i,a in enumerate(A) if a&2])
+%o A101620             if any(a&1 and (p & ~D_mask or U_mask & ~r) or
+%o A101620                    a&2 and r & ~U_mask for a,r,p in zip(A,P,preds)): continue
+%o A101620             P_new = [r|bit_N if a&1 else r for a,r in zip(A,P)]
+%o A101620             P_new.append(U_mask | bit_N)
+%o A101620             matrices.append(tuple(P_new))
+%o A101620     return matrices
+%o A101620 def topology(R):
+%o A101620     T = 1; L = [0] * 2**(n := len(R))
+%o A101620     for i,r in enumerate(R):
+%o A101620         for s in range(b := 2**i): L[s|b] = L[s]|r; T |= 1 << L[s|b]
+%o A101620     return T
+%o A101620 @functools.cache
+%o A101620 def A101620_row(n): return sorted(topology(P)for P in preorders(n)) # _M. F. Hasler_, Jun 19 2026
+%Y A101620 Cf. A000798 (row lengths, number of topologies on n), A001035 (number of n-posets), A000798 (# unlabeled n-posets), A001930, A074486.
+%K A101620 nonn,tabf,changed
+%O A101620 0,2
 %A A101620 _Alford Arnold_, Dec 10 2004
+%E A101620 Offset changed to 0 and more terms by _M. F. Hasler_, Jun 18 2026

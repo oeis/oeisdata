@@ -1,0 +1,47 @@
+%I A397506 #9 Jul 07 2026 16:13:16
+%S A397506 1,1,34,6785,5911726,19771318252,241218045535650
+%N A397506 Number of fully indecomposable n X n matrices with all entries 0 or 1.
+%C A397506 An n X n matrix A is fully indecomposable if there are no permutation matrices P, Q such that P*A*Q has the block form [[B, 0], [C, D]] with B square and nonvacuous; equivalently, A has no k X (n-k) zero submatrix for 1 <= k <= n-1. By convention a 1 X 1 matrix is fully indecomposable iff it is nonzero, so a(1) = 1.
+%C A397506 Equivalently (strong Hall condition), A is fully indecomposable iff for every set S of columns with 1 <= |S| <= n-1, the number of rows whose support is contained in S is at most |S| - 1. The terms here are obtained by counting matrices satisfying this condition.
+%C A397506 These are the fully indecomposable blocks in the Dulmage-Mendelsohn decomposition; A326342 (n X n 0-1 matrices with total support) is built from them, which gives the formula below.
+%C A397506 The asymptotic growth of the number of totally (fully) indecomposable 0-1 matrices is studied by Bolotnikov and Tarakanov (see Links).
+%D A397506 R. A. Brualdi and H. J. Ryser, Combinatorial Matrix Theory, Encyclopedia of Mathematics and its Applications, Vol. 39, Cambridge University Press, 1991; chapter on fully indecomposable matrices.
+%H A397506 Yu. V. Bolotnikov and V. E. Tarakanov, <a href="https://doi.org/10.1007/BF02308812">Partially decomposable and totally indecomposable nonnegative matrices</a>, Mathematical Notes.
+%F A397506 A326342(n) = Sum_{k=1..n} binomial(n-1,k-1)*binomial(n,k)*a(k)*A326342(n-k), with A326342(0) = 1.
+%e A397506 a(2) = 1: the only fully indecomposable 2 X 2 0-1 matrix is [[1, 1], [1, 1]] (any matrix with a zero entry has a 1 X 1 zero submatrix, hence is partly decomposable).
+%o A397506 (Python)
+%o A397506 from math import factorial
+%o A397506 def I(n):
+%o A397506     if n < 2:
+%o A397506         return 1
+%o A397506     full = 1 << n
+%o A397506     pc = [bin(s).count("1") for s in range(full)]
+%o A397506     proper = sorted((s for s in range(full) if 2 <= pc[s] <= n-1), key=lambda s: pc[s])
+%o A397506     supersets = {s: [T for T in range(full) if T != full-1 and (T & s) == s] for s in proper}
+%o A397506     cnt = [0]*full
+%o A397506     total = 0
+%o A397506     def rec(start, rem, invprod):
+%o A397506         nonlocal total
+%o A397506         total += factorial(n)//(invprod*factorial(rem))
+%o A397506         for j in range(start, len(proper)):
+%o A397506             s = proper[j]; applied = 0
+%o A397506             for m in range(1, rem+1):
+%o A397506                 bad = False
+%o A397506                 for T in supersets[s]:
+%o A397506                     cnt[T] += 1
+%o A397506                     if cnt[T] > pc[T]-1: bad = True
+%o A397506                 applied = m
+%o A397506                 if bad:
+%o A397506                     for T in supersets[s]: cnt[T] -= 1
+%o A397506                     applied = m-1; break
+%o A397506                 rec(j+1, rem-m, invprod*factorial(m))
+%o A397506             for _ in range(applied):
+%o A397506                 for T in supersets[s]: cnt[T] -= 1
+%o A397506     rec(0, n, 1)
+%o A397506     return total
+%o A397506 print([I(n) for n in range(1, 7)])
+%o A397506 # (a(7) was computed with an equivalent compiled program.)
+%Y A397506 Cf. A326342 (n X n 0-1 matrices with total support, built from these blocks), A326343.
+%K A397506 nonn,hard,more,new
+%O A397506 1,3
+%A A397506 _Daniyal Kadirbekov_, Jun 28 2026
