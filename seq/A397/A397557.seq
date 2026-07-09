@@ -1,0 +1,51 @@
+%I A397557 #10 Jul 08 2026 18:12:19
+%S A397557 1,1,1,2,1,1,1,1,1,1,3,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,1,4,1,1,1,1,1,2,
+%T A397557 1,1,1,1,1,1,5,1,1,1,2,1,1,1,1,1,3,1,1,1,1,2,1,1,1,1,1,1,2,1,1,1,1,1,
+%U A397557 1,2,1,1,1,1,1,3,1,1,1,1,2,1,1,1,1,1,1
+%N A397557 A sequence constructed by greedily sampling the zeta distribution for parameter value 3 to minimize discrepancy.
+%C A397557 The probability mass function for this zeta distribution is given by p(i) = 1/(zeta(3)*i^3).
+%C A397557 A general family of these distributions is given by p(i) = 1/(zeta(s)*i^s) where s > 1. This sequence is the s=3 case.
+%C A397557 Properties change sharply at s=2, the geometric mean remains finite for all s but the arithmetic mean becomes finite for s > 2 and infinite for s <= 2.
+%C A397557 | mean       | 1 < s <= 2 | s > 2  |
+%C A397557 | ---------- | ---------- | ------ |
+%C A397557 | arithmetic |     oo     | finite |
+%C A397557 | geometric  |   finite   | finite |
+%C A397557 The geometric mean approaches exp(-zeta'(3)/zeta(3)) = 1.1791840098089555... in the limit. In general, if the sequence was formed by every k^s occurrences, it would approach e^(-zeta'(s)/zeta(s)).
+%C A397557 Unlike A381617, this sequence has a finite arithmetic mean, equal to zeta(2)/zeta(3) = 1.368432777... and in general for power s it equals zeta(s-1)/zeta(s).
+%H A397557 Jwalin Bhatt, <a href="/A397557/b397557.txt">Table of n, a(n) for n = 1..10000</a>
+%H A397557 Wikipedia, <a href="https://en.wikipedia.org/wiki/Zeta_distribution">Zeta distribution</a>.
+%e A397557 Let p(k) denote the probability of k and c(k) the number of occurrences of k among the first n-1 terms; the expected count among n terms is n*p(k). We pick the k maximizing n*p(k) - c(k).
+%e A397557 | n | n*p(1) - c(1) | n*p(2) - c(2) | n*p(3) - c(3) | choice |
+%e A397557 |---|---------------|---------------|---------------|--------|
+%e A397557 | 1 |     0.831     |       -       |       -       |   1    |
+%e A397557 | 2 |     0.663     |     0.207     |       -       |   1    |
+%e A397557 | 3 |     0.495     |     0.311     |       -       |   1    |
+%e A397557 | 4 |     0.327     |     0.415     |       -       |   2    |
+%e A397557 | 5 |     1.159     |    -0.480     |     0.154     |   1    |
+%e A397557 | 6 |     0.991     |    -0.376     |     0.184     |   1    |
+%t A397557 probCountDiff[j_, k_, count_] := k/(Zeta[3] j^3) - Lookup[count, j, 0]
+%t A397557 samplePDF[n_] := Module[{coeffs, unreachedVal, counts, k, probCountDiffs, mostProbable},
+%t A397557   coeffs = ConstantArray[0, n]; unreachedVal = 1; counts = <||>;
+%t A397557   Do[probCountDiffs = Table[probCountDiff[i, k, counts], {i, 1, unreachedVal}];
+%t A397557     mostProbable = First@FirstPosition[probCountDiffs, Max[probCountDiffs]];
+%t A397557     If[mostProbable == unreachedVal, unreachedVal++]; coeffs[[k]] = mostProbable;
+%t A397557     counts[mostProbable] = Lookup[counts, mostProbable, 0] + 1, {k, 1, n}]; coeffs]
+%t A397557 A397557 = samplePDF[87]
+%o A397557 (Python)
+%o A397557 from sympy import zeta
+%o A397557 def prob_count_diff(j, k, count):
+%o A397557     return k/(zeta(3)*j**3) - count
+%o A397557 def sample_zeta_distribution(num_coeffs):
+%o A397557     coeffs, unreached_val, counts = [], 1, {}
+%o A397557     for k in range(1, num_coeffs+1):
+%o A397557         diffs = [prob_count_diff(i, k, counts.get(i, 0)) for i in range(1, unreached_val+1)]
+%o A397557         most_probable = diffs.index(max(diffs)) + 1
+%o A397557         unreached_val += most_probable == unreached_val
+%o A397557         coeffs.append(most_probable)
+%o A397557         counts[most_probable] = counts.get(most_probable, 0) + 1
+%o A397557     return coeffs
+%o A397557 A397557 = sample_zeta_distribution(87)
+%Y A397557 Cf. A381522, A381617.
+%K A397557 nonn,new
+%O A397557 1,4
+%A A397557 _Jwalin Bhatt_, Jun 30 2026

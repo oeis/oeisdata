@@ -1,0 +1,73 @@
+%I A397303 #40 Jul 08 2026 15:58:33
+%S A397303 1,0,1,0,1,1,0,3,2,1,0,9,11,3,1,0,39,57,19,4,1,0,189,363,133,29,5,1,0,
+%T A397303 1107,2623,1030,232,41,6,1,0,7281,21439,9080,2088,369,55,7,1,0,54351,
+%U A397303 194545,88909,20755,3690,550,71,8,1,0,448821,1948331,956748,227380,40590,6050,781,89,9,1
+%N A397303 Triangle read by rows: T(n,k) is the number of cyclic permutations of [n] whose longest ascending run is length k, n >= k >= 1.
+%C A397303 Treating each row of the triangle as a statistical distribution, the expectation can be derived heuristically. The probability that a block of length k is increasing is 1/k!, so by linearity of expectation, there are approximately n/k! such blocks of length k (including those contained within longer increasing blocks). Modeling the occurrences of these blocks as approximately independent, rare events, the probability that no block of length k exists is approximately e^(-n/k!).
+%C A397303 The expected number of ascents transitions from many to none at about the k such that e^(-n/k!) = 1, so k! ~ n. Using Stirling's original approximation k! ~ sqrt(2*Pi)*((k+1/2)/e)^(k+1/2), k ~ log(n/sqrt(2*Pi)) / W_0(log(n/sqrt(2*Pi))/e) - 1/2 (where W_0 is the principal branch of the Lambert W function). Since W_0(x) = log(x) - log(log(x)) + o(1), a cruder asymptotic is k ~ log(n)/log(log(n)).
+%H A397303 Alois P. Heinz, <a href="/A397303/b397303.txt">Rows n = 0..141, flattened</a>
+%H A397303 Max A. Alekseyev, <a href="https://arxiv.org/abs/1205.4581">On the number of permutations with bounded run lengths</a>, arXiv preprint arXiv:1205.4581 [math.CO], 2012-2013.
+%H A397303 Peter Luschny, <a href="/A397303/a397303.txt">Maple and Python implementation of A397303</a>.
+%H A397303 Natalia L. Skirrow, <a href="https://oeis.org/wiki/User:Natalia_L._Skirrow/Stirling&#39;s_approximations">Stirling's approximations</a>.
+%F A397303 Sum_{k=1..n} T(n,k) = (n-1)!.
+%F A397303 T(n,1) = [n=1].
+%F A397303 T(n,2) = A080635(n-1) = A232864(n)/n.
+%F A397303 T(n,n-1) = n-2 for n>=2.
+%F A397303 T(n,k) = (k^2 + k - 1) * n!/k! for (n+1)/2 <= k <= n-2.
+%F A397303 Let y_k(x) = Sum_{n>=0} x^(k*n)/(k*n)! - x^(k*n+1)/(k*n+1)!.
+%F A397303 y_k(x) = Sum_{j=0..k-1} (1-w^j)*e^(w^j*x)/k, with w = e^(2*Pi*i/k).
+%F A397303 E.g.f. of k-th column: log(y_k(x) / y_{k+1}(x)), for k >= 2.
+%e A397303 n\k| 1     2      3     4     5    6   7  8  9 10
+%e A397303 ---+---------------------------------------------
+%e A397303  1 | 1
+%e A397303  2 | 0     1
+%e A397303  3 | 0     1      1
+%e A397303  4 | 0     3      2     1
+%e A397303  5 | 0     9     11     3     1
+%e A397303  6 | 0    39     57    19     4    1
+%e A397303  7 | 0   189    363   133    29    5   1
+%e A397303  8 | 0  1107   2623  1030   232   41   6  1
+%e A397303  9 | 0  7281  21439  9080  2088  369  55  7  1
+%e A397303 10 | 0 54351 194545 88909 20755 3690 550 71  8  1
+%p A397303 b:= proc(u, o, t, k) option remember; `if`(u+o=0, 1,
+%p A397303       `if`(t<k, add(b(u+j-1, o-j, t+1, k), j=1..o), 0)+
+%p A397303                 add(b(u-j, o+j-1, 1, k), j=1..u))
+%p A397303     end:
+%p A397303 T:= (n, k)-> b(0, n-1, 1, k)-`if`(k>1, b(0, n-1, 1, k-1), 0):
+%p A397303 seq(seq(T(n, k), k=1..n), n=1..11);  # _Alois P. Heinz_, Jun 21 2026
+%o A397303 (Python)
+%o A397303 from math import comb
+%o A397303 from itertools import count, chain
+%o A397303 from functools import cache
+%o A397303 C = [1]
+%o A397303 class col_cache(object):
+%o A397303     def __init__(c,k):
+%o A397303         c.clock = count(1)
+%o A397303         c.k = k
+%o A397303         c.b = [0]
+%o A397303     __iter__ = lambda c: chain(c.b,c.more())
+%o A397303     def more(c):
+%o A397303         for n in c.clock:
+%o A397303             if n > len(C):
+%o A397303                 C.append([0] * n)
+%o A397303                 m = n-1
+%o A397303                 C[m][0] = C[m][m] = 1
+%o A397303                 for k in range(1,m): C[m][k] = C[m-1][k-1] + C[m-1][k]
+%o A397303             new = (-1 if n%c.k==1 else int(not n%c.k)) + (n>1 and C[n-1][1]*c.b[-1])
+%o A397303             for i in range(c.k,n,c.k):
+%o A397303                 new -= C[n-1][i]*c.b[-i]
+%o A397303                 if i < n-1: new += C[n-1][i+1]*c.b[~i]
+%o A397303             c.b.append(new)
+%o A397303             yield new
+%o A397303     def __getitem__(c,i):
+%o A397303         if i >= len(c.b):
+%o A397303             for j in range(len(c.b),i+1): next(c.more())
+%o A397303         return c.b[i]
+%o A397303 logy = cache(lambda k: col_cache(k))
+%o A397303 A397303 = lambda n,k: int(n==1) if k==1 else logy(k)[n] - logy(k+1)[n]
+%o A397303 print([[A397303(n,k) for k in range(1,n+1)] for n in range(1,8)])
+%Y A397303 Cf. A008304 (equivalent triangle for permutations instead of cycles).
+%Y A397303 Cf. A000142, A080635, A232864.
+%K A397303 nonn,tabl,new
+%O A397303 1,8
+%A A397303 _Natalia L. Skirrow_, Jun 20 2026
