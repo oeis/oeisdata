@@ -1,0 +1,42 @@
+%I A394752 #30 Jul 12 2026 16:30:17
+%S A394752 0,1,2,20,28,86,286
+%N A394752 Indices of zeros (P-positions) in the Sprague-Grundy sequence for the octal game .404.
+%C A394752 The octal game .404 has rules encoded by the digits d_1 = 4, d_2 = 0, d_3 = 4 (after the radix point). Each digit d_i specifies, by its binary representation, which forms of "remove i stones" are legal: bit 0 means "leave 0 piles" (i.e., remove all i stones from a pile of exactly i stones), bit 1 means "leave 1 nonempty pile", bit 2 means "split the remaining stones into 2 nonempty piles". For .404 only bit 2 is set in d_1 and d_3, and d_2 = 0 forbids removing 2 stones. Thus a single legal move from a pile of n is: take 1 stone and split the remaining n - 1 stones into two nonempty piles (requires n >= 3), or take 3 stones and split the remaining n - 3 (requires n >= 5).
+%C A394752 Verified by exhaustive computation up to n = 20000: no P-position with 287 <= n <= 20000.
+%C A394752 Conjecture: a(7) = 286 is the largest P-position; equivalently, every n >= 287 is an N-position (first player wins).
+%C A394752 a(8), if it exists, exceeds 250000. - _Sean A. Irvine_, Jul 12 2026
+%H A394752 Achim Flammenkamp, <a href="http://wwwhomes.uni-bielefeld.de/achim/octal.html">Sprague-Grundy Values of the Octal-Games</a>.
+%H A394752 R. K. Guy and R. J. Nowakowski, <a href="https://arxiv.org/abs/math/9606225">Unsolved problems in combinatorial games</a>, arXiv:math/9606225 [math.GT], 1996.
+%H A394752 Wikipedia, <a href="https://en.wikipedia.org/wiki/Octal_game">Octal game</a>.
+%F A394752 G(n) = mex{ G(a) XOR G(b) : a + b = n - 1, a, b >= 1 } union { G(a) XOR G(b) : a + b = n - 3, a, b >= 1 } where G is the Sprague-Grundy function for the octal game .404. The sequence lists the values of n for which G(n) = 0.
+%e A394752 G(0) = 0 by convention (terminal position with no stones), so a(1) = 0.
+%e A394752 G(1) = 0: from a single stone, no legal moves are available (cannot take 1 by splitting since 0 stones remain; cannot take 2 or 3 since not enough stones). Thus a(2) = 1.
+%e A394752 G(2) = 0: similarly no legal moves. Thus a(3) = 2.
+%e A394752 G(3) = 1: take 1 stone, split remaining 2 into 1 + 1, reaching G(1) XOR G(1) = 0. So mex({0}) = 1. Position 3 is an N-position.
+%e A394752 G(20) = 0 by exhaustive computation; thus a(4) = 20.
+%o A394752 (Python)
+%o A394752 def octal_grundy(code, N):
+%o A394752     digits = [int(c) for c in code.split('.')[1]]
+%o A394752     G = [0] * (N + 1)
+%o A394752     P = [0]
+%o A394752     for n in range(1, N + 1):
+%o A394752         reach = set()
+%o A394752         for i, d in enumerate(digits, start=1):
+%o A394752             if i > n: break
+%o A394752             if d & 1 and n == i: reach.add(0)
+%o A394752             if d & 2 and n - i > 0: reach.add(G[n-i])
+%o A394752             if d & 4:
+%o A394752                 ni = n - i
+%o A394752                 for a in range(1, (ni // 2) + 1):
+%o A394752                     b = ni - a
+%o A394752                     if b >= 1: reach.add(G[a] ^ G[b])
+%o A394752         g = 0
+%o A394752         while g in reach: g += 1
+%o A394752         G[n] = g
+%o A394752         if g == 0: P.append(n)
+%o A394752     return P
+%o A394752 print(octal_grundy("0.404", 1000))
+%Y A394752 Cf. A267194 (analogous P-positions for octal game .6 and Couples-are-Forever).
+%K A394752 nonn,more,new
+%O A394752 1,3
+%A A394752 _Sijie Wu_, May 06 2026

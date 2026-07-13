@@ -1,0 +1,53 @@
+%I A397492 #24 Jul 12 2026 18:57:49
+%S A397492 4,9,20,16,208,56,25,1476,1593,120,36,8024,30616,7256,220,49,35744,
+%T A397492 445485,294616,24305,364,64,136352,5217190,9028612,1797600,66424,560,
+%U A397492 81,459304,51124091,222446648,100106965,8101916,157073,816,100,1397017,430885240,4582212760,4475836024,743035060,29421896,333328,1140
+%N A397492 Square array read by antidiagonals: A(n,m) is the number of satisfiable 3-SAT formulas with n variables and m clauses in the multiset clause model, n >= 1, m >= 1.
+%C A397492 A clause is a multiset of 3 literals chosen from {x_1, ..., x_n, not x_1, ..., not x_n}; repeated literals inside a clause are allowed. A formula is a multiset of m such clauses, so repeated clauses are also allowed. This is the satisfiable companion of A396351: together they partition all m-clause formulas over n variables, so A(n,m) + A396351(n,m) = binomial(C(n)+m-1, m), where C(n) = binomial(2*n+2,3) is the number of clause types. The first row is A(1,m) = (m+1)^2. The first column is A(n,1) = binomial(2*n+2,3) (every single clause is satisfiable).
+%H A397492 Stephen A. Cook, <a href="https://doi.org/10.1145/800157.805047">The complexity of theorem-proving procedures</a>, Proceedings of the Third Annual ACM Symposium on Theory of Computing, 1971, 151-158.
+%H A397492 Jian Ding, Allan Sly, and Nike Sun, <a href="https://doi.org/10.1145/2746539.2746619">Proof of the satisfiability conjecture for large k</a>, Proceedings of the forty-seventh annual ACM symposium on Theory of Computing, 2015, 59-68.
+%H A397492 Marc Mézard, Giorgio Parisi, and Riccardo Zecchina, <a href="https://aiichironakano.github.io/cs653/Mezard-RSAT-Science02.pdf">Analytic and algorithmic solution of random satisfiability problems</a>, Science 297 (2002), 812-815.
+%F A397492 A(n,m) = binomial(binomial(2*n+2,3)+m-1, m) - A396351(n,m).
+%F A397492 A(n,1) = binomial(2*n+2,3).
+%F A397492 A(1,m) = (m+1)^2.
+%F A397492 A(n,2) = binomial(binomial(2*n+2,3)+1,2) - n.
+%F A397492 A(n,3) = binomial(binomial(2*n+2,3)+2,3) - 2*n*(2*n^3 + 3*n^2 + 19*n - 18)/3.
+%e A397492   m =    1,    2,      3,       4,         5,          6, ...
+%e A397492   -------------------------------------------------------
+%e A397492   n=1:   4,    9,     16,      25,        36,         49, ...
+%e A397492   n=2:  20,  208,   1476,    8024,     35744,     136352, ...
+%e A397492   n=3:  56, 1593,  30616,  445485,   5217190,   51124091, ...
+%e A397492   n=4: 120, 7256, 294616, 9028612, 222446648, 4582212760, ...
+%o A397492 (Python)
+%o A397492 from itertools import combinations_with_replacement
+%o A397492 def clauses(n):
+%o A397492     lits = list(range(-n, 0)) + list(range(1, n+1))
+%o A397492     return list(combinations_with_replacement(lits, 3))
+%o A397492 def lit_value(lit, a):
+%o A397492     v = abs(lit)-1
+%o A397492     val = (a >> v) & 1
+%o A397492     return val if lit > 0 else 1-val
+%o A397492 def sat(n, formula):
+%o A397492     for a in range(1 << n):
+%o A397492         if all(any(lit_value(lit, a) for lit in clause) for clause in formula):
+%o A397492             return True
+%o A397492     return False
+%o A397492 def A(n, m):
+%o A397492     cl = clauses(n)
+%o A397492     s = 0
+%o A397492     for idxs in combinations_with_replacement(range(len(cl)), m):
+%o A397492         if sat(n, [cl[i] for i in idxs]):
+%o A397492             s += 1
+%o A397492     return s
+%o A397492 def table_by_antidiagonals(N):
+%o A397492     out = []
+%o A397492     for s in range(2, N+2):
+%o A397492         for n in range(1, s):
+%o A397492             m = s-n
+%o A397492             out.append(A(n, m))
+%o A397492     return out
+%o A397492 print(table_by_antidiagonals(10))
+%Y A397492 Cf. A396351, A396492, A396493, A395546, A395609, A397222, A397223, A000290.
+%K A397492 nonn,tabl,hard,new
+%O A397492 1,1
+%A A397492 _Ramin Mohammadi Masoudi_, Jun 28 2026
