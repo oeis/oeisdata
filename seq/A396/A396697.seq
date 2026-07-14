@@ -1,0 +1,35 @@
+%I A396697 #26 Jul 13 2026 22:43:15
+%S A396697 39,279,6735,37995,66975,83061,100695,130695,165315,192375,254043,
+%T A396697 293895,308151,839325,929025,1133961,1373679,1640055,2042235,2936979,
+%U A396697 3002115,3080349,3210819,3266295,3579531,3729375,4145259,4413885,5314665,5867991,6027609,6473745
+%N A396697 Smallest composite of each composite domino orthogonally enclosed by primes in the odds-only Ulam spiral.
+%C A396697 The odds-only Ulam spiral is defined with the following conventions: number k=1 (center) is at (x,y)=(0,0), 3 is at (1,0) starting shell s=1, 5 is at (1,1). Thus the spiral turns counterclockwise and the transitions from shell s to s+1 occur at the south-east diagonal.
+%C A396697 Theorem 1: None of the cells of isolated composite dominoes are diagonal cells of the odds-only Ulam spiral.
+%C A396697 Theorem 2: All terms (smaller composite of the isolated domino) are divisible by 3.
+%C A396697 Theorem 3: For along-spiral dominoes, the larger composite is not divisible by 3.
+%H A396697 Paul Steendijk, <a href="/A396697/a396697.png">Isolated composite dominoes in odds-only Ulam spiral (10 shells)</a>
+%H A396697 Paul Steendijk, <a href="/A396697/a396697_3.png">Isolated composite dominoes in odds-only Ulam spiral (150 shells)</a>
+%H A396697 Paul Steendijk, <a href="/A396697/a396697_4.png">Isolated composite dominoes in odds-only Ulam spiral (20000 shells, resampled in blocks of 100 X 100 cells)</a>
+%e A396697 a(1) = 39: the related isolated composite domino consists of cells at (x,y) = (-3,-1) and (-2,-1) with values 81 and 39, respectively. The 6 enclosing primes are 139 at (-4,-1), 79 at (-3,0), 83 at (-3,-2), 13 at (-1,-1), 37 at (-2,0), and 41 at (-2,-2).
+%e A396697 a(7) = 100695: the related isolated composite domino consists of cells at (-112,-60) and (-112,-59) with values 100697 and 100695, respectively. The 6 enclosing primes are 100699 at (-112,-61), 102499 at (-113,-60), 98911 at (-111,-60), 100693 at (-112,-58), 102497 at (-113,-59), 98909 at (-111,-59).
+%t A396697 v[x_,y_]:=Which[x==0&&y==0,1,-x<y&&y<=x,1+8x^2-6x+2y,-y<=x&&x<y,1+8y^2-2y-2x,x<=y&&y<-x,1+8x^2-2x-2y,True,1+8y^2-6y+2x]
+%t A396697 isComp[x_,y_]:=With[{k=v[x,y]},k>1&&!PrimeQ[k]]
+%t A396697 isPair[x_,y_,dx_,dy_]:=isComp[x,y]&&isComp[x+dx,y+dy]&&PrimeQ[v[x-dx,y-dy]]&&PrimeQ[v[x-dy,y+dx]]&&PrimeQ[v[x+dy,y-dx]]&&PrimeQ[v[x+2dx,y+2dy]]&&PrimeQ[v[x+dx-dy,y+dy+dx]]&&PrimeQ[v[x+dx+dy,y+dy-dx]]
+%t A396697 shellCells[s_]:=Join[Table[{s,y},{y,-s+1,s}],Table[{x,s},{x,s-1,-s,-1}],Table[{-s,y},{y,s-1,-s,-1}],Table[{x,-s},{x,-s+1,s}]]
+%t A396697 Term[nMax_]:=Module[{r={},s=0},While[Length[r]<nMax,s++;Do[With[{x=cell[[1]],y=cell[[2]]},If[isComp[x,y],If[isPair[x,y,1,0],AppendTo[r,Min[v[x,y],v[x+1,y]]],If[isPair[x,y,0,1],AppendTo[r,Min[v[x,y],v[x,y+1]]]]]]],{cell,shellCells[s]}]];Take[Sort[r],nMax]]
+%t A396697 Term[10]
+%o A396697 (PARI)
+%o A396697 v(x,y)=if(x==0&&y==0,1,if(-x<y&&y<=x,1+8*x^2-6*x+2*y,if(-y<=x&&x<y,1+8*y^2-2*y-2*x,if(x<=y&&y<-x,1+8*x^2-2*x-2*y,1+8*y^2-6*y+2*x))));
+%o A396697 isComp(x,y)=my(k=v(x,y));k>1&&!isprime(k);
+%o A396697 isPair(x,y,dx,dy)=isComp(x,y)&&isComp(x+dx,y+dy)&&isprime(v(x-dx,y-dy))&&isprime(v(x-dy,y+dx))&&isprime(v(x+dy,y-dx))&&isprime(v(x+2*dx,y+2*dy))&&isprime(v(x+dx-dy,y+dy+dx))&&isprime(v(x+dx+dy,y+dy-dx));
+%o A396697 {Term(nMax)=my(r=List(),s=0);while(#r<nMax,s++;for(y=-s+1,s,my(x=s); if(isComp(x,y),if(isPair(x,y,1,0),listput(r,min(v(x,y),v(x+1,y))),if(isPair(x,y,0,1),listput(r,min(v(x,y),v(x,y+1)))))));
+%o A396697 forstep(x=s-1,-s,-1,my(y=s); if(isComp(x,y),if(isPair(x,y,1,0),listput(r,min(v(x,y),v(x+1,y))),if(isPair(x,y,0,1),listput(r,min(v(x,y),v(x,y+1)))))));
+%o A396697 forstep(y=s-1,-s,-1,my(x=-s); if(isComp(x,y),if(isPair(x,y,1,0),listput(r,min(v(x,y),v(x+1,y))),if(isPair(x,y,0,1),listput(r,min(v(x,y),v(x,y+1)))))));
+%o A396697 for(x=-s+1,s,my(y=-s); if(isComp(x,y),if(isPair(x,y,1,0),listput(r,min(v(x,y),v(x+1,y))),if(isPair(x,y,0,1),listput(r,min(v(x,y),v(x,y+1))))))));
+%o A396697 my(vv=vecsort(Vec(r)));
+%o A396697 vv[1..min(nMax,#vv)]};
+%o A396697 Term(10)
+%Y A396697 Cf. A396052.
+%K A396697 nonn,new
+%O A396697 1,1
+%A A396697 _Paul Steendijk_, Jun 04 2026

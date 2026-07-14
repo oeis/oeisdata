@@ -1,0 +1,52 @@
+%I A397559 #6 Jul 13 2026 18:37:44
+%S A397559 0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,1,0,2,0,2,0,0,0,1,1,0,2,0,1,2,
+%T A397559 1,0,0,0,0,2,2,2,0,1,0,1,1,1,0,1,0,1,0,0,0,0,0,0,0,2,1,0,1,0,0,0,0,0,
+%U A397559 0,0,0,0,2,1,0,0,0,1,0,0,0,0,0,1,0,0,0,0
+%N A397559 a(n) is the number of inclusion-minimal balanced supports among binomial(n, 0), ..., binomial(n, floor((n-1)/2)).
+%C A397559 A support S is a subset of {0, ..., floor((n - 1)/2)} is balanced if S admits a partition into disjoint subsets A and B such that Sum_{i in A} binomial(n, i) = Sum_{i in B} binomial(n, i).
+%C A397559 A balanced support is primitive if no proper subset of S is balanced.
+%C A397559 Equivalently, a(n) counts primitive relations among binomial(n, 0), ..., binomial(n, floor((n - 1)/2)), where a primitive relation is an identity Sum_{i in A} binomial(n, i) = Sum_{i in B} binomial(n, i), with A and B disjoint and A union B inclusion-minimal.
+%C A397559 Examples of primitive relations: binomial(13, 4) + binomial(13, 5) = binomial(13, 3) + binomial(13, 6); binomial(22, 8) + binomial(22, 9) = binomial(22, 7) + binomial(22, 10); binomial(33, 13) + binomial(33, 14) = binomial(33, 12) + binomial(33, 15).
+%C A397559 Values greater than 1 show that multiple primitive relations may occur for the same n.
+%e A397559 a(12) = 1 because {0, 5} is the unique primitive support; indeed binomial(12, 0) + binomial(12, 5) = binomial(12, 1) + binomial(12, 2) + binomial(12, 3) + binomial(12, 4).
+%e A397559 a(13) = 1 because {3, 4, 5, 6} is a primitive support; indeed binomial(13, 3) + binomial(13, 6) = binomial(13, 4) + binomial(13, 5).
+%e A397559 a(22) = 2 because {7, 8, 9, 10} and {1, 2, 4, 7, 8, 9} are primitive supports; indeed binomial(22, 8) + binomial(22, 9) = binomial(22, 7) + binomial(22, 10), and binomial(22, 1) + binomial(22, 4) + binomial(22, 7) + binomial(22, 8) = binomial(22, 2) + binomial(22, 9).
+%p A397559 A397559 := proc(n)
+%p A397559     local b, i, m, p, r, s;
+%p A397559     m := iquo(n - 1, 2); b := Array(0 .. m);
+%p A397559     for i from 0 to m do
+%p A397559         b[i] := binomial(n, i);
+%p A397559     end do;
+%p A397559     r := Array(0 .. m); r[0] := b[0];
+%p A397559     for i from 1 to m do
+%p A397559         r[i] := r[i - 1] + b[i];
+%p A397559     end do;
+%p A397559     p := []; s := proc(k, u, v, w, x)
+%p A397559         local d, j, y;
+%p A397559         d := u - v;
+%p A397559         if d = 0 and w >= 2 then
+%p A397559             for j in p do
+%p A397559                 if convert(j, set) minus convert(x, set) = {} then return end if;
+%p A397559             end do;
+%p A397559             p := [op(p), x];
+%p A397559             return;
+%p A397559         end if;
+%p A397559         if k < 0 then return end if;
+%p A397559         y := r[k];
+%p A397559         if abs(d) > y then return end if;
+%p A397559         s(k - 1, u, v, w, x);
+%p A397559         if w = 0 then
+%p A397559             s(k - 1, u + b[k], v, 1, [op(x), k]);
+%p A397559         else
+%p A397559             s(k - 1, u + b[k], v, w + 1, [op(x), k]);
+%p A397559             s(k - 1, u, v + b[k], w + 1, [op(x), k]);
+%p A397559         end if;
+%p A397559     end proc;
+%p A397559     s(m, 0, 0, 0, []);
+%p A397559     nops(p);
+%p A397559 end proc:
+%p A397559 seq(A397559(n), n = 1 .. 40);
+%Y A397559 Cf. A007318, A273096, A389802, A390082, A390083, A397501, A397551.
+%K A397559 nonn,new
+%O A397559 1,22
+%A A397559 _Felix Huber_, Jul 06 2026
