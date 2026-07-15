@@ -1,0 +1,46 @@
+%I A394505 #45 Jul 14 2026 12:04:00
+%S A394505 1,32,225,1062,7164,55213,367869,2451527,16899444,117097007,796748754,
+%T A394505 5462709376,37429241689,256967743675,1758182066515,12061301181094,
+%U A394505 82613086585407,566546891562158,3880797538118024,26609057791613799,182311670360675823,1249839553416068949
+%N A394505 Number of ways to place non-attacking knights on a 5 X n chessboard.
+%C A394505 a(n) is the number of independent vertex sets in the 5 X n knight graph (including the empty set).
+%C A394505 Can be computed via column-by-column transfer matrix DP: state encodes the row-occupation patterns of the previous two columns; a new column placement is valid iff for every occupied row r in the new column, neither r +- 2 (in the previous column) nor r +- 1 (in the column two steps back) is occupied.
+%H A394505 Alois P. Heinz, <a href="/A394505/b394505.txt">Table of n, a(n) for n = 0..1195</a>
+%H A394505 Eric Weisstein's World of Mathematics, <a href="https://mathworld.wolfram.com/KnightGraph.html">Knight Graph</a>
+%H A394505 Eric Weisstein's World of Mathematics, <a href="https://mathworld.wolfram.com/IndependentVertexSet.html">Independent Vertex Set</a>
+%H A394505 <a href="/index/Rec#order_43">Index entries for linear recurrences with constant coefficients</a>, signature (7, 22, -179, 358, -2047, 250, 34611, -61753, 33001, 184000, -1565997, 1531933, 2326772, -4448141, 23277162, -24737752, -50360392, 61429300, -135716524, 218725008, 252040032, -438178096, 460709040, -904734832, -215541856, 1157648640, -944858752, 1587255168, -499472448, -1071929856, 1093624320, -1345886208, 639173632, 356229120, -638431232, 752222208, -178987008, -274194432, 190476288, -97222656, -1540096, 45088768, -14417920).
+%F A394505 The growth rate is a(n)/a(n-1) -> lambda ~ 6.85369858..., the largest real root of the characteristic polynomial of the transfer matrix's reachable component.
+%e A394505 For n = 1: the 5 X 1 board admits no knight moves (board too narrow), so every subset of the 5 cells is independent, giving a(1) = 2^5 = 32.
+%e A394505 For n = 5: the 5 X 5 board admits 55213 independent sets, in agreement with A141243(5).
+%o A394505 (Python)
+%o A394505 def T_mn(M, N):
+%o A394505     valid = list(range(1 << M))
+%o A394505     def conf_prev(s, prev):
+%o A394505         for r in range(M):
+%o A394505             if s & (1 << r):
+%o A394505                 if r-2 >= 0 and (prev & (1 << (r-2))): return True
+%o A394505                 if r+2 < M and (prev & (1 << (r+2))): return True
+%o A394505         return False
+%o A394505     def conf_pprev(s, pprev):
+%o A394505         for r in range(M):
+%o A394505             if s & (1 << r):
+%o A394505                 if r-1 >= 0 and (pprev & (1 << (r-1))): return True
+%o A394505                 if r+1 < M and (pprev & (1 << (r+1))): return True
+%o A394505         return False
+%o A394505     state = {(0, 0): 1}
+%o A394505     out = []
+%o A394505     for col in range(1, N+1):
+%o A394505         new_state = {}
+%o A394505         for (pp, p), cnt in state.items():
+%o A394505             for s in valid:
+%o A394505                 if conf_prev(s, p) or conf_pprev(s, pp): continue
+%o A394505                 key = (p, s)
+%o A394505                 new_state[key] = new_state.get(key, 0) + cnt
+%o A394505         state = new_state
+%o A394505         out.append(sum(state.values()))
+%o A394505     return out
+%o A394505 print(T_mn(5, 20))
+%Y A394505 Cf. A141243 (n X n diagonal), A189145 (2 X n), A321251 (3 X n), A030978 (n X n), A244081, A392323.
+%K A394505 nonn,easy,new
+%O A394505 0,2
+%A A394505 _Sijie Wu_, May 06 2026

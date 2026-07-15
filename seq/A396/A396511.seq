@@ -1,0 +1,41 @@
+%I A396511 #54 Jul 14 2026 23:00:09
+%S A396511 0,1,1,0,2,0,3,2,3,4,6,9,12,15,22,30,45,59,87,118,168,237,337,474,676,
+%T A396511 956,1366,1936,2776,3943,5657,8070,11573,16566,23780,34109,49029,
+%U A396511 70436,101372,145844,210152,302736,436663,629832,909277,1312982,1897235,2742192,3965815,5737041
+%N A396511 Number of Lyndon compositions of n whose parts are prime.
+%C A396511 A Lyndon composition of n is a finite sequence of positive integers summing to n that is lexicographically strictly less than all of its cyclic rotations.
+%C A396511 Also the exponents in the Euler product form of A023360.
+%C A396511 a(n) is the number of the primitive compositions of n whose part sizes are prime.
+%C A396511 a(n) is equivalently the number of Lyndon words of weight n over an alphabet with letters of weight p for each prime p.
+%C A396511 In the notation of Christian Bower's transforms, this is the "CHK" (necklace, identity, unlabeled) transform of A010051.
+%H A396511 Christian G. Bower, <a href="/transforms2.html">Transforms (2)</a>
+%H A396511 Pieter Moree, <a href="https://doi.org/10.1016/j.disc.2005.03.004">The formal series Witt transform</a>, Discr. Math. no. 295 vol. 1-3 (2005) 143-160.
+%F A396511 a(n) = (1/n)*Sum_{d|n} Mobius(d)*b(n/d), where b(m) = A307977(m-1).
+%e A396511 For n = 5, the prime composition is 5, 2+3, and 3+2. 2+3 is a cyclic rotation of 3+2, so 2+3 is counted once and a(5) = 2.
+%e A396511 For n = 10, the prime compositions are 5+5, 2+2+2+2+2, 2+2+3+3, 3+7, 2+3+5, 2+5+3, and 2+3+2+3. Excluding repetitions of lower weight, 2+2+2+2+2, 5+5, and 2+3, there are 4 new prime compositions that are not cyclic rotations of each other: 2+2+3+3, 3+7, 2+3+5, and 2+5+2, so a(10) = 4.
+%o A396511 (Python)
+%o A396511 import sympy as sp
+%o A396511 N=100
+%o A396511 terms= 51
+%o A396511 x=sp.symbols('x')
+%o A396511 primes=list(sp.primerange(1,N+1))
+%o A396511 P=sum(x**p for p in primes if p<=N)
+%o A396511 A=sp.series(1/(1-P),x,0,N+1).removeO()
+%o A396511 # y = coeff x^m of x P'/(1-P)
+%o A396511 Y=sp.series(x*sp.diff(P,x)/(1-P),x,0,N+1).removeO()
+%o A396511 y=[0]+[int(sp.expand(Y).coeff(x,m)) for m in range(1,N+1)]
+%o A396511 def mobius(n): return int(sp.mobius(n))
+%o A396511 c=[]
+%o A396511 for n in range(1,terms):
+%o A396511     s=0
+%o A396511     for d in sp.divisors(n):
+%o A396511         s += mobius(d)*y[n//d]
+%o A396511     c.append(s//n if s % n ==0 else sp.Rational(s,n))
+%o A396511 print(c)
+%o A396511 (PARI)
+%o A396511 CHK(p, n)={sum(d=1, n, moebius(d)/d*log(subst(1/(1+O(x*x^(n\d))-p), x, x^d)))}
+%o A396511 seq(n) = Vec(CHK(x*Ser(vector(n, i, isprime(i))), n), -n) \\ _Andrew Howroyd_, Jul 09 2026
+%Y A396511 Cf. A008683, A010051, A023360, A147623, A307977.
+%K A396511 nonn,new
+%O A396511 1,5
+%A A396511 _Nour Abouyoussef_, Jun 28 2026
