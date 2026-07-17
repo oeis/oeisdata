@@ -1,26 +1,113 @@
-%I A091351 #10 Jun 13 2017 21:51:30
+%I A091351 #37 Jul 17 2026 01:14:36
 %S A091351 1,1,1,1,2,1,1,4,3,1,1,9,9,4,1,1,24,30,16,5,1,1,77,115,70,25,6,1,1,
 %T A091351 295,510,344,135,36,7,1,1,1329,2602,1908,805,231,49,8,1,1,6934,15133,
 %U A091351 11904,5325,1616,364,64,9,1,1,41351,99367,83028,39001,12381,2919,540,81,10,1
 %N A091351 Triangle T, read by rows, such that T(n,k) equals the (n-k)-th row sum of T^k, where T^k is the k-th power of T as a lower triangular matrix.
 %C A091351 Since T(n,0)=1 for n>=0, then the k-th column of the lower triangular matrix T equals the leftmost column of T^(k+1) for k>=0.
-%F A091351 T(n, k) = sum_{j=0..n-k} T(n-k, j)*T(j+k-1, k-1) for n>=k>0 with T(n, 0)=1 (n>=0).
-%F A091351 Equals SHIFT_UP(A104445), or A104445(n+1, k) = T(n, k) for n>=k>=0, where triangular matrix X=A104445 satisfies: SHIFT_LEFT_UP(X) = X^2 - X + I.
-%e A091351 T(7,3) = 344 = 1*1 + 9*3 + 9*9 + 4*30 + 1*115
-%e A091351 = T(4,0)*T(2,2) +T(4,1)*T(3,2) +T(4,2)*T(4,2) +T(4,3)*T(5,2) +T(4,4)*T(6,2).
-%e A091351 Rows begin:
-%e A091351 {1},
-%e A091351 {1,1},
-%e A091351 {1,2,1},
-%e A091351 {1,4,3,1},
-%e A091351 {1,9,9,4,1},
-%e A091351 {1,24,30,16,5,1},
-%e A091351 {1,77,115,70,25,6,1},
-%e A091351 {1,295,510,344,135,36,7,1},
-%e A091351 {1,1329,2602,1908,805,231,49,8,1},
-%e A091351 {1,6934,15133,11904,5325,1616,364,64,9,1},...
-%o A091351 (PARI) T(n,k)=if(k>n || n<0 || k<0,0,if(k==0 || k==n,1, sum(j=0,n-k,T(n-k,j)*T(j+k-1,k-1)););)
+%H A091351 Paul D. Hanna, <a href="/A091351/b091351.txt">Table of n, a(n) for n = 0..2555 (rows 0..70)</a>
+%F A091351 T(n, k) = Sum_{j=0..n-k} T(n-k, j)*T(j+k-1, k-1) for n >= k > 0 with T(n, 0) = 1 (n >= 0).
+%F A091351 Equals SHIFT_UP(A104445), or A104445(n+1, k) = T(n, k) for n>=k>=0, where triangular matrix X = A104445 satisfies: SHIFT_LEFT_UP(X) = X^2 - X + I.
+%F A091351 This triangle T as a triangular matrix satisfies L = D + D^2 where L = T shift left 1 column and D = T shift down 1 row. - _Paul D. Hanna_, Jul 15 2026
+%F A091351 Conjecture: given this triangle T as a triangular matrix, then we have the relation [T^p](n+q-1,q-1) = [T^q](n+p-1,p-1) for n >= 0, p > 0, q > 0; that is, column q-1 of matrix power T^p equals column p-1 of matrix power T^q, for all positive integers p and q. - _Paul D. Hanna_, Jul 16 2026
+%e A091351 This triangle T begins
+%e A091351   1;
+%e A091351   1,    1;
+%e A091351   1,    2,     1;
+%e A091351   1,    4,     3,     1;
+%e A091351   1,    9,     9,     4,    1;
+%e A091351   1,   24,    30,    16,    5,    1;
+%e A091351   1,   77,   115,    70,   25,    6,   1;
+%e A091351   1,  295,   510,   344,  135,   36,   7,  1;
+%e A091351   1, 1329,  2602,  1908,  805,  231,  49,  8, 1;
+%e A091351   1, 6934, 15133, 11904, 5325, 1616, 364, 64, 9, 1;
+%e A091351   ...
+%e A091351 We illustrate the formula
+%e A091351   T(n, k) = Sum_{j=0..n-k} T(n-k, j)*T(j+k-1, k-1)
+%e A091351 by the following dot products.
+%e A091351   T(6,3) = 70 = [1, 4, 3, 1]*[1, 3, 9, 30]~.
+%e A091351   T(7,3) = 344 = [1, 9, 9, 4, 1]*[1, 3, 9, 30, 115]~
+%e A091351   = 1*1 + 9*3 + 9*9 + 4*30 + 1*115
+%e A091351   = T(4,0)*T(2,2) + T(4,1)*T(3,2) + T(4,2)*T(4,2) + T(4,3)*T(5,2) + T(4,4)*T(6,2).
+%e A091351   T(8,2) = 2602 = [1, 77, 115, 70, 25, 6, 1]*[1, 2, 4, 9, 24, 77, 295]~.
+%e A091351   T(8,3) = 1908 = [1, 24, 30, 16, 5, 1]*[1, 3, 9, 30, 115, 510]~.
+%e A091351   T(9,4) = 5325 = [1, 24, 30, 16, 5, 1]*[1, 4, 16, 70, 344, 1908]~.
+%e A091351 GENERATE TRIANGLE T AS A TRIANGULAR MATRIX.
+%e A091351 This triangle T as a triangular matrix satisfies
+%e A091351   L = D + D^2
+%e A091351 where L = T shift left 1 column and D = T shift down 1 row.
+%e A091351 As an example using 7 X 7 matrices, L equals
+%e A091351   [ 0   0  0  0  0  0  0]
+%e A091351   [ 1   0  0  0  0  0  0]
+%e A091351   [ 2   1  0  0  0  0  0]
+%e A091351   [ 4   3  1  0  0  0  0] = D + D^2
+%e A091351   [ 9   9  4  1  0  0  0]
+%e A091351   [24  30 16  5  1  0  0]
+%e A091351   [77 115 70 25  6  1  0]
+%e A091351 where D + D^2 =
+%e A091351   [0  0  0  0  0  0  0]   [ 0   0   0  0  0  0]
+%e A091351   [1  0  0  0  0  0  0]   [ 0   0   0  0  0  0]
+%e A091351   [1  1  0  0  0  0  0]   [ 1   0   0  0  0  0]
+%e A091351   [1  2  1  0  0  0  0] + [ 3   1   0  0  0  0]
+%e A091351   [1  4  3  1  0  0  0]   [ 8   5   1  0  0  0]
+%e A091351   [1  9  9  4  1  0  0]   [23  21   7  1  0  0]
+%e A091351   [1 24 30 16  5  1  0]   [76  91  40  9  1  0].
+%e A091351 Then T equals L when shift right by inserting a leftmost column of 1's.
+%e A091351 GENERATING TRIANGLE T FROM MATRIX POWERS OF ITSELF.
+%e A091351 The matrix square of this triangle begins
+%e A091351     1;
+%e A091351     2,    1;
+%e A091351     4,    4,   1;
+%e A091351     9,   14,   6,   1;
+%e A091351    24,   52,  30,   8,  1;
+%e A091351    77,  217, 153,  52, 10,  1; ...
+%e A091351 in which column 0 of T^2 equals column 1 of T,
+%e A091351 and the row sums of T^2 equals column 2 of T.
+%e A091351 Also, column 2 of T^2 appears to equal column 1 of T^3,
+%e A091351 column 3 of T^2 appears to equal column 1 of T^4, etc.
+%e A091351 The matrix cube of this triangle begins
+%e A091351     1;
+%e A091351     3,    1;
+%e A091351     9,    6,   1;
+%e A091351    30,   30,   9,   1;
+%e A091351   115,  153,  63,  12,  1;
+%e A091351   510,  845, 429, 108, 15,  1; ...
+%e A091351 in which column 0 of T^3 equals column 2 of T,
+%e A091351 and the row sums of T^3 equals column 3 of T.
+%e A091351 Also, column 3 of T^3 appears to equal column 2 of T^4,
+%e A091351 column 4 of T^3 appears to equal column 2 of T^5, etc.
+%e A091351 The matrix fourth power of this triangle begins
+%e A091351     1;
+%e A091351     4,    1;
+%e A091351    16,    8,   1;
+%e A091351    70,   52,  12,   1;
+%e A091351   344,  336, 108,  16,  1;
+%e A091351  1908, 2294, 918, 184, 20,  1; ...
+%e A091351 in which column 0 of T^4 equals column 3 of T,
+%e A091351 and the row sums of T^4 equals column 4 of T.
+%e A091351 Also, column 4 of T^4 appears to equal column 3 of T^5,
+%e A091351 column 5 of T^4 appears to equal column 3 of T^6, etc.
+%o A091351 (PARI) \\ By definition (slow)
+%o A091351 {T(n,k) = if(k>n || n<0 || k<0,0, if(k==0 || k==n,1, sum(j=0,n-k,T(n-k,j)*T(j+k-1,k-1)););)}
+%o A091351 {for(n=0,12, for(k=0,n, print1(T(n,k),", "));print(""))}
+%o A091351 (PARI) \\ Using Matrix Products (faster)
+%o A091351 {T(n, k) = my(M=matrix(2, 2, r, c, if(r>=c, 1)), D, L); for(i=2, n,
+%o A091351 \\ D = M shift down 1 row
+%o A091351 D = matrix(#M+1, #M+1, r, c, if(r==1, 0, if(c>#M, 0, M[r-1, c])) );
+%o A091351 \\ L = new M but shifted left 1 column
+%o A091351 L = D + D^2;
+%o A091351 \\ Shift L right 1 column to obtain M with a new row
+%o A091351 M = matrix(#M+1, #M+1, r, c, if(c==1, 1, L[r, c-1]) ));
+%o A091351 TM = M; M[n+1, k+1]}
+%o A091351 \\ Print up to n rows of triangular matrix TM
+%o A091351 {uptoRow(n) = T(n, n); for(r=0, n, for(c=0, r, print1(TM[r+1, c+1], ", ")); print(""))}
+%o A091351 uptoRow(12) \\ _Paul D. Hanna_, Jul 15 2026
+%o A091351 \\ Verification: if the definition holds true,
+%o A091351 \\ then the following should return all zeros
+%o A091351 {for(n=0,#TM-1, for(k=0,n, print1(TM[n+1,k+1] - sum(j=0,n-k, (TM^k)[n-k+1,j+1]),", "));print(""))}
+%o A091351 \\ Verification: if the conjecture holds true,
+%o A091351 \\ then the following should return all zeros
+%o A091351 {for(p=1,min(12,#TM), for(q=1,min(12,#TM), print1("p,q = ",p,",",q,": "); for(n=0,min(#TM-p,#TM-q), print1( (TM^p)[n+q,q] - (TM^q)[n+p,p],", "));print(""));print(""))}
 %Y A091351 Cf. A091352, A091353, A091354, A104445.
-%K A091351 nonn,tabl
+%K A091351 nonn,tabl,changed
 %O A091351 0,5
 %A A091351 _Paul D. Hanna_, Jan 02 2004

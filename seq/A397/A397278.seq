@@ -1,0 +1,33 @@
+%I A397278 #21 Jul 16 2026 10:55:30
+%S A397278 0,0,1,1,1,2,2,3,3,2,3,6,3,5,5,7,4,8,5,7,8,8,6,14,6,8,10,13,7,12,8,15,
+%T A397278 12,11,10,21,9,14,13,17,10,22,11,20,16,17,12,30,14,16,17,21,13,28,15,
+%U A397278 29,20,20,15,32,15,23,26,31,16,34,17,28,24,27,18,47
+%N A397278 a(n) is the number of incongruent acute triangles of area n/2 with vertices on the integer lattice points of a Cartesian grid.
+%e A397278 There are two triangles of area 5: a(10) = 2. The two triangles have edge lengths {2,sqrt(26),sqrt(26)} and {sqrt(8),sqrt(13),sqrt(17)}.
+%t A397278 a[n_] := With[{mb=2n/Sqrt@3}, Length@Union[Sort[Norm /@ {##, #1-#2}] & @@@ Select[Flatten[Table[{{ax,ay},{bx,by}}, {ax,1,mb}, {ay,0,Sqrt[mb^2-ax^2]}, {bx,-n,ax-1}, {by,1,mb Sqrt@2}], 3], #1.#2>0 && #1.(#1-#2)>0 && #2.(#2-#1)>0 && Det[{##}]==n &@@#&]]];
+%t A397278 Table[a[n], {n, 20}] (* _Andrei Zabolotskii_, Jul 16 2026 *)
+%o A397278 (Rust)
+%o A397278 fn a(n: i32) -> usize {
+%o A397278   let mb = (2.0 * n as f64 / 3.0f64.sqrt()) as i32 + 1;
+%o A397278   let mut triangles = std::collections::HashSet::new();
+%o A397278   for ax in 1..=mb {
+%o A397278     for ay in 0..=(((mb*mb-ax*ax) as f64).sqrt() as i32 + 1) {
+%o A397278       for bx in -n..ax {
+%o A397278         for by in 1..=(mb as f64 * std::f64::consts::SQRT_2) as i32 + 1 {
+%o A397278           if ax*by - bx*ay == n
+%o A397278            && ax*bx+ay*by > 0 && ax*(ax-bx)+ay*(ay-by) > 0 && bx*(bx-ax)+by*(by-ay) > 0 {
+%o A397278             let (s1, s2, s3) = (ax*ax+ay*ay, bx*bx+by*by, (ax-bx)*(ax-bx) + (ay-by)*(ay-by));
+%o A397278             let (mn, mx) = (s1.min(s2).min(s3), s1.max(s2).max(s3));
+%o A397278             triangles.insert((mn, s1+s2+s3-mn-mx, mx));
+%o A397278           }
+%o A397278         }
+%o A397278       }
+%o A397278     }
+%o A397278   }
+%o A397278   triangles.len()
+%o A397278 } // _Andrei Zabolotskii_, Jul 16 2026
+%Y A397278 Cf. A372917 (right), A003051 (not necessarily acute, up to affine transformations), A372915 (not necessarily acute, in an n X n grid), A190309 (isosceles, in an n X n grid).
+%K A397278 nonn,new
+%O A397278 1,6
+%A A397278 _Gordon Hamilton_, Jun 20 2026
+%E A397278 Terms a(13) onwards from _Andrei Zabolotskii_, Jul 16 2026

@@ -1,10 +1,12 @@
-%I A367227 #6 Nov 15 2023 08:06:12
+%I A367227 #11 Jul 16 2026 12:47:11
 %S A367227 3,5,7,11,13,17,19,23,25,27,29,31,35,37,41,43,47,49,53,55,59,61,63,65,
 %T A367227 67,71,73,77,79,83,85,89,91,95,97,99,101,103,107,109,113,115,117,119,
 %U A367227 121,127,131,133,137,139,143,145,147,149,151,153,155,157,161,163
 %N A367227 Numbers m whose prime indices have no nonnegative linear combination equal to bigomega(m).
 %C A367227 A prime index of n is a number m such that prime(m) divides n. The multiset of prime indices of n is row n of A112798.
 %C A367227 These are the Heinz numbers of the partitions counted by A367219.
+%C A367227 All terms are odd.  Includes all odd primes and semiprimes coprime to 6. - _Robert Israel_, Jul 16 2026
+%H A367227 Robert Israel, <a href="/A367227/b367227.txt">Table of n, a(n) for n = 1..10000</a>
 %e A367227 The prime indices of 24 are {1,1,1,2} with (1+1+1+1) = 4 or (1+1)+(2) = 4 or (2+2) = 4, so 24 is not in the sequence.
 %e A367227 The terms together with their prime indices begin:
 %e A367227      3: {2}        43: {14}        85: {3,7}
@@ -22,6 +24,18 @@
 %e A367227     35: {3,4}      77: {4,5}      117: {2,2,6}
 %e A367227     37: {12}       79: {22}       119: {4,7}
 %e A367227     41: {13}       83: {23}       121: {5,5}
+%p A367227 filter:= proc(n) local F,W,w,S,j,k;
+%p A367227   F:= ifactors(n)[2];
+%p A367227   W:= map(t -> NumberTheory:-pi(t[1]),F);
+%p A367227   w:= convert(F[..,2],`+`);
+%p A367227   S:= {0};
+%p A367227   for j from 1 to nops(F) do
+%p A367227     S:= map(s -> seq(s+k*W[j],k=0..(w-s)/W[j]), S);
+%p A367227     if member(w,S) then return false fi
+%p A367227   od;
+%p A367227   true
+%p A367227 end proc:
+%p A367227 select(filter, [$2..200]); # _Robert Israel_, Jul 16 2026
 %t A367227 prix[n_]:=If[n==1,{}, Flatten[Cases[FactorInteger[n], {p_,k_}:>Table[PrimePi[p], {k}]]]];
 %t A367227 combs[n_,y_]:=With[{s=Table[{k,i}, {k,y}, {i,0,Floor[n/k]}]}, Select[Tuples[s], Total[Times@@@#]==n&]];
 %t A367227 Select[Range[100], combs[PrimeOmega[#], Union[prix[#]]]=={}&]
@@ -39,6 +53,6 @@
 %Y A367227 A304792 counts subset-sums of partitions, strict A365925.
 %Y A367227 A365046 counts combination-full subsets, differences of A364914.
 %Y A367227 Cf. A000720, A046663, A088314, A106529, A116861, A236912, A364345, A364346, A364347, A364350, A365073, A365312.
-%K A367227 nonn
+%K A367227 nonn,changed
 %O A367227 1,1
 %A A367227 _Gus Wiseman_, Nov 15 2023
