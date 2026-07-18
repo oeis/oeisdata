@@ -1,0 +1,39 @@
+%I A397672 #33 Jul 17 2026 18:49:25
+%S A397672 0,0,1,0,3,2,2,0,7,6,6,4,6,4,3,0,15,14,14,12,14,12,11,8,14,12,11,8,9,
+%T A397672 6,4,0,31,30,30,28,30,28,27,24,30,28,27,24,25,22,20,16,30,28,27,24,25,
+%U A397672 22,20,16,21,18,16,12,12,8,5,0,63,62,62,60,62,60,59,56
+%N A397672 Value of the Colless index for the rooted binary echelon tree with n leaves.
+%C A397672 The rooted binary echelon tree plays an important role in the literature on tree balance, and the Colless index is an established balance measure. The n-th value of the sequence gives the values of the Colless index for the rooted binary echelon tree with n leaves.
+%C A397672 Let T be the rooted binary echelon tree with n leaves, which can be constructed recursively as follows: Let k=floor(log_2(n)). If n==2^k, the rooted binary echelon tree T equals the fully balanced tree with 2^k leaves. If n>2^k, then T=(T_b,T_c), where T_b is the fully balanced tree of size 2^k and T_c is the echelon tree of size n-2^k.
+%C A397672 The Colless index of a tree is defined as: C(T)=Sum_{v: inner vertex of T} |l_b-l_c|, where l_b is the number of leaves descending from the left child of v and l_c is the number of leaves descending from the right child of v (or vice versa).
+%C A397672 Now, a(n) is the Colless index of the rooted binary echelon tree with n leaves.
+%H A397672 Mareike Fischer, Lina Herbst, Sophie Kersting, Annemarie Luise Kühn, and Kristina Wicke, <a href="https://doi.org/10.1007/978-3-031-39800-1_12">Tree Balance Indices: A comprehensive survey</a>, Springer Nature Link, 2023.
+%H A397672 Linda Knüver and Mareike Fischer, <a href="https://arxiv.org/abs/2509.04995">Revealing the building blocks of tree balance: fundamental units of the Sackin and Colless Indices</a>, arXiv:2509.04995 [q-bio.PE], 2025-2026.
+%F A397672 a(2^n)=0 for n>=0, otherwise a(n) = 2*m - n + a(n-m) where m=2^k is the highest power of 2 <= n. - _Sean A. Irvine_, Jul 16 2026
+%e A397672 a(1) = 0 as the rooted binary echelon tree T with 1 leaf consists only of one vertex, which is a leaf, so the Colless index is a summation over an empty sum and thus equals 0.
+%e A397672 a(2) = 0 as the rooted binary echelon tree T with 2 leaves consists only of a so-called "cherry"; i.e., two leaves attached to a common inner vertex of T, so the Colless index is 1-1=0.
+%e A397672 a(3) = 1 as the rooted binary echelon tree with 3 leaves consists of the root of the tree, whose children are a cherry and a singleton leaf. The cherry parent has Colless value 1-1=0, and the root of the entire tree has Colless value 2-1=1, giving a Colless index of 0+1=1 for the entire tree.
+%p A397672 a:= proc(n) option remember;
+%p A397672       (m-> `if`(m=n, 0, 2*m-n+a(n-m)))(2^ilog2(n))
+%p A397672     end:
+%p A397672 seq(a(n), n=1..72);  # _Alois P. Heinz_, Jul 17 2026
+%t A397672 CollessIndex[tree_] := Module[{list, size1, size2},
+%t A397672    list = Level[tree, {0, Infinity}];
+%t A397672    list = DeleteCases[list, 1];
+%t A397672    Sum[
+%t A397672     size1 = Total[element[[1]], Infinity];
+%t A397672     size2 = Total[element[[2]], Infinity];
+%t A397672     Abs[size1 - size2]
+%t A397672     , {element,list}]
+%t A397672    ];
+%t A397672 MBtree[1] = 1;
+%t A397672 MBtree[n_] := {MBtree[Ceiling[n/2]], MBtree[Floor[n/2]]};
+%t A397672 EchelonTree[1] = 1;
+%t A397672 EchelonTree[n_] := Module[{kn = Ceiling[Log2[n]]},
+%t A397672    {MBtree[2^(kn - 1)], EchelonTree[n - 2^(kn - 1)]}
+%t A397672  ];
+%t A397672 Table[CollessIndex[EchelonTree[n]], {n, 72}]
+%Y A397672 Cf. A307689, A296062.
+%K A397672 nonn,new
+%O A397672 1,5
+%A A397672 _Mareike Fischer_, Jul 04 2026

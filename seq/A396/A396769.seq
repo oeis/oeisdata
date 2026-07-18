@@ -1,0 +1,36 @@
+%I A396769 #41 Jul 17 2026 20:09:59
+%S A396769 0,2,5,8,13,16,20,24,33,36,40,44,50,54,59,64,81,84,88,92,98,102,107,
+%T A396769 112,122,126,131,136,143,148,154,160,193,196,200,204,210,214,219,224,
+%U A396769 234,238,243,248,255,260,266,272,290,294,299,304,311,316,322,328,339,344
+%N A396769 Value of the Sackin index for the rooted binary echelon tree with n leaves.
+%C A396769 The rooted binary echelon tree plays an important role in the literature on tree balance, and the Sackin index is an established balance measure. The n-th value of the sequence gives the values of the Sackin index for the rooted binary echelon tree with n leaves.
+%C A396769 Let T be the rooted binary echelon tree with n leaves, which can be constructed recursively as follows: Let k = floor(log_2(n)). If n = 2^k, the rooted binary echelon tree T equals the fully balanced tree with 2^k leaves. If n > 2^k, then T = (T_b, T_c), where T_b is the fully balanced tree of size 2^k, and T_c is the echelon tree of size n - 2^k.
+%C A396769 The Sackin index of a tree is defined as: S(T) = Sum_{i:leaf of T} delta(T, i), where delta(T, i) is the depth of leaf i in tree T, that is, the distance from i to the root of T.
+%C A396769 Now a(n) is the Sackin index of the rooted binary echelon tree with n leaves.
+%H A396769 Linda Knüver and Mareike Fischer, <a href="https://arxiv.org/abs/2509.04995">Revealing the building blocks of tree balance: fundamental units of the Sackin and Colless Indices</a>, arXiv:2509.04995 [q-bio.PE], 2025-2026.
+%F A396769 a(n) = A003071(n) + n - 1. - _Andrei Zabolotskii_, Jul 05 2026
+%F A396769 a(2^k) = k*2^k, otherwise a(n) = a(n-2^k) + n + k*2^k where 2^k is the largest power of 2 <= n. - _Sean A. Irvine_, Jul 16 2026
+%e A396769 a(1) = 0 as the rooted binary echelon tree T with 1 leaf consists only of one vertex which has depth 0, so the Sackin index is 0.
+%e A396769 a(2) = 2 as the rooted binary echelon tree T with 2 leaves consists only of a so-called "cherry"; i.e., two leaves attached to a common inner vertex of T, both of which have depth 1, so the Sackin index of this tree is 1 + 1 = 2.
+%e A396769 a(3) = 5 as the rooted binary echelon tree with 3 leaves consists of the root of the tree, whose children are a cherry and a singleton leaf. The cherry leaves both have depth 2 and the singleton has depth 1, so the Sackin index is 2 + 2 + 1 = 5.
+%p A396769 a:= proc(n) option remember;
+%p A396769       (k-> `if`(2^k=n, k*n, a(n-2^k)+n+k*2^k))(ilog2(n))
+%p A396769     end:
+%p A396769 seq(a(n), n=1..58);  # _Alois P. Heinz_, Jul 16 2026
+%t A396769 SackinIndex[tree_] :=
+%t A396769   Module[{list},
+%t A396769    list = Level[tree, {0, Infinity}];
+%t A396769    list = DeleteCases[list, 1];
+%t A396769    Total[list, Infinity]
+%t A396769   ];
+%t A396769 MBtree[1] = 1;
+%t A396769 MBtree[n_] := {MBtree[Ceiling[n/2]], MBtree[Floor[n/2]]};
+%t A396769 EchelonTree[1] = 1;
+%t A396769 EchelonTree[n_] := Module[{kn = Ceiling[Log2[n]]},
+%t A396769    {MBtree[2^(kn - 1)], EchelonTree[n - 2^(kn - 1)]}
+%t A396769   ];
+%t A396769 Table[SackinIndex[EchelonTree[n]], {n, 58}]
+%Y A396769 Cf. A299037, A345135, A344934, A003071.
+%K A396769 nonn,new
+%O A396769 1,2
+%A A396769 _Mareike Fischer_, Jul 04 2026

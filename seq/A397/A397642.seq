@@ -1,0 +1,48 @@
+%I A397642 #43 Jul 17 2026 20:06:07
+%S A397642 1,1,1,1,2,2,1,1,3,8,6,6,4,3,1,1,4,21,31,99,72,104,38,52,27,48,24,18,
+%T A397642 7,4,1,1,5,44,116,751,1121,3611,3108,14705,7366,19184,12892,21344,
+%U A397642 7707,7562,1978,4031,1408,3597,2575,4467,2074,2028,522,529,153,190,70,40,11,5
+%N A397642 Number of rooted binary trees with n leaves and minimal Delta_CS value (Colless value minus Sackin value).
+%C A397642 a(n) is the number of rooted binary trees with n leaves with minimal Delta_CS value, where Delta_CS(T) = C(T) - S(T) for a rooted binary tree T with n leaves. Here, C is the Colless value of a tree and S is the Sackin value of a tree.
+%C A397642 Let n be the number of leaves; let k be the exponent of the largest power of 2 that divides n; let n_0 = n/(2^k); define m_1 > ... > m_(l-1) > m_l = 0 with a suitable choice of l >= 0 such that n_0 = Sum_{i=1..l} 2^(m_i); i.e., the exponents m_i give the binary expansion of n_0.
+%C A397642 For n >= 2 define the set M(n) to contain all pairs (n_a, n_b) with the following properties:
+%C A397642 (i) If l = 1, M(n) = {(n/2, n/2)};
+%C A397642 (ii) If l > 1:
+%C A397642   M(n) contains (b, c) where b = 2^k*(Sum_{i=1..l-1}) 2^(m_i - 1) + 1, and c = 2^k*Sum_{i=1..l-1} 2^(m_i-1).
+%C A397642   For every j=2,...,l-1 with m_j > m_(j+1) + 1, M(n) contains the pair (b, c) where b = 2^k*(Sum_{i=1..j-1} 2^(m_i - 1) + 2^(m_j)), and c = n - 2^k*(Sum_{i=1..j-1} 2^(m_i - 1) + 2^(m_j)).
+%C A397642   For every j=2,...,l-1 with m_j < m_(j+1) - 1, M(n) contains the pair (b, c) where b = n-2^k*(Sum_{i=1..j-1} 2^(m_i-1), and c = 2^k*(Sum_{i=1..j-1} 2^(m_i-1)).
+%C A397642 (iii) If k >= 1, M(n) contains the pair (n/2, n/2).
+%C A397642 (iv) If n is in {2^(s-1) + 1,...,3*2^(s - 2)} with s = log_2(n), then M contains the pair (2^(s - 1), n - 2^(s - 1)).
+%C A397642 For n >= 2, we have a(n) = Sum_{(n_b, n_c) in M(n), n_b > n_c} a(n_b) * a(n_c) + [n even] * (binomial(a(n/2),2) + a(n/2)), where [] is the Iverson bracket.
+%H A397642 Linda Knüver and Mareike Fischer, <a href="https://arxiv.org/abs/2509.04995">Revealing the building blocks of tree balance: fundamental units of the Sackin and Colless Indices</a>, arXiv:2509.04995 [q-bio.PE], 2025-2026.
+%e A397642 a(1) = a(2) = a(3) = 1 because there is only one rooted binary tree with n leaves for n=1,...,3.
+%e A397642 a(4) = 1 because the only tree with minimal Delta_CS value and 4 leaves is the fully balanced tree on four leaves. See comments section for how to calculate this: n = 4, k = 2 (largest power of 2 dividing 4), n_0 = 4/(2^k) = 1 = 2^0 = Sum_{i=1..l} 2^(m_i) with l = 1 and m_1 = 0. As l = 1, M(4) = {(n/2,n/2)}, i.e., the only leaf division allowed at the root is (2,2). The only other rooted binary tree with four leaves has a leaf division of (3,1), which is not contained in M(4). Thus, a(4) = 1.
+%t A397642 QB[n_?EvenQ] := Append[With[{k=IntegerExponent[n, 2]}, 2^k QB[n/2^k]], {n/2, n/2}];
+%t A397642 QB[1] = {};
+%t A397642 QB[n_] := QB[n] = Module[{bin = IntegerDigits[n, 2], m, qb = {{(n+1)/2, (n-1)/2}}, t},
+%t A397642   m = Length[bin] - Flatten@Position[bin, 1];
+%t A397642   Do[
+%t A397642     t = Sum[2^(m[[i]] - 1), {i, j - 1}];
+%t A397642     If[m[[j-1]] - m[[j]] > 1,
+%t A397642       AppendTo[qb, {n - t, t}]];
+%t A397642     If[m[[j]] - m[[j+1]] > 1,
+%t A397642       t+=2^m[[j]];
+%t A397642       AppendTo[qb, {t, n - t}]];
+%t A397642   , {j, 2, Length[m]-1}];
+%t A397642   qb
+%t A397642 ];
+%t A397642 echelonpartition[n_] :=
+%t A397642  Module[{k= Ceiling[Log2[n]]},
+%t A397642   {2^(k - 1), n - 2^(k - 1)}
+%t A397642   ];
+%t A397642 a[1] = 1;
+%t A397642 a[n_] := Module[{M= DeleteDuplicates[
+%t A397642     Sort[Join[QB[n], {echelonpartition[n]}]]]},
+%t A397642  Sum[a[m[[1]]]*a[m[[2]]], {m,M}] +
+%t A397642       If[EvenQ[n],Binomial[a[n/2], 2],0]
+%t A397642 ];
+%t A397642 Table[a[n], {n,30}]
+%Y A397642 A307689 gives a lower bound.
+%K A397642 nonn,new
+%O A397642 1,5
+%A A397642 _Mareike Fischer_, Jul 03 2026
