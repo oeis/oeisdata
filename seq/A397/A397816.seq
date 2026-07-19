@@ -1,0 +1,38 @@
+%I A397816 #13 Jul 18 2026 19:49:02
+%S A397816 1,2,3,4,5,6,5,6,7,8,7,8,9,10,9,10
+%N A397816 a(n) is the minimum over all permutations s of {1,...,n} of the maximum number of vertices in a properly colored path in the 2-edge-colored multigraph on {1,...,n} with blue edges {i,i+1} for 1 <= i <= n-1 and red edges {s^(-1)(v), s^(-1)(v+1)} for 1 <= v <= n-1.
+%C A397816 The multigraph is the union of two Hamiltonian paths on a common vertex set: the blue path joins consecutive positions, the red path joins the positions holding consecutive values. A properly colored path uses edges that alternate in color. Doubled edges (one blue, one red, on the same pair) occur exactly at the successions of s; i.e., at positions i with |s(i+1)-s(i)| = 1; s has no doubled edge iff s has no succession, cf. A002464.
+%C A397816 A properly colored path is an path-alternating walk on adjacent vertices; this parameter is unrelated to monotone-subsequence (Erdős-Szekeres type) statistics of s, which impose order but not adjacency.
+%C A397816 a(n) = n for n <= 6: every permutation of at most 6 elements admits a properly colored Hamiltonian path; n = 7 is the smallest length where this fails.
+%C A397816 The sequence is not monotone: a(7) = 5 < 6 = a(6) and a(11) = 7 < 8 = a(10).
+%C A397816 It is not known whether a(n) -> infinity; no lower bound growing with n is known, and by the upper bound below any such bound is at most of order sqrt(n).
+%C A397816 Other names for the objects involved: alternating path, color-alternating path, union of two Hamiltonian paths, permutation multigraph.
+%H A397816 Alejandro Lizardi, <a href="https://github.com/alejlizardi/Periapsis_papers/tree/main/union-two-hamiltonian-paths-v2">Properly colored paths in the union of two Hamiltonian paths: the O(sqrt(n)) collapse, the transit floor, and the failure of block lower bounds</a>, 2026.
+%F A397816 a(n) <= 8*sqrt(n) + 20 for n >= 100 (Lizardi 2026).
+%F A397816 a(n) >= 3 for n >= 3.
+%e A397816 For n = 7 the permutation (2,1,5,4,3,7,6) admits no properly colored path on more than 5 vertices, and no permutation of {1,...,7} does worse, so a(7) = 5. A maximum properly colored path for it visits positions 1, 2, 3, 4, 5 (edge colors red, blue, red, blue: values 2,1 and 5,4 give the red edges).
+%e A397816 At n = 13, exactly 290 permutations attain a(13) = 9 (62 up to position reversal, value complementation and inversion); at n = 14, exactly 2894 attain a(14) = 10 (476 up to the same symmetries).
+%o A397816 (Python)
+%o A397816 from itertools import permutations
+%o A397816 def rho(s):  # s is a tuple: a permutation of range(n)
+%o A397816     n = len(s); inv = [0]*n
+%o A397816     for i, v in enumerate(s): inv[v] = i
+%o A397816     adj = [[] for _ in range(n)]  # entries (neighbor, color)
+%o A397816     for i in range(n-1): adj[i].append((i+1,0)); adj[i+1].append((i,0))
+%o A397816     for v in range(n-1):
+%o A397816         a, b = inv[v], inv[v+1]
+%o A397816         adj[a].append((b,1)); adj[b].append((a,1))
+%o A397816     best = 1
+%o A397816     def ext(v, last, seen):
+%o A397816         nonlocal best; best = max(best, len(seen))
+%o A397816         for w, c in adj[v]:
+%o A397816             if c != last and w not in seen:
+%o A397816                 seen.add(w); ext(w, c, seen); seen.discard(w)
+%o A397816     for v in range(n):
+%o A397816         for c in (0, 1): ext(v, 1-c, {v})
+%o A397816     return best
+%o A397816 def a(n): return min(rho(s) for s in permutations(range(n)))  # feasible for n <= 8
+%Y A397816 Cf. A002464 (permutations without successions: exactly the s whose multigraph is simple).
+%K A397816 nonn,hard,more,new
+%O A397816 1,2
+%A A397816 _Alejandro Lizardi_, Jul 10 2026
