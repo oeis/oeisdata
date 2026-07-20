@@ -1,0 +1,38 @@
+%I A397641 #12 Jul 19 2026 23:21:20
+%S A397641 1,1,8,99,570,2445,7752,19440,38760,63090,83980,92504,83980,63090,
+%T A397641 38760,19440,7752,2445,570,100,10,1,30,1281,29800,514695,6995766,
+%U A397641 78123023,736554852,5984537625,42556502560,268106154624,1511142718176,7681643124624
+%N A397641 Irregular triangle read by rows: T(m,r) is the number of chemical reaction networks on species A and B that use both species, contain r reactions, and have only complexes i*A+j*B with 1 <= i+j <= m, up to swapping A and B.
+%C A397641 For fixed m, an admissible complex is i*A+j*B, where i,j >= 0 and 1 <= i+j <= m. An admissible reaction is a directed pair y -> z of distinct admissible complexes. A network is a nonempty set of distinct admissible reactions.
+%C A397641 Both A and B must occur in at least one source or product. Two networks are equivalent when one is obtained from the other by either leaving A and B fixed or globally swapping A <-> B; complexes are not relabeled independently. The upper bound m need not be attained.
+%C A397641 There are c(m) = binomial(m+2,2)-1 = m*(m+3)/2 admissible complexes and R(m) = c(m)*(c(m)-1) admissible directed reactions. Thus row m consists of T(m,r) for 1 <= r <= R(m) and has length R(m). The first row lengths are 2, 20, 72, 182, ...
+%C A397641 For related CRN enumeration under species relabeling, see Spaccasassi et al. (2019). The conventions here exclude the zero complex and require both species to occur.
+%C A397641 Rows need not be palindromic, because the condition that both species occur is not preserved by complementing the reaction set; for example, T(2,2) = 99 while T(2,18) = 100.
+%D A397641 M. Feinberg, Foundations of Chemical Reaction Network Theory, Applied Mathematical Sciences 202, Springer, 2019.
+%D A397641 C. Spaccasassi, B. Yordanov, A. Phillips, and N. Dalchau, Fast enumeration of non-isomorphic chemical reaction networks, in: Computational Methods in Systems Biology, LNCS 11773, Springer, 2019, pp. 224-247.
+%H A397641 C. Spaccasassi et al., <a href="https://www.microsoft.com/en-us/research/publication/fast-enumeration-of-non-isomorphic-chemicalreaction-networks/">Fast enumeration of non-isomorphic chemical reaction networks</a>.
+%H A397641 C. Spaccasassi et al., <a href="https://github.com/CSpaccasassi/genCRN">genCRN software</a>.
+%F A397641 Let c = m*(m+3)/2, R = c*(c-1), d = m*(m-1), h = floor(m/2), f = h*(h-1), and p = (R-f)/2. Then T(m,r) = (binomial(R,r) - 2*binomial(d,r) + [x^r](1+x)^f*(1+x^2)^p)/2, where binomial(a,b) = 0 if b < 0 or b > a. Here f is the number of reactions fixed by A <-> B, and the remaining R-f reactions form p swapped pairs.
+%e A397641 Row m=1 (r=1..2) is [1,1]. The only reactions are A -> B and B -> A. They are swapped, so choosing either gives one orbit, and choosing both gives one orbit.
+%e A397641 For m=2 the five complexes are A, B, 2A, A+B, and 2B. Each can be the source of a reaction to any of the other four, so R(2) = 5*4 = 20. Four of these one-reaction networks use only one species: A -> 2A, 2A -> A, B -> 2B, and 2B -> B. The remaining 16 form eight pairs under A <-> B, so T(2,1) = 8. Also T(2,20) = 1.
+%e A397641 Row m=3 has length 72 and begins [30,1281,29800,514695,6995766,78123023,736554852,...].
+%o A397641 (Python)
+%o A397641 from math import comb
+%o A397641 def C(n, k):
+%o A397641     return comb(n, k) if 0 <= k <= n else 0
+%o A397641 def row(m):
+%o A397641     c = m*(m + 3)//2
+%o A397641     R = c*(c - 1)
+%o A397641     d = m*(m - 1)
+%o A397641     h = m//2
+%o A397641     f = h*(h - 1)
+%o A397641     p = (R - f)//2
+%o A397641     return [(C(R, r) - 2*C(d, r)
+%o A397641              + sum(C(p, k)*C(f, r - 2*k)
+%o A397641                    for k in range(r//2 + 1)))//2
+%o A397641             for r in range(1, R + 1)]
+%o A397641 print([a for m in range(1, 4) for a in row(m)])
+%o A397641 (PARI) row(n) = my(c=n*(n+3)*(n^2 + 3*n - 2)/4, d=(n\2)*(n\2-1), e=n*(n-1)); Vecrev(((1 + x)^c + (1 + x)^d*(1 + x^2)^((c-d)/2) - 2*(1 + x)^e)/2, -c) \\ _Andrew Howroyd_, Jul 13 2026
+%K A397641 nonn,tabf,new
+%O A397641 1,3
+%A A397641 _Alex Towell_, Jul 03 2026

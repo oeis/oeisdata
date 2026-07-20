@@ -1,0 +1,44 @@
+%I A397720 #11 Jul 19 2026 19:53:28
+%S A397720 1,6,55,833,14378,269710,5221076,103352306,2077742979
+%N A397720 Number of free polyominoes with 3n cells that can be tiled by n copies of the straight (I) tromino; equivalently, the number of n-fold multiples of the I-tromino, counted up to rotation and reflection.
+%C A397720 In the divisibility language of Polyomino Number Theory (Cibulis, Liu, and Wainwright), a polyomino assembled from n copies of a polyomino P is an n-fold multiple of P. This sequence counts the distinct free n-fold multiples of the straight tromino (1 X 3 bar). The copies may be placed in any orientation, must meet edge to edge, and may not overlap. Free analog below the tetromino sequences A397019-A397022 and A390620; the domino case is A056785, the monomino case A000105.
+%H A397720 A. Cibulis, A. Liu, and B. Wainwright, <a href="http://www.paulsalomon.com/uploads/2/8/3/3/28331113/polyomino_number_theory_(i).pdf">Polyomino Number Theory I</a>, Crux Mathematicorum 28(3) (2002), 147-150.
+%H A397720 <a href="/index/Pol#polyominoes">Index entries for sequences related to polyominoes</a>.
+%e A397720 a(1) = 1 (the tromino itself).
+%e A397720 a(2) = 6: two straight trominoes joined edge to edge form 6 distinct free hexominoes.
+%o A397720 (Python)
+%o A397720 def _norm(s):
+%o A397720     mx = min(x for x, y in s); my = min(y for x, y in s)
+%o A397720     return frozenset((x - mx, y - my) for x, y in s)
+%o A397720 def _orients(s):
+%o A397720     out = set(); c = _norm(s)
+%o A397720     for _ in range(4):
+%o A397720         out.add(c)
+%o A397720         out.add(_norm(frozenset((-x, y) for x, y in c)))
+%o A397720         c = _norm(frozenset((-y, x) for x, y in c))
+%o A397720     return out
+%o A397720 def _canon(s):
+%o A397720     return min(tuple(sorted(o)) for o in _orients(s))
+%o A397720 def a(n, piece=frozenset({(0,0),(1,0),(2,0)})):
+%o A397720     states = {frozenset(_canon(piece))}
+%o A397720     O = list(_orients(piece))
+%o A397720     for _ in range(n - 1):
+%o A397720         nxt = set()
+%o A397720         for st in states:
+%o A397720             xs = [x for x, y in st]; ys = [y for x, y in st]
+%o A397720             for o in O:
+%o A397720                 ox = [p[0] for p in o]; oy = [p[1] for p in o]
+%o A397720                 for dx in range(min(xs)-max(ox)-1, max(xs)-min(ox)+2):
+%o A397720                     for dy in range(min(ys)-max(oy)-1, max(ys)-min(oy)+2):
+%o A397720                         t = frozenset((p[0]+dx, p[1]+dy) for p in o)
+%o A397720                         if t & st: continue
+%o A397720                         if any((x+1,y) in st or (x-1,y) in st or (x,y+1) in st or (x,y-1) in st for x,y in t):
+%o A397720                             nxt.add(st | t)
+%o A397720         states = {frozenset(_canon(s)) for s in nxt}
+%o A397720     return len(states)
+%o A397720 print([a(n) for n in range(1, 6)])  # 1, 6, 55, 833, 14378
+%o A397720 # larger terms by the parallel external-frontier (hash-sharded, on-disk) method. _Haoyang Xu_
+%Y A397720 Cf. A397721 (I-tromino one-sided), A397722 (I-tromino fixed); A397723 (L-tromino); A000105 (Monomino); A056785 (Domino); A397019, A397020, A397021, A397022, A390620 (Tetrominoes).
+%K A397720 nonn,more,hard,new
+%O A397720 1,2
+%A A397720 _Haoyang Xu_, Jul 07 2026

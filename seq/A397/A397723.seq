@@ -1,0 +1,44 @@
+%I A397723 #10 Jul 19 2026 19:53:42
+%S A397723 1,14,256,7142,211933,6628508,212918854,6977805620
+%N A397723 Number of free polyominoes with 3n cells that can be tiled by n copies of the bent (L or V) tromino; equivalently, the number of n-fold multiples of the L-tromino, counted up to rotation and reflection.
+%C A397723 In the divisibility language of Polyomino Number Theory (Cibulis, Liu, and Wainwright), a polyomino assembled from n copies of a polyomino P is an n-fold multiple of P. This sequence counts the distinct free n-fold multiples of the bent tromino (L or V shaped). The copies may be placed in any orientation, must meet edge to edge, and may not overlap. Free analog below the tetromino sequences A397019-A397022, A390620; the domino case is A056785, the monomino case A000105.
+%H A397723 A. Cibulis, A. Liu, and B. Wainwright, <a href="http://www.paulsalomon.com/uploads/2/8/3/3/28331113/polyomino_number_theory_(i).pdf">Polyomino Number Theory I</a>, Crux Mathematicorum 28(3) (2002), 147-150.
+%H A397723 <a href="/index/Pol#polyominoes">Index entries for sequences related to polyominoes</a>.
+%e A397723 a(1) = 1 (the tromino itself).
+%e A397723 a(2) = 14: two bent trominoes joined edge to edge form 14 distinct free hexominoes (including the 2 X 3 rectangle).
+%o A397723 (Python)
+%o A397723 def _norm(s):
+%o A397723     mx = min(x for x, y in s); my = min(y for x, y in s)
+%o A397723     return frozenset((x - mx, y - my) for x, y in s)
+%o A397723 def _orients(s):
+%o A397723     out = set(); c = _norm(s)
+%o A397723     for _ in range(4):
+%o A397723         out.add(c)
+%o A397723         out.add(_norm(frozenset((-x, y) for x, y in c)))
+%o A397723         c = _norm(frozenset((-y, x) for x, y in c))
+%o A397723     return out
+%o A397723 def _canon(s):
+%o A397723     return min(tuple(sorted(o)) for o in _orients(s))
+%o A397723 def a(n, piece=frozenset({(0,0),(1,0),(0,1)})):
+%o A397723     states = {frozenset(_canon(piece))}
+%o A397723     O = list(_orients(piece))
+%o A397723     for _ in range(n - 1):
+%o A397723         nxt = set()
+%o A397723         for st in states:
+%o A397723             xs = [x for x, y in st]; ys = [y for x, y in st]
+%o A397723             for o in O:
+%o A397723                 ox = [p[0] for p in o]; oy = [p[1] for p in o]
+%o A397723                 for dx in range(min(xs)-max(ox)-1, max(xs)-min(ox)+2):
+%o A397723                     for dy in range(min(ys)-max(oy)-1, max(ys)-min(oy)+2):
+%o A397723                         t = frozenset((p[0]+dx, p[1]+dy) for p in o)
+%o A397723                         if t & st: continue
+%o A397723                         if any((x+1,y) in st or (x-1,y) in st or (x,y+1) in st or (x,y-1) in st for x,y in t):
+%o A397723                             nxt.add(st | t)
+%o A397723         states = {frozenset(_canon(s)) for s in nxt}
+%o A397723     return len(states)
+%o A397723 print([a(n) for n in range(1, 5)])  # 1, 14, 256, 7142
+%o A397723 # larger terms by the parallel external-frontier (hash-sharded, on-disk) method. _Haoyang Xu_
+%Y A397723 Cf. A397724 (L-tromino one-sided), A397725 (L-tromino fixed); A397720 (I-tromino); A000105 (Monomino); A056785 (Domino); A397019, A397020, A397021, A397022, A390620 (Tetrominoes).
+%K A397723 nonn,more,hard,new
+%O A397723 1,2
+%A A397723 _Haoyang Xu_, Jul 07 2026

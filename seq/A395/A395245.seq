@@ -1,0 +1,76 @@
+%I A395245 #48 Jul 20 2026 00:52:14
+%S A395245 0,0,1,5,34,246,2064,18960,194400,2167200,26409600,346550400,
+%T A395245 4902508800,74045664000,1193671987200,20399720140800,369287241523200,
+%U A395245 7045749494784000,141542673592320000,2982439084584960000,65848413563412480000,1518739078604267520000
+%N A395245 Sum over all permutations of [n] of the number of doubly shaded squares in a certain graphical representation of the permutations.
+%C A395245 For a permutation sigma of length n, consider an n by n grid.
+%C A395245 For every odd position i, shade the cells (i,k) for 1 <= k <= sigma(i).
+%C A395245 For every even position j, shade the cells (k,j) for 1 <= k <= sigma(j).
+%C A395245 A cell may be shaded by both rules. Let f(sigma) be the number of doubly shaded cells.
+%C A395245 The sequence gives S(n), the sum of f(sigma) over all permutations sigma of length n.
+%C A395245 f(sigma) equals the product of the number of odd weak exceedances and the number of even weak exceedances of sigma, where a weak exceedance is an index i such that sigma(i) >= i. - _Pontus von Brömssen_, Jul 13 2026
+%H A395245 Alois P. Heinz, <a href="/A395245/b395245.txt">Table of n, a(n) for n = 0..448</a>
+%F A395245 a(n) = sum f(sigma), where the sum is over all permutations sigma of length n.
+%F A395245 a(n) = (n-2)*a(n-1) + (n-1)!*floor(n^2/4) for n >= 1. - _Pontus von Brömssen_, Jul 14 2026
+%F A395245 a(n) = (n-2)! * [x^(n-2)] -(3*x^2+2*x+1)/(x^7-3*x^6+x^5+5*x^4-5*x^3-x^2+3*x-1) for n>=2. - _Alois P. Heinz_, Jul 14 2026
+%e A395245 Diagram for sigma = (4,1,2,3)
+%e A395245   4     X # # .
+%e A395245   3     # . . .
+%e A395245   2     X . # .
+%e A395245   1     # . # .
+%e A395245         1 2 3 4
+%e A395245 Doubly shaded squares: (1,2), (1,4). Therefore: f(sigma) = 2
+%e A395245 Diagram for sigma = (5,4,3,2,1)
+%e A395245   5     # . . . .
+%e A395245   4     X # . . .
+%e A395245   3     # . # . .
+%e A395245   2     X # X # .
+%e A395245   1     # . # . #
+%e A395245         1 2 3 4 5
+%e A395245 Doubly shaded squares: (1,2), (3,2), (1,4). Therefore: f(sigma) = 3
+%p A395245 b:= proc(s, i, k) option remember; (n-> `if`(n=0, i*k, add(
+%p A395245       b(s minus {j}, `if`(irem(n, 2)=1 or j<n, 0, 1)+i,
+%p A395245      `if`(irem(n, 2)=0 or j<n, 0, 1)+k), j=s)))(nops(s))
+%p A395245     end:
+%p A395245 a:= n-> b({$1..n}, 0$2):
+%p A395245 seq(a(n), n=0..14);  # _Alois P. Heinz_, Jul 13 2026
+%p A395245 # Alternative:
+%p A395245 a:= proc(n) option remember; `if`(n<3, n*(n-1)/2, ((n-3)*(3*n-4)*
+%p A395245       (n+1)*(n-1)*a(n-2)+(9*n^2-29*n+16)*a(n-1))/((n-2)*(3*n-7)))
+%p A395245     end:
+%p A395245 seq(a(n), n=0..30);  # _Alois P. Heinz_, Jul 13 2026
+%o A395245 (Python)
+%o A395245 import itertools
+%o A395245 def f(sigma):
+%o A395245     n = len(sigma)
+%o A395245     vertical = set()
+%o A395245     horizontal = set()
+%o A395245     for i in range(1, n + 1):
+%o A395245         if i % 2 == 1:
+%o A395245             for k in range(1, sigma[i - 1] + 1):
+%o A395245                 vertical.add((i, k))
+%o A395245     for j in range(1, n + 1):
+%o A395245         if j % 2 == 0:
+%o A395245             for k in range(1, sigma[j - 1] + 1):
+%o A395245                 horizontal.add((k, j))
+%o A395245     return len(vertical & horizontal)
+%o A395245 def S(n):
+%o A395245     return sum(f(p) for p in itertools.permutations(range(1, n + 1)))
+%o A395245 n = int(input("Enter a natural number: "))
+%o A395245 print(",".join(str(S(k)) for k in range(1, n + 1)))
+%o A395245 (Python)
+%o A395245 from functools import cache
+%o A395245 from math import factorial
+%o A395245 @cache
+%o A395245 def A395245(n):
+%o A395245     if n == 0: return 0
+%o A395245     return (n-2)*A395245(n-1)+factorial(n-1)*(n**2//4) # _Pontus von Brömssen_, Jul 14 2026
+%o A395245 (PARI)
+%o A395245 b(p) = { my(t=0); forstep(i=1, #p, 2, forstep(j=2, #p, 2, if(j<=p[i] && i<=p[j], t++))); t }
+%o A395245 a(n) = { my(s=0); forperm(n, p, s+=b(p)); s } \\ _Andrew Howroyd_, Jul 12 2026
+%Y A395245 Cf. A000142, A002620, A010551, A077613.
+%K A395245 nonn,new
+%O A395245 0,4
+%A A395245 _Marko Radulovic_, Jul 12 2026
+%E A395245 a(9)-a(12) from _Andrew Howroyd_, Jul 12 2026
+%E A395245 a(13)-a(21) from _Alois P. Heinz_, Jul 13 2026

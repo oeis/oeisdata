@@ -1,7 +1,74 @@
-%I A011961 #11 May 10 2026 09:51:35
-%S A011961 0,1,2,2,3,6,6,9,13,15,18,25,27,34,42,47,54,67,72,84
+%I A011961 #15 Jul 19 2026 14:20:11
+%S A011961 0,1,2,2,3,6,6,9,13,15,18,25,27,34,42,47,54,67,72,84,98,108,120,140,
+%T A011961 150,169,190,206,225,254,270,297,327,351,378,417,441,478,518,551,588,
+%U A011961 639,672,720,772,816,864,928,972,1033,1098,1154,1215,1294,1350,1425,1505,1575,1650,1745,1815,1906,2002,2087,2178,2291,2376,2484,2598,2700,2808,2940,3042,3169
 %N A011961 Number of ferrites M_4Y_n that repeat after 6n+20 layers.
 %H A011961 T. J. McLarnan, <a href="https://doi.org/10.1524/zkri.1981.155.3-4.269">The numbers of polytypes in close-packings and related structures</a>, Zeits. Krist. 155, 269-291 (1981).
-%K A011961 nonn,easy,more
+%p A011961 K1 := proc(N,S)
+%p A011961     local a,d,t ;
+%p A011961     a := 0 ;
+%p A011961     for d in numtheory[divisors](igcd(N/2,S)) do
+%p A011961         for t from 0 to S/d do
+%p A011961             if modp(S+t*d,3) = 0 then
+%p A011961                 a := a +numtheory[phi](d)*binomial(N/2/d+t-1,t)*binomial(N/2/d+S/d-1-t,S/d-t) ;
+%p A011961             end if;
+%p A011961         end do:
+%p A011961     end do:
+%p A011961     a ;
+%p A011961 end proc:
+%p A011961 K2 := proc(N,S)
+%p A011961     local a,t ,b;
+%p A011961     a := 0 ;
+%p A011961     if modp(N,4) = 2 then
+%p A011961         for t from 0 to S do
+%p A011961             if modp(S+t,3) = 0 then
+%p A011961                 a := a +binomial((N-2)/4+floor(t/2),(N-2)/4)
+%p A011961                     *binomial((N-2)/4+floor((S-t)/2),(N-2)/4) ;
+%p A011961             end if;
+%p A011961         end do:
+%p A011961     elif modp(N,4)=0 then
+%p A011961         for t from 0 to floor(S/2) do
+%p A011961             if modp(S-t,3) = 0 then
+%p A011961                 if modp(S,2) = 0 then
+%p A011961                     b:=2- N/(N+2*S-4*t) ;
+%p A011961                 else
+%p A011961                     b := 2 ;
+%p A011961                 end if;
+%p A011961                 a := a +b*binomial(N/4+t-1,t)*binomial(floor(S/2)+N/4-t,N/4) ;
+%p A011961             end if;
+%p A011961         end do:
+%p A011961     end if;
+%p A011961     a*N/2 ;
+%p A011961 end proc:
+%p A011961 K := proc(N,S)
+%p A011961     (K1(N,S)+K2(N,S))/N ;
+%p A011961 end proc:
+%p A011961 # 2V(N,S)-J(N,S) actually
+%p A011961 J := proc(N,S)
+%p A011961     local a,d ;
+%p A011961     if type(S,'odd') then
+%p A011961         0;
+%p A011961     else
+%p A011961         a := 0 ;
+%p A011961         for d in numtheory[divisors](gcd(N,S)) do
+%p A011961             if modp(gcd(N/2,S),d) >0 then
+%p A011961                 a := a+numtheory[phi](d)*binomial(N/d+S/d-1,S/d) ;
+%p A011961             end if;
+%p A011961         end do:
+%p A011961         a := a+N^2*binomial(N/2+S/2,S/2)/(2*N+2*S) ;
+%p A011961         a/N ;
+%p A011961     end if;
+%p A011961 end proc:
+%p A011961 Fprime := proc(N,S)
+%p A011961     (K(N,S)+J(N,S))/2 ;
+%p A011961 end proc:
+%p A011961 F := proc(N,S)
+%p A011961     add(Fprime(N/d,S/d)*numtheory[mobius](d),d=numtheory[divisors](gcd(N/2,S))) ;
+%p A011961 end proc:
+%p A011961 A011961 := proc(n)
+%p A011961     F(4,n) ;
+%p A011961 end proc:
+%p A011961 seq( A011961(n),n=1..80); # _R. J. Mathar_, Jul 19 2026
+%K A011961 nonn,easy,changed
 %O A011961 1,3
 %A A011961 _N. J. A. Sloane_
