@@ -1,0 +1,83 @@
+%I A396595 #50 Jul 20 2026 21:32:50
+%S A396595 1,2,3,4,6,8,11,14,17,22,30,38,50,63,76,89,117,147,192,237,288,349,
+%T A396595 451,553,666,793,959,1142,1446,1762,2210,2665,3221,3840,4506,5194,
+%U A396595 6401,7726,9509,11295,14076,16987,21287,25757,30827,36068,44316,52598,61817,72026
+%N A396595 Number of distinct subsets of {2,3,...,n+1} obtainable by choosing exactly one forbidden residue class modulo each k = 2,3,...,n.
+%C A396595 For n >= 1, choose exactly one forbidden residue class modulo each k = 2,3,...,n. A number m in {2,3,...,n+1} is kept if, for every k < m, it does not lie in the chosen forbidden residue class modulo k. This produces a subset of {2,3,...,n+1}. For each fixed choice of forbidden residues r = (r_2,...,r_n), the construction produces one subset S_n(r). The sequence a(n) counts how many distinct subsets S_n(r) arise when the residues r_k vary over all choices with 0 <= r_k < k. This sequence is a finite combinatorial analog of a sieve by forbidden residue classes.
+%C A396595 In sieve theory, one studies sifted sets obtained by excluding prescribed residue classes modulo primes or other moduli, and the basic problem is to estimate the size of such sets. Here, instead of fixing one sifted set and estimating its size, we count how many distinct sifted sets can arise on the finite ground set {2,3,...,n+1} when exactly one forbidden residue class is chosen modulo each k. Thus, a(n) measures the gap between local sieve data and global realizable outputs: it counts distinct sifted subsets, not distinct local residue choices.
+%C A396595 For n = 5 the possible subsets are {2,3,5}, {2,3}, {2,4,6}, {2,4}, {2,6}, and {2}. If P(n) denotes the number of locally distinct choices of forbidden residue classes, then P(n) = Product_{k=2..n} min(k,n-k+2) = A010551(n+2), so a(n) <= P(n).
+%H A396595 Sean A. Irvine, <a href="/A396595/b396595.txt">Table of n, a(n) for n = 1..83</a>
+%H A396595 Mario Raso, <a href="https://iris.uniroma1.it/handle/11573/1732819">Integer Sequences in Cryptography: A New Generalized Family and its Application</a>, Ph. D. Thesis, Sapienza University of Rome (Italy 2025). See p. 69.
+%F A396595 For each choice of residues r = (r_2,...,r_n) with 0 <= r_k < k, define S_n(r) := {m in {2,3,...,n+1} : m != r_k (mod k) for every 2 <= k < m}.
+%F A396595 Then a(n) = #{S_n(r) : 0 <= r_k < k for 2 <= k <= n}.
+%e A396595 For n = 3, the distinct survivor sets are {2,3}, {2,4}, {2}; hence a(3) = 3.
+%e A396595 For n = 6, the distinct survivor sets are {2}, {2,3}, {2,4}, {2,6}, {2,3,5}, {2,3,7}, {2,4,6}, {2,3,5,7}; hence a(6) = 8.
+%e A396595 For n = 10, the distinct survivor sets are {2}, {2,3}, {2,4}, {2,6}, {2,8}, {2,3,5}, {2,3,7}, {2,3,9}, {2,3,11}, {2,4,6}, {2,4,8}, {2,4,10}, {2,6,8}, {2,3,5,7}, {2,3,5,9}, {2,3,5,11}, {2,3,7,9}, {2,3,7,11}, {2,4,6,10}, {2,4,8,10}, {2,3,5,7,11}, {2,3,5,9,11}; hence a(10) = 22.
+%p A396595 local_options := proc(n, k)
+%p A396595     local a, m, mask, S;
+%p A396595     S := {};
+%p A396595     for a from 0 to k-1 do
+%p A396595         mask := 0;
+%p A396595         for m from k+1 to n+1 do
+%p A396595             if irem(m, k) = a then
+%p A396595                 mask := mask + 2^(m-2);
+%p A396595             end if;
+%p A396595         end do;
+%p A396595         S := S union {mask};
+%p A396595     end do;
+%p A396595     [op(S)];
+%p A396595 end proc:
+%p A396595 a := proc(n)
+%p A396595     local banned, newb, opts, k, b, o;
+%p A396595     banned := {0};
+%p A396595     for k from 2 to n do
+%p A396595         opts := local_options(n, k);
+%p A396595         newb := {};
+%p A396595         for b in banned do
+%p A396595             for o in opts do
+%p A396595                 newb := newb union {Bits:-Or(b, o)};
+%p A396595             end do;
+%p A396595         end do;
+%p A396595         banned := newb;
+%p A396595     end do;
+%p A396595     nops(banned);
+%p A396595 end proc:
+%p A396595 seq(a(n), n=1..50);
+%t A396595 localOptions[n_, k_] := DeleteDuplicates[
+%t A396595   Table[
+%t A396595     BitOr @@ Prepend[
+%t A396595       Table[If[Mod[m, k] == a, 2^(m - 2), 0], {m, k + 1, n + 1}],
+%t A396595       0
+%t A396595     ],
+%t A396595     {a, 0, k - 1}
+%t A396595   ]
+%t A396595 ];
+%t A396595 a[n_] := Module[{banned = {0}, opts, k},
+%t A396595   For[k = 2, k <= n, k++,
+%t A396595     opts = localOptions[n, k];
+%t A396595     banned = DeleteDuplicates[Flatten[Outer[BitOr, banned, opts, 1]]];
+%t A396595   ];
+%t A396595   Length[banned]
+%t A396595 ];
+%t A396595 Table[a[n], {n, 1, 50}]
+%o A396595 (Python)
+%o A396595 def local_options(n, k):
+%o A396595     return set(
+%o A396595         sum((1 << (m - 2)) for m in range(k + 1, n + 2) if m % k == a)
+%o A396595         for a in range(k)
+%o A396595     )
+%o A396595 def a(n):
+%o A396595     banned_set = {0}
+%o A396595     for k in range(2, n + 1):
+%o A396595         opts = local_options(n, k)
+%o A396595         new_set = set()
+%o A396595         for b in banned_set:
+%o A396595             for mask in opts:
+%o A396595                 new_set.add(b | mask)
+%o A396595         banned_set = new_set
+%o A396595     return len(banned_set)
+%o A396595 print([a(n) for n in range(1, 51)])
+%Y A396595 Cf. A010551.
+%K A396595 nonn,new
+%O A396595 1,2
+%A A396595 _Mario Raso_, Jul 04 2026
