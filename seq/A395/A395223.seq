@@ -1,0 +1,61 @@
+%I A395223 #74 Jul 21 2026 18:11:36
+%S A395223 11,16,96,166,190,198,206,227,242,293,311,316,321,323,324,337,367,378,
+%T A395223 388,407,425,481,494,506,511,526,544,575,647,652,705,711,724,727,787,
+%U A395223 799,804,853,929,931,958,963,966,971,1021,1030,1043,1072,1101,1117,1163,1169,1179
+%N A395223 Bases b for which there exists a larger base c satisfying A394570(b) = A394570(c).
+%C A395223 A394570(b) denote the number of integers of the form r^k (0 < r < b), where k is the number of base-b digits of r^k and the base-b digital root of r^k is r.
+%C A395223 The search for a larger base c is restricted to c <= A394570(b) + 1, since A394570(c) >= c - 1 and A394570(c) = A394570(b) implies c <= A394570(b) + 1.
+%e A395223 11 is a term since A394570(11) = A394570(12) = 45.
+%e A395223 16 is a term since A394570(16) = A394570(18) = 79.
+%e A395223 96 is a term since A394570(96) = A394570(102) = 723.
+%e A395223 166 is a term since A394570(166) = A394570(195) = 1588.
+%e A395223 242 is a term since A394570(242) = A394570(250) = A394570(252) = 2043.
+%o A395223 (Python)
+%o A395223 from math import floor, log, gcd, lcm
+%o A395223 from functools import lru_cache
+%o A395223 def L(b, r):
+%o A395223     return 1 if r == 1 else floor(1 / (1 - log(r, b)))
+%o A395223 def F(n):
+%o A395223     f = []; d = 2
+%o A395223     while d * d <= n:
+%o A395223         if n % d == 0:
+%o A395223             e = 0
+%o A395223             while n % d == 0: n //= d; e += 1
+%o A395223             f.append((d, e))
+%o A395223         d += 1 if d == 2 else 2
+%o A395223     if n > 1: f.append((n, 1))
+%o A395223     return f
+%o A395223 def O(a, m):
+%o A395223     if gcd(a, m) != 1: return None
+%o A395223     x = a % m; k = 1
+%o A395223     while x != 1: x = x * a % m; k += 1
+%o A395223     return k
+%o A395223 @lru_cache(maxsize=None)
+%o A395223 def N(b):
+%o A395223     s, f = 0, F(b - 1)
+%o A395223     for r in range(1, b):
+%o A395223         d = 1
+%o A395223         for p, a in f:
+%o A395223             q = p**a
+%o A395223             if r % q == 0: continue
+%o A395223             e, t = 0, r
+%o A395223             while t % p == 0: t //= p; e += 1
+%o A395223             if 0 < e < a: d = None; break
+%o A395223             d = lcm(d, O(r, q))
+%o A395223         s += 1 if d is None else 1 + (L(b, r) - 1) // d
+%o A395223     return s
+%o A395223 @lru_cache(maxsize=None)
+%o A395223 def G(c):
+%o A395223     return (c - 2) + L(c, c - 1)
+%o A395223 def is_term(b):
+%o A395223     Nb = N(b)
+%o A395223     if not any(G(c) <= Nb and N(c) == Nb for c in range(b+1, Nb+2)):
+%o A395223         return False
+%o A395223     return not any(N(bp) == Nb for bp in range(2, b))
+%o A395223 def terms(M):
+%o A395223     return [b for b in range(2, M+1) if is_term(b)]
+%o A395223 print(terms(1180))
+%Y A395223 Cf. A394570.
+%K A395223 nonn,base,new
+%O A395223 1,1
+%A A395223 _Ali Sidheek_, Jul 01 2026

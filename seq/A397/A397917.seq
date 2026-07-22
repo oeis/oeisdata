@@ -1,0 +1,46 @@
+%I A397917 #12 Jul 21 2026 17:38:32
+%S A397917 2,3,4,10,20,50,118,320,852,2500,7262,22545,70076,228419,749138,
+%T A397917 2547863,8741282,30870684,110134380,402462235,1486781268,5606721143,
+%U A397917 21380980158,83027311673,326064466578,1301576477366,5254037410634,21527444185427,89181977918708,374588825614495
+%N A397917 Number of connected bipartite multigraphs with n vertices of maximum degree 3, where the two parts are distinguished.
+%C A397917 The two parts are not interchangeable. Parallel edges are allowed but not loops. a(1) = 2 since a single isolated vertex may belong to either part.
+%C A397917 For n >= 2, a(n) is the number of pairs (p,q) with p + q = n together with a p X q matrix of nonnegative integers with all row and column sums in {1,2,3} and connected bipartite support, counted modulo independent row and column permutations.
+%C A397917 Equivalently, the number of connected structural isomers of molecules assembled from two distinguishable trivalent element types, with double and triple bonds allowed.
+%e A397917 a(2) = 3: one vertex in each part, joined by a single, double, or triple edge.
+%e A397917 a(3) = 4: one vertex u in the first part and two vertices in the second part, with u joined to the two others either by two single edges or by a single edge and a double edge; plus the two part-swapped counterparts.
+%o A397917 (Python)
+%o A397917 from itertools import permutations, product
+%o A397917 def a(n):
+%o A397917     if n == 1: return 2
+%o A397917     def conn(m, p, q):
+%o A397917         seen, todo = set(), [(0, 0)]
+%o A397917         while todo:
+%o A397917             s, v = todo.pop()
+%o A397917             if (s, v) in seen: continue
+%o A397917             seen.add((s, v))
+%o A397917             if s == 0:
+%o A397917                 todo += [(1, j) for j in range(q) if m[v][j]]
+%o A397917             else:
+%o A397917                 todo += [(0, i) for i in range(p) if m[i][v]]
+%o A397917         return len(seen) == p + q
+%o A397917     def cnt(p, q):
+%o A397917         if q > p: p, q = q, p
+%o A397917         R = [r for r in product(range(4), repeat=q) if 1 <= sum(r) <= 3]
+%o A397917         S, row = set(), []
+%o A397917         def rec(i0, d, cs):
+%o A397917             if d == p:
+%o A397917                 if min(cs) > 0 and conn(row, p, q):
+%o A397917                     S.add(min(tuple(sorted(tuple(r[j] for j in cp) for r in row)) for cp in permutations(range(q))))
+%o A397917                 return
+%o A397917             for i in range(i0, len(R)):
+%o A397917                 ns = [cs[j] + R[i][j] for j in range(q)]
+%o A397917                 if max(ns) <= 3:
+%o A397917                     row.append(R[i]); rec(i, d + 1, ns); row.pop()
+%o A397917         rec(0, 0, [0] * q)
+%o A397917         return len(S)
+%o A397917     return sum((1 if p == n - p else 2) * cnt(n - p, p) for p in range(1, n//2 + 1))
+%Y A397917 Cf. A000421, A005967, A007716.
+%K A397917 nonn,new
+%O A397917 1,1
+%A A397917 _Vlastimil Libra_, Jul 14 2026
+%E A397917 a(12) onward from _Andrew Howroyd_, Jul 15 2026
