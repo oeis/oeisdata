@@ -1,0 +1,43 @@
+%I A397647 #30 Jul 23 2026 12:37:58
+%S A397647 1,0,1,0,2,1,0,9,4,1,0,64,26,6,1,0,625,236,51,8,1,0,7776,2760,564,84,
+%T A397647 10,1,0,117649,39572,7701,1096,125,12,1,0,2097152,672592,125328,17128,
+%U A397647 1880,174,14,1,0,43046721,13227804,2370159,312264,33105,2964,231,16,1
+%N A397647 Triangle read by rows: T(n, k) is the number of partitions of [n] into k nonempty endofunctions such that a fixed set of k elements are forced into k distinct blocks (one specified element per block).
+%F A397647 T(n, k) = Sum_{j=0..n-k} binomial(n-k, j) * rf(k-1, j) * n^(n-k-j) where rf is the rising factorial.
+%F A397647 T(n, k) = Sum_{j=0..n-k+1) binomial(j+k-2, j) * ff(n-k, j) * n^(n-k-j) where ff is the falling factorial.
+%F A397647 T(n, k) = (n - k)! * [x^n] (T(x)/(1 - T(x)))^k where T(x) = -W(-x) and W Lambert's function.
+%F A397647 T(n, k) * binomial(n, k) = A394436(n, k). - _Natalia L. Skirrow_, Jul 21 2026
+%e A397647 Triangle starts:
+%e A397647   [0] [1]
+%e A397647   [1] [0,        1]
+%e A397647   [2] [0,        2,        1]
+%e A397647   [3] [0,        9,        4,       1]
+%e A397647   [4] [0,       64,       26,       6,      1]
+%e A397647   [5] [0,      625,      236,      51,      8,     1]
+%e A397647   [6] [0,     7776,     2760,     564,     84,    10,    1]
+%e A397647   [7] [0,   117649,    39572,    7701,   1096,   125,   12,   1]
+%e A397647   [8] [0,  2097152,   672592,  125328,  17128,  1880,  174,  14,  1]
+%e A397647   [9] [0, 43046721, 13227804, 2370159, 312264, 33105, 2964, 231, 16, 1]
+%p A397647 T := (n, k) -> local j; add(binomial(n-k, j)*pochhammer(k-1, j)*n^(n-k-j), j = 0..n-k): for n from 0 to 9 do seq(T(n, k), k = 0..n) od;
+%t A397647 A397647[n_Integer, k_Integer] := If[k < 0 || k > n, 0,
+%t A397647   (n - k)! * SeriesCoefficient[(-ProductLog[-x] / (1 + ProductLog[-x]))^k, {x, 0, n} ] ]
+%t A397647 Table[A397647[n, k], {n, 0, 9}, {k, 0, n}]
+%o A397647 (Python)
+%o A397647 def A397647(n: int, k: int) -> int:
+%o A397647     if k == n: return 1
+%o A397647     diff = n - k; ppow = n ** diff; perm = 1; tota = 0
+%o A397647     for j in range(diff + 1):
+%o A397647         tota += ppow * perm
+%o A397647         ppow //= n
+%o A397647         perm *= (diff - j) * (j + k - 1)
+%o A397647         perm //= (j + 1)
+%o A397647     return tota
+%o A397647 for n in range(10): print([A397647(n, k) for k in range(n+1)])
+%o A397647 (SageMath)
+%o A397647 def T(n, k):
+%o A397647     return sum(binomial(j+k-2,j)*falling_factorial(n-k,j)*n^(n-k-j) for j in range(n-k+1))
+%o A397647 T = [[T(n, k) for k in range(n+1)] for n in range(10)]; print(T)
+%Y A397647 Cf. A000169 (column 1), A001863 (column 2), A005843 (subdiagonal), A343560 (T(n, n-2)), A394436, A397605 (row sums).
+%K A397647 nonn,tabl,new
+%O A397647 0,5
+%A A397647 _Peter Luschny_, Jul 22 2026

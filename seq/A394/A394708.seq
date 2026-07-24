@@ -1,29 +1,51 @@
-%I A394708 #22 May 13 2026 10:26:24
-%S A394708 2,3,5,7,11,13,17,19,23,29,41,47,61,89,107,199,233,281,421,521,1103,
-%T A394708 1597,2161,2207,2521,3001,3571,14503,19801,28657,90481,103681,109441,
-%U A394708 135721,141961
+%I A394708 #38 Jul 24 2026 01:12:06
+%S A394708 2,3,5,7,11,13,17,19,23,29,41,47,61,89,107,109,113,199,233,281,307,
+%T A394708 421,521,967,1103,1427,1597,2161,2207,2221,2417,2521,3001,3041,3167,
+%U A394708 3571,4481,5779,9349,14503,19441,19801,20641,28657,54833,59369,63443,90481,95419
 %N A394708 Primes that are the greatest prime factor of some Fibonacci number.
 %C A394708 Primes that occur in A060385.
 %C A394708 Primes p such that A000045(A001177(p)) is p-smooth.
+%H A394708 Chai Wah Wu, <a href="/A394708/b394708.txt">Table of n, a(n) for n = 1..58</a>
 %e A394708 a(5) = 11 is a term because A000045(10) = 55 = 5 * 11 is a Fibonacci number whose greatest prime factor is 11.
-%p A394708 G:= proc(m) local a,b,t,i,L;
+%p A394708 G:= proc(m) local a,b,t,i,L; option remember;
 %p A394708    a:= 0; b:= 1; L:= NULL;
 %p A394708    for i from 2 do
 %p A394708      t:= b; b:= a+b mod m; a:= t;
 %p A394708      if b = 0 then return i fi;
 %p A394708    od;
 %p A394708 end proc:
-%p A394708 p:= 1: M:= {}: R:= NULL: count:= 0:
-%p A394708 while count < 35 do
+%p A394708 p:= 1: R:= NULL: count:= 0:
+%p A394708 while count < 49 do
 %p A394708   p:= nextprime(p);
-%p A394708   v:= G(p); GP[v]:= p; t:= fib(v);
+%p A394708   v:= G(p); GP[v]:= p; t:= combinat:-fibonacci(v);
 %p A394708   t:= t/p^padic:-ordp(t,p);
-%p A394708   for m in M while t > 1 do q:= GP[m]; t:= t/q^padic:-ordp(t,q) od;
+%p A394708   q:= 2:
+%p A394708   while t > 1 do
+%p A394708     if v mod G(q) = 0 then t:= t/q^padic:-ordp(t,q) fi;
+%p A394708     q:= nextprime(q);
+%p A394708     if q = p then break fi;
+%p A394708   od;
 %p A394708   if t = 1 then R:= R,p; count:= count+1 fi;
-%p A394708   M:= M union {v};
 %p A394708 od:
-%p A394708 R;
+%p A394708 R; # _Robert Israel_, Jul 22 2026
+%o A394708 (Python)
+%o A394708 # uses Python code in A001177
+%o A394708 from itertools import islice
+%o A394708 from sympy import nextprime, primerange, fibonacci, multiplicity
+%o A394708 def A394708_gen(startvalue=2): # generator of terms >= startvalue
+%o A394708     p = max(2,nextprime(startvalue-1))
+%o A394708     plist = list(primerange(p+1))
+%o A394708     while True:
+%o A394708         f = fibonacci(A001177(p))
+%o A394708         for q in plist:
+%o A394708             f //= q**multiplicity(q,f)
+%o A394708         if f == 1:
+%o A394708             yield p
+%o A394708         p = nextprime(p)
+%o A394708         plist.append(p)
+%o A394708 A394708_list = list(islice(A394708_gen(),20)) # _Chai Wah Wu_, Jul 20 2026
 %Y A394708 Cf. A000045, A001177, A060385, A394313, A395945.
-%K A394708 nonn,more
+%K A394708 nonn,changed
 %O A394708 1,1
 %A A394708 _Robert Israel_, May 13 2026
+%E A394708 Missing terms inserted by _Chai Wah Wu_, Jul 20 2026

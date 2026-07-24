@@ -1,4 +1,4 @@
-%I A202477 #27 Jul 13 2024 15:40:05
+%I A202477 #33 Jul 24 2026 01:05:51
 %S A202477 1,1,5,40,437,6036,100657,1965160,43937385,1106488720,30982333661,
 %T A202477 954607270464,32090625710365,1168646120904640,45826588690845705,
 %U A202477 1924996299465966976,86231288506425806033,4103067277186778016000,206655307175847710248885
@@ -8,6 +8,9 @@
 %F A202477 a(n) ~ n^(n-1/3) * exp(3/2*n^(1/3) - 2/3) / sqrt(3). - _Vaclav Kotesovec_, Sep 24 2013
 %F A202477 a(n) = Sum_{k=0..n} n^(n-k)*binomial(n-1,k-1)*A000262(k). - _Fabian Pereyra_, Jul 12 2024
 %F A202477 The above formula can be written with the Abel polynomials: a(n) = Sum_{k=0..n} (-1)^(n - k) * A137452(n, k) * A000262(k). - _Peter Luschny_, Jul 13 2024
+%F A202477 From _Peter Luschny_, Jul 23 2026: (Start)
+%F A202477 a(n) = Sum_{k=0..n} binomial(n, k) * n^(n-k) * hypergeom([k-n, k-1], [], -1/n) for n >= 1.
+%F A202477 a(n) = Sum_{k=0..n} A394436(n, k). (End)
 %p A202477 with(combinat):
 %p A202477 b:= proc(n, i) option remember; `if`(n=0, 1,
 %p A202477       `if`(i<1, 0, add(i^(i*j)*b(n-i*j, i-1)*
@@ -15,9 +18,30 @@
 %p A202477     end:
 %p A202477 a:= n-> b(n$2):
 %p A202477 seq(a(n), n=0..20);  # _Alois P. Heinz_, Mar 29 2016
+%p A202477 # Alternative:
+%p A202477 a := n -> local k; add(binomial(n, k)*n^(n - k)*hypergeom([-n + k, k - 1], [], -1/n), k = 0..n): [1, seq(simplify(a(n)), n = 1..18)];  # _Peter Luschny_, Jul 23 2026
 %t A202477 nn = 20; t = Sum[n^(n - 1) x^n/n!, {n, 1, nn}] ;
 %t A202477 Range[0, nn]! CoefficientList[Series[Exp[t/(1 - t)], {x, 0, nn}], x]
-%Y A202477 Cf. A000262 (the same for permutations), A137452.
-%K A202477 nonn
+%o A202477 (Python)
+%o A202477 def A202477(n: int) -> int:
+%o A202477     if n < 2: return 1
+%o A202477     if n == 2: return 5
+%o A202477     total = n ** n + 1
+%o A202477     comb = n * (n - 1) // 2
+%o A202477     start = n ** (n - 2)
+%o A202477     for k in range(2, n):
+%o A202477         m = n - k
+%o A202477         w = comb
+%o A202477         ppow = start
+%o A202477         for j in range(m + 1):
+%o A202477             total += w * ppow
+%o A202477             w = w * (m - j) * (k - 1 + j) // (j + 1)
+%o A202477             ppow //= n
+%o A202477         comb = comb * (n - k) // (k + 1)
+%o A202477         start //= n
+%o A202477     return total
+%o A202477 L = [A202477(n) for n in range(19)]; print(L)  # _Peter Luschny_, Jul 23 2026
+%Y A202477 Cf. A000262 (the same for permutations), A137452, A394436.
+%K A202477 nonn,changed
 %O A202477 0,3
 %A A202477 _Geoffrey Critzer_, Dec 19 2011

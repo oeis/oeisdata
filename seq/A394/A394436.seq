@@ -1,10 +1,23 @@
-%I A394436 #10 Apr 23 2026 03:47:50
+%I A394436 #31 Jul 23 2026 12:46:56
 %S A394436 1,0,1,0,4,1,0,27,12,1,0,256,156,24,1,0,3125,2360,510,40,1,0,46656,
 %T A394436 41400,11280,1260,60,1,0,823543,831012,269535,38360,2625,84,1,0,
 %U A394436 16777216,18832576,7018368,1198960,105280,4872,112,1,0,387420489,476200944,199093356,39345264,4171230,248976,8316,144,1
 %N A394436 Triangle read by rows: Bell-transform of the number of endofunctions on [n].
+%C A394436 From _Natalia L. Skirrow_, Jul 21 2026: (Start)
+%C A394436 T(n, k) is the number of partitions of [n] into a set of k nonempty endofunctions.
+%C A394436 T(n, k) is divisible by both C(n, k) and C(n-1, k-1). (End)
+%H A394436 Philippe Flajolet, Peter J. Grabner, Peter Kirschenhofer, and Helmut Prodinger, <a href="https://doi.org/10.1016/0377-0427(93)E0258-N">On Ramanujan's Q-function</a>, Journal of Computational and Applied Mathematics, vol. 58, iss. 1 (1995-03-20), pp. 103-116.
 %H A394436 Peter Luschny, <a href="https://oeis.org/wiki/User:Peter_Luschny/BellTransform">The Bell transform</a>.
 %H A394436 Peter Luschny, <a href="https://github.com/PeterLuschny/Gists/blob/main/BellTransformation.ipynb">Examples of the Bell transform, a SageMath notebook</a>.
+%H A394436 Natalia L. Skirrow, <a href="https://oeis.org/wiki/User:Natalia_L._Skirrow/Euler&#39;s_tree_function">Euler's tree function</a>.
+%F A394436 From _Natalia L. Skirrow_, Jul 21 2026: (Start)
+%F A394436 E.g.f.: e^(y*T(x)/(1 - T(x))), where T(x) = x*e^T(x) is Euler's tree function.
+%F A394436 T(n, k) = C(n, k) * Sum_{j=0..n-k} n^(n-k-j) * P(n-k, j) * C(j+k-2, j), where P(x, n) = x!/(x - n)! and (to compute columns k = 0,1) C(-2, 0) = C(-1, 0) = 1, C(-1, 1) = -1.
+%F A394436 For fixed k, T(n, k) ~ (sqrt(Pi) * n^n * (n/2)^((k - 1)/2) / k!) * (1/Gamma(k/2) - 2*k*sqrt(2/n) / (3*Gamma((k - 1)/2)) + O(1/n)). This asymptotic comes out of exact formulas; each column divided by n^n can be decomposed into (a polynomial in n) + (another polynomial in n)*Q(n), where Q(n) is Ramanujan's Q function.
+%F A394436 T(n,1) = n^n.
+%F A394436 T(n,2) = n^n*(Q(n) - 1) / 2 = A036276(n-1) = A001864(n) / 2.
+%F A394436 T(n,3) = n^n*(n - 2*Q(n) + 1) / 6. (End)
+%F A394436 T(n, k) = binomial(n, k) * Sum_{j=0..n-k} binomial(n-k, j) * rf(k-1, j) * n^(n-k-j) where rf is the rising factorial. - _Peter Luschny_, Jul 23 2026
 %e A394436 Triangle starts:
 %e A394436   [0] [1]
 %e A394436   [1] [0,        1]
@@ -16,11 +29,24 @@
 %e A394436   [7] [0,   823543,   831012,  269535,   38360,   2625,   84,   1]
 %e A394436   [8] [0, 16777216, 18832576, 7018368, 1198960, 105280, 4872, 112, 1]
 %p A394436 BellMatrix(n -> (n+1)^(n+1), 9);  # function BellMatrix defined in A264428.
+%p A394436 # Alternative:
+%p A394436 T := (n, k) -> local j; binomial(n, k) * add(binomial(n-k, j) * pochhammer(k-1, j) * n^(n-k-j), j = 0..n-k): for n from 0 to 8 do seq(T(n, k), k = 0..n) od; # _Peter Luschny_, Jul 23 2026
+%t A394436 A394436[n, k] := Which[
+%t A394436   k < 0 || k > n, 0,
+%t A394436   k == 0, If[n == 0, 1, 0],
+%t A394436   k == 1, n^n,
+%t A394436   k == n, 1,
+%t A394436   True, Binomial[n - 1, k - 1] * Sum[
+%t A394436     Binomial[j + k, j] * FactorialPower[n - k, j] * n^(n - k - j), {j, 0, n - k}]]
+%t A394436 Table[A394436[n, k], {n, 0, 8}, {k, 0, n}]  (* _Peter Luschny_, Jul 22 2026 *)
 %o A394436 (Python)  # The function 'BellTransform' is defined in A394439.
 %o A394436 N = 8; seq = [n ** n for n in range(N+1)]
 %o A394436 T = BellTransform(seq)
 %o A394436 for row in T: print(row)
-%Y A394436 Cf. A000312 (column 1), A202477 (row sums), A264428, A394439.
-%K A394436 nonn,tabl
+%o A394436 (Python)
+%o A394436 from math import comb
+%o A394436 A394436 = lambda n, k: comb(n, k)*A397647(n, k)  # _Natalia L. Skirrow_, Jul 21 2026
+%Y A394436 Cf. A000312, A036276, A001864, A202477 (row sums), A264428, A394439, A397647.
+%K A394436 nonn,tabl,changed
 %O A394436 0,5
 %A A394436 _Peter Luschny_, Mar 29 2026
