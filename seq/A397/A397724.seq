@@ -1,0 +1,48 @@
+%I A397724 #6 Jul 27 2026 17:38:03
+%S A397724 1,24,496,14192,423466,13254531,425826363,13955538299
+%N A397724 Number of one-sided polyominoes with 3n cells that can be tiled by n copies of the bent (L or V) tromino.
+%C A397724 One-sided analog of A397723: the same shapes, distinguished under rotation but not reflection. Equivalently, the number of n-fold multiples of the bent tromino counted up to rotation only, each shape counted once, however many dissections into the n copies it admits. a(n) = 2*A397723(n) - c(n), where c(n) is the number of these shapes having an axis of symmetry: c = 1, 4, 16, 92, 400, 2485, 11345, 72941 for n = 1..8.
+%H A397724 <a href="/index/Pol#polyominoes">Index entries for sequences related to polyominoes</a>.
+%e A397724 a(2) = 24: of the A397723(2) = 14 free shapes, 4 have an axis of symmetry and 10 are chiral, so a(2) = 4 + 2*10 = 24.
+%o A397724 (Python)
+%o A397724 def _norm(s):
+%o A397724     mx = min(x for x, y in s); my = min(y for x, y in s)
+%o A397724     return frozenset((x - mx, y - my) for x, y in s)
+%o A397724 def _orients(s):
+%o A397724     out = set(); c = _norm(s)
+%o A397724     for _ in range(4):
+%o A397724         out.add(c)
+%o A397724         out.add(_norm(frozenset((-x, y) for x, y in c)))
+%o A397724         c = _norm(frozenset((-y, x) for x, y in c))
+%o A397724     return out
+%o A397724 def _rots(s):
+%o A397724     out = set(); c = _norm(s)
+%o A397724     for _ in range(4):
+%o A397724         out.add(c)
+%o A397724         c = _norm(frozenset((-y, x) for x, y in c))
+%o A397724     return out
+%o A397724 def _canon(s):
+%o A397724     return min(tuple(sorted(o)) for o in _orients(s))
+%o A397724 def a(n, piece=frozenset({(0,0),(1,0),(0,1)})):
+%o A397724     states = {frozenset(_canon(piece))}
+%o A397724     O = list(_orients(piece))
+%o A397724     for _ in range(n - 1):
+%o A397724         nxt = set()
+%o A397724         for st in states:
+%o A397724             xs = [x for x, y in st]; ys = [y for x, y in st]
+%o A397724             for o in O:
+%o A397724                 ox = [p[0] for p in o]; oy = [p[1] for p in o]
+%o A397724                 for dx in range(min(xs)-max(ox)-1, max(xs)-min(ox)+2):
+%o A397724                     for dy in range(min(ys)-max(oy)-1, max(ys)-min(oy)+2):
+%o A397724                         t = frozenset((p[0]+dx, p[1]+dy) for p in o)
+%o A397724                         if t & st: continue
+%o A397724                         if any((x+1,y) in st or (x-1,y) in st or (x,y+1) in st or (x,y-1) in st for x, y in t):
+%o A397724                             nxt.add(st | t)
+%o A397724         states = {frozenset(_canon(s)) for s in nxt}
+%o A397724     return sum(len({min(tuple(sorted(r)) for r in _rots(q)) for q in _orients(s)}) for s in states)
+%o A397724 print([a(n) for n in range(1, 5)])  # 1, 24, 496, 14192
+%o A397724 # larger terms by the parallel external-frontier (hash-sharded, on-disk) method. Haoyang Xu
+%Y A397724 Cf. A397723 (L-tromino, free), A397725 (L-tromino fixed), A397721 (I-tromino one-sided), A000988 (one-sided polyominoes), A390621 (one-sided polynars).
+%K A397724 nonn,more,hard,new
+%O A397724 1,2
+%A A397724 _Haoyang Xu_, Jul 22 2026

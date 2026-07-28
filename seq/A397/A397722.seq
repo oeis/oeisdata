@@ -1,0 +1,42 @@
+%I A397722 #6 Jul 27 2026 17:33:48
+%S A397722 2,24,367,6267,113836,2150558,41746458,826679522,16621511004
+%N A397722 Number of fixed polyominoes with 3n cells that can be tiled by n copies of the straight (I) tromino.
+%C A397722 Fixed analog of A397720: the same shapes, distinguished up to translation only. Equivalently, the number of n-fold multiples of the straight tromino counted up to translation only, each shape counted once, however many dissections into the n copies it admits. a(n) <= 8*A397720(n), the deficit coming from the shapes with nontrivial symmetry.
+%H A397722 <a href="/index/Pol#polyominoes">Index entries for sequences related to polyominoes</a>.
+%e A397722 a(1) = 2: the straight tromino has two fixed orientations, horizontal and vertical.
+%o A397722 (Python)
+%o A397722 def _norm(s):
+%o A397722     mx = min(x for x, y in s); my = min(y for x, y in s)
+%o A397722     return frozenset((x - mx, y - my) for x, y in s)
+%o A397722 def _orients(s):
+%o A397722     out = set(); c = _norm(s)
+%o A397722     for _ in range(4):
+%o A397722         out.add(c)
+%o A397722         out.add(_norm(frozenset((-x, y) for x, y in c)))
+%o A397722         c = _norm(frozenset((-y, x) for x, y in c))
+%o A397722     return out
+%o A397722 def _canon(s):
+%o A397722     return min(tuple(sorted(o)) for o in _orients(s))
+%o A397722 def a(n, piece=frozenset({(0,0),(1,0),(2,0)})):
+%o A397722     states = {frozenset(_canon(piece))}
+%o A397722     O = list(_orients(piece))
+%o A397722     for _ in range(n - 1):
+%o A397722         nxt = set()
+%o A397722         for st in states:
+%o A397722             xs = [x for x, y in st]; ys = [y for x, y in st]
+%o A397722             for o in O:
+%o A397722                 ox = [p[0] for p in o]; oy = [p[1] for p in o]
+%o A397722                 for dx in range(min(xs)-max(ox)-1, max(xs)-min(ox)+2):
+%o A397722                     for dy in range(min(ys)-max(oy)-1, max(ys)-min(oy)+2):
+%o A397722                         t = frozenset((p[0]+dx, p[1]+dy) for p in o)
+%o A397722                         if t & st: continue
+%o A397722                         if any((x+1,y) in st or (x-1,y) in st or (x,y+1) in st or (x,y-1) in st for x, y in t):
+%o A397722                             nxt.add(st | t)
+%o A397722         states = {frozenset(_canon(s)) for s in nxt}
+%o A397722     return sum(len(_orients(s)) for s in states)
+%o A397722 print([a(n) for n in range(1, 6)])  # 2, 24, 367, 6267, 113836
+%o A397722 # larger terms by the parallel external-frontier (hash-sharded, on-disk) method. Haoyang Xu
+%Y A397722 Cf. A397720 (I-tromino, free), A397721 (I-tromino one-sided), A397725 (L-tromino fixed), A001168 (fixed polyominoes), A390622 (fixed polynars).
+%K A397722 nonn,more,hard,new
+%O A397722 1,1
+%A A397722 _Haoyang Xu_, Jul 22 2026
