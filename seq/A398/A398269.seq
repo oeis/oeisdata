@@ -1,0 +1,48 @@
+%I A398269 #12 Jul 29 2026 22:01:32
+%S A398269 1,2,4,2,1,2,4,8,2,1,2,4,8,4,2,4,8,16,4,2,4,8,16,8,4,8,16,32,8,4,8,16,
+%T A398269 32,16,8,16,32,64,16,2,4,8,16,8,4,8,16,32,8,1,2,4,8,4,2,4,8,16,4,2,4,
+%U A398269 8,16,8,4,8,16,32,8,4,8,16,32,16,8,16,32,64,16
+%N A398269 Number of ways to partition the standard Roman numeral representation of n into a sequence of one or more substrings, each of which is itself the standard Roman numeral representation of a positive integer.
+%C A398269 The domain is 1 <= n <= 3999, the range over which standard Roman numeral notation (using I,V,X,L,C,D,M with subtractive pairs IV,IX,XL,XC,CD,CM, each symbol repeated at most 3 times) is unambiguous.
+%C A398269 Every term is a power of 2 (proved: see FORMULA).
+%C A398269 For example, VIII (n=8) can be parsed as VIII (=8), VII+I (=7,1), VI+II (=6,2), VI+I+I (=6,1,1), V+III (=5,3), V+II+I (=5,2,1), V+I+II (=5,1,2), or V+I+I+I (=5,1,1,1), giving a(8) = 8.
+%C A398269 Proof of the formula: the canonical Roman numeral for n is built by concatenating, in order, the canonical block for each of the four decimal place values (thousands, hundreds, tens, units), with no interaction across the boundaries between blocks. Consequently, any suffix of the numeral starting at a place-value boundary is itself the canonical representation of the corresponding numeric suffix. Prepending 1, 2, or 3 copies of the relevant place symbol (I, X, or C) to that suffix therefore always yields another valid canonical numeral. This means every additional nonzero digit in n (beyond the first, reading left to right) exactly doubles the number of valid segmentations, which gives the formula below. This was also verified by exhaustive computation over the entire domain 1 <= n <= 3999.
+%C A398269 a(3888) = 16384 is the maximum value attained on the domain; the mean value of a(n) for 1 <= n <= 3999 is approximately 279.2.
+%C A398269 If a run of a single Roman symbol were allowed to repeat more than 3 times (as in non-standard variants, e.g. the "IIII" for 4 seen on some clock faces), the digit factors g(d) below would change and would no longer coincide with powers of 2, since g(d) for a run of length d follows the tribonacci recurrence g(d) = g(d-1)+g(d-2)+g(d-3), which departs from 2^(d-1) once d > 3.
+%H A398269 Parsa Ansari, <a href="/A398269/b398269.txt">Table of n, a(n) for n = 1..3999</a>
+%F A398269 Let d_3 d_2 d_1 d_0 be the base-10 digits of n (thousands, hundreds, tens, units; leading digits may be 0), and let g(0..9) = 1, 1, 2, 4, 2, 1, 2, 4, 8, 2. Let m = #{i : d_i != 0}. Then a(n) = 2^max(m-1,0) * Product_{i=0..3} g(d_i). (Proved - see COMMENTS.)
+%F A398269 Equivalently, a(n) = (1/2) * Product_{i=0..3} h(d_i), where h(0..9) = 1, 2, 4, 8, 4, 2, 4, 8, 16, 4.
+%F A398269 a(n) = 2^e(n), where e(n) = max(m-1,0) + Sum_{i=0..3} e(d_i), with e(0..9) = 0, 0, 1, 2, 1, 0, 1, 2, 3, 1. (Proved.)
+%e A398269 a(1) = 1: I has only the interpretation "1".
+%e A398269 a(2) = 2: II = "2" or "1,1".
+%e A398269 a(3) = 4: III = "3", "1,2", "2,1", or "1,1,1".
+%e A398269 a(8) = 8: VIII = "8", "7,1", "6,2", "6,1,1", "5,3", "5,2,1", "5,1,2", or "5,1,1,1".
+%e A398269 a(18) = 16: XVIII (18 = 10+8) has twice as many interpretations as VIII, since the leading X can either stand alone or merge with the front of any VIII-interpretation (X+V=XV, X+VI=XVI, X+VII=XVII, X+VIII=XVIII, all valid numerals).
+%e A398269 a(1994) = 64: MCMXCIV has digits 1,9,9,4, all nonzero, so a(1994) = g(1)*g(9)*g(9)*g(4)*2^3 = 1*2*2*2*8 = 64.
+%e A398269 a(3888) = 16384: the maximum over the domain; digits 3,8,8,8 give g(3)*g(8)*g(8)*g(8)*2^3 = 4*8*8*8*8 = 16384.
+%t A398269 g = {1, 1, 2, 4, 2, 1, 2, 4, 8, 2};
+%t A398269 a[n_] := Module[{d = IntegerDigits[n, 10, 4], nz},
+%t A398269   nz = Count[d, x_ /; x != 0];
+%t A398269   Times @@ (g[[# + 1]] & /@ d) * 2^Max[nz - 1, 0]]
+%t A398269 Table[a[n], {n, 1, 79}]
+%o A398269 (Python)
+%o A398269 def to_roman(num):
+%o A398269     val = [(1000,'M'),(900,'CM'),(500,'D'),(400,'CD'),(100,'C'),(90,'XC'),
+%o A398269            (50,'L'),(40,'XL'),(10,'X'),(9,'IX'),(5,'V'),(4,'IV'),(1,'I')]
+%o A398269     r = ''
+%o A398269     for v, s in val:
+%o A398269         while num >= v:
+%o A398269             r += s; num -= v
+%o A398269     return r
+%o A398269 canonical = {to_roman(k) for k in range(1, 4000)}
+%o A398269 def a(n):
+%o A398269     s = to_roman(n)
+%o A398269     dp = [0]*(len(s)+1); dp[0] = 1
+%o A398269     for i in range(1, len(s)+1):
+%o A398269         dp[i] = sum(dp[j] for j in range(i) if s[j:i] in canonical)
+%o A398269     return dp[len(s)]
+%o A398269 print([a(n) for n in range(1, 80)])
+%Y A398269 Cf. A000073 (tribonacci numbers: interpretations of a run of a single repeated Roman symbol, unrestricted length), A007954 (product of decimal digits, an analogous digitally multiplicative function), A000079 (powers of 2: this sequence's range).
+%K A398269 nonn,fini,full,new
+%O A398269 1,2
+%A A398269 _Parsa Ansari_, Jul 24 2026
