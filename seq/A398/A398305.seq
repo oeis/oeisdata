@@ -1,0 +1,51 @@
+%I A398305 #30 Jul 30 2026 16:18:24
+%S A398305 1,1,1,2,9,20,55,205,1265,8548,52030,352801,3210067,22997391,
+%T A398305 136484073,960485193,8920632927,83629004297,983060388614,
+%U A398305 12052744094850,176326665368163,2563988288839026,38384040356427748,523694654521644360,8431363646331329018
+%N A398305 Number of permutations sigma of {1..n} such that sigma(i)+i is squarefree for all i.
+%C A398305 a(n) is the permanent of the n X n matrix M with M(i,j) = 1 if i+j is squarefree, and 0 otherwise.
+%C A398305 Equivalently, a(n) is the number of perfect matchings in the bipartite graph with parts {1..n} and {1..n}, where an edge exists between i and j if i+j is squarefree.
+%C A398305 Heuristically, a(n) ~ C * n! * (6/Pi^2)^n, where 6/Pi^2 is the natural density of squarefree numbers. Empirical data for n <= 13 suggests C is approximately 2.4.
+%F A398305 a(n) = per(M_n), where M_n is the n X n matrix with entries M_n(i,j) = 1 if mu^2(i+j) = 1, and 0 otherwise (mu is the Moebius function).
+%e A398305 a(3) = 2 because among the 6 permutations of {1,2,3}, only (1,3,2) and (2,1,3) yield sums (2,5,5) and (3,3,6) respectively, which are all squarefree.
+%p A398305 b:= proc(s) option remember; uses numtheory; (n-> `if`(n=0, 1, add(
+%p A398305       `if`(issqrfree(j+n), b(s minus {j}), 0), j=s)))(nops(s))
+%p A398305     end:
+%p A398305 a:= n-> b({$1..n}):
+%p A398305 seq(a(n), n=0..18);  # _Alois P. Heinz_, Jul 26 2026
+%t A398305 a[n_]:=Permanent[Table[If[SquareFreeQ[i+j],1,0],{i,n},{j,n}]]; Array[a,20] (* _Stefano Spezia_, Jul 25 2026 *)
+%o A398305 (Python)
+%o A398305 from math import isqrt
+%o A398305 # Pruned backtracking algorithm for efficiency
+%o A398305 def a(n):
+%o A398305     max_sum = 2 * n
+%o A398305     sqf = [True] * (max_sum + 1)
+%o A398305     for d in range(2, isqrt(max_sum) + 1):
+%o A398305         d2 = d * d
+%o A398305         for k in range(d2, max_sum + 1, d2):
+%o A398305             sqf[k] = False
+%o A398305     used = [False] * (n + 1)
+%o A398305     def backtrack(i):
+%o A398305         if i > n:
+%o A398305             return 1
+%o A398305         count = 0
+%o A398305         for j in range(1, n + 1):
+%o A398305             if not used[j] and sqf[i + j]:
+%o A398305                 used[j] = True
+%o A398305                 count += backtrack(i + 1)
+%o A398305                 used[j] = False
+%o A398305         return count
+%o A398305     return backtrack(1)
+%o A398305 print([a(n) for n in range(12)])
+%o A398305 (PARI)
+%o A398305 a(n) = {
+%o A398305   my(M = matrix(n, n, i, j, issquarefree(i+j)));
+%o A398305   matpermanent(M);
+%o A398305 }
+%o A398305 vector(20, n, a(n-1))
+%Y A398305 Cf. A005117, A008683, A073364, A095986, A096901, A392408.
+%K A398305 nonn,hard,new
+%O A398305 0,4
+%A A398305 _Jean Lauro Muller_, Jul 25 2026
+%E A398305 a(14)-a(20) from _Stefano Spezia_, Jul 25 2026
+%E A398305 a(21)-a(24) from _Alois P. Heinz_, Jul 26 2026
