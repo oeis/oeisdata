@@ -1,30 +1,49 @@
-%I A243203 #8 May 30 2026 16:40:42
-%S A243203 0,0,1,0,2,2,0,9,12,6,0,64,96,72,24,0,625,1000,900,480,120,0,7776,
+%I A243203 #17 Aug 06 2026 00:50:47
+%S A243203 1,0,1,0,2,2,0,9,12,6,0,64,96,72,24,0,625,1000,900,480,120,0,7776,
 %T A243203 12960,12960,8640,3600,720,0,117649,201684,216090,164640,88200,30240,
 %U A243203 5040,0,2097152,3670016,4128768,3440640,2150400,967680,282240,40320,0
-%N A243203 Terms of a particular integer decomposition of N^N.
-%C A243203 a(n) is an element in the triangle of terms t(N,j) = c(N,j)*binomial(N,j), N = 0,1,2,3,... denoting a row, and j = 0,1,2,...r. The coefficients c(N,j) are specified numerically by the formula below. Note that all rows start with 0, which makes them easily recognizable.
-%C A243203 The sum of every row is N^N.
-%C A243203 Though the original contexts are different, this triangle matches that of A066324 except for row 0, and for the zero term of each row. On this point, see the comment in A243202.
-%H A243203 Stanislav Sykora, <a href="/A243203/b243203.txt">Table of n, a(n) for rows 0..100, flattened</a>
-%H A243203 S. Sykora, <a href="https://doi.org/10.3247/SL5Math14.002">A Random Mapping Statistics and a Related Identity</a>, <a href="http://ebyte.it/library/Library.html#math">Stan's Library</a>, Volume V, June 2014.
-%F A243203 c(N,j)=N^(N-j)*(j/N)*j!  for  N>0 and 0<=j<=N, and c(N,j)=0 otherwise.
-%e A243203 The first rows of the triangle are (first item is the row number N):
-%e A243203 0 0
-%e A243203 1 0, 1
-%e A243203 2 0, 2, 2
-%e A243203 3 0, 9, 12, 6
-%e A243203 4 0, 64, 96, 72, 24
-%e A243203 5 0, 625, 1000, 900, 480, 120
-%e A243203 6 0, 7776, 12960, 12960, 8640, 3600, 720
-%e A243203 7 0, 117649, 201684, 216090, 164640, 88200, 30240, 5040
-%e A243203 8 0, 2097152, 3670016, 4128768, 3440640, 2150400, 967680, 282240, 40320
+%N A243203 Triangle read by rows: T(n, k) = k * n^(n - k - 1) * n! / (n - k)! for n >= 1, T(0, 0) = 1.
+%C A243203 Terms of a particular integer decomposition of n^n.
+%C A243203 a(n) is an element in the triangle of terms T(n, j) = c(n, j)*binomial(n, j), n = 0,1,2,3,... denoting a row, and j = 0,1,2,...r. The coefficients c(n, j) are specified numerically by the formula below. Note that all rows n > 0 start with 0.
+%C A243203 The sum of every row is n^n, where we use the convention 0^0 = 1.
+%C A243203 Though the original contexts are different, this triangle matches that of A066324 except for row 0 and column 0. On this point, see the comment in A243202.
+%H A243203 Stanislav Sykora, <a href="/A243203/b243203.txt">Table of n, a(n) for rows 0..100, flattened</a>.
+%H A243203 Stanislav Sykora, <a href="https://doi.org/10.3247/SL5Math14.002">A Random Mapping Statistics and a Related Identity</a>, <a href="http://ebyte.it/library/Library.html#math">Stan's Library</a>, Volume V, June 2014.
+%F A243203 c(n, k) = n^(n - k) * (k/n) * k! for n > 0 and c(0, 0) = 1.
+%F A243203 T(n, k) = A008279(n, k) * k * n^(n - k - 1). - _Peter Luschny_, Aug 04 2026
+%e A243203 Triangle starts:
+%e A243203   [0] 1;
+%e A243203   [1] 0,       1;
+%e A243203   [2] 0,       2,       2;
+%e A243203   [3] 0,       9,      12,       6;
+%e A243203   [4] 0,      64,      96,      72,      24;
+%e A243203   [5] 0,     625,    1000,     900,     480,     120;
+%e A243203   [6] 0,    7776,   12960,   12960,    8640,    3600,    720;
+%e A243203   [7] 0,  117649,  201684,  216090,  164640,   88200,  30240,   5040;
+%e A243203   [8] 0, 2097152, 3670016, 4128768, 3440640, 2150400, 967680, 282240, 40320;
+%p A243203 T := (n, k) -> ifelse(n = 0, 1, k * n^(n - k - 1) * n! / (n - k)!):
+%p A243203 seq(print(seq(T(n, k), k = 0..n)), n = 0..8); # _Peter Luschny_, Aug 04 2026
 %o A243203 (PARI) A243202(maxrow) = {
 %o A243203   my(v,n,j,irow,f);v = vector((maxrow+1)*(maxrow+2)/2);
 %o A243203   for(n=1,maxrow,irow=1+n*(n+1)/2;v[irow]=0;f=1;
 %o A243203   for(j=1,n,f *= j;v[irow+j] = j*f*n^(n-j-1)*binomial(n,j);););
 %o A243203   return(v);}
-%Y A243203 Cf. A066324, A243202.
-%K A243203 nonn,tabl
+%o A243203 (Python)
+%o A243203 def A243203_row(n: int) -> list[int]:
+%o A243203     if n == 0: return [1]
+%o A243203     rec = [0] * (n + 1)
+%o A243203     p = n ** (n - 1)
+%o A243203     perm = 1
+%o A243203     for k in range(n):
+%o A243203         rec[k] = perm * k * p
+%o A243203         perm *= n - k
+%o A243203         p //= n
+%o A243203     rec[n] = perm
+%o A243203     return rec
+%o A243203 for n in range(9): print(A243203_row(n)) # _Peter Luschny_, Aug 04 2026
+%Y A243203 Variant: A066324.
+%Y A243203 Cf. A008279, A000312 (row sums), A201685, A243202.
+%K A243203 nonn,tabl,changed
 %O A243203 0,5
 %A A243203 _Stanislav Sykora_, Jun 01 2014
+%E A243203 New name, T(0,0) = 1 set and edited by _Peter Luschny_, Aug 04 2026

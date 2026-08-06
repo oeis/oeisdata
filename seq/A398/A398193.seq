@@ -1,9 +1,19 @@
-%I A398193 #17 Jul 27 2026 08:39:04
+%I A398193 #26 Aug 05 2026 03:28:12
 %S A398193 1,0,1,0,2,4,0,6,24,27,0,24,144,312,256,0,120,960,3060,4720,3125,0,
 %T A398193 720,7200,30240,67680,82800,46656,0,5040,60480,315000,920640,1617210,
 %U A398193 1662024,823543,0,40320,564480,3507840,12633600,28775040,42110208,37665152,16777216
 %N A398193 Triangle read by rows: T(n, k) = n! * [x^n] (T(x) / (1 - T(x)))^(n - k + 1) if k > 0 and delta_{n, 0} if k = 0, where T(x) = -W(-x) is Euler's tree function, and W Lambert's function.
+%H A398193 Andrew Howroyd, <a href="/A398193/b398193.txt">Table of n, a(n) for n = 0..1325</a> (rows 0..50)
 %F A398193 T(n, k) = (n-1)! * (n-k+1) * Sum_{j=0..k-1} binomial(n-j, k-1-j) * n^j / j! for k > 0. - _Peter Bala_, Jul 27 2026
+%F A398193 From _Natalia L. Skirrow_, Aug 04 2026: (Start)
+%F A398193 T(n,k) = (n-k+1)! * A394436(n,n-k+1).
+%F A398193 E.g.f.: 1/(1-t) + t^2 / ((1-t) * (y-(1+y)*t)), where t = -LambertW(-x*y).
+%F A398193 A394852(n,n-k) = T(n,k) + T(n,k+1),
+%F A398193 T(n,k) = Sum_{j=0..k-1} (-1)^(k-1-j)*A394852(n,n-j) = Sum_{j=k..n} (-1)^(j-k)*A394852(n,n-j).
+%F A398193 T(n,k) = n * Sum_{i=0..k} (-1)^(k-i) * T(n,i) * (k-i+1)/(n-i+1),
+%F A398193 T(n,k) = n * Sum_{i=0..k-1} (-1)^(k-i) * T(n,i) * (n-k+1)*(k-i+1)/((n-i+1)*(1-k)).
+%F A398193 D-finite with T(n,k+1) = (n-k)*(2*T(n,k) + T(n,k-1))/k.
+%F A398193 (End)
 %e A398193 Triangle starts:
 %e A398193   [0]  1;
 %e A398193   [1]  0,     1;
@@ -17,21 +27,20 @@
 %t A398193 A398193[n_Integer, k_Integer] := If[k == 0, Boole[n==k],
 %t A398193 n! * SeriesCoefficient[ (-ProductLog[-x] / (1 + ProductLog[-x]))^(n-k+1), {x, 0, n} ]];
 %t A398193 Table[A398193[n, k], {n, 0, 9}, {k, 0, n}]
+%t A398193 (* Alternate *)
+%t A398193 A398193row[n_Integer] := CoefficientList[SeriesCoefficient[1/(1-t) + t^2/(1-t)/(y-(1+y)*t)/.t->-LambertW[-x*y],{x,0,n}]*n!,y]
+%t A398193 Table[A398193row[n], {n, 0, 9}] (* _Natalia L. Skirrow_, Aug 04 2026 *)
 %o A398193 (Python)
-%o A398193 from math import comb, factorial
-%o A398193 from fractions import Fraction
-%o A398193 def T(n: int, k: int) -> int:
-%o A398193     if k == 0: return 1 if n == 0 else 0
-%o A398193     term = Fraction(comb(n, k - 1))
-%o A398193     total = term
-%o A398193     for j in range(1, k):
-%o A398193         term *= n * (k - j)
-%o A398193         term /= j * (n - j + 1)
-%o A398193         total += term
-%o A398193     result = factorial(n - 1) * (n - k + 1) * total
-%o A398193     return result.numerator
-%o A398193 for n in range(10):
-%o A398193     print([n], [T(n, k) for k in range(n + 1)])  # _Peter Luschny_, Jul 27 2026
+%o A398193 from math import factorial as fact
+%o A398193 def A398193_row(n,k=None): # returns [A398193(n,j) for j in range(k)]
+%o A398193     if k==None: k=n+1
+%o A398193     if n==0: return [1][:k]
+%o A398193     row=[0,fact(n)]
+%o A398193     for j in range(1,k-1): row.append((n-j)*(2*row[j]+row[j-1])//j)
+%o A398193     return row # _Natalia L. Skirrow_, Aug 04 2026
+%o A398193 (PARI)
+%o A398193 T(n) = {my(t=-lambertw(-x*y + O(x*x^n))); [Vecrev(p) | p<-Vec(serlaplace(1/(1-t) + t^2 / ((1-t) * (y-(1+y)*t))))]}
+%o A398193 { my(A=T(7)); for(i=1, #A, print(A[i])) } \\ _Andrew Howroyd_, Aug 05 2026
 %Y A398193 Cf. A000142 (column 1), A052609 (column 2), A000312 (main diagonal), A001864 (subdiagonal), A308863 (row sums).
 %K A398193 nonn,tabl,new
 %O A398193 0,5
