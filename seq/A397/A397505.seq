@@ -1,0 +1,38 @@
+%I A397505 #32 Aug 08 2026 00:07:43
+%S A397505 0,1,2,2,5,5,5,5,9,9,11,11,13,13,13,14,17,18,19,20,21,21,23,23,25,26,
+%T A397505 26,26,28,29,29,30,31,34,36,36,38,38,39,39,42,42,43,43,45,45,46,47,49,
+%U A397505 50,51,52,53,53,53,55,57,57,57,58,59,60,61,61,65,66,68,68
+%N A397505 Number of decimal places which are known after using n terms of A089618 and treating them as the coefficients of a continued fraction.
+%C A397505 The digits produced by the continued fraction are that of A397364.
+%C A397505 Let c(n) be the n-th convergent resulting from A089618.
+%C A397505 Further continued fraction terms are taken to be unknown and the worst case (maximum absolute difference) is a single additional 1.
+%C A397505 a(n) is therefore the length of agreement between c(n) and c(n) appended with a 1.
+%C A397505 Limit_{n->oo} n/a(n) seems to approach 0.9982.
+%H A397505 Jwalin Bhatt, <a href="/A397505/b397505.txt">Table of n, a(n) for n = 0..5000</a>
+%H A397505 Wikipedia, <a href="https://en.wikipedia.org/wiki/Lochs%27s_theorem">Lochs's theorem</a>
+%e A397505 For n=6, the continued fraction of 6 terms from A089618 is c(n) = [0; 2,5,1,11,1,3] = 302/655 and the worst case continuation is 379/822,
+%e A397505      302/655 = 0.4610 68...
+%e A397505      379/822 = 0.4610 70...
+%e A397505                ^ ^^^^ a(6) = 5 places agree
+%o A397505 (Python)
+%o A397505 from fractions import Fraction
+%o A397505 from sympy import floor, continued_fraction_convergents
+%o A397505 from collections import deque
+%o A397505 from os.path import commonprefix
+%o A397505 def van_der_corput(n):
+%o A397505     bits = bin(n)[2:][::-1]
+%o A397505     d = Fraction(int(bits, 2), 1 << len(bits))
+%o A397505     return int(1 / (2**d - 1))
+%o A397505 def reliable_digits_from_cf(coeffs, prec):
+%o A397505     bound1, bound2 = deque(continued_fraction_convergents(coeffs+[1]), maxlen=2)
+%o A397505     order = 10**prec
+%o A397505     trunc_bound1 = floor(bound1*order) / order
+%o A397505     trunc_bound2 = floor(bound2*order) / order
+%o A397505     rel_digits = commonprefix([f'{trunc_bound1:.{prec}f}', f'{trunc_bound2:.{prec}f}'])
+%o A397505     return len(rel_digits) - 1 if rel_digits else 0
+%o A397505 A089618 = [van_der_corput(i) for i in range(1, 201)]
+%o A397505 A397505 = [reliable_digits_from_cf([0]+A089618[:i], 1+int(i*1.031)) for i in range(len(A089618)+1)]
+%Y A397505 Cf. A086819, A089618, A390737, A393695, A397364.
+%K A397505 nonn,new
+%O A397505 0,3
+%A A397505 _Jwalin Bhatt_, Aug 04 2026
