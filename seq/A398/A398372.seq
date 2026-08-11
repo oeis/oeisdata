@@ -1,0 +1,60 @@
+%I A398372 #32 Aug 10 2026 18:51:37
+%S A398372 1,1,1,1,1,3,2,6,1,12,1,12,2,1,60,24,3,24,60,1,360,15,72,3,180,10,1,
+%T A398372 2520,80,720,48,720,120,105,1,20160,504,32,720,320,144,1008,140,1,
+%U A398372 181440,40320,15120,2880,8640,5760,90720,10080,2520,1,1814400,30240,6048,2520,86400,288,36288,15120,2800,420,1
+%N A398372 Triangle of denominators of coefficients of the polynomials generating the rows in A398004.
+%C A398372 The n-th row of the symmetric array corresponding to A398004 is given by a polynomial of degree n. The leading terms are the reciprocals A001710. Note that the first entry of each row corresponds to A001710, and the last entry appears to always be 1. For the numerators of the coefficients, A398371, the n-th row appears to start with 1 and end with -n (except for n=1).
+%C A398372 The k-th row polynomial of degree n, denoted A(n,k), fulfills the identity A(n,k) = A(n,k-1) + A(n-1,k) + n + k and A(k,1)=A(1,k)=k. Furthermore, A(k,n)=A(n,k).
+%C A398372 The leading terms are the reciprocals of A001710.
+%e A398372 The first few polynomials are:
+%e A398372   A(n,1) = n,
+%e A398372   A(n,2) = n^2 + 3*n - 2,
+%e A398372   A(n,3) = (1/3)*n^3 + (5/2)*n^2 + (19/6)*n - 3,
+%e A398372   A(n,4) = (1/12)*n^4 + n^3 + (41/12)*n^2 + (7/2)*n - 4,
+%e A398372   A(n,5) = (1/60)*n^5 + (7/24)*n^4 + (5/3)*n^3 + (101/24)*n^2 + (229/60)*n - 5,
+%e A398372   ...
+%e A398372 the next leading terms are (1/360)*n^6, (1/2520)*n^7, (1/20160)*n^8.
+%e A398372 Denominators of the coefficients of first rows of A398004, starting and descending from the leading term:
+%e A398372         1     1
+%e A398372         1     1     1
+%e A398372         3     2     6    1
+%e A398372        12     1    12    2     1
+%e A398372        60    24     3   24    60    1
+%e A398372       360    15    72    3   180   10     1
+%e A398372      2520    80   720   48   720  120   105     1
+%e A398372     20160   504    32  720   320  144  1008   140    1
+%e A398372    181440 40320 15120 2880  8640 5760 90720 10080 2520   1
+%e A398372   1814400 30240  6048 2520 86400  288 36288 15120 2800 420 1
+%e A398372   ...
+%o A398372 (Python)
+%o A398372 from sympy import Symbol, expand, Poly, summation
+%o A398372 def compute_polynomial_triangle(max_k):
+%o A398372     n = Symbol('n')
+%o A398372     i = Symbol('i')
+%o A398372     table = {}
+%o A398372     table[1] = Poly(n, n)
+%o A398372     for k in range(2, max_k + 1):
+%o A398372         prev = table[k-1]
+%o A398372         S = Poly(
+%o A398372             summation(prev.as_expr().subs(n, i), (i, 2, n)),
+%o A398372             n
+%o A398372         )
+%o A398372         table[k] = Poly(
+%o A398372             expand(S.as_expr() + (n*(n+1))/2 - 1 + k*(n-1) + k),
+%o A398372             n
+%o A398372 )
+%o A398372     return table
+%o A398372 def generate(n):
+%o A398372     table = compute_polynomial_triangle(n)
+%o A398372     denoms = []
+%o A398372     for k in sorted(table.keys()):
+%o A398372         poly = table[k]
+%o A398372         coeffs = poly.all_coeffs()
+%o A398372         for c in coeffs:
+%o A398372             _, d = c.as_numer_denom()
+%o A398372             denoms.append(d)
+%o A398372     return denoms
+%Y A398372 Cf. A398004, A398371 (numerators).
+%K A398372 tabf,easy,frac,nonn,new
+%O A398372 1,6
+%A A398372 _Eric Trébuchon_, Jul 27 2026

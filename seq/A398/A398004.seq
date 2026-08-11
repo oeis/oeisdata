@@ -1,0 +1,62 @@
+%I A398004 #49 Aug 10 2026 18:00:39
+%S A398004 1,2,2,3,8,3,4,16,16,4,5,26,38,26,5,6,38,71,71,38,6,7,52,117,150,117,
+%T A398004 52,7,8,68,178,276,276,178,68,8,9,86,256,464,562,464,256,86,9,10,106,
+%U A398004 353,731,1037,1037,731,353,106,10,11,128,471,1096,1780,2086,1780,1096,471,128,11
+%N A398004 Recursively defined symmetric multiplication table read by antidiagonals: A(n,k), n>=1, k>=1.
+%C A398004 Or, triangle T(n,m) = A(n-m+1,m) read by rows.
+%C A398004 The sequence comes from a slight change to the usual definition of multiplication by knowing addition and inductively calculating n*k := n*(k-1) + n till the case n*1 := n stops the recursion. Here, we change the concept by defining a multiplication x that does this reduction by 1 on both k, and n: n x k = (n x (k-1) + n) + ((n-1) x k + k) and requiring n x 1 = n, and 1 x k = k.
+%C A398004 This makes the new operation symmetric. This idea can be iterated to give some symmetrically defined version of exponentiation, by noticing that n^k := n^(k-1) * n looks exactly the same as the definition of normal multiplication, just with ^ standing for *, and * standing in for +. This corresponds to A(n,k,3) in the formula and program below, but with x replacing *.
+%C A398004 The commutative binary operation x is neither associative, 2x(2x3) = 302, (2x2)x3 = 353, nor distributive 2x(1+1) = 8, 2x1 + 2x1 = 4. Furthermore, there is no unique prime-factorization, because 3x3 = 38, while 5x2 = 28 as well, although 2,3 and 5 are prime in the following sense: an integer p is prime (w.r.t. the multiplication x), if p = a x b for a,b >=1 implies a=1 or b=1.
+%C A398004 Square array is A(n,k,2) for n>=1 and k>=1, with A(n,k,level) = A(A(A(n,k-1,level),n,level-1), A(A(k,n-1,level),k,level-1),level-1) and A(n,k,1)=n+k, and A(1,k,level)=k, A(n,1,level)=n.
+%C A398004 The n-th row of the array is a polynomial of degree n, and the polynomials are related by the same identity A(n,k) = A(n,k-1) + A(n-1,k) + n + k as above (see A398371, A398372 for the coefficients).
+%C A398004 The square array is symmetric, and the the sequence reads the antidiagonals; equivalently, the sequence reads the triangle T(n,m) = A(n-m+1,m) by rows.
+%e A398004 The array A(n,k) starts at row n=1 and column k=1 as follows:
+%e A398004   1   2   3    4    5     6     7     8      9     10
+%e A398004   2   8  16   26   38    52    68    86    106    128
+%e A398004   3  16  38   71  117   178   256   353    471    612
+%e A398004   4  26  71  150  276   464   731  1096   1580   2206
+%e A398004   5  38 117  276  562  1037  1780  2889   4483   6704
+%e A398004   6  52 178  464 1037  2086  3879  6782  11280  18000
+%e A398004   7  68 256  731 1780  3879  7772 14569  25865  43882
+%e A398004   8  86 353 1096 2889  6782 14569 29154  55036  98936
+%e A398004   9 106 471 1580 4483 11280 25865 55036 110090 209045
+%e A398004  10 128 612 2206 6704 18000 43882 98936 209045 418110
+%e A398004 The associated Triangle array T(n,k) = A(n-k+1,k) starts as
+%e A398004   1
+%e A398004   2   2
+%e A398004   3   8   3
+%e A398004   4  16  16   4
+%e A398004   5  26  38  26    5
+%e A398004   6  38  71  71   38    6
+%e A398004   7  52 117 150  117   52   7
+%e A398004   8  68 178 276  276  178  68   8
+%e A398004   9  86 256 464  562  464 256  86   9
+%e A398004  10 106 353 731 1037 1037 731 353 106 10
+%p A398004 A:= proc(n, k) option remember;
+%p A398004       `if`(min(n, k)=1, max(n, k), A(n, k-1)+n+A(n-1, k)+k)
+%p A398004     end:
+%p A398004 seq(seq(A(n, 1+d-n), n=1..d), d=1..11);  # _Alois P. Heinz_, Jul 24 2026
+%o A398004 (Python)
+%o A398004 from functools import cache
+%o A398004 @cache
+%o A398004 def A(n, k, level):
+%o A398004     if level == 1:
+%o A398004         return n + k
+%o A398004     if n == 1:
+%o A398004         return k
+%o A398004     if k == 1:
+%o A398004         return n
+%o A398004     return A( A(A(n, k-1, level), n, level-1), A(A(k, n-1, level), k, level-1), level-1 )
+%o A398004 def generate(N, level=2):
+%o A398004     seq = []
+%o A398004     for s in range(2, N):
+%o A398004         for y in range(1, s):
+%o A398004             n = s - y
+%o A398004             k = y
+%o A398004             seq.append(A(n, k, level))
+%o A398004     return seq
+%Y A398004 Cf. A003991 (usual multiplication).
+%Y A398004 Cf. A398371, A398372.
+%K A398004 nonn,tabl,easy,new
+%O A398004 1,2
+%A A398004 _Eric Trébuchon_, Jul 16 2026
