@@ -1,29 +1,56 @@
-%I A303380 #29 May 26 2018 22:11:54
+%I A303380 #38 Aug 12 2026 01:37:13
 %S A303380 1,14,2,74,21,3,147,120,13,4,174,121,37,14,5,471,1120,137,74,25,6,
 %T A303380 1135,1121,731,147,125,16,7,1531,14121,1135,174,521,67,17,8,5131,
 %U A303380 21114,1531,471,1125,76,77,18,9,13145,21174,5131,1135,1521,167,177,78,19,10
 %N A303380 A(n, k) is the smallest number x > A(n, k-1) such that every letter, with repetition, that occurs in the English name of A(n, k-1) also occurs in the English name of x, with A(n, 1) = n; square array, read by antidiagonals downwards.
+%C A303380 If A(n,k) = A(m,j), then A(n,k+i) = A(m,j+i) for i >= 0. Thus A(1,k) = A(3,k-1) for k >= 7. - _Robert Israel_, Aug 11 2026
+%H A303380 Robert Israel, <a href="/A303380/b303380.txt">Table of n, a(n) for n = 1..630</a> (first 35 antidiagonals, flattened)
 %H A303380 <a href="/index/Na">Index entries for sequences related to names of numbers</a>
 %F A303380 A(n, 1) = n. For k > 1, A(n, k) = A303475(A(n, k-1)).
 %e A303380 Array starts
-%e A303380 1, 14,  74, 147,  174,  471,  1135,  1531,  5131, 13145, ...
-%e A303380 2, 21, 120, 121, 1120, 1121, 14121, 21114, 21174, 21471, ...
-%e A303380 3, 13,  37, 137,  731, 1135,  1531,  5131, 13145, 13541, ...
-%e A303380 4, 14,  74, 147,  174,  471,  1135,  1531,  5131, 13145, ...
-%e A303380 5, 25, 125, 521, 1125, 1521,  5121, 11249, 11294, 11492, ...
-%e A303380 6, 16,  67,  76,  167,  176,   671,   761,  1165,  1561, ...
-%e A303380 7, 17,  77, 177,  771, 1175,  1571,  5171, 14175, 14571, ...
-%e A303380 8, 18,  78, 178,  871, 1178,  1871,  8171, 14178, 14871, ...
-%e A303380 9, 19,  79,  97,  137,  731,  1135,  1531,  5131, 13145, ...
-%e A303380 ...
+%e A303380   1, 14,  74, 147,  174,  471,  1135,  1531,  5131, 13145, ...
+%e A303380   2, 21, 120, 121, 1120, 1121, 14121, 21114, 21174, 21471, ...
+%e A303380   3, 13,  37, 137,  731, 1135,  1531,  5131, 13145, 13541, ...
+%e A303380   4, 14,  74, 147,  174,  471,  1135,  1531,  5131, 13145, ...
+%e A303380   5, 25, 125, 521, 1125, 1521,  5121, 11249, 11294, 11492, ...
+%e A303380   6, 16,  67,  76,  167,  176,   671,   761,  1165,  1561, ...
+%e A303380   7, 17,  77, 177,  771, 1175,  1571,  5171, 14175, 14571, ...
+%e A303380   8, 18,  78, 178,  871, 1178,  1871,  8171, 14178, 14871, ...
+%e A303380   9, 19,  79,  97,  137,  731,  1135,  1531,  5131, 13145, ...
+%e A303380   ...
 %e A303380 Initial terms of row n=1 illustrated in detail, with dots denoting places where new letters are inserted:
-%e A303380 one -> .o...e.n -> fourteen
-%e A303380 fourteen -> .e.ent.four -> seventyfour
-%e A303380 seventyfour -> one.u..re.f..tys.v.. -> onehundredfortyseven
-%e A303380 onehundredfortyseven -> onehundredseventyfo.r -> onehundredseventyfour
+%e A303380   one -> .o...e.n -> fourteen
+%e A303380   fourteen -> .e.ent.four -> seventyfour
+%e A303380   seventyfour -> one.u..re.f..tys.v.. -> onehundredfortyseven
+%e A303380   onehundredfortyseven -> onehundredseventyfo.r -> onehundredseventyfour
+%p A303380 Alph:= [$"a".."z"]:
+%p A303380 for i from 1 to 26 do J[Alph[i]]:= i od:
+%p A303380 g:= proc(n) option remember; local c,V;
+%p A303380   V:= Vector(26,datatype=integer[4]);
+%p A303380   for c in StringTools:-Explode(convert(n,english)) do
+%p A303380    if StringTools:-IsAlpha(c) then V[J[c]]:= V[J[c]]+1 fi
+%p A303380   od;
+%p A303380   V;
+%p A303380 end proc:
+%p A303380 succ:= proc(n) option remember; local r,k,s;
+%p A303380   r:= g(n);
+%p A303380   for k from n+1 do
+%p A303380    s:= g(k);
+%p A303380    if andmap(i -> s[i]>=r[i],[$1..26]) then return k fi
+%p A303380   od
+%p A303380 end proc:
+%p A303380 N:= 35:
+%p A303380 A:= Matrix(N,N):
+%p A303380 for n from 1 to N do
+%p A303380   A[n,1]:= n;
+%p A303380   for k from 2 to N+1-n do
+%p A303380     A[n,k]:= succ(A[n,k-1])
+%p A303380   od;
+%p A303380 od:
+%p A303380 seq(seq(A[k,j-k],k=1 .. j-1),j=2..N+1); # _Robert Israel_, Aug 11 2026
 %o A303380 (PARI) T(n, k) = if (k == 1, n, a303475(T(n, k-1)));
 %o A303380 tabl(nn) = for (n=1, nn, for (k=1, nn, print1(T(n,k), ", ")); print); \\ _Michel Marcus_, Apr 24 2018
 %Y A303380 Cf. A303475.
-%K A303380 nonn,word,tabl
+%K A303380 nonn,word,tabl,changed
 %O A303380 1,2
 %A A303380 _Felix Fröhlich_, Apr 22 2018

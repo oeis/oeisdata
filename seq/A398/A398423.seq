@@ -1,0 +1,53 @@
+%I A398423 #14 Aug 11 2026 19:28:35
+%S A398423 1,2,4,4,5,6,16,8,9,10,36,12,16,14,64,36,17,18,100,20,25,49,144,24,81,
+%T A398423 26,196,28,64,30,256,32,33,144,324,225,81,10648,400,169,256,42,484,44,
+%U A398423 144,100,576,48,256,50,676,324,169,54,784,121,64,361,900,60,625,62,1024
+%N A398423 Largest integer of the form r^k whose weighted base-n digit sum is r and whose number of base-n digits is k.
+%C A398423 Let W_n(m) denote the weighted digit sum of m in base n, where the least significant digit has weight 1, the next digit has weight 2, and so on. This sequence gives the largest integer of the form r^k such that W_n(r^k)=r and r^k has exactly k digits in base n.
+%C A398423 The condition that r^k has exactly k base-n digits guarantees that only finitely many exponents k need be considered for each base.
+%C A398423 This sequence is analogous to A396781 and A397879, where the defining digit functions are the digital root and alternating digital root, respectively.
+%C A398423 The sequence terms are maximum values of r^k satisfying W_n(r^k)=r and floor(log_n(r^k))+1=k, where W_n(m) = Sum_{i=0..m-1} (i+1)*d_i when m = Sum_{i=0..m-1} d_i*b^i, and where d_0 is the least significant digit.
+%e A398423 For n=2, a(2)=1=1^1. In base 2, 1=(1)_2 and W_2(1)=1.
+%e A398423 For n=6, a(6)=6=6^1. In base 6, 6=(1,0)_6 and W_6(6)=1*0+2*1=2.
+%e A398423 For n=12, a(12)=36=6^2. In base 12, 36=(3,0)_12 and W_12(36)=1*0+2*3=6.
+%o A398423 (Python)
+%o A398423 import numpy as np
+%o A398423 def weighted_digit_sum(n, b):
+%o A398423     s = 0
+%o A398423     pos = 1
+%o A398423     while n:
+%o A398423         s += pos * (n % b)
+%o A398423         pos += 1
+%o A398423         n //= b
+%o A398423     return s
+%o A398423 def num_digits(n, b):
+%o A398423     if n == 0:
+%o A398423         return 1
+%o A398423     c = 0
+%o A398423     while n:
+%o A398423         c += 1
+%o A398423         n //= b
+%o A398423     return c
+%o A398423 def largest_rk(b, digit_function):
+%o A398423     best = -1
+%o A398423     for r in range(1, b):
+%o A398423         if r == 1:
+%o A398423             k_max = 1
+%o A398423         else:
+%o A398423             k_max = int(np.floor(1/(1-np.log(r)/np.log(b))))
+%o A398423         for k in range(1, k_max+1):
+%o A398423             value = r**k
+%o A398423             if num_digits(value, b) != k:
+%o A398423                 continue
+%o A398423             if digit_function(value, b) == r:
+%o A398423                 if value > best:
+%o A398423                     best = value
+%o A398423     return best
+%o A398423 def sequence(max_base, digit_function):
+%o A398423     return [largest_rk(b, digit_function)
+%o A398423             for b in range(2, max_base+1)]
+%o A398423 print(sequence(64, weighted_digit_sum))
+%Y A398423 Cf. A396781, A397879, A395541.
+%K A398423 nonn,hard,base,new
+%O A398423 2,2
+%A A398423 _Ali Sidheek_, Jul 28 2026
