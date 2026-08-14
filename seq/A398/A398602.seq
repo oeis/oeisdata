@@ -1,0 +1,50 @@
+%I A398602 #97 Aug 13 2026 15:29:12
+%S A398602 1,1,2,1,2,2,2,2,2,2,2,2,2,2,2,2,3,3,3,2,2,3,2,3,3,3,3,3,3,3,2,2,2,3,
+%T A398602 2,2,2,2,2,2,2,2,3,3,2,2,3,3,2,2,2,2,2,2,2,2,2,2,3,3,2,2,2,2,2,3,2,2,
+%U A398602 3,3,3,3,3,3,2,2,3,3,2,3,2,3,2,3,2,3,2,3
+%N A398602 Maximum size of a subset of {1, 2, ..., n} containing n, such that the sum of any two distinct elements is a perfect power.
+%C A398602 Where is the position of the first occurrence of 5 in this sequence? It is <= 763442 (see the example).
+%H A398602 Nadav Mizrahi, <a href="/A398602/b398602.txt">Table of n, a(n) for n = 1..10000</a>
+%e A398602 For n = 1: the maximum subset containing 1 is {1} (size 1).
+%e A398602 For n = 3: the maximum subset containing 3 is {1, 3} since 1+3 = 4 = 2^2 (size 2).
+%e A398602 For n = 4: no smaller element forms a perfect power with 4, so the subset is {4} (size 1).
+%e A398602 For n = 17: the maximum subset containing 17 is {10, 15, 17} since 10+15 = 25 = 5^2, 10+17 = 27 = 3^3, and 15+17 = 32 = 2^5 (size 3).
+%e A398602 [7442, 28658, 148583, 177458, 763442] (5)
+%t A398602 powQ[n_] := powQ[n] = n == 1 || GCD @@ FactorInteger[n][[;; , 2]] > 1;
+%t A398602 a[n_] := Module[{v = Select[Range[n - 1], powQ[n + #] &], g}, If[Length[v] == 0, 1, g = Graph[v, Flatten[Table[If[i < j && powQ[i + j], i <-> j, Nothing], {i, v}, {j, v}]]]; 1 + Length[FindClique[g][[1]]]]]; Array[a, 88] (* _Amiram Eldar_, Aug 07 2026 *)
+%o A398602 (Python)
+%o A398602 from sympy import perfect_power
+%o A398602 def lista(target_N):
+%o A398602     adj = {}
+%o A398602     all_max_clique_lengths = []
+%o A398602     for current_N in range(1, target_N + 1):
+%o A398602         adj[current_N] = set()
+%o A398602         for u in range(1, current_N):
+%o A398602             s = u + current_N
+%o A398602             if s == 1 or perfect_power(s):
+%o A398602                 adj[u].add(current_N)
+%o A398602                 adj[current_N].add(u)
+%o A398602         max_clique = []
+%o A398602         def bron_kerbosch_pivot(r, p, x):
+%o A398602             nonlocal max_clique
+%o A398602             if len(r) + len(p) <= len(max_clique):
+%o A398602                 return
+%o A398602             if not p and not x:
+%o A398602                 if len(r) > len(max_clique):
+%o A398602                     max_clique = list(r)
+%o A398602                 return
+%o A398602             pivot = max(p | x, key=lambda u: len(p & adj[u]))
+%o A398602             for v in list(p - adj[pivot]):
+%o A398602                 bron_kerbosch_pivot(r | {v}, p & adj[v], x & adj[v])
+%o A398602                 p.remove(v)
+%o A398602                 x.add(v)
+%o A398602         initial_p = set(adj[current_N])
+%o A398602         initial_x = set()
+%o A398602         bron_kerbosch_pivot({current_N}, initial_p, initial_x)
+%o A398602         all_max_clique_lengths.append(len(max_clique))
+%o A398602     return all_max_clique_lengths
+%o A398602 print(lista(88))
+%Y A398602 Cf. A001597.
+%K A398602 nonn,easy,new
+%O A398602 1,3
+%A A398602 _Nadav Mizrahi_, Aug 04 2026

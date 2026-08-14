@@ -1,4 +1,4 @@
-%I A004016 M4042 #141 May 30 2026 16:39:47
+%I A004016 M4042 #150 Aug 13 2026 03:06:03
 %S A004016 1,6,0,6,6,0,0,12,0,6,0,0,6,12,0,0,6,0,0,12,0,12,0,0,0,6,0,6,12,0,0,
 %T A004016 12,0,0,0,0,6,12,0,12,0,0,0,12,0,0,0,0,6,18,0,0,12,0,0,0,0,12,0,0,0,
 %U A004016 12,0,12,6,0,0,12,0,0,0,0,0,12,0,6,12,0,0,12,0
@@ -50,6 +50,7 @@
 %F A004016 Euler transform of A192733. - _Michael Somos_, Mar 12 2012
 %F A004016 a(n) = (-1)^n * A180318(n). - _Michael Somos_, Sep 14 2015
 %F A004016 Asymptotic mean: Limit_{m->oo} (1/m) * Sum_{k=1..m} a(k) = 2*Pi/sqrt(3) = 3.627598... (A186706). - _Amiram Eldar_, Oct 15 2022
+%F A004016 For n > 1, write n = 3^t * p_1^a_1 * p_2^a_2 * ... * p_i^a_i * q_1^b_1 * q_2^b_2 * ... * q_j^b_j, where p_x and q_x are primes, with p_x == 1 (mod 3) and q_x == 2 (mod 3). Then, a(n) = 6*Product_{x=1..i} (a_x + 1), if all of b_y are even; otherwise, a(n) = 0. Short proof of this: a(n) = 6 * A002324(n), and A002324 is multiplicative, with A002324(p^e) = 1 for p = 3, e+1 for p == 1 (mod 3), and (1 + (-1)^e)/2 for p == 2 (mod 3). Writing A002324(n) as a product of A002324(p^e) over the prime powers dividing n, we get the formula above. - _Do Thanh Nhan_, Aug 07 2026
 %e A004016 G.f. = 1 + 6*x + 6*x^3 + 6*x^4 + 12*x^7 + 6*x^9 + 6*x^12 + 12*x^13 + 6*x^16 + ...
 %e A004016 Theta series of A_2 on the standard scale in which the minimal norm is 2:
 %e A004016 1 + 6*q^2 + 6*q^6 + 6*q^8 + 12*q^14 + 6*q^18 + 6*q^24 + 12*q^26 + 6*q^32 + 12*q^38 + 12*q^42 + 6*q^50 + 6*q^54 + 12*q^56 + 12*q^62 + 6*q^72 + 12*q^74 + 12*q^78 + 12*q^86 + 6*q^96 + 18*q^98 + 12*q^104 + 12*q^114 + 12*q^122 + 12*q^126 + 6*q^128 + 12*q^134 + 12*q^146 + 6*q^150 + 12*q^152 + 12*q^158 + ...
@@ -63,15 +64,19 @@
 %p A004016 end proc:
 %p A004016 seq(A004016(n),n=0..49) ; # _R. J. Mathar_, Feb 22 2021
 %t A004016 a[ n_] := If[ n < 1, Boole[ n == 0 ], 6 DivisorSum[ n, KroneckerSymbol[ #, 3] &]]; (* _Michael Somos_, Nov 08 2011 *)
+%t A004016 (* Alternative: *)
 %t A004016 a[ n_] := SeriesCoefficient[ (QPochhammer[ q]^3 + 9 q QPochhammer[ q^9]^3) / QPochhammer[ q^3], {q, 0, n}]; (* _Michael Somos_, Nov 13 2014 *)
+%t A004016 (* Alternative: *)
 %t A004016 a[ n_] := SeriesCoefficient[ EllipticTheta[ 3, 0, q] EllipticTheta[ 3, 0, q^3] + EllipticTheta[ 2, 0, q] EllipticTheta[ 2, 0, q^3], {q, 0, n}]; (* _Michael Somos_, Nov 13 2014 *)
+%t A004016 (* Alternative: *)
 %t A004016 a[ n_] := Length @ FindInstance[ x^2 + x y + y^2 == n, {x, y}, Integers, 10^9]; (* _Michael Somos_, Sep 14 2015 *)
+%t A004016 (* Alternative: *)
 %t A004016 terms = 81; f[q_] = LatticeData["A2", "ThetaSeriesFunction"][-I Log[q]/Pi]; s = Series[f[q], {q, 0, 2 terms}]; CoefficientList[s, q^2][[1 ;; terms]] (* _Jean-François Alcover_, Jul 04 2017 *)
 %o A004016 (PARI) {a(n) = my(A, p, e); if( n<1, n==0, A = factor(n); 6 * prod( k=1, matsize(A)[1], [p, e] = A[k, ]; if( p==3, 1, p%3==1, e+1, 1-e%2)))}; /* _Michael Somos_, May 20 2005 */ /* Editor's note: this is the most efficient program */
 %o A004016 (PARI) {a(n) = if( n<0, 0, polcoeff( 1 + 6 * sum( k=1,n, x^k / (1 + x^k + x^(2*k)), x * O(x^n)), n))}; /* _Michael Somos_, Oct 06 2003 */
 %o A004016 (PARI) {a(n) = if( n<1, n==0, 6 * sumdiv( n,d, kronecker( d, 3)))}; /* _Michael Somos_, Mar 16 2005 */
 %o A004016 (PARI) {a(n) = if( n<1, n==0, 6 * sumdiv( n,d, (d%3==1) - (d%3==2)))}; /* _Michael Somos_, May 20 2005 */
-%o A004016 (PARI) {a(n) = my(A); if( n<0, 0, n*=3; A = x * O(x^n); polcoeff( (eta(x + A)^3  + 3 * x * eta(x^9 + A)^3) / eta(x^3 + A), n))}; /* _Michael Somos_, May 20 2005 */
+%o A004016 (PARI) {a(n) = my(A); if( n<0, 0, n*=3; A = x * O(x^n); polcoeff( (eta(x + A)^3 + 3 * x * eta(x^9 + A)^3) / eta(x^3 + A), n))}; /* _Michael Somos_, May 20 2005 */
 %o A004016 (PARI) {a(n) = if( n<1, n==0, qfrep([ 2, 1; 1, 2], n, 1)[n] * 2)}; /* _Michael Somos_, Jul 16 2005 */
 %o A004016 (PARI) {a(n) = if( n<0, 0, polcoeff( 1 + 6 * sum( k=1, n, x^(3*k - 2) / (1 - x^(3*k - 2)) - x^(3*k - 1) / (1 - x^(3*k - 1)), x * O(x^n)), n))} /* _Paul D. Hanna_, Jul 03 2011 */
 %o A004016 (SageMath) ModularForms( Gamma1(3), 1, prec=81).0 ; # _Michael Somos_, Jun 04 2013
@@ -84,6 +89,6 @@
 %Y A004016 Cf. A002324, A003051, A003215, A005881, A005882, A005928, A008458, A033685, A033687, A038587-A038591, etc.
 %Y A004016 See also A035019.
 %Y A004016 Cf. A000007, A000122, A004015, A008444, A008445, A008446, A008447, A008448, A008449 (Theta series of lattices A_0, A_1, A_3, A_4, ...), A186706.
-%K A004016 nonn,nice,easy
+%K A004016 nonn,nice,easy,changed
 %O A004016 0,2
 %A A004016 _N. J. A. Sloane_
