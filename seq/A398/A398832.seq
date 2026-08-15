@@ -1,0 +1,42 @@
+%I A398832 #10 Aug 14 2026 11:21:57
+%S A398832 1,1,1,2,6,19,72,306,1477,7624,41785,238123,1400668,8439183,51880633,
+%T A398832 324365380,2057938113,13225749042,85978119507,564708713751,
+%U A398832 3743703012365,25029418620246,168637623664931,1144285933819009,7815317494978738,53700020308257035
+%N A398832 Number of Baxter permutations of length n equivalent under the action of dihedral group of the square D_4 on the permutation matrix.
+%C A398832 The Baxter class is closed under the full dihedral action of the square: reversal and complementation reflect the permutation matrix in the vertical and horizontal axes, and inversion reflects it in a diagonal. See Dilks, section 1.
+%C A398832 By Burnside's lemma the count is the average of the fixed-point counts of the eight elements of D4, and each of the five conjugacy classes has a known enumeration: the identity gives A001181; the two quarter-turns give A151374(m) = 2^m*Catalan(m) at n = 4m+1 and 0 otherwise (Dilks, Theorem 1.2); the half-turn gives A383372; the two reflections in an axis have no fixed point for n > 1, since a permutation of length n > 1 cannot equal its own reversal; and the two reflections in a diagonal fix A398688.
+%H A398832 Meghanto Majumder, <a href="/A398832/b398832.txt">Table of n, a(n) for n = 0..499</a>
+%H A398832 K. Dilks, <a href="https://arxiv.org/abs/1710.07007">Quarter-Turn Baxter Permutations</a>, arXiv:1710.07007 [math.CO], 2017.
+%H A398832 K. Dilks, <a href="https://arxiv.org/abs/1402.2961">Involutions on Baxter Objects</a>, arXiv:1402.2961 [math.CO], 2014.
+%H A398832 E. Fusy, <a href="https://arxiv.org/abs/1010.3850">Bijective counting of involutive Baxter permutations</a>, arXiv:1010.3850 [math.CO], 2010-2011.
+%F A398832 For n >= 1, 8*a(n) = A001181(n) + 2*F90(n) + A383372(n) + 2*[n=1] + 2*A398688(n), where F90(n) = A151374(m) = 2^m*A000108(m) if n = 4*m+1 and 0 otherwise.
+%F A398832 a(n) ~ 2^(3*n+2) / (Pi*sqrt(3)*n^4). - _Vaclav Kotesovec_, Aug 11 2026
+%e A398832 For n = 3 the six Baxter permutations 123, 132, 213, 231, 312, 321 fall into a(3) = 2 classes: {123, 321} and {132, 213, 231, 312}.
+%o A398832 (PARI)
+%o A398832 kco(n) = {
+%o A398832   my(K=vector(6));
+%o A398832   K[1] = (n-1)*n*(n+1)*(n+3)*(14490*n^5 - 340701*n^4 + 3066901*n^3 - 13187913*n^2 + 27069185*n - 21178410);
+%o A398832   K[2] = -(n-1)*(188370*n^8 - 4863813*n^7 + 49769971*n^6 - 255269060*n^5 + 671270036*n^4 - 759015265*n^3 - 31288161*n^2 + 557118954*n - 114247800);
+%o A398832   K[3] = -(188370*n^9 - 1139883*n^8 - 54459536*n^7 + 939883761*n^6 - 6631243796*n^5 + 25082779383*n^4 - 53610076784*n^3 + 62458603179*n^2 - 34118388414*n + 5170354200);
+%o A398832   K[4] = (n-5)*(5057010*n^8 - 148377309*n^7 + 1812470695*n^6 - 11955098188*n^5 + 46074634100*n^4 - 104354857481*n^3 + 131218702755*n^2 - 77587555662*n + 12184635600);
+%o A398832   K[5] = 4*(n-7)*(n-5)*(2072070*n^7 - 55936263*n^6 + 599736845*n^5 - 3258385746*n^4 + 9454213744*n^3 - 14080920723*n^2 + 9245157309*n - 1546492500);
+%o A398832   K[6] = 224*(n-9)^2*(n-7)*(n-5)*(14490*n^5 - 195801*n^4 + 920893*n^3 - 1804131*n^2 + 1377113*n - 244020);
+%o A398832   K;
+%o A398832 }
+%o A398832 Fdiag(n) = {
+%o A398832   my(S=[1,1,2,4,10,24,64,168,466,1286]);
+%o A398832   if(n<=9, return(S[n+1]));
+%o A398832   my(v=S, K);
+%o A398832   for(m=10, n, K=kco(m); v=concat(v, -sum(j=1, 5, K[j+1]*v[m-2*j+1])/K[1]));
+%o A398832   v[n+1];
+%o A398832 } /* Recurrence from A398688 */
+%o A398832 bax(N) = my(b=vector(N)); b[1]=1; b[2]=2; for(n=3, N, b[n] = ((7*n^2+7*n-2)*b[n-1] + 8*(n-1)*(n-2)*b[n-2])/((n+2)*(n+3))); b;
+%o A398832 f90(n) = if(n%4 != 1, 0, my(m=(n-1)/4); 2^m*binomial(2*m,m)/(m+1));
+%o A398832 th(k,l) = if(k%2 && l%2, 0, if(k%2, my(a=(k-1)/2, b=l/2); binomial(a+b+1,a+1)^2*binomial(a+b+1,a)/(a+b+1), if(l%2, th(l,k), my(a=k/2, b=l/2); binomial(a+b+1,a+1)*binomial(a+b+1,a)*binomial(a+b,a)/(a+b+1))));
+%o A398832 f180(n) = sum(k=0, n-1, th(k, n-k-1));
+%o A398832 seq(N) = my(b=bax(N)); vector(N, n, (b[n] + 2*f90(n) + f180(n) + 2*(n==1) + 2*Fdiag(n))/8);
+%o A398832 concat([1], seq(25))
+%Y A398832 Cf. A001181 (Baxter permutations), A383372 (fixed by the half-turn), A151374 (fixed by a quarter-turn), A398688 (fixed by a diagonal reflection), A397853 (simple Baxter permutations), A000108.
+%K A398832 nonn,new
+%O A398832 0,4
+%A A398832 _Meghanto Majumder_, Aug 11 2026
