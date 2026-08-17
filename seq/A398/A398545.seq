@@ -1,0 +1,41 @@
+%I A398545 #11 Aug 16 2026 22:48:51
+%S A398545 3,5,11,13,17,23,29,37,41,43,47,53,59,61,67,73,79,83,89,97,101,107,
+%T A398545 109,113,127,131,139,149,151,157,163,167,173,179,181,193,197,199,211,
+%U A398545 223,227,229,239,241,251,257,263,269,271,277,281,283,293,307,311,313
+%N A398545 Least prime that congruence conditions permit as the n-th smallest prime in a Goldbach partition of an even number.
+%C A398545 For even N, sort the primes p <= N/2 with N - p prime in increasing order: the n-th one is the n-th smallest Goldbach prime of N. If primes q_1 < ... < q_n occur as the n smallest for some N, then for each prime r <= n they cannot occupy all residue classes mod r, since otherwise r would divide N - q_i for some i, whatever N is. a(n) is the least possible q_n over all n-tuples of odd primes satisfying this congruence condition, and is therefore an unconditional lower bound on any n-th smallest Goldbach prime.
+%C A398545 Under the Hardy-Littlewood prime k-tuple conjecture, a(n) is attained as an n-th smallest Goldbach prime for infinitely many even N. Attainment is verified for n <= 9, first at N = 6, 10, 22, 114, 114, 120, 44286, 90, 120. For n = 10, 11, 12 the least attained value below 10^7 is 47, 53, 59 respectively.
+%C A398545 The primes missing from this sequence below a(28) are 7, 19, 31, 71, 103 and 137: 7 is excluded at n = 3 (one of N-3, N-5, N-7 is always divisible by 3), 19 at n = 6 (mod 5), 31 at n = 8 (mod 7), 71 at n = 16 (mod 11), 103 at n = 22 (mod 13), and 137 at n = 27 (mod 17). The excluding moduli 3, 5, 7, 11, 13, 17 occur in increasing order.
+%e A398545 a(3) = 11: the primes 3, 5, 7 occupy all residue classes mod 3, so for any even N one of N-3, N-5, N-7 is divisible by 3, and 7 can never be a 3rd smallest Goldbach prime; the triple {3, 5, 11} satisfies the congruence conditions, and 11 first occurs as a 3rd smallest Goldbach prime for N = 22 = 3 + 19 = 5 + 17 = 11 + 11.
+%o A398545 (Python)
+%o A398545 from sympy import primerange, primepi, prime
+%o A398545 def aupton(N=28):
+%o A398545     B = prime(primepi(N) + N) + 1  # a(n) <= n-th prime > N, so this pool suffices
+%o A398545     P = list(primerange(3, B)); L = len(P)
+%o A398545     Rs = list(primerange(3, N+1))
+%o A398545     kill = {r: [0]*r for r in Rs}
+%o A398545     for i, p in enumerate(P):
+%o A398545         for r in Rs: kill[r][p % r] |= 1 << i
+%o A398545     best = [None]*(N+1)
+%o A398545     def sv(m, upto):
+%o A398545         v = []; i = 0
+%o A398545         while m and len(v) < upto:
+%o A398545             if m & 1: v.append(P[i])
+%o A398545             m >>= 1; i += 1
+%o A398545         return v
+%o A398545     def dfs(d, alive):
+%o A398545         s = sv(alive, N)
+%o A398545         if all(best[n] and (len(s) < n or s[n-1] >= best[n]) for n in range(1, N+1)): return
+%o A398545         if d == len(Rs):
+%o A398545             for n in range(1, len(s)+1):
+%o A398545                 if best[n] is None or s[n-1] < best[n]: best[n] = s[n-1]
+%o A398545             return
+%o A398545         for m in range(Rs[d]): dfs(d+1, alive & ~kill[Rs[d]][m])
+%o A398545     dfs(0, (1 << L) - 1)
+%o A398545     return best[1:]
+%o A398545 print(aupton())
+%Y A398545 Cf. A020481, A398183, A398451.
+%K A398545 nonn,new
+%O A398545 1,1
+%A A398545 _Soroosh Hemmati_, Aug 01 2026
+%E A398545 More terms from _Sean A. Irvine_, Aug 16 2026
