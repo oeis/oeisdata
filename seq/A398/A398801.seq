@@ -1,0 +1,55 @@
+%I A398801 #18 Aug 17 2026 19:00:36
+%S A398801 1260,1435,1530,6880,102510,104260,105210,108135,152608,156240,182650,
+%T A398801 629680,10025010,10042510,10052010,10081260,10524208,10716300,
+%U A398801 10732900,10832850,12181500,14134500,1000250010,1000425010,1000520010,1000812510,1001332300,1005240208
+%N A398801 Numbers of the form i*j, where i and j both have m digits and i*j = 10^m*R(i) + j, R being the digit reversal (A004086); j may end in 0.
+%C A398801 Since i cannot end in 0 (otherwise i-1 would be prime to 10 and could not divide 10^m*R(i)), R(i) has m digits; as j has exactly m digits, the decimal expansion of i*j is R(i) followed by j.
+%C A398801 The 2m digits of the product are those of i and j taken together, so every term is a vampire number (A014575). The inclusion is strict: 1395, 1827 and 2187 belong to A014575 but not to this sequence.
+%C A398801 The relation i*j = 10^m*R(i) + j is equivalent to j*(i-1) = 10^m*R(i).
+%C A398801 For every m >= 3, i = 2*10^(m-1) + 1 and j = 5*10^(m-1) + 10 satisfy the relation, so the sequence is infinite.
+%C A398801 Read as an irregular triangle with row index m, the common number of digits of i and j: row lengths are 4, 8, 10, 20, 22, 35, 45, 58 for m = 2..9, as in A397756. Rows are in increasing order of the product, hence of R(i), whereas A397756 lists the corresponding i in increasing order of i; the two orders coincide only for m = 2. For m = 3 the terms here come from i = 201, 401, 501, 801, 251, 651, 281, 926.
+%C A398801 Up to m = 9, no term admits two representations of this form.
+%H A398801 Gnouma Jerome Kadouno, <a href="/A398801/b398801.txt">Table of n, a(n) for n = 1..202</a>
+%H A398801 G. J. Kadouno, <a href="https://doi.org/10.5281/zenodo.21820428">Janus numbers: classification and infinite families</a>, Zenodo, 2026.
+%e A398801 1260 = 21*60: m = 2, R(21) = 12, and 10^2*12 + 60 = 1260.
+%e A398801 10025010 = 2001*5010: m = 4, R(2001) = 1002, and 10^4*1002 + 5010 = 10025010.
+%o A398801 (Python)
+%o A398801 def a_list(mmax):
+%o A398801     res = []
+%o A398801     for m in range(2, mmax + 1):
+%o A398801         lo, P = 10**(m-1), 10**m
+%o A398801         for i in range(lo, P):
+%o A398801             d = i - 1
+%o A398801             if d % 2 and d % 5: continue
+%o A398801             r = int(str(i)[::-1])
+%o A398801             if not (r < d <= 10*r): continue
+%o A398801             j, rem = divmod(P*r, d)
+%o A398801             if rem == 0: res.append(i*j)
+%o A398801     return sorted(res)
+%o A398801 print(a_list(6))
+%o A398801 (Python)
+%o A398801 # vectorized version, used to compute the b-file; valid up to m = 9 (int64)
+%o A398801 import numpy as np
+%o A398801 def a_list(mmax, chunk=4_000_000):
+%o A398801     out = []
+%o A398801     for m in range(2, mmax + 1):
+%o A398801         lo, P = 10**(m-1), 10**m
+%o A398801         for start in range(lo, P, chunk):
+%o A398801             i = np.arange(start, min(start + chunk, P), dtype=np.int64)
+%o A398801             d = i - 1
+%o A398801             i = i[(d % 2 == 0) | (d % 5 == 0)]
+%o A398801             d = i - 1
+%o A398801             n, r = i.copy(), np.zeros_like(i)
+%o A398801             for _ in range(m):
+%o A398801                 r *= 10; r += n % 10; n //= 10
+%o A398801             k = (r < d) & (d <= 10 * r)
+%o A398801             i, d, r = i[k], d[k], r[k]
+%o A398801             num = P * r
+%o A398801             k = num % d == 0
+%o A398801             out.append(i[k] * (num[k] // d[k]))
+%o A398801     res = np.concatenate(out); res.sort()
+%o A398801     return res.tolist()
+%Y A398801 Cf. A004086, A014575, A397756, A009944, A048935.
+%K A398801 nonn,base,tabf,new
+%O A398801 1,1
+%A A398801 _Gnouma Jerome Kadouno_, Aug 09 2026

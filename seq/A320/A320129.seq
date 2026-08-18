@@ -1,9 +1,12 @@
-%I A320129 #42 Aug 14 2026 14:29:02
+%I A320129 #56 Aug 17 2026 08:53:53
 %S A320129 1,1,2,10,55,412,3736,40518,505486,7145031,112844566,1970286922,
-%T A320129 37676184205,783085946488,17578302627044,423817847191746
+%T A320129 37676184205,783085946488,17578302627044,423817847191746,
+%U A320129 10923106014523487,299684621588252304,8720400120282418608,268251819340689785942,8697835993634003695074,296482514974152743809228
 %N A320129 Number of ways to group the first 2*n natural numbers into n pairs (xi, yi) such that the n numbers xi + yi are all different.
 %H A320129 Altug Alkan, <a href="/A320129/a320129.png">Line plot of t(n)-t(n-1) where t(n) = a(n+1)/a(n) for n <= 11</a>
+%H A320129 Meghanto Majumder, <a href="/A320129/a320129.txt">C program used to compute a(16)-a(21) through inclusion-exclusion</a>
 %F A320129 a(n) >= A272363(n).
+%F A320129 a(n) = Sum_{A subset of [2n]} (-1)^|A| * e_n(c_3(A), ..., c_{4n-1}(A)), where c_s(A) is the number of pairs {i,j}, i+j = s, with i and j both outside A, and e_n denotes the elementary symmetric polynomial of degree n (choose n distinct sums and one surviving pair from each). Configurations that miss an element cancel, leaving exactly the matchings with n distinct sums. - _Meghanto Majumder_, Aug 15 2026
 %e A320129 For n = 2, a(2) = 2 since {(1,3), (2,4)} and {(1,2), (3,4)} are corresponding sets. {(2,4), (1,3)} and {(3,1), (4,2)} are considered to be the same grouping with {(1,3), (2,4)}.
 %o A320129 (PARI)
 %o A320129 okperm(vp, n) = {for (k=1, n-1, if (vp[k] > vp[k+1], return (0)); ); for (k=1, n, if (vp[k+n] <= vp[k], return (0)); ); 1; }
@@ -12,9 +15,33 @@
 %o A320129 from sympy.utilities.iterables import multiset_partitions
 %o A320129 def A320129(n):
 %o A320129     return 1 if n == 0 else sum(1 for p in multiset_partitions(list(range(1,2*n+1)),n) if max(len(d) for d in p) == 2 and len(set(sum(d) for d in p)) == n) # _Chai Wah Wu_, Oct 08 2018
-%Y A320129 Cf. A002968, A060963, A272363.
-%K A320129 nonn,more,changed
+%o A320129 (Python)
+%o A320129 # Sweep the possible pair sums s = 3..4n-1, deciding which pair {a,s-a}
+%o A320129 # has sum s; state = bitmask of used elements for fast distinctness check
+%o A320129 from collections import defaultdict
+%o A320129 def A320129(n):
+%o A320129     if n == 0: return 1
+%o A320129     N, S, total = 2*n, 4*n-1, n*(2*n+1)
+%o A320129     dp = {0: 1}
+%o A320129     for s in range(3, S+1):
+%o A320129         pairs = [(1<<(a-1))|(1<<(s-a-1)) for a in range(max(1,s-N), (s-1)//2+1)]
+%o A320129         nxt = defaultdict(int)
+%o A320129         for m, c in dp.items():
+%o A320129             R = n - (bin(m).count('1')>>1)
+%o A320129             need = total - sum(i+1 for i in range(N) if m>>i & 1)
+%o A320129             for place in (0, 1):
+%o A320129                 r, d = R-place, need-place*s
+%o A320129                 if r > S-s or not (r*(s+1)+r*(r-1)//2 <= d <= r*S-r*(r-1)//2): continue
+%o A320129                 if not place: nxt[m] += c
+%o A320129                 else:
+%o A320129                     for p in pairs:
+%o A320129                         if not m & p: nxt[m|p] += c
+%o A320129         dp = nxt
+%o A320129     return dp[(1<<N)-1] # _Meghanto Majumder_, Aug 15 2026
+%Y A320129 Cf. A002968, A060963, A272363, A398911.
+%K A320129 nonn,changed
 %O A320129 0,3
 %A A320129 _Altug Alkan_, Oct 06 2018
 %E A320129 a(11)-a(12) from _Giovanni Resta_, Oct 09 2018
 %E A320129 a(13)-a(15) from _Seiichi Manyama_, Aug 14 2026
+%E A320129 a(16)-a(21) from _Meghanto Majumder_, Aug 15 2026
