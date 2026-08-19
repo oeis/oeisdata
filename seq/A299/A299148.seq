@@ -1,4 +1,4 @@
-%I A299148 #27 Mar 02 2025 14:33:50
+%I A299148 #30 Aug 19 2026 01:22:51
 %S A299148 2,2,4,2,25,2,262144,4,4,64,734449,2,3100870943041,9066121,4,2,729,2,
 %T A299148 214355670008317962105386619478205641151753401,5041,64,16,25,
 %U A299148 10651330026288961,16610312161,2607021481,38950081,1817762776525603445521,5331481,2,2160067977820518171249529658520145004718584607049,21203610154988994565561
@@ -42,8 +42,32 @@
 %t A299148 Array[Block[{k = 2}, While[! AllTrue[DivisorSigma[1, #] & /@ {k, k^#}, PrimeQ], k++]; k] &, 10] (* _Michael De Vlieger_, Feb 05 2018 *)
 %o A299148 (Magma) [Min([n: n in[1..10000000] | IsPrime(SumOfDivisors(n)) and IsPrime(SumOfDivisors(n^k))]): k in [2..12]];
 %o A299148 (PARI) a(n) = {my(k=1); while (!(isprime(sigma(k)) && isprime(sigma(k^n))), k++); k;} \\ _Michel Marcus_, Feb 05 2018
+%o A299148 (Python)
+%o A299148 from heapq import heappop, heappush
+%o A299148 from sympy import isprime, nextprime
+%o A299148 def A299148(n):
+%o A299148     k = 1
+%o A299148     while not isprime(k*n+1):
+%o A299148         k = nextprime(k+1)-1
+%o A299148     h, hset, jlist = [(1<<k,0,2)], {1<<k}, [k]
+%o A299148     while True:
+%o A299148         pj, i, p = heappop(h)
+%o A299148         m = pj**n*p
+%o A299148         if isprime((pj*p-1)//(p-1)) and isprime((m-1)//(p-1)):
+%o A299148             return pj
+%o A299148         if i < len(jlist)-1:
+%o A299148             j = jlist[i+1]
+%o A299148         else:
+%o A299148             j = nextprime(jlist[i]+1)-1
+%o A299148             while not isprime(j*n+1):
+%o A299148                 j = nextprime(j+1)-1
+%o A299148             jlist.append(j)
+%o A299148         for w in [(p**j,i+1,p),((q:=nextprime(p))**k,0,q)]:
+%o A299148             if w[0] not in hset:
+%o A299148                 heappush(h,w)
+%o A299148                 hset.add(w[0]) # _Chai Wah Wu_, Aug 18 2026
 %Y A299148 Cf. A000203, A279094.
-%K A299148 nonn
+%K A299148 nonn,changed
 %O A299148 1,1
 %A A299148 _Jaroslav Krizek_, Feb 03 2018
 %E A299148 a(13) to a(32) from _Robert Israel_, Feb 06 2018

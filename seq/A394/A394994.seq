@@ -1,12 +1,34 @@
-%I A394994 #16 Apr 09 2026 10:36:12
+%I A394994 #25 Aug 18 2026 19:01:59
 %S A394994 1,2,3,4,5,6,7,9,10,11,13,14,15,17,18,19,21,22,23,25,26,27,29,30,31,
 %T A394994 33,34,35,37,38,39,41,42,43,45,46,47,49,50,51,53,54,55,57,58,59,61,62,
 %U A394994 63,65,66,67,69,70,71,73,74,75,77,78,79,81,82,83,85,86,87,89,90
 %N A394994 Matchable numbers: an integer k is matchable if there is a coprime matching between [1..tau(k)] and D(k), where tau(k) is A000005(k) and D(k) is the set of divisors of k.
+%C A394994 Every squarefree number is a term (McNew and Pomerance, Theorems 1 and 2), so A005117 is a subsequence. - _Freddy Barrera_, Aug 10 2026
+%C A394994 If 4 divides k and k > 4, then k is not a term: at least 2/3 of the divisors of k are even and must be matched with odd numbers in [1..tau(k)], but fewer than 2/3 of those numbers are odd (McNew and Pomerance, p. 1). - _Freddy Barrera_, Aug 11 2026
+%H A394994 Freddy Barrera, <a href="/A394994/b394994.txt">Table of n, a(n) for n = 1..10000</a>
 %H A394994 Nathan McNew and Carl Pomerance, <a href="https://arxiv.org/abs/2604.05304">Matchable numbers</a>, arXiv:2604.05304 [math.NT], 2026.
 %H A394994 Bernardo Récaman, <a href="https://mathoverflow.net/questions/415671/coprime-matching-of-an-integers-dn-divisors-with-the-set-of-the-first-dn-in">Coprime matching of an integer's d(n) divisors with the set of the first d(n) integers</a>, mathoverflow, 2022.
+%e A394994 6 is a term: 6 has 4 divisors, and 1 <-> 6, 2 <-> 1, 3 <-> 2, 4 <-> 3 is a coprime matching between 1, 2, 3, 4 and the divisors 1, 2, 3, 6.
+%e A394994 8 is the smallest number not in this sequence: 8 has 4 divisors, 1, 2, 4, 8, of which only 1 is odd, but both 2 and 4 must be matched with an odd divisor.
 %t A394994 Reap[Do[Which[SquareFreeQ[n], Sow[n], AnyTrue[FactorInteger[n], #2 >= #1 & @@ # &], Nothing, True, D = Divisors[n]; tau = Length[D]; If[ListQ@ SelectFirst[Permutations@ Range[tau]], Times @@ Boole[CoprimeQ @@@ Transpose@{#, D}] > 0 &]; Sow[n] ], {n, 90}] ][[-1, 1]] (* _Michael De Vlieger_, Apr 09 2026 *)
+%o A394994 (Python)
+%o A394994 from math import gcd
+%o A394994 from sympy import divisors
+%o A394994 def is_matchable(n): # uses Kuhn's augmenting-path algorithm for bipartite matching
+%o A394994     d = divisors(n)
+%o A394994     t = len(d)
+%o A394994     m = [0]*t
+%o A394994     def augment(u, seen):
+%o A394994         for j in range(t):
+%o A394994             if not seen[j] and gcd(u, d[j]) == 1:
+%o A394994                 seen[j] = True
+%o A394994                 if m[j] == 0 or augment(m[j], seen):
+%o A394994                     m[j] = u
+%o A394994                     return True
+%o A394994         return False
+%o A394994     return all(augment(u, [False]*t) for u in range(1, t+1))
+%o A394994 [n for n in range(1, 91) if is_matchable(n)] # _Freddy Barrera_, Aug 10 2026
 %Y A394994 Cf. A000005, A027750.
-%K A394994 nonn
+%K A394994 nonn,changed
 %O A394994 1,2
 %A A394994 _Michel Marcus_, Apr 09 2026
