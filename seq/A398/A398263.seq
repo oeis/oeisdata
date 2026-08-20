@@ -1,0 +1,65 @@
+%I A398263 #10 Aug 19 2026 04:09:03
+%S A398263 1,1,1,1,2,2,2,2,3,3,4,4,5,6,6,7,8,9,9,10,12,14,15,18,19,20,22,25,26,
+%T A398263 28,30,33,36,38,42,46,51,59,67,71,78,82,87,90,94,97,105,109,113,124,
+%U A398263 137,143,155,161,172,177,186,192,198,207,226,247,261,278,298,313
+%N A398263 a(n) is the maximum number of unordered representations with repetition of an integer as x + y, where x and y are chosen from the set of distinct multinomial coefficient values of order n.
+%C A398263 Let B(n) be the set of distinct numbers n!/(p_1!*...*p_r!), where (p_1, ..., p_r) ranges over the partitions of n. For an integer s, let r_n(s) = |{(x, y) : x, y in B(n), x <= y and x + y = s}|.
+%C A398263 Thus a(n) = max_s r_n(s).
+%C A398263 Appending a part 1 to every partition of n shows that (n + 1)*B(n) is a subset of B(n + 1). Hence every representation at order n persists, after multiplication by n + 1, at order n + 1, and therefore a(n + 1) >= a(n).
+%C A398263 For every m >= 2, the partition (2, 3, ..., 2*m - 1) of 2*m^2 - m - 1 produces an arithmetic progression of length 2*m - 1 in B(2*m^2 - m - 1): replacing the part j by j - 1 and 1 multiplies the corresponding coefficient by j. Hence the central pairwise sum has m unordered representations, giving a(n) >= floor((1 + sqrt(8*n + 9))/4).
+%C A398263 A398265 records the complete cumulative distribution of the representation multiplicities. In particular, a(n) is the largest k for which A398265(n, k) > 0.
+%C A398263 A398233(n) is the total collision excess and A398238(n) is the number of distinct colliding sums. Their average gives a(n) >= 1 + ceiling(A398233(n)/A398238(n)) for n >= 5, while a sum having a(n) representations gives a(n) <= A398233(n) - A398238(n) + 2.
+%C A398263 If M = A070289(n) = |B(n)|, then a fixed sum has at most ceiling(M/2) unordered representations, so a(n) <= ceiling(A070289(n)/2).
+%C A398263 For q >= 2, let N(q) = Sum_{p prime, p <= q} p*floor(log(q)/log(p)). The set B(N(q)) contains an arithmetic progression of length q, whose central sum has ceiling(q/2) unordered representations. Hence a(n) >= ceiling(q/2) whenever n >= N(q).
+%C A398263 Moreover, N(q) ~ q^2/(2*log(q)), which gives liminf_{n -> infinity} a(n)/sqrt(n*log(n)) >= 1/2. See the Huber link for proofs.
+%C A398263 A398230 and A398231 give the corresponding collision statistics for trinomial coefficients, A398232 and A398237 are the associated triangles by number of variables, A398233 and A398238 count the total collision excess and the number of distinct colliding sums, and A398265 records the complete cumulative multiplicity profile.
+%H A398263 Felix Huber, <a href="https://arxiv.org/abs/2608.02667">Large Sidon Subsets and Pair-Sum Multiplicities of Distinct Multinomial Coefficients</a>, arXiv:2608.02667 [math.CO], 2026.
+%H A398263 Felix Huber, <a href="/A398263/a398263.txt">Representation multiplicities and the cumulative multiplicity profile for A398263 and A398265</a>.
+%F A398263 a(n) = max_s r_n(s), where r_n(s) = |{(x, y) : x, y in B(n), x <= y and x + y = s}| and B(n) = {A210237(n, j) : 1 <= j <= A070289(n)}.
+%F A398263 a(n + 1) >= a(n).
+%F A398263 a(n) = 1 if and only if 1 <= n <= 4.
+%F A398263 a(n) = max{k : A398265(n, k) > 0} for n >= 5.
+%F A398263 a(n) >= floor((1 + sqrt(8*n + 9))/4).
+%F A398263 a(n) >= 1 + ceiling(A398233(n)/A398238(n)) for n >= 5.
+%F A398263 a(n) <= A398233(n) - A398238(n) + 2 for n >= 5.
+%F A398263 a(n) <= ceiling(A070289(n)/2).
+%F A398263 a(n) >= ceiling(q/2) whenever n >= N(q) and q >= 2, where N(q) = Sum_{p prime, p <= q} p*floor(log(q)/log(p)).
+%F A398263 liminf_{n -> infinity} a(n)/sqrt(n*log(n)) >= 1/2.
+%e A398263 a(9) = 3, since the sum 1764 has the three representations 84 + 1680, 252 + 1512, and 504 + 1260, and no pairwise sum of elements of B(9) has more representations.
+%p A398263 A398263 := proc(n) option remember;
+%p A398263     local a, b, i, j, l, m, r, s, t;
+%p A398263     t := table();
+%p A398263     b := proc(r, p, d)
+%p A398263         local i;
+%p A398263         if r = 0 then
+%p A398263             t[n!/d] := 1;
+%p A398263             return
+%p A398263         end if;
+%p A398263         for i from min(p, r) by -1 to 1 do
+%p A398263             b(r - i, i, d*i!)
+%p A398263         end do
+%p A398263     end proc;
+%p A398263     b(n, n, 1);
+%p A398263     l := [indices(t, 'nolist')];
+%p A398263     m := nops(l);
+%p A398263     s := table();
+%p A398263     a := 0;
+%p A398263     for i to m do
+%p A398263         for j from i to m do
+%p A398263             r := l[i] + l[j];
+%p A398263             if assigned(s[r]) then
+%p A398263                 s[r] := s[r] + 1
+%p A398263             else
+%p A398263                 s[r] := 1
+%p A398263             end if;
+%p A398263             a := max(a, s[r])
+%p A398263         end do
+%p A398263     end do;
+%p A398263     a
+%p A398263 end proc:
+%p A398263 seq(A398263(n), n = 1 .. 26);
+%Y A398263 Cf. A070289, A210237, A398230, A398231, A398232, A398233, A398237, A398238, A398265, A398429.
+%K A398263 nonn,new
+%O A398263 1,5
+%A A398263 _Felix Huber_, Aug 11 2026
+%E A398263 a(47)-a(66) from _Sean A. Irvine_, Aug 19 2026

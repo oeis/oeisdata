@@ -1,0 +1,32 @@
+%I A397413 #38 Aug 19 2026 18:44:08
+%S A397413 1,1,0,1,1,32,0,56,60,119,6,24929,572,11363,538917
+%N A397413 a(n) is the number of circular arrangements of 1, 2, ..., 2n such that every pair of adjacent numbers sums to a prime and every pair of antipodal (diametrically opposite) numbers differs by n, up to rotations and reflections.
+%C A397413 The antipodal condition c(i + n) == c(i) + n (mod 2n), with values taken in 1..2n, is a half-turn symmetry composed with the shift x -> x + n. It implies that whenever an edge has both endpoints in the same half of {1, ..., 2n}, the antipodal edge has sum s +- 2n; those sums therefore come in pairs of primes differing by 2n (de Polignac-type prime pairs). Edges whose endpoints straddle the two halves are mapped to edges with the same sum.
+%e A397413 For n = 4 (numbers 1..8), one of the arrangements is 1, 2, 3, 8, 5, 6, 7, 4 (cyclically): adjacent sums are 3, 5, 11, 13, 11, 13, 11, 5 (all prime) and the antipodal pairs (1,5), (2,6), (3,7), (8,4) each differ by 4.
+%o A397413 (Python)
+%o A397413 from sympy import isprime
+%o A397413 def a(n):
+%o A397413     m=2*n; k=n
+%o A397413     shift=lambda x: x+k if x<=k else x-k
+%o A397413     pid=lambda x: min(x, shift(x))
+%o A397413     sols=set(); h=[]; used=set()
+%o A397413     def back():
+%o A397413         if len(h)==k:
+%o A397413             if isprime(h[-1]+shift(h[0])) and isprime(shift(h[-1])+h[0]):
+%o A397413                 c=h+[shift(v) for v in h]
+%o A397413                 best=min(min(tuple(c[i:]+c[:i]) for i in range(m)), min(tuple(c[::-1][i:]+c[::-1][:i]) for i in range(m)))
+%o A397413                 sols.add(best)
+%o A397413             return
+%o A397413         for x in range(1, m+1):
+%o A397413             if pid(x) in used: continue
+%o A397413             if h and not (isprime(h[-1]+x) and isprime(shift(h[-1])+shift(x))): continue
+%o A397413             h.append(x); used.add(pid(x))
+%o A397413             back()
+%o A397413             h.pop(); used.discard(pid(x))
+%o A397413     back()
+%o A397413     return len(sols)
+%Y A397413 Cf. A051252 (prime circles without symmetry), A398694 (companion sequence).
+%K A397413 nonn,hard,more,new
+%O A397413 1,6
+%A A397413 _Patrick Reymond_, Aug 06 2026
+%E A397413 a(12)-a(15) from _Sean A. Irvine_, Aug 13 2026

@@ -1,0 +1,54 @@
+%I A398370 #27 Aug 19 2026 23:02:44
+%S A398370 1,3,1,5,3,9,5,13,8,18,29,41,25,39,24,14,31,49,30,18,39,61,37,22,47,
+%T A398370 73,45,73,102,132,81,113,146,90,125,161,99,61,37,77,118,72,115,71,43,
+%U A398370 89,136,84,133,82,133,185,238,147,90,146,203,261,161,99
+%N A398370 a(1)=1; for n>=2, a(n)=a(n-1)+n if a(n-1) mod floor(phi*n)<n, otherwise a(n)=floor(a(n-1)/phi), where phi=(1+sqrt(5))/2.
+%C A398370 In an exact computation through n = 100067704832, the maximum observed run length was 3 for both additive updates and contractions.
+%H A398370 Jake Foth, <a href="/A398370/b398370.txt">Table of n, a(n) for n = 1..10000</a>
+%H A398370 Jake Foth, <a href="https://doi.org/10.5281/zenodo.21679475">Golden Contraction: An Integer Recurrence with Golden-Ratio Modular Gating, Additive Growth, and Proportional Contraction</a>, Zenodo (2026).
+%e A398370 Since floor(2*phi)=3 and a(1) mod 3=1<2, a(2)=a(1)+2=3.
+%e A398370 Since floor(3*phi)=4 and a(2) mod 4=3>=3, a(3)=floor(a(2)/phi)=floor(3/phi)=1.
+%p A398370 g := k -> iquo(isqrt(5*k^2)-k, 2):
+%p A398370 a := proc(n)
+%p A398370     option remember;
+%p A398370     local x;
+%p A398370     if n = 1 then
+%p A398370         return 1;
+%p A398370     end if;
+%p A398370     x := a(n-1);
+%p A398370     if irem(x, n+g(n)) < n then
+%p A398370         return x+n;
+%p A398370     else
+%p A398370         return g(x);
+%p A398370     end if;
+%p A398370 end proc:
+%p A398370 seq(a(n), n=1..60);
+%t A398370 Clear[a, g];
+%t A398370 g[k_Integer] := Floor[k/GoldenRatio];
+%t A398370 a[1] = 1;
+%t A398370 a[n_Integer] /; n >= 2 := a[n] = If[Mod[a[n-1], n+g[n]] < n, a[n-1]+n, g[a[n-1]]];
+%t A398370 Table[a[n], {n, 1, 60}]
+%o A398370 (Python)
+%o A398370 from math import isqrt
+%o A398370 def G(k):
+%o A398370     if k < 0:
+%o A398370         raise ValueError("k must be nonnegative")
+%o A398370     return (isqrt(5*k*k) - k) // 2
+%o A398370 def A(N):
+%o A398370     if N < 1:
+%o A398370         return []
+%o A398370     x = 1
+%o A398370     values = [x]
+%o A398370     for n in range(2, N + 1):
+%o A398370         modulus = n + G(n)
+%o A398370         if x % modulus < n:
+%o A398370             x += n
+%o A398370         else:
+%o A398370             x = G(x)
+%o A398370         values.append(x)
+%o A398370     return values
+%o A398370 print(A(60))
+%Y A398370 Cf. A001622 (phi), A000201 (floor(phi*n)).
+%K A398370 nonn,easy,new
+%O A398370 1,2
+%A A398370 _Jake Foth_, Jul 27 2026
