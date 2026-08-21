@@ -1,0 +1,47 @@
+%I A398812 #38 Aug 21 2026 01:04:15
+%S A398812 0,1,4,8,16,22,36,44,60,74,100,109,144,158,184,208,256,267,324,336,
+%T A398812 380,422,484,492,560,602,648,688,784,791,900,912,988,1058,1124,1158,
+%U A398812 1296,1334,1400,1449,1600,1604,1764,1776,1864,1982,2116,2108,2268,2315,2440,2512,2704,2700,2852,2913,3068,3194,3364,3342
+%N A398812 a(n) = n^2 - A138808(n): number of lattice points in the square [1,n] X [1,n] not covered by any box [1,p] X [1,q] with p*q = n.
+%C A398812 The sequences A138808 (d=2), A283626 (d=3), A398809 (d=4), A398810 (d=5), and all the others (for d>=6) arise from a formalization of a manuscript that informally introduced the concept of the "number of structural units" in d-dimensional calculus.
+%C A398812 However, for every multidimensional number of the corresponding dimension d, there is an additional number, conventionally called an "anti-number" (or "mirror number" in the manuscript), which complements the multidimensional number, forming a regular geometric figure (completely filled with structural units).
+%C A398812 In this sequence, A398812, a(n) represents precisely such "mirror" numbers for dimension d=2. A(n, d) in Python means a(n) for d=2.
+%D A398812 Soslan Daurov, Multidimensional calculus. Composition and structure of a number, 2016.
+%H A398812 Soslan Daurov, <a href="/A398812/b398812.txt">Table of n, a(n) for n = 1..120</a>
+%H A398812 Soslan Daurov and Anton Cretov, <a href="https://doi.org/10.24108/preprints-3116072">Structural units of different-dimensional numbers</a>, Preprints, 2026. In Russian.
+%F A398812 a(n) = n^2 - A138808(n).
+%F A398812 a(n) = 0 iff n = 1.
+%F A398812 a(p) = (p-1)^2 for prime p.
+%F A398812 Conjecturally a(n)/n^2 -> 1; i.e., A138808(n) = o(n^2).
+%F A398812 If n = p^k for p prime, then a(n) = n*(n+k(1/p-1)-1). The above conjecture is true, since tau(n) <= 2*sqrt(n) and A138808(n) <= n*tau(n). - _Chai Wah Wu_, Aug 20 2026
+%e A398812 a(6) = 22: the square 6 X 6 has 36 cells; the boxes 1 X 6, 2 X 3, 3 X 2, 6 X 1 cover 14 of them (= A138808(6)), leaving 36 - 14 = 22.
+%o A398812 (Python)
+%o A398812 from functools import lru_cache
+%o A398812 def A(n, d):
+%o A398812     ds = tuple(x for x in range(1, n+1) if n % x == 0)
+%o A398812     W = {}; p = 0
+%o A398812     for x in ds: W[x] = x - p; p = x
+%o A398812     @lru_cache(None)
+%o A398812     def step(T, e):
+%o A398812         return frozenset(m//a for m in T for a in ds if m % a == 0 and a >= e)
+%o A398812     @lru_cache(None)
+%o A398812     def H(t, T):
+%o A398812         if t == 0: return 1 if 1 in T else 0
+%o A398812         s = 0
+%o A398812         for e in ds:
+%o A398812             u = step(T, e)
+%o A398812             if u: s += W[e]*H(t-1, u)
+%o A398812         return s
+%o A398812     return H(d, frozenset({n}))
+%o A398812 def a(n): return n**2 - A(n, 2)
+%o A398812 print([a(n) for n in range(1, 61)])
+%o A398812 (Python)
+%o A398812 from fractions import Fraction
+%o A398812 from sympy import divisors
+%o A398812 def A398812(n):
+%o A398812     d = divisors(n)
+%o A398812     return int(n*(n-(m:=len(d))+sum(Fraction(d[i],d[i+1]) for i in range(m-1)))) # _Chai Wah Wu_, Aug 20 2026
+%Y A398812 Cf. A138808.
+%K A398812 nonn,new
+%O A398812 1,3
+%A A398812 _Soslan Daurov_, Aug 10 2026
