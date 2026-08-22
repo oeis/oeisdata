@@ -1,0 +1,52 @@
+%I A397887 #57 Aug 21 2026 19:21:58
+%S A397887 1,3,6,5,11,9,12,14,14,21,22,21,22,26,29,30,29,39,33,42,42,44,37,50,
+%T A397887 54,56,56,67,50,63,53,74,75,78,72,86,58,92,95,96,63,109,69,94,108,99,
+%U A397887 76,122,124,128,123,138,83,112,147,151,153,121,88,169,100,131,157
+%N A397887 a(1) = 1; a(n) = n + a(A026238(n)) for n > 1.
+%C A397887 The sequence is well-defined because A026238(n) < n for all n >= 2, ensuring that the recursion strictly decreases and always terminates at the base case a(1) = 1.
+%C A397887 a(n) can be interpreted as the sum of the terms in the trajectory of n under repeated application of the map x -> A026238(x) until 1 is reached.
+%C A397887 The map A026238(n) can be expressed using A000720: if n is prime, A026238(n) = A000720(n); if n is composite, A026238(n) = n - A000720(n) - 1.
+%C A397887 If we consider a directed tree rooted at 1 where there is an edge from n to A026238(n) for all n >= 2, then a(n) is the sum of the nodes on the unique path from n to the root.
+%C A397887 The sequence was computed up to n = 10^9, and it was found that the sequence shows significant growth relative to n for composite values near powers of 10, which is where a(n) reaches its maximum for n <= 10^k. This might be happening because the mapping reduces primes drastically, but decreases composites slowly.
+%C A397887 The highest sums come from numbers whose trajectories avoid hitting a prime for as long as possible. While this heuristic requires further investigation, the trajectory lengths (number of steps to reach 1) for these record-setting values are included below for reference.
+%C A397887 Maximum values of a(n), their corresponding n, the ratio a(n)/n, and trajectory lengths for n <= 10^k:
+%C A397887   k=4: max a(n) = 72101 at n = 9989 (ratio ~ 7.2180) steps: 31
+%C A397887   k=5: max a(n) = 947653 at n = 99896 (ratio ~ 9.4863) steps: 49
+%C A397887   k=6: max a(n) = 11771861 at n = 999680 (ratio ~ 11.7756) steps: 74
+%C A397887   k=7: max a(n) = 140780169 at n = 9999819 (ratio ~ 14.0782) steps: 101
+%C A397887   k=8: max a(n) = 1638403565 at n = 99998927 (ratio ~ 16.3842) steps: 140
+%C A397887   k=9: max a(n) = 18690401281 at n = 999989370 (ratio ~ 18.6906) steps: 163
+%H A397887 Pravan Gupta, <a href="/A397887/b397887.txt">Table of n, a(n) for n = 1..10000</a>
+%F A397887 a(n) = n + a(A026238(n)) for n > 1, a(1) = 1.
+%e A397887 For n=18 we have a(18) = 18 + a(A026238(18)).
+%e A397887 Now A026238(n) is defined as j if n is the j-th prime, else as k if n is the k-th composite.
+%e A397887 So if we follow this as a trajectory till we reach 1 we would get:
+%e A397887   18 -> which is the 10th composite;
+%e A397887   10 -> which is the 5th composite;
+%e A397887   5 -> which is the 3rd prime;
+%e A397887   3 -> which is the 2nd prime;
+%e A397887   2 -> which is the 1st prime;
+%e A397887 So the trajectory sum for n=18 is simply achieved by following the trajectory which gives: a(18) = 18+10+5+3+2+1 = 39.
+%o A397887 (Python)
+%o A397887 import sympy as sp
+%o A397887 from itertools import islice
+%o A397887 def gen_a():
+%o A397887     yield 1
+%o A397887     a_n = [0, 1]
+%o A397887     n = 2
+%o A397887     while True:
+%o A397887         if sp.isprime(n):
+%o A397887             N = sp.primepi(n)
+%o A397887         else:
+%o A397887             N = n - sp.primepi(n) - 1
+%o A397887         term = n + a_n[N]
+%o A397887         a_n.append(term)
+%o A397887         yield term
+%o A397887         n += 1
+%o A397887 print(list(islice(gen_a(),100)))
+%o A397887 (PARI) a(n) = if(n<=1, n, n + a(if(isprime(n), primepi(n), n-primepi(n)-1))) \\ _Andrew Howroyd_, Aug 13 2026
+%o A397887 (PARI) lista(n) = {my(a=vector(n), c=0); a[1]=1; for(n=2, #a, a[n] = n + a[if(isprime(n), c++, n - c - 1)]); a} \\ _Andrew Howroyd_, Aug 13 2026
+%Y A397887 Cf. A000720, A026238, A065855, A397693 (record indices), A101184 (trajectory sum under PrimePi).
+%K A397887 nonn,new
+%O A397887 1,2
+%A A397887 _Pravan Gupta_, Aug 12 2026
