@@ -1,0 +1,70 @@
+%I A399000 #21 Aug 23 2026 22:53:32
+%S A399000 1,2,0,5,1,1,15,3,1,1,51,10,2,2,3,188,36,7,3,4,6,731,137,26,5,6,9,15,
+%T A399000 2950,543,101,19,9,13,21,36,12235,2219,406,75,14,19,30,51,91,51822,
+%U A399000 9285,1676,305,56,28,43,72,127,232,223191,39587,7066,1270,230,42,62,102,178,323,603
+%N A399000 The binomial matrix of the Catalan numbers, square array read by ascending antidiagonals.
+%C A399000 We associate a matrix A(n, k) (n >= 0, k >= 0) with a 0-based sequence a(0), a(1), ..., defined by A(n, k) = Sum_{m=0..d} binomial(d, m) * s^(d - m) * a(p + m), where d = abs(n - k), p = min(n, k), s = 1 if k <= n, otherwise -1. We call this matrix the 'binomial matrix' of a. We refer to the mapping a -> A itself as the 'gnomonic expansion' of a. The name describes the algorithmic, structural growth: each time a new term is appended to a, a new row is added below and a new column to the right of the existing matrix, transforming an n X n matrix into an (n+1) X (n+1) matrix. Only simple arithmetic is used here: iterated sums and forward differences. In this way, the given sequence a is embedded as the main diagonal in the matrix, while the top row becomes the inverse binomial transform of a and the left column becomes the binomial transform of a.
+%C A399000 Given its particular arithmetic and algorithmic simplicity, the gnomonic expansion of a sequence is one of the fundamental methods for investigating the structure of a sequence of numbers. Combined with the concept of iterators, as built into computer languages such as Python, it can also be implemented very efficiently (see the link to an implementation).
+%H A399000 Peter Luschny, <a href="https://github.com/PeterLuschny/Gists/blob/main/GnomonicExpansionAndBinomialMatrices.ipynb">Gnomonic Expansion and Binomial Matrices</a>, a Python notebook.
+%F A399000 A(n, n) = C(n), the Catalan numbers.
+%F A399000 A(n, k) = Sum_{m=0..d} binomial(d, m) * s^(d - m) * C(p + m), where d = abs(n - k), p = min(n, k), s = 1 if k <= n, otherwise -1.
+%e A399000 Array begins:
+%e A399000   [0]   1,   0,   1,   1,   3,   6,  15, ...
+%e A399000   [1]   2,   1,   1,   2,   4,   9,  21, ...
+%e A399000   [2]   5,   3,   2,   3,   6,  13,  30, ...
+%e A399000   [3]  15,  10,   7,   5,   9,  19,  43, ...
+%e A399000   [4]  51,  36,  26,  19,  14,  28,  62, ...
+%e A399000   [5] 188, 137, 101,  75,  56,  42,  90, ...
+%e A399000   [6] 731, 543, 406, 305, 230, 174, 132, ...
+%e A399000 .
+%e A399000 Seen as triangle:
+%e A399000   [0]   1;
+%e A399000   [1]   2,   0;
+%e A399000   [2]   5,   1,  1;
+%e A399000   [3]  15,   3,  1, 1;
+%e A399000   [4]  51,  10,  2, 2, 3;
+%e A399000   [5] 188,  36,  7, 3, 4, 6;
+%e A399000   [6] 731, 137, 26, 5, 6, 9, 15;
+%e A399000 .
+%e A399000 Illustrating the algorithm: Assume the given 3 X 3 matrix. First, compute a(3) = 5 and place it at the lower end of the diagonal. Add a new row starting from there, adding the entry on the left in the row above and repeat this until reaching the first column: 5 + 2 -> 7 + 3 -> 10 + 5 -> 15. Next, add a new column, starting again at the new diagonal term, and subtract the term in the previous row to its left; repeat this up to the first row: 5 - 2 -> 3 - 1 -> 2 - 1 = 1.
+%e A399000    1   0   1  |  1
+%e A399000    2   1   1  |  2
+%e A399000    5   3   2  |  3
+%e A399000    - - - - - - - -
+%e A399000   15  10   7  |  5
+%p A399000 binomial_matrix := proc(f::procedure) :: procedure;
+%p A399000     proc(n::integer, k::integer) :: rational;
+%p A399000         local s, d, p, m;
+%p A399000         s := `if`(k <= n, 1, -1);
+%p A399000         d := abs(n - k);
+%p A399000         p := min(n, k);
+%p A399000         add(binomial(d, m) * s^(d - m) * f(p + m), m = 0..d);
+%p A399000     end proc;
+%p A399000 end proc:
+%p A399000 BM := binomial_matrix(n -> binomial(2*n, n) / (n + 1)):
+%p A399000 M := Matrix(9, 9, (n, k) -> BM(n-1, k-1));
+%t A399000 binomialMatrix[seq_][n_Integer, k_Integer] := Module[{s, d, p},
+%t A399000     s = If[k <= n, 1, -1];
+%t A399000     d = Abs[n - k];
+%t A399000     p = Min[n, k];
+%t A399000     Sum[Binomial[d, m] s^(d - m) seq[p + m], {m, 0, d}] ]
+%t A399000 bM = binomialMatrix[CatalanNumber];
+%t A399000 Table[bM[n, k], {n, 0, 8}, {k, 0, 8}] // MatrixForm
+%o A399000 (Python)
+%o A399000 from math import comb as binomial
+%o A399000 from collections.abc import Callable
+%o A399000 def binomial_matrix(seq: Callable[[int], int]) -> Callable[[int, int], int]:
+%o A399000     def term(n: int, k: int) -> int:
+%o A399000         s = 1 if k <= n else -1
+%o A399000         d = abs(n - k)
+%o A399000         p = min(n, k)
+%o A399000         S = sum(binomial(d, m) * s ** (d - m) * seq(p + m)
+%o A399000             for m in range(d + 1))
+%o A399000         return S
+%o A399000     return term
+%o A399000 M = binomial_matrix(lambda n: binomial(2 * n, n) // (n + 1))
+%o A399000 for n in range(9): print([M(n, k) for k in range(9)])
+%Y A399000 Cf. A000108 (main diagonal), A005043 (row 0), A007317 (column 0), A106640, A398915 (antidiagonal sums).
+%K A399000 nonn,tabl,new
+%O A399000 0,2
+%A A399000 _Peter Luschny_, Aug 16 2026
