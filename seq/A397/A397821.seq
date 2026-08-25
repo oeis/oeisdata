@@ -1,0 +1,63 @@
+%I A397821 #38 Aug 24 2026 08:43:56
+%S A397821 105,385,455,595,665,715,805,935,1001,1045,1105,1155,1235,1265,1309,
+%T A397821 1365,1463,1495,1547,1615,1729,1771,1785,1955,1995,2093,2185,2233,
+%U A397821 2261,2387,2415,2431,2639,2717,2737,2821,2849,3045,3059,3157,3255,3289,3311,3367,3451
+%N A397821 Squarefree k whose third smallest distinct prime factor is smaller than the square of the least prime factor.
+%C A397821 Proper subset of A392008, odd squarefree numbers with at least 3 prime factors.
+%C A397821 Smallest term with j >= 3 prime factors is A002110(j+1)/2 = A070826(j+1).
+%C A397821 If k is a term and r is prime where r is greater than all prime factors of k, then k*r is a term. - _Robert Israel_, Aug 23 2026
+%H A397821 Robert Israel, <a href="/A397821/b397821.txt">Table of n, a(n) for n = 1..10000</a>
+%e A397821 Let lpf = least prime factor and q = third least distinct prime factor.
+%e A397821 Let s = A392008.
+%e A397821 The number 30 = 2 * 3 * 5 is not a term, because 2^2 < 5. No even number k exists such that q(k) < 2^2.
+%e A397821 a(1) = s(1) = 105 = 3 * 5 * 7, since q(105) < lpf(105)^2, that is, 7 < 9.
+%e A397821 s(2) = 165 = 3 * 5 * 11 is not a term because 3^2 < 11.
+%e A397821 s(3) = 195 = 3 * 5 * 13 is not a term because 3^2 < 13, etc.
+%e A397821 a(2) = s(10) = 385 = 5 * 7 * 11, since 11 < 5^2.
+%e A397821 a(3) = s(14) = 455 = 5 * 7 * 13, since 13 < 5^2, etc.
+%e A397821 Table of n, a(n) for select n:
+%e A397821     n               a(n)
+%e A397821   --------------------------------------------
+%e A397821     1      s(1) =   105 = 3 * 5 * 7
+%e A397821     2     s(10) =   385 = 5 * 7 * 11
+%e A397821     3     s(14) =   455 = 5 * 7 * 13
+%e A397821     4     s(19) =   595 = 5 * 7 * 17
+%e A397821     9     s(43) =  1001 = 7 * 11 * 13
+%e A397821    12     s(54) =  1155 = 3 * 5 * 7 * 11
+%e A397821    32    s(153) =  2431 = 11 * 13 * 17
+%e A397821    55    s(308) =  4199 = 13 * 17 * 19
+%e A397821    99    s(616) =  7429 = 17 * 19 * 23
+%e A397821   181   s(1181) = 12673 = 19 * 23 * 29
+%e A397821   223   s(1444) = 15015 = 3 * 5 * 7 * 11 * 13
+%e A397821   321   s(2099) = 20677 = 23 * 29 * 31
+%p A397821 N:= 10000: # for terms <= N
+%p A397821 P:= select(isprime, [seq(i,i=3..N/15,2)]): nP:= nops(P):
+%p A397821 with(priqueue):
+%p A397821 initialize(pq):
+%p A397821 for i1 from 1 to nP-2 do
+%p A397821   p1:= P[i1];
+%p A397821   for i3 from i1+2 while P[i3] <= p1^2 and p1 * P[i1+1] * P[i3] <= N do
+%p A397821     p3:= P[i3];
+%p A397821     for i2 from i1+1 to i3-1 while p1 * P[i2] * p3 <= N do
+%p A397821       insert([-p1*P[i2]*p3,i3],pq);
+%p A397821     od
+%p A397821   od
+%p A397821 od:
+%p A397821 R:= NULL:
+%p A397821 while pq[0] <> 0 do
+%p A397821   t:= extract(pq);
+%p A397821   R:= R, -t[1];
+%p A397821   for j from t[2]+1 to nP while -t[1]*P[j] <= N do
+%p A397821     insert([t[1]*P[j],j],pq);
+%p A397821   od
+%p A397821 od:
+%p A397821 R; # _Robert Israel_, Aug 23 2026
+%t A397821 s = Select[Range[3500], And[SquareFreeQ[#], PrimeNu[#] > 2] &]; Select[s, Log[#1, #3] < 2 & @@ FactorInteger[#][[1 ;; 3, 1]] &]
+%o A397821 (Python)
+%o A397821 from sympy import factorint
+%o A397821 def ok(n): return len(f:=factorint(n))>=3 and max(f.values())==1 and min(f)**2>sorted(f)[2]
+%o A397821 print([k for k in range(3500) if ok(k)]) # _Michael S. Branicky_, Aug 23 2026
+%Y A397821 Cf. A002110, A005408, A070826, A350352, A392008.
+%K A397821 nonn,new
+%O A397821 1,1
+%A A397821 _Michael De Vlieger_, Aug 18 2026
