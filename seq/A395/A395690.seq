@@ -1,0 +1,47 @@
+%I A395690 #28 Aug 27 2026 00:41:25
+%S A395690 1,0,1,1,4,18,10213,101310302
+%N A395690 Number of idempotent Latin squares of order n up to simultaneous permutation of rows, columns and symbols.
+%C A395690 A Latin square of order n on the symbols 0..n-1 is idempotent if the cell in row i, column i contains i for every i.
+%C A395690 Applying a single permutation simultaneously to rows, columns and symbols carries idempotent squares to idempotent squares. This is quasigroup isomorphism, and a(n) counts the resulting equivalence classes.
+%C A395690 Isotopy, which applies three independent permutations, does not preserve the main diagonal, so isomorphism rather than isotopy is the appropriate equivalence for idempotent squares.
+%C A395690 a(7) was computed by exhaustive classification using canonical forms, then checked by the orbit-stabilizer identity: summing n!/|Aut| over the 10213 classes returns exactly A395689(7) = 49390080.
+%C A395690 a(8) was computed from A395689(8) by Burnside's lemma, the number of classes being the average over all permutations of the number of squares each one fixes. Only highly symmetric squares are fixed by a non-identity permutation, so those fixed-point counts are small exhaustive searches.
+%F A395690 a(n) = A058175(n, n).
+%o A395690 (Python)
+%o A395690 from itertools import permutations
+%o A395690 def A395690(n):
+%o A395690     def squares():
+%o A395690         L = [[i if i == j else -1 for j in range(n)] for i in range(n)]
+%o A395690         out = []
+%o A395690         def rec(k):
+%o A395690             if k == n * n:
+%o A395690                 out.append(tuple(tuple(r) for r in L))
+%o A395690                 return
+%o A395690             i, j = divmod(k, n)
+%o A395690             if L[i][j] != -1:
+%o A395690                 rec(k + 1)
+%o A395690                 return
+%o A395690             for s in range(n):
+%o A395690                 if s not in L[i] and all(L[r][j] != s for r in range(n)):
+%o A395690                     L[i][j] = s
+%o A395690                     rec(k + 1)
+%o A395690                     L[i][j] = -1
+%o A395690         rec(0)
+%o A395690         return out
+%o A395690     def canon(sq):
+%o A395690         best = None
+%o A395690         for p in permutations(range(n)):
+%o A395690             q = [0] * n
+%o A395690             for i in range(n):
+%o A395690                 q[p[i]] = i
+%o A395690             m = tuple(tuple(p[sq[q[i]][q[j]]] for j in range(n)) for i in range(n))
+%o A395690             if best is None or m < best:
+%o A395690                 best = m
+%o A395690         return best
+%o A395690     return len({canon(s) for s in squares()})
+%o A395690 print([A395690(n) for n in range(1, 6)])
+%Y A395690 Main diagonal of A058175.
+%Y A395690 Cf. A395689, A398445.
+%K A395690 nonn,new
+%O A395690 1,5
+%A A395690 _Chris Segroves_, Jul 29 2026
