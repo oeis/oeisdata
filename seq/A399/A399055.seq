@@ -1,0 +1,40 @@
+%I A399055 #18 Aug 28 2026 18:33:11
+%S A399055 1,2,1,3,2,2,3,4,3,4,3,5,5,9,7,7,7,7,5,11,8,9,4,11,8,15,12,16,14,15,
+%T A399055 10,17,21,23,21
+%N A399055 Number of distinct terminal state loops of Rule 30 cellular automaton in a cyclic universe of width n.
+%H A399055 Eric Weisstein's World of Mathematics, <a href="https://mathworld.wolfram.com/Rule30.html">Rule 30</a>.
+%e A399055 For a(8)=4, the four possible terminal loops are:
+%e A399055   length 1:    length 1:    length 2:    length 5:
+%e A399055   00000000     01010101     01110111     00000111
+%e A399055                             01000100     10001100
+%e A399055                                          11011011
+%e A399055                                          00010010
+%e A399055                                          00111111
+%e A399055 The next state after the end of these loops is a rotation of the first state in the loop.
+%o A399055 (Python)
+%o A399055 def a(n:int):
+%o A399055     if n<=1: return 1
+%o A399055     a,count,past,mask=0,0,set(),(1<<n)-1
+%o A399055     while True: # generate all binary necklaces with length n
+%o A399055         i=n-1
+%o A399055         while i>=0 and ((a>>(n-1-i))&1): i-=1
+%o A399055         if i<0: return count # all starting states checked
+%o A399055         a|=(1<<(n-1-i))
+%o A399055         for j in range(i+1,n):
+%o A399055             if (a>>(n-j+i))&1: a|=(1<<(n-1-j))
+%o A399055             else: a&=~(1<<(n-1-j))
+%o A399055         if n%(i+1)==0 and a not in past: # new starting state
+%o A399055             path,now=[],a
+%o A399055             while now not in path and now not in past:
+%o A399055                 path.append(now)
+%o A399055                 left=(now>>1)|((now&1)<<(n-1))
+%o A399055                 right=((now<<1)&mask)|(now>>(n-1))
+%o A399055                 new=left^(now|right) # apply rule 30
+%o A399055                 # reduce to lowest integer representation:
+%o A399055                 now = min([((new<<k)&mask)|(new>>(n-k)) for k in range(n)])
+%o A399055             if now not in past: count+=1 # new loop found
+%o A399055             past.update(path)
+%Y A399055 Cf. A334496, A334497.
+%K A399055 nonn,more,new
+%O A399055 1,2
+%A A399055 _Lux Penet_, Aug 17 2026
