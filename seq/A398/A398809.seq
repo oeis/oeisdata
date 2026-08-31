@@ -1,0 +1,40 @@
+%I A398809 #37 Aug 30 2026 21:47:09
+%S A398809 1,5,9,19,17,39,25,63,57,79,41,133,49,119,129,192,65,229,73,267,201,
+%T A398809 199,89,408,193,239,305,419,113,517,121,552,345,319,329,742,145,359,
+%U A398809 417,798,161,799,169,723,737,439,185,1174,409,861,561,875,209,1166,601,1254,633,559,233,1614
+%N A398809 Number of integer quadruples (w,x,y,z), all > 0, such that w <= s, x <= t, y <= u, z <= v for some factorization n = s*t*u*v.
+%C A398809 This is the four-dimensional analog of A138808 (d=2) and A283626 (d=3).
+%C A398809 a(n) >= 4*n - 3, with equality iff n is 1 or a prime.
+%C A398809 Equivalently, the number of lattice points in the union of all boxes [1,s] X [1,t] X [1,u] X [1,v] with s*t*u*v = n.
+%C A398809 The sequences A138808 (d=2), A283626 (d=3) and all the others (for d>=4) arise from a formalization of a manuscript that informally introduced the concept of the "number of structural units" in d-dimensional calculus.
+%D A398809 Soslan Daurov "Multidimensional calculus. Composition and structure of a number" 2016. In Russian.
+%H A398809 Soslan Daurov, <a href="/A398809/b398809.txt">Table of n, a(n) for n = 1..120</a>
+%H A398809 Soslan Daurov and Anton Cretov, <a href="https://doi.org/10.24108/preprints-3116072">Structural units of different-dimensional numbers</a>, Preprints, 2026. In Russian.
+%F A398809 a(p) = 4*p - 3 for prime p.
+%F A398809 a(p^e) = Sum_{j=0..min(3,e)} (-1)^j*binomial(3,j)*binomial(e-j+3,3)*p^(e-j) for prime p.
+%F A398809 a(p^e) = [x^e] (1-x)^3/(1-p*x)^4 for prime p.
+%e A398809 a(2) = 5: the factorizations 2 = 2*1*1*1, 1*2*1*1, 1*1*2*1 and 1*1*1*2 cover 5 lattice points in total: [1,1,1,1], [1,1,1,2], [1,1,2,1], [1,2,1,1], and [2,1,1,1].
+%e A398809 a(4) = 19: the factorizations 4 = 4*1*1*1 (and permutations) and 4 = 2*2*1*1 (and permutations) cover 19 lattice points in total.
+%o A398809 (Python)
+%o A398809 from functools import lru_cache
+%o A398809 def A(n, d):
+%o A398809     ds = tuple(x for x in range(1, n+1) if n % x == 0)
+%o A398809     W = {}; p = 0
+%o A398809     for x in ds: W[x] = x - p; p = x
+%o A398809     @lru_cache(None)
+%o A398809     def step(T, e):
+%o A398809         return frozenset(m//a for m in T for a in ds if m % a == 0 and a >= e)
+%o A398809     @lru_cache(None)
+%o A398809     def H(t, T):
+%o A398809         if t == 0: return 1 if 1 in T else 0
+%o A398809         s = 0
+%o A398809         for e in ds:
+%o A398809             u = step(T, e)
+%o A398809             if u: s += W[e]*H(t-1, u)
+%o A398809         return s
+%o A398809     return H(d, frozenset({n}))
+%o A398809 print([A(n, 4) for n in range(1, 61)])
+%Y A398809 Cf. A138808 (d=2), A283626 (d=3).
+%K A398809 nonn,new
+%O A398809 1,2
+%A A398809 _Soslan Daurov_, Aug 10 2026

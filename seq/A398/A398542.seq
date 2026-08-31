@@ -1,0 +1,62 @@
+%I A398542 #18 Aug 30 2026 18:45:04
+%S A398542 1,3,11,47,224,1156,6332,36312,215936,1322455,8298878,53159260,
+%T A398542 346555823,2293953911,15388390533,104454393623,716517483477,
+%U A398542 4961622461811,34651192723908,243875205468862,1728525593334233,12330610667861660,88484596133017049,638447996226848078
+%N A398542 Number of 1324-avoiding L-griddings with n points.
+%C A398542 The plot of a permutation p of [n] is the set of n points (i, p(i)). An L-gridding is a choice of one vertical and one horizontal line, each falling between two consecutive integers or beyond all the points, cutting the plot into four cells, with the upper-right cell empty, the upper-left and lower-right cells avoiding 213, and the lower-left cell avoiding 132; the three nonempty cells form an L. Counted here are the L-griddings of permutations avoiding 1324.
+%C A398542 Griddings are counted rather than permutations, as in the two-cell case A000139.
+%C A398542 Bevan, Brignall, Elvey Price and Pantone enumerate the two-cell case, and in Section 7.4 identify a three-cell decomposition as a route to a sharper lower bound on the growth rate of A061552, noting that enumerating these seems to require new ideas. They call them trominoes; the term is avoided here since a tromino standardly denotes a polyomino with three squares.
+%C A398542 a(0)-a(12) were also computed by gridding every 1324-avoider, agreeing with the formula throughout.
+%H A398542 David Bevan, Robert Brignall, Andrew Elvey Price, and Jay Pantone, <a href="https://arxiv.org/abs/1711.10325">A structural characterisation of Av(1324) and new bounds on its growth rate</a>, arXiv:1711.10325 [math.CO], 2017-2019; European J. Combin. 88 (2020), 103115.
+%H A398542 Charles Cornell Norton, <a href="/A398542/a398542.txt">Python program computing a(0)-a(19) from the formula</a>
+%F A398542 a(n) = Sum_{i+m+j=n} Sum_{b in S(m)} d(b,i)*d(b^(-1),j), where S(m) is the set of 132-avoiding permutations of [m] and d(b,k) is the number of ways to complete a lower-left cell b by k points in the cell above it.
+%F A398542 d(b,k) = binomial(k+m,k)*A000108(k) for b the decreasing permutation of [m].
+%F A398542 Conjecture: for every m >= 1 and every b in S(m), d(b,k) = p(k)*binomial(2*k,k) + q(k)*4^k for polynomials p and q depending on b, with deg p <= m-1 and deg q <= m-2. Verified for m <= 6 and k <= 12.
+%e A398542 Writing the plot with position increasing to the right and value increasing upward, p = 126543 gridded with the vertical line after position 4 and the horizontal line between values 4 and 5 is
+%e A398542     . . X . | . .
+%e A398542     . . . X | . .
+%e A398542     --------+----
+%e A398542     . . . . | X .
+%e A398542     . . . . | . X
+%e A398542     . X . . | . .
+%e A398542     X . . . | . .
+%e A398542 The upper-left cell holds 65, the lower-left cell 12 and the lower-right cell 43; 65 and 43 avoid 213, 12 avoids 132, the upper-right cell is empty, and 126543 avoids 1324.
+%e A398542 a(0) = 1: the empty permutation, with the one placement of the two lines.
+%e A398542 a(1) = 3: the single point lies in the upper-left, the lower-left, or the lower-right cell.
+%e A398542 a(2) = 11: by the number of points in the upper-left, lower-left and lower-right cells, (2,0,0), (0,2,0) and (0,0,2) give 2 each, both patterns of size 2 avoiding 213 and both avoiding 132; (1,1,0) and (0,1,1) give 2 each, the two points interleaving by position and by value respectively; and (1,0,1) gives 1, both coordinates being forced.
+%t A398542 avoids1324[p_] := !AnyTrue[Subsets[Range[Length[p]], {4}], p[[#[[1]]]] < p[[#[[3]]]] < p[[#[[2]]]] < p[[#[[4]]]] &];
+%t A398542 avoids213[p_] := !AnyTrue[Subsets[Range[Length[p]], {3}], p[[#[[2]]]] < p[[#[[1]]]] < p[[#[[3]]]] &];
+%t A398542 avoids132[p_] := !AnyTrue[Subsets[Range[Length[p]], {3}], p[[#[[1]]]] < p[[#[[3]]]] < p[[#[[2]]]] &];
+%t A398542 a[n_] := Module[{t = 0}, Do[If[avoids1324[p], Do[If[AllTrue[Take[p, {c+1, n}], # < r &] && avoids213[Select[Take[p, c], # >= r &]] && avoids132[Select[Take[p, c], # < r &]] && avoids213[Select[Take[p, {c+1, n}], # < r &]], t++], {c, 0, n}, {r, 0, n}]], {p, Permutations[Range[0, n-1]]}]; t];
+%t A398542 Table[a[n], {n, 0, 8}]
+%o A398542 (Python)
+%o A398542 from itertools import permutations, combinations
+%o A398542 def avoids(p, q):
+%o A398542     k = len(q)
+%o A398542     return not any(all((p[c[i]] < p[c[j]]) == (q[i] < q[j])
+%o A398542                        for i in range(k) for j in range(i+1, k))
+%o A398542                    for c in combinations(range(len(p)), k))
+%o A398542 def a(n):
+%o A398542     t = 0
+%o A398542     for p in permutations(range(n)):
+%o A398542         if not avoids(p, (0, 2, 1, 3)):
+%o A398542             continue
+%o A398542         for C in range(n+1):
+%o A398542             for R in range(n+1):
+%o A398542                 if any(v >= R for v in p[C:]):
+%o A398542                     continue
+%o A398542                 if not avoids([v for v in p[:C] if v >= R], (1, 0, 2)):
+%o A398542                     continue
+%o A398542                 if not avoids([v for v in p[:C] if v < R], (0, 2, 1)):
+%o A398542                     continue
+%o A398542                 if not avoids([v for v in p[C:] if v < R], (1, 0, 2)):
+%o A398542                     continue
+%o A398542                 t += 1
+%o A398542     return t
+%o A398542 print([a(n) for n in range(9)])
+%o A398542 (Python) # See Norton link for a program computing a(0)-a(19) from the formula.
+%Y A398542 Cf. A000108 (one cell), A000139 (two cells: the number of n-point dominoes is A000139(n+1)), A061552.
+%K A398542 nonn,hard,new
+%O A398542 0,2
+%A A398542 _Charles Cornell Norton_, Aug 01 2026
+%E A398542 a(20)-a(23) from _Sean A. Irvine_, Aug 30 2026
