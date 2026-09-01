@@ -1,0 +1,48 @@
+%I A399152 #13 Aug 31 2026 22:10:30
+%S A399152 2,4,6,5,10,12,7,16,18,11,22,19,14,28,30,19,23,36,23,40,42,16,46,41,
+%T A399152 31,52,39,35,58,60,26,47,66,43,70,72,32,59,78,41,82,63,55,88,71,59,71,
+%U A399152 96,46,100,102,35,106,108,71,112,87,56,95,109,79,94,126,83
+%N A399152 a(n) is the minimum number of residues mod M = 2n+1 left uncovered when, for every divisor d > 1 of M, exactly one residue class mod d is removed.
+%C A399152 Equivalently, with M = 2n+1: a(n) = min over all choices of residues r_d (d | M, d > 1) of the number of x in Z/MZ such that x != r_d (mod d) for every d | M, d > 1.
+%C A399152 Throughout, u(M) denotes a((M-1)/2), so that u(2n+1) = a(n).
+%C A399152 a(n) = 0 would mean that there is a covering system of the integers whose distinct moduli are exactly the divisors d > 1 of the odd number M. Whether such a system exists is the odd covering problem of Erdős and Selfridge (Erdős Problem #7), so a(n) > 0 for all computed n.
+%C A399152 The union bound gives a(n) >= M - Sum_{d|M, d>1} M/d. For M = p^k it is attained: choose r_p, r_{p^2}, ..., r_{p^k} in turn; when r_{p^j} is chosen, the classes already fixed meet at most Sum_{i=1..j-1} p^(j-i) = (p^j - p)/(p - 1) < p^j of the residues mod p^j, so a class mod p^j disjoint from all of them exists. The k classes are then pairwise disjoint and cover Sum_{j=1..k} p^(k-j) = (p^k - 1)/(p - 1) residues, which gives the formula for prime powers.
+%C A399152 For M = p*q it is not attained, since the class mod p and the class mod q always intersect.
+%C A399152 For squarefree M with at least 3 prime factors p_1 < p_2 < ... < p_r the choice r_d = 0 for all d < M (giving phi(M) - 1) is not optimal: the class 0 mod p_1*p_2 lies inside the class 0 mod p_1 and covers nothing new, whereas any r == 1 (mod p_1*p_2) covers Product_{i>=3} (p_i - 1) >= 6 residues coprime to M, at most one of which is the class mod M. Hence a(n) <= phi(M) - 6 for such M; e.g. u(105) = 35 < 47, u(165) = 63 < 79, u(195) = 77 < 95.
+%C A399152 Further values: u(225) = 71, u(441) = 173, u(1225) = 731.
+%H A399152 P. Balister, B. Bollobás, R. Morris, J. Sahasrabudhe, and M. Tiba, <a href="https://doi.org/10.2140/ant.2021.15.609">The Erdős-Selfridge problem with square-free moduli</a>, Algebra & Number Theory 15 (2021), 609-626.
+%H A399152 Thomas Bloom, <a href="https://www.erdosproblems.com/7">Erdős Problem #7</a>, Erdős Problems.
+%H A399152 P. Erdős, <a href="https://users.renyi.hu/~p_erdos/1950-07.pdf">On integers of the form 2^k + p and some related problems</a>, Summa Brasil. Math. 2 (1950), 113-123.
+%H A399152 Ege Öztürk, <a href="https://doi.org/10.13140/RG.2.2.13216.55049">Closed-form nonexistence certificates for odd covering systems</a>, 2026.
+%F A399152 a(n) = p^k - (p^k - 1)/(p - 1) if 2n+1 = p^k is a prime power; in particular a(n) = p - 1 if 2n+1 = p is prime.
+%F A399152 a(n) = phi(2n+1) - 1 if 2n+1 = p*q is the product of two distinct primes.
+%F A399152 a(n) <= phi(2n+1) - 1 for all n (take r_d = 0 for d < M and r_M a unit mod M).
+%F A399152 a(n) >= 2n+1 - Sum_{d | 2n+1, d > 1} (2n+1)/d (union bound).
+%e A399152 For n = 7, M = 15 has divisors 3, 5, 15. Removing 0 mod 3 and 0 mod 5 kills 7 residues; removing one further unit mod 15 kills an 8th, leaving 7 uncovered. No choice does better, so a(7) = 7.
+%e A399152 For n = 52, M = 105: removing (r_3, r_5, r_7, r_15, r_21, r_35, r_105) = (0, 0, 0, 1, 2, 3, 4) leaves exactly 35 residues uncovered, and exhaustive search shows 35 is minimal, so a(52) = 35 < phi(105) - 1 = 47.
+%o A399152 (Python)
+%o A399152 def a(n):
+%o A399152     M = 2*n+1
+%o A399152     ds = [d for d in range(2, M+1) if M % d == 0]
+%o A399152     masks = {d: [sum(1 << x for x in range(r, M, d)) for r in range(d)] for d in ds}
+%o A399152     k = len(ds)
+%o A399152     suf = [0]*(k+1)
+%o A399152     for i in range(k-1, -1, -1):
+%o A399152         suf[i] = suf[i+1] + M//ds[i]
+%o A399152     best = [M]
+%o A399152     def dfs(i, cov):
+%o A399152         unc = M - bin(cov).count('1')
+%o A399152         if unc - suf[i] >= best[0]: return
+%o A399152         if i == k:
+%o A399152             best[0] = unc; return
+%o A399152         d = ds[i]
+%o A399152         rs = [0] if i == 0 else range(d)  # translation symmetry
+%o A399152         for r in sorted(rs, key=lambda r: -bin(masks[d][r] & ~cov).count('1')):
+%o A399152             dfs(i+1, cov | masks[d][r])
+%o A399152     dfs(0, 0)
+%o A399152     return best[0]
+%o A399152 print([a(n) for n in range(1, 65)])
+%Y A399152 Cf. A000010 (Euler phi), A000040 (primes), A005408 (odd numbers).
+%K A399152 nonn,hard,new
+%O A399152 1,1
+%A A399152 _Ege Öztürk_, Aug 20 2026
