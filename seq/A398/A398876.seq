@@ -1,33 +1,28 @@
-%I A398876 #23 Aug 25 2026 16:36:54
+%I A398876 #45 Sep 01 2026 23:34:20
 %S A398876 2,3,5,7,13,19,23,31,37,43,47,53,61,79,83,109,113,101,131,139,157,167,
 %T A398876 199,107,211,251,281,269,283,307,313,337,293,401,421,383,439,449,431,
 %U A398876 457,491,509,523,569,601,461,643,683,673,691,743,769,761,811,863,881,929,883,983,1013
-%N A398876 Primes added to a set starting with {2, 3} by considering successive even numbers k and, if k is not the sum of two members of the set, adjoining k - p, where p is the earliest-added member for which k - p is prime.
-%C A398876 In contrast to A398875, where the numerically smallest feasible new prime is selected, here priority is given to the earliest selected feasible member of F. Consequently, the two constructions generally select different complementary primes.
+%N A398876 a(1) = 2, a(2) = 3; for n > 2, a(n) is the prime k-p, where k is the smallest even number >=4 that cannot be generated as the sum of two (not necessarily distinct) terms from {a(1), ... ,a(n-1)}, and p is the earliest-added term in {a(1), ... ,a(n-1)} for which k-p is prime.
+%C A398876 In contrast to A358798, where the numerically smallest feasible new prime is selected, here priority is given to the earliest selected feasible member of the sequence. Consequently, the two constructions generally select different complementary primes.
 %C A398876 Selection order need not coincide with numerical order. For example, 109 and 113 are selected before 101, and 199 before 107.
 %D A398876 M. B. Nathanson, Additive Number Theory: The Classical Bases, Graduate Texts in Mathematics, Vol. 164, Springer, New York, 1996.
-%e A398876 Starting with F = (2, 3), the even integers 4 and 6 are already represented as 4 = 2 + 2 and 6 = 3 + 3, so no new prime is selected.
-%e A398876 For 8, the first feasible member of F in selection order is 3, since 8 - 3 = 5 is prime. Thus 5 is selected, a(3) = 5, and F becomes (2, 3, 5).
+%H A398876 Michael S. Branicky, <a href="/A398876/b398876.txt">Table of n, a(n) for n = 1..10000</a>
+%e A398876 Starting with a(1)=2, a(2)=3, the even integers 4 and 6 are already represented as 4 = 2 + 2 and 6 = 3 + 3, so no new prime is selected.
+%e A398876 The next even integer 8 cannot be represented as a sum of terms and its first feasible term in selection order is 3, since 8 - 3 = 5 is prime. Thus, a(3) = 5.
 %o A398876 (Python)
 %o A398876 from sympy import isprime
-%o A398876 def a(k):
-%o A398876     F = [2, 3]
-%o A398876     n = 4
-%o A398876     while len(F) < k:
-%o A398876         S = set(F)
-%o A398876         if not any(n - p in S for p in F):
-%o A398876             candidates = [
-%o A398876                 n - p for p in F
-%o A398876                 if isprime(n - p)
-%o A398876             ]
-%o A398876             if not candidates:
-%o A398876                 raise ValueError(
-%o A398876                     f"No feasible prime exists at n = {n}"
-%o A398876                 )
-%o A398876             F.append(candidates[0])
-%o A398876         n += 2
-%o A398876     return F[:k]
-%o A398876 print(a(100))
+%o A398876 from itertools import count, islice
+%o A398876 def agen(): # generator of terms
+%o A398876     alst, sums = [2, 3], {4, 5, 6}
+%o A398876     yield from alst
+%o A398876     for k in count(4, 2):
+%o A398876         if k not in sums:
+%o A398876             an = next((k-p for p in alst if isprime(k-p)), -1)
+%o A398876             if an != -1:
+%o A398876                 alst.append(an)
+%o A398876                 sums.update(ai+an for ai in alst)
+%o A398876                 yield an
+%o A398876 print(list(islice(agen(), 100))) # _Michael S. Branicky_, Aug 26 2026
 %Y A398876 Cf. A118371, A395012, A105170, A358798.
 %K A398876 nonn,new
 %O A398876 1,1
