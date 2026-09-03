@@ -1,0 +1,46 @@
+%I A396576 #106 Sep 02 2026 19:22:24
+%S A396576 1,1,1,1,3,1,2,1,6,4,1,11,5,2,6,1,10,10,5,1,35,32,13,9,7,2,50,26,14,6,
+%T A396576 24,1,15,20,15,6,1,85,117,48,66,52,15,14,16,9,2,225,236,129,56,71,75,
+%U A396576 32,24,20,6,274,154,94,54,24,120,1,21,35,35,21,7,1,175,322,133,273
+%N A396576 Number of increasing mobiles with n nodes, refined by the leaf-lineage composition of n-1, read by rows.
+%C A396576 Compositions of n-1 are grouped by number of parts k=1..n-1 and, within each group, listed in decreasing lexicographic order of the tuple (m_1,...,m_k), comparing entries left to right with larger parts first.
+%C A396576 Row n has A011782(n-1) = 2^(n-2) entries.
+%C A396576 In an increasing rooted tree, nodes are numbered and numbers increase as you move away from the root; a mobile additionally carries a cyclic order on the children of each node.
+%C A396576 Row sums give A029768(n).
+%C A396576 Summing within row n over compositions with a fixed number of parts k gives the k-th entry of row n of A055356; this triangle is a composition-indexed refinement of A055356.
+%C A396576 The sub-array of compositions (m,1,1,...,1) [a composition of n-1] gives the unsigned Stirling numbers of the first kind, A132393(n-1,m) (see also A008275 for the signed triangle).
+%H A396576 Jonas Eschgfäller, <a href="https://doi.org/10.5281/zenodo.22040221">Restricted growth sequences by ordered profile and a bijection with increasing mobiles</a>, Zenodo, (2026).
+%F A396576 T(m_1,...,m_k) = [m_k=1]*(M-1)*T(m_1,...,m_{k-1}) + Sum_{j: m_j>=2} T(m_1,...,m_j-1,...,m_k), where M = m_1+...+m_k and T(m) = 1 and [] is the Iverson bracket.
+%e A396576 Triangle begins (rows n=2..5, compositions shown for clarity):
+%e A396576   n=2: T(1)=1;
+%e A396576   n=3: T(2)=1, T(1,1)=1;
+%e A396576   n=4: T(3)=1, T(2,1)=3, T(1,2)=1, T(1,1,1)=2;
+%e A396576   n=5: T(4)=1, T(3,1)=6, T(2,2)=4, T(1,3)=1, T(2,1,1)=11, T(1,2,1)=5, T(1,1,2)=2, T(1,1,1,1)=6.
+%o A396576 (Python)
+%o A396576 from functools import lru_cache
+%o A396576 def comps_desc(n, k):
+%o A396576     def rec(rem, left):
+%o A396576         if left == 1:
+%o A396576             yield (rem,); return
+%o A396576         for first in range(rem-(left-1), 0, -1):
+%o A396576             for rest in rec(rem-first, left-1):
+%o A396576                 yield (first,)+rest
+%o A396576     yield from rec(n, k)
+%o A396576 @lru_cache(maxsize=None)
+%o A396576 def T(p):
+%o A396576     if len(p) == 1: return 1
+%o A396576     n = sum(p); total = 0
+%o A396576     if p[-1] == 1: total += (n-1)*T(p[:-1])
+%o A396576     for j in range(len(p)):
+%o A396576         if p[j] >= 2:
+%o A396576             total += T(p[:j]+(p[j]-1,)+p[j+1:])
+%o A396576     return total
+%o A396576 def row(n):
+%o A396576     return [T(p) for k in range(1,n+1) for p in comps_desc(n,k)]
+%Y A396576 Row lengths are 2^(n-2) given by number of compositions A011782.
+%Y A396576 Row sums give A029768.
+%Y A396576 Summed by number of parts within each row: A055356.
+%Y A396576 Sub-array (m,1,...,1): A132393 (unsigned Stirling numbers of the first kind; see also A008275).
+%K A396576 nonn,tabf,new
+%O A396576 2,5
+%A A396576 _Jonas Eschgfäller_, Aug 19 2026
