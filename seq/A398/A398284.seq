@@ -1,0 +1,49 @@
+%I A398284 #37 Sep 04 2026 00:58:45
+%S A398284 5,0,1,7,7,9,4,1,6,1,0,6,7,5,9,6,9,2,8,6,4,8,6,9,6,5,9,8,7,2,7,8,0,3,
+%T A398284 0,8,8,0,6,4,6,5,4,4,2,4,9,2,4,3,6,7,7,4,9,0,3,2,9,9,7,2,9,8,8,5,7,2,
+%U A398284 2,3,8,5,3,6,5,4,2,9,4,9,3,6,1,7,5,4,3,4,5,4,5,5,4,2,7,8,7,5,9,9,5,3,6,1,7
+%N A398284 Decimal expansion of Sum_{p prime} kappa(p^2)/(p^3-1), where kappa(P) = P*log(P) - (P-1)*log(P-1).
+%C A398284 This constant arises as the Jordan-totient extension of the mean totient entropy constant to order s=2: C^(2) = Sum_{p prime} ((p-1)/p) * Sum_{k>=1} H_{g_2}(p^k)/p^k, where g_2 = Id_2 * mu (Mobius inverse of n^2) and H_{g_2} is the Shannon entropy of the g_2-weighted divisor probability vector on p^k. The exact per-prime kernel is ((p-1)/p) * C_p^(2) = kappa(p^2)/(p^3-1), kappa(P) := P*log(P) - (P-1)*log(P-1); the factor (p-1)/p is already absorbed into this kernel, so C^(2) itself is the plain sum of kappa(p^2)/(p^3-1) over primes, with no further (p-1)/p multiplying it. The case s=1 recovers A396759.
+%H A398284 Vladimir Khomyakov, <a href="https://doi.org/10.5281/zenodo.22074388">Pseudo-Totient Entropy Constants: A One-Parameter Family Extending the Mean Totient Entropy Constant</a>, Zenodo, 2026.
+%F A398284 Equals Sum_{p prime} kappa(p^2)/(p^3-1), where kappa(P) = P*log(P) - (P-1)*log(P-1).
+%e A398284 0.5017794161067596928648696598727803088064654424924367749...
+%o A398284 (Python) # via mpmath; C^(2) = Sum_{p} kappa(p^2)/(p^3-1) with analytic prime-zeta tail
+%o A398284 from mpmath import mp, mpf, log, primezeta, zeta, nstr
+%o A398284 import sympy
+%o A398284 mp.dps = 130
+%o A398284 s = 2
+%o A398284 Psplit = 10**5
+%o A398284 sp = list(sympy.primerange(2, Psplit+1))
+%o A398284 mu = sympy.mobius
+%o A398284 def kappa(P): return P*log(P) - (P-1)*log(P-1)
+%o A398284 C_small = sum(kappa(mpf(p)**s)/(mpf(p)**(s+1)-1) for p in sp)
+%o A398284 def Sfull(m):
+%o A398284     o=mp.dps; mp.dps=o+40
+%o A398284     t=mpf(0); n=1
+%o A398284     while True:
+%o A398284         mob=mu(n)
+%o A398284         if mob: t+=mob*(zeta(n*m, derivative=1)/zeta(n*m))
+%o A398284         if mpf(2)**(-n*m)<mpf(10)**(-150): break
+%o A398284         n+=1
+%o A398284     mp.dps=o; return -t
+%o A398284 def Ptail(m): return primezeta(m)-sum(mpf(1)/mpf(p)**m for p in sp)
+%o A398284 def Stail(m): return Sfull(m)-sum(log(mpf(p))/mpf(p)**m for p in sp)
+%o A398284 def a_coeff(m): return mpf(s) if m % (s+1) == 0 else mpf(0)
+%o A398284 def h(i): return mpf(-1) if i==1 else mpf(1)/(i*(i-1))
+%o A398284 def b_coeff(m):
+%o A398284     tot=mpf(0); i=1
+%o A398284     while s*i <= m-1:
+%o A398284         if (m-1-s*i) % (s+1) == 0: tot += h(i)
+%o A398284         i += 1
+%o A398284     return -tot
+%o A398284 C_tail=mpf(0)
+%o A398284 for m in range(s+1, 261):
+%o A398284     a=a_coeff(m); b=b_coeff(m)
+%o A398284     term = b*Ptail(m)
+%o A398284     if a: term += a*Stail(m)
+%o A398284     C_tail += term
+%o A398284 print(nstr(C_small+C_tail, 110))
+%Y A398284 Cf. A396759 (the s=1 case, C).
+%K A398284 nonn,cons,new
+%O A398284 0,1
+%A A398284 _Vladimir Khomyakov_, Aug 24 2026

@@ -1,0 +1,46 @@
+%I A398609 #34 Sep 03 2026 10:17:26
+%S A398609 1,1,3,6,12,22,42,73,130,222,377,625,1033,1671,2691,4275,6742,10523,
+%T A398609 16323,25090,38343,58166,87736,131510,196112,290806,429187,630284,
+%U A398609 921524,1341337,1944494,2807381,4037982,5786368,8262800,11758541,16678820,23582422,33242255
+%N A398609 Number of prime-free self-conjugate 2-dimensional vector partitions of (n, n).
+%C A398609 This sequence counts the self-conjugate (transposition-symmetric) 2-dimensional vector partitions of (n, n) excluding elementary basis vectors (1,0) and (0,1).
+%C A398609 Equivalently, the number of factorizations of (p*q)^n into factors > 1 where neither p nor q are permitted as factors, which are symmetric under swapping p and q.
+%C A398609 The only allowed generator of weight 1 is the diagonal vector (1,1).
+%D A398609 P. A. MacMahon, Combinatory Analysis, Cambridge Univ. Press, London and New York, Vol. 2, 1916.
+%H A398609 Vaclav Kotesovec, <a href="/A398609/b398609.txt">Table of n, a(n) for n = 0..10000</a> (terms 0..1000 from Jishnu Babu Ranitha)
+%F A398609 G.f.: 1/(1-x) * Product_{k>=2} 1/(1-x^k)^(1 + floor((k+1)/2)).
+%F A398609 a(n) = (1/n) * Sum_{j=1..n} b(j) * a(n-j), where b(n) = Sum_{d|n} d * c(d) with c(1)=1 and c(k) = 1 + floor((k+1)/2) for k >= 2.
+%F A398609 From _Vaclav Kotesovec_, Sep 02 2026: (Start)
+%F A398609 G.f.: (1-x) / Product_{k>=1} (1 - x^k) * (1 - x^(2*k))^k * (1 - x^(2*k-1))^k.
+%F A398609 a(n) ~ zeta(3)^(49/72) * exp(3*zeta(3)^(1/3) * n^(2/3)/2 + 5*Pi^2 * n^(1/3) / (24*zeta(3)^(1/3)) + 1/24 - 25*Pi^4 / (3456*zeta(3))) / (Pi * 2^(5/4) * sqrt(3*A) * n^(85/72)), where A is the Glaisher-Kinkelin constant A074962. (End)
+%e A398609 a(0) = 1: the empty partition.
+%e A398609 a(1) = 1: {(1,1)}.
+%e A398609 a(2) = 3: {(2,2)}, {(1,1),(1,1)}, and {(2,0),(0,2)}.
+%e A398609 a(3) = 6: {(3,3)}, {(2,2),(1,1)}, {(1,1),(1,1),(1,1)}, {(3,0),(0,3)}, {(2,1),(1,2)}, and {(2,0),(0,2),(1,1)}.
+%t A398609 a[n_] := Coefficient[Series[1/(1 - x) * Product[1/(1 - x^k)^(1 + Floor[(k + 1)/2]), {k, 2, n}], {x, 0, n}], x^n]; Table[a[n], {n, 0, 50}]
+%t A398609 (* Alternative: *)
+%t A398609 a[n_] := a[n] = If[n == 0, 1, 1/n*Sum[Sum[d*If[d == 1, 1, (1 + Floor[(d+1)/2])], {d, Divisors[j]}] * a[n-j], {j, 1, n}]]; Table[a[n], {n, 0, 50}]
+%t A398609 (* Alternative: *)
+%t A398609 nmax = 50; CoefficientList[Series[(1 - x) * Product[1/((1 - x^k)*(1 - x^(2*k))^k*(1 - x^(2*k - 1))^k), {k, 1, nmax}], {x, 0, nmax}], x] (* _Vaclav Kotesovec_, Sep 02 2026 *)
+%t A398609 (* Alternative: faster *)
+%t A398609 nmax = 50; CoefficientList[(1-x)*Series[Exp[Sum[Sum[(x^(k*j) + k*x^(2*k*j) + k*x^((2*k - 1)*j))/j, {k, 1, Floor[nmax/j] + 1}], {j, 1, nmax}]], {x, 0, nmax}], x] (* _Vaclav Kotesovec_, Sep 02 2026 *)
+%o A398609 (Python)
+%o A398609 def a(n_max):
+%o A398609     c = [0]*(n_max+1); c[1] = 1
+%o A398609     for k in range(2, n_max+1): c[k] = 1 + (k+1)//2
+%o A398609     b = [0]*(n_max+1)
+%o A398609     for n in range(1, n_max+1):
+%o A398609         for d in range(1, n+1):
+%o A398609             if n % d == 0: b[n] += d * c[d]
+%o A398609     res = [1] + [0]*n_max
+%o A398609     for n in range(1, n_max+1):
+%o A398609         res[n] = sum(b[j]*res[n-j] for j in range(1, n+1)) // n
+%o A398609     return res
+%o A398609 print(a(50))
+%Y A398609 Cf. A000700, A002774, A003293, A397646, A398329, A000219, A002865, A035528.
+%Y A398609 Unrestricted counterpart: A219554 (Column k=2 of A219585).
+%Y A398609 3-dimensional analog: A398607.
+%Y A398609 4-dimensional analog: A399303.
+%K A398609 nonn,easy,new
+%O A398609 0,3
+%A A398609 _Jishnu Babu Ranitha_, Sep 02 2026
