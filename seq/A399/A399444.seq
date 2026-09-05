@@ -1,0 +1,64 @@
+%I A399444 #18 Sep 04 2026 05:58:05
+%S A399444 1,0,1,0,1,2,0,3,6,6,0,15,36,36,24,0,111,330,360,240,120,0,1161,4212,
+%T A399444 5130,3600,1800,720,0,16623,71064,97146,73080,37800,15120,5040,0,
+%U A399444 315873,1530504,2342088,1903104,1033200,423360,141120,40320
+%N A399444 Triangle read by rows: T(n,k) is the number of complete non-ambiguous trees with n+1 leaves and maximum weight 0, refined by the degree k of the minimal vertex of the associated fully tiered tree.
+%C A399444 Name by _Isabella Li_, see A398579. For the definition of 'fully tiered tree' and the relevant bijection see Dugan et al.
+%H A399444 W. Dugan, S. Glennon, P. E. Gunnells, and E. Steingrimsson, <a href="https://arxiv.org/abs/1702.02446">Tiered trees, weights, and q-Eulerian numbers</a>, arXiv:1702.02446 [math.CO], 2017-2019.
+%F A399444 T(n, k) = Sum_{i=1..n-k+1} T(n-i, k-1) * binomial(n, i) * binomial(n-k, i-1) * Sum_{j=0..i-1} T(i-1, j) for 1 <= k <= n, T(n, 0) = 0^n.
+%F A399444 T(n, 1) = Sum_{k=0..n-1} T(n - 1, k), for n >= 1.
+%F A399444 T(n, 1) = A398579(n) where we undersand T(0, 1) = 0.
+%e A399444 Triangle starts:
+%e A399444   [0] 1;
+%e A399444   [1] 0,      1;
+%e A399444   [2] 0,      1,       2;
+%e A399444   [3] 0,      3,       6,       6;
+%e A399444   [4] 0,     15,      36,      36,      24;
+%e A399444   [5] 0,    111,     330,     360,     240,     120;
+%e A399444   [6] 0,   1161,    4212,    5130,    3600,    1800,    720;
+%e A399444   [7] 0,  16623,   71064,   97146,   73080,   37800,  15120,   5040;
+%e A399444   [8] 0, 315873, 1530504, 2342088, 1903104, 1033200, 423360, 141120, 40320;
+%e A399444 .
+%e A399444 Seen as an array, A(n, k) = T(n + k, k):
+%e A399444   [0] 1,     1,       2,        6,         24,         120, ...  A000142
+%e A399444   [1] 0,     1,       6,       36,        240,        1800, ...  A180119
+%e A399444   [2] 0,     3,      36,      360,       3600,       37800, ...  A055303
+%e A399444   [3] 0,    15,     330,     5130,      73080,     1033200, ...  A399443
+%e A399444   [4] 0,   111,    4212,    97146,    1903104,    35244720, ...
+%e A399444   [5] 0,  1161,   71064,  2342088,   61399296,  1458097200, ...
+%e A399444   [6] 0, 16623, 1530504, 69779880, 2393621280, 71630341200, ...
+%p A399444 RowSum := proc(m) option remember; local j; add(T(m, j), j=0..m) end:
+%p A399444 T := proc(n, k) option remember; local i;
+%p A399444 if k < 0 or k > n then 0 elif n = 0 then 1 elif k = 0 then 0 else
+%p A399444 add(T(n-i,k-1)*binomial(n, i)*binomial(n-k, i-1)*RowSum(i-1), i=1..n-k+1) fi end:
+%p A399444 seq(print(seq(T(n, k), k = 0..n)), n = 0..8);
+%p A399444 # Alternative: as an array
+%p A399444 A := proc(n, k) option remember; local i;
+%p A399444 if n < 0 or k < 0 then 0 elif k = 0 then 0^n elif n = 0 and k = 1 then 1
+%p A399444 elif k = 1 then add(A(n-i, i), i = 1..n) else
+%p A399444 add(A(n-i, k-1)*A(i, 1)*binomial(n+k, i+1)*binomial(n, i), i=0..n ) fi end:
+%p A399444 seq(lprint(seq(A(n, k), k = 0..6)), n = 0..6);
+%t A399444 T[0, 0] = 1; T[n_, 0] /; n > 0 = 0; T[n_, k_] /; k < 0 || k > n || n < 0 = 0;
+%t A399444 T[n_Integer, k_Integer] := T[n, k] = Sum[T[n - i, k - 1] * Sum[T[i - 1, j], {j, 0, i - 1}] * Binomial[n, i] * Binomial[n - k, i - 1], {i, 1, n - k + 1} ];
+%t A399444 Table[T[n, k], {n, 0, 8}, {k, 0, n}] // Grid
+%o A399444 (Python)
+%o A399444 from math import comb
+%o A399444 def A399444_triangle(num_rows: int) -> list[list[int]]:
+%o A399444     if num_rows <= 0: return []
+%o A399444     if num_rows == 1: return [[1]]
+%o A399444     T = [[0] * num_rows for _ in range(num_rows)]
+%o A399444     T[0][0] = 1
+%o A399444     if num_rows > 0: T[1][1] = 1
+%o A399444     for m in range(2, num_rows):
+%o A399444         T[m][1] = sum(T[m - 1][i] for i in range(1, m))
+%o A399444         for j in range(2, m + 1):
+%o A399444             T[m][j] = sum(T[m - i][j - 1] * T[i][1] * comb(m, i) * comb(m - j, i - 1)
+%o A399444                       for i in range(1, m - j + 2))
+%o A399444     return [T[m][:m + 1] for m in range(num_rows)]
+%o A399444 triangle = A399444_triangle(9)
+%o A399444 for row in triangle: print(row)
+%Y A399444 Cf. A398579 (row sums).
+%Y A399444 Rows of array: A000142, A180119, A055303, A399443.
+%K A399444 nonn,tabl,new
+%O A399444 0,6
+%A A399444 _Peter Luschny_, Sep 01 2026

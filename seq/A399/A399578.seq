@@ -1,0 +1,45 @@
+%I A399578 #17 Sep 04 2026 04:08:15
+%S A399578 1,2,3,7,12,21,37,61,100,162,258,403,626,959,1455,2192,3269,4839,7118,
+%T A399578 10395,15086,21776,31250,44616,63396,89655,126230,176994,247168,
+%U A399578 343843,476603,658289,906180,1243420,1700848,2319604,3154386,4277643,5785336,7804192
+%N A399578 Number of self-conjugate 2-dimensional vector partitions of (n, n) into strictly distinct parts.
+%C A399578 This sequence counts the self-conjugate (transposition-symmetric) 2-dimensional vector partitions of (n, n) into strictly distinct parts.
+%C A399578 Equivalently, the number of factorizations of (p*q)^n into strictly distinct factors > 1 which are symmetric under swapping distinct primes p and q.
+%C A399578 Unlike the prime-free counterpart A398609, the elementary basis vectors (1,0) and (0,1) are permitted as a symmetric conjugate pair {(1,0), (0,1)}.
+%C A399578 This forms the distinct-parts counterpart to A003293 and the self-conjugate restriction of A219554.
+%D A399578 P. A. MacMahon, Combinatory Analysis, Cambridge Univ. Press, London and New York, Vol. 2, 1916.
+%H A399578 Jishnu Babu Ranitha, <a href="/A399578/b399578.txt">Table of n, a(n) for n = 0..10000</a>
+%F A399578 G.f.: Product_{k>=1} (1 + x^k)^(1 + floor((k+1)/2)).
+%F A399578 Decomposed G.f.: Product_{k>=1} (1 + x^k) * (1 + x^(2*k))^k * (1 + x^(2*k-1))^k.
+%F A399578 a(n) = (1/n) * Sum_{j=1..n} b(j) * a(n-j), where b(n) = Sum_{d|n} d * (1 + floor((d+1)/2)) * (-1)^(n/d - 1).
+%F A399578 Asymptotics: a(n) ~ zeta(3)^(1/6) * exp( 3^(4/3)*zeta(3)^(1/3)*n^(2/3) / 2^(5/3) + 5*Pi^2*n^(1/3) / (2^(10/3)*3^(4/3)*zeta(3)^(1/3)) - 25*Pi^4 / (10368*zeta(3)) ) / (Pi^(1/2) * 3^(1/3) * 2^(11/8) * n^(2/3)).
+%F A399578 Unlike the multiset counterpart A398609, the Mellin transform over the alternating product generates the Dirichlet eta function, cancelling the double pole at s=0 and eliminating the Glaisher-Kinkelin constant.
+%e A399578 a(0) = 1: the empty partition.
+%e A399578 a(1) = 2: {(1,1)} and {(1,0), (0,1)}.
+%e A399578 a(2) = 3: {(2,2)}, {(2,0), (0,2)}, and {(1,1), (1,0), (0,1)}.
+%e A399578 a(3) = 7: {(3,3)}, {(3,0), (0,3)}, {(2,1), (1,2)}, {(2,2), (1,1)}, {(2,2), (1,0), (0,1)}, {(2,0), (0,2), (1,1)}, and {(2,0), (0,2), (1,0), (0,1)}.
+%t A399578 a[n_] := Coefficient[Series[Product[(1 + x^k)^(1 + Floor[(k + 1)/2]), {k, 1, n}], {x, 0, n}], x^n]; Join[{1}, Table[a[n], {n, 1, 40}]]
+%t A399578 (* Alternative: using exact recurrence *)
+%t A399578 a[n_] := a[n] = If[n == 0, 1, 1/n * Sum[Sum[d * (1 + Floor[(d + 1)/2]) * (-1)^(j/d - 1), {d, Divisors[j]}] * a[n - j], {j, 1, n}]]; Table[a[n], {n, 0, 40}]
+%t A399578 (* Alternative: faster *)
+%t A399578 nmax = 50; CoefficientList[Series[Exp[Sum[-(-1)^j * Sum[(x^(k*j) + k*x^(2*k*j) + k*x^((2*k - 1)*j))/j, {k, 1, Floor[nmax/j] + 1}], {j, 1, nmax}]], {x, 0, nmax}], x] (* _Vaclav Kotesovec_, Sep 04 2026 *)
+%o A399578 (Python)
+%o A399578 def a(n_max):
+%o A399578     c = [1 + (k + 1) // 2 for k in range(n_max + 1)]
+%o A399578     b = [0] * (n_max + 1)
+%o A399578     for n in range(1, n_max + 1):
+%o A399578         for d in range(1, n + 1):
+%o A399578             if n % d == 0:
+%o A399578                 sign = 1 if (n // d) % 2 != 0 else -1
+%o A399578                 b[n] += d * c[d] * sign
+%o A399578     res = [1] + [0] * n_max
+%o A399578     for n in range(1, n_max + 1):
+%o A399578         res[n] = sum(b[j] * res[n - j] for j in range(1, n + 1)) // n
+%o A399578     return res
+%o A399578 print(a(40))
+%Y A399578 Cf. A000009, A000700, A001055, A002774, A003293, A219554 (Column k=2 of A219585), A397646, A398329.
+%Y A399578 Cf. A026007, A263140.
+%Y A399578 Prime-free counterpart: A398609.
+%K A399578 nonn,easy,new
+%O A399578 0,2
+%A A399578 _Jishnu Babu Ranitha_, Sep 03 2026

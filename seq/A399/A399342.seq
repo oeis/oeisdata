@@ -1,0 +1,49 @@
+%I A399342 #16 Sep 04 2026 16:06:59
+%S A399342 1,0,1,0,1,1,0,3,3,1,0,15,18,6,1,0,111,165,60,10,1,0,1161,2106,855,
+%T A399342 150,15,1,0,16623,35532,16191,3045,315,21,1,0,315873,765252,390348,
+%U A399342 79296,8610,588,28,1,0,7729569,20518515,11629980,2558304,293706,20790,1008,36,1
+%N A399342 Array read by ascending antidiagonals: A(n, k) = (1/k) * Sum_{j=0..n} A(n-j, k-1) * A(j, 1) * binomial(n+k, j+1) * binomial(n, j) for k >= 2, A(0, k) = 1, A(n, 0) = 0^n, and A(n, 1) = Sum_{j=1..n} j! * A(n-j, j).
+%F A399342 If seen as a triangle, T(n, 1) = A398579(n) where we undersand T(0, 1) = 0.
+%F A399342 T(n, k) * k! = A399444(n, k).
+%e A399342 Seen as a triangle, T(n, k) = A(n-k, k), for k = 0..n:
+%e A399342   [0] 1;
+%e A399342   [1] 0,     1;
+%e A399342   [2] 0,     1,     1;
+%e A399342   [3] 0,     3,     3,     1;
+%e A399342   [4] 0,    15,    18,     6,    1;
+%e A399342   [5] 0,   111,   165,    60,   10,   1;
+%e A399342   [6] 0,  1161,  2106,   855,  150,  15,  1;
+%e A399342   [7] 0, 16623, 35532, 16191, 3045, 315, 21, 1;
+%e A399342 .
+%e A399342 Array starts:
+%e A399342   [0] 1,     1,      1,        1,        1,         1, ... A000012
+%e A399342   [1] 0,     1,      3,        6,       10,        15, ... A000217
+%e A399342   [2] 0,     3,     18,       60,      150,       315, ... A006011
+%e A399342   [3] 0,    15,    165,      855,     3045,      8610, ... A399341
+%e A399342   [4] 0,   111,   2106,    16191,    79296,    293706, ...
+%e A399342   [5] 0,  1161,  35532,   390348,  2558304,  12150810, ...
+%e A399342   [6] 0, 16623, 765252, 11629980, 99734220, 596919510, ...
+%p A399342 A1 := proc(m) option remember; local i; if m = 0 then 1 else add(i! * A(m-i, i), i = 1..m) fi end:
+%p A399342 A := proc(n, k) option remember; local i; if n < 0 or k < 0 then 0 elif n = 0 then 1 elif k = 0 then 0 elif k = 1 then A1(n) else add(A(n-i, k-1) * A1(i) * binomial(n+k, i+1) * binomial(n, i), i = 0..n) / k fi end: seq(lprint(seq(A(n, k), k = 0..5)), n = 0..6);
+%o A399342 (Python)
+%o A399342 from math import comb, factorial
+%o A399342 from functools import cache
+%o A399342 @cache
+%o A399342 def A1(m: int) -> int:
+%o A399342     if m == 0: return 1
+%o A399342     return sum(factorial(i) * A(m - i, i) for i in range(1, m + 1))
+%o A399342 @cache
+%o A399342 def A(n: int, k: int) -> int:
+%o A399342     if n < 0 or k < 0: return 0
+%o A399342     elif n == 0: return 1
+%o A399342     elif k == 0: return 0
+%o A399342     elif k == 1: return A1(n)
+%o A399342     total = sum(A(n - i, k - 1) * A1(i) * comb(n + k, i + 1) * comb(n, i)
+%o A399342             for i in range(0, n + 1))
+%o A399342     return total // k
+%o A399342 for n in range(7):
+%o A399342     row = [A(n, k) for k in range(10)]; print(row)
+%Y A399342 Cf. A399444, A398579 (column 1), A399328, A000217, A006011, A399341.
+%K A399342 nonn,tabl,new
+%O A399342 0,8
+%A A399342 _Peter Luschny_, Sep 03 2026

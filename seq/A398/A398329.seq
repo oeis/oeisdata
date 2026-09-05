@@ -1,0 +1,45 @@
+%I A398329 #26 Sep 04 2026 16:15:13
+%S A398329 1,1,2,7,17,48,123,304,730,1712,3928,8815,19455,42174,90031,189479,
+%T A398329 393436,806839,1635537,3279364,6508154,12791800,24913130,48101710,
+%U A398329 92112560,175015055,330057681,618029759,1149394369,2123704930,3899431905,7117025884,12914770002
+%N A398329 Number of partitions of the 2-dimensional vector (n, n) into strictly distinct parts with nonnegative components, excluding elementary basis vectors (1,0) and (0,1).
+%C A398329 Also the number of factorizations of (p*q)^n into strictly distinct parts > 1 where neither p nor q are permitted as factors, for any two distinct primes p and q.
+%C A398329 The sequence depends only on the prime exponents (n, n) and is independent of the choice of distinct primes p and q.
+%C A398329 a(0) = 1 corresponds to the empty partition.
+%C A398329 a(1) = 1 since the only valid partition of (1,1) avoiding (1,0) and (0,1) is (1,1) itself.
+%C A398329 Equivalently, a(n) is the number of two-column nonnegative integer matrices with strictly distinct rows, column sums equal to n, and row sums > 1, up to permutation of rows.
+%D A398329 P. A. MacMahon, Combinatory Analysis, Cambridge Univ. Press, London and New York, Vol. 1, 1915 and Vol. 2, 1916.
+%H A398329 Jishnu Babu Ranitha, <a href="/A398329/b398329.txt">Table of n, a(n) for n = 0..200</a>
+%F A398329 G.f.: [x^n y^n] Product_{i>=0, j>=0, i+j>1} (1 + x^i * y^j).
+%F A398329 Conjecture: a(n) ~ A219554(n) / 4. - _Vaclav Kotesovec_, Sep 04 2026
+%e A398329 a(2) = 2 because there are 2 strict factorizations of p^2 * q^2 avoiding standalone p and q: {p^2 * q^2} and {p^2, q^2}. The corresponding a(2) = 2 nonnegative integer matrices with distinct rows are:
+%e A398329    [2 2]   and   [2 0]
+%e A398329                  [0 2]
+%e A398329 a(3) = 7 with corresponding matrices:
+%e A398329   [3 3],  [3 0]  [2 0]  [0 2]  [1 1]  [2 1]  [2 0]
+%e A398329           [0 3], [1 3], [3 1], [2 2], [1 2], [0 2]
+%e A398329                                              [1 1]
+%t A398329 a[n_] := Module[{dp}, dp = ConstantArray[0, {n + 1, n + 1}]; dp[[1, 1]] = 1; Do[If[i + j > 1, Do[dp[[x + 1, y + 1]] += dp[[x - i + 1, y - j + 1]], {x, n, i, -1}, {y, n, j, -1}]], {i, 0, n}, {j, 0, n}]; dp[[n + 1, n + 1]]];
+%t A398329 Table[a[n], {n, 0, 32}]
+%t A398329 (* Alternative: *)
+%t A398329 nmax = 20; p = 1; Do[Do[If[i + j > 1, p = Expand[p*(1 + x^i*y^j)]; If[i*j != 0, p = Select[p, (Exponent[#, x] <= nmax) && (Exponent[#, y] <= nmax) &]]], {i, 0, nmax}], {j, 0, nmax}]; p = Select[p, Exponent[#, x] == Exponent[#, y] &]; Flatten[{1, Table[Coefficient[p, x^n*y^n], {n, 1, nmax}]}] (* _Vaclav Kotesovec_, Sep 04 2026 *)
+%t A398329 (* Alternative: faster *)
+%t A398329 max = 32; se = Series[Sum[Log[1 + x^(n-k)*y^k], {n, 1, 2*max}, {k, 0, n}], {x, 0, 2*max}, {y, 0, 2*max}]; coes = CoefficientList[Series[Exp[se]/(1 + x)/(1 + y), {x, 1, 2*max}, {y, 1, 2*max}], {x, y}]; Table[coes[[n+1, n+1]], {n, 0, max}] (* _Vaclav Kotesovec_, Sep 04 2026 *)
+%o A398329 (Python)
+%o A398329 def lista(n_max):
+%o A398329     m = n_max + 1
+%o A398329     dp = [[0] * m for _ in range(m)]
+%o A398329     dp[0][0] = 1
+%o A398329     for c1 in range(m):
+%o A398329         for c2 in range(m):
+%o A398329             if c1 + c2 <= 1: continue
+%o A398329             for i1 in range(m - 1, c1 - 1, -1):
+%o A398329                 for i2 in range(m - 1, c2 - 1, -1):
+%o A398329                     dp[i1][i2] += dp[i1 - c1][i2 - c2]
+%o A398329     return [dp[n][n] for n in range(m)]
+%o A398329 print(lista(32))
+%Y A398329 Cf. A000009, A001055, A002774, A219585, A397646, A399303.
+%Y A398329 Cf. A219554.
+%K A398329 nonn,easy,new
+%O A398329 0,3
+%A A398329 _Jishnu Babu Ranitha_, Sep 01 2026
