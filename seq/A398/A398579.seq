@@ -1,0 +1,44 @@
+%I A398579 #33 Sep 05 2026 10:38:10
+%S A398579 0,1,1,3,15,111,1161,16623,315873,7729569,237054015,8903380545,
+%T A398579 401730225219,21431545586991,1333825544935683,95749827287585193,
+%U A398579 7851144660388199703,729127551728364952599,76123940326344183680361,8876260126595890923562575,1149168565579718633202454149
+%N A398579 Number of complete non-ambiguous trees with n leaves whose maximum weight is 0.
+%C A398579 A complete non-ambiguous tree (CNAT) with m leaves and maximum weight 0 corresponds, under the known bijection between CNATs with m leaves and weight-0 fully tiered trees on m vertices, to a unique fully tiered labeled tree with vertex labels 1, ..., m. The minimal vertex is the vertex with the smallest label, 1. The degree of this vertex is defined as the number of edges incident to it, or equivalently, the number of connected components that remain after its deletion. So T(n, k) is the number of maximum-weight-0 CNATs with n+1 leaves whose tree has exactly k components after deleting the vertex labeled 1. For further details on tiered trees, their weights, and the minimal vertex, see Dugan, Glennon, Gunnells, and Steingrimsson (arXiv:1702.02446). For the correspondence between tiered trees and non-ambiguous trees, refer to Dukes, Selig, Smith, and Steingrimsson (arXiv:1810.02437).
+%C A398579 The maximum weight of a complete non-ambiguous tree is defined as the maximum of w(T) over the corresponding fully tiered trees T.
+%C A398579 Omitting the maximum-weight-0 condition yields the total number of complete non-ambiguous trees with n leaves, given by A002190(n), which has been verified for n <= 7.
+%H A398579 Peter Luschny, <a href="/A398579/b398579.txt">Table of n, a(n) for n = 0..280</a>.
+%H A398579 J.-C. Aval, A. Boussicault, M. Bouvel, and M. Silimbani, <a href="https://arxiv.org/abs/1305.3716">Combinatorics of non-ambiguous trees</a>, arXiv:1305.3716 [math.CO], 2013.
+%H A398579 W. Dugan, S. Glennon, P. E. Gunnells, and E. Steingrimsson, <a href="https://arxiv.org/abs/1702.02446">Tiered trees, weights, and q-Eulerian numbers</a>, arXiv:1702.02446 [math.CO], 2017-2019.
+%H A398579 M. Dukes, T. Selig, J. P. Smith, and E. Steingrimsson, <a href="https://arxiv.org/abs/1810.02437">Permutation graphs and the Abelian sandpile model, tiered trees and non-ambiguous binary trees</a>, arXiv:1810.02437 [math.CO], 2018.
+%F A398579 a(0) = 0, a(1) = a(2) = 1; for n > 2, a(n) = Sum_{compositions a_1 + ... + a_k = n-1, all a_i >= 1} (Product_{i=1..k} a(a_i)) * multinomial(n-1; a_1,...,a_k) * multinomial(n-1-k; a_1-1,...,a_k-1).
+%e A398579 a(3) = 3: there are 4 complete non-ambiguous trees with 3 leaves (A002190(3) = 4). Three of them have maximum weight 0; the fourth corresponds to two fully tiered trees, of weights 0 and 1, so its maximum weight is 1 and it is not counted.
+%t A398579 a398579List[nMax_Integer] := Module[{a, T}, T[0, 0] = 1; T[m_, j_] /; m < j || m < 0 || j < 0 = 0; T[m_Integer, j_Integer] := T[m, j] = Sum[T[m - i, j - 1] * a[i] * Binomial[m, i] * Binomial[m - j, i - 1], {i, 1, m - j + 1} ]; a[1] = 1; a[n_Integer] := a[n] = Sum[T[n - 1, k], {k, 1, n - 1}]; Table[a[n], {n, 0, nMax}]]; a398579List[20] (* _Peter Luschny_, Sep 01 2026 *)
+%o A398579 (Python)
+%o A398579 from functools import lru_cache
+%o A398579 from math import comb, prod
+%o A398579 def compositions(m):
+%o A398579     if m == 0:
+%o A398579         yield ()
+%o A398579         return
+%o A398579     for first in range(1, m + 1):
+%o A398579         for rest in compositions(m - first):
+%o A398579             yield (first,) + rest
+%o A398579 def multinomial(top, parts):
+%o A398579     r, rem = 1, top
+%o A398579     for p in parts:
+%o A398579         r *= comb(rem, p)
+%o A398579         rem -= p
+%o A398579     return r
+%o A398579 @lru_cache(None)
+%o A398579 def a(n):
+%o A398579     if n < 2:
+%o A398579         return n
+%o A398579     return sum(prod(a(x) for x in c)
+%o A398579                * multinomial(n - 1, c)
+%o A398579                * multinomial(n - 1 - len(c), tuple(x - 1 for x in c))
+%o A398579                for c in compositions(n - 1))
+%o A398579 print([a(n) for n in range(21)])
+%Y A398579 Cf. A002190.
+%K A398579 nonn,new
+%O A398579 0,4
+%A A398579 _Isabella Li_, Aug 03 2026
