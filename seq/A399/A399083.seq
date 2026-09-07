@@ -1,0 +1,53 @@
+%I A399083 #32 Sep 07 2026 00:51:22
+%S A399083 18580,530721600,21627165600000,1193104504074240000,
+%T A399083 85711105400583168000000,7781609259893656535040000000,
+%U A399083 871837421922071664146841600000000,118226559674944452784737484800000000000,19094864807239519939160287362416640000000000
+%N A399083 a(n) = ((8+2n)!*360^n/8!) * Integral_V |x|^(2n) dx, where V is the Voronoi cell of the E_8 lattice.
+%C A399083 Let V be the Voronoi cell of the E_8 lattice and let mu_n = Integral_V |x|^(2n) dx. This sequence records these even radial moments after the normalization in the Formula section. The first nontrivial moment is mu_1 = 929/1620, so mu_1/8 = 929/12960 is the classical E_8 lattice quantizer constant of Conway and Sloane. The sequence extends this second-moment invariant to the higher even radial moments of the E_8 Voronoi cell; the normalized moments are integers and satisfy the minimal order-9 P-recurrence below.
+%D A399083 J. H. Conway and N. J. A. Sloane, Voronoi Regions of Lattices, Second Moments of Polytopes, and Quantization, IEEE Trans. Information Theory, IT-28 (1982), pp. 211-226, A revised version appears as Chapter 21 of ``Sphere Packings, Lattices and Groups'' by J. H. Conway and N. J. A. Sloane, Springer-Verlag, NY, 1988. Reprinted in ``Vector Quantization'', H. Abut, Ed., IEEE Press, NY, 1990, pp. 118-133.
+%H A399083 J. McCullough, <a href="https://doi.org/10.5281/zenodo.21972708">A ninth-order linear recurrence for the moment ladder of the E8 Voronoi cell</a>, Zenodo, 2026.
+%F A399083 a(n) = mu_n * (8+2n)! * 360^n / 8!, where mu_n is the 2n-th moment of the E_8 Voronoi cell.
+%F A399083 The sequence is P-recursive: 7*a(n) = -Sum_{j=1..9} p_j(n)*a(n-j) for n >= 10, where p_j is an integer polynomial of degree exactly 2j; the 190 coefficients are given in McCullough (2026).
+%F A399083 The leading coefficients form T(x) = Sum_{j=0..9} t_j*x^(9-j), where t_j is the coefficient of n^(2j) in p_j(n) and t_0 = 7; T(x) = 7 * Product_{s in {1/2, 2/3, 3/4, 4/5, 5/6, 6/7, 7/8, 8/9, 1}} (x - 1440*s).
+%F A399083 The nine values of s are the distinct squared circumradii of the Delaunay cells of E_8, equivalently the squared distances from the origin to the faces of the Voronoi cell.
+%e A399083 a(1) = 18580 = 20*929: the second moment of the cell is mu_1 = 929/1620, so a(1) = mu_1 * 10! * 360 / 8! = 18580, and mu_1/8 = 929/12960 is the E_8 quantizer constant of Conway and Sloane.
+%o A399083 (Python)
+%o A399083 from fractions import Fraction as F
+%o A399083 from math import factorial, prod
+%o A399083 # a(n) = Sum_{monomials t^e of (t'Gt)^n} coeff * Product(e_i!), where
+%o A399083 # G = 360*(C^-1)[a][b]/(m[a]*m[b]), C the E_8 Cartan matrix, m the
+%o A399083 # marks: the integral over the fundamental alcove, |W(E_8)| = 8!*Product(m).
+%o A399083 C = [[2,0,-1,0,0,0,0,0],[0,2,0,-1,0,0,0,0],[-1,0,2,-1,0,0,0,0],
+%o A399083  [0,-1,-1,2,-1,0,0,0],[0,0,0,-1,2,-1,0,0],[0,0,0,0,-1,2,-1,0],
+%o A399083  [0,0,0,0,0,-1,2,-1],[0,0,0,0,0,0,-1,2]]
+%o A399083 M = [[F(x) for x in r] for r in C]
+%o A399083 V = [[F(int(i == j)) for j in range(8)] for i in range(8)]
+%o A399083 for c in range(8):
+%o A399083  p = next(r for r in range(c, 8) if M[r][c])
+%o A399083  M[c], M[p], V[c], V[p] = M[p], M[c], V[p], V[c]
+%o A399083  d = M[c][c]
+%o A399083  M[c] = [x/d for x in M[c]]
+%o A399083  V[c] = [x/d for x in V[c]]
+%o A399083  for r in range(8):
+%o A399083   if r != c and M[r][c]:
+%o A399083    f = M[r][c]
+%o A399083    M[r] = [x-f*y for x, y in zip(M[r], M[c])]
+%o A399083    V[r] = [x-f*y for x, y in zip(V[r], V[c])]
+%o A399083 m = [2,3,4,6,5,4,3,2]
+%o A399083 G = [[int(V[a][b]*360/(m[a]*m[b])) for b in range(8)] for a in range(8)]
+%o A399083 def a(n):
+%o A399083  P = {(0,)*8: 1}
+%o A399083  for _ in range(n):
+%o A399083   Q = {}
+%o A399083   for e, c in P.items():
+%o A399083    for i in range(8):
+%o A399083     for j in range(i, 8):
+%o A399083      f = list(e); f[i] += 1; f[j] += 1
+%o A399083      Q[tuple(f)] = Q.get(tuple(f), 0) + c*G[i][j]*(2 if i < j else 1)
+%o A399083   P = Q
+%o A399083  return sum(c*prod(factorial(x) for x in e) for e, c in P.items())
+%o A399083 print([a(n) for n in range(1, 10)])
+%Y A399083 Cf. A004009, A004017, A008340, A008350, A108091.
+%K A399083 nonn,new
+%O A399083 1,1
+%A A399083 _Jared McCullough_, Aug 18 2026

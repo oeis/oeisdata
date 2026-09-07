@@ -1,0 +1,45 @@
+%I A398917 #26 Sep 06 2026 23:55:33
+%S A398917 0,0,0,1,24,337,4404,61451,948464,16325379,312269392,6587070085,
+%T A398917 152029453008,3811715531648,103171183713590
+%N A398917 Number of regular (asymmetric) orbits of chord diagrams on 2n vertices under the action of the dihedral group D_(2n).
+%C A398917 Regular orbits are (maximal) size |D_(2n)| = 4n under dihedral group action on perfect matchings of 2n vertices on a circle, aka the subset of all chord diagrams with trivial stabilizer (asymmetric diagrams).
+%C A398917 The sequence a(n) isolates the regular (asymmetric) orbits from the total number of dihedrally inequivalent chord diagrams A054499(n), introduced by Vladeta Jovovic in 2000.
+%C A398917 For n = 1, 2, 3, all chord diagrams possess nontrivial symmetry, so a(n) = 0.
+%C A398917 As n -> infinity, almost all chord diagrams are asymmetric, so a(n) ~ A054499(n) ~ (2*n-1)!! / (4*n).
+%F A398917 a(n) = A054499(n) - Sum_{d|4n, d < 4n} N_d(n), where N_d(n) is the number of orbits of size d under the action of the dihedral group D_(2n) (of order 4n) on chord diagrams with 2n vertices.
+%F A398917 a(n) ~ (2*n-1)!! / (4*n).
+%e A398917 For n = 4 (8 vertices), there are 17 dihedrally inequivalent chord diagrams (A054499(4) = 17). The breakdown of orbit sizes under D_8 (order 16) is: 1 orbit of size 1, 2 orbits of size 2, 5 orbits of size 4, 8 orbits of size 8, and exactly 1 regular orbit of size 16. Thus a(4) = 1.
+%e A398917 For n = 5 (10 vertices), there are 79 total dihedrally inequivalent chord diagrams (A054499(5) = 79), of which 24 have trivial stabilizer (regular orbits of size 20), so a(5) = 24.
+%o A398917 (GAP)
+%o A398917 NRFixed := function(H, n)
+%o A398917 local orbs, norb, wmat, u, v, w, qsum;
+%o A398917   if Size(H) = 1 then return Product([1, 3 .. 2*n-1]); fi;
+%o A398917   orbs := Orbits(H, [1..2*n]);
+%o A398917   norb := Length(orbs);
+%o A398917   wmat := NullMat(norb, norb);
+%o A398917   for u in [1..norb] do for v in [u..norb] do
+%o A398917     wmat[u][v] := Number(orbs[v], w -> Length(Union(Orbit(H, Set([orbs[u][1], w]), OnSets)))
+%o A398917                                      = 2*Length(Orbit(H, Set([orbs[u][1], w]), OnSets)));
+%o A398917     wmat[v][u] := wmat[u][v];
+%o A398917   od; od;
+%o A398917   qsum := function(r)
+%o A398917   local d, k, l;
+%o A398917     if Length(r) = 0 then return 1; fi;
+%o A398917     d := r[1];
+%o A398917     l := [2..Length(r)];
+%o A398917     return Sum(l, k -> wmat[d][r[k]] * qsum(r{Difference(l, [k])})) + wmat[d][d] * qsum(r{l});
+%o A398917   end;
+%o A398917   return qsum([1..norb]);
+%o A398917 end;
+%o A398917 # Main function returning a(n) as a single integer:
+%o A398917 A398917 := function(nchords)
+%o A398917 local tomi, reps, fixs;
+%o A398917   tomi := TableOfMarks(DihedralGroup(IsPermGroup, 4*nchords));
+%o A398917   reps := List([1..Length(MatTom(tomi))], i -> RepresentativeTom(tomi, i));
+%o A398917   fixs := List(reps, H -> NRFixed(H, nchords));
+%o A398917   return SolutionMat(MatTom(tomi), fixs)[1];
+%o A398917 end;
+%Y A398917 Cf. A054499 (total dihedrally inequivalent chord diagrams), A001147 (total perfect matchings (2n-1)!!), A390360, A392247.
+%K A398917 nonn,more,new
+%O A398917 1,5
+%A A398917 _Paul Sampson_, Aug 14 2026

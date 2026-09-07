@@ -1,0 +1,80 @@
+%I A399134 #30 Sep 06 2026 16:17:39
+%S A399134 0,2,0,3,3,0,4,4,3,0,5,5,4,3,0,6,6,5,5,3,0,7,7,7,6,5,3,0,8,8,8,7,6,5,
+%T A399134 3,0,9,9,9,8,7,6,5,3,0
+%N A399134 Triangle read by rows: T(n,m) = 2 * d_GH(S_n, S_m) for 1 <= m <= n, where d_GH is the Gromov-Hausdorff distance between symmetric groups equipped with the Hamming metric.
+%C A399134 The symmetric group S_m is naturally embedded in S_n as the pointwise stabilizer of {m+1, ..., n}. The Hamming metric d_Ham(x,y) counts the number of points in {1..n} where permutations x and y differ. Because the Gromov-Hausdorff distance between finite spaces with integer-valued metrics is always a half-integer, T(n,m) yields exact integers.
+%C A399134 If m! < n and c is an n-cycle, then the n permutations 1, c, ..., c^(n-1) are pairwise at Hamming distance n. Given any correspondence R between S_n and S_m, choose one partner in S_m for each of these n permutations. Since |S_m| = m! < n, two chosen partners coincide, so dis(R) >= n. The full relation S_n X S_m has distortion n. Hence T(n,m) = n.
+%D A399134 Jakub Gismatullin, "The Gromov-Hausdorff distance and finite symmetric groups", preprint in preparation, 2026.
+%F A399134 T(1,1) = 0.
+%F A399134 T(n,1) = n for n >= 2.
+%F A399134 T(n,n) = 0 for n >= 1.
+%F A399134 T(n,n-1) = 3 for n >= 3.
+%F A399134 T(n,m) = n if m! < n.
+%e A399134 Triangle begins:
+%e A399134   n=1: 0;
+%e A399134   n=2: 2, 0;
+%e A399134   n=3: 3, 3, 0;
+%e A399134   n=4: 4, 4, 3, 0;
+%e A399134   n=5: 5, 5, 4, 3, 0;
+%e A399134   n=6: 6, 6, 5, 5, 3, 0;
+%e A399134   n=7: 7, 7, 7, 6, 5, 3, 0;
+%e A399134   n=8: 8, 8, 8, 7, 6, 5, 3, 0;
+%e A399134   n=9: 9, 9, 9, 8, 7, 6, 5, 3, 0; ...
+%e A399134 Explicit example of the mechanics behind the sequence for T(4,2) = 4: For n = 4 and m = 2, let c = (1,2,3,4). The elements 1, c, and c^2 of S_4 are pairwise at Hamming distance 4, since c^(j-i) has no fixed point for 0 <= i < j <= 2. Let R be any correspondence between S_4 and S_2. For each i = 0,1,2, choose y_i in S_2 such that (c^i,y_i) is in R. Since |S_2| = 2, two of the y_i are equal. Hence dis(R) >= |4 - 0| = 4. Conversely, S_4 X S_2 is a correspondence of distortion 4. Therefore T(4,2) = 2*d_GH(S_4,S_2) = 4.
+%t A399134 Clear[computeT];
+%t A399134 computeT[n_Integer?Positive, m_Integer?Positive] /; m <= n :=
+%t A399134  Module[
+%t A399134   {sn, sm, hamming, x, vars, rowCover, colCover,
+%t A399134    badPairs, constraints, k},
+%t A399134   sn = Permutations[Range[n]];
+%t A399134   sm = (Join[#, Range[m + 1, n]] &) /@
+%t A399134     Permutations[Range[m]];
+%t A399134   hamming[p_List, q_List] := Count[p - q, Except[0]];
+%t A399134   vars = Flatten[
+%t A399134     Table[x[i, j], {i, Length[sn]}, {j, Length[sm]}]
+%t A399134   ];
+%t A399134   rowCover = And @@ Table[
+%t A399134     Or @@ Table[x[i, j], {j, Length[sm]}],
+%t A399134     {i, Length[sn]}
+%t A399134   ];
+%t A399134   colCover = And @@ Table[
+%t A399134     Or @@ Table[x[i, j], {i, Length[sn]}],
+%t A399134     {j, Length[sm]}
+%t A399134   ];
+%t A399134   Catch[
+%t A399134    Do[
+%t A399134     badPairs = Flatten @ Last @ Reap[
+%t A399134        Do[
+%t A399134         If[
+%t A399134          Abs[
+%t A399134            hamming[sn[[i1]], sn[[i2]]] -
+%t A399134            hamming[sm[[j1]], sm[[j2]]]
+%t A399134          ] > k,
+%t A399134          Sow[Not[x[i1, j1] && x[i2, j2]]]
+%t A399134         ],
+%t A399134         {i1, Length[sn]}, {j1, Length[sm]},
+%t A399134         {i2, i1, Length[sn]}, {j2, Length[sm]}
+%t A399134        ]
+%t A399134       ];
+%t A399134     constraints = And @@ badPairs;
+%t A399134     If[
+%t A399134      TrueQ @ SatisfiableQ[
+%t A399134        rowCover && colCover && constraints,
+%t A399134        vars,
+%t A399134        Method -> "SAT"
+%t A399134      ],
+%t A399134      Throw[k]
+%t A399134     ],
+%t A399134     {k, 0, n}
+%t A399134    ];
+%t A399134    $Failed
+%t A399134   ]
+%t A399134  ]
+%t A399134 Flatten[
+%t A399134  Table[computeT[n, m], {n, 1, 4}, {m, 1, n}]
+%t A399134 ]
+%t A399134 (* {0, 2, 0, 3, 3, 0, 4, 4, 3, 0} *)
+%Y A399134 Cf. A000142 (orders |S_m| = m!), A098825 (numbers of permutations at each Hamming distance from the identity), and A000166 (derangements, i.e. permutations at Hamming distance n from the identity).
+%K A399134 nonn,tabl,more,new
+%O A399134 1,2
+%A A399134 _Jakub Gismatullin_, Aug 19 2026
