@@ -1,0 +1,48 @@
+%I A395056 #27 Sep 07 2026 17:10:57
+%S A395056 0,1,0,1,1,0,2,1,1,1,0,2,1,2,1,1,1,0,2,2,2,1,2,1,2,1,1,1,0,2,1,2,2,2,
+%T A395056 1,2,1,2,1,1,1,0,2,2,2,1,2,1,2,2,2,1,2,1,2,1,1,1,0,2,1,2,2,2,1,2,1,2,
+%U A395056 2,2,1,2,1,2,1,1,1,0,2,2
+%N A395056 a(n) is the minimum, over all k >= 1, of the number of terms omitted from the first k terms of A008578 (1 followed by the primes) so that the remaining terms sum to n.
+%C A395056 Let h_i = A008578(i), so h_1 = 1, h_2 = 2, h_3 = 3, h_4 = 5, ..., and let P_T = h_1 + ... + h_T = A014284(T). For each T with P_T >= n, the deficit d = P_T - n is written as a sum of distinct terms from {h_1, ..., h_T}; a(n) is the minimum such term count over all valid T.
+%C A395056 a(n) = 0 if and only if n is a term of A014284.
+%C A395056 a(n) <= 3 for all 2 <= n <= 10^7; the histogram is {0: 1592, 1: 1268967, 2: 8699283, 3: 30157}.
+%C A395056 Conjectured: a(n) <= 3 for all n >= 2.
+%e A395056 a(7) = 2: {1,2,3,5} sums to 11; omit {1,3} to then leave the terms 2+5 = 7. No single-term omission works for any k.
+%e A395056 a(103) = 3 (first occurrence of 3): {1,2,3,5,7,11,13,17,19,23,29} sums to 130; omit {1,3,23} to leave the terms 2+5+7+11+13+17+19+29 = 103. No two-term omission works for any k.
+%o A395056 (Python)
+%o A395056 from sympy import nextprime
+%o A395056 def A395056(n):
+%o A395056     H, P, p = [1], [1], 2
+%o A395056     while P[-1] < n:
+%o A395056         H.append(p); P.append(P[-1] + p); p = nextprime(p)
+%o A395056     # extend past the first sufficient level; the minimum over T is global
+%o A395056     for _ in range(6):
+%o A395056         H.append(p); P.append(P[-1] + p); p = nextprime(p)
+%o A395056     best = None
+%o A395056     for T in range(len(P)):
+%o A395056         if P[T] < n: continue
+%o A395056         d, terms = P[T] - n, H[:T+1]
+%o A395056         S = set(terms)
+%o A395056         if d == 0: return 0
+%o A395056         if d in S: k = 1
+%o A395056         else:
+%o A395056             k = None
+%o A395056             for x in terms:
+%o A395056                 y = d - x
+%o A395056                 if y > x and y in S: k = 2; break
+%o A395056             if k is None:
+%o A395056                 L = len(terms)
+%o A395056                 for i in range(L):
+%o A395056                     for j in range(i+1, L):
+%o A395056                         z = d - terms[i] - terms[j]
+%o A395056                         if z > terms[j] and z in S: k = 3; break
+%o A395056                     if k is not None: break
+%o A395056         if k is not None:
+%o A395056             best = k if best is None else min(best, k)
+%o A395056     return best
+%o A395056 print([A395056(n) for n in range(1, 81)])
+%Y A395056 Cf. A008578, A014284.
+%K A395056 nonn,new
+%O A395056 1,7
+%A A395056 _Ron Gordon_, Jul 06 2026
+%E A395056 a(1)=0 prepended by _Sean A. Irvine_, Sep 07 2026
