@@ -1,0 +1,55 @@
+%I A398345 #41 Sep 08 2026 23:41:50
+%S A398345 7,23,79,528
+%N A398345 Two-color Green-Tao numbers grt_2(3,n).
+%C A398345 The notation follows Kullmann: a(n) = grt_2(3,n). The arithmetic progressions are formed by the prime values, not by their indices.
+%C A398345 Kullmann gives the exact values a(2)=7, a(3)=23, a(4)=79, and a(5)=528. He also gives the lower bounds a(6) >= 2072 and a(7) > 13800.
+%C A398345 a(7) > 13884 (Lopez Marcano, 2026); the previous published lower bound was a(7) > 13800 (Kullmann, 2010).
+%C A398345 The Green-Tao theorem implies that a(n) is finite for every n.
+%H A398345 Ben Green and Terence Tao, <a href="https://doi.org/10.4007/annals.2008.167.481">The primes contain arbitrarily long arithmetic progressions</a>, Annals of Mathematics, 167 (2008), 481-547.
+%H A398345 Oliver Kullmann, <a href="https://arxiv.org/abs/1004.0653">Exact Ramsey Theory: Green-Tao numbers and SAT</a>, arXiv:1004.0653 [cs.DM], 2010.
+%H A398345 Juan Lopez Marcano, <a href="https://doi.org/10.5281/zenodo.22224879">A Certified New Lower Bound for the Two-Color Green-Tao Number</a>, Zenodo, 2026.
+%F A398345 a(n+1) >= a(n) for n >= 2. This follows because every (n+1)-term arithmetic progression contains an n-term arithmetic progression.
+%e A398345 a(3)=23 means that the first 22 primes admit a 2-coloring with no monochromatic 3-term arithmetic progression, whereas every 2-coloring of the first 23 primes contains one.
+%e A398345 The verified coloring of the first 13884 primes proves a(7) > 13884. It does not determine the exact value of a(7).
+%o A398345 (Python)
+%o A398345 # Note: This requires SymPy and python-sat. The algorithm is exact but becomes computationally expensive for later terms. Tested with python 3.9+
+%o A398345 from sympy import prime
+%o A398345 from pysat.solvers import Minisat22
+%o A398345 def progressions(P, k):
+%o A398345     S = set(P)
+%o A398345     pos = {p: i + 1 for i, p in enumerate(P)}
+%o A398345     last = P[-1]
+%o A398345     result = []
+%o A398345     for i, first in enumerate(P):
+%o A398345         for j in range(i + 1, len(P)):
+%o A398345             d = P[j] - first
+%o A398345             if first + (k - 1) * d > last:
+%o A398345                 break
+%o A398345             ap = [first + t * d for t in range(k)]
+%o A398345             if all(x in S for x in ap):
+%o A398345                 result.append([pos[x] for x in ap])
+%o A398345     return result
+%o A398345 def satisfiable(m, n):
+%o A398345     P = [prime(i) for i in range(1, m + 1)]
+%o A398345     clauses = progressions(P, 3)
+%o A398345     clauses += [
+%o A398345         [-v for v in ap]
+%o A398345         for ap in progressions(P, n)
+%o A398345     ]
+%o A398345     with Minisat22(bootstrap_with=clauses) as solver:
+%o A398345         return solver.solve()
+%o A398345 def a(n):
+%o A398345     lo, hi = 0, 1
+%o A398345     while satisfiable(hi, n):
+%o A398345         lo, hi = hi, 2 * hi
+%o A398345     while hi - lo > 1:
+%o A398345         mid = (lo + hi) // 2
+%o A398345         if satisfiable(mid, n):
+%o A398345             lo = mid
+%o A398345         else:
+%o A398345             hi = mid
+%o A398345     return hi
+%Y A398345 Cf. A005115 (least final prime of an n-term arithmetic progression of primes), A343118 (length of the longest arithmetic progression among the first n primes), and A171081 (the analogous mixed van der Waerden numbers w(3,n)).
+%K A398345 nonn,hard,more,new
+%O A398345 2,1
+%A A398345 _Juan Lopez Marcano_, Sep 01 2026

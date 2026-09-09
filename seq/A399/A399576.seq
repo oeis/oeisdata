@@ -1,0 +1,61 @@
+%I A399576 #30 Sep 09 2026 01:03:06
+%S A399576 1,0,0,1,0,1,0,1,5,0,1,18,0,1,47,61,0,1,108,479,0,1,233,2414,1385,0,1,
+%T A399576 486,9970,19028,0,1,995,36867,157658,50521,0,1,2016,127401,1025268,
+%U A399576 1073517,0,1,4061,421372,5780619,13253431,2702765,0,1,8154,1353284,29707752,124815323,82112518
+%N A399576 Triangle read by rows: T(n,k) is the number of permutations of [n] with exactly k ascending runs and no ascending run of length 1; n >= 0, 0 <= k <= floor(n/2).
+%C A399576 On the no-singleton-run permutations, every descent is an interior peak. Hence T(n,k) also counts these permutations by k-1 descents or interior peaks.
+%C A399576 The cyclic modified Foata-Strehl action of Sun-Wang partitions the derangements into orbits with enumerator t^k*(1+t)^(n-2*k); the unique orbit representatives have no double excedance.
+%C A399576 The interpretation as gamma coefficients of derangement Eulerian polynomials is proved in Athanasiadis and Savvidou, Theorem 1.4.
+%H A399576 Alois P. Heinz, <a href="/A399576/b399576.txt">Rows n = 0..200, flattened</a>
+%H A399576 C. A. Athanasiadis and C. Savvidou, <a href="https://arxiv.org/abs/1204.0362">The local h-vector of the cluster subdivision of a simplex</a>, arXiv:1204.0362 [math.CO], 2012.
+%H A399576 C. A. Athanasiadis and C. Savvidou, <a href="https://www.mat.univie.ac.at/~slc/wpapers/s66athasav.html">The local h-vector of the cluster subdivision of a simplex</a>, Sem. Lothar. Combin. 66 (2012), Article B66c, 21 pp.
+%H A399576 H. Sun and Y. Wang, <a href="https://doi.org/10.37236/3723">A group action on derangements</a>, Electron. J. Combin. 21(1) (2014), Paper P1.67.
+%F A399576 T(0,0) = 1, and T(n,k) = 0 outside 0 <= k <= floor(n/2).
+%F A399576 T(n,k) = k*T(n-1,k) + 2*(n+1-2*k)*T(n-1,k-1) + (n-1)*T(n-2,k-1).
+%F A399576 T(n,1) = 1 for every n >= 2.
+%F A399576 T(n,2) = 2^n - 3*n + 1 for n >= 4. Thus this column is A109363 with an index shift: T(n,2) = A109363(n-2).
+%F A399576 For even n = 2*r, the final entry T(2*r,r) is the Euler up/down number A000111 at index 2*r.
+%F A399576 Let G_n(z) = Sum_k T(n,k)*z^k. Then G_n(z) = 2*(n-1)*z*G_(n-1)(z) + z*(1-4*z)*G'_(n-1)(z) + (n-1)*z*G_(n-2)(z).
+%F A399576 G.f.: Sum_{n>=0} G_n(z)*x^n/n! = 2*s / ((1+s)*exp((1-s)*x/2) - (1-s)*exp((1+s)*x/2)), where s = sqrt(1-4*z).
+%F A399576 Sum_{k=0..floor(n/2)} (-1)^k * T(n,k) = A057596(n). - _Alois P. Heinz_, Sep 06 2026
+%e A399576 Triangle starts:
+%e A399576   1;
+%e A399576   0;
+%e A399576   0, 1;
+%e A399576   0, 1;
+%e A399576   0, 1,   5;
+%e A399576   0, 1,  18;
+%e A399576   0, 1,  47,    61;
+%e A399576   0, 1, 108,   479;
+%e A399576   0, 1, 233,  2414,   1385;
+%e A399576   0, 1, 486,  9970,  19028;
+%e A399576   0, 1, 995, 36867, 157658, 50521;
+%e A399576   ...
+%e A399576 For n = 6, the row is 0, 1, 47, 61: there is 1 permutation with one ascending run, 47 with two ascending runs, and 61 with three ascending runs, none of whose ascending runs has length 1.
+%p A399576 b:= proc(u, o, t) option remember; expand(`if`(u+o=0,
+%p A399576      `if`(t, 0, x), add(b(u+j-1, o-j, false), j=1..o)+
+%p A399576      `if`(t, 0, x * add(b(u-j, o+j-1,  true), j=1..u))))
+%p A399576     end:
+%p A399576 g:= proc(n) g(n):=`if`(n=0, 1, add(b(j-1, n-j, true), j=1..n)) end:
+%p A399576 T:= (n, k)-> coeff(g(n), x, k):
+%p A399576 seq(seq(T(n, k), k=0..n/2), n=0..14);  # _Alois P. Heinz_, Sep 08 2026
+%t A399576 A399576[n_, k_] := A399576[n, k] = Which[k == 0, Boole[n == 0], 2*k > n, 0, True, k*A399576[n - 1, k] + 2*(n + 1 - 2*k)*A399576[n - 1, k - 1] + (n - 1)*A399576[n - 2, k - 1]];
+%t A399576 Table[A399576[n, k], {n, 0, 15}, {k, 0, n/2}] (* _Paolo Xausa_, Sep 08 2026 *)
+%o A399576 (Python)
+%o A399576 def rows(nmax):
+%o A399576     T = [[0]*(nmax//2 + 1) for _ in range(nmax + 1)]
+%o A399576     T[0][0] = 1
+%o A399576     for n in range(1, nmax + 1):
+%o A399576         for k in range(n//2 + 1):
+%o A399576             def a(i, j):
+%o A399576                 return T[i][j] if i >= 0 and j >= 0 else 0
+%o A399576             T[n][k] = (k*a(n-1, k)
+%o A399576                        + 2*(n+1-2*k)*a(n-1, k-1)
+%o A399576                        + (n-1)*a(n-2, k-1))
+%o A399576     return [T[n][1:n//2+1] for n in range(2, nmax + 1)]
+%Y A399576 Row sums give A097899.
+%Y A399576 T(2n,n) gives A000364.
+%Y A399576 Cf. A000111, A046739, A057596, A109363.
+%K A399576 nonn,tabf,new
+%O A399576 0,9
+%A A399576 _Per W. Alexandersson_, Sep 03 2026

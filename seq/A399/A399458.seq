@@ -1,15 +1,34 @@
-%I A399458 #15 Sep 05 2026 23:23:50
+%I A399458 #22 Sep 08 2026 17:23:06
 %S A399458 1,3,5,9,17,11,7,13,25,49,97,193,35,23,15,29,19,37,73,145,289,577,
 %T A399458 1153,461,307,613,175,349,41,27,53,21,83,33,65,43,85,169,337,673,269,
 %U A399458 179,51,101,67,133,265,529,151,301,601,1201,343,137,39,77,153,61,121,241
 %N A399458 a(1) = 1. For n > 1, choose the least k >= 1 such that 2^k*a(n-1) - 1 has a divisor not previously occurring in the sequence; a(n) is the least such unused divisor.
 %C A399458 Question: Will all odd numbers appear in this sequence?
+%H A399458 Michael S. Branicky, <a href="/A399458/b399458.txt">Table of n, a(n) for n = 1..10000</a>
 %e A399458 a(1) = 1;
 %e A399458 We take k = 1. 2*1-1 = 1 which is not a new number, so we choose k = 2. a(2) = 4-1 = 3.
 %e A399458 Now, we choose k = 1. 3*2-1 = 5. A new number, so a(3) = 5.
 %e A399458 5*2-1 = 9. Since we already have 3, we choose 9 as a(4), and so on.
+%p A399458 R:= 1: x:= 1:
+%p A399458 for i from 2 to 100 do
+%p A399458   found:= false;
+%p A399458   for k from 1 do
+%p A399458     V:= NumberTheory:-Divisors(2^k*x-1) minus {R};
+%p A399458     if  V <> {} then x:= min(V); R:= R,x; break fi;
+%p A399458 od od:
+%p A399458 R; # _Robert Israel_, Sep 08 2026
 %o A399458 (PARI) isok(k, prev, vs) = my(vd=divisors(2^k*prev - 1)); for (i=1, #vd, if (!vecsearch(vs, vd[i]), return(vd[i])););
 %o A399458 lista(nn) = my(v=vector(nn), vs); v[1] = 1; for(n=2, nn, vs = vecsort(v); my(k=1, d); while (!(d=isok(k, v[n-1], vs)), k++); v[n] = d;); v; \\ _Michel Marcus_, Aug 29 2026
+%o A399458 (Python)
+%o A399458 from sympy import divisors
+%o A399458 from itertools import count, islice
+%o A399458 def A399458(): # generator of terms
+%o A399458     an, aset = 1, set()
+%o A399458     while True:
+%o A399458         yield an
+%o A399458         aset.add(an)
+%o A399458         an = next(d for k in count(1) for d in divisors(2**k*an - 1) if d not in aset)
+%o A399458 print(list(islice(A399458(), 60))) # _Michael S. Branicky_, Sep 06 2026
 %Y A399458 Cf. A398414.
 %K A399458 nonn,new
 %O A399458 1,2
