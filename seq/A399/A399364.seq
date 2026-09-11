@@ -1,0 +1,68 @@
+%I A399364 #15 Sep 10 2026 18:42:23
+%S A399364 0,12,270,5916,123504,2538447,51497040,1038074187,20860210527,
+%T A399364 418429711224,8382927031902,167827226563374,3358570222045599,
+%U A399364 67196023858705425,1344212283980217555,26887733364774830334,537796671110979675579,10756437974822235283245,215134797774716879278017
+%N A399364 Number of triples (i,j,k) with 0 <= i,j,k < 3^n such that no two of i, j, k have digit 1 in the same base-3 position, and gcd(i,j,k) = 1.
+%C A399364 The digit condition is collective: at each base-3 position, look at the three digits found there, one from each of i, j, k; at most one of them may equal 1. A single coordinate may contain any number of 1's.
+%C A399364 Equivalently, with m(x) the set of base-3 positions where x has digit 1, the triple is admissible iff m(i), m(j), m(k) are pairwise disjoint; this is the base-3 analog of the condition i AND j = 0 in A396934.
+%C A399364 The 20^n admissible triples (A009964) are the cells of the level-n Menger sponge: subdivide the cube into 27 subcubes and discard the center and the six face centers, which are the subcubes where two or three coordinates have digit 1; repeat n times.
+%C A399364 Equivalently, a(n) is the number of lattice points of the level-n Menger sponge that are visible from the origin.
+%C A399364 For n >= 1 exactly 20^(n-1) of the admissible triples have i, j, k all divisible by 3, since dividing each coordinate by 3 maps them onto the admissible triples of level n-1. So the probability that 3 divides gcd(i,j,k) is exactly 1/20 at every finite level.
+%C A399364 gcd(0,0,m) = m and gcd(0,a,b) = gcd(a,b), so triples with zero coordinates are counted when coprime; gcd(0,0,0) = 0, so (0,0,0) is never counted and a(0) = 0.
+%C A399364 The analogous count on the Sierpinski triangle is A396934, whose constant 16/(3*Pi^2) follows from the same theorem.
+%H A399364 Carlo Mitchener, <a href="https://github.com/carlomitchener/carlomitchener/blob/main/research/coprime-density-above-dimension-one/paper.pdf">Coprimality Density Above Dimension One</a>, 2026.
+%H A399364 Carlo Mitchener, <a href="https://github.com/mrlyprod/mrlyprod/tree/main/research/lab/coprime-terms">Example Rust program</a>.
+%F A399364 a(n) = Sum_{d=1..3^n-1} mu(d)*(N(n,d) - 1), where N(n,d) is the number of admissible triples (i,j,k) with d | i, d | j, and d | k; the -1 removes (0,0,0). N(n,3*d) = N(n-1,d) for n >= 1, so only moduli coprime to 3 need to be computed.
+%F A399364 Limit_{n->oo} a(n)/20^n = (513/520)/zeta(3) = 0.8207086194... .
+%e A399364 a(1) = 12: the cells of the level-1 sponge with coprime coordinates are (0,0,1), (0,1,0), (0,1,2), (0,2,1), (1,0,0), (1,0,2), (1,2,0), (1,2,2), (2,0,1), (2,1,0), (2,1,2), (2,2,1).
+%e A399364 a(2) = 270: for instance (1,3,2) is counted, since in base 3 the coordinates are 1, 10, 2, no two of them have digit 1 in the same position, and gcd(1,3,2) = 1; (1,4,0) is not admissible, since 1 and 4 = 11_3 both have digit 1 in the units position; (0,2,4) is admissible but gcd(0,2,4) = 2.
+%o A399364 (Python)
+%o A399364 from math import gcd
+%o A399364 def ok(i, j, k, n):
+%o A399364     for _ in range(n):
+%o A399364         if (i % 3 == 1) + (j % 3 == 1) + (k % 3 == 1) > 1:
+%o A399364             return False
+%o A399364         i, j, k = i // 3, j // 3, k // 3
+%o A399364     return True
+%o A399364 def a(n):
+%o A399364     s = 3 ** n
+%o A399364     return sum(1 for i in range(s) for j in range(s) for k in range(s) if ok(i, j, k, n) and gcd(gcd(i, j), k) == 1)
+%o A399364 print([a(n) for n in range(5)])
+%o A399364 (Python)
+%o A399364 def a(n):
+%o A399364     s = 3 ** n
+%o A399364     mu, prime = [1] * s, [True] * s
+%o A399364     for p in range(2, s):
+%o A399364         if prime[p]:
+%o A399364             for k in range(2 * p, s, p): prime[k] = False
+%o A399364             for k in range(p, s, p): mu[k] = -mu[k]
+%o A399364             for k in range(p * p, s, p * p): mu[k] = 0
+%o A399364     mask = [0] * s
+%o A399364     for x in range(1, s):
+%o A399364         mask[x] = mask[x // 3] << 1 | (x % 3 == 1)
+%o A399364     full = (1 << n) - 1
+%o A399364     total = 0
+%o A399364     for d in range(1, s):
+%o A399364         if mu[d] == 0: continue
+%o A399364         c = [0] * (full + 1)
+%o A399364         for x in range(0, s, d): c[mask[x]] += 1
+%o A399364         g = c[:]
+%o A399364         for b in range(n):
+%o A399364             for T in range(full + 1):
+%o A399364                 if T >> b & 1: g[T] += g[T ^ (1 << b)]
+%o A399364         t = 0
+%o A399364         for A in range(full + 1):
+%o A399364             if c[A]:
+%o A399364                 R = full ^ A
+%o A399364                 B = R
+%o A399364                 while True:
+%o A399364                     t += c[A] * c[B] * g[R ^ B]
+%o A399364                     if B == 0: break
+%o A399364                     B = (B - 1) & R
+%o A399364         total += mu[d] * (t - 1)
+%o A399364     return total
+%o A399364 print([a(n) for n in range(10)])
+%Y A399364 Cf. A009964 (20^n, the admissible triples), A071778 (coprime triples in the full grid), A088453 (1/zeta(3)), A396934 (the same count on the Sierpinski triangle).
+%K A399364 nonn,base,new
+%O A399364 0,2
+%A A399364 _Carlo Mitchener_, Aug 27 2026
