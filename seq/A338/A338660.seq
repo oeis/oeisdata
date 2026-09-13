@@ -1,13 +1,41 @@
-%I A338660 #20 Dec 30 2021 00:24:07
-%S A338660 1,2,5,13,43,167
+%I A338660 #26 Sep 12 2026 18:17:02
+%S A338660 1,2,5,13,43,167,802,4630,30678
 %N A338660 Number of circle graphs of Gauss diagrams of meander curves with 2n+1 crossings.
 %C A338660 See A343358 for a definition of a graph corresponding to a closed planar curve. Meanders have been defined in various ways; for the purpose of considering their Gauss diagrams and graphs, a meander is understood as a closed planar curve in whose graph there is a vertex adjacent to every other vertex. This sequence is the number of distinct graphs of meanders of (necessarily odd) sizes.
+%C A338660 Cutting a meander curve at a universal crossing splits it into two simple loops that touch there and cross each other at the remaining 2n points; straightening one loop shows the other to be an open meander of order 2n. The curves can therefore be generated from the A005316(2n) open meanders. The correspondence is onto but not one-to-one, since a curve may have several universal crossings. - _Stephen J. Pursey_, Sep 06 2026
 %D A338660 Delecroix, Vincent, et al. "Enumeration of meanders and Masur-Veech volumes." Forum of Mathematics, Pi. Vol. 8. Cambridge University Press, 2020.
 %D A338660 Grinblat, Andrey, and Viktor Lopatkin. "On realizabilty of Gauss diagrams and constructions of meanders." Journal of Knot Theory and Its Ramifications 29.05 (2020): 2050031.
 %H A338660 V. Delecroix et al. <a href="https://arxiv.org/abs/1705.05190">Enumeration of meanders and Masur-Veech volumes</a>, arXiv preprint arXiv:1705.05190 [math.GT], 2017-2019.
 %H A338660 Andrey Grinblat and Viktor Lopatkin. <a href="https://arxiv.org/abs/1808.08542">On realizabilty of Gauss diagrams and constructions of meanders.</a> arXiv:1808.08542 [math.AT], 2018.
 %H A338660 Abdullah Khan, Alexei Lisitsa, Viktor Lopatkin, and Alexei Vernitski, <a href="https://arxiv.org/abs/2108.02873">Circle graphs (chord interlacement graphs) of Gauss diagrams: Descriptions of realizable Gauss diagrams, algorithms, enumeration</a>, arXiv:2108.02873 [math.GT], 2021.
-%Y A338660 Cf. A343358.
-%K A338660 nonn,hard,more
+%o A338660 (Python)
+%o A338660 from itertools import permutations
+%o A338660 import networkx as nx
+%o A338660 def cross(a, b, c, d):
+%o A338660     if len({a, b, c, d}) < 4: return False
+%o A338660     a, b = sorted((a, b)); c, d = sorted((c, d)); return a < c < b < d or c < a < d < b
+%o A338660 def valid(r): # r = order in which the second loop meets the first; loops touch at crossing 0
+%o A338660     s = (0,) + r + (0,); arcs = [(s[k], s[k+1]) for k in range(len(r)+1)]
+%o A338660     for p in (0, 1):
+%o A338660         t = arcs[p::2] # arches alternate sides of the first loop; each side must be non-crossing
+%o A338660         if any(cross(*x, *y) for i, x in enumerate(t) for y in t[i+1:]): return False
+%o A338660     return r[0] < r[-1] # crossing 0 transversal (a genuine chord), not a self-tangency
+%o A338660 def graph(w): # interlacement (circle) graph of the double-occurrence word w
+%o A338660     pos = {}
+%o A338660     for i, v in enumerate(w): pos.setdefault(v, []).append(i)
+%o A338660     G = nx.Graph(); G.add_nodes_from(pos)
+%o A338660     G.add_edges_from((u, v) for u in pos for v in pos if u < v and cross(*pos[u], *pos[v]))
+%o A338660     return G
+%o A338660 def a(n):
+%o A338660     m = 2*n; reps = []
+%o A338660     for r in permutations(range(1, m+1)):
+%o A338660         if not valid(r): continue
+%o A338660         G = graph([0] + list(range(1, m+1)) + [0] + list(r))
+%o A338660         if not any(nx.is_isomorphic(G, H) for H in reps): reps.append(G)
+%o A338660     return len(reps)
+%o A338660 print([a(n) for n in range(1, 6)]) # _Stephen J. Pursey_, Sep 06 2026
+%Y A338660 Cf. A343358, A005316.
+%K A338660 nonn,hard,more,changed
 %O A338660 1,2
 %A A338660 _Alexei Vernitski_, Apr 22 2021
+%E A338660 a(7)-a(9) from _Stephen J. Pursey_, Sep 06 2026

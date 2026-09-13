@@ -1,0 +1,36 @@
+%I A399189 #24 Sep 12 2026 17:56:23
+%S A399189 0,4,20,51,112,191,324,474,692,951,1300,1654,2160,2671,3296,3992,4864,
+%T A399189 5707,6804,7857,9140,10527,12100,13621,15504,17431,19512,21731,24304,
+%U A399189 26737,29700,32496,35732,39111,42676,46302,50544,54655,59072,63617,68800,73690,79380,84807,90744,97071,103684,110061
+%N A399189 a(n) = n^3 - A283626(n): number of lattice points in the cube [1,n]^3 not covered by any box [1,p] X [1,q] X [1,r] with p*q*r = n.
+%H A399189 Soslan Daurov, <a href="/A399189/b399189.txt">Table of n, a(n) for n = 1..120</a>
+%H A399189 Soslan Daurov and Anton Kretov, <a href="https://doi.org/10.24108/preprints-3116072">Structural units of different-dimensional numbers</a>, preprint, 2026 [in Russian].
+%F A399189 a(n) = n^3 - A283626(n).
+%F A399189 a(n) = 0 iff n = 1.
+%F A399189 a(p) = p^3 - 3*p + 2 for prime p.
+%e A399189 a(2) = 4: the cube 2 X 2 X 2 has 8 cells, of which 4 are covered.
+%e A399189 a(6) = 25: the cube 6 X 6 X 6 has 216 cells; the boxes 1 X 1 X 6, 1 X 6 X 1, 6 X 1 X 1, 1 X 2 X 3 and permutations cover 25 of them (= A283626(6)), leaving 216 - 25 = 191.
+%o A399189 (Python)
+%o A399189 from functools import lru_cache
+%o A399189 def A(n, d):
+%o A399189     ds = tuple(x for x in range(1, n+1) if n % x == 0)
+%o A399189     W = {}; p = 0
+%o A399189     for x in ds: W[x] = x - p; p = x
+%o A399189     @lru_cache(None)
+%o A399189     def step(T, e):
+%o A399189         return frozenset(m//a for m in T for a in ds if m % a == 0 and a >= e)
+%o A399189     @lru_cache(None)
+%o A399189     def H(t, T):
+%o A399189         if t == 0: return 1 if 1 in T else 0
+%o A399189         s = 0
+%o A399189         for e in ds:
+%o A399189             u = step(T, e)
+%o A399189             if u: s += W[e]*H(t-1, u)
+%o A399189         return s
+%o A399189     return H(d, frozenset({n}))
+%o A399189 def a(n): return n**3 - A(n, 3)
+%o A399189 print([a(n) for n in range(1, 49)])
+%Y A399189 Cf. A283626, A138808, A398812.
+%K A399189 nonn,new
+%O A399189 1,2
+%A A399189 _Soslan Daurov_, Aug 21 2026

@@ -1,0 +1,39 @@
+%I A398471 #42 Sep 12 2026 21:24:29
+%S A398471 1,4,10,18,30,45,65,88,115,145,181,221,266,315,371,431,496,565,640,
+%T A398471 719,803,891,987,1088,1195,1307,1426,1550,1680,1815,1959,2108,2263,
+%U A398471 2423,2590,2762,2940,3123,3314,3510,3712,3919,4133,4352,4577,4807,5047,5293,5546
+%N A398471 Minimum total search cost of an optimal binary search tree over n keys in sorted order, where key i has access frequency i.
+%C A398471 a(n) is the minimum, over all binary search trees on n keys that must remain in sorted (in-order) sequence, of Sum_{i=1..n} (frequency of key i) * (depth of key i in the tree), where key i has frequency i and the root has depth 1.
+%C A398471 Unlike Huffman coding, the keys cannot be freely reordered - the tree must respect the sorted order of the keys, as in a real search tree / dictionary. This extra constraint means a(n) is always >= the corresponding Huffman cost for the same weights (Huffman's algorithm has strictly more freedom since it does not need to preserve key order).
+%C A398471 This is the classical Optimal Binary Search Tree problem (Knuth, 1971).
+%D A398471 T. H. Cormen, C. E. Leiserson, R. L. Rivest, and C. Stein, Introduction to Algorithms, 3rd ed., MIT Press, 2009, Ch. 15.3.
+%D A398471 D. E. Knuth, Optimum binary search trees, Acta Informatica, 1 (1971), 14-25.
+%H A398471 Attili Veera Naga Sai Harsha, <a href="/A398471/b398471.txt">Table of n, a(n) for n = 1..200</a>
+%H A398471 Wikipedia, <a href="https://en.wikipedia.org/wiki/Optimal_binary_search_tree">Optimal binary search tree</a>.
+%F A398471 a(n) = cost(1,n) where cost(i,j) = (i+j)*(j-1+1)/2 + min_{r=i..j} (cost(i,r-1) + cost(r+1,j)), with cost(i,i-1) = 0.
+%e A398471 a(3) = 10: keys 1,2,3 with frequencies 1,2,3. Choosing key 2 as the root gives left child key 1 and right child key 3, at depths 1, 2, 2 respectively. Cost = 12 + 21 + 3*2 = 2 + 2 + 6 = 10, which is optimal among all 5 possible binary search trees on 3 sorted keys.
+%o A398471 (Python)
+%o A398471 def a(n):
+%o A398471     w = list(range(1, n+1))
+%o A398471     prefix = [0]*(n+1)
+%o A398471     for i in range(n):
+%o A398471         prefix[i+1] = prefix[i] + w[i]
+%o A398471     def rsum(i, j):
+%o A398471         return prefix[j+1] - prefix[i]
+%o A398471     cost = [[0]*n for _ in range(n)]
+%o A398471     for i in range(n):
+%o A398471         cost[i][i] = w[i]
+%o A398471     for length in range(2, n+1):
+%o A398471         for i in range(n-length+1):
+%o A398471             j = i + length - 1
+%o A398471             s = rsum(i, j)
+%o A398471             best = min(
+%o A398471                 (cost[i][r-1] if r > i else 0) + (cost[r+1][j] if r < j else 0) + s
+%o A398471                 for r in range(i, j+1)
+%o A398471             )
+%o A398471             cost[i][j] = best
+%o A398471     return cost[0][n-1]
+%o A398471 print([a(n) for n in range(1, 50)])
+%K A398471 nonn,new
+%O A398471 1,2
+%A A398471 _Attili Veera Naga Sai Harsha_, Sep 04 2026

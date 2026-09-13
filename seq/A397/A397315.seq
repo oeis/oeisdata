@@ -1,0 +1,68 @@
+%I A397315 #38 Sep 12 2026 22:10:01
+%S A397315 4,4,4,5,5,5,6,6,6,6,7,7,7,7,7,8,8,8,8,8,8,9,9,10,10,10,9,9,10,10,11,
+%T A397315 11,11,11,10,10,11,11,12,12,12,12,12,11,11
+%N A397315 Table read by antidiagonals: T(n,k) = maximum number of points that can be blacked out of an n X k grid of points so that every rectangle with all four vertices on grid points (tilted rectangles included) is uniquely identifiable from its set of visible vertices; n, k >= 2.
+%C A397315 From Problem 001 of Peter Kagey's Open Problem Collection (https://peterkagey.com/problems/001/): black out as many grid points as possible while every rectangle with lattice corners remains identifiable from its visible corners; equivalently, injectivity of the map R -> C(R) \ S over all rectangles.
+%C A397315 Equivalent formulation: n*k minus the minimum size of a hitting set of the hypergraph whose edges are the symmetric differences C(R1) triangle C(R2) over distinct rectangle pairs.
+%C A397315 T(2,m) = m+1 for m >= 3, with exactly m*2^(m-1) maximum blackouts (see link). T(2,2) = 4 since a single rectangle imposes no constraint. The number of maximum blackouts is given in A399580.
+%C A397315 Conjecture: T(3,m) = m+2 for all m >= 3 (verified for 3 <= m <= 10).
+%C A397315 Conjecture: T(n,m) = n+m whenever min(n,m) >= 4, except T(4,4) = 7 and T(4,5) = 8 (verified on seven cells through 6 X 6).
+%C A397315 The 5 X 5 maximum blackout is unique up to the symmetries of the square.
+%C A397315 All values cross-verified by two independently written implementations, and on small grids by exhaustive search from the definition.
+%H A397315 Peter Kagey, <a href="https://peterkagey.com/problems/001/">Open Problem Collection, Problem 001</a>.
+%H A397315 Arjun Pemmasani, <a href="https://github.com/apemm/Kagey-Problems">Solvers, exhaustive verification, and pre-registration ledger for Problem 001</a> (GitHub repository).
+%e A397315 Array starts:
+%e A397315   [ 2]  4,  4,  5,  6,  7,  8,  9, 10, 11, ...
+%e A397315   [ 3]  4,  5,  6,  7,  8,  9, 10, 11, ...
+%e A397315   [ 4]  5,  6,  7,  8, 10, 11, 12, ...
+%e A397315   [ 5]  6,  7,  8, 10, 11, 12, ...
+%e A397315   [ 6]  7,  8, 10, 11, 12, ...
+%e A397315   [ 7]  8,  9, 11, 12, ...
+%e A397315   [ 8]  9, 10, 12, ...
+%e A397315   [ 9] 10, 11, ...
+%e A397315   [10] 11, ...
+%e A397315   ...
+%e A397315 One of the 8 maximum blackouts for n = k = 5 (1 = blacked out):
+%e A397315 ..0..0..1..1..1
+%e A397315 ..0..0..1..0..0
+%e A397315 ..0..1..1..0..0
+%e A397315 ..1..1..0..0..0
+%e A397315 ..1..0..0..0..1
+%o A397315 (Python)
+%o A397315 from itertools import combinations
+%o A397315 def T(n, k): # (a(n,k), A399580(n,k)): max blackout and number of maximum blackouts, from the definition
+%o A397315     P = [(x, y) for x in range(k) for y in range(n)]; S = set(P)
+%o A397315     R = set()
+%o A397315     for A, B, C in combinations(P, 3):
+%o A397315         for a, b, c in ((A, B, C), (B, A, C), (A, C, B)):
+%o A397315             if (a[0]-b[0])*(c[0]-b[0]) + (a[1]-b[1])*(c[1]-b[1]) == 0:
+%o A397315                 d = (a[0]+c[0]-b[0], a[1]+c[1]-b[1])
+%o A397315                 if d in S: R.add(frozenset((a, b, c, d)))
+%o A397315     R = list(R)
+%o A397315     for m in range(len(P), -1, -1):
+%o A397315         cnt = 0
+%o A397315         for Sb in combinations(P, m):
+%o A397315             B = set(Sb); seen = set(); ok = True
+%o A397315             for r in R:
+%o A397315                 v = r - B
+%o A397315                 if v in seen: ok = False; break
+%o A397315                 seen.add(v)
+%o A397315             cnt += ok
+%o A397315         if cnt: return m, cnt
+%o A397315 print([T(n, d-n)[0] for d in range(4, 9) for n in range(2, d-1)]) # antidiagonals 4..8; slow beyond about 20 points
+%o A397315 (PARI)
+%o A397315 T(n, k) = {my(N=n*k, pt=vector(N, i, [(i-1)\n, (i-1)%n]), R=[], cnt, vis);
+%o A397315   for(a=1, N, for(b=1, N, for(c=1, N, if(a!=b && b!=c && a!=c,
+%o A397315     my(u=pt[a]-pt[b], v=pt[c]-pt[b]); if(u[1]*v[1]+u[2]*v[2]==0,
+%o A397315       my(d=pt[a]+pt[c]-pt[b]); if(d[1]>=0 && d[1]<k && d[2]>=0 && d[2]<n,
+%o A397315         my(di=d[1]*n+d[2]+1); R=concat(R, [2^(a-1)+2^(b-1)+2^(c-1)+2^(di-1)])))))));
+%o A397315   R=Set(R);
+%o A397315   forstep(m=N, 0, -1, cnt=0;
+%o A397315     forsubset([N, m], s, my(B=sum(i=1, #s, 2^(s[i]-1)));
+%o A397315       vis=vector(#R, i, bitnegimply(R[i], B));
+%o A397315       if(#Set(vis)==#R, cnt++));
+%o A397315     if(cnt, return([m, cnt])));} \\ [a(n,k), A399580(n,k)]
+%Y A397315 Cf. A001787, A085582, A289832, A399580.
+%K A397315 nonn,tabl,more,new
+%O A397315 2,1
+%A A397315 _Arjun Pemmasani_, Sep 02 2026

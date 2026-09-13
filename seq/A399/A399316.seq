@@ -1,0 +1,38 @@
+%I A399316 #9 Sep 12 2026 21:26:44
+%S A399316 1,2,6,23,115,688,4795,37145,310233
+%N A399316 Number of Gauss diagrams of meander curves with 2n+1 crossings.
+%C A399316 A meander curve here is a closed planar curve whose Gauss diagram has a chord crossing all the others, equivalently whose interlacement (circle) graph has a universal vertex; this is the same family of curves counted by A338660.
+%C A399316 Diagrams are counted up to the symmetries of the circle (rotations and reflections). A variant counting up to rotation only, so that a diagram and its mirror image are distinct unless self-mirror, gives a related sequence.
+%C A399316 Cutting such a curve at a universal crossing gives an open meander with 2n crossings, so these curves arise from the A005316(2n) open meanders; the correspondence is surjective but not injective, since a meander curve may admit more than one universal chord and cutting at each recovers a different open meander. The first discrepancy is at n = 2: there are A005316(4) = 3 open meanders but only 2 diagrams.
+%C A399316 a(n) counts the chord diagrams themselves; A338660(n) counts their interlacement graphs, a further quotient, so A338660(n) <= a(n).
+%e A399316 For n = 2 the three meander curves with 5 crossings have double-occurrence words 0123401234, 0123401432 and 0123403214, where 0 denotes the universal chord. The last two describe the same chord diagram (reflecting the circle about the first position carries one to the other), while the first is distinct, so a(2) = 2.
+%o A399316 (Python)
+%o A399316 from itertools import permutations
+%o A399316 def cross(a, b, c, d):
+%o A399316     if len({a, b, c, d}) < 4: return False
+%o A399316     a, b = sorted((a, b)); c, d = sorted((c, d)); return a < c < b < d or c < a < d < b
+%o A399316 def valid(r): # r = order in which the second loop meets the first; loops tangent at crossing 0
+%o A399316     s = (0,) + r + (0,); arcs = [(s[k], s[k+1]) for k in range(len(r)+1)]
+%o A399316     for p in (0, 1):
+%o A399316         t = arcs[p::2] # arches alternate sides of the first loop; each side must be non-crossing
+%o A399316         if any(cross(*x, *y) for i, x in enumerate(t) for y in t[i+1:]): return False
+%o A399316     return r[0] < r[-1] # crossing 0 transversal (a genuine chord), not a self-tangency
+%o A399316 def canon(w): # least relabeled word over rotations and reflections of the circle
+%o A399316     L = len(w); best = None
+%o A399316     for d in (1, -1):
+%o A399316         for st in range(L):
+%o A399316             lab = {}; out = []
+%o A399316             for i in range(L):
+%o A399316                 v = w[(st + d*i) % L]
+%o A399316                 if v not in lab: lab[v] = len(lab)
+%o A399316                 out.append(lab[v])
+%o A399316             best = tuple(out) if best is None else min(best, tuple(out))
+%o A399316     return best
+%o A399316 def a(n):
+%o A399316     m = 2*n
+%o A399316     return len({canon([0] + list(range(1, m+1)) + [0] + list(r)) for r in permutations(range(1, m+1)) if valid(r)})
+%o A399316 print([a(n) for n in range(1, 6)])
+%Y A399316 Cf. A005316, A338660.
+%K A399316 nonn,hard,more,new
+%O A399316 1,2
+%A A399316 _Stephen J. Pursey_, Aug 26 2026
