@@ -1,23 +1,48 @@
-%I A394576 #26 May 21 2026 21:24:49
+%I A394576 #53 Sep 14 2026 01:03:36
 %S A394576 1,2,3,4,5,7,8,10,11,13,14,15,17,18,19,21,22,23,24,26,27,28,30,31,32,
 %T A394576 33,35,36,37,39,40,41,43,44,45,47,48,49,51,52,53,55,56,57,59,60,61,63,
 %U A394576 64,65,67,68,70,71,72,74,75,76,78,79,80,82,83,84,86,87,88,90,91,92,94,95,97,98,99
-%N A394576 a(1) = 1; a(n+1) as the smallest positive integer greater than a(n) that avoids violating the condition a(k) + a(k+1) + a(k+2) is not term.
+%N A394576 a(1) = 1; a(n+1) is the smallest positive integer greater than a(n) that avoids violating the condition a(k) + a(k+1) + a(k+2) is not a term.
 %C A394576 Conjecture 1: a(n) <= floor((4*n-1)/3).
-%C A394576 Conjecture 2: The sequence L(k) = 9^(k-1) + 2 describes the number of consecutive terms that match the formula a(n) = floor((4*n-1)/3) : (Start)
-%C A394576 [a(1)..a(3)] : L(1) = 9^(1-1) + 2 = 3
-%C A394576 [a(8)..a(18)] : L(2) = 9^(2-1) + 2 = 11
-%C A394576 [a(71)..a(153)] : L(3) = 9^(3-1) + 2 = 83
-%C A394576 [a(908)..a(1638)] : L(4) = 9^(4-1) + 2 = 731
-%C A394576 [a(5741)..a(12303)] : L(5) = 9^(5-1) + 2 = 6563
-%C A394576 [a(51668)..a(110718)] : L(6) = 9^(6-1) + 2 = 59051
-%C A394576 [a(465011)..a(996453)] : L(7) = 9^(7-1) + 2 = 531443
-%C A394576 ... (End).
+%C A394576 From _Hoang Xuan Thanh_, Sep 07 2026: (Start)
+%C A394576 Conjecture 2: The sequence alternates between "stable blocks" where a(n) strictly equals floor((4*n-1)/3) and "gaps" where the pattern temporarily breaks to avoid forbidden sums.
+%C A394576 Let k >= 1 be the index of the stable block. Empirical data up to n = 5*10^6 shows the following exact fractal structure:
+%C A394576   The k-th stable block has length L(k) = 9^(k-1) + 2.
+%C A394576   The k-th stable block starts exactly at index S(k) = (7 * 9^(k-1) + 1) / 8.
+%C A394576   The k-th stable block ends exactly at index E(k) = (15 * 9^(k-1) + 9) / 8.
+%C A394576 Number of terms in the gap between the (k-1)-th and k-th stable block: G(k) = 6 * 9^(k-2) - 2 (for k >= 2).
+%C A394576   [a(1)..a(3)] : L(1) = 3
+%C A394576   [a(8)..a(18)] : L(2) = 11, G(2) = 4
+%C A394576   [a(71)..a(153)] : L(3) = 83, G(3) = 52
+%C A394576   [a(638)..a(1368)] : L(4) = 731, G(4) = 484
+%C A394576   [a(5741)..a(12303)] : L(5) = 6563, G(5) = 4372
+%C A394576   [a(51668)..a(110718)] : L(6) = 59051, G(6) = 39364
+%C A394576   [a(465011)..a(996453)] : L(7) = 531443, G(7) = 354292
+%C A394576   ...
+%C A394576 Conjecture 3: Exact binary structure of the gaps.
+%C A394576 Let d(n) = floor((4*n-1)/3) - a(n). From Conjecture 1, d(n) = 0 within the stable blocks and fluctuates strictly in {0, 1} within the gaps.
+%C A394576 For k >= 2, the sequence d(n) in the k-th gap (spanning from index n = E(k-1)+1 to S(k)-1, with length G(k) = 6*9^(k-2) - 2) is constructed by a precise concatenation of 3-term patterns.
+%C A394576 Let X = (1, 0, 0) and Y = (1, 1, 0). The sequence d(n) in the k-th gap is exactly given by the word: X^(A_k) Y^(B_k) X^(C_k) (1), where the exponents denote the number of repetitions: A_k = (9^(k-2) - 1) / 4, B_k = 9^(k-2), C_k = 3 * (9^(k-2) - 1) / 4.
+%C A394576 For example, for k = 3, the gap length is G(3) = 52. The pattern is X^2 Y^9 X^6 (1), expanding to: (1,0,0)^2 (1,1,0)^9 (1,0,0)^6 (1).
+%C A394576 For k = 4, the gap length is G(4) = 484. The pattern expands to X^20 Y^81 X^60 (1).
+%C A394576 Consequently, the total sum of errors (the exact number of 1s) required to pass through the k-th gap is precisely A_k*1 + B_k*2 + C_k*1 + 1 = 3*9^(k-2). (End)
+%H A394576 Robert Israel, <a href="/A394576/b394576.txt">Table of n, a(n) for n = 1..10000</a>
+%H A394576 Hoang Xuan Thanh, <a href="https://doi.org/10.5281/zenodo.22674326">Algorithm for OEIS A394576, A394676 and Generalized Forbidden Sums</a>, Zenodo, 2026.
+%p A394576 N:= 200: # for terms <= N
+%p A394576 Cands:= {$3..N}:
+%p A394576 R:= 1,2:
+%p A394576 for i from 3 while Cands <> {} do
+%p A394576   x:= min(Cands);
+%p A394576   R:= R, x;
+%p A394576   v:= R[-3]+R[-2]+x;
+%p A394576   Cands:= Cands minus {x,v};
+%p A394576 od:
+%p A394576 R; # _Robert Israel_, Sep 07 2026
 %o A394576 (PARI)
 %o A394576 a_seq(N) = {my(a = [1], used = Set([1]), forb = Set([]), maxv = 2); while(#a < N, my(cand = a[#a] + 1); while(1, if( setsearch(used, cand)==0 && setsearch(forb, cand)==0, break); cand++; ); a = concat(a, cand); used = setunion(used, [cand]); my(m = #a); if(m >= 3, my(s = a[m-2] + a[m-1] + a[m]); forb = setunion(forb, [s]); ); if(m >= 2, my(s = a[m-1] + a[m] + (m+1 <= N)); ); if(m >= 1 && m+1 <= N && m+2 <= N, 0); ); a; };
 %o A394576 A394576 = a_seq(1000);
 %o A394576 vector(100, n, A394576[n]) \\ _Hoang Xuan Thanh_, May 14 2026
-%Y A394576 Cf. A042968.
-%K A394576 nonn
+%Y A394576 Cf. A042968, A394676 (sum of 4 terms is not term).
+%K A394576 nonn,changed
 %O A394576 1,2
 %A A394576 _Hoang Xuan Thanh_, May 11 2026

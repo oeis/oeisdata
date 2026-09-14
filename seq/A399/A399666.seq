@@ -1,0 +1,57 @@
+%I A399666 #7 Sep 13 2026 04:12:23
+%S A399666 1,0,1,0,1,1,0,2,3,1,0,6,11,6,1,0,12,50,35,10,1,0,60,202,225,85,15,1,
+%T A399666 0,60,1092,1372,735,175,21,1,0,420,4764,9436,6097,1960,322,28,1,0,840,
+%U A399666 25092,62612,53172,20937,4536,546,36,1
+%N A399666 Triangle read by rows: The Bell transform of the least common multiple of {1, 2, ..., n}. (LCM(n) = A003418(n)).
+%C A399666 For the definition of the Bell transform see A264428.
+%H A399666 Peter Luschny, <a href="https://oeis.org/wiki/User:Peter_Luschny/BellTransform">The Bell transform</a>.
+%H A399666 Peter Luschny, <a href="https://github.com/PeterLuschny/Gists/blob/main/BellTransformation.ipynb">Examples of the Bell transform, a SageMath notebook</a>.
+%F A399666 T(n, k) = Bell_{n, k}(A003418), where Bell_{n, k} is the partial Bell polynomial, evaluated over the least common multiple of [n], LCM(n). (see Mathematica)
+%F A399666 T(n, k) = Sum_{j=0..n-k} binomial(n-1, j) * T(n-j-1, k-1) * LCM(j); T(n, n) = 1, T(n, 0) = 0^n.
+%e A399666 Triangle T(n, k) begins:
+%e A399666   [0] 1;
+%e A399666   [1] 0,   1;
+%e A399666   [2] 0,   1,    1;
+%e A399666   [3] 0,   2,    3,    1;
+%e A399666   [4] 0,   6,   11,    6,    1;
+%e A399666   [5] 0,  12,   50,   35,   10,    1;
+%e A399666   [6] 0,  60,  202,  225,   85,   15,   1;
+%e A399666   [7] 0,  60, 1092, 1372,  735,  175,  21,  1;
+%e A399666   [8] 0, 420, 4764, 9436, 6097, 1960, 322, 28, 1;
+%e A399666 .
+%e A399666 Seen as an array A(n, k) = T(n + k, k):
+%e A399666   [0] 1,  1,    1,     1,      1,       1,        1, ... A000012
+%e A399666   [1] 0,  1,    3,     6,     10,      15,       21, ... A000217
+%e A399666   [2] 0,  2,   11,    35,     85,     175,      322, ... A000914
+%e A399666   [3] 0,  6,   50,   225,    735,    1960,     4536, ... A001303
+%e A399666   [4] 0, 12,  202,  1372,   6097,   20937,    60249, ...
+%e A399666   [5] 0, 60, 1092,  9436,  53172,  226485,   791175, ...
+%e A399666   [6] 0, 60, 4764, 62612, 463040, 2450690, 10322015, ...
+%e A399666 The first four rows are identical to those of the array of unsigned Stirling_1 numbers A132393.
+%p A399666 # Using the function BellMatrix from A264428:
+%p A399666 LCM := proc(n) option remember; ifelse(n=0, 1, ilcm(n, LCM(n-1))) end:
+%p A399666 BellMatrix(LCM, 9);
+%t A399666 Trow[n_] := With[{lcmSeq = Table[If[j <= 2, 1, LCM @@ Range[1, j - 1]], {j, 1, Max[1, n]}]}, Table[BellY[n, k, lcmSeq], {k, 0, n}]]; Table[Trow[n], {n,0,7}]
+%o A399666 (Python)
+%o A399666 from functools import cache
+%o A399666 from math import lcm
+%o A399666 @cache
+%o A399666 def LCM(n: int) -> int:
+%o A399666     if n <= 0: return 1 if n == 0 else 0
+%o A399666     return lcm(n, LCM(n - 1))
+%o A399666 @cache
+%o A399666 def T(n: int, k: int) -> int:
+%o A399666     if n == k: return 1
+%o A399666     if k <= 0 or k > n: return 0
+%o A399666     total = 0; binom = 1
+%o A399666     for j in range(n - k + 1):
+%o A399666         total += binom * T(n - j - 1, k - 1) * LCM(j)
+%o A399666         binom = binom * (n - 1 - j) // (j + 1)
+%o A399666     return total
+%o A399666 for n in range(9): print([T(n, k) for k in range(n + 1)])
+%o A399666 for n in range(7): print([T(n + k, k) for k in range(7)])
+%Y A399666 Cf. A264428, A003418, A354794, A399667 (row sums).
+%Y A399666 Cf. A000217, A000914, A001303, A132393.
+%K A399666 nonn,tabl,new
+%O A399666 0,8
+%A A399666 _Peter Luschny_, Sep 12 2026
