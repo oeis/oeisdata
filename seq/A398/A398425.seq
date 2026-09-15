@@ -1,0 +1,48 @@
+%I A398425 #22 Sep 14 2026 15:46:20
+%S A398425 0,0,1,10,86,837,9559,126318,1912903,32729768,624938237,13176271883,
+%T A398425 304070534866,7623497612541,206342756299940,5996836871635702,
+%U A398425 186254701336231544,6156752647582652869,215810382409533148729,7995774669139522610260,312215963277087289649422
+%N A398425 Number of regular (rotationally asymmetric) orbits of chord diagrams on 2n vertices under the action of the cyclic group C_(2n).
+%C A398425 Regular orbits of n-chord diagrams on 2n vertices of a circle under the action of C_(2n) have size 2n with trivial cyclic stabilizer (no rotational symmetry).
+%C A398425 This sequence isolates rotationally asymmetric diagrams from the total number of rotationally inequivalent chord diagrams A007769, introduced by Christian G. Bower and Vladeta Jovovic in 2000.
+%F A398425 a(n) = 2*A398917(n) + R(n), where A398917(n) counts regular dihedral orbits (splitting as pairs of chiral cyclic orbits under reflection or reversal) and R(n) counts achiral dihedral orbits invariant with only one reflection axis (orbit size being 2n under both C_(2n) and D_(2n)).
+%F A398425 a(n) = (1/(2*n)) * Sum_{q|2n} mu(q) * alpha(2*n/q, q), where mu is the Mobius function and alpha(p, q) is defined as in A007769:
+%F A398425   If q is odd: alpha(p, q) = q^(p/2) * (p-1)!! for even p, and 0 for odd p.
+%F A398425   If q is even: alpha(p, q) = Sum_{k=0..floor(p/2)} binomial(p, 2*k) * q^k * (2*k-1)!!.
+%F A398425 a(n) ~ (2*n-1)!! / (2*n) ~ 2 * A398917(n) ~ 2 * A054499(n), because as n -> infinity, almost all chord diagrams are asymmetric.
+%e A398425 For n = 1, 2, all chord diagrams possess nontrivial rotational symmetry, so a(1) = a(2) = 0.
+%e A398425 For n = 3, there are 6 chord diagrams under C_6 (A007769(3) = 6), of which exactly 1 is rotationally asymmetric (a(3) = 1), whereas all 5 chord diagrams under D_6 possess nontrivial symmetry (A398917(3) = 0).
+%e A398425 For n = 3 (6 vertices), there are 6 rotationally inequivalent chord diagrams (A007769(3) = 6). Exactly 1 orbit has maximal size 6 under C_6 (one diameter chord and two parallel chords), so a(3) = 1.
+%e A398425 For n = 4 (8 vertices), there are 21 rotationally inequivalent chord diagrams (A007769(4) = 21), of which 10 have maximal orbit size 8 under C_8, so a(4) = 10.
+%e A398425 For n = 5 (10 vertices), there are 106 total chord diagrams under C_10 (A007769(5) = 106), of which 86 have trivial cyclic stabilizer, so a(5) = 86.
+%o A398425 (PARI)
+%o A398425 alpha(p, q) = if(q%2, if(p%2, 0, q^(p/2)*prod(k=1, p/2, 2*k-1)), sum(k=0, p\2, binomial(p, 2*k)*q^k*if(k==0, 1, prod(j=1, k, 2*j-1))));
+%o A398425 a(n) = sumdiv(2*n, q, moebius(q)*alpha(2*n/q, q)) / (2*n);
+%o A398425 vector(21, n, a(n))
+%o A398425 (Python)
+%o A398425 from math import comb
+%o A398425 def dfact(n):
+%o A398425     if n <= 0: return 1
+%o A398425     r = 1
+%o A398425     for i in range(n, 0, -2): r *= i
+%o A398425     return r
+%o A398425 def alpha(p, q):
+%o A398425     if q % 2 != 0:
+%o A398425         return (q ** (p // 2)) * dfact(p - 1) if p % 2 == 0 else 0
+%o A398425     return sum(comb(p, 2 * k) * (q ** k) * dfact(2 * k - 1) for k in range(p // 2 + 1))
+%o A398425 def mu(n):
+%o A398425     d, factors = 2, 0
+%o A398425     while d * d <= n:
+%o A398425         if n % (d * d) == 0: return 0
+%o A398425         if n % d == 0: factors += 1; n //= d
+%o A398425         d += 1
+%o A398425     if n > 1: factors += 1
+%o A398425     return -1 if factors % 2 else 1
+%o A398425 def a(n):
+%o A398425     return sum(mu(q) * alpha((2 * n) // q, q) for q in range(1, 2 * n + 1) if (2 * n) % q == 0) // (2 * n)
+%o A398425 print([a(n) for n in range(1, 22)])
+%Y A398425 Cf. A007769, A054499, A398917.
+%Y A398425 Cf. A001147 ((2*n-1)!! unrestricted matchings).
+%K A398425 nonn,new
+%O A398425 1,4
+%A A398425 _Paul Sampson_, Sep 08 2026

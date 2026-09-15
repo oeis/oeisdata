@@ -1,0 +1,53 @@
+%I A399510 #25 Sep 15 2026 00:08:27
+%S A399510 25,35,85,145,152,155,189,265,275,368,468,745,755,855,985,1105,2075,
+%T A399510 2195,2312,2315,3129,3152,3368,3381,3468,3528,4105,4221,4235,4825,
+%U A399510 5312,6565,6625,7585,8435,11772,16465,16932,18855,19509,19715,19808,19932,20195,21720,22808,22945,27875
+%N A399510 Sum of two proper prime powers divisible by the sum and the difference of the primes.
+%C A399510 Subsequence of A290135. The primes must be distinct because a division by zero is not allowed. Let the primes be p and q with p<q.
+%C A399510 The term p^(2m+1)+q^(2m+1) is divisible by (p+q) with any positive integer m because p^(2m+1) + q^(2m+1) = (p+q)*Sum_{i..2m} (-1)^i*p^(2m-i)*q^i. If additionally q-p=1 (p=2, q=3) or q-p=2 (twin primes), the term is "simple" and belongs to the sequence.
+%C A399510 a(n) cannot be written in two ways for a(n)<10^11.
+%C A399510 Statistics of number of terms with a(n)<10^k:
+%C A399510    k    odd   even
+%C A399510    3      3     12
+%C A399510    4      9     26
+%C A399510    5     22     43
+%C A399510    6     37     63
+%C A399510    7     61     92
+%C A399510    8    102    124
+%C A399510    9    132    154
+%C A399510   10    192    200
+%C A399510   11    299    253
+%C A399510 Apparently, the number of odd terms (one summand is a power of 2) increases faster than the number of even terms.
+%H A399510 Robert Israel, <a href="/A399510/b399510.txt">Table of n, a(n) for n = 1..552</a>
+%e A399510 a(1) = 25 = 2^4+3^2 = 1*25 = 5*5.
+%e A399510 a(2) = 35 = 2^3+3^3 = 1*35 = 5*7 (simple, q-p = 1).
+%e A399510 a(5) = 152 = 3^3+5^3 = 2*76 = 8*19 (simple, q-p = 2).
+%p A399510 N:= 10^5: # for terms <= N
+%p A399510 P:= select(isprime, [2,seq(i,i=3..floor(sqrt(N)),2)]): nP:= nops(P):
+%p A399510 R:= {}:
+%p A399510 for i from 1 to nP do
+%p A399510   for m1 from 2 while P[i]^m1 < N do
+%p A399510     for j from 1 to i-1 while P[i]^m1 + P[j]^2 <= N do
+%p A399510       for m2 from 2 do
+%p A399510         v:= P[i]^m1 + P[j]^m2;
+%p A399510         if v > N then break fi;
+%p A399510         if v mod (P[i]-P[j]) = 0 and v mod (P[i]+P[j]) = 0 then
+%p A399510             R:= R union {v};
+%p A399510         fi;
+%p A399510 od od od od:
+%p A399510 sort(convert(R,list)); # _Robert Israel_, Aug 31 2026
+%o A399510 (Maxima)
+%o A399510 block(kmax:10000, sum:[], prim[1]:2, j:1,
+%o A399510 while prim[j]^2<kmax do (prim[j+1]:next_prime(prim[j]), j:j+1),
+%o A399510 j1:1, j2:2, pot1:4, pot2:9, su:13,
+%o A399510 while su <=kmax do (p:prim[j1], q:prim[j2], new:true,
+%o A399510  if mod(su,q-p)=0 and mod(su,q+p)=0 then sum: append(sum,[su]),
+%o A399510  if pot1+q*pot2<=kmax then (pot2:q*pot2, new:false)
+%o A399510  elseif pot1 + prim[j2+1]^2<=kmax then j2:j2+1
+%o A399510  elseif p*pot1 + prim[j1+1]^2<=kmax then (pot1:p*pot1, j2:j1+1)
+%o A399510  else (j1:j1+1, j2:j1+1, pot1: prim[j1]^2),
+%o A399510  if new then pot2: prim[j2]^2, su:pot1+pot2 ), sum:sort(sum));
+%Y A399510 Cf. A246547, A290135.
+%K A399510 nonn,new
+%O A399510 1,1
+%A A399510 _Gerhard Kirchner_, Aug 31 2026

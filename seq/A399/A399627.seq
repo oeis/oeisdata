@@ -1,0 +1,46 @@
+%I A399627 #8 Sep 14 2026 21:57:49
+%S A399627 0,0,0,0,1,1,2,3,4,7,12,21,37,66,119,214,391,722,1336,2494,4695,8871,
+%T A399627 16820,32051,61251,117371,225557,434274,837790,1618863,3132418,
+%U A399627 6070433,11777018,22874015,44476559,86555747,168604530,328701176,641294161,1252118588
+%N A399627 a(n) is the number of residues modulo 2^n counted by A396966 that are not lifts of a residue counted by A396966 modulo 2^(n-1).
+%C A399627 The residues modulo 2^n counted by A396966 are of two kinds: the two lifts r and r + 2^(n-1) of a residue already counted at level n-1, and those that are genuinely new at level n. This sequence counts the second kind, so a(n) = A396966(n) - 2*A396966(n-1) for n > 1 (with a(1) = 0), the lift-balance defect. a(n) = 0 for n <= 4; the first new residues are r = 27 (n = 5) and r = 19 (n = 6).
+%C A399627 The new residues generate the whole family by lifting, and the asymptotic density of A396966 is exactly the generating series c_W = Sum_{n>=1} a(n)/2^n. The exact value of c_W is an open problem, governed by the growth of this sequence.
+%C A399627 By the conjugation theorem of the linked manuscript, the same counts a(n) arise (via the lift balance) for every Collatz-type map (3x+b)/2^A007814(3x+b) with b odd -- in particular the classical 3x+1 map, not only the defining 3x-1.
+%H A399627 Jakob Stemberger, <a href="https://doi.org/10.5281/zenodo.20356496">Collatz obstruction-residue theory: manuscripts and verification code</a>, Zenodo, 2026.
+%H A399627 Jakob Stemberger, <a href="https://github.com/yaccob/collatz/tree/main/manuscripts/obstruction_residues/code">Enumeration code (Python and Rust)</a>.
+%F A399627 a(n) = A396966(n) - 2*A396966(n-1) for n > 1, and a(1) = 0.
+%F A399627 c_W = Sum_{n>=1} a(n)/2^n is the asymptotic density of A396966. The ratios A396966(n)/2^n are non-decreasing lower bounds for c_W; at n = 40, c_W >= 172651809822/2^40 = 0.157025906... The exact value of c_W is an open problem.
+%e A399627 a(5) = 1: the only new residue is 27.
+%e A399627 a(6) = 1: the only new residue is 19 (27 and 59 are the lifts of 27).
+%e A399627 a(7) = 2: the new residues are 79 and 99.
+%e A399627 a(8) = 3: the new residues are 67, 111 and 157.
+%o A399627 (Python)
+%o A399627 from fractions import Fraction
+%o A399627 def v2(n):
+%o A399627     n=abs(n); k=0
+%o A399627     while n and n%2==0: n//=2; k+=1
+%o A399627     return k
+%o A399627 def is_obstruction(r,L):
+%o A399627     if r%2==0: return False
+%o A399627     v=v2(r-1)
+%o A399627     if v<=0 or v>=L: return False
+%o A399627     aK,bK=r,1<<L
+%o A399627     aI,bI=(r-1)>>v,1<<(L-v)
+%o A399627     c=Fraction(1,1<<v); d=Fraction(-1,1<<v)
+%o A399627     while True:
+%o A399627         AK=3*aK-1; vK=v2(AK); vbK=v2(bK)
+%o A399627         AI=3*aI-1; vI=v2(AI); vbI=v2(bI)
+%o A399627         if vK>=vbK or vI>=vbI:
+%o A399627             return 3*d+c==1
+%o A399627         c0=c
+%o A399627         c=c0*Fraction(1<<vK,1<<vI)
+%o A399627         d=(3*d+c0-1)/Fraction(1<<vI)
+%o A399627         aK=AK>>vK; bK=(3*bK)>>vK
+%o A399627         aI=AI>>vI; bI=(3*bI)>>vI
+%o A399627 def A396966(n): return sum(1 for r in range(1,1<<n,2) if is_obstruction(r,n)) if n>=5 else 0
+%o A399627 def a(n): return A396966(n) - 2*A396966(n-1)  # lift-balance defect
+%o A399627 print([a(n) for n in range(1,17)])  # -> [0,0,0,0,1,1,2,3,4,7,12,21,37,66,119,214]
+%Y A399627 Cf. A396966, A007814, A394480.
+%K A399627 nonn,new
+%O A399627 1,7
+%A A399627 _Jakob Stemberger_, Sep 05 2026
