@@ -1,0 +1,47 @@
+%I A399611 #22 Sep 15 2026 16:35:38
+%S A399611 0,1,15,233,2832,29981,277422,2337663,18116229,131188187,895364383,
+%T A399611 5806377790,35985616358,214231321127,1230005972723,6834389706528,
+%U A399611 36856154769827,193382077164217,989335116757816,4944232763896349,24176203837252412,115833333653764752
+%N A399611 Number of factorizations of (p*q*r)^n into parts > 1 containing at least one part divisible by p*q*r, where p, q, and r are distinct primes.
+%C A399611 The number of factorizations depends only on the prime exponents (n, n, n) and is independent of the choice of distinct primes p, q, and r.
+%C A399611 Equivalently, a(n) is the number of tripartite (or 3-dimensional vector) partitions of (n, n, n) into parts with nonnegative components (not all zero) that contain at least one part with strictly positive entries in all three dimensions.
+%C A399611 Equivalently, the number of 3-column nonnegative integer matrices with column sums equal to n and row sums > 0, up to row permutations, having at least one row with strictly positive entries in all three columns.
+%C A399611 Subtracting the factorizations where each part is divisible by at most two of the primes from the total factorizations A219678(n) yields a(n). This differs from A219678(n) - A000041(n)^3, which also counts factorizations that contain parts mixing only two primes (such as parts divisible by p*q or q*r but not p*q*r).
+%C A399611 a(0) = 0 because the empty factorization contains no parts.
+%C A399611 2-dimensional analog is A395808.
+%D A399611 P. A. MacMahon, Combinatory Analysis, Cambridge Univ. Press, London and New York, Vol. 1, 1915 and Vol. 2, 1916.
+%H A399611 Jishnu Babu Ranitha, <a href="/A399611/b399611.txt">Table of n, a(n) for n = 0..40</a>
+%F A399611 a(n) = A219678(n) - R(n), where A219678(n) is the number of unrestricted tripartite vector partitions of (n, n, n) and R(n) is the number of tripartite vector partitions of (n, n, n) restricted to parts with at least one coordinate equal to zero.
+%F A399611 G.f.: [x^n y^n z^n] (G(x,y,z) - H(x,y,z)), where G(x,y,z) = Product_{i,j,k>=0, i+j+k>0} 1 / (1 - x^i * y^j * z^k) and H(x,y,z) = Product_{i,j,k>=0, i*j*k=0, i+j+k>0} 1 / (1 - x^i * y^j * z^k).
+%e A399611 a(1) = 1: For (p*q*r)^1 = p*q*r (e.g., 30). The only factorization containing a totally mixed factor (divisible by p, q, and r) is {p*q*r} itself.
+%e A399611 a(2) = 15: For (p*q*r)^2 = p^2*q^2*r^2 (e.g., 900). There are 15 factorizations into parts > 1 containing at least one part divisible by p*q*r.
+%t A399611 lista[nmax_] := Module[{m = nmax + 1, dpT, dpR}, dpT = ConstantArray[0, {m, m, m}]; dpT[[1, 1, 1]] = 1; dpR = ConstantArray[0, {m, m, m}]; dpR[[1, 1, 1]] = 1; Do[If[c1 + c2 + c3 > 0, Do[dpT[[i1, i2, i3]] += dpT[[i1 - c1, i2 - c2, i3 - c3]], {i1, c1 + 1, m}, {i2, c2 + 1, m}, {i3, c3 + 1, m}]; If[c1*c2*c3 == 0, Do[dpR[[i1, i2, i3]] += dpR[[i1 - c1, i2 - c2, i3 - c3]], {i1, c1 + 1, m}, {i2, c2 + 1, m}, {i3, c3 + 1, m}]]], {c1, 0, nmax}, {c2, 0, nmax}, {c3, 0, nmax}]; Table[dpT[[n + 1, n + 1, n + 1]] - dpR[[n + 1, n + 1, n + 1]], {n, 0, nmax}]]; lista[21]
+%t A399611 (* Alternative: Fast Generating Function using Exp/Log series *)
+%t A399611 max = 21; s[u_, m_] := Sum[u^(m*i), {i, 0, max/m}]; seT = Series[Sum[(s[x, m]*s[y, m]*s[z, m] - 1)/m, {m, 1, max}], {x, 0, max}, {y, 0, max}, {z, 0, max}]; seR = Series[Sum[(s[x, m]*s[y, m] + s[y, m]*s[z, m] + s[z, m]*s[x, m] - s[x, m] - s[y, m] - s[z, m])/m, {m, 1, max}], {x, 0, max}, {y, 0, max}, {z, 0, max}]; coesT = CoefficientList[Exp[seT], {x, y, z}]; coesR = CoefficientList[Exp[seR], {x, y, z}]; Table[coesT[[n + 1, n + 1, n + 1]] - coesR[[n + 1, n + 1, n + 1]], {n, 0, max}]
+%o A399611 (Python)
+%o A399611 def lista(n_max):
+%o A399611     m = n_max + 1
+%o A399611     dp_T = [[[0] * m for _ in range(m)] for _ in range(m)]
+%o A399611     dp_T[0][0][0] = 1
+%o A399611     dp_R = [[[0] * m for _ in range(m)] for _ in range(m)]
+%o A399611     dp_R[0][0][0] = 1
+%o A399611     for c1 in range(m):
+%o A399611         for c2 in range(m):
+%o A399611             for c3 in range(m):
+%o A399611                 if c1 == 0 and c2 == 0 and c3 == 0: continue
+%o A399611                 for i1 in range(c1, m):
+%o A399611                     for i2 in range(c2, m):
+%o A399611                         for i3 in range(c3, m):
+%o A399611                             dp_T[i1][i2][i3] += dp_T[i1-c1][i2-c2][i3-c3]
+%o A399611                 if c1 * c2 * c3 == 0:
+%o A399611                     for i1 in range(c1, m):
+%o A399611                         for i2 in range(c2, m):
+%o A399611                             for i3 in range(c3, m):
+%o A399611                                 dp_R[i1][i2][i3] += dp_R[i1-c1][i2-c2][i3-c3]
+%o A399611     return [dp_T[n][n][n] - dp_R[n][n][n] for n in range(m)]
+%o A399611 print(lista(21))
+%Y A399611 Cf. A000041, A001055, A219678, A398553.
+%Y A399611 2-dimensional analog: A395808.
+%K A399611 nonn,new
+%O A399611 0,3
+%A A399611 _Jishnu Babu Ranitha_, Sep 04 2026

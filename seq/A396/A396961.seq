@@ -1,0 +1,41 @@
+%I A396961 #34 Sep 15 2026 19:00:13
+%S A396961 0,1,4,13,42,114,307,784,1930,4596,10692,24303,54119,118357,254507,
+%T A396961 539123,1126255,2322405,4731564,9532163,19001186,37502026,73325573,
+%U A396961 142101586,273077436,520592141,984916827,1849883858,3450426796,6393138205,11770328697,21538130651
+%N A396961 Number of bipartite partitions of (n, n) into distinct parts containing at least one part with both coordinates strictly positive.
+%C A396961 A bipartite (or 2-dimensional vector) partition of (n, n) is a collection of nonzero integer pairs (i, j) with i, j >= 0 summing to (n, n).
+%C A396961 A part (i, j) is called "pure" if it lies on an axis, i.e., (i, 0) or (0, j). A part is called "mixed" if both coordinates are strictly positive (i > 0 and j > 0).
+%C A396961 This sequence counts the partitions of (n, n) into strictly distinct parts that contain at least one part (i, j) with i > 0 and j > 0.
+%C A396961 Partitions containing only pure parts decouple into two independent distinct integer partitions of n, counted by A000009(n)^2. Subtracting these from the total number of distinct bipartite partitions of (n, n) (A219554(n)) gives a(n) = A219554(n) - A000009(n)^2.
+%C A396961 Also the number of factorizations of p^n * q^n into strictly distinct factors > 1 containing at least one factor divisible by p*q, for any two distinct primes p and q.
+%C A396961 a(0) = 0 because the empty partition has no parts.
+%D A396961 P. A. MacMahon, Combinatory Analysis, Cambridge Univ. Press, London and New York, Vol. 2, 1916.
+%H A396961 Jishnu Babu Ranitha, <a href="/A396961/b396961.txt">Table of n, a(n) for n = 0..200</a>
+%F A396961 a(n) = A219554(n) - A000009(n)^2.
+%F A396961 a(n) = [x^n y^n] Product_{i>=0, j>=0, i+j>0} (1 + x^i * y^j) - ([x^n] Product_{k>=1} (1 + x^k))^2.
+%e A396961 a(1) = 1: The distinct partitions of (1,1) are {(1,1)} and {(1,0),(0,1)}. The only one containing a mixed part is {(1,1)}, so a(1) = 1.
+%e A396961 a(2) = 4: The total number of distinct partitions of (2,2) is A219554(2) = 5. The only pure one is {(2,0),(0,2)}. The remaining 4 partitions ({(2,2)}, {(2,1),(0,1)}, {(1,2),(1,0)}, {(1,1),(1,0),(0,1)}) contain mixed parts, so a(2) = 5 - 1^2 = 4.
+%t A396961 lista[nmax_] := Module[{m = nmax + 1, dp, q, c1, c2, x, y, k}, dp = ConstantArray[0, {m, m}]; dp[[1, 1]] = 1; Do[If[c1 + c2 > 0, Do[dp[[x, y]] += dp[[x - c1, y - c2]], {x, m, c1 + 1, -1}, {y, m, c2 + 1, -1}]], {c1, 0, nmax}, {c2, 0, nmax}]; q = ConstantArray[0, m]; q[[1]] = 1; Do[Do[q[[x]] += q[[x - k]], {x, m, k + 1, -1}], {k, 1, nmax}]; Table[dp[[n + 1, n + 1]] - q[[n + 1]]^2, {n, 0, nmax}]]; lista[31]
+%t A396961 (* Alternative: *)
+%t A396961 max = 31; se = Series[Sum[Log[1 + x^(n-k)*y^k], {n, 1, 2*max}, {k, 0, n}], {x, 0, 2*max}, {y, 0, 2*max}]; coes = CoefficientList[Series[Exp[se], {x, 1, 2*max}, {y, 1, 2*max}], {x, y}]; Table[coes[[n+1, n+1]] - PartitionsQ[n]^2, {n, 0, max}] (* _Vaclav Kotesovec_, Sep 05 2026 *)
+%o A396961 (Python)
+%o A396961 def lista(n_max):
+%o A396961     m = n_max + 1
+%o A396961     dp = [[0] * m for _ in range(m)]
+%o A396961     dp[0][0] = 1
+%o A396961     for c1 in range(m):
+%o A396961         for c2 in range(m):
+%o A396961             if c1 == 0 and c2 == 0: continue
+%o A396961             for i1 in range(m - 1, c1 - 1, -1):
+%o A396961                 for i2 in range(m - 1, c2 - 1, -1):
+%o A396961                     dp[i1][i2] += dp[i1 - c1][i2 - c2]
+%o A396961     q = [1] + [0] * n_max
+%o A396961     for i in range(1, m):
+%o A396961         for x in range(n_max, i - 1, -1):
+%o A396961             q[x] += q[x - i]
+%o A396961     return [dp[n][n] - q[n]**2 for n in range(m)]
+%o A396961 print(lista(31))
+%Y A396961 Cf. A000009, A001055, A002774, A219554, A395808, A397646, A398329.
+%K A396961 nonn,easy,new
+%O A396961 0,3
+%A A396961 _Jishnu Babu Ranitha_, Sep 04 2026
