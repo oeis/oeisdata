@@ -1,28 +1,65 @@
-%I A156744 #24 Jul 20 2026 23:25:30
+%I A156744 #38 Sep 17 2026 13:00:38
 %S A156744 -1,0,1,1,-8,0,8,-1,-1,9,-45,0,45,-9,1,3,-32,168,-672,0,672,-168,32,
 %T A156744 -3,-2,25,-150,600,-2100,0,2100,-600,150,-25,2,5,-72,495,-2200,7425,
 %U A156744 -23760,0,23760,-7425,2200,-495,72,-5
 %N A156744 Coefficients for estimation of derivative from equally spaced numerical data using the Lagrange interpolating polynomial.
 %C A156744 An effective way to approximate the derivative of equally spaced numerical data is to differentiate its Lagrange interpolating polynomial. If y[x] is equally spaced data from x = -n to +n, its Lagrange interpolating polynomial P(x) has degree 2*n. Then P'(0) may be expressed as a weighted sum over the y[x]. This is the triangle of coefficients C[n,m] such that P'(0) = (1/d[n]) * Sum_{m=-n}^n C[n,m] y[m]. The denominator d[n] is given by sequence A099996. This is very useful in numerical analysis. For example, when n=1, this gives the centered difference approximation to the derivative. [Corrected by _Carlo Corti_, Jul 15 2026]
 %H A156744 Carlo Corti, <a href="/A156744/b156744.txt">Table of n, a(n) for n = 1..9999</a>
-%H A156744 Carlo Corti, <a href="https://doi.org/10.5281/zenodo.21370911">OEIS A156744: Exact Lagrange differentiation coefficients</a>, Zenodo archive, 2026.
+%H A156744 Natalia L. Skirrow, <a href="/wiki/User:Natalia_L._Skirrow/A156744_and_square_hyperpyramids">A156744 and square hyperpyramids</a>, OEISwiki userpage, Feb 17 2025.
 %F A156744 From _Carlo Corti_, Jul 15 2026: (Start)
 %F A156744 a(r^2+r) = 0, and a(r^2+r-m) = -a(r^2+r+m) for 1 <= m <= r.
 %F A156744 a(r^2+r+m) = (-1)^(m+1)*A099996(r)*(r!)^2/(m*(r-m)!*(r+m)!) for 1 <= m <= r.
 %F A156744 (End)
+%F A156744 From _Natalia L. Skirrow_, Sep 13 2026: (Start)
+%F A156744 Using the indexing scheme with n >= 1 and -n <= k <= n (exhibited in EXAMPLE), let c(n,k) = T(n,k)/A099996(n).
+%F A156744 c(n,k) = (-1)^(k+1) * C(2*n,n+k) / (k * C(2*n,n)) for k != 0.
+%F A156744 Define P(0;n) = 2*n-1 and P(d;n) = Sum_{k=1..n} P(d-1;k), so P(0;n) are the odd-line numbers, P(1;n) the square numbers, P(2;n) the square pyramidal numbers, P(d;n) the square (pyramidal)^(d-1) numbers; P(d;n) = C(n+d-1,d)*(d+2*n-1)/(d+1).
+%F A156744 These coefficients also arise in the partial fraction decomposition:
+%F A156744 1/P(2*d+1;n) = (-1)^d*(d+1)^2*C(2*d+1,d)*( 1/(d+n)^2 + Sum_{k=-d..d, k != 0} c(d,k)/(d+k+n) ).
+%F A156744 (End)
+%F A156744 T(n, k) = (-1)^(k+1)*LCM(2n)*ff(n,|k|)/(k*ff(n+|k|,|k|)), where ff is the falling factorial. - _Peter Luschny_, Sep 17 2026.
 %e A156744 Irregular triangle begins:
-%e A156744   -1, 0, 1;
-%e A156744   1, -8, 0, 8, -1;
-%e A156744   -1, 9, -45, 0, 45, -9, 1;
-%e A156744   3, -32, 168, -672, 0, 672, -168, 32, -3;
-%e A156744   -2, 25, -150, 600, -2100, 0, 2100, -600, 150, -25, 2;  ...
+%e A156744   -1,   0,    1;
+%e A156744    1,  -8,    0,    8,    -1;
+%e A156744   -1,   9,  -45,    0,    45,  -9,    1;
+%e A156744    3, -32,  168, -672,     0, 672, -168,   32,  -3;
+%e A156744   -2,  25, -150,  600, -2100,   0, 2100, -600, 150, -25, 2;
+%e A156744   ...
+%e A156744 From _Natalia L. Skirrow_, Sep 13 2026: (Start)
+%e A156744 Aligned array starts:
+%e A156744   n\k|-5 -4   -3  -2    -1 0    1    2   3   4 5
+%e A156744   ---+------------------------------------------
+%e A156744    1 |                  -1 0    1
+%e A156744    2 |             1    -8 0    8   -1
+%e A156744    3 |        -1   9   -45 0   45   -9   1
+%e A156744    4 |    3  -32 168  -672 0  672 -168  32  -3
+%e A156744    5 |-2 25 -150 600 -2100 0 2100 -600 150 -25 2
+%e A156744 (End)
 %t A156744 facs[x_, j_, n_] := Product[If[k == j, 1, x - k], {k, -n, n}]
 %t A156744 coefs[x_, n_] := Table[facs[x, j, n]/facs[j, j, n], {j, -n, n}]
 %t A156744 d[n_] := Apply[LCM, Table[j, {j, 1, 2*n}]]
 %t A156744 dCoefs[x_, n_] := d[n] D[coefs[y, n], y] /. {y -> x}
 %t A156744 MatrixForm[Table[dCoefs[0, n], {n, 1, 5}]]
+%o A156744 (Python)
+%o A156744 from functools import cache
+%o A156744 from math import comb
+%o A156744 from sympy import lcm
+%o A156744 A099996=cache(lambda n: lcm(range(1,2*n+1)))
+%o A156744 A156744=lambda n,k: k and A099996(n)*(-1)**(abs(k)+1)*comb(2*n,n+k)//(k*comb(2*n,n))
+%o A156744 for n in range(1,8): print([A156744(n,k) for k in range(-n,n+1)]) # _Natalia L. Skirrow_, Sep 13 2026
+%o A156744 (SageMath)
+%o A156744 from functools import cache
+%o A156744 @cache
+%o A156744 def LCM(n: int) -> int: return lcm(range(n + 1, 2 * n + 1))
+%o A156744 def A156744(n: int, k: int) -> int:
+%o A156744     a = abs(k)
+%o A156744     if not k or a > n: return 0
+%o A156744     q = LCM(n) * falling_factorial(n, a) // (k * falling_factorial(n + a, a))
+%o A156744     return q if k & 1 else -q
+%o A156744 for n in range(1, 11):
+%o A156744     print([A156744(n, k) for k in range(-n, n + 1)])  # _Peter Luschny_, Sep 17 2026
 %Y A156744 When divided by sequence A099996, this triangle gives the coefficients needed to estimate derivatives from equally spaced numerical data using Lagrange interpolation. The first and last entry of each row of the triangle has absolute value lcm{1, 2, ..., 2*n}/n*binomial(2n, n), as seen in A068553.
-%K A156744 sign,tabf
+%K A156744 sign,tabf,changed
 %O A156744 1,5
 %A A156744 _Bruce Boghosian_, Feb 14 2009
 %E A156744 a(25)-a(48) from _Carlo Corti_, Jul 15 2026

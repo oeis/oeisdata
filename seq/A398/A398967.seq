@@ -1,0 +1,35 @@
+%I A398967 #22 Sep 17 2026 21:45:31
+%S A398967 1,2,6,28,166,1141,8645,70351,603253
+%N A398967 Number of Gauss diagrams of meander curves with 2n+1 crossings, counted up to rotation of the circle.
+%C A398967 Same as A399316, except that diagrams are counted up to rotations of the circle only, so a diagram and its mirror image are distinct unless the diagram has a reflection symmetry. Hence A399316(n) <= a(n) <= 2*A399316(n), and 2*A399316(n) - a(n) is the number of diagrams with a reflection symmetry.
+%C A398967 The curves are generated as in A338660 and A399316: cutting a meander curve at a universal crossing leaves an open meander of order 2n (see A005316), and the Gauss word [0, 1, ..., 2n, 0, rho(1), ..., rho(2n)] of each curve is reduced to a canonical form under rotation.
+%e A398967 For n = 4 there are 28 diagrams up to rotation. 18 of them are mirror symmetric and the other 10 form 5 mirror pairs, giving the 23 diagrams of A399316(4).
+%o A398967 (Python)
+%o A398967 from itertools import permutations
+%o A398967 def cross(a, b, c, d):
+%o A398967     if len({a, b, c, d}) < 4: return False
+%o A398967     a, b = sorted((a, b)); c, d = sorted((c, d)); return a < c < b < d or c < a < d < b
+%o A398967 def valid(r): # r = order in which the second loop meets the first; loops tangent at crossing 0
+%o A398967     s = (0,) + r + (0,); arcs = [(s[k], s[k+1]) for k in range(len(r)+1)]
+%o A398967     for p in (0, 1):
+%o A398967         t = arcs[p::2] # arches alternate sides of the first loop; each side must be non-crossing
+%o A398967         if any(cross(*x, *y) for i, x in enumerate(t) for y in t[i+1:]): return False
+%o A398967     return r[0] < r[-1] # crossing 0 transversal (a genuine chord), not a self-tangency
+%o A398967 def canon(w): # least relabelled word over rotations of the circle
+%o A398967     L = len(w); best = None
+%o A398967     for st in range(L):
+%o A398967         lab = {}; out = []
+%o A398967         for i in range(L):
+%o A398967             v = w[(st + i) % L]
+%o A398967             if v not in lab: lab[v] = len(lab)
+%o A398967             out.append(lab[v])
+%o A398967         best = tuple(out) if best is None else min(best, tuple(out))
+%o A398967     return best
+%o A398967 def a(n):
+%o A398967     m = 2*n
+%o A398967     return len({canon([0] + list(range(1, m+1)) + [0] + list(r)) for r in permutations(range(1, m+1)) if valid(r)})
+%o A398967 print([a(n) for n in range(1, 6)]) # _Stephen J. Pursey_, Sep 13 2026
+%Y A398967 Cf. A005316, A338660, A399316.
+%K A398967 nonn,hard,more,new
+%O A398967 1,2
+%A A398967 _Stephen J. Pursey_, Sep 13 2026
