@@ -1,0 +1,48 @@
+%I A399789 #25 Sep 19 2026 02:15:09
+%S A399789 1,2,3,6,7,6,7,12,9,14,11,18,7,14,21,24,15,18,19,42,21,22,23,36,35,14,
+%T A399789 27,42,39,42,31,48,33,30,49,54,39,38,21,84,31,42,43,66,63,46,47,72,49,
+%U A399789 70,45,42,39,54,77,84,57,78,59,126,71,62,63,96,49,66,67,90,69,98,71,108
+%N A399789 Number of pairs (x,y) modulo n satisfying y^2 == x^3 - x (mod n).
+%C A399789 The pairs are taken from {0,1,...,n-1}^2. These are the affine solution counts for the lemniscatic elliptic curve y^2=x^3-x, including singular reductions; no projective points outside this affine chart are counted.
+%C A399789 This gives the congruence-solution counts for one fixed classical curve at all moduli. Chinese remaindering makes the sequence multiplicative. At an odd prime p, each solution has p lifts at each higher prime-power level; the exceptional powers of 2 have the separate formula below.
+%C A399789 The prime subsequence is already A276730: a(prime(k))=A276730(k). Its prime traces are A278720. The field GF(p^e) is not the residue ring Z/p^e Z when e>1.
+%C A399789 Although y^2=x^3+4*x has the same prime counts, the two models need not have the same composite-modulus counts: at n=16 this sequence is 24, while that model has 40 affine solutions.
+%H A399789 Chai Wah Wu, <a href="/A399789/b399789.txt">Table of n, a(n) for n = 1..10000</a> (terms 1..100 from Alper Ferudun)
+%H A399789 Alper Ferudun, <a href="/A399789/a399789.txt">Python program using prime-power formulas, with a direct verifier</a>.
+%H A399789 Y. Martin and K. Ono, <a href="https://uva.theopenscholar.com/files/ken-ono/files/026_8.pdf">Eta-quotients and elliptic curves</a>, Proc. Amer. Math. Soc. 125 (1997), 3169-3176, Theorems 2 and 3 (prime trace formula for the conductor-32 isogeny class).
+%F A399789 Multiplicative with a(1)=1, a(2)=2 and a(2^e) = 3*2^(e-1) for e>=2.
+%F A399789 For an odd prime p and e>=1, a(p^e) = p^(e-1)*(p-t(p)), where t(p)=p-a(p) is the p-defect (t(prime(k))=A278720(k)). Here t(p)=0 if p==3 (mod 4). If p==1 (mod 4), write p=A^2+B^2 with A and B positive, A odd and B even; then t(p)=2*A if A+B==1 (mod 4) and t(p)=-2*A if A+B==3 (mod 4), i.e., t(p)=(-1)^((A-1)/2+B/2)*2*A. The prime trace formula is classical; see Martin and Ono and A278720.
+%F A399789 Equivalently for odd p, a(p) = p+Sum_{x=0..p-1} Legendre(x^3-x,p), with Legendre(0,p)=0.
+%F A399789 a(prime(n)) = A276730(n).
+%e A399789 a(4)=6: the pairs are (0,0),(0,2),(1,0),(1,2),(3,0),(3,2).
+%e A399789 a(5)=7: the pairs are (0,0),(1,0),(2,1),(2,4),(3,2),(3,3),(4,0). Here 5=1^2+2^2 with 1+2==3 (mod 4), so t(5)=-2 and a(5)=5-t(5)=7.
+%e A399789 a(12)=a(3)*a(4)=3*6=18.
+%o A399789 (Python) # Direct residue count; no external packages.
+%o A399789 def a(n):
+%o A399789     squares = [0]*n
+%o A399789     for y in range(n):
+%o A399789         squares[y*y % n] += 1
+%o A399789     return sum(squares[(x*x*x-x) % n] for x in range(n))
+%o A399789 print([a(n) for n in range(1,101)])
+%o A399789 (Python)
+%o A399789 from itertools import count
+%o A399789 from math import isqrt, prod
+%o A399789 from sympy import legendre_symbol, factorint
+%o A399789 def A399789(n):
+%o A399789     def f(p,e):
+%o A399789         if p == 2: return 2 if e == 1 else 3<<e-1
+%o A399789         if p&3==3: return p**e
+%o A399789         q = next(filter(lambda x:legendre_symbol(x,p)<0,count(2)))
+%o A399789         x, r, z = pow(q,p-1>>2,p), isqrt(p), p
+%o A399789         while x>r: z, x = x, z%x
+%o A399789         y = isqrt(p-x*x)
+%o A399789         g = x+y&3==3
+%o A399789         if not x&1: x = y
+%o A399789         if g: x = -x
+%o A399789         return p**(e-1)*(p-(x<<1))
+%o A399789     return prod(f(p,e) for p, e in factorint(n).items()) # _Chai Wah Wu_, Sep 18 2026
+%o A399789 (PARI) a(n) = sum(x=0, n-1, my(xn=Mod(x,n)); sum(y=0, n-1, Mod(y,n)^2 == xn^3-xn)); \\ _Michel Marcus_, Sep 11 2026
+%Y A399789 Cf. A276730, A278720, A060457, A098513.
+%K A399789 nonn,mult,easy,new
+%O A399789 1,2
+%A A399789 _Alper Ferudun_, Sep 11 2026
