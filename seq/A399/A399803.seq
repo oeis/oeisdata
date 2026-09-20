@@ -1,0 +1,41 @@
+%I A399803 #19 Sep 19 2026 21:52:35
+%S A399803 2,3,11,11,17,29,37,59,67,89,107,131,167,191,251,269,347,359,449,479,
+%T A399803 587,599,719,743,863,911,1031,1091,1217,1301,1423,1511,1637,1777,1871,
+%U A399803 2027,2141,2309,2441,2621,2741,2957,3079,3299,3449,3671,3797,4073,4201,4481
+%N A399803 Smallest prime that is the sum of n distinct elements from the union of primes and factorials.
+%C A399803 a(n) is the smallest prime p that can be represented as the sum of n distinct elements of S = A000040 U A000142, the union of primes and factorials.
+%F A399803 a(n) = min { p in A000040 : p = Sum_{i=1..n} s_i where s_i in (A000040 U A000142) are distinct }.
+%e A399803 For n = 1, a(1) = 2 (is prime).
+%e A399803 For n = 2, a(2) = 3 = 1 + 2 (is prime).
+%e A399803 For n = 3, a(3) = 11 = 1 + 3 + 7 (is prime).
+%e A399803 For n = 4, a(4) = 11 = 1 + 2 + 3 + 5 (is prime).
+%e A399803 For n = 5, a(5) = 17 = 1 + 2 + 3 + 5 + 6 (is prime).
+%e A399803 For n = 8, a(8) = 59 = 1 + 2 + 3 + 5 + 6 + 7 + 11 + 24 (is prime).
+%o A399803 (Python)
+%o A399803 from sympy import nextprime, primerange
+%o A399803 def generate_set(limit):
+%o A399803     factorials, f, k = [], 1, 1
+%o A399803     while f <= limit: factorials.append(f); k += 1; f *= k
+%o A399803     return sorted(list(set(factorials + list(primerange(2, limit+1)))))
+%o A399803 def can_partition(target, count, max_idx, s, memo):
+%o A399803     if count == 0: return target == 0
+%o A399803     if target <= 0 or max_idx < 0 or count > max_idx + 1: return False
+%o A399803     if (state := (target, count, max_idx)) in memo: return memo[state]
+%o A399803     if s[max_idx] <= target:
+%o A399803         if can_partition(target - s[max_idx], count - 1, max_idx - 1, s, memo):
+%o A399803             memo[state] = True
+%o A399803             return True
+%o A399803     ans = can_partition(target, count, max_idx - 1, s, memo)
+%o A399803     memo[state] = ans
+%o A399803     return ans
+%o A399803 def a(n):
+%o A399803     S, p = generate_set(1000), 2
+%o A399803     while True:
+%o A399803         if p > S[-1]: S = generate_set(p * 2)
+%o A399803         sub_S = [x for x in S if x <= p]
+%o A399803         if len(sub_S) >= n and can_partition(p, n, len(sub_S) - 1, sub_S, {}): return p
+%o A399803         p = nextprime(p)
+%Y A399803 Cf. A000040, A000142, A399546.
+%K A399803 nonn,new
+%O A399803 1,1
+%A A399803 _Iurii Kirpichev_, Sep 12 2026
