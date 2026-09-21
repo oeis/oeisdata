@@ -1,13 +1,20 @@
-%I A126851 #16 Mar 13 2024 19:28:01
+%I A126851 #30 Sep 21 2026 00:46:38
 %S A126851 1,3,2,7,6,6,6,15,11,18,10,14,14,18,12,31,18,33,18,42,12,30,22,30,31,
 %T A126851 42,38,42,30,36,30,63,20,54,36,77,38,54,28,90,42,36,42,70,66,66,46,62,
 %U A126851 55,93,36,98,54,114,60,90,36,90,58,84,62,90,66,127,84,60,66,126,44,108,70,165,74,114,62,126,60,84,78,186
-%N A126851 SPM4Sigma(n) = (-1)^(1/2*((Sum_i p_i)-Omega(m'))*Sum_{d|n} (-1)^(1/2*((Sum_j p_j)-Omega(d'))*d =(2^(r+1)-1)*Product_i [Sum_{1<=s_i<=r_i} p_i^s_i +(-1)^((p_i-1)/2)] where n=2^r*m', gcd(2,m')=1, m'=Product_i p_i^r_i, d=2^k*d', gcd(2,d')=1, d'=Product_j p_j^r_j SPM4 for Signed by Prime factors Mod 4.
-%C A126851 The name contains an unmatched parenthesis. - Editors, Mar 12 2024
-%F A126851 SPM4Sigma(n) = (2^r-1)*Product_i (p_i^(r_i+1)-p_i)/(p_i-1)+(-1)^(1/2*(p_i-1)) = (2^r-1)*Product_{i=1 mod 4} ((p_i^(r_i+1)-p_i)/(p_i-1)+1)*Product_{i=3 mod 4} ((p_i^(r_i+1)-p_i)/(p_i-1)-1)
-%F A126851 a(2^n) = A000225(n+1). - _R. J. Mathar_, Mar 13 2024
-%F A126851 A038712(n) | a(n). - _R. J. Mathar_, Mar 13 2024
-%e A126851 SPM4Sigma(240) = (1+2+4+8+16)*(-1+3)*(1+5).
+%N A126851 a(n) = f(n) * Sum_{d|n} f(d) * d, where f(n) = (-1)^(A055631(A000265(n))/2).
+%C A126851 Previous name: "SPM4Sigma(n) = (-1)^((1/2)*((Sum_i p_i)-Omega(m')))*Sum_{d|n} (-1)^((1/2)*((Sum_j p_j)-Omega(d'))*d) = (2^(r+1)-1)*Product_i [Sum_{1<=s_i<=r_i} p_i^s_i +(-1)^((p_i-1)/2)] where n=2^r*m', gcd(2,m')=1, m'=Product_i p_i^r_i, d=2^k*d', gcd(2,d')=1, d'=Product_j p_j^r_j, SPM4 for Signed by Prime factors Mod 4."
+%H A126851 Amiram Eldar, <a href="/A126851/b126851.txt">Table of n, a(n) for n = 1..10000</a>
+%F A126851 a(n) = (2^(r+1)-1) * Product_i (Sum_{1 <= s_i <= r_i} p_i^s_i + (-1)^((p_i - 1)/2)), where n = 2^r * Product_i p_i^r_i, and p_i are the odd prime divisors of n.
+%F A126851 a(n) = (2^(r+1)-1) * Product_i (p_i^(r_i+1)-p_i)/(p_i-1)+(-1)^((1/2)*(p_i-1)).
+%F A126851 a(n) = (2^(r+1)-1) * Product_{p_i == 1 mod 4} ((p_i^(r_i+1)-p_i)/(p_i-1)+1) * Product_{p_i == 3 mod 4} ((p_i^(r_i+1)-p_i)/(p_i-1)-1).
+%F A126851 From _R. J. Mathar_, Mar 13 2024: (Start)
+%F A126851 a(2^n) = A000225(n+1).
+%F A126851 A038712(n) | a(n). (End)
+%F A126851 From _Amiram Eldar_, Sep 19 2026: (Start)
+%F A126851 Multiplicative with a(2^e) = 2^(e+1) - 1, and a(p^e) = (p^(e+1) - p)/(p-1) + (-1)^((p-1)/2) for an odd prime p.
+%F A126851 Sum_{k=1..n} a(k) ~ c * n^2, where c = (2/3) * A175647 * Product_{primes p == 3 (mod 4)} (1 - (p-2)/(p^3-p)) = 0.654909564224... . (End)
+%e A126851 a(240) = (1+2+4+8+16)*(-1+3)*(1+5) = 372.
 %p A126851 A126851 := proc(n)
 %p A126851     local r,mprime,piri,iprod,pi,ri,si;
 %p A126851     r := A007814(n) ;
@@ -24,8 +31,11 @@
 %p A126851     %*A038712(n) ;
 %p A126851 end proc:
 %p A126851 seq(A126851(n),n=1..40) ; # _R. J. Mathar_, Mar 13 2024
-%Y A126851 Cf. A126852.
-%K A126851 nonn,uned
+%t A126851 f[p_, e_] := (p^(e+1) - p)/(p-1) + (-1)^((p-1)/2); f[2, e_] := 2^(e+1) - 1; a[1] = 1; a[n_] := Times @@ f @@@ FactorInteger[n]; Array[a, 100] (* _Amiram Eldar_, Sep 19 2026 *)
+%o A126851 (PARI) a(n) = {my(f = factor(n)); prod(i = 1, #f~, if(f[i,1] == 2, 2^(f[i,2]+1)-1, (f[i,1]^(f[i,2]+1) - f[i,1])/(f[i,1]-1) + (-1)^((f[i,1]-1)/2)));} \\ _Amiram Eldar_, Sep 19 2026
+%Y A126851 Cf. A000225, A000265, A038712, A055631, A126852, A175647.
+%K A126851 nonn,mult,easy,changed
 %O A126851 1,2
 %A A126851 _Yasutoshi Kohmoto_, Feb 24 2007
-%E A126851 a(2) and a(7) corrected, sequence extended beyond a(20). - _R. J. Mathar_, Mar 13 2024
+%E A126851 a(2) and a(7) corrected and sequence extended beyond a(20) by _R. J. Mathar_, Mar 13 2024
+%E A126851 Name simplified, entry edited and corrected, and keyword "mult" added by _Amiram Eldar_, Sep 19 2026
