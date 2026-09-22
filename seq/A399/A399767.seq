@@ -1,0 +1,42 @@
+%I A399767 #15 Sep 21 2026 21:38:08
+%S A399767 1,3,11,36,115,357,1099,3335,10084
+%N A399767 Number of transitive relations on unlabeled points with no isolated point and no connected component consisting of a single arrow, having defect n, where the defect of a relation with v points and e related pairs is 2*e - v.
+%C A399767 Equivalently, a(n) = A399030(2*k-n, k) for every k >= 2*n: the eventual value along the n-th "defect diagonal" of A399030. The bound k >= 2*n is sharp, since A399030(3*n-2, 2*n-1) = a(n) - (n+1) for n >= 1.
+%C A399767 Among the relations counted by a(n), exactly n+1 have the maximal number 2*n of related pairs, and exactly 4*n-3 have 2*n-1 related pairs (n >= 1).
+%C A399767 The grading of A399030 by defect is due to Ben Spitz (private communication, Sep 08 2026), who introduced it for the table of finite categories A125697. The present sequence is its analog for transitive relations.
+%C A399767 All terms follow from rows 1-10 of A399030. Inverting the Euler product 1 + Sum_{n,k} A399030(n,k)*x^k*y^n = Product_{e,v} 1/(1 - x^e*y^v)^c(e,v) recovers c(e,v), the number of connected such relations with e related pairs on v points, for every v <= 10, and a(n) needs only v <= n+2. The recovered c(e,v) agree with a direct enumeration for e <= 6, and their sums over e agree with A296105(v) for 2 <= v <= 10.
+%F A399767 G.f.: Product_{d>=1} 1/(1 - x^d)^A399771(d), the Euler transform of A399771 ignoring its initial 1.
+%F A399767 a(n) = A399030(2*k-n, k) for any k >= 2*n.
+%e A399767 a(0) = 1: the empty relation.
+%e A399767 a(1) = 3: the single loop {(a,a)}, the out-star {(a,b),(a,c)} and the in-star {(b,a),(c,a)}. Each is connected of defect 1, and no other relation without a single-arrow component has defect 1.
+%o A399767 (Python)
+%o A399767 from math import comb
+%o A399767 def defect_seqs(bfile='b399030.txt', N=8):  # needs the b-file of A399030 (rows 1..10)
+%o A399767     t = [int(l.split()[1]) for l in open(bfile) if l.strip() and l[0] != '#']
+%o A399767     V, K, i, T = 10, 100, 0, {}
+%o A399767     for n in range(1, V + 1):
+%o A399767         for k in range(1, n * n + 1): T[n, k] = t[i]; i += 1
+%o A399767     P = [[0] * (K + 1) for _ in range(V + 1)]; P[0][0] = 1; D = {}
+%o A399767     for v in range(1, V + 1):
+%o A399767         lev = {(e, v): T[v, e] - P[v][e] for e in range(1, v * v + 1) if T[v, e] != P[v][e]}
+%o A399767         for (e, _), m in lev.items():
+%o A399767             Q = [r[:] for r in P]
+%o A399767             for n in range(V + 1):
+%o A399767                 for k in range(K + 1):
+%o A399767                     j = 1
+%o A399767                     while P[n][k] and n + j * v <= V and k + j * e <= K:
+%o A399767                         Q[n + j * v][k + j * e] += P[n][k] * comb(m + j - 1, j); j += 1
+%o A399767             P = Q
+%o A399767         D.update(lev)
+%o A399767     c = [sum(D.get((e, 2 * e - d), 0) for e in range(1, d + 2)) for d in range(N + 1)]
+%o A399767     a = [1] + [0] * N
+%o A399767     for d in range(1, N + 1):
+%o A399767         for _ in range(c[d]):
+%o A399767             for m in range(d, N + 1): a[m] += a[m - d]
+%o A399767     return c, a
+%o A399767 print(defect_seqs()[1])  # [1, 3, 11, 36, 115, 357, 1099, 3335, 10084]
+%Y A399767 Cf. A399030, A399304, A399771 (connected case), A399913 (connected triangle), A296105, A091073.
+%Y A399767 Analogous constructions: A022016, A342447 (posets by Hasse-diagram arcs); A125697, A125700, A125701 (finite categories).
+%K A399767 nonn,more,hard,new
+%O A399767 0,2
+%A A399767 _Alikhan Sultanbek_, Sep 10 2026

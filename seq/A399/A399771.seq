@@ -1,0 +1,42 @@
+%I A399771 #11 Sep 21 2026 21:44:02
+%S A399771 1,3,5,11,22,54,126,317,812
+%N A399771 Number of connected transitive relations on unlabeled points with no isolated point, having defect n, where the defect of a relation with v points and e related pairs is 2*e - v.
+%C A399771 a(0) = 1: the single arrow on two points is the only connected such relation of defect 0.
+%C A399771 A connected such relation with e related pairs on v points has v <= e+1, so one of defect n has ceiling((n+1)/2) <= e <= n+1 and at most n+2 points.
+%C A399771 The grading by defect is due to Ben Spitz (private communication, Sep 08 2026), who introduced it for the table of finite categories A125697.
+%C A399771 All terms follow from rows 1-10 of A399030 by inverting the Euler product described in A399767. For n <= 5 they agree with a direct enumeration of the connected relations with at most 6 related pairs.
+%F A399771 a(n) = Sum_{e=ceiling((n+1)/2)..n+1} c(e, 2*e-n), where c(e,v) is the number of connected transitive relations with no isolated point having e related pairs on v points.
+%F A399771 A399767 is the Euler transform of this sequence, ignoring a(0).
+%e A399771 a(1) = 3: the single loop {(a,a)}, the out-star {(a,b),(a,c)} and the in-star {(b,a),(c,a)}.
+%e A399771 a(2) = 5: on 2 points, {(a,a),(a,b)} and {(a,b),(b,b)}; on 4 points, the out-star {(a,b),(a,c),(a,d)}, the in-star {(b,a),(c,a),(d,a)} and the zigzag {(a,b),(c,b),(c,d)}.
+%o A399771 (Python)
+%o A399771 from math import comb
+%o A399771 def defect_seqs(bfile='b399030.txt', N=8):  # needs the b-file of A399030 (rows 1..10)
+%o A399771     t = [int(l.split()[1]) for l in open(bfile) if l.strip() and l[0] != '#']
+%o A399771     V, K, i, T = 10, 100, 0, {}
+%o A399771     for n in range(1, V + 1):
+%o A399771         for k in range(1, n * n + 1): T[n, k] = t[i]; i += 1
+%o A399771     P = [[0] * (K + 1) for _ in range(V + 1)]; P[0][0] = 1; D = {}
+%o A399771     for v in range(1, V + 1):
+%o A399771         lev = {(e, v): T[v, e] - P[v][e] for e in range(1, v * v + 1) if T[v, e] != P[v][e]}
+%o A399771         for (e, _), m in lev.items():
+%o A399771             Q = [r[:] for r in P]
+%o A399771             for n in range(V + 1):
+%o A399771                 for k in range(K + 1):
+%o A399771                     j = 1
+%o A399771                     while P[n][k] and n + j * v <= V and k + j * e <= K:
+%o A399771                         Q[n + j * v][k + j * e] += P[n][k] * comb(m + j - 1, j); j += 1
+%o A399771             P = Q
+%o A399771         D.update(lev)
+%o A399771     c = [sum(D.get((e, 2 * e - d), 0) for e in range(1, d + 2)) for d in range(N + 1)]
+%o A399771     a = [1] + [0] * N
+%o A399771     for d in range(1, N + 1):
+%o A399771         for _ in range(c[d]):
+%o A399771             for m in range(d, N + 1): a[m] += a[m - d]
+%o A399771     return c, a
+%o A399771 print(defect_seqs()[0])  # [1, 3, 5, 11, 22, 54, 126, 317, 812]
+%Y A399771 Cf. A399030, A399304, A399767 (Euler transform), A399913 (connected triangle), A296105 (connected transitive relations by number of points).
+%Y A399771 Compare A125700, the analogous count for finite categories graded by excess rather than defect.
+%K A399771 nonn,more,hard,new
+%O A399771 0,2
+%A A399771 _Alikhan Sultanbek_, Sep 11 2026
