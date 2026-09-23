@@ -1,0 +1,39 @@
+%I A398229 #49 Sep 22 2026 19:30:02
+%S A398229 2,18,100,512,2604,13760,71696,373606,1959480,10253464,53572120,
+%T A398229 280144068,1466078320,7671469892,40151310456,210173091264,
+%U A398229 1100244959140,5760040552004,30156845751096,157892327720292,826697328614856,4328517546378256
+%N A398229 Number of ordered pairs of finite sequences of polynomials over GF(2), each polynomial of degree 1 or 2 and each sequence of total degree n, having the same continuant.
+%C A398229 Equivalently, a(n) = Sum_g N(g)^2, where g runs over the monic polynomials of degree n over GF(2) and N(g) is the number of ways of writing g as a continuant K(a_1, ..., a_k) with every a_i of degree 1 or 2; equivalently N(g) is the number of polynomials p with deg(p) < n and gcd(p, g) = 1 such that every partial quotient of the continued fraction expansion of g/p has degree at most 2.
+%C A398229 The total number of such sequences of degree n is Sum_g N(g) = 2^n * Fibonacci(n+1) = A063727(n), so a(n) is the second moment of a distribution whose first moment is known in closed form.
+%C A398229 The conjecture of Mesirov and Sweet (1987) asserts that N(g) > 0 for every monic g; that is, every monic polynomial over GF(2) is a continuant of polynomials of degree 1 or 2; this is the function field analog of Zaremba's conjecture. An upper bound a(n) <= C * 2^n * Fibonacci(n+1)^2 would imply, by Cauchy-Schwarz, that the conjecture holds for at least a proportion 1/C of the monic polynomials of degree n.
+%C A398229 Empirically a(n)/a(n-1) converges to 3 + sqrt(5) = 5.2360679..., which is A063727(n)^2/2^n per degree: the rate one would obtain from pairs colliding at random among the 2^n monic polynomials of degree n. Equivalently, the ratio a(n)/(2^n*Fibonacci(n+1)^2) in the Cauchy-Schwarz bound above decreases steadily from 1.272189 at n = 6 to 1.256660 at n = 22, which would give a proportion of at least 0.7958. The arithmetic content of the sequence lies in this deviation from the random rate.
+%H A398229 Simon R. Blackburn, <a href="https://doi.org/10.1006/jnth.1997.2201">Orthogonal sequences of polynomials over arbitrary fields</a>, J. Number Theory 68 (1998), 99-111.
+%H A398229 Jill P. Mesirov and Melvin M. Sweet, <a href="https://doi.org/10.1016/0022-314X(87)90058-8">Continued fraction expansions of rational expressions with irreducible denominators in characteristic 2</a>, J. Number Theory 27 (1987), 144-148.
+%F A398229 Conjecturally a(n) ~ C * 2^n * Fibonacci(n+1)^2, where C = 4 * Product_{P irreducible over GF(2)} (1 - 2/|P|^2 + 1/|P|^3) = 1.2565939226045041483..., with |P| = 2^deg(P); equivalently C = 2 * Product_{P irreducible over GF(2)} (1 - 1/(|P|*(|P|+1))).
+%e A398229 For n = 2 the eight sequences are the four single polynomials of degree 2 and the four ordered pairs of polynomials of degree 1. Their continuants are x^2 (twice), x^2+1 (twice), x^2+x (once) and x^2+x+1 (three times), so a(2) = 4 + 4 + 1 + 9 = 18.
+%o A398229 (Python)
+%o A398229 # Polynomials over GF(2) are encoded as integers by their coefficient bits:
+%o A398229 # 2 = x, 3 = x+1, 4 = x^2, 5 = x^2+1, 6 = x^2+x, 7 = x^2+x+1.
+%o A398229 def A398229(n):
+%o A398229     def mul(a, p):
+%o A398229         r = 0
+%o A398229         while a:
+%o A398229             if a & 1: r ^= p
+%o A398229             a >>= 1; p <<= 1
+%o A398229         return r
+%o A398229     lv = {0: [(1, 0)]}
+%o A398229     for m in range(1, n+1):
+%o A398229         s = []
+%o A398229         for a in range(2, 8):
+%o A398229             k = a.bit_length() - 1
+%o A398229             for (p, q) in lv.get(m-k, []):
+%o A398229                 s.append((mul(a, p) ^ q, p))
+%o A398229         lv[m] = s
+%o A398229     c = {}
+%o A398229     for (p, q) in lv[n]: c[p] = c.get(p, 0) + 1
+%o A398229     return sum(v*v for v in c.values())
+%o A398229 print([A398229(n) for n in range(1, 15)])
+%Y A398229 Cf. A063727 (number of such sequences), A085449, A000045.
+%K A398229 nonn,more,new
+%O A398229 1,1
+%A A398229 _David Niedbala Giraudin_, Aug 27 2026

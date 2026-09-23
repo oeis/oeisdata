@@ -1,0 +1,62 @@
+%I A399923 #11 Sep 22 2026 19:40:56
+%S A399923 1,1,0,1,1,1,1,1,3,1,1,4,16,8,2,1,11,139,131,26,2,1,41,1750,4272,1148,
+%T A399923 70,4,1,162,29388,229073,125426,8914,204,4,1,715,624889,18496016,
+%U A399923 26997328,3287970,66514,537,7,1,3425,16255738,2112707217,10079819766,2790069901,79234492,464585,1430,8
+%N A399923 Square array A(n,k), n >= 0, k >= 1, read by antidiagonals: A(n,k) is the number of k-dimensional vector partitions of (n, n, ..., n) into parts with nonnegative components, excluding the k elementary basis vectors.
+%C A399923 This array is the prime-free counterpart to the square array of unrestricted vector partitions A219727.
+%C A399923 By excluding the k elementary basis vectors (1, 0, ..., 0), (0, 1, ..., 0), ..., (0, ..., 0, 1), every part in the partition is forced to have a coordinate sum >= 2.
+%C A399923 Equivalently, A(n,k) is the number of factorizations of m^n into parts > 1 where none of the k distinct prime factors of m are permitted as standalone factors (where m is a squarefree product of k distinct primes).
+%C A399923 Row n = 0 gives A000012.
+%C A399923 Row n = 1 gives A000296(k) for k >= 1 (Associated Bell numbers: partitions of a k-element set with no singletons), which is the prime-free analog of the Bell numbers A000110 in Row 1 of A219727.
+%D A399923 P. A. MacMahon, Combinatory Analysis, Cambridge Univ. Press, London and New York, Vol. 1, 1915 and Vol. 2, 1916.
+%F A399923 A(n, k) = [x_1^n ... x_k^n] Product_{c_1, ..., c_k >= 0, sum c_i >= 2} 1 / (1 - x_1^{c_1} ... x_k^{c_k}).
+%e A399923 Square array A(n,k) begins:
+%e A399923   n\k | 1   2     3       4       5        6
+%e A399923   ----+-----------------------------------------------------------
+%e A399923   0   | 1   1     1       1       1        1 ...
+%e A399923   1   | 0   1     1       4      11       41 ... (A000296)
+%e A399923   2   | 1   3    16     139    1750    29388 ...
+%e A399923   3   | 1   8   131    4272  229073 18496016 ...
+%e A399923   4   | 2  26  1148  125426 26997328 ...
+%e A399923   5   | 2  70  8914 3287970 ...
+%e A399923   6   | 4 204 66514 ...
+%o A399923 (Python)
+%o A399923 import itertools
+%o A399923 def A(n, k):
+%o A399923     if n == 0: return 1
+%o A399923     if k == 1:
+%o A399923         dp = [0] * (n + 1)
+%o A399923         dp[0] = 1
+%o A399923         for part in range(2, n + 1):
+%o A399923             for i in range(part, n + 1):
+%o A399923                 dp[i] += dp[i - part]
+%o A399923         return dp[n]
+%o A399923     dims = [n + 1] * k
+%o A399923     total_size = (n + 1) ** k
+%o A399923     strides = [1] * k
+%o A399923     for i in range(k - 2, -1, -1):
+%o A399923         strides[i] = strides[i + 1] * dims[i + 1]
+%o A399923     dp = [0] * total_size
+%o A399923     dp[0] = 1
+%o A399923     ranges = [range(n + 1) for _ in range(k)]
+%o A399923     allowed_parts = [v for v in itertools.product(*ranges) if sum(v) >= 2]
+%o A399923     for part in allowed_parts:
+%o A399923         shift = sum(part[i] * strides[i] for i in range(k))
+%o A399923         target_ranges = [range(part[i], dims[i]) for i in range(k)]
+%o A399923         for target in itertools.product(*target_ranges):
+%o A399923             idx = sum(target[i] * strides[i] for i in range(k))
+%o A399923             dp[idx] += dp[idx - shift]
+%o A399923     return dp[total_size - 1]
+%o A399923 def antidiagonals(max_sum):
+%o A399923     res = []
+%o A399923     for s in range(1, max_sum + 1):
+%o A399923         for n in range(s):
+%o A399923             res.append(A(n, s - n))
+%o A399923     return res
+%o A399923 print(antidiagonals(10))
+%Y A399923 Columns k = 1..4 give: A002865, A397646, A398553, A398816.
+%Y A399923 Rows n = 0..1 give: A000012, A000296.
+%Y A399923 Cf. A219727 (unrestricted multiset counterpart), A397804 (strict prime-free counterpart), A219585 (strict counterpart).
+%K A399923 nonn,tabl,new
+%O A399923 0,9
+%A A399923 _Jishnu Babu Ranitha_, Sep 16 2026

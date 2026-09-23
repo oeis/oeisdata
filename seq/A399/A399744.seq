@@ -1,0 +1,50 @@
+%I A399744 #11 Sep 22 2026 18:02:44
+%S A399744 0,1,2,2,2,2,3,3,3,3,4,4,5,5,7,2,7,6,6,6,10,9,7,7,7,9,0,11,10,11,12,9,
+%T A399744 10,12,15,10,11,11,0,15,16,14,13,14,0,16,15,15,15,18,20,17,19,18,18,
+%U A399744 18,19,21,22,20,20,19,20,20,21,25,23,19,23,23,22,23,25,22,0
+%N A399744 a(n) is the minimum number of entries needed to represent the n-th Lucas number as a signed sum of entries from row n of Pascal's triangle, with each position used at most once, or 0 if no such representation exists.
+%C A399744 Each position in row n may be used at most once, with coefficient +1 or -1, or omitted. Equal binomial coefficients occurring at different positions are regarded as distinct entries.
+%C A399744 The value 0 is used to indicate nonrepresentation. Thus a(0) = 0 is the trivial initial case; the first positive indices n with a(n) = 0 are 26, 38, 44, 74. These indices form A399745.
+%H A399744 Felix Huber, <a href="https://felixhuber-math.github.io/papers/digital-obstructions-lucas-pascal.pdf">Digital Obstructions to Signed Pascal Representations of Lucas Numbers</a>, preprint, 2026.
+%F A399744 a(n) = min{Sum_{k=0..n} abs(epsilon_k) : epsilon_k in {-1, 0, 1}, Sum_{k=0..n} epsilon_k*binomial(n, k) = A000032(n)}, with a(n) = 0 if this set is empty.
+%e A399744 a(15) = 2 since A000032(15) = 1364 = binomial(15,4) - binomial(15,0) = 1365 - 1, and 1364 is not an entry of row 15.
+%e A399744 For n = 26, put A = epsilon_0 + epsilon_26, B = epsilon_1 + epsilon_25, C = epsilon_2 + epsilon_24, D = epsilon_3 + epsilon_23. Reduction modulo 13 gives A + 2*epsilon_13 = 3, hence A = 1. Reduction modulo 5 then gives A + B == 3 (mod 5), hence B = 2. Finally, reduction modulo 23 gives A + 3*B + 3*C + D = -3, so 3*C + D = -10, impossible since C,D are in {-2,-1,0,1,2}. Therefore a(26) = 0.
+%p A399744 A399744 := proc(n)
+%p A399744     option remember;
+%p A399744     local a, c, d, h, i, k, l, m, q, r, s, t, u, w;
+%p A399744     if n = 0 then return 0 end if;
+%p A399744     r := 2; l := 1;
+%p A399744     for i from 2 to n do
+%p A399744         t := r + l; r := l; l := t
+%p A399744     end do;
+%p A399744     h := iquo(n, 2); w := []; m := [];
+%p A399744     for k from h by -1 to 0 do
+%p A399744         w := [op(w), binomial(n, k)];
+%p A399744         if 2*k = n then m := [op(m), 1] else m := [op(m), 2] end if
+%p A399744     end do;
+%p A399744     u := nops(w); s := table(); s[u + 1] := 0;
+%p A399744     for i from u by -1 to 1 do
+%p A399744         s[i] := s[i + 1] + m[i]*w[i]
+%p A399744     end do;
+%p A399744     d := table(); d[0] := 0;
+%p A399744     for i from 1 to u do
+%p A399744         q := table();
+%p A399744         for r in [indices(d, 'nolist')] do
+%p A399744             for c from -m[i] to m[i] do
+%p A399744                 t := r + c*w[i];
+%p A399744                 if abs(l - t) <= s[i + 1] then
+%p A399744                     a := d[r] + abs(c);
+%p A399744                     if not assigned(q[t]) or a < q[t] then q[t] := a end if
+%p A399744                 end if
+%p A399744             end do
+%p A399744         end do;
+%p A399744         d := eval(q)
+%p A399744     end do;
+%p A399744     if assigned(d[l]) then a := d[l] else a := 0 end if;
+%p A399744     a
+%p A399744 end proc:
+%p A399744 seq(A399744(n), n = 0 .. 26);
+%Y A399744 Cf. A000032, A007318, A399743, A399745.
+%K A399744 nonn,new
+%O A399744 0,3
+%A A399744 _Felix Huber_, Sep 13 2026

@@ -1,0 +1,62 @@
+%I A397804 #46 Sep 22 2026 19:57:17
+%S A397804 1,1,0,1,1,1,1,1,2,1,1,4,12,7,1,1,11,119,115,17,2,1,41,1579,3700,862,
+%T A397804 48,2,1,162,27136,199842,97901,6209,123,3,1,715,584974,16309877,
+%U A397804 21638694,2362218,42049,304,3,1,3425,15362487,1883291589,8257835072,2069394899,52262239,269340,730,5
+%N A397804 Square array A(n,k), n >= 0, k >= 1, read by antidiagonals: A(n,k) is the number of k-dimensional vector partitions of (n, n, ..., n) into strictly distinct parts with nonnegative components, excluding the k elementary basis vectors.
+%C A397804 This array is the prime-free counterpart to the square array of strictly distinct vector partitions A219585.
+%C A397804 By excluding the k elementary basis vectors (1, 0, ..., 0), (0, 1, ..., 0), ..., (0, ..., 0, 1), every part in the partition is forced to have a coordinate sum >= 2.
+%C A397804 Equivalently, A(n,k) is the number of factorizations of m^n into strictly distinct parts > 1 where none of the k distinct prime factors of m are permitted as standalone factors (where m is a squarefree product of k distinct primes).
+%C A397804 Row n = 0 gives A000012.
+%C A397804 Row n = 1 gives A000296(k) for k >= 1 (Associated Bell numbers: partitions of a k-element set with no singletons). Because partitions of a set with no duplicate elements inherently consist of strictly distinct blocks, this row matches the unrestricted multiset array exactly.
+%D A397804 P. A. MacMahon, Combinatory Analysis, Cambridge Univ. Press, London and New York, Vol. 1, 1915 and Vol. 2, 1916.
+%F A397804 A(n, k) = [x_1^n ... x_k^n] Product_{c_1, ..., c_k >= 0, sum c_i >= 2} (1 + x_1^{c_1} ... x_k^{c_k}).
+%e A397804 Square array A(n,k) begins:
+%e A397804   n\k | 1   2     3        4        5
+%e A397804   ----+---------------------------------------------------------
+%e A397804   0   | 1   1     1        1        1 ...
+%e A397804   1   | 0   1     1        4       11 ... (A000296)
+%e A397804   2   | 1   2    12      119     1579 ...
+%e A397804   3   | 1   7   115     3700   199842 ...
+%e A397804   4   | 1  17   862    97901 21638694 ...
+%e A397804   5   | 2  48  6209  2362218          ...
+%e A397804   6   | 2 123 42049 52262239          ...
+%o A397804 (Python)
+%o A397804 import itertools
+%o A397804 def A_strict(n, k):
+%o A397804     if n == 0: return 1
+%o A397804     if k == 1:
+%o A397804         dp = [0] * (n + 1)
+%o A397804         dp[0] = 1
+%o A397804         for part in range(2, n + 1):
+%o A397804             for i in range(n, part - 1, -1):
+%o A397804                 dp[i] += dp[i - part]
+%o A397804         return dp[n]
+%o A397804     dims = [n + 1] * k
+%o A397804     total_size = (n + 1) ** k
+%o A397804     strides = [1] * k
+%o A397804     for i in range(k - 2, -1, -1):
+%o A397804         strides[i] = strides[i + 1] * dims[i + 1]
+%o A397804     dp = [0] * total_size
+%o A397804     dp[0] = 1
+%o A397804     ranges = [range(n + 1) for _ in range(k)]
+%o A397804     allowed_parts = [v for v in itertools.product(*ranges) if sum(v) >= 2]
+%o A397804     for part in allowed_parts:
+%o A397804         shift = sum(part[i] * strides[i] for i in range(k))
+%o A397804         target_ranges = [range(dims[i] - 1, part[i] - 1, -1) for i in range(k)]
+%o A397804         for target in itertools.product(*target_ranges):
+%o A397804             idx = sum(target[i] * strides[i] for i in range(k))
+%o A397804             dp[idx] += dp[idx - shift]
+%o A397804     return dp[total_size - 1]
+%o A397804 def antidiagonals(max_sum):
+%o A397804     res = []
+%o A397804     for s in range(1, max_sum + 1):
+%o A397804         for n in range(s):
+%o A397804             res.append(A_strict(n, s - n))
+%o A397804     return res
+%o A397804 print(antidiagonals(10))
+%Y A397804 Columns k = 1..4 give: A025147, A398329, A398607, A399303.
+%Y A397804 Rows n = 0..1 give: A000012, A000296 (for k >= 1).
+%Y A397804 Cf. A219585 (unrestricted strict counterpart), A219727.
+%K A397804 nonn,tabl,new
+%O A397804 0,9
+%A A397804 _Jishnu Babu Ranitha_, Sep 16 2026

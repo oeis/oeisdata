@@ -1,0 +1,48 @@
+%I A399743 #7 Sep 22 2026 21:36:15
+%S A399743 0,1,1,2,2,1,3,3,3,3,2,5,3,5,3,6,7,6,4,6,6,9,5,8,5,8,10,11,8,10,8,9,8,
+%T A399743 12,12,13,13,9,11,11,12,12,13,13,13,14,13,13,12,16,16,17,19,18,16,18,
+%U A399743 16,17,18,16,18,17,15,20,23,22,23,24,21,22,22,19,21,24
+%N A399743 a(n) is the minimum number of entries from row n of Pascal's triangle needed to represent Fibonacci(n) as a signed sum, with each position used at most once.
+%C A399743 The definition is motivated by signed binomial representations of Fibonacci numbers whose coefficients are periodic modulo 5. These representations use coefficients in {-1, 0, 1} and yield the upper bound in the Formula section; see links.
+%C A399743 Entries in different positions are regarded as distinct, even when they have the same value; each position may be used at most once.
+%H A399743 Greg Dresden and Yike Li, <a href="https://arxiv.org/abs/2210.04322">Periodic Weighted Sums of Binomial Coefficients</a>, arXiv:2210.04322 [math.NT], 2022.
+%H A399743 Greg Dresden and Yike Li, <a href="https://cs.uwaterloo.ca/journals/JIS/VOL26/Dresden/dresden26.html">Periodic Weighted Sums of Binomial Coefficients</a>, Journal of Integer Sequences, Vol. 26 (2023), Article 23.8.7.
+%F A399743 a(n) <= floor((2*n + 4)/5) = ceiling(2*n/5).
+%F A399743 Conjecture: a(n) <= ceiling(n/3) + 2.
+%e A399743 a(5) = 1 since Fibonacci(5) = 5 = binomial(5, 1).
+%e A399743 a(10) = 2 since Fibonacci(10) = 55 = binomial(10, 2) + binomial(10, 1) = 45 + 10, while 55 is not an entry of row 10 of Pascal's triangle.
+%e A399743 a(18) = 4 since Fibonacci(18) = 2584 = binomial(18, 3) + binomial(18, 6) + binomial(18, 7) - binomial(18, 9) = 816 + 18564 + 31824 - 48620, and no representation using fewer than four entries exists.
+%p A399743 A399743 := proc(n)
+%p A399743     local a, b, c, f, g, h, k, m, s, x;
+%p A399743     if n = 0 then return 0 end if;
+%p A399743     a := floor((2*n + 4)/5); b := []; c := [];
+%p A399743     for k from 0 to floor((n - 1)/2) do
+%p A399743         b := [b[], binomial(n, k)]; c := [c[], 2];
+%p A399743     end do;
+%p A399743     if irem(n, 2) = 0 then b := [b[], binomial(n, n/2)]; c := [c[], 1] end if;
+%p A399743     h := proc(b, c, p, q, a)
+%p A399743         local i, j, s, t, u, v, w;
+%p A399743         t := table(); t[0] := 0;
+%p A399743         for i from p to q do
+%p A399743             u := table();
+%p A399743             for s in indices(t, 'nolist') do
+%p A399743                 for j from -c[i] to c[i] do
+%p A399743                     v := s + j*b[i]; w := t[s] + abs(j);
+%p A399743                     if w <= a and (not assigned(u[v]) or w < u[v]) then u[v] := w end if;
+%p A399743                 end do;
+%p A399743             end do;
+%p A399743             t := eval(u);
+%p A399743         end do;
+%p A399743         return t;
+%p A399743     end proc;
+%p A399743     m := iquo(nops(b), 2); f := h(b, c, 1, m, a); g := h(b, c, m + 1, nops(b), a); x := combinat:-fibonacci(n);
+%p A399743     for s in indices(f, 'nolist') do
+%p A399743         if assigned(g[x - s]) then a := min(a, f[s] + g[x - s]) end if;
+%p A399743     end do;
+%p A399743     a
+%p A399743 end proc:
+%p A399743 seq(A399743(n), n = 0 .. 30);
+%Y A399743 Cf. A000045, A007318, A058978, A399744, A399745.
+%K A399743 nonn,new
+%O A399743 0,4
+%A A399743 _Felix Huber_, Sep 16 2026

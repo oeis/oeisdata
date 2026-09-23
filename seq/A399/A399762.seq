@@ -1,0 +1,31 @@
+%I A399762 #11 Sep 22 2026 18:55:28
+%S A399762 1,1,1,2,3,4,4,8,14,22,38,56,98,156,240,388,612,1038,1620,2684,4372,
+%T A399762 6978
+%N A399762 Minimum over monic polynomials g of degree n over GF(2) of the number of polynomials p with deg(p) < n and gcd(p, g) = 1 such that every partial quotient of the continued fraction expansion of g/p has degree at most 2.
+%C A399762 With N(g) as in A398229, a(n) = min_g N(g) over the 2^n monic polynomials g of degree n. The assertion a(n) >= 1 for all n is exactly the conjecture of Mesirov and Sweet (1987), the function field analog of Zaremba's conjecture; it is open. It has been verified for all n <= 27.
+%C A399762 The average of N(g) over the 2^n monic polynomials of degree n is Fibonacci(n+1) = A063727(n)/2^n; in particular a(n) <= Fibonacci(n+1).
+%H A399762 Simon R. Blackburn, <a href="https://doi.org/10.1006/jnth.1997.2201">Orthogonal sequences of polynomials over arbitrary fields</a>, J. Number Theory 68 (1998), 99-111.
+%H A399762 Jill P. Mesirov and Melvin M. Sweet, <a href="https://doi.org/10.1016/0022-314X(87)90058-8">Continued fraction expansions of rational expressions with irreducible denominators in characteristic 2</a>, J. Number Theory 27 (1987), 144-148.
+%e A399762 For n = 2 the continuants of the eight sequences of total degree 2 are x^2 (twice), x^2+1 (twice), x^2+x (once) and x^2+x+1 (three times), so a(2) = 1.
+%e A399762 For n = 3 the monic cubics x^3, x^3+1, x^3+x, x^3+x+1, x^3+x^2, x^3+x^2+1, x^3+x^2+x, x^3+x^2+x+1 are obtained respectively 3, 2, 1, 6, 1, 6, 2, 3 times, totaling 24 = A063727(3), so a(3) = 1.
+%o A399762 (Python)
+%o A399762 # Polynomials over GF(2) are encoded as integers by their coefficient bits:
+%o A399762 # 2 = x, 3 = x+1, 4 = x^2, 5 = x^2+1, 6 = x^2+x, 7 = x^2+x+1; these six are
+%o A399762 # all the admissible partial quotients, for every n.
+%o A399762 # The computation is exhaustive: c is indexed by all 2^n monic polynomials of
+%o A399762 # degree n, so a polynomial that is not a continuant contributes 0 to the minimum.
+%o A399762 # Memory grows like 2^n*Fibonacci(n+1) pairs, about 1.5 GB at n = 14.
+%o A399762 def a(n):
+%o A399762     lv = [[(1, 0)]] + [[] for _ in range(n)]
+%o A399762     for m in range(1, n+1):
+%o A399762         for b, k in ((2, 1), (3, 1), (4, 2), (5, 2), (6, 2), (7, 2)):
+%o A399762             if k <= m:
+%o A399762                 lv[m] += [((((b>>2)&1)*(p<<2)) ^ (((b>>1)&1)*(p<<1)) ^ ((b&1)*p) ^ q, p) for (p, q) in lv[m-k]]
+%o A399762     c = [0] * (1 << n)
+%o A399762     for (p, q) in lv[n]: c[p ^ (1 << n)] += 1
+%o A399762     return min(c)
+%o A399762 print([a(n) for n in range(1, 13)])
+%Y A399762 Cf. A063727, A398229.
+%K A399762 nonn,more,new
+%O A399762 1,4
+%A A399762 _David Niedbala Giraudin_, Sep 10 2026
