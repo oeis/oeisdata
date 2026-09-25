@@ -1,0 +1,45 @@
+%I A399660 #7 Sep 24 2026 22:31:15
+%S A399660 1,0,1,0,2,1,0,4,2,1,0,9,7,2,1,0,20,17,7,2,1,0,51,48,21,7,2,1,0,125,
+%T A399660 127,60,21,7,2,1,0,329,352,174,65,21,7,2,1,0,862,963,504,190,65,21,7,
+%U A399660 2,1,0,2311,2689,1456,570,196,65,21,7,2,1,0,6217,7496,4212,1684,590,196,65,21,7,2,1
+%N A399660 Triangle read by rows: T(n, k) is the number of endofunction patterns on n nodes having k connected components; T(0, 0) = 1 by convention.
+%C A399660 An 'endofunction pattern on n nodes' is a functional digraph on n nodes, counted up to relabeling. This is different from 'endofunctions on n objects'.
+%H A399660 Marko Riedel, <a href="/A217860/a217860_12.pdf">Counting components of nonisomorphic maps</a>.
+%F A399660 T(n, k) = [x^n] [y^k] Product_{m>=1} 1/(1 - x^m*y)^A002861(m).
+%F A399660 Recurrence (Marko Riedel): T(n, 1) = A002861(n), T(n, k) = T(n-1, k-1) for 2*k > n and k*T(n, k) = Sum_{q=1..n} Sum_{p|q, p<=k} A002861(q/p)*T(n-q, k-p) otherwise.
+%F A399660 T(n, k) = T(n - 1, k - 1) if k > floor(n/2).
+%e A399660 Triangle starts:
+%e A399660   [0] [1]
+%e A399660   [1] [0,   1]
+%e A399660   [2] [0,   2,   1]
+%e A399660   [3] [0,   4,   2,   1]
+%e A399660   [4] [0,   9,   7,   2,   1]
+%e A399660   [5] [0,  20,  17,   7,   2,  1]
+%e A399660   [6] [0,  51,  48,  21,   7,  2,  1]
+%e A399660   [7] [0, 125, 127,  60,  21,  7,  2, 1]
+%e A399660   [8] [0, 329, 352, 174,  65, 21,  7, 2, 1]
+%e A399660   [9] [0, 862, 963, 504, 190, 65, 21, 7, 2, 1]
+%e A399660 .
+%e A399660 For n = 5, k = 3 there are two partitions of 5 into 3 parts: 5 = 3 + 1 + 1 = 2 + 2 + 1. Let a(m) = T(m,1) =  1,2,4, ... (m >= 1). Then C(a(3),1)*C(a(1)+1,2) = C(4,1)*C(2,2) = 4 and C(a(2)+1,2)*C(a(1),1) = C(3,2)*C(1,1) = 3, so T(5,3) = 4+3 = 7.
+%p A399660 # Using function A002861.
+%p A399660 A399660 := proc(n, k) option remember; local p, q;
+%p A399660   if   k = 0 then ifelse(n = 0, 1, 0)
+%p A399660   elif k > n then 0
+%p A399660   elif k = 1 then A002861(n)
+%p A399660   elif k > iquo(n, 2) then A399660(n - 1, k - 1)
+%p A399660   else iquo(add(add(ifelse(p <= k, A002861(iquo(q, p)) * A399660(n - q, k - p), 0),
+%p A399660   p in numtheory:-divisors(q)), q = 1 .. n), k) fi end:
+%p A399660 seq(print(seq(A399660(n, k), k = 0..n)), n = 0..9);
+%o A399660 (SageMath)  # using function A002861
+%o A399660 @cached_function
+%o A399660 def A399660(n, k):
+%o A399660     if k == 0: return 1 if n == 0 else 0
+%o A399660     if k > n: return 0
+%o A399660     if k == 1: return A002861(n)
+%o A399660     if k > n // 2: return A399660(n - 1, k - 1)
+%o A399660     return sum(sum(A002861(q // p) * A399660(n - q, k - p) if p <= k else 0
+%o A399660            for p in divisors(q)) for q in range(1, n + 1)) // k
+%Y A399660 Cf. A127136 (variant), A002861 (column 1), A001372 (row sums).
+%K A399660 nonn,tabl,new
+%O A399660 0,5
+%A A399660 _Peter Luschny_, Sep 19 2026
