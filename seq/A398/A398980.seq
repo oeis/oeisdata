@@ -1,0 +1,85 @@
+%I A398980 #17 Sep 25 2026 21:20:53
+%S A398980 1,1,0,1,1,1,2,0,0,0,2,1,1,1,1,1,1,2,0,2,1,6,1,3,1,1,3,1,6,1,2,3,1,3,
+%T A398980 2,1,7,7,7,7,7,7,7,7,7,13,8,8,7,9,6,9,7,8,8,20,16,13,16,15,16,16,15,
+%U A398980 16,13,16,41,39,42,37,43,40,42,40,43,37,42,39
+%N A398980 Triangle read by rows: T(n,m) is the number of standard hexagonal Young tableaux with n cells whose major index is congruent to m modulo n.
+%C A398980 For a standard hexagonal Young tableau Q, let row_Q(i) be the row containing i, with rows numbered from top to bottom. Define Des(Q) = {i in {1,...,n-1} : row_Q(i+1) > row_Q(i)} and maj(Q) = Sum_{i in Des(Q)} i. Then T(n,m) counts the standard hexagonal Young tableaux Q with n cells such that maj(Q) == m (mod n), for 0 <= m < n.
+%D A398980 R. P. Stanley, Enumerative Combinatorics, Vol. 2, 2nd ed., Cambridge University Press, 2011.
+%F A398980 T(n,m) = T(n,n-m), 1 <= m < n.
+%e A398980 The triangle begins
+%e A398980   n\m  0   1   2   3   4   5   6   7   8   9
+%e A398980   1:   1
+%e A398980   2:   1   0
+%e A398980   3:   1   1   1
+%e A398980   4:   2   0   0   0
+%e A398980   5:   2   1   1   1   1
+%e A398980   6:   1   1   2   0   2   1
+%e A398980   7:   6   1   3   1   1   3   1
+%e A398980   8:   6   1   2   3   1   3   2   1
+%e A398980   9:   7   7   7   7   7   7   7   7   7
+%e A398980  10:  13   8   8   7   9   6   9   7   8   8
+%e A398980 For example, T(7,2) = 3 because among all standard hexagonal Young tableaux with 7 cells, exactly 3 have major index congruent to 2 modulo 7.
+%e A398980 The sum of row n=7 is: 6 + 1 + 3 + 1 + 1 + 3 + 1 = 16, which agrees with A370665(7) = 16.
+%o A398980 (Python)
+%o A398980 from collections import defaultdict
+%o A398980 def hex_shapes(n):
+%o A398980     out = []
+%o A398980     def rec(rem, a):
+%o A398980         if rem == 0:
+%o A398980             out.append(tuple(a))
+%o A398980             return
+%o A398980         if not a:
+%o A398980             for x in range(1, rem + 1):
+%o A398980                 rec(rem - x, [x])
+%o A398980         else:
+%o A398980             for x in (a[-1] - 1, a[-1] + 1):
+%o A398980                 if 1 <= x <= rem:
+%o A398980                     rec(rem - x, a + [x])
+%o A398980     rec(n, [])
+%o A398980     return out
+%o A398980 def shape_data(shape):
+%o A398980     cells = []
+%o A398980     # Center the rows. Multiplication by 2 avoids half-integer
+%o A398980     # horizontal coordinates.
+%o A398980     for r, L in enumerate(shape):
+%o A398980         for j in range(L):
+%o A398980             x = 2*j - (L - 1)
+%o A398980             cells.append((r, x))
+%o A398980     # Horizontal rows and the two families of downward diagonals.
+%o A398980     lines = [defaultdict(list) for _ in range(3)]
+%o A398980     for i, (r, x) in enumerate(cells):
+%o A398980         lines[0][r].append((x, i))
+%o A398980         lines[1][x-r].append((r, i))
+%o A398980         lines[2][x+r].append((r, i))
+%o A398980     pred = [0] * len(cells)
+%o A398980     for family in lines:
+%o A398980         for line in family.values():
+%o A398980             line.sort()
+%o A398980             for (_, a), (_, b) in zip(line, line[1:]):
+%o A398980                 pred[b] |= 1 << a
+%o A398980     return cells, pred
+%o A398980 def Trow(n):
+%o A398980     a = [0] * n
+%o A398980     for shape in hex_shapes(n):
+%o A398980         cells, pred = shape_data(shape)
+%o A398980         N = len(cells)
+%o A398980         full = (1 << N) - 1
+%o A398980         def rec(mask, last, maj):
+%o A398980             if mask == full:
+%o A398980                 a[maj % n] += 1
+%o A398980                 return
+%o A398980             k = mask.bit_count() + 1
+%o A398980             for v in range(N):
+%o A398980                 if not ((mask >> v) & 1) and (pred[v] & ~mask) == 0:
+%o A398980                     newmaj = maj
+%o A398980                     if last is not None and cells[v][0] > cells[last][0]:
+%o A398980                         newmaj += k - 1
+%o A398980                     rec(mask | (1 << v), v, newmaj)
+%o A398980         rec(0, None, 0)
+%o A398980     return a
+%o A398980 for n in range(1, 13):
+%o A398980     print(Trow(n))
+%Y A398980 Cf. A370665 (row sums), A370666 (ordinary SYT analog), A173258 (hexagonal Young diagrams).
+%K A398980 nonn,tabl,new
+%O A398980 1,7
+%A A398980 _Gabriel Michael Chavez_, Sep 20 2026
