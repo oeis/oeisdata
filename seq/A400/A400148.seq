@@ -1,0 +1,42 @@
+%I A400148 #11 Sep 26 2026 21:41:18
+%S A400148 2,3,7,13,29,37,61,149,157,277,541,661,1381,2789,2917,7013,13381,
+%T A400148 21269,33637,38677,103573,176789,177301,530197,932677,933397,2143381,
+%U A400148 4341269,7183637,11902229,12426517,35495189,70884629,110932501,174543637,178172437,572437013,1059794453,1579920917,2630523157,4750814741
+%N A400148 Smallest prime that is the sum of n distinct elements from the union of powers of 2 and factorials.
+%C A400148 a(n) is the smallest prime p that can be represented as the sum of n distinct elements of S = A000079 U A000142, the union of powers of 2 and factorials.
+%F A400148 a(n) = min { p in A000040 : p = Sum_{i=1..n} s_i where s_i in S and s_i are distinct, with S = A000079 U A000142 }.
+%e A400148 For n = 1, a(1) = 2 (is prime).
+%e A400148 For n = 2, a(2) = 3 = 1 + 2 (is prime).
+%e A400148 For n = 3, a(3) = 7 = 1 + 2 + 4 (is prime).
+%e A400148 For n = 4, a(4) = 13 = 1 + 2 + 4 + 6 (is prime).
+%e A400148 For n = 5, a(5) = 29 = 1 + 2 + 4 + 6 + 16 (is prime).
+%e A400148 For n = 6, a(6) = 37 = 1 + 2 + 4 + 6 + 8 + 16 (is prime).
+%o A400148 (Python)
+%o A400148 from sympy import nextprime
+%o A400148 def generate_set(limit):
+%o A400148     factorials, powers, p_of_2, f, k = [], [], 1, 1, 1
+%o A400148     while f <= limit: factorials.append(f); k += 1; f *= k
+%o A400148     while p_of_2 <= limit: powers.append(p_of_2); p_of_2 *= 2
+%o A400148     return sorted(list(set(factorials + powers)))
+%o A400148 def can_partition(target, count, max_idx, s, memo):
+%o A400148     if count == 0: return target == 0
+%o A400148     if target <= 0 or max_idx < 0 or count > max_idx + 1: return False
+%o A400148     if (state := (target, count, max_idx)) in memo: return memo[state]
+%o A400148     if s[max_idx] <= target:
+%o A400148         if can_partition(target - s[max_idx], count - 1, max_idx - 1, s, memo):
+%o A400148             memo[state] = True
+%o A400148             return True
+%o A400148     ans = can_partition(target, count, max_idx - 1, s, memo)
+%o A400148     memo[state] = ans
+%o A400148     return ans
+%o A400148 def a(n):
+%o A400148     S, p = generate_set(1000), 2
+%o A400148     while True:
+%o A400148         if p > S[-1]: S = generate_set(p * 2)
+%o A400148         sub_S = [x for x in S if x <= p]
+%o A400148         if len(sub_S) >= n and can_partition(p, n, len(sub_S) - 1, sub_S, {}): return p
+%o A400148         p = nextprime(p)
+%Y A400148 Cf. A000040, A000079, A000142, A399546, A399803.
+%K A400148 nonn,new
+%O A400148 1,1
+%A A400148 _Iurii Kirpichev_, Sep 20 2026

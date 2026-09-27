@@ -1,0 +1,59 @@
+%I A399663 #16 Sep 26 2026 05:38:53
+%S A399663 1,0,1,0,2,3,0,5,6,7,0,13,17,18,19,0,35,42,45,46,47,0,95,117,125,128,
+%T A399663 129,130,0,262,312,331,338,341,342,343,0,727,871,919,939,946,949,950,
+%U A399663 951,0,2033,2403,2537,2584,2603,2610,2613,2614,2615,0,5714,6757,7108,7239,7287,7306,7313,7316,7317,7318
+%N A399663 Triangle read by rows: T(n, k) = Sum_{j=0..floor(n/k)} T(n-j*k, k-1) * T(j, 1), T(n, 1) = Sum_{j=1..n} T(n-j, 1) * A000081(j), T(n, k) = 1 if n = 0 and 0 if k = 0 and n > 1.
+%C A399663 We follow the exposition and Maple code of Marko Riedel.
+%D A399663 F. Harary and E. M. Palmer, Graphical Enumeration, Academic Press, NY, 1973, p. 70, Table 3.4.1.
+%H A399663 Marko Riedel, <a href="/A217860/a217860.maple.txt">Maple code for recurrences</a>.
+%H A399663 Marko Riedel, <a href="/A217860/a217860_2.pdf">Counting components of nonisomorphic maps</a>.
+%F A399663 T(n, 1) = A000107(n) for n >= 1.
+%F A399663 T(n, n) = A001372(n).
+%F A399663 T(n, k) = T(n, n) for k >= n.
+%F A399663 T(n, k) = [x^n] Product_{i=1..k} B(x^i), for 0 <= k <= n, where B(x) = 1/(1 - A(x)) is the g.f. of A000107 and A(x) is the g.f. of A000081 (rooted trees).
+%e A399663 Triangle starts:
+%e A399663   [0] [1]
+%e A399663   [1] [0,    1]
+%e A399663   [2] [0,    2,    3]
+%e A399663   [3] [0,    5,    6,    7]
+%e A399663   [4] [0,   13,   17,   18,   19]
+%e A399663   [5] [0,   35,   42,   45,   46,   47]
+%e A399663   [6] [0,   95,  117,  125,  128,  129,  130]
+%e A399663   [7] [0,  262,  312,  331,  338,  341,  342,  343]
+%e A399663   [8] [0,  727,  871,  919,  939,  946,  949,  950,  951]
+%e A399663   [9] [0, 2033, 2403, 2537, 2584, 2603, 2610, 2613, 2614, 2615]
+%p A399663 A81 := proc(n) option remember; local k, l;
+%p A399663     if n <= 1 then return n fi;
+%p A399663     add(A81(n-k)*add(l*A81(l), l in numtheory:-divisors(k)), k=1..n-1)/(n-1) end:
+%p A399663 T := (n, k) -> local i, m; coeff(convert(series(mul(1/(1 - add(A81(m)*x^(m*i), m = 1..iquo(n,i))), i = 1..k), x, n+1), polynom), x, n):
+%p A399663 for n from 0 to 9 do lprint(seq(T(n, k), k=0..n)) od;
+%p A399663 # Alternative:
+%p A399663 T := proc(n,k) option remember; local j, p;
+%p A399663     if k = 0 then return 0^n fi;
+%p A399663     if n = 0 then return 1 fi;
+%p A399663     if k = 1 then return add(T(n-p,1)*A81(p), p=1..n) fi;
+%p A399663     add(T(n-j*k, k-1)*T(j, 1), j=0..floor(n/k));
+%p A399663 end:
+%p A399663 for n from 0 to 9 do seq(T(n, k), k=0..n) od;
+%o A399663 (SageMath)
+%o A399663 @cached_function
+%o A399663 def divsumTc(k):
+%o A399663     return sum(l * Tc(l) for l in divisors(k))
+%o A399663 @cached_function
+%o A399663 def Tc(n):
+%o A399663     if n == 1: return 1
+%o A399663     total = sum(Tc(n - k) * divsumTc(k) for k in range(1, n))
+%o A399663     return total // (n - 1)
+%o A399663 @cached_function
+%o A399663 def T(n, k):
+%o A399663     if n == 0: return 1
+%o A399663     if k == 0: return 0
+%o A399663     if k == 1: return sum(T(n - p, 1) * Tc(p) for p in range(1, n + 1))
+%o A399663     return sum(T(n - j * k, k - 1) * T(j, 1) for j in range(n // k + 1))
+%o A399663 triangle = [[T(n, k) for k in range(n + 1)] for n in range(10)]
+%o A399663 for row in triangle: print(row)
+%Y A399663 Cf. A000107 (column 1), A001372 (main diagonal), A399662 (row sums).
+%Y A399663 Cf. A000081, A001372, A001373.
+%K A399663 nonn,tabl,new
+%O A399663 0,5
+%A A399663 _Peter Luschny_, Sep 17 2026
