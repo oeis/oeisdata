@@ -1,4 +1,4 @@
-%I A073267 #33 May 30 2026 16:40:08
+%I A073267 #42 Sep 28 2026 00:30:19
 %S A073267 0,0,1,2,1,2,2,0,1,2,2,0,2,0,0,0,1,2,2,0,2,0,0,0,2,0,0,0,0,0,0,0,1,2,
 %T A073267 2,0,2,0,0,0,2,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,2,0,
 %U A073267 2,0,0,0,2,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0
@@ -6,16 +6,31 @@
 %C A073267 Starting with 1 = self-convolution of A036987, the characteristic function of the powers of 2. [_Gary W. Adamson_, Feb 23 2010]
 %H A073267 Reinhard Zumkeller, <a href="/A073267/b073267.txt">Table of n, a(n) for n = 0..10000</a>
 %H A073267 Sen-Peng Eu, Shu-Chung Liu and Yeong-Nan Yeh, <a href="https://doi.org/10.1016/j.ejc.2007.06.019">Catalan and Motzkin numbers modulo 4 and 8</a>, Eur. J. Combinat. 29 (2008) 1449-1466.
-%F A073267 G.f.: (Sum_{k>=0} x^(2^k) )^2. - _Vladeta Jovovic_, Mar 28 2005
+%F A073267 G.f.: (Sum_{k>=0} x^(2^k))^2. - _Vladeta Jovovic_, Mar 28 2005
 %F A073267 a(n+1) = A000108(n) mod 4, n>=1 [Theorem 2.3 of Eu et al.]. - _R. J. Mathar_, Feb 27 2008
-%F A073267 a(n) = sum (A209229(k)*A036987(n-k): k = 0..n), convolution of characteristic functions of 2^n and 2^n-1. [_Reinhard Zumkeller_, Mar 07 2012]
+%F A073267 a(n) = Sum_{k=0..n} A209229(k)*A036987(n-k), convolution of characteristic functions of 2^n and 2^n-1. [_Reinhard Zumkeller_, Mar 07 2012]
 %F A073267 a(n+2) = A000168(n) mod 4. - _John M. Campbell_, Jul 07 2016
+%F A073267 From _Ridouane Oudra_, Sep 26 2026: (Start)
+%F A073267 a(n) = u(n)^2 - u(n-1)^2 + 2*(ceiling(log_2(v(n))) - ceiling(log_2(v(n-1)))), for n > 1 with u(n) = floor(log_2(n)) and v(n) = n + 1 - 2^u(n).
+%F A073267 a(n) = A130779(A000120(n)), for n > 1.
+%F A073267 a(n) = A151758(n) + A209229(n).
+%F A073267 a(2*n) = a(n) and a(2*n+1) = 2*A209229(n), for n > 1.
+%F A073267 The only possible values of a(n) are 0, 1, 2, more precisely:
+%F A073267 a(n) = 0 iff n is in A072823 U {0}.
+%F A073267 a(n) = 1 iff n is in A000079 \ {1}.
+%F A073267 a(n) = 2 iff n is in A018900. (End)
 %e A073267 For 2 there is only composition {1+1}, for 3 there is {1+2, 2+1}, for 4 {2+2}, for 5 {1+4, 4+1}, for 6 {2+4,4+2}, for 7 none, thus a(2)=1, a(3)=2, a(4)=1, a(5)=2, a(6)=2 and a(7)=0.
 %p A073267 f:= proc(n) local d;
 %p A073267 d:= convert(convert(n,base,2),`+`);
 %p A073267 if d=2 then 2 elif d=1 then 1 else 0 fi
 %p A073267 end proc:
 %p A073267 0, 0, seq(f(n),n=2..100); # _Robert Israel_, Jul 07 2016
+%p A073267 # Alternative:
+%p A073267 b:= proc(n, t) option remember;
+%p A073267      `if`(n=0, `if`(t=0, 1, 0), `if`(t<1, 0, add(b(n-2^j, t-1), j=0..ilog2(n))));
+%p A073267     end:
+%p A073267 a:= n-> b(n, 2):
+%p A073267 seq(a(n), n=0..120); # _Ridouane Oudra_, Sep 26 2026
 %t A073267 Table[Count[Map[{#, n - #} &, Range[0, n]], k_ /; Times @@ Boole@ Map[IntegerQ@ Log2@ # &, k] == 1], {n, 0, 88}] (* _Michael De Vlieger_, Jul 08 2016 *)
 %o A073267 (Haskell)
 %o A073267 a073267 n = sum $ zipWith (*) a209229_list $ reverse $ take n a036987_list
@@ -29,6 +44,8 @@
 %o A073267 def A073267(n): return m if n>1 and (m:=n.bit_count())<3 else 0 # _Chai Wah Wu_, Oct 30 2024
 %Y A073267 The second row of the table A073265. The essentially same sequence 1, 1, 2, 1, 2, 2, 0, 1, ... occurs for first time in A073202 as row 105 (the fix count sequence of A073290). The positions of 1's for n > 1 is given by the characteristic function of A000079, i.e. A036987 with offset 1 instead of 0 and the positions of 2's is given by A018900. Cf. also A023359.
 %Y A073267 Cf. A036987. [_Gary W. Adamson_, Feb 23 2010]
-%K A073267 nonn
+%Y A073267 Cf. A130779, A000120, A151758, A072823, A062050.
+%Y A073267 (Sum_{k>=0} x^(2^k))^m; A209229 (m=1), this sequence (m=2), A151759 (m=3), A151760 (m=4), A151761 (m=5), A151762 (m=6).
+%K A073267 nonn,changed
 %O A073267 0,4
 %A A073267 _Antti Karttunen_, Jun 25 2002

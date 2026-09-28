@@ -1,9 +1,40 @@
-%I A162100 #9 Oct 02 2025 23:18:54
+%I A162100 #15 Sep 27 2026 21:33:45
 %S A162100 2,3,15,234,10706,1411450,539124281,607445721710,2067567866431155,
 %T A162100 21800911304159109857,729339095058066848554771,
-%U A162100 79087815902731059447907964833
+%U A162100 79087815902731059447907964833,28317823583313561286396432438708448,34013487390609579783526573234983620877987,138910911123371142613186564924382808502717926425
 %N A162100 Number of n X n binary arrays with rows and columns, considered as binary numbers, in strictly increasing order.
+%C A162100 From _Meghanto Majumder_, Sep 21 2026: (Start)
+%C A162100 Equivalently, a(n) counts doubly lexically ordered n X n binary matrices with distinct rows and columns.
+%C A162100 After the first k rows, partition the columns into maximal consecutive blocks having equal k-bit prefixes. A new row preserves the column order exactly when its entries are nondecreasing within every block. The partition is then refined by splitting each block between its 0's and 1's.
+%C A162100 The lower bound below follows by applying double ordering to binary matrices with distinct rows and columns; a union bound excludes at most n*(n-1)/2^n of all labeled matrices.
+%C A162100 (End)
+%H A162100 Meghanto Majumder, <a href="/A162100/b162100.txt">Table of n, a(n) for n=1..17</a>
 %H A162100 R. H. Hardin, <a href="/A151801/a151801.txt">Binary arrays with both rows and cols sorted, symmetries</a>
-%K A162100 nonn
+%H A162100 Anna Lubiw, <a href="https://doi.org/10.1137/0216057">Doubly Lexical Orderings of Matrices</a>, SIAM J. Comput. 16 (1987), no. 5, 854-879.
+%F A162100 From _Meghanto Majumder_, Sep 21 2026: (Start)
+%F A162100 Let F_k(P,x) count valid k-row arrays whose last row is x and whose equal-prefix blocks form the interval partition P. Initially, for every nondecreasing binary row x, F_1(P(x),x)=1, where P(x) is the partition into maximal constant blocks.
+%F A162100 For every y>x that is nondecreasing on each block of P, add F_k(P,x) to F_(k+1)(P|y,y), where P|y is obtained by splitting each block between the 0's and 1's of y. Then a(n)=Sum_x F_n(P_disc,x), where P_disc is the partition into singleton blocks.
+%F A162100 2^(n^2)*(1-n*(n-1)/2^n)/(n!)^2 <= a(n) <= 2^(n^2) for all sufficiently large n. Consequently, lim_{n->infinity} a(n)^(1/n^2)=2.
+%F A162100 (End)
+%o A162100 (Python)
+%o A162100 def a(n):
+%o A162100     r = 1 << n
+%o A162100     m = r // 2 - 1
+%o A162100     d = [(x >> 1) & (x ^ (r - 1)) for x in range(r)]
+%o A162100     e = [(x ^ (x >> 1)) & m for x in range(r)]
+%o A162100     f = {(e[x], x): 1 for x in range(r) if not d[x]}
+%o A162100     for _ in range(1, n):
+%o A162100         g = {}
+%o A162100         for (s, x), c in f.items():
+%o A162100             for y in range(x + 1, r):
+%o A162100                 if d[y] & ~s == 0:
+%o A162100                     k = (s | e[y], y)
+%o A162100                     g[k] = g.get(k, 0) + c
+%o A162100         f = g
+%o A162100     return sum(c for (s, x), c in f.items() if s == m)
+%o A162100 # _Meghanto Majumder_, Sep 21 2026
+%Y A162100 Cf. A089006 (both orders non-strict), A151801 (only the row order strict).
+%K A162100 nonn,changed
 %O A162100 1,1
 %A A162100 _R. H. Hardin_, Jun 25 2009
+%E A162100 a(13)-a(15) from _Meghanto Majumder_, Sep 21 2026
