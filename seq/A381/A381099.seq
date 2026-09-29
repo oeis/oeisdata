@@ -1,12 +1,46 @@
-%I A381099 #10 Mar 02 2025 23:47:31
+%I A381099 #14 Sep 29 2026 00:16:19
 %S A381099 101,11,11,2,3,5,83,13,211,347,557,89,1447,233,2377,6101,1987,1597,
 %T A381099 25841,24181,67651,109469,177113,28657,2463683,1750253,1213931,
 %U A381099 1964189,2317811,514229,8320409,13462693,22178309,35245781,135702887,192274651,149303521
 %N A381099 a(n) is the smallest prime number that contains Fibonacci(n) as a substring.
 %C A381099 If Fibonacci(n) is itself prime (n in A001605), then a(n) = Fibonacci(n).
+%H A381099 Robert Israel, <a href="/A381099/b381099.txt">Table of n, a(n) for n = 0..2000</a>
 %F A381099 a(n) = A062584(A000045(n)).
 %e A381099 For n = 6, since Fibonacci(6) = 8, the smallest prime that contains 8 as a substring is 83, so a(6) = 83.
+%p A381099 f:= proc(n) local t,dt,d,i,S,flag;
+%p A381099    t:= combinat:-fibonacci(n);
+%p A381099    if isprime(t) then return t fi;
+%p A381099    dt:= 1+ilog10(t);
+%p A381099    S:= infinity;
+%p A381099    for d from 1 do
+%p A381099      for i from 0 to d do
+%p A381099        if i = 0 then
+%p A381099          for y from 1 by 2 to 10^d - 1 do
+%p A381099            if isprime(t*10^d + y) then S:= t*10^d + y; break fi
+%p A381099          od
+%p A381099        elif i = d then
+%p A381099          if t::even then next fi;
+%p A381099          for x from 10^(d-1) to 10^d-1 do
+%p A381099            :z:= x*10^dt + t;
+%p A381099             if z > S then break fi;
+%p A381099             if isprime(z) then S:= z; break fi
+%p A381099          od
+%p A381099        else
+%p A381099          flag:= true;
+%p A381099          for x from 10^(i-1) to 10^i-1 while flag do
+%p A381099            for y from 1 by 2 to 10^(d-i)-1 do
+%p A381099              z:= x*10^(dt+d-i) + t*10^(d-i) + y;
+%p A381099              if z > S then flag:= false; break fi;
+%p A381099              if isprime(z) then S:= z; flag:= false; break fi;
+%p A381099          od od:
+%p A381099        fi;
+%p A381099      od;
+%p A381099      if S < infinity then return S fi;
+%p A381099    od
+%p A381099 end proc;
+%p A381099 f(0):= 101:
+%p A381099 map(f, [$0..50]); # _Robert Israel_, Sep 28 2026
 %Y A381099 Cf. A000040, A000045, A001605, A062584.
-%K A381099 nonn,base
+%K A381099 nonn,base,changed
 %O A381099 0,1
 %A A381099 _Gonzalo Martínez_, Feb 13 2025
