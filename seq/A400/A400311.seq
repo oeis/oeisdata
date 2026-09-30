@@ -1,0 +1,31 @@
+%I A400311 #17 Sep 29 2026 19:54:12
+%S A400311 0,0,1,4,10,22,47,81,152,268,414,600,838,1205,1595,2144,2880,3800,
+%T A400311 4653,5582,6969,7839,9822,11701,13675,16822,7048,20495,23082,28260,
+%U A400311 31589,36201,41258,48098,53729,61565,67250,77896,88315,98496,108197,122384
+%N A400311 Lexicographically earliest sequence of nonnegative integers such that all triangles determined by the points (n, a(n)) have distinct positive areas.
+%C A400311 The sequence is constructed greedily: Given a(0)..a(n-1), a(n) is the least nonnegative integer such that among the points (k, a(k)) for 0 <= k <= n, no three are collinear and no two triples form triangles with the same area.
+%C A400311 Equivalently, for every 0 <= i < j < k <= n, |(j-i)*(a(k)-a(i)) - (k-i)*(a(j)-a(i))| must all be distinct (the doubled triangle areas).
+%H A400311 Eric Fox, <a href="/A400311/b400311.txt">Table of n, a(n) for n = 0..84</a>
+%e A400311 The first three points are (0, 0), (1, 0), (2, 1), whose triangle has area 0.5.
+%e A400311   For the point (3, y), the three new areas are y/2, |(2y-3)/2|, and |(y-2)/2|.
+%e A400311   For y = 0, y/2 = 0; reject.
+%e A400311   For y = 1, y/2 = |(2y-3)/2|, creating two new triangles of equal area; reject.
+%e A400311   For y = 2, |(y-2)/2| = 0; reject.
+%e A400311   For y = 3, |(y-2)/2| = 0.5, a previously existing area; reject.
+%e A400311   For y = 4, the areas are 2, 2.5, and 1, all positive, unique, and unused; accept.
+%e A400311 The point (n = 13, y = 1192) would not give a triangle with an area that already occurred earlier, with any of the existing pairs, but it would yield an area of 1728 with the point (4, 10) and either (1, 0) or (10, 414). Therefore it is excluded and the correct y value is a(13) = 1205. - _M. F. Hasler_, Sep 29 2026
+%o A400311 (Python)
+%o A400311 def A400311(n):
+%o A400311     if not hasattr(A:=A400311, "terms"): A.terms=[0,0]; A.areas={0}
+%o A400311     while (L := len(T := A.terms)) <= n:
+%o A400311         aL = next(aL for aL in range(T[-1]+1, 1<<53) if
+%o A400311               all(abs((k-j)*(aL-aj) - (T[k]-aj)*(L-j)) not in A.areas
+%o A400311                   for j,aj in enumerate(T) for k in range(j)) and
+%o A400311               len(set(new := [abs((k-j)*(aL-aj) - (T[k]-aj)*(L-j))
+%o A400311                   for j,aj in enumerate(T) for k in range(j)]))==len(new))
+%o A400311         A.areas.update(new) ; T.append(aL)
+%o A400311     return T[n] # _M. F. Hasler_, Sep 29 2026
+%Y A400311 Cf. A236335, A303331, A322740.
+%K A400311 nonn,nice,new
+%O A400311 0,4
+%A A400311 _Eric Fox_, Sep 22 2026

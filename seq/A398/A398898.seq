@@ -1,0 +1,45 @@
+%I A398898 #20 Sep 29 2026 15:22:08
+%S A398898 2,3,4,5,5,5,5,6,5,5,7,7,6,6,7,8,7,7,7,8,8,7,7,8,8,8,8,8,8,8,8,9,8,8,
+%T A398898 8,8,8,8,8,8,8,8,10,9,8,8,8,10,8,8,8,9,9,9,9,9,8,8,10,9,8,8,9,11,10,9,
+%U A398898 10,10,10,10,9,10,9,9,10,10,9,9,10,11,10,9,10,11,11,10,10,10,10,10,10,10,10,10,10,11,10,10,10,11
+%N A398898 A heap of stones can be split into two heaps of equal size, possibly with an extra stone added to one of the heaps. Starting from a heap of 3*n stones, define a(n) to be the fewest  splittings needed so the heaps can be recombined into three exactly equal pieces.
+%C A398898 As the growth rate appears logarithmic, this sequence might be called "bumps on a log".
+%e A398898 a(3) = 4 because there is no shorter path than (9)->(4,5)->(2,2,5)->(2,2,2,3)->(1,1,2,2,3) which is partitioned into (1,2)x2 and (3) each summing to 3
+%o A398898 (Python)
+%o A398898 """f(n): fewest splittings of a heap of 3n stones (h -> floor(h/2), ceil(h/2))
+%o A398898 so the heaps can be grouped into three parts each summing to n.
+%o A398898 Structure:
+%o A398898   can3(heaps, n) - subset-sum DP over pairs (sum1, sum2); third group is implied.
+%o A398898   f(n)           - BFS by depth over sorted tuples (multisets) of heap sizes.
+%o A398898 From Claude.ai but reads right.
+%o A398898 """
+%o A398898 def can3(heaps, n):
+%o A398898     S = {(0, 0)}
+%o A398898     for h in heaps:
+%o A398898         T = set()
+%o A398898         for a, b in S:
+%o A398898             T.add((a, b))
+%o A398898             if a + h <= n:
+%o A398898                 T.add((a + h, b))
+%o A398898             if b + h <= n:
+%o A398898                 T.add((a, b + h))
+%o A398898         S = T
+%o A398898     return (n, n) in S
+%o A398898 def f(n):
+%o A398898     frontier = {(3 * n,)}
+%o A398898     k = 0
+%o A398898     while True:
+%o A398898         if any(can3(s, n) for s in frontier):
+%o A398898             return k
+%o A398898         nxt = set()
+%o A398898         for s in frontier:
+%o A398898             for i, h in enumerate(s):
+%o A398898                 if h > 1 and (i == 0 or s[i - 1] != h):  # skip duplicate sizes
+%o A398898                     t = list(s[:i] + s[i + 1:]) + [h // 2, h - h // 2]
+%o A398898                     nxt.add(tuple(sorted(t)))
+%o A398898         frontier = nxt
+%o A398898         k += 1
+%o A398898 print([a(n) for n in range(1,10)])
+%K A398898 nonn,new
+%O A398898 1,1
+%A A398898 _Chaim Goodman-Strauss_, Sep 27 2026

@@ -1,0 +1,42 @@
+%I A399199 #59 Sep 29 2026 23:36:53
+%S A399199 0,1,1,2,2,2,3,3,2,3,4,4,3,3,4,5,5,4,3,3,5,6,6,5,4,4,3,6,7,7,6,5,4,4,
+%T A399199 4,7,8,8,7,6,5,5,4,4,8,9,9,8,7,6,5,5,4,4,9,10,10,9,8,7,6,6,5,4,4,10,
+%U A399199 11,11,10,9,8,7,6,6,5,4,5,11,12,12,11,10,9,8,7,7,6,5,5,5,12,13,13,12,11,10,9,8,7,7
+%N A399199 Table of T(n, k) read by antidiagonals: Exact inverse of Pascal's triangle (A007318) such that T(binomial(N, k), k) = N, for n >= 0, k >= 1.
+%C A399199 While Pascal's triangle maps a row index N and column k to n = binomial(N, k), this array performs the inverse, mapping n back to the maximum row index N in column k.
+%C A399199 In the combinatorial number system (Macaulay representation), any integer n >= 0 is uniquely expressed as n = binomial(N_k, k) + ... + binomial(N_1, 1) with N_k > ... > N_1 >= 0. T(n, k) directly yields this leading index N_k. Consequently, in column k, each value N appears exactly binomial(N, k-1) times consecutively.
+%C A399199 This array also provides the combinatorial structure for the generalized Tower of Hanoi (Frame-Stewart numbers, A137695). Klavzar and Milutinovic (2002) express the optimal moves for p pegs and n disks using an index based on the inverse binomial function, which corresponds to a shifted column of T. Because the run-lengths of T(n, k) exactly synchronize with Pascal's identity, the total moves A(p, n) = Sum_{i=1..n} 2^(T(i-1, p-2) - p + 3) automatically absorb fractional blocks and fold directly into a closed-form polynomial without algorithmic branching. Note that the related array A399609 gives the simplex group index and is simply a backward shift: A399609(n, k) = T(n, k) - k + 1.
+%C A399199 For highly efficient sequential computation of column k, the binomial boundary can be updated dynamically in O(1) time without recomputing factorials: when n reaches the current boundary W = binomial(T(n-1, k) + 1, k), T is incremented by 1, and the new boundary becomes W * (T + 1) / (T + 1 - k).
+%H A399199 Yoshio Okita, <a href="/A399199/b399199.txt">Table of n, a(n) for n = 0..10010</a>
+%H A399199 S. Klavzar and U. Milutinovic, <a href="https://users.fmf.uni-lj.si/klavzar/preprints/gth-formulas-scan.pdf">Simple explicit formulas for the Frame-Stewart numbers</a>, Annals of Combinatorics, 6 (2002), 157-167.
+%H A399199 Wikipedia, <a href="https://en.wikipedia.org/wiki/Combinatorial_number_system">Combinatorial number system</a>.
+%H A399199 <a href="/index/Com#combinations">Index entries for sequences related to combinations</a>
+%F A399199 T(n, k) = max { N >= k-1 : binomial(N, k) <= n }.
+%F A399199 T(n, k) = ceiling(x) + k - 1, where x is the maximum real root of binomial(x+k, k) = (x+1)(x+2)...*(x+k) / k! = n+1.
+%F A399199 Equivalently, T(n, k) = floor(y) + k, where y is the maximum real root of binomial(y+k, k) = n.
+%F A399199 T(n, k) = Sum_{j=1..n+1} floor(2 / (A_j - n + abs(A_j - n) + 2)) + k - 2, where A_j = binomial(j+k-2, k).
+%F A399199 T(n, k) = A399609(n, k) + k - 1.
+%F A399199 T(0, k) = k - 1, and for n >= 1, T(n, k) = T(n-1, k) + [n = binomial(T(n-1, k) + 1, k)], where [] is the Iverson bracket. Alternatively, using the Kronecker delta: T(n-1, k) + delta_{n, binomial(T(n-1, k) + 1, k)}.
+%F A399199 G.f. for column k: (k - 1 + Sum_{N>=k} x^binomial(N, k)) / (1 - x).
+%F A399199 G.f. F(x, y) = Sum_{n>=0, k>=1} T(n, k) * x^n * y^k = y^2 / ((1 - x)*(1 - y)^2) + (1 / (1 - x)) * Sum_{N>=1} Sum_{j=1..N} x^binomial(N, j) * y^j.
+%e A399199 The array T(n, k) begins:
+%e A399199   n\k|  1  2  3  4  5
+%e A399199  --------------------
+%e A399199   0  |  0  1  2  3  4
+%e A399199   1  |  1  2  3  4  5
+%e A399199   2  |  2  2  3  4  5
+%e A399199   3  |  3  3  3  4  5
+%e A399199   4  |  4  3  4  4  5
+%e A399199   5  |  5  3  4  5  5
+%e A399199   6  |  6  4  4  5  6
+%e A399199   7  |  7  4  4  5  6
+%e A399199 Values can be calculated from the continuous algebraic equation mapped from the discrete binomial boundaries.
+%e A399199 For n = 6 and k = 2, the maximum real root of binomial(x+2, 2) = 7 is x = 2.2749... Thus, T(6, 2) = ceiling(2.2749) + 2 - 1 = 4. This precisely matches the maximum row index N since binomial(4, 2) = 6 <= 6.
+%e A399199 For the base case n = 0, the maximum real root of binomial(x+k, k) = 1 is exactly x = 0. Thus, T(0, k) = ceiling(0) + k - 1 = k - 1.
+%o A399199 (PARI) T(n, k) = my(N=k-1); while (binomial(N, k) <= n, N++); N-1;
+%o A399199 matrix(7,7,n,k,T(n-1,k)) \\ _Michel Marcus_, Sep 26 2026
+%Y A399199 Cf. A007318 (Pascal's triangle), A399609.
+%Y A399199 Columns k=1..4: A000027, A002024, A194847, A194882.
+%K A399199 nonn,tabl,new
+%O A399199 0,4
+%A A399199 _Yoshio Okita_, Sep 24 2026
