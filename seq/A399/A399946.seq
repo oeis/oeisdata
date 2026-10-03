@@ -1,0 +1,53 @@
+%I A399946 #10 Oct 02 2026 17:24:11
+%S A399946 0,1,1,0,0,2,2,2,4,3,3,4,3,6,8,6,6,10
+%N A399946 Maximum terminal value in the Gilbreath reduction of graceful paths of order n.
+%C A399946 A graceful path of order n is a permutation pi of {0, ..., n-1} such that the consecutive differences |pi(i+1) - pi(i)| form a permutation of {1, ..., n-1} (counted by A006967). The Gilbreath reduction applied to pi produces a triangular array T(k, j) = |T(k-1, j) - T(k-1, j+1)| with T(0, j) = pi(j). The terminal value is Omega(pi) = T(n-1, 1). The sequence gives a(n) = max_{pi in G_n} Omega(pi).
+%C A399946 For n = 1, the trivial path (0) has terminal value 0, so a(1) = 0.
+%C A399946 Theorem (Grillet, 2026): For any k >= 2 and n in {2^k, 2^k + 1}, every graceful path has an even terminal value: Omega(pi) = 0 (mod 2). Consequently, a(n) is even and a(n) != 1 for all n in A229693.
+%C A399946 For n = 4 and n = 5, all graceful paths terminate at 0: a(4) = a(5) = 0.
+%F A399946 a(n) = max { T(n-1, 1)(pi) : pi in G_n } for n >= 1.
+%e A399946 For n = 1: G_1 = {(0)}, terminal value = 0, so a(1) = 0.
+%e A399946 For n = 2: G_2 = {(0, 1), (1, 0)}, terminal value = 1, so a(2) = 1.
+%e A399946 For n = 3: G_3 has 4 permutations, all terminate at 1, so a(3) = 1.
+%e A399946 For n = 4: G_4 has 4 permutations: (0, 3, 1, 2), (2, 1, 3, 0), (1, 2, 0, 3), (3, 0, 2, 1). All terminate at 0, so a(4) = 0.
+%e A399946 For n = 8: graceful paths produce terminal values in {0, 2}, so a(8) = 2.
+%e A399946 For n = 9: graceful paths produce terminal values in {0, 2, 4}, so a(9) = 4.
+%e A399946 For n = 12: graceful paths produce terminal values in {0, 1, 2, 4}, so a(12) = 4.
+%e A399946 For n = 13: graceful paths produce terminal values in {0, 1, 2, 3}, so a(13) = 3.
+%o A399946 (Python)
+%o A399946 def gilbreath_tip(p):
+%o A399946     curr = list(p)
+%o A399946     while len(curr) > 1:
+%o A399946         curr = [abs(curr[i] - curr[i+1]) for i in range(len(curr)-1)]
+%o A399946     return curr[0]
+%o A399946 def a(n):
+%o A399946     if n == 1: return 0
+%o A399946     used = [False]*n
+%o A399946     used_d = [False]*n
+%o A399946     path = [0]*n
+%o A399946     max_tip = 0
+%o A399946     def bt(idx):
+%o A399946         nonlocal max_tip
+%o A399946         if idx == n:
+%o A399946             tip = gilbreath_tip(path)
+%o A399946             if tip > max_tip: max_tip = tip
+%o A399946             return
+%o A399946         for v in range(n):
+%o A399946             if not used[v]:
+%o A399946                 if idx > 0:
+%o A399946                     d = abs(v - path[idx-1])
+%o A399946                     if d == 0 or used_d[d]: continue
+%o A399946                     used_d[d] = True; used[v] = True; path[idx] = v
+%o A399946                     bt(idx + 1)
+%o A399946                     used[v] = False; used_d[d] = False
+%o A399946                 else:
+%o A399946                     used[v] = True; path[idx] = v
+%o A399946                     bt(idx + 1)
+%o A399946                     used[v] = False
+%o A399946     bt(0)
+%o A399946     return max_tip
+%Y A399946 Cf. A006967, A036262, A229693, A398093.
+%K A399946 nonn,hard,more,new
+%O A399946 1,6
+%A A399946 _Eliott Grillet_, Sep 16 2026
+%E A399946 a(14)-a(18) from _Sean A. Irvine_, Oct 02 2026

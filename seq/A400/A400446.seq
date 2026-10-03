@@ -1,0 +1,47 @@
+%I A400446 #14 Oct 02 2026 20:29:00
+%S A400446 0,0,1,0,3,2,1,0,5,4,3,4,4,2,1,0,6,6,8,6,7,4,3,8,5,4,3,4,4,2,1,0,7,8,
+%T A400446 7,11,10,9,7,10,8,6,5,6,6,4,3,16,6,9,8,6,7,4,3,8,5,4,3,4,4,2,1,0,8,10,
+%U A400446 11,12,13,8,10,14,12,11,9,10,10,8,7,18
+%N A400446 Number of 0-cells captured, Othello-style in all 8 directions, when the binary expansion of n is written in row n, right-justified beneath rows 1..n-1.
+%C A400446 A 0-cell captured simultaneously along multiple directions or by multiple flanking 1's is counted once.
+%C A400446 Row 2^n-1 consists of n consecutive 1's, so it has no internal 0 to capture horizontally; its rightmost 1 captures exactly one 0 vertically, from row 2^n-2 (which ends in 0), closed by a 1 in row 2^n-3 (whose last bit is 1, since 2^n-3 is odd). No other 1 in the row captures anything, since row 2^n-2 agrees with row 2^n-1 in every bit except the last.
+%C A400446 For k >= 1, writing m = 2^(k-1) and n = 3*m: row n has binary representation "11" followed by k-1 zeros, so it has exactly two 1's, in the two leftmost columns. Every row r with 2*m <= r <= 3*m-1 starts with "10" followed by the (k-1)-bit representation of r-2*m, so the column directly below the rightmost 1 of row n is 0 for all of these m rows; row 2*m-1 = 2^k-1 has a 1 in that same column, closing the vertical run. Thus the rightmost 1 of row n captures exactly this run of m zeros, and no other 0 is captured, giving a(3*2^(k-1)) = 2^(k-1). Consequently, a(n)/n = 1/3 along this subsequence.
+%F A400446 a(2^k) = 0 for k >= 0.
+%F A400446 a(2^n - 1) = 1 for n >= 2.
+%F A400446 a(3*2^(k-1)) = 2^(k-1) for k >= 1.
+%e A400446 Binary digits of 1..5, right-justified, one row per n (columns left to right):
+%e A400446   .  .  1
+%e A400446   .  1  0
+%e A400446   .  1  1
+%e A400446   1  0  0
+%e A400446   1  0  1
+%e A400446 When row 5 ("101") is written, the two 1's at the ends of the row flank the 0 between them (horizontal capture within row 5), and each also flanks a 0 directly above it (row 4) in a diagonal/vertical run terminated by a 1 in row 3. The 3 distinct captured 0-cells give a(5) = 3.
+%o A400446 (Python)
+%o A400446 def a(N):
+%o A400446     W = len(bin(N)) - 2
+%o A400446     grid = [['E']*(W+1) for _ in range(N+1)]
+%o A400446     a = [0]*(N+1)
+%o A400446     dirs = [(-1,-1),(-1,0),(-1,1),(0,-1),(0,1),(1,-1),(1,0),(1,1)]
+%o A400446     for n in range(1, N+1):
+%o A400446         b = bin(n)[2:]
+%o A400446         start = W - len(b) + 1
+%o A400446         for i, ch in enumerate(b):
+%o A400446             grid[n][start+i] = ch
+%o A400446         captured = set()
+%o A400446         for c in range(1, W+1):
+%o A400446             if grid[n][c] != '1':
+%o A400446                 continue
+%o A400446             for dr, dc in dirs:
+%o A400446                 r, cc, run = n+dr, c+dc, []
+%o A400446                 while 1 <= r <= N and 1 <= cc <= W:
+%o A400446                     if grid[r][cc] == '0':
+%o A400446                         run.append((r, cc)); r += dr; cc += dc
+%o A400446                     elif grid[r][cc] == '1':
+%o A400446                         captured.update(run); break
+%o A400446                     else:
+%o A400446                         break
+%o A400446         a[n] = len(captured)
+%o A400446     return a[1:]
+%K A400446 nonn,base,new
+%O A400446 1,5
+%A A400446 _Dimas Saputra_, Sep 26 2026
