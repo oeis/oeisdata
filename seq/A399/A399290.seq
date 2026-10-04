@@ -1,0 +1,41 @@
+%I A399290 #35 Oct 03 2026 23:49:17
+%S A399290 2,3,7,11,17,29,31,47,59,71,97,107,139,163,191,223,251,293,331,383,
+%T A399290 419,491,521,593,641,719,787,853,941,997,1097,1181,1259,1361,1451,
+%U A399290 1549,1657,1777,1871,1999,2099,2243,2357,2521,2633,2777,2939,3083,3253,3407,3593
+%N A399290 Smallest prime that is the sum of n distinct elements from the union of primes and squares.
+%C A399290 a(n) is the smallest prime p that can be represented as the sum of n distinct elements of A089237 \ {0}, the union of primes and positive squares.
+%F A399290 a(n) = min { p in A000040 : p = Sum_{i=1..n} s_i where s_i in (A089237 \ {0}) are distinct }.
+%e A399290 For n = 1, a(1) = 2 (is prime).
+%e A399290 For n = 2, a(2) = 3 = 1 + 2 (is prime).
+%e A399290 For n = 3, a(3) = 7 = 1 + 2 + 4 (is prime).
+%e A399290 For n = 4, a(4) = 11 = 1 + 2 + 3 + 5 (is prime).
+%e A399290 For n = 5, a(5) = 17 = 1 + 2 + 3 + 4 + 7 (is prime).
+%o A399290 (Python)
+%o A399290 from sympy import nextprime, primerange
+%o A399290 from math import isqrt
+%o A399290 def generate_set(limit):
+%o A399290     squares = [k**2 for k in range(1, isqrt(limit) + 1)]
+%o A399290     primes = list(primerange(2, limit + 1))
+%o A399290     return sorted(list(set(squares + primes)))
+%o A399290 def can_partition(target, count, max_idx, s, memo):
+%o A399290     if count == 0: return target == 0
+%o A399290     if target <= 0 or max_idx < 0 or count > max_idx + 1: return False
+%o A399290     if (state := (target, count, max_idx)) in memo: return memo[state]
+%o A399290     if s[max_idx] <= target:
+%o A399290         if can_partition(target - s[max_idx], count - 1, max_idx - 1, s, memo):
+%o A399290             memo[state] = True
+%o A399290             return True
+%o A399290     ans = can_partition(target, count, max_idx - 1, s, memo)
+%o A399290     memo[state] = ans
+%o A399290     return ans
+%o A399290 def a(n):
+%o A399290     S, p = generate_set(1000), 2
+%o A399290     while True:
+%o A399290         if p > S[-1]: S = generate_set(p * 2)
+%o A399290         sub_S = [x for x in S if x <= p]
+%o A399290         if len(sub_S) >= n and can_partition(p, n, len(sub_S) - 1, sub_S, {}): return p
+%o A399290         p = nextprime(p)
+%Y A399290 Cf. A000040, A000290, A089237, A399546, A399803, A400148.
+%K A399290 nonn,new
+%O A399290 1,1
+%A A399290 _Iurii Kirpichev_, Sep 30 2026
