@@ -1,0 +1,34 @@
+%I A399661 #12 Oct 05 2026 08:08:07
+%S A399661 0,1,3,10,31,96,288,869,2591,7732,22998,68377,203008,602538,1787103,
+%T A399661 5298840,15705375,46538147,137867850,408353416,1209299266,3580708820,
+%U A399661 10601020609,31381771045,92888762936,274922255521,813619569454,2407693500163,7124465008055,21080319983880
+%N A399661 a(n) is the number of ordered forests of rooted trees on n nodes where one node in the first tree is marked.
+%H A399661 Vincenzo Librandi, <a href="/A399661/b399661.txt">Table of n, a(n) for n = 0..1000</a>
+%F A399661 a(n) = [x^n] x*A'(x)/(1 - A(x)), where A(x) is the g.f. for A000081.
+%F A399661 a(n) = Sum_{j=1..n} j * A000081(j) * A000107(n - j).
+%F A399661 Sum_{d|n} EulerPhi(n/d)*a(d) = n * A002861(n).
+%p A399661 A81 := proc(n) option remember; local k; if n = 0 then 0 elif n = 1 then 1 else
+%p A399661 add(c81(k) * A81(n-k), k = 1..n-1) / (n-1) fi end:
+%p A399661 c81 := proc(k) option remember; local d; add(d * A81(d), d in numtheory:-divisors(k)) end:
+%p A399661 A399661 := proc(n) option remember; local k; if n = 0 then 0 else n*A81(n) + add(A399661(k)*A81(n-k), k = 0..n-1) fi end: seq(A399661(n), n = 0..29);
+%t A399661 a081[0] = 0; a081[1] = 1; a081[n_] := a081[n] = 1/(n - 1) Sum[m * a081[m] * a081[n - k*m], {m, 1, n - 1}, {k, 1, Quotient[n - 1, m]}];
+%t A399661 a107[0] = 1; a107[n_] := a107[n] = Sum[a081[i] * a107[n - i], {i, 1, n}];
+%t A399661 A399661[0] = 0; A399661[n_] := A399661[n] = Sum[i * a081[i] * a107[n - i], {i, 1, n}];
+%t A399661 Table[A399661[n], {n, 0, 29}]
+%o A399661 (SageMath)
+%o A399661 def A399661List(N):
+%o A399661     if N < 1: return [0]
+%o A399661     M = N + 1; A = [0, 1]; S = [0] + [1] * M
+%o A399661     for n in range(2, M + 1):
+%o A399661         val = sum(A[n - j] * S[j] for j in range(1, n)) // (n - 1)
+%o A399661         A.append(val)
+%o A399661         for m in range(n, M + 1, n): S[m] += n * val
+%o A399661     R.<x> = PowerSeriesRing(ZZ, default_prec=M + 1)
+%o A399661     A_x = R(A)
+%o A399661     a_x = x * A_x.derivative() / (1 - A_x)
+%o A399661     return a_x.list()[:N + 1]
+%o A399661 print(A399661List(29))
+%Y A399661 Cf. A000081, A000107, A002861, A399660
+%K A399661 nonn,new
+%O A399661 0,3
+%A A399661 _Peter Luschny_, Sep 19 2026

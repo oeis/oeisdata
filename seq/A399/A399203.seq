@@ -1,0 +1,49 @@
+%I A399203 #26 Oct 05 2026 11:26:52
+%S A399203 1,4,136,2804480,768614611824951296,
+%T A399203 12179180311090859341900591764988585012195491840,
+%U A399203 54725008606103443350387555694643908065023084179201677932392061901435104041199928994321082164351192230580965081088
+%N A399203 Number of equivalence classes of maps f: {0,1}^n -> {0,1}^n under conjugation by permutations of coordinates.
+%C A399203 Here {0,1}^n is the set of all binary words of length n. Two maps f,g are equivalent if there exists a permutation sigma of the n coordinates such that g = sigma o f o sigma^(-1).
+%F A399203 For lambda = 1^r_1 2^r_2 ... a partition of n, define
+%F A399203 C_lambda(j) = Sum_{i>=1} r_i*gcd(i,j),
+%F A399203 M_lambda(d) = (1/d)*Sum_{e|d} mu(d/e)*2^C_lambda(e),
+%F A399203 z_lambda = Product_{i>=1} i^r_i*r_i!.
+%F A399203 a(n) = Sum_{lambda partition of n} 2^(Sum_{d>=1} M_lambda(d)*C_lambda(d))/z_lambda.
+%e A399203 For n = 3, the three cycle types 1^3, 2*1 and 3 contribute 2^24, 2^14 and 2^8 fixed maps, respectively. Hence a(3) = (2^24 + 3*2^14 + 2*2^8)/6 = 2804480.
+%o A399203 (Julia)
+%o A399203 using Nemo
+%o A399203 using Combinatorics
+%o A399203 function a(n::Int)
+%o A399203     if n == 0
+%o A399203         return ZZ(1)
+%o A399203     end
+%o A399203     s = QQ(0)
+%o A399203     for p in partitions(n)
+%o A399203         r = zeros(Int, n)
+%o A399203         for part in p
+%o A399203             r[part] += 1
+%o A399203         end
+%o A399203         L = isempty(p) ? 1 : lcm(p)
+%o A399203         C(j) = sum(r[i] * gcd(i, j) for i in 1:n)
+%o A399203         function M(d)
+%o A399203             val = sum(moebius_mu(div(d, e)) * (ZZ(2)^C(e)) for e in divisors(d))
+%o A399203             return div(val, d)
+%o A399203         end
+%o A399203         z = ZZ(1)
+%o A399203         for i in 1:n
+%o A399203             if r[i] > 0
+%o A399203                 z *= (ZZ(i)^r[i]) * factorial(ZZ(r[i]))
+%o A399203             end
+%o A399203         end
+%o A399203         E = sum(M(d) * C(d) for d in divisors(L))
+%o A399203         s += (ZZ(2)^E) // z
+%o A399203     end
+%o A399203     return ZZ(s)
+%o A399203 end
+%o A399203 for n in 0:9
+%o A399203     println(a(n))
+%o A399203 end  # _Peter Luschny_, Oct 05 2026
+%Y A399203 Cf. A057156, A397971.
+%K A399203 nonn,new
+%O A399203 0,2
+%A A399203 _Vladeta Jovovic_, Oct 02 2026

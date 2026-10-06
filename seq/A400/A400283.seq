@@ -1,0 +1,42 @@
+%I A400283 #15 Oct 05 2026 09:59:34
+%S A400283 1,7,6,8,8,8,1,9,2,6,4,5,2,6,6,3,5,5,8,9,7,8,7,0,8,1,4,0,6,8,1,3,1,4,
+%T A400283 1,2,8,9,2,4,3,6,4,7,3,5,0,8,2,7,6,7,7,1,7,4,7,7,8,3,3,8,3,9,2,0,6,2,
+%U A400283 5,5,6,7,8,8,4,3,8,9,1,0,6,0,0,5,5,4,3,6,5,6,4,8,4,9,5,6
+%N A400283 Decimal expansion of 1/sqrt(x0), where x0 is the smallest positive x with J_0(x) = J_1(x).
+%C A400283 The functions J_0(q) = J_0(q, 1) and J_1(q) = J_1(q, 1) are introduced in [Flajolet-Sedgewick, 2009] as q-Bessel-type functions.
+%C A400283 The constant is the growth constant in the asymptotic development of A400281.
+%H A400283 Philippe Flajolet and Robert Sedgewick, <a href="https://algo.inria.fr/flajolet/Publications/books.html">Analytic Combinatorics</a>, 2009; Chapter IX, §IX.6, Eq. (43), page 661.
+%F A400283 J_0(q) = Sum_{n>=0} ((-1)^n*q^(n*(n+1)/2)) / ((q;q)_n*(q;q)_n).
+%F A400283 J_1(q) = Sum_{n>=1} ((-1)^(n-1)*q^(n*(n+1)/2)) / ((q;q)_(n-1)*(q;q)_n).
+%F A400283 J0(q) - J1(q) = (q;q)_{oo} * Sum_{n>=0} (-1)^n*q^((3*n^2 - n)/2) / (q;q)_n^3.
+%F A400283 Here (q;q)_n = Product_{k=1..n} (1 - q^k) with (q;q)_0 = 1. Since for 0 < q < 1 the factor (q,q)_{oo} is > 0, and thus has no zeros, x0 is characterized by:
+%F A400283 x0 = min{q in (0,1) : Sum_{n>=0} (-1)^n*q^((3*n^2 - n)/2) / (q;q)_n^3 = 0}.
+%e A400283 1.768881926452663558978708140681314128924364735...
+%t A400283 j0[x_?NumericQ, m_: 80] :=
+%t A400283     Sum[(-1)^n x^(n (n + 1)/2) / QPochhammer[x, x, n]^2, {n, 0, m} ];
+%t A400283 j1[x_?NumericQ, m_: 80] :=
+%t A400283     Sum[(-1)^(n-1) x^(n (n+1)/2) / (QPochhammer[x, x, n-1] QPochhammer[x, x, n]), {n, 1, m} ];
+%t A400283 x0 = x /. FindRoot[j0[x] == j1[x], {x, 8/25},
+%t A400283     WorkingPrecision -> 150, AccuracyGoal -> 120, PrecisionGoal -> 120 ];
+%t A400283 N[1 / Sqrt[x0], 100]
+%o A400283 (Python)
+%o A400283 from mpmath import mp, findroot, sqrt
+%o A400283 mp.dps = 150
+%o A400283 def f_target(q, m=80):
+%o A400283     total = mp.mpf(0)
+%o A400283     p_n = mp.mpf(1)
+%o A400283     for n in range(m + 1):
+%o A400283         if n > 0: p_n *= (1 - q**n)
+%o A400283         exp = (3 * n * n - n) // 2
+%o A400283         term = ((-1)**n) * (q**exp) / (p_n**3)
+%o A400283         total += term
+%o A400283     return total
+%o A400283 x_init = mp.mpf(8) / mp.mpf(25)
+%o A400283 x0 = findroot(f_target, x_init)
+%o A400283 res = 1 / sqrt(x0)
+%o A400283 mp.dps = 100
+%o A400283 print(mp.nstr(res, 100))
+%Y A400283 Cf. A301735 (J_0), A400284 (J_1), A400281.
+%K A400283 nonn,cons,new
+%O A400283 1,2
+%A A400283 _Peter Luschny_, Sep 29 2026

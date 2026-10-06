@@ -1,0 +1,38 @@
+%I A397650 #15 Oct 05 2026 20:28:51
+%S A397650 3,6,13,19,30,34,41,49,55,64,69,76,82,87,95,103,113
+%N A397650 Largest 2-adic valuation of a number with n nonzero decimal digits not ending in zero.
+%C A397650 a(n) is strictly increasing. If k >= a(n) then 2^k has at least n nonzero decimal digits.
+%e A397650 a(3) = 13 because 2^13 divides 9003008, which has three nonzero digits, but every multiple of 2^14 not ending in zero has at least four nonzero digits.
+%o A397650 (Python)
+%o A397650 from itertools import combinations, product
+%o A397650 def v2(n):
+%o A397650     return (n & -n).bit_length() - 1
+%o A397650 def suffixes(m):
+%o A397650     if m == 1:
+%o A397650         yield from ((d, 0) for d in (2, 4, 6, 8))
+%o A397650     else:
+%o A397650         for n, j in suffixes(m - 1):
+%o A397650             t = v2(n)
+%o A397650             for k in range(j + 1, t + 1):
+%o A397650                 for d in range(1 if k == t else 2, 10, 2):
+%o A397650                     yield n + d * 10**k, k
+%o A397650 B = [max(map(v2, range(1, 10)))]
+%o A397650 for m in range(2, 11):
+%o A397650     q = min(2, m - 1)
+%o A397650     modulus = 2**(B[-1] + 1)
+%o A397650     tails = {}
+%o A397650     for positions in combinations(range(1, B[-1] + 1), q):
+%o A397650         for digits in product(range(1, 10), repeat=q):
+%o A397650             n = sum(d * 10**k for d, k in zip(digits, positions))
+%o A397650             tails.setdefault(n % modulus, []).append((n, positions[0]))
+%o A397650     best = B[-1]
+%o A397650     for n, j in suffixes(m - q):
+%o A397650         for tail, k in tails.get(-n % modulus, ()):
+%o A397650             if k > j:
+%o A397650                 best = max(best, v2(n + tail))
+%o A397650     B.append(best)
+%o A397650 print(B)
+%Y A397650 Cf. A007814, A001370.
+%K A397650 nonn,base,more,new
+%O A397650 1,1
+%A A397650 _David Radcliffe_, Sep 28 2026
