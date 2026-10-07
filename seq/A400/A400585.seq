@@ -1,0 +1,36 @@
+%I A400585 #20 Oct 07 2026 00:16:19
+%S A400585 0,1,3,6,10,16,21,28,39,46,55,72,78,92,118,120,136,169,171,196,234,
+%T A400585 232,253,304,310,326,390,384,406,496,465,496,586,562,626,702,666,704,
+%U A400585 822,808,820,968,903,952,1144,1036,1081,1248,1197,1271,1414,1332,1378,1600
+%N A400585 a(n) = Sum_{d|n, n/d odd} binomial(d, 2).
+%C A400585 This sequence provides the core divisor sum used to evaluate the logarithmic derivative of the generating function for A005309.
+%C A400585 Let F(x) = Product_{k>=1} ((1 + x^k)/(1 - x^k))^(k - 1) be the generating function of A005309. Then x * d/dx log(F(x)) = 4 * Sum_{n>=1} a(n) * x^n.
+%C A400585 By the generalized Euler transform, this allows A005309 to be evaluated via the integer recurrence: A005309(n) = (4/n) * Sum_{k=1..n} a(k) * A005309(n-k) for n >= 1, with A005309(0) = 1.
+%C A400585 The kernel isolates the non-vanishing modes of the formal logarithmic expansion. Because log(1 + x^k) - log(1 - x^k) cancels all even powers of x^k, the series contains only odd powers x^(k*(2*j - 1)). Differentiating and equating coefficients yields a sum strictly over divisors d of n where the cofactor n/d is odd, with weight binomial(d, 2).
+%H A400585 Jishnu Babu Ranitha, <a href="/A400585/b400585.txt">Table of n, a(n) for n = 1..10000</a>
+%F A400585 a(n) = Sum_{d|n, (n/d) mod 2 == 1} binomial(d, 2).
+%F A400585 4 * a(n) = n * [x^n] d/dx log( Product_{k>=1} ((1 + x^k)/(1 - x^k))^(k - 1) ).
+%F A400585 Conjecture: Sum_{k=1..n} a(k) ~ 7*Zeta(3)*n^3/48. - _Vaclav Kotesovec_, Oct 01 2026
+%F A400585 a(n) = m*(m*sigma_2(k)-sigma(k))/2 where m = A006519(n) and k = A000265(n). - _Chai Wah Wu_, Oct 06 2026
+%e A400585 For n = 4, the divisors are 1, 2, and 4 with cofactors 4, 2, and 1. Only d = 4 has an odd cofactor. Thus, a(4) = binomial(4, 2) = 6.
+%e A400585 For n = 6, the divisors with odd cofactors are 2 (cofactor 3) and 6 (cofactor 1). Thus, a(6) = binomial(2, 2) + binomial(6, 2) = 1 + 15 = 16.
+%p A400585 f:= proc(n) local d; add(binomial(n/d,2), d = NumberTheory:-Divisors(n/2^padic:-ordp(n,2))) end proc:
+%p A400585 map(f, [$1..100]); # _Robert Israel_, Oct 06 2026
+%t A400585 a[n_] := Sum[If[OddQ[n/d], Binomial[d, 2], 0], {d, Divisors[n]}]; Table[a[n], {n, 1, 54}]
+%o A400585 (Python)
+%o A400585 from math import comb
+%o A400585 def a(n):
+%o A400585     return sum(comb(d, 2) for d in range(1, n + 1) if n % d == 0 and (n // d) % 2 == 1)
+%o A400585 print([a(n) for n in range(1, 61)])
+%o A400585 (Python)
+%o A400585 from math import prod
+%o A400585 from sympy import factorint
+%o A400585 def A400585(n):
+%o A400585     m = n&-n
+%o A400585     f = factorint(n>>m.bit_length()-1).items()
+%o A400585     return m*(m*prod((p**(e+1<<1)-1)//(p*p-1) for p,e in f)-prod((p**(e+1)-1)//(p-1) for p,e in f))>>1 # _Chai Wah Wu_, Oct 06 2026
+%o A400585 (PARI) a(n) = sumdiv(n, d, if (n/d % 2, d*(d-1)/2)); \\ _Michel Marcus_, Sep 30 2026
+%Y A400585 Cf. A005309 (generated fermionic string states), A000217, A005308, A069153, A006519, A000265.
+%K A400585 nonn,easy,new
+%O A400585 1,3
+%A A400585 _Jishnu Babu Ranitha_, Sep 30 2026

@@ -1,0 +1,45 @@
+%I A400747 #17 Oct 06 2026 15:04:31
+%S A400747 1,1,3,250,185988393588,1064477933906579598029284131263924096,
+%T A400747 11248266654670046708643761434178254125476541994122270383477122446327811135894267605795151991516672
+%N A400747 Number of invertible self-dual Boolean functions of n variables under permutations and complementations of variables in both domain and range.
+%C A400747 a(n) is the number of equivalence classes of self-dual invertible maps F: {0,1}^n -> {0,1}^n, F(1-x) = 1-F(x), under permutations and complementations of the variables in both the domain and the range.
+%C A400747 _Peter Luschny_ derived direct formulas for the induced signed cycle counts P(d) and Q(d), using fixed-point counts and Möbius inversion. This avoids explicit enumeration of the 2^n binary vectors and considerably speeds up the computation. - _Vladeta Jovovic_, Oct 06 2026
+%F A400747 Let B_n = C_2^n semidirect S_n.
+%F A400747 A complementary pair is a pair {x,1-x}, where x is in {0,1}^n. Let P_g(d) be the number of d-cycles of complementary pairs for which g^d(x) = x, and Q_g(d) the number of d-cycles for which g^d(x) = 1-x.
+%F A400747 Two elements g,h in B_n have the same type t if P_g(d) = P_h(d) and Q_g(d) = Q_h(d) for all d. Let N_t be the number of elements of B_n of type t, and write P_t(d) and Q_t(d) for their common values.
+%F A400747 Let Z_t = Product_{d>=1} (2*d)^(P_t(d)+Q_t(d))*P_t(d)!*Q_t(d)! then a(n) = (1/(2^n*n!)^2)*Sum_t N_t^2*Z_t.
+%F A400747 For a partition lambda = (1^m_1, 2^m_2, ...), let z_lambda = Product_{r>=1} r^m_r*m_r! and l(lambda) = Sum_{r>=1} m_r.
+%F A400747 Every element of B_n has a signed cycle type (alpha,beta). Here alpha is the partition formed by the lengths of the cycles of the coordinate permutation containing an even number of complemented coordinates, and beta is the partition formed by the lengths of those containing an odd number. Thus |alpha|+|beta| = n.
+%F A400747 The number of elements of B_n having signed cycle type (alpha,beta) is 2^n*n!/(2^(l(alpha)+l(beta))*z_alpha*z_beta).
+%F A400747 Thus N_t can be obtained by summing 2^n*n!/(2^(l(alpha)+l(beta))*z_alpha*z_beta) over all signed cycle types (alpha,beta) inducing type t.
+%e A400747 For n = 3, representatives of the 3 equivalence classes are the maps with output lists
+%e A400747   (000,001,010,011,100,101,110,111),
+%e A400747   (000,001,010,100,011,101,110,111),
+%e A400747   (000,001,011,010,101,100,110,111),
+%e A400747 where the inputs are ordered as 000,001,...,111. Hence a(3) = 3.
+%o A400747 (SageMath)
+%o A400747 from collections import Counter, defaultdict
+%o A400747 def a(n):
+%o A400747     B, N = 2**n * factorial(n), defaultdict(int)
+%o A400747     for k in range(n + 1):
+%o A400747         for al in Partitions(k):
+%o A400747             for be in Partitions(n - k):
+%o A400747                 cyc = [(r, 0) for r in al] + [(r, 1) for r in be]
+%o A400747                 D = divisors(lcm([r * (1 + s) for r, s in cyc]))
+%o A400747                 f = lambda r, s, k: 2**gcd(r, k) if s == 0 or k // gcd(r, k) % 2 == 0 else 0
+%o A400747                 c = lambda r, s, k: 2**gcd(r, k) if (r + s*k) // gcd(r, k) % 2 == 0 else 0
+%o A400747                 F = lambda k: prod(f(r, s, k) for r, s in cyc)
+%o A400747                 C = lambda k: prod(c(r, s, k) for r, s in cyc)
+%o A400747                 Q = {d: sum(moebius(e) * C(d // e) for e in divisors(d) if e % 2) // (2*d) for d in D}
+%o A400747                 P = {d: sum(moebius(d // e) * (F(e) - 2 * sum(j * Q[j] for j in D if e % (2*j) == 0))
+%o A400747                         for e in divisors(d)) // (2*d) for d in D}
+%o A400747                 z = prod(r**m * factorial(m) for lam in (al, be)
+%o A400747                     for r, m in Counter(lam).items())
+%o A400747                 N[tuple((d, P[d], Q[d]) for d in D if P[d] or Q[d])] += B // (2**len(cyc) * z)
+%o A400747     return  sum(Nt**2 * prod((2*d)**(p+q) * factorial(p) * factorial(q)
+%o A400747                         for d, p, q in t) for t, Nt in N.items()) // B**2
+%o A400747 for n in range(1, 10): print(n, a(n)) # _Peter Luschny_, Oct 06 2026
+%Y A400747 Cf. A000725.
+%K A400747 nonn,new
+%O A400747 1,3
+%A A400747 _Vladeta Jovovic_, Oct 05 2026

@@ -1,0 +1,37 @@
+%I A400619 #5 Oct 06 2026 20:54:45
+%S A400619 2,5,73,1129,1201,21169,118801,8803369,119945383009
+%N A400619 Primes p at which 4*x - p sets a record, where x is the smallest denominator occurring in any solution of 4/p = 1/x + 1/y + 1/z in positive integers.
+%C A400619 For each prime p the Erdős-Straus equation 4/p = 1/x + 1/y + 1/z has solutions; let x(p) be the least denominator that occurs in any of them. Then 4*x(p) - p is a positive integer congruent to -p modulo 4, and this sequence lists the primes at which it exceeds its value at every smaller prime. The record values are in A400620.
+%C A400619 For fixed x, 4/p - 1/x = m/(p*x) with m = 4*x - p is a sum of two unit fractions if and only if some two divisors r, s of p*x have r + s divisible by m, and every such representation arises this way (y = (p*x/s)*(r+s)/m, z = (p*x/r)*(r+s)/m). So x(p) is found by testing x = floor(p/4) + 1, floor(p/4) + 2, ... in turn.
+%C A400619 Searched for all primes below 4*10^11 with exact integer arithmetic; every record was checked independently (a separate program confirmed the solution and that no smaller x works). No prime between 119945383009 and 4*10^11 reaches 4*x - p >= 112.
+%C A400619 A392469 lists the primes that set records for a different quantity, the least k for which a solution with y = k*p exists.
+%C A400619 Bello-Hernández, Benito and Fernández (Remark 24) report that 8803369 requires k = 107 in their divisor parametrization, where 4/n = 1/((n+k)/4) + ..., so their k is 4*x - p for the denominator x = (n+k)/4; this agrees with a(8) and its record value 107.
+%H A400619 M. Bello-Hernández, M. Benito, and E. Fernández, <a href="https://arxiv.org/abs/2606.10922">A Divisor Parametrization for the Erdős-Straus Conjecture</a>, arXiv:2606.10922 [math.NT], 2026.
+%e A400619 a(3) = 73: 4/73 = 1/20 + 1/219 + 1/4380, no solution has a denominator below 20, and 4*20 - 73 = 7 is larger than 4*x - p for every prime p < 73.
+%o A400619 (Python)
+%o A400619 from sympy import divisors, nextprime
+%o A400619 def least_x(k, p, distinct=False):
+%o A400619     for x in range(p//k + 1, 3*p//k + 1):
+%o A400619         m, n = k*x - p, p*x
+%o A400619         ds = divisors(n)
+%o A400619         for i, r in enumerate(ds):
+%o A400619             for s in ds[i:]:
+%o A400619                 if (r + s) % m == 0:
+%o A400619                     y, z = n//s*((r + s)//m), n//r*((r + s)//m)
+%o A400619                     if not distinct or len({x, y, z}) == 3:
+%o A400619                         return x
+%o A400619     return None
+%o A400619 def records(k, limit, distinct=False):
+%o A400619     best, out, p = -1, [], 2
+%o A400619     while p <= limit:
+%o A400619         x = least_x(k, p, distinct)
+%o A400619         if x is not None and k*x - p > best:
+%o A400619             best = k*x - p
+%o A400619             out.append(p)
+%o A400619         p = nextprime(p)
+%o A400619     return out
+%o A400619 print(records(4, 130000))  # [2, 5, 73, 1129, 1201, 21169, 118801]
+%Y A400619 Cf. A073101, A075245, A257839, A292581, A292624, A392469, A392470, A400620.
+%K A400619 nonn,more,new
+%O A400619 1,1
+%A A400619 _Merlijn Witteveen_, Oct 01 2026
