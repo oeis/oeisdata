@@ -1,0 +1,49 @@
+%I A399383 #51 Oct 07 2026 22:20:38
+%S A399383 1,0,1,0,3,1,0,8,9,1,0,24,59,18,1,0,89,360,215,30,1,0,415,2254,2205,
+%T A399383 565,45,1,0,2372,15232,21469,8715,1225,63,1,0,16072,113868,209356,
+%U A399383 122129,26460,2338,84,1,0,125673,948840,2111318,1642872,504399,67284,4074,108,1
+%N A399383 Triangle read by rows: T(n,k) = Sum_{i=0..n-k} binomial(n,i)*|Stirling1(n-i,k)|*k^i, for n >= 0 and 0 <= k <= n.
+%C A399383 T(n,k) counts partitions of n labeled nodes into k unlabeled cells. Each cell has a nonempty set of nodes cyclically ordered on its membrane and an unordered, possibly empty, set of nodes in its interior. Cyclic orders are taken up to rotation.
+%C A399383 To obtain the defining sum, choose the i interior nodes, arrange the remaining n-i nodes into k permutation cycles (the membranes), and assign each interior node to one of these k cells.
+%C A399383 This is the exponential Riordan array [1, exp(x)*log(1/(1-x))], or equivalently the array of exponential partial Bell polynomials with weights A002104(1), A002104(2), ... .
+%C A399383 The n-th row, as a probability density function, is asymptotic in distribution to a Poisson random variable with rate parameter e*log(n).
+%H A399383 Natalia L. Skirrow, <a href="https://oeis.org/A030019/a030019.pdf">A short proof of Vladimir Kruchinin's comment on A052888</a>, September 18, 2026, Theorem 1 and its specializations c=0 and c=1.
+%F A399383 Sum_{k=1..n} B_k(k+c)/(k+c)*(-1)^(n-k)*T(n,k) = c^(n-1) for n >= 1, where B_n(x) = Sum_{j=0..n} Stirling2(n,j)*x^j is the Touchard polynomial [Skirrow, Theorem 1].
+%F A399383 E.g.f.: 1/(1-x)^(y*exp(x)).
+%F A399383 E.g.f. of k-th column: (exp(x)*log(1/(1-x)))^k/k!.
+%F A399383 Row o.g.f.: Sum_{k=0..n} T(n,k)*y^k = Sum_{k=0..n} C(n,k) * (y * d/dy)^k * rf(y,n-k).
+%F A399383 T(n,k) = [x^k] rf(x,n)*hypergeom([-n],[1-x-n],k).
+%F A399383 T(n,k) = [x^k] rf(x,k)*C(n,k)*k^(n-k)*hypergeom([k-n,x+k],[k+1],-1/k).
+%F A399383 For fixed k, T(n,k) ~ ((n-1)!/(k-1)!) * exp(k) * H(n)^(k-1), where H(n) = A001008(n)/A002805(n).
+%F A399383 For fixed d, T(n,n-d) ~ (3/2)^d * n^(2*d) / d!.
+%F A399383 For fixed c, T(n,c*n) ~ (n^(1-c) * exp(c*(r+1)-1) * (l/c)^c / r)^n / ( c * sqrt(2*Pi*n*b) ), where r*(1 + 1/((1-r)*l)) = 1/c, l = log(1/(1-r)), and b = r*(1 + (l-r)/((1-r)*l)^2).
+%F A399383 For fixed m, Sum_{k=m..n} T(n,k) * ff(k,m) ~ n! * n^(e-1) * (e*log(n))^m / Gamma(e), where e=exp(1).
+%F A399383 T(n+1,k) = k*T(n,k) + Sum_{j=k-1..n} C(n,j)*T(j,k-1)*A000522(n-j).
+%F A399383 |Stirling1(n,k)| = Sum_{j=k..n} C(n,j)*T(j,k)*(-k)^(n-j).
+%F A399383 Sum_{k=0..n} (-1)^(n-k) * T(n,k) = A009198(n). - _Alois P. Heinz_, Oct 01 2026
+%e A399383 The triangle begins:
+%e A399383   1;
+%e A399383   0,  1;
+%e A399383   0,  3,   1;
+%e A399383   0,  8,   9,   1;
+%e A399383   0, 24,  59,  18,  1;
+%e A399383   0, 89, 360, 215, 30, 1;
+%e A399383   ...
+%e A399383 T(3,1) = 8: there are 3 choices with one membrane node, 3 choices with two membrane nodes, and 2 cyclic orders with all three nodes on the membrane.
+%p A399383 T:= (n, k)-> add(binomial(n, i)*abs(Stirling1(n-i, k))*k^i, i=0..n-k):
+%p A399383 seq(seq(T(n, k), k=0..n), n=0..9);  # _Alois P. Heinz_, Oct 01 2026
+%o A399383 (PARI)
+%o A399383 T(n,k) = sum(i=0, n-k, binomial(n,i)*abs(stirling(n-i,k,1))*k^i);
+%o A399383 concat(vector(10, n, vector(n, k, T(n-1,k-1))))
+%o A399383 (Python)
+%o A399383 from functools import cache
+%o A399383 A000522=cache(lambda n: n and (n-1)*(A000522(n-1)+A000522(n-2))+2 if n>0 else int(n==0))
+%o A399383 A399383=cache(lambda n,k: k*A399383(n-1,k) + (c:=1)*A399383(n-1,k-1) + sum((c:=c*(n-j)//j)*A399383(n-j-1,k-1)*A000522(j) for j in range(1,n-k+1)) if n>=k>0 else int(n==k))
+%o A399383 for n in range(8): print([A399383(n,k) for k in range(n+1)])
+%Y A399383 Columns k=0-1 give: A000007, A002104.
+%Y A399383 Row sums give A191365.
+%Y A399383 T(n+1,n) gives A045943 or 3*A000217.
+%Y A399383 Cf. A009198, A132393 (unsigned Stirling numbers of the first kind), A030019, A052888.
+%K A399383 nonn,tabl,new
+%O A399383 0,5
+%A A399383 _Natalia L. Skirrow_ and _Meghanto Majumder_, Oct 01 2026

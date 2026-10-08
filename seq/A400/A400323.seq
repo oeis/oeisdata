@@ -1,0 +1,54 @@
+%I A400323 #27 Oct 07 2026 18:11:07
+%S A400323 1,2,5,6,31,36,43,66,67,68,201,210,211,256,257,258,261,266,269,272,
+%T A400323 273,274,277,278,285,288,751,756,801,802,803,804,805,806,845,846,847,
+%U A400323 848,851,860,889,908,911,912,1027,1028,1029,1030,1031,1032,1033,1034,1041
+%N A400323 Number of steps for the Rule 30 middle-column random walk to reach distance n.
+%C A400323 Treating the middle column as a walk (+1 for 1, -1 for 0), a(n) is the number of steps to first reach distance n from the origin.
+%C A400323 The divergence a(n)/n -> infinity is equivalent to Problem 2 of Wolfram's 2019 Rule 30 Prizes (whether colors occur equally often). The linked proof demonstrates this equivalence, serving as a restatement of the problem rather than a solution. For a fair coin, a(n) grows roughly as n^2; empirically, a(2574) = 1696264.
+%D A400323 W. Feller, An Introduction to Probability Theory and Its Applications, Vol. I, 3rd ed., Wiley, 1968, Chapter III.
+%D A400323 Stephen Wolfram, A New Kind of Science, Wolfram Media, 2002; pp. 27, 317, 871, 1084, 1087.
+%H A400323 David L. Condrey, <a href="/A400323/b400323.txt">Table of n, a(n) for n = 1..2574</a>
+%H A400323 David L. Condrey, <a href="/A400323/a400323.txt">Proof that Problem 2 is equivalent to a(n)/n -> infinity</a>.
+%H A400323 Philip Hartman and Aurel Wintner, <a href="https://doi.org/10.2307/2371287">On the Law of the Iterated Logarithm</a>, Amer. J. Math. 63 (1941), 169-176.
+%H A400323 Christian Mauduit and András Sárközy, <a href="https://doi.org/10.4064/aa-82-4-365-377">On finite pseudorandom binary sequences I: Measure of pseudorandomness, the Legendre symbol</a>, Acta Arith. 82 (1997), 365-377.
+%H A400323 Stephen Wolfram, <a href="https://writings.stephenwolfram.com/2019/10/announcing-the-rule-30-prizes/">Announcing the Rule 30 Prizes</a>, 2019.
+%H A400323 Stephen Wolfram, <a href="https://doi.org/10.1016/0196-8858(86)90028-X">Random sequence generation by cellular automata</a>, Adv. Appl. Math. 7 (1986), 123-169.
+%H A400323 <a href="/index/Ce#cell">Index entries for sequences related to cellular automata</a>
+%H A400323 <a href="https://oeis.org/wiki/Index_to_Elementary_Cellular_Automata">Index to Elementary Cellular Automata</a>
+%F A400323 a(n) = least k >= 1 such that |2*A327982(k-1) - k| = n.
+%F A400323 a(n) >= n.
+%e A400323 The middle column A051023 begins 1, 1, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1.
+%e A400323 Replacing 0 by -1 and taking partial sums gives S(k) for k = 1, 2, 3, ...:
+%e A400323   k:    1   2   3   4   5   6   7   8   9  10
+%e A400323   S(k): 1   2   1   2   3   4   3   2   3   4
+%e A400323 |S| first reaches 1 at k = 1, so a(1) = 1.
+%e A400323 |S| first reaches 2 at k = 2, so a(2) = 2.
+%e A400323 |S| first reaches 3 at k = 5, so a(3) = 5.
+%e A400323 |S| first reaches 4 at k = 6, so a(4) = 6.
+%p A400323 A400323_list := proc(nmax) local x, s, out, L, k;
+%p A400323   x, s, out, L := 1, 0, NULL, 1;
+%p A400323   for k from 0 do
+%p A400323     s := s + 2*Bits:-And(Bits:-Shift(x, -k), 1) - 1;
+%p A400323     if abs(s) = L then out := out, k+1; L := L+1;
+%p A400323       if L > nmax then return [out]; end if; end if;
+%p A400323     x := Bits:-Xor(x, Bits:-Or(2*x, 4*x));
+%p A400323   end do;
+%p A400323 end proc:
+%p A400323 A400323_list(44);
+%t A400323 recordPositions[kmax_] := Module[{s = Accumulate[2*CellularAutomaton[30, {{1}, 0}, {kmax, {{0}}}] - 1], best = 0, out = {}},
+%t A400323   Do[If[Abs[s[[i]]] > best, best = Abs[s[[i]]]; AppendTo[out, i]], {i, Length[s]}]; out];
+%t A400323 recordPositions[2000]
+%o A400323 (Python)
+%o A400323 def A400323_list(n):
+%o A400323     x, s, k, out = 1, 0, 0, []
+%o A400323     while len(out) < n:
+%o A400323         s += 2 * ((x >> k) & 1) - 1
+%o A400323         if abs(s) > len(out): out.append(k + 1)
+%o A400323         x ^= (x << 1) | (x << 2)
+%o A400323         k += 1
+%o A400323     return out
+%o A400323 print(A400323_list(53))
+%Y A400323 Cf. A051023, A110240, A269160, A327982, A327984, A327985.
+%K A400323 nonn,easy,new
+%O A400323 1,2
+%A A400323 _David L. Condrey_, Sep 23 2026

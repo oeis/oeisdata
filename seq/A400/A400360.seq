@@ -1,14 +1,32 @@
-%I A400360 #8 Sep 30 2026 05:36:35
+%I A400360 #14 Oct 07 2026 11:04:43
 %S A400360 1,1,5,6,19,24,61,79,174,229,456,605,1120,1491,2607,3475,5806,7734,
 %T A400360 12453,16558,25853,34288,52160,68967,102606,135208,197313,259078,
 %U A400360 371754,486322,687520,896034,1250079,1623103,2237749,2894679,3948469,5088842,6874568,8828060
 %N A400360 Expansion of Product_{k>=1} (1+x^k) * (1+x^(2*k)) / (1-x^(2*k))^3.
 %H A400360 Vaclav Kotesovec, <a href="/A400360/b400360.txt">Table of n, a(n) for n = 0..10000</a>
 %F A400360 a(n) ~ 3 * exp(Pi*sqrt(3*n/2)) / (32*n^(3/2)).
+%F A400360 Convolution product A000009 * (A035457 * (A035363^3)). - _Georg Fischer_, Oct 06 2026
 %t A400360 CoefficientList[Series[1/(QPochhammer[-x]*QPochhammer[x]^2), {x, 0, 60}], x]
 %t A400360 (* Alternative: *)
 %t A400360 nmax = 60; CoefficientList[Series[Product[(1+x^k)*(1+x^(2*k))/(1-x^(2*k))^3, {k, 1, nmax}], {x, 0, nmax}], x]
-%Y A400360 Cf. A228831, A255257, A400337.
+%o A400360 (Python)
+%o A400360 from more_itertools import convolve
+%o A400360 def A9_41(N: int) -> tuple[list[int], list[int]]:
+%o A400360     a = [0] * (N + 1); a[0] = 1
+%o A400360     p = [0] * (N + 1); p[0] = 1
+%o A400360     for k in range(1, N + 1):
+%o A400360         for n in range(N, k - 1, -1): a[n] += a[n - k]
+%o A400360         for n in range(k, N + 1): p[n] += p[n - k]
+%o A400360     return a, p
+%o A400360 def A400360(N: int) -> list[int]:
+%o A400360     A, P = A9_41(N)
+%o A400360     D = list(convolve(A[:N//2 + 1], P)); D = D[:N//2 + 1]
+%o A400360     D = list(convolve(D, P)); D = D[:N // 2 + 1]
+%o A400360     D = list(convolve(D, P)); D = D[:N // 2 + 1]
+%o A400360     return [sum(A[n - 2*j] * D[j]
+%o A400360         for j in range(n // 2 + 1)) for n in range(N + 1)]
+%o A400360 print(A400360(39))  # _Peter Luschny_, Oct 07 2026
+%Y A400360 Cf. A000009, A035457, A035363, A228831, A255257, A400337.
 %K A400360 nonn,new
 %O A400360 0,3
 %A A400360 _Vaclav Kotesovec_, Sep 24 2026
