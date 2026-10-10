@@ -1,0 +1,54 @@
+%I A400647 #11 Oct 09 2026 03:52:27
+%S A400647 2,3,7,43,13,547,97,52963,757,5,31,19,571,271,113,41,23371,6001981,
+%T A400647 1093,823981,29,61,1008331,1016730397231,1993,2311,163,12642907,2963,
+%U A400647 1627,199,4672457173,67,5393,364340887231,10639,3876222699239971,103,22859,139,157,1201
+%N A400647 a(1) = 2; a(n+1) is the least prime factor of 1 + Product_{k=1..n, a(k) active} a(k) which is not yet in the sequence, where a(k) becomes permanently inactive as soon as some later a(j), j>k, is less than a(k).
+%C A400647 A variant of the Euclid-Mullin sequence A000945.
+%C A400647 It is not proven that there is always at least one prime factor that is not yet in the sequence (this is not trivial because of the way we exclude certain values already in the sequence when forming the product for term n).
+%H A400647 Tesfamichael Bogale, <a href="/A400647/b400647.txt">Table of n, a(n) for n = 1..1560</a>
+%H A400647 Wikipedia, <a href="https://en.wikipedia.org/wiki/Euclid%E2%80%93Mullin_sequence">Euclid-Mullin sequence</a>.
+%e A400647 a(1) = 2.
+%e A400647 Active set {2}. N = 2+1 = 3, so a(2) = 3.
+%e A400647 Active set {2, 3}. N = 2*3+1 = 7, so a(3) = 7.
+%e A400647 Active set {2, 3, 7}. N = 2*3*7+1 = 43, so a(4) = 43.
+%e A400647 Active set {2, 3, 7, 43}. N = 2*3*7*43+1 = 1807 = 13*139, so a(5) = 13.
+%e A400647 Active set {2, 3, 7, 13}. N = 2*3*7*13+1 = 547, so a(6) = 547.
+%e A400647 Active set {2, 3, 7, 13, 547}. N = 2*3*7*13*547+1 = 298663 = 97*3079, so a(7) = 97.
+%e A400647 Active set {2, 3, 7, 13, 97}. N = 2*3*7*13*97+1 = 52963, so a(8) = 52963.
+%e A400647 Active set {2, 3, 7, 13, 97, 52963}. N = 2*3*7*13*97*52963+1 = 2805026407 = 757*3705451, so a(9) = 757.
+%e A400647 Active set {2, 3, 7, 13, 97, 757}. N = 2*3*7*13*97*757+1 = 40092235 = 5*8018447, so a(10) = 5.
+%e A400647 Active set {2, 3, 5}. N = 2*3*5+1 = 31, so a(11) = 31.
+%e A400647 ...
+%o A400647 (Python)
+%o A400647 from sympy import factorint
+%o A400647 def smallest_new_prime_factor(n, discovered):
+%o A400647     remainder = n
+%o A400647     while True:
+%o A400647         f = min(factorint(remainder).keys())
+%o A400647         if f not in discovered:
+%o A400647             return f
+%o A400647         while remainder % f == 0:
+%o A400647             remainder //= f  # discard a previously seen prime, keep searching
+%o A400647 def a_list(N):
+%o A400647     seq = [2, 3]
+%o A400647     benched = set()
+%o A400647     endpoint = 3
+%o A400647     while len(seq) < N:
+%o A400647         active = [p for p in seq if p <= endpoint and p not in benched]
+%o A400647         n = 1
+%o A400647         for p in active:
+%o A400647             n *= p
+%o A400647         n += 1
+%o A400647         f = smallest_new_prime_factor(n, set(seq))
+%o A400647         for p in seq:
+%o A400647             # permanently exclude all primes greater than the new endpoint
+%o A400647             if f < p <= endpoint:
+%o A400647                 benched.add(p)
+%o A400647         endpoint = f
+%o A400647         seq.append(f)
+%o A400647     return seq[:N]
+%o A400647 print(a_list(15))
+%Y A400647 Cf. A000945, A020639, A400347.
+%K A400647 nonn,hard,new
+%O A400647 1,1
+%A A400647 _Tesfamichael Bogale_, Oct 02 2026
