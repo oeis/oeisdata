@@ -1,0 +1,43 @@
+%I A400573 #34 Oct 10 2026 16:53:08
+%S A400573 2,3,5,7,11,13,17,163,317,1087,1721,37,1861,3709,1093,1553,3593,1129,
+%T A400573 3037,1039,1187,79,9739,1297,1999,101,10271,107,14083,113,10433,131,
+%U A400573 13063,12391,149,151,157,18397,167,12899,179,181,191,13109,30293,199,36319,38839
+%N A400573 Smallest prime p such that lpf(p*R(p)) is the n-th prime, where R(p) is the digit reversal of p.
+%C A400573 Also, smallest prime p such that min(p, lpf(R(p))) is the n-th prime, which eases calculation. - _Michael S. Branicky_, Oct 01 2026
+%H A400573 David A. Corneth, <a href="/A400573/b400573.txt">Table of n, a(n) for n = 1..10000</a> (first 2246 terms from Michael S. Branicky)
+%H A400573 David A. Corneth, <a href="/A400573/a400573.gp.txt">PARI program</a>
+%e A400573 a(8) = 163, because lpf(163*361) = lpf(19^2*163) = 19 = prime(8). And no lesser prime has this property.
+%e A400573 a(9) = 317. prime(9) = 23 and lpf(rev(23)) < 23 so a(9) != 23. So rev(a(n)) is not prime and is 23-rough and a multiple of 23. If rev(a(n)) has at most 3 digits then rev(a(n)) comes from {529, 667, 713, 851, 943, 989}. Checking these numbers for primality of rev(rev(a(n))) = a(n) and minimizing such numbers gives a(n) = rev(713) = 317. - _David A. Corneth_, Oct 01 2026
+%p A400573 rev:= proc(n) local L,i;
+%p A400573      L:= convert(n,base,10);
+%p A400573      add(L[-i]*10^(i-1),i=1..nops(L))
+%p A400573 end proc:
+%p A400573 V:= Vector(100): count:= 0: p:= 1:
+%p A400573 while count < 100 do
+%p A400573   p:= nextprime(p);
+%p A400573   x:= p*rev(p);
+%p A400573   j:= NumberTheory:-pi(min(NumberTheory:-PrimeFactors(x)));
+%p A400573   if j <= 100 and V[j] = 0 then V[j]:= p; count:= count+1 fi
+%p A400573 od:
+%p A400573 convert(V,list); # _Robert Israel_, Sep 30 2026
+%t A400573 lpf[n_]:=FactorInteger[n][[1, 1]]; a[n_]:=Module[{p=2},While[lpf[p*IntegerReverse[p]]!=Prime[n], p=NextPrime[p]]; p]; Array[a,48] (* _Stefano Spezia_, Sep 30 2026 *)
+%o A400573 (PARI) a(n) = my(p=2, pn=prime(n)); while (vecmin(factor(p*fromdigits(Vecrev(digits(p))))[1, 1]) != pn, p = nextprime(p+1)); p; \\ _Michel Marcus_, Oct 01 2026
+%o A400573 (PARI) \\ See Corneth link
+%o A400573 (Python)
+%o A400573 from itertools import islice
+%o A400573 from sympy import factorint, nextprime, primepi
+%o A400573 def agen():
+%o A400573     adict, p, n = dict(), 1, 1
+%o A400573     while True:
+%o A400573         p = nextprime(p)
+%o A400573         v = primepi(min(p, min(factorint(int(str(p)[::-1])))))
+%o A400573         if v not in adict:
+%o A400573             adict[v] = p
+%o A400573             while n in adict:
+%o A400573                 yield adict[n]
+%o A400573                 n += 1
+%o A400573 print(list(islice(agen(), 48))) # _Michael S. Branicky_, Oct 01 2026
+%Y A400573 Cf. A000040, A004086, A020639 (lpf).
+%K A400573 nonn,base,new
+%O A400573 1,1
+%A A400573 _Jean-Marc Rebert_, Sep 30 2026
