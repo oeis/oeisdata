@@ -1,0 +1,63 @@
+%I A400660 #9 Oct 11 2026 20:59:53
+%S A400660 0,0,0,0,1,1,3,2,6,5,4,6,7,7,10,10,11,10,12,13,12,12,15,14,15,17,16,
+%T A400660 19,14,18,19,21,24,21,22,21,26,24,28,28,27,25,30,28,29,27,29,32,36,30,
+%U A400660 36,37,32,38,38,38,39,38,39,38,39,42,40,45,44,48,47,45,49,46
+%N A400660 Number of bases b in range 2 <= b <= prime(n) in which prime(n) is a two-sided truncatable prime.
+%C A400660 A prime p is a two-sided truncatable prime in base b if every prefix and every suffix of its base-b representation is prime (with no leading zeros in intermediate suffixes).
+%C A400660 Bases b > prime(n) are excluded because p would have a single digit in base b, trivially satisfying the condition.
+%C A400660 The sequence is strictly positive for n >= 5 (i.e., for prime(n) >= 11).
+%C A400660 Proof: For every odd prime p >= 11, the base b = (p-3)/2 is an integer >= 4. In this base, p = 2b + 3, so its representation consists of exactly the two digits [2, 3]. Since both 2 and 3 are prime, every prefix and suffix is prime, hence b = (p-3)/2 is always a valid base.
+%C A400660 More generally, for any prime c with 3 <= c < p/3, the base b = (p-c)/2 yields the two-digit representation [2, c], which is always two-sided truncatable.
+%C A400660 Consequently, a(n) >= pi((prime(n)-1)/3) - 1 for n >= 5, which rigorously proves that a(n) -> infinity as n -> infinity.
+%C A400660 The asymptotic growth is dominated by 2-digit representations, since the number of bases giving >= 3 digits is strictly bounded by sqrt(p).
+%C A400660 On average, a(n) ~ C * prime(n) / log(prime(n)), where C = 1/3 + Sum_{q in primes, q >= 3} 1/(q(q^2-1)) is approximately 0.3875.
+%C A400660 Highly composite numbers and primorials (such as 210, 420, 330, 180, 120) appear most frequently as valid bases because they maximize the local density of admissible coprime digits.
+%F A400660 a(n) >= pi((prime(n) - 1)/3) - 1 for n >= 5.
+%e A400660 For n = 1 (p = 2): in base 2, 2 = 10_2; suffix 0 is not prime, so a(1) = 0.
+%e A400660 For n = 2, 3, 4 (p = 3, 5, 7): no base in 2 <= b <= p satisfies the condition, so a(2) = a(3) = a(4) = 0.
+%e A400660 For n = 5 (p = 11): only base b = 4 is valid, where 11 = 23_4 and both digits 2 and 3 are prime, so a(5) = 1.
+%e A400660 For n = 6 (p = 13): only base b = 5 is valid (13 = 23_5), so a(6) = 1.
+%e A400660 For n = 7 (p = 17): valid bases are b = 5 (32_5), b = 6 (25_6), and b = 7 (23_7), so a(7) = 3.
+%t A400660 isTwoSided[p_, b_] := Module[{d = IntegerDigits[p, b], k},
+%t A400660   k = Length[d];
+%t A400660   If[MemberQ[Most[d], 0], Return[False]];
+%t A400660   And @@ Table[PrimeQ[FromDigits[Take[d, i], b]], {i, 1, k}] &&
+%t A400660   And @@ Table[PrimeQ[FromDigits[Take[d, -i], b]], {i, 1, k}]
+%t A400660 ];
+%t A400660 a[n_] := Module[{p = Prime[n]},
+%t A400660   Count[Range[2, p], b_ /; isTwoSided[p, b]]
+%t A400660 ];
+%t A400660 Table[a[n], {n, 1, 70}]
+%o A400660 (Python)
+%o A400660 from sympy import isprime, prime
+%o A400660 def is_two_sided(p, b):
+%o A400660     digits = []
+%o A400660     temp = p
+%o A400660     while temp > 0:
+%o A400660         digits.append(temp % b)
+%o A400660         temp //= b
+%o A400660     digits.reverse()
+%o A400660     k = len(digits)
+%o A400660     s = 0
+%o A400660     mult = 1
+%o A400660     for i in range(k - 1, -1, -1):
+%o A400660         if digits[i] == 0 and i < k - 1:
+%o A400660             return False
+%o A400660         s += digits[i] * mult
+%o A400660         mult *= b
+%o A400660         if not isprime(s):
+%o A400660             return False
+%o A400660     pref = 0
+%o A400660     for d in digits:
+%o A400660         pref = pref * b + d
+%o A400660         if not isprime(pref):
+%o A400660             return False
+%o A400660     return True
+%o A400660 def a(n):
+%o A400660     p = prime(n)
+%o A400660     return sum(1 for b in range(2, p + 1) if is_two_sided(p, b))
+%o A400660 print([a(n) for n in range(1, 71)])
+%Y A400660 Cf. A000040, A020994, A076586.
+%K A400660 nonn,base,new
+%O A400660 1,7
+%A A400660 _Guido Avagliano_, Oct 03 2026

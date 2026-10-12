@@ -1,0 +1,37 @@
+%I A399208 #24 Oct 11 2026 18:20:12
+%S A399208 0,1,3,4,4,5,9,10,12,13,17,18,20,21,27
+%N A399208 Minimum over all symmetric n X n {-1,1} matrices M with zero diagonal of the maximum of |Sum_{1 <= i < j <= n} M[i,j]*x[i]*x[j]| over all vectors x in {-1,1}^n.
+%C A399208 a(n) is the value of a two-move game on the complete graph on n vertices. A designer first labels every edge +1 (the endpoints want to agree) or -1 (they want to disagree). A second player, seeing the labels, assigns +1 or -1 to every vertex; each edge then scores the product of its label with its endpoints' signs, and the player tries to make the total score as far from zero as possible, in either direction. The designer, moving first, tries to make every possible assignment score close to zero. a(n) is the imbalance that the best designer cannot avoid against best play.
+%C A399208 n*sqrt(n-1)/Pi <= a(n), and limsup a(n)/n^(3/2) <= 1/2. Whether a(n)/n^(3/2) converges is an open question of Paata Ivanisvili (see the MathOverflow link).
+%C A399208 a(16) is 28 or 30: monotonicity and parity give a(16) >= 28, and an explicit construction gives a(16) <= 30.
+%C A399208 The values a(11), a(13), and a(15) were obtained by computer search using nauty, with the enumeration independently checked from the saved counts.
+%C A399208 The terms a(1) through a(10), a(12), and a(14) have direct certificates. Verification scripts for a(1) through a(15) are available in the linked GitHub repository.
+%H A399208 Paata Ivanisvili, <a href="https://mathoverflow.net/questions/413935">Min max of a quadratic form of plus-minus ones</a>, MathOverflow, 2022.
+%H A399208 Rob Sneiderman, <a href="https://github.com/Robby955/mo-413935-research">Exact values, computational certificates, and verification scripts</a>, GitHub, 2026.
+%F A399208 a(n) = binomial(n,2) - 2*r(n), where r(n) is the covering radius of the code {(x[i]*x[j])_{i<j} : x in {-1,1}^n} U {-(x[i]*x[j])_{i<j} : x in {-1,1}^n} in the Hamming cube of dimension binomial(n,2).
+%F A399208 a(n) == binomial(n,2) (mod 2), since every score is a sum of binomial(n,2) signs.
+%F A399208 a(n) <= a(n+1) <= a(n) + n.
+%e A399208 For n = 1 there are no edges, the score is always 0, hence a(1) = 0.
+%e A399208 For n = 2: there is exactly one edge, labeled +1 or -1. Whatever the label and whatever signs the player picks, the score is that single edge's contribution, which is +1 or -1 -- so its absolute value is exactly 1 on every assignment. The designer has no way to push it below 1 (the score is never 0), and the player has no way above 1, hence a(2) = 1.
+%e A399208 For n = 3 there are two labelings of the triangle up to switching, with edge-sign product +1 or -1. For the all-plus triangle, x = (1,1,1) scores 3. For the labels (+1,+1,-1), x = (1,-1,-1) scores -3. So a(3) = 3.
+%o A399208 (Python)
+%o A399208 from itertools import combinations
+%o A399208 def a(n):  # exact; feasible for n <= 8 (2^binomial(n-1,2) signings after root switching)
+%o A399208     m = n - 1
+%o A399208     pairs = list(combinations(range(m), 2))
+%o A399208     states = [[1 if s >> i & 1 else -1 for i in range(m)] for s in range(1 << m)]
+%o A399208     best = None
+%o A399208     for g in range(1 << len(pairs)):
+%o A399208         signs = [-1 if g >> k & 1 else 1 for k in range(len(pairs))]
+%o A399208         mx = 0
+%o A399208         for x in states:
+%o A399208             q = sum(x) + sum(s * x[i] * x[j] for s, (i, j) in zip(signs, pairs))
+%o A399208             mx = max(mx, abs(q))
+%o A399208             if best is not None and mx >= best: break
+%o A399208         if best is None or mx < best: best = mx
+%o A399208     return best
+%o A399208 print([a(n) for n in range(1, 8)])
+%Y A399208 Cf. A002854 (switching classes of signed complete graphs and Seidel matrices), A245230 (maximum frustration and covering radii of codes associated with complete bipartite graphs).
+%K A399208 nonn,hard,more,new
+%O A399208 1,3
+%A A399208 _Rob Sneiderman_, Aug 22 2026
