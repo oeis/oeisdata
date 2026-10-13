@@ -1,0 +1,39 @@
+%I A400567 #24 Oct 12 2026 21:38:49
+%S A400567 0,0,1,4,13,41,136,504,2143,10231,52366,276255,1468039,7776652,
+%T A400567 40938262,214637882,1132301911,6186335989,37413670534,277196212745,
+%U A400567 2650629650719,30619857649602,385425552958942,4960683887665005,63585213550860499,804792730627381901
+%N A400567 Number of set partitions of an n-element set whose number of blocks is a Sophie Germain prime.
+%C A400567 Stirling transform of the characteristic function of the Sophie Germain primes (compare A085507, same transform for the primes).
+%C A400567 A085507(n) - a(n) = 1, 28, 462, 5880, 63987, 627396, 5715425 for n = 7..13; it is the sum of S(n,k) over primes k that are not Sophie Germain primes.
+%C A400567 a(n)/A000110(n) does not appear to converge (empirical): for 100 <= n <= 400 it ranges from about 2*10^(-5) (n = 288) to about 0.17 (n = 101).
+%C A400567 a(n) is a (probable) prime for n = 4, 5, 8, 36 (n <= 400; the primality of a(36) was checked with a Miller-Rabin test, so it is a probable prime).
+%H A400567 Pierre Colmant, <a href="/A400567/b400567.txt">Table of n, a(n) for n = 0..575</a>
+%F A400567 G.f.: Sum_{p in A005384} x^p / Product_{j=1..p} (1 - j*x).
+%F A400567 E.g.f.: Sum_{p in A005384} (exp(x)-1)^p / p!.
+%F A400567 a(n) = Sum_{p in A005384, p<=n} (1/p!) * Sum_{j=0..p} (-1)^(p-j) * binomial(p,j) * j^n.
+%e A400567 a(4) = 13 because the Sophie Germain block counts at most 4 are 2 and 3, giving S(4,2) + S(4,3) = 7 + 6.
+%e A400567 a(7) = 504 = S(7,2) + S(7,3) + S(7,5) = 63 + 301 + 140, since 2, 3, 5 are Sophie Germain primes (5, 7, 11 are prime) but 7 is not (15 is not prime). Compare A085507(7) = 505, which also counts the S(7,7) = 1 partition into 7 blocks.
+%p A400567 b:= proc(n, m) option remember; `if`(n=0, `if`(andmap(
+%p A400567       isprime, [m, 2*m+1]), 1, 0), m*b(n-1, m)+b(n-1, m+1))
+%p A400567     end:
+%p A400567 a:= n-> b(n, 0):
+%p A400567 seq(a(n), n=0..25);  # _Alois P. Heinz_, Sep 30 2026
+%t A400567 Table[Total[Table[If[PrimeQ[k] && PrimeQ[2 k + 1], StirlingS2[n, k], 0], {k, 1, n}]], {n, 0, 25}]
+%o A400567 (Python)
+%o A400567 from sympy import isprime
+%o A400567 def a_terms(N):
+%o A400567     row = [1]
+%o A400567     values = [0]
+%o A400567     for n in range(1, N + 1):
+%o A400567         new = [0] * (n + 1)
+%o A400567         for k in range(1, n + 1):
+%o A400567             new[k] = row[k - 1] + (k * row[k] if k < len(row) else 0)
+%o A400567         row = new
+%o A400567         values.append(sum(row[k] for k in range(1, n + 1)
+%o A400567                           if isprime(k) and isprime(2 * k + 1)))
+%o A400567     return values
+%o A400567 print(a_terms(25))
+%Y A400567 Cf. A000110, A005384, A008277, A010051, A085507.
+%K A400567 nonn,less,new
+%O A400567 0,4
+%A A400567 _Pierre Colmant_, Sep 30 2026

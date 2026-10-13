@@ -1,0 +1,38 @@
+%I A400501 #22 Oct 12 2026 23:18:03
+%S A400501 1,1,1,2,1,4,1,6,5,10,1,17,1,25,31,38,1,69,1,106,128,149,1,251,211,
+%T A400501 345,401,557,1,763,1,1093,1368,1542,1853,2369,1,3159,4099,4582,1,6774,
+%U A400501 1,9583,11257,12767,1,17970,16797,24709,29303,33984,1,47065
+%N A400501 Number of partitions of n that can be reduced to a single part by repeatedly replacing two parts x and y with gcd(x,y) > 1 by their sum x + y.
+%C A400501 a(n) = 1 if and only if n = 1 or n is prime. Proof: the final fusion producing [n] merges two parts x, y with x + y = n and gcd(x,y) = g > 1, so g | n; if n is prime this forces g = n, impossible since g <= min(x,y) < n, hence only the one-part partition is reducible. If n is composite with smallest prime factor p, then [n-p, p] has gcd(n-p, p) = p > 1 and fuses to [n], so a(n) >= 2.
+%C A400501 A gcd-based analog of the difference-based reduction family A397939 (rule |x - y| >= 2) and A395687 (rule |x - y| >= 3).
+%H A400501 Sean A. Irvine, <a href="/A400501/b400501.txt">Table of n, a(n) for n = 1..100</a> (terms 1..57 from Damian Velázquez López)
+%e A400501 For n = 6, a(6) = 4: the reducible partitions are [6]; [2,4] (gcd 2, -> [6]); [3,3] (gcd 3, -> [6]); and [2,2,2] (-> [2,4] -> [6]). No other partition of 6 has a pair of parts with gcd > 1 leading to a full reduction.
+%o A400501 (Python)
+%o A400501 from math import gcd
+%o A400501 from collections import Counter
+%o A400501 from sympy.utilities.iterables import partitions
+%o A400501 def a(n):
+%o A400501     memo = {}
+%o A400501     def red(c):
+%o A400501         if len(c) == 1: return True
+%o A400501         if c in memo: return memo[c]
+%o A400501         memo[c] = False; cnt = Counter(c); vals = sorted(cnt); res = False
+%o A400501         for i in range(len(vals)):
+%o A400501             for j in range(i, len(vals)):
+%o A400501                 x, y = vals[i], vals[j]
+%o A400501                 if x == y and cnt[x] < 2: continue
+%o A400501                 if gcd(x, y) > 1:
+%o A400501                     nc = cnt.copy(); nc[x] -= 1
+%o A400501                     if nc[x] == 0: del nc[x]
+%o A400501                     nc[y] -= 1
+%o A400501                     if y in nc and nc[y] == 0: del nc[y]
+%o A400501                     nc[x+y] = nc.get(x+y, 0) + 1
+%o A400501                     if red(tuple(sorted(nc.elements()))): res = True; break
+%o A400501             if res: break
+%o A400501         memo[c] = res; return res
+%o A400501     return sum(red(tuple(sorted(sum(([d]*m for d,m in p.items()), []))))
+%o A400501                for p in partitions(n))
+%Y A400501 Cf. A000041, A397939, A395687.
+%K A400501 nonn,new
+%O A400501 1,4
+%A A400501 _Damian Velázquez López_, Sep 27 2026
