@@ -1,0 +1,61 @@
+%I A399656 #16 Oct 13 2026 14:58:06
+%S A399656 1,2,4,3,12,8,16,10,6,7,5,2064,1040,528,2576,1552,272,2320,1296,784,
+%T A399656 1808,144,2192,1168,656,1680,400,2448,1424,912,1936,80,2128,1104,592,
+%U A399656 1616,336,2384,1360,848,1872,208,2256,1232,720,1744,464,2512,1488,976,2000,48
+%N A399656 A permutation of the positive integers with no 4-term arithmetic progression as a subsequence (see Comments for the construction).
+%C A399656 Davis, Entringer, Graham, and Simmons (1977) showed that every permutation p(1), p(2), p(3), ... of the positive integers contains a 3-term arithmetic progression as a subsequence, constructed one with no 5-term progression, and asked whether some permutation avoids 4-term progressions x, x+r, x+2r, x+3r (r != 0). This permutation, constructed by Ho (2026), answers the question positively.
+%C A399656 The construction uses the order on the nonnegative integers in which m comes before n if m has a 1 at the lowest binary digit where they differ; on {0, ..., 7} this order is 7, 3, 5, 1, 6, 2, 4, 0. Starting from the empty list, for k = 0, 1, 2, ... a recursive procedure (Algorithm 1 in Ho (2026)) extends the current list to one that contains k. Each list is an initial segment of the next, and in the limit they give a permutation b(0), b(1), ... of the nonnegative integers; a(n) = b(n-1) + 1. See also the Python program.
+%C A399656 The lists after k = 0, 1, ..., 8 have lengths 1, 2, 4, 4, 11, 11, 11, 11, 354, and the list after k = 16 has about 8.649*10^103 terms. So a(n) <= 2624 for n <= 354, while a(355), ..., a(10000) have 103 to 107 digits. The number 17 is the last term of the list after k = 16: a(n) = 17 for n = 86490269228787868778162354420127054646097210344857566587452455939942287077121924077987594629694148963631. The Python program keeps that list as a tree instead of listing it, so it can compute a(n) for any n up to about 8.649*10^103; it reproduces the b-file in a few seconds.
+%H A399656 Boon Suan Ho, <a href="/A399656/b399656.txt">Table of n, a(n) for n = 1..10000</a>
+%H A399656 Sarosh Adenwalla, <a href="https://doi.org/10.1016/j.disc.2024.114183">Avoiding monotone arithmetic progressions in permutations of integers</a>, Discrete Math. 347 (2024), 114183; <a href="https://arxiv.org/abs/2211.04451">arXiv version</a>, arXiv:2211.04451 [math.CO], 2022-2024.
+%H A399656 James A. Davis, Roger C. Entringer, Ronald L. Graham, and Gustavus J. Simmons, <a href="https://doi.org/10.4064/aa-34-1-81-90">On permutations containing no long arithmetic progressions</a>, Acta Arith. 34 (1977), 81-90.
+%H A399656 Boon Suan Ho, <a href="https://arxiv.org/abs/2609.12780">A 4AP-free permutation of the positive integers</a>, arXiv:2609.12780 [math.CO], 2026. See Algorithm 1 (p. 3) and p. 5.
+%H A399656 Boon Suan Ho, <a href="https://github.com/boonsuan/4ap">Lean formalization and Python implementation</a>, GitHub, 2026.
+%H A399656 Timothy D. LeSaulnier and Sujith Vijay, <a href="https://doi.org/10.1016/j.disc.2010.10.006">On permutations avoiding arithmetic progressions</a>, Discrete Math. 311 (2011), 205-207.
+%H A399656 <a href="/index/Per#IntegerPermutation">Index entries for sequences that are permutations of the natural numbers</a>
+%e A399656 The lists after k = 0, 1, 2 are (0), (0, 1), (0, 1, 3, 2); k = 3 is already present, and k = 4 gives (0, 1, 3, 2, 11, 7, 15, 9, 5, 6, 4). Adding 1 gives a(1..11) = 1, 2, 4, 3, 12, 8, 16, 10, 6, 7, 5.
+%o A399656 (Python)
+%o A399656 # Algorithm 1 of Ho (2026), with each target set written as {0, ..., H-1} union X and the
+%o A399656 # terms each call appends kept as a tree, so the list for k = 16 never has to be listed.
+%o A399656 # Starting from T = {k}, every target set that Algorithm 1 forms has this form, since
+%o A399656 # halving the even or odd part of an interval gives an interval, and the odd call only
+%o A399656 # adds {0, ..., h-1}. PERFORMANCE.md in the Ho GitHub link explains the method in detail.
+%o A399656 def extend(P, H, X): # returns (number of new terms, largest new term or -1, tree)
+%o A399656     X = {x for x in X if x >= H}
+%o A399656     if max(P, default=0) == 0: # base case: P (empty or (0)) and the targets, in reverse order
+%o A399656         if P and H == 0: X.add(0) # so that the listing starts with P = (0)
+%o A399656         largest = max([H - 1] * (H > 0) + list(X), default=-1)
+%o A399656         return H + len(X) - len(P), largest, ('base', H, X, len(P))
+%o A399656     P0 = [x // 2 for x in P if x % 2 == 0] # even terms of P, halved
+%o A399656     P1 = [x // 2 for x in P if x % 2 == 1] # odd terms x of P, as (x-1)/2
+%o A399656     n0, largest0, tree0 = extend(P0, (H + 1) // 2, {x // 2 for x in X if x % 2 == 0})
+%o A399656     h = 2 * largest0 if n0 else 0 # largest new even term
+%o A399656     n1, largest1, tree1 = extend(P1, max(H // 2, h), {x // 2 for x in X if x % 2 == 1})
+%o A399656     largest = max(2 * largest1 + 1 if n1 else -1, 2 * largest0 if n0 else -1)
+%o A399656     return n1 + n0, largest, ('split', n1, tree1, tree0) # new odd terms, then new even terms
+%o A399656 # listed(H, X, i): the i-th term of {0..H-1} | X in reverse order, that is, the even
+%o A399656 # terms first and then the odd ones, each part halved and ordered in the same way.
+%o A399656 def listed(H, X, i):
+%o A399656     if H + len(X) == 1: return H - 1 if H else min(X)
+%o A399656     evens = (H + 1) // 2 + sum(1 for x in X if x % 2 == 0)
+%o A399656     if i < evens: return 2 * listed((H + 1) // 2, {x // 2 for x in X if x % 2 == 0}, i)
+%o A399656     return 2 * listed(H // 2, {x // 2 for x in X if x % 2 == 1}, i - evens) + 1
+%o A399656 def nth(tree, i): # i-th new term in a tree, found without listing the others
+%o A399656     if tree[0] == 'base':
+%o A399656         _, H, X, skip = tree
+%o A399656         return listed(H, X, i + skip)
+%o A399656     _, n1, tree1, tree0 = tree
+%o A399656     if i < n1: return 2 * nth(tree1, i) + 1
+%o A399656     return 2 * nth(tree0, i - n1)
+%o A399656 def A_list(N): # N < 8.649*10^103
+%o A399656     P = []
+%o A399656     for k in range(9): # targets k = 0..8 give the first 354 terms; k = 9..15 add nothing
+%o A399656         count, _, tree = extend(P, 0, {k})
+%o A399656         P += [nth(tree, i) for i in range(count)]
+%o A399656     count, _, tree = extend(P, 0, {16}) # about 8.649*10^103 new terms, kept as a tree
+%o A399656     return [x + 1 for x in P[:N]] + [nth(tree, i) + 1 for i in range(max(0, N - len(P)))]
+%o A399656 print(A_list(52))
+%Y A399656 Cf. A003407, A368357, A368358.
+%K A399656 nonn,new
+%O A399656 1,2
+%A A399656 _Boon Suan Ho_, Oct 05 2026

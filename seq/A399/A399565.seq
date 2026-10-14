@@ -1,0 +1,78 @@
+%I A399565 #18 Oct 13 2026 19:03:05
+%S A399565 0,1,52,3206,148333,5704976,186418822,5363838147,138516282022,
+%T A399565 3263239583201,70975381784698,1438974221808277,27404512901792514,
+%U A399565 493365219589278307,8440836584815018164,137852105408514398933,2157304156039536622778,32457345757968776634172
+%N A399565 Number of factorizations of (p*q*r*s)^n into parts > 1 containing at least one part divisible by p*q*r*s, where p, q, r, and s are distinct primes.
+%C A399565 The number of factorizations depends only on the prime exponents (n, n, n, n) and is independent of the choice of distinct primes p, q, r, and s.
+%C A399565 Equivalently, a(n) is the number of 4-dimensional vector partitions (or quadripartite partitions) of (n, n, n, n) into parts with nonnegative components (not all zero) that contain at least one part with strictly positive entries in all four dimensions.
+%C A399565 Subtracting the factorizations where each part is divisible by at most three of the primes from the total factorizations A397811(n) yields a(n).
+%C A399565 a(0) = 0 because the empty factorization contains no parts.
+%C A399565 The 2-dimensional analog is A395808, and the 3-dimensional analog is A399611.
+%F A399565 a(n) = A397811(n) - R_{<=3}(n, n, n, n), where R_{<=3} is the number of 4-dimensional vector partitions restricted to parts with at least one coordinate equal to zero.
+%e A399565 a(0) = 0: the empty factorization contains no parts.
+%e A399565 a(1) = 1: for p*q*r*s, the only factorization containing a totally mixed factor (divisible by p, q, r, and s) is {p*q*r*s} itself.
+%t A399565 lista[nmax_] := Module[{m = nmax + 1, dpT, dpR},
+%t A399565   dpT = ConstantArray[0, {m, m, m, m}]; dpT[[1, 1, 1, 1]] = 1;
+%t A399565   dpR = ConstantArray[0, {m, m, m, m}]; dpR[[1, 1, 1, 1]] = 1;
+%t A399565   Do[
+%t A399565     If[c1 + c2 + c3 + c4 > 0,
+%t A399565       Do[dpT[[i1, i2, i3, i4]] += dpT[[i1 - c1, i2 - c2, i3 - c3, i4 - c4]],
+%t A399565         {i1, c1 + 1, m}, {i2, c2 + 1, m}, {i3, c3 + 1, m}, {i4, c4 + 1, m}];
+%t A399565       If[c1*c2*c3*c4 == 0,
+%t A399565         Do[dpR[[i1, i2, i3, i4]] += dpR[[i1 - c1, i2 - c2, i3 - c3, i4 - c4]],
+%t A399565           {i1, c1 + 1, m}, {i2, c2 + 1, m}, {i3, c3 + 1, m}, {i4, c4 + 1, m}]]
+%t A399565     ],
+%t A399565     {c1, 0, nmax}, {c2, 0, nmax}, {c3, 0, nmax}, {c4, 0, nmax}
+%t A399565   ];
+%t A399565   Table[dpT[[n + 1, n + 1, n + 1, n + 1]] - dpR[[n + 1, n + 1, n + 1, n + 1]], {n, 0, nmax}]
+%t A399565 ]; lista[14]
+%t A399565 (* Alternative: Fast Generating Function using Exp/Log series *)
+%t A399565 max = 14; s[u_, m_] := Sum[u^(m*i), {i, 0, max/m}];
+%t A399565 seT = Series[Sum[(s[w, m]*s[x, m]*s[y, m]*s[z, m] - 1)/m, {m, 1, max}],
+%t A399565   {w, 0, max}, {x, 0, max}, {y, 0, max}, {z, 0, max}];
+%t A399565 seR = Series[Sum[(
+%t A399565     s[w, m]*s[x, m]*s[y, m] + s[w, m]*s[x, m]*s[z, m] + s[w, m]*s[y, m]*s[z, m] + s[x, m]*s[y, m]*s[z, m]
+%t A399565     - s[w, m]*s[x, m] - s[w, m]*s[y, m] - s[w, m]*s[z, m] - s[x, m]*s[y, m] - s[x, m]*s[z, m] - s[y, m]*s[z, m]
+%t A399565     + s[w, m] + s[x, m] + s[y, m] + s[z, m] - 2
+%t A399565   )/m, {m, 1, max}],
+%t A399565   {w, 0, max}, {x, 0, max}, {y, 0, max}, {z, 0, max}];
+%t A399565 coesT = CoefficientList[Exp[seT], {w, x, y, z}];
+%t A399565 coesR = CoefficientList[Exp[seR], {w, x, y, z}];
+%t A399565 Table[coesT[[n + 1, n + 1, n + 1, n + 1]] - coesR[[n + 1, n + 1, n + 1, n + 1]], {n, 0, max}]
+%o A399565 (Python)
+%o A399565 def lista(n_max):
+%o A399565     m = n_max + 1
+%o A399565     m2, m3 = m * m, m * m * m
+%o A399565     size = m * m * m * m
+%o A399565     dp_T = [0] * size
+%o A399565     dp_R = [0] * size
+%o A399565     dp_T[0] = 1
+%o A399565     dp_R[0] = 1
+%o A399565     for c1 in range(m):
+%o A399565         for c2 in range(m):
+%o A399565             for c3 in range(m):
+%o A399565                 for c4 in range(m):
+%o A399565                     if c1 + c2 + c3 + c4 == 0:
+%o A399565                         continue
+%o A399565                     shift = c1 * m3 + c2 * m2 + c3 * m + c4
+%o A399565                     for i1 in range(c1, m):
+%o A399565                         for i2 in range(c2, m):
+%o A399565                             for i3 in range(c3, m):
+%o A399565                                 for i4 in range(c4, m):
+%o A399565                                     idx = i1 * m3 + i2 * m2 + i3 * m + i4
+%o A399565                                     dp_T[idx] += dp_T[idx - shift]
+%o A399565                     if c1 * c2 * c3 * c4 == 0:
+%o A399565                         for i1 in range(c1, m):
+%o A399565                             for i2 in range(c2, m):
+%o A399565                                 for i3 in range(c3, m):
+%o A399565                                     for i4 in range(c4, m):
+%o A399565                                         idx = i1 * m3 + i2 * m2 + i3 * m + i4
+%o A399565                                         dp_R[idx] += dp_R[idx - shift]
+%o A399565     diag = [k * m3 + k * m2 + k * m + k for k in range(m)]
+%o A399565     return [dp_T[i] - dp_R[i] for i in diag]
+%o A399565 print(lista(14))
+%Y A399565 Cf. A001055, A395808 (2D analog), A397811 (unrestricted 4D diagonal), A398816 (prime-free 4D diagonal), A399611 (3D analog).
+%K A399565 nonn,hard,new
+%O A399565 0,3
+%A A399565 _Jishnu Babu Ranitha_, Oct 08 2026
+%E A399565 More terms from _Sean A. Irvine_, Oct 13 2026

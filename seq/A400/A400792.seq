@@ -1,20 +1,56 @@
-%I A400792 #26 Oct 12 2026 20:56:32
-%S A400792 0,1,2,4,6,3,12,8,10,18,14,16,24,9,30,20,5,15,60,36,22,42,26,28,40,32,
+%I A400792 #50 Oct 13 2026 10:35:35
+%S A400792 1,2,4,6,3,12,8,10,18,14,16,24,9,30,20,5,15,60,36,22,42,26,28,40,32,
 %T A400792 34,48,21,54,38,90,50,44,46,66,72,52,56,7,70,84,58,78,27,210,33,120,
 %U A400792 62,64,96,45,39,102,108,68,80,114,74,76,126,150,82,88,86,100,98,35,168,92,94
-%N A400792 a(0) = 0. For n > 0, a(n) is the smallest unused positive integer k such that (number of earlier terms smaller than k that are coprime to k) - (number of earlier terms larger than k that share a factor with k) = 1.
+%N A400792 a(1) = 1. For n > 1, a(n) is the smallest unused positive integer k such that (number of earlier terms smaller than k that are coprime to k) - (number of earlier terms larger than k that share a factor with k) = 1.
 %C A400792 The sequence is well defined: a(n) exists for all n.
-%C A400792 Our convention is that 0, like 1, is coprime to every positive integer.
-%C A400792 Conjecture: this a permutation of the nonnegative integers.
+%C A400792 Conjecture: this is a permutation of the positive integers.
 %C A400792 Up to n = 446, the primes appear in their natural order, and likewise the primorials, respectively at the bottom and at the top of the graph (see the scatterplot link). Does this pattern repeat indefinitely?
-%H A400792 Paolo Xausa, <a href="/A400792/b400792.txt">Table of n, a(n) for n = 0..446</a>
-%H A400792 Michael De Vlieger, <a href="/A400792/a400792_1.png">Plot prime(i)^m | a(n) at (x,y) = (n,i)</a>, n = 1..447, 4X horizontal, 12X vertical exaggeration, with a color function showing m = 1 in black, m = 2 in red, m = 3 in orange, etc. The index bar below the graph registers primes in red, proper prime powers in gold, primorials > 2 in green, other squarefree composites in green, and numbers neither squarefree nor prime powers in blue.
+%H A400792 Chai Wah Wu, <a href="/A400792/b400792.txt">Table of n, a(n) for n = 1..1614</a> (terms 1..446 from Paolo Xausa)
+%H A400792 Michael De Vlieger, <a href="/A400792/a400792_1.png">Plot prime(i)^m | a(n) at (x,y) = (n,i)</a>, n = 1..446, 4X horizontal, 12X vertical exaggeration, with a color function showing m = 1 in black, m = 2 in red, m = 3 in orange, etc. The index bar below the graph registers primes in red, proper prime powers in gold, primorials > 2 in green, other squarefree composites in green, and numbers neither squarefree nor prime powers in blue.
 %H A400792 Paolo Xausa, <a href="/A400792/a400792.png">Log-log scatterplot of n, a(n) for n = 1..446</a>, showing primes in orange and primorials in blue.
 %e A400792 a(13) = 9 because the number of earlier terms smaller than 9 that are coprime to 9 is 4 (i.e., 1, 2, 4, 8), the number of earlier terms larger than 9 that are not coprime to 9 is 3 (i.e., 12, 18, 24), 4 - 3 = 1 and 9 is the least integer not previously used which satisfies these conditions.
-%t A400792 A400792list[nmax_] := Module[{s, a = ConstantArray[0, nmax + 1], k, u = 1, c}, s[_] := False; Do[While[s[u], u++]; k = u; While[s[k] || Count[First[c = CoprimeQ[GatherBy[a[[;; n]], # < k &], k]], True] != If[Length[c] == 2, Count[Last[c], False] + 1, 1], k++]; s[k] = True; a[[n + 1]] = k, {n, nmax}]; a];
+%t A400792 A400792list[nmax_] := Module[{s, a = ConstantArray[1, nmax], k, u = 2, c}, s[_] := False; Do[While[s[u], u++]; k = u; While[s[k] || Count[First[c = CoprimeQ[GatherBy[a[[;; n - 1]], # < k &], k]], True] != If[Length[c] == 2, Count[Last[c], False] + 1, 1], k++]; s[k] = True; a[[n]] = k, {n, 2, nmax}]; a];
 %t A400792 A400792list[100]
-%Y A400792 Cf. A400793 (positions of primes), A400794 (positions of primorials).
+%o A400792 (Python)
+%o A400792 from math import gcd
+%o A400792 from itertools import count, islice
+%o A400792 from sympy import isprime
+%o A400792 def A400792_gen(): # generator of terms
+%o A400792     xlist, l, q = [1], 1, 1
+%o A400792     yield 1
+%o A400792     while True:
+%o A400792         for i in range(l-1):
+%o A400792             for k in range(xlist[i]+1,xlist[i+1]):
+%o A400792                 c, m = 0, sum(1 for x in xlist[i+1:] if gcd(x,k)>1)+1
+%o A400792                 for x in xlist[:i+1]:
+%o A400792                     if gcd(x,k)==1:
+%o A400792                         c += 1
+%o A400792                         if c>m: break
+%o A400792                 if c == m:
+%o A400792                     xlist = xlist[:i+1]+[k]+xlist[i+1:]
+%o A400792                     yield k
+%o A400792                     if isprime(k): q *= k
+%o A400792                     l += 1
+%o A400792                     break
+%o A400792             else: continue
+%o A400792             break
+%o A400792         else:
+%o A400792             for k in count(max(xlist[-1]+1,q)):
+%o A400792                 c = 0
+%o A400792                 for x in xlist:
+%o A400792                     if gcd(x,k) == 1:
+%o A400792                         c += 1
+%o A400792                         if c>1: break
+%o A400792                 if c==1:
+%o A400792                     xlist.append(k)
+%o A400792                     yield k
+%o A400792                     if isprime(k): q *= k
+%o A400792                     l += 1
+%o A400792                     break
+%o A400792 A400792_list = list(islice(A400792_gen(),30)) # _Chai Wah Wu_, Oct 12 2026
+%Y A400792 Cf. A400793 (positions of primes), A400794 (positions of primorials), A397358 (inverse).
 %Y A400792 Cf. A064413, A280985, A339671, A364164, A384275.
 %K A400792 nonn,new
-%O A400792 0,3
+%O A400792 1,2
 %A A400792 _Paolo Xausa_ and _Michael De Vlieger_, Oct 06 2026

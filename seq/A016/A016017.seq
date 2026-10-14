@@ -1,4 +1,4 @@
-%I A016017 #45 Nov 08 2024 05:51:09
+%I A016017 #48 Oct 14 2026 00:02:44
 %S A016017 1,2,4,8,6,32,64,12,256,512,24,2048,36,30,16384,32768,96,72,262144,
 %T A016017 192,1048576,2097152,60,8388608,216,768,67108864,288,1536,536870912,
 %U A016017 1073741824,120,576,8589934592,6144,34359738368,68719476736,180,864
@@ -19,9 +19,24 @@
 %e A016017 a(5)=6 because 1/6 = 1/7 + 1/42 = 1/8 + 1/24 = 1/9 + 1/18 = 1/10 + 1/15 = 1/12 + 1/12.
 %t A016017 f[j_, n_] := (Times @@ (j(Last /@ FactorInteger[n]) + 1) + j - 1)/j; t = Table[0, {50}]; Do[a = f[2, n]; If[a < 51 && t[[a]] == 0, t[[a]] = n; Print[{a, n}]], {n, 2^30}] (* _Robert G. Wilson v_, Aug 03 2005 *)
 %o A016017 (PARI) a(n) = {k = 1; while (numdiv(k^2) != (2*n-1), k++); return (k); }; \\ _Amiram Eldar_, Jan 07 2019 after _Michel Marcus_ at A071571
+%o A016017 (Python)
+%o A016017 from functools import lru_cache
+%o A016017 from math import prod
+%o A016017 from sympy import isprime, divisors, prime
+%o A016017 def A016017(n):
+%o A016017     @lru_cache(maxsize=None)
+%o A016017     def mult_factors(n):
+%o A016017         if isprime(n): return [(n,)]
+%o A016017         c = []
+%o A016017         for d in divisors(n,generator=True):
+%o A016017             if 1<d<n:
+%o A016017                 for a in mult_factors(n//d):
+%o A016017                     c.append(tuple(sorted((d,)+a)))
+%o A016017         return list(set(c))
+%o A016017     return min((prod(prime(i)**(j-1>>1) for i,j in enumerate(reversed(d),1)) for d in mult_factors((n<<1)-1)),default=1) # _Chai Wah Wu_, Oct 12 2026
 %Y A016017 Identical to A071571 shifted right.
 %Y A016017 Cf. A000005, A000290, A005408, A005179, A003680, A037992, A055079, A048691.
-%K A016017 nonn
+%K A016017 nonn,changed
 %O A016017 1,2
 %A A016017 _Robert G. Wilson v_
 %E A016017 Entry revised by _N. J. A. Sloane_, Aug 14 2005

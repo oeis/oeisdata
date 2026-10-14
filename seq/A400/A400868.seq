@@ -1,0 +1,41 @@
+%I A400868 #4 Oct 13 2026 16:58:17
+%S A400868 0,0,2,0,64,72,3363,0,273156,322940,32668555,23880636,5374605768,
+%T A400868 4544440488,1173142165027,0
+%N A400868 Number of deals of n cards numbered 1 to n between two players for which the card game War never ends, when the winner of each turn puts the losing card and then the winning card at the bottom of their pile.
+%C A400868 This is the game of A400411 with the other order of putting the cards back. The cards 1..n are dealt alternately to two players, player 1 first. On each turn both players turn over their top card. The higher card wins, and the winner puts the losing card and then the winning card at the bottom of their pile. A player with no cards loses. All cards are different, so there are no ties. The play is fixed by the deal, so a game that never ends eventually repeats a position and from then on goes around the same cycle of positions forever.
+%C A400868 The count is the same for any fixed way of dealing that gives player 1 ceiling(n/2) cards and player 2 the other floor(n/2), since every such way produces each pair of starting piles of these sizes exactly once. For odd n it also does not matter which player gets the extra card, since swapping the players turns an endless game into an endless game.
+%C A400868 a(n)/n! is the probability that a random deal never ends. For odd n it grows: 33.3%, 53.3%, 66.7%, 75.3%, 81.8%, 86.3% and 89.7% for n = 3, 5, ..., 15. For even n that is not a power of 2 it is small: 10.0%, 8.9%, 5.0% and 5.2% for n = 6, 10, 12, 14.
+%C A400868 For n <= 16, a(n) = 0 exactly when n is a power of 2. For n = 2, 4, 8, 16 no position of the game lies on a cycle at all. This follows from a search of every position in which player 1 has card n on top, since every cycle passes through such a position, up to swapping the players (card n never loses, so in an endless game it keeps coming back to the top of its holder's pile). Spivey notes that for this rule a version of his Theorem 3 gives cycles for every n that is not a power of 2.
+%C A400868 Conjecture: a(n) = 0 exactly when n is a power of 2.
+%C A400868 Each term was computed by at least two independently written programs. The Python program below is practical only for small n; a(11)-a(16) were computed with GPU programs. For n = 16 two of them searched all 19615115520000 positions with card 16 on top of player 1's pile.
+%H A400868 Evgeny Lakshtanov and Vera Roshchina, <a href="https://arxiv.org/abs/1007.1371">On finiteness in the card game of War</a>, arXiv:1007.1371 [math.DS], 2010-2011; Amer. Math. Monthly 119 (2012), 318-323.
+%H A400868 Daniel Okwor, <a href="https://doi.org/10.5281/zenodo.22957686">Endless Games of War: Counting the Deals That Never End</a>, Zenodo, 2026.
+%H A400868 Daniel Okwor, <a href="https://github.com/OrygnsCode/endless-games-of-war">Programs and data for endless games of War</a>, GitHub repository, 2026.
+%H A400868 Michael Z. Spivey, <a href="https://math.colgate.edu/~integers/kg2/kg2.pdf">Cycles in War</a>, Integers 10 (2010), #G02, 747-764.
+%e A400868 a(3) = 2: of the 6 deals of 3 cards, the decks in order 1, 2, 3 and 1, 3, 2 never end. For 1, 2, 3, player 1 gets 1, 3 and player 2 gets 2 (top card first), and the piles go
+%e A400868   (1,3 | 2) -> (3 | 1,2) -> (1,3 | 2),
+%e A400868 so the game repeats every 2 turns from the start. With the winning card put back first, as in A400411, no deal of 3 cards cycles.
+%o A400868 (Python)
+%o A400868 from itertools import permutations
+%o A400868 from collections import deque
+%o A400868 def a(n):  # deals of cards 1..n for which War (losing card, then winning card, under the winner's pile) never ends
+%o A400868     count = 0
+%o A400868     for deal in permutations(range(1, n + 1)):
+%o A400868         p1, p2, seen = deque(deal[0::2]), deque(deal[1::2]), set()
+%o A400868         while p1 and p2:
+%o A400868             state = (tuple(p1), tuple(p2))
+%o A400868             if state in seen:
+%o A400868                 count += 1
+%o A400868                 break
+%o A400868             seen.add(state)
+%o A400868             x, y = p1.popleft(), p2.popleft()
+%o A400868             if x > y:
+%o A400868                 p1.extend((y, x))
+%o A400868             else:
+%o A400868                 p2.extend((x, y))
+%o A400868     return count
+%o A400868 print([a(n) for n in range(1, 11)])
+%Y A400868 Cf. A000079, A400411.
+%K A400868 nonn,hard,more,new
+%O A400868 1,3
+%A A400868 _Daniel Okwor_, Oct 07 2026

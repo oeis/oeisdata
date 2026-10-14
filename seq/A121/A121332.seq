@@ -1,8 +1,43 @@
-%I A121332 #3 Mar 30 2012 16:50:30
-%S A121332 0,1,5,20,71,235,753,2345,7190,21753,65188,193834,527743,1683615,
-%T A121332 4927394,14367845,41761634,121052806,350049108,1010123293,2909478000
+%I A121332 #10 Oct 13 2026 17:51:30
+%S A121332 0,1,5,20,71,235,753,2345,7190,21753,65188,193834,572743,1683615,
+%T A121332 4927394,14367845,41761634,121052806,350049108,1010123293,2909478000,
+%U A121332 8366523704,24023736637,68892110463,197328049467,564610499481,1613961480530,4609562954610,13154735685699
 %N A121332 Number of bridged bicyclic skeletons with n carbon atoms (see Parks et al. for precise definition).
+%C A121332 Equivalently, a(n) is the number of connected graphs with n vertices, n+1 edges and maximum degree 4 whose 2-core is a theta graph: two bridgeheads joined by three paths with a, a and c internal vertices, a != c, a, c >= 1 (bridged, so the bridgeheads are not adjacent; A121331 and A121333 are the cases with three equal and three different path lengths). The terms can be computed with Burnside's lemma over the symmetry group of the core (order 4: exchange of the two equal paths, exchange of the bridgeheads), attaching alkyl radicals (A000598) to the core vertices: at most one at each bridgehead and at most two at every other core vertex. - _Alper Ferudun_, Oct 08 2026
 %D A121332 Camden A. Parks and James B. Hendrickson, Enumeration of monocyclic and bicyclic carbon skeletons, J. Chem. Inf. Comput. Sci., vol. 31, 334-339 (1991).
-%K A121332 nonn
+%o A121332 (Python)
+%o A121332 def A121332_list(N):  # a(5..N)
+%o A121332     def mul(a, b):
+%o A121332         c = [0]*(N+1)
+%o A121332         for i, x in enumerate(a):
+%o A121332             if x:
+%o A121332                 for j in range(N+1-i): c[i+j] += x*b[j]
+%o A121332         return c
+%o A121332     def sub(a, k): return [a[i//k] if i % k == 0 else 0 for i in range(N+1)]
+%o A121332     def pw(a, m):
+%o A121332         r = [1] + [0]*N
+%o A121332         for _ in range(m): r = mul(r, a)
+%o A121332         return r
+%o A121332     T = [1] + [0]*N  # A000598: rooted trees with at most 3 children per node
+%o A121332     for _ in range(N+1):
+%o A121332         T3, T12, Tx3 = mul(mul(T, T), T), mul(T, sub(T, 2)), sub(T, 3)
+%o A121332         T = [1] + [(T3[i] + 3*T12[i] + 2*Tx3[i])//6 for i in range(N)]
+%o A121332     B = [0] + T[:N]  # bridgehead: at most one radical
+%o A121332     TT, T2 = mul(T, T), sub(T, 2)
+%o A121332     P = [0] + [(TT[i] + T2[i])//2 for i in range(N)]  # other core vertex: at most two radicals
+%o A121332     P2, B2 = sub(P, 2), sub(B, 2)
+%o A121332     rev = lambda m: mul(pw(P2, m//2), pw(P, m % 2))  # a path of m vertices reversed onto itself
+%o A121332     tot = [0]*(N+1)
+%o A121332     for a in range(1, N):
+%o A121332         for c in range(1, N):
+%o A121332             if c == a or 2*a + c + 2 > N: continue
+%o A121332             terms = [mul(mul(B, B), pw(P, 2*a + c)),           # identity
+%o A121332                      mul(mul(B, B), mul(pw(P2, a), pw(P, c))),  # exchange the two equal paths
+%o A121332                      mul(B2, mul(mul(rev(a), rev(a)), rev(c))), # exchange the bridgeheads
+%o A121332                      mul(B2, mul(pw(P2, a), rev(c)))]           # both
+%o A121332             for i in range(N+1): tot[i] += sum(t[i] for t in terms)
+%o A121332     return [x//4 for x in tot[5:]]  # _Alper Ferudun_, Oct 08 2026
+%K A121332 nonn,changed
 %O A121332 5,3
 %A A121332 _N. J. A. Sloane_, Aug 27 2006
+%E A121332 a(17) corrected and more terms from _Alper Ferudun_, Oct 07 2026
