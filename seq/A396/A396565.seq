@@ -1,0 +1,86 @@
+%I A396565 #70 Oct 14 2026 16:19:38
+%S A396565 1,1,2,7,16,47,99,277,546,1424,2483,6170,10675,24446,39795,90137,
+%T A396565 142787,303798,462693,964420,1436702,2902924,4172035,8256736,11801684,
+%U A396565 22444378,31191616,58980930,80684694,146975915
+%N A396565 Number of prime-free knapsack 2-dimensional vector partitions of (n, n).
+%C A396565 A 2-dimensional vector partition of (n, n) is a collection of nonzero integer pairs (i, j) with i, j >= 0 summing to (n, n).
+%C A396565 A vector partition is called "knapsack" if the subset sums of its parts are all distinct (i.e., every subset of parts has a unique coordinate sum). Because duplicate parts would immediately yield identical subset sums, all parts in a knapsack partition must be strictly distinct. This is the 2-dimensional vector analog to A108917 and A292886.
+%C A396565 A partition is called "prime-free" if it avoids the elementary basis vectors (1, 0) and (0, 1).
+%C A396565 Equivalently, the number of factorizations of (p*q)^n into strictly distinct factors > 1 where neither p nor q are permitted as standalone factors, such that every subset of factors has a unique product, for any two distinct primes p and q.
+%e A396565 a(0) = 1: the empty partition.
+%e A396565 a(1) = 1: the only prime-free partition of (1,1) is {(1,1)}, which has distinct subset sums (0,0) and (1,1).
+%e A396565 a(2) = 2: the 2 prime-free knapsack partitions of (2,2) are {(2,2)} and {(2,0), (0,2)}.
+%e A396565 (Note: the partition {(1,1), (1,1)} is excluded because duplicate parts give the same subset sum (1,1) twice).
+%t A396565 ClearAll[a];
+%t A396565 a[0] = 1;
+%t A396565 a[n_Integer] := Module[{M = n + 1, parts, partsX, partsY, shifts, nParts, count = 0, dfs},
+%t A396565   (* 1. Generate allowed prime-free parts (i, j) with i+j >= 2 *)
+%t A396565   (* Sorted descending by total weight (i+j) then i for aggressive branch pruning *)
+%t A396565   parts = SortBy[
+%t A396565     Select[Tuples[Range[0, n], 2],
+%t A396565       (#[[1]] + #[[2]] >= 2) && (# != {1, 0}) && (# != {0, 1}) &],
+%t A396565     {-#[[1]] - #[[2]] &, -#[[1]] &}
+%t A396565   ];
+%t A396565   (* 2. Flatten into fast 1D coordinate arrays and precomputed bit shifts *)
+%t A396565   partsX = parts[[All, 1]];
+%t A396565   partsY = parts[[All, 2]];
+%t A396565   shifts = partsX * M + partsY;
+%t A396565   nParts = Length[parts];
+%t A396565   (* 3. Depth-first search with bitwise subset-sum tracking *)
+%t A396565   dfs[idx_, rx_, ry_, mask_] := (
+%t A396565     If[rx == 0 && ry == 0, count++; Return[]];
+%t A396565     If[rx + ry < 2, Return[]]; (* Prune: no valid part has coordinate sum < 2 *)
+%t A396565     Do[
+%t A396565       With[{vx = partsX[[i]], vy = partsY[[i]], sh = shifts[[i]]},
+%t A396565         If[vx <= rx && vy <= ry,
+%t A396565           (* O(1) bitwise test: ensures all 2^k subset sums remain strictly unique *)
+%t A396565           If[BitAnd[mask, BitShiftLeft[mask, sh]] == 0,
+%t A396565             dfs[i + 1, rx - vx, ry - vy, BitOr[mask, BitShiftLeft[mask, sh]]]
+%t A396565           ]
+%t A396565         ]
+%t A396565       ],
+%t A396565       {i, idx, nParts}
+%t A396565     ]
+%t A396565   );
+%t A396565   dfs[1, n, n, 1];
+%t A396565   count
+%t A396565 ];
+%t A396565 (* Compute terms from n = 0 to 18 *)
+%t A396565 Table[Print["n = ", n, " -> ", a[n]]; a[n], {n, 0, 18}]
+%o A396565 (Python)
+%o A396565 def a(n):
+%o A396565     if n == 0:
+%o A396565         return 1
+%o A396565     M = n + 1
+%o A396565     # Generate and sort allowed parts descending by coordinate sum
+%o A396565     parts = []
+%o A396565     for i in range(n, -1, -1):
+%o A396565         for j in range(n, -1, -1):
+%o A396565             if i + j >= 2 and (i, j) not in ((1, 0), (0, 1)):
+%o A396565                 parts.append((i, j))
+%o A396565     parts.sort(key=lambda v: (-(v[0] + v[1]), -v[0]))
+%o A396565     shifts = [vx * M + vy for vx, vy in parts]
+%o A396565     n_parts = len(parts)
+%o A396565     count = 0
+%o A396565     def dfs(idx, rx, ry, mask):
+%o A396565         nonlocal count
+%o A396565         if rx == 0 and ry == 0:
+%o A396565             count += 1
+%o A396565             return
+%o A396565         if rx + ry < 2:
+%o A396565             return
+%o A396565         for i in range(idx, n_parts):
+%o A396565             vx, vy = parts[i]
+%o A396565             if vx <= rx and vy <= ry:
+%o A396565                 sh = shifts[i]
+%o A396565                 if not (mask & (mask << sh)):
+%o A396565                     dfs(i + 1, rx - vx, ry - vy, mask | (mask << sh))
+%o A396565     dfs(0, n, n, 1)
+%o A396565     return count
+%o A396565 for n in range(22):
+%o A396565     print(f"n = {n} -> {a(n)}")
+%Y A396565 Cf. A002774, A002865, A108917, A292886, A397646.
+%K A396565 nonn,hard,more,new
+%O A396565 0,3
+%A A396565 _Jishnu Babu Ranitha_, Oct 08 2026
+%E A396565 a(23)-a(29) from _Sean A. Irvine_, Oct 14 2026
