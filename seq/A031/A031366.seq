@@ -1,7 +1,7 @@
-%I A031366 #30 Feb 16 2021 13:13:15
+%I A031366 #41 Oct 16 2026 09:21:03
 %S A031366 1,0,0,25,36,0,0,0,100,0,288,0,0,0,0,440,0,0,800,900,0,0,0,0,960,0,0,
-%T A031366 0,1800,0,2048,0,0,0,0,2500,0,0,0,0,3528,0,0,7200,3600,0,0,0,2550,0,0,
-%U A031366 0,0,0,10368,0,0,0,7200,0,7688,0,0,7330,0,0,0,0,0,0,10368,0,0,0,0,20000,0,0,12800,15840,8362,0,0,0,0,0,0,0,16200,0,0,0,0,0,28800,0,0,0,28800,23899
+%T A031366 0,1800,0,2048,0,0,0,0,2500,0,0,0,0,3528,0,0,7200,3600,0,0,0,2500,0,0,
+%U A031366 0,0,0,10368,0,0,0,7200,0,7688,0,0,7200,0,0,0,0,0,0,10368,0,0,0,0,20000,0,0,12800,15840,8280,0,0,0,0,0,0,0,16200,0,0,0,0,0,28800,0,0,0,28800,24000
 %N A031366 Number of symmetrically inequivalent coincidence rotations of icosian ring of index n.
 %C A031366 The overall number of coincidence rotations is 7200 times this value. Some symmetrically distinct rotations generate the same coincidence site modules, hence a(n) >= A331143(n). - _Andrey Zabolotskiy_, Feb 16 2021
 %H A031366 M. Baake, <a href="https://arxiv.org/abs/math/0605222">Solution of the coincidence problem in dimensions d <= 4</a>, in R. V. Moody, ed., Math. of Long-Range Aperiodic Order, Kluwer 1997, pp. 9-44.; arXiv:math/0605222 [math.MG], 2006.
@@ -58,9 +58,7 @@
 %p A031366 # generate Zeta_L(s-1)
 %p A031366 L1shft := [seq(op(i,L1)*i,i=1..nops(L1))] ;
 %p A031366 # generate 1/Zeta_L(s)
-%p A031366 L1x := add(op(i,L1)*x^(i-1),i=1..nops(L1)) :
-%p A031366 taylor(1/L1x,x=0,nops(L1)) :
-%p A031366 L1i := gfun[seriestolist](%) ;
+%p A031366 L1i := DIRICHLETi(L1) ; # corrected by _Alper Ferudun_, Oct 16 2026
 %p A031366 # generate 1/Zeta_L(2s)
 %p A031366 L1i2 := [1,seq(0,i=2..nops(L1))] ;
 %p A031366 for k from 2 to nops(L1i) do
@@ -77,9 +75,27 @@
 %p A031366 # generate Phis(s-1)
 %p A031366 Phishif := [seq(op(i,Phis)*i,i=1..nops(Phis))] ;
 %p A031366 DIRICHLET(Phis,Phishif) ;
+%o A031366 (PARI) seq(n) = direuler(p=2, n, my(k=kronecker(5, p), F(q, Y)=(1+Y)*(1+q*Y)/((1-q*Y)*(1-q^2*Y))); if(k==1, F(p, X)^2, k==-1, F(p^2, X^2), F(p, X))) \\ _Alper Ferudun_, Oct 15 2026
+%o A031366 (SageMath)
+%o A031366 def A031366_list(n):
+%o A031366     def c(q, j): return 0 if j < 0 else q^j * (q^(j+1) - 1) // (q - 1)
+%o A031366     def coef(q, e): return c(q, e) + (1 + q)*c(q, e-1) + q*c(q, e-2)
+%o A031366     cache = {}
+%o A031366     def prime_power(p, e):
+%o A031366         key = (p, e)
+%o A031366         if key not in cache:
+%o A031366             k = kronecker_symbol(5, p)
+%o A031366             if k == 1: v = sum(coef(p, i) * coef(p, e - i) for i in range(e + 1))
+%o A031366             elif k == -1: v = coef(p^2, e // 2) if e % 2 == 0 else 0
+%o A031366             else: v = coef(p, e)
+%o A031366             cache[key] = ZZ(v)
+%o A031366         return cache[key]
+%o A031366     return [prod(prime_power(p, e) for p, e in factor(m)) for m in range(1, n+1)]
+%o A031366 print(A031366_list(100))  _Peter Luschny_, Oct 16 2026
 %Y A031366 Cf. A331143.
-%K A031366 nonn,mult
+%K A031366 nonn,mult,changed
 %O A031366 1,4
 %A A031366 _N. J. A. Sloane_
 %E A031366 Terms beyond a(36) from _R. J. Mathar_, Mar 04 2018
 %E A031366 New name from _Andrey Zabolotskiy_, Feb 16 2021
+%E A031366 a(49), a(64), a(81) and a(100) corrected by _Alper Ferudun_, Oct 15 2026

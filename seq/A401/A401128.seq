@@ -1,0 +1,52 @@
+%I A401128 #8 Oct 17 2026 00:15:07
+%S A401128 1,14,546,42504,5565120,1104436080,309831575760,116877749788800,
+%T A401128 57105137232299520,35099017220365862400,26513786075269742726400,
+%U A401128 24151045649614394389401600,26109913526446934263029350400,33057124547767403334524540467200
+%N A401128 Number of ways to give each of n cars an ordered pair of (not necessarily distinct) spots in [n] so that all cars park, where each car in turn takes its first choice if free, else its second choice if free, else the first free spot after its second choice.
+%C A401128 There are n spots 1..n on a street. Car i has two choices: first choice f(i) and second choice s(i), both in [n]. Cars arrive in order 1..n. A car parks at f(i) if it is free; otherwise at s(i) if it is free; otherwise it drives on from s(i) toward n and parks in the first free spot after s(i). The list of choices ((f(1),s(1)),(f(2),s(2)),..,(f(n),s(n))) fails if some car passes spot n. a(n) counts the successful lists among the n^(2n) possible lists.
+%C A401128 With each car having the same first and second choice (equivalently, only one preferred spot), this is the classical parking problem, counted by (n+1)^(n-1) = A000272(n+1).
+%C A401128 Unlike classical parking functions, success depends on the order of the cars: for n=2, the list ((2,1),(2,2)) fails while ((2,2),(2,1)) succeeds.
+%C A401128 Proof outline of the formulas: It can be considered as a classical parking function, having the preference spot of c_i=f(i) if f(i) is free when car i arrives, s(i) otherwise. The size of the preimage of c_i depends only on i and whether c_i is free. By tracking lucky cars (cars that park at their first choice) and adapting Pollak's circular argument, the formula a(n) = n!*binomial((n+1)^2-2, n-1) can be proved. Details will be given in a linked file later.
+%H A401128 Dominique Foata and John Riordan, <a href="https://irma.math.unistra.fr/~foata/paper/pub20.pdf">Mappings of acyclic and parking functions</a>, Aequationes Math. 10(1) (1974), 10-22.
+%H A401128 Ira M. Gessel and Seunghyun Seo, <a href="https://doi.org/10.37236/1884">A refinement of Cayley's formula for trees</a>, Electron. J. Combin. 11(2) (2004-2006), #R27.
+%H A401128 Catherine H. Yan, <a href="https://people.tamu.edu/~huafei-yan/Files/Yan-Final-Own-Copy.pdf">Parking functions</a>, in M. Bóna (ed.), Handbook of Enumerative Combinatorics, Chapman and Hall/CRC, 2015, pp. 835-893.
+%F A401128 a(n) = n!*binomial((n+1)^2-2, n-1).
+%F A401128 a(n) = n!*A177784(n+1).
+%F A401128 a(n) = Sum_{k=0..n} n^k*(n+1)^(n-k)*A370832(n,k).
+%e A401128 For n=2, there are (2^2)^2=16 total lists, and exactly 2 of them fail:
+%e A401128 ((2,1),(2,2)): car 1 parks at 2; car 2 finds 2 occupied, then 2 occupied, and drives past spot 2, failing the parking
+%e A401128 ((2,2),(2,2)): the same. car 1 parks at 2; car 2 finds 2 occupied twice and drives past spot 2.
+%e A401128 So a(2) = 16 - 2 = 14
+%o A401128 (Python) # direct simulation of the parking rule, impratical for n>5
+%o A401128 from itertools import product
+%o A401128 def parks(L,n):
+%o A401128     occ=[False]*(n+2)
+%o A401128     for f,s in L:
+%o A401128         if not occ[f]: occ[f]=True
+%o A401128         elif not occ[s]: occ[s]=True
+%o A401128         else:
+%o A401128             p=s
+%o A401128             while p<=n and occ[p]: p+=1
+%o A401128             if p>n: return False
+%o A401128             occ[p]=True
+%o A401128     return True
+%o A401128 def a(n): return sum(parks(L,n) for L in product(product(range(1,n+1),repeat=2),repeat=n))
+%o A401128 (Python) # faster: count by the set of filled spots
+%o A401128 def a(n):
+%o A401128     # dp[S] = number of ways for the first t cars to fill exactly the set S of spots
+%o A401128     dp = {0: 1}
+%o A401128     for t in range(n):
+%o A401128         new={}
+%o A401128         for S,w in dp.items():
+%o A401128             for s in range(n):
+%o A401128                 if (S>>s)&1: continue
+%o A401128                 r=0 # occupied spots immediately to the left of s
+%o A401128                 while s-r-1>=0 and (S>>(s-r-1))&1: r+=1
+%o A401128                 T=S|(1<<s)
+%o A401128                 new[T]=new.get(T,0)+w*(n+t*(1+r))
+%o A401128         dp=new
+%o A401128     return dp[(1<<n)-1]
+%Y A401128 Cf. A000272, A002674, A177784, A370832.
+%K A401128 nonn,new
+%O A401128 1,2
+%A A401128 _Juwon Park_, Oct 15 2026

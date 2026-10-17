@@ -1,0 +1,40 @@
+%I A394634 #56 Oct 16 2026 19:11:49
+%S A394634 0,2,5,13,11,23,35,53,119,335,287,1439,1559,2639,2519,14399,35279,
+%T A394634 39599,71279
+%N A394634 a(n) is the least k >= 0 such that the maximum length of a divisibility chain among the distinct entries in row k of Pascal's triangle is n, or -1 if no such k exists.
+%C A394634 A divisibility chain is a sequence of distinct entries x_1, ..., x_r from a row of Pascal's triangle such that x_1 | x_2 | ... | x_r.
+%C A394634 Conjecture: a(n) >= 0.
+%C A394634 For 0 <= i < j <= floor(k/2), binomial(k, j)/binomial(k, i) = binomial(k - i, j - i)/binomial(j, i), hence binomial(k, i) | binomial(k, j) iff binomial(j, i) | binomial(k - i, j - i); in particular, for j = i + 1, binomial(k, i) | binomial(k, i + 1) iff i + 1 | k + 1.
+%e A394634 Row 5 has maximum chain length 3: 1 | 5 | 10. No earlier row has maximum chain length 3, so a(3) = 5.
+%e A394634 Row 13 has maximum chain length 4: 1 | 13 | 78 | 1716. No earlier row has maximum chain length 4, so a(4) = 13.
+%e A394634 Row 11 has maximum chain length 5: 1 | 11 | 55 | 165 | 330. No earlier row has maximum chain length 5, so a(5) = 11.
+%p A394634 h := proc(k) option remember;
+%p A394634     local b, f, i, j, l, m, q, t, u;
+%p A394634     m := iquo(k, 2); t := Array(0 .. m, 'fill' = 1); l := Array(1 .. m + 1, 'fill' = []);  l[1] := [0]; u := 1;
+%p A394634     for i from 1 to m do
+%p A394634         t[i] := 2;
+%p A394634         if irem(k + 1, i) = 0 then t[i] := t[i - 1] + 1 end if;
+%p A394634         b := t[i]; f := false;
+%p A394634         for j from u by -1 to b while not f do
+%p A394634             for q in l[j] do
+%p A394634                 if irem(binomial(k - q, i - q), binomial(i, q)) = 0 then
+%p A394634                     t[i] := j + 1; f := true; break
+%p A394634                 end if
+%p A394634             end do
+%p A394634         end do;
+%p A394634         u := max(u, t[i]); l[t[i]] := [i, op(l[t[i]])]
+%p A394634     end do;
+%p A394634     u
+%p A394634 end proc:
+%p A394634 A394634 := proc(n)
+%p A394634     local a;
+%p A394634     option remember;
+%p A394634     for a from 0 do
+%p A394634         if h(a) = n then return a end if
+%p A394634     end do
+%p A394634 end proc:
+%p A394634 seq(A394634(n), n = 1 .. 11);
+%Y A394634 Cf. A002944, A007318, A008619, A349958, A399060, A399069.
+%K A394634 nonn,hard,more,new
+%O A394634 1,2
+%A A394634 _Felix Huber_, Oct 12 2026
