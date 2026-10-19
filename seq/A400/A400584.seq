@@ -1,0 +1,46 @@
+%I A400584 #28 Oct 18 2026 16:40:09
+%S A400584 1,1,3,2,2,1,39,25,20,17,14,8,4,1,8463,5346,4110,3392,2886,2486,2028,
+%T A400584 1562,1074,678,400,210,92,32,8,1,483008799,302911713,229437276,
+%U A400584 187375528,159157920,138442616,121385364,106369048,92341116,78210800,64340220,51430236,39805524,29769840,21553992,15134237,10295694,6762632,4262324,2560140,1456228,779764,390536,181400,77236,29660,10048,2916,696,128,16,1
+%N A400584 Irregular triangle read by rows: T(n,k) is the number of labelings of the internal vertices of the complete plane binary tree of depth n by + or min, with every leaf equal to 1, that evaluate to k at the root (n >= 1, 1 <= k <= 2^n).
+%C A400584 The tree has 2^n leaves and 2^n - 1 internal vertices. Each internal vertex applies its operator to the values of its two children. Left and right positions are distinguished; labelings related by exchanges of children are counted separately.
+%C A400584 Row n has 2^n positive entries and sums to Q_n = 2^(2^n - 1) = A058891(n+1), since each internal vertex has two possible labels. If each internal operator is chosen independently with probabilities 1/2 and 1/2, T(n,k)/Q_n is the probability of root value k in Pemantle's min-plus process; see Auffinger and Cable.
+%C A400584 A labeling has root value 1 exactly when it contains a root-to-leaf path whose internal vertices are all min. Choosing the leftmost such path gives a product decomposition of this class. This decomposition proves the product identity conjectured by Peter Bala in A076628 (Feb 11 2015); see Mendonça (2026), technical note linked below.
+%C A400584 Auffinger and Cable report unpublished work of Albert Chen proving that the root-value probabilities decrease with k, independently discovered by Tam Cheetham-West. Here monotonicity must be understood in the weak sense, since the first two rows contain ties. Conjecture: T(n,k) > T(n,k+1) for n >= 3 and 1 <= k < 2^n. This strict-monotonicity conjecture has been verified by exact computation for 3 <= n <= 12, but is not proved in general.
+%C A400584 Rows need not be log-concave: T(3,1)*T(3,3) = 39*20 = 780 > 625 = T(3,2)^2.
+%H A400584 J. R. G. Mendonça, <a href="/A400584/b400584.txt">Table of n, a(n) for n = 1..2046</a>
+%H A400584 A. Auffinger and D. Cable, <a href="https://arxiv.org/abs/1709.07849">Pemantle's min-plus binary tree</a>, arXiv:1709.07849 [math.PR] (2017).
+%H A400584 J. R. G. Mendonça, <a href="https://doi.org/10.1088/1751-8121/ae941d">Finite-depth scaling and an exact Bernoulli-leaf identity for the min-plus process on the binary tree</a>, J. Phys. A: Math. Theor. 59, 325202 (2026).
+%H A400584 J. R. G. Mendonça, <a href="/A400584/a400584.pdf">The min-plus configuration triangle: Technical note supporting OEIS A400584</a> (2026).
+%F A400584 T(0,1) = 1 and T(n,k) = 0 for k < 1 or k > 2^n. For n >= 0 and 1 <= k <= 2^(n+1), T(n+1,k) = T(n,k)^2 + 2*T(n,k)*Sum_{u=k+1..2^n} T(n,u) + Sum_{i=1..k-1} T(n,i)*T(n,k-i), with empty sums equal to 0.
+%F A400584 T(n,1) = A076628(n+1).
+%F A400584 T(n,2^n) = 1 and T(n,2^n-1) = 2^(n-1) for n >= 1.
+%F A400584 T(n,2^n-2) = 2^(2*n-3) for n >= 2.
+%F A400584 T(n,2^n-3) = 14*2^(n-3) + (2^(3*n-4) - 2^(n+2))/3 for n >= 3.
+%F A400584 For each fixed integer j >= 1, T(n,2^n-j) ~ binomial(2^(n-1),j) as n tends to infinity.
+%e A400584 Triangle begins:
+%e A400584   n=1: 1, 1;
+%e A400584   n=2: 3, 2, 2, 1;
+%e A400584   n=3: 39, 25, 20, 17, 14, 8, 4, 1;
+%e A400584   n=4: 8463, 5346, 4110, 3392, 2886, 2486, 2028, 1562, 1074, 678, 400, 210, 92, 32, 8, 1.
+%e A400584 At depth 2, there are three internal vertices and eight operator labelings. A min root gives value 1 for the three ordered child-operator pairs (min,min), (min,+), and (+,min), and value 2 for (+,+). A plus root gives values 2, 3, 3, and 4 for those four pairs. Hence the row is 3, 2, 2, 1.
+%o A400584 (Python)
+%o A400584 def minplus_rows(max_depth):
+%o A400584     c = [0, 1]  # depth 0; index 0 is unused
+%o A400584     for n in range(1, max_depth + 1):
+%o A400584         width = len(c) - 1
+%o A400584         nxt = [0] * (2 * width + 1)
+%o A400584         for i in range(1, width + 1):
+%o A400584             for j in range(1, width + 1):
+%o A400584                 count = c[i] * c[j]
+%o A400584                 nxt[min(i, j)] += count
+%o A400584                 nxt[i + j] += count
+%o A400584         c = nxt
+%o A400584         yield c[1:]
+%o A400584 print([v for row in minplus_rows(5) for v in row])
+%Y A400584 First column: A076628. Row sums: A058891.
+%Y A400584 Diagonals T(n,2^n-1) and T(n,2^n-2): A000079 and A004171, respectively.
+%Y A400584 Cf. A100441, A167424.
+%K A400584 nonn,tabf,easy,new
+%O A400584 1,3
+%A A400584 _J. R. G. Mendonça_, Sep 30 2026
