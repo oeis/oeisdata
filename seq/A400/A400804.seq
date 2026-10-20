@@ -1,0 +1,45 @@
+%I A400804 #20 Oct 19 2026 18:40:49
+%S A400804 36,39,95,141,143,161,209,215,217,219,221,305,309,329,341,365,393,395,
+%T A400804 417,489,493,505,517,529,537,543,545,553,565,573,589,703,707,721,741,
+%U A400804 753,771,781,803,813,817,851,869,871,889,901,923,951,955,961,993,1081
+%N A400804 Least m such that the divisor graph on {2,...,m}, after removing isolated vertices, has at least n independent linear relations among the columns of its adjacency matrix.
+%C A400804 Connect two distinct integers from 2 through m when one divides the other, and discard integers with no connections. The number of independent linear relations among the columns of the adjacency matrix of this graph is A400803(m). This sequence lists where each count is first reached: a(n) is the least m with A400803(m) >= n.
+%C A400804 Because A400803 changes by at most 1 from one m to the next, A400803(m) takes every value from 0 up to its current maximum. Hence a(n) is also the least m with A400803(m) = n, and A400803(a(n)) = n. In particular, a(n) is strictly increasing.
+%C A400804 No term is prime or twice a prime, since A400803(p) = A400803(p-1) and A400803(2p) = A400803(2p-1) for every prime p, so the count cannot increase at such m.
+%C A400804 Every a(n) exists because A400803(m) tends to infinity; see the lower bound in A400803.
+%C A400804 The table through n = 238 was obtained by scanning the certified exact values of A400803(m) for 1 <= m <= 4000 and recording the first occurrence of each positive value.
+%H A400804 Vicenzo P DeMaar, <a href="/A400804/b400804.txt">Table of n, a(n) for n = 1..238</a>
+%F A400804 a(n) = min{m >= 2: A400803(m) >= n} = min{m >= 2: A400803(m) = n}.
+%F A400804 limsup_{n -> infinity} a(n)/(n*log(n)) <= 12. This follows from A400803(m) >= pi(floor(m/3)) - pi(floor(m/4)) - 1 ~ m/(12*log(m)).
+%e A400804 A400803(m) = 0 for 2 <= m <= 35 and A400803(36) = 1, so a(1) = 36.
+%e A400804 A400803(37) = A400803(38) = 1 and A400803(39) = 2, so a(2) = 39.
+%e A400804 A400803(m) <= 2 for 2 <= m < 95 and A400803(95) = 3, so a(3) = 95.
+%o A400804 (Python)
+%o A400804 from itertools import count, islice
+%o A400804 from sympy import SparseMatrix
+%o A400804 from sympy.polys.matrices import DomainMatrix
+%o A400804 def b(m):
+%o A400804     edges = [(d, j)
+%o A400804              for d in range(2, m//2 + 1)
+%o A400804              for j in range(2*d, m + 1, d)]
+%o A400804     vertices = sorted({v for edge in edges for v in edge})
+%o A400804     pos = {v: i for i, v in enumerate(vertices)}
+%o A400804     entries = {}
+%o A400804     for d, j in edges:
+%o A400804         entries[pos[d], pos[j]] = 1
+%o A400804         entries[pos[j], pos[d]] = 1
+%o A400804     C = SparseMatrix(len(vertices), len(vertices), entries)
+%o A400804     return len(vertices) - DomainMatrix.from_Matrix(C).rank()
+%o A400804 def terms():
+%o A400804     highest = 0
+%o A400804     for m in count(2):
+%o A400804         value = b(m)
+%o A400804         while highest < value:
+%o A400804             highest += 1
+%o A400804             yield m
+%o A400804 print(list(islice(terms(), 11)))
+%Y A400804 Cf. A400803.
+%Y A400804 Cf. A337125, A344497, A356831 for other invariants of the divisor graph.
+%K A400804 nonn,new
+%O A400804 1,1
+%A A400804 _Vicenzo P DeMaar_, Oct 07 2026
