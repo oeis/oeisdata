@@ -1,0 +1,67 @@
+%I A400927 #18 Oct 20 2026 20:21:48
+%S A400927 2,5,11,24,54,122,276,623,1395,3101
+%N A400927 Number of distinct time intervals measurable by burning n non-uniform ropes, each burning for 1 unit of time, extinguishing allowed, as measured from the initial state to any transition.
+%C A400927 There are N ropes. Each rope burns for 1 unit of time if lit from one end. Ropes are non-uniform, so 1/k-th fraction of rope length does not burn for 1/k-th of time. Based on how many rope ends are burning, each rope can burn at 0, 1, or 2 rate. Every time one or more ropes burn out completely, a configuration can be changed by lighting up or extinguishing the ends of remaining ropes. The experiment lasts until no ropes are burning.
+%C A400927 A measurable interval is the time elapsed from initial lighting event until some burnout event.
+%C A400927 The sequence counts intervals by distinct duration, regardless of the number of possible configurations that leads to that burning duration.
+%C A400927 The number of reachable states seems to be A137153(N,k) where N is the initial number of ropes and k is the number of remaining ropes.
+%C A400927 This sequence is similar to A283075, but additionally allows extinguishing and reignition of ropes.
+%e A400927 For n = 1, experiments and 2 measurable intervals are:
+%e A400927       (t=0) light rope A on both ends
+%e A400927   [1] (t=1/2) A burns out
+%e A400927       (t=0) light rope A on one end
+%e A400927   [2] (t=1) A burns out
+%e A400927 For n = 2, example (non-exhaustive) experiments and 5 measurable intervals are:
+%e A400927       (t=0) light rope A from both ends, and rope B from one end
+%e A400927   [1] (t=1/2) A burns out, then light B from another end
+%e A400927   [2] (t=3/4) B burns out
+%e A400927       (t=0) light rope A from one end
+%e A400927   [3] (t=1) A burns out, light rope B from one end
+%e A400927   [4] (t=2) B burns out
+%e A400927       (t=0) light rope A from both ends
+%e A400927       (t=1/2) A burns out, light rope B from one end
+%e A400927   [5] (t=3/2) B burns out
+%e A400927 For n = 4, this sequence allows measure 17/16 in addition to what A283075 allows:
+%e A400927   t=0: light A and B from one end, C from two ends, keep D.
+%e A400927   t=1/2: C burns out. light B from second end, and D from both ends.
+%e A400927   t=3/4: B burns out. light A from second end, and put out one end of D.
+%e A400927   t=7/8: A burns out. light D's second end again.
+%e A400927   t=17/16: D burns out.
+%o A400927 (Python)
+%o A400927 from collections import defaultdict
+%o A400927 from itertools import product
+%o A400927 def a(n):
+%o A400927     states = {(1 << n,) * n: 1}
+%o A400927     times = 0
+%o A400927     while states:
+%o A400927         next_states = defaultdict(int)
+%o A400927         for lengths, bits in states.items():
+%o A400927             choices = []
+%o A400927             for length in set(lengths):
+%o A400927                 count = lengths.count(length)
+%o A400927                 choices.append([
+%o A400927                     ((length, 0),) * i + ((length, 1),) * j
+%o A400927                     + ((length, 2),) * (count - i - j)
+%o A400927                     for i in range(count + 1)
+%o A400927                     for j in range(count - i + 1)
+%o A400927                 ])
+%o A400927             for groups in product(*choices):
+%o A400927                 rates = [pair for group in groups for pair in group]
+%o A400927                 dt = min((length // rate for length, rate in rates if rate),
+%o A400927                          default=None)
+%o A400927                 if dt is None:
+%o A400927                     continue
+%o A400927                 remaining = tuple(sorted(
+%o A400927                     length - rate * dt for length, rate in rates
+%o A400927                     if length > rate * dt
+%o A400927                 ))
+%o A400927                 new_bits = bits << dt
+%o A400927                 times |= new_bits
+%o A400927                 if remaining:
+%o A400927                     next_states[remaining] |= new_bits
+%o A400927         states = next_states
+%o A400927     return times.bit_count()
+%Y A400927 Cf. A137153, A400926, A283075.
+%K A400927 nonn,hard,more,new
+%O A400927 1,1
+%A A400927 _Alex Tori_, Oct 09 2026
