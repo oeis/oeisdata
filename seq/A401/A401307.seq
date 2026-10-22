@@ -1,0 +1,54 @@
+%I A401307 #17 Oct 21 2026 07:05:32
+%S A401307 1,1,1,3,7,2,15,55,46,6,105,525,760,326,24,945,5985,12460,9856,2556,
+%T A401307 120,10395,79695,217350,257068,128492,22212,720,135135,1216215,
+%U A401307 4109490,6536530,5031460,1731276,212976,5040,2027025,20945925,84504420,169699530,179386900,97266620,24403176,2239344,40320
+%N A401307 Triangle read by rows: T(n, k) = (2*n - k)! * [x^(n-k)] Laguerre(2*n - k, -x, -x).
+%F A401307 T(n, k) = (4*n - 2*k - 1) * T(n-1, k-1) + (2*n - k - 1) * T(n-1, k) - (2*n - k - 1)^2 * T(n-2, k-2), with T(0, 0) = 1 and T(n, k) = 0 if k < 0 or k > n.
+%F A401307 E.g.f.: exp(x/2 * hypergeom([2, 2], [3], x*y)) / (1 - x*y).
+%e A401307 Triangle starts:
+%e A401307   [0] [     1]
+%e A401307   [1] [     1,       1]
+%e A401307   [2] [     3,       7,       2]
+%e A401307   [3] [    15,      55,      46,       6]
+%e A401307   [4] [   105,     525,     760,     326,      24]
+%e A401307   [5] [   945,    5985,   12460,    9856,    2556,     120]
+%e A401307   [6] [ 10395,   79695,  217350,  257068,  128492,   22212,    720]
+%e A401307   [7] [135135, 1216215, 4109490, 6536530, 5031460, 1731276, 212976, 5040]
+%p A401307 with(orthopoly): Tpoly := (n, k, x) -> simplify(L(2*n - k, -x, -x)):
+%p A401307 T := (n, k) -> (2*n - k)! * coeff(Tpoly(n, k, x), x, n - k):
+%p A401307 seq(seq(T(n, k), k = 0..n), n = 0..7);
+%p A401307 # Alternative:
+%p A401307 egf := (x, y) -> exp(x/2 * hypergeom([2,2], [3], x*y)) / (1 - x*y):
+%p A401307 RowT := proc(n) local x, y, p, k;
+%p A401307 p := convert(series(egf(x, y), x=0, n+1), polynom);
+%p A401307 p := expand(coeff(p, x, n));
+%p A401307 seq(simplify((2*n-k)! * coeff(p, y, k)), k=0..n) end:
+%p A401307 seq(print(RowT(n)), n = 0..7);
+%t A401307 Tpoly[n_, k_, x_] := Expand[LaguerreL[2 n - k, -x, -x]];
+%t A401307 T[n_, k_] := If[k > n, 0, (2 n - k)! Coefficient[Tpoly[n, k, x], x, n - k  ] ];
+%t A401307 Table[Table[T[n, k], {k, 0, n}], {n, 0, 7}] // TableForm
+%t A401307 (* Alternative: *)
+%t A401307 egf[x_, y_] := Exp[x/2 HypergeometricPFQ[{2, 2}, {3}, x y]]/(1 - x y);
+%t A401307 RowT[n_Integer?NonNegative] := Module[{z, w, p},
+%t A401307     p = Normal@Series[egf[z, w], {z, 0, n}];
+%t A401307     p = Expand@Coefficient[p, z, n];
+%t A401307     Table[(2 n - k)! Coefficient[p, w, k], {k, 0, n}] ];
+%t A401307 Table[RowT[n], {n, 0, 7}] // TableForm
+%o A401307 (Python)
+%o A401307 def A401307List(rows: int) -> list[list[int]]:
+%o A401307     T = [[1]]
+%o A401307     for n in range(1, rows):
+%o A401307         row = []
+%o A401307         for k in range(n + 1):
+%o A401307             a = 2*n - k - 1
+%o A401307             x = T[n-1][k-1] if k else 0
+%o A401307             y = T[n-1][k]   if k < n else 0
+%o A401307             z = T[n-2][k-2] if k >= 2 else 0
+%o A401307             row.append((2*a + 1)*x + a*(y - a*z))
+%o A401307         T.append(row)
+%o A401307     return T
+%o A401307 for row in A401307List(8): print(row)
+%Y A401307 Cf. A400988 (variant), A001147 (column 0), A000142 (main diagonal), A058349 (row sums).
+%K A401307 nonn,tabl,new
+%O A401307 0,4
+%A A401307 _Peter Luschny_, Oct 20 2026

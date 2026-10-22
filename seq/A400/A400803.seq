@@ -1,0 +1,39 @@
+%I A400803 #31 Oct 21 2026 19:28:27
+%S A400803 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+%T A400803 0,1,1,1,2,1,1,1,1,0,0,0,0,0,1,0,1,0,0,0,0,0,1,1,1,1,1,1,1,1,2,1,1,0,
+%U A400803 1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1
+%N A400803 Number of independent linear relations among the columns of the adjacency matrix of the divisor graph on {2,...,n}, after removing isolated vertices.
+%C A400803 Connect two distinct integers from 2 through n when one divides the other, and discard integers with no connections. Assign rational weights to the remaining integers so that, at each integer, the weights on all integers connected to it add to zero. Then a(n) counts the independent free parameters in these assignments.
+%C A400803 The purpose is to measure relations beyond those automatically supplied by large primes. For n >= 2, in the graph that also includes 1, every prime in (n/2, n] connects only to 1. Weights on these t primes that sum to zero give t - 1 independent relations. Removing 1 and the isolated vertices subtracts exactly this contribution.
+%C A400803 The remaining relations first appear at n = 36, disappear at n = 44, and reappear at n = 49. Their number tends to infinity, although it can decrease when n increases. Thus divisibility forces arbitrarily many additional relations even after the large-prime contribution is removed. The reduced graph is connected for n >= 4.
+%C A400803 The adjacency matrix records these connections, with entry 1 for connected vertices and 0 otherwise, in particular 0 on the diagonal. Equivalently, a(n) is its number of columns minus its rank over Q, also called its nullity. The reduced graph is empty for 1 <= n <= 3, so a(1) = a(2) = a(3) = 0.
+%H A400803 Vicenzo P DeMaar, <a href="/A400803/b400803.txt">Table of n, a(n) for n = 1..4000</a>
+%F A400803 Let A_n be the adjacency matrix of the divisor graph on {1,...,n}, and let pi(x) count the primes <= x. All ranks are over Q.
+%F A400803 a(n) = n + 1 - rank(A_n) - pi(n) + pi(floor(n/2)), for n >= 2. Deleting 1 together with a prime greater than n/2 lowers the rank by 2.
+%F A400803 a(p) = a(p-1), for p prime, since p is isolated when added.
+%F A400803 a(2p) = a(2p-1), for p prime: at n = 2p, vertex p has only one neighbor, 2p, and deleting this pair preserves nullity.
+%F A400803 |a(n) - a(n-1)| <= 1, for n >= 2.
+%F A400803 a(n) >= max(0, pi(floor(n/3)) - pi(floor(n/4)) - 1), for n >= 12.
+%F A400803 For the lower bound, put weights c_q and -c_q on 2q and 3q for primes q in (n/4, n/3], with all other weights zero and sum c_q = 0. The prime number theorem shows that this bound tends to infinity.
+%e A400803 At n = 49, the only integer connected to 25 is 5, those connected to 35 are 5 and 7, and the only integer connected to 49 is 7. Giving 25 and 49 weight 1, 35 weight -1, and all other integers weight 0 makes every required sum zero. This proves a(49) >= 1. Exact rank computation using PROG gives 42 columns and rank 41, hence a(49) = 1. At n = 50, the same assignment fails because the sum at the new vertex 50 is 1; exact computation gives a(50) = 0.
+%o A400803 (Python)
+%o A400803 from sympy import SparseMatrix
+%o A400803 from sympy.polys.matrices import DomainMatrix
+%o A400803 def a(n):
+%o A400803     edges = [(d, m)
+%o A400803              for d in range(2, n//2 + 1)
+%o A400803              for m in range(2*d, n + 1, d)]
+%o A400803     vertices = sorted({v for edge in edges for v in edge})
+%o A400803     pos = {v: i for i, v in enumerate(vertices)}
+%o A400803     entries = {}
+%o A400803     for d, m in edges:
+%o A400803         entries[pos[d], pos[m]] = 1
+%o A400803         entries[pos[m], pos[d]] = 1
+%o A400803     C = SparseMatrix(len(vertices), len(vertices), entries)
+%o A400803     return len(vertices) - DomainMatrix.from_Matrix(C).rank()
+%o A400803 print([a(n) for n in range(1, 88)])
+%Y A400803 Cf. A400804 (least m such that a(m) = n).
+%Y A400803 Cf. A337125, A344497, A356831 for other invariants of the divisor graph.
+%K A400803 nonn,new
+%O A400803 1,39
+%A A400803 _Vicenzo P DeMaar_, Oct 07 2026
