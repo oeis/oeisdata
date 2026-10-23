@@ -1,11 +1,19 @@
-%I A367400 #10 Nov 21 2023 16:42:49
+%I A367400 #21 Oct 22 2026 21:36:30
 %S A367400 1,2,4,7,13,25,47,88,166,313,589,1109,2089,3934,7408,13951,26273,
 %T A367400 49477,93175,175468,330442,622289,1171897,2206921,4156081,7826746,
-%U A367400 14739356,27757207,52272469,98439697,185381983,349112000,657448942,1238110153
+%U A367400 14739356,27757207,52272469,98439697,185381983,349112000,657448942,1238110153,2331613381,4390902493,8268962969,15572140054
 %N A367400 Number of subsets of {1..n} whose cardinality is not the sum of two distinct elements.
+%H A367400 Jewoo Suh, <a href="/A367400/b367400.txt">Table of n, a(n) for n = 0..500</a>
+%H A367400 Jewoo Suh, <a href="https://github.com/jewoo-suh/oeis-lean">Lean 4 proofs of the formula and the recurrence</a>
+%H A367400 <a href="/index/Rec#order_04">Index entries for linear recurrences with constant coefficients</a>, signature (2,-1,2,-1).
 %F A367400 Conjectures from _Chai Wah Wu_, Nov 21 2023: (Start)
 %F A367400 a(n) = 2*a(n-1) - a(n-2) + 2*a(n-3) - a(n-4) for n > 3.
 %F A367400 G.f.: (-x^3 + x^2 + 1)/(x^4 - 2*x^3 + x^2 - 2*x + 1). (End)
+%F A367400 From _Jewoo Suh_, Oct 15 2026: (Start)
+%F A367400 a(n) = Sum_{k=0..n} Sum_{j=0..p} binomial(p,j)*2^j*binomial(n-2*p,k-j), where p = floor((k-1)/2) for k >= 1 and p = 0 for k = 0. Proof: a k-subset S is counted iff it contains at most one element of each of the p disjoint pairs {x, k-x}, 1 <= x < k/2; take one element from each of j pairs and k-j of the remaining n-2*p elements.
+%F A367400 The two conjectures of Chai Wah Wu above are true. Proof: write g(f,p,k) = [x^k] (1+2*x)^p*(1+x)^f and T_s(n) = Sum_{p=0..floor(n/2)} g(n-2*p, p, 2*p+s), so that a(n) = 1 + T_1(n) + T_2(n) by the formula above. Pascal's rule in f gives T_{s+1}(n+1) = T_{s+1}(n) + T_s(n), and in p it gives T_s(n+2) = binomial(n+2,s) + T_{s+2}(n) + 2*T_{s+1}(n). The first identity for s = 1, 2 and the second for s = 1 form a linear system from which the recurrence follows, and the initial terms 1, 2, 4, 7 then give the g.f. Both the formula and the recurrence are formalized in Lean 4 (see Links).
+%F A367400 a(n) = a(n-1) + A112575(n) for n >= 1, since (1-x)*(1+x^2-x^3) = 1 - 2*x + x^2 - 2*x^3 + x^4 + x. As a(n) - a(n-1) counts the subsets that contain n, this proves the remark in Crossrefs that the version containing n is A112575.
+%F A367400 a(n) = 2^n - A367396(n). (End)
 %e A367400 The set s = {1,2,3,6,7,8} has the following sums of pairs of distinct elements: {3,4,5,7,8,9,10,11,13,14,15}. This does not include 6, so s is counted under a(8).
 %e A367400 The a(0) = 1 through a(4) = 13 subsets:
 %e A367400   {}  {}   {}     {}     {}
@@ -25,6 +33,16 @@
 %o A367400 (Python)
 %o A367400 from itertools import combinations
 %o A367400 def A367400(n): return (n*(n+1)>>1)+1+sum(1 for k in range(3,n+1) for w in (set(d) for d in combinations(range(1,n+1),k)) if not any({a,k-a}<=w for a in range(1,k+1>>1))) # _Chai Wah Wu_, Nov 21 2023
+%o A367400 (Python)
+%o A367400 from math import comb
+%o A367400 def A367400(n): return sum(comb(p, j)*2**j*comb(n-2*p, k-j) for k in range(n+1) for p in [max(k-1, 0)//2] for j in range(p+1))
+%o A367400 (Python)
+%o A367400 def A367400_gen():  # generator of terms, by the recurrence
+%o A367400     a = [1, 2, 4, 7]
+%o A367400     yield from a
+%o A367400     while True:
+%o A367400         a = a[1:] + [2*a[3] - a[2] + 2*a[1] - a[0]]
+%o A367400         yield a[3]
 %Y A367400 The version containing n appears to be A112575.
 %Y A367400 The following sequences count and rank integer partitions and finite sets according to whether their length is a subset-sum, linear combination, or semi-sum of the parts. The current sequence is starred.
 %Y A367400              sum-full  sum-free  comb-full comb-free semi-full semi-free
@@ -43,7 +61,8 @@
 %Y A367400 A365541 counts subsets with a semi-sum k.
 %Y A367400 A367404 counts partitions with a semi-sum k, strict A367405.
 %Y A367400 Cf. A237113, A237667, A238628, A304792, A363225, A364272, A365543, A365658, A365918, A366131, A366740.
-%K A367400 nonn,more
+%K A367400 nonn,easy,changed
 %O A367400 0,2
 %A A367400 _Gus Wiseman_, Nov 21 2023
 %E A367400 a(18)-a(33) from _Chai Wah Wu_, Nov 21 2023
+%E A367400 a(34)-a(37) from _Jewoo Suh_, Oct 15 2026
