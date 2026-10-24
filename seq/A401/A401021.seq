@@ -1,0 +1,65 @@
+%I A401021 #17 Oct 23 2026 21:35:17
+%S A401021 3,5,7,8,11,11,12,12,15,16,16,16,20,20,20,20,21,21,24,24,26,26,26,26,
+%T A401021 27,27,27,31,31,31,32,32,33,33,33,33,38,38,38,38,39,39,39,39,39,40,40,
+%U A401021 40,45,45,45,45,45,45,47,47,47,47,47,47,48,48,48,48
+%N A401021 Half the minimum surface area of a rectangular box with positive integer side lengths and volume at least n.
+%C A401021 The minimum outside surface area of an integer-sided rectangular box that can hold n unit cubes, allowing unused space, is 2*a(n). Thus a(1)=3 corresponds to surface area 6 for a unit cube, and a(7)=12 corresponds to area 24 for a 2 X 2 X 2 box holding seven cubes. Equivalently, a(n) is the least possible sum of the areas of three mutually adjacent faces of such a box.
+%C A401021 Unlike A075777, the box volume may exceed n. Unlike A193416, the shape must be a rectangular box. The sequence is nondecreasing.
+%C A401021 The version allowing unused space was discussed by Kevin Karplus in comments on Dan Meyer's 2014 post and by Addison Stumpf and Jonah in comments on his 2015 post; see Links.
+%H A401021 Scott B. Farrar, <a href="/A401021/b401021.txt">Table of n, a(n) for n = 1..10000</a>
+%H A401021 Dan Meyer, <a href="https://blog.mrmeyer.com/2014/purposeful-practice-dandy-candies/">Purposeful Practice & Dandy Candies</a> (2014). See comment 12 by gasstationwithoutpumps (Kevin Karplus), August 10, 2014, discussing unused capacity and an enumeration algorithm.
+%H A401021 Dan Meyer, <a href="https://blog.mrmeyer.com/2015/the-math-problem-that-1000-math-teachers-couldnt-solve/">The Math Problem That 1,000 Math Teachers Couldn't Solve</a> (2015). See comments 135-136 by Addison Stumpf and Jonah, September 26, 2015, discussing the variant allowing empty spaces.
+%H A401021 Jonathan Rotgé and Gérald Tenenbaum, <a href="https://tenenb.perso.math.cnrs.fr/PPP/on_integral_boxes.pdf">On integral boxes of minimal surface</a>, Journal of Number Theory 289 (2026), 85-95. Related work on boxes with prescribed exact volume.
+%F A401021 a(n) = min{x*y + x*z + y*z : x,y,z are positive integers and x*y*z >= n}.
+%F A401021 a(n) = min{A075777(m)/2 : n <= m <= ceiling(n^(1/3))^3}.
+%F A401021 3*n^(2/3) <= a(n) <= 3*ceiling(n^(1/3))^2.
+%F A401021 a(k^3) = 3*k^2 for k >= 1.
+%F A401021 a(n) ~ 3*n^(2/3).
+%e A401021 For n = 5, the box with dimensions 1,2,3 has volume 6 and surface area 22, so a(5) = 11. One unit of capacity is unused.
+%e A401021 For n = 7, the 2 X 2 X 2 box has volume 8 and surface area 24, so a(7) = 12. A075777(7) = 30 because that sequence requires exact volume 7.
+%e A401021 a(10) = a(11) = a(12) = 16, attained by the 2 X 2 X 3 box, which has surface area 32.
+%t A401021 Clear[a];
+%t A401021 a[n_Integer] /; n >= 1 := Module[{k, best, x, y, z},
+%t A401021   k = Ceiling[n^(1/3)];
+%t A401021   best = 3 k^2;
+%t A401021   Do[
+%t A401021     Do[
+%t A401021       z = Max[y, Ceiling[n/(x y)]];
+%t A401021       best = Min[best, x y + x z + y z],
+%t A401021       {y, x, Floor[Sqrt[best + x^2]] - x}
+%t A401021     ],
+%t A401021     {x, 1, k}
+%t A401021   ];
+%t A401021   best
+%t A401021 ];
+%t A401021 Table[a[n], {n, 1, 64}]
+%o A401021 (Python)
+%o A401021 from math import isqrt
+%o A401021 def ceil_cuberoot(n):
+%o A401021     """Exact ceil(cube_root(n)) for a positive integer."""
+%o A401021     if type(n) is not int or n < 1:
+%o A401021         raise ValueError("n must be a positive integer")
+%o A401021     lo, hi = 0, 1 << ((n.bit_length() + 2) // 3)
+%o A401021     while lo + 1 < hi:
+%o A401021         mid = (lo + hi) // 2
+%o A401021         if mid ** 3 < n:
+%o A401021             lo = mid
+%o A401021         else:
+%o A401021             hi = mid
+%o A401021     return hi
+%o A401021 def a(n):
+%o A401021     """Minimum of x*y+x*z+y*z over positive integers x*y*z >= n."""
+%o A401021     k = ceil_cuberoot(n)
+%o A401021     best = 3 * k * k  # Half-area of a feasible k by k by k cube.
+%o A401021     for x in range(1, k + 1):
+%o A401021         # For x <= y <= z, half-area >= y*y + 2*x*y.
+%o A401021         for y in range(x, isqrt(best + x*x) - x + 1):
+%o A401021             z = max(y, (n + x*y - 1) // (x*y))
+%o A401021             best = min(best, x*y + x*z + y*z)
+%o A401021     return best
+%o A401021 if __name__ == "__main__":
+%o A401021     print([a(n) for n in range(1, 65)])
+%Y A401021 Cf. A075777, A193416.
+%K A401021 nonn,new
+%O A401021 1,1
+%A A401021 _Scott B. Farrar_, Oct 13 2026
