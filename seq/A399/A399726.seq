@@ -1,0 +1,37 @@
+%I A399726 #28 Oct 24 2026 17:03:51
+%S A399726 1,2,19,312,7643,256020,11096168,598896401,39139847188,3031322144533,
+%T A399726 273521581657006,28358733352479982,3339902710297719296,
+%U A399726 442517243620250926437,65415815270340860490360,10712294881435175920813811,1931132206343352778109827474,381131556689328150695615393793
+%N A399726 Number of distinct configurations of n matryoshkas that are also allowed to stack.
+%C A399726 Doll k is either closed (top half on bottom half) or split into its bottom B_k and top T_k. A piece may only be nested inside, or stood on, a piece of a larger doll. A closed doll or a bottom half holds at most one smaller closed doll or bottom half directly (which may in turn hold another); a top half holds at most one smaller top half; a loose top half may not go inside a bottom half or a closed doll. In addition, the flat head of a top half or of a closed doll may carry one smaller item (a closed doll, a bottom half or a top half, together with whatever it carries). A head anywhere inside a closed doll or covered by another top half cannot carry anything; a piece standing in an open bottom half sticks out, so its head can, provided that bottom half is not itself inside a closed doll. Only what is inside or on top of what matters, not positions on the table.
+%C A399726 Without stacking on heads the count is A124426(n) = Bell(n)*Bell(n+1). When all n dolls are closed the count is A000258(n).
+%H A399726 James Guillochon, <a href="/A399726/b399726.txt">Table of n, a(n) for n = 0..180</a>
+%H A399726 James Guillochon, <a href="https://guillochon.github.io/matryoshka-sequences/">Matryoshka sequences</a>, drawings of every arrangement for n <= 4.
+%H A399726 James Guillochon, <a href="https://github.com/guillochon/oeis-results/tree/main/A124426">Programs and data</a>.
+%F A399726 a(n) >= A124426(n), with equality only for n = 0 and 1.
+%F A399726 a(n) == 1 (mod 2) if and only if n mod 30 is in {0, 2, 4, 7, 9, 13, 15, 17, 18, 19, 21, 26, 27, 29}. a(n) mod 4 is periodic with period 120 for n >= 4.
+%e A399726 a(2) = 19: write D_k for closed doll k, B_k and T_k for its halves, X[Y] for Y nested inside X and X^Y for Y standing on the head of X. The 19 arrangements are
+%e A399726   D_2[D_1];  D_2^D_1;  D_2[B_1]^T_1;
+%e A399726   D_2 D_1;  D_2[B_1] T_1;  D_2^B_1 T_1;  D_2^T_1 B_1;  B_2[D_1] T_2;  B_2 T_2^D_1;
+%e A399726   B_2[B_1] T_2[T_1];  B_2[B_1] T_2^T_1;  B_2 T_2[T_1]^B_1;
+%e A399726   D_2 B_1 T_1;  D_1 B_2 T_2;  B_2[B_1] T_1 T_2;  B_1 B_2 T_2[T_1];  B_1 B_2 T_2^T_1;  B_2 T_2^B_1 T_1;
+%e A399726   B_1 T_1 B_2 T_2.
+%o A399726 (Python)
+%o A399726 from collections import Counter
+%o A399726 def a(n):
+%o A399726     st = Counter({(0, 0, 0, 0): 1})  # (free heads, open-bottom tower ends, outer closed dolls, outer tops)
+%o A399726     for _ in range(n):
+%o A399726         new = Counter()
+%o A399726         for (s, f, e, t), w in st.items():
+%o A399726             new[s+1, f, e+1, t] += w; new[s, f, e+1, t] += w*s
+%o A399726             new[s+1, f-1, e+1, t] += w*f; new[s, f, e, t] += w*e
+%o A399726             for (s2, f2), m in (((s, f+1), 1), ((s-1, f+1), s), ((s, f), f+e)):
+%o A399726                 if m:
+%o A399726                     new[s2+1, f2, e, t+1] += w*m; new[s2, f2, e, t+1] += w*m*s2
+%o A399726                     new[s2, f2, e, t] += w*m*t
+%o A399726         st = new
+%o A399726     return sum(st.values())
+%Y A399726 Cf. A000110, A000258, A008277, A124426.
+%K A399726 nonn,new
+%O A399726 0,2
+%A A399726 _James Guillochon_, Oct 07 2026
