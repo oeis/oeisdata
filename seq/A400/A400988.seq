@@ -1,0 +1,52 @@
+%I A400988 #24 Oct 26 2026 07:22:19
+%S A400988 1,0,1,0,1,2,0,0,7,6,0,0,3,46,24,0,0,0,55,326,120,0,0,0,15,760,2556,
+%T A400988 720,0,0,0,0,525,9856,22212,5040,0,0,0,0,105,12460,128492,212976,
+%U A400988 40320,0,0,0,0,0,5985,257068,1731276,2239344,362880
+%N A400988 Triangle read by rows: T(n, k) = n! * [x^(n-k)] Laguerre(n, -x, -x).
+%C A400988 T(n,k) is the number of sets of lists (as in A000262) on [n] in which n-k lists do not start with their minimum element.
+%C A400988 T(n,k) is the number of connected labeled series-parallel posets (as in A058349) on [k+1] with defect n-k, where defect is defined in the answer by GChromodynamics to the StackExchange question. It also gives details of the bijection between A000262 and A058349.
+%H A400988 Andrei Z. Broder, <a href="https://doi.org/10.1016/0012-365X(84)90161-4">The r-Stirling numbers</a>, Discrete Mathematics, Vol. 49, Iss. 3 (1984), pp. 241-259.
+%H A400988 Natalia L. Skirrow, <a href="https://math.stackexchange.com/questions/5151939/on-a-bijection-between-combinatorial-species-sets-of-lists-connected-series-pa">On a bijection between combinatorial species (sets of lists, connected series-parallel posets) hiding inside the Stirling numbers</a>, StackExchange. [In the question, T_c(n,k) = A400987(k,n) and T_num(n,k) = T(n,k).]
+%F A400988 E.g.f.: (1-x*y)^(1/y-1)*e^(x/(1-x*y)).
+%F A400988 D-finite with T(n+1,k+1) = (2*n+1)*T(n,k) - n*(n*T(n-1,k-1) - T(n-1,k)).
+%F A400988 n-th row o.g.f.: hypergeom([-n,1/x-n],[],x).
+%F A400988 Row sums: Sum_{k=ceiling(n/2)..n} T(n,k) = A000262(n).
+%F A400988 Column sums: Sum_{n=k..2*k} T(n,k) = A058349(k+1) [see StackExchange link].
+%F A400988 T(n,k) = Sum_{i=0..k} Stirling1(n+1,n+1-i)*A400987(k-i,n).
+%F A400988 T(n,k) = Sum_{r=2*(n-k)..n} |Stirling1(n+1,r+1)|*A008299(r,n-k).
+%F A400988 T(n,k) = Sum_{j=0..n-k} C(n,j) * (-1)^(n+k-j) * Stirling2(-j; k-1-n, -1-n), where Stirling2(r; n, k) is an r-subset number.
+%F A400988 T(n,k) = Sum_{i=0..n} C(n,i)*Sum_{j=i-k..i} (-1)^j * |Stirling1(i+1,j+1)| * A271703(n-i,n-k-j).
+%F A400988 A400987(n,k) = Sum_{i=ceiling(k/2)..k} T(k,i) * Stirling2(n+k-i,k).
+%F A400988 As a distribution, n-th row has expectation n - sqrt(n) + (2*log(n)+1)/4 + o(1) and variance = (sqrt(n)-log(n)+1)/2 + o(1).
+%F A400988 T(n,n  ) = n!.
+%F A400988 T(n,n-1) = n!*(n-H(n)) = A067318(n), where H(n) = A001008(n)/A002805(n). [However, this is not the number triangle from _Philippe Deléham_'s formula on A067318.]
+%F A400988 T(n,n-2) = n!*(n*(n-1)/4 - n*(H(n)-1) + (H(n)^2-H(n,2))/2), where H(n,2) = A007406(n)/A007407(n).
+%F A400988 Sum_{k=0..n} T(n,k)*(-1)^(n-k) = A066668(n). - _Alois P. Heinz_, Apr 29 2025
+%F A400988 T(n, k) = [x^k] p(n,x) where p(n,x) = x*((1 - n)*(n*x - x - 1)*p(n - 2) + (2*n - 1)*p(n - 1)) with p(0,x) = 1, p(1,x) = x. - _Peter Luschny_, Oct 20 2026
+%e A400988 Triangle begins:
+%e A400988  n\k|0 1 2  3   4     5      6       7        8         9        10       11
+%e A400988  ---+-----------------------------------------------------------------------
+%e A400988   0 |1
+%e A400988   1 |  1
+%e A400988   2 |  1 2
+%e A400988   3 |    7  6
+%e A400988   4 |    3 46  24
+%e A400988   5 |      55 326   120
+%e A400988   6 |      15 760  2556    720
+%e A400988   7 |         525  9856  22212    5040
+%e A400988   8 |         105 12460 128492  212976    40320
+%e A400988   9 |              5985 257068 1731276  2239344    362880
+%e A400988  10 |               945 217350 5031460 24403176  25659360   3628800
+%e A400988  11 |                    79695 6536530 97266620 361732536 318540960 39916800
+%p A400988 with(orthopoly): Tpoly := (n, x) -> simplify(L(n, -x, -x)):
+%p A400988 T := (n, k) -> n! * coeff(Tpoly(n, x), x, n - k):
+%p A400988 seq(seq(T(n, k), k = 0..n), n = 0..9); # _Peter Luschny_, Oct 19 2026
+%t A400988 rows=10;CoefficientList[CoefficientList[Series[(1-x*y)^(1/y-1)*E^(x/(1-x*y)),{x,0,rows}],x]*Range[0,rows]!,y]//MatrixForm
+%o A400988 (Python)
+%o A400988 from functools import cache
+%o A400988 A400988=cache(lambda n,k: int(0<=k<=n<=2*k and (n==k==0 or (2*n-1)*A400988(n-1,k-1) - (n-1)*((n-1)*A400988(n-2,k-2) - A400988(n-2,k-1)))))
+%Y A400988 Cf. A000262 (row sums), A058349 (column sums), A008299, A066668, A067318 (T(n,n-1)), A400987.
+%Y A400988 Cf. A001008/A002805 (H(n)), A007406/A007407 (H(n,2)).
+%K A400988 nonn,tabl,new
+%O A400988 0,6
+%A A400988 _Natalia L. Skirrow_, Oct 15 2026
