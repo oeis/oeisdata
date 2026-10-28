@@ -1,0 +1,38 @@
+%I A401301 #9 Oct 27 2026 22:11:48
+%S A401301 2,5,17,17,37,37,67,67,107,109,163,167,241,233,331,317,421,431,541,
+%T A401301 547,673,677,827,827,997,991,1181,1181,1399,1381,1601,1597,1847,1847,
+%U A401301 2111,2113,2393,2393,2699,2707,3041,3037,3389,3391,3761,3761,4157,4153,4583,4567,5003
+%N A401301 Smallest prime that is the sum of n distinct elements from the union of primes and powers of 3 starting at 3.
+%C A401301 The sequence is not monotonic. For example, a(13) = 241 > a(14) = 233, and a(47) = 4157 > a(48) = 4153.
+%e A401301 For n = 1, a(1) = 2 (is prime).
+%e A401301 For n = 2, a(2) = 5 = 2 + 3 (is prime).
+%e A401301 For n = 3, a(3) = 17 = 3 + 5 + 9 (is prime).
+%e A401301 For n = 4, a(4) = 17 = 2 + 3 + 5 + 7 (is prime).
+%e A401301 For n = 5, a(5) = 37 = 3 + 5 + 7 + 9 + 13 (is prime).
+%o A401301 (Python)
+%o A401301 from sympy import nextprime, primerange
+%o A401301 def generate_set(limit):
+%o A401301     p3 = [3**k for k in range(1, int(limit.bit_length() * 0.7) + 2) if 3**k <= limit]
+%o A401301     return sorted(list(set(p3 + list(primerange(2, limit)))))
+%o A401301 def can_partition(target, count, max_idx, s, memo):
+%o A401301     if count == 0: return target == 0
+%o A401301     if target <= 0 or max_idx < 0 or count > max_idx + 1: return False
+%o A401301     if (state := (target, count, max_idx)) in memo: return memo[state]
+%o A401301     if s[max_idx] <= target:
+%o A401301         if can_partition(target - s[max_idx], count - 1, max_idx - 1, s, memo):
+%o A401301             memo[state] = True
+%o A401301             return True
+%o A401301     ans = can_partition(target, count, max_idx - 1, s, memo)
+%o A401301     memo[state] = ans
+%o A401301     return ans
+%o A401301 def a(n):
+%o A401301     S, p = generate_set(1000), 2
+%o A401301     while True:
+%o A401301         if p > S[-1]: S = generate_set(p * 2)
+%o A401301         sub_S = [x for x in S if x <= p]
+%o A401301         if len(sub_S) >= n and can_partition(p, n, len(sub_S) - 1, sub_S, {}): return p
+%o A401301         p = nextprime(p)
+%Y A401301 Cf. A000040, A000244, A399546, A399803, A400148, A399290, A398402.
+%K A401301 nonn,new
+%O A401301 1,1
+%A A401301 _Iurii Kirpichev_, Oct 20 2026

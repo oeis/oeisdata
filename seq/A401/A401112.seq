@@ -1,0 +1,65 @@
+%I A401112 #13 Oct 27 2026 20:25:56
+%S A401112 1,2,3,4,6,7,14,15,49,56,60,110,119,120,124,193,195,199,202,215,394,
+%T A401112 396,406,409,411,413,414,415,418,422,423,426,427,428,429,440,454,460,
+%U A401112 465,467,478,479,483,484,496,497,502,503,504,506,510,973,974,975,987,989,995,999
+%N A401112 Strictly non-handsome numbers in all bases from 2 to k: numbers k such that for every base b (2 <= b <= k), k cannot be written as the sum of its base-b digits raised to positive integer powers.
+%C A401112 A handsome number in base b (cf. A007532 for base 10) is an integer k such that k = Sum_{i=1..L} d_i^(e_i), where d_i are the digits of k in base b and each e_i >= 1 is an integer.
+%C A401112 This sequence lists positive integers k that are not handsome in any base b in the range 2 <= b <= k.
+%C A401112 If b > k, k has only one digit in base b, so the condition holds trivially as k^1 = k; hence the base range is restricted to 2 <= b <= k.
+%C A401112 If k - 1 = h^m for some integers h >= 2 and m >= 2, then in base b = k - h the number k is represented as [1, h], and 1^1 + h^m = 1 + (k - 1) = k. Thus k is handsome. Consequently, no number of the form h^m + 1 with h, m >= 2 belongs to this sequence.
+%C A401112 The sequence exhibits dense clusters separated by long deserts with no terms (e.g., [511, 972], [1000, 1550], and [2024, 3073]).
+%e A401112 For k = 5:
+%e A401112 In base 2, 5 is [1, 0, 1]_2; 1^a + 0^b + 1^c = 2 != 5 for any positive integers.
+%e A401112 In base 3, 5 is [1, 2]_3; 1^1 + 2^2 = 1 + 4 = 5.
+%e A401112 Thus 5 is handsome in base 3 and is not in the sequence.
+%e A401112 For k = 14:
+%e A401112 Testing all bases b from 2 to 14:
+%e A401112   b=2:  [1, 1, 1, 0]_2 -> 1^a + 1^b + 1^c + 0 = 3 != 14.
+%e A401112   b=3:  [1, 1, 2]_3    -> 1 + 1 + 2^e in {4, 6, 10, 18, ...} != 14.
+%e A401112   b=4:  [3, 2]_4       -> 3^a + 2^b in {5, 7, 11, 13, 17, ...} != 14.
+%e A401112   b=5:  [2, 4]_5       -> 2^a + 4^b in {6, 8, 12, 18, 20, ...} != 14.
+%e A401112   b=6:  [2, 2]_6       -> 2^a + 2^b in {4, 6, 8, 10, 12, 16, ...} != 14.
+%e A401112   b=7:  [2, 0]_7       -> 2^a + 0 in {2, 4, 8, 16, ...} != 14.
+%e A401112   b=8:  [1, 6]_8       -> 1 + 6^b in {7, 37, ...} != 14.
+%e A401112   b=9:  [1, 5]_9       -> 1 + 5^b in {6, 26, ...} != 14.
+%e A401112   b=10: [1, 4]_10      -> 1 + 4^b in {5, 17, ...} != 14.
+%e A401112   b=11: [1, 3]_11      -> 1 + 3^b in {4, 10, 28, ...} != 14.
+%e A401112   b=12: [1, 2]_12      -> 1 + 2^b in {3, 5, 9, 17, ...} != 14.
+%e A401112   b=13: [1, 1]_13      -> 1^a + 1^b = 2 != 14.
+%e A401112   b=14: [1, 0]_14      -> 1^a + 0 = 1 != 14.
+%e A401112 Since no base 2 <= b <= 14 yields 14, 14 is in the sequence.
+%o A401112 (Python)
+%o A401112 def can_form(digits, target):
+%o A401112     num_ones = digits.count(1)
+%o A401112     other = [d for d in digits if d > 1]
+%o A401112     rem = target - num_ones
+%o A401112     if rem < 0:
+%o A401112         return False
+%o A401112     possible = {0}
+%o A401112     for d in other:
+%o A401112         new_sums = set()
+%o A401112         p = d
+%o A401112         while p <= rem:
+%o A401112             for s in possible:
+%o A401112                 if s + p <= rem:
+%o A401112                     new_sums.add(s + p)
+%o A401112             p *= d
+%o A401112         possible = new_sums
+%o A401112         if not possible:
+%o A401112             return False
+%o A401112     return rem in possible
+%o A401112 def is_handsome(n):
+%o A401112     for b in range(2, n + 1):
+%o A401112         temp = n
+%o A401112         digits = []
+%o A401112         while temp > 0:
+%o A401112             digits.append(temp % b)
+%o A401112             temp //= b
+%o A401112         if len(digits) >= 2 and can_form(digits[::-1], n):
+%o A401112             return True
+%o A401112     return False
+%o A401112 print([n for n in range(1, 1501) if not is_handsome(n)])
+%Y A401112 Cf. A005188, A007532, A014576.
+%K A401112 nonn,base,new
+%O A401112 1,2
+%A A401112 _Guido Avagliano_, Oct 15 2026

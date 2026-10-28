@@ -1,0 +1,66 @@
+%I A401115 #10 Oct 27 2026 21:38:51
+%S A401115 6,12,18,24,28,30,36,40,48,54,56,60,72,80,84,90,96,108,112,120,126,
+%T A401115 132,140,144,150,156,160,162,168,176,180,192,196,198,200,208,210,216,
+%U A401115 220,224,228,234,240,252,260,264,270,276,280,288,300,308,312,320,324,330,336,340,342,350
+%N A401115 Pseudoperfect numbers k such that every proper divisor of k belongs to at least one subset of proper divisors summing to k.
+%C A401115 A number k is pseudoperfect (or semiperfect, A005835) if k is the sum of a subset of its proper divisors.
+%C A401115 This sequence lists pseudoperfect numbers k such that the union of all subsets of proper divisors that sum to k equals the entire set of proper divisors of k and we can call it omnipseudoperfect.
+%C A401115 Every perfect number (A000396) is trivially omnipseudoperfect, because the complete set of proper divisors sums to n and contains every proper divisor.
+%C A401115 There are infinitely many omnipseudoperfect numbers: the family k = 3 * 2^h is omnipseudoperfect for all h >= 1. Specifically, for each 0 <= j <= h-1, the subset S_j = {2^j, 2^(j+1)} U {3 * 2^i : j <= i <= j-1} sums to 3 * 2^k, and the union of these subsets over all j covers every proper divisor of 3 * 2^k.
+%C A401115 There are also infinitely many pseudoperfect numbers that are not omnipseudoperfect: if P is a perfect number and p is a prime with p > 2*P, then n = P*p is pseudoperfect but never omnipseudoperfect (for example, 6*p for all primes p >= 7).
+%C A401115 More generally, if n is abundant (sigma(k) > 2*k) and p is a prime with p > sigma(k), then k*p is pseudoperfect but cannot contain any proper divisor of k in any valid subset summing to k*p.
+%C A401115 Unlike pseudoperfect numbers, this sequence is not closed under integer multiplication: 12 is omnipseudoperfect, but its multiple 12 * 17 = 204 is not.
+%C A401115 The smallest primitive pseudoperfect number (A006036) that is not perfect and belongs to this sequence is 350.
+%C A401115 The smallest odd term is 945, which is also the smallest odd pseudoperfect number.
+%e A401115 For k = 12:
+%e A401115 Proper divisors are {1, 2, 3, 4, 6}.
+%e A401115 The subsets summing to 12 are {6, 4, 2} and {6, 3, 2, 1}.
+%e A401115 Their union is {6, 4, 2} U {6, 3, 2, 1} = {1, 2, 3, 4, 6}, which includes every proper divisor.
+%e A401115 Thus 12 is omnipseudoperfect.
+%e A401115 For k = 204 (a multiple of 12, since 204 = 12 * 17):
+%e A401115 Proper divisors are {1, 2, 3, 4, 6, 12, 17, 34, 51, 68, 102}.
+%e A401115 There are exactly 6 subsets of proper divisors that sum to 204:
+%e A401115   {1, 3, 12, 17, 34, 68, 102},
+%e A401115   {4, 12, 17, 34, 68, 102},
+%e A401115   {2, 3, 4, 17, 34, 68, 102},
+%e A401115   {1, 2, 4, 17, 34, 68, 102},
+%e A401115   {2, 17, 51, 68, 102},
+%e A401115   {1, 3, 17, 51, 68, 102}.
+%e A401115 The proper divisor 6 is never used in any valid subset.
+%e A401115 Thus, 204 is not omnipseudoperfect, showing that a multiple of an omnipseudoperfect number need not be omnipseudoperfect.
+%o A401115 (Python)
+%o A401115 def proper_divisors(n):
+%o A401115     if n <= 1:
+%o A401115         return []
+%o A401115     divs = [1]
+%o A401115     for i in range(2, int(n**0.5) + 1):
+%o A401115         if n % i == 0:
+%o A401115             divs.append(i)
+%o A401115             if i * i != n:
+%o A401115                 divs.append(n // i)
+%o A401115     return sorted(divs)
+%o A401115 def can_sum(div_list, target):
+%o A401115     possible = {0}
+%o A401115     for x in div_list:
+%o A401115         new_poss = set()
+%o A401115         for s in possible:
+%o A401115             if s + x == target:
+%o A401115                 return True
+%o A401115             if s + x < target:
+%o A401115                 new_poss.add(s + x)
+%o A401115         possible.update(new_poss)
+%o A401115     return target in possible
+%o A401115 def is_omni_pseudoperfect(n):
+%o A401115     divs = proper_divisors(n)
+%o A401115     if sum(divs) < n or not can_sum(divs, n):
+%o A401115         return False
+%o A401115     for i, d in enumerate(divs):
+%o A401115         rem = divs[:i] + divs[i+1:]
+%o A401115         if not can_sum(rem, n - d):
+%o A401115             return False
+%o A401115     return True
+%o A401115 print([n for n in range(1, 401) if is_omni_pseudoperfect(n)])
+%Y A401115 Cf. A000396, A005101, A005835, A006036.
+%K A401115 nonn,new
+%O A401115 1,1
+%A A401115 _Guido Avagliano_, Oct 15 2026

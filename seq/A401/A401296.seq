@@ -1,0 +1,36 @@
+%I A401296 #16 Oct 27 2026 22:45:07
+%S A401296 2,4,34,34,274,9164,83656,937364,17375786,129441586,1836634526,
+%T A401296 78660043034,1132818685844,7093616538854,80434953238366,
+%U A401296 22462730192833204,2496804796343004146,13868404138936137946,330737194874381417396,73273585529916669248924,167593081544776655897284
+%N A401296 Smallest even k > 0 such that k == +1 or -1 (mod p) for each of the first n odd primes p.
+%C A401296 a(n) <= 2*A323746(n+1), with equality if and only if a(n) == 2 (mod 4). Proof: a number m is maximally far from every multiple of an odd prime p exactly when 2m == +-1 (mod p), and maximally far from multiples of 2 exactly when m is odd, so 2*A323746(n+1) is the smallest k == 2 (mod 4) with k == +-1 (mod p) for each of the first n odd primes; the present sequence also admits k == 0 (mod 4). The two differ at n = 2, 6, 7, 8 (a(n) = 4, 9164, 83656, 937364 versus 14, 18446, 138566, 3582734) and agree at n = 1, 3, 4, 5, 9, 10, 11, 12. For 13 <= n <= 18 they differ at n = 13, 16 and agree at n = 14, 15, 17, 18.
+%C A401296 Equivalently, a(n) is the smallest even k > 0 with k^2 == 1 (mod P_n), where P_n = 3*5*7*...*prime(n+1) = A070826(n+1) is the product of the first n odd primes. Since P_n is odd and squarefree, k^2 == 1 (mod P_n) has exactly 2^n solutions mod P_n. P_n - 1 is always an even solution, so a(n) <= A070826(n+1) - 1, with equality for n = 1.
+%C A401296 Motivation: let p and p+g be consecutive primes and q an odd prime with q < p. The sum p + (p+g) - 1 = 2p + g - 1 is divisible by q only if p == (1-g)/2 (mod q), and that residue class is already excluded by the primality of p or of p+g precisely when g == +1 or -1 (mod q). So for g = a(n), the sum can never be divisible by any odd prime up to prime(n+1); a(n) is the smallest even g with this "shield" property.
+%C A401296 a(n) = a(n+1) when a(n) == +-1 (mod prime(n+2)) already holds, as for a(3) = a(4) = 34 (34 == 1 (mod 11)).
+%H A401296 John M Schoonover, <a href="/A401296/b401296.txt">Table of n, a(n) for n = 1..40</a>
+%H A401296 John M Schoonover, <a href="https://github.com/johnmschoonover/prime_shield_analyzer">prime_shield_analyzer</a>
+%H A401296 John M Schoonover, <a href="https://theschoonover.net/writing/2026-10-20-defeating-the-sieve-part-3-the-shield-was-always-symmetric">Defeating the Sieve Part 3: The Shield Was Always Symmetric</a>
+%e A401296 a(3) = 34 because 34 == 1 (mod 3), 34 == -1 (mod 5), 34 == -1 (mod 7), and no smaller even number is +-1 modulo all of 3, 5, 7; equivalently 34^2 - 1 = 33*35 = 3*5*7*11.
+%o A401296 (Python)
+%o A401296 from itertools import product
+%o A401296 def oddprimes(n):
+%o A401296     ps, c = [], 3
+%o A401296     while len(ps) < n:
+%o A401296         if all(c % p for p in ps): ps.append(c)
+%o A401296         c += 2
+%o A401296     return ps
+%o A401296 def a(n):
+%o A401296     ps = oddprimes(n); P = 1
+%o A401296     for p in ps: P *= p
+%o A401296     best = None
+%o A401296     for signs in product((1, -1), repeat=n):
+%o A401296         r, M = 0, 1
+%o A401296         for s, p in zip(signs, ps):
+%o A401296             r += M * (((s - r) * pow(M, -1, p)) % p); M *= p
+%o A401296         k = r if r % 2 == 0 else r + P
+%o A401296         if best is None or k < best: best = k
+%o A401296     return best
+%Y A401296 Cf. A323746 (odd analog), A088028, A070826, A002110.
+%K A401296 nonn,new
+%O A401296 1,1
+%A A401296 _John M Schoonover_, Oct 19 2026
