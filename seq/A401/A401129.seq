@@ -1,0 +1,40 @@
+%I A401129 #23 Oct 28 2026 14:59:29
+%S A401129 1,5,13,25,41,61,85,113,145,505,1121,2025,3245,4805,6725,9021,11705,
+%T A401129 14785,47905,102485,181533,287881,424129,592597,795285,1033841,
+%U A401129 1309537,4216357,9006221,15961125,25353625,37441397,52462177,70629201,92127245,117109345
+%N A401129 a(n) is the number of points (x, y) of the square lattice Z^2 connected to the origin by a path of unit horizontal and vertical steps through points satisfying digitsum(|x|) + digitsum(|y|) <= n.
+%C A401129 a(19) = 102485 answers the classic puzzle of the area accessible to a walker constrained by digit sums (often posed with threshold 19).
+%C A401129 Reachability has an exact characterization: writing x and y with k = floor(n/9) + 1 digits (most significant first), (x, y) with x, y >= 0 is reachable if and only if for every prefix length 1 <= s < k the prefix digit sums satisfy ds(x_prefix) + ds(y_prefix) <= n - 9*(k-s) + 1, and ds(x) + ds(y) <= n. Consequently a(n) is computed by a one-dimensional dynamic program over the walk d_s (see Program), in time polynomial in k.
+%C A401129 Every reachable point has |x|, |y| < A051885(n+1). Among the points of that square satisfying digitsum(|x|) + digitsum(|y|) <= n, the fraction that are reachable decays as c/sqrt(n) on the subsequence n == 8 (mod 9), where c = (6/sqrt(Pi)) * exp((1/2) * Sum_{m>=1} p_m/m) = 3.847174895..., with p_m the probability that a sum of 2m independent uniform digits equals 9m (a Sparre Andersen / Wiener-Hopf constant).
+%C A401129 The base-2 analog of the quadrant version A401130 is A002054: in base 2 the quadrant count at threshold n is A002054(n+1).
+%H A401129 Adam Benzan, <a href="/A401129/b401129.txt">Table of n, a(n) for n = 0..100</a>
+%H A401129 Adam Benzan, <a href="/A401129/a401129.pdf">An exact reachability criterion for digit-sum-bounded lattice walks</a>, 2026.
+%F A401129 a(n) = 4*A401130(n) - 4*A051885(n+1) + 1, where A051885(n+1) = (r+1)*10^q - 1 with n+1 = 9*q + r, 1 <= r <= 9, is the least integer with digit sum n+1.
+%e A401129 For n = 0 only the origin is allowed, so a(0) = 1.
+%e A401129 For n = 1 the reachable points are (0,0), (+-1,0), (0,+-1): a(1) = 5.
+%e A401129 The point (2,0) is not counted for n = 1 since digitsum(2) = 2 > 1; the point (300,0) is not counted for n = 19 despite digitsum(300) = 3, because every path to it must pass the column |x| = 299 whose digit sum 20 exceeds 19.
+%o A401129 (Python)
+%o A401129 def a(n, b=10):
+%o A401129     B = b - 1
+%o A401129     k = n // B + 1
+%o A401129     w = [0] * (2 * b - 1)
+%o A401129     for i in range(b):
+%o A401129         for j in range(b):
+%o A401129             w[i + j] += 1
+%o A401129     W = {B * k - n: 1}
+%o A401129     for s in range(k):
+%o A401129         cap = 1 if s < k - 1 else 0
+%o A401129         nxt = {}
+%o A401129         for d, c in W.items():
+%o A401129             for m, wm in enumerate(w):
+%o A401129                 if d + m - B <= cap:
+%o A401129                     nxt[d + m - B] = nxt.get(d + m - B, 0) + c * wm
+%o A401129         W = nxt
+%o A401129     Q = sum(W.values())
+%o A401129     r = (n % B) + 1
+%o A401129     wall = (r + 1) * b ** ((n + 1 - r) // B) - 1
+%o A401129     return 4 * Q - 4 * wall + 1
+%Y A401129 Cf. A401130 (quadrant version), A002054 (base-2 quadrant analog), A051885 (least integer with given digit sum), A007953 (digit sum).
+%K A401129 nonn,base,walk,new
+%O A401129 0,2
+%A A401129 _Adam Benzan_, Oct 15 2026

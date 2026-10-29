@@ -1,0 +1,73 @@
+%I A399323 #65 Oct 28 2026 21:27:01
+%S A399323 1,3,3,5,19,19,7,43,201,201,9,75,551,3081,3081,11,115,1117,9593,62683,
+%T A399323 62683,13,163,1947,21657,213405,1598955,1598955,15,219,3089,41577,
+%U A399323 521967,5812435,49180113,49180113,17,283,4591,72041,1080049,15120403,187924847,1773405649,1773405649
+%N A399323 Triangle read by rows: T(n,t), 1 <= t <= n, of the polynomial family defined by T(n,0)=1, T(t,t)=T(t,t-1), dT(n,t)/dn = s*t*T(n,t-1) for s=2.
+%C A399323 The polynomial family is constructed recursively as follows. Starting with T(n,0) = 1, each subsequent polynomial is determined by dT(n,t)/dn = s*t*T(n,t-1), together with the boundary condition T(t,t) = T(t,t-1).
+%C A399323 Then for t > 0 T(n,t) = T(t,t-1) + Integral_{u=t..n} 2*t*T(u,t-1) du.
+%C A399323 Thus the differential recurrence determines T(n,t) up to an additive constant, while the boundary condition supplies the value of that constant.
+%C A399323 The diagonal T(n,n) agrees with A362968. It also has a unique interpretation in terms of the physicist's Hermite polynomial, and the Lambert W function.
+%C A399323 The factor 2*t in the differential recurrence admits a more general form s*t, with s corresponding to the dilation factor of the permutohedron in A362968.
+%C A399323 For general s, T(n,n) = Sum_k A138464(n,k)*s^k.
+%C A399323 For s=1, T(n,n) = A001858(n).
+%H A399323 James Ekern, <a href="/A399323/b399323.txt">Table of n, a(n) for n = 1..5050</a> (rows 1..100).
+%H A399323 James Ekern, <a href="/A399323/a399323.md.txt">Integral Recursion Proof</a>
+%H A399323 James Ekern, <a href="/A399323/a399323_1.md.txt">Discovery and Derivation</a>
+%H A399323 James Ekern, <a href="/A399323/a399323_4.md.txt">Lagrange Inversion Lemma</a>
+%H A399323 James Ekern, <a href="/A399323/a399323_5.md.txt">Explicit Formula Proof</a>
+%F A399323 T(n,0) = 1.
+%F A399323 dT(n,t)/dn = 2*t*T(n,t-1), for t >= 1.
+%F A399323 T(t,t) = T(t,t-1), for t >= 1.
+%F A399323 T(n,t) = H_t(n+1/2) - 2*t*H_{t-1}(n+1/2), where H_t is the physicists' Hermite polynomial and H_{-1} = 0.
+%F A399323 E.g.f. for fixed n: Sum_{t>=0} T(n,t)*x^t/t! = (1-2*x)*exp((2*n+1)*x-x^2).
+%F A399323 Diagonal e.g.f.: Sum_{n>=0} T(n,n)*x^n/n! = exp(-W(-2*x)/2 - W(-2*x)^2/4), where W is the Lambert W branch with W(0)=0.
+%F A399323 For n >= 1, T(n,n) = A362968(n).
+%e A399323 Finding row for t=5
+%e A399323   T(n, 4) = 16*n^4-32*n^3-120*n^2+8*n+41, T(5, 4) = 3081.
+%e A399323   T(n, 5) = 3081 + Integral_{u=t..n} 10*T(u, 4) du = 32*n^5-80*n^4-400*n^3+40*n^2+410*n+31.
+%e A399323 Triangle begins:
+%e A399323    1
+%e A399323    3,   3
+%e A399323    5,  19,   19
+%e A399323    7,  43,  201,  201
+%e A399323    9,  75,  551, 3081,  3081
+%e A399323   11, 115, 1117, 9593, 62683, 62683
+%e A399323   ...
+%p A399323 N := 9:
+%p A399323 P[0] := x -> 1:
+%p A399323 for t from 1 to N do
+%p A399323   P[t] := unapply( P[t-1](t) + int( 2*t*P[t-1](u), u = t..x ), x ):
+%p A399323 od:
+%p A399323 seq(seq(P[t](n), t = 1..n), n = 1..N);
+%t A399323 nMax = 9;
+%t A399323 s = 2;
+%t A399323 A[0] = 1;
+%t A399323 Do[
+%t A399323   A[t] = Expand[
+%t A399323     (A[t - 1] /. n -> t) +
+%t A399323     Integrate[s t (A[t - 1] /. n -> u), {u, t, n}]
+%t A399323   ],
+%t A399323   {t, 1, nMax}
+%t A399323 ];
+%t A399323 Flatten[Table[A[t] /. n -> k, {k, 1, nMax}, {t, 1, k}]]
+%o A399323 (Python)
+%o A399323 import sympy as sp
+%o A399323 n, u = sp.symbols("n u")
+%o A399323 def generate_triangle(n_max):
+%o A399323     T = {0: sp.Integer(1)}
+%o A399323     table = []
+%o A399323     for t in range(1, n_max + 1):
+%o A399323         boundary = T[t - 1].subs(n, t)
+%o A399323         integrand = 2 * t * T[t - 1].subs(n, u)
+%o A399323         T[t] = sp.expand(boundary + sp.integrate(integrand, (u, t, n)))
+%o A399323     for row_n in range(1, n_max + 1):
+%o A399323         row = [T[t].subs(n, row_n) for t in range(1, row_n + 1)]
+%o A399323         table.append(row)
+%o A399323     return table
+%o A399323 def print_triangle(triangle):
+%o A399323     for row in triangle:
+%o A399323         print(str(row).replace("[", "").replace("]", ""))
+%Y A399323 Cf. A362968, A138464, A001858.
+%K A399323 easy,nonn,tabl,new
+%O A399323 1,2
+%A A399323 _James Ekern_, Sep 23 2026
