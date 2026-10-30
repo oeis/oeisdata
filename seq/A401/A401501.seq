@@ -1,4 +1,4 @@
-%I A401501 #15 Oct 28 2026 04:16:27
+%I A401501 #21 Oct 29 2026 08:23:58
 %S A401501 1,1,0,3,4,0,15,40,18,0,105,420,430,96,0,945,5040,8260,4536,600,0,
 %T A401501 10395,69300,157500,144928,49644,4320,0,135135,1081080,3153150,
 %U A401501 4145680,2460780,574848,35280,0,2027025,18918900,67477410,116276160,100948540,41920560,7090416,322560,0
@@ -7,9 +7,12 @@
 %F A401501 T(n, n-1) = n*n!.
 %F A401501 T(n, 0) = (2*n-1)!!.
 %F A401501 T(n, 1) = (2*n-1)!! * 4*(n-1)/3.
+%F A401501 T(n, k) = (2*n - k)! * [x^(n-k)] Laguerre(2*n - k, -x-1, -x).
+%F A401501 E.g.f.: exp(x/2 * hypergeom([2, 2], [3], x*y)).
 %F A401501 T(n, k) = B_{2*n-k, n-k}(c1, c2, ..., c_{n+1}), where B_{m,r} is the partial exponential Bell polynomial and c_j = (j-1)*(j-1)! for j >= 1.
 %F A401501 T(n, k) = (2*n - k)! [x^n y^k] exp(Sum_{j>=1} (j / (j+1)) * x^j * y^(j-1)).
 %F A401501 Recurrence: T(n, k) = (2*n-k-1) * (T(n-1, k) + 2*T(n-1, k-1) - (2*n-k-2)*T(n-2, k-2)) for n >= 1 and 0 <= k <= n, with T(0, 0) = 1, and in all other cases = 0.
+%F A401501 Sum_{k=0..floor(n/2)} T(n-k, n-2*k) = A288268(n).
 %e A401501 Triangle begins:
 %e A401501   [0]       1;
 %e A401501   [1]       1,       0;
@@ -29,8 +32,23 @@
 %p A401501 T := proc(n,k) local j; if k > n then return 0 elif n=0 then return 1 fi;
 %p A401501 IncompleteBellB(2*n-k, n-k, seq((j-1)*factorial(j-1), j = 1..n+1)) end:
 %p A401501 seq(seq(T(n, k), k = 0..n), n = 0..8);
+%p A401501 # Alternative:
+%p A401501 with(orthopoly): Tpoly := (n, k, x) -> simplify(L(2*n - k, -x - 1, -x)):
+%p A401501 T := (n, k) -> (2*n - k)! * coeff(Tpoly(n, k, x), x, n - k):
+%p A401501 seq(print(seq(T(n, k), k = 0..n)), n = 0..7);
+%p A401501 # Alternative:
+%p A401501 egf := (x, y) -> exp(x/2 * hypergeom([2, 2], [3], x*y)):
+%p A401501 RowT := proc(n) local x, y, p, k;
+%p A401501 p := convert(series(egf(x, y), x=0, n+1), polynom);
+%p A401501 p := expand(coeff(p, x, n));
+%p A401501 seq(simplify((2*n-k)! * coeff(p, y, k)), k=0..n) end:
+%p A401501 seq(print(RowT(n)), n = 0..7);
 %t A401501 T[n_, k_] := BellY[2 n - k, n - k, Table[(j - 1) (j - 1)!, {j, n + 1}]];
 %t A401501 Table[T[n, k], {n, 0, 8}, {k, 0, n}] // Flatten
+%t A401501 (* Alternative *)
+%t A401501 Tpoly[n_, k_, x_] := Expand[LaguerreL[2 n - k, -x -1, -x]];
+%t A401501 T[n_, k_] := If[k > n, 0, (2 n - k)! Coefficient[Tpoly[n, k, x], x, n - k ]];
+%t A401501 Table[Table[T[n, k], {k, 0, n}], {n, 0, 7}] // TableForm
 %t A401501 (* Alternative: *)
 %t A401501 T[0,0] = 1; T[n_, k_] := Module[{r = n-k, partitions}, If[k >= n, Return[0]];
 %t A401501 partitions = Select[IntegerPartitions[k], Length[#] <= r &];
@@ -53,7 +71,7 @@
 %o A401501     R = p.parent()
 %o A401501     return ZZ(p.subs({R.gen(j): j*factorial(j) for j in range(n+1)}))
 %o A401501 print(flatten([[T(n,k) for k in range(n+1)] for n in range(9)]))
-%Y A401501 Cf. A001147, A001563, A048174 (row sums).
+%Y A401501 Cf. A001147, A001563, A048174 (row sums), A288268 (diagonal sums), A401307.
 %K A401501 nonn,tabl,new
 %O A401501 0,4
 %A A401501 _Peter Luschny_, Oct 27 2026
