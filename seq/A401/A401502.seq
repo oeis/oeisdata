@@ -1,0 +1,52 @@
+%I A401502 #14 Oct 30 2026 09:21:31
+%S A401502 1,0,1,0,4,3,0,18,40,15,0,96,430,420,105,0,600,4536,8260,5040,945,0,
+%T A401502 4320,49644,144928,157500,69300,10395,0,35280,574848,2460780,4145680,
+%U A401502 3153150,1081080,135135,0,322560,7090416,41920560,100948540,116276160,67477410,18918900,2027025
+%N A401502 Triangle read by rows: T(n, k) is the number of partitions of the set {1, 2, ..., n+k} into k nonempty lists, such that the smallest element of each list is not in the initial position. The lists themselves are unordered.
+%H A401502 Peter Luschny, <a href="/A401502/b401502.txt">Rows n = 0..141</a>.
+%F A401502 T(n, 0) = 0 for n >= 1, and T(0, 0) = 1.
+%F A401502 T(n, 1) = n*n! for n >= 1.
+%F A401502 T(n, n) = (2*n-1)!!.
+%F A401502 T(n, n-1) = (2*n-1)!! * 4*(n-1)/3.
+%F A401502 T(n, k) = Sum_{j=0..k} (-1)^j * C(n+k, n+j) * Sum_{i=0..n} C(i+j, j) * |Stirling1(n+j, i+j)| * (k-j)^i.
+%F A401502 T(n, k) = (n + k)! * [x^k] Laguerre(n + k, -x-1, -x).
+%F A401502 T(n, k) = (n + k)! * [x^n y^k] exp(x*y/2 * hypergeom([2, 2], [3], x)).
+%F A401502 T(n, k) = ((n + k)! / k!) * [x^n] (Sum_{j>=1} (j/(j+1)) x^j)^k.
+%F A401502 T(n, k) = B_{n+k,k}(c_1, c_2, ..., c_{n+1}), where B_{m,r} is the partial exponential Bell polynomial and c_j = (j-1)*(j-1)! for j >= 1.
+%F A401502 Recurrence: T(n, k) = (n+k-1)*(T(n-1, k-1) + 2*T(n-1, k) - (n+k-2)*T(n-2, k)) for n >= 1 and 0 <= k <= n, with T(0, 0) = 1, and in all other cases = 0.
+%F A401502 T(n, k) = A401501(n, n-k).
+%F A401502 Sum_{k=0..n} T(n, k) = A048174(n+1).
+%F A401502 Sum_{k=0..n} (-1)^(n-k)*T(n, k) = A331404(n).
+%F A401502 Sum_{k=0..floor(n/2)} T(n-k, k) = A288268(n).
+%e A401502 Triangle begins:
+%e A401502   [0]  1;
+%e A401502   [1]  0,     1;
+%e A401502   [2]  0,     4,      3;
+%e A401502   [3]  0,    18,     40,      15;
+%e A401502   [4]  0,    96,    430,     420,     105;
+%e A401502   [5]  0,   600,   4536,    8260,    5040,     945;
+%e A401502   [6]  0,  4320,  49644,  144928,  157500,   69300,   10395;
+%e A401502   [7]  0, 35280, 574848, 2460780, 4145680, 3153150, 1081080, 135135;
+%e A401502 .
+%e A401502 Example: T(3,2) = 40. The partitions {(3,1), (4,2,5)} and {(4,2,5), (3,1)} are regarded as the same, since the order of the lists does not matter. However, {(1,3), (4,2,5)} is a different partition and is not counted, since 1 is the first element of its list.
+%p A401502 T := (n, k) -> (n + k)! * coeff(expand(LaguerreL(n + k, -x-1, -x)), x, k):
+%p A401502 seq(seq(T(n, k), k = 0..n), n = 0..8);
+%t A401502 T[n_, k_] := BellY[n + k, k, Table[(j - 1) (j - 1)!, {j, n + 1}]];
+%t A401502 Table[T[n, k], {n, 0, 8}, {k, 0, n}] // Flatten
+%t A401502 (* Alternative: *)
+%t A401502 T[n_, k_] := Sum[ (-1)^j Binomial[n+k, n+j] * Sum[Binomial[i+j, j] Abs[StirlingS1[n+j, i+j]] * If[i == 0, 1, (k-j)^i], {i, 0, n}], {j, 0, k}];
+%t A401502 Flatten[Table[T[n, k], {n, 0, 8}, {k, 0, n}]]
+%o A401502 (Python)
+%o A401502 from functools import cache
+%o A401502 @cache
+%o A401502 def T(n, k):
+%o A401502     if n == k == 0: return 1
+%o A401502     if n < 0 or k < 0 or k > n: return 0
+%o A401502     return (n+k-1) * (T(n-1, k-1) + 2*T(n-1, k) - (n+k-2)*T(n-2, k))
+%o A401502 def rowT(n): return [T(n, k) for k in range(n+1)]
+%o A401502 triangle = [rowT(n) for n in range(8)]
+%o A401502 for row in triangle: print(row)
+%Y A401502 Cf. A401501 (row reversed), A001147, A001563, A132393, A048174 (row sum), A331404 (alternating row sum), A288268 (antidiagonal sum).
+%K A401502 nonn,tabl,new
+%O A401502 0,5
+%A A401502 _Peter Luschny_, Oct 30 2026
