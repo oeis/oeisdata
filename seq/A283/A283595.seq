@@ -1,4 +1,4 @@
-%I A283595 #41 Mar 26 2018 13:02:34
+%I A283595 #45 Oct 31 2026 18:45:58
 %S A283595 1,1,1,1,3,1,1,7,4,1,1,15,13,5,1,1,31,38,19,6,1,1,63,105,64,26,7,1,1,
 %T A283595 127,280,202,97,34,8,1,1,255,729,612,334,139,43,9,1,1,511,1866,1803,
 %U A283595 1094,516,191,53,10,1,1,1023,4717,5205,3465,1802,760,254,64,11,1
@@ -6,6 +6,9 @@
 %C A283595 Row n has n+1 entries.
 %H A283595 Alois P. Heinz, <a href="/A283595/b283595.txt">Rows n = 0..140, flattened</a>
 %H A283595 Steven R. Finch, <a href="https://arxiv.org/abs/1802.04615">How far might we walk at random?</a>, arXiv:1802.04615 [math.HO], 2018.
+%F A283595 From _Chaz Reid_, Oct 23 2026: (Start)
+%F A283595 G.f. of column k: z^k/(R(k)*R(k+1)), where R(2*j) = P(j) - z*P(j-1), R(2*j+1) = P(j+1) - z^2*P(j-1), P(-1) = 0, and P(k) are the polynomials of A097862: P(0) = 1, P(1) = 1-z, P(k) = (1-z)*P(k-1) - z^2*P(k-2).
+%F A283595 R(k) = Product_{i=1..k, i odd} (1 - (1 + 2*cos(i*Pi/(k+1)))*z). (End)
 %e A283595 Triangle starts:
 %e A283595   1;
 %e A283595   1,  1;
@@ -22,10 +25,18 @@
 %p A283595 T:= n-> (p-> seq(coeff(p, z, i), i=0..n))(b(n, 0$2)):
 %p A283595 seq(T(n), n=0..12);  # _Alois P. Heinz_, Mar 13 2017
 %t A283595 b[x_, y_, m_] := b[x, y, m] = If[x==0, z^m, b[x-1, y, m] + If[y>0, b[x-1, y - 1, m], 0] + b[x-1, y+1, Max[m, y+1]]]; T[n_] := Function[p, Table[ Coefficient[p, z, i], {i, 0, n}]][b[n, 0, 0]]; Table[T[n], {n, 0, 12}] // Flatten (* _Jean-François Alcover_, Mar 18 2017, after _Alois P. Heinz_ *)
+%o A283595 (Python)
+%o A283595 def H(n, k): # Motzkin prefixes of length n and height at most k
+%o A283595     v = [1] + [0]*k
+%o A283595     for _ in range(n): v = [(v[j-1] if j else 0) + v[j] + (v[j+1] if j < k else 0) for j in range(k+1)]
+%o A283595     return sum(v)
+%o A283595 def T(n, k): return H(n, k) - H(n, k-1) if k else 1
+%o A283595 print([T(n, k) for n in range(11) for k in range(n+1)]) # _Chaz Reid_, Oct 23 2026
 %Y A283595 Row sums give A005773(n+1).
 %Y A283595 T(2n,n) gives A283667.
+%Y A283595 Column k=2 gives A094706(n-1).
 %Y A283595 Cf. A000225, A097862, A282869.
-%K A283595 nonn,tabl
+%K A283595 nonn,tabl,changed
 %O A283595 0,5
 %A A283595 _Steven Finch_, Mar 13 2017
 %E A283595 More terms from _Alois P. Heinz_, Mar 13 2017
