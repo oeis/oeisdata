@@ -1,0 +1,57 @@
+%I A399821 #24 Nov 01 2026 15:19:37
+%S A399821 1,2,6,19,41,75,165,253,391
+%N A399821 Maximum number of elements in an admissible tuple with consecutive gaps at most 2n.
+%C A399821 An admissible tuple misses at least one residue class modulo every prime. This gives an eventual upper bound for the number of primes in a cluster with gaps at most 2n.
+%C A399821 The Hardy-Littlewood prime-tuples conjecture predicts infinitely many clusters attaining the bound.
+%e A399821 For n=1, {0,2} is admissible. Admissibility modulo 2 forces all positions to have the same parity, so three positions with gaps at most 2 would, after translation, be {0,2,4}, which covers every residue modulo 3. Thus a(1)=2.
+%e A399821 For n=2, {0,4,6,10,12,16} is admissible and the wheel modulo 30 proves that no larger tuple with gaps at most 4 is admissible, so a(2)=6.
+%e A399821 For n=3, an admissible 19-element tuple is {0,4,6,10,16,18,24,28,30,34,40,46,48,54,58,60,66,70,76}. The wheel modulo 2310 gives the matching upper bound, so a(3)=19.
+%e A399821 These maxima concern admissible patterns. Small prime clusters can be exceptional: {2,3,5,7} contains four primes with gaps at most 2, although a(1)=2.
+%o A399821 (Python)
+%o A399821 from math import gcd
+%o A399821 from heapq import heappush, heappop
+%o A399821 from sympy import nextprime, primerange
+%o A399821 def a(n):
+%o A399821     step, M, p = 2*n, 1, 1
+%o A399821     while True:
+%o A399821         p = int(nextprime(p))
+%o A399821         M *= p
+%o A399821         r = [x for x in range(M) if gcd(x, M) == 1]
+%o A399821         m = len(r)
+%o A399821         cuts = [i for i in range(m)
+%o A399821                 if r[(i+1) % m] + (M if i+1 == m else 0) - r[i] > step]
+%o A399821         if cuts:
+%o A399821             break
+%o A399821     heap, seen = [], set()
+%o A399821     def add(h):
+%o A399821         h = tuple(x-h[0] for x in h)
+%o A399821         h = min(h, tuple(h[-1]-x for x in h[::-1]))
+%o A399821         if h not in seen:
+%o A399821             seen.add(h)
+%o A399821             heappush(heap, (-len(h), h))
+%o A399821     rr = r + [x+M for x in r]
+%o A399821     for i, j in zip(cuts, cuts[1:]+[cuts[0]+m]):
+%o A399821         add(rr[i+1:j+1])
+%o A399821     primes = list(primerange(2, -heap[0][0]+1))
+%o A399821     while heap:
+%o A399821         _, h = heappop(heap)
+%o A399821         p = next((p for p in primes if p <= len(h)
+%o A399821                   and len({x % p for x in h}) == p), None)
+%o A399821         if p is None:
+%o A399821             return len(h)
+%o A399821         for residue in range(p):
+%o A399821             part = []
+%o A399821             for x in h:
+%o A399821                 if x % p == residue:
+%o A399821                     continue
+%o A399821                 if part and x-part[-1] > step:
+%o A399821                     add(part)
+%o A399821                     part = []
+%o A399821                 part.append(x)
+%o A399821             if part:
+%o A399821                 add(part)
+%o A399821 print([a(n) for n in range(7)])
+%Y A399821 Cf. A008407, A023193, A292224, A399819.
+%K A399821 nonn,more,new
+%O A399821 0,2
+%A A399821 _Jwalin Bhatt_, Oct 22 2026
