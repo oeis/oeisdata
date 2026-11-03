@@ -1,0 +1,39 @@
+%I A398220 #21 Nov 02 2026 20:56:32
+%S A398220 2,8,32,82,302,1238,7792
+%N A398220 Minimum diameter of an admissible nondegenerate Hilbert cube of dimension n: least s(1) + ... + s(n) over positive integers s(1) < ... < s(n) such that all 2^n subset sums are distinct and, for every prime p, they miss at least one residue class modulo p.
+%C A398220 The set H = {Sum_{i in S} s(i) : S subset of {1..n}} is a Hilbert cube (subset-sum cube) with 2^n distinct elements and diameter max(H) - min(H) = s(1) + ... + s(n). "Admissible" is meant in the sense of the prime k-tuple conjecture: H does not cover all residue classes modulo any prime p. A set of 2^n primes, all greater than 2^n, is necessarily admissible; conversely, by the Hardy-Littlewood prime k-tuple conjecture, every admissible H has infinitely many translates m + H consisting entirely of primes. Thus a(n) is conjecturally the smallest possible diameter of a set of 2^n primes, all greater than 2^n, forming a nondegenerate n-dimensional Hilbert cube.
+%C A398220 Only primes p <= 2^n need to be checked, since H has 2^n elements.
+%C A398220 Admissibility modulo 2 forces all s(i) to be even.
+%C A398220 For n <= 7 the minimizing axis set is unique: n=1: (2); n=2: (2, 6); n=3: (2, 12, 18); n=4: (10, 12, 18, 42); n=5: (20, 30, 42, 78, 132); n=6: (42, 110, 156, 240, 270, 420); n=7: (190, 330, 462, 1020, 1092, 1890, 2808).
+%F A398220 a(n) >= A008407(2^n), since H is an admissible 2^n-tuple of diameter a(n). Equality holds for n = 1, 2; the ratio a(n)/A008407(2^n) is 1, 1, 1.23, 1.37, 2.07, 3.75, 10.39 for n = 1..7.
+%e A398220 a(2) = 8: the axes (2, 6) give H = {0, 2, 6, 8}, the prime quadruplet pattern, realized e.g. by 5, 7, 11, 13.
+%e A398220 a(3) = 32: the axes (2, 12, 18) give H = {0, 2, 12, 14, 18, 20, 30, 32}. H misses the residue 1 mod 2, 1 mod 3, 1 mod 5 and the residues 1, 3 mod 7, so it is admissible. The smallest m with m + H all prime is m = 663569: 663569, 663571, 663581, 663583, 663587, 663589, 663599, 663601.
+%o A398220 (Python)
+%o A398220 from sympy import primerange
+%o A398220 def a(n):
+%o A398220     P = list(primerange(2, 2**n + 1))
+%o A398220     def admissible(s):
+%o A398220         return all(len({x % p for x in s}) < p for p in P)
+%o A398220     def search(D):
+%o A398220         def rec(k, lo, rem, sums):
+%o A398220             if k == n - 1:
+%o A398220                 if rem < lo: return False
+%o A398220                 new = {x + rem for x in sums}
+%o A398220                 return not (new & sums) and admissible(sums | new)
+%o A398220             left = n - 1 - k
+%o A398220             x = lo
+%o A398220             while x * (left + 1) + left * (left + 1) // 2 <= rem:
+%o A398220                 new = {y + x for y in sums}
+%o A398220                 if not (new & sums) and rec(k + 1, x + 1, rem - x, sums | new):
+%o A398220                     return True
+%o A398220                 x += 1
+%o A398220             return False
+%o A398220         return rec(0, 1, D, {0})
+%o A398220     D = 1
+%o A398220     while not search(D): D += 1
+%o A398220     return D
+%o A398220 print([a(n) for n in range(1, 5)])  # [2, 8, 32, 82]
+%Y A398220 Cf. A008407, A276661, A005318.
+%K A398220 nonn,hard,more,new
+%O A398220 1,1
+%A A398220 _Jacek Szymkowiak_, Oct 18 2026

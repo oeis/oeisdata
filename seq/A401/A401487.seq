@@ -1,0 +1,38 @@
+%I A401487 #6 Nov 02 2026 22:13:10
+%S A401487 1,2,3,3,5,6,4,7,11,9,5,10,13,20,14,6,10,13,22,24,17,7,14,21,28,35,42,
+%T A401487 26,8,15,23,25,40,46,56,33,9,17,24,35,43,49,63,71,42,10,19,27,39,39,
+%U A401487 52,70,79,87,51,11,22,33,44,55,66,77,88,99,110,62
+%N A401487 Triangle read by rows: T(n,k) is the number of distinct Laplacian eigenvalues of the grid graph P_k X P_n, 1 <= k <= n.
+%C A401487 The Laplacian eigenvalues of P_k X P_n are 4 - 2*cos(Pi*i/k) - 2*cos(Pi*j/n), 0 <= i <= k-1, 0 <= j <= n-1, so T(n,k) is the number of distinct values of cos(Pi*i/k) + cos(Pi*j/n).
+%C A401487 Coincidences among the eigenvalues come from vanishing sums of roots of unity (Conway and Jones).
+%H A401487 J. H. Conway and A. J. Jones, <a href="http://eudml.org/doc/205475">Trigonometric diophantine equations (On vanishing sums of roots of unity)</a>, Acta Arithmetica 30 (1976), 229-240.
+%F A401487 T(n,1) = n.
+%F A401487 T(n,n) = A395911(n).
+%F A401487 T(n,k) <= n*k.
+%e A401487 Triangle begins:
+%e A401487   1;
+%e A401487   2,  3;
+%e A401487   3,  5,  6;
+%e A401487   4,  7, 11,  9;
+%e A401487   5, 10, 13, 20, 14;
+%e A401487   6, 10, 13, 22, 24, 17;
+%e A401487   7, 14, 21, 28, 35, 42, 26;
+%e A401487   8, 15, 23, 25, 40, 46, 56, 33;
+%e A401487   ...
+%e A401487 For T(3,2), cos(Pi*i/2) takes the values 1, 0 and cos(Pi*j/3) takes the values 1, 1/2, -1/2. The six sums are 2, 3/2, 1/2, 1, 1/2, -1/2, with 5 distinct values, so T(3,2) = 5.
+%o A401487 (Python)
+%o A401487 from sympy import cyclotomic_poly, Poly, symbols
+%o A401487 from math import lcm
+%o A401487 def T(n, k):
+%o A401487     N = 2*lcm(n, k); u, v = N//(2*k), N//(2*n)
+%o A401487     z = symbols('z'); P = Poly(cyclotomic_poly(N, z), z)
+%o A401487     def red(exps):
+%o A401487         c = [0]*N
+%o A401487         for e in exps: c[e % N] += 1
+%o A401487         return tuple(Poly(c[::-1], z).rem(P).all_coeffs())
+%o A401487     return len({red([i*u, -i*u, j*v, -j*v]) for i in range(k) for j in range(n)})
+%o A401487 (PARI) T(n,k) = my(N=2*lcm(n,k), P=polcyclo(N,x), e(m)=x^(m%N), u=N/(2*k), v=N/(2*n), S=List()); for(i=0, k-1, for(j=0, n-1, listput(S, lift(Mod(e(i*u)+e(-i*u)+e(j*v)+e(-j*v), P))))); #Set(S)
+%Y A401487 Cf. A395911 (diagonal), A399677.
+%K A401487 nonn,tabl,new
+%O A401487 1,2
+%A A401487 _Scott M. Foltz_, Oct 27 2026

@@ -1,0 +1,65 @@
+%I A401441 #11 Nov 02 2026 19:59:03
+%S A401441 1,1,2,1,2,2,1,2,2,3,1,2,2,2,2,1,2,2,2,2,4,1,2,2,2,2,4,2,1,2,2,2,2,4,
+%T A401441 2,4,1,2,2,2,2,4,2,2,3,1,2,2,2,2,4,2,2,2,4,1,2,2,2,2,4,2,2,2,4,2,1,2,
+%U A401441 2,2,2,4,2,2,2,4,2,6
+%N A401441 Square array A(n,k), n >= 1, k >= 1, read by antidiagonals (A(1,1), A(1,2), A(2,1), A(1,3), A(2,2), A(3,1), ...): A(n,k) is the number of divisors d of n such that gcd(d, n/d) is a k-th power.
+%C A401441 For any fixed k >= 1, A(n,k) is multiplicative in n.
+%C A401441 A(n,k) is nonincreasing in k.
+%C A401441 This array generalizes A365171 to arbitrary powers k.
+%C A401441 For a fixed n, A(n,k) = A034444(n) for all k > floor(e_max / 2), where e_max is the maximum exponent in the prime factorization of n. For a prime p with exponent e, the gcd exponent min(j, e-j) is at most floor(e/2). Thus, if k > floor(e/2), only exponent 0 is a multiple of k, and each prime contributes exactly 2 to the count (for j=0 and j=e). This yields the count of divisors with gcd 1, which is precisely A034444(n).
+%C A401441 Column k=1 gives the total number of divisors of n, A000005(n).
+%C A401441 Column k=2 gives A365171(n). Its analog using gcud (greatest common unitary divisor) in place of gcd is A399830.
+%C A401441 For column k=2, A(n,2) is odd if and only if n is a fourth power (A000583).
+%H A401441 Jishnu Babu Ranitha, <a href="/A401441/b401441.txt">Table of n, a(n) for n = 1..10000</a>
+%F A401441 A(p^e, k) = 2 * floor(e / (2*k)) + 1 + [2*k does not divide e], where [] is the Iverson bracket.
+%F A401441 Dirichlet g.f. for column k: Sum_{n>=1} A(n,k) / n^s = zeta(s)^2 * zeta(2*k*s) / zeta(2*s).
+%F A401441 For k = 1, this reduces to zeta(s)^2, which is the generating function for A000005.
+%F A401441 For k = 2, the g.f. reduces to zeta(s)^2 * zeta(4*s) / zeta(2*s), equivalent to the Euler product Product_{p} (1 - 1/(p^(2*s) + 1)) * (1 - 1/p^s)^(-2) given in A365171.
+%e A401441 Square array A(n,k) begins:
+%e A401441   n\k | 1   2   3   4   5
+%e A401441   ----+------------------
+%e A401441    1  | 1   1   1   1   1
+%e A401441    2  | 2   2   2   2   2
+%e A401441    3  | 2   2   2   2   2
+%e A401441    4  | 3   2   2   2   2
+%e A401441    5  | 2   2   2   2   2
+%e A401441    6  | 4   4   4   4   4
+%e A401441    7  | 2   2   2   2   2
+%e A401441    8  | 4   2   2   2   2
+%e A401441    9  | 3   2   2   2   2
+%e A401441   10  | 4   4   4   4   4
+%e A401441   11  | 2   2   2   2   2
+%e A401441   12  | 6   4   4   4   4
+%e A401441   13  | 2   2   2   2   2
+%e A401441   14  | 4   4   4   4   4
+%e A401441   15  | 4   4   4   4   4
+%e A401441   16  | 5   3   2   2   2
+%e A401441 For n=16, k=2: The divisors of 16 are 1, 2, 4, 8, 16. The gcd(d, 16/d) values are 1, 2, 4, 2, 1. Exactly 3 of these gcds (the two 1s and the 4) are perfect squares. Thus A(16,2) = 3.
+%e A401441 For n=16, k=3: Of the gcds (1, 2, 4, 2, 1), only the two 1s are perfect cubes, so A(16,3) = 2.
+%t A401441 A[1, _] := 1;
+%t A401441 A[n_, k_] := Times @@ ((2*Floor[#[[2]]/(2*k)] + 1 + Boole[Mod[#[[2]], 2*k] != 0] &) /@ FactorInteger[n]);
+%t A401441 Table[A[s - k + 1, k], {s, 1, 12}, {k, s, 1, -1}] // Flatten
+%o A401441 (Python)
+%o A401441 def A(n, k):
+%o A401441     # A is multiplicative, so we can compute it prime by prime using trial division.
+%o A401441     if n == 1: return 1
+%o A401441     res = 1
+%o A401441     d = 2
+%o A401441     while d * d <= n:
+%o A401441         if (n // d) * d == n:
+%o A401441             e = 0
+%o A401441             while (n // d) * d == n:
+%o A401441                 e += 1
+%o A401441                 n //= d
+%o A401441             res *= 2 * (e // (2 * k)) + 1 + (1 if e % (2 * k) != 0 else 0)
+%o A401441         d += 1
+%o A401441     if n > 1:
+%o A401441         res *= 2
+%o A401441     return res
+%o A401441 print([A(s - k + 1, k) for s in range(1, 13) for k in range(s, 0, -1)])
+%Y A401441 Limit of columns as k grows (gcd = 1): A034444.
+%Y A401441 Cf. A000005 (col 1), A000583, A046101, A046951, A365171 (col 2).
+%Y A401441 Cf. A399830 (analogous sequence with gcud for squares).
+%K A401441 nonn,tabl,mult,easy,new
+%O A401441 1,3
+%A A401441 _Jishnu Babu Ranitha_, Oct 25 2026
