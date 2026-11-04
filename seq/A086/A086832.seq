@@ -1,8 +1,55 @@
-%I A086832 #3 Nov 02 2026 17:02:44
+%I A086832 #25 Nov 03 2026 13:19:07
 %S A086832 1,2,5,36,324,7041,233265,16038658,1884307184,426645198097,
-%T A086832 173238487743952
+%T A086832 173238487743952,131664287724670873,182704889432151631401,
+%U A086832 469652518175119070936920,2218026430081229346340359741,19337224036279668188933536123344,310379066716120668103958300564934388
 %N A086832 Number of ways to tile an n X n board having a black border with the following 1 X 1 tiles: bbbb, bbww, wbbw, bwwb, wwbb, where the colors are read clockwise around each tile.
 %C A086832 A valid tiling is one in which black touches black and white touches white.
-%K A086832 nonn,more,changed
+%H A086832 Jeff Sponaugle, <a href="/A086832/b086832.txt">Table of n, a(n) for n = 1..37</a>
+%H A086832 Jeff Sponaugle, <a href="/A086832/a086832.png">Example 20 by 20 board</a>
+%e A086832 a(3) = 5: writing 1 for a two-colored tile and 0 for bbbb, the five tilings are
+%e A086832   0 0 0   1 1 0   0 1 1   0 0 0   0 0 0
+%e A086832   0 0 0   1 1 0   0 1 1   1 1 0   0 1 1
+%e A086832   0 0 0   0 0 0   0 0 0   1 1 0   0 1 1
+%e A086832 In each 2 X 2 block of 1's the white edges form a small square.
+%e A086832 For n = 4, one of the a(4) = 36 tilings is
+%e A086832   0 1 1 0       . o-o .
+%e A086832   1 1 1 1         | |
+%e A086832   1 1 1 1       o-o o-o
+%e A086832   0 1 1 0       |     |
+%e A086832                 o-o o-o
+%e A086832                   | |
+%e A086832                 . o-o .
+%e A086832 (right: o = two-colored tile, - and | = white edges); its 12 two-colored tiles form a single loop. Read clockwise from the top, the tiles are
+%e A086832   bbbb bwwb bbww bbbb
+%e A086832   bwwb wbbw wwbb bbww
+%e A086832   wwbb bbww bwwb wbbw
+%e A086832   bbbb wwbb wbbw bbbb
+%t A086832 a[n_] := Module[{rows, v, w},
+%t A086832   rows = BitOr[#, 2 #] & /@ Select[Range[0, 2^(n - 1) - 1], BitAnd[#, 2 #] == 0 &];
+%t A086832   v = <|0 -> 1|>;
+%t A086832   Do[w = <||>;
+%t A086832     KeyValueMap[Function[{s, c},
+%t A086832       Do[If[BitAnd[r, s] == s, w[BitXor[r, s]] = Lookup[w, BitXor[r, s], 0] + c], {r, rows}]], v];
+%t A086832     v = w, {n}];
+%t A086832   Lookup[v, 0, 0]];
+%t A086832 Array[a, 12] (* _Jeff Sponaugle_, Nov 03 2026 *)
+%o A086832 (PARI) a(n) = my(D = Set([bitor(x, 2*x) | x <- [0..2^(n-1)-1], !bitand(x, 2*x)]), M = matrix(2^n, 2^n, s, t, !bitand(s-1, t-1) && setsearch(D, bitor(s-1, t-1))), v = vector(2^n, i, i == 1)); for(i = 1, n, v *= M); v[1]; \\ _Jeff Sponaugle_, Nov 03 2026
+%o A086832 (Python)
+%o A086832 def a(n):
+%o A086832     rows = [x | x << 1 for x in range(1 << n - 1) if not x & x << 1]  # rows = disjoint horizontal dominoes
+%o A086832     v = {0: 1}  # state = set of columns whose current vertical run of 1's has odd length
+%o A086832     for _ in range(n):
+%o A086832         w = {}
+%o A086832         for s, c in v.items():
+%o A086832             for r in rows:
+%o A086832                 if r & s == s:  # an odd vertical run must continue
+%o A086832                     w[r ^ s] = w.get(r ^ s, 0) + c
+%o A086832         v = w
+%o A086832     return v.get(0, 0)
+%o A086832 print([a(n) for n in range(1, 15)])  # _Jeff Sponaugle_, Nov 03 2026
+%Y A086832 Main diagonal of A220614.
+%K A086832 nonn,changed
 %O A086832 1,2
 %A A086832 Aaron M. Balog (ambalog(AT)ucdavis.edu), Aug 07 2003
+%E A086832 a(12)-a(16) (using data from A220614) from _Alois P. Heinz_, Nov 02 2026
+%E A086832 a(17) onward from _Jeff Sponaugle_, Nov 02 2026

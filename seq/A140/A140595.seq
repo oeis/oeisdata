@@ -1,9 +1,65 @@
-%I A140595 #22 Jun 09 2026 18:10:41
+%I A140595 #31 Nov 03 2026 16:36:29
 %S A140595 1,2,3,4,5,6,7,9,8,11,10,13,14,12,15,16,18,19,17,21,23,22,20,25,26,24,
-%T A140595 27,28,29,30,31,32,33,34,35,37
-%N A140595 A140485 read by columns.
+%T A140595 27,28,29,30,31,33,32,34,35,37,36,39,38,40,43,42,41,46,47,44,45,50,48,
+%U A140595 51,49,54,55,52,53,59,58,57,56,62,63,61,60,66,67,64,65,71,70,69,68,74,72,75,73,78,79,77,76,83,82,80,81,86,85,84,87,90,88,89
+%N A140595 Tree diagram of the trajectories of the map n -> n + A396771(n) (as in A140485), with n in column floor(n/4) and rows stacked depth-first, read by columns.
 %C A140595 This sequence is actually somewhat interesting, but might not be well-defined. To understand what is going on look at the Example figure in A140485. It is not clear to me that at some future point, there could be more values in the first column (or even values that extend further to the left). - _Sean A. Irvine_, Apr 09 2026
 %C A140595 As the first differences of A140485 are known to become periodic and thus have a bounded maximum value of 8, it is also known that no more values are to be expected in the columns. Nevertheless, the definition is problematic, as the alignment of the columns in the diagram seems to be motivated by visualization, and it is not clear how this can be defined by a consistent rule here. - _Thomas Scheuerle_, Jun 04 2026
-%K A140595 nonn,more,uned
+%C A140595 From _Jeff Sponaugle_, Nov 03 2026: (Start)
+%C A140595 Let a(n) = n + A396771(n), where A396771(n) is the second-smallest number that does not divide n; A140485 is the trajectory of 1 under a(). The diagram (see Example) is defined as follows. Rows: the top row is the trajectory of 1. Every other row starts at a number that is not of the form a(m) and follows its trajectory up to, but not including, the first term that also lies on the trajectory of a smaller number (the attachment point of the row). Equivalently, n is in the row of the smallest number whose trajectory contains n. Columns: n is in column floor(n/4). Order of rows: depth-first; i.e., directly below a row R come the rows attached to R, from left to right by attachment point, each one immediately followed (recursively) by the rows attached to it; rows attached at the same point are ordered by decreasing last term. The sequence lists column 0, column 1, column 2, ..., each read from top to bottom.
+%C A140595 The diagram is a single tree, because every trajectory of a() joins A140485 after at most 17 steps. (End)
+%H A140595 Jeff Sponaugle, <a href="/A140595/b140595.txt">Table of n, a(n) for n = 0..9999</a>
+%e A140595 The diagram for columns 0..10 (numbers 1..43); the rows starting at 36, 24 and 41 attach at 46, 50 and 97, beyond the right edge:
+%e A140595  .1---4---9---13--16--21--25--28--33--37--40---
+%e A140595  .............|.......................|
+%e A140595  .....5---8---+.......................|
+%e A140595  .....................................|
+%e A140595  .............................29--32--+
+%e A140595  .....................................|
+%e A140595  .2---6---11--14--18--23--26--30------+
+%e A140595  .............|...........|
+%e A140595  .3---7---10--+...........|
+%e A140595  .........................|
+%e A140595  .............12--19--22--+
+%e A140595  .................|.......|
+%e A140595  .............15--+.......|
+%e A140595  .........................|
+%e A140595  .................17--20--+
+%e A140595  ..............................................
+%e A140595  .....................................36--43---
+%e A140595  .........................................|
+%e A140595  .....................................39--+
+%e A140595  ..............................................
+%e A140595  .........................24--31--34--38--42---
+%e A140595  .............................|.......|
+%e A140595  .........................27--+.......|
+%e A140595  .....................................|
+%e A140595  .................................35--+
+%e A140595  ..............................................
+%e A140595  .........................................41---
+%e A140595  Reading the columns from top to bottom gives (1, 2, 3), (4, 5, 6, 7), (9, 8, 11, 10), (13, 14, 12, 15), (16, 18, 19, 17), (21, 23, 22, 20), (25, 26, 24, 27), (28, 29, 30, 31), (33, 32, 34, 35), (37, 36, 39, 38), (40, 43, 42, 41), ...
+%o A140595 (Python)
+%o A140595 def A140595_list(N):  # a(0..N-1)
+%o A140595      def s(n):  # A396771(n), second-smallest non-divisor of n
+%o A140595          k = c = 0
+%o A140595          while c < 2:
+%o A140595              k += 1
+%o A140595              c += n % k > 0
+%o A140595          return k
+%o A140595      X = N + 2000
+%o A140595      f = [0] + [n + s(n) for n in range(1, X + 1)]
+%o A140595      row, key = [0]*(X + 1), {}
+%o A140595      for m in range(1, N + 8):
+%o A140595         if row[m]: continue
+%o A140595          x = last = m
+%o A140595          while x <= X and not row[x]:
+%o A140595              row[x], last, x = m, x, f[x]
+%o A140595          key[m] = () if m == 1 else key[row[x]] + ((x, -last),)
+%o A140595      return [n for k in range(N//4 + 1) for n in
+%o A140595              sorted(range(max(1, 4*k), 4*k + 4), key=lambda n: key[row[n]])][:N]
+%o A140595  print(A140595_list(60)) # _Jeff Sponaugle_, Nov 03 2026
+%Y A140595 Cf. A140485, A396771.
+%K A140595 nonn,changed
 %O A140595 0,2
 %A A140595 _Paul Curtz_, Jul 07 2008
+%E A140595 Name clarified, a(31)-a(32) corrected, and more terms by _Jeff Sponaugle_, Nov 03 2026
