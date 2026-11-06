@@ -1,0 +1,40 @@
+%I A401531 #18 Nov 05 2026 16:56:21
+%S A401531 0,0,0,0,1,2,4,15,34,71,144,304,661,1258,2452,4968,9916,19913,40296,
+%T A401531 80852,160112,321456,642836,1287375,2572096,5147260,10295723,20588245,
+%U A401531 41184108,82366751,164731553,329466622,658935356,1317890171,2635824796,5271639182
+%N A401531 Number of n-bit binary significands X for which RN_n(X * RN_n(1/X)) != 1 where RN_n is the rounding to n significant binary bits using round to nearest, ties to even, with an unbounded exponent range.
+%C A401531 Let RN_n denote rounding to n significant binary bits using round to nearest, ties to even, with an unbounded exponent range. The count is over integers X satisfying 2^(n-1) <= X < 2^n. This model excludes overflow and underflow. By scaling by a power of two, the same count applies to normalized significands X/2^(n-1) in [1,2), provided the corresponding operations in a finite-exponent format remain normal and are correctly rounded.
+%C A401531 For n >= 2, put K = 2^(2n-1) and r = K mod X. Then a(n) is the number of integers X in the stated range for which r > 2^(n-2) and 2*r < X. Also, a(1) = 0. For example, when n = 5 and X = 25, K = 512, r = 12, and RN_5(1/25) = 5/128. Thus X*RN_5(1/X) = 125/128, which rounds to 31/32, not 1.
+%C A401531 The equality r/X = 1/2 is impossible: it would imply 2K = (2q+1)*X for some integer q, so X divides 2K = 2^(2n) and hence is a power of 2. The only power of 2 in [N, 2N), where N = 2^(n-1), is X = N. But for X = N, r = K mod X = 0, contradicting r = X/2.
+%C A401531 Write K = qX + r, with 0 <= r < X. The rounding grid for 1/X has spacing 1/K. Thus RN_n(1/X) = q/K when r < X/2 and (q+1)/K when r > X/2. In the latter case, X*RN_n(1/X) = 1 + (X-r)/K < 1 + 2^(-n), below the midpoint above 1, so the product rounds to 1. In the former case, X*RN_n(1/X) = 1 - r/K. This rounds to a value other than 1 precisely when r/K > 2^(-(n+1)), or equivalently r > 2^(n-2). At equality, ties-to-even rounds to 1. Hence the stated modular criterion follows.
+%C A401531 This sequence is related to, but different from, A336774 and A336778, which concern the first deviation from an exact power during repeated multiplication in binary32 and binary64 arithmetic, respectively.
+%C A401531 The asymptotic estimate is a(n) ~ ((1 - log(2))/2)*2^(n-1).
+%C A401531 To justify it, put N = 2^(n-1), t = X/N, and u = {2N^2/X}, where {x} denotes fractional part. Since 2^(2n-1) = 2N^2, the criterion becomes 1/(2t) < u < 1/2, with 1 <= t < 2.
+%C A401531 For fixed integers m and h with h != 0, apply the second derivative estimate to S = Sum_{N <= X < 2N} exp(2*pi*i*(mX/N + 2hN^2/X)).
+%C A401531 The second derivative of the phase is 4hN^2/x^3, whose absolute value is bounded above and below by positive constants depending on h times 1/N on [N, 2N]. Hence S = O_h(sqrt(N)).
+%C A401531 For h = 0 and nonzero integer m, the corresponding geometric sum over X = N,...,2N-1 is zero once N > |m|. Weyl's criterion therefore gives joint uniform distribution of (X/N, {2N^2/X}) in [1,2] x [0,1]. The boundary of the counting region has area zero, so lim_{n->infinity} a(n)/2^(n-1) = Integral_{t=1..2} (1/2 - 1/(2t)) dt = (1 - log(2))/2.
+%H A401531 D. Goldberg, <a href="https://doi.org/10.1145/103162.103163">What Every Computer Scientist Should Know About Floating-Point Arithmetic</a>, ACM Computing Surveys, 23 (1) (1991), 5-48.
+%H A401531 S. W. Graham and Grigori Kolesnik, <a href="https://doi.org/10.1017/CBO9780511661976">Van der Corput's Method of Exponential Sums</a>, Cambridge University Press, 1991.
+%H A401531 M. N. Huxley, <a href="https://doi.org/10.1112/JLMS/S2-43.2.367">Exponential Sums and Rounding Error</a>, Journal of the London Mathematical Society, Series 2, 43 (1991), 367-384.
+%H A401531 IEEE, <a href="https://standards.ieee.org/ieee/754/6210/">IEEE Standard for Floating-Point Arithmetic, IEEE Std 754-2019</a>.
+%F A401531 For n=1, a(n)=0. For n>=2, let K=2^(2*n-1). Then a(n) = #{X in Z : 2^(n-1) <= X < 2^n, r > 2^(n-2), and 2*r < X}, where r is the least nonnegative remainder K mod X.
+%e A401531 For n=5, the range is 16 <= X < 32 and a(5)=1. The value X=25 is counted: K=2^9=512 and r=512 mod 25=12, so r>2^3 and 2*r=24<25. Directly, RN_5(1/25)=20/512=5/128 and RN_5(25*(5/128))=RN_5(125/128)=31/32, not 1.
+%o A401531 (Python)
+%o A401531 def a(n):
+%o A401531     if n < 1:
+%o A401531         raise ValueError("n must be positive")
+%o A401531     if n == 1:
+%o A401531         return 0
+%o A401531     K = 1 << (2*n - 1)
+%o A401531     H = 1 << (n - 2)
+%o A401531     count = 0
+%o A401531     for X in range(1 << (n - 1), 1 << n):
+%o A401531         r = K % X
+%o A401531         if r > H and 2*r < X:
+%o A401531             count += 1
+%o A401531     return count
+%Y A401531 Cf. A336774, A336778.
+%K A401531 nonn,more,new
+%O A401531 1,6
+%A A401531 _Akash Suresh_, Oct 28 2026
+%E A401531 a(33)-a(37) from _Sean A. Irvine_, Nov 05 2026

@@ -1,4 +1,4 @@
-%I A106566 #93 May 30 2026 16:40:25
+%I A106566 #100 Nov 05 2026 23:06:05
 %S A106566 1,0,1,0,1,1,0,2,2,1,0,5,5,3,1,0,14,14,9,4,1,0,42,42,28,14,5,1,0,132,
 %T A106566 132,90,48,20,6,1,0,429,429,297,165,75,27,7,1,0,1430,1430,1001,572,
 %U A106566 275,110,35,8,1,0,4862,4862,3432,2002,1001,429,154,44,9,1
@@ -56,8 +56,18 @@
 %e A106566   0,  14,  14,  9,  4,  1;
 %e A106566   0,  42,  42, 28, 14,  5, 1;
 %e A106566   0, 132, 132, 90, 48, 20, 6, 1;
-%e A106566 From _Paul Barry_, Sep 28 2009: (Start)
-%e A106566 Production array is
+%e A106566 .
+%e A106566 Seen as a table:
+%e A106566   [0] 1,   1,    1,    1,    1,     1,     1, ...
+%e A106566   [1] 0,   1,    2,    3,    4,     5,     6, ...
+%e A106566   [2] 0,   2,    5,    9,   14,    20,    27, ...
+%e A106566   [3] 0,   5,   14,   28,   48,    75,   110, ...
+%e A106566   [4] 0,  14,   42,   90,  165,   275,   429, ...
+%e A106566   [5] 0,  42,  132,  297,  572,  1001,  1638, ...
+%e A106566   [6] 0, 132,  429, 1001, 2002,  3640,  6188, ...
+%e A106566   [7] 0, 429, 1430, 3432, 7072, 13260, 23256, ...
+%e A106566 .
+%e A106566 Production array is:
 %e A106566   0, 1,
 %e A106566   0, 1, 1,
 %e A106566   0, 1, 1, 1,
@@ -66,7 +76,7 @@
 %e A106566   0, 1, 1, 1, 1, 1, 1,
 %e A106566   0, 1, 1, 1, 1, 1, 1, 1,
 %e A106566   0, 1, 1, 1, 1, 1, 1, 1, 1,
-%e A106566   0, 1, 1, 1, 1, 1, 1, 1, 1, 1 (End)
+%e A106566   0, 1, 1, 1, 1, 1, 1, 1, 1, 1
 %p A106566 A106566 := proc(n,k)
 %p A106566     if n = 0 then
 %p A106566         1;
@@ -76,8 +86,14 @@
 %p A106566         binomial(2*n-k-1,n-k)*k/n ;
 %p A106566     end if;
 %p A106566 end proc: # _R. J. Mathar_, Mar 01 2015
+%p A106566 # Alternative:
+%p A106566 Trow := proc(n) option remember; local prev, s, row, k;
+%p A106566 if n = 0 then return [1] elif n = 1 then return [0, 1] fi;
+%p A106566 prev := Trow(n - 1); s := add(prev); row := [0, s, s];
+%p A106566 for k from 2 to n-1 do row := [op(row), row[-1] - prev[k]] od;
+%p A106566 row end: seq(print(Trow(n)), n=0..8); # _Peter Luschny_, Nov 05 2026
 %t A106566 T[n_, k_] := Binomial[2n-k-1, n-k]*k/n; T[0, 0] = 1; Table[T[n, k], {n, 0, 10}, {k, 0, n}] // Flatten (* _Jean-François Alcover_, Feb 18 2017 *)
-%t A106566 (* The function RiordanArray is defined in A256893. *)
+%t A106566 (* Alternative: The function RiordanArray is defined in A256893 *)
 %t A106566 RiordanArray[1&, #(1-Sqrt[1-4#])/(2#)&, 11] // Flatten (* _Jean-François Alcover_, Jul 16 2019 *)
 %o A106566 (Magma)
 %o A106566 A106566:= func< n,k | n eq 0 select 1 else (k/n)*Binomial(2*n-k-1, n-k) >;
@@ -86,6 +102,19 @@
 %o A106566 def A106566(n, k): return 1 if (n==0) else (k/n)*binomial(2*n-k-1, n-k)
 %o A106566 flatten([[A106566(n,k) for k in (0..n)] for n in (0..12)]) # _G. C. Greubel_, Sep 06 2021
 %o A106566 (PARI) {T(n, k) = if( k<=0 || k>n, n==0 && k==0, binomial(2*n - k, n) * k/(2*n - k))}; /* _Michael Somos_, Oct 01 2022 */
+%o A106566 (Python)
+%o A106566 from functools import cache
+%o A106566 @cache
+%o A106566 def Trow(n: int) -> list[int]:
+%o A106566     if n == 0: return [1]
+%o A106566     if n == 1: return [0, 1]
+%o A106566     prev = Trow(n - 1)
+%o A106566     s = sum(prev)
+%o A106566     row = [0, s, s]
+%o A106566     for x in prev[1:-1]:
+%o A106566         row.append(row[-1] - x)
+%o A106566     return row
+%o A106566 for n in range(10): print(Trow(n))  # _Peter Luschny_, Nov 05 2026
 %Y A106566 Column k for k = 0, 1, 2, ..., 13: A000007, A000108, A000108, A000245, A002057, A000344, A003517, A000588, A003517, A001392, A003518, A000589, A003519, A000590
 %Y A106566 The three triangles A059365, A106566 and A099039 are the same except for signs and the leading term.
 %Y A106566 Diagonals: A000012, A001477, A000096, A005586, A005587, A005557, A064059, A064061
@@ -93,7 +122,7 @@
 %Y A106566 Generalized Catalan numbers C(x, n) for -11 <= x <= 10: A064333, A064332, A064331, A064330, A064329, A064328, A064327, A064326, A064325, A064311, A064310, A000012, A000108, A064062, A064063, A064087, A064088, A064089, A064090, A064091, A064092, A064093.
 %Y A106566 The following are all versions of (essentially) the same Catalan triangle: A009766, A030237, A033184, A059365, A099039, A106566, A130020, A047072.
 %Y A106566 Diagonals give A000108 A000245 A002057 A000344 A003517 A000588 A003518 A003519 A001392, ...
-%K A106566 nonn,tabl
+%K A106566 nonn,tabl,changed
 %O A106566 0,8
 %A A106566 _Philippe Deléham_, May 30 2005
 %E A106566 Formula corrected by _Philippe Deléham_, Oct 31 2008

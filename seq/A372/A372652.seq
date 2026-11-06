@@ -1,11 +1,14 @@
-%I A372652 #32 May 13 2024 12:20:01
-%S A372652 1,9,1089,1225,25921,372100,3530641,55890576,1682148196
+%I A372652 #39 Nov 05 2026 22:59:10
+%S A372652 1,9,1089,1225,25921,372100,3530641,55890576,1682148196,34572196096,
+%T A372652 1070548216929
 %N A372652 Smallest square that can be expressed as Sum_{i=1..n} p(2i-1)^p(2i) where p is a permutation of {1, 2, 3, ..., 2n}.
 %C A372652 It is unknown whether a(n) exists for all n, but it is expected.
 %C A372652 a(n) exists for n <= 11. - _Chai Wah Wu_, May 13 2024
 %H A372652 Bryle Morga et al., <a href="https://mathoverflow.net/questions/470816/does-there-exists-a-sigma-in-s-2n-such-that-sum-n-1n-sigma2n-1">MathOverflow question about this sequence</a>.
 %e A372652 a(5) = 25921 = 161^2 = 8^1 + 9^3 + 6^5 + 4^7 + 2^10.
 %e A372652 a(6) = 372100 = 610^2 = 11^1 + 10^3 + 8^4 + 12^5 + 7^6 + 2^9.
+%e A372652 a(10) = 34572196096 = 185936^2 = 20^2 + 14^3 + 13^4 + 17^5 + 16^6 + 19^7 + 15^8 + 12^9 + 11^10 + 1^18.
+%e A372652 a(11) = 1070548216929 = 1034673^2 = 16^1 + 22^4 + 17^5 + 20^6 + 15^7 + 19^8 + 13^9 + 14^10 + 12^11 + 2^18 + 3^21.
 %o A372652 (Python)
 %o A372652 import itertools
 %o A372652 import math
@@ -33,8 +36,37 @@
 %o A372652             if k<m and is_square(k):
 %o A372652                 m = k
 %o A372652     return m # _Chai Wah Wu_, May 13 2024
+%o A372652 (Python)
+%o A372652 import math
+%o A372652 def A372652(n):
+%o A372652     N = 2 * n
+%o A372652     pw = [[a ** b for b in range(N + 1)] for a in range(N + 1)]
+%o A372652     best = [math.inf]
+%o A372652     def dfs(mask, cur):
+%o A372652         if cur >= best[0]: return
+%o A372652         if mask == 0:
+%o A372652             if math.isqrt(cur) ** 2 == cur: best[0] = cur
+%o A372652             return
+%o A372652         hi = mask.bit_length()
+%o A372652         rem = mask ^ (1 << (hi - 1))
+%o A372652         cands = []
+%o A372652         m = rem
+%o A372652         while m:
+%o A372652             lb = m & -m
+%o A372652             lo = lb.bit_length()
+%o A372652             m ^= lb
+%o A372652             nm = rem ^ lb
+%o A372652             if cur + pw[hi][lo] < best[0]: cands.append((pw[hi][lo], nm))
+%o A372652             if cur + pw[lo][hi] < best[0]: cands.append((pw[lo][hi], nm))
+%o A372652         cands.sort()
+%o A372652         for val, nm in cands:
+%o A372652             if cur + val >= best[0]: break
+%o A372652             dfs(nm, cur + val)
+%o A372652     dfs((1 << N) - 1, 0)
+%o A372652     return best[0] # _Byron Baxley_, Nov 01 2026
 %Y A372652 Cf. A372653.
-%K A372652 nonn,more
+%K A372652 nonn,more,changed
 %O A372652 1,2
 %A A372652 _Bryle Morga_, May 08 2024
 %E A372652 a(9) from _Chai Wah Wu_, May 13 2024
+%E A372652 a(10)-a(11) from _Byron Baxley_, Nov 01 2026
