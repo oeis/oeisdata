@@ -1,0 +1,45 @@
+%I A401735 #11 Nov 06 2026 11:22:29
+%S A401735 0,0,0,0,1,0,0,0,0,0,0,1,1,1,0,0,0,1,1,0,0,0,1,0,2,0,1,0,0,0,0,0,0,0,
+%T A401735 0,0,0,1,1,1,1,1,1,1,0,0,0,1,1,1,1,1,1,0,0,0,1,0,2,2,2,2,2,0,1,0,0,0,
+%U A401735 0,0,1,2,2,1,0,0,0,0,0,1,1,1,0,2,3,2,0,1,1,1,0
+%N A401735 Lexicographically earliest square array of nonnegative integers, read by antidiagonals, with no axis-parallel square whose four corners are equal.
+%C A401735 Equivalently, T(x,y) is the least nonnegative color c such that no square with corners (x,y), (x-d,y), (x,y-d), (x-d,y-d), 1 <= d <= min(x,y), has all four corners colored c. The other three corners have smaller coordinate sum, so this defines T uniquely, whatever the reading order within each antidiagonal.
+%C A401735 The array is symmetric: T(x,y) = T(y,x). Thus each antidiagonal is a palindrome. Row n means the sequence x -> T(x,n).
+%C A401735 T(x,y) = 0 if and only if x AND y = 0 (bitwise AND, A004198), i.e., if and only if binomial(x+y,x) is odd; so the color-0 cells form the Sierpinski triangle A047999 rotated by 45 degrees. They are also the greedy squarefree set: a cell gets color 0 unless it completes a square whose other three corners have color 0. That the greedy algorithm gives this rotated triangle, with A064194(n) points in the n X n corner, was observed by N. J. A. Sloane in his comment of Jan 18 2016 in A047999.
+%C A401735 Proof of the zero set (induction on x+y): if e = x AND y > 0, the other three corners (x-e,y), (x,y-e), (x-e,y-e) of the square of side e have AND 0, hence color 0, so T(x,y) > 0. If x AND y = 0, then for every side d one of the other three corners has bit v2(d) set in both coordinates, hence a nonzero color, so T(x,y) = 0.
+%C A401735 For n >= 1 the n X n corner contains A064194(n) zeros (3^k for n = 2^k).
+%C A401735 Row n is eventually periodic, with least eventual period A399521(n) and least preperiod A401738(n). Its zero set is purely periodic with least period A062383(n) = 2^bitlength(n) (period word A268229(n)), which therefore divides A399521(n).
+%C A401735 Every nonnegative integer occurs. By the Gallai-Witt theorem, for each k every large enough square block contains a color >= k, and a cell of color c >= 1 at (x,y) has a cell of color c-1 at some (x-d,y-d). The maxima of the periodic parts of the rows are also unbounded: apply the theorem to a block beyond the preperiods of all rows meeting it.
+%C A401735 Conjecture: T(x,y) <= max{T(k,k): 0 <= k < x} for 0 <= y < x. This implies that A401736 is unbounded, since T is unbounded, and that each color c first appears in the squares [0,m]^2 at m = A401737(c), at the single cell (m,m). Verified for x <= 32769 (for x >= 16384 by one computation only).
+%C A401735 A one-dimensional analog, the greedy coloring of the nonnegative integers with no monochromatic 3-term arithmetic progression, is A006997; its color-0 class is A005836.
+%D A401735 R. L. Graham, B. L. Rothschild and J. H. Spencer, Ramsey Theory, 2nd ed., Wiley, New York, 1990.
+%H A401735 Alper Ferudun, <a href="/A401735/b401735.txt">Table of n, a(n) for n = 0..10010</a> (antidiagonals 0..140, flattened)
+%H A401735 Joseph Gerver, James Propp and Jamie Simpson, <a href="https://doi.org/10.1090/S0002-9939-1988-0929018-1">Greedily partitioning the natural numbers into sets free of arithmetic progressions</a>, Proc. Amer. Math. Soc. 102 (1988), no. 3, 765-772.
+%H A401735 R. Rado, <a href="https://doi.org/10.1112/plms/s2-48.1.122">Note on combinatorial analysis</a>, Proc. London Math. Soc. (2) 48 (1945), 122-160.
+%H A401735 E. Witt, <a href="https://doi.org/10.1002/mana.19520060502">Ein kombinatorischer Satz der Elementargeometrie</a>, Math. Nachr. 6 (1952), 261-262.
+%F A401735 T(x,y) = mex{c: T(x-d,y) = T(x,y-d) = T(x-d,y-d) = c for some 1 <= d <= min(x,y)}, where mex denotes the least nonnegative integer absent from the set; mex({}) = 0.
+%F A401735 a(s*(s+1)/2+x) = T(x,s-x) for 0 <= x <= s.
+%F A401735 0 <= T(x,y) <= min(x,y).
+%F A401735 T(x,s-x) = 0 if and only if binomial(s,x) is odd (equivalently, A047999(s,x) = 1).
+%e A401735 The corner of the array, with y indexing rows and x indexing columns, begins:
+%e A401735   0 0 0 0 0 0 0 0
+%e A401735   0 1 0 1 0 1 0 1
+%e A401735   0 0 1 1 0 0 1 1
+%e A401735   0 1 1 2 0 1 1 2
+%e A401735   0 0 0 0 1 1 2 1
+%e A401735   0 1 0 1 1 2 2 2
+%e A401735   0 0 1 1 2 2 3 2
+%e A401735   0 1 1 2 1 2 2 3
+%e A401735 At (3,3), sides d = 1 and 2 each exclude color 1, and side d = 3 excludes color 0; hence T(3,3) = 2.
+%o A401735 (Python)
+%o A401735 from functools import cache
+%o A401735 @cache
+%o A401735 def T(x, y):  # least c such that no d in 1..min(x,y) has T(x-d,y) = T(x,y-d) = T(x-d,y-d) = c
+%o A401735     s = {T(x-d, y) for d in range(1, min(x, y)+1) if T(x-d, y) == T(x, y-d) == T(x-d, y-d)}
+%o A401735     return min(set(range(len(s)+1)) - s)
+%o A401735 print([T(k, n-k) for n in range(13) for k in range(n+1)])  # antidiagonal order: shallow recursion
+%Y A401735 Row periods: A399521; row preperiods: A401738; diagonal: A401736; first diagonal occurrences: A401737; periods of the color-1 indicators: A401739.
+%Y A401735 Cf. A004198, A005836, A006997, A047999, A062383, A064194, A227133, A268229.
+%K A401735 nonn,tabl,new
+%O A401735 0,25
+%A A401735 _Alper Ferudun_, Nov 03 2026

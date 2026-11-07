@@ -1,0 +1,56 @@
+%I A401780 #25 Nov 06 2026 19:18:14
+%S A401780 1,1,2,6,17,61,264,1186,6029,33815,205644,1328158,9272177,68697989,
+%T A401780 536209582,4448562040,38592604703,351364858689,3347441169916,
+%U A401780 33195913595884,343021466415115,3680840628540231,40929582596701206,471296311437384042,5610303385331375733
+%N A401780 Total number of canonical (origin-fixed) isotypic composition transversals across all set partitions of the discrete cyclic lattice Z_n.
+%C A401780 For a partition M of Z_n with block sizes lambda, an isotypic composition gamma is a cyclic stride sequence permuting lambda. An origin o and stride gamma induce a polygon; it is a transversal if it intersects every block of M in exactly one vertex.
+%C A401780 a(n) counts pairs (M, gamma) admitting a valid transversal rooted at origin 1.
+%C A401780 Grading by block count k yields the canonical transversal triangle R(n, k), partitioning a(n) analogously to how Stirling numbers of the second kind partition Bell numbers B_n (A000110).
+%C A401780 The sequence k -> R(n, k) is strictly log-concave and unimodal for all n >= 1.
+%C A401780 As n -> infinity, the ratio a(n)/B_n diverges super-polynomially as exp(Theta(n / ln n)).
+%H A401780 Alois P. Heinz, <a href="/A401780/b401780.txt">Table of n, a(n) for n = 0..551</a> (first 51 terms from Paul Sampson)
+%H A401780 Paul Sampson, <a href="https://github.com/applutan/isotypic-transversals">Isotypic Composition Transversals on Cyclic Lattices</a>
+%F A401780 a(n) = Sum_{lambda |- n} (c_lambda)^2 * (n - k)! / Product_{j=1..k} (lambda_j - 1)!
+%F A401780 where
+%F A401780    lambda = (1^{m_1} ... n^{m_n}) |- n
+%F A401780    k = length(lambda) = Sum m_i
+%F A401780    c_lambda = k! / Product_{i=1..n} m_i! is the composition multinomial coefficient.
+%F A401780 a(n) = Sum_{k=1..n} R(n, k), where R(n, k) is the canonical transversal triangle (graded by k blocks).
+%F A401780 a(n) mod 2 = A133872(n). - _Alois P. Heinz_, Nov 06 2026
+%e A401780 For n = 3: B_3 = 5 partitions.
+%e A401780 k=1: shape (3) gives R(3, 1) = 1.
+%e A401780 k=2: shape (2,1) gives R(3, 2) = 4.
+%e A401780 k=3: shape (1^3) gives R(3, 3) = 1.
+%e A401780 Total: 1 + 4 + 1 = 6, so a(3) = 6.
+%e A401780 For n = 4: B_4 = 15 partitions.
+%e A401780 k=1: shape (4) gives R(4, 1) = 1.
+%e A401780 k=2: shape (3,1) gives 4, shape (2,2) gives 2, total R(4, 2) = 6.
+%e A401780 k=3: shape (2,1^2) gives R(4, 3) = 9.
+%e A401780 k=4: shape (1^4) gives R(4, 4) = 1.
+%e A401780 Total: 1 + 6 + 9 + 1 = 17, so a(4) = 17.
+%p A401780 a:= proc(n) option remember; local b; b:=
+%p A401780       proc(m, i, k) option remember; `if`(m=0 or i=1, ((k+m)!/m!)^2*(n-k-m)!,
+%p A401780         add(b(m-i*j, min(m-i*j, i-1), k+j)/(i-1)!^j/j!^2, j=0..m/i))
+%p A401780       end; b(n$2,0)
+%p A401780     end:
+%p A401780 seq(a(n), n=0..24);  # _Alois P. Heinz_, Nov 05 2026
+%o A401780 (Python)
+%o A401780 from math import factorial, prod
+%o A401780 def a(n):
+%o A401780     def parts(n, m=None):
+%o A401780         if m is None: m = n
+%o A401780         if n == 0: yield []
+%o A401780         for p in range(min(n, m), 0, -1):
+%o A401780             for r in parts(n - p, p): yield [p] + r
+%o A401780     tot = 0
+%o A401780     for p in parts(n):
+%o A401780         k = len(p)
+%o A401780         c = factorial(k) // prod(factorial(p.count(x)) for x in set(p))
+%o A401780         m = factorial(n - k) // prod(factorial(x - 1) for x in p)
+%o A401780         tot += (c ** 2) * m
+%o A401780     return tot
+%o A401780 print([a(n) for n in range(1, 17)])
+%Y A401780 Cf. A000110 (Bell numbers), A133872, A327711.
+%K A401780 nonn,easy,new
+%O A401780 0,3
+%A A401780 _Paul Sampson_, Nov 05 2026

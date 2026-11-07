@@ -1,0 +1,44 @@
+%I A401614 #14 Nov 06 2026 14:55:38
+%S A401614 0,0,2,4,6,10,14,16,20,22,26,30,34,38,42,44,48,52,56,58,62,66,70,74,
+%T A401614 78,82,86,90,92,96,100,104,108,110,118,122
+%N A401614 The minimal total height of an n-building skyline such that each building of height h sees exactly h other buildings in total to its left and right.
+%C A401614 An n-building skyline is an ordered n-tuple of nonnegative integer building heights (h_1,...,h_n). As in the city-building sequence A400000, an i-th building "sees" another building j if every intermediate building at position k, i < k < j or j < k < i, has its rooftop (k, h_k) on or below the straight line joining (i, h_i) and (j, h_j).
+%C A401614 a(n) is the minimal total height of a skyline such that for every i with 1 <= i <= n the i-th building sees exactly h_i other buildings in total to its left and right.
+%C A401614 All terms are even because for every pair of rooftops i and j seeing each other, this line of sight is counted toward both h_i and h_j, adding 2 to the total height.
+%C A401614 a(n) can be seen as the minimal budget required to build an n-building skyline satisfying the visibility requirement, whereas a(n+1)-a(n) is the cost of extending the skyline by one building. The first terms in a(n+1)-a(n) are 0, 2, 2, 2, 4, 4, 2, 4, 2, 4, 4, 4, 4, 4, 2, 4, 4, 4, 2, 4, 4, 4, 4, 4, 4, 4, 4, 2, 4, 4, 4, 4, 2, 8, 4...
+%F A401614 a(n+1) >= a(n)+2 (conjectured).
+%e A401614 a(4) = 6 because the skyline (1,2,2,1) that counts toward A401611(n) has the total height 6 and no skyline with a smaller total height satisfies the visibility condition.
+%t A401614 skylineExists = Compile[{{n, _Integer}, {b, _Integer}},
+%t A401614    Module[{h = ConstantArray[0, n], d = ConstantArray[0, {n+1, n}],
+%t A401614      p = ConstantArray[0, {n+1, n}], q = ConstantArray[0, {n+1, n}],
+%t A401614      s = ConstantArray[0, n+1], u = ConstantArray[n-1, n], j = 1,
+%t A401614      i = 0, c = 0, r = 0, t = 0, ok = 0, ans = 0},
+%t A401614     While[j > 0 && ans == 0, h[[j]]++;
+%t A401614      If[h[[j]] > u[[j]], j--, c = 0; ok = 1; r = n - j;
+%t A401614       For[i = 1, i < j && ok == 1, i++, d[[j+1, i]] = d[[j, i]];
+%t A401614        p[[j+1, i]] = p[[j, i]];
+%t A401614        q[[j+1, i]] = q[[j, i]];
+%t A401614        If[q[[j, i]] == 0 || (h[[j]] - h[[i]]) q[[j, i]] >= (j-i) p[[j, i]],
+%t A401614         d[[j+1, i]]++; c++;
+%t A401614         p[[j+1, i]] = h[[j]] - h[[i]];
+%t A401614         q[[j+1, i]] = j - i];
+%t A401614        If[d[[j+1, i]] > h[[i]] || d[[j+1, i]] + r < h[[i]], ok = 0]];
+%t A401614       If[c + If[r > 0, 1, 0] > h[[j]] || c + r < h[[j]], ok = 0];
+%t A401614       If[ok == 1, s[[j+1]] = s[[j]] + h[[j]];
+%t A401614        If[j == n, ans = 1, d[[j+1, j]] = c;
+%t A401614         p[[j+1, j]] = q[[j+1, j]] = 0; t = 0;
+%t A401614         For[i = 1, i <= j, i++, t += h[[i]] - d[[j+1, i]]];
+%t A401614         If[s[[j+1]] + t + 2(r-1) <= b,
+%t A401614          u[[j+1]] = Min[n-1, b - s[[j+1]] - If[r > 1, 2 r - 3, 0]];
+%t A401614          For[i = 1, i <= j, i++,
+%t A401614           If[d[[j+1, i]] == h[[i]], u[[j+1]] = Min[u[[j+1]],
+%t A401614              h[[i]] + Quotient[p[[j+1, i]]*(j+1-i)-1, q[[j+1, i]]]]]];
+%t A401614          j++;
+%t A401614          h[[j]] = If[j == n, Max[1, h[[1]]], 2]-1]]]]]; ans]];
+%t A401614 a[0] = a[1] = 0; a[n_Integer] /; n >= 2 :=
+%t A401614   a[n] = Module[{b = 2 n - 2}, While[skylineExists[n, b] == 0, b += 2]; b];
+%t A401614 Table[a[n], {n, 0, 20}]
+%Y A401614 Cf. A400000, A401611.
+%K A401614 nonn,more,new
+%O A401614 0,3
+%A A401614 _Dmytro Inosov_, Oct 30 2026

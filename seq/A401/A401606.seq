@@ -1,0 +1,35 @@
+%I A401606 #9 Nov 06 2026 14:25:39
+%S A401606 1,1,1,1,3,2,3,6,9,17,24,46,84,162,312,541,1047,1949,3533,6393,11715
+%N A401606 Number of n-building skylines where each building has the least height h from which it sees exactly h other buildings in total to its left and right.
+%C A401606 An n-building skyline is an ordered n-tuple of nonnegative integer building heights (h_1,...,h_n). As in the city-building sequence A400000, an i-th building "sees" another building j if every intermediate building at position k, i < k < j or j < k < i, has its rooftop (k, h_k) on or below the straight line joining (i, h_i) and (j, h_j). A skyline is counted toward a(n) if every h_i is the smallest nonnegative integer, with all other heights held fixed, for which the i-th building sees exactly h_i other buildings in total to its left and right.
+%C A401606 The sequence of symmetric skyline counts, starting at n = 0, is 1, 1, 1, 1, 1, 2, 1, 2, 1, 3, 2, 6, 6, 10, 6, 21, 13, 43, 19, 71, 35... Do such skylines exist for every n?
+%F A401606 a(n) >= A401611(n).
+%e A401606 a(0) = 1 vacuously. Empty skyline satisfies the condition because any statement about elements of the empty set is true.
+%e A401606 a(1) = 1 because the only skyline satisfying the condition is (0). One building of height 0 sees zero other buildings.
+%e A401606 a(2) = 1 because (1,1) is the only skyline satisfying the condition: each building of height 1 sees its only neighbor, and 1 is the minimal height for which this is possible.
+%e A401606 a(3) = 1 because (1,2,1) is the only skyline satisfying the condition: the outer buildings see only the central one, the central building sees both outer buildings.
+%e A401606 a(4) = 3 because the following skylines satisfy the condition: (1,2,2,1), (1,3,2,2), (2,2,3,1).
+%e A401606 a(5) = 2 because the following skylines satisfy the condition: (1,3,2,3,1) and (2,2,4,2,2).
+%t A401606 Clear[a];
+%t A401606 a = Compile[{{n, _Integer}},
+%t A401606    Module[{v = ConstantArray[0, n], j = 1, i = 0, h = 0, g = 0, c = 0,
+%t A401606       s = 0, d = 0, k = 0, dx0 = 0, dy0 = 0, dy = 0, need = 0, ok = 0,
+%t A401606       ans = 0}, If[n < 2, ans = 1, While[j > 0, v[[j]]++;
+%t A401606       If[v[[j]] >= n, v[[j]] = 0; j--, ok = 1; i = 1;
+%t A401606        While[i <= j && ok == 1, g = v[[i]]; h = g; c = 0;
+%t A401606         While[h >= Max[1, g - c] && ok == 1,
+%t A401606          need = If[h == g, g + 1, h - g + c + 1]; s = 0;
+%t A401606          For[d = -1, d <= 1 && s < need, d += 2, dx0 = dy0 = 0; k = 1;
+%t A401606           While[i + d k >= 1 && i + d k <= j && s < need,
+%t A401606            dy = v[[i + d k]] - h;
+%t A401606            If[dx0 dy >= k dy0, s++; dx0 = k; dy0 = dy]; k++]];
+%t A401606          If[h == g, c = s;
+%t A401606           If[c > g || c + n - j < g || (i == j && j < n && c == g),
+%t A401606            ok = 0], If[s < need, ok = 0]]; h--]; i++];
+%t A401606        If[ok == 1, If[j == n, ans++, j++; v[[j]] = If[j < n, 1, 0]]]]]];
+%t A401606      ans]];
+%t A401606 n = 0; While[True, Print[a[n]]; n++]
+%Y A401606 Cf. A400000, A401611.
+%K A401606 nonn,more,new
+%O A401606 0,5
+%A A401606 _Dmytro Inosov_, Oct 30 2026
