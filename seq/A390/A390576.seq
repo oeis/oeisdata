@@ -1,4 +1,4 @@
-%I A390576 #44 Oct 30 2026 17:37:34
+%I A390576 #53 Nov 07 2026 10:58:00
 %S A390576 7,3,2,55,3,5,7,5,2,2,215,3,5,3,9,2,5,2,3,23,5,3,199,2,3,249,5,2,423,
 %T A390576 3,2,215,3,7,263,5,3,2,3,3,5,3,41,2,11,2,439,2,5,3,161,2,3,393,5,2,
 %U A390576 473,11,3,2,89,3,5,313,5,2,2,361,2,3,7,3,71,2,5,3,5,3,503,2,3,521
@@ -10,15 +10,63 @@
 %D A390576 Marco Ripà, La strana coda della serie n^n^...^n, Trento, UNI Service, Nov 2011. ISBN 978-88-6178-789-6.
 %H A390576 Gabriele Di Pietro, <a href="/A390576/b390576.txt">Table of n, a(n) for n = 1..194</a> (corrected by Alper Ferudun)
 %H A390576 Marco Ripà, <a href="https://doi.org/10.7546/nntdm.2021.27.4.43-61">The congruence speed formula</a>, Notes Number Theory Disc. Math. 27(4) (2021), 43—61.
-%H A390576 Marco Ripà, <a href="https://doi.org/10.13140/RG.2.2.32124.09609">Nonconstant Congruence Speeds of Integer Tetration</a>, ResearchGate, 2026. See pp. 2, 9.
+%H A390576 Marco Ripà, <a href="https://hexagonmath.org/2611.00097v1">Nonconstant Congruence Speeds of Integer Tetration in Non-Squarefree Radices</a>, Hexagon, 2026.
 %H A390576 Marco Ripà and Gabriele Di Pietro, <a href="https://doi.org/10.7546/nntdm.2026.32.3.477-496">A compact notation for peculiar properties characterizing integer tetration</a>, Notes Number Theory Disc. Math. 32(3) (2026), 477-496. See Appendix B.
 %H A390576 Marco Ripà and Luca Onnis, <a href="https://doi.org/10.7546/nntdm.2022.28.3.441-457">Number of stable digits of any integer tetration</a>, Notes Number Theory Disc. Math. 28(3) (2022), 441—457.
 %H A390576 Wikipedia, <a href="https://en.wikipedia.org/wiki/Tetration">Tetration</a>.
+%F A390576 Let r = A013929(n), and let v_p denote the p-adic valuation. Define c_p(m) = v_2(m^2 - 1) - 1 if p = 2, and c_p(m) = v_p(m^(p - 1) - 1) if p is odd. Then a(n) = min{m >= 2: gcd(m,r) = 1 and min_{p|r} c_p(m)/v_p(r) is not an integer}. - _Marco Ripà_, Nov 04 2026
 %e A390576 a(1)=7 since the congruence speed of 7 does not converge to a fixed value in the radix-4 and 7 is coprime to 4.
 %o A390576 (PARI) isns(m, r) = my(f=factor(r), t=oo); for(i=1, #f~, my(p=f[i, 1]); if(m%p, t=min(t, if(p==2, valuation(m^2-1, 2)-1, valuation(m^znorder(Mod(m, p))-1, p))/f[i, 2]))); t==oo || denominator(t)>1; \\ m never stabilizes in radix r
 %o A390576 a(n) = my(r=1, c=0); while(c<n, r++; c+=!issquarefree(r)); for(m=2, oo, if(gcd(m, r)==1 && isns(m, r), return(m))); \\ _Alper Ferudun_, Oct 20 2026
-%Y A390576 Cf. A013929, A317905, A373387 (radix-10 constant congruence speed), A379906, A380031, A390597, A390598 (radix-6 constant congruence speed), A390535.
-%K A390576 nonn,hard,changed
+%o A390576 (Python)
+%o A390576 from functools import lru_cache
+%o A390576 from itertools import count
+%o A390576 from math import gcd
+%o A390576 # Based on Alper Ferudun's LTE criterion (see above).
+%o A390576 @lru_cache(maxsize=None)
+%o A390576 def factor(n):
+%o A390576     f = []
+%o A390576     p = 2
+%o A390576     while p*p <= n:
+%o A390576         if n % p == 0:
+%o A390576             e = 0
+%o A390576             while n % p == 0:
+%o A390576                 n //= p
+%o A390576                 e += 1
+%o A390576             f.append((p, e))
+%o A390576         p = 3 if p == 2 else p + 2
+%o A390576     if n > 1:
+%o A390576         f.append((n, 1))
+%o A390576     return tuple(f)
+%o A390576 def nonstabilizing(m, f):
+%o A390576     t = None
+%o A390576     for p, e in f:
+%o A390576         if p == 2:
+%o A390576             x = m*m - 1
+%o A390576             s = (x & -x).bit_length() - 2
+%o A390576         else:
+%o A390576             s, mod = 1, p*p
+%o A390576             while pow(m, p-1, mod) == 1:
+%o A390576                 s += 1
+%o A390576                 mod *= p
+%o A390576         if t is None or s*t[1] < t[0]*e:
+%o A390576             t = (s, e)
+%o A390576     return t[0] % t[1] != 0
+%o A390576 def A390576(n):
+%o A390576     if n < 1:
+%o A390576         raise ValueError("n must be positive")
+%o A390576     for r in count(4):
+%o A390576         f = factor(r)
+%o A390576         if any(e > 1 for _, e in f):
+%o A390576             n -= 1
+%o A390576             if n == 0:
+%o A390576                 break
+%o A390576     for m in count(2):
+%o A390576         if gcd(m, r) == 1 and nonstabilizing(m, f):
+%o A390576             return m
+%o A390576 print([A390576(n) for n in range(1, 83)]); # _Marco Ripà_, Nov 04 2026
+%Y A390576 Cf. A013929, A317905, A373387 (radix-10 constant congruence speed), A379906, A380031, A390597, A390598 (radix-6 constant congruence speed), A390535, A401494.
+%K A390576 nonn,changed
 %O A390576 1,1
 %A A390576 _Gabriele Di Pietro_ and _Marco Ripà_, Dec 09 2025
 %E A390576 a(34) corrected by _Alper Ferudun_, Oct 20 2026

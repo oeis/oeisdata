@@ -1,0 +1,56 @@
+%I A401611 #22 Nov 07 2026 14:05:01
+%S A401611 1,1,1,1,1,1,3,1,2,1,1,2,3,6,7,1,3,5,9,1,1,3,2,4,3,7,11,22,1,1,2,2,6,
+%T A401611 1,6,2
+%N A401611 Number of distinct (up to reflection) n-building skylines of minimal total height such that each building of height h sees exactly h other buildings in total to its left and right.
+%C A401611 An n-building skyline is an ordered n-tuple of nonnegative integer building heights (h_1,...,h_n). As in the city-building sequence A400000, an i-th building "sees" another building j if every intermediate building at position k, i < k < j or j < k < i, has its rooftop (k, h_k) on or below the straight line joining (i, h_i) and (j, h_j). A skyline is counted toward a(n) if for every i with 1 <= i <= n the i-th building sees exactly h_i other buildings in total to its left and right, and only if it has the minimal budget, i.e. its total height A401614(n) = Sum_{i=1..n} h_i is the smallest among all n-building skylines satisfying this visibility condition. Asymmetric skylines related by reflection are considered equivalent and are only counted once.
+%F A401611 a(n) <= A401606(n).
+%e A401611 a(0) = 1 vacuously. Empty skyline satisfies the condition because any statement about elements of the empty set is true.
+%e A401611 a(1) = 1 because the only skyline satisfying the condition is (0). One building of height 0 sees zero other buildings.
+%e A401611 a(2) = 1 because (1,1) is the only skyline satisfying the condition: each building of height 1 sees its only neighbor, and 1 is the minimal height for which this is possible.
+%e A401611 a(3) = 1 because (1,2,1) is the only skyline satisfying the condition: the outer buildings see only the central one, the central building sees both outer buildings.
+%e A401611 a(4) = 1 because (1,2,2,1) is the only skyline satisfying both the visibility and the minimality conditions, delivering the minimal total height of 6. The pair of skylines (1,3,2,2) and (2,2,3,1) that count toward A401606(4) are not minimal because each of them has a larger total height of 8.
+%e A401611 a(6) = 3 is the first term > 1 because the following three skylines satisfy the visibility conditions while having the same minimal total height of 14:
+%e A401611   1) (1,3,2,4,2,2) / (2,2,4,2,3,1) - mirror pair;
+%e A401611   2) (1,3,3,2,4,1) / (1,4,2,3,3,1) - mirror pair;
+%e A401611   3) (2,2,3,3,2,2) - symmetric skyline.
+%e A401611 a(8) = 2 is the first term to which no symmetric skyline contributes. At n = 8, the minimal total height of 20 is reached for the following two mirror pairs:
+%e A401611   1) (1,3,2,4,2,4,2,2) / (2,2,4,2,4,2,3,1).
+%e A401611   2) (1,3,2,5,2,3,3,1) / (1,3,3,2,5,2,3,1).
+%e A401611 a(20) = 1 because the minimal total height of 62 is reached for the following unique mirror pair: (1,3,2,5,2,4,2,6,2,4,2,6,2,4,2,5,2,4,2,2) / (2,2,4,2,5,2,4,2,6,2,4,2,6,2,4,2,5,2,3,1).
+%t A401611 Clear[a, skylineCount];
+%t A401611 skylineCount = Compile[{{n, _Integer}, {b, _Integer}},
+%t A401611    Module[{h = ConstantArray[0, n], d = ConstantArray[0, {n+1, n}],
+%t A401611      p = ConstantArray[0, {n+1, n}], q = ConstantArray[0, {n+1, n}],
+%t A401611       s = ConstantArray[0, n+1], u = ConstantArray[n-1, n], j = 1,
+%t A401611       i = 0, c = 0, r = 0, t = 0, ok = 0, ans = 0},
+%t A401611     While[j > 0, h[[j]]++;
+%t A401611      If[h[[j]] > u[[j]], j--, c = 0; ok = 1; r = n - j;
+%t A401611       For[i = 1, i < j && ok == 1, i++, d[[j+1, i]] = d[[j, i]];
+%t A401611        p[[j+1, i]] = p[[j, i]];
+%t A401611        q[[j+1, i]] = q[[j, i]];
+%t A401611        If[q[[j, i]] == 0 || (h[[j]] - h[[i]]) q[[j, i]] >= (j - i) p[[j, i]],
+%t A401611         d[[j+1, i]]++; c++;
+%t A401611         p[[j+1, i]] = h[[j]] - h[[i]];
+%t A401611         q[[j+1, i]] = j-i];
+%t A401611        If[d[[j+1, i]] > h[[i]] || d[[j+1, i]] + r < h[[i]], ok = 0]];
+%t A401611       If[c + If[r > 0, 1, 0] > h[[j]] || c + r < h[[j]], ok = 0];
+%t A401611       If[ok == 1, s[[j+1]] = s[[j]] + h[[j]];
+%t A401611        If[j == n, i = 1;
+%t A401611         While[i < n && h[[i]] == h[[n+1-i]], i++];
+%t A401611         If[h[[i]] <= h[[n+1-i]], ans++], d[[j+1, j]] = c;
+%t A401611         p[[j+1, j]] = q[[j+1, j]] = 0; t = 0;
+%t A401611         For[i = 1, i <= j, i++, t += h[[i]] - d[[j+1, i]]];
+%t A401611         If[s[[j+1]] + t + 2(r-1) <= b,
+%t A401611          u[[j+1]] = Min[n-1, b - s[[j+1]] - If[r > 1, 2r-3, 0]];
+%t A401611          For[i = 1, i <= j, i++,
+%t A401611           If[d[[j+1, i]] == h[[i]], u[[j+1]] = Min[u[[j+1]],
+%t A401611              h[[i]] + Quotient[p[[j+1, i]]*(j+1-i)-1, q[[j+1, i]]]]]]; j++;
+%t A401611          h[[j]] = If[j == n, Max[1, h[[1]]], 2]-1]]]]]; ans]];
+%t A401611 a[0] = a[1] = 1;
+%t A401611 a[n_Integer] /; n >= 2 := a[n] = Module[{b = 2 n - 2, c = 0},
+%t A401611     While[c == 0, c = skylineCount[n, b]; If[c == 0, b += 2]]; c];
+%t A401611 Table[a[n], {n, 0, 20}]
+%Y A401611 Cf. A400000, A401606, A401614.
+%K A401611 nonn,more,new
+%O A401611 0,7
+%A A401611 _Dmytro Inosov_, Oct 30 2026
