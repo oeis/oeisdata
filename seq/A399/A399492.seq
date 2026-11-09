@@ -1,0 +1,32 @@
+%I A399492 #15 Nov 08 2026 21:13:13
+%S A399492 0,1,3,5,8,11,15,18,23,27,31,36,41,47,50,56,60,66,71,78,83,91,97,103,
+%T A399492 110,116,124,131,138,146,154,163,169,178,185,194,202,212,220,231,236,
+%U A399492 245,254,264,273,284,290,300,310,321,328,338,350,358,370,379,391,401
+%N A399492 a(0) = 0, a(1) = 1; for n >= 2, a(n) = a(n-1) + 1 + c(n), where c(n) is the number of pairs 0 <= i < j < n with a(j) - a(i) = a(n-1) - a(n-2).
+%C A399492 The pair (i, j) = (n-2, n-1) is always counted, so c(n) >= 1 (immediate from the definition).
+%C A399492 The first differences d(n) = a(n) - a(n-1) satisfy d(1) = 1 and, for n >= 2, d(n) = 1 + (the number of ways to write d(n-1) as a sum of one or more consecutive terms of d(1..n-1)). Without the added 1 this is the rule of A331614: the sequence 0, 1, ... defined by a(n) = a(n-1) + c(n) has first differences A331614.
+%C A399492 Proof that 2 <= a(n) - a(n-1) <= n for n >= 2: c(n) >= 1, and since a is strictly increasing each j admits at most one i, so c(n) <= n - 1. Hence 2*n - 1 <= a(n) <= n*(n+1)/2 for n >= 1.
+%C A399492 a(n) >= (sqrt(2)/3)*(n-1)^(3/2) for all n >= 1, and the same lower bound holds for the partial sums of A331614; a proof is given in the Agyemang link.
+%C A399492 Empirically, a(n)/n^(3/2) = 0.9536 at n = 9999 and 0.9597 at n = 79999. Conjecture: a(n) = O(n^(3/2)).
+%H A399492 Paul Agyemang, <a href="/A399492/b399492.txt">Table of n, a(n) for n = 0..9999</a>
+%H A399492 Paul Agyemang, <a href="https://doi.org/10.13140/RG.2.2.26536.33288">The step-echo sequence: a self-reading sequence, its place in the OEIS, and the three-halves law of the echo family</a>, preprint, ResearchGate (2026).
+%F A399492 a(n) >= (sqrt(2)/3)*(n-1)^(3/2) for n >= 1 (proved; see Agyemang link).
+%F A399492 2*n - 1 <= a(n) <= n*(n+1)/2 for n >= 1 (proved; see Comments).
+%e A399492 a(4): the last difference is a(3) - a(2) = 5 - 3 = 2. Among the terms 0, 1, 3, 5 the pairs with difference 2 are (1, 3) and (3, 5), so c(4) = 2 and a(4) = 5 + 1 + 2 = 8.
+%o A399492 (PARI) lista(nn) = my(v=vector(nn+1), c=Map(), d, k, x); v[2] = 1; mapput(c, 1, 1); for(n=2, nn, d = v[n] - v[n-1]; k = if(mapisdefined(c, d), mapget(c, d), 0); v[n+1] = v[n] + 1 + k; for(i=1, n, x = v[n+1] - v[i]; mapput(c, x, if(mapisdefined(c, x), mapget(c, x), 0) + 1))); v;
+%o A399492 (Python)
+%o A399492 from itertools import islice
+%o A399492 from collections import Counter
+%o A399492 def agen(): # generator of terms
+%o A399492     a, diffs = [0, 1], Counter({1: 1})
+%o A399492     yield from a
+%o A399492     while True:
+%o A399492         new = a[-1] + 1 + diffs[a[-1] - a[-2]]
+%o A399492         diffs.update(new - x for x in a)
+%o A399492         a.append(new)
+%o A399492         yield new
+%o A399492 print(list(islice(agen(), 60)))
+%Y A399492 Cf. A331614 (first differences of the same rule without the added 1), A399995 (counts representations of the previous term as sums of two earlier terms), A332518, A336037, A358799, A359034, A396030.
+%K A399492 nonn,easy,new
+%O A399492 0,3
+%A A399492 _Paul Agyemang_, Nov 01 2026

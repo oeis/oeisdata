@@ -1,0 +1,62 @@
+%I A399292 #18 Nov 08 2026 20:20:09
+%S A399292 0,2,16,78,188,450,1066,1800,2958,6908,8846,15122
+%N A399292 Maximum span of an admissible tuple with consecutive gaps at most 2n.
+%C A399292 An admissible tuple misses at least one residue class modulo every prime. This gives an eventual upper bound for the span of a prime cluster with gaps at most 2n.
+%C A399292 The Hardy-Littlewood prime-tuples conjecture predicts infinitely many clusters attaining the bound.
+%C A399292 The span is the largest element minus the smallest; a singleton has span 0.
+%e A399292 For n=0, only singletons are possible, so a(0)=0.
+%e A399292 For n=1, {0,2} is admissible and has span 2. Admissibility modulo 2 forces all positions to have the same parity, so three positions with gaps at most 2 would, after translation, be {0,2,4}, which covers every residue modulo 3. Thus a(1)=2.
+%e A399292 For n=2, {0,4,6,10,12,16} is admissible and the wheel modulo 30 proves that no admissible tuple with gaps at most 4 has larger span, so a(2)=16.
+%e A399292 For n=3, {0,2,6,8,12,18,20,26,30,32,36,42,48,50,56,62,68,72,78} is admissible and has span 78. The wheel modulo 210 gives the matching upper bound, so a(3)=78.
+%e A399292 These maxima concern admissible patterns. Small prime clusters can be exceptional: {2,3,5,7} has span 5 with gaps at most 2, although a(1)=2.
+%o A399292 (Python)
+%o A399292 from math import gcd
+%o A399292 from heapq import heappush, heappop
+%o A399292 from sympy import nextprime, primerange
+%o A399292 def a(n):
+%o A399292     if n == 0:
+%o A399292         return 0
+%o A399292     step, M, p = 2*n, 1, 1
+%o A399292     while True:
+%o A399292         p = int(nextprime(p))
+%o A399292         M *= p
+%o A399292         r = [x for x in range(M) if gcd(x, M) == 1]
+%o A399292         m = len(r)
+%o A399292         cuts = [i for i in range(m)
+%o A399292                 if r[(i+1) % m] + (M if i+1 == m else 0) - r[i] > step]
+%o A399292         if cuts:
+%o A399292             break
+%o A399292     heap, seen = [], set()
+%o A399292     def add(h):
+%o A399292         h = tuple(x-h[0] for x in h)
+%o A399292         h = min(h, tuple(h[-1]-x for x in h[::-1]))
+%o A399292         if h not in seen:
+%o A399292             seen.add(h)
+%o A399292             heappush(heap, (-(h[-1]-h[0]), h))
+%o A399292     rr = r + [x+M for x in r]
+%o A399292     for i, j in zip(cuts, cuts[1:]+[cuts[0]+m]):
+%o A399292         add(rr[i+1:j+1])
+%o A399292     primes = list(primerange(2, max(len(h) for _, h in heap)+1))
+%o A399292     while heap:
+%o A399292         _, h = heappop(heap)
+%o A399292         p = next((p for p in primes if p <= len(h)
+%o A399292                   and len({x % p for x in h}) == p), None)
+%o A399292         if p is None:
+%o A399292             return h[-1]-h[0]
+%o A399292         for residue in range(p):
+%o A399292             part = []
+%o A399292             for x in h:
+%o A399292                 if x % p == residue:
+%o A399292                     continue
+%o A399292                 if part and x-part[-1] > step:
+%o A399292                     add(part)
+%o A399292                     part = []
+%o A399292                 part.append(x)
+%o A399292             if part:
+%o A399292                 add(part)
+%o A399292 print([a(n) for n in range(7)])
+%Y A399292 Cf. A008407, A023193, A292224, A399821, A400690.
+%K A399292 nonn,more,new
+%O A399292 0,2
+%A A399292 _Jwalin Bhatt_, Nov 01 2026
+%E A399292 a(11) from _Sean A. Irvine_, Nov 08 2026

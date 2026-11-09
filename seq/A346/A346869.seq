@@ -1,15 +1,21 @@
-%I A346869 #33 Jul 29 2023 14:24:04
+%I A346869 #46 Nov 08 2026 21:55:27
 %S A346869 0,0,0,0,3,3,3,11,11,11,21,21,26,38,38,38,52,64,64,80,80,80,112,112,
 %T A346869 119,139,139,155,177,177,177,217,235,235,261,261,261,309,327,327,366,
 %U A346869 366,388,420,420,440,474,498,498,554,554,554,640,640,640,680,680,708,772,796
 %N A346869 Sum of all divisors, except the smallest and the largest of every number, of the first n odd numbers.
 %C A346869 Partial sums of the odd-indexed terms of Chowla's function A048050.
 %C A346869 a(n) has a symmetric representation.
+%C A346869 The formula a(n) = Sum_{e odd, 1 <= e <= 2*n-1} floor((floor((2*n-1)/e)+1)/2)^2 - n^2 - n + 1 follows by writing the sum of sigma(N) over the odd N <= 2*n-1 as a sum over the odd cofactors e: each odd e occurs once for every odd d <= (2*n-1)/e, and the sum of the odd numbers up to t is floor((t+1)/2)^2. Grouping the values of e with the same floor((2*n-1)/e) gives an algorithm with O(sqrt(n)) operations. - _Carlo Nurra_, Oct 26 2026
+%F A346869 From _Carlo Nurra_, Oct 26 2026: (Start)
+%F A346869 a(n) = Sum_{e odd, 1 <= e <= 2*n-1} floor((floor((2*n-1)/e)+1)/2)^2 - n^2 - n + 1.
+%F A346869 a(n) ~ (Pi^2/8 - 1)*n^2. (End)
+%F A346869 a(n) = A326123(n) - n^2 - n + 1. - _Jeff Sponaugle_, Nov 01 2026
 %p A346869 a:= proc(n) option remember; `if`(n=1, 0,
 %p A346869       a(n-1)+numtheory[sigma](2*n-1)-2*n)
 %p A346869     end:
 %p A346869 seq(a(n), n=1..60);  # _Alois P. Heinz_, Aug 19 2021
-%t A346869 s[1] = 0; s[n_] := DivisorSigma[1, 2*n - 1] - 2*n; Accumulate @ Array[s, 50] (* _Amiram Eldar_, Aug 19 2021 *)
+%t A346869 s[1] = 0; s[n_] := DivisorSigma[1, 2*n - 1] - 2*n; Accumulate @ Array[s, 60] (* _Amiram Eldar_, Aug 19 2021 *)
+%t A346869 (* Alternative: *)
 %t A346869 Accumulate[Join[{0},Table[DivisorSigma[1,n]-n-1,{n,3,151,2}]]] (* _Harvey P. Dale_, Jul 29 2023 *)
 %o A346869 (Python)
 %o A346869 from sympy import divisors
@@ -17,8 +23,21 @@
 %o A346869 def A346879(n): return sum(divisors(2*n-1)[1:-1])
 %o A346869 def aupton(nn): return list(accumulate(A346879(n) for n in range(1, nn+1)))
 %o A346869 print(aupton(60)) # _Michael S. Branicky_, Aug 19 2021
+%o A346869 (Python)
+%o A346869 def A346869(n):
+%o A346869     X = 2*n - 1
+%o A346869     tot = 0
+%o A346869     e = 1
+%o A346869     while e <= X:
+%o A346869         q = X // e
+%o A346869         hi = X // q
+%o A346869         tot += ((hi + 1)//2 - e//2) * ((q + 1)//2)**2
+%o A346869         e = hi + 1
+%o A346869     return tot - n*n - n + 1
+%o A346869 # _Carlo Nurra_, Oct 26 2026
+%o A346869 (PARI) a(n) = sum(e=1, 2*n-1, if (e%2, floor((floor((2*n-1)/e)+1)/2)^2)) - n^2 - n + 1; \\ _Michel Marcus_, Oct 28 2026
 %Y A346869 Partial sums of A346879.
 %Y A346869 Cf. A000203, A005408, A008438, A048050, A237593, A245092, A244049, A326123, A346870.
-%K A346869 nonn,easy
+%K A346869 nonn,easy,changed
 %O A346869 1,5
 %A A346869 _Omar E. Pol_, Aug 18 2021
