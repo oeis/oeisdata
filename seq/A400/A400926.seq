@@ -1,0 +1,77 @@
+%I A400926 #23 Nov 09 2026 20:30:31
+%S A400926 2,6,15,35,80,179,396,870,1897,4114
+%N A400926 Number of distinct time intervals measurable by burning n non-uniform ropes, each burning for 1 unit of time, extinguishing allowed, as measured between any two state transitions.
+%C A400926 There are n ropes. Each rope burns for 1 unit of time if lit from one end. Ropes are non-uniform, so 1/k-th fraction of rope length does not burn for 1/k-th of time. Based on how many rope ends are burning, each rope can burn at 0, 1, or 2 rate. Every time one or more ropes burn out completely, a configuration can be changed by lighting up or extinguishing the ends of remaining ropes. The experiment lasts until no ropes are burning.
+%C A400926 A measurable interval is the time elapsed between any two distinct events - initial lighting event and subsequent burnouts.
+%C A400926 The sequence counts intervals by distinct duration, regardless of the number of possible configurations that leads to that burning duration.
+%C A400926 The number of reachable states seems to be A137153(n,k) where n is the initial number of ropes and k is the number of remaining ropes.
+%C A400926 This sequence is similar to A287012, but additionally allows extinguishing and reignition of ropes.
+%e A400926 For n = 1, experiments and 2 measurable intervals are:
+%e A400926       (t=0) light rope A on both ends
+%e A400926       (t=1/2) A burns out
+%e A400926   [1] 1/2 units: between (t=0) and (t=1/2)
+%e A400926       (t=0) light rope A on one end
+%e A400926       (t=1) A burns out
+%e A400926   [2] 1 unit: between (t=0) and (t=1)
+%e A400926 For n = 2, example (non-exhaustive) experiments and 6 measurable intervals are:
+%e A400926       (t=0) light rope A from both ends, and rope B from one end
+%e A400926       (t=1/2) A burns out, then light B from another end
+%e A400926       (t=3/4) B burns out
+%e A400926   [1] 1/4 units: between (t=1/2) and (t=3/4)
+%e A400926   [2] 1/2 units: between (t=0) and (t=1/2)
+%e A400926   [3] 3/4 units: between (t=0) and (t=3/4)
+%e A400926       (t=0) light rope A from one end
+%e A400926       (t=1) A burns out, light rope B from one end
+%e A400926       (t=2) B burns out
+%e A400926   [4] 1 units: between (t=0) and (t=1)
+%e A400926   [5] 2 units: between (t=0) and (t=2)
+%e A400926       (t=0) light rope A from both ends
+%e A400926       (t=1/2) A burns out, light rope B from one end
+%e A400926       (t=3/2) B burns out
+%e A400926   [6] 3/2 units: between (t=0) and (t=3/2)
+%e A400926 For n = 5, this sequence has solutions 53/32 (from start to end) and 37/32 (from t=1/2 to the end) in addition to what A287012 allows:
+%e A400926   t=0: light D from one end, E from both ends, keep A, B and C unlit.
+%e A400926   t=1/2: E burns out. Light D from second end, B from one end, and C from both ends.
+%e A400926   t=3/4: D burns out. Light B from second end, and put out one end of C.
+%e A400926   t=9/8: B burns out. Relight C's second end again, and light A from one end.
+%e A400926   t=19/16: C burns out. Light A from second end.
+%e A400926   t=53/32: A burns out.
+%o A400926 (Python)
+%o A400926 from collections import defaultdict
+%o A400926 from itertools import product
+%o A400926 def a(n):
+%o A400926     states = {(1 << n,) * n: 1}
+%o A400926     times = 0
+%o A400926     while states:
+%o A400926         next_states = defaultdict(int)
+%o A400926         for lengths, bits in states.items():
+%o A400926             bits |= 1
+%o A400926             choices = []
+%o A400926             for length in set(lengths):
+%o A400926                 count = lengths.count(length)
+%o A400926                 choices.append([
+%o A400926                     ((length, 0),) * i + ((length, 1),) * j
+%o A400926                     + ((length, 2),) * (count - i - j)
+%o A400926                     for i in range(count + 1)
+%o A400926                     for j in range(count - i + 1)
+%o A400926                 ])
+%o A400926             for groups in product(*choices):
+%o A400926                 rates = [pair for group in groups for pair in group]
+%o A400926                 dt = min((length // rate for length, rate in rates if rate),
+%o A400926                          default=None)
+%o A400926                 if dt is None:
+%o A400926                     continue
+%o A400926                 remaining = tuple(sorted(
+%o A400926                     length - rate * dt for length, rate in rates
+%o A400926                     if length > rate * dt
+%o A400926                 ))
+%o A400926                 new_bits = bits << dt
+%o A400926                 times |= new_bits
+%o A400926                 if remaining:
+%o A400926                     next_states[remaining] |= new_bits
+%o A400926         states = next_states
+%o A400926     return times.bit_count()
+%Y A400926 Cf. A137153, A400927, A287012.
+%K A400926 nonn,hard,more,new
+%O A400926 1,1
+%A A400926 _Alex Tori_, Oct 09 2026

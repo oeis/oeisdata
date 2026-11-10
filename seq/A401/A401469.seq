@@ -1,0 +1,47 @@
+%I A401469 #9 Nov 09 2026 21:14:40
+%S A401469 1,2,4,8,16,28,56,112,224,448,784,1568,3136,5600,11200,19936,39872,
+%T A401469 72256,144512,289024,523136,1046272,2092544,4185088,8370176,13515776,
+%U A401469 24449024,48898048,97796096,176023552,318977024,637954048,1275908096,2551816192,4579262464,8143237120,16286474240,30140555264
+%N A401469 Number of subsets of {1..n}, including the empty set, that contain no Pythagorean triple x < y < z with x^2 + y^2 = z^2.
+%C A401469 Inside {1..n}, the number n can only be the largest number z of a triple. So if n is not the hypotenuse of a right triangle with integer sides, n can be added to every counted subset of {1..n-1}, and a(n) = 2*a(n-1). If x^2 + y^2 = n^2 with x < y < n, then {x, y} is counted but {x, y, n} is not, so a(n) < 2*a(n-1).
+%C A401469 A272709(n) <= a(n): a 2-coloring of {1..n} with no monochromatic Pythagorean triple is determined by its first color class, and that class is counted here. The first difference is at n = 5, where A272709(5) = 24 and a(5) = 28.
+%C A401469 In every Pythagorean triple one of the three numbers is a multiple of 5, because a square is 0, 1 or 4 modulo 5. So every subset of {1..n} with no multiple of 5 is counted, and a(n) >= 2^(n - floor(n/5)).
+%H A401469 Yinon Werner, <a href="/A401469/b401469.txt">Table of n, a(n) for n = 0..120</a>
+%F A401469 a(n) = 2*a(n-1) if and only if n is not in A009003, that is, if n is not the hypotenuse of an integer right triangle; otherwise a(n) < 2*a(n-1).
+%F A401469 a(n) >= 2^(n - floor(n/5)).
+%e A401469 a(5) = 28: the only Pythagorean triple in {1..5} is {3,4,5}, and 4 of the 32 subsets contain it, so a(5) = 32 - 4 = 28.
+%e A401469 a(10) = 784: the triples in {1..10} are {3,4,5} and {6,8,10}. By inclusion-exclusion, a(10) = 2^10 - 2^7 - 2^7 + 2^4 = 784.
+%o A401469 (Python)
+%o A401469 # Decide the numbers 1, 2, ..., n in order. Remember only the chosen numbers that can still be
+%o A401469 # part of a later triple; all other choices are merged. Fast enough for n up to about 60.
+%o A401469 from math import isqrt
+%o A401469 def a(n):
+%o A401469     T = [(x, y, isqrt(x*x + y*y)) for x in range(1, n + 1) for y in range(x + 1, n + 1)
+%o A401469          if isqrt(x*x + y*y)**2 == x*x + y*y and isqrt(x*x + y*y) <= n]   # triples x < y < z <= n
+%o A401469     last = {}                             # last[v] = largest z of a triple containing v
+%o A401469     for x, y, z in T:
+%o A401469         for v in (x, y, z): last[v] = max(last.get(v, 0), z)
+%o A401469     pairs = {}                            # pairs[z] = list of (x, y) with x^2 + y^2 = z^2
+%o A401469     for x, y, z in T: pairs.setdefault(z, []).append((x, y))
+%o A401469     states = {0: 1}                       # bit mask of remembered chosen numbers -> number of ways
+%o A401469     for z in range(1, n + 1):
+%o A401469         new = {}
+%o A401469         for m, c in states.items():
+%o A401469             new[m] = new.get(m, 0) + c    # z not chosen
+%o A401469             if all(not (m >> x & 1 and m >> y & 1) for x, y in pairs.get(z, [])):
+%o A401469                 m2 = m | (1 << z)         # z chosen (allowed: no pair {x,y} below it is already chosen)
+%o A401469                 new[m2] = new.get(m2, 0) + c
+%o A401469         states = {}
+%o A401469         for m, c in new.items():
+%o A401469             for v in range(1, z + 1):     # forget numbers that no later triple uses
+%o A401469                 if m >> v & 1 and last.get(v, 0) <= z: m &= ~(1 << v)
+%o A401469             states[m] = states.get(m, 0) + c
+%o A401469     return sum(states.values())
+%o A401469 (PARI) \\ Brute force; slow, fine for n <= 16.
+%o A401469 ok(i, S) = for(j=1, #S, my(y=i^2-S[j]^2); if(y>S[j]^2 && issquare(y) && vecsearch(S, sqrtint(y)), return(0))); 1;
+%o A401469 f(i, n, S) = if(i>n, 1, f(i+1, n, S) + if(ok(i, S), f(i+1, n, concat(S, [i])), 0));
+%o A401469 a(n) = f(1, n, []);
+%Y A401469 Cf. A009003, A046080, A272709.
+%K A401469 nonn,new
+%O A401469 0,2
+%A A401469 _Yinon Werner_, Oct 26 2026

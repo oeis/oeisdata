@@ -1,4 +1,4 @@
-%I A038547 #95 Nov 03 2025 04:21:31
+%I A038547 #105 Nov 09 2026 10:28:44
 %S A038547 1,3,9,15,81,45,729,105,225,405,59049,315,531441,3645,2025,945,
 %T A038547 43046721,1575,387420489,2835,18225,295245,31381059609,3465,50625,
 %U A038547 2657205,11025,25515,22876792454961,14175,205891132094649,10395,1476225,215233605,455625,17325,150094635296999121
@@ -9,15 +9,28 @@
 %C A038547 The politeness of an integer, A069283(n), is defined to be the number of its nontrivial runsum representations, and the sequence 3, 9, 15, 81, 45, 729, 105, ... represents the least integers to have a politeness of 1, 2, 3, 4, ... This is also the sequence of smallest integers with n+1 odd divisors and so apart from the leading 1, is precisely this sequence. - _Ant King_, Sep 23 2009
 %C A038547 a(n) is also the least number k with the property that the symmetric representation of sigma(k) has n subparts. - _Omar E. Pol_, Dec 31 2016
 %H A038547 Don Reble, <a href="/A038547/b038547.txt">Table of n, a(n) for n = 1..2000</a>
-%H A038547 T. Verhoeff, <a href="https://cs.uwaterloo.ca/journals/JIS/trapzoid.html">Rectangular and Trapezoidal Arrangements</a>, J. Integer Sequences, Vol. 2, 1999, #99.1.6.
+%H A038547 Tom Verhoeff, <a href="https://cs.uwaterloo.ca/journals/JIS/trapzoid.html">Rectangular and Trapezoidal Arrangements</a>, J. Int. Seq. 2 (1999), Art. 99.1.6.
 %F A038547 a(p) = 3^(p-1) for primes p. - _Zak Seidov_, Apr 18 2006
 %F A038547 a(n) = A119265(n,n). - _Reinhard Zumkeller_, May 11 2006
 %F A038547 It was suggested by _Alexander Adamchuk_ that for all n >= 1, we have a(3^(n-1)) = (p(n)#/2)^2 = (A002110(n)/2)^2 = A070826(n)^2. But this is false! E.g., (p(n)#/2)^2 = 3^2 * 5^2 * 7^2 * ... * 23^2 * 29^2 does indeed have 3^9 odd factors, but it is greater than 3^8 * 5^2 * 7^2 * ... * 23^2 which has 9*3*3*3*3*3*3*3 = 9*3^7 = 3^9 odd factors. - _Richard Sabey_, Oct 06 2007
 %F A038547 a(A053640(m)) = a(A000005(A053624(m))) = A053624(m). - _Rick L. Shepherd_, Apr 20 2008
 %F A038547 a(p^k) = Product_{i=1..k} prime(i+1)^(p-1), p prime and k >= 0, only when p_(k+1) < 3^p. - _Hartmut F. W. Hoft_, Nov 03 2022
 %e A038547 a(2^3) = 105 = 3 * 5 * 7 while a(2^4) = 945 = 3^3 * 5 * 7. There are 5 partition lists for the exponents of numbers with 16 odd divisors; they are {1, 1, 1, 1}, {3, 1, 1}, {3, 3}, {7, 1}, and {15} that result in the 5 numbers 1155, 945, 3375, 10935, and 14348907. Number a(3^8) = a(6561) = 3^2 * 5^2 * ... * 19^2 * 23^2 = 12442607161209225 while a(3^9) = a(19683) = 3^8 * 5^2 * ... * 19^2 * 23^2 = 9070660620521525025. The numbers a(5^52) = 3^4 * 5^4 * 7^4 * ... and a(5^53) = 3^24 * 5^4 * 7^4 * ... have 393 and 402 digits, respectively. - _Hartmut F. W. Hoft_, Nov 03 2022
+%p A038547 g:= proc(n,p) # least number with n divisors and no prime divisor < p
+%p A038547       option remember;
+%p A038547       local q,t,d;
+%p A038547       t:= p^(n-1);
+%p A038547       q:= nextprime(p);
+%p A038547       for d in NumberTheory:-Divisors(n) minus {1,n} do
+%p A038547           t:= min(t, p^(d-1)*procname(n/d,q));
+%p A038547       od;
+%p A038547       t
+%p A038547 end proc:
+%p A038547 seq(g(n,3),n=1..100); # _Robert Israel_, Nov 09 2026
 %t A038547 Table[Select[Range[1,532000,2],DivisorSigma[0,#]==k+1 &,1],{k,0,15}]//Flatten (* _Ant King_, Nov 28 2010 *)
+%t A038547 (* Alternative: *)
 %t A038547 2#-1&/@With[{ds=DivisorSigma[0,Range[1,600000,2]]},Table[Position[ds,n,1,1],{n,16}]]//Flatten (* The program is not suitable for generating terms beyond a(16) *) (* _Harvey P. Dale_, Jun 06 2017 *)
+%t A038547 (* Alternative: *)
 %t A038547 (* direct computation of A038547(n) *)
 %t A038547 (* Function by _Vaclav Kotesovec_ in A005179, Apr 04 2021, modified for odd divisors *)
 %t A038547 mp[1, m_] := {{}}; mp[n_, 1] := {{}}; mp[n_?PrimeQ, m_] := If[m<n, {}, {{n}}];
@@ -25,7 +38,7 @@
 %t A038547 mp[n_]:=mp[n,n];
 %t A038547 a038547[bound_] := Module[{mulpar}, Table[mulpar=mp[n]-1; Min[Table[Product[Prime[s+1]^mulpar[[j, s]], {s, 1, Length[mulpar[[j]]]}], {j, 1, Length[mulpar]}]], {n, 1, bound}]]
 %t A038547 a038547[34] (* _Hartmut F. W. Hoft_, Mar 05 2023 *)
-%o A038547 (PARI) for(nd=1,15,forstep(k=1,10^66,2,if(nd==numdiv(k),print1(k,", ");break())))
+%o A038547 (PARI) a(n) = my(k=1); while (numdiv(k) != n, k+=2); k; \\ _Michel Marcus_, Nov 09 2026
 %o A038547 (Haskell)
 %o A038547 import Data.List  (find)
 %o A038547 import Data.Maybe (fromJust)
@@ -50,7 +63,7 @@
 %Y A038547 Cf. A001227, A005179, A002110, A070826, A000005, A053640, A053624, A237593, A279387.
 %Y A038547 Row 1 of A266531. - _Omar E. Pol_, Dec 31 2016
 %Y A038547 Cf. A006093, A076274, A080577.
-%K A038547 nonn,nice
+%K A038547 nonn,nice,look,changed
 %O A038547 1,2
 %A A038547 _Tom Verhoeff_
 %E A038547 Corrected by _Ron Knott_, Feb 22 2001

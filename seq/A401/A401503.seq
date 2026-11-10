@@ -1,0 +1,68 @@
+%I A401503 #9 Nov 09 2026 07:35:25
+%S A401503 1,1,1,3,3,2,17,17,14,8,155,155,138,104,56,2073,2073,1918,1608,1160,
+%T A401503 608,38227,38227,36154,32008,25944,18272,9440,929569,929569,891342,
+%U A401503 814888,702280,557664,387104,198272,28820619,28820619,27891050,26031912,23281432,19716064,15448416,10623104,5410688
+%N A401503 Triangle of coefficients of the Genocchi-Seidel polynomials, read by rows.
+%C A401503 'Genocchi-Seidel polynomials' is a proposed name, not an established terminology. The polynomials are defined GS(0, x) = 1, and for n >= 1 as the polynomial quotient GS(n, x) = PolQuo(x^(n+2)*GS(n-1, 1) - x^2*GS(n-1, x), (1-x)^2).
+%C A401503 Define a Dumont permutation of {1,...,2*n+1} as a permutation where every even entry is followed by a smaller entry and every odd entry is followed by a larger entry or is the last entry. Denote the set of Dumont permutations by D_n. Then T(n, k) = card{s in D_n : k <= s(1) <= 2*n - k + 1}.
+%C A401503 The triangle is the row reversal of A297703 and the reversal of the even-indexed rows of Seidel's triangle A014781. The first column contains the unsigned Genocchi numbers A110501, while the last column contains of the median Genocchi numbers A005439. Row sums yield the median Genocchi numbers, shifted by one index. In each noninitial row, the first two entries are equal. Entries decrease weakly from left to right, and their first differences are nondecreasing.
+%F A401503 T(n, k) = (-1)^n * Sum_{j=0..floor(k/2)} binomial(k, 2*j) * (2*(n-j+1)) * Euler(2*(n-j)+1, 1), where Euler(m, x) denotes the Euler polynomial.
+%F A401503 T(n, k) = k! * (2*n-k+1)! * [x^k*y^(2*n-k+1)] egf(x,y), where
+%F A401503 egf(x,y) = cos(x) * (x + y + sin(x+y)) / (1 + cos(x+y)).
+%F A401503 T(0, 0) = 1 and T(n, n) = Sum_{j=0..n-1} T(n-1, j) for n >= 1.
+%F A401503 T(n, k) = 2*T(n, k+1) - T(n, k+2) - T(n-1, k) for 0 <= k < n.
+%e A401503 Triangle starts:
+%e A401503   [0]      1;
+%e A401503   [1]      1,      1;
+%e A401503   [2]      3,      3,      2;
+%e A401503   [3]     17,     17,     14,      8;
+%e A401503   [4]    155,    155,    138,    104,     56;
+%e A401503   [5]   2073,   2073,   1918,   1608,   1160,    608;
+%e A401503   [6]  38227,  38227,  36154,  32008,  25944,  18272,   9440;
+%e A401503   [7] 929569, 929569, 891342, 814888, 702280, 557664, 387104, 198272;
+%e A401503 .
+%e A401503 For n = 3, there are 17 Dumont permutations s of {1,...,7} satisfying s(i) > s(i+1) <=> s(i) is even. The numbers of such permutations beginning with 1,2,...,7 are respectively (0,3,3,5,3,3,0). Restricting the first entry to the interval [k, 7-k], for k = 0,1,2,3, yield the counts (17,17,14,8), which is row 3 of the triangle. (A014780.)
+%p A401503 GSpoly := proc(n) option remember; local p;
+%p A401503   if n = 0 then 1 else p := GSpoly(n-1);
+%p A401503   quo(x^(n+2)*eval(p, x = 1) - x^2*p, (1-x)^2, x) fi end:
+%p A401503 seq(print(seq(coeff(GSpoly(n), x, k), k=0..n)), n=0..8);
+%p A401503 # Alternative: Euler representation
+%p A401503 T := (n, k) -> local j; (-1)^n*2*add(binomial(k, 2*j)*(n-j+1) * euler(2*(n-j)+1, 1), j = 0..iquo(k, 2)): seq(seq(T(n, k), k = 0..n), n = 0..8);
+%t A401503 GS[0] = 1; GS[n_] := GS[n] = Module[{p = GS[n-1]},
+%t A401503 PolynomialQuotient[x^(n+2)*(p /. x -> 1) - x^2*p, (1-x)^2, x ]];
+%t A401503 rowT[n_] := CoefficientList[GS[n], x]; Table[rowT[n], {n, 0, 8}] // Flatten
+%t A401503 (* Alternative: term recurrence *)
+%t A401503 T[n_, k_] := T[n, k] = Which[
+%t A401503     n < 0 || k < 0 || k > n, 0,
+%t A401503     n == 0, 1,
+%t A401503     k == n, Sum[T[n - 1, j], {j, 0, n - 1}],
+%t A401503     True, 2 T[n, k + 1] - T[n, k + 2] - T[n - 1, k] ];
+%t A401503 Table[Table[T[n, k], {k, 0, n}], {n, 0, 8}]
+%o A401503 (Python)  # Seidel zig-zag
+%o A401503 from functools import cache
+%o A401503 @cache
+%o A401503 def T(n):  # returns row n
+%o A401503     if n == 0: return [1]
+%o A401503     row = [0] + T(n - 1) + [0]
+%o A401503     for k in range(1, n + 1): row[k] += row[k - 1]
+%o A401503     for k in range(n - 1, -1, -1): row[k] += row[k + 1]
+%o A401503     return row[:-1]
+%o A401503 for n in range(9): print(T(n))
+%o A401503 (SageMath)  # polynomial recurrence
+%o A401503 from functools import cache
+%o A401503 R = PolynomialRing(ZZ, 'x'); x = R.gen()
+%o A401503 @cache
+%o A401503 def GS(n):
+%o A401503     if n == 0: return R.one()
+%o A401503     p = GS(n - 1)
+%o A401503     return (p(1)*x**(n + 2) - x**2*p) // (1 - x)**2
+%o A401503 for n in range(9): print(GS(n).list())
+%o A401503 (PARI)
+%o A401503 GS(n) = { if(n == 0, return(1)); my(p = GS(n-1));
+%o A401503 (x^(n+2)*subst(p, x, 1) - x^2*p) \ (1-x)^2 };
+%o A401503 for(n=0, 8, print(vector(n+1, k, polcoef(GS(n), k-1))));
+%Y A401503 Triangle reversal of A297703.
+%Y A401503 Cf. A014781 (Seidel's triangle), A110501 (Genocchi numbers), A005439 (median Genocchi numbers), A014780.
+%K A401503 nonn,tabl,new
+%O A401503 0,4
+%A A401503 _Peter Luschny_, Nov 08 2026
