@@ -1,0 +1,39 @@
+%I A401738 #10 Nov 10 2026 14:05:37
+%S A401738 0,0,0,0,0,0,0,0,0,0,0,0,16,0,0,14,0,0,0,0,96,95,0,82,60,96,90,109,
+%T A401738 108,94,91,31,61,0,63,60,64,63,128,127,118,123,128,113,142,189,237,
+%U A401738 240,119,184,190,456,446,446,430,658,794,638,985,829,828,1087,1167,1180,621,1100,1019,1440,3410
+%N A401738 Least preperiod of row n of A401735.
+%C A401738 Row n is x -> T(x,n), where T is the array A401735. If P(n) = A399521(n) is its least eventual period, a(n) is the least u >= 0 such that T(x+P(n),n) = T(x,n) for every x >= u. Thus a(n) counts entries before the periodic tail, with columns indexed from 0.
+%C A401738 Every row is eventually periodic, so a(n) is well defined. The certification lemma in A399521 certifies a periodic tail; the last mismatch between columns x and x+P(n) determines the least preperiod exactly.
+%C A401738 Every term n <= 211 was certified by a program using the lemma in A399521. A second, independently written program recomputed rows 0..203 and verified each certificate, including the exact preperiod. Terms 204..211 rest on the first program only.
+%C A401738 Among 0 <= n <= 211, row n is purely periodic (a(n) = 0) exactly for n = 0..11, 13, 14, 16..19, 22 and 33.
+%H A401738 Alper Ferudun, <a href="/A401738/b401738.txt">Table of n, a(n) for n = 0..211</a>
+%e A401738 Rows 0..11 are purely periodic, so a(0..11) = 0.
+%e A401738 Row 12 begins 0,0,0,0,1,1,2,1,2,2,1,3,4,3,3,2 (x = 0..15) and then repeats 0,0,0,0,1,1,3,1,2,2,1,3,4,2,2,3 with period A399521(12) = 16. The last x with T(x,12) != T(x+16,12) is x = 15 (T(15,12) = 2, T(31,12) = 3), so a(12) = 16.
+%o A401738 (Python)
+%o A401738 from math import lcm
+%o A401738 def periods(N):  # P(0..N) = least eventual periods, U(0..N) = least preperiods of the rows x -> T(x,y)
+%o A401738     R, P, U, Q, S = [], [], [], 1, 0  # stored rows; rows < y are Q-periodic from column S
+%o A401738     def grow(y, L):  # row y on [0,L) by the definition, rows < y extended by periodicity
+%o A401738         r = R[y]
+%o A401738         for x in range(len(r), L):
+%o A401738             for z in range(y):
+%o A401738                 while len(R[z]) <= x: R[z].append(R[z][-P[z]])
+%o A401738             s = {r[x-d] for d in range(1, min(x, y)+1) if r[x-d] == R[y-d][x] == R[y-d][x-d]}
+%o A401738             r.append(min(set(range(len(s)+1)) - s))
+%o A401738     for y in range(N+1):
+%o A401738         R.append([]); r = R[y]; x = S+y; M = 0
+%o A401738         while not M:  # least M = j*Q with row y equal on [u,u+y) and [u+M,u+M+y) for some u >= S
+%o A401738             x += 1; grow(y, x)
+%o A401738             M = next((m for m in range(Q, x-y-S+1, Q) if r[x-y-m:x-m] == r[x-y:x]), 0)
+%o A401738         u = x-y-M; grow(y, u+2*M)  # so row y is M-periodic from u
+%o A401738         p = min(q for q in range(1, M+1) if M % q == 0 and r[u+q:u+q+M] == r[u:u+M])
+%o A401738         P.append(p); U.append(max([i+1 for i in range(u) if r[i] != r[i+p]], default=0))
+%o A401738         Q, S = lcm(Q, p), max(S, U[y])
+%o A401738     return P, U, R
+%o A401738 print(periods(74)[1])
+%Y A401738 Cf. A401735, A399521, A401736, A401737, A401739.
+%Y A401738 Cf. A046874.
+%K A401738 nonn,hard,new
+%O A401738 0,13
+%A A401738 _Alper Ferudun_, Nov 03 2026

@@ -1,0 +1,42 @@
+%I A401537 #28 Nov 10 2026 17:19:29
+%S A401537 4,155,5280,160885,4604156,126603840,3386364982,88757780045,
+%T A401537 2290517248608,58389058416775,1473711499677134,36891414001495680,
+%U A401537 917147843910165160,22667192325000121535,557380873166277013536,13645392950479544187865,332760605769872033878112,8086901061682799337136320
+%N A401537 Number of spanning trees of the 3 X n Klein bottle grid graph using exactly 1 twist edge.
+%C A401537 The 3 X n Klein bottle grid graph has 3n vertices arranged in a 3 X n grid with periodic boundary conditions in the vertical direction (forming a cylinder in each column) and antiperiodic boundary conditions with twist in the horizontal direction: (r, n-1) ~ (2-r, 0). Three edges cross the twist: (0,n-1)-(2,0), (1,n-1)-(1,0), (2,n-1)-(0,0). This sequence counts spanning trees containing exactly one of these three edges.
+%C A401537 The total number of spanning trees of the 3 X n Klein bottle grid graph decomposes as A400234(n) = c_0(n) + c_1(n) + c_2(n) + c_3(n), where c_j(n) counts spanning trees using exactly j twist edges. This sequence is c_1(n). The twist-free component c_0(n) counts spanning trees of the cylinder C_3 X P_n.
+%C A401537 It appears that a(n)/c_0(n) tends to n as n grows (observed for n <= 10).
+%C A401537 For n <= 7, c_1(n) > c_2(n); for n >= 8, c_1(n) < c_2(n) (observed for n <= 10). The crossover c_1(n) = c_2(n) lies between n = 7 and n = 8.
+%H A401537 Eric Weisstein's World of Mathematics, <a href="https://mathworld.wolfram.com/SpanningTree.html">Spanning Tree</a>.
+%H A401537 <a href="/index/Rec#order_06">Index entries for linear recurrences with constant coefficients</a>, signature (48,-624,1154,-624,48,-1).
+%F A401537 a(n) is the coefficient of y in any cofactor of the Laplacian matrix of the 3 X n Klein bottle grid graph where each of the three twist edges has weight y and all other edges have weight 1. Expanding this cofactor as c_0(n) + c_1(n)*y + c_2(n)*y^2 + c_3(n)*y^3 gives the decomposition; a(n) = c_1(n).
+%F A401537 a(n) = 48*a(n-1) - 624*a(n-2) + 1154*a(n-3) - 624*a(n-4) + 48*a(n-5) - a(n-6) for n >= 7.
+%e A401537 For n=1, the 3 X 1 Klein bottle grid has 7 spanning trees total, of which a(1) = 4 use exactly 1 twist edge.
+%e A401537 For n=2, the 3 X 2 Klein bottle grid has 350 spanning trees total, of which a(2) = 155 use exactly 1 twist edge.
+%o A401537 (Python)
+%o A401537 from sympy import Matrix, symbols
+%o A401537 def C(n, y):
+%o A401537     m, cols = 3, n
+%o A401537     V = m*cols
+%o A401537     L = [[0]*V for _ in range(V)]
+%o A401537     def idx(r, c): return r*cols + c
+%o A401537     def add(u, v, w=1):
+%o A401537         L[u][u] += w; L[v][v] += w
+%o A401537         L[u][v] -= w; L[v][u] -= w
+%o A401537     for r in range(m):
+%o A401537         for c in range(cols-1):
+%o A401537             add(idx(r, c), idx(r, c+1))          # horizontal internal
+%o A401537     for r in range(m):
+%o A401537         for c in range(cols):
+%o A401537             add(idx(r, c), idx((r+1) % m, c))    # vertical periodic
+%o A401537     for r in range(m):
+%o A401537         add(idx(r, cols-1), idx(m-1-r, 0), y)    # twist edges, weight y
+%o A401537     M = Matrix([row[1:] for row in L[1:]])
+%o A401537     return M.det()
+%o A401537 def A401537(n):
+%o A401537     y = symbols('y')
+%o A401537     return C(n,y).coeff(y, 1)
+%Y A401537 Cf. A400234 (total spanning trees), A006235 (n-prism graph), A020871 (Möbius strip).
+%K A401537 nonn,easy,new
+%O A401537 1,1
+%A A401537 _Jean Lauro Muller_, Oct 28 2026
