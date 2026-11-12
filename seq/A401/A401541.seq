@@ -1,0 +1,52 @@
+%I A401541 #13 Nov 11 2026 21:45:19
+%S A401541 3,10,136,738,14184,32896,78596,93400,236448,335944,1933096,5633824,
+%T A401541 9153396,10884600,11301642,25302400,39220776,58585000,68231888,
+%U A401541 91176064,162097488,164261034,182815200,188324836,205380018,365394176,450610308,589788448,669934242,766509156,807062536,911525400
+%N A401541 Numbers of the form m * (sigma(m) + 2) where m is a practical number (A005153) such that sigma(m) + 2 is prime, ordered by increasing value.
+%C A401541 These numbers b = m * q (where q = sigma(m) + 2 = h + 1 is prime and h = sigma(m) + 1 is the unique hole) are the primary Level-0 root bases of all single-hole and almost practical number families (A174533).
+%C A401541 For k >= 2, B = a(k) satisfies the tight quadratic bounds: h*(h + 1) / (exp(gamma) * log(log(h))) < b <= h*(h + 1)/2, where gamma is the Euler-Mascheroni constant (exp(gamma) = 1.7810724...). Equality b = h*(h + 1)/2 (the h-th triangular number) holds if and only if M = 2^e is a power of 2 and q = 2^(e+1) + 1 is a Fermat prime (giving b = 3, 10, 136, 32896, 2147516416).
+%C A401541 For k >= 2, b * p_1 is an even almost practical number (A174534) if and only if p_1 is a prime satisfying q < p_1 <= 2*h + 1.
+%e A401541 The initial terms and their generating pairs (m, q = sigma(m) + 2) are:
+%e A401541   a(1) = 3:    m = 1,    q = 1 + 2 = 3 (prime), so 1 * 3 = 3;
+%e A401541   a(2) = 10:   m = 2,    q = 3 + 2 = 5 (prime), so 2 * 5 = 10;
+%e A401541   a(3) = 136:  m = 8,    q = 15 + 2 = 17 (prime), so 8 * 17 = 136;
+%e A401541   a(4) = 738:  m = 18,   q = 39 + 2 = 41 (prime), so 18 * 41 = 738.
+%e A401541 The terms are ordered by increasing value of a(k), not by m. The underlying values of m are not monotonic; the first inversion occurs at:
+%e A401541   a(22) = 164261034: m = 7938, q = 20691 + 2 = 20693;
+%e A401541   a(23) = 182815200: m = 7200, q = 25389 + 2 = 25391,
+%e A401541 where m decreases from 7938 to 7200 while a(22) < a(23).
+%o A401541 (Python)
+%o A401541 from sympy import factorint, divisor_sigma, isprime
+%o A401541 def is_practical(m):
+%o A401541     if m == 1:
+%o A401541         return True
+%o A401541     factors = factorint(m)
+%o A401541     if 2 not in factors:
+%o A401541         return False
+%o A401541     sig_running = 1
+%o A401541     for p in sorted(factors.keys()):
+%o A401541         if p > sig_running + 1:
+%o A401541             return False
+%o A401541         e = factors[p]
+%o A401541         sig_running *= (p**(e + 1) - 1) // (p - 1)
+%o A401541     return True
+%o A401541 def generate_bases(max_m):
+%o A401541     bases = []
+%o A401541     e2 = 0
+%o A401541     while (1 << e2) <= max_m:
+%o A401541         p2 = 1 << e2
+%o A401541         s = 1
+%o A401541         while p2 * s * s <= max_m:
+%o A401541             m = p2 * s * s
+%o A401541             if is_practical(m):
+%o A401541                 q = int(divisor_sigma(m)) + 2
+%o A401541                 if isprime(q):
+%o A401541                     bases.append(m * q)
+%o A401541             s += 2
+%o A401541         e2 += 1
+%o A401541     return sorted(bases)
+%o A401541 print(generate_bases(20000)[:32])
+%Y A401541 Cf. A000040, A000203, A000217, A005153, A019434, A174533, A174534.
+%K A401541 nonn,new
+%O A401541 1,1
+%A A401541 _Guido Avagliano_, Oct 28 2026

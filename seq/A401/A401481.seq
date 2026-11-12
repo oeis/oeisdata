@@ -1,0 +1,38 @@
+%I A401481 #17 Nov 11 2026 14:07:01
+%S A401481 1,0,1,1,4,1,5,0,5,3,24,1,25,2,5,1,20,5,77,4,85,7,112,1,113,6,85,5,76,
+%T A401481 5,21,0,21,11,408,5,1593,50,341,3,1444,85,4717,24,1365,15,480,1,481,
+%U A401481 14,1365,25,4716,85,1445,2,341,51,1592,5,409,10,21,1,84,21,1229
+%N A401481 Binary encodings of the top-to-bottom column words of the Gosper-Lafitte triangle.
+%C A401481 The column n of the fractal tile described in A000360 reads from top to bottom as V(n)=(v_0,...,v_{q-1}), with filled and empty congruent medial down-triangles represented by 1 and 0. We further take q=A002487(n+1), and the top v_0 as carrying weight 2^0.
+%C A401481 W(n) of A000361 is V(n) taken in reverse order. The number of 1s is A000360(n), and the number of 0s is A284556(n+1); they add up to q.
+%C A401481 Each and every positive rational p/q occurs without repetition as the ratio of the lengths of V(k) and V(k+1). Under dyadic refinement, the inserted column has length p+q, providing the two ratios p/(p+q) and (p+q)/q. More precisely, let A=V(k), B=V(k+1), p=|A|, q=|B|, and let rho(B) be the cyclic left rotation of B by one digit. Starting with x=0, form a word C by repeating the following p+q times: append the next digit of A if x<p, or the next digit of rho(B) if x>=p, then replace x by (x+q) mod (p+q). The resulting word satisfies V(2*k+1)=tau(A), V(2*k+2)=C, and V(2*k+3)=tau(B), where tau() complements words of odd length but leaves invariant words of even length. This supplies a hereditary lift of Stern's enumeration, in which every positive rational number is associated with a pair of binary words whose lineage is uniquely retraceable.
+%C A401481 The V(n) and W(n) bearings have different 2-adic boundaries; see A000361 for the latter. At refinement level r, consider n_r=3*2^r-1 for the middle-axis. For k,m>=1, the residue of a(n_r-k) modulo 2^m ultimately becomes independent of r. These compatible residues determine the unique beta(k) in Z_2 satisfying (2^A002487(k) - 1)* beta(k) = A102283(k) - a(k - 1). The word V(k-1) is repeated infinitely, with the first digit decremented by A102283(k). For 3|k no digit is changed, whereas for k == 1 or 2 (mod 3): 1 changes to 0, and 0 changes to 1, respectively. The period divides A002487(k).
+%H A401481 M. Jeremie Lafitte (Levitas), <a href="/A401481/b401481.txt">Table of n, a(n) for n = 0..4999</a>
+%F A401481 a(n) = Sum_{j=0..q-1} 2^j * ((((j*p - 1) mod q) + 1 - p) mod 2), where p = A002487(n) and q = A002487(n+1).
+%e A401481 For k=9, the parents A=V(9)=110 and B=V(10)=00011 have lengths 3 and 5. We have rho(B)=00110.
+%e A401481 route   = L R L R R L R R
+%e A401481 A       = 1   1     0
+%e A401481 rho(B)  =   0   0 1   1 0
+%e A401481 C       = 1 0 1 0 1 0 1 0
+%e A401481 Hence C=V(20)=10101010, and a(20)=1+4+16+64=85.
+%t A401481 tau[w_] := Mod[w + Length[w], 2]; (* 0 = L, 1 = R; first bit with weight 2^0. *)
+%t A401481 route[p_, q_] := Boole[# >= p] & /@ Most@NestList[If[# < p, # + q, # - p] &, 0, p + q];
+%t A401481 recombine[{u_, v_}] := With[{h = route[Length[u], Length[v]]}, ReplacePart[h, Join[Thread[Flatten@Position[h, 0] -> u], Thread[Flatten@Position[h, 1] -> RotateLeft[v]]]]];
+%t A401481 branch[p : {u_, v_}, b_] := With[{w = recombine[p]}, {{tau[u], w}, {w, tau[v]}}[[b + 1]]];
+%t A401481 a[n_] := FromDigits[Reverse@First@Fold[branch, {{1}, {0}}, Rest@IntegerDigits[n + 1, 2]], 2];
+%t A401481 Table[a[n], {n, 0, 66}]
+%o A401481 (PARI)
+%o A401481 \\ Forward stemma rationum
+%o A401481 tail(w) = vector(#w - 1, j, w[j + 1]);
+%o A401481 rho(w) = concat(tail(w), [w[1]]);
+%o A401481 xor(w, e) = apply(b -> bitxor(b, e), w);
+%o A401481 weave(p, q, x, U, V) = if(#U + #V == 0, [], if(x < p, concat([U[1]], weave(p, q, x + q, tail(U), V)), concat([V[1]], weave(p, q, x - p, U, tail(V)))));
+%o A401481 star(A, B) = weave(#A, #B, 0, A, rho(B));
+%o A401481 branch(A, B, b) = if(b, [star(A, B), xor(B, A[1])], [xor(A, bitxor(A[1], B[1])), star(A, B)]);
+%o A401481 pair(n) = if(n == 0, [[1], [0]], call((A, B) -> branch(A, B, (n + 1) % 2), pair((n - 1) \ 2)));
+%o A401481 a(n) = fromdigits(Vecrev(pair(n)[1]), 2);
+%o A401481 vector(67, n, a(n - 1))
+%Y A401481 Cf. A000361, A002487, A000360, A284556, A401018, A102283, A401309.
+%K A401481 nonn,eigen,new
+%O A401481 0,5
+%A A401481 _M. Jeremie Lafitte (Levitas)_, Oct 27 2026
