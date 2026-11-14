@@ -1,0 +1,61 @@
+%I A401969 #23 Nov 14 2026 00:20:25
+%S A401969 1,1,1,1,1,1,1,3,1,17,5,155,691,2073,7,5461,3617,929569,43867,
+%T A401969 28820619,174611,1109652905,854513,51943281731,236364091,
+%U A401969 2905151042481,8553103,191329672483963,23749461029,14655626154768697,8615841276005,1291885088448017715,7709321041217
+%N A401969 a(n) = numerator(b(n)), where b(n) = (-1)^m * 2*m * (2^(2*m) - 1)*zeta(1 - 2*m) / (2^n - 1), for n >= 2, and m = floor(n/2). b(0) = 1, b(1) = 1/2.
+%C A401969 Intuitively, this sequence fills the gaps in the sequence of Bernoulli numbers, where 'gaps' refers to the vanishing terms, while preserving the close connection between the Bernoulli numbers and the Euler numbers. We defined the sequence in signless form to allow for various meaningful sign assignments. Specifically, b(n) = abs(Bernoulli(n)) whenever Bernoulli(n) != 0. We may refer to b(n) as extended Bernoulli numbers.
+%F A401969 a(n) = numerator(b(n)), where b(n) = Li(1-2*m, -1)*(-1)^m*2*m / (2^n-1), for n >= 2, and m = floor(n/2). Li(n, x) is the polylogarithm.
+%F A401969 a(n) = numerator(b(n), where b(n) = ((-1)^m * m * Euler(2*m - 1, 1) / (1 - 2^n)), for n >= 2, and m = floor(n/2). Euler(n, x) denotes the Euler polynomial.
+%F A401969 Define polynomials P(0, x) = 1, and for n >= 1 as the polynomial quotient P(n, x) = PolQuo(x^(n+2)*P(n-1, 1) - x*P(n-1, x), (1-x)^2). Then a(n) = ([x^(m - 1)] P(n-1, x)) / ((2*(2^n - 1)) for n >= 2, where m = floor(n/2), and 1/(n + 1) for n in {0, 1}.
+%e A401969 1, 1/2, 1/6, 1/14, 1/30, 1/62, 1/42, 3/254, 1/30, 17/1022, 5/66, 155/4094, 691/2730, ...
+%p A401969 a := n -> ifelse(n<2, 1/(n+1), (iquo(n,2)*(-1)^iquo(n,2)*euler(2*iquo(n,2)-1, 1))/ (1-2^n)): seq(numer(a(n)), n = 0..32);
+%p A401969 # Alternative:
+%p A401969 a := proc(n) option remember;
+%p A401969     if n = 0 then 1; elif n = 1 then 1/2;
+%p A401969     elif irem(n, 2) = 0 then abs(bernoulli(n));
+%p A401969     else (2^(n-1)-1)/(2^n-1) * abs(bernoulli(n-1));
+%p A401969     fi end:
+%p A401969 seq(numer(a(n)), n = 0..32);
+%t A401969 (* Riemann version *)
+%t A401969 a[n_] := If[n < 2, 1/(n + 1), With[{m = Quotient[n, 2]},
+%t A401969     (-1)^m * 2*m*(2^(2*m) - 1)*Zeta[1 - 2*m]/(2^n - 1) ] ]
+%t A401969 T = Table[a[n], {n, 0, 32}]; Numerator /@ T
+%t A401969 (* Alternative: Dirichlet version *)
+%t A401969 a[n_] := If[n < 2, 1/(n + 1), With[{m = Quotient[n, 2]},
+%t A401969     (-1)^m * 2*m*PolyLog[1 - 2*m, -1]/(2^n - 1) ] ]
+%t A401969 (* Alternative: Euclidean polynomial division *)
+%t A401969 P[0] = 1; P[n_] := P[n] = PolynomialQuotient[x^(n + 2) (P[n - 1] /. x -> 1) - x P[n - 1], (1 - x)^2, x ];
+%t A401969 a[n_] := If[n < 2, 1/(n + 1), Last[CoefficientList[P[Quotient[n, 2] - 1], x]] / (2 (2^n - 1)) ];
+%o A401969 (Python)
+%o A401969 from fractions import Fraction as Q
+%o A401969 from sympy import euler
+%o A401969 def a(n: int) -> Fraction:
+%o A401969     if n < 2: return [Q(1,1), Q(1,2)][n]
+%o A401969     m = n // 2
+%o A401969     return((-1)**m * m * euler(2*m - 1, 0) / (2**n - 1))
+%o A401969 A = [a(n).numerator for n in range(33)]; print(A)
+%o A401969 (Python)
+%o A401969 from functools import cache
+%o A401969 from fractions import Fraction as Q
+%o A401969 @cache
+%o A401969 def genocchi(n: int) -> list[int]:
+%o A401969     if n == 0: return [1]
+%o A401969     row = [0] + genocchi(n - 1) + [0]
+%o A401969     for k in range(n, 0, -1): row[k] += row[k + 1]
+%o A401969     for k in range(2, n + 2): row[k] += row[k - 1]
+%o A401969     return row[1:]
+%o A401969 def a(n: int) -> Fraction:
+%o A401969     if n < 2: return Q(1, n + 1)
+%o A401969     g = genocchi(n // 2 - 1)[-1]
+%o A401969     return Q(g, 2 * (2 ** n  - 1))
+%o A401969 A = [a(n) for n in range(33)]
+%o A401969 print([t.numerator for t in A])
+%o A401969 (PARI)
+%o A401969 P(n) = {if(n == 0, return(1)); my(p = P(n-1));
+%o A401969   (x^(n+2)*subst(p, x, 1) - x*p) \ (1-x)^2 };
+%o A401969 a(n) = if(n < 2, 1/(n+1), pollead(P(n\2-1))/(2*(2^n-1)));
+%o A401969 print(vector(33, k, numerator(a(k-1))));
+%Y A401969 Cf. A000367, A110501, A198631, A000225, A401970 (denominators).
+%K A401969 nonn,frac,new
+%O A401969 0,8
+%A A401969 _Peter Luschny_, Nov 10 2026

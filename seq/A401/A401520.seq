@@ -1,0 +1,59 @@
+%I A401520 #18 Nov 13 2026 13:59:26
+%S A401520 1,2,1,3,2,1,5,4,2,1,6,5,4,3,2,9,8,7,6,3,2,11,10,9,8,7,6,3,14,13,12,
+%T A401520 10,9,8,7,4,16,15,14,13,12,11,10,9,8,18,17,16,15,14,13,12,11,10,9,20,
+%U A401520 19,18,17,16,15,14,13,12,11,10,22,21,20,19,18,17,16,15,14,13,12,11
+%N A401520 Minimal addition Venn diagram. A Venn diagram with n questions is populated by 2^n multisets. This triangular array records the minimal addition questions necessary to fill the Venn diagram. Each question is of the form: "One or more elements of the multiset sum to a(n)." Each row of the table is decreasing and each a(n) is chosen to be as small as possible, before proceeding to a(n+1).
+%C A401520 For every n >= 2, the row 2n-2, 2n-3, ..., n-1 always works: any two distinct elements sum to more than 2n-2, so the region for a subset S is filled by the multiset S itself. So the first term of row n is at most 2n-2. For 9 <= n <= 14 the row is exactly 2n-2, ..., n-1. - _Jeff Sponaugle_, Nov 05 2026
+%e A401520 Triangle begins:
+%e A401520    1;
+%e A401520    2,  1;
+%e A401520    3,  2,  1;
+%e A401520    5,  4,  2,  1;
+%e A401520    6,  5,  4,  3,  2;
+%e A401520    9,  8,  7,  6,  3,  2;
+%e A401520   11, 10,  9,  8,  7,  6,  3;
+%e A401520   14, 13, 12, 10,  9,  8,  7,  4;
+%e A401520   16, 15, 14, 13, 12, 11, 10,  9,  8;
+%e A401520   18, 17, 16, 15, 14, 13, 12, 11, 10,  9;
+%e A401520   ...
+%e A401520 The fourth row of the table is 5,4,2,1. This corresponds to a Venn diagram with four questions:
+%e A401520 One or more elements of the multiset sum to 5?
+%e A401520 One or more elements of the multiset sum to 4?
+%e A401520 One or more elements of the multiset sum to 2?
+%e A401520 One or more elements of the multiset sum to 1?
+%e A401520 This Venn diagram can have each of its 16 regions populated by a multiset. For example the region corresponding to no,yes,yes,no can be populated by the multiset {2,2}, and the region corresponding to yes,no,no,yes can e populated by the multiset {1,5}.
+%e A401520 Is 5 the minimal possible value for the first term in this decreasing row? Let's assume the row was 4,3,2,1.
+%e A401520 One or more elements of the multiset sum to 4?
+%e A401520 One or more elements of the multiset sum to 3?
+%e A401520 One or more elements of the multiset sum to 2?
+%e A401520 One or more elements of the multiset sum to 1?
+%e A401520 Can this Venn diagram be filled with multisets? No. There is no way to fill the region corresponding to no,yes,no,yes.
+%e A401520 The fifth row is 6,5,4,3,2. All regions can be populated by multisets. 6,5,4,3,1 has a lower last term, but unfortunately not all its regions can be filled with multisets. That is why it does not appear as the fifth row.
+%o A401520 (Python)
+%o A401520 from itertools import count
+%o A401520 def A401520_row(n):
+%o A401520     # Lexicographically earliest decreasing n-tuple Q of positive integers such that
+%o A401520     # for every subset S of Q there is a multiset M of positive integers whose
+%o A401520     # nonempty sub-multiset sums meet Q exactly in S.
+%o A401520     # Only sums <= max(Q) matter, so enumerate all subset-sum sets truncated to [0,m].
+%o A401520     for m in count(n):
+%o A401520         full, seen, st = (1 << (m+1))-1, {1}, [1]
+%o A401520         while st:
+%o A401520             s = st.pop()
+%o A401520             for x in range(1, m+1):
+%o A401520                 t = (s | (s << x)) & full
+%o A401520                 if t not in seen: seen.add(t); st.append(t)
+%o A401520         C = list(seen)
+%o A401520         def shattered(Q):
+%o A401520             qb = sum(1 << q for q in Q)
+%o A401520             return len({c & qb for c in C}) == 1 << len(Q)
+%o A401520         def dfs(Q):
+%o A401520             if len(Q) == n: return Q
+%o A401520             for a in range(n-len(Q), Q[-1]):
+%o A401520                 if shattered(Q+[a]) and (r := dfs(Q+[a])): return r
+%o A401520         if r := dfs([m]): return r
+%o A401520 print([t for n in range(1, 11) for t in A401520_row(n)]) # _Jeff Sponaugle_ Nov 05 2026
+%K A401520 nonn,tabl,new
+%O A401520 1,2
+%A A401520 _Gordon Hamilton_, Oct 27 2026
+%E A401520 a(15) onward from _Jeff Sponaugle_, Nov 05 2026

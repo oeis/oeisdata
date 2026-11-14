@@ -1,0 +1,34 @@
+%I A401970 #17 Nov 14 2026 00:20:20
+%S A401970 1,2,6,14,30,62,42,254,30,1022,66,4094,2730,16382,6,9362,510,262142,
+%T A401970 798,1048574,330,4194302,138,16777214,2730,67108862,6,268435454,870,
+%U A401970 1073741822,14322,4294967294,510,17179869182,6,68719476734,1919190,274877906942,6,1099511627774
+%N A401970 a(n) = denominator(b(n)), where b(n) = (-1)^m * 2*m * (2^(2*m) - 1)*zeta(1 - 2*m) / (2^n - 1), for n >= 2, and m = floor(n/2). b(0) = 1, b(1) = 1/2.
+%C A401970 See the comments and formulas in A401969.
+%e A401970 1, 1/2, 1/6, 1/14, 1/30, 1/62, 1/42, 3/254, 1/30, 17/1022, 5/66, 155/4094, 691/2730, ...
+%p A401970 a := n -> ifelse(n<2, 1/(n+1), (iquo(n,2)*(-1)^iquo(n,2)*euler(2*iquo(n,2)-1, 1))/(1-2^n)): seq(denom(a(n)), n = 0..39);
+%t A401970 a[n_] := If[n < 2, 1/(n + 1), With[{m = Quotient[n, 2]},
+%t A401970     (-1)^m * 2*m*(2^(2*m) - 1)*Zeta[1 - 2*m]/(2^n - 1) ] ]
+%t A401970 T = Table[a[n], {n, 0, 39}]; Denominator /@ T
+%t A401970 (* Alternative: Dirichlet version *)
+%t A401970 a[n_] := If[n < 2, 1/(n + 1), With[{m = Quotient[n, 2]},
+%t A401970     (-1)^m * 2*m*PolyLog[1 - 2*m, -1]/(2^n - 1) ] ]
+%t A401970 (* Alternative: polynomial division *)
+%t A401970 P[0] = 1; P[n_] := P[n] = PolynomialQuotient[x^(n + 2) (P[n - 1] /. x -> 1) - x P[n - 1], (1 - x)^2, x ];
+%t A401970 a[n_] := If[n < 2, 1/(n + 1), Last[CoefficientList[P[Quotient[n, 2] - 1], x]] / (2 (2^n - 1)) ];
+%o A401970 (Python)
+%o A401970 from fractions import Fraction as Q
+%o A401970 from sympy import euler
+%o A401970 def a(n: int) -> Fraction:
+%o A401970     if n < 2: return [Q(1,1), Q(1,2)][n]
+%o A401970     m = n // 2
+%o A401970     return((-1)**m * m * euler(2*m - 1, 0) / (2**n - 1))
+%o A401970 A = [a(n).denominator for n in range(40)]; print(A)
+%o A401970 (PARI)
+%o A401970 P(n) = {if(n == 0, return(1)); my(p = P(n-1));
+%o A401970   (x^(n+2)*subst(p, x, 1) - x*p) \ (1-x)^2 };
+%o A401970 a(n) = if(n < 2, 1/(n+1), pollead(P(n\2-1))/(2*(2^n-1)));
+%o A401970 print(vector(39, k, denominator(a(k-1))));
+%Y A401970 Cf. A002445, A110501, A198631, A000225, A401969 (numerators).
+%K A401970 nonn,frac,new
+%O A401970 0,2
+%A A401970 _Peter Luschny_, Nov 10 2026

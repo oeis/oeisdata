@@ -1,0 +1,38 @@
+%I A401667 #7 Nov 13 2026 16:17:27
+%S A401667 5,7,13,19,31,47,59,73,151,331,401,1943069,83584483,158450797,
+%T A401667 1554906533
+%N A401667 Primes p >= 5 for which the iteration of K(u) = (u^3 - 7*u)/6 on GF(p) collapses every element into {-1, 0, 1}.
+%C A401667 Over Z, 6*(K(u) - 1) = (u + 1)*(u + 2)*(u - 3) and 6*(K(u) + 1) = (u - 1)*(u - 2)*(u + 3), so {-1, 0, 1} is invariant: 0 is fixed and {1, -1} is a 2-cycle.
+%C A401667 The 2-periodic points satisfy 6^4*(K(K(u)) - u) = u*(u^2 - 1)*(u^2 - 13)*(u^4 - 7*u^2 + 36), with D_fix = 2^2 + 3^2 = 13 and 2-cycle discriminants 3^3 - 2^3 = 19 and 1 - 6 = -5. Hence every term p satisfies Kronecker(13, p) <= 0 and min(Kronecker(19, p), Kronecker(-5, p)) <= 0.
+%C A401667 Over Z, K maps {-3, ..., 3} into {-1, 0, 1}.
+%C A401667 No other terms below 10^6 (exhaustive full functional-graph traversal of GF(p) for every prime p). The terms above 10^6 were found in a bounded-step orbit scan up to 2*10^9 and individually certified by a complete traversal of GF(p); completeness of the list above 10^6 is not established.
+%H A401667 Igor M. Zhuk, <a href="https://doi.org/10.5281/zenodo.23420627">Unital Collapse Primes in Arithmetic Dynamics: Total Backward-Orbit Collapse for T(x) = (x^2 - 2)^2 mod p, Galois Stratification, and Fermat-Totient Asymptotics</a>, Zenodo preprint (2026).
+%H A401667 Igor M. Zhuk, <a href="https://doi.org/10.5281/zenodo.23856837">Total-Collapse Primes of Polynomial Maps over GF(p): Eighteen Families and Two Related Sequences</a>, Zenodo preprint (2026); <a href="https://github.com/Nondual-Observer/total-collapse-primes-oeis">GitHub verification suite</a>.
+%F A401667 p is in the sequence iff #{x in {0..p-1} : K^(p)(x) in {-1, 0, 1} (mod p)} = p, where K(x) = (x^3 - 7*x)/6 mod p and K^(k) denotes the k-th iterate of K.
+%e A401667 For p = 5: 6^(-1) == 1 (mod 5), so K(u) == u^3 - 2*u (mod 5). The map is 0 -> 0, 1 -> 4, 4 -> 1, 2 -> 4, 3 -> 1; all elements enter {0, 1, 4} = {0, 1, -1} mod 5 in 1 step, so 5 is in the sequence.
+%e A401667 For p = 7: 6^(-1) == -1 (mod 7), so K(u) == -u^3 (mod 7). Since u^3 in {0, 1, 6} mod 7 for all u in GF(7), the entire field collapses in 1 step to {0, 1, 6}, so 7 is in the sequence.
+%e A401667 For p = 11: 6^(-1) == 2 (mod 11), so K(u) == 2*u*(u^2 - 7) (mod 11), and 5 -> 4 -> 6 -> 7 -> 5 is an extraneous 4-cycle outside {0, 1, 10}, so 11 is not in the sequence.
+%o A401667 (Julia)
+%o A401667 isprime(n::Int) = n > 1 && all(d -> n % d != 0, 2:isqrt(n))
+%o A401667 function isok(p::Int)
+%o A401667     (!isprime(p) || p < 5) && return false
+%o A401667     if p > 5
+%o A401667         powermod(13, p >> 1, p) == 1 && return false
+%o A401667         (powermod(19, p >> 1, p) == 1 && powermod(-5, p >> 1, p) == 1) && return false
+%o A401667     end
+%o A401667     inv6, st = invmod(6, p), zeros(UInt8, p)
+%o A401667     st[1] = st[2] = st[p] = 2
+%o A401667     f(c) = mod(mod(c * mod(c*c - 7, p), p) * inv6, p)
+%o A401667     for x in 2:(p >> 1)
+%o A401667         st[x + 1] == 2 && continue
+%o A401667         c = x; while st[c + 1] == 0; st[c + 1] = 1; c = f(c); end
+%o A401667         st[c + 1] == 1 && return false
+%o A401667         c = x; while st[c + 1] == 1; st[c + 1] = st[p - c + 1] = 2; c = f(c); end
+%o A401667     end
+%o A401667     return true
+%o A401667 end
+%o A401667 println([p for p in 5:5000 if isok(p)])
+%Y A401667 Cf. A398745, A401173. See the linked article for the companion sequences for K_n(u) = (u^3 - (n^2 + n + 1)*u)/(n*(n + 1)), n = 1, 4, 5, 6, 7, 8.
+%K A401667 nonn,hard,more,new
+%O A401667 1,1
+%A A401667 _Igor Zhuk_, Nov 01 2026
