@@ -1,12 +1,15 @@
-%I A401969 #23 Nov 14 2026 00:20:25
+%I A401969 #32 Nov 14 2026 16:04:04
 %S A401969 1,1,1,1,1,1,1,3,1,17,5,155,691,2073,7,5461,3617,929569,43867,
 %T A401969 28820619,174611,1109652905,854513,51943281731,236364091,
 %U A401969 2905151042481,8553103,191329672483963,23749461029,14655626154768697,8615841276005,1291885088448017715,7709321041217
 %N A401969 a(n) = numerator(b(n)), where b(n) = (-1)^m * 2*m * (2^(2*m) - 1)*zeta(1 - 2*m) / (2^n - 1), for n >= 2, and m = floor(n/2). b(0) = 1, b(1) = 1/2.
-%C A401969 Intuitively, this sequence fills the gaps in the sequence of Bernoulli numbers, where 'gaps' refers to the vanishing terms, while preserving the close connection between the Bernoulli numbers and the Euler numbers. We defined the sequence in signless form to allow for various meaningful sign assignments. Specifically, b(n) = abs(Bernoulli(n)) whenever Bernoulli(n) != 0. We may refer to b(n) as extended Bernoulli numbers.
+%C A401969 Intuitively, this sequence fills the gaps in the sequence of Bernoulli numbers, where 'gaps' refers to the vanishing terms, while preserving the close connection between the Bernoulli numbers and the Euler numbers. We defined the sequence in signless form to allow for various meaningful sign assignments. Specifically, b(n) = abs(Bernoulli(n)) whenever Bernoulli(n) != 0. We may refer to b(n) as extended Bernoulli numbers. Arguably the most natural signed form is b(0) = 1 and (-1)^floor((n-1)/2)*b(n) for n >= 1.
+%H A401969 Ludwig Seidel, <a href="http://publikationen.badw.de/de/003384831">Über eine einfache Entstehungsweise der Bernoulli'schen Zahlen und einiger verwandten Reihen</a>, Sitzungsberichte der mathematisch-physikalischen Classe der königlich bayerischen Akademie der Wissenschaften zu München, Vol. 7 (1877), pp. 157-187.
 %F A401969 a(n) = numerator(b(n)), where b(n) = Li(1-2*m, -1)*(-1)^m*2*m / (2^n-1), for n >= 2, and m = floor(n/2). Li(n, x) is the polylogarithm.
 %F A401969 a(n) = numerator(b(n), where b(n) = ((-1)^m * m * Euler(2*m - 1, 1) / (1 - 2^n)), for n >= 2, and m = floor(n/2). Euler(n, x) denotes the Euler polynomial.
 %F A401969 Define polynomials P(0, x) = 1, and for n >= 1 as the polynomial quotient P(n, x) = PolQuo(x^(n+2)*P(n-1, 1) - x*P(n-1, x), (1-x)^2). Then a(n) = ([x^(m - 1)] P(n-1, x)) / ((2*(2^n - 1)) for n >= 2, where m = floor(n/2), and 1/(n + 1) for n in {0, 1}.
+%F A401969 The exponential generating function for the /signed/ form is: b(0)=1, b(1)= 1/2, and b(n) = n! * [x^n] (x / (1 - exp(-x))) for n even >= 2, and ((n-1)!/(2^n-1)) * [x^(n-1)] (x / (1 + exp(x))) for n odd >= 3.
+%F A401969 In the /signed/ case: b(n) = (n*eta(1-n) - (n-1)*eta(2-n)) / (2^n-1) for n >= 3, or b(n) = (-1)^n * 2 * m * eta(1 - 2*m) / (2^n - 1) for n >= 2 and m = floor(n/2), where eta(z) denotes the Dirichlet eta function.
 %e A401969 1, 1/2, 1/6, 1/14, 1/30, 1/62, 1/42, 3/254, 1/30, 17/1022, 5/66, 155/4094, 691/2730, ...
 %p A401969 a := n -> ifelse(n<2, 1/(n+1), (iquo(n,2)*(-1)^iquo(n,2)*euler(2*iquo(n,2)-1, 1))/ (1-2^n)): seq(numer(a(n)), n = 0..32);
 %p A401969 # Alternative:
@@ -39,6 +42,7 @@
 %o A401969 from fractions import Fraction as Q
 %o A401969 @cache
 %o A401969 def genocchi(n: int) -> list[int]:
+%o A401969     """Seidel's zig-zag operation."""
 %o A401969     if n == 0: return [1]
 %o A401969     row = [0] + genocchi(n - 1) + [0]
 %o A401969     for k in range(n, 0, -1): row[k] += row[k + 1]
@@ -50,6 +54,20 @@
 %o A401969     return Q(g, 2 * (2 ** n  - 1))
 %o A401969 A = [a(n) for n in range(33)]
 %o A401969 print([t.numerator for t in A])
+%o A401969 (SageMath)
+%o A401969 """The exponential generating function for the /signed/ form."""
+%o A401969 def egfB(N: int) -> list[Rational]:
+%o A401969     P = PowerSeriesRing(QQ, 'x', default_prec=N + 3); x = P.gen()
+%o A401969     beta = ~((1 - (-x).exp()).shift(-1))       # x / (1 - e^(-x))
+%o A401969     gama = x * ~(1 + x.exp())                  # x / (1 + e^x)
+%o A401969     c = [QQ(1), QQ(1) / 2][:N + 1]             # n = 0 and n = 1
+%o A401969     for n in range(2, N + 1):
+%o A401969         if n % 2 == 0:
+%o A401969             c.append(factorial(n) * beta[n])
+%o A401969         else:
+%o A401969             c.append(factorial(n - 1) * gama[n - 1] / (2**n - 1))
+%o A401969     return c
+%o A401969 print(egfB(20))
 %o A401969 (PARI)
 %o A401969 P(n) = {if(n == 0, return(1)); my(p = P(n-1));
 %o A401969   (x^(n+2)*subst(p, x, 1) - x*p) \ (1-x)^2 };
