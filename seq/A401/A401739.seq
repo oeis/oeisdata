@@ -1,0 +1,65 @@
+%I A401739 #12 Nov 15 2026 22:18:46
+%S A401739 1,2,4,4,8,8,8,8,16,16,16,16,16,16,16,16,32,32,32,32,32,32,32,32,32,
+%T A401739 32,32,32,32,32,32,32,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,
+%U A401739 64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,64,128,128,128,128,128,128,128,128,128,128,128,128,128,128,256
+%N A401739 Least eventual period of the positions of the 1's in row n of A401735.
+%C A401739 T(x,y), x,y >= 0, denotes the array A401735: T(x,y) is the least nonnegative integer absent from {T(x-d,y): 1 <= d <= min(x,y), T(x-d,y) = T(x,y-d) = T(x-d,y-d)}. Let B(x,y) = 1 if T(x,y) = 1 and B(x,y) = 0 otherwise; a(n) is the least eventual period of x -> B(x,n).
+%C A401739 Every row of T is eventually periodic, so x -> B(x,n) is eventually periodic and a(n) divides A399521(n).
+%C A401739 All terms n <= 177 are certified: periodicity by the binary certification lemma below, applied to the recurrence for B in the formula section, and least periods by divisor tests with mismatch witnesses.
+%C A401739 Binary certification lemma: if 2^bitlength(n) divides M, rows 0,...,n-1 of B are M-periodic from u, and B(x+M,n) = B(x,n) for u <= x < u+n, then row n of B is M-periodic from u. Here bitlength(0) = 0.
+%C A401739 Proof of the lemma, by induction on x >= u+n: in the formula for B(x+M,n), the factor [((x+M) AND n) > 0] equals [(x AND n) > 0], since 2^bitlength(n) divides M and n < 2^bitlength(n); the factors from rows below n agree by their M-periodicity, and the factors B(x+M-d,n) agree by induction.
+%C A401739 For n <= 177, a(n) = A062383(n) exactly when n is in 0..77, 79..80, 82..84, or n = 87; A062383(n) divides a(n) throughout this range.
+%C A401739 For n <= 177, a(n) = A399521(n) exactly when n is in 0..48, n = 64, or n is in 110..177.
+%C A401739 For 0 <= n <= 176, a(n) divides a(n+1) except at n = 78, 81, 86, where a(n) = 256 and a(n+1) = 128.
+%C A401739 The first factors 5, 3, and 5^2 occur at n = 94, 108, and 131, respectively.
+%H A401739 Alper Ferudun, <a href="/A401739/b401739.txt">Table of n, a(n) for n = 0..177</a>
+%F A401739 B(x,y) = [(x AND y) > 0] * Product_{d=1..min(x,y)} (1 - B(x-d,y)*B(x,y-d)*B(x-d,y-d)), where AND is bitwise AND and [] is the Iverson bracket. This follows from the zero set in A401735: T(x,y) = 0 if and only if x AND y = 0.
+%e A401739 B(x,0) is identically 0, hence a(0) = 1. Row 1 is 0,1,0,1,..., hence a(1) = 2.
+%e A401739 a(49) = 64 whereas A399521(49) = 128; a(78) = 256 and a(79) = 128.
+%o A401739 (Python)
+%o A401739 from math import lcm
+%o A401739 def binary_periods(N):  # [a(0), ..., a(N)]
+%o A401739     R, P, Q, S = [bytearray([0])], [1], 1, 0
+%o A401739     for y in range(1, N + 1):
+%o A401739         # Lower binary rows are Q-periodic from S; include the AND phase.
+%o A401739         Q = lcm(Q, 1 << y.bit_length())
+%o A401739         r = bytearray()
+%o A401739         R.append(r)
+%o A401739         seen, L = {}, S + y
+%o A401739         while True:
+%o A401739             for row, p in zip(R[:-1], P):
+%o A401739                 if len(row) < L:
+%o A401739                     q, t = divmod(L - len(row), p)
+%o A401739                     w = row[-p:]
+%o A401739                     row.extend(w * q + w[:t])
+%o A401739             # Self-contained %F recurrence for B(x,y) = [T(x,y) = 1].
+%o A401739             # T(x,y) = 0 iff x AND y = 0 (proved in A401735).
+%o A401739             for x in range(len(r), L):
+%o A401739                 b = int(bool(x & y))
+%o A401739                 if b:
+%o A401739                     for d in range(1, min(x, y) + 1):
+%o A401739                         row = R[y - d]
+%o A401739                         if r[x - d] and row[x] and row[x - d]:
+%o A401739                             b = 0
+%o A401739                             break
+%o A401739                 r.append(b)
+%o A401739             # Length-y windows start at S+j*Q, with 2^bitlength(y) | Q.
+%o A401739             state = bytes(r[-y:])
+%o A401739             if state in seen:
+%o A401739                 # Equal windows certify M-periodicity from u.
+%o A401739                 u, M = seen[state], L - y - seen[state]
+%o A401739                 break
+%o A401739             seen[state] = L - y
+%o A401739             L += Q
+%o A401739         w = bytes(r[u:u + M])
+%o A401739         p = (w + w).find(w, 1)  # Least period of the certified tail.
+%o A401739         v = next((x + 1 for x in range(u - 1, -1, -1)
+%o A401739                   if r[x] != r[x + p]), 0)  # Least preperiod.
+%o A401739         P.append(p)
+%o A401739         Q, S = lcm(Q, p), max(S, v)
+%o A401739     return P
+%o A401739 print(binary_periods(82))
+%Y A401739 Cf. A062383, A399521, A401735, A401736, A401737, A401738.
+%K A401739 nonn,hard,new
+%O A401739 0,2
+%A A401739 _Alper Ferudun_, Nov 03 2026

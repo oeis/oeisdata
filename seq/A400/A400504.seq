@@ -1,0 +1,45 @@
+%I A400504 #21 Nov 15 2026 17:39:16
+%S A400504 1,2,4,6,16,12,57,48,103,92,386,140,794,420,579,836,2517,826,4048,
+%T A400504 1522,2712,3260,9109,2676,9191,6852,10174,7050,24158,5694,31931,15788,
+%U A400504 20289,22194,27520,14866,66712,35896,41933,28104,102091,27040,124314,51824,58742,81276
+%N A400504 Number of regions in a disk cut by the chords of a round-mirror billiard: n points equally spaced on the circle, and from point 0, for each k = 1..n-1, a ray joins points j*k and (j+1)*k (mod n) for j = 0, 1, 2, ... until it returns to point 0.
+%C A400504 A ray in a circular billiard that moves k/n of a turn per bounce returns to its start after n/gcd(n,k) bounces; it draws the chords of step k that start at the multiples of gcd(n,k). So the drawing for n contains every chord of step k when gcd(n,k) = 1 and only n/gcd(n,k) of them otherwise.
+%C A400504 a(n) <= A000127(n) = binomial(n,4) + binomial(n,2) + 1, with equality if and only if n is prime. For prime n every ray visits every point, so all binomial(n,2) chords are drawn, and for odd n no three diagonals of a regular n-gon meet at an interior point (Poonen and Rubinstein), so the count is maximal. For composite n some chord is missing (for a proper divisor g > 1 of n, the chord joining points 1 and 1 + g is never drawn), and every chord adds at least one region.
+%C A400504 For odd n no three of the drawn chords are concurrent, so a(n) = 1 + (number of chords) + (number of crossing pairs of chords).
+%C A400504 For even n some chords are concurrent; for n = 30 there are 86 interior points where 4 chords meet and 21 where 5 meet. For n <= 100 no interior point lies on more than 5 chords (computed; every multiple point confirmed with 50-digit arithmetic).
+%H A400504 Adam Raźniewski, <a href="/A400504/b400504.txt">Table of n, a(n) for n = 1..100</a>
+%H A400504 B. Poonen and M. Rubinstein, <a href="https://arxiv.org/abs/math/9508209">The number of intersection points made by the diagonals of a regular polygon</a>, arXiv:math/9508209 [math.MG], 1995-2006.
+%H A400504 Adam Raźniewski, <a href="/A400504/a400504.txt">Python program (exact computation of the b-file)</a>
+%F A400504 a(p) = A000127(p) = A007678(p) + p for prime p.
+%e A400504 a(4) = 6: the rays k = 1 and k = 3 draw the square, the ray k = 2 draws the diagonal (0, 2) and returns; the disk is cut into 2 triangles and 4 circular segments.
+%e A400504 a(5) = 16 = A000127(5): all 10 chords are drawn (the pentagram inside the pentagon).
+%e A400504 a(6) = 12: the rays k = 1, 5 draw the hexagon, k = 2 and k = 4 draw the triangle (0, 2, 4), k = 3 draws the diameter (0, 3); 10 chords, 1 interior crossing point.
+%o A400504 (Python)
+%o A400504 from math import gcd, cos, sin, pi
+%o A400504 def chords(n):
+%o A400504     s = set()
+%o A400504     for k in range(1, n):
+%o A400504         g = gcd(n, k)
+%o A400504         for j in range(n // g):
+%o A400504             a, b = (j*k) % n, ((j+1)*k) % n
+%o A400504             s.add((min(a, b), max(a, b)))
+%o A400504     return sorted(s)
+%o A400504 def a(n, tol=1e-9):  # Euler's formula; intersection points merged within tol
+%o A400504     if n == 1: return 1
+%o A400504     P = lambda j: (cos(2*pi*j/n), sin(2*pi*j/n))
+%o A400504     ch = chords(n)
+%o A400504     pts, on = set(), [set() for _ in ch]
+%o A400504     for i, (p, q) in enumerate(ch):
+%o A400504         for j in range(i+1, len(ch)):
+%o A400504             r, s = ch[j]
+%o A400504             if len({p, q, r, s}) < 4 or ((p < r < q) == (p < s < q)): continue
+%o A400504             (x1, y1), (x2, y2), (x3, y3), (x4, y4) = P(p), P(q), P(r), P(s)
+%o A400504             t = ((x1-x3)*(y3-y4) - (y1-y3)*(x3-x4)) / ((x1-x2)*(y3-y4) - (y1-y2)*(x3-x4))
+%o A400504             key = (round((x1 + t*(x2-x1))/tol), round((y1 + t*(y2-y1))/tol))
+%o A400504             pts.add(key); on[i].add(key); on[j].add(key)
+%o A400504     return sum(len(o) + 1 for o in on) + n - (n + len(pts)) + 1
+%o A400504 print([a(n) for n in range(1, 47)])
+%Y A400504 Cf. A000010, A000127, A006561, A007678.
+%K A400504 nonn,new
+%O A400504 1,2
+%A A400504 _Adam Raźniewski_, Oct 29 2026

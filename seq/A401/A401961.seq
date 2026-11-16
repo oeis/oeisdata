@@ -1,0 +1,49 @@
+%I A401961 #7 Nov 15 2026 21:24:17
+%S A401961 2,4,8,16,30,56,104,189,330,572,978,1638,2669,4290,6862,10894,16905,
+%T A401961 25849,39384,59145,87537,128832,189170,274498,392192,556727,789497,
+%U A401961 1111129,1551635,2147083,2961523,4052848,5494126,7418438,9995927,13409607,17859009,23630045,31220018,41089173,53700295
+%N A401961 Number of distinct binary words of length n obtained by reading equally spaced entries from left to right within a single row of Pascal's triangle modulo 2.
+%C A401961 a(n) is the number of distinct words (binomial(R, x+i*d) mod 2, i = 0..n-1) over all integers R >= 0, x >= 0, d >= 1 with x + (n-1)*d <= R. By Lucas's theorem, it is also the number of distinct words c(0..n-1) with c(i) = 1 if (x + i*d) AND m = 0 and c(i) = 0 otherwise, over all integers x >= 0, d >= 1, m >= 0 (bitwise AND).
+%C A401961 In the terminology of Avgustinovich, Fon-Der-Flaass and Frid, a(n) is the arithmetical complexity of the language of rows of A047999 (compare A333994). If only contiguous entries are read (d = 1), the number of words is n^2 - n + 2 = A386480(n) (Allouche and Berthé).
+%C A401961 The shortest words that occur in no row for any spacing d are 10111 and 11101; the other 30 words of length 5 all occur in rows 0..55.
+%C A401961 Gap bound: if a row has L odd entries in columns x, x+d, ..., x+(L-1)*d, then two odd entries of that row in columns y and y+(g+1)*d with only even entries in the g >= 1 columns y+d, ..., y+g*d between them satisfy g >= L-1. This is sharp for every L >= 2. It rules out every word of length at most 8 that does not occur, but not 100011011.
+%C A401961 A word of length n occurs if and only if it is the bitwise AND of a finite set of rotation words of length n, that is, of words with w(i) = 1 if frac(beta + i*alpha) < 1/2 and w(i) = 0 otherwise (i = 0..n-1) for some real alpha and beta (codings of circle rotations with respect to a half-circle). The rotation words are exactly the words whose first differences modulo 2 form a balanced (finite Sturmian) word; there are 2*A005598(n-1) of them.
+%C A401961 a(n) grows faster than every polynomial and slower than every exponential (see Formula), but the order of growth of log(a(n)) is not known. Proofs of all statements are in the Ferudun link.
+%H A401961 Alper Ferudun, <a href="/A401961/b401961.txt">Table of n, a(n) for n = 1..52</a>
+%H A401961 Jean-Paul Allouche and Valérie Berthé, <a href="https://doi.org/10.36045/bbms/1105730620">Triangle de Pascal, complexité et automates</a>, Bull. Belg. Math. Soc. Simon Stevin 4 (1997), 1-23.
+%H A401961 S. V. Avgustinovich, D. G. Fon-Der-Flaass, and A. E. Frid, <a href="https://doi.org/10.1142/9789812704979_0004">Arithmetical complexity of infinite words</a>, in: Words, Languages & Combinatorics III, World Scientific, 2003, pp. 51-62.
+%H A401961 Alper Ferudun, <a href="/A401961/a401961.txt">Proofs of the comments and formulas</a>.
+%H A401961 Alper Ferudun, <a href="/A401961/a401961_1.txt">Rust program</a>.
+%F A401961 a(n) = 2^n for n <= 4.
+%F A401961 a(n) <= a(n+1) <= 2*a(n).
+%F A401961 a(n) <= Sum_{j=0..A003004(n)} binomial(n,j), so log(a(n)) = o(n) by Szemerédi's theorem.
+%F A401961 For every eps > 0, log(a(n)) > n^(1/2-eps) for all sufficiently large n.
+%e A401961 Row 6 of Pascal's triangle is 1, 6, 15, 20, 15, 6, 1, which is 1, 0, 1, 0, 1, 0, 1 modulo 2. Three entries with d = 1 give 101 or 010, and the entries in columns 0, 2, 4 (d = 2) give 111.
+%e A401961 a(5) = 30: for example, 01110 first occurs in row 55, in columns 13, 16, 19, 22, 25. The word 10111 never occurs: three consecutive odd entries (L = 3) do not allow a single even entry (g = 1) between two odd ones for the same spacing.
+%e A401961 In row 23, the entries in columns 0, 3, 6 are odd (L = 3), and those in columns 7, 10, 13, 16 are odd, even, even, odd (g = 2 = L-1).
+%o A401961 (Python)
+%o A401961 def balanced(w, n):
+%o A401961     p = [0]
+%o A401961     for i in range(n):
+%o A401961         p.append(p[-1] + ((w >> i) & 1))
+%o A401961     for k in range(1, n + 1):
+%o A401961         counts = [p[i + k] - p[i] for i in range(n - k + 1)]
+%o A401961         if max(counts) - min(counts) > 1:
+%o A401961             return False
+%o A401961     return True
+%o A401961 # rotations holds words whose adjacent XOR word is balanced.
+%o A401961 rotations = {0, 1}
+%o A401961 for n in range(1, 19):
+%o A401961     # readable is the closure of rotations under bitwise AND.
+%o A401961     readable = {(1 << n) - 1}
+%o A401961     for w in rotations:
+%o A401961         readable |= {u & w for u in readable}
+%o A401961     print(len(readable), flush=True)
+%o A401961     if n < 18:
+%o A401961         rotations = {2 * w + b for w in rotations for b in (0, 1)
+%o A401961                      if balanced((2 * w + b) ^ ((2 * w + b) >> 1), n)}
+%o A401961 (Rust) // See Links section.
+%Y A401961 Cf. A003004, A005598, A007318, A047999, A333994, A386480.
+%K A401961 nonn,new
+%O A401961 1,1
+%A A401961 _Alper Ferudun_, Nov 10 2026

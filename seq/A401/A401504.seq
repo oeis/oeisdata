@@ -1,0 +1,67 @@
+%I A401504 #11 Nov 15 2026 10:28:12
+%S A401504 1,2,1,8,6,3,56,48,34,17,608,552,448,310,155,9440,8832,7672,6064,4146,
+%T A401504 2073,198272,188832,170560,144616,112608,76454,38227,5410688,5212416,
+%U A401504 4825312,4267648,3565368,2750480,1859138,929569,186043904,180633216,170010112,154561696,134845632,111564200,85532288,57641238,28820619
+%N A401504 Triangle of coefficients of the companion Genocchi-Seidel polynomials, read by rows.
+%C A401504 Coefficients of the companion Genocchi-Seidel polynomials P(n, x), where the Genocchi-Seidel polynomials refer to A401503. The polynomials are defined P(0, x) = 1, and for n >= 1, as the polynomial quotient P(n, x) = PolQuo(x^(n+2)*P(n-1, 1) - x*P(n-1, x), (1-x)^2 ). Then T(n, k) = [x^k] P(n, x).
+%C A401504 The triangle consists of the odd-indexed rows of the zero-based Seidel's triangle A014781. The first column contains the median Genocchi numbers A005439, shifted by one, while the main diagonal contains the unsigned Genocchi numbers A110501. Row sums are the unsigned Genocchi numbers, shifted by one. Entries decrease strictly from left to right.
+%F A401504 T(n, k) = (-1)^n * Sum_{j=0..floor((n-k)/2)} binomial(n-k+1, 2*j+1) * 2 * (n-j+1) * Euler(2*(n-j)+1, 1), where Euler(m, x) denotes the Euler polynomial.
+%F A401504 T(n, k) = (n-k+1)! * (n+k+1)! * [x^(n-k+1)*y^(n+k+1)] egf(x,y), where
+%F A401504 egf(x,y) = sin(x) * (x + y + sin(x+y)) / (1 + cos(x+y)).
+%F A401504 T(0, 0) = 1 and T(n, n) = Sum_{j=0..n-1} T(n-1, j) for n >= 1. T(n, n-1) = 2*T(n,n) for n >= 1, and T(n, k) = 2*T(n, k+1) - T(n, k+2) - T(n-1, k+1) for 0<=k<=n-2.
+%F A401504 T(n, k) = Sum_{j=0..n-k} A401503(n, j).
+%e A401504 Triangle begins:
+%e A401504   [0]        1;
+%e A401504   [1]        2,       1;
+%e A401504   [2]        8,       6,       3;
+%e A401504   [3]       56,      48,      34,      17;
+%e A401504   [4]      608,     552,     448,     310,     155;
+%e A401504   [5]     9440,    8832,    7672,    6064,    4146,    2073;
+%e A401504   [6]   198272,  188832,  170560,  144616,  112608,   76454,   38227;
+%e A401504   [7]  5410688, 5212416, 4825312, 4267648, 3565368, 2750480, 1859138, 929569;
+%p A401504 P := proc(n) option remember; local p;
+%p A401504   if n = 0 then 1 else p := P(n-1);
+%p A401504   quo(x^(n+2)*eval(p, x = 1) - x*p, (1-x)^2, x) fi end:
+%p A401504 seq(print(seq(coeff(P(n), x, k), k = 0..n)), n = 0..7);
+%p A401504 # Alternative: Euler representation
+%p A401504 T := (n, k) -> local j; (-1)^n*add(binomial(n-k+1, 2*j+1)*2*(n-j+1) * euler(2*(n-j)+1, 1), j = 0..iquo(n-k, 2)): seq(seq(T(n, k), k = 0..n), n = 0..7);
+%t A401504 T[n_, k_] := T[n, k] = Which[
+%t A401504   n < 0 || k < 0 || k > n, 0,
+%t A401504   n == 0, 1,
+%t A401504   k == n, Sum[T[n - 1, j], {j, 0, n - 1}],
+%t A401504   k == n - 1, 2 T[n, n],
+%t A401504   True, 2 T[n, k + 1] - T[n, k + 2] - T[n - 1, k + 1] ];
+%t A401504 Table[Table[T[n, k], {k, 0, n}], {n, 0, 8}] // Flatten
+%t A401504 (* Alternative: polynomial recurrence *)
+%t A401504 P[0] = 1; P[n_] := P[n] = Module[{p = P[n - 1]},
+%t A401504   PolynomialQuotient[x^(n + 2)*(p /. x -> 1) - x*p, (1 - x)^2, x]];
+%t A401504 row[n_] := CoefficientList[P[n], x];
+%t A401504 Table[row[n], {n, 0, 8}] // Flatten
+%o A401504 (Python) # Seidel zig-zag: odd-indexed rows
+%o A401504 from functools import cache
+%o A401504 @cache
+%o A401504 def T(n: int) -> list[int]:  # returns row n
+%o A401504     if n == 0: return [1]
+%o A401504     row = [0] + T(n - 1) + [0]
+%o A401504     for k in range(1, n + 2): row[k] += row[k - 1]
+%o A401504     for k in range(n, 0, -1): row[k] += row[k + 1]
+%o A401504     return row[1:]
+%o A401504 for n in range(9): print(T(n))
+%o A401504 (SageMath)
+%o A401504 from functools import cache
+%o A401504 R = PolynomialRing(ZZ, 'x'); x = R.gen()
+%o A401504 @cache
+%o A401504 def P(n: int):
+%o A401504     if n == 0: return R.one()
+%o A401504     p = P(n - 1)
+%o A401504     return (p(1) * x**(n + 2) - x*p) // (1 - x)**2
+%o A401504 def row(n: int) -> list[int]: return P(n).list()
+%o A401504 for n in range(9): print(row(n))
+%o A401504 (PARI)
+%o A401504 P(n) = { if(n == 0, return(1)); my(p = P(n-1));
+%o A401504 (x^(n+2)*subst(p, x, 1) - x*p) \ (1-x)^2 };
+%o A401504 for(n=0, 8, print(vector(n+1, k, polcoef(P(n), k-1))));
+%Y A401504 Cf. A014781 (Seidel's triangle), A110501 (Genocchi numbers), A005439 (median Genocchi numbers), A014780, A099959, A401503 (Genocchi-Seidel polynomials).
+%K A401504 nonn,tabl,new
+%O A401504 0,2
+%A A401504 _Peter Luschny_, Nov 10 2026

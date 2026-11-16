@@ -1,0 +1,43 @@
+%I A401945 #7 Nov 15 2026 10:28:20
+%S A401945 1,0,22,0,292,842,0,3928,43129,39146,0,52816,1862426,4358500,1988940,
+%T A401945 0,710176,77334941,366729525,374831728,106151288,0,9549184,3171791110,
+%U A401945 28112135326,49502163796,29467089880,5844532788,0,128400448,129552796553,2069019114504,5708382682509,5433664989960,2192626551441,328800087810
+%N A401945 Triangle read by rows: T(n,k) is half the number of words of length 4*n over the alphabet [4] such that c(2) = c(3) = c(4), any prefix satisfies c(1) >= c(2), c(1) >= c(3), c(2) >= c(4), c(3) >= c(4), no proper prefix satisfies c(1) = c(2) = c(3) = c(4), and the maximum value of c(1) - c(4) = k for some prefix. Here c(i) is the number of occurrences of the letter i.
+%C A401945 Here one half of valid words are counted since for any word satisfying the constraints you can permute all the 2's and 3's. So only words in which 2 appears before 3 are counted as seen in the example. All columns have rational g.f.s.
+%e A401945 Triangle begins:
+%e A401945     k=1       2         3          4          5          6
+%e A401945  n=1 [1]
+%e A401945  n=2 [0,     22]
+%e A401945  n=3 [0,    292,      842]
+%e A401945  n=4 [0,   3928,    43129,     39146]
+%e A401945  n=5 [0,  52816,  1862426,   4358500,   1988940]
+%e A401945  n=6 [0, 710176, 77334941, 366729525, 374831728, 106151288]
+%e A401945 ...
+%e A401945 T(1,1) = 1: (1,2,3,4).
+%e A401945 T(2,2) = 22: (1,1,2,2,3,3,4,4), (1,1,2,2,3,4,3,4), (1,1,2,3,2,3,4,4), (1,1,2,3,2,4,3,4), (1,1,2,3,3,2,4,4), (1,1,2,3,3,4,2,4), (1,1,2,3,4,2,3,4), (1,1,2,3,4,3,2,4), (1,2,1,2,3,3,4,4), (1,2,1,2,3,4,3,4), (1,2,1,3,2,3,4,4), (1,2,1,3,2,4,3,4), (1,2,1,3,3,2,4,4), (1,2,1,3,3,4,2,4), (1,2,1,3,4,2,3,4), (1,2,1,3,4,3,2,4), (1,2,3,1,2,3,4,4), (1,2,3,1,2,4,3,4), (1,2,3,1,3,2,4,4), (1,2,3,1,3,4,2,4), (1,2,3,1,4,2,3,4), (1,2,3,1,4,3,2,4).
+%o A401945 (Python)
+%o A401945 def A401945(row_max):
+%o A401945     A = {(0, 0, 0, 0, 0): 1}
+%o A401945     C = []
+%o A401945     for i in range(1, 4*row_max+1):
+%o A401945         B = {}
+%o A401945         for (bs, cs, db, dc, h), ways in A.items():
+%o A401945             states = [(bs+1, cs+1, db, dc)]
+%o A401945             if bs > 0:
+%o A401945                 states.append((bs-1, cs, db+1, dc))
+%o A401945             if cs > 0:
+%o A401945                 states.append((bs, cs-1, db, dc+1))
+%o A401945             if db > 0 and dc > 0:
+%o A401945                 states.append((bs, cs, db-1, dc-1))
+%o A401945             for bs1, cs1, db1, dc1 in states:
+%o A401945                 s = (bs1, cs1, db1, dc1, max(h, bs1 + db1))
+%o A401945                 B[s] = B.get(s, 0) + ways
+%o A401945         if i % 4 == 0:
+%o A401945             C.append([B.pop((0, 0, 0, 0, h+1), 0)//2 for h in range(i//4)])
+%o A401945         A = B
+%o A401945     return C
+%Y A401945 Cf. A399293 (row sums * 2).
+%Y A401945 Cf. A114714, A384725.
+%K A401945 nonn,tabl,new
+%O A401945 1,3
+%A A401945 _John Tyler Rascoe_, Nov 09 2026
