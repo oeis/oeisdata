@@ -1,0 +1,47 @@
+%I A398739 #27 Nov 17 2026 16:18:50
+%S A398739 0,1,2,2,3,3,3,4,5,5,5,5,7,6,4,5,6,3,5,3,6,11,2,6,8,6,4,8,4,2,6,6,3,5,
+%T A398739 3,3,9,4,5,7,3,7,6,4,4,9,5,3,14,3,3,12,3,4,5,4,4,7,5,3,7,4,4,5,4,4,9,
+%U A398739 3,4,7,4,4,10,3,3,6,4,4,5,5,5,19,4,5,5,4,5,6,3,3,5,5,4,8,3,3,11,4,3,4
+%N A398739 Maximum length of a cyclic run of primes in a Schick cycle modulo 2n+1.
+%C A398739 For n >= 1, put m = 2*n + 1 and let U be the set of odd integers x such that 1 <= x < m and gcd(x,m) = 1. The map x -> abs(2*x - m) permutes U and partitions it into cycles. Then a(n) is the maximum length of a cyclically consecutive block of prime entries in any one of these cycles. Runs are cyclic, so a run may continue from the last entry of a displayed cycle back to its first entry.
+%H A398739 Robert Potter, <a href="/A398739/b398739.txt">Table of n, a(n) for n = 1..10000</a>
+%H A398739 Tim Beyne and Gerold Brändli, <a href="https://arxiv.org/abs/1504.02757">Modified Congruence Modulo n with Half The Amount of Residues</a>, arXiv:1504.02757 [math.NT], 2015-2016. See p. 9.
+%H A398739 Jonathan Chappelon, <a href="https://cs.uwaterloo.ca/journals/JIS/VOL13/Chappelon/chappelon3.html">On the multiplicative order of a^n modulo n</a>, J. Int. Seq. 13 (2010), Art. 10.2.1. See also <a href="https://arxiv.org/abs/0902.4366">arXiv:0902.4366</a> [math.NT], 2009-2016.
+%H A398739 Paul Erdős and Pál Révész, <a href="https://combinatorica.hu/~p_erdos/1977-21.pdf">On the length of the longest head-run</a>, Colloquia Mathematica Societatis Janos Bolyai 16 (1977), 219-228.
+%H A398739 Jon Froemke and Jerrold W. Grossman, <a href="https://www.researchgate.net/publication/261855090">An Algebraic Approach to Some Number-Theoretic Problems Arising from Paper-Folding Regular Polygons</a>, Amer. Math. Monthly 95(4) (1988), 289-307. <a href="https://doi.org/10.1080/00029890.1988.11972001">DOI</a> link.
+%H A398739 Wolfdieter Lang, <a href="https://arxiv.org/abs/2008.04300">On the Equivalence of Three Complete Cyclic Systems of Integers</a>, arXiv:2008.04300 [math.NT], 2020-2023.
+%H A398739 Marc Munsch and Igor Shparlinski, <a href="https://arxiv.org/abs/1412.0440">Congruences with intervals and subgroups modulo a prime</a>, arXiv:1412.0440 [math.NT], 2014.
+%H A398739 Robert Potter, <a href="/A398739/a398739.pdf">Prime Runs in Schick Cycles of the Folded Doubling Map</a>, 2026.
+%e A398739 a(8) = 4 because, for m = 2*8 + 1 = 17, the cycle (3, 11, 5, 7) consists entirely of primes.
+%e A398739 a(52) = 12 because, for m = 105, the cycle (11, 83, 61, 17, 71, 37, 31, 43, 19, 67, 29, 47) consists entirely of primes.
+%e A398739 a(262) = 21 because, for m = 525, the 21 cyclically consecutive entries (239, 47, 431, 337, 149, 227, 71, 383, 241, 43, 439, 353, 181, 163, 199, 127, 271, 17, 491, 457, 389) are prime. Their cyclic predecessor and successor are 143 = 11*13 and 253 = 11*23, respectively, and are both composite.
+%o A398739 (Python)
+%o A398739 from itertools import groupby
+%o A398739 from math import gcd
+%o A398739 from sympy import isprime
+%o A398739 def a(n):
+%o A398739     m = 2*n + 1
+%o A398739     unseen = {x for x in range(1, m, 2) if gcd(x, m) == 1}
+%o A398739     answer = 0
+%o A398739     while unseen:
+%o A398739         seed = min(unseen)
+%o A398739         cycle = []
+%o A398739         x = seed
+%o A398739         while True:
+%o A398739             cycle.append(x)
+%o A398739             unseen.remove(x)
+%o A398739             x = abs(2*x - m)
+%o A398739             if x == seed:
+%o A398739                 break
+%o A398739         flags = [isprime(x) for x in cycle]
+%o A398739         run = len(flags) if all(flags) else max(
+%o A398739             (len(list(g)) for value, g in groupby(flags + flags) if value),
+%o A398739             default=0
+%o A398739         )
+%o A398739         answer = max(answer, run)
+%o A398739     return answer
+%o A398739 print([a(n) for n in range(1, 101)])
+%Y A398739 Cf. A003558, A135303, A216319, A332434, A334430.
+%K A398739 nonn,new
+%O A398739 1,3
+%A A398739 _Robert Potter_, Nov 02 2026

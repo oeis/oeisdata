@@ -1,0 +1,43 @@
+%I A402036 #8 Nov 17 2026 16:59:18
+%S A402036 1,1,1,2,1,2,1,3,2,2,1,5,1,3,4,4,1,5,1,4,3,2,1,7,2,5,6,7,1,2,1,3,4,2,
+%T A402036 6,8,1,4,5,3,1,2,1,6,4,3,1,0,2,3,5,5,1,7,5,5,3,2,1,2,1,5,4,6,6,7,1,4,
+%U A402036 6,2,1,6,1,6,0,5,6,2,1,7,6,2,1,2,3,5,4
+%N A402036 Preperiod of n under Chowla's function (A048050), or -1 if not eventually periodic.
+%C A402036 a(n)=0 for numbers already on a cycle. Treat 0 as a fixed point, so reaching 0 also ends the count.
+%C A402036 a(n)=1 where n is prime.
+%C A402036 Conjecture: a(n)>=0 for all n>=1. Verified through 10^8. The maximum there is 61, first attained at n=38979710.
+%C A402036 Agrees with A153024 for orbits reaching 0. For orbits entering a nonzero cycle, A153024 is -1 whereas this sequence gives the steps to enter that cycle. For example, a(48)=0 and a(92)=1 since 92 -> 75 -> 48 -> 75.
+%H A402036 Jwalin Bhatt, <a href="/A402036/b402036.txt">Table of n, a(n) for n = 1..10000</a>
+%H A402036 Paul Pollack, <a href="https://cs.uwaterloo.ca/journals/JIS/VOL14/Pollack/pollack3.pdf">Quasi-Amicable Numbers are Rare</a>, Journal of Integer Sequences 14 (2011), Article 11.5.2.
+%e A402036 For n = 4, a(n) = 2, because A048050(4) = 2 and A048050(2) = 0, so it takes two steps to reach zero.
+%e A402036 For n = 92, a(n) = 1, because A048050(92) = 75, which belongs to the cycle 75 -> 48 -> 75, so it takes one step to enter a cycle.
+%e A402036 For n = 48, a(n) = 0, because 48 belongs to the 2-cycle 48 -> 75 -> 48.
+%t A402036 c[n_] := If[n > 1, DivisorSigma[1, n] - n - 1, 0]
+%t A402036 a[n_] := With[{t = NestWhileList[c, n, UnsameQ, All]}, First[FirstPosition[Most[t], Last[t]]] - 1]
+%t A402036 Array[a, 87]
+%o A402036 (Python)
+%o A402036 def chowla(n):
+%o A402036     if n <= 1:  return 0
+%o A402036     rest, sigma, p = n, 1, 2
+%o A402036     while p*p <= rest:
+%o A402036         subtotal, power = 1, 1
+%o A402036         while rest % p == 0:
+%o A402036             rest //= p
+%o A402036             power *= p
+%o A402036             subtotal += power
+%o A402036         sigma *= subtotal
+%o A402036         p = 3 if p == 2 else p+2
+%o A402036     if rest > 1:
+%o A402036         sigma *= rest+1
+%o A402036     return sigma-n-1
+%o A402036 def a(n):
+%o A402036     seen = {}
+%o A402036     while n not in seen:
+%o A402036         seen[n] = len(seen)
+%o A402036         n = chowla(n)
+%o A402036     return seen[n]
+%o A402036 print([a(n) for n in range(1,88)])
+%Y A402036 Cf. A000203, A002954, A005276, A048050, A098008, A153024.
+%K A402036 sign,new
+%O A402036 1,4
+%A A402036 _Jwalin Bhatt_, Nov 11 2026

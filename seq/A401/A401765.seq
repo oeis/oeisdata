@@ -1,0 +1,70 @@
+%I A401765 #10 Nov 17 2026 21:40:01
+%S A401765 1,5,9,5,19,9,6,17,9,19,11,9,63,9,19,17,9,69
+%N A401765 Largest m such that an n X m rectangle can be tiled with Culik's 13 Wang tiles so that every column wraps around (its bottom edge matches its top edge).
+%C A401765 Culik's tiles tile the plane but never periodically, so every a(n) is finite.
+%C A401765 Using the numbers in the Example, each row multiplies the sum of the numbers on its horizontal edges by 3 (rows of tiles T1-T6) or by 1/2 (rows of tiles T7-T13). That is, the sum on the bottom edges of the row is 3 or 1/2 times the sum on its top edges, up to the two side numbers at the ends of the row. A wide strip that closes after n rows, r of them made of tiles T1-T6, therefore needs 3^r/2^(n-r) to be close to 1. So a(n) is large when n*log(2)/log(6) is close to an integer, as at n = 5, 13, 31, 106, 137, 791, 1719, ...
+%C A401765 Stacking copies of a strip gives a(n) >= a(d) whenever d divides n.
+%C A401765 Larger known values: a(31) >= 280, a(137) >= 956, a(1719) >= 45813.
+%H A401765 Karel Culik II, <a href="https://doi.org/10.1016/S0012-365X(96)00118-5">An aperiodic set of 13 Wang tiles</a>, Discrete Math. 160 (1996), 245-251.
+%H A401765 Bruno Durand, Guilhem Gamard, and Anael Grandjean, <a href="https://arxiv.org/abs/1312.4126">Aperiodic tilings and entropy</a>, arXiv:1312.4126 [cs.LO], 2013.
+%H A401765 Emmanuel Jeandel and Michaël Rao, <a href="https://doi.org/10.19086/aic.18614">An aperiodic set of 11 Wang tiles</a>, Advances in Combinatorics 2021:1.
+%H A401765 Jarkko Kari, <a href="https://doi.org/10.1016/0012-365X(95)00120-L">A small aperiodic set of Wang tiles</a>, Discrete Math. 160 (1996), 259-264.
+%H A401765 Wikipedia, <a href="https://en.wikipedia.org/wiki/Wang_tile">Wang tile</a>.
+%F A401765 a(k*n) >= a(n).
+%F A401765 a(n) >= 2/(log(6)*||n*t||) - 2 when ||n*t|| < 0.19.
+%F A401765 a(n) <= 3.75*n/(1 - 6^(-||n*t||)) + 2.
+%F A401765 Here t = log(2)/log(6), and ||x|| is the distance from x to the nearest integer.
+%e A401765 The 13 tiles (top, left, right and bottom edge colors):
+%e A401765   +--G--+  +--G--+  +--G--+  +--R--+  +--R--+  +--R--+
+%e A401765   R T1  G  R T2  B  G T3  B  G T4  R  B T5  R  B T6  G
+%e A401765   +--B--+  +--G--+  +--B--+  +--G--+  +--B--+  +--G--+
+%e A401765   +--Y--+  +--B--+  +--G--+  +--G--+  +--Y--+  +--B--+  +--G--+
+%e A401765   Y T7  Y  Y T8  Y  Y T9  K  Y T10 K  K T11 K  K T12 K  K T13 Y
+%e A401765   +--R--+  +--G--+  +--R--+  +--Y--+  +--R--+  +--G--+  +--G--+
+%e A401765 Read as numbers:
+%e A401765   top and bottom edges:  R = 0, Y = 0 (a marked zero), G = 1, B = 2
+%e A401765   side edges:            R, G, B = -2, -1, 0 on tiles 1-6;  Y, K = 0, 1/2 on tiles 7-13
+%e A401765   tiles 1-6:    3*top + left = bottom + right    (a row of them multiplies by 3)
+%e A401765   tiles 7-13:   top/2 + left = bottom + right    (a row of them multiplies by 1/2)
+%e A401765 a(2) = 5
+%e A401765   +---B---+---G---+---G---+---G---+---B---+   <-- same colors as the bottom line,
+%e A401765   |       |       |       |       |       |       so the strip closes up
+%e A401765   Y  T8   Y  T9   K  T13  Y  T9   K  T12  K
+%e A401765   |       |       |       |       |       |
+%e A401765   +---G---+---R---+---G---+---R---+---G---+
+%e A401765   |       |       |       |       |       |
+%e A401765   R  T1   G  T4   R  T2   B  T6   G  T3   B
+%e A401765   |       |       |       |       |       |
+%e A401765   +---B---+---G---+---G---+---G---+---B---+
+%e A401765 No strip of height 2 has 6 columns.
+%o A401765 (Python)
+%o A401765 import numpy as np
+%o A401765 from itertools import product
+%o A401765 T = "GGBR GBGR GBBG RRGG RRBB RGGB YYRY BYGY GKRY GKYY YKRK BKGK GYGK".split()  # top, right, bottom, left
+%o A401765 V = {"U": "RGB", "L": "YK"}  # side colors of the upper tiles T1-T6 and of the lower tiles T7-T13
+%o A401765 K = {k: [("RYGB".index(t[0]), V[k].index(t[3]), "RYGB".index(t[2]), V[k].index(t[1]))
+%o A401765          for t in (T[:6] if k == "U" else T[6:])] for k in V}
+%o A401765 def width(w):  # widest closed strip whose rows have kinds w; a state colors a column boundary
+%o A401765     rad = [len(V[k]) for k in w]
+%o A401765     mul, S, m = np.cumprod([1] + rad[:-1]), np.arange(np.prod(rad), dtype=np.int64), 0
+%o A401765     while len(S):
+%o A401765         nxt = []
+%o A401765         for x in range(4):  # color of the top edge of the next column
+%o A401765             s, c = S, np.full(len(S), x)
+%o A401765             for i, k in enumerate(w):
+%o A401765                 d = s // mul[i] % rad[i]
+%o A401765                 u = np.unique(np.concatenate([(s[o] + (r - d[o]) * mul[i]) * 4 + b
+%o A401765                                               for t, l, b, r in K[k] for o in [(c == t) & (d == l)]]))
+%o A401765                 s, c = u // 4, u % 4
+%o A401765             nxt.append(s[c == x])
+%o A401765         S, m = np.unique(np.concatenate(nxt)), m + 1
+%o A401765     return m - 1
+%o A401765 def a(n):  # rows of a strip with >= 6 columns are cyclic blocks UL and ULL (dos Santos, Lemma 4.1)
+%o A401765     ws = {min(w[i:] + w[:i] for i in range(n)) for w in map("".join, product("UL", repeat=n))}
+%o A401765     b = max([width(w) for w in ws if "U" in w and "UU" not in w + w[0] and "LLL" not in w + w[:2]], default=0)
+%o A401765     return b if b >= 6 else max(map(width, ws))
+%o A401765 print([a(n) for n in range(1, 15)])
+%Y A401765 Cf. A005663, A005664, A028507, A152683.
+%K A401765 nonn,hard,more,new
+%O A401765 1,2
+%A A401765 _Pietro Tiaraju Giavarina dos Santos_, Nov 05 2026

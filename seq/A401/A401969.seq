@@ -1,4 +1,4 @@
-%I A401969 #42 Nov 16 2026 03:01:59
+%I A401969 #52 Nov 17 2026 16:34:27
 %S A401969 1,1,1,1,1,1,1,3,1,17,5,155,691,2073,7,5461,3617,929569,43867,
 %T A401969 28820619,174611,1109652905,854513,51943281731,236364091,
 %U A401969 2905151042481,8553103,191329672483963,23749461029,14655626154768697,8615841276005,1291885088448017715,7709321041217
@@ -7,12 +7,14 @@
 %H A401969 Peter Luschny, <a href="/A401969/b401969.txt">Table of n, a(n) for n = 0..500</a>
 %H A401969 Peter Luschny, <a href="http://www.luschny.de/math/primes/bernincl.html">An approximation of the Bernoulli numbers</a>.
 %H A401969 Peter Luschny, <a href="/A401969/a401969.txt">Asymptotic evaluation of the extended Bernoulli numbers with Maple</a>.
-%H A401969 Ludwig Seidel, <a href="http://publikationen.badw.de/de/003384831">Über eine einfache Entstehungsweise der Bernoulli'schen Zahlen und einiger verwandten Reihen</a>, Sitzungsberichte der mathematisch-physikalischen Classe der königlich bayerischen Akademie der Wissenschaften zu München, Vol. 7 (1877), pp. 157-187.
+%H A401969 Ludwig Seidel, <a href="https://publikationen.badw.de/de/003384831">Über eine einfache Entstehungsweise der Bernoulli'schen Zahlen und einiger verwandten Reihen</a>, Sitzungsberichte der mathematisch-physikalischen Classe der königlich bayerischen Akademie der Wissenschaften zu München, Vol. 7 (1877), pp. 157-187.
 %F A401969 a(n) = numerator(b(n)), where b(n) = Li(1-2*m, -1)*(-1)^m*2*m / (2^n-1), for n >= 2, and m = floor(n/2). Li(n, x) is the polylogarithm.
-%F A401969 a(n) = numerator(b(n), where b(n) = ((-1)^m * m * Euler(2*m - 1, 1) / (1 - 2^n)), for n >= 2, and m = floor(n/2). Euler(n, x) denotes the Euler polynomial.
-%F A401969 Define polynomials P(0, x) = 1, and for n >= 1 as the polynomial quotient P(n, x) = PolQuo(x^(n+2)*P(n-1, 1) - x*P(n-1, x), (1-x)^2). Then a(n) = ([x^(m - 1)] P(n-1, x)) / ((2*(2^n - 1)) for n >= 2, where m = floor(n/2), and 1/(n + 1) for n in {0, 1}.
+%F A401969 a(n) = numerator(b(n)), where b(n) = ((-1)^m * m * Euler(2*m - 1, 1) / (1 - 2^n)), for n >= 2, and m = floor(n/2). Euler(n, x) denotes the Euler polynomial.
+%F A401969 Define polynomials P(0, x) = 1, and for n >= 1 as the polynomial quotient P(n, x) = PolQuo(x^(n+2)*P(n-1, 1) - x*P(n-1, x), (1-x)^2). Then a(n) = ([x^(m - 1)] P(n-1, x)) / (2*(2^n - 1)) for n >= 2, where m = floor(n/2), and 1/(n + 1) for n in {0, 1}.
 %F A401969 The exponential generating function for the /signed/ form is: b(0)=1, b(1)= 1/2, and b(n) = n! * [x^n] (x / (1 - exp(-x))) for n even >= 2, and ((n-1)!/(2^n-1)) * [x^(n-1)] (x / (1 + exp(x))) for n odd >= 3.
 %F A401969 In the /signed/ case: b(n) = (n*eta(1-n) - (n-1)*eta(2-n)) / (2^n-1) for n >= 3, or b(n) = (-1)^n * 2 * m * eta(1 - 2*m) / (2^n - 1) for n >= 2 and m = floor(n/2), where eta(z) denotes the Dirichlet eta function.
+%F A401969 The last formula shows that odd-indexed values are rational multiples of the preceding even-indexed values. Define nabla(f(x)) = f(x) - f(x-1) and f(x) = x*eta(1 - x), then d(x) = nabla(f(x))/(2^x - 1) is a normalized first difference. This gives d(2*n + 1) = -d(2*n) * (2^(2*n) - 1) / (2^(2*n+1) - 1).
+%F A401969 In the even-indexed case we have the binomial identity d(2*m) = (((2*m - 1)/2) - Sum_{k=1..m-1} binomial(2*m+1, 2*k) * d(2*k) ) / (2*m+1).
 %F A401969 b(n) = 4 * Pi * (Pi/n)^(n mod 2) * (n/(2*Pi*e))^(n+1/2) * exp(1/2 + n^(-1)/12 - n^(-3)/360 + n^(-5)/1260 - n^(-7)/1680 + O(n^(-9))). (See links for a Maple procedure.)
 %e A401969 1, 1/2, 1/6, 1/14, 1/30, 1/62, 1/42, 3/254, 1/30, 17/1022, 5/66, 155/4094, 691/2730, ...
 %p A401969 a := n -> ifelse(n<2, 1/(n+1), (iquo(n,2)*(-1)^iquo(n,2)*euler(2*iquo(n,2)-1, 1))/ (1-2^n)): seq(numer(a(n)), n = 0..32);
@@ -23,13 +25,21 @@
 %p A401969     else (2^(n-1)-1)/(2^n-1) * abs(bernoulli(n-1));
 %p A401969     fi end:
 %p A401969 seq(numer(a(n)), n = 0..32);
-%t A401969 (* Riemann version *)
+%t A401969 (* Recurrence for the signed numbers *)
+%t A401969 d[0] = 1; d[1] = 1/2;
+%t A401969 d[n_Integer?EvenQ] /; n >= 2 := d[n] = ((n - 1)/2 - Sum[Binomial[n + 1, 2 k] d[2 k], {k, 1, n/2 - 1}])/(n + 1);
+%t A401969 d[n_Integer?OddQ] /; n >= 3 := d[n] = -(2^(n - 1) - 1)/(2^n - 1) d[n - 1];
+%t A401969 Table[d[n], {n, 0, 32}] // Numerator
+%t A401969 (* Riemann version with Zeta *)
 %t A401969 a[n_] := If[n < 2, 1/(n + 1), With[{m = Quotient[n, 2]},
 %t A401969     (-1)^m * 2*m*(2^(2*m) - 1)*Zeta[1 - 2*m]/(2^n - 1) ] ]
 %t A401969 T = Table[a[n], {n, 0, 32}]; Numerator /@ T
-%t A401969 (* Alternative: Dirichlet version *)
+%t A401969 (* Alternative: Dirichlet version with PolyLog *)
 %t A401969 a[n_] := If[n < 2, 1/(n + 1), With[{m = Quotient[n, 2]},
 %t A401969     (-1)^m * 2*m*PolyLog[1 - 2*m, -1]/(2^n - 1) ] ]
+%t A401969 (* Alternative: Signed version with Dirichlet eta *)
+%t A401969 d[0] = 1; d[1] = 1/2; d[n_ /; n >= 2] := d[n] = If[EvenQ[n], n DirichletEta[1 - n]/(2^n - 1), -(2^(n - 1) - 1)/(2^n - 1) d[n - 1]];
+%t A401969 Table[d[n], {n, 0, 32}] // Numerator
 %t A401969 (* Alternative: Euclidean polynomial division *)
 %t A401969 P[0] = 1; P[n_] := P[n] = PolynomialQuotient[x^(n + 2) (P[n - 1] /. x -> 1) - x P[n - 1], (1 - x)^2, x ];
 %t A401969 a[n_] := If[n < 2, 1/(n + 1), Last[CoefficientList[P[Quotient[n, 2] - 1], x]] / (2 (2^n - 1)) ];
@@ -43,7 +53,7 @@
 %o A401969 A = [a(n).numerator for n in range(33)]; print(A)
 %o A401969 (Python)
 %o A401969 from functools import cache
-%o A401969 from fractions import Fraction as Q
+%o A401969 from fractions import Fraction as QQ
 %o A401969 @cache
 %o A401969 def genocchi(n: int) -> list[int]:
 %o A401969     """Seidel's zig-zag operation."""
@@ -52,10 +62,10 @@
 %o A401969     for k in range(n, 0, -1): row[k] += row[k + 1]
 %o A401969     for k in range(2, n + 2): row[k] += row[k - 1]
 %o A401969     return row[1:]
-%o A401969 def b(n: int) -> Q:
-%o A401969     if n < 2: return Q(1, n + 1)
+%o A401969 def b(n: int) -> QQ:
+%o A401969     if n < 2: return QQ(1, n + 1)
 %o A401969     g = genocchi(n // 2 - 1)[-1]
-%o A401969     return Q(g, 2 * (2 ** n  - 1))
+%o A401969     return QQ(g, 2 * (2 ** n - 1))
 %o A401969 B = [b(n) for n in range(33)]
 %o A401969 print([t.numerator for t in B])
 %o A401969 (SageMath)

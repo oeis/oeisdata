@@ -1,0 +1,51 @@
+%I A401540 #11 Nov 17 2026 14:19:59
+%S A401540 2,4,16,40,196,256,400,466,820,856,1996,3592,5188,6046,7906,11116,
+%T A401540 11716,11812,14536,19608,20692,21568,22972,25390,29128,34672,34840,
+%U A401540 38728,42016,48280,53068,54778,56266,58312,65536,66430,73018,73750,74296,88642,94108,97156,103456,107836,108928,111322,111442
+%N A401540 Numbers of the form sigma(m) + 1 where m is a practical number (A005153) such that sigma(m) + 2 is prime.
+%C A401540 An integer k > 1 is called an almost practical number if [1, k] contains exactly one integer H that cannot be written as a sum of distinct divisors of m. For m > 3, this is equivalent to k being an almost practical number (A174533), having exactly two unrepresentable integers h and sigma(k) - h in [1, sigma(k)].
+%C A401540 Every such hole h is necessarily of the form h = sigma(M) + 1, where M is a practical number (A005153) of the form m = 2^e * s^2 (with e >= 0 and s >= 1 odd) such that q = h + 1 = sigma(m) + 2 is prime.
+%C A401540 Since M is a practical number, sigma(m) >= 2*m- 1, which implies m <= h/2 for all h. This bound guarantees that scanning all practical numbers m <= x/2 exhaustively produces all terms a(n) <= x.
+%C A401540 All terms are even. For n >= 2, a(n) == 4 (mod 6) unless m is divisible by p^(2*a) for some prime p == 1 (mod 3) with a == 2 (mod 3); the first term not congruent to 4 mod 6 (after a(1) = 2) is a(20) = 19608, arising from m = 9604 = 2^2 * 7^4.
+%C A401540 The mapping m -> sigma(m) + 1 is not injective: a(13) = 5188 arises from two distinct practical prefixes, m = 1764 = 2^2 * 3^2 * 7^2 and m = 2178 = 2 * 3^2 * 11^2.
+%C A401540 The subsequence of powers of 2 in this sequence consists of F_r - 1 = 2^(2^r) where F_r is a Fermat prime (A019434), namely 2, 4, 16, 256, 65536. In particular, 8, 32, 64, and 128 can never be the unique hole of any integer k.
+%e A401540 2 is a term because m = 1 is practical, sigma(1) = 1, and sigma(1) + 2 = 3 is prime; h = 2 is the unique hole of k = 3 and k = 945 in [1, k].
+%e A401540 4 is a term because m = 2 is practical, sigma(2) = 3, and sigma(2) + 2 = 5 is prime; h = 4 is the unique hole of k = 70 in [1, 70].
+%e A401540 16 is a term because m = 8 is practical, sigma(8) = 15, and sigma(8) + 2 = 17 is prime; h = 16 is the unique hole of k = 2584 = 2^3 * 17 * 19 in [1, 2584].
+%e A401540 40 is a term because m = 18 = 2 * 3^2 is practical, sigma(18) = 39, and sigma(18) + 2 = 41 is prime; h= 40 is the unique hole of k = 31734 = 2 * 3^2 * 41 * 43 in [1, 31734].
+%o A401540 (Python)
+%o A401540 from sympy import factorint, divisor_sigma, isprime
+%o A401540 def is_practical(m):
+%o A401540     if m == 1:
+%o A401540         return True
+%o A401540     factors = factorint(m)
+%o A401540     if 2 not in factors:
+%o A401540         return False
+%o A401540     sig_running = 1
+%o A401540     for p in sorted(factors.keys()):
+%o A401540         if p > sig_running + 1:
+%o A401540             return False
+%o A401540         e = factors[p]
+%o A401540         sig_running *= (p**(e + 1) - 1) // (p - 1)
+%o A401540     return True
+%o A401540 def generate_holes(limit_h):
+%o A401540     max_m = limit_h // 2
+%o A401540     holes_set = set()
+%o A401540     e2 = 0
+%o A401540     while (1 << e2) <= max_m:
+%o A401540         p2 = 1 << e2
+%o A401540         s = 1
+%o A401540         while p2 * s * s <= max_m:
+%o A401540             m = p2 * s * s
+%o A401540             if is_practical(m):
+%o A401540                 sig = int(divisor_sigma(m))
+%o A401540                 if sig + 1 <= limit_h and isprime(sig + 2):
+%o A401540                     holes_set.add(sig + 1)
+%o A401540             s += 2
+%o A401540         e2 += 1
+%o A401540     return sorted(holes_set)
+%o A401540 print(generate_holes(112000))
+%Y A401540 Cf. A000040, A000203, A005153, A019434, A174533, A174534, A174535.
+%K A401540 nonn,new
+%O A401540 1,1
+%A A401540 _Guido Avagliano_, Oct 28 2026
