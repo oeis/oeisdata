@@ -1,0 +1,46 @@
+%I A402234 #10 Nov 18 2026 10:43:35
+%S A402234 1,1,2,1,12,12,1,86,264,192,1,840,7320,13440,7680,1,11642,304260,
+%T A402234 1161600,1566720,737280,1,227892,19617612,154694400,386211840,
+%U A402234 412876800,165150720
+%N A402234 Triangle read by rows: T(n,k) is the number of acyclic digraphs (or DAGs) on n labeled nodes whose longest directed path has k arcs, n >= 1, 0 <= k <= n-1.
+%C A402234 Equivalently, the number of acyclic digraphs on n labeled nodes with exactly k+1 levels, where the level of a node is the number of arcs in the longest directed path that ends at it.
+%C A402234 If the nodes are tasks of unit duration and an arc u -> v means that u must be finished before v starts, then k+1 is the least time in which all tasks can be done when any number of tasks may run in parallel (the length of a critical path).
+%C A402234 An acyclic digraph whose longest path has one arc is transitive, so column k=1 counts the labeled partial orders whose longest chain has 2 elements (A055531).
+%D A402234 R. W. Robinson, Counting labeled acyclic digraphs, in F. Harary, ed., New Directions in the Theory of Graphs, Academic Press, NY, 1973, pp. 239-273.
+%H A402234 Tyler Satchel Orden, <a href="/A402234/b402234.txt">Rows n = 1..40 of triangle, flattened</a>
+%H A402234 Wikipedia, <a href="https://en.wikipedia.org/wiki/Longest_path_problem">Longest path problem</a>.
+%F A402234 T(n,k) = Sum_{(m_1,...,m_{k+1})} n!/(m_1!*...*m_{k+1}!) * Product_{j=2..k+1} ((2^m_{j-1} - 1)*2^(m_1+...+m_{j-2}))^m_j, where the sum is over the compositions of n into k+1 parts. (m_j is the number of nodes on level j-1; each such node has at least one parent on the level below and any parents on lower levels.)
+%F A402234 T(n,0) = 1.
+%F A402234 T(n,1) = Sum_{m=1..n-1} binomial(n,m)*(2^m-1)^(n-m) = A055531(n) for n >= 2.
+%F A402234 T(n,n-1) = n!*2^binomial(n-1,2) = n*A011266(n-1).
+%F A402234 Sum_{k=0..n-1} T(n,k) = A003024(n).
+%e A402234 Triangle begins:
+%e A402234   1;
+%e A402234   1, 2;
+%e A402234   1, 12, 12;
+%e A402234   1, 86, 264, 192;
+%e A402234   1, 840, 7320, 13440, 7680;
+%e A402234   1, 11642, 304260, 1161600, 1566720, 737280;
+%e A402234 Row n=3: of the 25 acyclic digraphs on 3 nodes, one has no arc; 12 have a longest path with one arc (6 with a single arc, 3 with two arcs out of one node, 3 with two arcs into one node); 12 contain a path a -> b -> c (6 paths and 6 paths with the extra arc a -> c).
+%o A402234 (Python)
+%o A402234 from math import comb
+%o A402234 def row(n):  # T(n,0), ..., T(n,n-1)
+%o A402234     h = {(m, m, 0): comb(n, m) for m in range(1, n+1)}  # (nodes placed, size of last level, path length)
+%o A402234     for u in range(1, n):
+%o A402234         for p in range(1, u+1):
+%o A402234             for r in range(u):
+%o A402234                 w = h.get((u, p, r), 0)
+%o A402234                 if w:
+%o A402234                     for m in range(1, n-u+1):
+%o A402234                         key = (u+m, m, r+1)
+%o A402234                         h[key] = h.get(key, 0) + w*comb(n-u, m)*((2**p-1)*2**(u-p))**m
+%o A402234     return [sum(h.get((n, p, r), 0) for p in range(1, n+1)) for r in range(n)]
+%o A402234 print([x for n in range(1, 8) for x in row(n)])
+%Y A402234 Row sums give A003024.
+%Y A402234 Cf. A055531 (column k=1), A011266.
+%Y A402234 Cf. A342587 (labeled partial orders by longest chain).
+%Y A402234 Cf. A402235 (in-degree at most 2).
+%Y A402234 Cf. A081064 (by number of arcs), A361718 (by number of sources), A350448 (unlabeled version).
+%K A402234 nonn,tabl,new
+%O A402234 1,3
+%A A402234 _Tyler Satchel Orden_, Nov 16 2026

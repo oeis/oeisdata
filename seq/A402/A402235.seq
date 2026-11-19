@@ -1,0 +1,45 @@
+%I A402235 #9 Nov 18 2026 10:43:51
+%S A402235 1,1,2,1,12,12,1,82,216,144,1,685,4270,6120,2880,1,7131,103950,254340,
+%T A402235 244080,86400,1,90342,3099054,12408480,18542160,12972960,3628800,1,
+%U A402235 1357448,111959820,728328216,1550183040,1630379520,886152960,203212800
+%N A402235 Triangle read by rows: T(n,k) is the number of acyclic digraphs (or DAGs) on n labeled nodes in which every node has in-degree at most 2 and the longest directed path has k arcs, n >= 1, 0 <= k <= n-1.
+%C A402235 Equivalently, the number of such digraphs with exactly k+1 levels, where the level of a node is the number of arcs in the longest directed path that ends at it.
+%C A402235 If the nodes are tasks of unit duration, each with at most 2 immediate predecessors, and an arc u -> v means that u must be finished before v starts, then k+1 is the least time in which all tasks can be done when any number of tasks may run in parallel (the length of a critical path).
+%C A402235 The triangle agrees with A402234 for n <= 3; the first difference is T(4,1) = 82 against 86.
+%H A402235 Tyler Satchel Orden, <a href="/A402235/b402235.txt">Rows n = 1..40 of triangle, flattened</a>
+%H A402235 Wikipedia, <a href="https://en.wikipedia.org/wiki/Longest_path_problem">Longest path problem</a>.
+%F A402235 T(n,k) = Sum_{(m_1,...,m_{k+1})} n!/(m_1!*...*m_{k+1}!) * Product_{j=2..k+1} F(m_{j-1}, m_1+...+m_{j-2})^m_j, where the sum is over the compositions of n into k+1 parts and F(p,q) = p*(p+2*q+1)/2 is the number of sets of at most 2 parents, chosen from p+q nodes, that contain at least one of p given nodes. (m_j is the number of nodes on level j-1; each such node has at least one parent on the level below.)
+%F A402235 T(n,0) = 1.
+%F A402235 T(n,1) = Sum_{m=1..n-1} binomial(n,m)*(m*(m+1)/2)^(n-m).
+%F A402235 T(n,n-1) = n!*(n-1)! = A010790(n-1).
+%F A402235 Sum_{k=0..n-1} T(n,k) = A397711(n).
+%e A402235 Triangle begins:
+%e A402235   1;
+%e A402235   1, 2;
+%e A402235   1, 12, 12;
+%e A402235   1, 82, 216, 144;
+%e A402235   1, 685, 4270, 6120, 2880;
+%e A402235   1, 7131, 103950, 254340, 244080, 86400;
+%e A402235 T(4,1) = 82: of the 86 acyclic digraphs on 4 nodes whose longest path has one arc, 4 have a node with in-degree 3.
+%o A402235 (Python)
+%o A402235 from math import comb
+%o A402235 def row(n, d=2):  # d = bound on the in-degree; returns T(n,0), ..., T(n,n-1)
+%o A402235     F = lambda p, q: sum(comb(p+q, i) - comb(q, i) for i in range(1, d+1))
+%o A402235     h = {(m, m, 0): comb(n, m) for m in range(1, n+1)}  # (nodes placed, size of last level, path length)
+%o A402235     for u in range(1, n):
+%o A402235         for p in range(1, u+1):
+%o A402235             for r in range(u):
+%o A402235                 w = h.get((u, p, r), 0)
+%o A402235                 if w:
+%o A402235                     for m in range(1, n-u+1):
+%o A402235                         key = (u+m, m, r+1)
+%o A402235                         h[key] = h.get(key, 0) + w*comb(n-u, m)*F(p, u-p)**m
+%o A402235     return [sum(h.get((n, p, r), 0) for p in range(1, n+1)) for r in range(n)]
+%o A402235 print([x for n in range(1, 9) for x in row(n)])
+%Y A402235 Row sums give A397711.
+%Y A402235 Cf. A402234 (no bound on the in-degree).
+%Y A402235 Cf. A010790 (right border).
+%Y A402235 Cf. A395247 (by maximum in-degree).
+%K A402235 nonn,tabl,new
+%O A402235 1,3
+%A A402235 _Tyler Satchel Orden_, Nov 16 2026
