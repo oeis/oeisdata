@@ -1,0 +1,52 @@
+%I A402177 #9 Nov 19 2026 22:12:52
+%S A402177 1,2,3,5,9,17,32,60,111,203,367,654,1144,1962,3304,5481,8993,14648,
+%T A402177 23743,38335,61649,98701,157266,249398,393815,619612,971989,1521016,
+%U A402177 2374947,3700291,5751807,8916891,13780599
+%N A402177 Number of distinct polynomials obtained after n steps starting from P(x) = 1 and repeatedly applying either P -> x*(x*P)' or P -> P(0) + Integral_{t=0..x} ((P(t) - P(0))/t) dt.
+%C A402177 Since the second operation maps 1 to 1, the set S_n of reachable polynomials satisfies S_{n-1} subset S_n for all n >= 1, so a(n) also counts the distinct polynomials obtained in at most n steps.
+%C A402177 A polynomial is reachable in n steps if and only if it is equal to 1 or to a monomial of the form (k! / (d_1 * ... * d_{n-k})) * x^k for some 1 <= k <= n and 1 <= d_1 <= ... <= d_{n-k} <= k (with the empty product equal to 1).
+%e A402177 With going left representing P -> x*(x*P)',
+%e A402177 with going right representing P -> P(0) + Integral_{t=0..x} ((P(t) - P(0))/t) dt,
+%e A402177 the graph of production of polynomials, where already-produced polynomials are omitted, starts:
+%e A402177  0                  1
+%e A402177                     |
+%e A402177                  +--+
+%e A402177                  |
+%e A402177  1               x
+%e A402177                  |
+%e A402177               +--+
+%e A402177               |
+%e A402177  2           2x^2
+%e A402177               |
+%e A402177         +-----+------+
+%e A402177         |            |
+%e A402177  3     6x^3          x^2
+%e A402177         |            |
+%e A402177      +--+--+    +----+----+
+%e A402177      |     |    |         |
+%e A402177  4 24x^4  2x^3 3x^3  (1/2)x^2
+%e A402177 Level 0 contains 1 polynomial, so a(0)=1.
+%e A402177 Levels 0..1 contain 2 polynomials, so a(1) = 2.
+%e A402177 Levels 0..2 contain 3 polynomials, so a(2) = 3.
+%e A402177 Levels 0..3 contain 5 polynomials, so a(3) = 5.
+%e A402177 Levels 0..4 contain 9 polynomials, so a(4) = 9.
+%o A402177 (PARI)
+%o A402177 f(P) = x*(x*P)';
+%o A402177 g(P) = subst(P, x, 0) + intformal((P - subst(P, x, 0))/x);
+%o A402177 seq(N) = {
+%o A402177   my(res = vector(N), S = Set(x^0), F = S);
+%o A402177   if(N >= 1, res[1] = 1);
+%o A402177   for(n = 1, N - 1,
+%o A402177     my(c = setunion(Set([f(P) | P <- F]), Set([g(P) | P <- F])));
+%o A402177     F = setminus(c, S);
+%o A402177     S = setunion(S, F);
+%o A402177     res[n + 1] = #S;
+%o A402177   );
+%o A402177   res;
+%o A402177 }
+%o A402177 seq(25)
+%Y A402177 Cf. A402178 (number of distinct values at x = 1).
+%K A402177 nonn,more,new
+%O A402177 0,2
+%A A402177 _Luc Rousseau_, Nov 14 2026
+%E A402177 a(31)-a(32) from _Sean A. Irvine_, Nov 19 2026

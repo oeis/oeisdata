@@ -1,0 +1,54 @@
+%I A401821 #11 Nov 19 2026 15:30:40
+%S A401821 2,5,14,37,101,274,746,2028,5512,14983,40729,110712,300945,818054,
+%T A401821 2223701,6044646,16431050,44664226,121409953,330026470,897104956,
+%U A401821 2438584099,6628758844,18018834711,48980270965,133142180516,361917969899,983795040969,2674232182794,7269316747569
+%N A401821 Least m such that Sum_{k=1..m} sin(1/k) > n (angles in radians).
+%C A401821 This is a sine analog of the harmonic threshold sequence A004080. Write S(m) = Sum_{k=1..m} sin(1/k). Since 0 < 1/k - sin(1/k) < 1/(6*k^3), the difference S(m) - H_m converges, where H_m is the m-th harmonic number. In particular, S(m) is strictly increasing and unbounded, so every term is well-defined.
+%C A401821 The limiting difference is C = Sum_{k>=1} (sin(1/k) - 1/k) = -0.1918990855062648279811460772264398434... Thus C measures the limiting deficit relative to the harmonic sum and determines the exponential growth of a(n), as shown below.
+%C A401821 The sum-minus-logarithm constant gamma + C = 0.3853165793952680326253660128559625876... used here is different from the related sum-minus-integral (Sine Euler) constant in A249022.
+%F A401821 Let H_m^(r) = Sum_{k=1..m} 1/k^r, with H_0^(r) = 0 and H_m = H_m^(1). Then S(m) = H_m + Sum_{j>=1} (-1)^j*H_m^(2*j+1)/(2*j+1)!.
+%F A401821 C = Sum_{j>=1} (-1)^j*zeta(2*j+1)/(2*j+1)!.
+%F A401821 For m >= 1, S(m) = psi(m+1) + gamma + C - Sum_{j>=1} (-1)^j*zeta(2*j+1, m+1)/(2*j+1)!, where psi is the digamma function, gamma is Euler's constant, and zeta(s,q) is the Hurwitz zeta function. Set S(0) = 0.
+%F A401821 These identities follow by expanding sin(1/k) in its Taylor series and using H_m^(r) = zeta(r) - zeta(r,m+1) for r > 1, and H_m = psi(m+1) + gamma.
+%F A401821 S(a(n)-1) <= n < S(a(n)).
+%F A401821 S(m) = log(m) + gamma + C + 1/(2*m) + O(1/m^2).
+%F A401821 a(n) ~ exp(n - gamma - C); in particular, lim_{n->infinity} a(n+1)/a(n) = e.
+%e A401821 For n = 1, S(1) = 0.8414709848078965... < 1 and S(2) = 1.3208965234120995... > 1, so a(1) = 2.
+%e A401821 For n = 2, S(4) = 1.8954951794627746... < 2 and S(5) = 2.0941645102578358... > 2, so a(2) = 5.
+%o A401821 (Python)
+%o A401821 import mpmath as mp
+%o A401821 def terms(count=30):
+%o A401821     # The precision and truncation below are validated for n = 1,...,30.
+%o A401821     if not isinstance(count, int) or not 1 <= count <= 30:
+%o A401821         raise ValueError("Supported range: 1 <= count <= 30")
+%o A401821     with mp.workdps(120):
+%o A401821         J = 30
+%o A401821         c = [(-1)**j / mp.factorial(2*j+1) for j in range(1, J+1)]
+%o A401821         C = mp.fsum(c[j-1] * mp.zeta(2*j+1) for j in range(1, J+1))
+%o A401821         def S(m):
+%o A401821             if m == 0:
+%o A401821                 return mp.mpf(0)
+%o A401821             return (mp.digamma(m+1) + mp.euler + C
+%o A401821                     - mp.fsum(c[j-1] * mp.zeta(2*j+1, m+1)
+%o A401821                               for j in range(1, J+1)))
+%o A401821         answer = []
+%o A401821         for n in range(1, count+1):
+%o A401821             # S(m) = log(m) + EulerGamma + C + 1/(2*m) + O(m**-2).
+%o A401821             x = mp.exp(n - mp.euler - C)
+%o A401821             m = max(1, int(mp.floor(x - mp.mpf("0.5"))) + 1)
+%o A401821             while S(m) <= n:
+%o A401821                 m += 1
+%o A401821             while m > 1 and S(m-1) > n:
+%o A401821                 m -= 1
+%o A401821             # The omitted Taylor terms total less than zeta(63)/63! < 5.1e-88.
+%o A401821             # These margins are comfortably larger than that truncation error.
+%o A401821             tol = mp.mpf("1e-80")
+%o A401821             assert n - S(m-1) > tol and S(m) - n > tol
+%o A401821             answer.append(m)
+%o A401821         return answer
+%o A401821 if __name__ == "__main__":
+%o A401821     print(", ".join(map(str, terms())))
+%Y A401821 Cf. A004080, A249022.
+%K A401821 nonn,new
+%O A401821 1,1
+%A A401821 _Firdous Ahmad Mala_, Nov 06 2026
