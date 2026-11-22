@@ -1,0 +1,33 @@
+%I A402203 #6 Nov 21 2026 15:19:50
+%S A402203 3,7,13,29,53,97,181,349,683,1361,2657,5147,10247,20399,40709,80897,
+%T A402203 161717,323249,646169,1292063,2583517,5166871,10333639,20667217,
+%U A402203 41335477,82670857,165341521,330682057,661364191
+%N A402203 Smallest prime whose tree of most central Goldbach partitions has height n.
+%C A402203 Every prime P >= 7 can be written P = q1 + q2 + 1 with q1 = m - k, q2 = m + k, m = (P-1)/2 and k = A047160(m) the least k >= 0 such that m - k and m + k are both prime, so that q1 = A112823(m) and q2 = A234345(m). Applying the rule recursively to q1 and q2 gives a binary tree whose leaves are 3 and 5. The height is h(3) = h(5) = 0 and h(P) = 1 + max(h(q1), h(q2)).
+%C A402203 Since each child is close to half its parent, the primes of height n lie almost exactly in the interval [c*2^n, 2c*2^n) with c = 2.4637...: only 0.045% of the primes between 1001 and 6.6*10^8 lie in the overlap of two consecutive heights. a(n)/2^n is between 2.46372 and 2.46379 for 21 <= n <= 28; it is not known whether it converges.
+%C A402203 Following from a(n) down to a leaf f a path whose height decreases by 1 at each step gives the exact formula a(n)/2^n = f + Sum_{j=1..n} (1 + 2*e_j*L_j)/2^j, where L_j is the value of k at the node of height j and e_j = -1 if the path goes to the larger child, +1 to the smaller one. Since the terms are divided by 2^j, the constant c is fixed mainly by the values of k at a few small primes near the leaves (k = 3 for 17, 29 and 53).
+%H A402203 Nizar Montacer, <a href="https://zenodo.org/records/24245674">Centered decomposition of primes: Goldbach gaps and orphan primes</a>, working version (file article_en_travail.pdf), Zenodo, 2026.
+%e A402203 a(1) = 7 = 3 + 3 + 1.
+%e A402203 a(2) = 13: 13 = 5 + 7 + 1 and 7 = 3 + 3 + 1, so 13 has height 2, while 11 = 5 + 5 + 1 has height 1.
+%o A402203 (Python)
+%o A402203 def sieve(n):
+%o A402203     s = bytearray([1]) * (n + 1); s[0] = s[1] = 0
+%o A402203     for i in range(2, int(n**0.5) + 1):
+%o A402203         if s[i]: s[i*i::i] = bytearray(len(range(i*i, n + 1, i)))
+%o A402203     return s
+%o A402203 def children(P, s):  # most central partition P - 1 = (m - k) + (m + k), k = A047160(m)
+%o A402203     m, k = (P - 1) // 2, 0
+%o A402203     while not (s[m - k] and s[m + k]): k += 1
+%o A402203     return m - k, m + k
+%o A402203 def heights(N):  # a(0), a(1), ... with a(n) <= N
+%o A402203     s = sieve(N); h = {3: 0, 5: 0}; a = [3]
+%o A402203     for P in range(7, N + 1, 2):
+%o A402203         if s[P]:
+%o A402203             q1, q2 = children(P, s); h[P] = 1 + max(h[q1], h[q2])
+%o A402203             if h[P] == len(a): a.append(P)
+%o A402203     return a
+%o A402203 print(heights(3000000))
+%Y A402203 Cf. A000040, A047160, A112823, A234345, A402202, A402204.
+%K A402203 nonn,more,new
+%O A402203 0,1
+%A A402203 _Nizar Montacer_, Nov 15 2026

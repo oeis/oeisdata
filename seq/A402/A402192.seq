@@ -1,0 +1,52 @@
+%I A402192 #15 Nov 21 2026 16:31:28
+%S A402192 1,3,17,150,1848,29636,589362,14032452,389622192,12362824150
+%N A402192 Number of ways to remove n unit triangles from an equilateral triangle of side n so that the rest can be tiled by lozenges.
+%C A402192 A lozenge is two unit triangles joined along an edge.
+%C A402192 The triangle of side n is cut into n^2 unit triangles: n*(n+1)/2 point up and n*(n-1)/2 point down. A lozenge covers one of each, so exactly n upward pointing triangles have to be removed.
+%C A402192 Call the removed triangles holes. Ardila and Billey proved that the rest can be tiled if and only if every upward pointing subtriangle of side k contains at most k holes, for 1 <= k <= n.
+%C A402192 a(n) is also the number of bases of the matroid T_{n,3} defined by Ardila and Billey.
+%C A402192 a(n) <= A014068(n), the number of ways to choose any n of the upward pointing triangles.
+%C A402192 The sum of the number of lozenge tilings over all these hole sets is A122722(n)/n! (see Santos).
+%C A402192 For n = 1 nothing is left after the removal, and this counts as one way.
+%H A402192 Federico Ardila and Sara Billey, <a href="https://arxiv.org/abs/math/0605598">Flag arrangements and triangulations of products of simplices</a>, arXiv:math/0605598 [math.CO], 2006.
+%H A402192 Francisco Santos, <a href="https://arxiv.org/abs/math/0312069">The Cayley trick and triangulations of products of simplices</a>, arXiv:math/0312069 [math.CO], 2003-2004.
+%H A402192 Karan Sharma, <a href="/A402192/a402192.png">The 17 hole sets for n = 3 with their tilings, and the 3 that cannot be tiled</a>
+%H A402192 Karan Sharma, <a href="/A402192/a402192_1.png">All 150 hole sets for n = 4, each with one lozenge tiling</a>
+%e A402192 For n = 3 there are 6 upward triangles and binomial(6,3) = 20 ways to remove 3 of them.
+%e A402192 In 3 of these ways the holes are the 3 upward triangles of one subtriangle of side 2. That subtriangle then has a single downward triangle left, with no neighbor to pair with, so no tiling exists.
+%e A402192 The other 17 ways work, so a(3) = 17.
+%e A402192 Table for n = 1..10:
+%e A402192    n | ways to choose n holes | a(n) = can be tiled
+%e A402192   ---+------------------------+--------------------
+%e A402192    1 |                      1 |                   1
+%e A402192    2 |                      3 |                   3
+%e A402192    3 |                     20 |                  17
+%e A402192    4 |                    210 |                 150
+%e A402192    5 |                   3003 |                1848
+%e A402192    6 |                  54264 |               29636
+%e A402192    7 |                1184040 |              589362
+%e A402192    8 |               30260340 |            14032452
+%e A402192    9 |              886163135 |           389622192
+%e A402192   10 |            29248649430 |         12362824150
+%e A402192 The second column is A014068(n).
+%o A402192 (Python)
+%o A402192 def a(n):
+%o A402192     cells = [(i, j) for i in range(n) for j in range(i+1)]
+%o A402192     subs = [(k, i, j) for k in range(1, n) for i in range(n-k+1) for j in range(i+1)]
+%o A402192     memb = [[s for s, (k, i, j) in enumerate(subs) if 0 <= c[1]-j <= c[0]-i < k] for c in cells]
+%o A402192     cnt = [0]*len(subs)
+%o A402192     def rec(t, left):
+%o A402192         if left == 0: return 1
+%o A402192         if len(cells)-t < left: return 0
+%o A402192         r = rec(t+1, left)
+%o A402192         if all(cnt[s] < subs[s][0] for s in memb[t]):
+%o A402192             for s in memb[t]: cnt[s] += 1
+%o A402192             r += rec(t+1, left-1)
+%o A402192             for s in memb[t]: cnt[s] -= 1
+%o A402192         return r
+%o A402192     return rec(0, n)
+%o A402192 print([a(n) for n in range(1, 8)])  # slow for n > 8
+%Y A402192 Cf. A014068, A122722.
+%K A402192 nonn,hard,more,new
+%O A402192 1,2
+%A A402192 _Karan Sharma_, Nov 15 2026

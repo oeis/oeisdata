@@ -1,0 +1,36 @@
+%I A402204 #4 Nov 21 2026 15:28:35
+%S A402204 5,11,23,47,89,179,359,719,1439,2879,5387,10607,20921,41843,83177,
+%T A402204 165059,327421,650927,1299451,2598119,5191819,10383599,20767199,
+%U A402204 41337869,82675739,165347761,330691799,661378519
+%N A402204 Largest prime whose tree of most central Goldbach partitions has height n.
+%C A402204 Every prime P >= 7 can be written P = q1 + q2 + 1 with q1 = m - k, q2 = m + k, m = (P-1)/2 and k = A047160(m) the least k >= 0 such that m - k and m + k are both prime, so that q1 = A112823(m) and q2 = A234345(m). Applying the rule recursively to q1 and q2 gives a binary tree whose leaves are 3 and 5. The height is h(3) = h(5) = 0 and h(P) = 1 + max(h(q1), h(q2)).
+%C A402204 The sequence is well defined and its terms are certain: the larger child q2 = m + k satisfies q2 + 1 >= (P+1)/2, so following larger children from P reaches a leaf f <= 5 after at most h(P) steps, whence (P+1)/2^h(P) <= f + 1 <= 6. Every prime of height n is therefore at most 6*2^n - 1, and a(n) is found by examining all primes up to that bound. Equality holds for n = 0..3: 5, 11, 23 and 47 = 6*2^n - 1.
+%C A402204 If p is a Sophie Germain prime (A005384), 2p + 1 has children p and p (k = 0), so h(2p + 1) = h(p) + 1. Accordingly the sequence contains Cunningham chains of the first kind: a(0..3) = 5, 11, 23, 47, from the chain starting at 2, and a(4..9) = 89, 179, 359, 719, 1439, 2879, the smallest complete Cunningham chain of length 6 (A005602). The relation a(n) = 2*a(n-1) + 1 also holds for n = 13, 22 and 24.
+%C A402204 For large n, a(n) lies just above the smallest prime of height n + 1 (A402203), the two heights overlapping slightly: a(24) = 82675739 > A402203(25) = 82670857. a(n)/2^n is between 4.92765 and 4.92786 for 23 <= n <= 27.
+%H A402204 Nizar Montacer, <a href="https://zenodo.org/records/24245674">Centered decomposition of primes: Goldbach gaps and orphan primes</a>, working version (file article_en_travail.pdf), Zenodo, 2026.
+%e A402204 a(1) = 11 = 5 + 5 + 1 has height 1, and every prime of height 1 is at most 6*2 - 1 = 11.
+%e A402204 a(4) = 89 = 41 + 47 + 1, where 47 = 23 + 23 + 1, 23 = 11 + 11 + 1 and 11 = 5 + 5 + 1, so 89 has height 4.
+%o A402204 (Python)
+%o A402204 def sieve(n):
+%o A402204     s = bytearray([1]) * (n + 1); s[0] = s[1] = 0
+%o A402204     for i in range(2, int(n**0.5) + 1):
+%o A402204         if s[i]: s[i*i::i] = bytearray(len(range(i*i, n + 1, i)))
+%o A402204     return s
+%o A402204 def children(P, s):  # most central partition P - 1 = (m - k) + (m + k), k = A047160(m)
+%o A402204     m, k = (P - 1) // 2, 0
+%o A402204     while not (s[m - k] and s[m + k]): k += 1
+%o A402204     return m - k, m + k
+%o A402204 def largest(N):  # all a(n) with 6*2^n - 1 <= N; a prime of height n is <= 6*2^n - 1
+%o A402204     s = sieve(N); h = {3: 0, 5: 0}; a = [5]
+%o A402204     for P in range(7, N + 1, 2):
+%o A402204         if s[P]:
+%o A402204             q1, q2 = children(P, s); h[P] = 1 + max(h[q1], h[q2])
+%o A402204             a += [0] * (h[P] + 1 - len(a)); a[h[P]] = P
+%o A402204     n = 0
+%o A402204     while 6 * 2**(n + 1) - 1 <= N: n += 1
+%o A402204     return a[:n + 1]
+%o A402204 print(largest(3000000))
+%Y A402204 Cf. A000040, A005384, A005602, A047160, A112823, A234345, A402203.
+%K A402204 nonn,more,new
+%O A402204 0,1
+%A A402204 _Nizar Montacer_, Nov 15 2026
