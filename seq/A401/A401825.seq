@@ -1,0 +1,32 @@
+%I A401825 #25 Nov 22 2026 15:57:48
+%S A401825 0,0,2,6,4,20,20,42,42,72,42,110,110,156,156,180,208,272,272,342,342,
+%T A401825 420,342,506,506,600,600,702,513,812,812,930,930,1024,1023,1155,1260,
+%U A401825 1332,1332,1404,1332,1640,1640,1806,1806,1980,1806,2162,2162,2352,2352,2500,2352,2756,2756,2860,3080,3080,2793,3422,3422,3660
+%N A401825 Maximum number of digits of a zerofree non-repdigit permutation-invariant Niven number in base n, or 0 if no such number exists.
+%C A401825 A positive integer h in base n is a permutation-invariant Niven number (PINN; cf. Wu and Lou) if every integer formed by permuting the base-n digits of h is divisible by the sum of the base-n digits of h.
+%C A401825 A multiset M of L >= 2 nonzero base-n digits (1 <= d <= n-1) that is not a repdigit forms a PINN if and only if its digit sum S divides (n-1)*g and a0*(R_L^(n) - L) == 0 (mod S), where a0 = min(M), g = gcd_{x,y in M}(|x - y|), and R_L^(n) = (n^L - 1)/(n - 1).
+%C A401825 Since 1 <= g <= n-2 and L < S <= (n-1)*g <= (n-1)*(n-2), the set of zero-free non-repdigit PINNs in base n is finite for every base n >= 2, and a(n) is well-defined.
+%C A401825 For n = 2 and n = 3, no zero-free non-repdigit PINNs exist, so a(2) = a(3) = 0.
+%C A401825 For every base n >= 5, a(n) satisfies the universal upper bound a(n) <= (n-2)*(n-3).
+%C A401825 If n - 2 = p^r is an odd prime power, the bound is achieved with equality: a(n) = (n-2)*(n-3), realized by the digit multiset consisting of (n-2)*(n-3) - 2 copies of 1 and 2 copies of (n-1).
+%C A401825 If n >= 8 is even and gcd(3, n-3) = 1 with n - 3 = p^r a prime power, then a(n) = (n-3)*(n-4), realized by the digit multiset consisting of (n-3)*(n-4) - 3 copies of 1 and 3 copies of (n-2).
+%C A401825 In particular, in base n = 10, a(10) = 7*6 = 42, achieved uniquely by the 42-digit multiset with thirty-nine 1's and three 8's.
+%H A401825 Hui-Ling Wu and S. Y. Lou, <a href="https://arxiv.org/abs/2508.01611">Permutation-invariant Niven numbers</a>, arXiv:2508.01611 [math.CO], 2025.
+%F A401825 a(n) <= (n-2)*(n-3) for all n >= 5.
+%F A401825 a(n) = (n-2)*(n-3) if n - 2 is an odd prime power.
+%F A401825 a(n) = (n-3)*(n-4) if n >= 8 is even, gcd(3, n-3) = 1, and n - 3 is a prime power.
+%e A401825 For n = 4, the only zero-free non-repdigit PINN multiset in base 4 is {1, 2} (representing 12_4 = 6 and 21_4 = 9, both divisible by 1 + 2 = 3), which has 2 digits, so a(4) = 2.
+%e A401825 For n = 5, the multiset {1, 1, 1, 1, 4, 4} in base 5 has digit sum S = 12, and all 15 permutations in base 5 are divisible by 12; this is the maximum possible length, so a(5) = 6.
+%e A401825 For n = 10, the maximal zero-free non-repdigit decimal PINN multiset consists of thirty-nine 1's and three 8's (digit sum S = 63, length 42), so a(10) = 42.
+%t A401825 pBounded[n_, r_, m_] := pBounded[n, r, m] = Which[n == 0, 1, n < 0 || r <= 0 || m <= 0, 0, True, Module[{mv = Min[n, m]}, pBounded[n - mv, r - 1, mv] + pBounded[n, r, mv - 1]]];
+%t A401825 primPart[c_, r_, m_] := Sum[MoebiusMu[d]*pBounded[c/d, r, Quotient[m, d]], {d, Divisors[c]}];
+%t A401825 a[k_] := If[k <= 3, 0, Module[{best = 0, maxS, maxC, maxL, rem, c, rk}, Do[maxS = (k - 1)*g; If[maxS - g > best, Do[Do[maxC = Quotient[k - 1 - a0, g]; If[maxC >= 1, maxL = Quotient[s - g, a0]; Do[rem = s - len*a0; If[rem > 0 && Divisible[rem, g], c = Quotient[rem, g]; If[c <= (len - 1)*maxC, rk = Mod[Quotient[PowerMod[k, len, s*(k - 1)] - 1, k - 1], s]; If[Divisible[a0*(rk - len), s] && primPart[c, len - 1, maxC] > 0, best = len; Break[]]]], {len, maxL, best + 1, -1}]], {a0, 1, k - 1 - g}], {s, Select[Divisors[maxS], # >= 2 &]}]], {g, 1, k - 2}]; best]];
+%t A401825 Table[a[k], {k, 2, 35}]
+%o A401825 (PARI)
+%o A401825 pB(n, r, m) = if(n==0, 1, if(n<0 || r<=0 || m<=0, 0, my(mv=min(n, m)); pB(n-mv, r-1, mv) + pB(n, r, mv-1)));
+%o A401825 pPart(c, r, m) = sumdiv(c, d, moebius(d) * pB(c/d, r, m\d));
+%o A401825 a(k) = {if(k<=3, return(0)); my(best=0); for(g=1, k-2, my(mS=(k-1)*g); if(mS-g > best, fordiv(mS, s, if(s>=2, for(a0=1, k-1-g, my(mc=(k-1-a0)\g); if(mc>=1, forstep(L=(s-g)\a0, best+1, -1, my(rem=s-L*a0); if(rem>0 && rem%g==0, my(c=rem/g); if(c<=(L-1)*mc, my(rk=(lift(Mod(k, s*(k-1))^L) - 1) \ (k-1) % s); if((a0*(rk - L))%s==0 && pPart(c, L-1, mc)>0, best=L; break)))))))))); best};
+%Y A401825 Cf. A005349, A225782, A014950.
+%K A401825 nonn,base,new
+%O A401825 2,3
+%A A401825 _Guido Avagliano_, Nov 06 2026

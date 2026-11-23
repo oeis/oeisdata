@@ -1,0 +1,42 @@
+%I A402240 #9 Nov 22 2026 20:07:59
+%S A402240 1,2,4,7,14,25,45,61,122,222,406,573,1054,1530,2271,2480,4960,9187,
+%T A402240 17066,25116,46762,70603,108500,121338,226917,351169,552024,628939,
+%U A402240 1008673,1167613,1373701,1385552,2771104,5216241,9834199,15055556,28398970,44557610,70964248,82052149,154811878,248229989
+%N A402240 Number of subsets of {1..n} that contain the bitwise OR of any two of their elements whenever this OR is <= n.
+%C A402240 Write each number from 1 to 2^k - 1 as the set of positions of the 1's in its binary expansion. Then OR becomes union, and every OR of two such numbers is again <= 2^k - 1. So a(2^k - 1) is the number of families of nonempty subsets of {1..k} that are closed under union, which is A102896(k).
+%C A402240 The numbers from 1 to 2^k - 2 are the nonempty subsets of {1..k} except the full set {1..k}, which is 2^k - 1. Adding {1..k} to a family counted by a(2^k - 2) gives a union-closed family that covers {1..k}, and every such family is obtained exactly once in this way. So a(2^k - 2) = A102894(k).
+%C A402240 If the OR must be in the subset even when it is > n, the count becomes the number of terms of A326875 that are less than 2^n: 1, 2, 3, 7, 8, 12, 16, 61, ...
+%H A402240 Yinon Werner, <a href="/A402240/b402240.txt">Table of n, a(n) for n = 0..79</a>
+%F A402240 a(n) = 2*a(n-1) if and only if n is a power of 2; otherwise a(n-1) < a(n) < 2*a(n-1).
+%F A402240 a(2^k - 2) = A102894(k) for k >= 1; a(2^k - 1) = A102896(k) and a(2^k) = A102897(k) for k >= 0.
+%e A402240 a(3) = 7: of the 8 subsets of {1,2,3}, only {1,2} is missing, because 1 OR 2 = 3. The 7 subsets are {}, {1}, {2}, {3}, {1,3}, {2,3}, {1,2,3}.
+%e A402240 a(4) = 14 = 2*a(3): for x = 1, 2, 3 we have x OR 4 = x + 4 > 4, so 4 can be added to each of the 7 subsets above or left out.
+%o A402240 (Python)
+%o A402240 from functools import lru_cache
+%o A402240 def a(n):
+%o A402240     # Decide the numbers n, n-1, ..., 1, largest first. A set S is counted if, for all
+%o A402240     # w < y in S with w|y <= n, also w|y is in S. This pair is checked when y is decided:
+%o A402240     # w|y >= y, so at that moment we already know whether w|y is in S.
+%o A402240     @lru_cache(maxsize=None)
+%o A402240     def f(y, allowed, chosen):
+%o A402240         # allowed: bit mask of the numbers <= y that may still be put in S
+%o A402240         # chosen:  bit mask of the numbers in S that are > y and below 2^(bit length of y);
+%o A402240         #          only these can be equal to w|v with w, v <= y
+%o A402240         if y == 0: return 1
+%o A402240         low = (1 << y) - 1                              # numbers < y
+%o A402240         keep = (1 << (1 << (y - 1).bit_length())) - 1   # numbers below 2^(bit length of y-1)
+%o A402240         total = f(y - 1, allowed & low, chosen & keep)  # y is not in S
+%o A402240         if allowed >> y & 1:                            # y is in S
+%o A402240             c = chosen | 1 << y
+%o A402240             bad = 0
+%o A402240             for w in range(1, y):
+%o A402240                 v = w | y
+%o A402240                 if v <= n and not c >> v & 1:           # w|y is needed but is not in S,
+%o A402240                     bad |= 1 << w                       # so w may not be put in S
+%o A402240             total += f(y - 1, allowed & low & ~bad, c & keep)
+%o A402240         return total
+%o A402240     return f(n, (1 << (n + 1)) - 2, 0)
+%Y A402240 Cf. A102894, A102896, A102897, A326080, A326875, A359527, A402241, A402242.
+%K A402240 nonn,new
+%O A402240 0,2
+%A A402240 _Yinon Werner_, Nov 16 2026

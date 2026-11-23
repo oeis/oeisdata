@@ -1,0 +1,40 @@
+%I A398116 #66 Nov 22 2026 15:43:31
+%S A398116 0,60,389488,4350069824940,236058362078882840752440
+%N A398116 Number of sequences of at least two pairwise distinct points of an n X n grid such that every grid point strictly between two consecutive points has already appeared earlier in the sequence.
+%C A398116 a(n) counts the possible touch-screen passwords on an n X n square grid, where any previously unvisited point crossed by a straight segment is automatically included in the password and no point may be selected twice.
+%H A398116 Project Euler, <a href="https://projecteuler.net/problem=879">Problem 879 (Touch-screen Password)</a>.
+%F A398116 Let V_n := {0, 1, ..., n - 1}^2. For S a subset of V_n and p in S, let F(S,p) count the valid continuations from p after visiting exactly the points in S, including the empty continuation. Then, F(S,p) = 1 + Sum_{q} F(S union {q},q), where the sum runs over all q in V_n with q not in S such that every grid point strictly between p and q belongs to S. Finally, a(n) = Sum_{p in V_n} (F({p},p) - 1).
+%e A398116 a(1) = 0 (since a password must contain at least two distinct points), and a(2) = 60 since no segment joining two points of a 2 X 2 grid contains another grid point in its interior. Thus, a(2) = 4*3 + 4*3*2 + 4*3*2*1 = 60.
+%o A398116 (Python)
+%o A398116 from functools import lru_cache
+%o A398116 from math import gcd
+%o A398116 def a(n):
+%o A398116     N = n*n
+%o A398116     between = [[0]*N for _ in range(N)]
+%o A398116     for u in range(N):
+%o A398116         x, y = divmod(u, n)
+%o A398116         for v in range(N):
+%o A398116             if u == v:
+%o A398116                 continue
+%o A398116             X, Y = divmod(v, n)
+%o A398116             dx, dy = X-x, Y-y
+%o A398116             g = gcd(abs(dx), abs(dy))
+%o A398116             for k in range(1, g):
+%o A398116                 w = (x + k*(dx//g))*n + y + k*(dy//g)
+%o A398116                 between[u][v] |= 1 << w
+%o A398116     @lru_cache(None)
+%o A398116     def f(S, u):
+%o A398116         return 1 + sum(
+%o A398116             f(S | (1 << v), v)
+%o A398116             for v in range(N)
+%o A398116             if not (S & (1 << v))
+%o A398116             and not (between[u][v] & ~S)
+%o A398116         )
+%o A398116     return sum(f(1 << u, u) - 1 for u in range(N))
+%o A398116 if __name__ == "__main__":
+%o A398116     for n in range(1, 5):
+%o A398116         print(f"a({n}) = {a(n)}", flush=True)
+%Y A398116 Cf. A163889 (counts Android unlock patterns by length on a fixed 3 X 3 grid).
+%K A398116 nonn,hard,more,new
+%O A398116 1,2
+%A A398116 _Marco Ripà_, Nov 15 2026

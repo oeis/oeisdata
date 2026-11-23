@@ -1,0 +1,31 @@
+%I A402242 #10 Nov 22 2026 20:05:04
+%S A402242 1,2,4,5,10,13,15,16,32,43,51,56,61,64,66,67,134,185,225,254,281,300,
+%T A402242 314,323,339,350,358,363,368,371,373,374,748,1055,1311,1516,1703,1850,
+%U A402242 1968,2057,2175,2266,2338,2391,2440,2475,2501,2518,2585,2636,2676,2705,2732,2751,2765,2774,2790
+%N A402242 Number of subsets of {1..n} that contain the bitwise XOR of any two distinct elements whenever this XOR is <= n.
+%C A402242 Think of each number from 1 to 2^k - 1 as a vector of k binary digits. Then XOR is addition of vectors modulo 2, and the XOR of two such numbers is always <= 2^k - 1. So a set S is counted by a(2^k - 1) exactly when S together with 0 is a subspace of GF(2)^k, and a(2^k - 1) = A006116(k), the number of subspaces.
+%C A402242 Removing n from a counted subset of {1..n} gives a counted subset of {1..n-1}. If n = 2^j, then x XOR n = x + n > n for x < n, and two numbers below 2^j have XOR below 2^j, so n can be added to or left out of every counted subset of {1..n-1}. Otherwise n = x XOR y with x the lowest power of 2 in n and y = n - x, and {x, y} is counted for n-1 but not for n.
+%C A402242 The same definition with ordinary addition instead of XOR gives A326080.
+%H A402242 Yinon Werner, <a href="/A402242/b402242.txt">Table of n, a(n) for n = 0..256</a>
+%F A402242 a(n) = 2*a(n-1) if and only if n is a power of 2; otherwise a(n) < 2*a(n-1).
+%F A402242 a(2^k - 1) = A006116(k) and a(2^k) = 2*A006116(k) for k >= 0.
+%e A402242 a(3) = 5: 1 XOR 2 = 3, 1 XOR 3 = 2 and 2 XOR 3 = 1, so a counted subset of {1,2,3} with two elements must also contain the third. The 5 subsets are {}, {1}, {2}, {3}, {1,2,3}; with 0 added they are the 5 subspaces of GF(2)^2.
+%o A402242 (Python)
+%o A402242 def a(n):
+%o A402242     # Build the list of all counted subsets of {1..m} for m = 1, 2, ..., n (subsets are bit masks).
+%o A402242     # Removing m from a counted subset of {1..m} gives a counted subset of {1..m-1}.
+%o A402242     sets = [0]
+%o A402242     for m in range(1, n + 1):
+%o A402242         pairs = [(x, x ^ m) for x in range(1, m) if x < x ^ m < m]   # x XOR y = m with x < y < m
+%o A402242         new = []
+%o A402242         for T in sets:
+%o A402242             if not any(T >> x & 1 and T >> y & 1 for x, y in pairs):
+%o A402242                 new.append(T)                     # m left out: no pair in T has XOR equal to m
+%o A402242             if all(T >> (x ^ m) & 1 for x in range(1, m) if T >> x & 1 and x ^ m < m):
+%o A402242                 new.append(T | 1 << m)            # m put in: x XOR m < m must be in T for every x in T
+%o A402242         sets = new
+%o A402242     return len(sets)
+%Y A402242 Cf. A006116, A190939, A326080, A326083, A402240, A402241.
+%K A402242 nonn,new
+%O A402242 0,2
+%A A402242 _Yinon Werner_, Nov 16 2026

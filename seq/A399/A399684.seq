@@ -1,0 +1,31 @@
+%I A399684 #26 Nov 22 2026 21:32:50
+%S A399684 3,5,13,23,41,22381,45503,3852347,1801981681
+%N A399684 Primes p such that the iteration of T(x) = (x^2 - 2)^4 collapses every element of GF(p) to 1.
+%C A399684 With h(x) = x^2 - 2 and g(u) = u^4 one has T = g o h, and F = h o g, F(u) = u^8 - 2; the cycles of T and F correspond bijectively via h, so p is a term iff every orbit of F mod p reaches -1 = h(1).
+%C A399684 For p > 3 a necessary condition is that (F(u) - u)/(u + 1) = u^7 - u^6 + u^5 - u^4 + u^3 - u^2 + u - 2 (discriminant -26522311) has no root in GF(p). If p == 7 (mod 12), the basin of 1 is {1, -1}, so p is not a term.
+%C A399684 The orbit of the critical point 0 over Z is 0 -> 16 -> 254^4 -> ..., and 254^4 - 1 = 3*5*11*17*23*149*433.
+%C A399684 No other terms below 10^8 (exhaustive full functional-graph traversal of GF(p) for every prime p). The term 1801981681 was found in a bounded-step orbit scan up to 2*10^9 and certified by a complete traversal of GF(p); completeness of the list above 10^8 is not established.
+%H A399684 Igor M. Zhuk, <a href="https://doi.org/10.5281/zenodo.23420627">Unital Collapse Primes in Arithmetic Dynamics: Total Backward-Orbit Collapse for T(x) = (x^2 - 2)^2 mod p, Galois Stratification, and Fermat-Totient Asymptotics</a>, Zenodo preprint (2026).
+%H A399684 Igor M. Zhuk, <a href="https://doi.org/10.5281/zenodo.23856837">Total-Collapse Primes of Polynomial Maps over GF(p): Eighteen Families and Two Related Sequences</a>, Zenodo preprint (2026); <a href="https://github.com/Nondual-Observer/total-collapse-primes-oeis">GitHub verification suite</a>.
+%F A399684 p is in the sequence iff #{x in {0..p-1} : T^(p)(x) == 1 (mod p)} = p, where T(x) = (x^2 - 2)^4 mod p and T^(k) denotes the k-th iterate of T.
+%e A399684 For p = 3: T(0) = 16 == 1 (mod 3), T(1) = T(2) = 1, so all 3 elements of GF(3) reach 1 in 1 step; thus 3 is in the sequence.
+%e A399684 For p = 13: T(0) = 16 == 3 (mod 13), T(3) = 7^4 = 2401 == 9 (mod 13), T(9) = 79^4 = 1^4 = 1 (mod 13), and all 13 elements of GF(13) reach 1 within 3 steps; thus 13 is in the sequence.
+%o A399684 (Julia)
+%o A399684 using Primes
+%o A399684 function isok(p::Int)
+%o A399684     (!isprime(p) || p == 2 || p % 12 == 7) && return false
+%o A399684     f(c) = (u = mod(c*c - 2, p); u2 = mod(u*u, p); mod(u2*u2, p))
+%o A399684     st = zeros(UInt8, p); st[2] = st[p] = 2
+%o A399684     for x in 0:(p >> 1)
+%o A399684         st[x + 1] == 2 && continue
+%o A399684         c = x; while st[c + 1] == 0; st[c + 1] = 1; c = f(c); end
+%o A399684         st[c + 1] == 1 && return false
+%o A399684         c = x; while st[c + 1] == 1; st[c + 1] = 2; c > 0 && (st[p - c + 1] = 2); c = f(c); end
+%o A399684     end
+%o A399684     return true
+%o A399684 end
+%o A399684 println(filter(isok, primes(3, 50000)))
+%Y A399684 Cf. A019434, A399326, A401173.
+%K A399684 nonn,hard,more,new
+%O A399684 1,1
+%A A399684 _Igor Zhuk_, Nov 16 2026
