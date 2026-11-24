@@ -1,0 +1,62 @@
+%I A402605 #9 Nov 23 2026 23:27:48
+%S A402605 1,0,2,0,0,6,6,0,0,0,24,84,84,24,0,0,0,0,120,960,2660,3500,2400,840,
+%T A402605 120,0,0,0,0,0,720,10800,59280,170250,296010,334680,253920,129300,
+%U A402605 42660,8280,720,0,0,0,0,0,0,5040,126000,1175580,5931240,18958842,41833302
+%N A402605 Triangle read by rows: T(n,k) is the number of acyclic digraphs on n labeled vertices with k arcs, exactly one source and exactly one sink, for n >= 1 and 0 <= k <= binomial(n,2).
+%C A402605 For n=1 the lone vertex is both source and sink.  For n>1 the endpoints are distinct such that labels are not fixed.
+%C A402605 Choosing s sinks leaves a DAG counted by B(n-s,x); each chosen sink needs a nonempty set of predecessors among the other vertices. The factor s selects exactly one sink by inclusion-exclusion.
+%C A402605 Credit: A350487 gives the one-source polynomial recurrence, and Andrew Howroyd's program in A165950 gives P(n,1). Figure 7 of the Genitrini-Pepin-Viola preprint tabulates the same triangle.
+%H A402605 Gregory Morse, <a href="/A402605/b402605.txt">Table of n, a(n) for n = 1..9919</a>
+%H A402605 A. Genitrini, M. Pépin, and A. Viola, <a href="https://doi.org/10.1016/j.procs.2021.11.057">Unlabelled ordered DAGs and labelled DAGs: constructive enumeration and uniform random sampling</a>, Procedia Computer Science 195 (2021), 468-477.
+%H A402605 A. Genitrini, M. Pépin, and A. Viola, <a href="https://hal.sorbonne-universite.fr/hal-03029381v2/document">Unlabelled ordered DAGs and labelled DAGs: constructive enumeration and uniform random sampling</a>, HAL preprint hal-03029381v2, Figure 7.
+%H A402605 Marcel et al., <a href="https://mathoverflow.net/q/395095">Is there a formula for the number of st-dags (DAG with 1 source and 1 sink) with n vertices?</a>
+%F A402605 Let B(n,x) = Sum_{k=0..binomial(n,2)} A350487(n,k)*x^k.
+%F A402605 B(1,x) = P(1,x) = 1. For n >= 2, B(n,x) = Sum_{s=1..n-1} (-1)^(s-1)*binomial(n,s)*((1+x)^(n-s)-1)^s*B(n-s,x).
+%F A402605 For n >= 2, P(n,x) = Sum_{s=1..n-1} (-1)^(s-1)*s*binomial(n,s)*((1+x)^(n-s)-1)^s*B(n-s,x).
+%F A402605 T(n,k) = [x^k] P(n,x).
+%F A402605 T(n,n-1) = T(n,binomial(n,2)) = A000142(n).
+%e A402605 Triangle begins:
+%e A402605   1;
+%e A402605   0, 2;
+%e A402605   0, 0, 6, 6;
+%e A402605   0, 0, 0, 24, 84, 84, 24;
+%e A402605   0, 0, 0, 0, 120, 960, 2660, 3500, 2400, 840, 120;
+%o A402605 (Python)
+%o A402605 import math
+%o A402605 def st_dag_rows(nmax: int) -> list[list[int]]:
+%o A402605   """Rows 1 through nmax for labeled DAGs with one source and one sink."""
+%o A402605   if nmax < 1:
+%o A402605     raise ValueError("nmax must be >= 1")
+%o A402605   def multiply(p, q):
+%o A402605     out = [0] * (len(p) + len(q) - 1)
+%o A402605     for i, a in enumerate(p):
+%o A402605       if a:
+%o A402605         for j, b in enumerate(q):
+%o A402605           if b:
+%o A402605             out[i + j] += a * b
+%o A402605     return out
+%o A402605   # B counts DAGs with one source; the list index is the vertex count.
+%o A402605   B = [[], [1]]
+%o A402605   rows = [[1]]
+%o A402605   incoming = [[]] + [[0] + [math.comb(r, k) for k in range(1, r + 1)]
+%o A402605                      for r in range(1, nmax)]
+%o A402605   powers = [[1] for _ in range(nmax)]
+%o A402605   for n in range(2, nmax + 1):
+%o A402605     source = [0] * (math.comb(n, 2) + 1)
+%o A402605     both = [0] * len(source)
+%o A402605     for r in range(1, n):
+%o A402605       s = n - r
+%o A402605       powers[r] = multiply(powers[r], incoming[r])
+%o A402605       sign = (-1)**(s - 1) * math.comb(n, s)
+%o A402605       for k, a in enumerate(multiply(B[r], powers[r])):
+%o A402605         source[k] += sign * a
+%o A402605         both[k] += sign * s * a
+%o A402605     B.append(source)
+%o A402605     rows.append(both)
+%o A402605   return rows
+%o A402605 [v for row in st_dag_rows(8) for v in row]
+%Y A402605 Row sums give A165950. The unlabeled version is A350491.
+%Y A402605 Cf. A081064, A350487.
+%K A402605 nonn,tabf,new
+%O A402605 1,3
+%A A402605 _Gregory Morse_, Nov 21 2026

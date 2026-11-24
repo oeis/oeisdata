@@ -1,6 +1,7 @@
-%I A181026 #5 Dec 11 2020 09:57:26
-%S A181026 3,6,12,18,25,34,44
+%I A181026 #10 Nov 23 2026 09:37:21
+%S A181026 3,6,12,18,25,34,44,56,68,82,97,114,131,150,171
 %N A181026 Maximum number of 1s in an nX(n+2) binary matrix with no four 1s adjacent in a line along a row, column or diagonally.
+%C A181026 a(8)-a(15) were obtained with a SAT solver: for each n a matrix with a(n) ones was found, and the nonexistence of a matrix with a(n)+1 ones was certified by DRAT proofs (CaDiCaL, cube-and-conquer with symmetry breaking) that were verified with drat-trim. - _Nikhil Narayan Daphale_, Nov 17 2026
 %e A181026 Some solutions for 6X8
 %e A181026 ..0..1..1..1..0..1..1..1....0..1..1..1..0..1..1..1....0..1..1..1..0..1..1..1
 %e A181026 ..1..1..1..0..1..1..1..0....1..1..1..0..1..1..1..0....1..1..1..0..1..1..1..0
@@ -8,7 +9,32 @@
 %e A181026 ..1..1..1..0..1..1..0..1....1..1..0..0..1..1..0..1....1..1..0..0..0..1..0..1
 %e A181026 ..0..1..1..1..0..1..1..1....0..1..1..1..0..1..1..1....0..1..1..1..0..1..1..1
 %e A181026 ..1..1..1..0..1..1..1..0....1..1..1..0..1..1..1..0....1..1..1..0..1..1..1..0
+%o A181026 (Python)
+%o A181026 # M(R, C, L) = maximum number of 1s in an R X C binary matrix with no L 1s adjacent in a line (row, column,
+%o A181026 # diagonal or antidiagonal).  A181023: M(n,n,4); A181025: M(n,n+1,4); A181026: M(n,n+2,4); A181027: M(n,n+3,4).
+%o A181026 # Requires OR-Tools (pip install ortools).
+%o A181026 from ortools.sat.python import cp_model
+%o A181026 def M(R, C, L=4, workers=0):
+%o A181026     m = cp_model.CpModel()
+%o A181026     x = [[m.NewBoolVar('') for j in range(C)] for i in range(R)]
+%o A181026     for i in range(R):
+%o A181026         for j in range(C):
+%o A181026             for di, dj in ((0, 1), (1, 0), (1, 1), (1, -1)):
+%o A181026                 cells = [(i + t*di, j + t*dj) for t in range(L)]
+%o A181026                 if all(0 <= a < R and 0 <= b < C for a, b in cells):
+%o A181026                     m.Add(sum(x[a][b] for a, b in cells) <= L - 1)
+%o A181026     m.Maximize(sum(map(sum, x)))
+%o A181026     s = cp_model.CpSolver(); s.parameters.num_workers = workers   # 0 = use all cores
+%o A181026     assert s.Solve(m) == cp_model.OPTIMAL
+%o A181026     return round(s.ObjectiveValue())
+%o A181026 if __name__ == '__main__':
+%o A181026     import sys
+%o A181026     d, L, nmax = int(sys.argv[1]), int(sys.argv[2]), int(sys.argv[3])
+%o A181026     for n in range(1, nmax + 1):
+%o A181026         print(n, M(n, n + d, L), flush=True)
+%o A181026 # _Nikhil Narayan Daphale_, Nov 17 2026
 %Y A181026 Superdiagonal 2 of A181024.
-%K A181026 nonn,more
+%K A181026 nonn,hard,more,changed
 %O A181026 1,1
 %A A181026 _R. H. Hardin_, Sep 30 2010
+%E A181026 a(8)-a(15) from _Nikhil Narayan Daphale_, Nov 17 2026

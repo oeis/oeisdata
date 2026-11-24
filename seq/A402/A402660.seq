@@ -1,0 +1,49 @@
+%I A402660 #23 Nov 23 2026 05:50:31
+%S A402660 1,20,360,25920,984960,173560320,14545474560,3698380062720,
+%T A402660 467776012124160,232197197638533120,41547678832109813760,
+%U A402660 23833896689041428971520,7197974075449067553423360,6099627154186371558455377920,1848455119996114009012001832960,2208320149218802646730259373752320
+%N A402660 Coefficient of E_4^(n + 1) in the 2*n-th derivative of E_4 under the normalized Ramanujan derivation 12*q*d/dq, evaluated at E_2 = E_6 = 0.
+%C A402660 The sequence can be viewed combinatorially as the weight of loops (closed walks) of length 2*n on a state-space grid. Starting at the state (a, c) = (0, 0), which represents E_4, each derivative step acts as a directed, weighted transition to neighboring exponent states of E_2^a * E_6^c. The final coefficient a(n) is the accumulated weight of all paths that return to the origin state (0, 0) after 2*n steps. See the Python implementation.
+%H A402660 Jimmie Adriazola, <a href="https://github.com/jimjamzola/RH-Alpoge-Reconstruction/blob/main/RH_Route_Notes.pdf">An End-to-End Reconstruction of the Alpöge-Claude Route to the Riemann Hypothesis</a>, accessed on Nov. 22, 2026, see C_r in sections 4.4 and 5.2.
+%H A402660 Levent Alpöge, <a href="https://alpo.ge/remark.pdf">Remark</a>, November 20, 2026.
+%H A402660 Srinivasa Ramanujan, <a href="https://ramanujan.sirinudi.org/Volumes/published/ram18.pdf">On certain Arithmetical Functions</a>, Trans. Cambridge Phil. Soc., XXII, No.9, 1916, 159-184, eq. 30.
+%H A402660 Don Zagier, <a href="https://people.mpim-bonn.mpg.de/zagier/files/doi/10.1007/978-3-540-74119-0_1/fulltext.pdf">Elliptic modular forms and their applications</a>, In: The 1-2-3 of Modular Forms, Springer, 2008, see Section 5, Proposition 15.
+%F A402660 Let E_2, E_4, E_6 be the normalized Eisenstein series of weights 2, 4, 6, and let D' = 12*q*d/dq. By Ramanujan's identities, D' acts on the ring Q[E_2, E_4, E_6] as the derivation with D'E_2 = E_2^2 - E_4; D'E_4 = 4*(E_2*E_4 - E_6); D'E_6 = 6*(E_2*E_6 - E_4^2).
+%e A402660 (D')^2 E_4 = 20*E_4^2 + 20*E_2^2 * E_4 - 40*E_2 * E_6, setting E_2 = E_6 = 0, the coefficient of E_4^2 is 20, so a(1) = 20. Similarly:
+%e A402660 (D')^4 E_4 |_{E_2=E_6=0} = 360*E_4^3, and
+%e A402660 (D')^6 E_4 |_{E_2=E_6=0} = 25920*E_4^4.
+%t A402660 (* An algebraic evaluation by setting x = E_2, y = E_4, and z = E_6. *)
+%t A402660 a[n_] := Module[{x, y, z, p}, p = y; Do[p = Expand[(x^2-y) D[p, x] + 4 (x y - z)
+%t A402660 D[p, y] + 6 (x z - y^2) D[p, z] ], {2 n} ]; p /. {x -> 0, y -> 1, z -> 0} ];
+%t A402660 Table[a[n], {n, 0, 15}]
+%o A402660 (Python)
+%o A402660 def A402660_list(max_n):
+%o A402660     out, cur = [1], {(0, 0): 1}
+%o A402660     for step in range(2 * max_n):
+%o A402660         nxt = {}
+%o A402660         def add(key, val):
+%o A402660             nxt[key] = nxt.get(key, 0) + val
+%o A402660         for (a, c), w in cur.items():
+%o A402660             b = (4 + 2 * step - 2 * a - 6 * c) // 4
+%o A402660             if a > 0: add((a + 1, c), w * a); add((a - 1, c), -w * a)
+%o A402660             if b > 0: add((a + 1, c), 4 * b * w); add((a, c + 1), -4 * b * w)
+%o A402660             if c > 0: add((a + 1, c), 6 * c * w); add((a, c - 1), -6 * c * w)
+%o A402660         cur = nxt
+%o A402660         if step % 2 == 1: out.append(cur.get((0, 0), 0))
+%o A402660     return out
+%o A402660 print(A402660_list(15))
+%o A402660 (SageMath)
+%o A402660 R = PolynomialRing(ZZ, names=('x', 'y', 'z'))
+%o A402660 x, y, z = R.gens()
+%o A402660 def a(n: int) -> int:
+%o A402660     p = y
+%o A402660     for _ in range(2*n):
+%o A402660         p = ((x**2 - y) * p.derivative(x)
+%o A402660           + 4*(x*y - z) * p.derivative(y)
+%o A402660           + 6*(x*z - y**2) * p.derivative(z))
+%o A402660     return p.monomial_coefficient(y^(n+1))
+%o A402660 print([a(n) for n in range(16)])
+%Y A402660 Cf. A000594, A006352 (E_2), A004009 (E_4), A013973 (E_6), A296920.
+%K A402660 nonn,walk,new
+%O A402660 0,2
+%A A402660 _Peter Luschny_, Nov 22 2026

@@ -1,20 +1,43 @@
-%I A386381 #31 Nov 18 2026 23:09:43
+%I A386381 #39 Nov 23 2026 23:23:11
 %S A386381 1,1,1,2,8,56,640,10960,264640,8581760,360331520,19031302400,
 %T A386381 1235451750400,96722377139200,8988790940876800,978442125179648000,
 %U A386381 123324448870740377600,17820979140159760793600,2926936219425738642227200,542215853077506417192140800,112527512540808439576566169600
-%N A386381 Main diagonal of A386363.
+%N A386381 Factorial-weighted convolution of the Euler zig-zag numbers (A000111).
 %H A386381 Vaclav Kotesovec, <a href="/A386381/b386381.txt">Table of n, a(n) for n = 0..264</a>
+%F A386381 Main diagonal of A386363.
 %F A386381 This sequence has surprising divisibility properties. Let E(n) = A000111(n) and phi(n) = A000010(n).
 %F A386381 Conjecture 1: if d is a divisor of a(k), then d is also a divisor of a(m*d + k) where m is any natural number. In particular, a(k) is a divisor of a(m*a(k) + k) for any k >= 0 where m is any natural number.
 %F A386381 Conjecture 2: if d > 2 is a divisor of E(k), then d is also a divisor of E(m*phi(d)+k) where m is any natural number. In particular, E(k) is a divisor of E(m*phi(E(k)) + k) for any k >= 0 (with single exception at k = 3) where m is any natural number.
 %F A386381 From _Peter Luschny_, Jul 20 2025: (Start)
 %F A386381 Conjecture: 2*a(n) is divisible by A060818(n). (End)
 %F A386381 a(n) ~ c * 2^(n+1) * n^(2*n-3) / (exp(2*n) * Pi^(n-1)), where c = 25.574519628957467521537232312735336894... - _Vaclav Kotesovec_, Sep 02 2025
-%F A386381 a(n+2) = Sum_{j=0..n} binomial(n,j)^2*j!*E(j)*a(n+1-j). - _Peter Luschny_, Nov 18 2026
+%F A386381 From _Peter Luschny_, Nov 20 2026: (Start)
+%F A386381 a(n+2) = Sum_{j=0..n} binomial(n,j)^2*j!*E(j)*a(n+1-j).
+%F A386381 a(n+1) = n!^2 * [x^n] p(x) for n >= 0 and a(0) = 1, where p(x) is the unique formal power series satisfying (x*p'(x))' = (sec(x) + tan(x))*p(x). (End)
 %p A386381 a := proc(n) local T; T := proc(n, k) option remember; ifelse(k = 0, 0^n, ifelse(k = 1, T(n-1, n-1), T(n, k-1) + (n - 2)*T(n-1, n-k))) end: T(n, n) end:
 %p A386381 seq(a(n), n = 0..20);  # _Peter Luschny_, Jul 21 2025
+%t A386381 e[k_] := e[k] = SeriesCoefficient[Sec[x] + Tan[x], {x, 0, k}];
+%t A386381 c[0] = 1; c[n_] := c[n] = Sum[e[k] c[n - 1 - k], {k, 0, n - 1}] / n^2;
+%t A386381 a386381[0] = 1; a386381[n_] := ((n - 1)!)^2 c[n - 1];
+%t A386381 Table[a386381[n], {n, 0, 20}]  (* _Peter Luschny_, Nov 20 2026 *)
 %o A386381 (PARI) list(n) = {my(v1 = vector(n+1, i, 0), v2 = vector(n+1, i, 0), v3); v1[1] = 1; v2[1] = 1; for(i=1, n, v3 = v1; v1[1] = 0; v1[2] = v3[i]; for(j=2, i, v1[j+1] = v1[j] + (i-2)*v3[i-j+1]); v2[i+1] = v1[i+1]); v2}
-%Y A386381 Cf. A000010, A000111, A060818, A386363.
+%o A386381 (Python)
+%o A386381 from itertools import islice
+%o A386381 def A386381():
+%o A386381     row = [1]
+%o A386381     yield 1
+%o A386381     n = 0
+%o A386381     while True:
+%o A386381         n += 1
+%o A386381         r = [0, row[-1]]
+%o A386381         for k in range(2, n + 1):
+%o A386381             r.append(r[-1] + (n - 2) * row[n - k])
+%o A386381         row = r
+%o A386381         yield row[-1]
+%o A386381 def aList(N): return list(islice(A386381(), N))
+%o A386381 print(aList(21))  # _Peter Luschny_, Nov 19 2026
+%Y A386381 Cf. A000010, A000111, A060818, A386363, A402436.
 %K A386381 nonn,changed
 %O A386381 0,4
 %A A386381 _Mikhail Kurkov_, Jul 20 2025
+%E A386381 New name by _Peter Luschny_, Nov 20 2026

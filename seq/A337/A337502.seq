@@ -1,12 +1,41 @@
-%I A337502 #13 Aug 30 2020 18:02:36
-%S A337502 0,1,3,6,9,15,20,27,34,43
+%I A337502 #20 Nov 23 2026 09:37:03
+%S A337502 0,1,3,6,9,15,20,27,34,43,52,63,73,86,99,114,128,144,160
 %N A337502 Minimum number of painted cells in an n X n grid to avoid unpainted tetrominoes.
+%C A337502 a(11)-a(19) were obtained with a SAT solver: a painting with a(n) cells was found and the nonexistence of a painting with a(n)-1 cells was certified by a DRAT proof (CaDiCaL) verified with drat-trim. - _Nikhil Narayan Daphale_, Nov 17 2026
 %e A337502 For n = 4, painting only 5 cells would leave an unpainted tetromino, but painting the following 6 cells avoids all unpainted tetrominoes:
-%e A337502 . . X .
-%e A337502 X X . X
-%e A337502 . . X .
-%e A337502 . X . .
+%e A337502    . . X .
+%e A337502    X X . X
+%e A337502    . . X .
+%e A337502    . X . .
+%o A337502 (Python)
+%o A337502 # A337502: minimum number of painted cells in an n X n grid such that no tetromino (4 edge-connected cells) is unpainted.
+%o A337502 # Requires OR-Tools (pip install ortools).  k=3 gives A337501, k=5 gives A337503.
+%o A337502 from ortools.sat.python import cp_model
+%o A337502 def a(n, k=4, workers=0):
+%o A337502     polys, seen = set(), set()
+%o A337502     def grow(s):
+%o A337502         if s in seen: return
+%o A337502         seen.add(s)
+%o A337502         if len(s) == k: polys.add(s); return
+%o A337502         for (i, j) in s:
+%o A337502             for c in ((i+1, j), (i-1, j), (i, j+1), (i, j-1)):
+%o A337502                 if 0 <= c[0] < n and 0 <= c[1] < n and c not in s: grow(s | {c})
+%o A337502     for i in range(n):
+%o A337502         for j in range(n): grow(frozenset({(i, j)}))
+%o A337502     m = cp_model.CpModel()
+%o A337502     x = {(i, j): m.NewBoolVar('') for i in range(n) for j in range(n)}
+%o A337502     for p in polys: m.AddBoolOr([x[c] for c in p])
+%o A337502     m.Minimize(sum(x.values()))
+%o A337502     s = cp_model.CpSolver(); s.parameters.num_workers = workers   # 0 = use all cores
+%o A337502     assert s.Solve(m) == cp_model.OPTIMAL
+%o A337502     return round(s.ObjectiveValue())
+%o A337502 if __name__ == '__main__':
+%o A337502     import sys
+%o A337502     for n in range(1, int(sys.argv[1]) + 1):
+%o A337502         print(n, a(n), flush=True)
+%o A337502 # _Nikhil Narayan Daphale_, Nov 17 2026
 %Y A337502 Cf. A337501.
-%K A337502 nonn,more
+%K A337502 nonn,hard,more,changed
 %O A337502 1,3
 %A A337502 _Rob Pratt_, Aug 29 2020
+%E A337502 a(11)-a(19) from _Nikhil Narayan Daphale_, Nov 17 2026
