@@ -1,0 +1,39 @@
+%I A402353 #6 Nov 24 2026 15:03:36
+%S A402353 10,1430,1870,2090,2210,2470,5032,5576,5848,6392,6435,7150,8415,9350,
+%T A402353 10450,11050,12350,13764,15252,15730,15996,17484,18590,19305,19716,
+%U A402353 20570,21948,22990,24310,25245,27170,28215,28730,31790,32110,32175,32890,33915,35530,35750,37570,39710,41055,41470,41990,42075
+%N A402353 Positive integers k such that [1, k] contains exactly two integers that cannot be represented as a sum of distinct divisors of k.
+%C A402353 Except for a(1) = 10 (which has 3 unrepresentable integers {4, 9, 14} in [1, sigma(10)] = [1, 18] because 9 = sigma(10)/2 is self-complementary), every term k > 10 in this sequence has exactly 4 unrepresentable integers in [1, sigma(k)], namely {H_1, H_2, sigma(k) - H_2, sigma(k) - H_1}.
+%C A402353 These numbers arise from two distinct structural mechanisms:
+%C A402353 (Type I - Separated holes H_1 = H and H_2 = 2*H + 1): Starting from a single-hole root base B = M * q (such as B = 10 for H = 4, or B = 136 for H = 16), one skips the Level-1 prime window (q, 2*H + 1] (leaving 2*H + 1 open as the second hole) and multiplies B by primes in the second window (2*H + 2, 3*H + 1]. For example, 136 * p_1 for p_1 in {37, 41, 43, 47} gives the terms 5032, 5576, 5848, 6392 with holes (16, 33). Similarly, odd terms such as 6435 = 3^2 * 5 * 11 * 13 skip the divisor 7 and have holes (2, 7).
+%C A402353 (Type II - Twin consecutive holes H_1 = sigma(M) + 1 and H_2 = sigma(M) + 2): Starting from a practical number M with sigma(M) even such that q = sigma(M) + 3 is prime, multiplying B = M * q by a prime p_1 in (q, 2*sigma(M) + 3] leaves the two consecutive integers sigma(M) + 1 and sigma(M) + 2 unrepresentable. The first Type II family comes from M = 12 (sigma(12) = 28, q = 31, B = 372), giving 372 * p_1 for p_1 in {37, 41, 43, 47, 53, 59}, i.e., 13764, 15252, 15996, 17484, 19716, 21948, all having consecutive holes (29, 30).
+%e A402353 a(1) = 10 because the divisors of 10 are {1, 2, 5, 10}, whose subset sums in [1, 10] are {1, 2, 3, 5, 6, 7, 8, 10}, missing exactly the 2 integers {4, 9}.
+%e A402353 a(2) = 1430 = 2 * 5 * 11 * 13 misses only {4, 9} in [1, 1430].
+%e A402353 a(7) = 5032 = 2^3 * 17 * 37 misses only {16, 33} in [1, 5032].
+%e A402353 a(11) = 6435 = 3^2 * 5 * 11 * 13 is the smallest odd pseudoperfect number with 2 holes in [1, k], missing only {2, 7}.
+%e A402353 a(18) = 13764 = 2^2 * 3 * 31 * 37 misses only the two consecutive integers {29, 30} in [1, 13764].
+%t A402353 twoHolesQ[k_] := Module[{divs = Most[Divisors[k]], b = 1, mask},
+%t A402353   If[Total[divs] < k - 2 && k > 10, Return[False]];
+%t A402353   Do[b = BitOr[b, BitShiftLeft[b, d]];
+%t A402353     b = BitAnd[b, 2^(k + 1) - 1], {d, divs}];
+%t A402353   DigitCount[BitAnd[BitNot[b], 2^k - 2], 2, 1] == 2
+%t A402353 ];
+%t A402353 Select[Range[43000], twoHolesQ]
+%o A402353 (Python)
+%o A402353 from sympy import divisors
+%o A402353 def has_two_holes(k):
+%o A402353     proper_divs = divisors(k)[:-1]
+%o A402353     if sum(proper_divs) < k - 2 and k > 10:
+%o A402353         return False
+%o A402353     bitset = 1
+%o A402353     limit_mask = (1 << (k + 1)) - 1
+%o A402353     for d in proper_divs:
+%o A402353         bitset |= (bitset << d)
+%o A402353         bitset &= limit_mask
+%o A402353     missing_mask = (~bitset) & ((1 << k) - 2)
+%o A402353     return missing_mask.bit_count() == 2
+%o A402353 print([k for k in range(1, 43000) if has_two_holes(k)])
+%Y A402353 Cf. A005153, A005835, A083207, A174533, A174534, A174535.
+%K A402353 nonn,new
+%O A402353 1,1
+%A A402353 _Guido Avagliano_, Nov 17 2026

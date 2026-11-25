@@ -1,0 +1,49 @@
+%I A402396 #6 Nov 24 2026 22:21:09
+%S A402396 1,0,10392,4412592,2635098324,1393412907584,770197822607052,
+%T A402396 417435568848837808,228038293303036207212,124214865545709408762336,
+%U A402396 67727525670116364384386400,36916289300933828609254694128,20124047506581543516018998096396,10969795244546512405043611201416632
+%N A402396 Number of tilings of a 3 X 3 X n box using copies of the seven Soma cube pieces (any number of each, in any orientation).
+%C A402396 The pieces are the V tricube and the six nonconvex tetracubes L, T, Z, A, B and P, used in all 92 of their orientations. The set of pieces is closed under reflection (A and B are mirror images of each other, and the other five pieces are achiral), so allowing reflections does not change the count.
+%C A402396 Tilings that differ by a symmetry of the box are counted as distinct, as in A233289 and A233506.
+%C A402396 The terms were computed with a layer transfer matrix, in which a state records which cells of the next two layers are already covered. After merging states equivalent under the 8 symmetries of the 3 X 3 square and removing states from which the empty state cannot be reached, 7134 states remain. Hence a(n) satisfies a linear recurrence with constant coefficients of order at most 7134.
+%C A402396 Empirically, the Berlekamp-Massey algorithm applied to 14468 terms modulo each of three primes gives a minimal recurrence of order 4128.
+%C A402396 The terms were checked by three independent methods: direct enumeration for n <= 3, a cell-by-cell transfer method for n <= 12, and the layer transfer matrix for n <= 200.
+%D A402396 Elwyn R. Berlekamp, John H. Conway, and Richard K. Guy, Winning Ways for Your Mathematical Plays, Vol. 2, Academic Press, 1982, Chapter 24.
+%D A402396 Martin Gardner, Mathematical Games: A game in which standard pieces composed of cubes are assembled into larger forms, Scientific American, Vol. 199, No. 3 (September 1958), 182-192.
+%D A402396 C. Peter-Orth, All solutions of the Soma cube puzzle, Discrete Math. 57 (1985), 105-121.
+%H A402396 Eric Weisstein's World of Mathematics, <a href="https://mathworld.wolfram.com/SomaCube.html">Soma Cube</a>.
+%H A402396 Wikipedia, <a href="https://en.wikipedia.org/wiki/Soma_cube">Soma cube</a>.
+%F A402396 a(n) ~ c * d^n, where d = 545.11301977997792504730... and c = 0.02923304771838919081...
+%e A402396 a(1) = 0: a 3 X 3 X 1 layer admits only the flat pieces V, L, T and Z, and since 9 = 3 + 3 + 3 it would need three V pieces, which cannot cover a 3 X 3 square.
+%e A402396 a(2) = 10392 is also the number of tilings of the 2 X 3 X 3 box (the same box in another orientation).
+%e A402396 a(3) = 4412592 tilings of the 3 X 3 X 3 cube. Using each piece exactly once gives only 11520 tilings (240 up to rotations and reflections).
+%o A402396 (Python)
+%o A402396 from itertools import permutations, product
+%o A402396 def A(nmax): # a(0..nmax)
+%o A402396     soma = [((0,0,0),(1,0,0),(0,1,0)), ((0,0,0),(1,0,0),(2,0,0),(0,1,0)),
+%o A402396             ((0,0,0),(1,0,0),(2,0,0),(1,1,0)), ((0,0,0),(1,0,0),(1,1,0),(2,1,0)),
+%o A402396             ((0,0,0),(1,0,0),(0,1,0),(1,0,1)), ((0,0,0),(1,0,0),(0,1,0),(0,1,1)),
+%o A402396             ((0,0,0),(1,0,0),(0,1,0),(0,0,1))]
+%o A402396     shapes = set()
+%o A402396     for p, s, cells in product(permutations(range(3)), product((1,-1), repeat=3), soma):
+%o A402396         img = sorted((tuple(s[i]*c[p[i]] for i in range(3)) for c in cells),
+%o A402396                      key=lambda c: (c[2], c[1], c[0]))
+%o A402396         shapes.add(tuple(tuple(c[i]-img[0][i] for i in range(3)) for c in img))
+%o A402396     moves = [[sum(1 << (dx + 3*dy + 9*dz) for dx, dy, dz in sh) for sh in shapes
+%o A402396               if all(0 <= x+dx < 3 and 0 <= y+dy < 3 for dx, dy, dz in sh)]
+%o A402396              for y in range(3) for x in range(3)]
+%o A402396     dp, out = {0: 1}, [1]
+%o A402396     for n in range(nmax):
+%o A402396         for cell in range(9):
+%o A402396             new = {}
+%o A402396             for m, c in dp.items():
+%o A402396                 nxt = [m >> 1] if m & 1 else [(m | pm) >> 1 for pm in moves[cell] if not pm & m]
+%o A402396                 for k in nxt: new[k] = new.get(k, 0) + c
+%o A402396             dp = new
+%o A402396         out.append(dp.get(0, 0))
+%o A402396     return out
+%o A402396 print(A(7))
+%Y A402396 Cf. A233289, A233506, A234833, A237357.
+%K A402396 nonn,new
+%O A402396 0,3
+%A A402396 _Pietro Tiaraju Giavarina dos Santos_, Nov 18 2026

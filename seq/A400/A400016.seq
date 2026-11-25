@@ -1,0 +1,38 @@
+%I A400016 #10 Nov 24 2026 20:03:56
+%S A400016 1,1,2,5,20,93,537,3620,28028,244958,2387106,25619484,300827428,
+%T A400016 3830834496,52621848720,775304570616,12199437513120,204105337192872,
+%U A400016 3619675855954056,67796848363410384,1337728789986951600,27731362313423353344,602619114461141954880
+%N A400016 Number of permutations p of [n] such that every left-to-right maximum of p is a vertex of the upper convex hull of the points (i, p(i)).
+%C A400016 Points on a straight edge of the hull between two vertices are not counted as vertices.
+%C A400016 Only the left-to-right maxima matter. A point that is not a left-to-right maximum lies below an earlier record, so it can never push a record off the hull, and the next higher record pushes it off. So a(n) is a sum over strictly concave chains of left-to-right maxima, starting at position 1 and ending at the value n. Each chain is weighted by the number of ways to fill the other positions.
+%C A400016 In cost-effectiveness analysis, take n strategies with costs 1, 2, ..., n and effects p(1), ..., p(n). The left-to-right maxima are the strategies that are not strongly dominated. The hull vertices are the strategies on the efficiency frontier. a(n) counts the permutations in which no strategy is removed by extended dominance.
+%H A400016 Karan Sharma, <a href="/A400016/b400016.txt">Table of n, a(n) for n = 0..55</a>
+%H A400016 Scott B. Cantor, <a href="https://doi.org/10.1177/0272989X9401400308">Cost-effectiveness analysis, extended dominance, and ethics: a quantitative assessment</a>, Medical Decision Making 14(3) (1994), 259-265.
+%e A400016 For n = 3, all permutations except 123 are counted. In 123 the points (1,1), (2,2), (3,3) are collinear, so (2,2) is not a hull vertex although 2 is a left-to-right maximum. In 132 the left-to-right maxima 1 and 3 are both hull vertices. So a(3) = 5.
+%o A400016 (Python)
+%o A400016 from functools import cache
+%o A400016 from math import factorial, prod
+%o A400016 def a(n):
+%o A400016     if n == 0: return 1
+%o A400016     def fill(x, y, x2):  # ways to fill positions x+1..x2-1 below record y
+%o A400016         return prod(y-i+1 for i in range(x+1, x2))
+%o A400016     @cache
+%o A400016     def f(px, py, x, y):  # last two records (px,py), (x,y)
+%o A400016         if y == n: return factorial(n-x)
+%o A400016         s = 0
+%o A400016         for x2 in range(x+1, n+1):
+%o A400016             for y2 in range(y+1, n+1):
+%o A400016                 if (y-py)*(x2-px) > (y2-py)*(x-px):
+%o A400016                     s += fill(x, y, x2)*f(x, y, x2, y2)
+%o A400016         return s
+%o A400016     s = factorial(n-1)
+%o A400016     for y in range(1, n):
+%o A400016         for x2 in range(2, n+1):
+%o A400016             for y2 in range(y+1, n+1):
+%o A400016                 s += fill(1, y, x2)*f(1, y, x2, y2)
+%o A400016     return s
+%o A400016 print([a(n) for n in range(23)])
+%Y A400016 Cf. A000142, A132393.
+%K A400016 nonn,new
+%O A400016 0,3
+%A A400016 _Karan Sharma_, Nov 22 2026

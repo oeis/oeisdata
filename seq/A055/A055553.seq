@@ -1,27 +1,57 @@
-%I A055553 #112 Mar 16 2026 08:59:20
+%I A055553 #119 Nov 24 2026 03:05:53
 %S A055553 0,0,1,7,16,43,105,255,646,1547,3605,8241,19279,44706,105212,246683,
-%T A055553 585355,1401644,3381806,8220777,20138200,49679870,123381982,308279939
+%T A055553 585355,1401644,3381806,8220777,20138200,49679870,123381982,308279939,
+%U A055553 774716397
 %N A055553 Number of Carmichael numbers (A002997) less than 10^n.
+%C A055553 Of the 774716397 Carmichael numbers below 10^25, 139763 have 13 prime factors, 1599 have 14 and 2 have 15; none has more. For 3 to 12 prime factors see A132195, A174612-A174617, A299710, A299711 and A392847. - _Jeff Sponaugle_, Nov 23 2026
 %D A055553 Richard Pinch, Carmichael Numbers up to 10^20, ANTS 7.
 %D A055553 Richard G. E. Pinch, The Carmichael numbers up to 10^21, Proceedings of Conference on Algorithmic Number Theory 2007.
 %D A055553 Paulo Ribenboim, The Little Book of Bigger Primes, Springer-Verlag, NY, 2004. See p. 219.
-%H A055553 Claude Goutier, <a href="http://www-labs.iro.umontreal.ca/~goutier/OEIS/A055553/">Text file readme.text summarizing enumeration of Carmichael numbers up to 10^22.</a>
+%H A055553 Claude Goutier, <a href="https://www-labs.iro.umontreal.ca/~goutier/OEIS/A055553/">Text file readme.text summarizing enumeration of Carmichael numbers up to 10^22.</a>
 %H A055553 Claude Goutier, <a href="/A055553/a055553.txt">Text file readme.text summarizing enumeration of Carmichael numbers up to 10^22.</a> [Local copy, with permission]
 %H A055553 Claude Goutier, <a href="/A002997/a002997.7z">Compressed text file carm10e22.7z containing all the Carmichael numbers up to 10^22</a>. [Local copy, with permission. This is a very large file.]
 %H A055553 Romeo Meštrović, <a href="https://arxiv.org/abs/1305.1867">Generalizations of Carmichael numbers I,</a> arXiv:1305.1867v1 [math.NT], 2013.
 %H A055553 Richard G. E. Pinch, <a href="https://arxiv.org/abs/math/0504119">The Carmichael numbers up to 10^17</a>, arXiv:math/0504119 [math.NT], 2005.
-%H A055553 Richard G. E. Pinch, <a href="http://arXiv.org/abs/math/0604376">The Carmichael numbers up to 10^18</a>, arXiv:math/0604376 [math.NT], 2006.
+%H A055553 Richard G. E. Pinch, <a href="https://arxiv.org/abs/math/0604376">The Carmichael numbers up to 10^18</a>, arXiv:math/0604376 [math.NT], 2006.
 %H A055553 Richard G. E. Pinch, <a href="http://www.s369624816.websitehome.co.uk/rgep/rcam.html">Mathematics research page</a>.
 %H A055553 Andrew Shallue and Jonathan Webster, <a href="https://doi.org/10.1007/s40993-024-00598-3">Advances in Tabulating Carmichael Numbers</a>, Research in Number Theory, Vol. 11, No. 8 (2025), pp. 1-8; <a href="https://arxiv.org/abs/2401.14495">arXiv preprint</a>, arXiv:2401.14495 [math.NT], 2024.
 %H A055553 Andrew Shallue and Jonathan Webster, <a href="https://arxiv.org/abs/2506.09903">Algorithms for Carmichael numbers</a>, arXiv:2506.09903 [math.NT], 2025-2026.
+%H A055553 Jeff Sponaugle, <a href="/A055553/a055553_1.txt">Carmichael numbers below 10^n by number of prime factors for n = 3..25, and counts below m*10^23</a>
 %H A055553 Hermann Stamm-Wilbrandt, <a href="https://stamm-wilbrandt.de/carm10e24.bin">Carmichael numbers up to 10^24</a> converted and stored binary (11.45GB) for PARI/GP fast read, from <a href="https://blue.butler.edu/~jewebste/">Jonathan Webster's website</a>.
 %H A055553 Eric Weisstein's World of Mathematics, <a href="https://mathworld.wolfram.com/CarmichaelNumber.html">Carmichael Number</a>.
 %H A055553 Eric Weisstein's World of Mathematics, <a href="https://mathworld.wolfram.com/Pseudoprime.html">Pseudoprime</a>.
 %H A055553 <a href="/index/Ca#Carmichael">Index entries for sequences related to Carmichael numbers</a>.
 %o A055553 (PARI) \\ Uses file from Stamm-Wilbrandt Link above
 %o A055553 b=read("carm10e24.bin"); d=10^3; C=0; foreach(b, c, if(c>=d, print1(C", "); d=d*10); C+=1); print(C) \\ _Hermann Stamm-Wilbrandt_, Mar 07 2026
+%o A055553 (Python)
+%o A055553 from math import isqrt
+%o A055553 def carmichael_below(limit, seg=1 << 22):
+%o A055553     r = isqrt(limit)
+%o A055553     is_prime = bytearray([1]) * (r + 1)
+%o A055553     primes = []
+%o A055553     for p in range(3, r + 1, 2):
+%o A055553         if is_prime[p]:
+%o A055553             primes.append(p)
+%o A055553             is_prime[p * p::2 * p] = bytes(len(range(p * p, r + 1, 2 * p)))
+%o A055553     found = []
+%o A055553     for lo in range(0, limit, seg):
+%o A055553         hi = min(lo + seg, limit)
+%o A055553         acc = [1] * (hi - lo)
+%o A055553         for p in primes:
+%o A055553             m = p * (p - 1)
+%o A055553             first = p + m
+%o A055553             if first < lo:
+%o A055553                 first += -(-(lo - first) // m) * m
+%o A055553             for n in range(first, hi, m):
+%o A055553                 acc[n - lo] *= p
+%o A055553         found += [n for n, a in enumerate(acc, lo) if a == n and n > 1]
+%o A055553     return found
+%o A055553 def A055553_list(nmax):
+%o A055553     c = carmichael_below(10**nmax)
+%o A055553     return [sum(1 for x in c if x < 10**n) for n in range(1, nmax + 1)]
+%o A055553 print(A055553_list(8))  # _Jeff Sponaugle_, Nov 23 2026
 %Y A055553 Cf. A002997.
-%K A055553 nonn,more
+%K A055553 nonn,more,changed
 %O A055553 1,4
 %A A055553 _Eric W. Weisstein_
 %E A055553 Updates from Pinch's articles sent by _Charles R Greathouse IV_, Dec 04 2005, Jul 16 2006, May 29 2007
@@ -29,3 +59,4 @@
 %E A055553 a(22) from Shallue and Webster (2024) added by _Amiram Eldar_, Feb 23 2024
 %E A055553 a(22) = 49679870 reported by _Claude Goutier_ on Dec 28 2022 (see links). - _N. J. A. Sloane_, Apr 18 2024
 %E A055553 a(23)-a(24) from Shallue and Webster (2025-2026) added by _Amiram Eldar_, Jan 24 2026
+%E A055553 a(25) from _Jeff Sponaugle_, Nov 23 2026
