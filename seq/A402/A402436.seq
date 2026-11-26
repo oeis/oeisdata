@@ -1,0 +1,57 @@
+%I A402436 #13 Nov 25 2026 14:25:44
+%S A402436 1,0,1,0,1,1,0,2,4,2,0,8,18,18,12,0,56,128,144,192,120,0,640,1400,
+%T A402436 1600,2400,3000,1920,0,10960,23040,25200,38400,54000,69120,43920,0,
+%U A402436 264640,537040,564480,823200,1176000,1693440,2152080,1370880
+%N A402436 Triangle read by rows. T(n, k) = binomial(n-1, k-1)^2 * A373433(k-1) * A386381(n-k+1) for 1 <= k <= n; T(n, 0) = 0^n.
+%C A402436 The triangle provides a row-wise refinement of A386381. The sum of each row equals the first nonzero entry of the next row, while the rightmost diagonal reproduces the factorial-weighted Euler zigzag numbers (A373433).
+%F A402436 T(n, 1) = A386381(n) for n >= 1, T(n, n) = A373433(n-1).
+%F A402436 Sum_{k=0..n} T(n, k) = A386381(n+1).
+%e A402436 Triangle starts:
+%e A402436   [0] [1]
+%e A402436   [1] [0,      1]
+%e A402436   [2] [0,      1,      1]
+%e A402436   [3] [0,      2,      4,      2]
+%e A402436   [4] [0,      8,     18,     18,     12]
+%e A402436   [5] [0,     56,    128,    144,    192,     120]
+%e A402436   [6] [0,    640,   1400,   1600,   2400,    3000,    1920]
+%e A402436   [7] [0,  10960,  23040,  25200,  38400,   54000,   69120,   43920]
+%e A402436   [8] [0, 264640, 537040, 564480, 823200, 1176000, 1693440, 2152080, 1370880]
+%p A402436 rev := s -> [0, op(ListTools:-PartialSums(ListTools:-Reverse(s)))]:
+%p A402436 Triangle := proc(N)
+%p A402436   local n, k, r, row, ent, b, fact, rows;
+%p A402436   row := [1]; rows := [row]; ent := [1];
+%p A402436   b := table([0 = 1]); fact := 1;
+%p A402436   for n from 1 to N do
+%p A402436     r := seq(iquo((n-1)^2*b[k]*row[k+1], k^2*b[k-1]), k = 1..n-1);
+%p A402436     row := [0, add(row), r]; rows := [op(rows), row];
+%p A402436     ent := rev(ent); fact := fact * n;
+%p A402436     b[n] := fact * ent[-1];
+%p A402436   od;
+%p A402436 rows end:
+%p A402436 T := Triangle(8): for row in T do lprint(row) od:
+%o A402436 (Python)
+%o A402436 def Triangle(N: int):
+%o A402436     row = [1]; ent = [1]; b = [1]; fact = 1
+%o A402436     yield row
+%o A402436     for n in range(1, N + 1):
+%o A402436         m = n - 1
+%o A402436         new = [0, sum(row)]
+%o A402436         for k in range(1, n):
+%o A402436             numer = m*m * b[k] * row[k]
+%o A402436             denom = k*k * b[k-1]
+%o A402436             new.append(numer // denom)
+%o A402436         row = new
+%o A402436         # x = row[1]; y = (~x & x-1).bit_length()
+%o A402436         # assert (n + 1 - y) == A402435(n)
+%o A402436         yield row
+%o A402436         old = ent
+%o A402436         ent = [0, old[-1]]
+%o A402436         for x in old[-2::-1]:
+%o A402436             ent.append(ent[-1] + x)
+%o A402436         fact *= n
+%o A402436         b.append(fact * ent[-1])
+%o A402436 for row in Triangle(8): print(row)
+%Y A402436 Cf. A373433, A386381, A402435.
+%K A402436 nonn,tabl,new
+%O A402436 0,8
+%A A402436 _Peter Luschny_, Nov 18 2026

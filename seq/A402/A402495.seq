@@ -1,0 +1,57 @@
+%I A402495 #10 Nov 25 2026 22:50:20
+%S A402495 428,438,656,751,767,804,825,998,1050,1190,1445,1681,1714,1752,2040,
+%T A402495 2043,2134,2193,2215,2216,2223,2233,2299,2344,2366,2370,2393,2421,
+%U A402495 2422,2427,2470,2488,2492,2508,2527,2551,2567,2568,2579,2585,2599,2603,2669,2708,2709
+%N A402495 Board sizes k >= 5 for which Warnsdorff's knight's tour heuristic with the specified half-up variant of Roth's tie-breaking fails.
+%C A402495 Start at the top left corner and repeatedly move to an unvisited square with the fewest unvisited onward knight moves.
+%C A402495 Number rows and columns from 1. Choose the tied square farthest from (ceiling(n/2)-1/2, ceiling(n/2)-1/2). If still tied, use the first move in the order (2,-1), (1,-2), (-1,-2), (-2,-1), (-2,1), (-1,2), (1,2), (2,1).
+%C A402495 Roth reported fewer than 1% failures for board sizes below 2000. The data shows 14 failures which is about 0.702%.
+%H A402495 Jwalin Bhatt, <a href="/A402495/b402495.txt">Table of n, a(n) for n = 1..10000</a>
+%H A402495 Sam Ganzfried, <a href="https://sites.science.oregonstate.edu/math_reu/proceedings/REU_Proceedings/Proceedings2004/2004Ganzfried.pdf">A Simple Algorithm for Knight's Tours</a> (2004), Section 2.
+%H A402495 Brady Haran, <a href="https://www.numberphile.com/videos/knights-tour">Knight's Tour</a>, Numberphile video (2014).
+%H A402495 Arnd Roth, <a href="https://library.wolfram.com/infocenter/MathSource/909/">The Problem of the Knight: A Fast and Simple Algorithm</a>, Mathematica notebook.
+%H A402495 Wikipedia, <a href="https://en.wikipedia.org/wiki/Knight%27s_tour">Knight's tour</a>.
+%e A402495 On a 428 X 428 board, the heuristic visits 183172 of 183184 squares, leaving 12 unvisited.
+%e A402495 On a 438 X 438 board, it leaves 8 squares unvisited.
+%e A402495 On a 1681 X 1681 board, it visits 1113909 of 2825761 squares, leaving 1711852 unvisited.
+%o A402495 (Python)
+%o A402495 from itertools import count, islice
+%o A402495 import numpy as np
+%o A402495 from numba import njit
+%o A402495 moves = ((2, -1), (1, -2), (-1, -2), (-2, -1),
+%o A402495          (-2, 1), (-1, 2), (1, 2), (2, 1))
+%o A402495 @njit
+%o A402495 def visited(n):
+%o A402495     degree = np.full((n+4, n+4), -1, np.int8)
+%o A402495     degree[2:n+2, 2:n+2] = 0
+%o A402495     for x in range(2, n+2):
+%o A402495         for y in range(2, n+2):
+%o A402495             for dx, dy in moves:
+%o A402495                 degree[x, y] += degree[x+dx, y+dy] >= 0
+%o A402495     target = 2*((n+1)//2)+1
+%o A402495     x = y = 2
+%o A402495     visits = 0
+%o A402495     while True:
+%o A402495         degree[x, y] = -1
+%o A402495         visits += 1
+%o A402495         best, next_x, next_y = (9, 0), -1, -1
+%o A402495         for dx, dy in moves:
+%o A402495             u, v = x+dx, y+dy
+%o A402495             if degree[u, v] >= 0:
+%o A402495                 degree[u, v] -= 1
+%o A402495                 distance = (2*u-target)**2 + (2*v-target)**2
+%o A402495                 key = (int(degree[u, v]), -distance)
+%o A402495                 if key < best:
+%o A402495                     best, next_x, next_y = key, u, v
+%o A402495         if next_x < 0:
+%o A402495             return visits
+%o A402495         x, y = next_x, next_y
+%o A402495 def gen_A402495():
+%o A402495     for n in count(5):
+%o A402495         if visited(n) < n*n:
+%o A402495             yield n
+%o A402495 print(list(islice(gen_A402495(), 10)))
+%Y A402495 Cf. A001230, A165134.
+%K A402495 nonn,new
+%O A402495 1,1
+%A A402495 _Jwalin Bhatt_, Nov 19 2026

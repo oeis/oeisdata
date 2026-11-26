@@ -1,10 +1,13 @@
-%I A140773 #57 Nov 19 2026 21:31:08
+%I A140773 #68 Nov 25 2026 23:18:00
 %S A140773 1,2,2,4,2,5,2,6,4,5,2,10,2,5,5,9,2,10,2,10,5,5,2,16,4,5,6,10,2,14,2,
 %T A140773 12,5,5,5,20,2,5,5,16,2,14,2,10,10,5,2,24,4,10,5,10,2,16,5,16,5,5,2,
 %U A140773 28,2,5,10,16,5,14,2,10,5,14,2,32,2,5,10,10,5,14,2,24,9,5,2,28,5,5,5,16,2,28,5
 %N A140773 Consider the products of all pairs of (not necessarily distinct) positive divisors of n. a(n) is the number of these products that divide n. a(n) also is the number of the products that are divisible by n.
 %C A140773 Number of 3D grids of n congruent boxes with two different edge lengths, in a box, modulo rotation (cf. A034836 for cubes instead of boxes and A007425 for boxes with three different edge lengths; cf. A000005 for the 2D case). - _Manfred Boergens_, Feb 25 2021
 %C A140773 Number of distinct faces obtainable by arranging n unit cubes into a cuboid. - _Chris W. Milson_, Mar 14 2021
+%C A140773 From _M. F. Hasler_, Nov 21 2026: (Start)
+%C A140773 As the data and examples show, "products of pairs" means only unordered pairs (or sets {d, d'} = {d', d}) are counted: e.g., for n = 2, we count 1*1 and 1*2 as divisors of n, 2*1 is not counted separately.
+%C A140773 Let D = {1, ..., n} be the k divisors of n. The number a(n) of products d*d' that divide n is the number of integers among the k(k+1)/2 numbers (n/(d*d'); (d, d') in D^2, d' >= d). But we have D = {n/d; d in D}, and replacing each d with n/d and d' with n/d' gives the family (d*d'/n; (d, d') in D^2, d >= d') which has exactly the same entries, except for reversed order. Here the integers are the products d*d' divisible by n, hence their number is also a(n). (End)
 %H A140773 Antti Karttunen, <a href="/A140773/b140773.txt">Table of n, a(n) for n = 1..10000</a>
 %H A140773 Chris W. Milson, <a href="https://github.com/chrismilson/cuboid-areas">Constructing Cuboids</a>
 %H A140773 Chris W. Milson, <a href="https://github.com/chrismilson/cuboid-areas/blob/e860c66ec6dfce910bafffe5ead15fa5548169cf/main.py#L49">A faster algorithm for a(n)</a>
@@ -17,13 +20,12 @@
 %p A140773 g:= proc(L) option remember; local i; (mul((L[i]+1)*(L[i]+2)/2, i=1..nops(L))+ mul(floor(L[i]/2)+1,i=1..nops(L)))/2 end proc:
 %p A140773 f:= n -> g(sort(ifactors(n)[2][..,2])):
 %p A140773 map(f, [$1..100]); # _Robert Israel_, Nov 19 2026
-%t A140773 (* first do *) Needs["Combinatorica`"] (* then *) f[n_] := Count[ n/Times @@@ Union[Sort /@ Tuples[Divisors@ n, 2]], _Integer]; Array[f, 91] (* _Robert G. Wilson v_, May 31 2008 *)
+%t A140773 f[n_] := Count[ n/Times @@@ Union[Sort /@ Tuples[Divisors@ n, 2]], _Integer]; Array[f, 91] (* _Robert G. Wilson v_, May 31 2008; edited by _M. F. Hasler_, Nov 22 2026 *)
+%t A140773 (* Alternative: *)
 %t A140773 d=Divisors[n]; r=Length[d]; Sum[Ceiling[Length[Divisors[d[[j]]]]/2],{j,r}] (* _Manfred Boergens_, Feb 25 2021 *)
 %o A140773 (PARI)
-%o A140773 \\ Two implementations, after the two different interpretations given by the author of the sequence:
-%o A140773 A140773v1(n) = { my(ds = divisors(n),s=0); for(i=1,#ds,for(j=i,#ds,if(!(n%(ds[i]*ds[j])),s=s+1))); s; }
-%o A140773 A140773v2(n) = { my(ds = divisors(n),s=0); for(i=1,#ds,for(j=i,#ds,if(!((ds[i]*ds[j])%n),s=s+1))); s; }
-%o A140773 \\ _Antti Karttunen_, May 19 2017
+%o A140773 A140773v2(n) = { my(ds = divisors(n),s=0); for(i=1,#ds,for(j=i,#ds,if(!(ds[i]*ds[j]%n),s=s+1))); s; } \\ where ds[i]*ds[j]%n can be replaced by n%(ds[i]*ds[j]) for the other interpretation. - _Antti Karttunen_, May 19 2017
+%o A140773 (PARI) apply( {A140773(n)=my(D=divisors(n), N=#D);sum(i=2,N-1,sum(j=max(i,N-i+1),N-1,!(D[i]*D[j]%n),N>1),N>1)+1}, [1..70]) \\ For given i, we need d <= d' >= n/d <=> i <= j >= N-i+1; j = N is always OK, no need to test, and only solution for i = 1 or N. - _M. F. Hasler_, Nov 21 2026
 %o A140773 (Python) # See C. W. Milson link.
 %Y A140773 Cf. A140774.
 %Y A140773 Cf. A000005, A034836, A038548, A007425, A046951.
