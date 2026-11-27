@@ -1,0 +1,43 @@
+%I A402459 #19 Nov 26 2026 17:49:51
+%S A402459 4,900,9,64,16,1296,25,3025,36,6084,49,11025,64,18496,81,3844,100,
+%T A402459 15876,121,25,144,90000,169,36,196,164836,225,49,256,278784,289,64,
+%U A402459 324,9409,361,81,400,336400,441,100,484,2025,529,121,576,3025,625,144,676,40401
+%N A402459 a(n) is the least square without digit n-1 in base n that stays square when every digit increases by 1 in base n.
+%C A402459 Adding 1 to each of the L digits of x^2 in base n (with no carries) adds R_L = (n^L-1)/(n-1), so a(n) = x^2 where y^2 - x^2 = R_L for the least valid L.
+%C A402459 No solution exists for n = 2 because every positive binary number has a digit 1 = n - 1.
+%C A402459 No solution was found for n = 3 up to 16 digits (empirical; conjectured none exists).
+%C A402459 Upper bounds: a(n) <= (n/2)^2 for even n >= 4, and a(n) <= (n*(n-1)/2)^2 for odd n >= 7.
+%C A402459 The even bound is strict starting at n = 56, where a(56) = 64 = (1,8)_56 shifts to (2,9)_56 = 81.
+%C A402459 The first odd base with a 2-digit solution is n = 23, where a(23) = 25 = (1,2)_23 shifts to (2,3)_23 = 49.
+%C A402459 For 4 <= n <= 200 every solution has at most 5 digits, with a(5) = 900 = 12100_5 being the sole 5-digit term (empirical).
+%e A402459 a(4) = 4 = 10_4, since 4 = 2^2 and increasing each base-4 digit by 1 gives 21_4 = 9 = 3^2.
+%e A402459 a(5) = 900 = 12100_5, since 900 = 30^2 and increasing each base-5 digit by 1 gives 23211_5 = 1681 = 41^2.
+%o A402459 (Python)
+%o A402459 from sympy import divisors
+%o A402459 def digits(m, b):
+%o A402459     d = []
+%o A402459     while m:
+%o A402459         d.append(m % b)
+%o A402459         m //= b
+%o A402459     return d[::-1]
+%o A402459 def A(n, maxlen=20):
+%o A402459     for L in range(2, maxlen+1):
+%o A402459         R = (n**L - 1)//(n - 1)
+%o A402459         best = None
+%o A402459         for d in divisors(R):
+%o A402459             e = R//d
+%o A402459             if d > e or (d + e) % 2:
+%o A402459                 continue
+%o A402459             x = (e - d)//2
+%o A402459             m = x*x
+%o A402459             if x >= 1 and n**(L-1) <= m < n**L and max(digits(m, n)) < n - 1:
+%o A402459                 best = m if best is None else min(best, m)
+%o A402459         if best:
+%o A402459             return best
+%o A402459 print([A(n) for n in range(4, 54)])
+%o A402459 (PARI) isok(k, n) = my(d=digits(k^2, n)); !#select(x->(x==n-1), d) && issquare(fromdigits(apply(x->x+1, d), n));
+%o A402459 a(n) = my(k=1); while (!isok(k, n), k++); k^2; \\ _Michel Marcus_, Nov 19 2026
+%Y A402459 Cf. A000290, A055615, A055616, A061843, A061844, A117755.
+%K A402459 nonn,base,new
+%O A402459 4,1
+%A A402459 _Himesh Neupane_, Nov 19 2026

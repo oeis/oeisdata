@@ -1,0 +1,43 @@
+%I A401011 #23 Nov 26 2026 16:44:56
+%S A401011 1,3,45,75,765,2295,3825,4335,6885,7395,10965,14535,16575,18105,19125,
+%T A401011 21165,21675,22695,25245,28815,2555865,2818005,2949075,3342285,
+%U A401011 3735495,4128705,10813275,11075415,11468625,11599695,11992905,19201755,19463895,19857105
+%N A401011 Irregular triangle read by rows: row n lists, in increasing order, the numbers of the binary generating rules with memory n that produce a de Bruijn sequence of order n from every initial condition.
+%C A401011 A generating rule with memory n is a Boolean function R: {0,1}^n -> {0,1} applied recursively as x(j+1) = R(x(j-n+1), ..., x(j)) to produce a binary sequence x; this is a zero-dimensional cellular automaton with memory, equivalent to a binary feedback shift register. The rule number is Sum_{k=0..2^n-1} R(k)*2^k, where k is the n-tuple (x(j-n+1), ..., x(j)) read as a binary number with x(j-n+1) as the most significant bit (Wolfram-style numbering).
+%C A401011 A rule is a de Bruijn rule if, from every initial n-tuple, it generates a cyclic sequence of maximal period 2^n, i.e., a de Bruijn sequence of order n. De Bruijn rules are in bijection with binary de Bruijn sequences of order n, so row n has A016031(n) = 2^(2^(n-1)-n) terms.
+%C A401011 For n >= 3, every term in row n is divisible by 2^(2^(n-1)) - 1, and the quotient is an odd evil number (A001969); see Muñoz and Nuño (2025), Table 2 and Appendix B.
+%H A401011 Francisco J. Muñoz, <a href="/A401011/b401011.txt">Table of n, a(n) for n = 1..2068</a>
+%H A401011 Francisco J. Muñoz and Juan Carlos Nuño, <a href="https://doi.org/10.3390/math13162598">Rule-Based Generation of de Bruijn Sequences: Memory and Learning</a>, Mathematics 13(16) (2025), 2598.
+%H A401011 Francisco J. Muñoz and Juan Carlos Nuño, <a href="https://arxiv.org/abs/2507.09764">Rule-based Generation of de Bruijn Sequences: Memory and Learning</a>, arXiv:2507.09764 [cs.FL], 2025.
+%e A401011 Triangle begins:
+%e A401011   n=1: 1;
+%e A401011   n=2: 3;
+%e A401011   n=3: 45, 75;
+%e A401011   n=4: 765, 2295, 3825, 4335, 6885, 7395, 10965, 14535, 16575, 18105, 19125, 21165, 21675, 22695, 25245, 28815;
+%e A401011   n=5: 2555865, 2818005, 2949075, ... (2048 terms).
+%e A401011 For n = 3, rule 45 = 00101101_2 maps 111->0, 110->0, 101->1, 100->0, 011->1, 010->1, 001->0, 000->1 and generates the de Bruijn sequence 00010111 from every initial triple; rule 75 = 01001011_2 generates 00011101.
+%o A401011 (Python)
+%o A401011 def row(n):
+%o A401011     N, m, res = 1 << n, (1 << n) - 1, []
+%o A401011     vis, out = [False]*N, {}
+%o A401011     vis[0] = True
+%o A401011     def dfs(x, d):  # Hamiltonian cycles of the de Bruijn graph from node 0
+%o A401011         if d == N:
+%o A401011             for b in (0, 1):
+%o A401011                 if ((x << 1) | b) & m == 0:
+%o A401011                     o = dict(out); o[x] = b
+%o A401011                     res.append(sum(o[k] << k for k in range(N)))
+%o A401011             return
+%o A401011         for b in (0, 1):
+%o A401011             y = ((x << 1) | b) & m
+%o A401011             if not vis[y]:
+%o A401011                 vis[y] = True; out[x] = b
+%o A401011                 dfs(y, d + 1)
+%o A401011                 vis[y] = False; del out[x]
+%o A401011     dfs(0, 1)
+%o A401011     return sorted(res)
+%o A401011 print([t for n in range(1, 5) for t in row(n)])
+%Y A401011 Cf. A001969, A016031.
+%K A401011 nonn,tabf,new
+%O A401011 1,2
+%A A401011 _Francisco J. Muñoz_, Nov 10 2026

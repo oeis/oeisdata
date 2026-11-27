@@ -1,4 +1,4 @@
-%I A400943 #22 Nov 03 2026 16:29:04
+%I A400943 #25 Nov 26 2026 22:57:49
 %S A400943 0,0,0,1,0,1,0,1,1,1,0,1,0,1,1,1,0,1,0,1,1,1,0,2,1,1,1,1,0,2,0,1,1,1,
 %T A400943 2,2,0,1,1,3,0,1,0,1,2,1,0,3,1,1,1,1,0,2,1,2,1,1,0,4,0,1,2,1,1,1,0,1,
 %U A400943 1,2,0,3,0,1,2,1,2,1,0,3,1,1,0,4,1,1,1
@@ -16,19 +16,28 @@
 %C A400943 For every n >= 1 and every prime q >= max(3, 2*n-1), a(n*q) = a(n*prime(n)) (stabilization; see Pohl, "DivisorDiversity-Folgen").
 %C A400943 For n >= 6, a(6*n) = 1 if and only if n is prime.
 %C A400943 For primes p >= 5, p is in A001359 if and only if a(6*(p+2)) = 1.
-%C A400943 All statements above are proved in the Pohl references, except the count for n <= 10^6, which is computational.
+%C A400943 For odd n >= 3, a(n) >= 3 if and only if n has three divisors u < v < w < 3*u (Pohl, "DivisorDiversity und Teilerkonzentration", Theorem 3.9).
+%C A400943 a(n) <= 18*A226898(n)^3 for all n; thus long chains require many divisors of n in some interval [u, e*u] (Pohl, "DivisorDiversity und Teilerkonzentration", Theorem 3.10).
+%C A400943 For almost all n, (log log n)^0.176 < a(n) < (log log n)^1.387, by Theorem 3.10 of Pohl, "DivisorDiversity und Teilerkonzentration", combined with the divisor concentration bounds of Ford, Green and Koukoulopoulos and of Maier and Tenenbaum.
+%C A400943 For almost all n, a(n*q) = a(n) for every prime q >= max(3, 2*n-1); i.e., the stabilized value a(n*prime(n)) equals a(n) for almost all n (Pohl, "Einseitige DivisorDiversity", Theorem 5.3).
+%C A400943 Let p be the largest prime factor of n > 1. If n < p^3, then a(n) <= p, with equality only for n = 120 and n = 210 (Pohl, "Einseitige DivisorDiversity", Theorem 9.13).
+%C A400943 Let p be the largest prime factor of n > 1 and q the next prime after p. If n < q^3, then a(n) < q, except for n = 840 and n = 1260, where a(n) = 13 >= q = 11 (Pohl, "Einseitige DivisorDiversity", Theorem 9.9).
+%C A400943 For every Chen prime p >= 11 (A109611), a(2*p*(p+2)) = 4 if 3 divides p+2, and a(2*p*(p+2)) = 3 otherwise (Pohl, "DivisorDiversity und Teilerkonzentration", Theorem 7.7).
+%C A400943 All statements above are proved in the Pohl references; the count for n <= 10^6 is computational, and the proofs of the two cubic prime bounds are computer-assisted.
 %D A400943 P. Erdos, On the density of some sequences of integers, Bull. Amer. Math. Soc. 54 (1948), 685-692.
 %D A400943 H. Maier and G. Tenenbaum, On the set of divisors of an integer, Invent. Math. 76 (1984), 121-128.
 %H A400943 Siegfried Pohl, <a href="https://doi.org/10.13140/RG.2.2.30694.18249">n-Darstellungen III: DivisorDiversity</a>, ResearchGate preprint, 2026 (in German).
 %H A400943 Siegfried Pohl, <a href="https://doi.org/10.13140/RG.2.2.13829.72167">Divisorkettenfolgen - Grundfolge, Schwellenhierarchie, Minimal- und Rekordtraeger der DivisorDiversity</a>, ResearchGate preprint, 2026 (in German).
 %H A400943 Siegfried Pohl, <a href="https://doi.org/10.13140/RG.2.2.31615.37280">DivisorDiversity-Folgen - Stabile Kofaktoren, Zwillingsfilter und ein exakter Primzahltest</a>, ResearchGate preprint, 2026 (in German).
+%H A400943 Siegfried Pohl, <a href="https://doi.org/10.13140/RG.2.2.21190.23369">DivisorDiversity und Teilerkonzentration - Kettenstruktur, Primfaktorfenster und Anwendungen auf Chen-Primzahlen</a>, ResearchGate preprint, 2026 (in German).
+%H A400943 Siegfried Pohl, <a href="https://doi.org/10.13140/RG.2.2.24326.13122">Einseitige DivisorDiversity - Asymptotische Gleichheit, Sprungtraeger und kubische Primzahlgrenzen</a>, ResearchGate preprint, 2026 (in German).
 %e A400943 a(24) = 2: 24 = 4*6, 48 = 6*8. A third step would need 72 = d*e with d >= 8 and e >= 10, which is impossible since 8*10 > 72.
 %e A400943 a(40) = 3: 40 = 5*8, 80 = 8*10, 120 = 10*12.
 %e A400943 a(p) = 0 for prime p, since p has no factorization d*e with d, e >= 2.
 %p A400943 DDNext := proc(n, j, R) local N, S, d, e, U, Dv; N := (j + 1)*n; S := {}; for d in R do e := iquo(j*n, d); U := iquo(N, e + 2); for Dv in NumberTheory:-Divisors(N) do if d + 2 <= Dv and Dv <= U then S := S union {Dv}; end if; end do; end do; return S; end proc;
 %p A400943 A := proc(n) local R, j; R := select(d -> 2 <= d and 2*d <= n, NumberTheory:-Divisors(n)); j := 0; while 0 < nops(R) do j := j + 1; R := DDNext(n, j, R); end do; return j; end proc;
 %p A400943 seq(A(n), n = 1 .. 87);
-%Y A400943 Cf. A000040, A000961, A001358, A001359, A002808, A005279, A050372, A109611, A174905.
-%K A400943 nonn
+%Y A400943 Cf. A000040, A000961, A001358, A001359, A002808, A005279, A050372, A109611, A174905, A226898, A400583, A400625.
+%K A400943 nonn,changed
 %O A400943 1,24
 %A A400943 _Siegfried Pohl_, Oct 10 2026
