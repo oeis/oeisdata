@@ -1,0 +1,56 @@
+%I A401089 #32 Nov 27 2026 21:11:32
+%S A401089 2,16,15,64,40,294,77,256,126,400,187,1116,260,784,345,1024,442,1746,
+%T A401089 551,1600,672,1936,805,3384,950,2704,1107,3136,1276,4350,1457,4096,
+%U A401089 1650,4624,1855,6804,2072,5776,2301,6400,2542,8106,2795,7744,3060,8464,3337
+%N A401089 Number of regular pentagons bounded by the sides and diagonals of a regular 5n-gon.
+%C A401089 A pentagon is counted when each of its five edges lies on a side or a diagonal of the 5n-gon. This is the convention of A238822, which counts equilateral triangles in the regular 3n-gon.
+%C A401089 The sides and diagonals of a regular m-gon point in directions that are integer multiples of Pi/m, and consecutive edges of a regular pentagon differ in direction by 2*Pi/5, so such pentagons exist only when 5 divides m.
+%C A401089 For 0 <= i < n and n <= d < 5*n/2, the five chords joining vertex i+k*n to vertex i+k*n+d (k = 0..4, vertices taken mod 5*n) bound a regular pentagon concentric with the 5n-gon. These are all the concentric ones, n*ceiling(3*n/2) in number.
+%C A401089 For odd n <= 43 there are no other pentagons, so a(n) = n*(3*n+1)/2 = A005449(n) for these n; that is, a(2*k-1) = A033568(k) for k <= 22. For even n there are also off-center pentagons, 5*n^2/2 of them when n is not divisible by 3.
+%C A401089 Extra pentagons appear when 6 divides n, and their number depends on n mod 12. In the formula of Poonen and Rubinstein for the number of intersection points of the diagonals of a regular m-gon (A006561), correction terms appear for m divisible by 6 and by 12, which for m = 5*n means 6 | n and 12 | n. Their other special values of m (multiples of 18, 24, 42, 84, 90, 120 and 210) correspond to n divisible by 18, 24, 42 or 84, and a(18), a(24), a(42) and a(84) follow the conjectured formula.
+%H A401089 B. Poonen and M. Rubinstein, <a href="https://arxiv.org/abs/math/9508209">The number of intersection points made by the diagonals of a regular polygon</a>, SIAM J. Discrete Math. 11 (1998), 135-156.
+%F A401089 a(n) >= n*ceiling(3*n/2).
+%F A401089 Conjecture: a(n) = n*(3*n+1)/2 if n is odd; a(n) = 4*n^2 if n == 2 or 4 (mod 6); a(n) = 4*n^2 + 25*n if n == 6 (mod 12); a(n) = 4*n^2 + 45*n if n == 0 (mod 12). Checked for n <= 43 and n = 84.
+%e A401089 a(1) = 2: the regular pentagon itself and the inner pentagon of its pentagram.
+%e A401089 a(2) = 16: label the vertices of the regular decagon 0..9.
+%e A401089 Six pentagons are concentric with the decagon:
+%e A401089 2 are bounded by the chords (i,i+2) (the pentagons on alternate vertices),
+%e A401089 2 are bounded by the chords (i,i+3),
+%e A401089 2 are bounded by the chords (i,i+4) (the inner pentagons of the two pentagrams).
+%e A401089 The other ten are congruent to each other, have the side length of the decagon and have one side of the decagon as an edge, e.g., the pentagon bounded by the side (6,7), the diameters (0,5) and (3,8), and the diagonals (0,7) and (3,6).
+%o A401089 (Python)
+%o A401089 import numpy as np
+%o A401089 from math import pi
+%o A401089 def a(n):
+%o A401089     m, s = 5*n, 2*n      # 5n-gon with circumradius 1; normals of a regular pentagon are s steps of pi/m apart
+%o A401089     V = np.exp(2j*pi*np.arange(m)/m)
+%o A401089     off = [[] for _ in range(2*m)]          # off[t]: offsets h of the chords u.x = h with normal angle pi*t/m
+%o A401089     for i in range(m):
+%o A401089         for j in range(i+1, m):
+%o A401089             t = i+j; h = (V[i]*np.exp(-1j*pi*t/m)).real
+%o A401089             off[t % (2*m)].append(h); off[(t+m) % (2*m)].append(-h)
+%o A401089     off = [np.unique(np.round(o, 11)) for o in off]
+%o A401089     cnt = 0
+%o A401089     for t0 in range(s):                      # pentagon with edges u_k.x = u_k.c + r, u_k at angle pi*(t0+k*s)/m
+%o A401089         T = [(t0+k*s) % (2*m) for k in range(5)]
+%o A401089         U = np.exp(1j*pi*np.array(T)/m)
+%o A401089         M = np.linalg.inv(np.c_[U.real[:3], U.imag[:3], np.ones(3)])
+%o A401089         H = np.array(np.meshgrid(*[off[t] for t in T[:3]], indexing="ij")).reshape(3, -1)
+%o A401089         cx, cy, r = M @ H
+%o A401089         ok = r > 1e-9
+%o A401089         for k in (3, 4):                     # the other two edges must lie on chords too
+%o A401089             h = U[k].real*cx + U[k].imag*cy + r
+%o A401089             o = off[T[k]]; p = np.clip(np.searchsorted(o, h), 1, len(o)-1)
+%o A401089             ok &= np.minimum(abs(o[p]-h), abs(o[p-1]-h)) < 1e-9
+%o A401089         R = r/np.cos(pi/5)                   # all five vertices inside the 5n-gon
+%o A401089         for k in range(5):
+%o A401089             w = cx + 1j*cy + R*U[k]*np.exp(1j*pi/5)
+%o A401089             ok &= ((w[:, None]*np.exp(-1j*pi*(2*np.arange(m)+1)/m)).real.max(axis=1) <= np.cos(pi/m) + 1e-9)
+%o A401089         cnt += int(ok.sum())
+%o A401089     return cnt
+%o A401089 print([a(n) for n in range(1, 13)])
+%Y A401089 Cf. A005449, A006561, A007678, A033568, A067152, A238822, A331450.
+%K A401089 nonn,new
+%O A401089 1,1
+%A A401089 _Pietro Tiaraju Giavarina dos Santos_, Nov 19 2026
+%E A401089 More terms from _Sean A. Irvine_, Nov 27 2026

@@ -1,31 +1,63 @@
-%I A003192 M1369 #69 Feb 16 2025 08:32:27
-%S A003192 0,0,2,5,10,17,24,35,47
+%I A003192 M1369 #81 Nov 27 2026 12:24:18
+%S A003192 0,0,2,5,10,17,24,35,47,61,76,94,113,135
 %N A003192 Length of uncrossed knight's path on an n X n board.
 %C A003192 I used ZDD techniques to show that a(9)=47. (This is the longest uncrossed knight's path on a 9 X 9 board; thus I confirmed the conjecture that the paths of length 47, found by hand long ago, are indeed optimum.) - _Don Knuth_, Jun 24 2010
 %C A003192 For best known results see link to Alex Chernov's site. - _Dmitry Kamenetsky_, Mar 02 2021
+%C A003192 a(10)-a(14) were computed by a row-by-row transfer ("profile") dynamic program. Each two-row knight move is cut at its midpoint, so that all pieces of the path between two consecutive row lines are segments whose left-to-right order must be preserved (an idea of Derek Kisman). The values 61, 76, 94, 113 and 135 coincide with the lengths of the longest paths found previously, which are thereby proved optimal: 61, 76, 94 and 113 by Robin Merson in 1990 and 135 by Alexander Fischer in 2006 (see the Jelliss link); Chernov's database also credits paths of all five lengths to Bernard Lemaire, 1976-1980. - _Jeff Sponaugle_, Nov 25 2026
 %D A003192 D. E. Knuth, Long and skinny knight's tours, in Selected Papers on Fun and Games, CSLI, Stanford, CA, 2010. (CSLI Lecture Notes, vol. 192)
 %D A003192 J. S. Madachy, Letter to N. J. A. Sloane, Apr 26 1975.
 %D A003192 N. J. A. Sloane and Simon Plouffe, The Encyclopedia of Integer Sequences, Academic Press, 1995 (includes this sequence).
 %D A003192 Various authors, Uncrossed knight's tours, J. Rec. Math., 2 (1969), 154-157.
 %D A003192 L. D. Yarbrough, Uncrossed knight's tours, J. Rec. Math., 1 (No. 3, 1969), 140-142.
 %H A003192 Alex Chernov, <a href="https://web.archive.org/web/20210416192956/http://ukt.alex-black.ru/">Uncrossed Knight's Tours</a>.
-%H A003192 George Jelliss, <a href="http://www.mayhematics.com/t/2n.htm">Non-Intersecting Paths</a>.
+%H A003192 George Jelliss, <a href="https://www.mayhematics.com/t/2n.htm">Non-Intersecting Paths</a>.
 %H A003192 J. S. Madachy, <a href="/A003192/a003192_2.pdf">Letter to N. J. A. Sloane, Apr 26 1975</a>.
 %H A003192 Jean-Charles Meyrignac, <a href="http://euler.free.fr/knight/index.htm">Non-crossing knight tours</a>.
 %H A003192 N. J. A. Sloane, <a href="/A003192/a003192.gif">Illustration of initial terms</a>
 %H A003192 Various authors, <a href="/A003192/a003192.pdf">Uncrossed knight's tours</a>, J. Rec. Math., 2 (1969), 154-157. [Annotated scanned copy]
 %H A003192 Eric Weisstein's World of Mathematics, <a href="https://mathworld.wolfram.com/KnightsTour.html">Knight's Tour</a>
 %H A003192 L. D. Yarbrough, <a href="/A003192/a003192_1.pdf">Uncrossed knight's tours</a>, J. Rec. Math., 1 (No. 3, 1969), 140-142. [Annotated scanned copy]
-%e A003192 Lengths of longest uncrossed knight's paths on all sufficiently small rectangular boards m X n, with 3 <= m <= n:
-%e A003192 ......2...4...5...6...8...9..10
-%e A003192 ..........5...7...9..11..13..15
-%e A003192 .............10..14..16..19..22
-%e A003192 .................17..21..25..29
-%e A003192 .....................24..30..35
-%e A003192 .........................35..42
-%e A003192 .............................47
+%H A003192 Jeff Sponaugle, <a href="/A003192/a003192.txt">Optimal paths for n = 3..14</a>
+%e A003192 Lengths of longest uncrossed knight's paths on all sufficiently small rectangular boards m X n, with 3 <= m <= n <= 14:
+%e A003192 ......2...4...5...6...8...9..10..11..12..13..14..15
+%e A003192 ..........5...7...9..11..13..15..17..19..21..23..25
+%e A003192 .............10..14..16..19..22..25..28..31..34..37
+%e A003192 .................17..21..25..29..32..35..39..43..47
+%e A003192 .....................24..30..35..39..44..49..54..59
+%e A003192 .........................35..42..47..53..59..63..69
+%e A003192 .............................47..55..61..67..74..81
+%e A003192 .................................61..69..76..83..92
+%e A003192 .....................................76..87..94.101
+%e A003192 .........................................94.103.113
+%e A003192 ............................................113.125
+%e A003192 ................................................135
+%o A003192 (Python)
+%o A003192 def a(n):  # depth-first search over all uncrossed paths
+%o A003192     sq = [(r, c) for r in range(n) for c in range(n)]
+%o A003192     mv = [(i, j) for i in range(n*n) for j in range(i)  # the knight moves
+%o A003192           if {abs(sq[i][0]-sq[j][0]), abs(sq[i][1]-sq[j][1])} == {1, 2}]
+%o A003192     def side(a, b, c):  # sign of the turn a -> b -> c
+%o A003192         (ar, ac), (br, bc), (cr, cc) = sq[a], sq[b], sq[c]
+%o A003192         return (br-ar)*(cc-ac) - (bc-ac)*(cr-ar)
+%o A003192     def cross(u, v):  # do the moves u and v cross?
+%o A003192         (a, b), (c, d) = u, v
+%o A003192         return (side(a, b, c)*side(a, b, d) < 0
+%o A003192                 and side(c, d, a)*side(c, d, b) < 0)
+%o A003192     bad = [sum(1 << y for y, v in enumerate(mv) if cross(u, v)) for u in mv]
+%o A003192     nbr = [[] for _ in sq]
+%o A003192     for x, (i, j) in enumerate(mv):
+%o A003192         nbr[i].append((j, x)); nbr[j].append((i, x))
+%o A003192     def longest(i, seen, banned):  # seen: squares used, banned: the moves
+%o A003192         # that cross a move made; returns the most moves that can follow i
+%o A003192         return max((1 + longest(j, seen | 1 << j, banned | bad[x])
+%o A003192                     for j, x in nbr[i] if not (seen >> j | banned >> x) & 1),
+%o A003192                    default=0)
+%o A003192     return max((longest(i, 1 << i, 0) for i, (r, c) in enumerate(sq)
+%o A003192                 if r <= c <= (n-1)/2), default=0)  # starts up to symmetry
+%o A003192 # _Jeff Sponaugle_, Nov 25 2026
 %Y A003192 Cf. A157416.
-%K A003192 nonn,walk,nice,more,hard
+%K A003192 nonn,walk,nice,more,hard,changed
 %O A003192 1,3
 %A A003192 _N. J. A. Sloane_
 %E A003192 a(1)=a(2)=0 prepended by _Max Alekseyev_, Jul 17 2011
+%E A003192 a(10)-a(14) (optimality of the paths found by Bernard Lemaire, Robin Merson and Alexander Fischer) from _Jeff Sponaugle_, Nov 25 2026

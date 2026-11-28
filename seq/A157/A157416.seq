@@ -1,21 +1,56 @@
-%I A157416 #26 Mar 07 2021 18:51:43
-%S A157416 0,0,0,4,8,12,24,32,42,54
+%I A157416 #37 Nov 27 2026 12:24:28
+%S A157416 0,0,0,4,8,12,24,32,42,54,70,86,106,126
 %N A157416 Length of maximal uncrossed cycle of knight moves on n X n board.
 %C A157416 I had computed the values for n up to 8 long ago and reported them in a letter to the editor of the Journal of Recreational Mathematics 2 (1969), 155-157. The values for n=9 and n=10 are new, found using ZDDs.
 %C A157416 For best known results see link to Alex Chernov's site. - _Dmitry Kamenetsky_, Mar 02 2021
+%C A157416 a(11)-a(14) were computed with the same program as a(10)-a(14) of A003192 (a row-by-row transfer dynamic program over non-crossing connection states, pruned with a bound from a relaxation that ignores connectivity). All four values coincide with the lengths of the longest tours found previously, which are thereby proved optimal: 70 and 86 by Robin Merson in 1991 (see the Jelliss link), 106 by Alex Chernov in 2011 and 126 by Derek Kisman in 2018 (see Chernov's link).  - _Jeff Sponaugle_, Nov 25 2026
 %D A157416 D. E. Knuth, Selected Papers on Fun and Games. CSLI, Stanford, CA, 2010. (CSLI Lecture Notes, vol. 192)
 %H A157416 Alex Chernov, <a href="http://ukt.alex-black.ru/">Uncrossed Knight's Tours</a>.
-%e A157416 Lengths of longest uncrossed knight cycles on all sufficiently small rectangular boards m X n, with 3 <=m <= n:
-%e A157416 ......0...0...4...6...6...6...6..10
-%e A157416 ..........4...6...8..10..12..14..16
-%e A157416 ..............8..12..14..18..20..22
-%e A157416 .................12..18..22..24..28
-%e A157416 .....................24..26..32..36
-%e A157416 .........................32..36..42
-%e A157416 .............................42..50
-%e A157416 .................................54
+%e A157416 Lengths of longest uncrossed knight cycles on all sufficiently small rectangular boards m X n, with 3 <= m <= n <= 14:
+%e A157416 ......0...0...4...6...6...6...6..10..10..10..10..14
+%e A157416 ..........4...6...8..10..12..14..16..18..20..22..24
+%e A157416 ..............8..12..14..18..20..22..24..28..30..34
+%e A157416 .................12..18..22..24..28..32..36..38..42
+%e A157416 .....................24..26..32..36..42..44..48..54
+%e A157416 .........................32..36..42..46..52..58..64
+%e A157416 .............................42..50..56..60..68..74
+%e A157416 .................................54..64..70..78..84
+%e A157416 .....................................70..80..86..94
+%e A157416 .........................................86..96.106
+%e A157416 ............................................106.116
+%e A157416 ................................................126
+%o A157416 (Python)
+%o A157416 def a(n):  # depth-first search over all uncrossed knight cycles
+%o A157416     sq = [(r, c) for r in range(n) for c in range(n)]
+%o A157416     mv = [(i, j) for i in range(n*n) for j in range(i)  # the knight moves
+%o A157416           if {abs(sq[i][0]-sq[j][0]), abs(sq[i][1]-sq[j][1])} == {1, 2}]
+%o A157416     def side(a, b, c):  # sign of the turn a -> b -> c
+%o A157416         (ar, ac), (br, bc), (cr, cc) = sq[a], sq[b], sq[c]
+%o A157416         return (br-ar)*(cc-ac) - (bc-ac)*(cr-ar)
+%o A157416     def cross(u, v):  # do the moves u and v cross?
+%o A157416         (a, b), (c, d) = u, v
+%o A157416         return (side(a, b, c)*side(a, b, d) < 0
+%o A157416                 and side(c, d, a)*side(c, d, b) < 0)
+%o A157416     bad = [sum(1 << y for y, v in enumerate(mv) if cross(u, v)) for u in mv]
+%o A157416     nbr, idx = [[] for _ in sq], {}
+%o A157416     for x, (i, j) in enumerate(mv):
+%o A157416         nbr[i].append((j, x)); nbr[j].append((i, x)); idx[i, j] = idx[j, i] = x
+%o A157416     def longest(s, i, seen, banned, k):  # longest cycle that closes the path
+%o A157416         # s -> ... -> i of k moves; seen: squares used, banned: the moves that
+%o A157416         # cross a move made
+%o A157416         x = idx.get((i, s))
+%o A157416         best = k + 1 if k > 2 and x is not None and not banned >> x & 1 else 0
+%o A157416         for j, y in nbr[i]:
+%o A157416             if not (seen >> j | banned >> y) & 1:
+%o A157416                 best = max(best, longest(s, j, seen | 1 << j, banned | bad[y],
+%o A157416                                          k + 1))
+%o A157416         return best
+%o A157416     return max([0] + [longest(i, i, 1 << i, 0, 0) for i, (r, c) in
+%o A157416                       enumerate(sq) if r <= c <= (n-1)/2])  # up to symmetry
+%o A157416 # _Jeff Sponaugle_, Nov 25 2026
 %Y A157416 Cf. A003192.
-%K A157416 nonn,more,hard
+%K A157416 nonn,more,hard,changed
 %O A157416 1,4
 %A A157416 _Don Knuth_, Jun 24 2010
 %E A157416 a(1)=a(2)=a(3)=0 prepended by _Max Alekseyev_, Jul 17 2011
+%E A157416 a(11)-a(14) (optimality of the tours found by Robin Merson, Alex Chernov and Derek Kisman) from  _Jeff Sponaugle_, Nov 25 2026
